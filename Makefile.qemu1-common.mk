@@ -79,6 +79,11 @@ ifdef ANDROID_SDK_TOOLS_REVISION
     EMULATOR_COMMON_CFLAGS += -DANDROID_SDK_TOOLS_REVISION=$(ANDROID_SDK_TOOLS_REVISION)
 endif
 
+ANDROID_BUILD_NUMBER := $(strip $(BUILD_NUMBER))
+ifdef ANDROID_BUILD_NUMBER
+    EMULATOR_COMMON_CFLAGS += -DANDROID_BUILD_NUMBER=$(ANDROID_BUILD_NUMBER)
+endif
+
 # Enable large-file support (i.e. make off_t a 64-bit value)
 ifeq ($(HOST_OS),linux)
 EMULATOR_COMMON_CFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
@@ -152,6 +157,16 @@ ifeq ($(HOST_OS),windows)
   BREAKPAD_LDLIBS += -lstdc++
 endif
 
+EMULATOR_CRASHUPLOAD := $(strip $(EMULATOR_CRASHUPLOAD))
+ifdef EMULATOR_CRASHUPLOAD
+    EMULATOR_COMMON_CFLAGS += -DCRASHUPLOAD=$(EMULATOR_CRASHUPLOAD)
+endif
+
+EMULATOR_CRASHSERVER := $(strip $(EMULATOR_CRASHSERVER))
+ifdef EMULATOR_CRASHSERVER
+    EMULATOR_COMMON_CFLAGS += -DCRASHSERVER=$(EMULATOR_CRASHSERVER)
+endif
+
 ###########################################################
 # Android utility functions
 #
@@ -193,6 +208,8 @@ common_LOCAL_SRC_FILES += \
 	android/base/threads/ThreadStore.cpp \
 	android/base/Uri.cpp \
 	android/base/Version.cpp \
+	android/crashreport/BreakpadUtils.cpp \
+	android/crashreport/BreakpadHandler.cpp \
 	android/emulation/android_pipe.c \
 	android/emulation/android_pipe_pingpong.c \
 	android/emulation/android_pipe_throttle.c \
