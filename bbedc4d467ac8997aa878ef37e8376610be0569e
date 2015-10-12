@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "bfb7aeb4_2dd45978",
+        "filename": "android/emulation/control/sensors_agent.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T21:25:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7fa9b65d_8bac5162",
+      "revId": "bbedc4d467ac8997aa878ef37e8376610be0569e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df39c202_86fbcea6",
         "filename": "android/skin/qt/editable-slider-widget.cpp",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-12T20:55:22Z",
       "side": 1,
       "message": "nit: trailing tab or space.",
+      "revId": "bbedc4d467ac8997aa878ef37e8376610be0569e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dfb462b2_2e30d3b7",
+        "filename": "android/skin/qt/editable-slider-widget.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T21:25:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df39c202_86fbcea6",
       "revId": "bbedc4d467ac8997aa878ef37e8376610be0569e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "df39c202_c625d6bf",
+        "filename": "android/skin/qt/editable-slider-widget.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T21:25:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5fa8725b_072b784e",
+      "revId": "bbedc4d467ac8997aa878ef37e8376610be0569e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df39c202_06efbede",
         "filename": "android/skin/qt/extended-window.h",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2015-10-12T20:55:22Z",
       "side": 1,
       "message": "nit: whitespace",
+      "revId": "bbedc4d467ac8997aa878ef37e8376610be0569e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9fae6a64_69ab21c7",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T21:25:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df39c202_06efbede",
       "revId": "bbedc4d467ac8997aa878ef37e8376610be0569e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "dfb462b2_0e42af04",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T21:25:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bf3c0ef3_4221b46c",
+      "revId": "bbedc4d467ac8997aa878ef37e8376610be0569e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7fa9b65d_6b6235cb",
         "filename": "android/skin/qt/sources.mk",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2015-10-12T20:55:22Z",
       "side": 1,
       "message": "nit: same here. Thanks.",
+      "revId": "bbedc4d467ac8997aa878ef37e8376610be0569e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fa8725b_e72bbc18",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T21:25:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7fa9b65d_6b6235cb",
       "revId": "bbedc4d467ac8997aa878ef37e8376610be0569e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
