@@ -17,11 +17,6 @@
 /* length of the framed header */
 #define  FRAME_HEADER_SIZE  4
 
-/* Version number of snapshots code. Increment whenever the data saved
- * or the layout in which it is saved is changed.
- */
-#define QEMUD_SAVE_VERSION 2
-
 #define  D(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)
 #define  D_ACTIVE  VERBOSE_CHECK(qemud)
 
