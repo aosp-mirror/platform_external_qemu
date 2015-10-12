@@ -11,7 +11,7 @@
 */
 #include "android-qemu1-glue/hw-kmsg.h"
 #include "sysemu/char.h"
-#include "android/charpipe.h"
+#include "android-qemu1-glue/emulation/charpipe.h"
 #include "android/utils/debug.h"
 
 static CharDriverState*  android_kmsg_cs;

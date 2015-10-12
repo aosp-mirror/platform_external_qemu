@@ -12,7 +12,7 @@
 
 #include "android-qemu1-glue/hw-qemud.h"
 
-#include "android/charpipe.h"
+#include "android-qemu1-glue/emulation/charpipe.h"
 #include "android/emulation/android_qemud.h"
 #include "android-qemu1-glue/emulation/CharSerialLine.h"
 #include "android/utils/debug.h"

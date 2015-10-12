@@ -599,7 +599,7 @@ CORE_MISC_SOURCES = \
     qemu-log.c \
     savevm.c \
     android/boot-properties.c \
-    android-qemu1-glue/charpipe.c \
+    android-qemu1-glue/emulation/charpipe.c \
     android/core-init-utils.c   \
     android/ext4_resize.cpp   \
     android-qemu1-glue/gps.c \

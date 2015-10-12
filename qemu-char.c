@@ -100,7 +100,7 @@
 #define READ_BUF_LEN 4096
 
 #ifdef CONFIG_ANDROID
-#include "android/charpipe.h"
+#include "android-qemu1-glue/emulation/charpipe.h"
 #include "android-qemu1-glue/gps.h"
 #include "android-qemu1-glue/hw-kmsg.h"
 #include "android-qemu1-glue/hw-qemud.h"

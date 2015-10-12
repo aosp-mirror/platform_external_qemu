@@ -48,7 +48,7 @@
 
 #include "android/android.h"
 #include "android/camera/camera-service.h"
-#include "android/charpipe.h"
+#include "android-qemu1-glue/emulation/charpipe.h"
 #include "android/curl-support.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/ext4_resize.h"
