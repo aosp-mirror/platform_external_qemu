@@ -15,18 +15,26 @@
 
 #include <stdint.h>
 
-// This is a C wrapper for a SerialLine abstraction, based
+// This is a C wrapper for a serial line abstraction, based
 // on QEMU's character device (char.h)
 //
-// SerialLine allows one to write data into the connection and supply a
-// callback for reading.
-// To send some data, just call |android_serialline_write| on a line
+// CSerialLine allows one to write data into the connection and supply a
+// callback for reading. To send some data, call android_serialline_write()
+// which returns the number of writes accepted by the serial line (which may
+// be less than what is being sent if the line is not ready). It is possible
+// to create a buffered serial line wrapper by calling
+// android_serialline_buffer_open().
+//
 // When there's some data to read, the callbacks supplied in
 // android_serialline_addhandlers() will be called in this order:
 //    SLCanReadHandler(opaque)
 //    SLReadHandler(opaque, data, len)
 // |opaque| is the value passed in second argument of
 // android_serialline_addhandlers() - some user state for the callbacks
+
+// Note that CSerialLine instances can only be created/destroyed from QEMU
+// glue code. During unit-testing, a special TestSerialLine implementation
+// will be provided instead, but isn't part of AndroidEmu itself.
 
 ANDROID_BEGIN_HEADER
 
@@ -49,5 +57,21 @@ extern void android_serialline_addhandlers(CSerialLine* sl, void* opaque,
 // try to send |len| bytes of |data| through the serial line,
 // returns the number of bytes that went through, or negative number on error
 extern int android_serialline_write(CSerialLine* sl, const uint8_t* data, int len);
+
+// Given an existing CSerialLine instance |sl|, create a new instance that
+// implements a buffer for any data sent to |sl|. On the other hand,
+// any can_read() / read() request performed by it will be passed
+// directly to |sl|'s handlers.
+// NOTE: This function is not implemented by AndroidEmu and must be provided
+// by the QEMU glue code, or unit-test runtime.
+CSerialLine* android_serialline_buffer_open(CSerialLine* sl);
+
+// Create two new SerialLine instances that are connected through buffers
+// as a pipe. On success, return 0 and sets |*pfirst| and |*psecond| to
+// the instance pointers. On failure, return -1 and sets |*pfirst| and
+// |*psecond| to NULL.
+// NOTE: This function is not implemented by AndroidEmu and must be provided
+// by the QEMU glue code, or unit-test runtime.
+int android_serialline_pipe_open(CSerialLine** pfirst, CSerialLine** psecond);
 
 ANDROID_END_HEADER

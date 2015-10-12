@@ -21,7 +21,9 @@ namespace qemu1 {
 CharSerialLine::CharSerialLine(CharDriverState* cs) : mCs(cs) { }
 
 CharSerialLine::~CharSerialLine() {
-    qemu_chr_close(mCs);
+    if (mCs) {
+        qemu_chr_close(mCs);
+    }
 }
 
 void CharSerialLine::addHandlers(void* opaque, CanReadFunc canReadFunc, ReadFunc readFunc) {
