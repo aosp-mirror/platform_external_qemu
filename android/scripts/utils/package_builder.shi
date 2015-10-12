@@ -236,13 +236,13 @@ builder_check_all_timestamps () {
 # Call this function to enable C++11 features. Must happen before
 # any build_prepare_xxxxx function call.
 builder_enable_cxx11 () {
-    _SHU_BUILDER_CXX11=true
+    _SHU_BUILDER_NO_CXX11=
 }
 
 # Call this function to disable C++11 features. Must happen before
 # any build_prepare_xxxx function call.
 build_disable_cxx11 () {
-    _SHU_BUILDER_CXX11=
+    _SHU_BUILDER_NO_CXX11=true
 }
 
 # Prepare for a remote darwin build. This takes as a parameter the
@@ -468,7 +468,7 @@ EOF
     for _PREFIX in $_SHU_BUILDER_TOOLCHAIN_PREFIX; do
         var_append EXTRA_FLAGS "--prefix=$_PREFIX"
     done
-    if [ "$_SHU_BUILDER_CXX11" ]; then
+    if [ ! "$_SHU_BUILDER_NO_CXX11" ]; then
         var_append EXTRA_FLAGS "--cxx11"
     fi
     run $(program_directory)/gen-android-sdk-toolchain.sh \
