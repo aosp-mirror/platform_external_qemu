@@ -15,9 +15,20 @@
 #include "android/charpipe.h"
 #include "android/emulation/android_qemud.h"
 #include "android-qemu1-glue/qemu/emulation/CharSerialLine.h"
+#include "android/qemu/utils/stream.h"
 #include "android/utils/debug.h"
 
+extern "C" {
+    #include "migration/vmstate.h"
+}
+
 #define  D(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)
+
+/* Version number of snapshots code. Increment whenever the data saved
+ * or the layout in which it is saved is changed.
+ */
+#define QEMUD_SAVE_VERSION 2
+
 
 using android::qemu1::CharSerialLine;
 
@@ -52,6 +63,21 @@ using android::qemu1::CharSerialLine;
  *
  */
 
+static void qemud_save(QEMUFile* f, void* opaque) {
+    Stream* stream = stream_from_qemufile(f);
+    QemudMultiplexer* m = static_cast<QemudMultiplexer*>(opaque);
+    qemud_multiplexer_save(stream, m);
+    stream_free(stream);
+}
+
+static int qemud_load(QEMUFile* f, void* opaque, int version) {
+    Stream* stream = stream_from_qemufile(f);
+    QemudMultiplexer* m = static_cast<QemudMultiplexer*>(opaque);
+    int ret = qemud_multiplexer_load(stream, m, version);
+    stream_free(stream);
+    return ret;
+}
+
 /* this is the end of the serial charpipe that must be passed
  * to the emulated tty implementation. The other end of the
  * charpipe must be passed to qemud_multiplexer_init().
@@ -69,6 +95,15 @@ CharDriverState* android_qemud_get_cs(void) {
         }
 
         android_qemud_init(new CharSerialLine(csOut));
+
+        register_savevm(nullptr,
+                        "qemud",
+                        0,
+                        QEMUD_SAVE_VERSION,
+                        qemud_save,
+                        qemud_load,
+                        qemud_multiplexer);
+
         android_qemud_cs = csIn;
     }
 

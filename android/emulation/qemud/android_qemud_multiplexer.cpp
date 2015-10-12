@@ -337,7 +337,7 @@ static int qemud_load_services(Stream* f, QemudService* current_services) {
     return ret;
 }
 
-int qemud_load_multiplexer(Stream* stream,
+int qemud_multiplexer_load(Stream* stream,
                            QemudMultiplexer* m,
                            int version) {
     int ret = 0;
@@ -371,8 +371,4 @@ void qemud_multiplexer_save(Stream* stream, QemudMultiplexer* m) {
             qemud_serial_client_save(stream, c);
         }
     }
-}
-
-QemudService** qemud_multiplexer_get_services(QemudMultiplexer* m) {
-    return &m->services;
 }
