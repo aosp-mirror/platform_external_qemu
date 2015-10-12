@@ -15,6 +15,7 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
+#include "android/utils/host_bitness.h"
 #include "android/utils/path.h"
 #include "android/utils/dirscanner.h"
 #include "android/utils/x86_cpuid.h"
@@ -949,10 +950,13 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
         }
         hw->hw_ramSize = ramSize;
     }
-
+    bool is32bitWindowsHost = false;
+#ifdef _WIN32
+    is32bitWindowsHost = android_getHostBitness();
+#endif
     // For recent system versions, ensure a minimum of 1GB or memory, anything
     // lower is very painful during the boot process and after that.
-    if (hw->hw_ramSize < 1024 && avdInfo_getApiLevel(avd) >= 21) {
+    if (hw->hw_ramSize < 1024 && avdInfo_getApiLevel(avd) >= 21 && !is32bitWindowsHost) {
         dwarning("Increasing RAM size to 1GB");
         hw->hw_ramSize = 1024;
     }
