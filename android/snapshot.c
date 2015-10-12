@@ -24,6 +24,14 @@
  * system, which would pull in a lot of code irrelevant for the UI.
  */
 
+#include "android/snapshot.h"
+
+#ifdef _WIN32
+#  include "android/base/sockets/Winsock.h"
+#else
+#  include <netinet/in.h>
+#endif
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdint.h>
@@ -33,17 +41,30 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "qemu/bswap.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/system.h"
-#include "android/snapshot.h"
 
 /* "Magic" sequence of four bytes required by spec to be the first four bytes
  * of any Qcow file.
  */
 #define QCOW_MAGIC (('Q' << 24) | ('F' << 16) | ('I' << 8) | 0xfb)
 #define QCOW_VERSION 2
+
+// converts a 64-bit integer from big endian to a current cpu's byte order
+static uint64_t ntoh64(uint64_t n) {
+    // platform-independent implementation
+    const unsigned char* const np = (unsigned char*)&n;
+
+    return ((uint64_t)np[0] << 56) |
+           ((uint64_t)np[1] << 48) |
+           ((uint64_t)np[2] << 40) |
+           ((uint64_t)np[3] << 32) |
+           ((uint64_t)np[4] << 24) |
+           ((uint64_t)np[5] << 16) |
+           ((uint64_t)np[6] << 8) |
+           (uint64_t)np[7];
+}
 
 /* Reads 'nbyte' bytes from 'fd' into 'buf', retrying on interrupts.
  * Exit()s if the read fails for any other reason.
@@ -127,14 +148,14 @@ snapshot_info_read( int fd, SnapshotInfo* info )
     read_or_die(fd, &extra_data_size,     sizeof(extra_data_size));
 
     /* convert to host endianness */
-    be16_to_cpus(&id_str_size);
-    be16_to_cpus(&name_size);
-    be32_to_cpus(&info->date_sec);
-    be32_to_cpus(&info->date_nsec);
-    be64_to_cpus(&info->vm_clock_nsec);
-    be32_to_cpus(&info->vm_state_size);
-    be32_to_cpus(&extra_data_size);
-    be32_to_cpus(&extra_data_size);
+    id_str_size = ntohs(id_str_size);
+    name_size = ntohs(name_size);
+    info->date_sec = ntohl(info->date_sec);
+    info->date_nsec = ntohl(info->date_nsec);
+    info->vm_clock_nsec = ntoh64(info->vm_clock_nsec);
+    info->vm_state_size = ntohl(info->vm_state_size);
+    extra_data_size = ntohl(extra_data_size);
+    extra_data_size = ntohl(extra_data_size);
 
     /* read variable-length buffers*/
     info->id_str = android_alloc(id_str_size + 1); // +1: manual null-termination
@@ -267,8 +288,8 @@ snapshot_validate_qcow_file( int fd )
     uint32_t magic, version;
     read_or_die(fd, &magic, sizeof(magic));
     read_or_die(fd, &version, sizeof(version));
-    be32_to_cpus(&magic);
-    be32_to_cpus(&version);
+    magic = ntohl(magic);
+    version = ntohl(version);
 
     if (magic != QCOW_MAGIC) {
         derror("Not a valid Qcow snapshot file (expected magic value '%08x', got '%08x').",
@@ -299,8 +320,8 @@ snapshot_read_qcow_header( int fd, uint32_t *nb_snapshots, uint64_t *snapshots_o
     read_or_die(fd, snapshots_offset, sizeof(*snapshots_offset));
 
     /* convert to host endianness */
-    be32_to_cpus(nb_snapshots);
-    be64_to_cpus(snapshots_offset);
+    *nb_snapshots = ntohl(*nb_snapshots);
+    *snapshots_offset = ntoh64(*snapshots_offset);
 }
 
 /* Prints a table with information on the snapshots in the qcow2-formatted file
