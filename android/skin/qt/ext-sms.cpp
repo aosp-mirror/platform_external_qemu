@@ -29,10 +29,6 @@ void ExtendedWindow::initSms()
 
 void ExtendedWindow::on_sms_sendButton_clicked()
 {
-    if (!mTelephonyAgent || !mTelephonyAgent->getModem) {
-        return;
-    }
-
     // Get the "from" number
     SmsAddressRec sender;
     int retVal = sms_address_from_str(&sender,
@@ -78,8 +74,10 @@ void ExtendedWindow::on_sms_sendButton_clicked()
         return;
     }
 
-    for (int idx = 0; pdus[idx] != NULL; idx++) {
-        amodem_receive_sms(mTelephonyAgent->getModem(), pdus[idx]);
+    if (mTelephonyAgent && mTelephonyAgent->getModem) {
+        for (int idx = 0; pdus[idx] != NULL; idx++) {
+            amodem_receive_sms(mTelephonyAgent->getModem(), pdus[idx]);
+        }
     }
 
     smspdu_free_list( pdus );
