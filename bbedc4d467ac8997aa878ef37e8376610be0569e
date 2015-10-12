@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7fa9b65d_8bac5162",
+        "filename": "android/emulation/control/sensors_agent.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-12T20:55:22Z",
+      "side": 1,
+      "message": "nit: respect 80-characters max line width in the comment.",
+      "revId": "bbedc4d467ac8997aa878ef37e8376610be0569e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df39c202_86fbcea6",
+        "filename": "android/skin/qt/editable-slider-widget.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-12T20:55:22Z",
+      "side": 1,
+      "message": "nit: trailing tab or space.",
+      "revId": "bbedc4d467ac8997aa878ef37e8376610be0569e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fa8725b_072b784e",
+        "filename": "android/skin/qt/editable-slider-widget.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-12T20:55:22Z",
+      "side": 1,
+      "message": "nit: trailing space.",
+      "revId": "bbedc4d467ac8997aa878ef37e8376610be0569e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df39c202_06efbede",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-12T20:55:22Z",
+      "side": 1,
+      "message": "nit: whitespace",
+      "revId": "bbedc4d467ac8997aa878ef37e8376610be0569e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bf3c0ef3_4221b46c",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-12T20:55:22Z",
+      "side": 1,
+      "message": "nit: please respect alphabetical ordering whenever possible. I know there is a lot of funky stuff because we did a lot of automated refactoring / source moves lately. Sorry about that.",
+      "revId": "bbedc4d467ac8997aa878ef37e8376610be0569e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7fa9b65d_6b6235cb",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-12T20:55:22Z",
+      "side": 1,
+      "message": "nit: same here. Thanks.",
+      "revId": "bbedc4d467ac8997aa878ef37e8376610be0569e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
