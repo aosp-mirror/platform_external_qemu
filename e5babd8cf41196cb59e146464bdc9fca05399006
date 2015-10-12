@@ -19,6 +19,108 @@
     },
     {
       "key": {
+        "uuid": "9fae6a64_49a66500",
+        "filename": "android/skin/qt/editable-slider-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-12T21:43:22Z",
+      "side": 1,
+      "message": "Can we display the numbers right-justified with a fixed number of decimal places?",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3fa3be81_c937b5c7",
+        "filename": "android/skin/qt/editable-slider-widget.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-12T21:43:22Z",
+      "side": 1,
+      "message": "Prefer to have these in alphabetical order",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f30ba11_4877135d",
+        "filename": "android/skin/qt/ext-virtsensors.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-12T21:43:22Z",
+      "side": 1,
+      "message": "Isn\u0027t [-180, +180] the right range for these three?",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3fa3be81_0925cd47",
+        "filename": "android/skin/qt/ext-virtsensors.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-12T21:43:22Z",
+      "side": 1,
+      "message": "Be sure to remove this before promoting.",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bf3c0ef3_42e9b41d",
+        "filename": "android/skin/qt/ext-virtsensors.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-12T21:43:22Z",
+      "side": 1,
+      "message": "I\u0027d like to have these values right-justified and with a fixed number of fractional digits so their positions don\u0027t jump around as the numbers change.\n(Also, in the text, it would be nice to use a superscript 2 instead of \"s^2\")",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7fa9b65d_eb006582",
+        "filename": "android/skin/qt/extended-window-styles.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-12T21:43:22Z",
+      "side": 1,
+      "message": "I get a compiler warning about a space after the backslash",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7f1ff654_955ea47d",
         "filename": "android/skin/qt/extended-window.h",
         "patchSetId": 3
@@ -48,6 +150,57 @@
       "side": 1,
       "message": "Well, this is weird. Previously if I included these headers before Qt, I would get an avalanche of cryptic errors. However, now that I\u0027m trying it again the errors are gone...",
       "parentUuid": "7f1ff654_955ea47d",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df39c202_a63412c4",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-12T21:43:22Z",
+      "side": 1,
+      "message": "nit: * placement",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f30ba11_481b9315",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-12T21:43:22Z",
+      "side": 1,
+      "message": "Move this after KmlParser for alphabetical order",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3fa3be81_a9e35936",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-12T21:43:22Z",
+      "side": 1,
+      "message": "Order here, too",
       "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
