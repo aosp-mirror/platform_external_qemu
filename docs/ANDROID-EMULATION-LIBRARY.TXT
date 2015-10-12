@@ -134,7 +134,7 @@ To achieve this, a series of programming techniques will be used, for example
       android/base/async/Looper.h
       android/base/async/Looper.cpp
       android/base/async/ThreadLooper.h
-      android-qemu1-glue/qemu/base/async/Looper.cpp
+      android-qemu1-glue/base/async/Looper.cpp
 
     Technically, only the last source file is part of the QEMU1-specific glue.
 

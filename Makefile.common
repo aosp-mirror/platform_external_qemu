@@ -237,9 +237,9 @@ common_LOCAL_SRC_FILES += \
 	android/metrics/metrics_reporter_ga.c \
 	android/metrics/metrics_reporter_toolbar.c \
 	android/metrics/StudioHelper.cpp \
-	android-qemu1-glue/qemu/base/async/Looper.cpp \
-	android-qemu1-glue/qemu/base/files/QemuFileStream.cpp \
-	android/qemu/utils/stream.cpp \
+	android-qemu1-glue/base/async/Looper.cpp \
+	android-qemu1-glue/base/files/QemuFileStream.cpp \
+	android-qemu1-glue/utils/stream.cpp \
 	android/opengl/EmuglBackendList.cpp \
 	android/opengl/EmuglBackendScanner.cpp \
 	android/opengl/emugl_config.cpp \
@@ -612,8 +612,8 @@ CORE_MISC_SOURCES = \
     android-qemu1-glue/hw-qemud.cpp \
     android/looper-qemu.cpp \
     android/hw-pipe-net.c \
-    android-qemu1-glue/qemu/base/async/Looper.cpp \
-    android-qemu1-glue/qemu/emulation/CharSerialLine.cpp \
+    android-qemu1-glue/base/async/Looper.cpp \
+    android-qemu1-glue/emulation/CharSerialLine.cpp \
     android-qemu1-glue/qemu-setup.c \
     android/qemu-tcpdump.c \
     android-qemu1-glue/shaper.c \

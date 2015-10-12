@@ -14,7 +14,7 @@
 
 #include "android/charpipe.h"
 #include "android/emulation/android_qemud.h"
-#include "android-qemu1-glue/qemu/emulation/CharSerialLine.h"
+#include "android-qemu1-glue/emulation/CharSerialLine.h"
 #include "android/utils/debug.h"
 
 #define  D(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)

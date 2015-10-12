@@ -9,13 +9,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/qemu/base/async/Looper.h"
+#include "android-qemu1-glue/base/async/Looper.h"
 
 #include "android/base/Log.h"
 #include "android/base/containers/TailQueueList.h"
 #include "android/base/containers/ScopedPointerSet.h"
 #include "android/base/sockets/SocketUtils.h"
-#include "android/qemu/base/files/QemuFileStream.h"
+#include "android-qemu1-glue/base/files/QemuFileStream.h"
 #include "android/utils/stream.h"
 
 extern "C" {
