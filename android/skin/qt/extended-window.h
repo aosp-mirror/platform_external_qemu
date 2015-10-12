@@ -12,15 +12,16 @@
 
 #pragma once
 
-#include "android/ui-emu-agent.h"
-
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/cellular_agent.h"
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/location_agent.h"
+#include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/gps/GpsFix.h"
+#include "android/hw-sensors.h"
 #include "android/settings-agent.h"
+#include "android/ui-emu-agent.h"
 
 #include <QFile>
 #include <QFrame>
@@ -28,7 +29,10 @@
 #include <QString>
 #include <QTableWidget>
 #include <QTimer>
-#include <QValidator>
+#include <QDoubleValidator>
+
+#include <vector>
+#include <map>
 
 class EmulatorQtWindow;
 class ToolWindow;
@@ -103,6 +107,7 @@ private:
     void initSettings();
     void initSms();
     void initTelephony();
+    void initVirtualSensors();
 
     BatteryState    mBatteryState;
     SettingsState   mSettingsState;
@@ -112,6 +117,7 @@ private:
     const QAndroidCellularAgent* mCellularAgent;
     const QAndroidFingerAgent* mFingerAgent;
     const QAndroidLocationAgent* mLocationAgent;
+    const QAndroidSensorsAgent    *mSensorsAgent;
     const QAndroidTelephonyAgent* mTelephonyAgent;
     const SettingsAgent* mSettingsAgent;
 
@@ -119,6 +125,7 @@ private:
     bool     mLoc_nowPaused;
     int      mLoc_rowToSend;
     QTimer   mLoc_timer;
+    QDoubleValidator mMagFieldValidator;
 
     Ui::ExtendedControls *mExtendedUi;
 
@@ -133,7 +140,6 @@ private:
     static void setButtonEnabled(QPushButton*  theButton,
                                  SettingsTheme theme,
                                  bool          isEnabled);
-
     void    dpad_setPressed(QPushButton* button);
     void    dpad_setReleased(QPushButton* button);
 
@@ -200,6 +206,11 @@ private slots:
 
     // Settings
     void on_set_themeBox_currentIndexChanged(int index);
+
+    // Sensors
+    void on_temperatureSensorValueWidget_valueChanged(double value);
+    void on_proximitySensorValueWidget_valueChanged(double value);
+    void onPhoneRotationChanged();
 
     // SMS messaging
     void on_sms_sendButton_clicked();

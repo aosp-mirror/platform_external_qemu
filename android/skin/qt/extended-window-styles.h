@@ -88,9 +88,11 @@ enum { PANE_IDX_LOCATION = 0,
     "*[ColorGroup=\"Title\"]         { color:" THEME##_TITLE_COLOR "}" \
     "*::disabled[ColorGroup=\"Tool\"]{ color:" THEME##_DISABLED_TOOL_COLOR "}" \
     "*[ColorGroup=\"Tool\"]          { color:" THEME##_TOOL_COLOR "}" \
+    "*[class=\"EditableValue\"]  { color:" THEME##_TEXT_COLOR "; font-size: 11pt }" \
+    "*[ColorGroup=\"SliderLabel\"]  { color:" THEME##_DIVIDER_COLOR "; font-size: 9pt }" \
     "*                               { color:" THEME##_TEXT_COLOR ";" \
-                                      "background-color: " THEME##_BKG_COLOR "}" \
-    "QPlainTextEdit, QTextEdit, QTreeView {" \
+                                      "background-color: " THEME##_BKG_COLOR "}" \ 
+    "QPlainTextEdit, QTextEdit, QLineEdit, QTreeView {" \
             "border-top: 0px; "\
             "border-bottom: 2px solid " THEME##_DIVIDER_COLOR "}" \
     "QCheckBox::indicator:checked {" \
@@ -122,4 +124,13 @@ enum { PANE_IDX_LOCATION = 0,
         THEME##_DIVIDER_COLOR "}" \
     "QComboBox::drop-down { border-left-style: solid; }" \
     "QComboBox::down-arrow { image:url(:/" THEME##_PATH "/drop_down); " \
-        "border: none; width: 24px; height: 24px; }"
+        "border: none; width: 24px; height: 24px; }" \
+    "QTabWidget::pane {border: none;}" \
+    "QTabWidget::tab-bar {left: 0px;}" \
+    "QTabBar::tab {background:" THEME##_BKG_COLOR "; padding-bottom:8px; font-size: 11pt; width: 150px; text-align: left}" \
+    "QTabBar::tab:selected {color:" THEME##_TEXT_COLOR ";" \
+        "border-bottom: 4px solid " THEME##_TOOL_COLOR "}" \
+    "QTabBar::tab:!selected{color:" THEME##_TITLE_COLOR ";" \
+        "border-bottom: 4px solid " THEME##_BKG_COLOR "}" \
+    "QTabBar::tab:disabled {color: transparent;" \
+        "border-bottom: 4px solid transparent}"

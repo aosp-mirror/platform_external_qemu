@@ -17,6 +17,7 @@ ANDROID_SKIN_LDLIBS_64 += $(LIBXML2_LDLIBS_64)
 ANDROID_SKIN_SOURCES += \
     android/gps/GpxParser.cpp \
     android/gps/KmlParser.cpp \
+    android/skin/qt/editable-slider-widget.cpp \
     android/skin/qt/emulator-qt-window.cpp \
     android/skin/qt/ext-battery.cpp \
     android/skin/qt/ext-cellular.cpp \
@@ -27,10 +28,12 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/ext-settings.cpp \
     android/skin/qt/ext-sms.cpp \
     android/skin/qt/ext-telephony.cpp \
+    android/skin/qt/ext-virtsensors.cpp \
     android/skin/qt/extended-window.cpp \
     android/skin/qt/tool-window.cpp \
 
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
+    android/skin/qt/editable-slider-widget.h \
     android/skin/qt/emulator-qt-window.h \
     android/skin/qt/extended-window.h \
     android/skin/qt/tool-window.h \
