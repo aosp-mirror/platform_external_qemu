@@ -91,7 +91,7 @@ enum { PANE_IDX_LOCATION = 0,
     "*[class=\"EditableValue\"]  { color:" THEME##_TEXT_COLOR "; font-size: 11pt }" \
     "*[ColorGroup=\"SliderLabel\"]  { color:" THEME##_DIVIDER_COLOR "; font-size: 9pt }" \
     "*                               { color:" THEME##_TEXT_COLOR ";" \
-                                      "background-color: " THEME##_BKG_COLOR "}" \ 
+                                      "background-color: " THEME##_BKG_COLOR "}" \
     "QPlainTextEdit, QTextEdit, QLineEdit, QTreeView {" \
             "border-top: 0px; "\
             "border-bottom: 2px solid " THEME##_DIVIDER_COLOR "}" \

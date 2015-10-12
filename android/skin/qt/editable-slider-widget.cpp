@@ -34,7 +34,7 @@ EditableSliderWidget::EditableSliderWidget(QWidget *parent) :
     mMaxValueLabel.setProperty("ColorGroup", "SliderLabel");
     mLineEditValidator.setDecimals(1);
     mLineEdit.setValidator(&mLineEditValidator);
-    mLineEdit.setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    mLineEdit.setAlignment(Qt::AlignRight | Qt::AlignTop);
     mLineEdit.setMaximumWidth(64);
     mLineEdit.setTextMargins(0, 0, 0, 4);
     mLineEdit.setProperty("class", "EditableValue");
@@ -53,7 +53,7 @@ void EditableSliderWidget::setValue(double value) {
     mSlider.blockSignals(true);
     mSlider.setValue(static_cast<int>(mValue * 10.0));
     mSlider.blockSignals(false);
-    mLineEdit.setText(QString::number(mValue));
+    mLineEdit.setText(QString("%1").arg(mValue, 0, 'f', 1, '0'));
 
     emit valueChanged(mValue);
     emit valueChanged();

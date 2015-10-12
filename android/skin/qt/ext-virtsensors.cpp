@@ -16,9 +16,9 @@
 
 void ExtendedWindow::initVirtualSensors()
 {
-    mExtendedUi->yawAngleWidget->setRange(-360., 360);
-    mExtendedUi->pitchAngleWidget->setRange(-360, 360);
-    mExtendedUi->rollAngleWidget->setRange(-360, 360);
+    mExtendedUi->yawAngleWidget->setRange(-180., 180);
+    mExtendedUi->pitchAngleWidget->setRange(-180, 180);
+    mExtendedUi->rollAngleWidget->setRange(-180, 180);
     mExtendedUi->temperatureSensorValueWidget->setRange(-273.1, 100.0);
     mExtendedUi->proximitySensorValueWidget->setRange(0, 10);
     mExtendedUi->magNorthWidget->setValidator(&mMagFieldValidator);
@@ -44,6 +44,11 @@ void ExtendedWindow::on_temperatureSensorValueWidget_valueChanged(double value) 
 
 void ExtendedWindow::on_proximitySensorValueWidget_valueChanged(double value) {
     mSensorsAgent->setSensor(ANDROID_SENSOR_PROXIMITY, static_cast<float>(value), .0f, .0f);
+}
+
+// Helper function.
+static QString formatSensorValue(double value) {
+    return QString("%1").arg(value, 8, 'f', 2, ' ');
 }
 
 void ExtendedWindow::onPhoneRotationChanged() {
@@ -99,15 +104,11 @@ void ExtendedWindow::onPhoneRotationChanged() {
                              static_cast<float>(roll));
 
     // Update labels with new values.
-    mExtendedUi->accelerometerValuesLabel->setText(
-            "(" +
-            QString::number(device_gravity_vector.x(), 'f', 3) + ", " +
-            QString::number(device_gravity_vector.y(), 'f', 3) + ", " +
-            QString::number(device_gravity_vector.z(), 'f', 3) + ")");
-    mExtendedUi->magnetometerValuesLabel->setText(
-            "(" +
-            QString::number(device_magnetic_vector.x(), 'f', 3) + ", " +
-            QString::number(device_magnetic_vector.y(), 'f', 3) + ", " +
-            QString::number(device_magnetic_vector.z(), 'f', 3) + ")");
+    mExtendedUi->accelerometerXLabel->setText(formatSensorValue(device_gravity_vector.x()));
+    mExtendedUi->accelerometerYLabel->setText(formatSensorValue(device_gravity_vector.y()));
+    mExtendedUi->accelerometerZLabel->setText(formatSensorValue(device_gravity_vector.z()));
+    mExtendedUi->magnetometerNorthLabel->setText(formatSensorValue(device_magnetic_vector.x()));
+    mExtendedUi->magnetometerEastLabel->setText(formatSensorValue(device_magnetic_vector.y()));
+    mExtendedUi->magnetometerVerticalLabel->setText(formatSensorValue(device_magnetic_vector.z()));
 }
 
