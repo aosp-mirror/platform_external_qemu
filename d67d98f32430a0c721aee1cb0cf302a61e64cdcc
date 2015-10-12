@@ -22,6 +22,30 @@
       "revId": "d67d98f32430a0c721aee1cb0cf302a61e64cdcc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df39c202_00b7a6bf",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-12T17:20:27Z",
+      "side": 1,
+      "message": "Absolutely, that\u0027s an oversight :-/ But we\u0027ll fix that by moving the modem driver code back into android/ soon anyway",
+      "parentUuid": "df39c202_c0881e25",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 1
+      },
+      "revId": "d67d98f32430a0c721aee1cb0cf302a61e64cdcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
