@@ -63,6 +63,9 @@ extern void             skin_window_set_onion( SkinWindow*   window,
 extern void             skin_window_set_scale( SkinWindow*  window,
                                                double       scale );
 
+extern void             skin_window_set_zoom( SkinWindow*  window,
+                                              double       zoom );
+
 extern void             skin_window_position_changed( SkinWindow*   window,
                                                       int x, int y );
 

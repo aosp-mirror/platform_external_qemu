@@ -16,6 +16,7 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QIcon>
+#include <QInputDialog>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPixmap>
@@ -49,15 +50,18 @@ using namespace android::base;
 static EmulatorQtWindow *instance;
 
 EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
-        QFrame(parent)
+        QFrame(parent),
+        mContainer(this),
+        mZoomFactor(1.0),
+        mNextIsZoom(false)
 {
     instance = this;
     backing_surface = NULL;
     batteryState    = NULL;
 
-    tool_window = new ToolWindow(this);
+    tool_window = new ToolWindow(this, &mContainer);
 
-    setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
+    mContainer.setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
 
     this->setAcceptDrops(true);
 
@@ -94,62 +98,6 @@ EmulatorQtWindow::~EmulatorQtWindow()
 EmulatorQtWindow *EmulatorQtWindow::getInstance()
 {
     return instance;
-}
-
-bool EmulatorQtWindow::event(QEvent *e)
-{
-    // Ignore MetaCall events
-    if (e->type() == QEvent::MetaCall) {
-        return QFrame::event(e);
-    }
-
-    // Add to the event buffer, but keep it a reasonable size - a few events, such as repaint,
-    // can occur in between resizes but before the release happens
-    mEventBuffer.push_back(e->type());
-    if (mEventBuffer.size() > 8) {
-        mEventBuffer.removeFirst();
-    }
-
-    // Scan to see if a resize event happened recently
-    bool foundResize = false;
-    int i = 0;
-    for (; i < mEventBuffer.size(); i++) {
-        if (mEventBuffer[i] == QEvent::Resize) {
-            foundResize = true;
-            i++;
-            break;
-        }
-    }
-
-    // Determining resize-over is OS / window-manager specific
-    // Do so by scanning the remainder of the event buffer for specific combinations
-    if (foundResize) {
-
-#ifdef _WIN32
-
-        for (; i < mEventBuffer.size() - 1; i++) {
-            if (mEventBuffer[i] == QEvent::NonClientAreaMouseButtonRelease) {
-                doResize();
-                break;
-            }
-        }
-
-#else // !_WIN32
-
-        for (; i + 2 < mEventBuffer.size(); i++) {
-            if (mEventBuffer[i] == QEvent::WindowActivate &&
-                mEventBuffer[i+1] == QEvent::ActivationChange &&
-                mEventBuffer[i+2] == QEvent::InputMethodQuery) {
-                doResize();
-                break;
-            }
-        }
-
-#endif
-
-    }
-
-    return QFrame::event(e);
 }
 
 void EmulatorQtWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -232,15 +180,9 @@ void EmulatorQtWindow::paintEvent(QPaintEvent *)
     }
 }
 
-void EmulatorQtWindow::moveEvent(QMoveEvent *event)
-{
-    QFrame::moveEvent(event);
-    simulateWindowMoved(pos());
-    tool_window->dockMainWindow();
-}
-
 void EmulatorQtWindow::show()
 {
+    mContainer.show();
     QFrame::show();
     tool_window->show();
 }
@@ -331,14 +273,14 @@ void EmulatorQtWindow::slot_getWindowId(WId *out_id, QSemaphore *semaphore)
 
 void EmulatorQtWindow::slot_getWindowPos(int *xx, int *yy, QSemaphore *semaphore)
 {
-    *xx = x();
-    *yy = y();
+    *xx = mContainer.x();
+    *yy = mContainer.y();
     if (semaphore != NULL) semaphore->release();
 }
 
 void EmulatorQtWindow::slot_isWindowFullyVisible(bool *out_value, QSemaphore *semaphore)
 {
-    *out_value = ((QApplication*)QApplication::instance())->desktop()->screenGeometry().contains(geometry());
+    *out_value = ((QApplication*)QApplication::instance())->desktop()->screenGeometry().contains(mContainer.geometry());
     if (semaphore != NULL) semaphore->release();
 }
 
@@ -372,7 +314,7 @@ void EmulatorQtWindow::slot_releaseBitmap(SkinSurface *s, QSemaphore *semaphore)
 
 void EmulatorQtWindow::slot_requestClose(QSemaphore *semaphore)
 {
-    close();
+    mContainer.close();
     if (semaphore != NULL) semaphore->release();
 }
 
@@ -388,7 +330,7 @@ void EmulatorQtWindow::slot_requestUpdate(const QRect *rect, QSemaphore *semapho
 
 void EmulatorQtWindow::slot_setWindowPos(int x, int y, QSemaphore *semaphore)
 {
-    move(x, y);
+    mContainer.move(x, y);
     if (semaphore != NULL) semaphore->release();
 }
 
@@ -403,7 +345,7 @@ void EmulatorQtWindow::slot_setWindowIcon(const unsigned char *, int, QSemaphore
 
 void EmulatorQtWindow::slot_setWindowTitle(const QString *title, QSemaphore *semaphore)
 {
-    setWindowTitle(*title);
+    mContainer.setWindowTitle(*title);
     if (semaphore != NULL) semaphore->release();
 }
 
@@ -414,7 +356,15 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, 
         showFullScreen();
     } else {
         showNormal();
-        setGeometry(*rect);
+        setFixedSize(rect->size());
+
+        // If this was the result of a zoom, don't change the overall window size
+        if (mNextIsZoom) {
+            mContainer.move(rect->topLeft());
+        } else {
+            mContainer.setGeometry(*rect);
+        }
+        mNextIsZoom = false;
     }
     show();
     if (semaphore != NULL) semaphore->release();
@@ -617,17 +567,17 @@ SkinEvent *EmulatorQtWindow::createSkinEvent(SkinEventType type)
     return skin_event;
 }
 
-void EmulatorQtWindow::doResize()
+void EmulatorQtWindow::doResize(const QSize &size)
 {
-    mEventBuffer.clear(); // Ensures one resize release does not produce multiple set-scales
     if (backing_surface) {
         QSize newSize(backing_surface->original_w, backing_surface->original_h);
-        newSize.scale(this->size(), Qt::KeepAspectRatio);
+        newSize.scale(size, Qt::KeepAspectRatio);
 
         double newScale = (double) newSize.width() / (double) backing_surface->original_w;
         simulateSetScale(newScale);
     }
 }
+
 
 void EmulatorQtWindow::handleEvent(SkinEventType type, QMouseEvent *event)
 {
@@ -666,6 +616,9 @@ bool EmulatorQtWindow::handleQtKeyEvent(SkinEventType type, QKeyEvent *event)
     if (key == Qt::Key_F10 && (modifiers & Qt::ControlModifier)) {
         screenshot();
         usedEvent = true;
+    } else if (key == Qt::Key_F9 && (modifiers & Qt::ControlModifier)) {
+        zoom();
+        usedEvent = true;
     }
 
     return usedEvent;
@@ -687,9 +640,20 @@ void EmulatorQtWindow::simulateKeyPress(int keyCode, int modifiers)
 void EmulatorQtWindow::simulateSetScale(double scale)
 {
     SkinEvent *event = createSkinEvent(kEventSetScale);
-    event->u.window.x = pos().x();
-    event->u.window.y = pos().y();
+    event->u.window.x = mContainer.pos().x();
+    event->u.window.y = mContainer.pos().y();
     event->u.window.scale = scale;
+    slot_queueEvent(event);
+}
+
+void EmulatorQtWindow::simulateSetZoom(double zoom)
+{
+    mNextIsZoom = true;
+
+    SkinEvent *event = createSkinEvent(kEventSetZoom);
+    event->u.window.x = mContainer.pos().x();
+    event->u.window.y = mContainer.pos().y();
+    event->u.window.scale = zoom;
     slot_queueEvent(event);
 }
 
@@ -701,7 +665,20 @@ void EmulatorQtWindow::simulateWindowMoved(const QPoint &pos)
     slot_queueEvent(event);
 }
 
+
 void EmulatorQtWindow::slot_runOnUiThread(SkinGenericFunction* f, void* data, QSemaphore* semaphore) {
     (*f)(data);
     if (semaphore) semaphore->release();
+}
+
+void EmulatorQtWindow::zoom()
+{
+    if (backing_surface) {
+        bool pressedOk;
+        mZoomFactor = QInputDialog::getDouble(this, tr("Zoom Factor"), tr("Enter a zoom factor:"),
+                                              1.0, 1.0, 3.0, 1, &pressedOk);
+        if (pressedOk) {
+            simulateSetZoom(mZoomFactor);
+        }
+    }
 }

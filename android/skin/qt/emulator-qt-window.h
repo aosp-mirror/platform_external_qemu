@@ -23,6 +23,7 @@
 #include <QPainter>
 #include <QProcess>
 #include <QResizeEvent>
+#include <QScrollArea>
 #include <QTimer>
 #include <QWidget>
 
@@ -57,13 +58,11 @@ public:
     virtual ~EmulatorQtWindow();
 
     static EmulatorQtWindow *getInstance();
-    bool event(QEvent *e);
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
     void paintEvent(QPaintEvent *event);
-    void moveEvent(QMoveEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
@@ -113,7 +112,9 @@ public:
     void screenshot();
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateSetScale(double scale);
+    void simulateSetZoom(double zoom);
     void simulateWindowMoved(const QPoint &pos);
+    void zoom();
 
 private slots:
     void slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore = NULL);
@@ -146,7 +147,7 @@ public slots:
     void slot_screencapPullFinished(int exitStatus);
 
 private:
-    void doResize();
+    void doResize(const QSize &size);
 
     void handleEvent(SkinEventType type, QMouseEvent *event);
     SkinEvent *createSkinEvent(SkinEventType type);
@@ -163,7 +164,101 @@ private:
     QQueue<SkinEvent*> event_queue;
     ToolWindow *tool_window;
 
-    QList<QEvent::Type> mEventBuffer;
+    // Class contained by EmulatorQtWindow so it has access to private members
+    class EmulatorWindowContainer : public QScrollArea
+    {
+    public:
+        explicit EmulatorWindowContainer(EmulatorQtWindow *window)
+            : QScrollArea(), mEmulatorWindow(window)
+        {
+            setFrameShape(QFrame::NoFrame);
+            setWidget(window);
+        }
+
+        bool event(QEvent *e)
+        {
+            // Ignore MetaCall and UpdateRequest events
+            if (e->type() == QEvent::MetaCall || e->type() == QEvent::UpdateRequest) {
+                return QScrollArea::event(e);
+            }
+
+            // Add to the event buffer, but keep it a reasonable size - a few events, such as repaint,
+            // can occur in between resizes but before the release happens
+            mEventBuffer.push_back(e->type());
+            if (mEventBuffer.size() > 8) {
+                mEventBuffer.removeFirst();
+            }
+
+            // Scan to see if a resize event happened recently
+            bool foundResize = false;
+            int i = 0;
+            for (; i < mEventBuffer.size(); i++) {
+                if (mEventBuffer[i] == QEvent::Resize) {
+                    foundResize = true;
+                    i++;
+                    break;
+                }
+            }
+
+            // Determining resize-over is OS specific
+            // Do so by scanning the remainder of the event buffer for specific combinations
+            if (foundResize) {
+
+#ifdef _WIN32
+
+                for (; i < mEventBuffer.size() - 1; i++) {
+                    if (mEventBuffer[i] == QEvent::NonClientAreaMouseButtonRelease) {
+                        mEventBuffer.clear();
+                        mEmulatorWindow->doResize(this->size());
+                        break;
+                    }
+                }
+
+#else // !_WIN32
+
+                for (; i < mEventBuffer.size() - 3; i++) {
+                    if (mEventBuffer[i] == QEvent::WindowActivate &&
+                            mEventBuffer[i+1] == QEvent::ActivationChange &&
+                            mEventBuffer[i+2] == QEvent::FocusIn &&
+                            mEventBuffer[i+3] == QEvent::InputMethodQuery) {
+                        mEventBuffer.clear();
+                        mEmulatorWindow->doResize(this->size());
+                        break;
+                    }
+                }
+
+#endif
+
+            }
+
+            return QScrollArea::event(e);
+        }
+
+        void keyPressEvent(QKeyEvent *event)
+        {
+            mEmulatorWindow->keyPressEvent(event);
+        }
+
+        void keyReleaseEvent(QKeyEvent *event)
+        {
+            mEmulatorWindow->keyReleaseEvent(event);
+        }
+
+        void moveEvent(QMoveEvent *event)
+        {
+            QScrollArea::moveEvent(event);
+            mEmulatorWindow->simulateWindowMoved(this->pos());
+            mEmulatorWindow->tool_window->dockMainWindow();
+        }
+
+    private:
+        EmulatorQtWindow *mEmulatorWindow;
+        QList<QEvent::Type> mEventBuffer;
+    }; // EmulatorWindowContainer
+
+    EmulatorWindowContainer mContainer;
+    double mZoomFactor;
+    bool mNextIsZoom;
 
     QProcess mScreencapProcess;
     QProcess mScreencapPullProcess;
