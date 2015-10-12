@@ -281,7 +281,7 @@ find_program () {
 }
 
 # Default value of --ui option.
-UI_DEFAULT=sdl2
+UI_DEFAULT=qt
 
 # Default value of --gles option.
 GLES_DEFAULT=dgl
@@ -394,8 +394,8 @@ EOF
     echo "  --strip                     Strip emulator executables."
     echo "  --no-strip                  Do not strip emulator executables (default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
-    echo "  --ui=sdl2                   Use SDL2-based UI backend (default)."
-    echo "  --ui=qt                     Use Qt-based UI backend."
+    echo "  --ui=sdl2                   Use SDL2-based UI backend."
+    echo "  --ui=qt                     Use Qt-based UI backend (default)."
     echo "  --gles=dgl                  Build the OpenGLES to Desktop OpenGL Translator (default)"
     echo "  --gles=angle                Build the OpenGLES to ANGLE wrapper"
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"

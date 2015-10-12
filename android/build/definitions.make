@@ -263,12 +263,16 @@ ifeq (,$$(strip $$(QT_MOC_TOOL)))
 $$(error QT_MOC_TOOL is not defined when trying to generate $$(MOC_SRC) !!)
 endif
 
+# OS X is not happy with the relative include path if the intermediate
+# build directory is under a symlink. So we're going to force moc to use the
+# absolute path with the path prefix flag (-p).
+$$(MOC_SRC): PRIVATE_SRC_DIR := $$(abspath $$(dir $$(SRC)))
 $$(MOC_SRC): PRIVATE_SRC := $$(SRC)
 $$(MOC_SRC): PRIVATE_DST := $$(MOC_SRC)
 $$(MOC_SRC): $$(SRC) $$(MOC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt moc: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
-	$(hide) $$(QT_MOC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC)
+	$(hide) $$(QT_MOC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC) -p $$(PRIVATE_SRC_DIR)
 
 $$(eval $$(call compile-generated-cxx-source,$$(MOC_SRC)))
 endef
