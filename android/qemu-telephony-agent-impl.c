@@ -16,6 +16,9 @@
 #include "android/telephony/modem.h"
 #include "telephony/modem_driver.h"
 
+#include <ctype.h>
+#include <stdio.h>
+
 static int gsm_number_is_bad(const char*);
 
 static TelephonyResponse telephony_telephonyCmd(TelephonyOperation op,
