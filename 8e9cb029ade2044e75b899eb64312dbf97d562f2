@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9fae6a64_a605c628",
+        "filename": "android-qemu1-glue/hw-qemud.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-12T17:01:16Z",
+      "side": 1,
+      "message": "after my changes it looks like this is the only function that should remain in glue code",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 75,
+        "endChar": 1
+      },
+      "revId": "8e9cb029ade2044e75b899eb64312dbf97d562f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
