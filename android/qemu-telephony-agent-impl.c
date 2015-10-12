@@ -14,7 +14,7 @@
 
 #include "android/emulation/control/telephony_agent.h"
 #include "android/telephony/modem.h"
-#include "android-qemu1-glue/telephony/modem_driver.h"
+#include "android/telephony/modem_driver.h"
 
 #include <ctype.h>
 #include <stdio.h>

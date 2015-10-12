@@ -28,7 +28,7 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/looper.h"
 
-#include "android-qemu1-glue/telephony/modem_driver.h"
+#include "android/telephony/modem_driver.h"
 
 #if CONFIG_QT
 #include "android/skin/qt/set-ui-emu-agent.h"

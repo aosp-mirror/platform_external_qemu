@@ -13,7 +13,7 @@
 #include "libslirp.h"
 #include "qemu-common.h"
 #include "sysemu/sysemu.h"
-#include "android-qemu1-glue/telephony/modem_driver.h"
+#include "android-qemu1-glue/telephony/modem_init.h"
 
 #include "android/console.h"
 #include "android/adb-qemud.h"
@@ -363,7 +363,7 @@ void  android_emulation_setup( void )
         report_console(android_op_report_console, base_port);
     }
 
-    android_modem_init( base_port );
+    qemu_android_modem_init( base_port );
 
     /* Save base port. */
     android_base_port = base_port;
