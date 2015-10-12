@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ff32061b_045b3818",
+        "filename": "android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1418,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-12T19:52:37Z",
+      "side": 1,
+      "message": "I\u0027m not sure how this works.\nIf I set the zoom to 2x twice, is the second one redundant, or do I get 4x?",
+      "revId": "81427a6bd74d926afa208c9debc511e88ada7e61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
