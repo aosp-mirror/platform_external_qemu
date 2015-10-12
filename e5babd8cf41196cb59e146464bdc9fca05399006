@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "bfb7aeb4_871f6673",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T21:25:17Z",
+      "side": 1,
+      "message": "Well, this is weird. Previously if I included these headers before Qt, I would get an avalanche of cryptic errors. However, now that I\u0027m trying it again the errors are gone...",
+      "parentUuid": "7f1ff654_955ea47d",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e55355fb_a5c2d4ba",
         "filename": "android/ui-emu-agent.h",
         "patchSetId": 3
@@ -47,6 +65,24 @@
       "writtenOn": "2015-10-12T14:40:28Z",
       "side": 1,
       "message": "nit: star location is on the left :)",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fa8725b_2411d268",
+        "filename": "android/ui-emu-agent.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T21:25:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e55355fb_a5c2d4ba",
       "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
