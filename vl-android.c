@@ -87,7 +87,7 @@
 #include "android/wear-agent/android_wear_agent.h"
 #include "exec/hwaddr.h"
 #include "migration/qemu-file.h"
-#include "android-qemu1-glue/telephony/modem_driver.h"
+#include "android/telephony/modem_driver.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>

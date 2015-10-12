@@ -13,12 +13,12 @@
  * it communicates through a serial port with "rild" (Radio Interface Layer Daemon)
  * on the emulated device.
  */
-#include "modem_driver.h"
+#include "android/telephony/modem_driver.h"
 
 #include "android/telephony/debug.h"
 #include "android/utils/debug.h"
 
-#include "hw/hw.h"
+#include <string.h>
 
 #define  xxDEBUG
 
@@ -128,37 +128,12 @@ modem_driver_read( void*  _md, const uint8_t*  src, int  len )
     D( "%s: done\n", __FUNCTION__ );
 }
 
-#define MODEM_DEV_STATE_SAVE_VERSION 1
-
-static void
-modem_state_save(QEMUFile* file, void* opaque)
-{
-    amodem_state_save((AModem)opaque, (SysFile*)file);
-}
-
-static int
-modem_state_load(QEMUFile* file, void* opaque, int version_id)
-{
-    if (version_id != MODEM_DEV_STATE_SAVE_VERSION)
-      return -1;
-
-    return amodem_state_load((AModem)opaque, (SysFile*)file);
-}
-
 static void
 modem_driver_init(int base_port, ModemDriver* dm, CSerialLine* sl) {
     dm->serial_line = sl;
     dm->in_pos = 0;
     dm->in_sms = 0;
     dm->modem = amodem_create( base_port, modem_driver_unsol, dm );
-
-    register_savevm(NULL,
-                    "android_modem",
-                    0,
-                    MODEM_DEV_STATE_SAVE_VERSION,
-                    modem_state_save,
-                    modem_state_load,
-                    dm->modem);
 
     android_serialline_addhandlers(sl,
                                    dm,
