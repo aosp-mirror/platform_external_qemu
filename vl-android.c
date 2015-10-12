@@ -61,6 +61,7 @@
 #include "android-qemu1-glue/emulation/serial_line.h"
 #include "android/hw-pipe-net.h"
 #include "android/hw-qemud.h"
+#include "android-qemu1-glue/android_qemud.h"
 #include "android/hw-sensors.h"
 #include "android/log-rotate.h"
 #include "android/looper-qemu.h"

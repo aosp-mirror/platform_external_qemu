@@ -217,7 +217,7 @@ common_LOCAL_SRC_FILES += \
 	android/emulation/android_pipe_pingpong.c \
 	android/emulation/android_pipe_throttle.c \
 	android/emulation/android_pipe_zero.c \
-	android-qemu1-glue/emulation/android_qemud.cpp \
+	android/emulation/android_qemud.cpp \
 	android/emulation/qemud/android_qemud_sink.cpp \
 	android/emulation/qemud/android_qemud_serial.cpp \
 	android/emulation/qemud/android_qemud_client.cpp \
@@ -237,6 +237,7 @@ common_LOCAL_SRC_FILES += \
 	android/metrics/metrics_reporter_ga.c \
 	android/metrics/metrics_reporter_toolbar.c \
 	android/metrics/StudioHelper.cpp \
+	android-qemu1-glue/android_qemud.cpp \
 	android-qemu1-glue/base/async/Looper.cpp \
 	android-qemu1-glue/base/files/QemuFileStream.cpp \
 	android-qemu1-glue/utils/stream.cpp \

@@ -17,10 +17,6 @@
 
 ANDROID_BEGIN_HEADER
 
-/* Initialize the qemud service for use in QEMU1
- */
-extern void android_qemu1_qemud_init(void);
-
 /* return the character driver state object that needs to be connected to the
  * emulated serial port where all multiplexed channels go through.
  */

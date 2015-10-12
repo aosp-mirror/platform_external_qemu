@@ -75,10 +75,6 @@ CSerialLine* android_qemud_get_serial_line(void) {
 }
 
 
-void android_qemu1_qemud_init(void) {
-    (void) android_qemud_get_serial_line();
-}
-
 /*
  * The following code is used for backwards compatibility reasons.
  * It allows you to implement a given qemud-based service through
