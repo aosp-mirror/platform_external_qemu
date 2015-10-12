@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-#include "android/charpipe.h"
+#include "android-qemu1-glue/emulation/charpipe.h"
 #include "android/log-rotate.h"
 #include "android/snaphost-android.h"
 #include "block/aio.h"

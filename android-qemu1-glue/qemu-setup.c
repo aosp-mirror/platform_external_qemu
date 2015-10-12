@@ -13,7 +13,7 @@
 #include "libslirp.h"
 #include "qemu-common.h"
 #include "sysemu/sysemu.h"
-#include "telephony/modem_driver.h"
+#include "android-qemu1-glue/telephony/modem_driver.h"
 
 #include "android/console.h"
 #include "android/adb-qemud.h"
@@ -22,7 +22,7 @@
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
-#include "android-qemu1-glue/hw-qemud.h"
+#include "android/hw-qemud.h"
 #include "android/hw-sensors.h"
 #include "android/proxy/proxy_http.h"
 #include "android/qemu-control-impl.h"

@@ -11,7 +11,7 @@
 
 #include "android/emulation/android_qemud.h"
 
-#include "android/qemu/utils/stream.h"
+#include "android-qemu1-glue/utils/stream.h"
 #include "android/utils/looper.h"
 #include "android/utils/misc.h"
 #include "android/utils/panic.h"
@@ -22,28 +22,8 @@
 #include "android/emulation/qemud/android_qemud_multiplexer.h"
 #include "android/emulation/qemud/android_qemud_service.h"
 
-extern "C" {
-    #include "migration/vmstate.h"
-}
-
 #include <assert.h>
 #include <stdlib.h>
-
-
-static void qemud_save(QEMUFile* f, void* opaque) {
-    Stream* stream = stream_from_qemufile(f);
-    QemudMultiplexer* m = static_cast<QemudMultiplexer*>(opaque);
-    qemud_multiplexer_save(stream, m);
-    stream_free(stream);
-}
-
-static int qemud_load(QEMUFile* f, void* opaque, int version) {
-    Stream* stream = stream_from_qemufile(f);
-    QemudMultiplexer* m = static_cast<QemudMultiplexer*>(opaque);
-    int ret = qemud_load_multiplexer(stream, m, version);
-    stream_free(stream);
-    return ret;
-}
 
 /* Initializes QEMUD serial interface.
  */
@@ -56,16 +36,7 @@ static void _android_qemud_serial_init(CSerialLine* sl) {
     }
 
     qemud_serial_line = sl;
-
     qemud_multiplexer_init(qemud_multiplexer, sl);
-
-    register_savevm(NULL,
-                    "qemud",
-                    0,
-                    QEMUD_SAVE_VERSION,
-                    qemud_save,
-                    qemud_load,
-                    qemud_multiplexer);
 }
 
 /*------------------------------------------------------------------------------

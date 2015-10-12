@@ -19,7 +19,6 @@
 #include "android/utils/debug.h"
 
 #include "hw/hw.h"
-#include "sysemu/char.h"
 
 #define  xxDEBUG
 
@@ -30,11 +29,11 @@
 #  define  D(...)   ((void)0)
 #endif
 
-AModem            android_modem;
-CharDriverState*  android_modem_cs;
+AModem        android_modem;
+CSerialLine*  android_modem_serial_line;
 
 typedef struct {
-    CharDriverState*  cs;
+    CSerialLine*      serial_line;
     AModem            modem;
     char              in_buff[ 1024 ];
     int               in_pos;
@@ -48,7 +47,7 @@ modem_driver_unsol( void*  _md, const char*  message)
     ModemDriver*      md = _md;
     int               len = strlen(message);
 
-    qemu_chr_write(md->cs, (const uint8_t*)message, len);
+    android_serialline_write(md->serial_line, (const uint8_t*)message, len);
 }
 
 static int
@@ -112,8 +111,8 @@ modem_driver_read( void*  _md, const uint8_t*  src, int  len )
                 if (len == 2 && answer[0] == '>' && answer[1] == ' ')
                     md->in_sms = 1;
 
-                qemu_chr_write(md->cs, (const uint8_t*)answer, len);
-                qemu_chr_write(md->cs, (const uint8_t*)"\r", 1);
+                android_serialline_write(md->serial_line, (const uint8_t*)answer, len);
+                android_serialline_write(md->serial_line, (const uint8_t*)"\r", 1);
             } else
                 D( "%s: -- NO ANSWER\n", __FUNCTION__ );
 
@@ -147,12 +146,11 @@ modem_state_load(QEMUFile* file, void* opaque, int version_id)
 }
 
 static void
-modem_driver_init( int  base_port, ModemDriver*  dm, CharDriverState*  cs )
-{
-    dm->cs     = cs;
+modem_driver_init(int base_port, ModemDriver* dm, CSerialLine* sl) {
+    dm->serial_line = sl;
     dm->in_pos = 0;
     dm->in_sms = 0;
-    dm->modem  = amodem_create( base_port, modem_driver_unsol, dm );
+    dm->modem = amodem_create( base_port, modem_driver_unsol, dm );
 
     register_savevm(NULL,
                     "android_modem",
@@ -162,7 +160,10 @@ modem_driver_init( int  base_port, ModemDriver*  dm, CharDriverState*  cs )
                     modem_state_load,
                     dm->modem);
 
-    qemu_chr_add_handlers( cs, modem_driver_can_read, modem_driver_read, NULL, dm );
+    android_serialline_addhandlers(sl,
+                                   dm,
+                                   modem_driver_can_read,
+                                   modem_driver_read);
 }
 
 
@@ -174,8 +175,8 @@ void android_modem_init( int  base_port )
     android_telephony_debug_radio = VERBOSE_CHECK(radio);
     android_telephony_debug_socket = VERBOSE_CHECK(socket);
 
-    if (android_modem_cs != NULL) {
-        modem_driver_init( base_port, modem_driver, android_modem_cs );
+    if (android_modem_serial_line != NULL) {
+        modem_driver_init(base_port, modem_driver, android_modem_serial_line);
         android_modem = modem_driver->modem;
     }
 }

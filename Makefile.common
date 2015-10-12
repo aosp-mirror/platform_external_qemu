@@ -217,7 +217,7 @@ common_LOCAL_SRC_FILES += \
 	android/emulation/android_pipe_pingpong.c \
 	android/emulation/android_pipe_throttle.c \
 	android/emulation/android_pipe_zero.c \
-	android-qemu1-glue/emulation/android_qemud.cpp \
+	android/emulation/android_qemud.cpp \
 	android/emulation/qemud/android_qemud_sink.cpp \
 	android/emulation/qemud/android_qemud_serial.cpp \
 	android/emulation/qemud/android_qemud_client.cpp \
@@ -237,9 +237,10 @@ common_LOCAL_SRC_FILES += \
 	android/metrics/metrics_reporter_ga.c \
 	android/metrics/metrics_reporter_toolbar.c \
 	android/metrics/StudioHelper.cpp \
-	android-qemu1-glue/qemu/base/async/Looper.cpp \
-	android-qemu1-glue/qemu/base/files/QemuFileStream.cpp \
-	android/qemu/utils/stream.cpp \
+	android-qemu1-glue/android_qemud.cpp \
+	android-qemu1-glue/base/async/Looper.cpp \
+	android-qemu1-glue/base/files/QemuFileStream.cpp \
+	android-qemu1-glue/utils/stream.cpp \
 	android/opengl/EmuglBackendList.cpp \
 	android/opengl/EmuglBackendScanner.cpp \
 	android/opengl/emugl_config.cpp \
@@ -599,21 +600,22 @@ CORE_MISC_SOURCES = \
     qemu-log.c \
     savevm.c \
     android/boot-properties.c \
-    android-qemu1-glue/charpipe.c \
+    android-qemu1-glue/emulation/charpipe.c \
     android/core-init-utils.c   \
     android/ext4_resize.cpp   \
-    android-qemu1-glue/gps.c \
-    android-qemu1-glue/hw-kmsg.c \
+    android/gps.c \
+    android/hw-kmsg.c \
     android/hw-lcd.c \
     android/hw-events.c \
     android/hw-control.c \
     android/hw-fingerprint.c \
     android/hw-sensors.c \
-    android-qemu1-glue/hw-qemud.cpp \
+    android/hw-qemud.cpp \
     android/looper-qemu.cpp \
     android/hw-pipe-net.c \
-    android-qemu1-glue/qemu/base/async/Looper.cpp \
-    android-qemu1-glue/qemu/emulation/CharSerialLine.cpp \
+    android-qemu1-glue/emulation/serial_line.cpp \
+    android-qemu1-glue/base/async/Looper.cpp \
+    android-qemu1-glue/emulation/CharSerialLine.cpp \
     android-qemu1-glue/qemu-setup.c \
     android/qemu-tcpdump.c \
     android-qemu1-glue/shaper.c \
@@ -725,8 +727,8 @@ common_LOCAL_SRC_FILES += \
     android/telephony/remote_call.c \
     android/telephony/sim_card.c \
     android/telephony/sms.c \
-    telephony/modem_driver.c \
-    telephony/sysdeps_qemu.c
+    android-qemu1-glue/telephony/modem_driver.c \
+    android-qemu1-glue/telephony/sysdeps_qemu.c
 
 # sources inherited from upstream, but not fully
 # integrated into android emulator

@@ -83,9 +83,9 @@ and is *NOT* affected by this coding style guide.
 
       NOTE: Do not put high-level features here.
 
-  external/qemu/android/qemu/base/
+  external/qemu/android-qemu1-glue/base/
       Currently contains QEMU-specific implementations of android/base/
-      interfaces. E.g. android/qemu/base/async/Looper.h provides
+      interfaces. E.g. android-qemu1-glue/base/async/Looper.h provides
       android::qemu::createLooper(), which returns a Looper instance
       based on the QEMU main event loop.
 
@@ -97,8 +97,6 @@ and is *NOT* affected by this coding style guide.
 
       This kind of decoupling is very useful and should be encouraged in
       general.
-
-      NOTE: This might be moved to a different directory in the future.
 
   external/qemu/android/<feature>/
       Should contain code related to a specific feature used during emulation.

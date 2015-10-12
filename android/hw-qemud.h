@@ -12,39 +12,34 @@
 
 #pragma once
 
+#include "android/emulation/serial_line.h"
 #include "android/utils/compiler.h"
 
-#include "qemu-common.h"
-
 ANDROID_BEGIN_HEADER
-
-/* Initialize the qemud service for use in QEMU1
- */
-extern void android_qemu1_qemud_init(void);
 
 /* return the character driver state object that needs to be connected to the
  * emulated serial port where all multiplexed channels go through.
  */
-extern CharDriverState* android_qemud_get_cs(void);
+extern CSerialLine* android_qemud_get_serial_line(void);
 
-/* returns in '*pcs' a CharDriverState object that will be connected to
+/* Return in |*psl| a CSerialLine object that will be connected to
  * a single client in the emulated system for a given named service.
  *
  * this is only used to connect GPS and GSM service clients to the
- * implementation that requires a CharDriverState object for legacy
+ * implementation that requires a CSerialLine object for legacy
  * reasons.
  *
  * returns 0 on success, or -1 in case of error
  */
-extern int android_qemud_get_channel(const char* name, CharDriverState** pcs);
+extern int android_qemud_get_channel(const char* name, CSerialLine** psl);
 
-/* set an explicit CharDriverState object for a given qemud communication channel. this
+/* Set an explicit CSerialLine object for a given qemud communication channel. this
  * is used to attach the channel to an external char driver device (e.g. one
  * created with "-serial <device>") directly.
  *
  * returns 0 on success, -1 on error
  */
-extern int android_qemud_set_channel(const char* name, CharDriverState* peer_cs);
+extern int android_qemud_set_channel(const char* name, CSerialLine* peer_sl);
 
 /* list of known qemud channel names */
 #define  ANDROID_QEMUD_GSM      "gsm"

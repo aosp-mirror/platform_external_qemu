@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "qemu-common.h"
+#include "android/emulation/serial_line.h"
 
 /* this chardriver is used to read the kernel messages coming
  * from the first serial port (i.e. /dev/ttyS0) and store them
@@ -24,6 +24,6 @@ typedef enum {
     ANDROID_KMSG_PRINT_MESSAGES = (1 << 1),
 } AndroidKmsgFlags;
 
-extern void  android_kmsg_init( AndroidKmsgFlags  flags );
+extern void  android_kmsg_init(AndroidKmsgFlags flags);
 
-extern CharDriverState*  android_kmsg_get_cs( void );
+extern CSerialLine* android_kmsg_get_serial_line(void);

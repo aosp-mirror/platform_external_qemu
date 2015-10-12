@@ -9,12 +9,13 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android-qemu1-glue/gps.h"
+#include "android/gps.h"
 #include "android/utils/debug.h"
 #include "android/utils/stralloc.h"
-#include "sysemu/char.h"
 
-CharDriverState*   android_gps_cs;
+#include <string.h>
+
+CSerialLine* android_gps_serial_line;
 
 #define  D(...)  VERBOSE_PRINT(gps,__VA_ARGS__)
 
@@ -26,13 +27,13 @@ android_gps_send_nmea( const char*  sentence )
 
     D("sending '%s'", sentence);
 
-    if (android_gps_cs == NULL) {
+    if (android_gps_serial_line == NULL) {
         D("missing GPS channel, ignored");
         return;
     }
 
-    qemu_chr_write( android_gps_cs, (const void*)sentence, strlen(sentence) );
-    qemu_chr_write( android_gps_cs, (const void*)"\n", 1 );
+    android_serialline_write( android_gps_serial_line, (const void*)sentence, strlen(sentence) );
+    android_serialline_write( android_gps_serial_line, (const void*)"\n", 1 );
 }
 
 ////////////////////////////////////////////////////////////

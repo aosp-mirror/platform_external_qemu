@@ -86,19 +86,4 @@ extern void qemud_multiplexer_init(QemudMultiplexer* mult,
                                    CSerialLine* serial_line);
 
 
-/* Load QemuD state from file.
- */
-extern int qemud_load_multiplexer(Stream* stream,
-                                  QemudMultiplexer* m,
-                                  int version);
-
-/* Save QemuD state to snapshot.
- *
- * The control channel has no state of its own, other than the local variables
- * in qemud_multiplexer_control_recv. We can therefore safely skip saving it,
- * which spares us dealing with the exception of a client not connected to a
- * service.
- */
-extern void qemud_multiplexer_save(Stream* stream, QemudMultiplexer* m);
-
 ANDROID_END_HEADER

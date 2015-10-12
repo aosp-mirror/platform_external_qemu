@@ -10,16 +10,15 @@
 ** GNU General Public License for more details.
 */
 
-#include "android-qemu1-glue/hw-qemud.h"
+#include "android/hw-qemud.h"
 
-#include "android/charpipe.h"
 #include "android/emulation/android_qemud.h"
-#include "android-qemu1-glue/qemu/emulation/CharSerialLine.h"
 #include "android/utils/debug.h"
 
-#define  D(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)
+#include <stddef.h>
+#include <stdlib.h>
 
-using android::qemu1::CharSerialLine;
+#define  D(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)
 
 /*
  *  This implements support for the 'qemud' multiplexing communication
@@ -56,29 +55,25 @@ using android::qemu1::CharSerialLine;
  * to the emulated tty implementation. The other end of the
  * charpipe must be passed to qemud_multiplexer_init().
  */
-static CharDriverState* android_qemud_cs = NULL;
+static CSerialLine* android_qemud_serial_line = NULL;
 
-CharDriverState* android_qemud_get_cs(void) {
-    if (!android_qemud_cs) {
-        CharDriverState* csIn;
-        CharDriverState* csOut;
-        if (qemu_chr_open_charpipe(&csIn, &csOut) != 0) {
+CSerialLine* android_qemud_get_serial_line(void) {
+    if (!android_qemud_serial_line) {
+        CSerialLine* slIn;
+        CSerialLine* slOut;
+        if (android_serialline_pipe_open(&slIn, &slOut) < 0) {
             derror( "%s: can't create charpipe to serial port",
                     __FUNCTION__ );
             exit(1);
         }
 
-        android_qemud_init(new CharSerialLine(csOut));
-        android_qemud_cs = csIn;
+        android_qemud_init(slOut);
+        android_qemud_serial_line = slIn;
     }
 
-    return android_qemud_cs;
+    return android_qemud_serial_line;
 }
 
-
-void android_qemu1_qemud_init(void) {
-    (void) android_qemud_get_cs();
-}
 
 /*
  * The following code is used for backwards compatibility reasons.
@@ -180,8 +175,7 @@ static QemudClient* _qemud_char_service_connect(void* opaque,
     return data->client;
 }
 
-static int android_qemud_channel_connect(const char* name, CharDriverState* cs) {
-    CharSerialLine* sl = new CharSerialLine(cs);
+static int android_qemud_channel_connect(const char* name, CSerialLine* sl) {
     qemud_service_register(name, 1, sl, _qemud_char_service_connect, NULL, NULL);
     return 0;
 }
@@ -189,27 +183,26 @@ static int android_qemud_channel_connect(const char* name, CharDriverState* cs) 
 /* returns a charpipe endpoint that can be used by an emulated
  * device or external serial port to implement a char. service
  */
-int android_qemud_get_channel(const char* name, CharDriverState** pcs) {
-    CharDriverState* cs;
+int android_qemud_get_channel(const char* name, CSerialLine** psl) {
+    CSerialLine* sl;
 
-    if (qemu_chr_open_charpipe(&cs, pcs) < 0) {
+    if (android_serialline_pipe_open(&sl, psl) < 0) {
         derror("can't open charpipe for '%s' qemud service", name);
         return -1;
     }
 
-    return android_qemud_channel_connect(name, cs);
+    return android_qemud_channel_connect(name, sl);
 }
 
 /* set the character driver state for a given qemud communication channel. this
  * is used to attach the channel to an external char driver device directly.
  * returns 0 on success, -1 on error
  */
-int android_qemud_set_channel(const char* name, CharDriverState* peer_cs) {
-    CharDriverState* char_buffer = qemu_chr_open_buffer(peer_cs);
-
-    if (char_buffer == NULL) {
+int android_qemud_set_channel(const char* name, CSerialLine* peer_sl) {
+    CSerialLine* buffer = android_serialline_buffer_open(peer_sl);
+    if (!buffer) {
         return -1;
     }
 
-    return android_qemud_channel_connect(name, char_buffer);
+    return android_qemud_channel_connect(name, buffer);
 }

@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android-qemu1-glue/qemu/emulation/CharSerialLine.h"
+#include "android-qemu1-glue/emulation/CharSerialLine.h"
 
 extern "C" {
 #include "sysemu/char.h"
@@ -21,7 +21,9 @@ namespace qemu1 {
 CharSerialLine::CharSerialLine(CharDriverState* cs) : mCs(cs) { }
 
 CharSerialLine::~CharSerialLine() {
-    qemu_chr_close(mCs);
+    if (mCs) {
+        qemu_chr_close(mCs);
+    }
 }
 
 void CharSerialLine::addHandlers(void* opaque, CanReadFunc canReadFunc, ReadFunc readFunc) {

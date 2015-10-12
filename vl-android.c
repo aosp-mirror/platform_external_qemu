@@ -48,7 +48,6 @@
 
 #include "android/android.h"
 #include "android/camera/camera-service.h"
-#include "android/charpipe.h"
 #include "android/curl-support.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/ext4_resize.h"
@@ -57,10 +56,12 @@
 #include "android/filesystems/partition_types.h"
 #include "android/filesystems/ramdisk_extractor.h"
 #include "android/globals.h"
-#include "android-qemu1-glue/gps.h"
-#include "android-qemu1-glue/hw-kmsg.h"
+#include "android/gps.h"
+#include "android/hw-kmsg.h"
+#include "android-qemu1-glue/emulation/serial_line.h"
 #include "android/hw-pipe-net.h"
-#include "android-qemu1-glue/hw-qemud.h"
+#include "android/hw-qemud.h"
+#include "android-qemu1-glue/android_qemud.h"
 #include "android/hw-sensors.h"
 #include "android/log-rotate.h"
 #include "android/looper-qemu.h"
@@ -86,7 +87,7 @@
 #include "android/wear-agent/android_wear_agent.h"
 #include "exec/hwaddr.h"
 #include "migration/qemu-file.h"
-#include "telephony/modem_driver.h"
+#include "android-qemu1-glue/telephony/modem_driver.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -3350,9 +3351,11 @@ int main(int argc, char **argv, char **envp)
                         "used -help-char-devices for list of available formats",
                     android_op_radio);
         }
-        android_qemud_set_channel( ANDROID_QEMUD_GSM, cs);
+        android_qemud_set_channel(ANDROID_QEMUD_GSM,
+                                  android_serialline_from_cs(cs));
     } else if (android_hw->hw_gsmModem != 0 ) {
-        if ( android_qemud_get_channel( ANDROID_QEMUD_GSM, &android_modem_cs ) < 0 ) {
+        if (android_qemud_get_channel(ANDROID_QEMUD_GSM,
+                                      &android_modem_serial_line) < 0) {
             PANIC("could not initialize qemud 'gsm' channel");
         }
     }
@@ -3365,9 +3368,11 @@ int main(int argc, char **argv, char **envp)
                         "used -help-char-devices for list of available formats",
                     android_op_gps);
         }
-        android_qemud_set_channel( ANDROID_QEMUD_GPS, cs);
+        android_qemud_set_channel(ANDROID_QEMUD_GPS,
+                                  android_serialline_from_cs(cs));
     } else if (android_hw->hw_gps != 0) {
-        if ( android_qemud_get_channel( "gps", &android_gps_cs ) < 0 ) {
+        if (android_qemud_get_channel(ANDROID_QEMUD_GPS,
+                                      &android_gps_serial_line) < 0 ) {
             PANIC("could not initialize qemud 'gps' channel");
         }
     }

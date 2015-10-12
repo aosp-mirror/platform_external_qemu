@@ -313,7 +313,7 @@ common_LOCAL_SRC_FILES := \
     android-qemu1-glue/qemu-battery-agent-impl.c \
     android/qemu-cellular-agent-impl.c \
     android/qemu-finger-agent-impl.c \
-    android-qemu1-glue/qemu-location-agent-impl.c \
+    android/qemu-location-agent-impl.c \
     android/qemu-telephony-agent-impl.c \
     android-qemu1-glue/qemu-user-event-agent-impl.c \
     android-qemu1-glue/qemu-vm-operations-impl.c \
