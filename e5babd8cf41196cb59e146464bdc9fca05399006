@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ae8da64_914586df",
+        "filename": "android/emulation/control/sensors_agent.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-12T14:40:28Z",
+      "side": 1,
+      "message": "nit: it would be nice if there was a minimal amount of documentation regarding the |sensorId| values here.",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7f1ff654_955ea47d",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-12T14:40:28Z",
+      "side": 1,
+      "message": "any reason to move the location of these headers? Qt headers are really third-party and should appear after these according to the style guide.",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e55355fb_a5c2d4ba",
+        "filename": "android/ui-emu-agent.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-12T14:40:28Z",
+      "side": 1,
+      "message": "nit: star location is on the left :)",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
