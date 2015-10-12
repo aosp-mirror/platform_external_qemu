@@ -398,16 +398,15 @@ compute_fb_update_rect_linear(FbUpdateState*  fbs,
                 }
                 xx2--;
             });
-#if defined(HOST_WORDS_BIGENDIAN) != defined(TARGET_WORDS_BIGENDIAN)
+#if 1
             /* Convert the guest pixels into host ones */
             int xx = xx1;
             DUFF4(xx2-xx1+1,{
                 uint32_t   spix = src[xx];
                 spix = (spix << 16) | (spix >> 16);
-                spix = ((spix << 8) & 0xff00ff00) | ((spix >> 8) & 0x00ff00ff);
                 dst[xx] = spix;
                 xx++;
-            })
+            });
 #else
             memcpy( dst+xx1, src+xx1, (xx2-xx1+1)*4 );
 #endif
