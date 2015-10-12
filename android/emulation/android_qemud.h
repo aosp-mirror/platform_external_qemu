@@ -165,8 +165,19 @@ extern void qemud_service_broadcast(QemudService* sv,
                                     const uint8_t* msg,
                                     int msglen);
 
-/* get a services list from a given multiplexer
+/* Load QemuD state from a stream.
  */
-extern QemudService** qemud_multiplexer_get_services(QemudMultiplexer* m);
+extern int qemud_multiplexer_load(QemudMultiplexer* m,
+                                  Stream* stream,
+                                  int version);
+
+/* Save QemuD state to snapshot.
+ *
+ * The control channel has no state of its own, other than the local variables
+ * in qemud_multiplexer_control_recv. We can therefore safely skip saving it,
+ * which spares us dealing with the exception of a client not connected to a
+ * service.
+ */
+extern void qemud_multiplexer_save(QemudMultiplexer* m, Stream* stream);
 
 ANDROID_END_HEADER
