@@ -9,7 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android-qemu1-glue/gps.h"
+#include "android/gps.h"
 #include "android/utils/debug.h"
 #include "android/utils/stralloc.h"
 
