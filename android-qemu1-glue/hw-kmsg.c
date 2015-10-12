@@ -10,61 +10,61 @@
 ** GNU General Public License for more details.
 */
 #include "android-qemu1-glue/hw-kmsg.h"
-#include "sysemu/char.h"
-#include "android-qemu1-glue/emulation/charpipe.h"
+
+#include "android/emulation/serial_line.h"
 #include "android/utils/debug.h"
 
-static CharDriverState*  android_kmsg_cs;
+#include <stdio.h>
+#include <stdlib.h>
+
+static CSerialLine* android_kmsg_serial_line;
 
 typedef struct {
-    CharDriverState*  cs;
-    AndroidKmsgFlags  flags;
+    CSerialLine* serial_line;
+    AndroidKmsgFlags flags;
 } KernelLog;
 
-static int
-kernel_log_can_read( void*  opaque )
-{
+static int kernel_log_can_read(void* opaque) {
     return 1024;
 }
 
-static void
-kernel_log_read( void*  opaque, const uint8_t*  from, int  len )
-{
-    KernelLog*  k = opaque;
+static void kernel_log_read(void* opaque, const uint8_t* from, int len) {
+    KernelLog* k = opaque;
 
-    if (k->flags & ANDROID_KMSG_PRINT_MESSAGES)
-        printf( "%.*s", len, (const char*)from );
+    if (k->flags & ANDROID_KMSG_PRINT_MESSAGES) {
+        printf("%.*s", len, (const char*)from);
+    }
 
     /* XXXX: TODO: save messages into in-memory buffer for later retrieval */
 }
 
-static void
-kernel_log_init( KernelLog*  k, AndroidKmsgFlags  flags )
-{
-    if ( qemu_chr_open_charpipe( &k->cs, &android_kmsg_cs ) < 0 ) {
+static void kernel_log_init(KernelLog* k, AndroidKmsgFlags flags) {
+    if (android_serialline_pipe_open(&k->serial_line,
+                                     &android_kmsg_serial_line) < 0) {
         derror( "could not create kernel log charpipe" );
         exit(1);
     }
 
-    qemu_chr_add_handlers( k->cs, kernel_log_can_read, kernel_log_read, NULL, k );
-
+    android_serialline_addhandlers(k->serial_line,
+                                   k,
+                                   kernel_log_can_read,
+                                   kernel_log_read);
     k->flags = flags;
 }
 
 static KernelLog  _kernel_log[1];
 
 void
-android_kmsg_init( AndroidKmsgFlags  flags )
-{
-    if (_kernel_log->cs == NULL)
-        kernel_log_init( _kernel_log, flags );
+android_kmsg_init(AndroidKmsgFlags flags) {
+    if (_kernel_log->serial_line == NULL) {
+        kernel_log_init(_kernel_log, flags);
+    }
 }
 
 
-CharDriverState*  android_kmsg_get_cs( void )
-{
-    if (android_kmsg_cs == NULL) {
+CSerialLine* android_kmsg_get_serial_line(void) {
+    if (android_kmsg_serial_line == NULL) {
         android_kmsg_init(0);
     }
-    return android_kmsg_cs;
+    return android_kmsg_serial_line;
 }

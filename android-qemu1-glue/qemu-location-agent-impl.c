@@ -18,7 +18,7 @@
 #include <stdbool.h>
 
 static bool location_gpsIsSupported() {
-    return android_gps_cs != NULL;
+    return android_gps_serial_line != NULL;
 }
 
 static const QAndroidLocationAgent sQAndroidLocationAgent = {

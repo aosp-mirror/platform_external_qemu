@@ -100,7 +100,7 @@
 #define READ_BUF_LEN 4096
 
 #ifdef CONFIG_ANDROID
-#include "android-qemu1-glue/emulation/charpipe.h"
+#include "android-qemu1-glue/emulation/serial_line.h"
 #include "android-qemu1-glue/gps.h"
 #include "android-qemu1-glue/hw-kmsg.h"
 #include "android-qemu1-glue/hw-qemud.h"
@@ -571,25 +571,26 @@ int send_all(int fd, const void *_buf, int len1)
 
 static CharDriverState *qemu_chr_open_android_modem(QemuOpts* opts)
 {
-    CharDriverState*  cs;
-    qemu_chr_open_charpipe( &cs, &android_modem_cs );
-    return cs;
+    CSerialLine* sl;
+    android_serialline_pipe_open(&sl, &android_modem_serial_line);
+    return android_serialline_release_cs(sl);
 }
+
 static CharDriverState *qemu_chr_open_android_gps(QemuOpts* opts)
 {
-    CharDriverState*  cs;
-    qemu_chr_open_charpipe( &cs, &android_gps_cs );
-    return cs;
+    CSerialLine* sl;
+    android_serialline_pipe_open(&sl, &android_gps_serial_line);
+    return android_serialline_release_cs(sl);
 }
 
 static CharDriverState *qemu_chr_open_android_kmsg(QemuOpts* opts)
 {
-    return android_kmsg_get_cs();
+    return android_serialline_get_cs(android_kmsg_get_serial_line());
 }
 
 static CharDriverState *qemu_chr_open_android_qemud(QemuOpts* opts)
 {
-    return android_qemud_get_cs();
+    return android_serialline_get_cs(android_qemud_get_serial_line());
 }
 
 
