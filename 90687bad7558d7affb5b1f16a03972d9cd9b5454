@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "5061411e_3cae500a",
+        "filename": "android/skin/qt/ext-virtsensors.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T21:25:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f00235ba_38026920",
+      "revId": "90687bad7558d7affb5b1f16a03972d9cd9b5454",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f0079550_f096c0ba",
         "filename": "android/skin/qt/extended-window.h",
         "patchSetId": 1
@@ -47,6 +65,24 @@
       "writtenOn": "2015-10-07T15:47:20Z",
       "side": 1,
       "message": "nit: header location",
+      "revId": "90687bad7558d7affb5b1f16a03972d9cd9b5454",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "504861a0_d59c5cde",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T21:25:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f0079550_f096c0ba",
       "revId": "90687bad7558d7affb5b1f16a03972d9cd9b5454",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
