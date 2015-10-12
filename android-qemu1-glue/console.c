@@ -45,7 +45,7 @@
 #include "libslirp.h"
 #endif
 #include "net/net.h"
-#include "telephony/modem_driver.h"
+#include "android-qemu1-glue/telephony/modem_driver.h"
 #include "ui/console.h"
 
 #include <fcntl.h>

@@ -15,7 +15,7 @@
 #include "android/android.h"
 #include "android/emulation/control/cellular_agent.h"
 #include "android/shaper.h"
-#include "telephony/modem_driver.h"
+#include "android-qemu1-glue/telephony/modem_driver.h"
 
 static void cellular_setSignalStrength(int zeroTo31)
 {

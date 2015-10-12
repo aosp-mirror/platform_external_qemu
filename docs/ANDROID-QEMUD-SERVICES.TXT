@@ -23,7 +23,7 @@ image.
    There can be only 1 client talking to the modem, since the AT command
    protocol does not allow for anything more complex.
 
-   Implementation: telephony/modem_driver.c
+   Implementation: android-qemu1-glue/telephony/modem_driver.c
    Since:          SDK 1.0
 
 "gps" service:
