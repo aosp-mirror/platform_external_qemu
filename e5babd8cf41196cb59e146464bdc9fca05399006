@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "bfb7aeb4_70b1c665",
+        "filename": "android/skin/qt/editable-slider-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T23:19:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9fae6a64_49a66500",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3fa3be81_c937b5c7",
         "filename": "android/skin/qt/editable-slider-widget.h",
         "patchSetId": 3
@@ -47,6 +65,24 @@
       "writtenOn": "2015-10-12T21:43:22Z",
       "side": 1,
       "message": "Prefer to have these in alphabetical order",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f30ba11_6be2d188",
+        "filename": "android/skin/qt/editable-slider-widget.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T23:19:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3fa3be81_c937b5c7",
       "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "3fa3be81_acfa87d4",
+        "filename": "android/skin/qt/ext-virtsensors.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T23:19:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1f30ba11_4877135d",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3fa3be81_0925cd47",
         "filename": "android/skin/qt/ext-virtsensors.cpp",
         "patchSetId": 3
@@ -81,6 +135,24 @@
       "writtenOn": "2015-10-12T21:43:22Z",
       "side": 1,
       "message": "Be sure to remove this before promoting.",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df39c202_26c48298",
+        "filename": "android/skin/qt/ext-virtsensors.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T23:19:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3fa3be81_0925cd47",
       "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "7fa9b65d_0ec94fb0",
+        "filename": "android/skin/qt/ext-virtsensors.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T23:19:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bf3c0ef3_42e9b41d",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7fa9b65d_eb006582",
         "filename": "android/skin/qt/extended-window-styles.h",
         "patchSetId": 3
@@ -115,6 +205,24 @@
       "writtenOn": "2015-10-12T21:43:22Z",
       "side": 1,
       "message": "I get a compiler warning about a space after the backslash",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fa8725b_4a2e57c9",
+        "filename": "android/skin/qt/extended-window-styles.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T23:19:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7fa9b65d_eb006582",
       "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -173,6 +281,24 @@
     },
     {
       "key": {
+        "uuid": "7fa9b65d_8eb69fc1",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T23:19:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df39c202_a63412c4",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1f30ba11_481b9315",
         "filename": "android/skin/qt/sources.mk",
         "patchSetId": 3
@@ -190,6 +316,24 @@
     },
     {
       "key": {
+        "uuid": "bfb7aeb4_100c0a50",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T23:19:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1f30ba11_481b9315",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3fa3be81_a9e35936",
         "filename": "android/skin/qt/sources.mk",
         "patchSetId": 3
@@ -201,6 +345,24 @@
       "writtenOn": "2015-10-12T21:43:22Z",
       "side": 1,
       "message": "Order here, too",
+      "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f30ba11_0befc5de",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-12T23:19:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3fa3be81_a9e35936",
       "revId": "e5babd8cf41196cb59e146464bdc9fca05399006",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
