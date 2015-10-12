@@ -29,6 +29,10 @@ sdk {
             executable true
             builtBy buildDefaultEmulator
         }
+        item("$buildDefaultEmulator.output/bin64") {
+            into 'bin64'
+            builtBy buildDefaultEmulator
+        }
         item("$buildDefaultEmulator.output/qemu") {
             into 'qemu'
             builtBy buildDefaultEmulator
@@ -94,6 +98,10 @@ sdk {
             executable true
             builtBy buildDefaultEmulator
         }
+        item("$buildDefaultEmulator.output/bin") {
+            into 'bin'
+            builtBy buildDefaultEmulator
+        }
         item("$buildDefaultEmulator.output/emulator-x86") {
             executable true
             builtBy buildDefaultEmulator
@@ -123,6 +131,10 @@ sdk {
         }
         item("$buildWindowsEmulator.output/emulator.exe") {
             builtBy buildWindowsEmulator
+        }
+        item("$buildDefaultEmulator.output/bin") {
+            into 'bin'
+            builtBy buildDefaultEmulator
         }
         item("$buildWindowsEmulator.output/qemu") {
             into 'qemu'
