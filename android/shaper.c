@@ -10,11 +10,14 @@
 ** GNU General Public License for more details.
 */
 #include "android/shaper.h"
-#include "qemu-common.h"
-#include "qemu/timer.h"
-#include <stdlib.h>
 
-#define  SHAPER_CLOCK        QEMU_CLOCK_REALTIME
+#include "android/utils/looper.h"
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define  SHAPER_CLOCK        LOOPER_CLOCK_REALTIME
 #define  SHAPER_CLOCK_UNIT   1000.
 
 static int
@@ -52,7 +55,7 @@ _packet_is_internal( const uint8_t*  data, size_t  size )
  * direction of the user vlan.
  */
 typedef struct QueuedPacketRec_ {
-    int64_t                    expiration;
+    Duration                   expiration;
     struct QueuedPacketRec_*   next;
     size_t                     size;
     void*                      opaque;
@@ -72,7 +75,7 @@ queued_packet_create( const void*   data,
     if (do_copy)
         packet_size += size;
 
-    packet = g_malloc(packet_size);
+    packet = malloc(packet_size);
     packet->next       = NULL;
     packet->expiration = 0;
     packet->size       = (size_t)size;
@@ -91,7 +94,7 @@ static void
 queued_packet_free( QueuedPacket  packet )
 {
     if (packet) {
-        g_free( packet );
+        free( packet );
     }
 }
 
@@ -99,10 +102,10 @@ typedef struct NetShaperRec_ {
     QueuedPacket   packets;   /* list of queued packets, ordered by expiration date */
     int            num_packets;
     int            active;    /* is this shaper active ? */
-    int64_t        block_until;
+    Duration       block_until;
     double         max_rate;  /* max rate expressed in bytes/second */
     double         inv_rate;  /* inverse of max rate                */
-    QEMUTimer*     timer;     /* QEMU timer */
+    LoopTimer*     timer;     /* timer */
 
     int                do_copy;
     NetShaperSendFunc  send_func;
@@ -123,21 +126,22 @@ netshaper_destroy( NetShaper  shaper )
             queued_packet_free(packet);
         }
 
-        timer_del(shaper->timer);
-        timer_free(shaper->timer);
+        loopTimer_stop(shaper->timer);
+        loopTimer_free(shaper->timer);
         shaper->timer = NULL;
-        g_free(shaper);
+        free(shaper);
     }
 }
 
 /* this function is called when the shaper's timer expires */
 static void
-netshaper_expires( NetShaper  shaper )
+netshaper_expires(void* opaque, LoopTimer* unused)
 {
+    NetShaper shaper = (NetShaper)opaque;
     QueuedPacket  packet;
 
     while ((packet = shaper->packets) != NULL) {
-        int64_t   now = qemu_clock_get_ms( SHAPER_CLOCK );
+       Duration now = looper_nowWithClock(looper_getForThread(), SHAPER_CLOCK);
 
        if (packet->expiration > now)
            break;
@@ -151,7 +155,7 @@ netshaper_expires( NetShaper  shaper )
    /* reprogram timer if needed */
    if (shaper->packets) {
        shaper->block_until = shaper->packets->expiration;
-       timer_mod( shaper->timer, shaper->block_until );
+       loopTimer_startAbsolute(shaper->timer, shaper->block_until);
    } else {
        shaper->block_until = -1;
    }
@@ -162,14 +166,13 @@ NetShaper
 netshaper_create( int                do_copy,
                   NetShaperSendFunc  send_func )
 {
-    NetShaper  shaper = g_malloc(sizeof(*shaper));
+    NetShaper  shaper = malloc(sizeof(*shaper));
 
     shaper->active = 0;
     shaper->packets = NULL;
     shaper->num_packets = 0;
-    shaper->timer   = timer_new( SHAPER_CLOCK, SCALE_MS,
-                                 (QEMUTimerCB*) netshaper_expires,
-                                 shaper );
+    shaper->timer = loopTimer_newWithClock(
+            looper_getForThread(), netshaper_expires, shaper, SHAPER_CLOCK);
     shaper->send_func = send_func;
     shaper->max_rate  = 1e6;
     shaper->inv_rate  = 0.;
@@ -188,14 +191,14 @@ netshaper_set_rate( NetShaper  shaper,
         QueuedPacket  packet = shaper->packets;
         shaper->packets = packet->next;
         shaper->send_func(packet->data, packet->size, packet->opaque);
-        g_free(packet);
+        free(packet);
         shaper->num_packets = 0;
     }
 
     shaper->max_rate = rate;
     if (rate > 1.) {
-        shaper->inv_rate = (8.*SHAPER_CLOCK_UNIT)/rate;  /* qemu_get_clock returns time in ms */
-        shaper->active   = 1;                            /* for the real-time clock           */
+        shaper->inv_rate = (8.*SHAPER_CLOCK_UNIT)/rate;  /* our clock time is in ms */
+        shaper->active   = 1;                            /* for the real-time clock */
     } else {
         shaper->active = 0;
     }
@@ -209,14 +212,14 @@ netshaper_send_aux( NetShaper  shaper,
                     size_t     size,
                     void*      opaque )
 {
-    int64_t   now;
+    Duration now;
 
     if (!shaper->active || _packet_is_internal(data, size)) {
         shaper->send_func( data, size, opaque );
         return;
     }
 
-    now = qemu_clock_get_ms( SHAPER_CLOCK );
+    now = looper_nowWithClock(looper_getForThread(), SHAPER_CLOCK);
     if (now >= shaper->block_until) {
         shaper->send_func( data, size, opaque );
         shaper->block_until = now + size*shaper->inv_rate;
@@ -245,8 +248,9 @@ netshaper_send_aux( NetShaper  shaper,
             packet->next = *pnode;
             *pnode       = packet;
 
-            if (packet == shaper->packets)
-                timer_mod( shaper->timer, packet->expiration );
+            if (packet == shaper->packets) {
+                loopTimer_startAbsolute(shaper->timer, packet->expiration);
+            }
         }
         shaper->num_packets += 1;
     }
@@ -266,7 +270,7 @@ netshaper_send( NetShaper  shaper,
 int
 netshaper_can_send( NetShaper  shaper )
 {
-    int64_t  now;
+    Duration now;
 
     if (!shaper->active || shaper->block_until < 0)
         return 1;
@@ -274,7 +278,7 @@ netshaper_can_send( NetShaper  shaper )
     if (shaper->packets)
         return 0;
 
-    now = qemu_clock_get_ms( SHAPER_CLOCK );
+    now = looper_nowWithClock(looper_getForThread(), SHAPER_CLOCK);
     return (now >= shaper->block_until);
 }
 
@@ -287,7 +291,7 @@ netshaper_can_send( NetShaper  shaper )
  * if session->packet is != NULL, then the connection is delayed
  */
 typedef struct SessionRec_ {
-    int64_t               expiration;
+    Duration              expiration;
     struct SessionRec_*   next;
     unsigned              src_ip;
     unsigned              dst_ip;
@@ -311,7 +315,7 @@ session_free( Session  session )
             queued_packet_free(session->packet);
             session->packet = NULL;
         }
-        g_free( session );
+        free( session );
     }
 }
 
@@ -384,7 +388,7 @@ typedef struct NetDelayRec_
 {
     Session     sessions;
     int         num_sessions;
-    QEMUTimer*  timer;
+    LoopTimer*  timer;
     int         active;
     int         min_ms;
     int         max_ms;
@@ -421,12 +425,13 @@ netdelay_lookup_session( NetDelay  delay, Session  info )
 
 /* called by the delay's timer on expiration */
 static void
-netdelay_expires( NetDelay  delay )
+netdelay_expires(void* opaque, LoopTimer* unused)
 {
+    NetDelay delay = (NetDelay)opaque;
     Session  session;
-    int64_t  now = qemu_clock_get_ms(SHAPER_CLOCK);
+    Duration now = looper_nowWithClock(looper_getForThread(), SHAPER_CLOCK);
     int      rearm = 0;
-    int64_t  rearm_time = 0;
+    Duration rearm_time = 0;
 
     for (session = delay->sessions; session != NULL; session = session->next)
     {
@@ -451,21 +456,21 @@ netdelay_expires( NetDelay  delay )
         }
     }
 
-    if (rearm)
-        timer_mod( delay->timer, rearm_time );
+    if (rearm) {
+        loopTimer_startAbsolute(delay->timer, rearm_time);
+    }
 }
 
 
 NetDelay
 netdelay_create( NetShaperSendFunc  send_func )
 {
-    NetDelay  delay = g_malloc(sizeof(*delay));
+    NetDelay  delay = malloc(sizeof(*delay));
 
     delay->sessions     = NULL;
     delay->num_sessions = 0;
-    delay->timer        = timer_new( SHAPER_CLOCK, SCALE_MS,
-                                     (QEMUTimerCB*) netdelay_expires,
-                                     delay );
+    delay->timer = loopTimer_newWithClock(
+            looper_getForThread(), netdelay_expires, delay, SHAPER_CLOCK);
     delay->active = 0;
     delay->min_ms = 0;
     delay->max_ms = 0;
@@ -547,13 +552,13 @@ netdelay_send_aux( NetDelay  delay, const void*  data, size_t  size, void* opaqu
                     latency += rand() % range;
 
                     //fprintf(stderr, "NetDelay:RST: delay creation for %s\n", session_to_string(info) );
-                session = g_malloc( sizeof(*session) );
+                session = malloc( sizeof(*session) );
 
                 session->next        = delay->sessions;
                 delay->sessions      = session;
                 delay->num_sessions += 1;
 
-                session->expiration = qemu_clock_get_ms(SHAPER_CLOCK) + latency;
+                session->expiration = looper_nowWithClock(looper_getForThread(), SHAPER_CLOCK) + latency;
 
                 session->src_ip   = info->src_ip;
                 session->dst_ip   = info->dst_ip;
@@ -563,7 +568,7 @@ netdelay_send_aux( NetDelay  delay, const void*  data, size_t  size, void* opaqu
 
                 session->packet = queued_packet_create( data, size, opaque, 1 );
 
-                netdelay_expires(delay);
+                netdelay_expires(delay, delay->timer);
                 return;
             }
         }
@@ -583,8 +588,11 @@ netdelay_destroy( NetDelay  delay )
             session_free(session);
             delay->num_sessions -= 1;
         }
+        loopTimer_stop(delay->timer);
+        loopTimer_free(delay->timer);
+        delay->timer = NULL;
         delay->active = 0;
-        g_free( delay );
+        free( delay );
     }
 }
 

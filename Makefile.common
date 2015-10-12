@@ -618,7 +618,7 @@ CORE_MISC_SOURCES = \
     android-qemu1-glue/emulation/CharSerialLine.cpp \
     android-qemu1-glue/qemu-setup.c \
     android/qemu-tcpdump.c \
-    android-qemu1-glue/shaper.c \
+    android/shaper.c \
     android/snapshot.c \
     android/async-socket-connector.c \
     android/async-socket.c \
