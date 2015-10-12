@@ -50,4 +50,16 @@ extern void android_serialline_addhandlers(CSerialLine* sl, void* opaque,
 // returns the number of bytes that went through, or negative number on error
 extern int android_serialline_write(CSerialLine* sl, const uint8_t* data, int len);
 
+// Given an existing CSerialLine instance |sl|, create a new instance that
+// implements a buffer for any data sent to |sl|. On the other hand,
+// any can_read() / read() request performed by it will be passed
+// directly to |sl|'s handlers.
+CSerialLine* android_serialline_buffer_open(CSerialLine* sl);
+
+// Create two new SerialLine instances that are connected through buffers
+// as a pipe. On success, return 0 and sets |*pfirst| and |*psecond| to
+// the instance pointers. On failure, return -1 and sets |*pfirst| and
+// |*psecond| to NULL.
+int android_serialline_pipe_open(CSerialLine** pfirst, CSerialLine** psecond);
+
 ANDROID_END_HEADER

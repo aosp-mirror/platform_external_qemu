@@ -32,6 +32,14 @@ public:
 
     virtual int write(const uint8_t* data, int len);
 
+    CharDriverState* state() const { return mCs; }
+
+    CharDriverState* release() {
+        CharDriverState* cs = mCs;
+        mCs = nullptr;
+        return cs;
+    }
+
 private:
     DISALLOW_COPY_AND_ASSIGN(CharSerialLine);
 
