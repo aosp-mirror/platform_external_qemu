@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3fa3be81_6394a213",
+        "filename": "android/hw-qemud.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-12T16:46:33Z",
+      "side": 1,
+      "message": "I was going to make hw-qemud.* a part of glue code, removing all generic one but leaving qemu1-specific stuff here",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 29
+      },
+      "revId": "42f045d9a2eaa8d006437b0fae361a4fcfc506ea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
