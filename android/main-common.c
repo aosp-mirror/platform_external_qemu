@@ -953,7 +953,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
     }
     bool is32bitWindowsHost = false;
 #ifdef _WIN32
-    is32bitWindowsHost = android_getHostBitness();
+    is32bitWindowsHost = (32 == android_getHostBitness());
 #endif
     // For recent system versions, ensure a minimum of 1GB or memory, anything
     // lower is very painful during the boot process and after that.
