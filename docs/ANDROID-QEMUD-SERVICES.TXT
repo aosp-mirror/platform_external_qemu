@@ -34,7 +34,7 @@ image.
 
   All sentences are un-framed and end with a \n character.
 
-  Implementation: android-qemu1-glue/gps.c
+  Implementation: android/gps.c
   Since:          SDK 1.0
 
 

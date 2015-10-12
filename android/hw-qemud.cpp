@@ -10,7 +10,7 @@
 ** GNU General Public License for more details.
 */
 
-#include "android-qemu1-glue/hw-qemud.h"
+#include "android/hw-qemud.h"
 
 #include "android/emulation/android_qemud.h"
 #include "android/utils/debug.h"
