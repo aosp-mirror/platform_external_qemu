@@ -13,7 +13,7 @@
 #include "libslirp.h"
 #include "qemu-common.h"
 #include "sysemu/sysemu.h"
-#include "telephony/modem_driver.h"
+#include "android-qemu1-glue/telephony/modem_driver.h"
 
 #include "android/console.h"
 #include "android/adb-qemud.h"

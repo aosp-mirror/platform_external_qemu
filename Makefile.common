@@ -726,8 +726,8 @@ common_LOCAL_SRC_FILES += \
     android/telephony/remote_call.c \
     android/telephony/sim_card.c \
     android/telephony/sms.c \
-    telephony/modem_driver.c \
-    telephony/sysdeps_qemu.c
+    android-qemu1-glue/telephony/modem_driver.c \
+    android-qemu1-glue/telephony/sysdeps_qemu.c
 
 # sources inherited from upstream, but not fully
 # integrated into android emulator

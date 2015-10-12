@@ -178,7 +178,7 @@ IV. CharPipe objects:
 The Android emulator also provides a convenient abstraction called a "charpipe"
 used to connect two CharDriverState users together. For example, this is used
 to connect a serial port emulation (in hw/android/goldfish/tty.c) to the
-internal GSM modem emulation (see telephony/modem_driver.c).
+internal GSM modem emulation (see android-qemu1-glue/telephony/modem_driver.c).
 
 Essentially, a "charpipe" is a bi-directionnal communication pipe whose two
 endpoints are both CS objects. You call "qemu_chr_open_pipe()" to create the
