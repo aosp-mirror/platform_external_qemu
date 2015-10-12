@@ -212,6 +212,8 @@ EOF
     run rm -rf "$INSTALL_DIR/common/include.old"
 }
 
+build_disable_cxx11
+
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     # Perform remote Darwin build first.
     dump "Remote Qt build for: $DARWIN_SYSTEMS"
