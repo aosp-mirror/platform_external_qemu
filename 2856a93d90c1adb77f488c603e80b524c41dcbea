@@ -22,6 +22,30 @@
       "revId": "2856a93d90c1adb77f488c603e80b524c41dcbea",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dfb462b2_2843eb28",
+        "filename": "android/emulation/serial_line.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-12T17:02:12Z",
+      "side": 1,
+      "message": "No, because I plan to add a TestSerialLine implementation in the future in order to write unit-tests for all AndroidEmu code that uses serial lines.",
+      "parentUuid": "5fa8725b_6417ca60",
+      "range": {
+        "startLine": 53,
+        "startChar": 1,
+        "endLine": 63,
+        "endChar": 78
+      },
+      "revId": "2856a93d90c1adb77f488c603e80b524c41dcbea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
