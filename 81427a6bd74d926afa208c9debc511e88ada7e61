@@ -16,6 +16,24 @@
       "revId": "81427a6bd74d926afa208c9debc511e88ada7e61",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7fa9b65d_68479be6",
+        "filename": "android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1418,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-12T20:00:53Z",
+      "side": 1,
+      "message": "The second one would be redundant. We can support that behavior by making line 1559 \"window-\u003ezoom *\u003d zoom\", but this seems like an undesired behavior. Specifically, it seems nice to have an easy way to reset zoom to 1.0, which this allows for.",
+      "parentUuid": "ff32061b_045b3818",
+      "revId": "81427a6bd74d926afa208c9debc511e88ada7e61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
