@@ -54,9 +54,11 @@ typedef void* FBNativeWindowType;
   FUNCTION_(int, initOpenGLRenderer, (int width, int height, bool useSubWindow, char* addr, size_t addrLen), (width, height, addr, addrLen)) \
   FUNCTION_VOID_(getHardwareStrings, (const char** vendors, const char** renderer, const char** version), (vendors, renderer, version)) \
   FUNCTION_VOID_(setPostCallback, (OnPostFunc onPost, void* onPostContext), (onPost, onPostContext)) \
-  FUNCTION_(bool, createOpenGLSubwindow, (FBNativeWindowType window, int x, int y, int width, int height, float zRot), (window, x, y, width, height, zRot)) \
+  FUNCTION_(bool, createOpenGLSubwindow, (FBNativeWindowType window, int wx, int wy, int ww, int wh, int fbw, int fbh, float zRot), (window, wx, wy, ww, wh, fbw, fbh, zRot)) \
   FUNCTION_(bool, destroyOpenGLSubwindow, (void), ()) \
+  FUNCTION_(bool, moveOpenGLSubwindow, (int x, int y, int width, int height), (x, y, width, height)) \
   FUNCTION_VOID_(setOpenGLDisplayRotation, (float zRot), (zRot)) \
+  FUNCTION_VOID_(setOpenGLDisplayTranslation, (float dx, float dy), (dx, dy)) \
   FUNCTION_VOID_(repaintOpenGLDisplay, (void), ()) \
   FUNCTION_(int, stopOpenGLRenderer, (void), ()) \
 
@@ -284,15 +286,24 @@ android_stopOpenglesRenderer(void)
 }
 
 int
-android_showOpenglesWindow(void* window, int x, int y, int width, int height, float rotation)
+android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
+                           int fbw, int fbh, float rotation)
 {
     if (!rendererStarted) {
         return -1;
     }
     FBNativeWindowType win = (FBNativeWindowType)(uintptr_t)window;
     bool success = createOpenGLSubwindow(
-            win, x, y, width, height, rotation);
+            win, wx, wy, ww, wh, fbw, fbh, rotation);
     return success ? 0 : -1;
+}
+
+void
+android_setOpenglesTranslation(float px, float py)
+{
+    if (rendererStarted) {
+        setOpenGLDisplayTranslation(px, py);
+    }
 }
 
 int
@@ -302,6 +313,16 @@ android_hideOpenglesWindow(void)
         return -1;
     }
     bool success = destroyOpenGLSubwindow();
+    return success ? 0 : -1;
+}
+
+int
+android_moveOpenglesWindow(int x, int y, int width, int height)
+{
+    if (!rendererStarted) {
+        return -1;
+    }
+    bool success = moveOpenGLSubwindow(x, y, width, height);
     return success ? 0 : -1;
 }
 

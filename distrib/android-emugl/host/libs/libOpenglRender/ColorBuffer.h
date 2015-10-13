@@ -112,7 +112,7 @@ public:
     // Post this ColorBuffer to the host native sub-window.
     // |rotation| is the rotation angle in degrees, clockwise in the GL
     // coordinate space.
-    bool post(float rotation);
+    bool post(float rotation, float dx, float dy);
 
     // Bind the current context's EGL_TEXTURE_2D texture to this ColorBuffer's
     // EGLImage. This is intended to implement glEGLImageTargetTexture2DOES()
