@@ -57,6 +57,7 @@ enum Command {
     CMD_SETUP_SUBWINDOW,
     CMD_REMOVE_SUBWINDOW,
     CMD_SET_ROTATION,
+    CMD_SET_TRANSLATION,
     CMD_REPAINT,
     CMD_FINALIZE,
 };
@@ -84,12 +85,20 @@ struct RenderWindowMessage {
         // CMD_SETUP_SUBWINDOW
         struct {
             FBNativeWindowType parent;
-            int x;
-            int y;
-            int w;
-            int h;
+            int wx;
+            int wy;
+            int ww;
+            int wh;
+            int fbw;
+            int fbh;
             float rotation;
         } subwindow;
+
+        // CMD_SET_TRANSLATION;
+        struct {
+            float px;
+            float py;
+        } trans;
 
         // CMD_SET_ROTATION
         float rotation;
@@ -127,19 +136,23 @@ struct RenderWindowMessage {
                 break;
 
             case CMD_SETUP_SUBWINDOW:
-                D("CMD_SETUP_SUBWINDOW: parent=%p x=%d y=%d w=%d h=%d rotation=%f\n",
+                D("CMD_SETUP_SUBWINDOW: parent=%p wx=%d wy=%d ww=%d wh=%d fbw=%d fbh=%d rotation=%f\n",
                     (void*)msg.subwindow.parent,
-                    msg.subwindow.x,
-                    msg.subwindow.y,
-                    msg.subwindow.w,
-                    msg.subwindow.h,
+                    msg.subwindow.wx,
+                    msg.subwindow.wy,
+                    msg.subwindow.ww,
+                    msg.subwindow.wh,
+                    msg.subwindow.fbw,
+                    msg.subwindow.fbh,
                     msg.subwindow.rotation);
                 result = FrameBuffer::getFB()->setupSubWindow(
                         msg.subwindow.parent,
-                        msg.subwindow.x,
-                        msg.subwindow.y,
-                        msg.subwindow.w,
-                        msg.subwindow.h,
+                        msg.subwindow.wx,
+                        msg.subwindow.wy,
+                        msg.subwindow.ww,
+                        msg.subwindow.wh,
+                        msg.subwindow.fbw,
+                        msg.subwindow.fbh,
                         msg.subwindow.rotation);
                 break;
 
@@ -153,6 +166,15 @@ struct RenderWindowMessage {
                 fb = FrameBuffer::getFB();
                 if (fb) {
                     fb->setDisplayRotation(msg.rotation);
+                    result = true;
+                }
+                break;
+
+            case CMD_SET_TRANSLATION:
+                D("CMD_SET_TRANSLATION translation=%f,%f\n", msg.trans.px, msg.trans.py);
+                fb = FrameBuffer::getFB();
+                if (fb) {
+                    fb->setDisplayTranslation(msg.trans.px, msg.trans.py);
                     result = true;
                 }
                 break;
@@ -344,10 +366,12 @@ void RenderWindow::setPostCallback(OnPostFn onPost, void* onPostContext) {
 }
 
 bool RenderWindow::setupSubWindow(FBNativeWindowType window,
-                                  int x,
-                                  int y,
-                                  int width,
-                                  int height,
+                                  int wx,
+                                  int wy,
+                                  int ww,
+                                  int wh,
+                                  int fbw,
+                                  int fbh,
                                   float zRot) {
     D("Entering mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
     if (mHasSubWindow) {
@@ -357,10 +381,12 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
     RenderWindowMessage msg;
     msg.cmd = CMD_SETUP_SUBWINDOW;
     msg.subwindow.parent = window;
-    msg.subwindow.x = x;
-    msg.subwindow.y = y;
-    msg.subwindow.w = width;
-    msg.subwindow.h = height;
+    msg.subwindow.wx = wx;
+    msg.subwindow.wy = wy;
+    msg.subwindow.ww = ww;
+    msg.subwindow.wh = wh;
+    msg.subwindow.fbw = fbw;
+    msg.subwindow.fbh = fbh;
     msg.subwindow.rotation = zRot;
 
     mHasSubWindow = processMessage(msg);
@@ -387,6 +413,16 @@ void RenderWindow::setRotation(float zRot) {
     RenderWindowMessage msg;
     msg.cmd = CMD_SET_ROTATION;
     msg.rotation = zRot;
+    (void) processMessage(msg);
+    D("Exiting\n");
+}
+
+void RenderWindow::setTranslation(float px, float py) {
+    D("Entering translation=%f,%f\n", px, py);
+    RenderWindowMessage msg;
+    msg.cmd = CMD_SET_TRANSLATION;
+    msg.trans.px = px;
+    msg.trans.py = py;
     (void) processMessage(msg);
     D("Exiting\n");
 }

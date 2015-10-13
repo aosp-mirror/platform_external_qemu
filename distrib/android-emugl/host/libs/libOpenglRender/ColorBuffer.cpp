@@ -305,7 +305,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
     s_gles2.glViewport(0, 0, m_width, m_height);
 
     // render m_blitTex
-    m_helper->getTextureDraw()->draw(m_blitTex, 0.);
+    m_helper->getTextureDraw()->draw(m_blitTex, 0., 0, 0);
 
     // Restore previous viewport.
     s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
@@ -348,9 +348,9 @@ bool ColorBuffer::bindToRenderbuffer() {
     return true;
 }
 
-bool ColorBuffer::post(float rotation) {
+bool ColorBuffer::post(float rotation, float dx, float dy) {
     // NOTE: Do not call m_helper->setupContext() here!
-    return m_helper->getTextureDraw()->draw(m_tex, rotation);
+    return m_helper->getTextureDraw()->draw(m_tex, rotation, dx, dy);
 }
 
 void ColorBuffer::readback(unsigned char* img) {

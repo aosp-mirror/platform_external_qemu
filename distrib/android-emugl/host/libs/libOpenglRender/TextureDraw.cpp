@@ -62,12 +62,13 @@ const char kVertexShaderSource[] =
     "attribute vec2 inCoord;\n"
     "varying vec2 outCoord;\n"
     "uniform float rotation;\n"
+    "uniform vec2 translation;\n"
 
     "void main(void) {\n"
     "  float cs = cos(rotation);\n"
     "  float sn = sin(rotation);\n"
-    "  gl_Position.x = position.x * cs - position.y * sn;\n"
-    "  gl_Position.y = position.y * cs + position.x * sn;\n"
+    "  gl_Position.x = position.x * cs - position.y * sn - translation.x;\n"
+    "  gl_Position.y = position.y * cs + position.x * sn - translation.y;\n"
     "  gl_Position.zw = position.zw;\n"
     "  outCoord = inCoord;\n"
     "}\n";
@@ -107,7 +108,8 @@ TextureDraw::TextureDraw(EGLDisplay display) :
         mPositionSlot(-1),
         mInCoordSlot(-1),
         mTextureSlot(-1),
-        mRotationSlot(-1) {
+        mRotationSlot(-1),
+        mTranslationSlot(-1) {
     // Create shaders and program.
     mVertexShader = createShader(GL_VERTEX_SHADER, kVertexShaderSource);
     mFragmentShader = createShader(GL_FRAGMENT_SHADER, kFragmentShaderSource);
@@ -139,6 +141,7 @@ TextureDraw::TextureDraw(EGLDisplay display) :
     s_gles2.glEnableVertexAttribArray(mInCoordSlot);
 
     mRotationSlot = s_gles2.glGetUniformLocation(mProgram, "rotation");
+    mTranslationSlot = s_gles2.glGetUniformLocation(mProgram, "translation");
     mTextureSlot = s_gles2.glGetUniformLocation(mProgram, "texture");
 
 #if 0
@@ -160,7 +163,7 @@ TextureDraw::TextureDraw(EGLDisplay display) :
                          GL_STATIC_DRAW);
 }
 
-bool TextureDraw::draw(GLuint texture, float rotation) {
+bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
     if (!mProgram) {
         ERR("%s: no program\n", __FUNCTION__);
         return false;
@@ -217,6 +220,7 @@ bool TextureDraw::draw(GLuint texture, float rotation) {
 
     // setup the |rotation| uniform value.
     s_gles2.glUniform1f(mRotationSlot, rotation * M_PI / 180.);
+    s_gles2.glUniform2f(mTranslationSlot, dx, dy);
 
 #if 1
     // Validate program, just to be sure.
