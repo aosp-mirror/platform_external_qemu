@@ -12,13 +12,13 @@
 
 #pragma once
 
-#include <QWidget>
-#include <QSlider>
-#include <QLineEdit>
 #include <QDoubleValidator>
 #include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
+#include <QSlider>
+#include <QVBoxLayout>
+#include <QWidget>
 
 // This widget is souped-up slider that supports fractional values, and has an editable
 // text box next to it that displays the current value.

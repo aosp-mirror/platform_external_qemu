@@ -117,7 +117,7 @@ private:
     const QAndroidCellularAgent* mCellularAgent;
     const QAndroidFingerAgent* mFingerAgent;
     const QAndroidLocationAgent* mLocationAgent;
-    const QAndroidSensorsAgent    *mSensorsAgent;
+    const QAndroidSensorsAgent* mSensorsAgent;
     const QAndroidTelephonyAgent* mTelephonyAgent;
     const SettingsAgent* mSettingsAgent;
 
