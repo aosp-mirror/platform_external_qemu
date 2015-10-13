@@ -29,13 +29,12 @@ using namespace android::base;
 
 static ToolWindow *twInstance = NULL;
 
-ToolWindow::ToolWindow(EmulatorQtWindow *window) :
-    QFrame(window),
+ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
+    QFrame(parent),
     emulator_window(window),
     extendedWindow(NULL),
     uiEmuAgent(NULL),
-    toolsUi(new Ui::ToolControls),
-    scale(.4)
+    toolsUi(new Ui::ToolControls)
 {
     Q_INIT_RESOURCE(resources);
 
@@ -173,7 +172,7 @@ void ToolWindow::runAdbPush(const QList<QUrl> &urls)
 
 void ToolWindow::dockMainWindow()
 {
-    move(emulator_window->geometry().right() + 10, emulator_window->geometry().top() + 10);
+    move(parentWidget()->geometry().right() + 10, parentWidget()->geometry().top() + 10);
 }
 
 void ToolWindow::on_back_button_clicked()
@@ -182,7 +181,7 @@ void ToolWindow::on_back_button_clicked()
 }
 void ToolWindow::on_close_button_clicked()
 {
-    emulator_window->close();
+    parentWidget()->close();
 }
 void ToolWindow::on_home_button_clicked()
 {

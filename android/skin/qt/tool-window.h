@@ -24,6 +24,7 @@
 #include <QProgressDialog>
 #include <QToolButton>
 #include <QUrl>
+#include <QWidget>
 #include <QQueue>
 
 #define REMOTE_DOWNLOADS_DIR "/sdcard/Download"
@@ -45,7 +46,7 @@ class ToolWindow : public QFrame
     Q_OBJECT
 
 public:
-    explicit ToolWindow(EmulatorQtWindow *emulatorWindow);
+    explicit ToolWindow(EmulatorQtWindow *emulatorWindow, QWidget *parent);
     void show();
     void dockMainWindow();
     void extendedIsClosing() { extendedWindow = NULL; }
@@ -73,7 +74,6 @@ private:
     const struct UiEmuAgent *uiEmuAgent;
 
     Ui::ToolControls  *toolsUi;
-    double scale; // TODO: add specific UI for scaling
 
     QErrorMessage mErrorMessage;
 
