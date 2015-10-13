@@ -214,7 +214,7 @@ private:
                     }
                 }
 
-#else // !_WIN32
+#elif __linux__
 
                 for (; i < mEventBuffer.size() - 3; i++) {
                     if (mEventBuffer[i] == QEvent::WindowActivate &&
@@ -225,6 +225,15 @@ private:
                         mEmulatorWindow->doResize(this->size());
                         break;
                     }
+                }
+
+#elif __APPLE__
+
+                if (e->type() == QEvent::NonClientAreaMouseMove ||
+                        e->type() == QEvent::Enter ||
+                        e->type() == QEvent::Leave) {
+                    mEventBuffer.clear();
+                    mEmulatorWindow->doResize(this->size());
                 }
 
 #endif
