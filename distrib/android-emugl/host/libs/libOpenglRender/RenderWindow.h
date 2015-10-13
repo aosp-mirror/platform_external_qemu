@@ -81,17 +81,20 @@ public:
     void setPostCallback(OnPostFn onPost, void* onPostContext);
 
     // Start displaying the emulated framebuffer using a sub-window of a
-    // parent |window| id. |x|, |y|, |width| and |height| are the position
+    // parent |window| id. |wx|, |wy|, |ww| and |wh| are the position
     // and dimension of the sub-window, relative to its parent.
+    // |fbw| and |fbh| are the dimensions of the underlying guest framebuffer.
     // |rotation| is a clockwise-rotation for the content. Only multiples of
     // 90. are accepted. Returns true on success, false otherwise.
     //
     // One can call removeSubWindow() to remove the sub-window.
     bool setupSubWindow(FBNativeWindowType window,
-                        int x,
-                        int y,
-                        int width,
-                        int height,
+                        int wx,
+                        int wy,
+                        int ww,
+                        int wh,
+                        int fbw,
+                        int fbh,
                         float rotation);
 
     // Remove the sub-window created by calling setupSubWindow().
@@ -100,9 +103,20 @@ public:
     // otherwise.
     bool removeSubWindow();
 
+    // Moves the sub-window created by calling setupSubWindow().
+    // |x|,|y| are the new top-right corner of the sub-window, and
+    // |width|,|height| are the new dimensions of the sub-window.
+    bool moveSubWindow(int x, int y, int width, int height);
+
     // Change the display rotation on the fly. |zRot| is a clockwise rotation
     // angle in degrees. Only multiples of 90. are accepted.
     void setRotation(float zRot);
+
+    // Change the display translation. |px|,|py| are numbers between 0 and 1,
+    // with (0,0) indicating "align the bottom left of the framebuffer with the
+    // bottom left of the subwindow", and (1,1) indicating "align the top right of
+    // the framebuffer with the top right of the subwindow."
+    void setTranslation(float px, float py);
 
     // Force a repaint of the whole content into the sub-window.
     void repaint();

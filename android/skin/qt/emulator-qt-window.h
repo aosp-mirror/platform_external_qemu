@@ -112,6 +112,7 @@ signals:
 public:
     void screenshot();
     void simulateKeyPress(int keyCode, int modifiers);
+    void simulateScrollBarChanged(int x, int y);
     void simulateSetScale(double scale);
     void simulateSetZoom(double zoom);
     void simulateWindowMoved(const QPoint &pos);
@@ -138,6 +139,9 @@ private slots:
     void slot_setWindowTitle(const QString *title, QSemaphore *semaphore = NULL);
     void slot_showWindow(SkinSurface* surface, const QRect* rect, int is_fullscreen, QSemaphore *semaphore = NULL);
     void slot_runOnUiThread(SkinGenericFunction* f, void* data, QSemaphore* semaphore = NULL);
+
+    void slot_horizontalScrollChanged(int value);
+    void slot_verticalScrollChanged(int value);
 
     /*
      Here are conventional slots that perform interesting high-level functions in the emulator. These can be hooked up to signals

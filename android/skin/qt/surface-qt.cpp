@@ -79,7 +79,7 @@ static void skin_surface_free(SkinSurface *s)
 extern int skin_surface_height(SkinSurface *s)
 {
     D("skin_surface_height %d", s->id);
-    return s->bitmap->size().height();
+    return s->h;
 }
 
 extern int skin_surface_lock(SkinSurface *s, SkinSurfacePixels *pix)
@@ -117,7 +117,7 @@ extern void skin_surface_unrefp(SkinSurface* *psurface)
 extern int skin_surface_width(SkinSurface *s)
 {
     D("skin_surface_width %d", s->id);
-    return s->bitmap->size().width();
+    return s->w;
 }
 
 extern SkinSurface *skin_surface_create_slow(int w, int h)

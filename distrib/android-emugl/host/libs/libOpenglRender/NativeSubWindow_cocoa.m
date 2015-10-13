@@ -64,3 +64,24 @@ void destroySubWindow(EGLNativeWindowType win) {
         [glView release];
     }
 }
+
+int moveSubWindow(FBNativeWindowType p_window,
+                  int x,
+                  int y,
+                  int width,
+                  int height) {
+    NSWindow *win = (NSWindow *)p_window;
+    if (!win) {
+        return 0;
+    }
+
+    /* (x,y) assume an upper-left origin, but Cocoa uses a lower-left origin */
+    NSRect content_rect = [win contentRectForFrameRect:[win frame]];
+    int cocoa_y = (int)content_rect.size.height - (y + height);
+    NSRect contentRect = NSMakeRect(x, cocoa_y, width, height);
+
+    NSView *glView = [win contentView];
+    [glView setFrame:contentRect];
+
+    return 1;
+}
