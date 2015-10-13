@@ -59,50 +59,27 @@ log2 "BUILD_ARCH=$BUILD_ARCH"
 # other values may be possible but haven't been tested
 #
 
-EXE=""
-OS=`uname -s`
-case "$OS" in
-    Darwin)
-        OS=darwin-$BUILD_ARCH
-        ;;
-    Linux)
-        # note that building  32-bit binaries on x86_64 is handled later
-        OS=linux-$BUILD_ARCH
-        ;;
-    FreeBSD)
-        OS=freebsd-$BUILD_ARCH
-        ;;
+BUILD_EXEEXT=
+BUILD_OS=`uname -s`
+case "$BUILD_OS" in
+    Darwin) BUILD_OS=darwin;;
+    Linux) BUILD_OS=linux;;
+    FreeBSD) BUILD_OS=freebsd;;
     CYGWIN*|*_NT-*)
         panic "Please build Windows binaries on Linux with --mingw option."
         ;;
+    *) panic "Unknown build OS: $BUILD_OS";;
 esac
 
-log2 "OS=$OS"
-log2 "EXE=$EXE"
+BUILD_TAG=$BUILD_OS-$BUILD_ARCH
 
-# at this point, the value of OS should be one of the following:
-#   linux-x86
-#   linux-x86_64
-#   darwin-x86
-#   darwin-x86_64
-#
-# other values may be possible but have not been tested
+log2 "BUILD_TAG=$BUILD_TAG"
+log2 "BUILD_EXEEXT=$BUILD_EXEEXT"
 
-# define HOST_OS as $OS without any cpu-specific suffix
-#
-case $OS in
-    linux-*) HOST_OS=linux
-    ;;
-    darwin-*) HOST_OS=darwin
-    ;;
-    freebsd-*) HOST_OS=freebsd
-    ;;
-    *) HOST_OS=$OS
-esac
-
+HOST_OS=$BUILD_OS
 HOST_ARCH=$BUILD_ARCH
 HOST_TAG=$HOST_OS-$HOST_ARCH
-BUILD_TAG=$HOST_TAG
+
 
 #### Toolchain support
 ####
@@ -112,12 +89,12 @@ WINDRES=
 # Various probes are going to need to run a small C program
 TMPC=/tmp/android-$$-test.c
 TMPO=/tmp/android-$$-test.o
-TMPE=/tmp/android-$$-test$EXE
+TMPE=/tmp/android-$$-test$BUILD_EXEEXT
 TMPL=/tmp/android-$$-test.log
 
 # cleanup temporary files
 clean_temp () {
-    rm -f $TMPC $TMPO $TMPL $TMPE
+    rm -f $TMPC $TMPO $TMPL $TMPLE
 }
 
 # cleanup temp files then exit with an error
@@ -126,28 +103,7 @@ clean_exit () {
     exit 1
 }
 
-# this function should be called to enforce the build of 32-bit binaries on 64-bit systems
-# that support it.
-FORCE_32BIT=no
-force_32bit_binaries () {
-    if [ $BUILD_ARCH = x86_64 ] ; then
-        FORCE_32BIT=yes
-        case $OS in
-            linux-x86_64) OS=linux-x86 ;;
-            darwin-x86_64) OS=darwin-x86 ;;
-            freebsd-x86_64) OS=freebsd-x86 ;;
-        esac
-        HOST_ARCH=x86
-        BUILD_ARCH=x86
-        HOST_TAG=$HOST_OS-$HOST_ARCH
-        log "Check32Bits: Forcing generation of 32-bit binaries."
-    fi
-}
-
 # this function will setup the compiler and linker and check that they work as advertized
-# note that you should call 'force_32bit_binaries' before this one if you want it to work
-# as advertized.
-#
 setup_toolchain () {
     if [ -z "$CC" ] ; then
         CC=gcc
@@ -157,19 +113,6 @@ setup_toolchain () {
     cat > $TMPC <<EOF
 int main(void) {}
 EOF
-
-    if [ $FORCE_32BIT = yes ] ; then
-        CFLAGS="$CFLAGS -m32"
-        LDFLAGS="$LDFLAGS -m32"
-        compile
-        if [ $? != 0 ] ; then
-            # sometimes, we need to also tell the assembler to generate 32-bit binaries
-            # this is highly dependent on your GCC installation (and no, we can't set
-            # this flag all the time)
-            CFLAGS="$CFLAGS -Wa,--32"
-        fi
-    fi
-
     compile
     if [ $? != 0 ] ; then
         echo "your C compiler doesn't seem to work: $CC"
@@ -494,18 +437,6 @@ if [ -n "$OPTION_CXX" ]; then
     CC="$OPTION_CXX"
 fi
 
-if [ -z "$CC" ]; then
-  CC=$HOST_CC
-fi
-
-if [ -z "$CXX" ]; then
-  CXX=$HOST_CXX
-fi
-
-# By default, generate 32-bit binaries, the Makefile have targets that
-# generate 64-bit ones by using -m64 on the command-line.
-force_32bit_binaries
-
 setup_toolchain
 
 BUILD_AR=$AR
@@ -690,7 +621,7 @@ fi
 # Build the config.make file
 #
 
-case $OS in
+case $BUILD_OS in
     windows)
         BUILD_EXEEXT=.exe
         BUILD_DLLEXT=.dll
@@ -805,7 +736,7 @@ if [ "$ANDROID_SDK_TOOLS_REVISION" ] ; then
   echo "ANDROID_SDK_TOOLS_REVISION := $ANDROID_SDK_TOOLS_REVISION" >> $config_mk
 fi
 
-if [ "$OPTION_MINGW" = "yes" ] ; then
+if [ "$config_mk" = "yes" ] ; then
     echo "" >> $config_mk
     echo "USE_MINGW := 1" >> $config_mk
     echo "HOST_OS   := windows" >> $config_mk
@@ -878,15 +809,15 @@ if [ "$HOST_OS" != "windows" ] ; then
 fi
 echo "#define QEMU_VERSION    \"0.10.50\"" >> $config_h
 echo "#define QEMU_PKGVERSION \"Android\"" >> $config_h
-BSD=0
+BSD=
 case "$HOST_OS" in
     linux) CONFIG_OS=LINUX
     ;;
     darwin) CONFIG_OS=DARWIN
-              BSD=1
+            BSD=1
     ;;
     freebsd) CONFIG_OS=FREEBSD
-              BSD=1
+             BSD=1
     ;;
     windows) CONFIG_OS=WIN32
     ;;
@@ -900,7 +831,7 @@ case $HOST_OS in
 esac
 
 echo "#define CONFIG_$CONFIG_OS   1" >> $config_h
-if [ $BSD = 1 ] ; then
+if [ "$BSD" ]; then
     echo "#define CONFIG_BSD       1" >> $config_h
     echo "#define O_LARGEFILE      0" >> $config_h
     echo "#define MAP_ANONYMOUS    MAP_ANON" >> $config_h
