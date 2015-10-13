@@ -12,6 +12,7 @@
 #include "android-qemu1-glue/telephony/modem_init.h"
 
 #include "android/telephony/modem_driver.h"
+#include "android-qemu1-glue/utils/stream.h"
 
 extern "C" {
     #include "hw/hw.h"
@@ -21,7 +22,9 @@ extern "C" {
 
 static void modem_state_save(QEMUFile* file, void* opaque)
 {
-    amodem_state_save((AModem)opaque, (SysFile*)file);
+    Stream* const s = stream_from_qemufile(file);
+    amodem_state_save((AModem)opaque, (SysFile*)s);
+    stream_free(s);
 }
 
 static int modem_state_load(QEMUFile* file, void* opaque, int version_id)
@@ -29,7 +32,11 @@ static int modem_state_load(QEMUFile* file, void* opaque, int version_id)
     if (version_id != MODEM_DEV_STATE_SAVE_VERSION)
         return -1;
 
-    return amodem_state_load((AModem)opaque, (SysFile*)file);
+    Stream* const s = stream_from_qemufile(file);
+    const int res = amodem_state_load((AModem)opaque, (SysFile*)s);
+    stream_free(s);
+
+    return res;
 }
 
 
