@@ -42,6 +42,9 @@ void skin_winsys_set_window_pos(int window_x, int window_y);
 // Get main window position.
 void skin_winsys_get_window_pos(int* window_x, int* window_y);
 
+// Get main window borders.
+void skin_winsys_get_window_borders(int *left, int *right, int *top, int *bottom);
+
 // Set window title.
 void skin_winsys_set_window_title(const char* title);
 
