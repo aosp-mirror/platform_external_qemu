@@ -40,8 +40,9 @@ public:
     // Fill the current framebuffer with the content of |texture|, which must
     // be the name of a GLES 2.x texture object. |rotationDegrees| is a
     // clockwise rotation angle in degrees (clockwise in the GL Y-upwards
-    // coordinate space).
-    bool draw(GLuint texture, float rotationDegrees);
+    // coordinate space). |dx,dy| is the translation of the image towards the
+    // origin.
+    bool draw(GLuint texture, float rotationDegrees, float dx, float dy);
 
 private:
     EGLDisplay mDisplay;
@@ -52,6 +53,7 @@ private:
     GLint mInCoordSlot;
     GLint mTextureSlot;
     GLint mRotationSlot;
+    GLint mTranslationSlot;
     GLuint mVertexBuffer;
     GLuint mIndexBuffer;
 };

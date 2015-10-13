@@ -77,22 +77,29 @@ public:
 
     // Setup a new sub-window to display the content of the emulated GPU
     // on-top of an existing UI window. |p_window| is the platform-specific
-    // parent window handle. |x|, |y|, |width| and |height| are the dimensions
-    // in pixels of the sub-window, relative to the parent window's coordinate.
-    // Note that |width| and |height| can be different from the dimensions
-    // used to initialize the framebuffer (in which case scaling will be
-    // applied automatically). |zRot| is a rotation angle in degrees,
-    // (clockwise in the Y-upwards GL coordinate space).
+    // parent window handle. |wx|, |wy|, |ww| and |wh| are the
+    // dimensions in pixels of the sub-window, relative to the parent window's
+    // coordinate. |fbw| and |fbh| are the dimensions used to initialize
+    // the framebuffer, which may be different from the dimensions of the
+    // sub-window (in which case scaling will be applied automatically).
+    // |zRot| is a rotation angle in degrees, (clockwise in the Y-upwards GL
+    // coordinate space).
     // Return true on success, false otherwise.
     //
-    // NOTE: This can return NULL for software-only EGL engines like OSMesa.
+    // NOTE: This can return false for software-only EGL engines like OSMesa.
     bool setupSubWindow(FBNativeWindowType p_window,
-                        int x, int y,
-                        int width, int height, float zRot);
+                        int wx, int wy,
+                        int ww, int wh,
+                        int fbw, int fbh, float zRot);
 
     // Remove the sub-window created by setupSubWindow(), if any.
     // Return true on success, false otherwise.
     bool removeSubWindow();
+
+    // Move the sub-window created by setupSubWindow(), if any,
+    // to |x|,|y| with dimensions |width|,|height|. Returns true on
+    // success, false otherwise.
+    bool moveSubWindow(int x, int y, int width, int height);
 
     // Finalize the instance.
     void finalize();
@@ -105,10 +112,10 @@ public:
     const FrameBufferCaps &getCaps() const { return m_caps; }
 
     // Return the emulated GPU display width in pixels.
-    int getWidth() const { return m_width; }
+    int getWidth() const { return m_framebufferWidth; }
 
     // Return the emulated GPU display height in pixels.
-    int getHeight() const { return m_height; }
+    int getHeight() const { return m_framebufferHeight; }
 
     // Return the list of configs available from this display.
     const FbConfigList* getConfigs() const { return m_configs; }
@@ -266,6 +273,18 @@ public:
         repost();
     }
 
+    // Changes what coordinate of this framebuffer will be displayed at the
+    // corner of the GPU sub-window. Specifically, |px| and |py| = 0 means
+    // align the bottom-left of the framebuffer with the bottom-left of the
+    // sub-window, and |px| and |py| = 1 means align the top right of the
+    // framebuffer with the top right of the sub-window. Intermediate values
+    // interpolate between these states.
+    void setDisplayTranslation(float px, float py) {
+        m_px = px > 1 ? 1 : (px < 0 ? 0 : px);
+        m_py = py > 1 ? 1 : (py < 0 ? 0 : py);
+        repost();
+    }
+
     // Return a TextureDraw instance that can be used with this surfaces
     // and windows created by this instance.
     TextureDraw* getTextureDraw() const { return m_textureDraw; }
@@ -286,8 +305,10 @@ private:
     static HandleType s_nextHandle;
     int m_x;
     int m_y;
-    int m_width;
-    int m_height;
+    int m_framebufferWidth;
+    int m_framebufferHeight;
+    int m_windowWidth;
+    int m_windowHeight;
     bool m_useSubWindow;
     emugl::Mutex m_lock;
     FbConfigList* m_configs;
@@ -312,6 +333,8 @@ private:
     EGLConfig  m_eglConfig;
     HandleType m_lastPostedColorBuffer;
     float      m_zRot;
+    float      m_px;
+    float      m_py;
     bool       m_eglContextInitialized;
 
     int m_statsNumFrames;

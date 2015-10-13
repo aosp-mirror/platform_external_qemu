@@ -39,9 +39,15 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                     int width,
                                     int height);
 
-
 // Destroy a sub-window previously created through createSubWindow() above.
 void destroySubWindow(EGLNativeWindowType win);
+
+// Moves a sub-window previously created through createSubWindow() above.
+int moveSubWindow(FBNativeWindowType p_window,
+                  int x,
+                  int y,
+                  int width,
+                  int height);
 
 #ifdef __cplusplus
 }
