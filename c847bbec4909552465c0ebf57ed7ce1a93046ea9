@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1f30ba11_77a472ab",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-13T18:54:14Z",
+      "side": 1,
+      "message": "well, make help says it doesn\u0027t:\n\nThe ‘-j’ option is a special case (see Parallel Execution). If you set it to some numeric value ‘N’ and your operating system supports it (most any UNIX system will; others typically won’t), the parent make and all the sub-makes will communicate to ensure that there are only ‘N’ jobs running at the same time between them all. Note that any job that is marked recursive (see Instead of Executing Recipes) doesn’t count against the total jobs (otherwise we could get ‘N’ sub-makes running and have no slots left over for any real work!)\n\nhttps://www.gnu.org/software/make/manual/html_node/Options_002fRecursion.html#Options_002fRecursion",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 38
+      },
+      "revId": "c847bbec4909552465c0ebf57ed7ce1a93046ea9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7f2b7617_381c0535",
+        "filename": "Makefile.qemu2",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-13T18:54:14Z",
+      "side": 1,
+      "message": "won\u0027t it be empty anyway? :)",
+      "range": {
+        "startLine": 2,
+        "startChar": 53,
+        "endLine": 2,
+        "endChar": 68
+      },
+      "revId": "c847bbec4909552465c0ebf57ed7ce1a93046ea9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
