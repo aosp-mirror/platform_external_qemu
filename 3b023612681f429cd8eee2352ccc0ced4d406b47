@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1f30ba11_374dca36",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-13T20:56:08Z",
+      "side": 1,
+      "message": "please update the comment above to explain what |windowWidth| and |windowHeight| are.",
+      "revId": "3b023612681f429cd8eee2352ccc0ced4d406b47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fa8725b_f334dac4",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-13T20:56:08Z",
+      "side": 1,
+      "message": "can you clarify what is being translated, relative to what?",
+      "revId": "3b023612681f429cd8eee2352ccc0ced4d406b47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f30ba11_b700ba81",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/render_api.entries",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-13T20:56:08Z",
+      "side": 1,
+      "message": "ok, this is confusing, can you clarify? I\u0027m pretty sure the scrollbar doesn\u0027t need to be mentioned here because this code doesn\u0027t know anything about the UI where it\u0027s going to get embedded.",
+      "revId": "3b023612681f429cd8eee2352ccc0ced4d406b47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
