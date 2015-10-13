@@ -15,6 +15,8 @@
 #include <stdarg.h>
 #include <stddef.h>
 
+#include <string>
+
 namespace android {
 namespace base {
 
@@ -289,6 +291,7 @@ public:
     LogStream& operator<<(unsigned long long v);
     LogStream& operator<<(float v);
     LogStream& operator<<(double v);
+    LogStream& operator<<(const std::string& v);
 
     const char* string() const { return mString ? mString : ""; }
     size_t size() const { return mSize; }
