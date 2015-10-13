@@ -55,7 +55,7 @@ auserConfig_new( AvdInfo*  info )
     char          needUUID = 1;
     char          temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
     char*         parentPath;
-    IniFile*      ini = NULL;
+    CIniFile*      ini = NULL;
 
     ANEW0(uc);
 
@@ -181,7 +181,7 @@ auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y )
 void
 auserConfig_save( AUserConfig*  uconfig )
 {
-    IniFile*   ini;
+    CIniFile*   ini;
 
     if (uconfig->changed == 0) {
         D("User-config was not changed.");
