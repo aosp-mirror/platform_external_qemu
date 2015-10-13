@@ -47,9 +47,12 @@ void android_getOpenglesHardwareStrings(char* vendor, size_t vendorBufSize,
                                         char* renderer, size_t rendererBufSize,
                                         char* version, size_t versionBufSize);
 
-int android_showOpenglesWindow(void* window, int x, int y, int width, int height, float rotation);
+int android_showOpenglesWindow(void* window, int x, int y, int width, int height,
+                               int viewportWidth, int viewportHeight, float rotation);
 
 int android_hideOpenglesWindow(void);
+
+void android_setOpenglesTranslation(float px, float py);
 
 void android_redrawOpenglesWindow(void);
 

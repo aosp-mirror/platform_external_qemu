@@ -88,7 +88,8 @@ public:
     // NOTE: This can return NULL for software-only EGL engines like OSMesa.
     bool setupSubWindow(FBNativeWindowType p_window,
                         int x, int y,
-                        int width, int height, float zRot);
+                        int width, int height,
+                        int windowWidth, int windowHeight, float zRot);
 
     // Remove the sub-window created by setupSubWindow(), if any.
     // Return true on success, false otherwise.
@@ -266,6 +267,13 @@ public:
         repost();
     }
 
+    // Change the translation of the displayed GPU sub-window.
+    void setDisplayTranslation(float px, float py) {
+        m_px = px;
+        m_py = py;
+        repost();
+    }
+
     // Return a TextureDraw instance that can be used with this surfaces
     // and windows created by this instance.
     TextureDraw* getTextureDraw() const { return m_textureDraw; }
@@ -288,6 +296,8 @@ private:
     int m_y;
     int m_width;
     int m_height;
+    int m_windowWidth;
+    int m_windowHeight;
     bool m_useSubWindow;
     emugl::Mutex m_lock;
     FbConfigList* m_configs;
@@ -312,6 +322,8 @@ private:
     EGLConfig  m_eglConfig;
     HandleType m_lastPostedColorBuffer;
     float      m_zRot;
+    float        m_px;
+    float        m_py;
     bool       m_eglContextInitialized;
 
     int m_statsNumFrames;

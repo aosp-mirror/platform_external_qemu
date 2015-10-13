@@ -1006,7 +1006,11 @@ struct SkinWindow {
     int           y_pos;
 
     double        scale;
+
+    // Viewport parameters
     double        zoom;
+    int           vw;
+    int           vh;
 };
 
 static void
@@ -1207,6 +1211,8 @@ typedef struct {
     int y;
     int w;
     int h;
+    int vw; // Viewport parameters
+    int vh;
     float rot;
 } gles_show_data;
 
@@ -1217,6 +1223,8 @@ static void skin_window_run_opengles_show(void* p) {
                                            data->y,
                                            data->w,
                                            data->h,
+                                           data->vw,
+                                           data->vh,
                                            data->rot);
 }
 
@@ -1237,6 +1245,8 @@ skin_window_show_opengles( SkinWindow* window )
     data.y = drect.pos.y;
     data.w = drect.size.w;
     data.h = drect.size.h;
+    data.vw = window->vw;
+    data.vh = window->vh;
     data.rot = disp->rotation * -90.;
 
     skin_winsys_run_ui_update(&skin_window_run_opengles_show, &data);
@@ -1295,7 +1305,6 @@ skin_window_create(SkinLayout* slayout,
 
     window->win_funcs    = win_funcs;
     window->scale = scale;
-    window->zoom = 1.0;
     window->no_display   = no_display;
 
     /* enable everything by default */
@@ -1395,6 +1404,13 @@ skin_window_position_changed( SkinWindow* window, int x, int y )
     window->y_pos = y;
 }
 
+void
+skin_window_set_translation( SkinWindow* window, int dx, int xmax, int dy, int ymax )
+{
+    window->win_funcs->opengles_setTranslation((float) dx / (float) xmax,
+                                               (float) dy / (float) ymax);
+}
+
 static void
 skin_window_resize( SkinWindow*  window )
 {
@@ -1413,6 +1429,10 @@ skin_window_resize( SkinWindow*  window )
         int           window_y = window->y_pos;
         double        scale = window->scale;
         int           fullscreen = window->fullscreen;
+
+        // Record the actual size of the window before updating the scale
+        window->vw = (int) ceil(layout_w * scale) - window->vw;
+        window->vh = (int) ceil(layout_h * scale) - window->vh;
 
         if (window->zoom != 1.0) {
             scale *= window->zoom;
@@ -1446,6 +1466,10 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
 
     layout_done( &window->layout );
     window->layout = layout;
+
+    window->zoom = 1.0;
+    window->vw = 0;
+    window->vh = 0;
 
     disp = window->layout.displays;
     if (disp != NULL) {
@@ -1547,16 +1571,22 @@ void
 skin_window_set_scale(SkinWindow* window, double scale)
 {
     window->scale = scale;
-    window->zoom = 1.0; // Scaling the window should reset zoom
+    window->zoom = 1.0;     // Scaling the window should all "viewport" parameters
+    window->vw = 0;
+    window->vh = 0;
 
     skin_window_resize( window );
     skin_window_redraw( window, NULL );
 }
 
 void
-skin_window_set_zoom(SkinWindow* window, double zoom)
+skin_window_set_zoom(SkinWindow* window, double zoom, int dw, int dh)
 {
     window->zoom = zoom;
+
+    // Extra space taken up by the scroll bars
+    window->vw = dw;
+    window->vh = dh;
 
     skin_window_resize( window );
     skin_window_redraw( window, NULL );

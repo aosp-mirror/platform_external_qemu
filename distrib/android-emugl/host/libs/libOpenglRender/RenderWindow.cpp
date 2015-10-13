@@ -57,6 +57,7 @@ enum Command {
     CMD_SETUP_SUBWINDOW,
     CMD_REMOVE_SUBWINDOW,
     CMD_SET_ROTATION,
+    CMD_SET_TRANSLATION,
     CMD_REPAINT,
     CMD_FINALIZE,
 };
@@ -88,8 +89,16 @@ struct RenderWindowMessage {
             int y;
             int w;
             int h;
+            int vw; // Viewport parameters
+            int vh;
             float rotation;
         } subwindow;
+
+        // CMD_SET_TRANSLATION;
+        struct {
+            float px;
+            float py;
+        } trans;
 
         // CMD_SET_ROTATION
         float rotation;
@@ -127,12 +136,14 @@ struct RenderWindowMessage {
                 break;
 
             case CMD_SETUP_SUBWINDOW:
-                D("CMD_SETUP_SUBWINDOW: parent=%p x=%d y=%d w=%d h=%d rotation=%f\n",
+                D("CMD_SETUP_SUBWINDOW: parent=%p x=%d y=%d w=%d h=%d vw=%d vh=%d rotation=%f\n",
                     (void*)msg.subwindow.parent,
                     msg.subwindow.x,
                     msg.subwindow.y,
                     msg.subwindow.w,
                     msg.subwindow.h,
+                    msg.subwindow.vw,
+                    msg.subwindow.vh,
                     msg.subwindow.rotation);
                 result = FrameBuffer::getFB()->setupSubWindow(
                         msg.subwindow.parent,
@@ -140,6 +151,8 @@ struct RenderWindowMessage {
                         msg.subwindow.y,
                         msg.subwindow.w,
                         msg.subwindow.h,
+                        msg.subwindow.vw,
+                        msg.subwindow.vh,
                         msg.subwindow.rotation);
                 break;
 
@@ -153,6 +166,15 @@ struct RenderWindowMessage {
                 fb = FrameBuffer::getFB();
                 if (fb) {
                     fb->setDisplayRotation(msg.rotation);
+                    result = true;
+                }
+                break;
+
+            case CMD_SET_TRANSLATION:
+                D("CMD_SET_TRANSLATION translation=%f,%f\n", msg.trans.px, msg.trans.py);
+                fb = FrameBuffer::getFB();
+                if (fb) {
+                    fb->setDisplayTranslation(msg.trans.px, msg.trans.py);
                     result = true;
                 }
                 break;
@@ -348,6 +370,8 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
                                   int y,
                                   int width,
                                   int height,
+                                  int viewportWidth,
+                                  int viewportHeight,
                                   float zRot) {
     D("Entering mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
     if (mHasSubWindow) {
@@ -361,6 +385,8 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
     msg.subwindow.y = y;
     msg.subwindow.w = width;
     msg.subwindow.h = height;
+    msg.subwindow.vw = viewportWidth;
+    msg.subwindow.vh = viewportHeight;
     msg.subwindow.rotation = zRot;
 
     mHasSubWindow = processMessage(msg);
@@ -387,6 +413,16 @@ void RenderWindow::setRotation(float zRot) {
     RenderWindowMessage msg;
     msg.cmd = CMD_SET_ROTATION;
     msg.rotation = zRot;
+    (void) processMessage(msg);
+    D("Exiting\n");
+}
+
+void RenderWindow::setTranslation(float px, float py) {
+    D("Entering translation=%f,%f\n", px, py);
+    RenderWindowMessage msg;
+    msg.cmd = CMD_SET_TRANSLATION;
+    msg.trans.px = px;
+    msg.trans.py = py;
     (void) processMessage(msg);
     D("Exiting\n");
 }
