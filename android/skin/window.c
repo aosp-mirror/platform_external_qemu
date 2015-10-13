@@ -1319,6 +1319,12 @@ skin_window_create(SkinLayout* slayout,
         /* If it is still too large, we ensure the top-border is visible */
         if (new_y < 0)
             new_y = 0;
+#ifdef _WIN32
+        /* for windows, the title bar is about 30 pixels */
+        /* TODO: find a reliable way to get it */
+        if (new_y < 30)
+            new_y = 30;
+#endif
 
         VERBOSE_PRINT(init, "Window repositioned to [%d,%d]", new_x, new_y);
 
