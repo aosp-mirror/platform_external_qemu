@@ -1006,7 +1006,11 @@ struct SkinWindow {
     int           y_pos;
 
     double        scale;
+
+    // Viewport parameters
     double        zoom;
+    int           vw;
+    int           vh;
 };
 
 static void
@@ -1203,20 +1207,24 @@ skin_window_hide_opengles( SkinWindow* window )
 typedef struct {
     SkinWindow* window;
     void* handle;
-    int x;
-    int y;
-    int w;
-    int h;
+    int wx;
+    int wy;
+    int ww;
+    int wh;
+    int fbw;
+    int fbh;
     float rot;
 } gles_show_data;
 
 static void skin_window_run_opengles_show(void* p) {
     const gles_show_data* data = (const gles_show_data*)p;
     data->window->win_funcs->opengles_show(data->handle,
-                                           data->x,
-                                           data->y,
-                                           data->w,
-                                           data->h,
+                                           data->wx,
+                                           data->wy,
+                                           data->ww,
+                                           data->wh,
+                                           data->fbw,
+                                           data->fbh,
                                            data->rot);
 }
 
@@ -1233,10 +1241,12 @@ skin_window_show_opengles( SkinWindow* window )
     gles_show_data data;
     data.window = window;
     data.handle = winhandle;
-    data.x = drect.pos.x;
-    data.y = drect.pos.y;
-    data.w = drect.size.w;
-    data.h = drect.size.h;
+    data.wx = drect.pos.x;
+    data.wy = drect.pos.y;
+    data.ww = window->vw;
+    data.wh = window->vh;
+    data.fbw = drect.size.w;
+    data.fbh = drect.size.h;
     data.rot = disp->rotation * -90.;
 
     skin_winsys_run_ui_update(&skin_window_run_opengles_show, &data);
@@ -1295,7 +1305,6 @@ skin_window_create(SkinLayout* slayout,
 
     window->win_funcs    = win_funcs;
     window->scale = scale;
-    window->zoom = 1.0;
     window->no_display   = no_display;
 
     /* enable everything by default */
@@ -1395,6 +1404,13 @@ skin_window_position_changed( SkinWindow* window, int x, int y )
     window->y_pos = y;
 }
 
+void
+skin_window_set_translation( SkinWindow* window, int dx, int xmax, int dy, int ymax )
+{
+    window->win_funcs->opengles_setTranslation((float) dx / (float) xmax,
+                                               (float) dy / (float) ymax);
+}
+
 static void
 skin_window_resize( SkinWindow*  window )
 {
@@ -1413,6 +1429,10 @@ skin_window_resize( SkinWindow*  window )
         int           window_y = window->y_pos;
         double        scale = window->scale;
         int           fullscreen = window->fullscreen;
+
+        // Record the actual size of the window before updating the scale
+        window->vw = (int) ceil(layout_w * scale) - window->vw;
+        window->vh = (int) ceil(layout_h * scale) - window->vh;
 
         if (window->zoom != 1.0) {
             scale *= window->zoom;
@@ -1446,6 +1466,10 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
 
     layout_done( &window->layout );
     window->layout = layout;
+
+    window->zoom = 1.0;
+    window->vw = 0;
+    window->vh = 0;
 
     disp = window->layout.displays;
     if (disp != NULL) {
@@ -1547,18 +1571,31 @@ void
 skin_window_set_scale(SkinWindow* window, double scale)
 {
     window->scale = scale;
-    window->zoom = 1.0; // Scaling the window should reset zoom
+    window->zoom = 1.0;     // Scaling the window should all "viewport" parameters
+    window->vw = 0;
+    window->vh = 0;
 
     skin_window_resize( window );
     skin_window_redraw( window, NULL );
 }
 
 void
-skin_window_set_zoom(SkinWindow* window, double zoom)
+skin_window_set_zoom(SkinWindow* window, double zoom, int dw, int dh)
 {
+    // When zoom is 1.0, we don't actually want scroll bars, so just re-scale the window
+    if (zoom == 1.0) {
+        skin_window_set_scale(window, window->scale);
+        return;
+    }
+
     window->zoom = zoom;
 
+    // Extra space taken up by the scroll bars
+    window->vw = dw;
+    window->vh = dh;
+
     skin_window_resize( window );
+    skin_window_set_translation( window, 0, 1, 1, 1 ); // Align to the bottom left corner
     skin_window_redraw( window, NULL );
 }
 

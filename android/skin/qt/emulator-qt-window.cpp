@@ -22,6 +22,7 @@
 #include <QPixmap>
 #include <QPushButton>
 #include <QScreen>
+#include <QScrollBar>
 #include <QSemaphore>
 
 #include "android/base/files/PathUtils.h"
@@ -88,6 +89,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
 
     QObject::connect(&mScreencapProcess, SIGNAL(finished(int)), this, SLOT(slot_screencapFinished(int)));
     QObject::connect(&mScreencapPullProcess, SIGNAL(finished(int)), this, SLOT(slot_screencapPullFinished(int)));
+
+    QObject::connect(mContainer.horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_horizontalScrollChanged(int)));
+    QObject::connect(mContainer.verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_verticalScrollChanged(int)));
 }
 
 EmulatorQtWindow::~EmulatorQtWindow()
@@ -370,6 +374,16 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, 
     if (semaphore != NULL) semaphore->release();
 }
 
+void EmulatorQtWindow::slot_horizontalScrollChanged(int value)
+{
+    simulateScrollBarChanged(value, mContainer.verticalScrollBar()->value());
+}
+
+void EmulatorQtWindow::slot_verticalScrollChanged(int value)
+{
+    simulateScrollBarChanged(mContainer.horizontalScrollBar()->value(), value);
+}
+
 void EmulatorQtWindow::screenshot()
 {
     if (mScreencapProcess.state() != QProcess::NotRunning) {
@@ -637,6 +651,19 @@ void EmulatorQtWindow::simulateKeyPress(int keyCode, int modifiers)
     slot_queueEvent(event);
 }
 
+void EmulatorQtWindow::simulateScrollBarChanged(int x, int y)
+{
+    SkinEvent *event = createSkinEvent(kEventScrollBarChanged);
+    event->u.scroll.x = x;
+    event->u.scroll.xmax = mContainer.horizontalScrollBar()->maximum();
+
+    // GL is Y-up, but Qt does Y-down, so invert this value
+    int ymax = mContainer.verticalScrollBar()->maximum();
+    event->u.scroll.y = ymax - y;
+    event->u.scroll.ymax  = ymax;
+    slot_queueEvent(event);
+}
+
 void EmulatorQtWindow::simulateSetScale(double scale)
 {
     SkinEvent *event = createSkinEvent(kEventSetScale);
@@ -650,9 +677,11 @@ void EmulatorQtWindow::simulateSetZoom(double zoom)
 {
     mNextIsZoom = true;
 
+    simulateWindowMoved(mContainer.pos());
+
     SkinEvent *event = createSkinEvent(kEventSetZoom);
-    event->u.window.x = mContainer.pos().x();
-    event->u.window.y = mContainer.pos().y();
+    event->u.window.x = mContainer.verticalScrollBar()->width();
+    event->u.window.y = mContainer.horizontalScrollBar()->height();
     event->u.window.scale = zoom;
     slot_queueEvent(event);
 }
