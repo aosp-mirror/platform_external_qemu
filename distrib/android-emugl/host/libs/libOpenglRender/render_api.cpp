@@ -189,14 +189,16 @@ RENDER_APICALL bool RENDER_APIENTRY createOpenGLSubwindow(
         FBNativeWindowType window_id,
         int x,
         int y,
-        int width,
-        int height,
+        int windowWidth,
+        int windowHeight,
+        int framebufferWidth,
+        int framebufferHeight,
         float zRot)
 {
     RenderWindow* window = s_renderWindow;
 
     if (window) {
-       return window->setupSubWindow(window_id,x,y,width,height, zRot);
+       return window->setupSubWindow(window_id,x,y,windowWidth,windowHeight,framebufferWidth,framebufferHeight,zRot);
     }
     // XXX: should be implemented by sending the renderer process
     //      a request
@@ -226,6 +228,20 @@ RENDER_APICALL void RENDER_APIENTRY setOpenGLDisplayRotation(float zRot)
 
     if (window) {
         window->setRotation(zRot);
+        return;
+    }
+    // XXX: should be implemented by sending the renderer process
+    //      a request
+    ERR("%s not implemented for separate renderer process !!!\n",
+            __FUNCTION__);
+}
+
+RENDER_APICALL void RENDER_APIENTRY setOpenGLDisplayTranslation(float px, float py)
+{
+    RenderWindow* window = s_renderWindow;
+
+    if (window) {
+        window->setTranslation(px, py);
         return;
     }
     // XXX: should be implemented by sending the renderer process
