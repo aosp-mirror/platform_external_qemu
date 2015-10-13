@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "android/utils/compiler.h"
@@ -25,11 +26,12 @@ ANDROID_BEGIN_HEADER
 /* an opaque structure used to model an .ini configuration file */
 typedef struct IniFile   IniFile;
 
-/* creates a new IniFile object from a config file loaded in memory.
- *  'fileName' is only used when writing a warning to stderr in case
- * of badly formed output
+/*
+ * Creates a new empty IniFile not bound to any underlying file, and without any
+ * data. |filePath| is only used when writing a warning to stderr, in case of
+ * badly formed output.
  */
-IniFile*  iniFile_newFromMemory( const char*  text, const char*  fileName  );
+IniFile* iniFile_newEmpty( const char* filePath );
 
 /* creates a new IniFile object from a file path,
  * returns NULL if the file cannot be opened.
@@ -52,10 +54,8 @@ void      iniFile_free( IniFile*  f );
 /* returns the number of (key.value) pairs in an IniFile */
 int       iniFile_getPairCount( IniFile*  f );
 
-/* returns the value of a given key from an IniFile.
- * NULL if the key is not assigned in the corresponding configuration file
- */
-const char*  iniFile_getValue( IniFile*  f, const char*  key );
+/* Check if a key exists in the iniFile */
+bool iniFile_hasKey( IniFile*  f, const char*  key );
 
 /* Copies a 'key, value' pair for an entry in the file.
  * Param:

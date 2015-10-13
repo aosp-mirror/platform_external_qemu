@@ -122,7 +122,7 @@ iniFile_getPair( IniFile* i, const char* key )
     return NULL;
 }
 
-const char*
+static const char*
 iniFile_getValue( IniFile*  i, const char*  key )
 {
     IniPair* pair = iniFile_getPair(i, key);
@@ -130,6 +130,12 @@ iniFile_getValue( IniFile*  i, const char*  key )
         return pair->value;
     else
         return NULL;
+}
+
+bool
+iniFile_hasKey( IniFile* i, const char* key )
+{
+    return iniFile_getPair(i, key) != NULL;
 }
 
 int
@@ -178,7 +184,7 @@ isKeyChar( int  c )
     return isKeyStartChar(c) || ((unsigned)(c-'0') < 10) || (c == '.') || (c == '-');
 }
 
-IniFile*
+static IniFile*
 iniFile_newFromMemory( const char*  text, const char*  fileName )
 {
     const char*  p      = text;
@@ -255,6 +261,11 @@ iniFile_newFromMemory( const char*  text, const char*  fileName )
     D("%s: parsing finished", fileName);
 
     return ini;
+}
+
+IniFile*
+iniFile_newEmpty( const char* filepath ) {
+    return iniFile_newFromMemory("", filepath);
 }
 
 IniFile*
