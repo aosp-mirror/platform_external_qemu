@@ -118,6 +118,15 @@ sdk {
             into 'bin'
             builtBy buildWindowsEmulator
         }
+        item("$buildWindowsEmulator.output/bin/e2fsck.exe") {
+            builtBy buildWindowsEmulator
+        }
+        item("$buildWindowsEmulator.output/bin/resize2fs.exe") {
+            builtBy buildWindowsEmulator
+        }
+        item("$buildWindowsEmulator.output/bin/tune2fs.exe") {
+            builtBy buildWindowsEmulator
+        }
         item("$buildWindowsEmulator.output/qemu") {
             into 'qemu'
             builtBy buildWindowsEmulator
