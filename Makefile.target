@@ -223,10 +223,8 @@ endif  # EMULATOR_TARGET_ARCH == mips
 
 common_LOCAL_SRC_FILES += fpu/softfloat.c
 
-# compile KVM only if target is x86 on x86 Linux
-QEMU_KVM_TAG := $(QEMU_HOST_TAG)-$(EMULATOR_TARGET_ARCH)
-QEMU_DO_KVM := $(if $(filter linux-x86-x86 linux-x86_64-x86,$(QEMU_KVM_TAG)),true,false)
-ifeq ($(QEMU_DO_KVM),true)
+# compile KVM only if target is x86 on x86 or x86_64 Linux
+ifeq (linux-x86,$(HOST_OS)-$(EMULATOR_TARGET_ARCH))
     common_LOCAL_SRC_FILES += \
         target-i386/kvm.c \
         target-i386/kvm-gs-restore.c \
