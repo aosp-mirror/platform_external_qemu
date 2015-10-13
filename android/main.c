@@ -937,7 +937,7 @@ int main(int argc, char **argv) {
      */
     {
         const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
-        IniFile*    hwIni         = iniFile_newFromMemory("", NULL);
+        IniFile*    hwIni         = iniFile_newEmpty(NULL);
         androidHwConfig_write(hw, hwIni);
 
         if (filelock_create(coreHwIniPath) == NULL) {
