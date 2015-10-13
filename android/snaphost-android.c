@@ -164,7 +164,7 @@ snaphost_save_config(const char* name)
     }
 
     /* Create HW config backup file from the current HW config settings. */
-    IniFile* hwcfg_bkp = iniFile_newFromMemory("", bkp_path);
+    IniFile* hwcfg_bkp = iniFile_newEmpty(bkp_path);
     if (hwcfg_bkp == NULL) {
         W("Unable to create backup HW config file '%s'. Error: %s",
           bkp_path, strerror(errno));

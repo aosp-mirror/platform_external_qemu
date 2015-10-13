@@ -83,11 +83,11 @@ androidHwConfig_read( AndroidHwConfig*  config,
 
     /* use the magic of macros to implement the hardware configuration loaded */
 
-#define   HWCFG_BOOL(n,s,d,a,t)       if (iniFile_getValue(ini, s)) { config->n = iniFile_getBoolean(ini, s, d); }
-#define   HWCFG_INT(n,s,d,a,t)        if (iniFile_getValue(ini, s)) { config->n = iniFile_getInteger(ini, s, d); }
-#define   HWCFG_STRING(n,s,d,a,t)     if (iniFile_getValue(ini, s)) { AFREE(config->n); config->n = iniFile_getString(ini, s, d); }
-#define   HWCFG_DOUBLE(n,s,d,a,t)     if (iniFile_getValue(ini, s)) { config->n = iniFile_getDouble(ini, s, d); }
-#define   HWCFG_DISKSIZE(n,s,d,a,t)   if (iniFile_getValue(ini, s)) { config->n = iniFile_getDiskSize(ini, s, d); }
+#define   HWCFG_BOOL(n,s,d,a,t)       if (iniFile_hasKey(ini, s)) { config->n = iniFile_getBoolean(ini, s, d); }
+#define   HWCFG_INT(n,s,d,a,t)        if (iniFile_hasKey(ini, s)) { config->n = iniFile_getInteger(ini, s, d); }
+#define   HWCFG_STRING(n,s,d,a,t)     if (iniFile_hasKey(ini, s)) { AFREE(config->n); config->n = iniFile_getString(ini, s, d); }
+#define   HWCFG_DOUBLE(n,s,d,a,t)     if (iniFile_hasKey(ini, s)) { config->n = iniFile_getDouble(ini, s, d); }
+#define   HWCFG_DISKSIZE(n,s,d,a,t)   if (iniFile_hasKey(ini, s)) { config->n = iniFile_getDiskSize(ini, s, d); }
 
 #include "android/avd/hw-config-defs.h"
 
