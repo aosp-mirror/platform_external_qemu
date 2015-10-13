@@ -328,6 +328,10 @@ OPT_UI=
 option_register_var "--ui=<name>" OPT_UI \
         "Specify UI backend ('sdl2' or 'qt')"
 
+OPT_GLES=
+option_register_var "--gles=<name>" OPT_GLES \
+        "Specify GLES backend ('dgl' or 'angle')"
+
 package_builder_register_options
 aosp_prebuilts_dir_register_options
 prebuilts_dir_register_option
@@ -643,6 +647,9 @@ build_darwin_binaries_on () {
     if [ "$OPT_UI" ]; then
         var_append DARWIN_BUILD_FLAGS "--ui=$OPT_UI"
     fi
+    if [ "$OPT_GLES" ]; then
+        var_append DARWIN_BUILD_FLAGS "--gles=$OPT_GLES"
+    fi
     cat > $DARWIN_PKG_DIR/build.sh <<EOF
 #!/bin/bash -l
 cd $DARWIN_REMOTE_DIR/qemu &&
@@ -694,6 +701,10 @@ fi
 
 if [ "$OPT_UI" ]; then
     var_append REBUILD_FLAGS "--ui=$OPT_UI"
+fi
+
+if [ "$OPT_GLES" ]; then
+    var_append REBUILD_FLAGS "--gles=$OPT_GLES"
 fi
 
 for SYSTEM in $(convert_host_list_to_os_list $LOCAL_HOST_SYSTEMS); do
