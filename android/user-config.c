@@ -182,28 +182,21 @@ void
 auserConfig_save( AUserConfig*  uconfig )
 {
     IniFile*   ini;
-    char       temp[256];
 
     if (uconfig->changed == 0) {
         D("User-config was not changed.");
         return;
     }
 
-    bufprint(temp, temp+sizeof(temp),
-             "%s = %d\n"
-             "%s = %d\n"
-             "%s = %lld\n",
-             KEY_WINDOW_X, uconfig->windowX,
-             KEY_WINDOW_Y, uconfig->windowY,
-             KEY_UUID,     uconfig->uuid );
-
-    DD("Generated user-config file:\n%s", temp);
-
-    ini = iniFile_newFromMemory(temp, uconfig->iniPath);
+    ini = iniFile_newEmpty(uconfig->iniPath);
     if (ini == NULL) {
-        D("Weird: can't create user-config iniFile?");
+        D("Weird: can't allocate user-config iniFile?");
         return;
     }
+
+    iniFile_setInteger(ini, KEY_WINDOW_X, uconfig->windowX);
+    iniFile_setInteger(ini, KEY_WINDOW_Y, uconfig->windowY);
+    iniFile_setInt64(ini, KEY_UUID, uconfig->uuid);
     if (iniFile_saveToFile(ini, uconfig->iniPath) < 0) {
         dwarning("could not save user configuration: %s: %s",
                  uconfig->iniPath, strerror(errno));

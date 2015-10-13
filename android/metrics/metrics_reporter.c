@@ -161,7 +161,7 @@ ABool androidMetrics_write(const AndroidMetrics* androidMetrics) {
         return 0;
     }
 
-    ini = iniFile_newFromMemory("", path);
+    ini = iniFile_newEmpty(path);
     if (ini == NULL) {
         mwarning("Failed to malloc ini file.");
         return 0;

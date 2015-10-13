@@ -25,11 +25,12 @@ ANDROID_BEGIN_HEADER
 /* an opaque structure used to model an .ini configuration file */
 typedef struct IniFile   IniFile;
 
-/* creates a new IniFile object from a config file loaded in memory.
- *  'fileName' is only used when writing a warning to stderr in case
- * of badly formed output
+/*
+ * Creates a new empty IniFile not bound to any underlying file, and without any
+ * data. |filePath| is only used when writing a warning to stderr, in case of
+ * badly formed output.
  */
-IniFile*  iniFile_newFromMemory( const char*  text, const char*  fileName  );
+IniFile* iniFile_newEmpty( const char* filePath );
 
 /* creates a new IniFile object from a file path,
  * returns NULL if the file cannot be opened.

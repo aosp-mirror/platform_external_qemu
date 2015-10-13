@@ -178,7 +178,7 @@ isKeyChar( int  c )
     return isKeyStartChar(c) || ((unsigned)(c-'0') < 10) || (c == '.') || (c == '-');
 }
 
-IniFile*
+static IniFile*
 iniFile_newFromMemory( const char*  text, const char*  fileName )
 {
     const char*  p      = text;
@@ -255,6 +255,11 @@ iniFile_newFromMemory( const char*  text, const char*  fileName )
     D("%s: parsing finished", fileName);
 
     return ini;
+}
+
+IniFile*
+iniFile_newEmpty( const char* filepath ) {
+    return iniFile_newFromMemory("", filepath);
 }
 
 IniFile*
