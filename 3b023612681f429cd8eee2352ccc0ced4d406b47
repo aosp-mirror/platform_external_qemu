@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7fa9b65d_9181dffa",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-13T21:39:26Z",
+      "side": 1,
+      "message": "Updated, please let me know if it\u0027s clear.\n\nI\u0027ve also changed the order/name of arguments in a number of places to be more obvious - x,y,windowWidth,windowHeight determine everything about the GL subwindow, while framebufferWidth/Height determine the size of the guest framebuffer.",
+      "parentUuid": "1f30ba11_374dca36",
+      "revId": "3b023612681f429cd8eee2352ccc0ced4d406b47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5fa8725b_f334dac4",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "3fa3be81_ac05a251",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-13T21:39:26Z",
+      "side": 1,
+      "message": "Updated, please let me know if it\u0027s clear.",
+      "parentUuid": "5fa8725b_f334dac4",
+      "revId": "3b023612681f429cd8eee2352ccc0ced4d406b47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1f30ba11_b700ba81",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/render_api.entries",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2015-10-13T20:56:08Z",
       "side": 1,
       "message": "ok, this is confusing, can you clarify? I\u0027m pretty sure the scrollbar doesn\u0027t need to be mentioned here because this code doesn\u0027t know anything about the UI where it\u0027s going to get embedded.",
+      "revId": "3b023612681f429cd8eee2352ccc0ced4d406b47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9fae6a64_e0e63e9a",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/render_api.entries",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-13T21:39:26Z",
+      "side": 1,
+      "message": "Again, updated, please let me know if it\u0027s clear.",
+      "parentUuid": "1f30ba11_b700ba81",
       "revId": "3b023612681f429cd8eee2352ccc0ced4d406b47",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
