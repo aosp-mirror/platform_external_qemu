@@ -25,10 +25,13 @@ typedef struct SkinWindowFuncs {
     int (*opengles_show)(void* winhandle,
                          int x,
                          int y,
+                         int viewport_width,
+                         int viewport_height,
                          int width,
                          int height,
                          float rotation_degrees);
     int (*opengles_hide)(void);
+    void (*opengles_setTranslation)(float px, float py);
     void (*opengles_redraw)(void);
     void (*opengles_free)(void);
 } SkinWindowFuncs;
@@ -64,10 +67,16 @@ extern void             skin_window_set_scale( SkinWindow*  window,
                                                double       scale );
 
 extern void             skin_window_set_zoom( SkinWindow*  window,
-                                              double       zoom );
+                                              double       zoom,
+                                              int          dw,
+                                              int          dh );
 
 extern void             skin_window_position_changed( SkinWindow*   window,
                                                       int x, int y );
+
+extern void             skin_window_set_translation( SkinWindow*    window,
+                                                     int dx, int xmax,
+                                                     int dy, int ymax );
 
 extern void             skin_window_set_title( SkinWindow*  window,
                                                const char*  title );
