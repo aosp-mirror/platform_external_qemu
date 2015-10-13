@@ -134,7 +134,7 @@ sdk {
         }
         item("$buildDefaultEmulator.output/bin") {
             into 'bin'
-            builtBy buildDefaultEmulator
+            builtBy buildWindowsEmulator
         }
         item("$buildWindowsEmulator.output/qemu") {
             into 'qemu'
