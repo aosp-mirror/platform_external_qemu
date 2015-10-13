@@ -90,8 +90,10 @@ public:
     bool setupSubWindow(FBNativeWindowType window,
                         int x,
                         int y,
-                        int width,
-                        int height,
+                        int windowWidth,
+                        int windowHeight,
+                        int framebufferWidth,
+                        int framebufferHeight,
                         float rotation);
 
     // Remove the sub-window created by calling setupSubWindow().
@@ -103,6 +105,8 @@ public:
     // Change the display rotation on the fly. |zRot| is a clockwise rotation
     // angle in degrees. Only multiples of 90. are accepted.
     void setRotation(float zRot);
+
+    void setTranslation(float px, float py);
 
     // Force a repaint of the whole content into the sub-window.
     void repaint();

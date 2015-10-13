@@ -438,14 +438,17 @@ bool skin_ui_process_events(SkinUI* ui) {
             }
             break;
 
+        case kEventScrollBarChanged:
+            skin_window_set_translation(ui->window, ev.u.scroll.x, ev.u.scroll.xmax, ev.u.scroll.y, ev.u.scroll.ymax);
+            break;
+
         case kEventSetScale:
             skin_window_position_changed(ui->window, ev.u.window.x, ev.u.window.y);
             skin_window_set_scale(ui->window, ev.u.window.scale);
             break;
 
         case kEventSetZoom:
-            skin_window_position_changed(ui->window, ev.u.window.x, ev.u.window.y);
-            skin_window_set_zoom(ui->window, ev.u.window.scale);
+            skin_window_set_zoom(ui->window, ev.u.window.scale, ev.u.window.x, ev.u.window.y);
             break;
 
         case kEventQuit:
