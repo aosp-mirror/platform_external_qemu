@@ -46,6 +46,7 @@
 #include "sysemu/blockdev.h"
 #include "audio/audio.h"
 
+#include "android-qemu1-glue/qemu-setup.h"
 #include "android/android.h"
 #include "android/camera/camera-service.h"
 #include "android/curl-support.h"
@@ -71,7 +72,7 @@
 #include "android/multitouch-screen.h"
 #include "android/opengles.h"
 #include "android/opengl/emugl_config.h"
-#include "android/qemu-control-impl.h"
+#include "android-qemu1-glue/qemu-control-impl.h"
 #include "android/skin/charmap.h"
 #include "android/snapshot.h"
 #include "android/tcpdump.h"
@@ -4076,7 +4077,7 @@ int main(int argc, char **argv, char **envp)
     }
 
     /* call android-specific setup function */
-    android_emulation_setup();
+    qemu_android_emulation_setup();
 
     android_emulator_set_base_port(android_base_port);
 
