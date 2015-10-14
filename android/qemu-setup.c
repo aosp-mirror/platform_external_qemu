@@ -18,7 +18,6 @@
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
 #include "android/proxy/proxy_http.h"
-#include "android-qemu1-glue/qemu-control-impl.h"
 #include "android/utils/debug.h"
 #include "android/utils/ipaddr.h"
 #include "android/utils/path.h"
