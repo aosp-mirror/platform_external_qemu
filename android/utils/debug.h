@@ -60,16 +60,16 @@ typedef enum {
 } VerboseTag;
 #undef  _VERBOSE_TAG
 
-extern unsigned long  android_verbose;
+extern unsigned long long  android_verbose;
 
 #define  VERBOSE_ENABLE(tag)    \
-    android_verbose |= (1UL << VERBOSE_##tag)
+    android_verbose |= (1ULL << VERBOSE_##tag)
 
 #define  VERBOSE_DISABLE(tag)   \
-    android_verbose &= (1UL << VERBOSE_##tag)
+    android_verbose &= (1ULL << VERBOSE_##tag)
 
 #define  VERBOSE_CHECK(tag)    \
-    ((android_verbose & (1UL << VERBOSE_##tag)) != 0)
+    ((android_verbose & (1ULL << VERBOSE_##tag)) != 0)
 
 #define  VERBOSE_CHECK_ANY()    \
     (android_verbose != 0)

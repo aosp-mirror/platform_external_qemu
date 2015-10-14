@@ -58,13 +58,20 @@ public:
                                     const android::base::Version& newer) = 0;
 };
 
-// UpdateChecker - class that incapsulates the logic for update checking
+// UpdateChecker - Class that incapsulates the logic for update checking
 //  once a day. It runs the check asynchronously and only if there was no
 //  check performed today.
-// Usage: create instance of the class dynamically, and if init() and
-//  needsCheck() return true, call runAsyncCheck(). it will do the checking
-//  and delete itself if runAsyncCheck() returned true.
-// If any of the calls returned false, one has to delete the object itself
+//  The class can also return the version that it discovered is available.
+//
+// Usage:
+//   To check the version daily:
+//     Create instance of the class dynamically, and if init() and
+//     needsCheck() return true, call runAsyncCheck(). It will do the
+//     checking and delete itself if runAsyncCheck() returned true.
+//     If any of the calls returned false, one has to delete the object itself.
+//
+//   To get the version discoved by the last 'runAsyncCheck()':
+//     Create an instance of the class and call getLatestVersion().
 
 class UpdateChecker {
 public:
@@ -78,6 +85,8 @@ public:
 
     bool runAsyncCheck();
 
+    android::base::Version getLatestVersion();
+
 protected:
     // constructor for tests
     UpdateChecker(IVersionExtractor*,
@@ -88,8 +97,6 @@ protected:
     static time_t clearHMS(time_t t);
 
     void asyncWorker();
-
-    android::base::Version loadLatestVersion();
 
     // Helper class to run the worker in a new thread
     class CheckerThread : public android::base::Thread {
