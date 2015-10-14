@@ -10,19 +10,14 @@
 ** GNU General Public License for more details.
 */
 
-#include "libslirp.h"
-#include "qemu-common.h"
-#include "sysemu/sysemu.h"
 #include "android-qemu1-glue/telephony/modem_init.h"
 
 #include "android/console.h"
 #include "android/adb-qemud.h"
 #include "android/adb-server.h"
 #include "android/android.h"
-#include "android/emulation/bufprint_config_dirs.h"
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
-#include "android/hw-qemud.h"
 #include "android/hw-sensors.h"
 #include "android/proxy/proxy_http.h"
 #include "android/qemu-control-impl.h"
@@ -55,22 +50,6 @@ int    android_base_port;
 char android_gl_vendor[ANDROID_GLSTRING_BUF_SIZE];
 char android_gl_renderer[ANDROID_GLSTRING_BUF_SIZE];
 char android_gl_version[ANDROID_GLSTRING_BUF_SIZE];
-
-/*** APPLICATION DIRECTORY
- *** Where are we ?
- ***/
-
-const char*  get_app_dir(void)
-{
-    char  buffer[1024];
-    char* p   = buffer;
-    char* end = p + sizeof(buffer);
-    p = bufprint_app_dir(p, end);
-    if (p >= end)
-        return NULL;
-
-    return strdup(buffer);
-}
 
 enum {
     REPORT_CONSOLE_SERVER = (1 << 0),
@@ -298,14 +277,14 @@ void  android_emulation_setup( void )
         // Set up redirect from host to guest system. adbd on the guest listens
         // on 5555.
         if (legacy_adb) {
-            slirp_redir( 0, adb_port, guest_ip, 5555 );
+            gQAndroidNetAgent->slirpRedir(false, adb_port, guest_ip, 5555);
         } else {
             adb_server_init(adb_port);
             android_adb_service_init();
         }
         if (qemu_control_console_start(console_port) < 0) {
             if (legacy_adb) {
-                slirp_unredir( 0, adb_port );
+                gQAndroidNetAgent->slirpUnredir(false, adb_port);
             }
         }
 
@@ -334,7 +313,7 @@ void  android_emulation_setup( void )
             /* setup first redirection for ADB, the Android Debug Bridge */
             adb_port = base_port + 1;
             if (legacy_adb) {
-                if ( slirp_redir( 0, adb_port, guest_ip, 5555 ) < 0 )
+                if ( gQAndroidNetAgent->slirpRedir(false, adb_port, guest_ip, 5555) < 0 )
                     continue;
             } else {
                 if (adb_server_init(adb_port))
@@ -345,7 +324,7 @@ void  android_emulation_setup( void )
             /* setup second redirection for the emulator console */
             if (qemu_control_console_start(base_port) < 0) {
                 if (legacy_adb) {
-                    slirp_unredir( 0, adb_port );
+                    gQAndroidNetAgent->slirpUnredir(false, adb_port);
                 }
                 continue;
             }
