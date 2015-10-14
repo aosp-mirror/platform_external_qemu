@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dfb462b2_e35e497e",
+        "filename": "android/utils/ini.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-14T16:43:45Z",
+      "side": 1,
+      "message": "as David said, the ordering is completely different in the new class",
+      "range": {
+        "startLine": 64,
+        "startChar": 38,
+        "endLine": 64,
+        "endChar": 43
+      },
+      "revId": "4aa23fa2c3c0c43d0bae271a3c761d771f414e97",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9fae6a64_6dc566c5",
+        "filename": "android/utils/ini.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-14T16:43:45Z",
+      "side": 1,
+      "message": "typo",
+      "range": {
+        "startLine": 68,
+        "startChar": 56,
+        "endLine": 68,
+        "endChar": 63
+      },
+      "revId": "4aa23fa2c3c0c43d0bae271a3c761d771f414e97",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
