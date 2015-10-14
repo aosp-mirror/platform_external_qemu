@@ -14,7 +14,7 @@
 #include "android/globals.h"  /* for android_hw */
 #include "android/hw-events.h"
 #include "android/multitouch-screen.h"
-#include "android/qemu-control-impl.h"
+#include "android-qemu1-glue/qemu-control-impl.h"
 #include "android/skin/charmap.h"
 #include "exec/cpu-common.h"
 #include "exec/hwaddr.h"

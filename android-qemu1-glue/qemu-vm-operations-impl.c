@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/qemu-control-impl.h"
+#include "android-qemu1-glue/qemu-control-impl.h"
 
 #include "android/emulation/control/callbacks.h"
 #include "android/emulation/control/vm_operations.h"

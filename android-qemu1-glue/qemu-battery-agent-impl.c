@@ -10,7 +10,7 @@
  ** GNU General Public License for more details.
  */
 
-#include "android/qemu-control-impl.h"
+#include "android-qemu1-glue/qemu-control-impl.h"
 
 #include "android/emulation/control/battery_agent.h"
 #include "hw/power_supply.h"

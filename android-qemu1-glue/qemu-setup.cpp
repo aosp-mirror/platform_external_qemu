@@ -12,20 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
+#include "android-qemu1-glue/qemu-setup.h"
 
-#include "android/utils/compiler.h"
+#include "android/android.h"
+#include "android-qemu1-glue/qemu-control-impl.h"
 
-#include <stdint.h>
-
-ANDROID_BEGIN_HEADER
-
-// convert an IPv4 string representation to int
-// returns 0 on success
-int inet_strtoip(const char* str, uint32_t* ip);
-
-// convert an IPv4 to a string
-// returns a static string buffer
-char* inet_iptostr(uint32_t ip);
-
-ANDROID_END_HEADER
+void qemu_android_emulation_setup() {
+    android_emulation_setup(
+            gQAndroidBatteryAgent,
+            gQAndroidCellularAgent,
+            gQAndroidFingerAgent,
+            gQAndroidLocationAgent,
+            gQAndroidSensorsAgent,
+            gQAndroidTelephonyAgent,
+            gQAndroidUserEventAgent,
+            gQAndroidVmOperations,
+            gQAndroidNetAgent
+    );
+}

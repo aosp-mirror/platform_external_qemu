@@ -10,22 +10,15 @@
 ** GNU General Public License for more details.
 */
 
-#include "libslirp.h"
-#include "qemu-common.h"
-#include "sysemu/sysemu.h"
-#include "android-qemu1-glue/telephony/modem_init.h"
-
 #include "android/console.h"
 #include "android/adb-qemud.h"
 #include "android/adb-server.h"
 #include "android/android.h"
-#include "android/emulation/bufprint_config_dirs.h"
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
-#include "android/hw-qemud.h"
 #include "android/hw-sensors.h"
 #include "android/proxy/proxy_http.h"
-#include "android/qemu-control-impl.h"
+#include "android-qemu1-glue/qemu-control-impl.h"
 #include "android/utils/debug.h"
 #include "android/utils/ipaddr.h"
 #include "android/utils/path.h"
@@ -55,22 +48,6 @@ int    android_base_port;
 char android_gl_vendor[ANDROID_GLSTRING_BUF_SIZE];
 char android_gl_renderer[ANDROID_GLSTRING_BUF_SIZE];
 char android_gl_version[ANDROID_GLSTRING_BUF_SIZE];
-
-/*** APPLICATION DIRECTORY
- *** Where are we ?
- ***/
-
-const char*  get_app_dir(void)
-{
-    char  buffer[1024];
-    char* p   = buffer;
-    char* end = p + sizeof(buffer);
-    p = bufprint_app_dir(p, end);
-    if (p >= end)
-        return NULL;
-
-    return strdup(buffer);
-}
 
 enum {
     REPORT_CONSOLE_SERVER = (1 << 0),
@@ -224,19 +201,32 @@ report_console( const char*  proto_port, int  console_port )
     restore_sigalrm (&sigstate);
 }
 
-static int qemu_control_console_start(int port) {
-    return control_console_start(port, gQAndroidBatteryAgent,
-                                 gQAndroidFingerAgent, gQAndroidLocationAgent,
-                                 gQAndroidUserEventAgent,
-                                 gQAndroidVmOperations,
-                                 gQAndroidNetAgent);
+static int qemu_control_console_start(int port, const QAndroidBatteryAgent* batteryAgent,
+                                      const QAndroidFingerAgent* fingerAgent,
+                                      const QAndroidLocationAgent* locationAgent,
+                                      const QAndroidUserEventAgent* userEventAgent,
+                                      const QAndroidVmOperations* vmOperations,
+                                      const QAndroidNetAgent* netAgent) {
+    return control_console_start(port, batteryAgent,
+                                 fingerAgent, locationAgent,
+                                 userEventAgent,
+                                 vmOperations,
+                                 netAgent);
 }
 
 /* this function is called from qemu_main() once all arguments have been parsed
  * it should be used to setup any Android-specific items in the emulation before the
  * main loop runs
  */
-void  android_emulation_setup( void )
+void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
+                             const QAndroidCellularAgent* cellularAgent,
+                             const QAndroidFingerAgent* fingerAgent,
+                             const QAndroidLocationAgent* locationAgent,
+                             const QAndroidSensorsAgent* sensorsAgent,
+                             const QAndroidTelephonyAgent* telephonyAgent,
+                             const QAndroidUserEventAgent* userEventAgent,
+                             const QAndroidVmOperations* vmOperations,
+                             const QAndroidNetAgent* netAgent)
 {
     int   tries     = MAX_ANDROID_EMULATORS;
     int   base_port = 5554;
@@ -298,14 +288,16 @@ void  android_emulation_setup( void )
         // Set up redirect from host to guest system. adbd on the guest listens
         // on 5555.
         if (legacy_adb) {
-            slirp_redir( 0, adb_port, guest_ip, 5555 );
+            netAgent->slirpRedir(false, adb_port, guest_ip, 5555);
         } else {
             adb_server_init(adb_port);
             android_adb_service_init();
         }
-        if (qemu_control_console_start(console_port) < 0) {
+        if (qemu_control_console_start(console_port, batteryAgent, fingerAgent,
+                                       locationAgent, userEventAgent,
+                                       vmOperations, netAgent) < 0) {
             if (legacy_adb) {
-                slirp_unredir( 0, adb_port );
+                netAgent->slirpUnredir(false, adb_port);
             }
         }
 
@@ -334,7 +326,7 @@ void  android_emulation_setup( void )
             /* setup first redirection for ADB, the Android Debug Bridge */
             adb_port = base_port + 1;
             if (legacy_adb) {
-                if ( slirp_redir( 0, adb_port, guest_ip, 5555 ) < 0 )
+                if (!netAgent->slirpRedir(false, adb_port, guest_ip, 5555))
                     continue;
             } else {
                 if (adb_server_init(adb_port))
@@ -343,9 +335,11 @@ void  android_emulation_setup( void )
             }
 
             /* setup second redirection for the emulator console */
-            if (qemu_control_console_start(base_port) < 0) {
+            if (qemu_control_console_start(base_port, batteryAgent, fingerAgent,
+                                           locationAgent, userEventAgent,
+                                           vmOperations, netAgent) < 0) {
                 if (legacy_adb) {
-                    slirp_unredir( 0, adb_port );
+                    netAgent->slirpUnredir(false, adb_port);
                 }
                 continue;
             }
@@ -365,14 +359,14 @@ void  android_emulation_setup( void )
         report_console(android_op_report_console, base_port);
     }
 
-    qemu_android_modem_init( base_port );
+    telephonyAgent->initModem(base_port);
 
     /* Save base port. */
     android_base_port = base_port;
 
-   /* send a simple message to the ADB host server to tell it we just started.
-    * it should be listening on port 5037. if we can't reach it, don't bother
-    */
+    /* send a simple message to the ADB host server to tell it we just started.
+     * it should be listening on port 5037. if we can't reach it, don't bother
+     */
     int s = socket_loopback_client(adb_host_port, SOCKET_STREAM);
     if (s < 0) {
         D("can't connect to ADB server: %s (errno = %d)", errno_str, errno );

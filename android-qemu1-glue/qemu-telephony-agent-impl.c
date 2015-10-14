@@ -10,11 +10,11 @@
  ** GNU General Public License for more details.
  */
 
-#include "android/qemu-control-impl.h"
-
+#include "android-qemu1-glue/qemu-control-impl.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/telephony/modem.h"
 #include "android/telephony/modem_driver.h"
+#include "android-qemu1-glue/telephony/modem_init.h"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -108,8 +108,9 @@ static AModem telephony_getModem() {
 }
 
 static const QAndroidTelephonyAgent sQAndroidTelephonyAgent = {
-    .telephonyCmd = telephony_telephonyCmd,
-    .getModem = telephony_getModem
+    .telephonyCmd = &telephony_telephonyCmd,
+    .initModem = &qemu_android_modem_init,
+    .getModem = &telephony_getModem
 };
 const QAndroidTelephonyAgent* const gQAndroidTelephonyAgent =
         &sQAndroidTelephonyAgent;

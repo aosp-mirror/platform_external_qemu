@@ -10,20 +10,21 @@
  ** GNU General Public License for more details.
  */
 
-#include "android/qemu-control-impl.h"
+#include "android-qemu1-glue/qemu-control-impl.h"
 
-#include "android/emulation/control/location_agent.h"
-#include "android/gps.h"
+#include "android/emulation/control/finger_agent.h"
+#include "android/hw-fingerprint.h"
 
-#include <stdbool.h>
-
-static bool location_gpsIsSupported() {
-    return android_gps_serial_line != NULL;
+static void finger_setTouch(bool isTouching, int touchId)
+{
+    if (isTouching) {
+        android_hw_fingerprint_touch(touchId);
+    } else {
+        android_hw_fingerprint_remove();
+    }
 }
 
-static const QAndroidLocationAgent sQAndroidLocationAgent = {
-        .gpsIsSupported = location_gpsIsSupported,
-        .gpsCmd = android_gps_send_location,
-        .gpsSendNmea = android_gps_send_nmea};
-const QAndroidLocationAgent* const gQAndroidLocationAgent =
-        &sQAndroidLocationAgent;
+static const QAndroidFingerAgent sQAndroidFingerAgent = {
+    .setTouch = finger_setTouch
+};
+const QAndroidFingerAgent* const gQAndroidFingerAgent = &sQAndroidFingerAgent;

@@ -16,7 +16,19 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "android/emulation/control/battery_agent.h"
+#include "android/emulation/control/cellular_agent.h"
+#include "android/emulation/control/finger_agent.h"
+#include "android/emulation/control/location_agent.h"
+#include "android/emulation/control/net_agent.h"
+#include "android/emulation/control/sensors_agent.h"
+#include "android/emulation/control/telephony_agent.h"
+#include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/vm_operations.h"
 #include "android/skin/rect.h"
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
 
 /** in vl.c */
 
@@ -97,5 +109,16 @@ extern char android_gl_vendor[ANDROID_GLSTRING_BUF_SIZE];
 extern char android_gl_renderer[ANDROID_GLSTRING_BUF_SIZE];
 extern char android_gl_version[ANDROID_GLSTRING_BUF_SIZE];
 
-extern void  android_emulation_setup( void );
+extern void android_emulation_setup(
+        const QAndroidBatteryAgent* batteryAgent,
+        const QAndroidCellularAgent* cellularAgent,
+        const QAndroidFingerAgent* fingerAgent,
+        const QAndroidLocationAgent* locationAgent,
+        const QAndroidSensorsAgent* sensorsAgent,
+        const QAndroidTelephonyAgent* telephonyAgent,
+        const QAndroidUserEventAgent* userEventAgent,
+        const QAndroidVmOperations* vmOperations,
+        const QAndroidNetAgent* netAgent);
 extern void  android_emulation_teardown( void );
+
+ANDROID_END_HEADER
