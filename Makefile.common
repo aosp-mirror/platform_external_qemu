@@ -268,6 +268,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/iolooper.cpp \
 	android/utils/ini.c \
 	android/utils/intmap.c \
+	android/utils/ipaddr.cpp \
 	android/utils/lineinput.c \
 	android/utils/looper.cpp \
 	android/utils/mapfile.c \
