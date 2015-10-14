@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9fae6a64_bbe39b36",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-14T01:03:07Z",
+      "side": 1,
+      "message": "Our g++ doesn\u0027t have the implementation for \u003cregex\u003e.\n\nUgh.\nAnd I have hit this once before: someone decided that it was a good idea to add the \u003cregex\u003e header to the standard with *stub implementations*.\nAt least blow up on me, dude!\n\u003c/rant\u003e",
+      "range": {
+        "startLine": 82,
+        "startChar": 5,
+        "endLine": 82,
+        "endChar": 18
+      },
+      "revId": "3c2c56b6a225ba0ac507b7fb8f978a51786535f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff32061b_c3e13df2",
+        "filename": "android/base/files/IniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-14T01:03:07Z",
+      "side": 1,
+      "message": "I can\u0027t just overload getBool because a string literal \"like this one\" implicit casts to bool instead of std::string.\n\nIt is possible to call the write overload by explicitly casting to string, but that\u0027s a gotcha that\u0027ll happen sooner than later.",
+      "range": {
+        "startLine": 79,
+        "startChar": 9,
+        "endLine": 79,
+        "endChar": 19
+      },
+      "revId": "3c2c56b6a225ba0ac507b7fb8f978a51786535f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7fa9b65d_27a0e9de",
+        "filename": "android/base/files/IniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-14T01:03:07Z",
+      "side": 1,
+      "message": "I played around with a templatized function \n\ntemplate \u003ctypename T\u003e\nvoid set(const std::string\u0026 key, const T\u0026 value);\n\nThe problem I hit is that DiskSize is really just an int64_t, while we want to serialize it specially.\nI worked around it by using a single element POD-type struct for DiskSize instead of typedef\u0027ing.\n\nIt was fun while it lasted, but that seemed like unnecessary complexity added by the fact that this interface isn\u0027t trying to serialize types. (There isn\u0027t 1:1 mapping between the C++ types and the types in an ini file).",
+      "range": {
+        "startLine": 89,
+        "startChar": 29,
+        "endLine": 89,
+        "endChar": 42
+      },
+      "revId": "3c2c56b6a225ba0ac507b7fb8f978a51786535f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
