@@ -604,9 +604,10 @@ DEFAULT_SKIN:
 
 
 void
-init_sdl_ui(AConfig*         skinConfig,
-            const char*      skinPath,
-            AndroidOptions*  opts)
+init_sdl_ui(AConfig*          skinConfig,
+            const char*       skinPath,
+            AndroidOptions*   opts,
+            const UiEmuAgent* uiEmuAgent)
 {
     int  win_x, win_y;
 
@@ -656,7 +657,8 @@ init_sdl_ui(AConfig*         skinConfig,
 
     user_config_get_window_pos(&win_x, &win_y);
 
-    if ( emulator_window_init(emulator_window_get(), skinConfig, skinPath, win_x, win_y, opts) < 0 ) {
+    if (emulator_window_init(emulator_window_get(), skinConfig, skinPath,
+                             win_x, win_y, opts, uiEmuAgent) < 0) {
         fprintf(stderr, "### Error: could not load emulator skin from '%s'\n", skinPath);
         exit(1);
     }

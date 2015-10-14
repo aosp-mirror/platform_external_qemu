@@ -60,6 +60,7 @@
 #include "android/globals.h"
 
 #include "android-qemu1-glue/display.h"
+#include "android-qemu1-glue/qemu-control-impl.h"
 
 #include "android/snapshot.h"
 
@@ -1000,9 +1001,20 @@ int main(int argc, char **argv) {
         printf("\n");
     }
 
+    static UiEmuAgent uiEmuAgent;
+    uiEmuAgent.battery = gQAndroidBatteryAgent;
+    uiEmuAgent.cellular = gQAndroidCellularAgent;
+    uiEmuAgent.finger = gQAndroidFingerAgent;
+    uiEmuAgent.location = gQAndroidLocationAgent;
+    uiEmuAgent.sensors = gQAndroidSensorsAgent;
+    uiEmuAgent.telephony = gQAndroidTelephonyAgent;
+    uiEmuAgent.userEvents = gQAndroidUserEventAgent;
+    // for now there's no uses of SettingsAgent, so we don't set it
+    uiEmuAgent.settings = NULL;
+
     /* Setup SDL UI just before calling the code */
 #if defined(CONFIG_SDL)
-    init_sdl_ui(skinConfig, skinPath, opts);
+    init_sdl_ui(skinConfig, skinPath, opts, &uiEmuAgent);
     enter_qemu_main_loop(n, args);
 #elif defined(CONFIG_QT)
 #ifdef __linux__
@@ -1010,7 +1022,7 @@ int main(int argc, char **argv) {
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, NULL);
 #endif
-    init_sdl_ui(skinConfig, skinPath, opts);
+    init_sdl_ui(skinConfig, skinPath, opts, &uiEmuAgent);
     skin_winsys_spawn_thread(enter_qemu_main_loop, n, args);
     skin_winsys_enter_main_loop(argc, argv);
 #endif
