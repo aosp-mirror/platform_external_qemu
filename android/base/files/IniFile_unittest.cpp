@@ -49,6 +49,7 @@ public:
         mTempDir.reset();
     }
 
+protected:
     bool writeIniFileData(vector<string> lines) {
         std::ofstream outFile(mIniFilePath,
                               std::ios_base::out | std::ios_base::trunc);
@@ -62,7 +63,28 @@ public:
         return true;
     }
 
-protected:
+    // Verifies that the underlying file for |ini| is |updated| when
+    // |writeIfChanged| is called.
+    // Note that this changes |ini|. After this function is called, |ini| is always
+    // clean, and the data has been changed arbitrarily.
+    void verifyFileUpdated(bool updated) {
+        static int counter = 0;
+        string key = "key" + std::to_string(counter++);
+        vector<string> lines = {key + " = somevalue"};
+
+        writeIniFileData(lines);
+        EXPECT_TRUE(mIni->writeIfChanged());
+        EXPECT_TRUE(mIni->read());
+
+        // If the file was updated, then the new uniquely written data must have
+        // disappeared, not otherwise.
+        if (updated) {
+            EXPECT_FALSE(mIni->hasKey(key));
+        } else {
+            EXPECT_TRUE(mIni->hasKey(key));
+        }
+    }
+
     unique_ptr<TestTempDir> mTempDir;
     string mIniFilePath;
     unique_ptr<IniFile> mIni;
@@ -324,6 +346,29 @@ TEST_F(IniFileTest, discardEmpty) {
     EXPECT_EQ(1, mIni->size());
     EXPECT_EQ("someValue", mIni->getString("nonEmpty", "defaultString"));
     EXPECT_EQ("defaultString", mIni->getString("empty", "defaultString"));
+}
+
+TEST_F(IniFileTest, writeIfChanged) {
+    // Initially, we must treat the object as dirty.
+    // Hence, we'll clear the lines we'd written previously.
+    mIni.reset(new IniFile(mIniFilePath));
+    verifyFileUpdated(true);
+
+    mIni->write();
+    // Now we consider the object as clean, so write shouldn't modify the
+    // underlying file.
+    verifyFileUpdated(false);
+
+    // Now let's change the data.
+    mIni->setString("random", "yippeeee");
+    verifyFileUpdated(true);
+
+    mIni->read();
+    // No changes, so write shouldn't do anything.
+    verifyFileUpdated(false);
+    // But resetting the file path means we should flush.
+    mIni->setBackingFile(mIniFilePath);
+    verifyFileUpdated(true);
 }
 
 TEST_F(IniFileTest, noBackingFile) {

@@ -29,25 +29,35 @@ public:
     // Note that the constructor _does not_ read data from the backing file.
     // Call |Read| to read the data.
     IniFile(const std::string& backingFilePath)
-        : mBackingFilePath(backingFilePath) {}
+        : mDirty(true), mBackingFilePath(backingFilePath) {}
     // When created without a backing file, all |read|/|write*| operations will
     // fail unless |setBackingFile| is called to point to a valid file path.
-    IniFile() = default;
+    IniFile() : mDirty(true) {}
 
     // Set a new backing file. This does not read data from the file. Call
     // |read|
     // to refresh data from the new backing file.
     void setBackingFile(const std::string& filePath);
+    const std::string& getBackingFile() const { return mBackingFilePath; }
 
     // Reads data into IniFile from the the backing file, overwriting any
     // existing data.
     bool read();
 
     // Write the current IniFile to the backing file.
-    bool write() const;
+    bool write();
     // Write the current IniFile to backing file. Discard any keys that have
     // empty values.
-    bool writeDiscardingEmpty() const;
+    bool writeDiscardingEmpty();
+    // An optimized write.
+    // - Advantage: We don't write if there have been no updates since last
+    // write.
+    // - Disadvantage: Not safe if something else might be changing the ini
+    //   file -- your view of the file is no longer consistent. Actually, this
+    //   "bug" can be considered a "feature", if the ini file changed unbeknown
+    //   to you, you're probably doing wrong in overwriting the changes without
+    //   any update on your side.
+    bool writeIfChanged();
 
     // Gets the number of (key,value) pairs in the file.
     int size() const;
@@ -109,9 +119,11 @@ public:
 protected:
     // Helper functions.
     bool isFileValid(const std::string& line);
-    bool writeCommon(bool discardEmpty) const;
+    bool writeCommon(bool discardEmpty);
+    void updateData(const std::string& key, const std::string& value);
 
 private:
+    bool mDirty;
     MapType mData;
     std::string mBackingFilePath;
 
