@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3fa3be81_5bb29e22",
+        "filename": "android-qemu1-glue/qemu-net-agent-impl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-14T18:47:35Z",
+      "side": 1,
+      "message": "I didn\u0027t want to change the calling code. but why not :)",
+      "parentUuid": "7f2b7617_a49eac61",
+      "range": {
+        "startLine": 26,
+        "startChar": 7,
+        "endLine": 26,
+        "endChar": 10
+      },
+      "revId": "a54db806fe67e8cd6c9df86d8e9e563c1eef4ffc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df39c202_dd259cbf",
         "filename": "android-qemu1-glue/qemu-net-agent-impl.c",
         "patchSetId": 1
@@ -59,6 +83,30 @@
       "writtenOn": "2015-10-14T18:23:48Z",
       "side": 1,
       "message": "leaked headers? :(",
+      "range": {
+        "startLine": 48,
+        "startChar": 10,
+        "endLine": 48,
+        "endChar": 17
+      },
+      "revId": "a54db806fe67e8cd6c9df86d8e9e563c1eef4ffc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f30ba11_9dfaf470",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-14T18:47:35Z",
+      "side": 1,
+      "message": "didn\u0027t get the question. ctype.h defines isdigit()",
+      "parentUuid": "7f2b7617_0481a0f8",
       "range": {
         "startLine": 48,
         "startChar": 10,
@@ -128,6 +176,30 @@
       "writtenOn": "2015-10-14T18:23:48Z",
       "side": 1,
       "message": "It\u0027d be nice to describe this interface a little bit here, since AndroidEmu is expected to use this independent of the implementation.\n\nin particular, is this returning 0 on success? See my comment about using bool returns instead.",
+      "range": {
+        "startLine": 26,
+        "startChar": 4,
+        "endLine": 26,
+        "endChar": 7
+      },
+      "revId": "a54db806fe67e8cd6c9df86d8e9e563c1eef4ffc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fa8725b_cbe32636",
+        "filename": "android/emulation/control/net_agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-14T18:47:35Z",
+      "side": 1,
+      "message": "sadly, the original functions aren\u0027t documented too. I will change the return type though",
+      "parentUuid": "7f2b7617_c4f9687f",
       "range": {
         "startLine": 26,
         "startChar": 4,
