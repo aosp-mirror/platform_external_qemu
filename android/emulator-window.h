@@ -20,6 +20,7 @@
 #include "android/utils/aconfig-file.h"
 
 #include "android/skin/ui.h"
+#include "android/ui-emu-agent.h"
 
 typedef struct {
     AConfig*       aconfig;
@@ -31,7 +32,8 @@ typedef struct {
     SkinRotation   onion_rotation;
     int            onion_alpha;
 
-    AndroidOptions  opts[1];  /* copy of options */
+    AndroidOptions opts[1];  /* copy of options */
+    UiEmuAgent     uiEmuAgent[1];
 } EmulatorWindow;
 
 /* Gets a pointer to a EmulatorWindow structure instance. */
@@ -43,12 +45,13 @@ android_emulator_set_window_scale(double  scale, int  is_dpi);
 
 /* Initializes EmulatorWindow structure instance. */
 int
-emulator_window_init(EmulatorWindow*  emulator,
-                     AConfig*         aconfig,
-                     const char*      basepath,
-                     int              x,
-                     int              y,
-                     AndroidOptions*  opts);
+emulator_window_init(EmulatorWindow*   emulator,
+                     AConfig*          aconfig,
+                     const char*       basepath,
+                     int               x,
+                     int               y,
+                     AndroidOptions*   opts,
+                     const UiEmuAgent* uiEmuAgent);
 
 /* Uninitializes EmulatorWindow structure instance on exit. */
 void
