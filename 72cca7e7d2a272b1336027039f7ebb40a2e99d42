@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "df39c202_3d200838",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-14T19:41:55Z",
+      "side": 1,
+      "message": "Can\u0027t do yet: this is in the glue.",
+      "range": {
+        "startLine": 13,
+        "startChar": 10,
+        "endLine": 13,
+        "endChar": 51
+      },
+      "revId": "72cca7e7d2a272b1336027039f7ebb40a2e99d42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff32061b_f45a3964",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-14T19:41:55Z",
+      "side": 1,
+      "message": "This is definitely part of qemu1 glue.\n\nSome other stuff here is probably too.",
+      "range": {
+        "startLine": 23,
+        "startChar": 18,
+        "endLine": 23,
+        "endChar": 35
+      },
+      "revId": "72cca7e7d2a272b1336027039f7ebb40a2e99d42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
