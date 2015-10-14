@@ -13,7 +13,7 @@
 #include "android/skin/argb.h"
 #include "android/skin/scaler.h"
 #include "android/utils/setenv.h"
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include <math.h>
 #include <stdarg.h>

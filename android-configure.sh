@@ -518,6 +518,39 @@ case "$HOST_OS" in
 esac
 
 ###
+###  Zlib probe
+###
+ZLIB_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/qemu-android-deps
+if [ -d "$ZLIB_PREBUILTS_DIR" ]; then
+    log "Zlib prebuilts dir :$ZLIB_PREBUILTS_DIR"
+else
+    panic "Missing prebuilts directory: $ZLIB_PREBUILTS_DIR"
+fi
+
+###
+###  Libpng probe
+###
+LIBPNG_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/qemu-android-deps
+if [ -d "$LIBPNG_PREBUILTS_DIR" ]; then
+    log "Libpng prebuilts dir :$LIBPNG_PREBUILTS_DIR"
+else
+    panic "Missing prebuilts directory: $LIBPNG_PREBUILTS_DIR"
+fi
+
+###
+###  LibSDL2 probe
+###
+SDL2_PREBUILTS_DIR=
+if [ "$OPTION_UI" = "sdl2" ]; then
+    SDL2_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/qemu-android-deps
+    if [ -d "$SDL2_PREBUILTS_DIR" ]; then
+        log "LibSDL2 prebuilts dir: $SDL2_PREBUILTS_DIR"
+    else
+        panic "Missing libSDL2 prebuilts directory: $SDL2_PREBUILTS_DIR"
+    fi
+fi
+
+###
 ###  Libxml2 probe
 ###
 LIBXML2_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/libxml2
@@ -706,6 +739,7 @@ if [ "$QT_PREBUILTS_DIR" ]; then
     echo "EMULATOR_USE_SDL2 := false" >> $config_mk
     echo "EMULATOR_USE_QT   := true" >> $config_mk
 else
+    echo "SDL2_PREBUILTS_DIR := $SDL2_PREBUILTS_DIR" >> $config_mk
     echo "EMULATOR_USE_SDL2 := true" >> $config_mk
     echo "EMULATOR_USE_QT   := false" >> $config_mk
 fi
@@ -715,6 +749,8 @@ else
     echo "EMULATOR_USE_ANGLE := false" >> $config_mk
 fi
 
+echo "ZLIB_PREBUILTS_DIR := $ZLIB_PREBUILTS_DIR" >> $config_mk
+echo "LIBPNG_PREBUILTS_DIR := $LIBPNG_PREBUILTS_DIR" >> $config_mk
 echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
 echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
 echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
@@ -722,7 +758,6 @@ echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 if [ $OPTION_DEBUG = "yes" ] ; then
     echo "BUILD_DEBUG_EMULATOR := true" >> $config_mk
 fi
-echo "EMULATOR_BUILD_EMUGL       := true" >> $config_mk
 echo "EMULATOR_EMUGL_SOURCES_DIR := $GLES_DIR" >> $config_mk
 if [ "$OPTION_STRIP" = "yes" ]; then
     echo "EMULATOR_STRIP_BINARIES := true" >> $config_mk

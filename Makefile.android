@@ -277,7 +277,7 @@ ifeq ($(HOST_OS),darwin)
 endif
 
 # Build libext4_utils and related modules/
-include $(LOCAL_PATH)/distrib/zlib-1.2.8/sources.make
+include $(LOCAL_PATH)/distrib/zlib.mk
 include $(LOCAL_PATH)/distrib/libsparse/sources.mk
 include $(LOCAL_PATH)/distrib/libselinux/sources.mk
 include $(LOCAL_PATH)/distrib/ext4_utils/sources.mk

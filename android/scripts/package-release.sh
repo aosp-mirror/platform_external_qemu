@@ -618,6 +618,9 @@ build_darwin_binaries_on () {
     copy_directory "$AOSP_KERNEL_PREBUILTS"/x86/pc-bios \
             "$DARWIN_KERNEL_PREBUILTS"/x86/pc-bios
 
+    copy_directory "$AOSP_BUILD_PREBUILTS"/qemu-android-deps/darwin-x86_64 \
+            "$DARWIN_BUILD_PREBUILTS"/qemu-android-deps/darwin-x86_64
+
     if [ ! -d "$AOSP_BUILD_PREBUILTS/common/e2fsprogs/darwin-x86_64" ]; then
         panic "Missing e2fsprogs prebuilts!"
     fi
