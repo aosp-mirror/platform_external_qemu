@@ -24,76 +24,78 @@ ANDROID_BEGIN_HEADER
  */
 
 /* an opaque structure used to model an .ini configuration file */
-typedef struct IniFile   IniFile;
+typedef struct CIniFile CIniFile;
 
 /*
- * Creates a new empty IniFile not bound to any underlying file, and without any
+ * Creates a new empty CIniFile not bound to any underlying file, and without
+ * any
  * data. |filePath| is only used when writing a warning to stderr, in case of
  * badly formed output.
  */
-IniFile* iniFile_newEmpty( const char* filePath );
+CIniFile* iniFile_newEmpty(const char* filePath);
 
-/* creates a new IniFile object from a file path,
+/* creates a new CIniFile object from a file path,
  * returns NULL if the file cannot be opened.
  */
-IniFile*  iniFile_newFromFile( const char*  filePath);
+CIniFile* iniFile_newFromFile(const char* filePath);
 
-/* try to write an IniFile into a given file.
+/* try to write an CIniFile into a given file.
  * returns 0 on success, -1 on error (see errno for error code)
  */
-int       iniFile_saveToFile( IniFile*  f, const char*  filePath );
+int iniFile_saveToFile(CIniFile* f, const char* filePath);
 
-/* try to write an IniFile into a given file, ignorig pairs with empty values.
+/* try to write an CIniFile into a given file, ignorig pairs with empty values.
  * returns 0 on success, -1 on error (see errno for error code)
  */
-int       iniFile_saveToFileClean( IniFile*  f, const char*  filepath );
+int iniFile_saveToFileClean(CIniFile* f, const char* filepath);
 
-/* free an IniFile object */
-void      iniFile_free( IniFile*  f );
+/* free an CIniFile object */
+void iniFile_free(CIniFile* f);
 
-/* returns the number of (key.value) pairs in an IniFile */
-int       iniFile_getPairCount( IniFile*  f );
+/* returns the number of (key.value) pairs in an CIniFile */
+int iniFile_getPairCount(CIniFile* f);
 
 /* Check if a key exists in the iniFile */
-bool iniFile_hasKey( IniFile*  f, const char*  key );
+bool iniFile_hasKey(CIniFile* f, const char* key);
 
 /* Copies a 'key, value' pair for an entry in the file.
  * Param:
- *  f - Initialized IniFile instance.
- *  index - Index of the entry to copy. Must be less than value returned from the
+ *  f - Initialized CIniFile instance.
+ *  index - Index of the entry to copy. Must be less than value returned from
+ * the
  *      iniFile_getPairCount routine.
  *  key, value - Receives key, and value strings for the entry. If this routine
  *      succeeds, the caller must free the buffers allocated for the strings.
  * Return:
  *  0 on success, -1 if the index exceeds the capacity of the file
  */
-int     iniFile_getEntry(IniFile* f, int index, char** key, char** value);
+int iniFile_getEntry(CIniFile* f, int index, char** key, char** value);
 
 /* returns a copy of the value of a given key, or NULL if defaultValue is NULL.
  * caller must free() it.
  */
-char*   iniFile_getString( IniFile*  f, const char*  key, const char* defaultValue );
+char* iniFile_getString(CIniFile* f, const char* key, const char* defaultValue);
 
 /* returns an integer value, or a default in case the value string is
  * missing or badly formatted
  */
-int     iniFile_getInteger( IniFile*  f, const char*  key, int  defaultValue );
+int iniFile_getInteger(CIniFile* f, const char* key, int defaultValue);
 
 /* returns a 64-bit integer value, or a default in case the value string is
  * missing or badly formatted
  */
-int64_t iniFile_getInt64( IniFile*  f, const char*  key, int64_t  defaultValue );
+int64_t iniFile_getInt64(CIniFile* f, const char* key, int64_t defaultValue);
 
 /* returns a double value, or a default in case the value string is
  * missing or badly formatted
  */
-double  iniFile_getDouble( IniFile*  f, const char*  key, double  defaultValue );
+double iniFile_getDouble(CIniFile* f, const char* key, double defaultValue);
 
 /* parses a key value as a boolean. Accepted values are "1", "0", "yes", "YES",
  * "no" and "NO". Returns either 1 or 0.
  * note that the default value must be provided as a string too
  */
-int     iniFile_getBoolean( IniFile*  f, const char*  key, const char*  defaultValue );
+int iniFile_getBoolean(CIniFile* f, const char* key, const char* defaultValue);
 
 /* parses a key value as a disk size. this means it can be an integer followed
  * by a suffix that can be one of "mMkKgG" which correspond to KiB, MiB and GiB
@@ -101,14 +103,16 @@ int     iniFile_getBoolean( IniFile*  f, const char*  key, const char*  defaultV
  *
  * NOTE: we consider that 1K = 1024, not 1000.
  */
-int64_t  iniFile_getDiskSize( IniFile*  f, const char*  key, const char*  defaultValue );
+int64_t iniFile_getDiskSize(CIniFile* f,
+                            const char* key,
+                            const char* defaultValue);
 
-/* These functions are used to set values in an IniFile */
-void iniFile_setValue( IniFile* f, const char* key, const char* value );
-void iniFile_setInteger( IniFile* f, const char* key, int value );
-void iniFile_setInt64( IniFile* f, const char* key, int64_t value );
-void iniFile_setDouble( IniFile* f, const char* key, double value );
-void iniFile_setBoolean( IniFile* f, const char* key, int value );
-void iniFile_setDiskSize( IniFile* f, const char* key, int64_t size );
+/* These functions are used to set values in an CIniFile */
+void iniFile_setValue(CIniFile* f, const char* key, const char* value);
+void iniFile_setInteger(CIniFile* f, const char* key, int value);
+void iniFile_setInt64(CIniFile* f, const char* key, int64_t value);
+void iniFile_setDouble(CIniFile* f, const char* key, double value);
+void iniFile_setBoolean(CIniFile* f, const char* key, int value);
+void iniFile_setDiskSize(CIniFile* f, const char* key, int64_t size);
 
 ANDROID_END_HEADER
