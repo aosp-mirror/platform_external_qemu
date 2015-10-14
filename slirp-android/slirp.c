@@ -26,6 +26,7 @@
 #include "android/android.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"  /* for dprint */
+#include "android/utils/ipaddr.h"
 #include "android/utils/sockets.h"
 
 #include "android/proxy/proxy_common.h"

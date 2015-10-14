@@ -17,6 +17,7 @@
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/location_agent.h"
+#include "android/emulation/control/net_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/utils/compiler.h"
@@ -32,6 +33,7 @@ extern int control_console_start(int port,
                                  const QAndroidFingerAgent* finger_agent,
                                  const QAndroidLocationAgent* location_agent,
                                  const QAndroidUserEventAgent* user_event_agent,
-                                 const QAndroidVmOperations* vm_operations);
+                                 const QAndroidVmOperations* vm_operations,
+                                 const QAndroidNetAgent* net_agent);
 
 ANDROID_END_HEADER

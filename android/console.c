@@ -31,23 +31,21 @@
 #include "android/skin/charmap.h"
 #include "android/skin/keycode-buffer.h"
 #include "android/tcpdump.h"
+#include "android/telephony/modem_driver.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/http_utils.h"
+#include "android/utils/ipaddr.h"
 #include "android/utils/looper.h"
 #include "android/utils/sockets.h"
 #include "android/utils/stralloc.h"
 #include "android/utils/utf8_utils.h"
 
 #include "config-host.h"
-#if defined(CONFIG_SLIRP)
-#include "libslirp.h"
-#endif
-#include "net/net.h"
-#include "android/telephony/modem_driver.h"
-#include "ui/console.h"
 
+#include <assert.h>
+#include <ctype.h>
 #include <fcntl.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -108,6 +106,7 @@ typedef struct ControlGlobalRec_
     QAndroidLocationAgent* location_agent;
     QAndroidUserEventAgent* user_event_agent;
     QAndroidVmOperations* vm_operations;
+    QAndroidNetAgent* net_agent;
 
     /* IO */
     Looper* looper;
@@ -628,7 +627,8 @@ int control_console_start(int control_port,
                           const QAndroidFingerAgent* finger_agent,
                           const QAndroidLocationAgent* location_agent,
                           const QAndroidUserEventAgent* user_event_agent,
-                          const QAndroidVmOperations* vm_operations) {
+                          const QAndroidVmOperations* vm_operations,
+                          const QAndroidNetAgent* net_agent) {
     ControlGlobal global = &_g_global;
     Socket  fd;
     int     ret;
@@ -642,6 +642,7 @@ int control_console_start(int control_port,
     COPY_AGENT(global->location_agent, location_agent);
     COPY_AGENT(global->user_event_agent, user_event_agent);
     COPY_AGENT(global->vm_operations, vm_operations);
+    COPY_AGENT(global->net_agent, net_agent);
 
     fd = socket_create_inet( SOCKET_STREAM );
     if (fd < 0) {
@@ -930,7 +931,8 @@ do_redir_add( ControlClient  client, char*  args )
     if ( !args )
         goto BadFormat;
 
-    if (!slirp_is_inited()) {
+    if (!client->global->net_agent->isSlirpInited())
+    {
         control_write( client, "KO: network emulation disabled\r\n");
         return -1;
     }
@@ -963,7 +965,7 @@ do_redir_add( ControlClient  client, char*  args )
         return -1;
     }
 
-    if (slirp_redir(host_proto, host_port, guest_ip, guest_port) < 0) {
+    if (!client->global->net_agent->slirpRedir(host_proto, host_port, guest_ip, guest_port)) {
         control_write( client, "KO: can't setup redirection, port probably used by another program on host\r\n" );
         control_global_del_redir( client->global, host_port, host_proto );
         return -1;
@@ -996,8 +998,8 @@ do_redir_del( ControlClient  client, char*  args )
         return -1;
     }
 
-    slirp_unredir( redir->host_udp, redir->host_port );
-    control_global_del_redir( client->global, port, proto );\
+    client->global->net_agent->slirpUnredir( redir->host_udp, redir->host_port );
+    control_global_del_redir( client->global, port, proto );
 
     return 0;
 
