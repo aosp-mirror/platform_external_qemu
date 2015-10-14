@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7f2b7617_a49eac61",
+        "filename": "android-qemu1-glue/qemu-net-agent-impl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-14T18:23:48Z",
+      "side": 1,
+      "message": "Could we return bool here.\n\nThe \"returns 0 on success\" mixed with \"returns bool success\" gets confusing. I like the latter more.",
+      "range": {
+        "startLine": 26,
+        "startChar": 7,
+        "endLine": 26,
+        "endChar": 10
+      },
+      "revId": "a54db806fe67e8cd6c9df86d8e9e563c1eef4ffc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df39c202_dd259cbf",
+        "filename": "android-qemu1-glue/qemu-net-agent-impl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-14T18:23:48Z",
+      "side": 1,
+      "message": "ditto.",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 3
+      },
+      "revId": "a54db806fe67e8cd6c9df86d8e9e563c1eef4ffc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7f2b7617_0481a0f8",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-14T18:23:48Z",
+      "side": 1,
+      "message": "leaked headers? :(",
+      "range": {
+        "startLine": 48,
+        "startChar": 10,
+        "endLine": 48,
+        "endChar": 17
+      },
+      "revId": "a54db806fe67e8cd6c9df86d8e9e563c1eef4ffc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dfb462b2_7e10aed7",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-14T18:23:48Z",
+      "side": 1,
+      "message": "nit:sort.",
+      "range": {
+        "startLine": 109,
+        "startChar": 4,
+        "endLine": 109,
+        "endChar": 20
+      },
+      "revId": "a54db806fe67e8cd6c9df86d8e9e563c1eef4ffc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dfb462b2_9eeec225",
+        "filename": "android/console.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-14T18:23:48Z",
+      "side": 1,
+      "message": "nit: keep these sorted?",
+      "range": {
+        "startLine": 37,
+        "startChar": 57,
+        "endLine": 37,
+        "endChar": 66
+      },
+      "revId": "a54db806fe67e8cd6c9df86d8e9e563c1eef4ffc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7f2b7617_c4f9687f",
+        "filename": "android/emulation/control/net_agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-14T18:23:48Z",
+      "side": 1,
+      "message": "It\u0027d be nice to describe this interface a little bit here, since AndroidEmu is expected to use this independent of the implementation.\n\nin particular, is this returning 0 on success? See my comment about using bool returns instead.",
+      "range": {
+        "startLine": 26,
+        "startChar": 4,
+        "endLine": 26,
+        "endChar": 7
+      },
+      "revId": "a54db806fe67e8cd6c9df86d8e9e563c1eef4ffc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff32061b_59ca3ed7",
+        "filename": "android/utils/ipaddr.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-14T18:23:48Z",
+      "side": 1,
+      "message": "strdup? / or return const char*",
+      "range": {
+        "startLine": 32,
+        "startChar": 11,
+        "endLine": 32,
+        "endChar": 15
+      },
+      "revId": "a54db806fe67e8cd6c9df86d8e9e563c1eef4ffc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
