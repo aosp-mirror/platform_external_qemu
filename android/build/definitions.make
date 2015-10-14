@@ -75,6 +75,9 @@ local-library-path = $(OBJS_DIR)/$(call local-bits-choice,libs,libs64)/$(1).a
 local-executable-path = $(OBJS_DIR)/$(1)$(call local-host-tool,EXEEXT)
 local-shared-library-path = $(OBJS_DIR)/$(call local-bits-choice,lib,lib64)/$(1)$(call local-host-tool,DLLEXT)
 
+intermediate-executable-path = $(call intermediates-dir-for,EXECUTABLES,$(1))/$(1)$(call local-host-tool,EXEEXT)
+intermediate-shared-library-path = $(call intermediates-dir-for,SHARED_LIBRARIES,$(1))/$(1)$(call local-host-tool,DLLEXT)
+
 # Expand to a shell statement that changes the runtime library search path.
 # Note that this is only used for Qt-related stuff, and on Windows, the
 # Windows libraries are placed under bin/ instead of lib/ so there is no

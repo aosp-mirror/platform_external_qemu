@@ -14,6 +14,7 @@
 #
 
 # first, call a library containing all object files
+INTERMEDIATE_BUILT_MODULE := $(call intermediate-shared-library-path,$(LOCAL_MODULE))
 LOCAL_BUILT_MODULE := $(call local-shared-library-path,$(LOCAL_MODULE))
 include $(BUILD_SYSTEM)/binary.make
 
@@ -21,26 +22,38 @@ LOCAL_LIBRARIES := $(foreach lib,$(LOCAL_STATIC_LIBRARIES),$(call local-library-
 
 LOCAL_LDLIBS := $(foreach lib,$(LOCAL_STATIC_LIBRARIES),$(call local-library-path,$(lib))) $(LOCAL_LDLIBS)
 
-$(LOCAL_BUILT_MODULE): PRIVATE_LDFLAGS := $(LDFLAGS) $(LOCAL_LDFLAGS)
-$(LOCAL_BUILT_MODULE): PRIVATE_LDLIBS  := $(LOCAL_LDLIBS)
-$(LOCAL_BUILT_MODULE): PRIVATE_LD      := $(LOCAL_LD)
-$(LOCAL_BUILT_MODULE): PRIVATE_OBJS    := $(LOCAL_OBJECTS)
+$(INTERMEDIATE_BUILT_MODULE): PRIVATE_LDFLAGS := $(LDFLAGS) $(LOCAL_LDFLAGS)
+$(INTERMEDIATE_BUILT_MODULE): PRIVATE_LDLIBS  := $(LOCAL_LDLIBS)
+$(INTERMEDIATE_BUILT_MODULE): PRIVATE_LD      := $(LOCAL_LD)
+$(INTERMEDIATE_BUILT_MODULE): PRIVATE_OBJS    := $(LOCAL_OBJECTS)
 
 LOCAL_SYMBOL_FILE := $(strip $(LOCAL_SYMBOL_FILE))
 ifdef LOCAL_SYMBOL_FILE
 $(eval $(call generate-symbol-file,$(LOCAL_PATH)/$(LOCAL_SYMBOL_FILE)))
-$(LOCAL_BUILT_MODULE): $(LOCAL_GENERATED_SYMBOL_FILE)
-$(LOCAL_BUILT_MODULE): PRIVATE_LDFLAGS += $(call symbol-file-linker-flags,$(LOCAL_GENERATED_SYMBOL_FILE))
+$(INTERMEDIATE_BUILT_MODULE): $(LOCAL_GENERATED_SYMBOL_FILE)
+$(INTERMEDIATE_BUILT_MODULE): PRIVATE_LDFLAGS += $(call symbol-file-linker-flags,$(LOCAL_GENERATED_SYMBOL_FILE))
 endif
 
-$(LOCAL_BUILT_MODULE): $(LOCAL_OBJECTS) $(LOCAL_LIBRARIES)
+$(INTERMEDIATE_BUILT_MODULE): $(LOCAL_OBJECTS) $(LOCAL_LIBRARIES)
 	@ mkdir -p $(dir $@)
-	@ echo "SharedLibrary: $@"
+	@ echo "Intermediate SharedLibrary: $@"
 	$(hide) $(PRIVATE_LD) $(PRIVATE_LDFLAGS) -shared -o $@ $(PRIVATE_LIBRARY) $(PRIVATE_OBJS) $(PRIVATE_LDLIBS)
 
+$(LOCAL_BUILT_MODULE): $(INTERMEDIATE_BUILT_MODULE)
+	@ mkdir -p $(dir $@)
+	@ echo "SharedLibrary: $@"
+ifdef STRIP_SYMBOLS
+	@ echo "Stripping $@"
+	$(hide) strip -x -o "$@" "$<"
+else
+	$(hide) cp "$<" "$@"
+endif
+
+ifdef BUILD_SYMB_FILES
 LOCAL_GENERATE_SYMBOLS := true
 include $(BUILD_SYSTEM)/symbols.make
+endif
 
-EXECUTABLES += $(LOCAL_BUILT_MODULE)
+EXECUTABLES += $(INTERMEDIATE_BUILT_MODULE) $(LOCAL_BUILT_MODULE)
 $(LOCAL_BUILT_MODULE): $(foreach lib,$(LOCAL_STATIC_LIBRARIES),$(call local-library-path,$(lib)))
 $(LOCAL_BUILT_MODULE): $(foreach lib,$(LOCAL_SHARED_LIBRARIES),$(call local-shared-library-path,$(lib)))

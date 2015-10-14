@@ -296,6 +296,7 @@ OPTION_STRIP=no
 OPTION_MINGW=no
 OPTION_UI=
 OPTION_GLES=
+OPTION_BUILD_SYMB=no
 OPTION_SDK_REV=
 
 GLES_SUPPORT=no
@@ -367,6 +368,8 @@ for opt do
   ;;
   --gles=angle) OPTION_GLES=angle
   ;;
+  --symb) OPTION_BUILD_SYMB=yes
+  ;;
   --ui=*) echo "Unknown --ui value, try one of: sdl2 qt"
   ;;
   --gles=*) echo "Unknown --gles value, try one of: dgl angle"
@@ -398,6 +401,7 @@ EOF
     echo "  --ui=qt                     Use Qt-based UI backend (default)."
     echo "  --gles=dgl                  Build the OpenGLES to Desktop OpenGL Translator (default)"
     echo "  --gles=angle                Build the OpenGLES to ANGLE wrapper"
+    echo "  --symb                      Generate Breakpad symbol files"
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
     echo "  --out-dir=<path>            Use specific output directory [objs/]"
     echo "  --mingw                     Build Windows executable on Linux"
@@ -709,18 +713,6 @@ case $HOST_OS in
         ;;
 esac
 
-# Strip executables and shared libraries when needed.
-if [ "$OPTION_DEBUG" != "yes" -a "$OPTION_STRIP" = "yes" ]; then
-    case $HOST_OS in
-        darwin)
-            LDFLAGS="$LDFLAGS -Wl,-S"
-            ;;
-        *)
-            LDFLAGS="$LDFLAGS -Wl,--strip-all"
-            ;;
-    esac
-fi
-
 # Re-create the configuration file
 config_mk=$OUT_DIR/config.make
 config_dir=$(dirname $config_mk)
@@ -783,13 +775,22 @@ else
     echo "EMULATOR_USE_ANGLE := false" >> $config_mk
 fi
 
+if [ "$OPTION_BUILD_SYMB" = "yes" ] ; then
+    echo "BUILD_SYMB_FILES := true" >> $config_mk
+fi
+
 echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
 echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
 echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 
-if [ $OPTION_DEBUG = yes ] ; then
+if [ "$OPTION_DEBUG" = yes ] ; then
     echo "BUILD_DEBUG_EMULATOR := true" >> $config_mk
 fi
+
+if [ "$OPTION_DEBUG" != "yes" -a "$OPTION_STRIP" = "yes" ]; then
+    echo "STRIP_SYMBOLS := true" >> $config_mk
+fi
+
 echo "EMULATOR_BUILD_EMUGL       := true" >> $config_mk
 echo "EMULATOR_EMUGL_SOURCES_DIR := $GLES_DIR" >> $config_mk
 

@@ -324,13 +324,21 @@ OPT_COPY_PREBUILTS=
 option_register_var "--copy-prebuilts=<dir>" OPT_COPY_PREBUILTS \
         "Copy final emulator binaries to <path>/prebuilts/android-emulator"
 
-OPT_UI=
+OPT_UI='qt'
 option_register_var "--ui=<name>" OPT_UI \
         "Specify UI backend ('sdl2' or 'qt')"
 
 OPT_GLES=
 option_register_var "--gles=<name>" OPT_GLES \
         "Specify GLES backend ('dgl' or 'angle')"
+
+OPT_STRIP=
+option_register_var "--strip" OPT_STRIP \
+        "Strip debug symbols"
+
+OPT_SYMB=
+option_register_var "--symb" OPT_SYMB \
+        "Generate breakpad symbols"
 
 package_builder_register_options
 aosp_prebuilts_dir_register_options
@@ -549,11 +557,6 @@ create_binaries_package () {
     # Get rid of some extra files we don't really want
     run rm -f "$TEMP_PKG_DIR"/tools/lib*/lib*emugl_test_shared_library*
 
-    # Get rid of extra symbol files in tools directory
-    run rm -f "$TEMP_PKG_DIR"/tools/*.sym
-    run find "$TEMP_PKG_DIR"/tools/lib -name "*.sym" -delete
-    run find "$TEMP_PKG_DIR"/tools/lib64 -name "*.sym" -delete
-
     dump "[$PKG_NAME] Creating README file."
     cat > $TEMP_PKG_DIR/README <<EOF
 This directory contains Android emulator binaries. You can use them directly
@@ -650,6 +653,12 @@ build_darwin_binaries_on () {
     if [ "$OPT_GLES" ]; then
         var_append DARWIN_BUILD_FLAGS "--gles=$OPT_GLES"
     fi
+    if [ "$OPT_SYMB" ]; then
+        var_append DARWIN_BUILD_FLAGS "--strip"
+    fi
+    if [ "$OPT_STRIP" ]; then
+        var_append DARWIN_BUILD_FLAGS "--symb"
+    fi
     cat > $DARWIN_PKG_DIR/build.sh <<EOF
 #!/bin/bash -l
 cd $DARWIN_REMOTE_DIR/qemu &&
@@ -705,6 +714,14 @@ fi
 
 if [ "$OPT_GLES" ]; then
     var_append REBUILD_FLAGS "--gles=$OPT_GLES"
+fi
+
+if [ "$OPT_STRIP" ]; then
+    var_append REBUILD_FLAGS "--strip"
+fi
+
+if [ "$OPT_SYMB" ]; then
+    var_append REBUILD_FLAGS "--symb"
 fi
 
 for SYSTEM in $(convert_host_list_to_os_list $LOCAL_HOST_SYSTEMS); do
