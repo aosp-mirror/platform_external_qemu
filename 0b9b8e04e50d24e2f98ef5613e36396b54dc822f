@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "df39c202_3de5a8b9",
+        "filename": "android/skin/window.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1574,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-14T18:41:34Z",
+      "side": 1,
+      "message": "s/should/should reset/",
+      "revId": "0b9b8e04e50d24e2f98ef5613e36396b54dc822f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df39c202_9d99544d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1003,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-14T18:41:34Z",
+      "side": 1,
+      "message": "(That\u0027s funny. When you put -1 on the board, I thought\nyou really meant 0.)",
+      "revId": "0b9b8e04e50d24e2f98ef5613e36396b54dc822f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dfb462b2_7e8d0e76",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-14T18:41:34Z",
+      "side": 1,
+      "message": "s/NULL/false/",
+      "revId": "0b9b8e04e50d24e2f98ef5613e36396b54dc822f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f30ba11_bd76d8c4",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-14T18:41:34Z",
+      "side": 1,
+      "message": "Do we ever have rotations other than {0, 90, 180, 270}?\nIf not, are sin() and cos() expensive and called often\nenough that we should special-case them as integers?",
+      "revId": "0b9b8e04e50d24e2f98ef5613e36396b54dc822f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
