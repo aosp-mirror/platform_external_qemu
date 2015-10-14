@@ -103,7 +103,6 @@ private:
     void initFinger();
     void initKbdShorts();
     void initLocation();
-    void initSd();
     void initSettings();
     void initSms();
     void initTelephony();
@@ -154,7 +153,6 @@ private slots:
     void on_kbdShortsButton_clicked();
     void on_locationButton_clicked();
     void on_recordScrButton_clicked();
-    void on_sdButton_clicked();
     void on_settingsButton_clicked();
     void on_telephoneButton_clicked();
     void on_virtSensorsButton_clicked();

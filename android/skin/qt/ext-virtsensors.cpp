@@ -20,6 +20,7 @@ void ExtendedWindow::initVirtualSensors()
     mExtendedUi->pitchAngleWidget->setRange(-180, 180);
     mExtendedUi->rollAngleWidget->setRange(-180, 180);
     mExtendedUi->temperatureSensorValueWidget->setRange(-273.1, 100.0);
+    mExtendedUi->temperatureSensorValueWidget->setValue(25.0);
     mExtendedUi->proximitySensorValueWidget->setRange(0, 10);
     mExtendedUi->magNorthWidget->setValidator(&mMagFieldValidator);
     mExtendedUi->magNorthWidget->setTextMargins(0, 0, 0, 4);
@@ -111,4 +112,3 @@ void ExtendedWindow::onPhoneRotationChanged() {
     mExtendedUi->magnetometerEastLabel->setText(formatSensorValue(device_magnetic_vector.y()));
     mExtendedUi->magnetometerVerticalLabel->setText(formatSensorValue(device_magnetic_vector.z()));
 }
-

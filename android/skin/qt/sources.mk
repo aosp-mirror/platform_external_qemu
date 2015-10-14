@@ -24,7 +24,6 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/ext-dpad.cpp \
     android/skin/qt/ext-finger.cpp \
     android/skin/qt/ext-location.cpp \
-    android/skin/qt/ext-sd.cpp \
     android/skin/qt/ext-settings.cpp \
     android/skin/qt/ext-sms.cpp \
     android/skin/qt/ext-telephony.cpp \
