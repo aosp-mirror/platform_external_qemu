@@ -144,8 +144,10 @@ private:
     void    dpad_setPressed(QPushButton* button);
     void    dpad_setReleased(QPushButton* button);
 
+    QString apiVersionString(int apiVersion);
+
     QIcon getIconForCurrentTheme(const QString& icon_name) {
-        QString iconType = 
+        QString iconType =
             mSettingsState.mTheme == SETTINGS_THEME_LIGHT ? LIGHT_PATH : DARK_PATH;
         return QIcon(":/" + iconType + "/" + icon_name);
     }

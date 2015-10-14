@@ -78,6 +78,8 @@ public:
 
     bool runAsyncCheck();
 
+    android::base::Version loadLatestVersion();
+
 protected:
     // constructor for tests
     UpdateChecker(IVersionExtractor*,
@@ -88,8 +90,6 @@ protected:
     static time_t clearHMS(time_t t);
 
     void asyncWorker();
-
-    android::base::Version loadLatestVersion();
 
     // Helper class to run the worker in a new thread
     class CheckerThread : public android::base::Thread {
