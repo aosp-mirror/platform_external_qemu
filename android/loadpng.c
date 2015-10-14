@@ -1,7 +1,8 @@
+#include <png.h>
+
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <png.h>
+#include <string.h>
 
 #if 0
 #define LOG(x...) fprintf(stderr,"error: " x)
@@ -87,7 +88,7 @@ void *loadpng(const char *fn, unsigned *_width, unsigned *_height)
 
     case PNG_COLOR_TYPE_GRAY:
         if(bitdepth < 8) {
-            png_set_gray_1_2_4_to_8(p);
+            png_set_expand_gray_1_2_4_to_8(p);
         }
 
     default:
@@ -219,7 +220,7 @@ void *readpng(const unsigned char *base, size_t   size, unsigned *_width, unsign
 
     case PNG_COLOR_TYPE_GRAY:
         if(bitdepth < 8) {
-            png_set_gray_1_2_4_to_8(p);
+            png_set_expand_gray_1_2_4_to_8(p);
         }
 
     default:

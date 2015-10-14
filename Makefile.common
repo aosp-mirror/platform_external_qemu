@@ -358,30 +358,31 @@ EMULATOR_LIBUI_STATIC_LIBRARIES_64 :=
 ###########################################################
 # Libpng configuration
 #
-LIBPNG_DIR := distrib/libpng-1.2.46
-include $(LOCAL_PATH)/$(LIBPNG_DIR)/sources.make
+include $(LOCAL_PATH)/distrib/libpng.mk
+EMULATOR_LIBUI_CFLAGS += $(LIBPNG_CFLAGS)
+EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libpng
+EMULATOR_LIBUI_STATIC_LIBRARIES_64 += emulator64-libpng
+common_LOCAL_SRC_FILES += android/loadpng.c
 
-EMULATOR_LIBUI_CFLAGS += \
-    $(LIBPNG_CFLAGS) \
-    -I$(LOCAL_PATH)/$(LIBPNG_DIR)
-
-common_LOCAL_SRC_FILES += $(LIBPNG_SOURCES) android/loadpng.c
+###########################################################
+# Libjpeg configuration
+#
+include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
+EMULATOR_LIBUI_CFLAGS += $(LIBJPEG_CFLAGS)
+EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libjpeg
+EMULATOR_LIBUI_STATIC_LIBRARIES_64 += emulator64-libjpeg
 
 ##############################################################################
 # SDL-related definitions
 #
 
 ifdef EMULATOR_USE_SDL2
-    SDL2_DIR := distrib/sdl2-2.0.3
-    include $(LOCAL_PATH)/$(SDL2_DIR)/sources.make
-
-    SDL2_STATIC_LIBRARIES := emulator_libSDL2
-    SDL2_STATIC_LIBRARIES_64 := emulator_lib64SDL2
+    include $(LOCAL_PATH)/distrib/libsdl2.mk
 
     EMULATOR_LIBUI_CFLAGS += $(SDL2_CFLAGS) $(foreach inc,$(SDL2_INCLUDES),-I$(inc))
     EMULATOR_LIBUI_LDLIBS += $(SDL2_LDLIBS)
-    EMULATOR_LIBUI_STATIC_LIBRARIES := $(SDL2_STATIC_LIBRARIES)
-    EMULATOR_LIBUI_STATIC_LIBRARIES_64 := $(SDL2_STATIC_LIBRARIES_64)
+    EMULATOR_LIBUI_STATIC_LIBRARIES += $(SDL2_STATIC_LIBRARIES)
+    EMULATOR_LIBUI_STATIC_LIBRARIES_64 += $(SDL2_STATIC_LIBRARIES_64)
 
     ifeq ($(HOST_OS),windows)
         # Special exception for Windows: -lmingw32 must appear before libSDLmain
@@ -389,6 +390,7 @@ ifdef EMULATOR_USE_SDL2
         # exported by the latter.
         EMULATOR_LIBUI_LDFLAGS += -lmingw32
         EMULATOR_LIBUI_LDFLAGS_64 += -lmingw32
+        EMULATOR_LIBUI_CFLAGS += -Dmain=SDL_main
     else
         # The following is needed by SDL_LoadObject
         EMULATOR_LIBUI_LDLIBS += -ldl
@@ -821,43 +823,6 @@ endif
 
 BLOCK_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 BLOCK_CFLAGS += -DCONFIG_BDRV_WHITELIST=\"\"
-
-##############################################################################
-##############################################################################
-###
-###  emulator-libjpeg: TARGET-INDEPENDENT QEMU FUNCTIONS
-###
-###  THESE ARE USED BY EVERYTHING EXCEPT 'emulator-ui'
-###
-
-common_LOCAL_CFLAGS =
-common_LOCAL_SRC_FILES =
-
-###########################################################
-# Jpeg configuration
-#
-LIBJPEG_DIR := distrib/jpeg-6b
-include $(LOCAL_PATH)/$(LIBJPEG_DIR)/sources.make
-
-common_LOCAL_SRC_FILES += $(LIBJPEG_SOURCES)
-
-common_LOCAL_CFLAGS += \
-    $(LIBJPEG_CFLAGS) \
-    -I$(LOCAL_PATH)/$(LIBJPEG_DIR)
-
-## one for 32-bit
-$(call start-emulator-library, emulator-libjpeg)
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-$(call end-emulator-library)
-
-
-## another for 64-bit, see note in emulator64-common
-$(call start-emulator64-library, emulator64-libjpeg)
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-$(call end-emulator-library)
-
 
 ##############################################################################
 ##############################################################################
