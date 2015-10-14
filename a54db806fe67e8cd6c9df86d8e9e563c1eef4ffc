@@ -119,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "ff32061b_54f685c0",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-14T19:17:47Z",
+      "side": 1,
+      "message": "As in, this header was not included in this compilation unit directly, while isdigit() is used directly.\n\nSo, the include leaked in from somewhere (other than console.h), which is a bad thing.\n\nThanks for fixing this.",
+      "parentUuid": "1f30ba11_9dfaf470",
+      "range": {
+        "startLine": 48,
+        "startChar": 10,
+        "endLine": 48,
+        "endChar": 17
+      },
+      "revId": "a54db806fe67e8cd6c9df86d8e9e563c1eef4ffc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dfb462b2_7e10aed7",
         "filename": "android/console.c",
         "patchSetId": 1
