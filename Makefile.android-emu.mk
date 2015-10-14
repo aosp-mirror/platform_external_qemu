@@ -164,6 +164,7 @@ ANDROID_EMU_SOURCES := \
     android/hw-sensors.c \
     android/loadpng.c \
     android/main-common-ui.c \
+    android/metrics/AutoFlushedIniFile.cpp \
     android/metrics/metrics_reporter.c \
     android/metrics/metrics_reporter_ga.c \
     android/metrics/metrics_reporter_toolbar.c \
