@@ -28,6 +28,8 @@ using std::string;
 using std::to_string;
 
 void IniFile::setBackingFile(const string& filePath) {
+    // We have no idea what the new backing file contains.
+    mDirty = true;
     mBackingFilePath = filePath;
 }
 
@@ -80,6 +82,7 @@ static inline string::const_iterator eatSpace(string::const_iterator citer,
 }
 
 bool IniFile::read() {
+    mDirty = false;
     mData.clear();
 
     if (mBackingFilePath.empty()) {
@@ -162,7 +165,7 @@ bool IniFile::read() {
     return true;
 }
 
-bool IniFile::writeCommon(bool discardEmpty) const {
+bool IniFile::writeCommon(bool discardEmpty) {
     if (mBackingFilePath.empty()) {
         LOG(WARNING) << "Write called without a backing file!";
         return false;
@@ -184,15 +187,21 @@ bool IniFile::writeCommon(bool discardEmpty) const {
         }
         outFile << key << " = " << value << std::endl;
     }
+
+    mDirty = false;
     return true;
 }
 
-bool IniFile::write() const {
+bool IniFile::write() {
     return writeCommon(false);
 }
 
-bool IniFile::writeDiscardingEmpty() const {
+bool IniFile::writeDiscardingEmpty() {
     return writeCommon(true);
+}
+
+bool IniFile::writeIfChanged() {
+    return !mDirty || writeCommon(false);
 }
 
 int IniFile::size() const {
@@ -340,25 +349,30 @@ IniFile::DiskSize IniFile::getDiskSizeStr(const string& key,
     return getDiskSize(key, parseDiskSize(defaultValueStr, 0, NULL));
 }
 
-void IniFile::setString(const string& key, const string& value) {
+void IniFile::updateData(const string& key, const string& value) {
+    mDirty = true;
     mData[key] = value;
 }
 
+void IniFile::setString(const string& key, const string& value) {
+    updateData(key, value);
+}
+
 void IniFile::setInt(const string& key, int value) {
-    mData[key] = to_string(value);
+    updateData(key, to_string(value));
 }
 
 void IniFile::setInt64(const string& key, int64_t value) {
     // long long is at least 64 bit in C++0x.
-    mData[key] = to_string(static_cast<long long>(value));
+    updateData(key, to_string(static_cast<long long>(value)));
 }
 
 void IniFile::setDouble(const string& key, double value) {
-    mData[key] = to_string(value);
+    updateData(key, to_string(value));
 }
 
 void IniFile::setBool(const string& key, bool value) {
-    mData[key] = value ? "true" : "false";
+    updateData(key, value ? "true" : "false");
 }
 
 void IniFile::setDiskSize(const string& key, int64_t value) {
@@ -378,10 +392,11 @@ void IniFile::setDiskSize(const string& key, int64_t value) {
         suffix = 'k';
     }
 
-    mData[key] = to_string(value);
+    auto valueStr = to_string(value);
     if (suffix) {
-        mData[key] += suffix;
+        valueStr += suffix;
     }
+    updateData(key, valueStr);
 }
 
 IniFile::iterator IniFile::begin() {
