@@ -27,6 +27,7 @@
 #include "android/proxy/proxy_http.h"
 #include "android/qemu-control-impl.h"
 #include "android/utils/debug.h"
+#include "android/utils/ipaddr.h"
 #include "android/utils/path.h"
 #include "android/utils/system.h"
 #include "android/utils/bufprint.h"
@@ -227,7 +228,8 @@ static int qemu_control_console_start(int port) {
     return control_console_start(port, gQAndroidBatteryAgent,
                                  gQAndroidFingerAgent, gQAndroidLocationAgent,
                                  gQAndroidUserEventAgent,
-                                 gQAndroidVmOperations);
+                                 gQAndroidVmOperations,
+                                 gQAndroidNetAgent);
 }
 
 /* this function is called from qemu_main() once all arguments have been parsed

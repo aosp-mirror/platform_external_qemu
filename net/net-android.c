@@ -30,6 +30,7 @@
 #include <zlib.h>
 
 #include "android/tcpdump.h"
+#include "android/utils/ipaddr.h"
 
 /* Needed early for HOST_BSD etc. */
 #include "config-host.h"

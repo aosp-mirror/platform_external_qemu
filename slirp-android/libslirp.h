@@ -22,9 +22,6 @@ extern "C" {
 
 struct mbuf;
 
-int    inet_strtoip(const char*  str, uint32_t  *ip);
-char*  inet_iptostr(uint32_t  ip);
-
 void slirp_init(int restricted, const char *special_ip);
 
 void slirp_select_fill(int *pnfds,

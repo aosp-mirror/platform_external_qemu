@@ -33,6 +33,7 @@
 #include "slirp.h"
 #include "ip_icmp.h"
 
+#include "android/utils/ipaddr.h"
 #include "android/utils/sockets.h"
 
 #ifdef LOG_ENABLED

@@ -8,6 +8,8 @@
 
 #include <slirp.h>
 
+#include "android/utils/ipaddr.h"
+
 FILE *dfd = NULL;
 #ifdef DEBUG
 int dostats = 1;
