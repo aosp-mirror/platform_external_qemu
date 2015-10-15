@@ -47,11 +47,9 @@ my-dir = $(call parent-dir,$(lastword $(MAKEFILE_LIST)))
 
 # Return the directory containing the intermediate files for a given
 # kind of executable
-# $1 = type (EXECUTABLES, STATIC_LIBRARIES or SHARED_LIBRARIES).
+# $1 = bitness (32 or 64)
 # $2 = module name
-# $3 = ignored
-#
-intermediates-dir-for = $(OBJS_DIR)/intermediates/$(2)
+intermediates-dir-for = $(OBJS_DIR)/build/intermediates$(1)/$(2)
 
 # Return the name of a given host tool, based on the value of
 # LOCAL_HOST_BUILD. If the variable is defined, return $(BUILD_$1),
@@ -66,12 +64,12 @@ local-host-define = $(if $(strip $(LOCAL_$1)),,$(eval LOCAL_$1 := $$(call local-
 
 # Return the directory containing the intermediate files for the current
 # module. LOCAL_MODULE must be defined before calling this.
-local-intermediates-dir = $(OBJS_DIR)/intermediates/$(LOCAL_MODULE)
+local-intermediates-dir = $(call intermediates-dir-for,$(LOCAL_MODULE_BITS),$(LOCAL_MODULE))
 
 # Return $1, except if LOCAL_MODULE_BITS is 64, where $2 is returned.
 local-bits-choice = $(strip $(if $(filter 64,$(LOCAL_MODULE_BITS)),$2,$1))
 
-local-library-path = $(OBJS_DIR)/$(call local-bits-choice,libs,libs64)/$(1).a
+local-library-path = $(call intermediates-dir-for,$(LOCAL_MODULE_BITS),$(1))/$(1).a
 local-executable-path = $(OBJS_DIR)/$(1)$(call local-host-tool,EXEEXT)
 local-shared-library-path = $(OBJS_DIR)/$(call local-bits-choice,lib,lib64)/$(1)$(call local-host-tool,DLLEXT)
 

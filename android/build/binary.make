@@ -17,7 +17,7 @@
 #
 
 # the directory where we're going to place our object files
-LOCAL_OBJS_DIR  := $(call intermediates-dir-for,EXECUTABLES,$(LOCAL_MODULE))
+LOCAL_OBJS_DIR  := $(call local-intermediates-dir)
 LOCAL_OBJECTS   :=
 $(call local-host-define,CC)
 $(call local-host-define,LD)
