@@ -48,15 +48,13 @@ void androidHwConfig_init( AndroidHwConfig*  hwConfig,
  * note that default values are written to hwConfig if the configuration
  * file doesn't have the corresponding hardware properties.
  */
-int  androidHwConfig_read( AndroidHwConfig*  hwConfig,
-                           IniFile*          configFile );
+int androidHwConfig_read(AndroidHwConfig* hwConfig, CIniFile* configFile);
 
 /* Write a hardware configuration to a config file object.
  * Returns 0 in case of success. Note that any value that is set to the
  * default will not bet written.
  */
-int  androidHwConfig_write( AndroidHwConfig*  hwConfig,
-                            IniFile*          configFile );
+int androidHwConfig_write(AndroidHwConfig* hwConfig, CIniFile* configFile);
 
 /* Finalize a given hardware configuration */
 void androidHwConfig_done( AndroidHwConfig* config );
