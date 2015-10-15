@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b90d0e2e_f723a0ba",
+        "filename": "android/emulation/control/display_agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-15T13:14:00Z",
+      "side": 1,
+      "message": "nit: documentation?",
+      "revId": "c63b3998c7df696085a8948458ee18eff6b2a511",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39759eb9_b368b8de",
+        "filename": "android/multitouch-port.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-15T13:14:00Z",
+      "side": 1,
+      "message": "nit: update documentation?",
+      "revId": "c63b3998c7df696085a8948458ee18eff6b2a511",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
