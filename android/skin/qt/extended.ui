@@ -95,7 +95,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>640</x>
-       <y>390</y>
+       <y>670</y>
        <width>36</width>
        <height>36</height>
       </rect>
@@ -119,7 +119,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>390</y>
+       <y>670</y>
        <width>471</width>
        <height>36</height>
       </rect>
@@ -150,7 +150,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>150</x>
-       <y>340</y>
+       <y>620</y>
        <width>72</width>
        <height>36</height>
       </rect>
@@ -166,7 +166,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>70</x>
-       <y>340</y>
+       <y>620</y>
        <width>36</width>
        <height>36</height>
       </rect>
@@ -190,7 +190,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>540</x>
-       <y>390</y>
+       <y>670</y>
        <width>36</width>
        <height>36</height>
       </rect>
@@ -219,7 +219,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>240</x>
-       <y>340</y>
+       <y>620</y>
        <width>72</width>
        <height>36</height>
       </rect>
@@ -235,7 +235,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>590</x>
-       <y>390</y>
+       <y>670</y>
        <width>36</width>
        <height>36</height>
       </rect>
@@ -259,7 +259,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>340</y>
+       <y>620</y>
        <width>36</width>
        <height>36</height>
       </rect>
@@ -281,7 +281,7 @@ font-family: &quot;Roboto&quot;</string>
        <x>20</x>
        <y>40</y>
        <width>651</width>
-       <height>240</height>
+       <height>560</height>
       </rect>
      </property>
      <property name="font">
@@ -295,12 +295,24 @@ font-family: &quot;Roboto&quot;</string>
      <property name="horizontalScrollBarPolicy">
       <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <property name="showGrid">
+      <bool>false</bool>
+     </property>
      <property name="rowCount">
       <number>1</number>
      </property>
      <property name="columnCount">
       <number>6</number>
      </property>
+     <attribute name="horizontalHeaderStretchLastSection">
+      <bool>true</bool>
+     </attribute>
      <attribute name="verticalHeaderVisible">
       <bool>false</bool>
      </attribute>
@@ -408,17 +420,6 @@ font-family: &quot;Roboto&quot;</string>
       </property>
      </item>
     </widget>
-    <zorder>locationGroup</zorder>
-    <zorder>loc_stopButton</zorder>
-    <zorder>loc_currentLocBox</zorder>
-    <zorder>loc_GpxButton</zorder>
-    <zorder>loc_removeRowButton</zorder>
-    <zorder>loc_playButton</zorder>
-    <zorder>loc_KmlButton</zorder>
-    <zorder>loc_pauseButton</zorder>
-    <zorder>loc_addRowButton</zorder>
-    <zorder>loc_pathTable</zorder>
-    <zorder>spacer2Button</zorder>
    </widget>
    <widget class="QWidget" name="cellular_page">
     <widget class="QGroupBox" name="cell_groupBox">

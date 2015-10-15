@@ -41,9 +41,18 @@ void ExtendedWindow::on_loc_addRowButton_clicked()
     mExtendedUi->loc_pathTable->insertRow(currentRow + 1);
     // Initialize it the same as the row above
     for (int col = 0; col< mExtendedUi->loc_pathTable->columnCount(); col++) {
-        mExtendedUi->loc_pathTable->setItem(currentRow+1, col,
-                                       mExtendedUi->loc_pathTable->item(currentRow, col)->clone());
+        QTableWidgetItem* new_item =
+            mExtendedUi->loc_pathTable->item(currentRow, col)->clone();
+        if (col == 0 && new_item->text() == "0") {
+            // Make sure the delay value of the newly added item is valid.
+            // Only the very first item can have a delay value of 0.
+            new_item->setText("1");
+        }
+        mExtendedUi->loc_pathTable->setItem(currentRow+1, col, new_item);
     }
+
+    // Scroll to bottom to make the newly added item visible.
+    mExtendedUi->loc_pathTable->scrollToBottom();
 
     // We must have more than one row. Allow deletion.
     setButtonEnabled(mExtendedUi->loc_removeRowButton,
@@ -51,25 +60,44 @@ void ExtendedWindow::on_loc_addRowButton_clicked()
                      true);
 }
 
+struct SelectionRangeComparator {
+    bool operator()(const QTableWidgetSelectionRange& rhs,
+                    const QTableWidgetSelectionRange& lhs) const {
+        return rhs.bottomRow() > lhs.topRow();
+    }
+};
+
 void ExtendedWindow::on_loc_removeRowButton_clicked()
 {
-    // Delete the currently-highlighted row
-    if (mExtendedUi->loc_pathTable->rowCount() > 1) {
-        // Only delete when we have multiple rows
-        int currentRow = mExtendedUi->loc_pathTable->currentRow();
-        if (currentRow < 0) {
-            // Nothing selected, delete the last row
-            currentRow = mExtendedUi->loc_pathTable->rowCount() - 1;
-        }
-        mExtendedUi->loc_pathTable->removeRow(currentRow);
-        if (currentRow == 0) {
-            // Re-check the delay in the new top row
-            on_loc_pathTable_cellChanged(0, 0);
+    // Get a list of selected ranges.
+    QList<QTableWidgetSelectionRange> selectedRowsRanges =
+        mExtendedUi->loc_pathTable->selectedRanges();
+
+    // Make sure the bottom-most range appears first in the list.
+    std::sort(selectedRowsRanges.begin(),
+              selectedRowsRanges.end(),
+              SelectionRangeComparator());
+
+    // Remove all rows in all ranges, but make sure at least one row remains.
+    // The rows are removed from bottom to top, to avoid having to account for
+    // changed indexes.
+    for (int r = 0;
+         r < selectedRowsRanges.size() &&
+            mExtendedUi->loc_pathTable->rowCount() > 1;
+         ++r) {
+        const QTableWidgetSelectionRange& range = selectedRowsRanges[r];
+        for (int row = range.bottomRow();
+             row >= range.topRow() &&
+                mExtendedUi->loc_pathTable->rowCount() > 1;
+             --row) {
+            mExtendedUi->loc_pathTable->removeRow(row);
         }
     }
+    // Re-check the delay in the new top row
+    on_loc_pathTable_cellChanged(0, 0);
 
+    // If there's only one row left, disable the Delete button
     if (mExtendedUi->loc_pathTable->rowCount() <= 1) {
-        // Only one row left. Disable the Delete button
         setButtonEnabled(mExtendedUi->loc_removeRowButton,
                          mSettingsState.mTheme,
                          false);
@@ -80,9 +108,10 @@ void ExtendedWindow::on_loc_pathTable_cellChanged(int row, int col)
 {
     // If the cell's contents are bad, turn the cell red
     bool cellOK = loc_cellIsValid(mExtendedUi->loc_pathTable, row, col);
-    QColor newColor = (cellOK ? Qt::white : Qt::red);
-
-    mExtendedUi->loc_pathTable->item(row, col)->setBackground(QBrush(newColor));
+    QColor normalColor =
+        mSettingsState.mTheme == SETTINGS_THEME_LIGHT ? Qt::black : Qt::white;
+    QColor newColor = (cellOK ? normalColor : Qt::red);
+    mExtendedUi->loc_pathTable->item(row, col)->setForeground(QBrush(newColor));
 }
 
 void ExtendedWindow::on_loc_playButton_clicked()
@@ -93,6 +122,7 @@ void ExtendedWindow::on_loc_playButton_clicked()
             if (!loc_cellIsValid(mExtendedUi->loc_pathTable, row, col)) {
                 mToolWindow->showErrorDialog(tr("The table contains errors.<br>No locations were sent."),
                                              tr("GPS Playback"));
+                mExtendedUi->loc_pathTable->scrollToItem(mExtendedUi->loc_pathTable->item(row, 0));
                 return;
             }
         }

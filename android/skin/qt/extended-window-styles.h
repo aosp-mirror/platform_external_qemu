@@ -112,9 +112,9 @@ enum { PANE_IDX_LOCATION = 0,
         "; border-radius: 1px}" \
     "QTableWidget { gridline-color:" THEME##_TAB_BKG_COLOR ";" \
         "background:" THEME##_TAB_BKG_COLOR "; border: 0px }" \
-    "QTableView::item { border-top: 1px solid " THEME##_DIVIDER_COLOR "}" \
+    "QTableView::item { border: 0; border-bottom: 1 solid " THEME##_DIVIDER_COLOR "}" \
     "QHeaderView::section { color:" THEME##_TITLE_COLOR "; background:" \
-        THEME##_TAB_BKG_COLOR "; border: 0px }" \
+        THEME##_TAB_BKG_COLOR "; border: 0px; padding: 16; border-bottom: 2 solid " THEME##_DIVIDER_COLOR "}" \
     "QScrollBar::vertical { background:" THEME##_TAB_BKG_COLOR \
         "; margin 21px 0 21 px 0 }" \
     "QScrollBar::handle:vertical { background:" THEME##_DIVIDER_COLOR \
