@@ -16,6 +16,18 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>922</width>
+    <height>745</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>922</width>
+    <height>745</height>
+   </size>
+  </property>
   <property name="font">
    <font>
     <family>Roboto</family>
@@ -396,6 +408,17 @@ font-family: &quot;Roboto&quot;</string>
       </property>
      </item>
     </widget>
+    <zorder>locationGroup</zorder>
+    <zorder>loc_stopButton</zorder>
+    <zorder>loc_currentLocBox</zorder>
+    <zorder>loc_GpxButton</zorder>
+    <zorder>loc_removeRowButton</zorder>
+    <zorder>loc_playButton</zorder>
+    <zorder>loc_KmlButton</zorder>
+    <zorder>loc_pauseButton</zorder>
+    <zorder>loc_addRowButton</zorder>
+    <zorder>loc_pathTable</zorder>
+    <zorder>spacer2Button</zorder>
    </widget>
    <widget class="QWidget" name="cellular_page">
     <widget class="QGroupBox" name="cell_groupBox">
@@ -2220,7 +2243,7 @@ font-family: &quot;Roboto&quot;</string>
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignLeft|AlignVCenter</set>
+       <set>AlignLeading|AlignVCenter</set>
       </property>
       <property name="flags">
        <set>NoItemFlags</set>
