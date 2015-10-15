@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
+/* Copyright (C) 2007-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -273,6 +273,7 @@ skin_keyset_get_default_text( void )
     "BUTTON_CALL         F3\n"
     "BUTTON_HANGUP       F4\n"
     "BUTTON_HOME         Home\n"
+    "BUTTON_HOMEPAGE     HomePage\n"
     "BUTTON_BACK         Escape\n"
     "BUTTON_MENU         F2, PageUp\n"
     "BUTTON_STAR         Shift-F2, PageDown\n"
