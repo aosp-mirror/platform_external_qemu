@@ -4,8 +4,6 @@
 # You must define BUILD_EMULATOR_HOST_OPENGL to 'true' in your environment to
 # build the following files.
 #
-ifeq (true,$(BUILD_EMULATOR_HOST_OPENGL))
-
 # Top-level for all modules
 EMUGL_PATH := $(call my-dir)
 
@@ -97,5 +95,3 @@ include $(EMUGL_PATH)/host/libs/Translator/EGL/Android.mk
 
 # Host shared libraries
 include $(EMUGL_PATH)/host/libs/libOpenglRender/Android.mk
-
-endif # BUILD_EMULATOR_HOST_OPENGL == true

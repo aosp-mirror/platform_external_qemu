@@ -79,10 +79,6 @@ ifeq ($(HOST_OS),windows)
   MY_LDFLAGS32 += -Xlinker --large-address-aware
 endif
 
-ifeq ($(HOST_ARCH),ppc)
-    MY_CFLAGS += -D__powerpc__
-endif
-
 ifeq ($(HOST_OS),darwin)
     MY_CFLAGS += -D_DARWIN_C_SOURCE=1
     # Clang complains about this flag being not useful anymore.
@@ -112,20 +108,6 @@ ifeq ($(HOST_OS),windows)
     endif
 endif
 
-ifneq ($(HOST_IS_64_BIT),)
-  MY_CFLAGS += -m64
-  MY_LDFLAGS += -m64
-else
-  ifneq ($(HOST_ARCH),x86_64)
-    MY_CFLAGS += -m32
-    MY_LDFLAGS += -m32
-  endif
-endif
-
-ifneq ($(BUILD_HOST_static),)
-  MY_LDLIBS += -static
-endif
-
 ifeq ($(HOST_OS),windows)
   # Ensure that printf() et al use GNU printf format specifiers as required
   # by QEMU. This is important when using the newer Mingw64 cross-toolchain.
@@ -137,16 +119,6 @@ endif
 # (the QEMU coding style loves using these).
 #
 MY_CFLAGS += -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
-
-# When using clang and ccache, disable the spammy warnings about unused
-# parameters during compilation, and re-enable colored output.
-#
-# See http://petereisentraut.blogspot.fr/2011/05/ccache-and-clang.html
-ifneq (,$(filter %ccache,$(MY_CC)))
-  ifneq (,$(filter LLVM,$(shell $(HOST_CC) -v 2>&1)))
-    MY_CFLAGS := -Qunused-arguments -fcolor-diagnostics $(MY_CFLAGS)
-  endif
-endif
 
 # Needed to build block.c on Linux/x86_64.
 MY_CFLAGS += -D_GNU_SOURCE=1
@@ -384,9 +356,6 @@ ifeq (,$(strip $(wildcard $(EMULATOR_EMUGL_SOURCES_DIR))))
 $(error Cannot find GPU emulation sources directory: $(EMULATOR_EMUGL_SOURCES_DIR))
 endif
 
-# TODO(digit): Remove the line below.
-BUILD_EMULATOR_OPENGL := true
-BUILD_EMULATOR_HOST_OPENGL := true
 ifeq (true,$(BUILD_DEBUG_EMULATOR))
 EMUGL_BUILD_DEBUG := 1
 endif
