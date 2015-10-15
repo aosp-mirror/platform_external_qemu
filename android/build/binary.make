@@ -31,7 +31,7 @@ LOCAL_CFLAGS := $(strip $(patsubst %,-I%,$(LOCAL_C_INCLUDES)) $(LOCAL_CFLAGS))
 
 # HACK ATTACK: For the Darwin x86 build, we need to add
 # '-read_only_relocs suppress' to the linker command to avoid errors.
-ifeq ($(HOST_OS)-$(LOCAL_MODULE_BITS),darwin-32)
+ifeq ($(HOST_OS)-$(HOST_BITS),darwin-32)
   LOCAL_LDLIBS += -Wl,-read_only_relocs,suppress
 endif
 

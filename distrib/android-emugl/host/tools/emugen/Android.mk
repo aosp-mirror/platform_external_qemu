@@ -13,6 +13,7 @@ LOCAL_SRC_FILES := \
     TypeFactory.cpp \
 
 LOCAL_HOST_BUILD := true
+LOCAL_INSTALL := false
 
 $(call emugl-end-module)
 
@@ -25,5 +26,6 @@ LOCAL_SRC_FILES := \
     Parser.cpp \
     Parser_unittest.cpp
 LOCAL_HOST_BUILD := true
+LOCAL_INSTALL := false
 $(call emugl-import,libemugl_gtest_host)
 $(call emugl-end-module)

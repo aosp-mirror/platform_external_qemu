@@ -89,7 +89,7 @@ EMULATOR_UNITTESTS_SOURCES += \
 
 endif
 
-$(call start-emulator-program, emulator_unittests)
+$(call start-emulator-program, emulator$(HOST_SUFFIX)_unittests)
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include  $(LIBXML2_INCLUDES)
 LOCAL_LDLIBS += $(EMULATOR_GTEST_LDLIBS) $(LIBCURL_LDLIBS) $(LIBXML2_LDLIBS)
 LOCAL_SRC_FILES := $(EMULATOR_UNITTESTS_SOURCES)
@@ -105,21 +105,6 @@ LOCAL_STATIC_LIBRARIES += \
 $(call end-emulator-program)
 
 
-$(call start-emulator64-program, emulator64_unittests)
-LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include  $(LIBXML2_INCLUDES)
-LOCAL_LDLIBS += $(EMULATOR_GTEST_LDLIBS) $(LIBCURL_LDLIBS_64) $(LIBXML2_LDLIBS_64)
-LOCAL_SRC_FILES := $(EMULATOR_UNITTESTS_SOURCES)
-LOCAL_CFLAGS += -O0 -I$(LIBCURL_INCLUDES_64)
-LOCAL_STATIC_LIBRARIES += \
-    lib64android-wear-agent \
-    emulator64-common \
-    emulator64-libext4_utils \
-    emulator64-libsparse \
-    emulator64-libselinux \
-    emulator64-zlib \
-    emulator64-libgtest
-$(call end-emulator-program)
-
 # Android skin unit tests
 
 ANDROID_SKIN_UNITTESTS := \
@@ -128,7 +113,7 @@ ANDROID_SKIN_UNITTESTS := \
     android/skin/rect_unittest.cpp \
     android/skin/region_unittest.cpp \
 
-$(call start-emulator-program, android_skin_unittests)
+$(call start-emulator-program, android$(HOST_SUFFIX)_skin_unittests)
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include
 LOCAL_LDLIBS += $(EMULATOR_GTEST_LDLIBS) $(LIBCURL_LDLIBS)
 LOCAL_SRC_FILES := $(ANDROID_SKIN_UNITTESTS)
@@ -149,27 +134,4 @@ LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
     emulator-common \
     emulator-libgtest
-$(call end-emulator-program)
-
-$(call start-emulator64-program, android64_skin_unittests)
-LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include
-LOCAL_LDLIBS += $(EMULATOR_GTEST_LDLIBS) $(LIBCURL_LDLIBS_64)
-LOCAL_SRC_FILES := $(ANDROID_SKIN_UNITTESTS)
-
-ifdef EMULATOR_USE_QT
-LOCAL_SRC_FILES += \
-    android/gps/GpxParser_unittest.cpp \
-    android/gps/internal/GpxParserInternal_unittest.cpp \
-    android/gps/internal/KmlParserInternal_unittest.cpp \
-    android/gps/KmlParser_unittest.cpp \
-
-LOCAL_C_INCLUDES += $(LIBXML2_INCLUDES)
-LOCAL_LDLIBS += $(LIBXML2_LDLIBS_64)
-endif  # EMULATOR_USE_QT
-
-LOCAL_CFLAGS += -O0 -I$(LIBCURL_INCLUDES_64)
-LOCAL_STATIC_LIBRARIES += \
-    emulator64-libui \
-    emulator64-common \
-    emulator64-libgtest
 $(call end-emulator-program)

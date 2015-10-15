@@ -43,7 +43,7 @@ host_common_CFLAGS :=
 
 
 ### host libOpenglRender #################################################
-$(call emugl-begin-host-shared-library,libOpenglRender)
+$(call emugl-begin-host-shared-library,lib$(HOST_SUFFIX)OpenglRender)
 
 $(call emugl-import,libGLESv1_dec libGLESv2_dec lib_renderControl_dec libOpenglCodecCommon)
 
@@ -59,27 +59,6 @@ LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/include
 LOCAL_STATIC_LIBRARIES += libemugl_common
 
 LOCAL_SYMBOL_FILE := render_api.entries
-
-$(call emugl-export,CFLAGS,$(host_common_CFLAGS))
-
-$(call emugl-end-module)
-
-
-### host libOpenglRender, 64-bit #########################################
-$(call emugl-begin-host64-shared-library,lib64OpenglRender)
-
-$(call emugl-import,lib64GLESv1_dec lib64GLESv2_dec lib64_renderControl_dec lib64OpenglCodecCommon)
-
-LOCAL_LDLIBS += $(host_common_LDLIBS)
-
-LOCAL_SRC_FILES := $(host_common_SRC_FILES)
-$(call emugl-export,C_INCLUDES,$(EMUGL_PATH)/host/include)
-$(call emugl-export,C_INCLUDES,$(LOCAL_PATH))
-
-# use Translator's egl/gles headers
-LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/include
-
-LOCAL_STATIC_LIBRARIES += lib64emugl_common
 
 $(call emugl-export,CFLAGS,$(host_common_CFLAGS))
 

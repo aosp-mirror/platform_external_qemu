@@ -140,12 +140,7 @@ start-emulator-library = \
     $(eval LOCAL_NO_DEFAULT_COMPILER_FLAGS := true) \
     $(eval LOCAL_MODULE := $1) \
     $(eval LOCAL_MODULE_CLASS := STATIC_LIBRARIES) \
-    $(eval LOCAL_MODULE_BITS := 32) \
     $(eval LOCAL_BUILD_FILE := $(BUILD_HOST_STATIC_LIBRARY))
-
-start-emulator64-library = \
-    $(call start-emulator-library, $1) \
-    $(eval LOCAL_MODULE_BITS := 64)
 
 # Used with start-emulator-library
 end-emulator-library = \
@@ -157,22 +152,12 @@ define-emulator-prebuilt-library = \
     $(eval LOCAL_SRC_FILES := $2) \
     $(eval $(end-emulator-module-ev)) \
 
-define-emulator64-prebuilt-library = \
-    $(call start-emulator64-library,$1) \
-    $(eval LOCAL_BUILD_FILE := $(PREBUILT_STATIC_LIBRARY)) \
-    $(eval LOCAL_SRC_FILES := $2) \
-    $(eval $(end-emulator-module-ev)) \
-
 # A variant of start-emulator-library to start the definition of a host
 # program instead. Use with end-emulator-program
 start-emulator-program = \
     $(call start-emulator-library,$1) \
     $(eval LOCAL_MODULE_CLASS := EXECUTABLES) \
     $(eval LOCAL_BUILD_FILE := $(BUILD_HOST_EXECUTABLE))
-
-start-emulator64-program = \
-    $(call start-emulator-program, $1) \
-    $(eval LOCAL_MODULE_BITS := 64)
 
 # A varient of end-emulator-library for host programs instead
 end-emulator-program = \
@@ -187,30 +172,30 @@ LOCAL_LD := $$(call my-host-tool,LD)
 LOCAL_SYMTOOL := $$(call my-host-tool,DUMPSYMS)
 
 LOCAL_CFLAGS := \
-    $$(call my-host-tool,CFLAGS$$(LOCAL_MODULE_BITS)) \
+    $$(call my-host-tool,CFLAGS$$(HOST_BITS)) \
     $$(call my-host-tool,CFLAGS) \
     $$(LOCAL_CFLAGS)
 
 LOCAL_LDFLAGS := \
-    $$(call my-host-tool,LDFLAGS$$(LOCAL_MODULE_BITS)) \
+    $$(call my-host-tool,LDFLAGS$$(HOST_BITS)) \
     $$(call my-host-tool,LDFLAGS) \
     $$(LOCAL_LDFLAGS)
 
 LOCAL_LDLIBS := \
     $$(LOCAL_LDLIBS) \
     $$(call my-host-tool,LDLIBS) \
-    $$(call my-host-tool,LDLIBS$$(LOCAL_MODULE_BITS))
+    $$(call my-host-tool,LDLIBS$$(HOST_BITS))
 
 # Ensure only one of -m32 or -m64 is being used and place it first.
 LOCAL_CFLAGS := \
-    -m$$(LOCAL_MODULE_BITS) \
+    -m$$(HOST_BITS) \
     $$(filter-out -m32 -m64, $$(LOCAL_CFLAGS))
 
 LOCAL_LDFLAGS := \
-    -m$$(LOCAL_MODULE_BITS) \
+    -m$$(HOST_BITS) \
     $$(filter-out -m32 -m64, $$(LOCAL_LDFLAGS))
 
-$$(call include-if-bitness-$$(LOCAL_MODULE_BITS), $$(LOCAL_BUILD_FILE))
+include $$(LOCAL_BUILD_FILE)
 endef
 
 # The common libraries
@@ -239,15 +224,24 @@ endif
 ifeq ($(HOST_OS),darwin)
   QEMU_SYSTEM_LDLIBS += -Wl,-framework,Cocoa,-framework,QTKit,-framework,CoreVideo,-framework,AVFoundation
 
-  # Required to avoid compilation errors when targetting i386 with newer
-  # XCode toolchain.
-  MY_LDFLAGS32 += -Wl,-read_only_relocs,suppress
-
   # SDK 10.6+ doesn't have __dyld_func_lookup anymore. Dynamic library lookup
   # symbols are instead resolved at runtime
   QEMU_SYSTEM_LDLIBS += -undefined dynamic_lookup
 endif
 
+ifdef EMULATOR_BUILD_32BITS
+HOST_BITS := 32
+HOST_ARCH := x86
+HOST_SUFFIX :=
 include $(LOCAL_PATH)/Makefile.common.mk
+endif
+
+ifdef EMULATOR_BUILD_64BITS
+HOST_BITS := 64
+HOST_ARCH := x86_64
+HOST_SUFFIX := 64
+
+include $(LOCAL_PATH)/Makefile.common.mk
+endif
 
 ## VOILA!!

@@ -253,13 +253,6 @@ $(call gen-hw-config-defs)
 $(call gen-hx-header,qemu-options.hx,qemu-options.def,os-posix.c os-win32.c)
 $(call end-emulator-library)
 
-$(call start-emulator64-library, emulator64-target-$(EMULATOR_TARGET_CPU))
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-$(call gen-hw-config-defs)
-$(call gen-hx-header,qemu-options.hx,qemu-options.def,os-posix.c os-win32.c)
-$(call end-emulator-library)
-
 ##############################################################################
 ##############################################################################
 ###
@@ -268,16 +261,12 @@ $(call end-emulator-library)
 ###
 
 common_LOCAL_LDFLAGS =
-common_LOCAL_LDFLAGS_64 =
 common_LOCAL_LDLIBS =
 common_LOCAL_CFLAGS =
 common_LOCAL_SRC_FILES =
 
 common_LOCAL_LDFLAGS += \
     $(EMULATOR_LIBUI_LDFLAGS)
-
-common_LOCAL_LDFLAGS_64 += \
-    $(EMULATOR_LIBUI_LDFLAGS_64)
 
 common_LOCAL_LDLIBS += \
     $(EMULATOR_COMMON_LDLIBS) \
@@ -336,8 +325,8 @@ common_LOCAL_CFLAGS    += $(BLOCK_CFLAGS)
 
 common_LOCAL_LDLIBS += $(CXX_STD_LIB)
 
-## one for 32-bit
-$(call start-emulator-program, emulator-$(EMULATOR_TARGET_ARCH))
+## 
+$(call start-emulator-program, emulator$(HOST_SUFFIX)-$(EMULATOR_TARGET_ARCH))
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
     emulator-libqemu \
@@ -358,39 +347,6 @@ LOCAL_LDFLAGS += $(common_LOCAL_LDFLAGS)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES)
 LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES)
 LOCAL_CFLAGS += -I$(BREAKPAD_INCLUDES)
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-LOCAL_GENERATE_SYMBOLS := true
-$(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)
-$(call gen-hw-config-defs)
-
-ifeq ($(HOST_OS),windows)
-  $(eval $(call insert-windows-icon))
-endif
-
-$(call end-emulator-program)
-
-
-$(call start-emulator64-program, emulator64-$(EMULATOR_TARGET_ARCH))
-LOCAL_STATIC_LIBRARIES += \
-    emulator64-libui \
-    emulator64-libqemu \
-    emulator64-target-$(EMULATOR_TARGET_CPU) \
-    emulator64-libjpeg \
-    lib64android-wear-agent \
-    emulator64-common \
-    emulator64-libext4_utils \
-    emulator64-libsparse \
-    emulator64-libselinux \
-    emulator64-zlib \
-    $(EMULATOR_LIBUI_STATIC_LIBRARIES_64)
-
-LOCAL_LDLIBS += $(common_LOCAL_LDLIBS) $(ANDROID_SKIN_LDLIBS_64) $(LIBCURL_LDLIBS_64)
-LOCAL_LDLIBS += $(LIBXML2_LDLIBS_64)
-LOCAL_LDLIBS += $(BREAKPAD_LDLIBS_64)
-LOCAL_LDFLAGS += $(common_LOCAL_LDFLAGS_64)
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES_64)
-LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES)
-LOCAL_CFLAGS += -I$(BREAKPAD_INCLUDES_64)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 LOCAL_GENERATE_SYMBOLS := true
 $(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)

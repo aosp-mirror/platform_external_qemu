@@ -7,6 +7,8 @@
 # Top-level for all modules
 EMUGL_PATH := $(call my-dir)
 
+EMUGL_OLD_LOCAL_PATH := $(LOCAL_PATH)
+
 # Directory containing common headers used by several modules
 # This is always set to a module's LOCAL_C_INCLUDES
 # See the definition of emugl-begin-module in common.mk
@@ -95,3 +97,5 @@ include $(EMUGL_PATH)/host/libs/Translator/EGL/Android.mk
 
 # Host shared libraries
 include $(EMUGL_PATH)/host/libs/libOpenglRender/Android.mk
+
+LOCAL_PATH := $(EMUGL_OLD_LOCAL_PATH)

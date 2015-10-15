@@ -30,12 +30,5 @@ LOCAL_CFLAGS += -O0
 LOCAL_SRC_FILES := $(EMULATOR_GTEST_SOURCES)
 $(call end-emulator-library)
 
-$(call start-emulator64-library, emulator64-libgtest)
-LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES)
-LOCAL_CPP_EXTENSION := .cc
-LOCAL_CFLAGS += -O0
-LOCAL_SRC_FILES := $(EMULATOR_GTEST_SOURCES)
-$(call end-emulator-library)
-
 LOCAL_PATH := $(old_LOCAL_PATH)
 

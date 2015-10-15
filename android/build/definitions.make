@@ -64,25 +64,22 @@ local-host-define = $(if $(strip $(LOCAL_$1)),,$(eval LOCAL_$1 := $$(call local-
 
 # Return the directory containing the intermediate files for the current
 # module. LOCAL_MODULE must be defined before calling this.
-local-intermediates-dir = $(call intermediates-dir-for,$(LOCAL_MODULE_BITS),$(LOCAL_MODULE))
-
-# Return $1, except if LOCAL_MODULE_BITS is 64, where $2 is returned.
-local-bits-choice = $(strip $(if $(filter 64,$(LOCAL_MODULE_BITS)),$2,$1))
+local-intermediates-dir = $(call intermediates-dir-for,$(HOST_BITS),$(LOCAL_MODULE))
 
 # Location of intermediate static libraries during build.
-local-library-path = $(call intermediates-dir-for,$(LOCAL_MODULE_BITS),$(1))/$(1).a
+local-library-path = $(call intermediates-dir-for,$(HOST_BITS),$(1))/$(1).a
 
 # Location of unstripped executables during build.
-local-executable-path = $(call intermediates-dir-for,$(LOCAL_MODULE_BITS),$(1))/$(1)$(call local-host-tool,EXEEXT)
+local-executable-path = $(call intermediates-dir-for,$(HOST_BITS),$(1))/$(1)$(call local-host-tool,EXEEXT)
 
 # Location of unstripped shared libraries during build.
-local-shared-library-path = $(call intermediates-dir-for,$(LOCAL_MODULE_BITS),$(1))/$(1)$(call local-host-tool,DLLEXT)
+local-shared-library-path = $(call intermediates-dir-for,$(HOST_BITS),$(1))/$(1)$(call local-host-tool,DLLEXT)
 
 # Location of final (potentially stripped) executables.
 local-executable-install-path = $(OBJS_DIR)/$(1)$(call local-host-tool,EXEEXT)
 
 # Location of final (potentially stripped) shared libraries.
-local-shared-library-install-path = $(OBJS_DIR)/$(call local-bits-choice,lib,lib64)/$(1)$(call local-host-tool,DLLEXT)
+local-shared-library-install-path = $(OBJS_DIR)/lib$(HOST_SUFFIX)/$(1)$(call local-host-tool,DLLEXT)
 
 # Expand to a shell statement that changes the runtime library search path.
 # Note that this is only used for Qt-related stuff, and on Windows, the

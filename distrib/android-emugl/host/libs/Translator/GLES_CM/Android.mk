@@ -8,14 +8,7 @@ host_common_SRC_FILES := \
 
 
 ### GLES_CM host implementation (On top of OpenGL) ########################
-$(call emugl-begin-host-shared-library,libGLES_CM_translator)
+$(call emugl-begin-host-shared-library,lib$(HOST_SUFFIX)GLES_CM_translator)
 $(call emugl-import,libGLcommon)
-LOCAL_SRC_FILES := $(host_common_SRC_FILES)
-$(call emugl-end-module)
-
-
-### GLES_CM host implementation, 64-bit ########################
-$(call emugl-begin-host64-shared-library,lib64GLES_CM_translator)
-$(call emugl-import,lib64GLcommon)
 LOCAL_SRC_FILES := $(host_common_SRC_FILES)
 $(call emugl-end-module)
