@@ -254,7 +254,7 @@ include $(LOCAL_PATH)/distrib/libsparse/sources.mk
 include $(LOCAL_PATH)/distrib/libselinux/sources.mk
 include $(LOCAL_PATH)/distrib/ext4_utils/sources.mk
 
-include $(LOCAL_PATH)/Makefile.common
+include $(LOCAL_PATH)/Makefile.qemu1-common.mk
 
 ifeq ($(HOST_OS),windows)
   # on Windows, link the icon file as well into the executable
@@ -282,24 +282,24 @@ endif
 # We want to build all variants of the emulator binaries. This makes
 # it easier to catch target-specific regressions during emulator development.
 EMULATOR_TARGET_ARCH := arm
-include $(LOCAL_PATH)/Makefile.target
+include $(LOCAL_PATH)/Makefile.qemu1-target.mk
 
 # Note: the same binary handles x86 and x86_64
 EMULATOR_TARGET_ARCH := x86
-include $(LOCAL_PATH)/Makefile.target
-include $(LOCAL_PATH)/Makefile.qemu-launcher
+include $(LOCAL_PATH)/Makefile.qemu1-target.mk
+include $(LOCAL_PATH)/Makefile.qemu-launcher.mk
 
 EMULATOR_TARGET_ARCH := x86_64
-include $(LOCAL_PATH)/Makefile.qemu-launcher
+include $(LOCAL_PATH)/Makefile.qemu-launcher.mk
 
 EMULATOR_TARGET_ARCH := mips
-include $(LOCAL_PATH)/Makefile.target
+include $(LOCAL_PATH)/Makefile.qemu1-target.mk
 
 EMULATOR_TARGET_ARCH := mips64
-include $(LOCAL_PATH)/Makefile.qemu-launcher
+include $(LOCAL_PATH)/Makefile.qemu-launcher.mk
 
 EMULATOR_TARGET_ARCH := arm64
-include $(LOCAL_PATH)/Makefile.qemu-launcher
+include $(LOCAL_PATH)/Makefile.qemu-launcher.mk
 
 ##############################################################################
 ##############################################################################
@@ -343,7 +343,7 @@ endif
 
 $(call end-emulator-program)
 
-include $(LOCAL_PATH)/Makefile.tests
+include $(LOCAL_PATH)/Makefile.tests.mk
 
 ##############################################################################
 ##############################################################################

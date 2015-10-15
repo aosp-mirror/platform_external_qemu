@@ -65,7 +65,7 @@ clean: clean-intermediates
 distclean: clean clean-config
 
 # let's roll
-include Makefile.android
+include Makefile.top.mk
 
 libraries: $(LIBRARIES)
 executables: $(EXECUTABLES)
