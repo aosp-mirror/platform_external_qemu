@@ -2,6 +2,91 @@
   "comments": [
     {
       "key": {
+        "uuid": "99ae8a64_00e27a87",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-15T23:38:30Z",
+      "side": 1,
+      "message": "I\u0027d like to have some parentheses here.\n*(emulator-\u003eopts) \u003d *opts;\nAfter only a few decades of using C, I\u0027m not confident\nthat I remember the operator precedence. (And I\u0027m even\nless confident that \"the other guy\" remembers.)",
+      "revId": "f7a37a256c98e71f2fd4216adee07e72327fd313",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d952c250_c12c9837",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-15T23:38:30Z",
+      "side": 1,
+      "message": "s/to reset/so reset/ ?",
+      "revId": "f7a37a256c98e71f2fd4216adee07e72327fd313",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d952c250_0137b07d",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-15T23:38:30Z",
+      "side": 1,
+      "message": "This sounds painful to track down!",
+      "revId": "f7a37a256c98e71f2fd4216adee07e72327fd313",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9bdc694_f58843b6",
+        "filename": "android/skin/ui.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-15T23:38:30Z",
+      "side": 1,
+      "message": "nit: no \u0027 in possessive \"its\" (twice)",
+      "revId": "f7a37a256c98e71f2fd4216adee07e72327fd313",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9b786e1_7919e7be",
+        "filename": "android/skin/window.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1430,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-15T23:38:30Z",
+      "side": 1,
+      "message": "If the size is unchanged, we do not updated the position.\nIs this OK?",
+      "revId": "f7a37a256c98e71f2fd4216adee07e72327fd313",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "99f12aa5_d4ae14d2",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/render_api.cpp",
         "patchSetId": 6
