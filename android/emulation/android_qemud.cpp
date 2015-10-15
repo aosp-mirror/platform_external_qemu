@@ -271,7 +271,15 @@ _qemudPipe_poll(void* opaque) {
 
 static void
 _qemudPipe_wakeOn(void* opaque, int flags) {
+    QemudPipe* qemud_pipe = (QemudPipe*) opaque;
+    QemudClient* c = qemud_pipe->client;
     D("%s: -> %X", __FUNCTION__, flags);
+    if (flags & PIPE_WAKE_READ) {
+        if (c->ProtocolSelector.Pipe.messages != NULL) {
+            android_pipe_wake(c->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
+                              PIPE_WAKE_READ);
+        }
+    }
 }
 
 static void _qemudPipe_save(void* opaque, Stream* f) {
