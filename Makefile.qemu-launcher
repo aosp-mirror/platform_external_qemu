@@ -28,7 +28,7 @@ qemu_launcher_SOURCES := \
 qemu_launcher_CFLAGS := \
     -DNO_SKIN=1 \
     -D$(TARGET_VARNAME_$(EMULATOR_TARGET_CPU))=1 \
-    -I$(OBJS_DIR)
+    -I$(OBJS_DIR)/build
 
 qemu_launcher_LDLIBS := $(CXX_STD_LIB)
 
