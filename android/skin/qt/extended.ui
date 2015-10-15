@@ -49,7 +49,7 @@ font-family: &quot;Roboto&quot;</string>
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="currentIndex">
-    <number>5</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="location_page">
     <widget class="QGroupBox" name="locationGroup">
@@ -1379,7 +1379,7 @@ font-family: &quot;Roboto&quot;</string>
         </rect>
        </property>
        <property name="text">
-        <string>Resulting Accelerometer Values (m/s²):</string>
+        <string>Resulting accelerometer values (m/s²):</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1395,7 +1395,7 @@ font-family: &quot;Roboto&quot;</string>
         </rect>
        </property>
        <property name="text">
-        <string>Resulting Magnetometer Values (μT):</string>
+        <string>Resulting magnetometer values (μT):</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1500,7 +1500,7 @@ font-family: &quot;Roboto&quot;</string>
      </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
-       <string>Additional Sensors</string>
+       <string>Additional sensors</string>
       </attribute>
       <widget class="QLabel" name="label_4">
        <property name="geometry">
@@ -1512,7 +1512,7 @@ font-family: &quot;Roboto&quot;</string>
         </rect>
        </property>
        <property name="text">
-        <string>Ambient Temperature (°C)</string>
+        <string>Ambient temperature (°C)</string>
        </property>
       </widget>
       <widget class="EditableSliderWidget" name="temperatureSensorValueWidget" native="true">
@@ -1551,20 +1551,20 @@ font-family: &quot;Roboto&quot;</string>
       <widget class="QLabel" name="label_7">
        <property name="geometry">
         <rect>
-         <x>330</x>
+         <x>350</x>
          <y>30</y>
          <width>170</width>
          <height>15</height>
         </rect>
        </property>
        <property name="text">
-        <string>Magnetic Field (μT)</string>
+        <string>Magnetic field (μT)</string>
        </property>
       </widget>
       <widget class="QWidget" name="horizontalLayoutWidget">
        <property name="geometry">
         <rect>
-         <x>330</x>
+         <x>350</x>
          <y>50</y>
          <width>220</width>
          <height>40</height>
@@ -1587,6 +1587,9 @@ font-family: &quot;Roboto&quot;</string>
           <property name="text">
            <string>22.0</string>
           </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
           <property name="class" stdset="0">
            <string>EditableValue</string>
           </property>
@@ -1605,6 +1608,9 @@ font-family: &quot;Roboto&quot;</string>
           <property name="text">
            <string>5.9</string>
           </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
           <property name="class" stdset="0">
            <string>EditableValue</string>
           </property>
@@ -1622,6 +1628,9 @@ font-family: &quot;Roboto&quot;</string>
           </property>
           <property name="text">
            <string>43.1</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
           <property name="class" stdset="0">
            <string>EditableValue</string>
@@ -2050,88 +2059,6 @@ font-family: &quot;Roboto&quot;</string>
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="sd_page">
-    <widget class="QGroupBox" name="sd_group">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>91</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>SD card</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="sd_pullPushButton">
-     <property name="geometry">
-      <rect>
-       <x>360</x>
-       <y>40</y>
-       <width>36</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string notr="true"/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/light/file_upload</normaloff>:/light/file_upload</iconset>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string>file_upload</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="sd_pushPushButton">
-     <property name="geometry">
-      <rect>
-       <x>240</x>
-       <y>40</y>
-       <width>36</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string notr="true"/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/light/file_download</normaloff>:/light/file_download</iconset>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string>file_download</string>
-     </property>
-    </widget>
-    <widget class="QTreeView" name="sd_treeView">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>80</y>
-       <width>611</width>
-       <height>611</height>
-      </rect>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOn</enum>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOn</enum>
-     </property>
-    </widget>
-   </widget>
    <widget class="QWidget" name="page_6">
     <widget class="QGroupBox" name="recordScrGroup">
      <property name="geometry">
@@ -2293,7 +2220,7 @@ font-family: &quot;Roboto&quot;</string>
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignLeading|AlignVCenter</set>
+       <set>AlignLeft|AlignVCenter</set>
       </property>
       <property name="flags">
        <set>NoItemFlags</set>
@@ -2472,6 +2399,9 @@ font-family: &quot;Roboto&quot;</string>
      </property>
     </widget>
     <widget class="QPlainTextEdit" name="set_adbPortBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -2515,30 +2445,6 @@ font-family: &quot;Roboto&quot;</string>
      </property>
      <property name="title">
       <string>Emulator window theme</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="gpuAccelTitle">
-     <property name="geometry">
-      <rect>
-       <x>360</x>
-       <y>40</y>
-       <width>181</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Emulator GPU acceleration</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Title</string>
@@ -2703,26 +2609,6 @@ font-family: &quot;Roboto&quot;</string>
      <property name="ColorGroup" stdset="0">
       <string>Title</string>
      </property>
-    </widget>
-    <widget class="QComboBox" name="set_gpuAccelBox">
-     <property name="geometry">
-      <rect>
-       <x>360</x>
-       <y>70</y>
-       <width>181</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <item>
-      <property name="text">
-       <string>Hardware (OpenGL ES)</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Software emulation</string>
-      </property>
-     </item>
     </widget>
     <widget class="QGroupBox" name="adbPortTitle">
      <property name="geometry">
@@ -3000,50 +2886,6 @@ font-family: &quot;Roboto&quot;</string>
     <string>MajorTab</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="sdButton">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>416</y>
-     <width>220</width>
-     <height>44</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-   <property name="autoFillBackground">
-    <bool>false</bool>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
-   </property>
-   <property name="text">
-    <string>  SD card</string>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/sd_storage</normaloff>:/light/sd_storage</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>20</width>
-     <height>20</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string>sd_storage</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>MajorTab</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="cameraButton">
    <property name="geometry">
     <rect>
@@ -3246,7 +3088,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>592</y>
+     <y>548</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -3293,7 +3135,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>636</y>
+     <y>592</y>
      <width>220</width>
      <height>151</height>
     </rect>
@@ -3327,7 +3169,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>460</y>
+     <y>416</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -3364,7 +3206,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>548</y>
+     <y>504</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -3408,7 +3250,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>504</y>
+     <y>460</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -3501,7 +3343,6 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>hwSensorsButton</tabstop>
   <tabstop>dpadButton</tabstop>
   <tabstop>fingerButton</tabstop>
-  <tabstop>sdButton</tabstop>
   <tabstop>recordScrButton</tabstop>
   <tabstop>kbdShortsButton</tabstop>
   <tabstop>settingsButton</tabstop>
@@ -3524,16 +3365,12 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>cell_dataStatusBox</tabstop>
   <tabstop>cell_signalStrengthSlider</tabstop>
   <tabstop>finger_IdBox</tabstop>
-  <tabstop>sd_treeView</tabstop>
-  <tabstop>sd_pushPushButton</tabstop>
-  <tabstop>sd_pullPushButton</tabstop>
   <tabstop>bat_healthBox</tabstop>
   <tabstop>additionalButton</tabstop>
   <tabstop>set_adbPortBox</tabstop>
   <tabstop>set_versionBox</tabstop>
   <tabstop>set_themeBox</tabstop>
   <tabstop>set_imageVersionBox</tabstop>
-  <tabstop>set_gpuAccelBox</tabstop>
   <tabstop>bat_levelSlider</tabstop>
   <tabstop>bat_chargeCkBox</tabstop>
   <tabstop>cell_sigStrengthText</tabstop>

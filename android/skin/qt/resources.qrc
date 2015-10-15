@@ -86,7 +86,6 @@
      <file alias="play_arrow_disabled">images/light/ic_play_arrow_BEE_48dp.svg</file>
      <file alias="remove">images/light/ic_remove_678_48dp.svg</file>
      <file alias="remove_disabled">images/light/ic_remove_BEE_48dp.svg</file>
-     <file alias="sd_storage">images/light/ic_sd_storage_678_48dp.svg</file>
      <file alias="send">images/light/ic_send_0BA_48dp.svg</file>
      <file alias="settings">images/light/ic_settings_678_48dp.svg</file>
      <file alias="signal_cellular_3_bar">images/light/ic_signal_cellular_3_bar_678_48dp.svg</file>
@@ -159,7 +158,6 @@
      <file alias="play_arrow_disabled">images/dark/ic_play_arrow_155_48dp.svg</file>
      <file alias="remove">images/dark/ic_remove_677_48dp.svg</file>
      <file alias="remove_disabled">images/dark/ic_remove_155_48dp.svg</file>
-     <file alias="sd_storage">images/dark/ic_sd_storage_677_48dp.svg</file>
      <file alias="send">images/dark/ic_send_0BA_48dp.svg</file>
      <file alias="settings">images/dark/ic_settings_677_48dp.svg</file>
      <file alias="signal_cellular_3_bar">images/dark/ic_signal_cellular_3_bar_677_48dp.svg</file>

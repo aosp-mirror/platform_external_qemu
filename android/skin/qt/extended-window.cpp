@@ -51,7 +51,6 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     initFinger();
     initKbdShorts();
     initLocation();
-    initSd();
     initSettings();
     initSms();
     initTelephony();
@@ -100,7 +99,6 @@ void ExtendedWindow::on_hwSensorsButton_clicked()   { adjustTabs(mExtendedUi->hw
 void ExtendedWindow::on_kbdShortsButton_clicked()   { adjustTabs(mExtendedUi->kbdShortsButton,   PANE_IDX_KBD_SHORTS); }
 void ExtendedWindow::on_locationButton_clicked()    { adjustTabs(mExtendedUi->locationButton,    PANE_IDX_LOCATION); }
 void ExtendedWindow::on_recordScrButton_clicked()   { adjustTabs(mExtendedUi->recordScrButton,   PANE_IDX_RECORD_SCR); }
-void ExtendedWindow::on_sdButton_clicked()          { adjustTabs(mExtendedUi->sdButton,          PANE_IDX_SD); }
 void ExtendedWindow::on_settingsButton_clicked()    { adjustTabs(mExtendedUi->settingsButton,    PANE_IDX_SETTINGS); }
 void ExtendedWindow::on_telephoneButton_clicked()   { adjustTabs(mExtendedUi->telephoneButton,   PANE_IDX_TELEPHONE); }
 void ExtendedWindow::on_virtSensorsButton_clicked() { adjustTabs(mExtendedUi->virtSensorsButton, PANE_IDX_VIRT_SENSORS); }
@@ -126,7 +124,6 @@ void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
     mExtendedUi->kbdShortsButton  ->setStyleSheet(colorStyle);
     mExtendedUi->locationButton   ->setStyleSheet(colorStyle);
     mExtendedUi->recordScrButton  ->setStyleSheet(colorStyle);
-    mExtendedUi->sdButton         ->setStyleSheet(colorStyle);
     mExtendedUi->settingsButton   ->setStyleSheet(colorStyle);
     // Omit "spacer buttons" -- The main style sheet handles them
     mExtendedUi->telephoneButton  ->setStyleSheet(colorStyle);
@@ -150,7 +147,6 @@ void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
     mExtendedUi->kbdShortsButton  ->setAutoFillBackground(true);
     mExtendedUi->locationButton   ->setAutoFillBackground(true);
     mExtendedUi->recordScrButton  ->setAutoFillBackground(true);
-    mExtendedUi->sdButton         ->setAutoFillBackground(true);
     mExtendedUi->settingsButton   ->setAutoFillBackground(true);
     mExtendedUi->spacer1Button    ->setAutoFillBackground(true);
     mExtendedUi->spacer2Button    ->setAutoFillBackground(true);

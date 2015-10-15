@@ -27,7 +27,6 @@ enum { PANE_IDX_LOCATION = 0,
        PANE_IDX_HW_SENSORS,
        PANE_IDX_DPAD,
        PANE_IDX_FINGER,
-       PANE_IDX_SD,
        PANE_IDX_RECORD_SCR,
        PANE_IDX_KBD_SHORTS,
        PANE_IDX_SETTINGS };
@@ -92,7 +91,9 @@ enum { PANE_IDX_LOCATION = 0,
     "*[ColorGroup=\"SliderLabel\"]  { color:" THEME##_DIVIDER_COLOR "; font-size: 9pt }" \
     "*                               { color:" THEME##_TEXT_COLOR ";" \
                                       "background-color: " THEME##_BKG_COLOR "}" \
-    "QPlainTextEdit, QTextEdit, QLineEdit, QTreeView {" \
+    "QPlainTextEdit:disabled, QTextEdit:disabled, QLineEdit:disabled {" \
+            "border: 0px}" \
+    "QPlainTextEdit, QTextEdit, QLineEdit {" \
             "border-top: 0px; "\
             "border-bottom: 2px solid " THEME##_DIVIDER_COLOR "}" \
     "QCheckBox::indicator:checked {" \
