@@ -28,7 +28,7 @@
 
 # First, define a rule to generate a dummy "emulator_hw_config_defs" module
 # which purpose is simply to host the generated header in its output directory.
-intermediates := $(call intermediates-dir-for,SHARED_LIBRARIES,emulator_hw_config_defs,true)
+intermediates := $(call intermediates-dir-for,,emulator_hw_config_defs)
 
 QEMU_HARDWARE_PROPERTIES_INI := $(LOCAL_PATH)/android/avd/hardware-properties.ini
 QEMU_HW_CONFIG_DEFS_H := $(intermediates)/android/avd/hw-config-defs.h
@@ -761,7 +761,7 @@ $(call start-emulator-library, emulator-libqemu)
 # gdbstub-xml.c contains C-compilable arrays corresponding to the content
 # of $(LOCAL_PATH)/gdb-xml/, and is generated with the 'feature_to_c.sh' script.
 #
-intermediates = $(call intermediates-dir-for,STATIC_LIBRARIES,$(LOCAL_MODULE),true)
+intermediates = $(call local-intermediates-dir)
 QEMU_GDBSTUB_XML_C = $(intermediates)/gdbstub-xml.c
 $(QEMU_GDBSTUB_XML_C): PRIVATE_PATH := $(LOCAL_PATH)
 $(QEMU_GDBSTUB_XML_C): PRIVATE_SOURCES := $(TARGET_XML_SOURCES)
@@ -781,7 +781,7 @@ $(call start-emulator64-library, emulator64-libqemu)
 # gdbstub-xml.c contains C-compilable arrays corresponding to the content
 # of $(LOCAL_PATH)/gdb-xml/, and is generated with the 'feature_to_c.sh' script.
 #
-intermediates = $(call intermediates-dir-for,STATIC_LIBRARIES,$(LOCAL_MODULE),true)
+intermediates = $(call local-intermediates-dir)
 QEMU_GDBSTUB_XML_C = $(intermediates)/gdbstub-xml.c
 $(QEMU_GDBSTUB_XML_C): PRIVATE_PATH := $(LOCAL_PATH)
 $(QEMU_GDBSTUB_XML_C): PRIVATE_SOURCES := $(TARGET_XML_SOURCES)
@@ -883,7 +883,7 @@ $(call end-emulator-library)
 gen-hx-header = $(eval $(call gen-hx-header-ev,$1,$2,$3))
 
 define gen-hx-header-ev
-intermediates := $$(call intermediates-dir-for,$$(LOCAL_MODULE_CLASS),$$(LOCAL_MODULE),true)
+intermediates := $$(call local-intermediates-dir)
 
 QEMU_HEADER_H := $$(intermediates)/$$2
 $$(QEMU_HEADER_H): PRIVATE_PATH := $$(LOCAL_PATH)
