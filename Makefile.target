@@ -319,6 +319,7 @@ common_LOCAL_SRC_FILES := \
     android-qemu1-glue/qemu-user-event-agent-impl.c \
     android-qemu1-glue/qemu-vm-operations-impl.c \
     android-qemu1-glue/qemu-net-agent-impl.c \
+    android-qemu1-glue/qemu-display-agent-impl.cpp \
     android/qt/qt_path.cpp \
     hw/core/loader.c \
     ui/keymaps.c \

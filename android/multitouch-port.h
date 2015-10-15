@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/sdk-controller-socket.h"
 
@@ -83,7 +84,8 @@ typedef struct AndroidMTSPort AndroidMTSPort;
  */
 extern AndroidMTSPort* mts_port_create(
         void* opaque,
-        const QAndroidUserEventAgent* user_event_agent);
+        const QAndroidUserEventAgent* user_event_agent,
+        const QAndroidDisplayAgent* display_agent);
 
 /* Disconnects from the multi-touch port, and destroys the descriptor. */
 extern void mts_port_destroy(AndroidMTSPort* amtp);

@@ -3934,7 +3934,7 @@ int main(int argc, char **argv, char **envp)
 
         /* Initialize multi-touch emulation. */
         if (androidHwConfig_isScreenMultiTouch(android_hw)) {
-            mts_port_create(NULL, gQAndroidUserEventAgent);
+            mts_port_create(NULL, gQAndroidUserEventAgent, gQAndroidDisplayAgent);
         }
 
         stralloc_reset(kernel_params);

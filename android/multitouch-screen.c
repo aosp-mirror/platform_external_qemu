@@ -22,7 +22,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 
-#include "ui/console.h"
+#include <assert.h>
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
@@ -59,10 +59,10 @@ typedef struct MTSPointerState {
 
 /* Describes state of an emulated multi-touch screen. */
 typedef struct MTSState {
+    /* Android display interface */
+    QAndroidDisplayAgent display_agent;
     /* Multi-touch port connected to the device. */
     AndroidMTSPort* mtsp;
-    /* Emulator's display state. */
-    DisplayState*   ds;
     /* Number of tracked pointers. */
     int             tracked_ptr_num;
     /* Index in the 'tracked_pointers' array of the last pointer for which
@@ -87,7 +87,7 @@ typedef struct MTSState {
 } MTSState;
 
 /* Default multi-touch screen descriptor */
-static MTSState _MTSState = { 0 };
+static MTSState _MTSState = { };
 
 /* Our very own stash of a pointer to the device that handles user events. */
 static const QAndroidUserEventAgent* _UserEventAgent;
@@ -333,7 +333,6 @@ static void
 _mt_fb_update(void* opaque, int x, int y, int w, int h)
 {
     MTSState* const mts_state = (MTSState*)opaque;
-    const DisplaySurface* const surface = mts_state->ds->surface;
 
     T("Multi-touch: Software renderer framebuffer update: %d:%d -> %dx%d",
       x, y, w, h);
@@ -341,11 +340,12 @@ _mt_fb_update(void* opaque, int x, int y, int w, int h)
     /* TODO: For sofware renderer general framebuffer properties can change on
      * the fly. Find a callback that can catch that. For now, just copy FB
      * properties over in every FB update. */
-    mts_state->fb_header.bpp = surface->pf.bytes_per_pixel;
-    mts_state->fb_header.bpl = surface->linesize;
-    mts_state->fb_header.disp_width = surface->width;
-    mts_state->fb_header.disp_height = surface->height;
-    mts_state->current_fb = surface->data;
+    mts_state->display_agent.getFrameBuffer(
+            &mts_state->fb_header.disp_width,
+            &mts_state->fb_header.disp_height,
+            &mts_state->fb_header.bpl,
+            &mts_state->fb_header.bpp,
+            &mts_state->current_fb);
     mts_state->ydir = 1;
 
     _mt_fb_common_update(mts_state, x, y, w, h);
@@ -417,11 +417,10 @@ multitouch_fb_updated(void)
 }
 
 void multitouch_init(AndroidMTSPort* mtsp,
-                     const QAndroidUserEventAgent* user_event_agent) {
+                     const QAndroidUserEventAgent* user_event_agent,
+                     const QAndroidDisplayAgent* display_agent) {
     if (!_is_mt_initialized) {
         MTSState* const mts_state = &_MTSState;
-        DisplayState* const ds = get_displaystate();
-        DisplayUpdateListener* dul;
         int index;
 
         /* Stash away interface objects. */
@@ -441,25 +440,26 @@ void multitouch_init(AndroidMTSPort* mtsp,
         mts_state->fb_header.header_size = sizeof(MTFrameHeader);
         mts_state->fb_transfer_in_progress = 0;
 
+        mts_state->display_agent = *display_agent;
+
+        /* Initialize framebuffer information in the screen descriptor. */
+
+        mts_state->fb_header.x = mts_state->fb_header.y = 0;
+        mts_state->fb_header.w = mts_state->fb_header.h = 0;
+        mts_state->fb_transfer_in_progress = 0;
+
+        mts_state->display_agent.getFrameBuffer(
+                &mts_state->fb_header.disp_width,
+                &mts_state->fb_header.disp_height,
+                &mts_state->fb_header.bpl,
+                &mts_state->fb_header.bpp,
+                NULL);
+
         /*
          * Set framebuffer update listener.
          */
 
-        ANEW0(dul);
-        dul->opaque = &_MTSState;
-        dul->dpy_update = _mt_fb_update;
-
-        /* Initialize framebuffer information in the screen descriptor. */
-        mts_state->ds = ds;
-        mts_state->fb_header.disp_width = ds->surface->width;
-        mts_state->fb_header.disp_height = ds->surface->height;
-        mts_state->fb_header.x = mts_state->fb_header.y = 0;
-        mts_state->fb_header.w = mts_state->fb_header.h = 0;
-        mts_state->fb_header.bpp = ds->surface->pf.bytes_per_pixel;
-        mts_state->fb_header.bpl = ds->surface->linesize;
-        mts_state->fb_transfer_in_progress = 0;
-
-        register_displayupdatelistener(ds, dul);
+        mts_state->display_agent.registerUpdateListener(&_mt_fb_update, mts_state);
 
         _is_mt_initialized = 1;
     }
