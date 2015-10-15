@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d952c250_61e02c81",
+        "filename": "android/utils/ini.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-15T22:58:50Z",
+      "side": 1,
+      "message": "Not anymore.\n\nIn the new patchset, I\u0027m doing the lookup twice: I run through the iterators till the index, and then do a map lookup.\n\nThis is slightly worse than the old implementation where there was just one link-list walk.\n\nOTOH, walking a vector iterator might actually be cheaper.\n\nIn any case, I don\u0027t think this is a bottleneck anywhere, and I\u0027m willing to accept that penalty just for the C interface.",
+      "parentUuid": "dfb462b2_e35e497e",
+      "range": {
+        "startLine": 64,
+        "startChar": 38,
+        "endLine": 64,
+        "endChar": 43
+      },
+      "revId": "4aa23fa2c3c0c43d0bae271a3c761d771f414e97",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9fae6a64_6dc566c5",
         "filename": "android/utils/ini.cpp",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2015-10-14T16:43:45Z",
       "side": 1,
       "message": "typo",
+      "range": {
+        "startLine": 68,
+        "startChar": 56,
+        "endLine": 68,
+        "endChar": 63
+      },
+      "revId": "4aa23fa2c3c0c43d0bae271a3c761d771f414e97",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1927faf5_33105a65",
+        "filename": "android/utils/ini.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-15T22:58:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9fae6a64_6dc566c5",
       "range": {
         "startLine": 68,
         "startChar": 56,
