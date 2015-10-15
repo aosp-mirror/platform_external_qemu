@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7992b615_9d6b43db",
+        "filename": "android-qemu1-glue/qemu-setup.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-15T13:32:08Z",
+      "side": 1,
+      "message": "ah ah, I love this :-)",
+      "revId": "0b87a3862a0aeb88d0d8ff1e6176f6105587e49e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
