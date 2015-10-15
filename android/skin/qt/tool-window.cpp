@@ -16,6 +16,7 @@
 #include "android/android.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
+#include "android/globals.h"
 #include "android/main-common.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -185,7 +186,15 @@ void ToolWindow::on_close_button_clicked()
 }
 void ToolWindow::on_home_button_clicked()
 {
-    emulator_window->simulateKeyPress(KEY_HOME, 0);
+    if ( !strcmp("Generic", android_hw->hw_keyboard_charmap) ) {
+        // The 'Generic' keyboard moved the HOME key! 'Generic' has HOME
+        // on we call HOMEPAGE. Beause 'Generic' is in use, send HOMEPAGE.
+        emulator_window->simulateKeyPress(KEY_HOMEPAGE, 0);
+    } else {
+        // Not 'Generic'. Assume 'qwerty' (or 'qwerty2') and
+        // send HOME.
+        emulator_window->simulateKeyPress(KEY_HOME, 0);
+    }
 }
 void ToolWindow::on_minimize_button_clicked()
 {

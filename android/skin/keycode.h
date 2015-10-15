@@ -1,4 +1,4 @@
-/* Copyright (C) 2009 The Android Open Source Project
+/* Copyright (C) 2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -32,6 +32,7 @@ typedef enum {
     kKeyCodeSoftLeft                = KEY_SOFT1,
     kKeyCodeSoftRight               = KEY_SOFT2,
     kKeyCodeHome                    = KEY_HOME,
+    kKeyCodeHomePage                = KEY_HOMEPAGE,
     kKeyCodeBack                    = KEY_BACK,
     kKeyCodeCall                    = KEY_SEND,
     kKeyCodeEndCall                 = KEY_END,

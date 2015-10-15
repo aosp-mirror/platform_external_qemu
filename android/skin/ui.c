@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2010 The Android Open Source Project
+/* Copyright (C) 2006-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -229,6 +229,7 @@ _skin_ui_handle_key_command(void* opaque, SkinKeyCommand command, int  down)
     {
         { SKIN_KEY_COMMAND_BUTTON_CALL,        kKeyCodeCall },
         { SKIN_KEY_COMMAND_BUTTON_HOME,        kKeyCodeHome },
+        { SKIN_KEY_COMMAND_BUTTON_HOMEPAGE,    kKeyCodeHomePage },
         { SKIN_KEY_COMMAND_BUTTON_BACK,        kKeyCodeBack },
         { SKIN_KEY_COMMAND_BUTTON_HANGUP,      kKeyCodeEndCall },
         { SKIN_KEY_COMMAND_BUTTON_POWER,       kKeyCodePower },
@@ -319,8 +320,8 @@ _skin_ui_handle_key_command(void* opaque, SkinKeyCommand command, int  down)
             ui->onion_alpha = alpha;
 
             skin_window_set_onion(ui->window,
-                                  ui->onion, 
-                                  ui->onion_rotation, 
+                                  ui->onion,
+                                  ui->onion_rotation,
                                   ui->onion_alpha);
             skin_window_redraw(ui->window, NULL);
             //dprint( "onion alpha set to %d (%.f %%)", alpha, alpha/2.56 );

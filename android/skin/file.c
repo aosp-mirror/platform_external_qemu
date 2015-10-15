@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
+/* Copyright (C) 2007-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -154,6 +154,7 @@ static unsigned translate_button_name(const char* name) {
         { "volume-down",  kKeyCodeVolumeDown },
         { "power",        kKeyCodePower },
         { "home",         kKeyCodeHome },
+        { "homepage",     kKeyCodeHomePage },
         { "back",         kKeyCodeBack },
         { "del",          kKeyCodeDel },
         { "0",            kKeyCode0 },
