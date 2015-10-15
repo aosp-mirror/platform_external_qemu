@@ -324,7 +324,7 @@ OPT_COPY_PREBUILTS=
 option_register_var "--copy-prebuilts=<dir>" OPT_COPY_PREBUILTS \
         "Copy final emulator binaries to <path>/prebuilts/android-emulator"
 
-OPT_UI=
+OPT_UI="qt"
 option_register_var "--ui=<name>" OPT_UI \
         "Specify UI backend ('sdl2' or 'qt')"
 
