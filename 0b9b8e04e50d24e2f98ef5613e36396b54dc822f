@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "dfb462b2_14aab156",
+        "filename": "android/skin/window.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1574,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-15T21:43:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df39c202_3de5a8b9",
+      "revId": "0b9b8e04e50d24e2f98ef5613e36396b54dc822f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df39c202_9d99544d",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-14T18:41:34Z",
       "side": 1,
       "message": "(That\u0027s funny. When you put -1 on the board, I thought\nyou really meant 0.)",
+      "revId": "0b9b8e04e50d24e2f98ef5613e36396b54dc822f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bfb7aeb4_5fb28622",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1003,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-15T21:43:09Z",
+      "side": 1,
+      "message": "Nope! I\u0027m used to having my standard quad in OGL be 1x1 from -.5 to .5, but this works fine as well.",
+      "parentUuid": "df39c202_9d99544d",
       "revId": "0b9b8e04e50d24e2f98ef5613e36396b54dc822f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "3fa3be81_9bab36c6",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-15T21:43:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dfb462b2_7e8d0e76",
+      "revId": "0b9b8e04e50d24e2f98ef5613e36396b54dc822f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1f30ba11_bd76d8c4",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2015-10-14T18:41:34Z",
       "side": 1,
       "message": "Do we ever have rotations other than {0, 90, 180, 270}?\nIf not, are sin() and cos() expensive and called often\nenough that we should special-case them as integers?",
+      "revId": "0b9b8e04e50d24e2f98ef5613e36396b54dc822f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9943ea80_52d184b8",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-15T21:43:09Z",
+      "side": 1,
+      "message": "No we do not I believe. I suppose pre-computing them might be worth doing, but I\u0027ll look into it later.",
+      "parentUuid": "1f30ba11_bd76d8c4",
       "revId": "0b9b8e04e50d24e2f98ef5613e36396b54dc822f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
