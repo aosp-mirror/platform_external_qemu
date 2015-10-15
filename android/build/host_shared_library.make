@@ -44,3 +44,8 @@ include $(BUILD_SYSTEM)/symbols.make
 EXECUTABLES += $(LOCAL_BUILT_MODULE)
 $(LOCAL_BUILT_MODULE): $(foreach lib,$(LOCAL_STATIC_LIBRARIES),$(call local-library-path,$(lib)))
 $(LOCAL_BUILT_MODULE): $(foreach lib,$(LOCAL_SHARED_LIBRARIES),$(call local-shared-library-path,$(lib)))
+
+ifeq (true,$(LOCAL_INSTALL))
+LOCAL_INSTALL_MODULE := $(call local-shared-library-install-path,$(LOCAL_MODULE))
+$(eval $(call install-stripped-binary,$(LOCAL_BUILT_MODULE),$(LOCAL_INSTALL_MODULE),--strip-unneeded))
+endif  # LOCAL_INSTALL == true
