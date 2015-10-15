@@ -332,6 +332,10 @@ OPT_GLES=
 option_register_var "--gles=<name>" OPT_GLES \
         "Specify GLES backend ('dgl' or 'angle')"
 
+OPT_NO_STRIP=
+option_register_var "--no-strip" OPT_NO_STRIP \
+        "Do not strip final binaries."
+
 package_builder_register_options
 aosp_prebuilts_dir_register_options
 prebuilts_dir_register_option
@@ -658,6 +662,10 @@ build_darwin_binaries_on () {
     if [ "$OPT_GLES" ]; then
         var_append DARWIN_BUILD_FLAGS "--gles=$OPT_GLES"
     fi
+    if [ "$OPT_NO_STRIP" ]; then
+        var_append DARWIN_BUILD_FLAGS "--no-strip"
+    fi
+
     cat > $DARWIN_PKG_DIR/build.sh <<EOF
 #!/bin/bash -l
 cd $DARWIN_REMOTE_DIR/qemu &&
@@ -712,6 +720,10 @@ fi
 
 if [ "$OPT_GLES" ]; then
     var_append REBUILD_FLAGS "--gles=$OPT_GLES"
+fi
+
+if [ "$OPT_NO_STRIP" ]; then
+    var_append REBUILD_FLAGS "--no-strip"
 fi
 
 for SYSTEM in $(convert_host_list_to_os_list $LOCAL_HOST_SYSTEMS); do

@@ -292,7 +292,7 @@ OPTION_IGNORE_AUDIO=no
 OPTION_AOSP_PREBUILTS_DIR=
 OPTION_OUT_DIR=
 OPTION_HELP=no
-OPTION_STRIP=no
+OPTION_STRIP=yes
 OPTION_MINGW=no
 OPTION_UI=
 OPTION_GLES=
@@ -336,7 +336,7 @@ for opt do
     fi
     ;;
 
-  --debug) OPTION_DEBUG=yes
+  --debug) OPTION_DEBUG=yes; OPTION_STRIP=no
   ;;
   --mingw) OPTION_MINGW=yes
   ;;
@@ -391,8 +391,8 @@ EOF
     echo "  --help                      Print this message"
     echo "  --cc=PATH                   Specify C compiler [$HOST_CC]"
     echo "  --cxx=PATH                  Specify C++ compiler [$HOST_CXX]"
-    echo "  --strip                     Strip emulator executables."
-    echo "  --no-strip                  Do not strip emulator executables (default)."
+    echo "  --no-strip                  Do not strip emulator executables."
+    echo "  --strip                     Strip emulator executables (default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
     echo "  --ui=sdl2                   Use SDL2-based UI backend."
     echo "  --ui=qt                     Use Qt-based UI backend (default)."
@@ -467,13 +467,15 @@ if [ "$CCACHE" ]; then
 else
     GEN_SDK_FLAGS="$GEN_SDK_FLAGS --no-ccache"
 fi
+SDK_TOOLCHAIN_DIR=$OUT_DIR/build/toolchain
 GEN_SDK_FLAGS="$GEN_SDK_FLAGS --aosp-dir=$AOSP_PREBUILTS_DIR/.."
-"$GEN_SDK" $GEN_SDK_FLAGS "$OUT_DIR/toolchain" || panic "Cannot generate SDK toolchain!"
-BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$OUT_DIR/toolchain")
-CC="$OUT_DIR/toolchain/${BINPREFIX}gcc"
-CXX="$OUT_DIR/toolchain/${BINPREFIX}g++"
-AR="$OUT_DIR/toolchain/${BINPREFIX}ar"
+"$GEN_SDK" $GEN_SDK_FLAGS "$SDK_TOOLCHAIN_DIR" || panic "Cannot generate SDK toolchain!"
+BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$SDK_TOOLCHAIN_DIR")
+CC="$SDK_TOOLCHAIN_DIR/${BINPREFIX}gcc"
+CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}g++"
+AR="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ar"
 LD=$CC
+OBJCOPY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}objcopy"
 
 if [ -n "$OPTION_CC" ]; then
     echo "Using specified C compiler: $OPTION_CC"
@@ -503,6 +505,7 @@ BUILD_AR=$AR
 BUILD_CC=$CC
 BUILD_CXX=$CXX
 BUILD_LD=$LD
+BUILD_OBJCOPY=$OBJCOPY
 BUILD_CFLAGS=$CFLAGS
 BUILD_CXXFLAGS=$CXXFLAGS
 BUILD_LDFLAGS=$LDFLAGS
@@ -515,13 +518,14 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
         exit 1
     fi
     GEN_SDK_FLAGS="$GEN_SDK_FLAGS --host=windows-x86_64"
-    "$GEN_SDK" $GEN_SDK_FLAGS "$OUT_DIR/toolchain" || panic "Cannot generate SDK toolchain!"
-    BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$OUT_DIR/toolchain")
-    CC="$OUT_DIR/toolchain/${BINPREFIX}gcc"
-    CXX="$OUT_DIR/toolchain/${BINPREFIX}g++"
+    "$GEN_SDK" $GEN_SDK_FLAGS "$SDK_TOOLCHAIN_DIR" || panic "Cannot generate SDK toolchain!"
+    BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$SDK_TOOLCHAIN_DIR")
+    CC="$SDK_TOOLCHAIN_DIR/${BINPREFIX}gcc"
+    CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}g++"
     LD=$CC
-    WINDRES=$OUT_DIR/toolchain/${BINPREFIX}windres
-    AR="$OUT_DIR/toolchain/${BINPREFIX}ar"
+    WINDRES=$SDK_TOOLCHAIN_DIR/${BINPREFIX}windres
+    AR="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ar"
+    OBJCOPY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}objcopy"
     HOST_OS=windows
     HOST_TAG=$HOST_OS-$HOST_ARCH
 fi
@@ -709,20 +713,8 @@ case $HOST_OS in
         ;;
 esac
 
-# Strip executables and shared libraries when needed.
-if [ "$OPTION_DEBUG" != "yes" -a "$OPTION_STRIP" = "yes" ]; then
-    case $HOST_OS in
-        darwin)
-            LDFLAGS="$LDFLAGS -Wl,-S"
-            ;;
-        *)
-            LDFLAGS="$LDFLAGS -Wl,--strip-all"
-            ;;
-    esac
-fi
-
 # Re-create the configuration file
-config_mk=$OUT_DIR/config.make
+config_mk=$OUT_DIR/build/config.make
 config_dir=$(dirname $config_mk)
 mkdir -p "$config_dir" 2> $TMPL
 if [ $? != 0 ] ; then
@@ -740,6 +732,7 @@ echo "HOST_CC     := $CC" >> $config_mk
 echo "HOST_CXX    := $CXX" >> $config_mk
 echo "HOST_LD     := $LD" >> $config_mk
 echo "HOST_AR     := $AR" >> $config_mk
+echo "HOST_OBJCOPY := $OBJCOPY" >> $config_mk
 echo "HOST_WINDRES:= $WINDRES" >> $config_mk
 echo "HOST_DUMPSYMS:= $DUMPSYMS" >> $config_mk
 echo "OBJS_DIR    := $OUT_DIR" >> $config_mk
@@ -757,6 +750,7 @@ echo "BUILD_AR          := $BUILD_AR" >> $config_mk
 echo "BUILD_CC          := $BUILD_CC" >> $config_mk
 echo "BUILD_CXX         := $BUILD_CXX" >> $config_mk
 echo "BUILD_LD          := $BUILD_LD" >> $config_mk
+echo "BUILD_OBJCOPY     := $BUILD_OBJCOPY" >> $config_mk
 echo "BUILD_CFLAGS      := $BUILD_CFLAGS" >> $config_mk
 echo "BUILD_LDFLAGS     := $BUILD_LDFLAGS" >> $config_mk
 echo "BUILD_DUMPSYMS    := $DUMPSYMS" >> $config_mk
@@ -787,11 +781,14 @@ echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
 echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
 echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 
-if [ $OPTION_DEBUG = yes ] ; then
+if [ $OPTION_DEBUG = "yes" ] ; then
     echo "BUILD_DEBUG_EMULATOR := true" >> $config_mk
 fi
 echo "EMULATOR_BUILD_EMUGL       := true" >> $config_mk
 echo "EMULATOR_EMUGL_SOURCES_DIR := $GLES_DIR" >> $config_mk
+if [ "$OPTION_STRIP" = "yes" ]; then
+    echo "EMULATOR_STRIP_BINARIES := true" >> $config_mk
+fi
 
 ANDROID_SDK_TOOLS_REVSION=
 if [ "$ANDROID_SDK_TOOLS_REVISION" ] ; then
@@ -807,7 +804,7 @@ fi
 
 # Build the config-host.h file
 #
-config_h=$OUT_DIR/config-host.h
+config_h=$OUT_DIR/build/config-host.h
 cat > $config_h <<EOF
 /* This file was autogenerated by '$PROGNAME' */
 

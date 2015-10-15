@@ -63,10 +63,10 @@ common_LOCAL_SRC_FILES =
 EMULATOR_COMMON_CFLAGS := -Werror=implicit-function-declaration
 
 # Needed by everything about the host
-# OBJS_DIR contains config-host.h
+# $(OBJS_DIR)/build contains config-host.h
 # $(LOCAL_PATH)/include contains common headers.
 EMULATOR_COMMON_CFLAGS += \
-    -I$(OBJS_DIR) \
+    -I$(OBJS_DIR)/build \
     -I$(LOCAL_PATH)/include
 
 # Need to include "qapi-types.h" and other auto-generated files from
