@@ -44,7 +44,7 @@
 
 extern void cpu_loop_exit(CPUArchState* env);
 
-extern const char *trace_filename;
+extern const char *trace_filename = NULL;
 
 /* for execve */
 static char exec_path[CLIENT_PAGE_SIZE];
