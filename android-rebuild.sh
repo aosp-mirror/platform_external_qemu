@@ -439,7 +439,7 @@ if [ -z "$NO_TESTS" ]; then
     fi
 
     if [ "$RUN_EMUGEN_TESTS" ]; then
-        EMUGEN_UNITTESTS=$OUT_DIR/emugen_unittests
+        EMUGEN_UNITTESTS=$OUT_DIR/build/intermediates64/emugen_unittests/emugen_unittests
         if [ ! -f "$EMUGEN_UNITTESTS" ]; then
             echo "FAIL: Missing binary: $EMUGEN_UNITTESTS"
             FAILURES="$FAILURES emugen_unittests-binary"
@@ -451,7 +451,7 @@ if [ -z "$NO_TESTS" ]; then
         echo "Running emugen regression test suite."
         # Note that the binary is always built for the 'build' machine type,
         # I.e. if --mingw is used, it's still a Linux executable.
-        EMUGEN=$OUT_DIR/emugen
+        EMUGEN=$OUT_DIR/build/intermediates64/emugen/emugen
         if [ ! -f "$EMUGEN" ]; then
             echo "FAIL: Missing 'emugen' binary: $EMUGEN"
             FAILURES="$FAILURES emugen-binary"

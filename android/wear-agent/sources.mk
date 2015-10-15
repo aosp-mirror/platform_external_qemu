@@ -15,11 +15,6 @@ LOCAL_SRC_FILES := $(LIBWEAR_AGENT_SOURCES)
 LOCAL_C_INCLUDES := $(LIBWEAR_AGENT_INCLUDES)
 $(call end-emulator-library)
 
-$(call start-emulator64-library, lib64android-wear-agent)
-LOCAL_SRC_FILES := $(LIBWEAR_AGENT_SOURCES)
-LOCAL_C_INCLUDES := $(LIBWEAR_AGENT_INCLUDES)
-$(call end-emulator-library)
-
 # Then, the standalone executable / test programs
 
 WEAR_AGENT_SOURCES := \
@@ -27,19 +22,11 @@ WEAR_AGENT_SOURCES := \
     android/wear-agent/PairUpWearPhone.cpp \
     android/wear-agent/WearAgent.cpp \
 
-WEAR_AGENT_LIBS32 := emulator-common
-WEAR_AGENT_LIBS64 := emulator64-common
+WEAR_AGENT_LIBS := emulator-common
 
-$(call start-emulator-program, wear-agent)
+$(call start-emulator-program, wear-agent$(HOST_SUFFIX))
 LOCAL_SRC_FILES := $(WEAR_AGENT_SOURCES)
 LOCAL_C_INCLUDES := $(LIBWEAR_AGENT_INCLUDES)
-LOCAL_STATIC_LIBRARIES := $(WEAR_AGENT_LIBS32)
-LOCAL_LDLIBS += $(CXX_STD_LIB)
-$(call end-emulator-program)
-
-$(call start-emulator64-program, wear-agent64)
-LOCAL_SRC_FILES := $(WEAR_AGENT_SOURCES)
-LOCAL_C_INCLUDES := $(LIBWEAR_AGENT_INCLUDES)
-LOCAL_STATIC_LIBRARIES := $(WEAR_AGENT_LIBS64)
+LOCAL_STATIC_LIBRARIES := $(WEAR_AGENT_LIBS)
 LOCAL_LDLIBS += $(CXX_STD_LIB)
 $(call end-emulator-program)

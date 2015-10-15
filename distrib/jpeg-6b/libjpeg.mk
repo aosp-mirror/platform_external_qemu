@@ -35,11 +35,6 @@ LOCAL_CFLAGS := $(LIBJPEG_CFLAGS)
 LOCAL_SRC_FILES := $(LIBJPEG_SOURCES)
 $(call end-emulator-library)
 
-$(call start-emulator64-library,emulator64-libjpeg)
-LOCAL_CFLAGS := $(LIBJPEG_CFLAGS)
-LOCAL_SRC_FILES := $(LIBJPEG_SOURCES)
-$(call end-emulator-library)
-
 LIBJPEG_CFLAGS := -I$(LOCAL_PATH)
 
 LOCAL_PATH := $(OLD_LOCAL_PATH)

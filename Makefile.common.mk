@@ -13,20 +13,19 @@ ifeq ($(HOST_OS),windows)
 
   # Usage: $(eval $(call insert-windows-icon))
   define insert-windows-icon
-    LOCAL_PREBUILT_OBJ_FILES += images/emulator_icon$(LOCAL_MODULE_BITS).o
+    LOCAL_PREBUILT_OBJ_FILES += images/emulator_icon$(HOST_BITS).o
   endef
+
+WINDRES_CPU_32 := i386
+WINDRES_CPU_64 := x86-64
 
 # This seems to be the only way to add an object file that was not generated from
 # a C/C++/Java source file to our build system. and very unfortunately,
 # $(TOPDIR)/$(LOCALPATH) will always be prepended to this value, which forces
 # us to put the object file in the source directory.
-$(LOCAL_PATH)/images/emulator_icon32.o: $(LOCAL_PATH)/images/android_icon.rc
+$(LOCAL_PATH)/images/emulator_icon$(HOST_BITS).o: $(LOCAL_PATH)/images/android_icon.rc
 	@echo "Windres (x86): $@"
-	$(MY_WINDRES) --target=pe-i386 $< -I $(LOCAL_PATH)/images -o $@
-
-$(LOCAL_PATH)/images/emulator_icon64.o: $(LOCAL_PATH)/images/android_icon.rc
-	@echo "Windres (x86_64): $@"
-	$(MY_WINDRES) --target=pe-x86-64 $< -I $(LOCAL_PATH)/images -o $@
+	$(MY_WINDRES) --target=pe-$(WINDRES_CPU_$(HOST_BITS)) $< -I $(LOCAL_PATH)/images -o $@
 endif
 
 # We want to build all variants of the emulator binaries. This makes
@@ -59,11 +58,8 @@ include $(LOCAL_PATH)/Makefile.qemu-launcher.mk
 
 # NOTE: Build as 32-bit or 64-bit executable, depending on the value of
 #       EMULATOR_PROGRAM_BITNESS.
-ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
+ifeq ($(HOST_BITS),$(EMULATOR_PROGRAM_BITNESS))
 $(call start-emulator-program, emulator)
-else
-$(call start-emulator64-program, emulator)
-endif
 LOCAL_SRC_FILES := \
     android/main-emulator.c \
 
@@ -76,13 +72,9 @@ ifdef EMULATOR_USE_QT
     LOCAL_CFLAGS += -DCONFIG_QT
 endif
 
-ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
-    LOCAL_STATIC_LIBRARIES := emulator-common
-    # Ensure this is always built, even if 32-bit binaries are disabled.
-    LOCAL_IGNORE_BITNESS := true
-else
-    LOCAL_STATIC_LIBRARIES := emulator64-common
-endif
+LOCAL_STATIC_LIBRARIES := emulator-common
+# Ensure this is always built, even if 32-bit binaries are disabled.
+LOCAL_IGNORE_BITNESS := true
 
 LOCAL_LDLIBS += $(CXX_STD_LIB)
 LOCAL_GENERATE_SYMBOLS := true
@@ -92,6 +84,7 @@ $(eval $(call insert-windows-icon))
 endif
 
 $(call end-emulator-program)
+endif  # HOST_BITS == EMULATOR_PROGRAM_BITNESS
 
 include $(LOCAL_PATH)/Makefile.tests.mk
 

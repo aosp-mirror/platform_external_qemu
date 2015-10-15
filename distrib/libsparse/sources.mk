@@ -24,35 +24,17 @@ LOCAL_C_INCLUDES := $(LIBSPARSE_INCLUDES) $(LOCAL_PATH)/src
 LOCAL_CFLAGS := $(LIBSPARSE_CFLAGS)
 $(call end-emulator-library)
 
-$(call start-emulator64-library,emulator64-libsparse)
-LOCAL_SRC_FILES := $(LIBSPARSE_SOURCES)
-LOCAL_C_INCLUDES := $(LIBSPARSE_INCLUDES) $(LOCAL_PATH)/src
-LOCAL_CFLAGS := $(LIBSPARSE_CFLAGS)
-$(call end-emulator-library)
-
-$(call start-emulator-program,emulator_img2simg)
+$(call start-emulator-program,emulator$(HOST_SUFFIX)_img2simg)
 LOCAL_SRC_FILES := src/img2simg.c
 LOCAL_C_INCLUDES := $(LIBSPARSE_INCLUDES)
 LOCAL_STATIC_LIBRARIES := emulator-libsparse emulator-zlib
 $(call end-emulator-program)
 
-$(call start-emulator-program,emulator_simg2img)
+$(call start-emulator-program,emulator$(HOST_SUFFIX)_simg2img)
 LOCAL_SRC_FILES := src/simg2img.c
 LOCAL_C_INCLUDES := $(LIBSPARSE_INCLUDES)
 LOCAL_STATIC_LIBRARIES := emulator-libsparse emulator-zlib
 $(call end-emulator-program)
-
-$(call start-emulator64-program,emulator64_img2simg)
-LOCAL_SRC_FILES := src/img2simg.c
-LOCAL_C_INCLUDES := $(LIBSPARSE_INCLUDES)
-LOCAL_STATIC_LIBRARIES := emulator64-libsparse emulator64-zlib
-#$(call end-emulator-program)
-
-$(call start-emulator64-program,emulator64_simg2img)
-LOCAL_SRC_FILES := src/simg2img.c
-LOCAL_C_INCLUDES := $(LIBSPARSE_INCLUDES)
-LOCAL_STATIC_LIBRARIES := emulator64-libsparse emulator64-zlib
-#$(call end-emulator-program)
 
 # Reset LOCAL_PATH before exiting this build file.
 LOCAL_PATH := $(LIBSPARSE_OLD_LOCAL_PATH)
