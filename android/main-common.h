@@ -16,6 +16,7 @@
 #include "android/avd/hw-config.h"
 #include "android/cmdline-option.h"
 #include "android/skin/keyset.h"
+#include "android/ui-emu-agent.h"
 #include "android/utils/aconfig-file.h"
 #include "android/utils/compiler.h"
 
@@ -66,9 +67,10 @@ void parse_skin_files(const char*      skinDirPath,
 /* Returns the amount of pixels used by the default display. */
 int64_t  get_screen_pixels(AConfig*  skinConfig);
 
-void init_sdl_ui(AConfig*         skinConfig,
-                 const char*      skinPath,
-                 AndroidOptions*  opts);
+void init_sdl_ui(AConfig*          skinConfig,
+                 const char*       skinPath,
+                 AndroidOptions*   opts,
+                 const UiEmuAgent* uiEmuAgent);
 
 /* Sanitize options. This deals with a few legacy options that are now
  * handled differently. Call before anything else that needs to read

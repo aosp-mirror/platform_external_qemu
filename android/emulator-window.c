@@ -20,7 +20,6 @@
 #include "android/hw-control.h"
 #include "android/hw-sensors.h"
 #include "android/opengles.h"
-#include "android-qemu1-glue/qemu-control-impl.h"
 #include "android/skin/keycode.h"
 #include "android/skin/winsys.h"
 #include "android/ui-emu-agent.h"
@@ -164,9 +163,7 @@ static void _emulator_window_on_gpu_frame(void* context,
 static void
 emulator_window_setup( EmulatorWindow*  emulator )
 {
-    // TODO(pprabhu) All aQAndroid*Agents need to be set externally to decouple
-    // emulator-window from QEMU.
-    user_event_agent = gQAndroidUserEventAgent;
+    user_event_agent = emulator->uiEmuAgent->userEvents;
 
     static const SkinWindowFuncs my_window_funcs = {
         .key_event = &emulator_window_window_key_event,
@@ -245,14 +242,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
     }
 
 #if CONFIG_QT
-    static UiEmuAgent myUiEmuAgent;
-    myUiEmuAgent.battery = gQAndroidBatteryAgent;
-    myUiEmuAgent.cellular = gQAndroidCellularAgent;
-    myUiEmuAgent.finger = gQAndroidFingerAgent;
-    myUiEmuAgent.location = gQAndroidLocationAgent;
-    myUiEmuAgent.sensors = gQAndroidSensorsAgent;
-    myUiEmuAgent.telephony = gQAndroidTelephonyAgent;
-    setUiEmuAgent(&myUiEmuAgent);
+    setUiEmuAgent(emulator->uiEmuAgent);
 #endif
 
     // Determine whether to use an EmuGL sub-window or not.
@@ -330,12 +320,14 @@ static int emulator_window_framebuffer_get_depth(void* opaque) {
 }
 
 int
-emulator_window_init( EmulatorWindow*       emulator,
-                AConfig*         aconfig,
-                const char*      basepath,
-                int              x,
-                int              y,
-                AndroidOptions*  opts )
+emulator_window_init(
+        EmulatorWindow* emulator,
+        AConfig* aconfig,
+        const char* basepath,
+        int x,
+        int y,
+        AndroidOptions* opts,
+        const UiEmuAgent* uiEmuAgent)
 {
     static const SkinFramebufferFuncs skin_fb_funcs = {
         .create_framebuffer = &emulator_window_framebuffer_create,
@@ -352,7 +344,8 @@ emulator_window_init( EmulatorWindow*       emulator,
     emulator->ui = NULL;
     emulator->win_x = x;
     emulator->win_y = y;
-    emulator->opts[0] = opts[0];
+    *emulator->opts = *opts;
+    *emulator->uiEmuAgent = *uiEmuAgent;
 
     /* register as a framebuffer clients for all displays defined in the skin file */
     SKIN_FILE_LOOP_PARTS( emulator->layout_file, part )
