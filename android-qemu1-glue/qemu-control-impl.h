@@ -16,6 +16,7 @@
 
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/cellular_agent.h"
+#include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/net_agent.h"
@@ -52,6 +53,9 @@ extern const QAndroidUserEventAgent* const gQAndroidUserEventAgent;
 
 // Defined in android-qemu1-glue/qemu-net-agent-impl.c
 extern const QAndroidNetAgent* const gQAndroidNetAgent;
+
+// Defined in android-qemu1-glue/qemu-display-agent-impl.cpp
+extern const QAndroidDisplayAgent* const gQAndroidDisplayAgent;
 
 // Called by hw/android/goldfish/events_device.c to initialize generic event
 // handling.
