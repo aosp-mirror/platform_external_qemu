@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "99f12aa5_d4ae14d2",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/render_api.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-15T21:43:09Z",
+      "side": 1,
+      "message": "This code is working fine on Linux, but for whatever strange reason, px and py are ALWAYS 0 as soon as the code enters this function on windows. @digit any ideas as to why that might happen?\n\nWorking with print statements also breaks some of the code, and sadly I don\u0027t have a Windows debugger working.",
+      "revId": "f7a37a256c98e71f2fd4216adee07e72327fd313",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
