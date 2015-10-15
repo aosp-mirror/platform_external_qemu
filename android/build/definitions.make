@@ -69,9 +69,20 @@ local-intermediates-dir = $(call intermediates-dir-for,$(LOCAL_MODULE_BITS),$(LO
 # Return $1, except if LOCAL_MODULE_BITS is 64, where $2 is returned.
 local-bits-choice = $(strip $(if $(filter 64,$(LOCAL_MODULE_BITS)),$2,$1))
 
+# Location of intermediate static libraries during build.
 local-library-path = $(call intermediates-dir-for,$(LOCAL_MODULE_BITS),$(1))/$(1).a
-local-executable-path = $(OBJS_DIR)/$(1)$(call local-host-tool,EXEEXT)
-local-shared-library-path = $(OBJS_DIR)/$(call local-bits-choice,lib,lib64)/$(1)$(call local-host-tool,DLLEXT)
+
+# Location of unstripped executables during build.
+local-executable-path = $(call intermediates-dir-for,$(LOCAL_MODULE_BITS),$(1))/$(1)$(call local-host-tool,EXEEXT)
+
+# Location of unstripped shared libraries during build.
+local-shared-library-path = $(call intermediates-dir-for,$(LOCAL_MODULE_BITS),$(1))/$(1)$(call local-host-tool,DLLEXT)
+
+# Location of final (potentially stripped) executables.
+local-executable-install-path = $(OBJS_DIR)/$(1)$(call local-host-tool,EXEEXT)
+
+# Location of final (potentially stripped) shared libraries.
+local-shared-library-install-path = $(OBJS_DIR)/$(call local-bits-choice,lib,lib64)/$(1)$(call local-host-tool,DLLEXT)
 
 # Expand to a shell statement that changes the runtime library search path.
 # Note that this is only used for Qt-related stuff, and on Windows, the
@@ -224,6 +235,32 @@ define transform-generated-source
 @mkdir -p $(dir $@)
 $(hide) $(PRIVATE_CUSTOM_TOOL)
 endef
+
+define install-stripped-binary
+_SRC := $(1)
+_SRC1 := $$(notdir $$(_SRC))
+_DST := $(2)
+EXECUTABLES += $$(_DST)
+$$(_DST): PRIVATE_DST := $$(_DST)
+$$(_DST): PRIVATE_SRC := $$(_SRC)
+$$(_DST): PRIVATE_OBJCOPY := $$(HOST_OBJCOPY)
+$$(_DST): PRIVATE_OBJCOPY_FLAGS := $(3)
+$$(_DST): $$(_SRC)
+	@mkdir -p $$(dir $$(PRIVATE_DST))
+	@echo "Install: $$(PRIVATE_DST)"
+ifeq (true,$$(EMULATOR_STRIP_BINARIES))
+ifeq (darwin,$$(HOST_OS))
+	$(hide) strip -S -o $$(PRIVATE_DST) $$(PRIVATE_SRC)
+else  # HOST_OS != darwin
+	$(hide) $$(PRIVATE_OBJCOPY) $$(PRIVATE_OBJCOPY_FLAGS) $$(PRIVATE_SRC) $$(PRIVATE_DST)
+endif  # HOST_OS != darwin
+else  # EMULATOR_STRIP_BINARIES != true
+	$(hide) cp -f $$(PRIVATE_SRC) $$(PRIVATE_DST)
+endif # EMULATOR_STRIP_BINARIES != true
+endef
+
+install-executable = $(eval $(call install-stripped-binary,$1,$2,--strip-all))
+install-shared-library = $(eval $(call install-stripped-binary,$1,$2,--strip-unneeded))
 
 # Generate DLL symbol file
 #

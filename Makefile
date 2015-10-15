@@ -29,10 +29,10 @@
 
 BUILD_SYSTEM := android/build
 OBJS_DIR     := objs
-SYMBOLS_DIR  := $(OBJS_DIR)/symbols
+SYMBOLS_DIR  := $(OBJS_DIR)/build/symbols
 LIBS_DIR     := $(OBJS_DIR)/libs
-CONFIG_MAKE  := $(OBJS_DIR)/config.make
-CONFIG_H     := $(OBJS_DIR)/config-host.h
+CONFIG_MAKE  := $(OBJS_DIR)/build/config.make
+CONFIG_H     := $(OBJS_DIR)/build/config-host.h
 
 ifeq ($(wildcard $(CONFIG_MAKE)),)
     $(error "The configuration file '$(CONFIG_MAKE)' doesn't exist, please run the 'android-configure.sh' script")

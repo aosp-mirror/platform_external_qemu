@@ -269,12 +269,17 @@ if [ -d "$PREBUILTS_DIR/mesa" ]; then
     done
 fi
 
+CONFIG_MAKE=$OUT_DIR/build/config.make
+if [ ! -f "$CONFIG_MAKE" ]; then
+    panic "Cannot find: $CONFIG_MAKE"
+fi
+
 # Copy Qt shared libraries, if needed.
 EMULATOR_USE_QT=$(awk '$1 == "EMULATOR_USE_QT" { print $3; }' \
-        $OUT_DIR/config.make 2>/dev/null)
+        $CONFIG_MAKE 2>/dev/null || true)
 if [ "$EMULATOR_USE_QT" = "true" ]; then
     QT_PREBUILTS_DIR=$(awk '$1 == "QT_PREBUILTS_DIR" { print $3; }' \
-            $OUT_DIR/config.make 2>/dev/null)
+            $CONFIG_MAKE 2>/dev/null || true)
     if [ ! -d "$QT_PREBUILTS_DIR" ]; then
         panic "Missing Qt prebuilts directory: $QT_PREBUILTS_DIR"
     fi
@@ -478,11 +483,11 @@ if [ -z "$NO_TESTS" ]; then
     # First need to locate the windres tool.
     if [ "$MINGW" ]; then
         echo "Checking windows executables icons."
-        if [ ! -f "$OUT_DIR/config.make" ]; then
-            echo "FAIL: Could not find \$OUT_DIR/config.make !?"
+        if [ ! -f "$CONFIG_MAKE" ]; then
+            echo "FAIL: Could not find \$CONFIG_MAKE !?"
             FAILURES="$FAILURES out-dir-config-make"
         else
-            WINDRES=$(awk '/^HOST_WINDRES:=/ { print $2; } $1 == "HOST_WINDRES" { print $3; }' $OUT_DIR/config.make) ||
+            WINDRES=$(awk '/^HOST_WINDRES:=/ { print $2; } $1 == "HOST_WINDRES" { print $3; }' $CONFIG_MAKE) ||
             if true; then
                 echo "FAIL: Could not find host 'windres' program"
                 FAILURES="$FAILURES host-windres"
