@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b90d0e2e_370a3838",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1004,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-15T13:11:53Z",
+      "side": 1,
+      "message": "why not:\n\n  static const UiEmuAgent uiEmuAgent \u003d {\n    .battery \u003d gQAndroidBatteryAgent,\n    ...\n  };\n\ninstead?",
+      "revId": "a755fecbeee1e768b5c34b2c949a42d3800a83b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
