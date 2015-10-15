@@ -359,14 +359,15 @@ _on_multitouch_message(void* client_opaque,
 
 AndroidMTSPort* mts_port_create(
         void* opaque,
-        const QAndroidUserEventAgent* user_event_agent) {
+        const QAndroidUserEventAgent* user_event_agent,
+        const QAndroidDisplayAgent* display_agent) {
     AndroidMTSPort* mtsp;
 
     ANEW0(mtsp);
     mtsp->opaque                = opaque;
 
     /* Initialize default MTS descriptor. */
-    multitouch_init(mtsp, user_event_agent);
+    multitouch_init(mtsp, user_event_agent, display_agent);
 
     /* Create JPEG compressor. Put message header + MTFrameHeader in front of the
      * compressed data. this way we will have entire query ready to be

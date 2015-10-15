@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/sdk-controller-socket.h"
 
@@ -75,6 +76,8 @@ typedef struct AndroidMTSPort AndroidMTSPort;
 /* Creates multi-touch port, and connects it to the device.
  * Param:
  *  opaque - An opaque pointer that is passed back to the callback routines.
+ *  user_event_agent, display_agent - interfaces to the Qemu display and
+ *      user event piping to the VM
  * Return:
  *  Initialized device descriptor on success, or NULL on failure. If failure is
  *  returned from this routine, 'errno' indicates the reason for failure. If this
@@ -83,7 +86,8 @@ typedef struct AndroidMTSPort AndroidMTSPort;
  */
 extern AndroidMTSPort* mts_port_create(
         void* opaque,
-        const QAndroidUserEventAgent* user_event_agent);
+        const QAndroidUserEventAgent* user_event_agent,
+        const QAndroidDisplayAgent* display_agent);
 
 /* Disconnects from the multi-touch port, and destroys the descriptor. */
 extern void mts_port_destroy(AndroidMTSPort* amtp);

@@ -632,7 +632,7 @@ CORE_MISC_SOURCES = \
     android/adb-server.c \
     android/adb-qemud.c \
     android/snaphost-android.c \
-    android-qemu1-glue/multitouch-screen.c \
+    android/multitouch-screen.c \
     android/multitouch-port.c \
     android/utils/jpeg-compress.c \
     net/net-android.c \
