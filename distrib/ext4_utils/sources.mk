@@ -30,16 +30,7 @@ LOCAL_C_INCLUDES := \
 LOCAL_CFLAGS := $(LIBEXT4_UTILS_CFLAGS)
 $(call end-emulator-library)
 
-$(call start-emulator64-library,emulator64-libext4_utils)
-LOCAL_SRC_FILES := $(LIBEXT4_UTILS_SOURCES)
-LOCAL_C_INCLUDES := \
-    $(LIBEXT4_UTILS_INCLUDES) \
-    $(LIBSPARSE_INCLUDES) \
-    $(LIBSELINUX_INCLUDES)
-LOCAL_CFLAGS := $(LIBEXT4_UTILS_CFLAGS)
-$(call end-emulator-library)
-
-$(call start-emulator-program,emulator_make_ext4fs)
+$(call start-emulator-program,emulator$(HOST_SUFFIX)_make_ext4fs)
 LOCAL_SRC_FILES := src/make_ext4fs_main.c
 LOCAL_C_INCLUDES := \
     $(LIBEXT4_UTILS_INCLUDES) \
@@ -50,19 +41,6 @@ LOCAL_STATIC_LIBRARIES := \
     emulator-libsparse \
     emulator-libselinux \
     emulator-zlib
-$(call end-emulator-program)
-
-$(call start-emulator64-program,emulator64_make_ext4fs)
-LOCAL_SRC_FILES := src/make_ext4fs_main.c
-LOCAL_C_INCLUDES := \
-    $(LIBEXT4_UTILS_INCLUDES) \
-    $(LIBSELINUX_INCLUDES)
-LOCAL_CFLAGS := $(LIBEXT4_UTILS_CFLAGS)
-LOCAL_STATIC_LIBRARIES := \
-    emulator64-libext4_utils \
-    emulator64-libsparse \
-    emulator64-libselinux \
-    emulator64-zlib
 $(call end-emulator-program)
 
 LOCAL_PATH := $(OLD_LOCAL_PATH)

@@ -28,7 +28,7 @@
 
 # First, define a rule to generate a dummy "emulator_hw_config_defs" module
 # which purpose is simply to host the generated header in its output directory.
-intermediates := $(call intermediates-dir-for,,emulator_hw_config_defs)
+intermediates := $(call intermediates-dir-for,$(HOST_BITS),emulator_hw_config_defs)
 
 QEMU_HARDWARE_PROPERTIES_INI := $(LOCAL_PATH)/android/avd/hardware-properties.ini
 QEMU_HW_CONFIG_DEFS_H := $(intermediates)/android/avd/hw-config-defs.h
@@ -114,24 +114,16 @@ common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
 ##############################################################################
 # Libcurl definitions
 #
-LIBCURL_TOP32_DIR := $(LIBCURL_PREBUILTS_DIR)/$(HOST_OS)-x86
-LIBCURL_TOP64_DIR := $(LIBCURL_PREBUILTS_DIR)/$(HOST_OS)-x86_64
+LIBCURL_TOP_DIR := $(LIBCURL_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
 
-LIBCURL_INCLUDES := $(LIBCURL_TOP32_DIR)/include
-LIBCURL_INCLUDES_64 := $(LIBCURL_TOP64_DIR)/include
-LIBCURL_LDLIBS := $(LIBCURL_TOP32_DIR)/lib/libcurl.a \
-    $(LIBCURL_TOP32_DIR)/lib/libssl.a \
-    $(LIBCURL_TOP32_DIR)/lib/libz.a \
-    $(LIBCURL_TOP32_DIR)/lib/libcrypto.a
-
-LIBCURL_LDLIBS_64 := $(LIBCURL_TOP64_DIR)/lib/libcurl.a \
-    $(LIBCURL_TOP64_DIR)/lib/libssl.a \
-    $(LIBCURL_TOP64_DIR)/lib/libz.a \
-    $(LIBCURL_TOP64_DIR)/lib/libcrypto.a
+LIBCURL_INCLUDES := $(LIBCURL_TOP_DIR)/include
+LIBCURL_LDLIBS := $(LIBCURL_TOP_DIR)/lib/libcurl.a \
+    $(LIBCURL_TOP_DIR)/lib/libssl.a \
+    $(LIBCURL_TOP_DIR)/lib/libz.a \
+    $(LIBCURL_TOP_DIR)/lib/libcrypto.a
 
 ifneq ($(HOST_OS),windows)
   LIBCURL_LDLIBS += -ldl
-  LIBCURL_LDLIBS_64 += -ldl
 endif
 
 EMULATOR_COMMON_CFLAGS += -DCURL_STATICLIB
@@ -139,18 +131,9 @@ EMULATOR_COMMON_CFLAGS += -DCURL_STATICLIB
 ##############################################################################
 # Libxml2 definitions
 #
-LIBXML2_TOP32_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86
-LIBXML2_TOP64_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-x86_64
-
-ifeq ($(HOST_OS),darwin)
-     LIBXML2_INCLUDES := $(LIBXML2_TOP64_DIR)/include
-else
-     LIBXML2_INCLUDES := $(LIBXML2_TOP32_DIR)/include
-endif
-LIBXML2_LDLIBS := $(LIBXML2_TOP32_DIR)/lib/libxml2.a
-LIBXML2_LDLIBS_64 := $(LIBXML2_TOP64_DIR)/lib/libxml2.a
-LIBXML2_LDLIBS := $(LIBXML2_TOP32_DIR)/lib/libxml2.a
-LIBXML2_LDLIBS_64 := $(LIBXML2_TOP64_DIR)/lib/libxml2.a
+LIBXML2_TOP_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
+LIBXML2_INCLUDES := $(LIBXML2_TOP_DIR)/include
+LIBXML2_LDLIBS := $(LIBXML2_TOP_DIR)/lib/libxml2.a
 
 # Required on Windows to indicate that the code will link against a static
 # version of libxml2. Otherwise, the linker complains about undefined
@@ -160,17 +143,13 @@ LIBXML2_CFLAGS := -DLIBXML_STATIC
 ##############################################################################
 # breakpad  definitions
 #
-BREAKPAD_TOP32_DIR := $(BREAKPAD_PREBUILTS_DIR)/$(HOST_OS)-x86
-BREAKPAD_TOP64_DIR := $(BREAKPAD_PREBUILTS_DIR)/$(HOST_OS)-x86_64
+BREAKPAD_TOP_DIR := $(BREAKPAD_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
 
-BREAKPAD_INCLUDES := $(BREAKPAD_TOP32_DIR)/include/breakpad
-BREAKPAD_INCLUDES_64 := $(BREAKPAD_TOP64_DIR)/include/breakpad
-BREAKPAD_LDLIBS := $(BREAKPAD_TOP32_DIR)/lib/libbreakpad_client.a
-BREAKPAD_LDLIBS_64 := $(BREAKPAD_TOP64_DIR)/lib/libbreakpad_client.a
+BREAKPAD_INCLUDES := $(BREAKPAD_TOP_DIR)/include/breakpad
+BREAKPAD_LDLIBS := $(BREAKPAD_TOP_DIR)/lib/libbreakpad_client.a
 
 ifeq ($(HOST_OS),windows)
   BREAKPAD_LDLIBS += -lstdc++
-  BREAKPAD_LDLIBS_64 += -lstdc++
 endif
 
 ###########################################################
@@ -326,14 +305,6 @@ endif
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
-$(call start-emulator64-library, emulator64-common)
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES_64)
-LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES)
-LOCAL_CFLAGS += -I$(BREAKPAD_INCLUDES_64)
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-$(call gen-hw-config-defs)
-$(call end-emulator-library)
-
 ##############################################################################
 ##############################################################################
 ###
@@ -351,9 +322,7 @@ common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 EMULATOR_LIBUI_CFLAGS :=
 EMULATOR_LIBUI_LDLIBS :=
 EMULATOR_LIBUI_LDFLAGS :=
-EMULATOR_LIBUI_LDFLAGS_64 :=
 EMULATOR_LIBUI_STATIC_LIBRARIES :=
-EMULATOR_LIBUI_STATIC_LIBRARIES_64 :=
 
 ###########################################################
 # Libpng configuration
@@ -361,7 +330,6 @@ EMULATOR_LIBUI_STATIC_LIBRARIES_64 :=
 include $(LOCAL_PATH)/distrib/libpng.mk
 EMULATOR_LIBUI_CFLAGS += $(LIBPNG_CFLAGS)
 EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libpng
-EMULATOR_LIBUI_STATIC_LIBRARIES_64 += emulator64-libpng
 common_LOCAL_SRC_FILES += android/loadpng.c
 
 ###########################################################
@@ -370,7 +338,6 @@ common_LOCAL_SRC_FILES += android/loadpng.c
 include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
 EMULATOR_LIBUI_CFLAGS += $(LIBJPEG_CFLAGS)
 EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libjpeg
-EMULATOR_LIBUI_STATIC_LIBRARIES_64 += emulator64-libjpeg
 
 ##############################################################################
 # SDL-related definitions
@@ -382,14 +349,12 @@ ifdef EMULATOR_USE_SDL2
     EMULATOR_LIBUI_CFLAGS += $(SDL2_CFLAGS) $(foreach inc,$(SDL2_INCLUDES),-I$(inc))
     EMULATOR_LIBUI_LDLIBS += $(SDL2_LDLIBS)
     EMULATOR_LIBUI_STATIC_LIBRARIES += $(SDL2_STATIC_LIBRARIES)
-    EMULATOR_LIBUI_STATIC_LIBRARIES_64 += $(SDL2_STATIC_LIBRARIES_64)
 
     ifeq ($(HOST_OS),windows)
         # Special exception for Windows: -lmingw32 must appear before libSDLmain
         # on the link command-line, because it depends on _WinMain@16 which is
         # exported by the latter.
         EMULATOR_LIBUI_LDFLAGS += -lmingw32
-        EMULATOR_LIBUI_LDFLAGS_64 += -lmingw32
         EMULATOR_LIBUI_CFLAGS += -Dmain=SDL_main
     else
         # The following is needed by SDL_LoadObject
@@ -401,7 +366,7 @@ endif  # EMULATOR_USE_SDL2
 # Qt-related definitions
 #
 ifdef EMULATOR_USE_QT
-    QT_TOP32_DIR := $(QT_PREBUILTS_DIR)/$(HOST_OS)-x86
+    QT_TOP_DIR := $(QT_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
     QT_TOP64_DIR := $(QT_PREBUILTS_DIR)/$(HOST_OS)-x86_64
     QT_MOC_TOOL := $(QT_TOP64_DIR)/bin/moc
     QT_RCC_TOOL := $(QT_TOP64_DIR)/bin/rcc
@@ -420,16 +385,11 @@ ifdef EMULATOR_USE_QT
         # not LDLIBS since qMain() is provided by object/libraries that
         # appear after these in the link command-line.
         EMULATOR_QT_LDFLAGS += \
-                -L$(QT_TOP32_DIR)/bin \
+                -L$(QT_TOP_DIR)/bin \
                 -lmingw32 \
-                $(QT_TOP32_DIR)/lib/libqtmain.a
-        EMULATOR_QT_LDFLAGS_64 += \
-                 -L$(QT_TOP64_DIR)/bin \
-                 -lmingw32 \
-                 $(QT_TOP64_DIR)/lib/libqtmain.a
+                $(QT_TOP_DIR)/lib/libqtmain.a
     else
-        EMULATOR_QT_LDFLAGS := -L$(QT_TOP32_DIR)/lib
-        EMULATOR_QT_LDFLAGS_64 := -L$(QT_TOP64_DIR)/lib
+        EMULATOR_QT_LDFLAGS := -L$(QT_TOP_DIR)/lib
     endif
     QT_INCLUDE := $(QT_PREBUILTS_DIR)/common/include
     EMULATOR_LIBUI_CFLAGS += \
@@ -438,7 +398,6 @@ ifdef EMULATOR_USE_QT
             -I$(QT_INCLUDE)/QtGui \
             -I$(QT_INCLUDE)/QtWidgets
     EMULATOR_LIBUI_LDFLAGS += $(EMULATOR_QT_LDFLAGS)
-    EMULATOR_LIBUI_LDFLAGS_64 += $(EMULATOR_QT_LDFLAGS_64)
     EMULATOR_LIBUI_LDLIBS += $(EMULATOR_QT_LDLIBS)
 
     EMULATOR_LIBUI_CFLAGS += $(LIBXML2_CFLAGS)
@@ -476,17 +435,6 @@ LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
 LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
-
-
-$(call start-emulator64-library, emulator64-libui)
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) $(ANDROID_SKIN_CFLAGS)
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
-LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
-LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES)
-$(call gen-hw-config-defs)
-$(call end-emulator-library)
-
 
 ##############################################################################
 ##############################################################################
@@ -758,28 +706,7 @@ endif
 common_LOCAL_CFLAGS += $(EMULATOR_LIBQEMU_CFLAGS)
 
 
-## one for 32-bit
 $(call start-emulator-library, emulator-libqemu)
-# gdbstub-xml.c contains C-compilable arrays corresponding to the content
-# of $(LOCAL_PATH)/gdb-xml/, and is generated with the 'feature_to_c.sh' script.
-#
-intermediates = $(call local-intermediates-dir)
-QEMU_GDBSTUB_XML_C = $(intermediates)/gdbstub-xml.c
-$(QEMU_GDBSTUB_XML_C): PRIVATE_PATH := $(LOCAL_PATH)
-$(QEMU_GDBSTUB_XML_C): PRIVATE_SOURCES := $(TARGET_XML_SOURCES)
-$(QEMU_GDBSTUB_XML_C): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/feature_to_c.sh $@ $(QEMU_TARGET_XML_SOURCES)
-$(QEMU_GDBSTUB_XML_C): $(QEMU_TARGET_XML_SOURCES) $(LOCAL_PATH)/feature_to_c.sh
-	$(hide) rm -f $@
-	$(transform-generated-source)
-LOCAL_GENERATED_SOURCES += $(QEMU_GDBSTUB_XML_C)
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(intermediates)
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-$(call gen-hw-config-defs)
-$(call end-emulator-library)
-
-
-## another for 64-bit, see note in emulator64-common
-$(call start-emulator64-library, emulator64-libqemu)
 # gdbstub-xml.c contains C-compilable arrays corresponding to the content
 # of $(LOCAL_PATH)/gdb-xml/, and is generated with the 'feature_to_c.sh' script.
 #
@@ -806,7 +733,7 @@ $(call end-emulator-library)
 # Normally, one would solve thus using LOCAL_WHOLE_STATIC_LIBRARIES, but
 # the Darwin linker doesn't support -Wl,--whole-archive or equivalent :-(
 #
-BLOCK_SOURCES += \
+BLOCK_SOURCES := \
     block.c \
     blockdev.c \
     block/qcow2.c \

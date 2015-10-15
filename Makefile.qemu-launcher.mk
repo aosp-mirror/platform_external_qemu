@@ -32,7 +32,7 @@ qemu_launcher_CFLAGS := \
 
 qemu_launcher_LDLIBS := $(CXX_STD_LIB)
 
-$(call start-emulator-program, emulator-ranchu-$(EMULATOR_TARGET_CPU))
+$(call start-emulator-program, emulator$(HOST_SUFFIX)-ranchu-$(EMULATOR_TARGET_CPU))
 LOCAL_SRC_FILES := $(qemu_launcher_SOURCES)
 LOCAL_CFLAGS := $(qemu_launcher_CFLAGS)
 LOCAL_STATIC_LIBRARIES := \
@@ -41,25 +41,6 @@ LOCAL_STATIC_LIBRARIES := \
     emulator-libsparse \
     emulator-libselinux \
     emulator-zlib
-LOCAL_LDLIBS := $(qemu_launcher_LDLIBS)
-LOCAL_GENERATE_SYMBOLS := true
-$(call gen-hw-config-defs)
-
-ifeq ($(HOST_OS),windows)
-$(eval $(call insert-windows-icon))
-endif
-
-$(call end-emulator-program)
-
-$(call start-emulator64-program, emulator64-ranchu-$(EMULATOR_TARGET_CPU))
-LOCAL_SRC_FILES := $(qemu_launcher_SOURCES)
-LOCAL_CFLAGS := $(qemu_launcher_CFLAGS)
-LOCAL_STATIC_LIBRARIES := \
-    emulator64-common \
-    emulator64-libext4_utils \
-    emulator64-libsparse \
-    emulator64-libselinux \
-    emulator64-zlib
 LOCAL_LDLIBS := $(qemu_launcher_LDLIBS)
 LOCAL_GENERATE_SYMBOLS := true
 $(call gen-hw-config-defs)

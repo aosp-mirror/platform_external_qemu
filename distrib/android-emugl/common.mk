@@ -24,10 +24,6 @@ emugl-begin-host-static-library = $(call emugl-begin-module,$1,HOST_STATIC_LIBRA
 emugl-begin-host-shared-library = $(call emugl-begin-module,$1,HOST_SHARED_LIBRARY,HOST)
 emugl-begin-host-executable = $(call emugl-begin-module,$1,HOST_EXECUTABLE,HOST)
 
-emugl-begin-host64-static-library = $(call emugl-begin-module64,$1,HOST_STATIC_LIBRARY,HOST)
-emugl-begin-host64-shared-library = $(call emugl-begin-module64,$1,HOST_SHARED_LIBRARY,HOST)
-emugl-begin-host64-executable = $(call emugl-begin-module64,$1,HOST_EXECUTABLE,HOST)
-
 # Internal list of all declared modules (used for sanity checking)
 _emugl_modules :=
 _emugl_HOST_modules :=
@@ -43,12 +39,7 @@ emugl-begin-module = \
     $(eval LOCAL_CFLAGS += $(EMUGL_COMMON_CFLAGS)) \
     $(eval LOCAL_LDLIBS += $(CXX_STD_LIB)) \
     $(eval LOCAL_BUILD_FILE := $(BUILD_$2)) \
-    $(eval LOCAL_MODULE_BITS := 32) \
     $(call _emugl-init-module,$1,$2,$3)
-
-emugl-begin-module64 = \
-    $(call emugl-begin-module,$1,$2,$3) \
-    $(eval LOCAL_MODULE_BITS := 64) \
 
 # Used to end a module definition, see function definitions above
 emugl-end-module = \
@@ -202,7 +193,7 @@ emugl-dump-module = \
 #    $(call emugl-gen-decoder,<input-dir>,<basename>)
 #
 emugl-gen-decoder = \
-    $(eval _emugl_out := $(call local-intermediates-dir))\
+    $(eval _emugl_out := $(call intermediates-dir-for,$(HOST_BITS),$2))\
     $(call emugl-gen-decoder-generic,$(_emugl_out),$1,$2)\
     $(call emugl-export,C_INCLUDES,$(_emugl_out))
 

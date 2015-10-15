@@ -33,12 +33,3 @@ $(call emugl-export,LDLIBS,$(host_commonLdLibs))
 $(call emugl-end-module)
 
 
-### OpenglCodecCommon  host, 64-bit #########################################
-$(call emugl-begin-host64-static-library,lib64OpenglCodecCommon)
-
-LOCAL_SRC_FILES := $(host_commonSources)
-$(call emugl-import, lib64emugl_common)
-$(call emugl-export,C_INCLUDES,$(EMUGL_PATH)/host/include/libOpenglRender $(LOCAL_PATH))
-$(call emugl-export,LDLIBS,$(host_commonLdLibs))
-$(call emugl-end-module)
-
