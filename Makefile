@@ -35,7 +35,7 @@ CONFIG_MAKE  := $(OBJS_DIR)/config.make
 CONFIG_H     := $(OBJS_DIR)/config-host.h
 
 ifeq ($(wildcard $(CONFIG_MAKE)),)
-    $(error "The configuration file '$(CONFIG_MAKE)' doesnt' exist, please run the "android-configure.sh" script)
+    $(error "The configuration file '$(CONFIG_MAKE)' doesn't exist, please run the 'android-configure.sh' script")
 endif
 
 include $(CONFIG_MAKE)
