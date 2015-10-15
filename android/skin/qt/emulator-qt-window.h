@@ -62,10 +62,11 @@ public:
     void dropEvent(QDropEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
-    void paintEvent(QPaintEvent *event);
+    void minimize();
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
+    void paintEvent(QPaintEvent *event);
     void show();
     void startThread(StartFunction f, int argc, char **argv);
     void wheelEvent(QWheelEvent *event);

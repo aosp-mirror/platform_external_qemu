@@ -189,7 +189,7 @@ void ToolWindow::on_home_button_clicked()
 }
 void ToolWindow::on_minimize_button_clicked()
 {
-    emulator_window->showMinimized();
+    emulator_window->minimize();
 }
 void ToolWindow::on_power_button_clicked()
 {
