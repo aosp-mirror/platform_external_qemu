@@ -20,7 +20,7 @@
 #include "android/hw-control.h"
 #include "android/hw-sensors.h"
 #include "android/opengles.h"
-#include "android/qemu-control-impl.h"
+#include "android-qemu1-glue/qemu-control-impl.h"
 #include "android/skin/keycode.h"
 #include "android/skin/winsys.h"
 #include "android/ui-emu-agent.h"
