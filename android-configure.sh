@@ -297,6 +297,7 @@ OPTION_MINGW=no
 OPTION_UI=
 OPTION_GLES=
 OPTION_SDK_REV=
+OPTION_SYMBOLS=no
 
 GLES_SUPPORT=no
 
@@ -359,6 +360,10 @@ for opt do
   --no-tests)
   # Ignore this option, only used by android-rebuild.sh
   ;;
+  --symbols) OPTION_SYMBOLS=yes
+  ;;
+  --no-symbols) OPTION_SYMBOLS=no
+  ;;
   --ui=sdl2) OPTION_UI=sdl2
   ;;
   --ui=qt) OPTION_UI=qt
@@ -393,6 +398,8 @@ EOF
     echo "  --cxx=PATH                  Specify C++ compiler [$HOST_CXX]"
     echo "  --no-strip                  Do not strip emulator executables."
     echo "  --strip                     Strip emulator executables (default)."
+    echo "  --symbols                   Generating Breakpad symbol files."
+    echo "  --no-symbols                Do not generate Breakpad symbol files (default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
     echo "  --ui=sdl2                   Use SDL2-based UI backend."
     echo "  --ui=qt                     Use Qt-based UI backend (default)."
@@ -788,6 +795,9 @@ echo "EMULATOR_BUILD_EMUGL       := true" >> $config_mk
 echo "EMULATOR_EMUGL_SOURCES_DIR := $GLES_DIR" >> $config_mk
 if [ "$OPTION_STRIP" = "yes" ]; then
     echo "EMULATOR_STRIP_BINARIES := true" >> $config_mk
+fi
+if [ "$OPTION_SYMBOLS" = "yes" ]; then
+    echo "EMULATOR_GENERATE_SYMBOLS := true" >> $config_mk
 fi
 
 ANDROID_SDK_TOOLS_REVSION=
