@@ -33,28 +33,6 @@
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 #define  DE(...) do { if (VERBOSE_CHECK(keys)) dprint(__VA_ARGS__); } while (0)
 
-struct SkinUI {
-    SkinUIParams           ui_params;
-    const SkinUIFuncs*     ui_funcs;
-
-    SkinFile*              layout_file;
-    SkinLayout*            layout;
-
-    SkinKeyboard*          keyboard;
-
-    SkinWindow*            window;
-
-    bool                   show_trackball;
-    SkinTrackBall*         trackball;
-
-    int                    lcd_brightness;
-
-    SkinImage*             onion;
-    SkinRotation           onion_rotation;
-    int                    onion_alpha;
-
-};
-
 static void _skin_ui_handle_key_command(void* opaque,
                                         SkinKeyCommand command,
                                         int  down);

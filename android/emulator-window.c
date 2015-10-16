@@ -22,6 +22,8 @@
 #include "android/opengles.h"
 #include "android/skin/keycode.h"
 #include "android/skin/winsys.h"
+#include "android/skin/ui.h"
+#include "android/skin/file.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
@@ -508,6 +510,56 @@ android_emulator_set_window_scale(double  scale, int  is_dpi)
     }
 }
 
+
+void
+android_emulator_set_window_orientation(AndroidCoarseOrientation orientation)
+{
+    EmulatorWindow* emulator = qemulator;
+    SkinLayout* layout = NULL;
+
+    static int current_orientation = ANDROID_COARSE_PORTRAIT;
+
+    if (emulator->ui) {
+
+        if (orientation == ANDROID_COARSE_PORTRAIT &&
+            current_orientation == ANDROID_COARSE_PORTRAIT) {
+
+            layout = emulator->ui->layout->next;
+            if (layout == NULL)
+                layout = emulator->ui->layout_file->layouts;
+            current_orientation = ANDROID_COARSE_LANDSCAPE;
+        }
+        else if (orientation == ANDROID_COARSE_LANDSCAPE &&
+                 current_orientation == ANDROID_COARSE_LANDSCAPE) {
+
+            layout = emulator->ui->layout_file->layouts;
+            while (layout->next && layout->next != emulator->ui->layout)
+                layout = layout->next;
+
+            current_orientation = ANDROID_COARSE_PORTRAIT;
+        }
+
+        if (layout != NULL) {
+            emulator->ui->layout = layout;
+            skin_window_reset(emulator->ui->window, layout);
+
+            SkinRotation rotation = skin_layout_get_dpad_rotation(layout);
+
+            if (emulator->ui->keyboard)
+                skin_keyboard_set_rotation(emulator->ui->keyboard, rotation);
+
+            if (emulator->ui->trackball) {
+                skin_trackball_set_rotation(emulator->ui->trackball, rotation);
+                skin_window_set_trackball(emulator->ui->window, emulator->ui->trackball);
+                skin_window_show_trackball(emulator->ui->window, emulator->ui->show_trackball);
+            }
+
+            skin_window_set_lcd_brightness(emulator->ui->window, emulator->ui->lcd_brightness);
+
+            emulator->ui->ui_funcs->framebuffer_invalidate();
+        }
+    }
+}
 
 void
 android_emulator_set_base_port( int  port )

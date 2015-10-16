@@ -29,6 +29,10 @@
 #include "android/hw-sensors.h"
 #include "android/shaper.h"
 #include "android/skin/charmap.h"
+#include "android/skin/window.h"
+#include "android/skin/file.h"
+#include "android/skin/keyboard.h"
+#include "android/skin/trackball.h"
 #include "android/skin/keycode-buffer.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"
@@ -54,6 +58,7 @@
 #include <unistd.h>
 
 extern void android_emulator_set_window_scale(double, int);
+extern void android_emulator_set_window_orientation(AndroidCoarseOrientation);
 
 #define  DEBUG  1
 
@@ -2602,6 +2607,31 @@ do_window_scale( ControlClient  client, char*  args )
     return 0;
 }
 
+static int
+do_window_rotate( ControlClient client, char* args )
+{
+    int     orientation;
+
+    if (!args) {
+        control_write( client, "KO: argument missing, try 'window rotate <orientation>'\r\n" );
+        return -1;
+    }
+
+    if (strcasecmp(args, "landscape") == 0) {
+        orientation = ANDROID_COARSE_PORTRAIT;
+    }
+    else if (strcasecmp(args, "portrait") == 0) {
+        orientation = ANDROID_COARSE_LANDSCAPE;
+    }
+    else {
+        control_write( client, "KO: argument <orientation> must be \"landscape\" or \"portrait\"\r\n");
+        return -1;
+    }
+
+    android_emulator_set_window_orientation(orientation);
+    return 0;
+}
+
 static const CommandDefRec  window_commands[] =
 {
     { "scale", "change the window scale",
@@ -2609,6 +2639,11 @@ static const CommandDefRec  window_commands[] =
     "<scale> must be either a real number between 0.1 and 3.0, or an integer followed by\r\n"
     "the 'dpi' prefix (as in '120dpi')\r\n",
     NULL, do_window_scale, NULL },
+
+    { "rotate", "change the window orientation",
+    "'window rotate <orientation>' allows you to change the orientation of the emulator window at runtime\r\n"
+    "<orientation> must be one of the following values: \"portrait\", \"landscape\"\r\n",
+    NULL, do_window_rotate, NULL },
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };

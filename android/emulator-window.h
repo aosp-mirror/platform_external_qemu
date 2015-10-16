@@ -14,6 +14,7 @@
 
 #include "android/cmdline-option.h"
 #include "android/framebuffer.h"
+#include "android/hw-sensors.h"
 #include "android/skin/file.h"
 #include "android/skin/keyboard.h"
 #include "android/skin/window.h"
@@ -42,6 +43,9 @@ emulator_window_get(void);
 
 void
 android_emulator_set_window_scale(double  scale, int  is_dpi);
+
+void
+android_emulator_set_window_orientation(AndroidCoarseOrientation  orientation);
 
 /* Initializes EmulatorWindow structure instance. */
 int
