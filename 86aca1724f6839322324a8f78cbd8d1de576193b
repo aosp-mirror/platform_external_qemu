@@ -1,0 +1,211 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "99ae8a64_fb2033b0",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-16T01:30:28Z",
+      "side": 1,
+      "message": "this is not needed - it means that the function is allowed to be defined several times, nothing else",
+      "range": {
+        "startLine": 38,
+        "startChar": 7,
+        "endLine": 38,
+        "endChar": 13
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d952c250_6c84a3a1",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-16T01:30:28Z",
+      "side": 1,
+      "message": "while (citer !\u003d cend \u0026\u0026 pred(*citer)) {\n    ++citer;\n}",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 5
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "996cca16_ea024fd8",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-16T01:30:28Z",
+      "side": 1,
+      "message": "maybe we should reset it only on successful read?",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 19
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9bdc694_e8ae266d",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-16T01:30:28Z",
+      "side": 1,
+      "message": "can you move this out into a separate function? it really looks huge now",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 173,
+        "endChar": 27
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1959ba73_e3d72046",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-16T01:30:28Z",
+      "side": 1,
+      "message": "auto commentIter \u003d std::cbegin() ?",
+      "range": {
+        "startLine": 193,
+        "startChar": 4,
+        "endLine": 193,
+        "endChar": 45
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d952c250_ec66f3a0",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-16T01:30:28Z",
+      "side": 1,
+      "message": ".find() ?",
+      "range": {
+        "startLine": 305,
+        "startChar": 0,
+        "endLine": 308,
+        "endChar": 40
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39611e20_bc8705dc",
+        "filename": "android/base/files/IniFile.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-16T01:30:28Z",
+      "side": 1,
+      "message": "using instead of typedef? Just for fun",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 49
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9943ea80_4d23a578",
+        "filename": "android/base/files/IniFile.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-16T01:30:28Z",
+      "side": 1,
+      "message": "what about a vector of pairs and an undordered_map of \u003ckey -\u003e index in vector\u003e ? you can do both lookup in O(1) and get by index that way; also, as you never insert in the middle after loading there\u0027s no danger of screwing things up\n\nWell, comments complicate things a bit\nwhat would be better here is:\n\nvector\u003cpair\u003ckey, value\u003e\u003e for everything\nunordered_map\u003ckey, index in first vector\u003e\u003e for an access by key\nunordered_map\u003cindex of the key-value, index in first vector\u003e for access by index\n\nOr some other ways\nIn the end you will always just dump out the first vector as a new file content",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 49
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99ae8a64_1b6e6fc0",
+        "filename": "android/base/files/IniFile_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-16T01:30:28Z",
+      "side": 1,
+      "message": "cref?",
+      "range": {
+        "startLine": 52,
+        "startChar": 27,
+        "endLine": 52,
+        "endChar": 40
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
