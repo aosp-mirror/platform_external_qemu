@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f91146d4_acfc2b9d",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-16T18:22:18Z",
+      "side": 1,
+      "message": "It \"hints\" to the compiler that this function can be inlined.\nMost (all?) modern compilers actually ignore this keyword.\n\nI see no reason to not have it there though. It tells the reader that this function is meant to be inlined.",
+      "parentUuid": "99ae8a64_fb2033b0",
+      "range": {
+        "startLine": 38,
+        "startChar": 7,
+        "endLine": 38,
+        "endChar": 13
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d952c250_6c84a3a1",
         "filename": "android/base/files/IniFile.cpp",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2015-10-16T01:30:28Z",
       "side": 1,
       "message": "while (citer !\u003d cend \u0026\u0026 pred(*citer)) {\n    ++citer;\n}",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 5
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99020a8c_2664d648",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-16T18:22:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d952c250_6c84a3a1",
       "range": {
         "startLine": 60,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "99d92a72_6ed18f55",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-16T18:22:18Z",
+      "side": 1,
+      "message": "I chose to do it this way for simplicity. The API is also clearer.\n\nIf you try to retain state in case of failed reads, you have to deal with read failures mid-flight.",
+      "parentUuid": "996cca16_ea024fd8",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 19
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f9bdc694_e8ae266d",
         "filename": "android/base/files/IniFile.cpp",
         "patchSetId": 5
@@ -82,6 +154,30 @@
       "writtenOn": "2015-10-16T01:30:28Z",
       "side": 1,
       "message": "can you move this out into a separate function? it really looks huge now",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 173,
+        "endChar": 27
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59e3321f_8ca287e8",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-16T18:22:18Z",
+      "side": 1,
+      "message": "Moved the whole parseFile part, not just the parseLine part, it\u0027s not worth keeping state about lineno\u0027s across calls for an extra loop.",
+      "parentUuid": "f9bdc694_e8ae266d",
       "range": {
         "startLine": 108,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "79fd56bf_85482227",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-16T18:22:18Z",
+      "side": 1,
+      "message": "Nack.\nI don\u0027t like using auto where I\u0027d have to look in another file to figure out the type, especially where the type is complicated and important for understanding the following code.",
+      "parentUuid": "1959ba73_e3d72046",
+      "range": {
+        "startLine": 193,
+        "startChar": 4,
+        "endLine": 193,
+        "endChar": 45
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d952c250_ec66f3a0",
         "filename": "android/base/files/IniFile.cpp",
         "patchSetId": 5
@@ -128,6 +248,30 @@
       "writtenOn": "2015-10-16T01:30:28Z",
       "side": 1,
       "message": ".find() ?",
+      "range": {
+        "startLine": 305,
+        "startChar": 0,
+        "endLine": 308,
+        "endChar": 40
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f91146d4_2c95db37",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-16T18:22:18Z",
+      "side": 1,
+      "message": "Done.\n\nOops. Missed it.",
+      "parentUuid": "d952c250_ec66f3a0",
       "range": {
         "startLine": 305,
         "startChar": 0,
