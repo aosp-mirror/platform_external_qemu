@@ -603,9 +603,17 @@ build_darwin_binaries_on () {
 
     AOSP_BUILD_PREBUILTS=$AOSP_PREBUILTS_DIR/android-emulator-build
     DARWIN_BUILD_PREBUILTS=$DARWIN_PKG_DIR/aosp/prebuilts/android-emulator-build
+    AOSP_KERNEL_PREBUILTS=$AOSP_PREBUILTS_DIR/qemu-kernel
+    DARWIN_KERNEL_PREBUILTS=$DARWIN_PKG_DIR/aosp/prebuilts/qemu-kernel
 
     copy_directory "$AOSP_BUILD_PREBUILTS"/curl/darwin-x86_64 \
             "$DARWIN_BUILD_PREBUILTS"/curl/darwin-x86_64
+
+    if [ ! -d "$AOSP_KERNEL_PREBUILTS/x86/pc-bios" ]; then
+        panic "Missing pc-bios prebuilts!"
+    fi
+    copy_directory "$AOSP_KERNEL_PREBUILTS"/x86/pc-bios \
+            "$DARWIN_KERNEL_PREBUILTS"/x86/pc-bios
 
     if [ ! -d "$AOSP_BUILD_PREBUILTS/common/e2fsprogs/darwin-x86_64" ]; then
         panic "Missing e2fsprogs prebuilts!"
@@ -662,7 +670,6 @@ EOF
     # `pwd` == external/qemu
     rm -rf objs/*
     run rsync -haz --delete --exclude=intermediates --exclude=libs $HOST:$DARWIN_REMOTE_DIR/qemu/objs .
-    # TODO(digit): Retrieve PC BIOS files.
     dump "Deleting files off darwin system"
     run ssh $HOST rm -rf $DARWIN_REMOTE_DIR
 
