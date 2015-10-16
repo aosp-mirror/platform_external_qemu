@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "99d92a72_4e6ff3e8",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-16T16:46:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "99ae8a64_00e27a87",
+      "revId": "f7a37a256c98e71f2fd4216adee07e72327fd313",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d952c250_c12c9837",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-15T23:38:30Z",
       "side": 1,
       "message": "s/to reset/so reset/ ?",
+      "revId": "f7a37a256c98e71f2fd4216adee07e72327fd313",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39de7e5b_8b538d4f",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-16T16:46:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d952c250_c12c9837",
       "revId": "f7a37a256c98e71f2fd4216adee07e72327fd313",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "190ffab2_2a95bf37",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-16T16:46:06Z",
+      "side": 1,
+      "message": "Yep, but this solution seems to work fine.",
+      "parentUuid": "d952c250_0137b07d",
+      "revId": "f7a37a256c98e71f2fd4216adee07e72327fd313",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f9bdc694_f58843b6",
         "filename": "android/skin/ui.c",
         "patchSetId": 6
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "d90802ae_283a6bfe",
+        "filename": "android/skin/ui.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-16T16:46:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f9bdc694_f58843b6",
+      "revId": "f7a37a256c98e71f2fd4216adee07e72327fd313",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f9b786e1_7919e7be",
         "filename": "android/skin/window.c",
         "patchSetId": 6
@@ -81,6 +153,24 @@
       "writtenOn": "2015-10-15T23:38:30Z",
       "side": 1,
       "message": "If the size is unchanged, we do not updated the position.\nIs this OK?",
+      "revId": "f7a37a256c98e71f2fd4216adee07e72327fd313",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99d92a72_8e0efb48",
+        "filename": "android/skin/window.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1430,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-16T16:46:06Z",
+      "side": 1,
+      "message": "The subwindow position is updated before both calls to this function, and I believe there are no cases where the size doesn\u0027t change AND the position of the intersected result is different from the \"original\" position. Feel free to correct me if this is untrue.",
+      "parentUuid": "f9b786e1_7919e7be",
       "revId": "f7a37a256c98e71f2fd4216adee07e72327fd313",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
