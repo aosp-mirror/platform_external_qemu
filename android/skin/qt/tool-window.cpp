@@ -221,11 +221,9 @@ void ToolWindow::on_scrShot_button_clicked()
 {
     emulator_window->screenshot();
 }
-void ToolWindow::on_fullscreen_button_clicked()
+void ToolWindow::on_zoom_button_clicked()
 {
-    // TODO: Re-enable this when we know what it's
-    //       supposed to do.
-//    emulator_window->simulateKeyPress(KEY_F9, 0);
+    emulator_window->zoom();
 }
 
 void ToolWindow::on_more_button_clicked()
