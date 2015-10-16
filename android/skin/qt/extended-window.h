@@ -21,6 +21,7 @@
 #include "android/gps/GpsFix.h"
 #include "android/hw-sensors.h"
 #include "android/settings-agent.h"
+#include "android/skin/qt/extended-window-styles.h"
 #include "android/ui-emu-agent.h"
 
 #include <QFile>
@@ -122,6 +123,7 @@ private:
 
     int      mLoc_mSecRemaining;
     bool     mLoc_nowPaused;
+    bool     mLoc_nowPlaying;
     int      mLoc_rowToSend;
     QTimer   mLoc_timer;
     QDoubleValidator mMagFieldValidator;
@@ -142,6 +144,11 @@ private:
     void    dpad_setPressed(QPushButton* button);
     void    dpad_setReleased(QPushButton* button);
 
+    QIcon getIconForCurrentTheme(const QString& icon_name) {
+        QString iconType = 
+            mSettingsState.mTheme == SETTINGS_THEME_LIGHT ? LIGHT_PATH : DARK_PATH;
+        return QIcon(":/" + iconType + "/" + icon_name);
+    }
 private slots:
     // Master tabs
     void on_batteryButton_clicked();
@@ -190,13 +197,12 @@ private slots:
 
     // Location
     void on_loc_addRowButton_clicked();
-    void on_loc_GpxButton_clicked();
-    void on_loc_KmlButton_clicked();
+    void on_loc_GpxKmlButton_clicked();
     void on_loc_pathTable_cellChanged(int row, int col);
-    void on_loc_pauseButton_clicked();
-    void on_loc_playButton_clicked();
     void on_loc_removeRowButton_clicked();
     void on_loc_stopButton_clicked();
+    void on_loc_pauseButton_clicked();
+    void on_loc_playButton_clicked();
 
     bool loc_cellIsValid(QTableWidget *table, int row, int col);
     void loc_populateTable(GpsFixArray *fixes);
