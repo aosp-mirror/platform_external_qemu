@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1959ba73_8340e41e",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-16T00:06:38Z",
+      "side": 1,
+      "message": "This needs to depend on the theme light/dark setting.",
+      "revId": "fa9e8c2ab378c5aaaada8d73e35e668dc754e471",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
