@@ -87,7 +87,6 @@ private:
 private slots:
     void on_back_button_clicked();
     void on_close_button_clicked();
-    void on_fullscreen_button_clicked();
     void on_home_button_clicked();
     void on_minimize_button_clicked();
     void on_more_button_clicked();
@@ -98,6 +97,7 @@ private slots:
     void on_scrShot_button_clicked();
     void on_volume_down_button_clicked();
     void on_volume_up_button_clicked();
+    void on_zoom_button_clicked();
 
     void slot_installCanceled();
     void slot_installFinished(int exitStatus);
