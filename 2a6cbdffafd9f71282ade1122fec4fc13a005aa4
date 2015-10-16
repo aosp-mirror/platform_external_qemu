@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f91146d4_6c53d3ff",
+        "filename": "android/metrics/AutoFlushedIniFile.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-16T18:36:03Z",
+      "side": 1,
+      "message": "it\u0027s destructor - there\u0027s no \u0027further\u0027 for this object anymore :)",
+      "range": {
+        "startLine": 69,
+        "startChar": 49,
+        "endLine": 69,
+        "endChar": 78
+      },
+      "revId": "2a6cbdffafd9f71282ade1122fec4fc13a005aa4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59e3321f_cfcc019e",
+        "filename": "android/metrics/AutoFlushedIniFile.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-16T18:36:03Z",
+      "side": 1,
+      "message": "What about thread safety? is there a possible update to the ini file from another thread?",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 65
+      },
+      "revId": "2a6cbdffafd9f71282ade1122fec4fc13a005aa4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
