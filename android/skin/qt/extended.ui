@@ -108,6 +108,9 @@ font-family: &quot;Roboto&quot;</string>
        <normaloff>:/light/stop</normaloff>
        <disabledoff>:/light/stop_disabled</disabledoff>:/light/stop</iconset>
      </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
      <property name="themeIconName" stdset="0">
       <string>stop</string>
      </property>
@@ -155,8 +158,22 @@ font-family: &quot;Roboto&quot;</string>
        <height>36</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="text">
-      <string>Load GPX</string>
+      <string>LOAD GPX</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Tool</string>
      </property>
     </widget>
     <widget class="QPushButton" name="loc_removeRowButton">
@@ -178,6 +195,9 @@ font-family: &quot;Roboto&quot;</string>
       <iconset resource="resources.qrc">
        <normaloff>:/light/remove</normaloff>
        <disabledoff>:/light/remove_disabled</disabledoff>:/light/remove</iconset>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
      <property name="themeIconName" stdset="0">
       <string>remove</string>
@@ -208,6 +228,9 @@ font-family: &quot;Roboto&quot;</string>
        <height>32</height>
       </size>
      </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
      <property name="themeIconName" stdset="0">
       <string>play_arrow</string>
      </property>
@@ -224,8 +247,22 @@ font-family: &quot;Roboto&quot;</string>
        <height>36</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="text">
-      <string>Load KML</string>
+      <string>LOAD KML</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Tool</string>
      </property>
     </widget>
     <widget class="QPushButton" name="loc_pauseButton">
@@ -247,6 +284,9 @@ font-family: &quot;Roboto&quot;</string>
       <iconset resource="resources.qrc">
        <normaloff>:/light/pause</normaloff>
        <disabledoff>:/light/pause_disabled</disabledoff>:/light/pause</iconset>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
      <property name="themeIconName" stdset="0">
       <string>pause</string>
@@ -270,6 +310,9 @@ font-family: &quot;Roboto&quot;</string>
      <property name="icon">
       <iconset resource="resources.qrc">
        <normaloff>:/light/add</normaloff>:/light/add</iconset>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
      <property name="themeIconName" stdset="0">
       <string>add</string>
