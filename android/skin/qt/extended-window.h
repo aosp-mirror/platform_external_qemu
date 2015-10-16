@@ -122,6 +122,7 @@ private:
 
     int      mLoc_mSecRemaining;
     bool     mLoc_nowPaused;
+    bool     mLoc_nowPlaying;
     int      mLoc_rowToSend;
     QTimer   mLoc_timer;
     QDoubleValidator mMagFieldValidator;
@@ -142,6 +143,11 @@ private:
     void    dpad_setPressed(QPushButton* button);
     void    dpad_setReleased(QPushButton* button);
 
+    QIcon getIconForCurrentTheme(const QString& icon_name) {
+        QString iconType = 
+            mSettingsState.mTheme == SETTINGS_THEME_LIGHT ? "light" : "dark";
+        return QIcon(":/" + iconType + "/" + icon_name);
+    }
 private slots:
     // Master tabs
     void on_batteryButton_clicked();
@@ -190,13 +196,13 @@ private slots:
 
     // Location
     void on_loc_addRowButton_clicked();
-    void on_loc_GpxButton_clicked();
-    void on_loc_KmlButton_clicked();
+    void on_loc_GpxKmlButton_clicked();
     void on_loc_pathTable_cellChanged(int row, int col);
-    void on_loc_pauseButton_clicked();
-    void on_loc_playButton_clicked();
+    void on_loc_playPauseButton_clicked();
     void on_loc_removeRowButton_clicked();
     void on_loc_stopButton_clicked();
+    void togglePause();
+    void startPlayback();
 
     bool loc_cellIsValid(QTableWidget *table, int row, int col);
     void loc_populateTable(GpsFixArray *fixes);

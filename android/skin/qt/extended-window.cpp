@@ -34,6 +34,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     mSettingsAgent (agentPtr ? agentPtr->settings  : NULL),
     mLoc_mSecRemaining(-1),
     mLoc_nowPaused(false),
+    mLoc_nowPlaying(false),
     mLoc_rowToSend(-1),
     mExtendedUi(new Ui::ExtendedControls)
 {

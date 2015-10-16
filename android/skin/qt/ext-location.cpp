@@ -114,7 +114,7 @@ void ExtendedWindow::on_loc_pathTable_cellChanged(int row, int col)
     mExtendedUi->loc_pathTable->item(row, col)->setForeground(QBrush(newColor));
 }
 
-void ExtendedWindow::on_loc_playButton_clicked()
+void ExtendedWindow::startPlayback()
 {
     // Validate all the table's values
     for (int row = 0; row < mExtendedUi->loc_pathTable->rowCount(); row++) {
@@ -128,12 +128,15 @@ void ExtendedWindow::on_loc_playButton_clicked()
         }
     }
 
+    mExtendedUi->loc_pathTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     mLoc_rowToSend = 0;
+    mLoc_nowPlaying = true;
+    mExtendedUi->loc_playPauseButton->setIcon(
+            getIconForCurrentTheme("pause"));
     mLoc_timer.setInterval(0); // Fire when I return
     mLoc_timer.start();
     SettingsTheme theme = mSettingsState.mTheme;
-    setButtonEnabled(mExtendedUi->loc_playButton,  theme, false);
-    setButtonEnabled(mExtendedUi->loc_pauseButton, theme, true);
+    setButtonEnabled(mExtendedUi->loc_GpxKmlButton,  theme, false);
     setButtonEnabled(mExtendedUi->loc_stopButton,  theme, true);
 }
 
@@ -172,13 +175,13 @@ void ExtendedWindow::loc_slot_timeout()
     memset(&timeVal, 0, sizeof(timeVal));
     gettimeofday(&timeVal, NULL);
 
-    char curLoc[64];
-    // ?? I set the style for the box with Text.AlignVCenter,
-    //    but the text still appears at the top of the box.
-    snprintf(curLoc, 64, "Sent row %2d: %9.4f, %8.4f, %3.0f",
-             mLoc_rowToSend+1, lat, lon, alt);
-
-    mExtendedUi->loc_currentLocBox->setPlainText(QString(curLoc));
+    if (mLoc_rowToSend > 0) {
+        mExtendedUi->loc_pathTable->item(mLoc_rowToSend - 1, 0)->setIcon(QIcon());
+    }
+    QTableWidgetItem* currentItem = mExtendedUi->loc_pathTable->item(mLoc_rowToSend, 0);
+    currentItem->setIcon(
+            getIconForCurrentTheme("play_arrow"));
+    mExtendedUi->loc_pathTable->scrollToItem(currentItem);
 
     if (mLocationAgent  &&  mLocationAgent->gpsCmd) {
         mLocationAgent->gpsCmd(lat, lon, alt, nSats, &timeVal);
@@ -202,7 +205,7 @@ void ExtendedWindow::loc_slot_timeout()
     mLoc_nowPaused = false;
 }
 
-void ExtendedWindow::on_loc_pauseButton_clicked()
+void ExtendedWindow::togglePause()
 {
     if (mLoc_nowPaused) {
         // Resume
@@ -217,6 +220,8 @@ void ExtendedWindow::on_loc_pauseButton_clicked()
         mLoc_timer.start();
         mLoc_mSecRemaining = -1;
         mLoc_nowPaused = false;
+        mExtendedUi->loc_playPauseButton->setIcon(
+                getIconForCurrentTheme("pause"));
     } else {
         // Pause the timer operation
         if (!mLoc_timer.isActive()) {
@@ -230,6 +235,16 @@ void ExtendedWindow::on_loc_pauseButton_clicked()
         if (mLoc_mSecRemaining < 0) mLoc_mSecRemaining = 0;
         mLoc_timer.stop();
         mLoc_nowPaused = true;
+        mExtendedUi->loc_playPauseButton->setIcon(
+                getIconForCurrentTheme("play_arrow"));
+    }
+}
+
+void ExtendedWindow::on_loc_playPauseButton_clicked() {
+    if (mLoc_nowPlaying) {
+        togglePause();
+    } else {
+        startPlayback();
     }
 }
 
@@ -237,12 +252,19 @@ void ExtendedWindow::on_loc_stopButton_clicked()
 {
     mLoc_timer.stop();
     mLoc_nowPaused = false;
+    if (mLoc_rowToSend > 0) {
+        mExtendedUi->loc_pathTable->item(mLoc_rowToSend - 1, 0)->setIcon(QIcon());
+    }
     mLoc_rowToSend = -1;
-
+    mLoc_nowPlaying = mLoc_nowPaused = false;
     SettingsTheme theme = mSettingsState.mTheme;
-    setButtonEnabled(mExtendedUi->loc_playButton,  theme, true);
-    setButtonEnabled(mExtendedUi->loc_pauseButton, theme, false);
+    setButtonEnabled(mExtendedUi->loc_GpxKmlButton,  theme, true);
     setButtonEnabled(mExtendedUi->loc_stopButton,  theme, false);
+    mExtendedUi->loc_playPauseButton->setIcon(
+            getIconForCurrentTheme("play_arrow"));
+    mExtendedUi->loc_pathTable->setEditTriggers(QAbstractItemView::DoubleClicked |
+                                                QAbstractItemView::EditKeyPressed |
+                                                QAbstractItemView::AnyKeyPressed);
 }
 
 bool ExtendedWindow::loc_cellIsValid(QTableWidget *table, int row, int col)
@@ -288,28 +310,36 @@ bool ExtendedWindow::loc_cellIsValid(QTableWidget *table, int row, int col)
     return cellOK;
 }
 
-void ExtendedWindow::on_loc_GpxButton_clicked()
+void ExtendedWindow::on_loc_GpxKmlButton_clicked()
 {
-    bool isOK;
+    bool isOK = false;
 
     // Use dialog to get file name
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open GPX File"), ".",
-                                                    tr("GPX files (*.gpx);;All files (*)"));
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open GPX or KML File"), ".",
+                                                    tr("GPX and KML files (*.gpx *.kml)"));
 
     if (fileName.isNull()) return;
 
     // Delete all rows in table
     mExtendedUi->loc_pathTable->setRowCount(0);
 
-    GpsFixArray gpxFixes;
+    GpsFixArray fixes;
     std::string errStr;
-    isOK = GpxParser::parseFile(fileName.toStdString().c_str(),
-                                &gpxFixes, &errStr);
+    QFileInfo fileInfo(fileName);
+    if (fileInfo.suffix() == "gpx") {
+        isOK = GpxParser::parseFile(fileName.toStdString().c_str(),
+                                    &fixes, &errStr);
+    } else if (fileInfo.suffix() == "kml") {
+        isOK = KmlParser::parseFile(fileName.toStdString().c_str(),
+                                    &fixes, &errStr);
+    }
+
     if (!isOK) {
-        mToolWindow->showErrorDialog(tr(errStr.c_str()),
-                                     tr("GPX Parser"));
+        mToolWindow->showErrorDialog(
+                tr(errStr.c_str()),
+                tr((fileInfo.suffix().toUpper() + " Parser").toStdString().c_str()));
     } else {
-        loc_populateTable(&gpxFixes);
+        loc_populateTable(&fixes);
     }
 
     // Ensure that we have at least one row
@@ -317,7 +347,7 @@ void ExtendedWindow::on_loc_GpxButton_clicked()
         mExtendedUi->loc_pathTable->insertRow(0);
 
         mExtendedUi->loc_pathTable->setItem(0, 0, new QTableWidgetItem("0")); // Delay
-        mExtendedUi->loc_pathTable->setItem(0, 1, new QTableWidgetItem("0")); // Latitute
+        mExtendedUi->loc_pathTable->setItem(0, 1, new QTableWidgetItem("0")); // Latitude
         mExtendedUi->loc_pathTable->setItem(0, 2, new QTableWidgetItem("0")); // Longitude
         mExtendedUi->loc_pathTable->setItem(0, 3, new QTableWidgetItem("0")); // Elevation
         mExtendedUi->loc_pathTable->setItem(0, 4, new QTableWidgetItem("" )); // Name
@@ -327,47 +357,7 @@ void ExtendedWindow::on_loc_GpxButton_clicked()
     setButtonEnabled(mExtendedUi->loc_removeRowButton,
                      mSettingsState.mTheme,
                      mExtendedUi->loc_pathTable->rowCount() > 1 );
-}
 
-void ExtendedWindow::on_loc_KmlButton_clicked()
-{
-    bool isOK;
-
-    // Use dialog to get file name
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open KML File"), ".",
-                                                    tr("KML files (*.kml);;All files (*)"));
-
-    if (fileName.isNull()) return;
-
-    // Delete all rows in table
-    mExtendedUi->loc_pathTable->setRowCount(0);
-
-    GpsFixArray kmlFixes;
-    std::string errStr;
-    isOK = KmlParser::parseFile(fileName.toStdString().c_str(),
-                                &kmlFixes, &errStr);
-    if (!isOK) {
-        mToolWindow->showErrorDialog(tr(errStr.c_str()),
-                                     tr("KML Parser"));
-    } else {
-        loc_populateTable(&kmlFixes);
-    }
-
-    // Ensure that we have at least one row
-    if (mExtendedUi->loc_pathTable->rowCount() == 0) {
-        mExtendedUi->loc_pathTable->insertRow(0);
-
-        mExtendedUi->loc_pathTable->setItem(0, 0, new QTableWidgetItem("0")); // Delay
-        mExtendedUi->loc_pathTable->setItem(0, 1, new QTableWidgetItem("0")); // Latitute
-        mExtendedUi->loc_pathTable->setItem(0, 2, new QTableWidgetItem("0")); // Longitude
-        mExtendedUi->loc_pathTable->setItem(0, 3, new QTableWidgetItem("0")); // Elevation
-        mExtendedUi->loc_pathTable->setItem(0, 4, new QTableWidgetItem("" )); // Name
-        mExtendedUi->loc_pathTable->setItem(0, 5, new QTableWidgetItem("" )); // Description
-    }
-
-    setButtonEnabled(mExtendedUi->loc_removeRowButton,
-                     mSettingsState.mTheme,
-                     mExtendedUi->loc_pathTable->rowCount() > 1 );
 }
 
 void ExtendedWindow::loc_populateTable(GpsFixArray *fixes)
@@ -400,6 +390,12 @@ void ExtendedWindow::loc_populateTable(GpsFixArray *fixes)
 //
 //  Adds a row at the end of the table
 
+static QTableWidgetItem* itemForTable(const QString& text) {
+    QTableWidgetItem* item = new QTableWidgetItem(text);
+    item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    return item;
+}
+
 void ExtendedWindow::loc_appendToTable(std::string lat,
                                        std::string lon,
                                        std::string elev,
@@ -410,10 +406,11 @@ void ExtendedWindow::loc_appendToTable(std::string lat,
     int newRow = mExtendedUi->loc_pathTable->rowCount();
 
     mExtendedUi->loc_pathTable->insertRow(newRow);
-    mExtendedUi->loc_pathTable->setItem(newRow, 0, new QTableWidgetItem(QString::number(time)));
-    mExtendedUi->loc_pathTable->setItem(newRow, 1, new QTableWidgetItem(lat.c_str()));
-    mExtendedUi->loc_pathTable->setItem(newRow, 2, new QTableWidgetItem(lon.c_str()));
-    mExtendedUi->loc_pathTable->setItem(newRow, 3, new QTableWidgetItem(elev.c_str()));
-    mExtendedUi->loc_pathTable->setItem(newRow, 4, new QTableWidgetItem(name.c_str()));
-    mExtendedUi->loc_pathTable->setItem(newRow, 5, new QTableWidgetItem(description.c_str()));
+    mExtendedUi->loc_pathTable->setItem(newRow, 0, itemForTable(QString::number(time)));
+    mExtendedUi->loc_pathTable->setItem(newRow, 1, itemForTable(QString::fromStdString(lat)));
+    mExtendedUi->loc_pathTable->setItem(newRow, 2, itemForTable(QString::fromStdString(lon)));
+    mExtendedUi->loc_pathTable->setItem(newRow, 3, itemForTable(QString::fromStdString(elev)));
+    mExtendedUi->loc_pathTable->setItem(newRow, 4, itemForTable(QString::fromStdString(name)));
+    mExtendedUi->loc_pathTable->setItem(newRow, 5, itemForTable(QString::fromStdString(description)));
+
 }
