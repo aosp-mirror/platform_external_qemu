@@ -33,28 +33,6 @@
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 #define  DE(...) do { if (VERBOSE_CHECK(keys)) dprint(__VA_ARGS__); } while (0)
 
-struct SkinUI {
-    SkinUIParams           ui_params;
-    const SkinUIFuncs*     ui_funcs;
-
-    SkinFile*              layout_file;
-    SkinLayout*            layout;
-
-    SkinKeyboard*          keyboard;
-
-    SkinWindow*            window;
-
-    bool                   show_trackball;
-    SkinTrackBall*         trackball;
-
-    int                    lcd_brightness;
-
-    SkinImage*             onion;
-    SkinRotation           onion_rotation;
-    int                    onion_alpha;
-
-};
-
 static void _skin_ui_handle_key_command(void* opaque,
                                         SkinKeyCommand command,
                                         int  down);
@@ -81,6 +59,13 @@ SkinUI* skin_ui_create(SkinFile* layout_file, const char* initial_orientation,
 
     ui->layout_file = layout_file;
     ui->layout = skin_file_select_layout(layout_file->layouts, initial_orientation);
+
+    if (strcmp(initial_orientation, "landscape") == 0) {
+        ui->orientation = SKIN_ROTATION_270;
+    } else {
+        // portrait is default
+        ui->orientation = SKIN_ROTATION_0;
+    }
 
     ui->ui_funcs = ui_funcs;
     ui->ui_params = ui_params[0];
@@ -347,6 +332,7 @@ _skin_ui_handle_key_command(void* opaque, SkinKeyCommand command, int  down)
                 skin_window_reset(ui->window, layout);
 
                 SkinRotation rotation = skin_layout_get_dpad_rotation(layout);
+                ui->orientation = rotation;
 
                 if (ui->keyboard)
                     skin_keyboard_set_rotation(ui->keyboard, rotation);

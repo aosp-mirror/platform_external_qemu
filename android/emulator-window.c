@@ -510,6 +510,52 @@ android_emulator_set_window_scale(double  scale, int  is_dpi)
 
 
 void
+android_emulator_set_window_orientation(AndroidCoarseOrientation orientation)
+{
+    EmulatorWindow* emulator = qemulator;
+    SkinLayout* layout = NULL;
+
+    if (emulator->ui) {
+
+        if (orientation == ANDROID_COARSE_PORTRAIT &&
+            emulator->ui->orientation == SKIN_ROTATION_0) {
+
+            layout = emulator->ui->layout->next;
+            if (layout == NULL)
+                layout = emulator->ui->layout_file->layouts;
+        }
+        else if (orientation == ANDROID_COARSE_LANDSCAPE &&
+                 emulator->ui->orientation == SKIN_ROTATION_270) {
+
+            layout = emulator->ui->layout_file->layouts;
+            while (layout->next && layout->next != emulator->ui->layout)
+                layout = layout->next;
+        }
+
+        if (layout != NULL) {
+            emulator->ui->layout = layout;
+            skin_window_reset(emulator->ui->window, layout);
+
+            SkinRotation rotation = skin_layout_get_dpad_rotation(layout);
+            emulator->ui->orientation = rotation;
+
+            if (emulator->ui->keyboard)
+                skin_keyboard_set_rotation(emulator->ui->keyboard, rotation);
+
+            if (emulator->ui->trackball) {
+                skin_trackball_set_rotation(emulator->ui->trackball, rotation);
+                skin_window_set_trackball(emulator->ui->window, emulator->ui->trackball);
+                skin_window_show_trackball(emulator->ui->window, emulator->ui->show_trackball);
+            }
+
+            skin_window_set_lcd_brightness(emulator->ui->window, emulator->ui->lcd_brightness);
+
+            emulator->ui->ui_funcs->framebuffer_invalidate();
+        }
+    }
+}
+
+void
 android_emulator_set_base_port( int  port )
 {
     if (qemulator->ui) {

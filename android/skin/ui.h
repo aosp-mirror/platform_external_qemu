@@ -18,11 +18,11 @@
 
 #include <stdbool.h>
 
-typedef struct SkinUI SkinUI;
-
 // Avoid including headers if possible.
-struct SkinFile;
-struct SkinLayout;
+typedef struct SkinWindow SkinWindow;
+typedef struct SkinTrackBall SkinTrackBall;
+typedef struct SkinFile SkinFile;
+typedef struct SkinLayout SkinLayout;
 struct SkinTrackBallParameters;
 struct SkinWindowFuncs;
 
@@ -75,6 +75,30 @@ typedef struct SkinUIParams {
     bool keyboard_raw_keys;
 
 } SkinUIParams;
+
+typedef struct SkinUI {
+    SkinUIParams           ui_params;
+    const SkinUIFuncs*     ui_funcs;
+
+    SkinFile*              layout_file;
+    SkinLayout*            layout;
+
+    SkinKeyboard*          keyboard;
+
+    SkinWindow*            window;
+
+    bool                   show_trackball;
+    SkinTrackBall*         trackball;
+
+    int                    lcd_brightness;
+
+    SkinRotation           orientation;
+
+    SkinImage*             onion;
+    SkinRotation           onion_rotation;
+    int                    onion_alpha;
+
+} SkinUI;
 
 // Create a new user-interface SkinUI object
 // |layout_file| is the original layout file for the corresponding skin.
