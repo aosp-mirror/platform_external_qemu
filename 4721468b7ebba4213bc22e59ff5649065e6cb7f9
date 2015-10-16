@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "991a0ab3_a60d267f",
+        "filename": "android/scripts/package-release.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 657,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-16T11:55:41Z",
+      "side": 1,
+      "message": "typo: should be --symb",
+      "revId": "4721468b7ebba4213bc22e59ff5649065e6cb7f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9ae4293_381f69a8",
+        "filename": "android/scripts/package-release.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 660,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-16T11:55:41Z",
+      "side": 1,
+      "message": "and here should be --strip :-)",
+      "revId": "4721468b7ebba4213bc22e59ff5649065e6cb7f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
