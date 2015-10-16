@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9943ea80_6df78140",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-16T00:47:49Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 65,
+        "startChar": 58,
+        "endLine": 65,
+        "endChar": 60
+      },
+      "revId": "9e76bf2ec1217b8c6d3c656fa4ba3713d5c2b753",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
