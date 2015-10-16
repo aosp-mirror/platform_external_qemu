@@ -150,6 +150,11 @@ void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
     }
 }
 
+void EmulatorQtWindow::minimize()
+{
+    mContainer.showMinimized();
+}
+
 void EmulatorQtWindow::mouseMoveEvent(QMouseEvent *event)
 {
     handleEvent(kEventMouseMotion, event);
