@@ -971,6 +971,30 @@
     },
     {
       "key": {
+        "uuid": "79d47637_edea2515",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-16T18:22:18Z",
+      "side": 1,
+      "message": "Perhaps. I still think that static_cast is informational in the right direction.",
+      "parentUuid": "39611e20_1c927925",
+      "range": {
+        "startLine": 353,
+        "startChar": 39,
+        "endLine": 353,
+        "endChar": 48
+      },
+      "revId": "3c2c56b6a225ba0ac507b7fb8f978a51786535f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7fa9b65d_7d21926c",
         "filename": "android/base/files/IniFile.cpp",
         "patchSetId": 4
@@ -1193,6 +1217,30 @@
     },
     {
       "key": {
+        "uuid": "b9f26ee4_ef3fc151",
+        "filename": "android/base/files/IniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-16T18:22:18Z",
+      "side": 1,
+      "message": "Several points.\n- I would like a separate DiskSize type to make templated getters/setters possible. They\u0027re nicer. As I said, I actually went down that path, and backtracked because I didn\u0027t think the it was worth the complexity of use. We can rethink that part later.\n\n- I don\u0027t really agree with free functions approach. It\u0027s more difficult to use than methods that use type inference to DTRT. Also, the original inifile was \"typed\", and I want to keep it that way.\n\nFinally, and most importantly, I\u0027m trying to migrate the ini file implementation from C to C++ making reasonable improvements. I am quite happy with the current interface, even if it doesn\u0027t meet \u0027perfect\u0027 standards ;)\n\nI\u0027d like to make progress here, and I\u0027d argue this CL is in a good enough state for that.",
+      "parentUuid": "b9550e3b_cb0dd57e",
+      "range": {
+        "startLine": 89,
+        "startChar": 29,
+        "endLine": 89,
+        "endChar": 42
+      },
+      "revId": "3c2c56b6a225ba0ac507b7fb8f978a51786535f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3fa3be81_a2084b41",
         "filename": "android/base/files/IniFile.h",
         "patchSetId": 4
@@ -1204,6 +1252,30 @@
       "writtenOn": "2015-10-14T16:38:12Z",
       "side": 1,
       "message": "why these are not const?",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 105,
+        "endChar": 19
+      },
+      "revId": "3c2c56b6a225ba0ac507b7fb8f978a51786535f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "79fd56bf_0590b2d5",
+        "filename": "android/base/files/IniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-16T18:22:18Z",
+      "side": 1,
+      "message": "- They\u0027re dropped from the final patchset.\n- They were not const because they were returning |iterator| which gives a mutable interface to the object. Can\u0027t be const.",
+      "parentUuid": "3fa3be81_a2084b41",
       "range": {
         "startLine": 104,
         "startChar": 0,
