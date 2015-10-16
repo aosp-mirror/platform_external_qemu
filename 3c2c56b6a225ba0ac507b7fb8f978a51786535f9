@@ -947,6 +947,30 @@
     },
     {
       "key": {
+        "uuid": "39611e20_1c927925",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-16T01:30:28Z",
+      "side": 1,
+      "message": "int64_t is a typedef, isn\u0027t it? most probably it is exactly the same as long long",
+      "parentUuid": "996cca16_f91d137a",
+      "range": {
+        "startLine": 353,
+        "startChar": 39,
+        "endLine": 353,
+        "endChar": 48
+      },
+      "revId": "3c2c56b6a225ba0ac507b7fb8f978a51786535f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7fa9b65d_7d21926c",
         "filename": "android/base/files/IniFile.cpp",
         "patchSetId": 4
@@ -1133,6 +1157,30 @@
       "writtenOn": "2015-10-14T01:03:07Z",
       "side": 1,
       "message": "I played around with a templatized function \n\ntemplate \u003ctypename T\u003e\nvoid set(const std::string\u0026 key, const T\u0026 value);\n\nThe problem I hit is that DiskSize is really just an int64_t, while we want to serialize it specially.\nI worked around it by using a single element POD-type struct for DiskSize instead of typedef\u0027ing.\n\nIt was fun while it lasted, but that seemed like unnecessary complexity added by the fact that this interface isn\u0027t trying to serialize types. (There isn\u0027t 1:1 mapping between the C++ types and the types in an ini file).",
+      "range": {
+        "startLine": 89,
+        "startChar": 29,
+        "endLine": 89,
+        "endChar": 42
+      },
+      "revId": "3c2c56b6a225ba0ac507b7fb8f978a51786535f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9550e3b_cb0dd57e",
+        "filename": "android/base/files/IniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-16T01:30:28Z",
+      "side": 1,
+      "message": "yeah, proper implementation should just have a DiskSize class which has a cast to int64, constructs from int64 and has comparison operators\nin that case one can both overload on it and be much more explicit that it\u0027s not just an int\n\nActually, I doubt it\u0027s a good idea to integrate types into the IniFile class. Good interface here should only operate on strings, and there should be a separate set of free function helpers to serialize/deserialize them. Something like\n\n  template \u003cclass T\u003e\n  T get(IniFile\u0026 f, string name);\n  \n  template \u003cclass T\u003e\n  void set(IniFile\u0026 f, string name, string value);\n\nThat\u0027s what I would call \u0027perfect interface\u0027 here :)",
+      "parentUuid": "7fa9b65d_27a0e9de",
       "range": {
         "startLine": 89,
         "startChar": 29,
