@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "59e3321f_55853ed1",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-16T23:03:02Z",
+      "side": 1,
+      "message": "There are #defines LIGHT_PATH and DARK_PATH for \"light\" and \"dark\". \n(Perhaps overkill, but trying to keep all that in emulator-window-styles.h.)",
+      "revId": "98839d79d0af771ff3497a1527b35063a711b9d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
