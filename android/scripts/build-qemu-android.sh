@@ -302,6 +302,7 @@ EOF
             --disable-attr \
             --disable-blobs \
             --disable-cap-ng \
+            --disable-cocoa \
             --disable-curl \
             --disable-curses \
             --disable-docs \
@@ -323,6 +324,7 @@ EOF
             --disable-vhost-net \
             --disable-werror \
             $ENABLE_ANDROID \
+            --enable-sdl \
             --with-sdlabi=2.0 \
             &&
 
