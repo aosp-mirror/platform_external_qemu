@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "79fd56bf_0599d2eb",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-18T22:11:03Z",
+      "side": 1,
+      "message": "It doesn\u0027t hint anything to the compiler. The only thing it does by the standard now - it only allows compiler to throw away multiple defined symbols with this name. Without inline it would be an error - \u0027function is already defined\u0027",
+      "parentUuid": "f91146d4_acfc2b9d",
+      "range": {
+        "startLine": 38,
+        "startChar": 7,
+        "endLine": 38,
+        "endChar": 13
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d952c250_6c84a3a1",
         "filename": "android/base/files/IniFile.cpp",
         "patchSetId": 5
@@ -131,6 +155,30 @@
       "side": 1,
       "message": "I chose to do it this way for simplicity. The API is also clearer.\n\nIf you try to retain state in case of failed reads, you have to deal with read failures mid-flight.",
       "parentUuid": "996cca16_ea024fd8",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 19
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9f26ee4_6fb87117",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-18T22:11:03Z",
+      "side": 1,
+      "message": "Definitely! If reading fails in the middle, just clean up all containers",
+      "parentUuid": "99d92a72_6ed18f55",
       "range": {
         "startLine": 69,
         "startChar": 0,
