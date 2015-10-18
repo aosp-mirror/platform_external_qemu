@@ -443,6 +443,9 @@ build_qemu_android_deps () {
         windows-*)
             sed -i -e '/^Libs: -L\${libdir} /s/$/ -Wl,--no-undefined -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid -static-libgcc/' $PREFIX/lib/pkgconfig/sdl2.pc
             ;;
+        darwin-*)
+            sed -i "" -e '/^Libs: -L\${libdir} /s/$/ -lm -Wl,-framework,OpenGL  -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit/' $PREFIX/lib/pkgconfig/sdl2.pc
+            ;;
         linux-*)
             sed -i -e '/^Libs: -L\${libdir} /s/$/ -Wl,--no-undefined -lm -ldl -lrt/' $PREFIX/lib/pkgconfig/sdl2.pc
             ;;
