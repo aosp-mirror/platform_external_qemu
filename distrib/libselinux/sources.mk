@@ -30,10 +30,4 @@ LOCAL_C_INCLUDES := $(LIBSELINUX_INCLUDES)
 LOCAL_CFLAGS := $(LIBSELINUX_CFLAGS)
 $(call end-emulator-library)
 
-$(call start-emulator64-library,emulator64-libselinux)
-LOCAL_SRC_FILES := $(LIBSELINUX_SOURCES)
-LOCAL_C_INCLUDES := $(LIBSELINUX_INCLUDES)
-LOCAL_CFLAGS := $(LIBSELINUX_CFLAGS)
-$(call end-emulator-library)
-
 LOCAL_PATH := $(OLD_LOCAL_PATH)

@@ -332,6 +332,14 @@ OPT_GLES=
 option_register_var "--gles=<name>" OPT_GLES \
         "Specify GLES backend ('dgl' or 'angle')"
 
+OPT_NO_STRIP=
+option_register_var "--no-strip" OPT_NO_STRIP \
+        "Do not strip final binaries."
+
+OPT_SYMBOLS=
+option_register_var "--symbols" OPT_SYMBOLS \
+       "Generate Breakpad symbols."
+
 package_builder_register_options
 aosp_prebuilts_dir_register_options
 prebuilts_dir_register_option
@@ -541,18 +549,13 @@ create_binaries_package () {
             done
         fi
     fi
-    if [ -d "objs/symbols" ]; then
+    if [ -d "objs/build/symbols" ]; then
         dump "[$PKG_NAME] Copying Symbols."
-        copy_directory objs/symbols "$TEMP_PKG_DIR"/symbols
+        copy_directory objs/build/symbols "$TEMP_PKG_DIR"/build/symbols
     fi
 
     # Get rid of some extra files we don't really want
     run rm -f "$TEMP_PKG_DIR"/tools/lib*/lib*emugl_test_shared_library*
-
-    # Get rid of extra symbol files in tools directory
-    run rm -f "$TEMP_PKG_DIR"/tools/*.sym
-    run find "$TEMP_PKG_DIR"/tools/lib -name "*.sym" -delete
-    run find "$TEMP_PKG_DIR"/tools/lib64 -name "*.sym" -delete
 
     dump "[$PKG_NAME] Creating README file."
     cat > $TEMP_PKG_DIR/README <<EOF
@@ -615,6 +618,9 @@ build_darwin_binaries_on () {
     copy_directory "$AOSP_KERNEL_PREBUILTS"/x86/pc-bios \
             "$DARWIN_KERNEL_PREBUILTS"/x86/pc-bios
 
+    copy_directory "$AOSP_BUILD_PREBUILTS"/qemu-android-deps/darwin-x86_64 \
+            "$DARWIN_BUILD_PREBUILTS"/qemu-android-deps/darwin-x86_64
+
     if [ ! -d "$AOSP_BUILD_PREBUILTS/common/e2fsprogs/darwin-x86_64" ]; then
         panic "Missing e2fsprogs prebuilts!"
     fi
@@ -633,7 +639,7 @@ build_darwin_binaries_on () {
     copy_directory "$AOSP_BUILD_PREBUILTS"/common/breakpad/darwin-x86_64 \
             "$DARWIN_BUILD_PREBUILTS"/common/breakpad/darwin-x86_64
 
-    if [ "$OPT_UI" = "qt" ]; then
+    if [ "$OPT_UI" != "sdl2" ]; then
         if [ ! -d "$AOSP_BUILD_PREBUILTS"/qt/darwin-x86_64 ]; then
             panic "Missing Darwin Qt prebuilts required by --ui=qt !!"
         fi
@@ -658,6 +664,13 @@ build_darwin_binaries_on () {
     if [ "$OPT_GLES" ]; then
         var_append DARWIN_BUILD_FLAGS "--gles=$OPT_GLES"
     fi
+    if [ "$OPT_NO_STRIP" ]; then
+        var_append DARWIN_BUILD_FLAGS "--no-strip"
+    fi
+    if [ "$OPT_SYMBOLS" ]; then
+        var_append DARWIN_BUILD_FLAGS "--symbols"
+    fi
+
     cat > $DARWIN_PKG_DIR/build.sh <<EOF
 #!/bin/bash -l
 cd $DARWIN_REMOTE_DIR/qemu &&
@@ -712,6 +725,14 @@ fi
 
 if [ "$OPT_GLES" ]; then
     var_append REBUILD_FLAGS "--gles=$OPT_GLES"
+fi
+
+if [ "$OPT_NO_STRIP" ]; then
+    var_append REBUILD_FLAGS "--no-strip"
+fi
+
+if [ "$OPT_SYMBOLS" ]; then
+    var_append REBUILD_FLAGS "--symbols"
 fi
 
 for SYSTEM in $(convert_host_list_to_os_list $LOCAL_HOST_SYSTEMS); do

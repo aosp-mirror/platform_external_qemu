@@ -1,0 +1,363 @@
+# This file is included several times to build target-specific
+# modules for the Android emulator. It will be called several times
+# for arm, x86 and mips
+#
+
+ifndef EMULATOR_TARGET_ARCH
+$(error EMULATOR_TARGET_ARCH is not defined!)
+endif
+
+EMULATOR_TARGET_CPU := $(EMULATOR_TARGET_ARCH)
+ifeq ($(EMULATOR_TARGET_CPU),x86)
+  EMULATOR_TARGET_CPU := i386
+endif
+
+##############################################################################
+##############################################################################
+###
+###  emulator-target-$CPU: target-specific emulation code.
+###
+###  Used by both the core and standalone programs.
+###
+
+# Common compiler flags for all target-dependent libraries
+EMULATOR_TARGET_CFLAGS := \
+    -I$(LOCAL_PATH)/android/config/target-$(EMULATOR_TARGET_ARCH) \
+    -I$(LOCAL_PATH)/target-$(EMULATOR_TARGET_CPU) \
+    -I$(LOCAL_PATH)/fpu \
+    -DNEED_CPU_H
+
+TCG_TARGET := $(HOST_ARCH)
+ifeq ($(HOST_ARCH),x86)
+  TCG_TARGET := i386
+endif
+ifeq ($(HOST_ARCH),x86_64)
+  TCG_TARGET := i386
+endif
+
+EMULATOR_TARGET_CFLAGS += \
+    -I$(LOCAL_PATH)/tcg \
+    -I$(LOCAL_PATH)/tcg/$(TCG_TARGET) \
+    -DTARGET_ARCH=\"$(EMULATOR_TARGET_ARCH)\"
+
+
+common_LOCAL_CFLAGS =
+common_LOCAL_SRC_FILES =
+
+common_LOCAL_CFLAGS += -I$(GLIB_INCLUDE_DIR) $(EMULATOR_COMMON_CFLAGS)
+
+# The following is to ensure that "config.h" will map to a target-specific
+# configuration file header.
+common_LOCAL_CFLAGS += $(EMULATOR_TARGET_CFLAGS)
+
+common_LOCAL_SRC_FILES += \
+    tcg/optimize.c \
+    tcg/tcg.c \
+    tcg-runtime.c \
+    util/bitops.c \
+    util/host-utils.c \
+
+##############################################################################
+# Emulated hardware devices.
+#
+
+HW_SOURCES := \
+    core/irq.c \
+    core/qdev.c \
+    core/sysbus.c \
+    core/dma.c \
+    android/goldfish/audio.c \
+    android/goldfish/device.c \
+    android/goldfish/events_device.c \
+    android/goldfish/fb.c \
+    android/goldfish/battery.c \
+    android/goldfish/mmc.c   \
+    android/goldfish/nand.c \
+    android/goldfish/pipe.c \
+    android/goldfish/tty.c \
+    android/goldfish/vmem.c \
+    android/goldfish/trace.c \
+    android/goldfish/profile.c \
+    pci/pci.c \
+    watchdog/watchdog.c
+
+
+ifeq ($(EMULATOR_TARGET_ARCH),arm)
+HW_SOURCES += \
+    android/android_arm.c \
+    arm/pic.c \
+    arm/boot.c \
+    android/goldfish/interrupt.c \
+    android/goldfish/timer.c
+
+# The following sources must be compiled with the final executables
+# because they contain device_init() or machine_init() statements.
+HW_OBJ_SOURCES := hw/net/smc91c111.c
+HW_OBJ_CFLAGS  := $(EMULATOR_TARGET_CFLAGS)
+
+common_LOCAL_SRC_FILES += disas/arm.c
+
+# smc91c111.c requires <zlib.h>
+common_LOCAL_CFLAGS += $(ZLIB_CFLAGS)
+endif
+
+# required to ensure we properly initialize virtual audio hardware
+common_LOCAL_CFLAGS += -DHAS_AUDIO
+
+ifeq ($(EMULATOR_TARGET_ARCH),x86)
+HW_SOURCES += \
+    intc/apic.c \
+    intc/i8259.c \
+    timer/mc146818rtc.c \
+    pci-host/piix.c \
+    timer/i8254.c \
+    input/pckbd.c \
+    intc/ioapic.c \
+    input/ps2.c \
+    i386/smbios.c \
+    nvram/fw_cfg.c
+
+# The following sources must be compiled with the final executables
+# because they contain device_init() or machine_init() statements.
+HW_OBJ_SOURCES := \
+    hw/net/ne2000.c \
+    hw/i386/pc.c
+
+HW_OBJ_CFLAGS  := $(EMULATOR_TARGET_CFLAGS)
+
+endif
+
+ifeq ($(EMULATOR_TARGET_ARCH),mips)
+HW_SOURCES += \
+    android/android_mips.c \
+    mips/mips_pic.c \
+    android/goldfish/interrupt.c \
+    android/goldfish/timer.c \
+    mips/cputimer.c \
+    mips/mips_int.c
+
+# The following sources must be compiled with the final executables
+# because they contain device_init() or machine_init() statements.
+HW_OBJ_SOURCES := hw/net/smc91c111.c
+HW_OBJ_CFLAGS  := $(EMULATOR_TARGET_CFLAGS)
+
+common_LOCAL_SRC_FILES += disas/mips.c
+
+# smc91c111.c requires <zlib.h>
+LOCAL_CFLAGS += $(ZLIB_CFLAGS)
+ifeq ($(ARCH_HAS_BIGENDIAN),true)
+  LOCAL_CFLAGS += -DTARGET_WORDS_BIGENDIAN
+endif
+
+endif
+common_LOCAL_SRC_FILES += $(HW_SOURCES:%=hw/%)
+
+common_LOCAL_SRC_FILES += \
+    backends/msmouse.c \
+    cpu-exec.c  \
+    cputlb.c \
+    exec.c \
+    main-loop.c \
+    memory-android.c \
+    monitor-android.c \
+    translate-all.c \
+    code-profile.c \
+
+##############################################################################
+# CPU-specific emulation.
+#
+common_LOCAL_CFLAGS += -fno-PIC -fomit-frame-pointer -Wno-sign-compare
+
+ifeq ($(HOST_ARCH),ppc)
+    common_LOCAL_CFLAGS += -D__powerpc__
+endif
+
+ifeq ($(EMULATOR_TARGET_ARCH),arm)
+common_LOCAL_SRC_FILES += \
+    target-arm/arm-semi.c \
+    target-arm/op_helper.c \
+    target-arm/iwmmxt_helper.c \
+    target-arm/neon_helper.c \
+    target-arm/helper.c \
+    target-arm/translate.c \
+    target-arm/machine.c \
+    hw/arm/armv7m.c \
+    hw/arm/armv7m_nvic.c
+endif  # EMULATOR_TARGET_ARCH == arm
+
+ifeq ($(EMULATOR_TARGET_ARCH), x86)
+common_LOCAL_SRC_FILES += \
+    target-i386/cc_helper.c \
+    target-i386/excp_helper.c \
+    target-i386/fpu_helper.c \
+    target-i386/int_helper.c \
+    target-i386/mem_helper.c \
+    target-i386/misc_helper.c \
+    target-i386/seg_helper.c \
+    target-i386/smm_helper.c \
+    target-i386/svm_helper.c \
+    target-i386/helper.c \
+    target-i386/translate.c \
+    target-i386/machine.c \
+
+ifeq ($(HOST_OS),darwin)
+common_LOCAL_SRC_FILES += \
+      target-i386/hax-all.c       \
+      target-i386/hax-darwin.c
+endif
+
+ifeq ($(HOST_OS),windows)
+common_LOCAL_SRC_FILES += \
+      target-i386/hax-all.c       \
+      target-i386/hax-windows.c
+endif
+endif  # EMULATOR_TARGET_ARCH == x86
+
+ifeq ($(EMULATOR_TARGET_ARCH), mips)
+common_LOCAL_SRC_FILES += \
+    target-mips/op_helper.c \
+    target-mips/helper.c \
+    target-mips/translate.c \
+    target-mips/machine.c
+endif  # EMULATOR_TARGET_ARCH == mips
+
+common_LOCAL_SRC_FILES += fpu/softfloat.c
+
+# compile KVM only if target is x86 on x86 or x86_64 Linux
+ifeq (linux-x86,$(HOST_OS)-$(EMULATOR_TARGET_ARCH))
+    common_LOCAL_SRC_FILES += \
+        target-i386/kvm.c \
+        target-i386/kvm-gs-restore.c \
+        kvm-all.c \
+        kvm-android.c
+endif
+
+common_LOCAL_SRC_FILES += \
+    cpus.c \
+    arch_init.c
+
+# What a mess, os-posix.c depends on the exact values of options
+# which are target specific.
+ifeq ($(HOST_OS),windows)
+    common_LOCAL_SRC_FILES += os-win32.c util/oslib-win32.c
+else
+    common_LOCAL_SRC_FILES += os-posix.c util/oslib-posix.c
+endif
+
+
+## one for 32-bit
+$(call start-emulator-library, emulator-target-$(EMULATOR_TARGET_CPU))
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+$(call gen-hw-config-defs)
+$(call gen-hx-header,qemu-options.hx,qemu-options.def,os-posix.c os-win32.c)
+$(call end-emulator-library)
+
+##############################################################################
+##############################################################################
+###
+###  emulator-$ARCH: Standalone emulator program
+###
+###
+
+common_LOCAL_LDFLAGS =
+common_LOCAL_LDLIBS =
+common_LOCAL_CFLAGS =
+common_LOCAL_SRC_FILES =
+
+common_LOCAL_LDFLAGS += \
+    $(EMULATOR_LIBUI_LDFLAGS)
+
+common_LOCAL_LDLIBS += \
+    $(EMULATOR_COMMON_LDLIBS) \
+    $(EMULATOR_LIBQEMU_LDLIBS) \
+    $(EMULATOR_LIBUI_LDLIBS) \
+    $(ELFF_LDLIBS)
+
+common_LOCAL_CFLAGS += \
+    $(EMULATOR_TARGET_CFLAGS) \
+    $(EMULATOR_COMMON_CFLAGS) \
+    $(EMULATOR_LIBQEMU_CFLAGS) \
+    $(EMULATOR_LIBUI_CFLAGS)
+
+common_LOCAL_SRC_FILES := \
+    audio/audio.c \
+    disas.c \
+    dma-helpers.c \
+    gdbstub.c \
+    qemu-timer.c \
+    log-rotate-android.c \
+    vl-android.c \
+    android/cmdline-option.c \
+    android/console.c \
+    android/cpu_accelerator.cpp \
+    android-qemu1-glue/display.c \
+    android/help.c \
+    android/main-common.c \
+    android/main-common-ui.c \
+    android-qemu1-glue/main.c \
+    android/opengles.c \
+    android-qemu1-glue/qemu-battery-agent-impl.c \
+    android-qemu1-glue/qemu-cellular-agent-impl.c \
+    android-qemu1-glue/qemu-finger-agent-impl.c \
+    android-qemu1-glue/qemu-location-agent-impl.c \
+    android-qemu1-glue/qemu-sensors-agent-impl.c \
+    android-qemu1-glue/qemu-telephony-agent-impl.c \
+    android-qemu1-glue/qemu-user-event-agent-impl.c \
+    android-qemu1-glue/qemu-vm-operations-impl.c \
+    android-qemu1-glue/qemu-net-agent-impl.c \
+    android-qemu1-glue/qemu-display-agent-impl.cpp \
+    android/qt/qt_path.cpp \
+    hw/core/loader.c \
+    ui/keymaps.c \
+    util/bitmap.c \
+    util/bitops.c \
+    util/iov.c \
+    util/qemu-timer-common.c \
+
+# The following files cannot be in static libraries because they contain
+# constructor functions that are otherwise stripped by the final linker
+common_LOCAL_SRC_FILES += $(HW_OBJ_SOURCES)
+common_LOCAL_CFLAGS    += $(HW_OBJ_CFLAGS)
+
+common_LOCAL_SRC_FILES += $(BLOCK_SOURCES)
+common_LOCAL_CFLAGS    += $(BLOCK_CFLAGS)
+
+common_LOCAL_LDLIBS += $(CXX_STD_LIB)
+
+## 
+$(call start-emulator-program, emulator$(HOST_SUFFIX)-$(EMULATOR_TARGET_ARCH))
+LOCAL_STATIC_LIBRARIES += \
+    emulator-libui \
+    emulator-libqemu \
+    emulator-target-$(EMULATOR_TARGET_CPU) \
+    emulator-libjpeg \
+    libandroid-wear-agent \
+    emulator-common \
+    emulator-libext4_utils \
+    emulator-libsparse \
+    emulator-libselinux \
+    emulator-zlib \
+    $(EMULATOR_LIBUI_STATIC_LIBRARIES)
+
+LOCAL_LDLIBS += $(common_LOCAL_LDLIBS) $(ANDROID_SKIN_LDLIBS) $(LIBCURL_LDLIBS)
+LOCAL_LDLIBS += $(LIBXML2_LDLIBS)
+LOCAL_LDLIBS += $(BREAKPAD_LDLIBS)
+LOCAL_LDFLAGS += $(common_LOCAL_LDFLAGS)
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES)
+LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES)
+LOCAL_CFLAGS += -I$(BREAKPAD_INCLUDES)
+LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+LOCAL_GENERATE_SYMBOLS := true
+$(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)
+$(call gen-hw-config-defs)
+
+ifeq ($(HOST_OS),windows)
+  $(eval $(call insert-windows-icon))
+  # Special exception for Windows: -lmingw32 must appear before libSDLmain
+  # on the link command-line, because it depends on _WinMain@16 which is
+  # exported by the latter.
+  LOCAL_LDFLAGS += -lmingw32
+endif
+
+$(call end-emulator-program)

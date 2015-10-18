@@ -59,50 +59,27 @@ log2 "BUILD_ARCH=$BUILD_ARCH"
 # other values may be possible but haven't been tested
 #
 
-EXE=""
-OS=`uname -s`
-case "$OS" in
-    Darwin)
-        OS=darwin-$BUILD_ARCH
-        ;;
-    Linux)
-        # note that building  32-bit binaries on x86_64 is handled later
-        OS=linux-$BUILD_ARCH
-        ;;
-    FreeBSD)
-        OS=freebsd-$BUILD_ARCH
-        ;;
+BUILD_EXEEXT=
+BUILD_OS=`uname -s`
+case "$BUILD_OS" in
+    Darwin) BUILD_OS=darwin;;
+    Linux) BUILD_OS=linux;;
+    FreeBSD) BUILD_OS=freebsd;;
     CYGWIN*|*_NT-*)
         panic "Please build Windows binaries on Linux with --mingw option."
         ;;
+    *) panic "Unknown build OS: $BUILD_OS";;
 esac
 
-log2 "OS=$OS"
-log2 "EXE=$EXE"
+BUILD_TAG=$BUILD_OS-$BUILD_ARCH
 
-# at this point, the value of OS should be one of the following:
-#   linux-x86
-#   linux-x86_64
-#   darwin-x86
-#   darwin-x86_64
-#
-# other values may be possible but have not been tested
+log2 "BUILD_TAG=$BUILD_TAG"
+log2 "BUILD_EXEEXT=$BUILD_EXEEXT"
 
-# define HOST_OS as $OS without any cpu-specific suffix
-#
-case $OS in
-    linux-*) HOST_OS=linux
-    ;;
-    darwin-*) HOST_OS=darwin
-    ;;
-    freebsd-*) HOST_OS=freebsd
-    ;;
-    *) HOST_OS=$OS
-esac
-
+HOST_OS=$BUILD_OS
 HOST_ARCH=$BUILD_ARCH
 HOST_TAG=$HOST_OS-$HOST_ARCH
-BUILD_TAG=$HOST_TAG
+
 
 #### Toolchain support
 ####
@@ -112,12 +89,12 @@ WINDRES=
 # Various probes are going to need to run a small C program
 TMPC=/tmp/android-$$-test.c
 TMPO=/tmp/android-$$-test.o
-TMPE=/tmp/android-$$-test$EXE
+TMPE=/tmp/android-$$-test$BUILD_EXEEXT
 TMPL=/tmp/android-$$-test.log
 
 # cleanup temporary files
 clean_temp () {
-    rm -f $TMPC $TMPO $TMPL $TMPE
+    rm -f $TMPC $TMPO $TMPL $TMPLE
 }
 
 # cleanup temp files then exit with an error
@@ -126,28 +103,7 @@ clean_exit () {
     exit 1
 }
 
-# this function should be called to enforce the build of 32-bit binaries on 64-bit systems
-# that support it.
-FORCE_32BIT=no
-force_32bit_binaries () {
-    if [ $BUILD_ARCH = x86_64 ] ; then
-        FORCE_32BIT=yes
-        case $OS in
-            linux-x86_64) OS=linux-x86 ;;
-            darwin-x86_64) OS=darwin-x86 ;;
-            freebsd-x86_64) OS=freebsd-x86 ;;
-        esac
-        HOST_ARCH=x86
-        BUILD_ARCH=x86
-        HOST_TAG=$HOST_OS-$HOST_ARCH
-        log "Check32Bits: Forcing generation of 32-bit binaries."
-    fi
-}
-
 # this function will setup the compiler and linker and check that they work as advertized
-# note that you should call 'force_32bit_binaries' before this one if you want it to work
-# as advertized.
-#
 setup_toolchain () {
     if [ -z "$CC" ] ; then
         CC=gcc
@@ -157,19 +113,6 @@ setup_toolchain () {
     cat > $TMPC <<EOF
 int main(void) {}
 EOF
-
-    if [ $FORCE_32BIT = yes ] ; then
-        CFLAGS="$CFLAGS -m32"
-        LDFLAGS="$LDFLAGS -m32"
-        compile
-        if [ $? != 0 ] ; then
-            # sometimes, we need to also tell the assembler to generate 32-bit binaries
-            # this is highly dependent on your GCC installation (and no, we can't set
-            # this flag all the time)
-            CFLAGS="$CFLAGS -Wa,--32"
-        fi
-    fi
-
     compile
     if [ $? != 0 ] ; then
         echo "your C compiler doesn't seem to work: $CC"
@@ -292,11 +235,12 @@ OPTION_IGNORE_AUDIO=no
 OPTION_AOSP_PREBUILTS_DIR=
 OPTION_OUT_DIR=
 OPTION_HELP=no
-OPTION_STRIP=no
+OPTION_STRIP=yes
 OPTION_MINGW=no
 OPTION_UI=
 OPTION_GLES=
 OPTION_SDK_REV=
+OPTION_SYMBOLS=no
 
 GLES_SUPPORT=no
 
@@ -336,7 +280,7 @@ for opt do
     fi
     ;;
 
-  --debug) OPTION_DEBUG=yes
+  --debug) OPTION_DEBUG=yes; OPTION_STRIP=no
   ;;
   --mingw) OPTION_MINGW=yes
   ;;
@@ -358,6 +302,10 @@ for opt do
   ;;
   --no-tests)
   # Ignore this option, only used by android-rebuild.sh
+  ;;
+  --symbols) OPTION_SYMBOLS=yes
+  ;;
+  --no-symbols) OPTION_SYMBOLS=no
   ;;
   --ui=sdl2) OPTION_UI=sdl2
   ;;
@@ -391,8 +339,10 @@ EOF
     echo "  --help                      Print this message"
     echo "  --cc=PATH                   Specify C compiler [$HOST_CC]"
     echo "  --cxx=PATH                  Specify C++ compiler [$HOST_CXX]"
-    echo "  --strip                     Strip emulator executables."
-    echo "  --no-strip                  Do not strip emulator executables (default)."
+    echo "  --no-strip                  Do not strip emulator executables."
+    echo "  --strip                     Strip emulator executables (default)."
+    echo "  --symbols                   Generating Breakpad symbol files."
+    echo "  --no-symbols                Do not generate Breakpad symbol files (default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
     echo "  --ui=sdl2                   Use SDL2-based UI backend."
     echo "  --ui=qt                     Use Qt-based UI backend (default)."
@@ -467,13 +417,15 @@ if [ "$CCACHE" ]; then
 else
     GEN_SDK_FLAGS="$GEN_SDK_FLAGS --no-ccache"
 fi
+SDK_TOOLCHAIN_DIR=$OUT_DIR/build/toolchain
 GEN_SDK_FLAGS="$GEN_SDK_FLAGS --aosp-dir=$AOSP_PREBUILTS_DIR/.."
-"$GEN_SDK" $GEN_SDK_FLAGS "$OUT_DIR/toolchain" || panic "Cannot generate SDK toolchain!"
-BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$OUT_DIR/toolchain")
-CC="$OUT_DIR/toolchain/${BINPREFIX}gcc"
-CXX="$OUT_DIR/toolchain/${BINPREFIX}g++"
-AR="$OUT_DIR/toolchain/${BINPREFIX}ar"
+"$GEN_SDK" $GEN_SDK_FLAGS "$SDK_TOOLCHAIN_DIR" || panic "Cannot generate SDK toolchain!"
+BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$SDK_TOOLCHAIN_DIR")
+CC="$SDK_TOOLCHAIN_DIR/${BINPREFIX}gcc"
+CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}g++"
+AR="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ar"
 LD=$CC
+OBJCOPY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}objcopy"
 
 if [ -n "$OPTION_CC" ]; then
     echo "Using specified C compiler: $OPTION_CC"
@@ -485,24 +437,13 @@ if [ -n "$OPTION_CXX" ]; then
     CC="$OPTION_CXX"
 fi
 
-if [ -z "$CC" ]; then
-  CC=$HOST_CC
-fi
-
-if [ -z "$CXX" ]; then
-  CXX=$HOST_CXX
-fi
-
-# By default, generate 32-bit binaries, the Makefile have targets that
-# generate 64-bit ones by using -m64 on the command-line.
-force_32bit_binaries
-
 setup_toolchain
 
 BUILD_AR=$AR
 BUILD_CC=$CC
 BUILD_CXX=$CXX
 BUILD_LD=$LD
+BUILD_OBJCOPY=$OBJCOPY
 BUILD_CFLAGS=$CFLAGS
 BUILD_CXXFLAGS=$CXXFLAGS
 BUILD_LDFLAGS=$LDFLAGS
@@ -515,13 +456,14 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
         exit 1
     fi
     GEN_SDK_FLAGS="$GEN_SDK_FLAGS --host=windows-x86_64"
-    "$GEN_SDK" $GEN_SDK_FLAGS "$OUT_DIR/toolchain" || panic "Cannot generate SDK toolchain!"
-    BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$OUT_DIR/toolchain")
-    CC="$OUT_DIR/toolchain/${BINPREFIX}gcc"
-    CXX="$OUT_DIR/toolchain/${BINPREFIX}g++"
+    "$GEN_SDK" $GEN_SDK_FLAGS "$SDK_TOOLCHAIN_DIR" || panic "Cannot generate SDK toolchain!"
+    BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$SDK_TOOLCHAIN_DIR")
+    CC="$SDK_TOOLCHAIN_DIR/${BINPREFIX}gcc"
+    CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}g++"
     LD=$CC
-    WINDRES=$OUT_DIR/toolchain/${BINPREFIX}windres
-    AR="$OUT_DIR/toolchain/${BINPREFIX}ar"
+    WINDRES=$SDK_TOOLCHAIN_DIR/${BINPREFIX}windres
+    AR="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ar"
+    OBJCOPY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}objcopy"
     HOST_OS=windows
     HOST_TAG=$HOST_OS-$HOST_ARCH
 fi
@@ -574,6 +516,39 @@ case "$HOST_OS" in
     windows) PROBE_WINAUDIO=yes
     ;;
 esac
+
+###
+###  Zlib probe
+###
+ZLIB_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/qemu-android-deps
+if [ -d "$ZLIB_PREBUILTS_DIR" ]; then
+    log "Zlib prebuilts dir :$ZLIB_PREBUILTS_DIR"
+else
+    panic "Missing prebuilts directory: $ZLIB_PREBUILTS_DIR"
+fi
+
+###
+###  Libpng probe
+###
+LIBPNG_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/qemu-android-deps
+if [ -d "$LIBPNG_PREBUILTS_DIR" ]; then
+    log "Libpng prebuilts dir :$LIBPNG_PREBUILTS_DIR"
+else
+    panic "Missing prebuilts directory: $LIBPNG_PREBUILTS_DIR"
+fi
+
+###
+###  LibSDL2 probe
+###
+SDL2_PREBUILTS_DIR=
+if [ "$OPTION_UI" = "sdl2" ]; then
+    SDL2_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/qemu-android-deps
+    if [ -d "$SDL2_PREBUILTS_DIR" ]; then
+        log "LibSDL2 prebuilts dir: $SDL2_PREBUILTS_DIR"
+    else
+        panic "Missing libSDL2 prebuilts directory: $SDL2_PREBUILTS_DIR"
+    fi
+fi
 
 ###
 ###  Libxml2 probe
@@ -679,7 +654,7 @@ fi
 # Build the config.make file
 #
 
-case $OS in
+case $BUILD_OS in
     windows)
         BUILD_EXEEXT=.exe
         BUILD_DLLEXT=.dll
@@ -709,20 +684,8 @@ case $HOST_OS in
         ;;
 esac
 
-# Strip executables and shared libraries when needed.
-if [ "$OPTION_DEBUG" != "yes" -a "$OPTION_STRIP" = "yes" ]; then
-    case $HOST_OS in
-        darwin)
-            LDFLAGS="$LDFLAGS -Wl,-S"
-            ;;
-        *)
-            LDFLAGS="$LDFLAGS -Wl,--strip-all"
-            ;;
-    esac
-fi
-
 # Re-create the configuration file
-config_mk=$OUT_DIR/config.make
+config_mk=$OUT_DIR/build/config.make
 config_dir=$(dirname $config_mk)
 mkdir -p "$config_dir" 2> $TMPL
 if [ $? != 0 ] ; then
@@ -740,6 +703,7 @@ echo "HOST_CC     := $CC" >> $config_mk
 echo "HOST_CXX    := $CXX" >> $config_mk
 echo "HOST_LD     := $LD" >> $config_mk
 echo "HOST_AR     := $AR" >> $config_mk
+echo "HOST_OBJCOPY := $OBJCOPY" >> $config_mk
 echo "HOST_WINDRES:= $WINDRES" >> $config_mk
 echo "HOST_DUMPSYMS:= $DUMPSYMS" >> $config_mk
 echo "OBJS_DIR    := $OUT_DIR" >> $config_mk
@@ -757,6 +721,7 @@ echo "BUILD_AR          := $BUILD_AR" >> $config_mk
 echo "BUILD_CC          := $BUILD_CC" >> $config_mk
 echo "BUILD_CXX         := $BUILD_CXX" >> $config_mk
 echo "BUILD_LD          := $BUILD_LD" >> $config_mk
+echo "BUILD_OBJCOPY     := $BUILD_OBJCOPY" >> $config_mk
 echo "BUILD_CFLAGS      := $BUILD_CFLAGS" >> $config_mk
 echo "BUILD_LDFLAGS     := $BUILD_LDFLAGS" >> $config_mk
 echo "BUILD_DUMPSYMS    := $DUMPSYMS" >> $config_mk
@@ -774,6 +739,7 @@ if [ "$QT_PREBUILTS_DIR" ]; then
     echo "EMULATOR_USE_SDL2 := false" >> $config_mk
     echo "EMULATOR_USE_QT   := true" >> $config_mk
 else
+    echo "SDL2_PREBUILTS_DIR := $SDL2_PREBUILTS_DIR" >> $config_mk
     echo "EMULATOR_USE_SDL2 := true" >> $config_mk
     echo "EMULATOR_USE_QT   := false" >> $config_mk
 fi
@@ -783,22 +749,29 @@ else
     echo "EMULATOR_USE_ANGLE := false" >> $config_mk
 fi
 
+echo "ZLIB_PREBUILTS_DIR := $ZLIB_PREBUILTS_DIR" >> $config_mk
+echo "LIBPNG_PREBUILTS_DIR := $LIBPNG_PREBUILTS_DIR" >> $config_mk
 echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
 echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
 echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 
-if [ $OPTION_DEBUG = yes ] ; then
+if [ $OPTION_DEBUG = "yes" ] ; then
     echo "BUILD_DEBUG_EMULATOR := true" >> $config_mk
 fi
-echo "EMULATOR_BUILD_EMUGL       := true" >> $config_mk
 echo "EMULATOR_EMUGL_SOURCES_DIR := $GLES_DIR" >> $config_mk
+if [ "$OPTION_STRIP" = "yes" ]; then
+    echo "EMULATOR_STRIP_BINARIES := true" >> $config_mk
+fi
+if [ "$OPTION_SYMBOLS" = "yes" ]; then
+    echo "EMULATOR_GENERATE_SYMBOLS := true" >> $config_mk
+fi
 
 ANDROID_SDK_TOOLS_REVSION=
 if [ "$ANDROID_SDK_TOOLS_REVISION" ] ; then
   echo "ANDROID_SDK_TOOLS_REVISION := $ANDROID_SDK_TOOLS_REVISION" >> $config_mk
 fi
 
-if [ "$OPTION_MINGW" = "yes" ] ; then
+if [ "$config_mk" = "yes" ] ; then
     echo "" >> $config_mk
     echo "USE_MINGW := 1" >> $config_mk
     echo "HOST_OS   := windows" >> $config_mk
@@ -807,7 +780,7 @@ fi
 
 # Build the config-host.h file
 #
-config_h=$OUT_DIR/config-host.h
+config_h=$OUT_DIR/build/config-host.h
 cat > $config_h <<EOF
 /* This file was autogenerated by '$PROGNAME' */
 
@@ -871,15 +844,15 @@ if [ "$HOST_OS" != "windows" ] ; then
 fi
 echo "#define QEMU_VERSION    \"0.10.50\"" >> $config_h
 echo "#define QEMU_PKGVERSION \"Android\"" >> $config_h
-BSD=0
+BSD=
 case "$HOST_OS" in
     linux) CONFIG_OS=LINUX
     ;;
     darwin) CONFIG_OS=DARWIN
-              BSD=1
+            BSD=1
     ;;
     freebsd) CONFIG_OS=FREEBSD
-              BSD=1
+             BSD=1
     ;;
     windows) CONFIG_OS=WIN32
     ;;
@@ -893,7 +866,7 @@ case $HOST_OS in
 esac
 
 echo "#define CONFIG_$CONFIG_OS   1" >> $config_h
-if [ $BSD = 1 ] ; then
+if [ "$BSD" ]; then
     echo "#define CONFIG_BSD       1" >> $config_h
     echo "#define O_LARGEFILE      0" >> $config_h
     echo "#define MAP_ANONYMOUS    MAP_ANON" >> $config_h
@@ -914,7 +887,8 @@ log "Generate   : $config_h"
 # understand, the platform build doesn't support a single tool
 # that generates several sources files, nor the standalone one.
 export PYTHONDONTWRITEBYTECODE=1
-AUTOGENERATED_DIR=qapi-auto-generated
+AUTOGENERATED_DIR=$OUT_DIR/build/qemu1-qapi-auto-generated
+mkdir -p "$AUTOGENERATED_DIR"
 python scripts/qapi-types.py qapi.types --output-dir=$AUTOGENERATED_DIR -b < qapi-schema.json
 python scripts/qapi-visit.py --output-dir=$AUTOGENERATED_DIR -b < qapi-schema.json
 python scripts/qapi-commands.py --output-dir=$AUTOGENERATED_DIR -m < qapi-schema.json
