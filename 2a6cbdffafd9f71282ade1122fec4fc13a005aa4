@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "b90b4ea8_7b0ee77a",
+        "filename": "android/metrics/AutoFlushedIniFile.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-18T22:26:59Z",
+      "side": 1,
+      "message": "and if you don\u0027t want to have any possible hierarchy, just mark the class as final - http://en.cppreference.com/w/cpp/language/final (3)",
+      "parentUuid": "59e3321f_cf308123",
+      "range": {
+        "startLine": 69,
+        "startChar": 49,
+        "endLine": 69,
+        "endChar": 78
+      },
+      "revId": "2a6cbdffafd9f71282ade1122fec4fc13a005aa4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "59e3321f_cfcc019e",
         "filename": "android/metrics/AutoFlushedIniFile.h",
         "patchSetId": 3
