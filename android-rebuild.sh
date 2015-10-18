@@ -214,22 +214,24 @@ else
         PREBUILTS_DIR=$PREBUILTS_DIR/android-emulator-build
     fi
 fi
-QEMU_ANDROID_HOSTS=
-QEMU_ANDROID_BINARIES=
-if [ -d "$PREBUILTS_DIR/qemu-android" ]; then
-    HOST_PREFIX=$TARGET_OS
-    if [ "$HOST_PREFIX" ]; then
-        QEMU_ANDROID_BINARIES=$(cd "$PREBUILTS_DIR"/qemu-android && ls $HOST_PREFIX-*/qemu-system-* 2>/dev/null || true)
+
+if [ ! -d "$OUT_DIR"/qemu ]; then
+    QEMU_ANDROID_BINARIES=
+    if [ -d "$PREBUILTS_DIR/qemu-android" ]; then
+        HOST_PREFIX=$TARGET_OS
+        if [ "$HOST_PREFIX" ]; then
+            QEMU_ANDROID_BINARIES=$(cd "$PREBUILTS_DIR"/qemu-android && ls $HOST_PREFIX-*/qemu-system-* 2>/dev/null || true)
+        fi
     fi
-fi
-if [ -z "$QEMU_ANDROID_BINARIES" ]; then
-    echo "WARNING: Missing qemu-android prebuilts. Please run build-qemu-android.sh!"
-else
-    echo "Copying prebuilt $HOST_PREFIX qemu-android binaries to $OUT_DIR/qemu/"
-    for QEMU_ANDROID_BINARY in $QEMU_ANDROID_BINARIES; do
-        copy_file "$PREBUILTS_DIR"/qemu-android/$QEMU_ANDROID_BINARY \
-                $OUT_DIR/qemu/$QEMU_ANDROID_BINARY
-    done
+    if [ -z "$QEMU_ANDROID_BINARIES" ]; then
+        echo "WARNING: Missing qemu-android prebuilts. Please run build-qemu-android.sh!"
+    else
+        echo "Copying prebuilt $HOST_PREFIX qemu-android binaries to $OUT_DIR/qemu/"
+        for QEMU_ANDROID_BINARY in $QEMU_ANDROID_BINARIES; do
+            copy_file "$PREBUILTS_DIR"/qemu-android/$QEMU_ANDROID_BINARY \
+                    $OUT_DIR/qemu/$QEMU_ANDROID_BINARY
+        done
+    fi
 fi
 
 if [ -d "$PREBUILTS_DIR/mesa" ]; then

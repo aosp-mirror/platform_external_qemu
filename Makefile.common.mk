@@ -108,3 +108,7 @@ ifeq (true,$(BUILD_DEBUG_EMULATOR))
 EMUGL_BUILD_DEBUG := 1
 endif
 include $(EMULATOR_EMUGL_SOURCES_DIR)/Android.mk
+
+ifdef QEMU2_TOP_DIR
+include $(QEMU2_TOP_DIR)/android-qemu2-glue/build/Makefile.qemu2.mk
+endif
