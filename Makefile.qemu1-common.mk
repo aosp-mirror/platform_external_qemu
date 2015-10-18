@@ -71,7 +71,7 @@ EMULATOR_COMMON_CFLAGS += \
 
 # Need to include "qapi-types.h" and other auto-generated files from
 # android-configure.sh
-EMULATOR_COMMON_CFLAGS += -I$(LOCAL_PATH)/qapi-auto-generated
+EMULATOR_COMMON_CFLAGS += -I$(OBJS_DIR)/build/qemu1-qapi-auto-generated
 
 
 ANDROID_SDK_TOOLS_REVISION := $(strip $(ANDROID_SDK_TOOLS_REVISION))
