@@ -94,8 +94,8 @@ font-family: &quot;Roboto&quot;</string>
      </property>
      <property name="geometry">
       <rect>
-       <x>640</x>
-       <y>670</y>
+       <x>630</x>
+       <y>680</y>
        <width>36</width>
        <height>36</height>
       </rect>
@@ -118,64 +118,6 @@ font-family: &quot;Roboto&quot;</string>
       <string>stop_disabled</string>
      </property>
     </widget>
-    <widget class="QTextBrowser" name="loc_currentLocBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>670</y>
-       <width>471</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="acceptDrops">
-      <bool>false</bool>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">Text.AlignVCenter;</string>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="loc_GpxButton">
-     <property name="geometry">
-      <rect>
-       <x>150</x>
-       <y>620</y>
-       <width>72</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>10</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>LOAD GPX</string>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Tool</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="loc_removeRowButton">
      <property name="enabled">
       <bool>false</bool>
@@ -183,7 +125,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>70</x>
-       <y>620</y>
+       <y>680</y>
        <width>36</width>
        <height>36</height>
       </rect>
@@ -206,100 +148,11 @@ font-family: &quot;Roboto&quot;</string>
       <string>remove_disabled</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="loc_playButton">
-     <property name="geometry">
-      <rect>
-       <x>540</x>
-       <y>670</y>
-       <width>36</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/light/play_arrow</normaloff>:/light/play_arrow</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>32</width>
-       <height>32</height>
-      </size>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string>play_arrow</string>
-     </property>
-     <property name="themeIconName_disabled" stdset="0">
-      <string>play_arrow_disabled</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="loc_KmlButton">
-     <property name="geometry">
-      <rect>
-       <x>240</x>
-       <y>620</y>
-       <width>72</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>10</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>LOAD KML</string>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Tool</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="loc_pauseButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>590</x>
-       <y>670</y>
-       <width>36</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/light/pause</normaloff>
-       <disabledoff>:/light/pause_disabled</disabledoff>:/light/pause</iconset>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string>pause</string>
-     </property>
-     <property name="themeIconName_disabled" stdset="0">
-      <string>pause_disabled</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="loc_addRowButton">
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>620</y>
+       <y>680</y>
        <width>36</width>
        <height>36</height>
       </rect>
@@ -317,6 +170,9 @@ font-family: &quot;Roboto&quot;</string>
      <property name="themeIconName" stdset="0">
       <string>add</string>
      </property>
+     <property name="themeIconName_disabled" stdset="0">
+      <string>add_disabled</string>
+     </property>
     </widget>
     <widget class="QTableWidget" name="loc_pathTable">
      <property name="geometry">
@@ -324,7 +180,7 @@ font-family: &quot;Roboto&quot;</string>
        <x>20</x>
        <y>40</y>
        <width>651</width>
-       <height>560</height>
+       <height>630</height>
       </rect>
      </property>
      <property name="font">
@@ -436,32 +292,144 @@ font-family: &quot;Roboto&quot;</string>
       <property name="text">
        <string>0</string>
       </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
      </item>
      <item row="0" column="1">
       <property name="text">
        <string>37.42228990140251</string>
+      </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
       </property>
      </item>
      <item row="0" column="2">
       <property name="text">
        <string>-122.0822035425683</string>
       </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
      </item>
      <item row="0" column="3">
       <property name="text">
        <string>0</string>
+      </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
       </property>
      </item>
      <item row="0" column="4">
       <property name="text">
        <string/>
       </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
      </item>
      <item row="0" column="5">
       <property name="text">
        <string/>
       </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
      </item>
+    </widget>
+    <widget class="QPushButton" name="loc_GpxKmlButton">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>680</y>
+       <width>130</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>LOAD GPX/KML</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Tool</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="loc_playButton">
+     <property name="geometry">
+      <rect>
+       <x>550</x>
+       <y>680</y>
+       <width>36</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/light/play_arrow</normaloff>:/light/play_arrow</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>play_arrow</string>
+     </property>
+     <property name="themeIconName_disabled" stdset="0">
+      <string>play_arrow_disabled</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="loc_pauseButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>590</x>
+       <y>680</y>
+       <width>36</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/dark/pause</normaloff>:/dark/pause</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>pause</string>
+     </property>
+     <property name="themeIconName_disabled" stdset="0">
+      <string>pause_disabled</string>
+     </property>
     </widget>
    </widget>
    <widget class="QWidget" name="cellular_page">
@@ -3420,13 +3388,8 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>tel_holdCallButton</tabstop>
   <tabstop>loc_addRowButton</tabstop>
   <tabstop>loc_removeRowButton</tabstop>
-  <tabstop>loc_GpxButton</tabstop>
-  <tabstop>loc_KmlButton</tabstop>
-  <tabstop>loc_playButton</tabstop>
-  <tabstop>loc_pauseButton</tabstop>
   <tabstop>loc_stopButton</tabstop>
   <tabstop>loc_pathTable</tabstop>
-  <tabstop>loc_currentLocBox</tabstop>
   <tabstop>cell_standardBox</tabstop>
   <tabstop>cell_voiceStatusBox</tabstop>
   <tabstop>cell_dataStatusBox</tabstop>
