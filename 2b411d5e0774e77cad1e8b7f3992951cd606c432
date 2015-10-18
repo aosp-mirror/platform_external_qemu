@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d952c250_2c4aab98",
+        "filename": "android/utils/ini.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-18T22:25:10Z",
+      "side": 1,
+      "message": "nullptr",
+      "range": {
+        "startLine": 87,
+        "startChar": 24,
+        "endLine": 87,
+        "endChar": 28
+      },
+      "revId": "2b411d5e0774e77cad1e8b7f3992951cd606c432",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
