@@ -340,6 +340,10 @@ OPT_SYMBOLS=
 option_register_var "--symbols" OPT_SYMBOLS \
        "Generate Breakpad symbols."
 
+OPT_BUILD_QEMU2=
+option_register_var "--build-qemu2" OPT_BUILD_QEMU2 \
+       "Build QEMU2 directly from sources."
+
 package_builder_register_options
 aosp_prebuilts_dir_register_options
 prebuilts_dir_register_option
@@ -670,6 +674,9 @@ build_darwin_binaries_on () {
     if [ "$OPT_SYMBOLS" ]; then
         var_append DARWIN_BUILD_FLAGS "--symbols"
     fi
+    if [ "$OPT_BUILD_QEMU2" ]; then
+        var_append DARWIN_BUILD_FLAGS "--build-qemu2"
+    fi
 
     cat > $DARWIN_PKG_DIR/build.sh <<EOF
 #!/bin/bash -l
@@ -733,6 +740,10 @@ fi
 
 if [ "$OPT_SYMBOLS" ]; then
     var_append REBUILD_FLAGS "--symbols"
+fi
+
+if [ "$OPT_BUILD_QEMU2" ]; then
+    var_append REBUILD_FLAGS "--build-qemu2"
 fi
 
 for SYSTEM in $(convert_host_list_to_os_list $LOCAL_HOST_SYSTEMS); do

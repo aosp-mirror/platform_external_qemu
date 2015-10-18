@@ -230,6 +230,7 @@ UI_DEFAULT=qt
 GLES_DEFAULT=dgl
 
 # Parse options
+OPTION_BUILD_QEMU2=
 OPTION_DEBUG=no
 OPTION_IGNORE_AUDIO=no
 OPTION_AOSP_PREBUILTS_DIR=
@@ -296,7 +297,7 @@ for opt do
   ;;
   --aosp-prebuilts-dir=*) OPTION_AOSP_PREBUILTS_DIR=$optarg
   ;;
-  --build-qemu-android) true # Ignored, used by android-rebuild.sh only.
+  --build-qemu2) OPTION_BUILD_QEMU2=true
   ;;
   --no-pcbios) PCBIOS_PROBE=no
   ;;
@@ -355,9 +356,7 @@ EOF
     echo "  --debug                     Build debug version of the emulator"
     echo "  --no-pcbios                 Disable copying of PC Bios files"
     echo "  --no-tests                  Don't run unit test suite"
-    if [ "$IN_ANDROID_REBUILD_SH" ]; then
-        echo "  --build-qemu-android        Also build qemu-android binaries"
-    fi
+    echo "  --build-qemu2               Build QEMU2 directly from sources"
     echo ""
     exit 1
 fi
@@ -526,58 +525,40 @@ case "$HOST_OS" in
     ;;
 esac
 
+probe_prebuilts_dir () {
+    local PREBUILTS_DIR
+    PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/$3
+    if [ ! -d "$PREBUILTS_DIR" ]; then
+        panic "Missing prebuilts directory: $PREBUILTS_DIR"
+    fi
+    log "$1 prebuilts dir: $PREBUILTS_DIR"
+    eval $2=\$PREBUILTS_DIR
+}
+
 ###
 ###  Zlib probe
 ###
-ZLIB_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/qemu-android-deps
-if [ -d "$ZLIB_PREBUILTS_DIR" ]; then
-    log "Zlib prebuilts dir :$ZLIB_PREBUILTS_DIR"
-else
-    panic "Missing prebuilts directory: $ZLIB_PREBUILTS_DIR"
-fi
+probe_prebuilts_dir "Zlib" ZLIB_PREBUILTS_DIR qemu-android-deps
 
 ###
 ###  Libpng probe
 ###
-LIBPNG_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/qemu-android-deps
-if [ -d "$LIBPNG_PREBUILTS_DIR" ]; then
-    log "Libpng prebuilts dir :$LIBPNG_PREBUILTS_DIR"
-else
-    panic "Missing prebuilts directory: $LIBPNG_PREBUILTS_DIR"
-fi
+probe_prebuilts_dir "Libpng" LIBPNG_PREBUILTS_DIR qemu-android-deps
 
 ###
 ###  LibSDL2 probe
 ###
-SDL2_PREBUILTS_DIR=
-if [ "$OPTION_UI" = "sdl2" ]; then
-    SDL2_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/qemu-android-deps
-    if [ -d "$SDL2_PREBUILTS_DIR" ]; then
-        log "LibSDL2 prebuilts dir: $SDL2_PREBUILTS_DIR"
-    else
-        panic "Missing libSDL2 prebuilts directory: $SDL2_PREBUILTS_DIR"
-    fi
-fi
+probe_prebuilts_dir "LibSDL2" SDL2_PREBUILTS_DIR qemu-android-deps
 
 ###
 ###  Libxml2 probe
 ###
-LIBXML2_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/libxml2
-if [ -d "$LIBXML2_PREBUILTS_DIR" ]; then
-    log "Libxml2 prebuilts dir: $LIBXML2_PREBUILTS_DIR"
-else
-    panic "Missing prebuilts directory (please run build-libxml2.sh): $LIBXML2_PREBUILTS_DIR"
-fi
+probe_prebuilts_dir "Libxml2" LIBXML2_PREBUILTS_DIR common/libxml2
 
 ###
 ###  Libcurl probe
 ###
-LIBCURL_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/curl
-if [ -d "$LIBCURL_PREBUILTS_DIR" ]; then
-    log "LibCURL prebuilts dir: $LIBCURL_PREBUILTS_DIR"
-else
-    panic "Missing prebuilts directory (please run build-curl.sh): $LIBCURL_PREBUILTS_DIR"
-fi
+probe_prebuilts_dir "LibCURL" LIBCURL_PREBUILTS_DIR curl
 
 CACERTS_FILE="$PROGDIR/android/data/ca-bundle.pem"
 if [ ! -f "$CACERTS_FILE" ]; then
@@ -589,17 +570,13 @@ cp -f "$CACERTS_FILE" "$OUT_DIR/lib/"
 ###
 ###  Breakpad probe
 ###
+probe_prebuilts_dir "Breakpad" BREAKPAD_PREBUILTS_DIR common/breakpad
 BREAKPAD_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/breakpad
-if [ -d "$BREAKPAD_PREBUILTS_DIR" ]; then
-    log "BREAKPAD prebuilts dir: $BREAKPAD_PREBUILTS_DIR"
-    if [ "$OPTION_MINGW" = "yes" ] ; then
-        DUMPSYMS=$BREAKPAD_PREBUILTS_DIR/$BUILD_TAG/bin/dump_syms_dwarf
-    else
-        ##Mac and Linux builds
-        DUMPSYMS=$BREAKPAD_PREBUILTS_DIR/$BUILD_TAG/bin/dump_syms
-    fi
+if [ "$OPTION_MINGW" = "yes" ] ; then
+    DUMPSYMS=$BREAKPAD_PREBUILTS_DIR/$BUILD_TAG/bin/dump_syms_dwarf
 else
-    panic "Missing prebuilts directory (please run build-breakpad.sh): $BREAKPAD_PREBUILTS_DIR"
+    ##Mac and Linux builds
+    DUMPSYMS=$BREAKPAD_PREBUILTS_DIR/$BUILD_TAG/bin/dump_syms
 fi
 
 ###
@@ -607,26 +584,13 @@ fi
 ###
 QT_PREBUILTS_DIR=
 if [ "$OPTION_UI" = "qt" ]; then
-    QT_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/qt
-    if [ -d "$QT_PREBUILTS_DIR" ]; then
-        log "Qt prebuilts dir: $QT_PREBUILTS_DIR"
-    else
-        panic "Missing Qt prebuilts directory (please run build-qt.sh): $QT_PREBUILTS_DIR"
-    fi
+    probe_prebuilts_dir "Qt" QT_PREBUILTS_DIR qt
 fi
 
 ###
 ###  e2fsprogs probe
 ###
-E2FSPROGS_PREBUILTS_DIR=
-if true; then
-    E2FSPROGS_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/e2fsprogs
-    if [ -d "$E2FSPROGS_PREBUILTS_DIR" ]; then
-        log "e2fsprogs prebuilts dir: $E2FSPROGS_PREBUILTS_DIR"
-    else
-        echo "WARNING: Missing e2fsprogs prebuilts directory: $E2FSPROGS_PREBUILTS_DIR"
-    fi
-fi
+probe_prebuilts_dir "e2fsprogs" E2FSPROGS_PREBUILTS_DIR common/e2fsprogs
 
 # create the objs directory that is going to contain all generated files
 # including the configuration ones
@@ -746,12 +710,12 @@ echo "CONFIG_ESD        := $PROBE_ESD" >> $config_mk
 echo "CONFIG_ALSA       := $PROBE_ALSA" >> $config_mk
 echo "CONFIG_OSS        := $PROBE_OSS" >> $config_mk
 echo "CONFIG_PULSEAUDIO := $PROBE_PULSEAUDIO" >> $config_mk
+echo "SDL2_PREBUILTS_DIR := $SDL2_PREBUILTS_DIR" >> $config_mk
 if [ "$QT_PREBUILTS_DIR" ]; then
     echo "QT_PREBUILTS_DIR  := $QT_PREBUILTS_DIR" >> $config_mk
     echo "EMULATOR_USE_SDL2 := false" >> $config_mk
     echo "EMULATOR_USE_QT   := true" >> $config_mk
 else
-    echo "SDL2_PREBUILTS_DIR := $SDL2_PREBUILTS_DIR" >> $config_mk
     echo "EMULATOR_USE_SDL2 := true" >> $config_mk
     echo "EMULATOR_USE_QT   := false" >> $config_mk
 fi
@@ -788,6 +752,20 @@ if [ "$config_mk" = "yes" ] ; then
     echo "USE_MINGW := 1" >> $config_mk
     echo "HOST_OS   := windows" >> $config_mk
     echo "HOST_MINGW_VERSION := $MINGW_GCC_VERSION" >> $config_mk
+fi
+
+QEMU2_TOP_DIR=
+if [ "$OPTION_BUILD_QEMU2" ]; then
+    QEMU2_TOP_DIR=$PROGDIR/../qemu-android
+    if [ ! -d "$QEMU2_TOP_DIR" ]; then
+        panic "Missing QEMU2 source directory: $QEMU2_TOP_DIR"
+    fi
+    QEMU2_TOP_DIR=$(cd "$QEMU2_TOP_DIR" && pwd -P)
+    log "QEMU2      : $QEMU2_TOP_DIR"
+
+    if [ -d "$QEMU2_TOP_DIR"/android-qemu2-glue ]; then
+        echo "QEMU2_TOP_DIR := $QEMU2_TOP_DIR" >> $config_mk
+    fi
 fi
 
 # Build the config-host.h file
@@ -904,7 +882,16 @@ mkdir -p "$AUTOGENERATED_DIR"
 python scripts/qapi-types.py qapi.types --output-dir=$AUTOGENERATED_DIR -b < qapi-schema.json
 python scripts/qapi-visit.py --output-dir=$AUTOGENERATED_DIR -b < qapi-schema.json
 python scripts/qapi-commands.py --output-dir=$AUTOGENERATED_DIR -m < qapi-schema.json
+
 log "Generate   : $AUTOGENERATED_DIR"
+
+if [ "$OPTION_BUILD_QEMU2" ]; then
+    QEMU2_CONFIGURE=$QEMU2_TOP_DIR/android-qemu2-glue/build/configure.sh
+    if [ -f "$QEMU2_CONFIGURE" ]; then
+        log "QEMU2    : Configuring."
+        . "$QEMU2_CONFIGURE"
+    fi
+fi
 
 clean_temp
 
