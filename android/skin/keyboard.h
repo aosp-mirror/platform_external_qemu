@@ -31,6 +31,7 @@ extern SkinKeyboard*  skin_keyboard_create(const char* kcm_file_path,
                                            SkinKeyCodeFlushFunc keycode_flush);
 
 extern void           skin_keyboard_set_keyset( SkinKeyboard*  keyboard, SkinKeyset*  kset );
+extern SkinKeyset*    skin_keyboard_get_keyset( SkinKeyboard* keyboard);
 
 extern const char*    skin_keyboard_charmap_name( SkinKeyboard*  keyboard );
 

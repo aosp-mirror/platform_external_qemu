@@ -15,9 +15,12 @@
 #include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
 
+#include <fcntl.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #define  DEBUG  1
 
@@ -208,6 +211,42 @@ skin_keyset_new_from_text( const char*  text )
     return result;
 }
 
+void
+skin_keyset_write_to_file( SkinKeyset* kset, const char* path ) {
+    SkinKeyBinding bindings[SKIN_KEY_COMMAND_MAX_BINDINGS];
+    int bindings_count = 0;
+    int binding_idx = 0;
+    SkinKeyCommand cmd = SKIN_KEY_COMMAND_NONE + 1;
+    SkinKeyBinding* binding = NULL;
+    int fd = open(path, O_WRONLY | O_CREAT, 0666);
+
+    if (fd < 0) {
+        return;
+    }
+
+    FILE* f = fdopen(fd, "w");
+    if (f == NULL) {
+        return;
+    }
+
+    for ( ; cmd < SKIN_KEY_COMMAND_MAX; ++cmd) {
+            bindings_count = skin_keyset_get_bindings(kset, cmd, bindings);
+            if (bindings_count <= 0) {
+                continue;
+            }
+            fprintf(f, "%s\t", skin_key_command_to_str(cmd));
+            for (binding_idx = 0; binding_idx < bindings_count; ++binding_idx) {
+                binding = &bindings[binding_idx];
+                fprintf(f, skin_key_pair_to_string(binding->sym, binding->mod));
+                if (binding_idx < bindings_count - 1) {
+                    fprintf(f, ",");
+                }
+            }
+            fprintf(f, "\n");
+    }
+    fclose(f);
+    close(fd);
+}
 
 void
 skin_keyset_free( SkinKeyset*  kset )
