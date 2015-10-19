@@ -61,12 +61,27 @@ int formatGAPostData(char** ptr, const AndroidMetrics* metrics) {
     static const char ga_event_action_single_run_info[] = "singleRunCrashInfo";
     static const char ga_event_label_crash_detected[] = "crashDetected";
     static const char ga_event_label_clean_exit[] = "cleanExit";
+    static const char ga_event_label_opengl_dead[] = "crashDetectedOpenglInitFailed";
+    static const char ga_event_label_opengl_inconsistent[] = "cleanExitOpenglInitFailedINCONSISTENT";
     // Custom metrics should match the index given in Analytics.
     static const char ga_cm_user_time_key[] = "cm2";
     static const char ga_cm_system_time_key[] = "cm3";
 
-    const char* label = metrics->is_dirty ? ga_event_label_crash_detected
-                                          : ga_event_label_clean_exit;
+    const char* label;
+    if (metrics->is_dirty) {
+        if (metrics->opengl_alive) {
+            label = ga_event_label_crash_detected;
+        } else {
+            label = ga_event_label_opengl_dead;
+        }
+    } else  {
+        if (metrics->opengl_alive) {
+            label = ga_event_label_clean_exit;
+        } else {
+            label = ga_event_label_opengl_inconsistent;
+        }
+    }
+
     char* ga_client_id = android_studio_get_installation_id();
 
     // TODO(pprabhu) Decide whether we want to report gpu_enabled.
