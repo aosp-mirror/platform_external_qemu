@@ -28,12 +28,14 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/ext-telephony.cpp \
     android/skin/qt/ext-virtsensors.cpp \
     android/skin/qt/extended-window.cpp \
+    android/skin/qt/QtLooper.cpp \
     android/skin/qt/tool-window.cpp \
 
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/editable-slider-widget.h \
     android/skin/qt/emulator-qt-window.h \
     android/skin/qt/extended-window.h \
+    android/skin/qt/QtLooperImpl.h \
     android/skin/qt/tool-window.h \
 
 ANDROID_SKIN_QT_RESOURCES := \
