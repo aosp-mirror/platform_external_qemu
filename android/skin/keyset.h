@@ -94,16 +94,6 @@ extern int              skin_keysym_str_count( void );
 /* return the n-th keysym string descriptor */
 extern const char*      skin_keysym_str( int  index );
 
-/* convert a (sym,mod) pair into a descriptive string. e.g. "Ctrl-K" or "Alt-A", etc..
- * result is a static string that is overwritten on each call
- */
-extern const char*      skin_key_symmod_to_str   ( int  sym, int  mod );
-
-/* convert a key binding description into a (sym,mod) pair. returns 0 on success, -1
- * if the string cannot be parsed.
- */
-extern int              skin_key_symmod_from_str ( const char*  str, int  *psym, int  *pmod );
-
 /* create a new keyset from a configuration tree node */
 extern SkinKeyset*      skin_keyset_new ( AConfig*  root );
 extern SkinKeyset*      skin_keyset_new_from_text( const char*  text );
