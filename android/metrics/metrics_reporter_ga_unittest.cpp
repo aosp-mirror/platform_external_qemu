@@ -63,6 +63,7 @@ TEST_F(MetricsReporterGaTest, cleanRun) {
     ANDROID_METRICS_STRASSIGN(metrics.emulator_version, "standalone");
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, "x86_64");
     metrics.guest_gpu_enabled = 1;
+    metrics.opengl_alive = 1;
     metrics.tick = 1;
     metrics.system_time = 1170;
     metrics.user_time = 220;
@@ -89,6 +90,7 @@ TEST_F(MetricsReporterGaTest, dirtyRun) {
     ANDROID_METRICS_STRASSIGN(metrics.emulator_version, "standalone");
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, "x86_64");
     metrics.guest_gpu_enabled = 1;
+    metrics.opengl_alive = 1;
     metrics.tick = 1;
     metrics.system_time = 1080;
     metrics.user_time = 180;

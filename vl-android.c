@@ -2113,7 +2113,7 @@ void android_nand_add_image(const char* part_name,
     nand_add_dev(tmp);
 }
 
-static void android_init_metrics()
+static void android_init_metrics(int opengl_alive)
 {
     char path[PATH_MAX], *pathend=path, *bufend=pathend+sizeof(path);
     AndroidMetrics metrics;
@@ -2149,6 +2149,7 @@ static void android_init_metrics()
                                            &metrics.guest_gl_version);
     }
 
+    metrics.opengl_alive = opengl_alive;
     androidMetrics_write(&metrics);
     androidMetrics_fini(&metrics);
 
@@ -3494,13 +3495,15 @@ int main(int argc, char **argv, char **envp)
      * because this requires changing the LD_LIBRARY_PATH before launching
      * the emulation engine. */
     int qemu_gles = 0;
+    int opengl_alive = 1;
     if (android_hw->hw_gpu_enabled) {
         if (android_initOpenglesEmulation() != 0 ||
             android_startOpenglesRenderer(android_hw->hw_lcd_width,
                                           android_hw->hw_lcd_height) != 0)
         {
-            derror("Could not initialize OpenglES emulation, use '-gpu off' to disable it.");
-            exit(1);
+            opengl_alive = 0;
+        } else {
+            opengl_alive = 1;
         }
         qemu_gles = 1;
     }
@@ -4113,7 +4116,12 @@ int main(int argc, char **argv, char **envp)
      * We want to track performance of a running emulator, ignoring any early
      * exits as a result of incorrect setup.
      */
-    android_init_metrics();
+    android_init_metrics(opengl_alive);
+    if(!opengl_alive) {
+        derror("Could not initialize OpenglES emulation, use '-gpu off' to disable it.");
+        exit(1);
+    }
+
     android_check_for_updates();
 
     main_loop();
