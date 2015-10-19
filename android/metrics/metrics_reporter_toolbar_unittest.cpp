@@ -74,6 +74,7 @@ TEST_F(MetricsReporterToolbarTest, cleanRun) {
     ANDROID_METRICS_STRASSIGN(metrics.emulator_version, "standalone");
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, "x86_64");
     metrics.guest_gpu_enabled = 1;
+    metrics.opengl_alive = 1;
     metrics.tick = 1;
     metrics.system_time = 1170;
     metrics.user_time = 220;
@@ -101,6 +102,35 @@ TEST_F(MetricsReporterToolbarTest, dirtyRun) {
     ANDROID_METRICS_STRASSIGN(metrics.emulator_version, "standalone");
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, "x86_64");
     metrics.guest_gpu_enabled = 1;
+    metrics.opengl_alive = 1;
+    metrics.tick = 1;
+    metrics.system_time = 1080;
+    metrics.user_time = 180;
+    metrics.is_dirty = 1;
+    metrics.num_failed_reports = 9;
+
+    ASSERT_EQ(kExpectedLen,
+              formatToolbarGetUrl(&formatted_url, mToolbarUrl, &metrics));
+    ASSERT_STREQ(kExpected, formatted_url);
+    androidMetrics_fini(&metrics);
+    free(formatted_url);
+}
+
+TEST_F(MetricsReporterToolbarTest, openGLErrorRun) {
+    char* formatted_url;
+    AndroidMetrics metrics;
+    static const char kExpected[] =
+            "https://tools.google.com/service/update?"
+            "as%3Dandroidsdk_emu_crash%26version%3Dstandalone"
+            "%26id%3D00000000-0000-0000-0000-000000000000%26guest_arch%3Dx86_64"
+            "%26exf%3D1%26system_time%3D1080%26user_time%3D180";
+    static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
+
+    androidMetrics_init(&metrics);
+    ANDROID_METRICS_STRASSIGN(metrics.emulator_version, "standalone");
+    ANDROID_METRICS_STRASSIGN(metrics.guest_arch, "x86_64");
+    metrics.guest_gpu_enabled = 1;
+    metrics.opengl_alive = 0;
     metrics.tick = 1;
     metrics.system_time = 1080;
     metrics.user_time = 180;
