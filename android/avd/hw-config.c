@@ -74,7 +74,10 @@ androidHwConfig_init( AndroidHwConfig*  config,
     }
 }
 
-int androidHwConfig_read(AndroidHwConfig* config, CIniFile* ini) {
+int
+androidHwConfig_read( AndroidHwConfig*  config,
+                      IniFile*          ini )
+{
     if (ini == NULL)
         return -1;
 
@@ -91,7 +94,10 @@ int androidHwConfig_read(AndroidHwConfig* config, CIniFile* ini) {
     return 0;
 }
 
-int androidHwConfig_write(AndroidHwConfig* config, CIniFile* ini) {
+int
+androidHwConfig_write( AndroidHwConfig* config,
+                       IniFile*         ini )
+{
     if (ini == NULL)
         return -1;
 
