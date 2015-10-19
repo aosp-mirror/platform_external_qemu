@@ -155,7 +155,7 @@ void androidMetrics_fini(AndroidMetrics* androidMetrics) {
 ABool androidMetrics_write(const AndroidMetrics* androidMetrics) {
     const char* path = androidMetrics_getMetricsFilePath();
     const AndroidMetrics* am = androidMetrics;
-    CIniFile* ini;
+    IniFile* ini;
 
     if (path == NULL) {
         return 0;
@@ -252,7 +252,7 @@ ABool androidMetrics_seal() {
 ABool androidMetrics_readPath(AndroidMetrics* androidMetrics,
                               const char* path) {
     AndroidMetrics* am = androidMetrics;
-    CIniFile* ini;
+    IniFile* ini;
 
     ini = iniFile_newFromFile(path);
     if (ini == NULL) {

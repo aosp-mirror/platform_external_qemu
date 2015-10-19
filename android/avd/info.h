@@ -15,6 +15,7 @@
 #include "android/avd/hw-config.h"
 #include "android/utils/compiler.h"
 #include "android/utils/file_data.h"
+#include "android/utils/ini.h"
 
 ANDROID_BEGIN_HEADER
 

@@ -64,7 +64,7 @@ auserConfig_new( AvdInfo*  info )
     char          needUUID = 1;
     char          temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
     char*         parentPath;
-    CIniFile* ini = NULL;
+    IniFile*      ini = NULL;
 
     ANEW0(uc);
 
@@ -209,7 +209,7 @@ auserConfig_setUiTheme( AUserConfig*  uconfig, int theme )
 void
 auserConfig_save( AUserConfig*  uconfig )
 {
-    CIniFile* ini;
+    IniFile*   ini;
 
     if (uconfig->changed == 0) {
         D("User-config was not changed.");

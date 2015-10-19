@@ -47,7 +47,6 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
-#include "android/utils/ini.h"
 #include "android/utils/lineinput.h"
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
@@ -939,7 +938,7 @@ int main(int argc, char **argv) {
      */
     {
         const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
-        CIniFile* hwIni = iniFile_newEmpty(NULL);
+        IniFile*    hwIni         = iniFile_newEmpty(NULL);
         androidHwConfig_write(hw, hwIni);
 
         if (filelock_create(coreHwIniPath) == NULL) {
