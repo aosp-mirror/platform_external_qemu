@@ -1009,6 +1009,8 @@ int main(int argc, char **argv) {
     uiEmuAgent.sensors = gQAndroidSensorsAgent;
     uiEmuAgent.telephony = gQAndroidTelephonyAgent;
     uiEmuAgent.userEvents = gQAndroidUserEventAgent;
+    uiEmuAgent.window = gQAndroidEmulatorWindowAgent;
+
     // for now there's no uses of SettingsAgent, so we don't set it
     uiEmuAgent.settings = NULL;
 
