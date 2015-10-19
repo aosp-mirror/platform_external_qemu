@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b9ec2e3d_a8273f82",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-19T20:56:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b90b4ea8_bb133fa0",
+      "range": {
+        "startLine": 202,
+        "startChar": 46,
+        "endLine": 202,
+        "endChar": 55
+      },
+      "revId": "9e904c8549812194eb6a5b02306ab3f1cffa8e14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "99f3ea1a_1ee4ad01",
         "filename": "android/base/files/IniFile.cpp",
         "patchSetId": 8
@@ -36,6 +60,30 @@
       "writtenOn": "2015-10-18T22:23:36Z",
       "side": 1,
       "message": "same thing - flushes the file",
+      "range": {
+        "startLine": 209,
+        "startChar": 44,
+        "endLine": 209,
+        "endChar": 54
+      },
+      "revId": "9e904c8549812194eb6a5b02306ab3f1cffa8e14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99020a8c_553d36f4",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-19T20:56:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "99f3ea1a_1ee4ad01",
       "range": {
         "startLine": 209,
         "startChar": 44,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "99f3ea1a_0440da1c",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-19T20:56:49Z",
+      "side": 1,
+      "message": "msdn says it doesn\u0027t exist, but mingw happily compiles this, unittests pass.",
+      "parentUuid": "f91146d4_c3960a18",
+      "range": {
+        "startLine": 300,
+        "startChar": 11,
+        "endLine": 300,
+        "endChar": 21
+      },
+      "revId": "9e904c8549812194eb6a5b02306ab3f1cffa8e14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d90802ae_fc741157",
         "filename": "android/base/files/IniFile.cpp",
         "patchSetId": 8
@@ -82,6 +154,30 @@
       "writtenOn": "2015-10-18T22:23:36Z",
       "side": 1,
       "message": "just FYI: this can be done with a single lookup:\n\nhttp://www.cplusplus.com/reference/unordered_map/unordered_map/emplace/\n\ntemplate \u003cclass... Args\u003e\npair\u003citerator, bool\u003e emplace ( Args\u0026\u0026... args );\n\nauto res \u003d map.emplace(key, value);\nif (!res.second) // not inserted - there was a key already\n{\n    res.first-\u003esecond \u003d value;\n}\nelse\n{\n    // inserted, handle that\n}\n\ndoesn\u0027t matter here is we\u0027re not in hurry already :)",
+      "range": {
+        "startLine": 388,
+        "startChar": 0,
+        "endLine": 390,
+        "endChar": 27
+      },
+      "revId": "9e904c8549812194eb6a5b02306ab3f1cffa8e14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d90802ae_3d21836a",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-19T20:56:49Z",
+      "side": 1,
+      "message": "Done, neat!\n\nI was actually looking for something like this when writing this function. Somehow missed this, so compromised with an extra lookup in the case when a new key is being inserted.\n\nbtw, I swear by cppreference ;)\nhttp://en.cppreference.com/w/cpp/container/unordered_map/emplace",
+      "parentUuid": "d90802ae_fc741157",
       "range": {
         "startLine": 388,
         "startChar": 0,
