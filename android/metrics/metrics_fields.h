@@ -38,4 +38,6 @@ METRICS_DURATION(user_time, "user_time", 0)
 
 METRICS_INT(is_dirty, "is_dirty", 1)
 
+METRICS_INT(opengl_alive, "opengl_alive", 0)
+
 METRICS_INT(num_failed_reports, "num_failed_reports", 0)

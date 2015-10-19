@@ -3479,7 +3479,10 @@ int main(int argc, char **argv, char **envp)
      * because this requires changing the LD_LIBRARY_PATH before launching
      * the emulation engine. */
     int qemu_gles = 0;
+    int opengl_alive = 0;
     if (android_hw->hw_gpu_enabled) {
+
+            fprintf(stdout, "HW GPU ENABLED\n");
         if (android_initOpenglesEmulation() == 0 &&
             android_startOpenglesRenderer(android_hw->hw_lcd_width,
                                           android_hw->hw_lcd_height) == 0)
@@ -3489,9 +3492,9 @@ int main(int argc, char **argv, char **envp)
                     android_gl_renderer, sizeof(android_gl_renderer),
                     android_gl_version, sizeof(android_gl_version));
             qemu_gles = 1;
+            opengl_alive = 1;
         } else {
-            derror("Could not initialize OpenglES emulation, use '-gpu off' to disable it.");
-            exit(1);
+            opengl_alive = 0;
         }
     }
     if (qemu_gles) {
@@ -4104,6 +4107,16 @@ int main(int argc, char **argv, char **envp)
      * exits as a result of incorrect setup.
      */
     android_init_metrics();
+    AndroidMetrics metrics_gl;
+    androidMetrics_init(&metrics_gl);
+    metrics_gl.opengl_alive = opengl_alive;
+    androidMetrics_write(&metrics_gl);
+    androidMetrics_fini(&metrics_gl);
+    if(!opengl_alive) {
+        derror("Could not initialize OpenglES emulation, use '-gpu off' to disable it.");
+        exit(1);
+    }
+
     android_check_for_updates();
 
     main_loop();
