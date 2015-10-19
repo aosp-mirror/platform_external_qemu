@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9ec2e3d_059e16a9",
+        "filename": "android/skin/window.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1481,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-19T19:18:44Z",
+      "side": 1,
+      "message": "This looks like it\u0027s trying to avoid divide-by-zero, but doesn\u0027t account for (left_buf + right_buf)\n\n(Same for \u0027py\u0027)",
+      "revId": "88878c1217674e6b2e6ddc7cd6deefdd1d3d3861",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
