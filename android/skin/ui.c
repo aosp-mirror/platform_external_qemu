@@ -479,6 +479,10 @@ SkinLayout* skin_ui_get_current_layout(SkinUI* ui) {
     return ui->layout;
 }
 
+SkinKeyset* skin_ui_get_current_keyset(SkinUI* ui) {
+    return skin_keyboard_get_keyset(ui->keyboard);
+}
+
 void skin_ui_set_name(SkinUI* ui, const char* name) {
     snprintf(ui->ui_params.window_name,
              sizeof(ui->ui_params.window_name),

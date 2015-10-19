@@ -299,14 +299,15 @@ common_LOCAL_SRC_FILES := \
     android/opengles.c \
     android-qemu1-glue/qemu-battery-agent-impl.c \
     android-qemu1-glue/qemu-cellular-agent-impl.c \
+    android-qemu1-glue/qemu-display-agent-impl.cpp \
     android-qemu1-glue/qemu-finger-agent-impl.c \
     android-qemu1-glue/qemu-location-agent-impl.c \
+    android-qemu1-glue/qemu-net-agent-impl.c \
     android-qemu1-glue/qemu-sensors-agent-impl.c \
     android-qemu1-glue/qemu-telephony-agent-impl.c \
     android-qemu1-glue/qemu-user-event-agent-impl.c \
     android-qemu1-glue/qemu-vm-operations-impl.c \
-    android-qemu1-glue/qemu-net-agent-impl.c \
-    android-qemu1-glue/qemu-display-agent-impl.cpp \
+    android-qemu1-glue/qemu-window-agent-impl.c \
     android/qt/qt_path.cpp \
     hw/core/loader.c \
     ui/keymaps.c \
