@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "79fd56bf_ff74ff56",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-19T20:56:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "79fd56bf_0599d2eb",
+      "range": {
+        "startLine": 38,
+        "startChar": 7,
+        "endLine": 38,
+        "endChar": 13
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d952c250_6c84a3a1",
         "filename": "android/base/files/IniFile.cpp",
         "patchSetId": 5
@@ -179,6 +203,30 @@
       "side": 1,
       "message": "Definitely! If reading fails in the middle, just clean up all containers",
       "parentUuid": "99d92a72_6ed18f55",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 19
+      },
+      "revId": "86aca1724f6839322324a8f78cbd8d1de576193b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "79fd56bf_1f90fbd5",
+        "filename": "android/base/files/IniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-19T20:56:49Z",
+      "side": 1,
+      "message": "If a read fails mid-flight:\n- I\u0027d clean up all the containers, since I don\u0027t want halfway read data to be exposed (you agreed with this)\n- I\u0027d set dirty to false, since I don\u0027t want a subsequent write to overwrite the backing data with an empty ini file that was the result of an error.\n\nSo, dirty would be set to false in any case.\n\nI do see some benefit in delaying this till after sanity check here (no backing file / can\u0027t open file), but decided to keep the API cleaner -- if you call read, your existing data is __gone__ no matter what happens.",
+      "parentUuid": "b9f26ee4_6fb87117",
       "range": {
         "startLine": 69,
         "startChar": 0,
