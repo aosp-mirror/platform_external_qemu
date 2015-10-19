@@ -258,6 +258,11 @@ skin_keyboard_set_keyset( SkinKeyboard*  keyboard, SkinKeyset*  kset )
 }
 
 
+SkinKeyset*
+skin_keyboard_get_keyset( SkinKeyboard* keyboard ) {
+    return keyboard->kset;
+}
+
 void
 skin_keyboard_set_rotation( SkinKeyboard*     keyboard,
                             SkinRotation      rotation )

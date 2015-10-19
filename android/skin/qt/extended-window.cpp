@@ -14,6 +14,7 @@
 #include "android/skin/qt/extended-window-styles.h"
 
 #include "android/main-common.h"
+#include "android/skin/keyset.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/tool-window.h"
 
@@ -27,6 +28,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     mToolWindow(tW),
     mBatteryAgent  (agentPtr ? agentPtr->battery   : NULL),
     mCellularAgent (agentPtr ? agentPtr->cellular  : NULL),
+    mEmulatorWindow(agentPtr ? agentPtr->window    : NULL),
     mFingerAgent   (agentPtr ? agentPtr->finger    : NULL),
     mLocationAgent (agentPtr ? agentPtr->location  : NULL),
     mSensorsAgent  (agentPtr ? agentPtr->sensors   : NULL),
@@ -156,21 +158,6 @@ void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
 
     thisButton->clearFocus(); // It looks better when not highlighted
     mExtendedUi->stackedWidget->setCurrentIndex(thisIndex);
-}
-
-void ExtendedWindow::initKbdShorts()
-{
-    // This table displays the keyboard shortcuts
-    // Make the columns fill the bounding box
-    mExtendedUi->shortcutsTableWidget->horizontalHeader()->
-            setSectionResizeMode(QHeaderView::Stretch);
-    // Make the rows big enough for the text to wrap onto two lines
-    mExtendedUi->shortcutsTableWidget->verticalHeader()->
-            setDefaultSectionSize(48);
-    // QtDesigner sponaneously clears this attribute(!).
-    // Set it explicitly.
-    mExtendedUi->shortcutsTableWidget->horizontalHeader()->
-            setVisible(true);
 }
 
 ////////////////////////////////////////////////////////////

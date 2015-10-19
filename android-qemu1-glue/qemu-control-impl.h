@@ -24,6 +24,7 @@
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/emulation/control/window_agent.h"
 
 ANDROID_BEGIN_HEADER
 
@@ -35,6 +36,9 @@ extern const QAndroidBatteryAgent* const gQAndroidBatteryAgent;
 
 // Defined in android/qemu-cellular-agent.c
 extern const QAndroidCellularAgent* const gQAndroidCellularAgent;
+
+// Defined in android-qemu1-glue/qemu-window-agent-impl.c
+extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
 
 // Defined in android/qemu-finger-agent.c
 extern const QAndroidFingerAgent* const gQAndroidFingerAgent;

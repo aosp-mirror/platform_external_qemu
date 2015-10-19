@@ -22,6 +22,7 @@ typedef struct SkinUI SkinUI;
 
 // Avoid including headers if possible.
 struct SkinFile;
+struct SkinKeyset;
 struct SkinLayout;
 struct SkinTrackBallParameters;
 struct SkinWindowFuncs;
@@ -117,6 +118,9 @@ void skin_ui_update_gpu_frame(SkinUI* ui, int w, int h, const void* pixels);
 
 // Return the current SkinLayout used by the user interface.
 struct SkinLayout* skin_ui_get_current_layout(SkinUI* ui);
+
+// Return the current keyset (hotkey bindings) used by the UI.
+struct SkinKeyset* skin_ui_get_current_keyset(SkinUI* ui);
 
 // Process all pending user input events. Returns true if the program needs
 // to exit/quit, false otherwise.

@@ -208,7 +208,6 @@ skin_keyset_new_from_text( const char*  text )
     return result;
 }
 
-
 void
 skin_keyset_free( SkinKeyset*  kset )
 {
