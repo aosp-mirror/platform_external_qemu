@@ -39,19 +39,21 @@ int formatToolbarGetUrl(char** ptr,
     static const char client_id_key[] = "id";
     static const char version_key[] = "version";
     static const char num_crashes_key[] = "exf";
+    static const char opengl_alive_key[] = "opengl";
     char* out_buf;
 
     char* client_id = android_studio_get_installation_id();
     int result = asprintf(
             &out_buf,
             "as=%s&%s=%s&%s=%s&%s=%s"
-            "&%s=%d&%s=%" PRId64 "&%s=%" PRId64,
+            "&%s=%d&%s=%d&%s=%" PRId64 "&%s=%" PRId64,
             product_name,
             version_key, metrics->emulator_version,
             client_id_key, client_id,
             guest_arch_key, metrics->guest_arch,
 
             num_crashes_key, metrics->is_dirty ? 1 : 0,
+            opengl_alive_key, metrics->opengl_alive,
             system_time_key, metrics->system_time,
             user_time_key, metrics->user_time);
     free(client_id);
