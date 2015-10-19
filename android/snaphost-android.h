@@ -16,12 +16,12 @@
 
 /* Matches HW config saved for a VM snapshot against the current HW config.
  * Param:
- *  hw_ini - IniFile instance containing the current HW config settings.
+ *  hw_ini - CIniFile instance containing the current HW config settings.
  *  name - Name of the snapshot for which the VM is loading.
  * Return:
  *  Boolean: 1 if HW configurations match, or 0 if they don't match.
  */
-extern int snaphost_match_configs(IniFile* hw_ini, const char* name);
+extern int snaphost_match_configs(CIniFile* hw_ini, const char* name);
 
 /* Saves HW config settings for the current VM.
  * Param:

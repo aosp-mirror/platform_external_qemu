@@ -80,6 +80,7 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
+#include "android/utils/ini.h"
 #include "android/utils/ipaddr.h"
 #include "android/utils/path.h"
 #include "android/utils/socket_drainer.h"
@@ -2193,7 +2194,7 @@ int main(int argc, char **argv, char **envp)
     const char* log_file = NULL;
     CPUState *cpu;
     int show_vnc_port = 0;
-    IniFile*  hw_ini = NULL;
+    CIniFile *hw_ini = NULL;
     STRALLOC_DEFINE(kernel_params);
     STRALLOC_DEFINE(kernel_config);
     int    dns_count = 0;

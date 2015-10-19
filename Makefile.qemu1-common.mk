@@ -173,6 +173,7 @@ common_LOCAL_SRC_FILES += \
 	android/base/containers/PointerSet.cpp \
 	android/base/containers/HashUtils.cpp \
 	android/base/containers/StringVector.cpp \
+	android/base/files/IniFile.cpp \
 	android/base/files/PathUtils.cpp \
 	android/base/files/StdioStream.cpp \
 	android/base/files/Stream.cpp \
@@ -245,7 +246,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/host_bitness.cpp \
 	android/utils/http_utils.cpp \
 	android/utils/iolooper.cpp \
-	android/utils/ini.c \
+	android/utils/ini.cpp \
 	android/utils/intmap.c \
 	android/utils/ipaddr.cpp \
 	android/utils/lineinput.c \
