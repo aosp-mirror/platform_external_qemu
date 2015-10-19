@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b90b4ea8_1f2c6ecf",
+        "filename": "android/skin/keyset.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-19T22:51:24Z",
+      "side": 1,
+      "message": "why not fopen() ?",
+      "range": {
+        "startLine": 221,
+        "startChar": 13,
+        "endLine": 221,
+        "endChar": 17
+      },
+      "revId": "27d0135e268809d1d24bca52c5f273ee884dea94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "79d47637_d6db7500",
+        "filename": "android/skin/keyset.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-19T22:51:24Z",
+      "side": 1,
+      "message": "close the fd?",
+      "range": {
+        "startLine": 229,
+        "startChar": 8,
+        "endLine": 229,
+        "endChar": 14
+      },
+      "revId": "27d0135e268809d1d24bca52c5f273ee884dea94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99020a8c_600bce69",
+        "filename": "android/skin/keyset.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-19T22:51:24Z",
+      "side": 1,
+      "message": "bindings is a local array, can we be sure skin_keyset_get_bindins() will never write out of bounds?",
+      "range": {
+        "startLine": 233,
+        "startChar": 65,
+        "endLine": 233,
+        "endChar": 73
+      },
+      "revId": "27d0135e268809d1d24bca52c5f273ee884dea94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39de7e5b_e527da81",
+        "filename": "android/skin/keyset.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-19T22:51:24Z",
+      "side": 1,
+      "message": "why is it indented twice?",
+      "range": {
+        "startLine": 233,
+        "startChar": 0,
+        "endLine": 245,
+        "endChar": 29
+      },
+      "revId": "27d0135e268809d1d24bca52c5f273ee884dea94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d90802ae_af5adada",
+        "filename": "android/skin/keyset.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-19T22:51:24Z",
+      "side": 1,
+      "message": "align it, please",
+      "range": {
+        "startLine": 102,
+        "startChar": 12,
+        "endLine": 102,
+        "endChar": 37
+      },
+      "revId": "27d0135e268809d1d24bca52c5f273ee884dea94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
