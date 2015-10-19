@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "79fd56bf_7f2daf2f",
+        "filename": "vl-android.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3483,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-10-19T21:07:00Z",
+      "side": 1,
+      "message": "I realized: It should be initialized to 1 because if we are _not_ doing HW rendering, there shouldn\u0027t be android_startOpenglesRenderer in the first place (and presumably, there should be a software renderer in its place)",
+      "revId": "cfc7f377c4f6b182a55fe08f5ba9c258ad5e2e26",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
