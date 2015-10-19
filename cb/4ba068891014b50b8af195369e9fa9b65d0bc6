@@ -1,0 +1,7 @@
+Code-Review+2: Bo Hu <bohu@google.com>
+Verified+1: Konstantinos Menychtas <kmenychtas@google.com>
+Submitted-by: Konstantinos Menychtas <kmenychtas@google.com>
+Submitted-at: Mon, 19 Oct 2015 01:58:53 +0000
+Reviewed-on: https://android-review.googlesource.com/175990
+Project: platform/external/qemu
+Branch: refs/heads/emu-1.4-release
