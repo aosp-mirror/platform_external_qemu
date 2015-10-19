@@ -168,6 +168,21 @@ void skin_winsys_get_window_pos(int* window_x, int* window_y) {
     }
 }
 
+void skin_winsys_get_window_borders(int *left, int *right, int *top, int *bottom) {
+#ifdef _WIN32
+    if (s_window) {
+        *left  = s_window_borders.left;
+        *right  = s_window_borders.right;
+        *top  = s_window_borders.top;
+        *bottom  = s_window_borders.bottom;
+    }
+#else
+    *left = *right = *top = *bottom = 0;
+#endif // _WIN32
+
+    return;
+}
+
 // Set window title.
 void skin_winsys_set_window_title(const char* title) {
     if (s_window) {
