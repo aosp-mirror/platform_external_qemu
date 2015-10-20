@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f91146d4_26e96fb1",
+        "filename": "Makefile.qemu1-common.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-20T01:10:17Z",
+      "side": 1,
+      "message": "is it possible to move this into the .sh script which generates the wrapper compiler and linker?",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 100,
+        "endChar": 23
+      },
+      "revId": "ea933342602505aafc2a7d5ec26ff078826b10a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
