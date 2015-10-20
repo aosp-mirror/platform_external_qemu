@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "59fc12c5_a49d62ae",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-20T23:29:48Z",
+      "side": 1,
+      "message": "nit: convention is to use OPT_DEBUG, but let\u0027s allow it here.",
+      "revId": "32699cdd82425d62aa33a592af4ef9d2aa42971d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
