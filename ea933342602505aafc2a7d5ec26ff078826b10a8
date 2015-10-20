@@ -63,6 +63,30 @@
       "revId": "ea933342602505aafc2a7d5ec26ff078826b10a8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9ec2e3d_b4c1568d",
+        "filename": "Makefile.qemu1-common.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-20T17:40:15Z",
+      "side": 1,
+      "message": "The last answer here suggests that statically linking a library into the exe, then loading a DLL that also references the same static lib might lead us into trouble:\nhttps://software.intel.com/en-us/forums/intel-visual-fortran-compiler-for-windows/topic/500949\n\nThe problem is that the DLL resolves _all symobls_ from the linked static lib at compile time. So, the exe and the static lib will end up with a different set of symbols from the same static lib, causing weird errors.",
+      "parentUuid": "595172a7_ff82fbfe",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 100,
+        "endChar": 23
+      },
+      "revId": "ea933342602505aafc2a7d5ec26ff078826b10a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
