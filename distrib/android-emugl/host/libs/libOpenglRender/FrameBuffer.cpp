@@ -415,8 +415,10 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
 }
 
 FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow) :
-    m_width(p_width),
-    m_height(p_height),
+    m_framebufferWidth(p_width),
+    m_framebufferHeight(p_height),
+    m_windowWidth(p_width),
+    m_windowHeight(p_height),
     m_useSubWindow(useSubWindow),
     m_configs(NULL),
     m_eglDisplay(EGL_NO_DISPLAY),
@@ -431,6 +433,8 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow) :
     m_textureDraw(NULL),
     m_lastPostedColorBuffer(0),
     m_zRot(0.0f),
+    m_px(0),
+    m_py(0),
     m_eglContextInitialized(false),
     m_statsNumFrames(0),
     m_statsStartTime(0LL),
@@ -457,7 +461,7 @@ void FrameBuffer::setPostCallback(OnPostFn onPost, void* onPostContext)
     m_onPost = onPost;
     m_onPostContext = onPostContext;
     if (m_onPost && !m_fbImage) {
-        m_fbImage = (unsigned char*)malloc(4 * m_width * m_height);
+        m_fbImage = (unsigned char*)malloc(4 * m_framebufferWidth * m_framebufferHeight);
         if (!m_fbImage) {
             ERR("out of memory, cancelling OnPost callback");
             m_onPost = NULL;
@@ -468,10 +472,12 @@ void FrameBuffer::setPostCallback(OnPostFn onPost, void* onPostContext)
 }
 
 bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
-                                 int p_x,
-                                 int p_y,
-                                 int p_width,
-                                 int p_height,
+                                 int wx,
+                                 int wy,
+                                 int ww,
+                                 int wh,
+                                 int fbw,
+                                 int fbh,
                                  float zRot) {
     bool success = false;
 
@@ -484,7 +490,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
     m_lock.lock();
     if (!m_subWin) {
         // create native subwindow for FB display output
-        m_subWin = createSubWindow(p_window, p_x, p_y, p_width, p_height);
+        m_subWin = createSubWindow(p_window, wx, wy, ww, wh);
         if (m_subWin) {
             m_nativeWindow = p_window;
 
@@ -503,8 +509,12 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                     // Subwin creation was successfull,
                     // update viewport and z rotation and draw
                     // the last posted color buffer.
-                    s_gles2.glViewport(0, 0, p_width, p_height);
+                    s_gles2.glViewport(0, 0, fbw, fbh);
+                    m_windowWidth = ww;
+                    m_windowHeight = wh;
                     m_zRot = zRot;
+                    m_px = 0;
+                    m_py = 0;
                     if (m_lastPostedColorBuffer) {
                         post(m_lastPostedColorBuffer, false);
                     } else {
@@ -542,6 +552,23 @@ bool FrameBuffer::removeSubWindow() {
     }
     m_lock.unlock();
     return removed;
+}
+
+bool FrameBuffer::moveSubWindow(int x, int y, int width, int height) {
+    if (!m_useSubWindow) {
+        ERR("%s: Cannot move native sub-window in this configuration\n",
+            __FUNCTION__);
+        return false;
+    }
+    bool success = false;
+    m_lock.lock();
+    if (m_subWin) {
+        m_windowWidth = width;
+        m_windowHeight = height;
+        success = ::moveSubWindow(m_subWin, x, y, width, height);
+    }
+    m_lock.unlock();
+    return success;
 }
 
 HandleType FrameBuffer::genHandle()
@@ -985,13 +1012,26 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
             goto EXIT;
         }
 
+        // get the viewport
+        GLint vp[4];
+        s_gles2.glGetIntegerv(GL_VIEWPORT, vp);
+
+        // find the x and y values at the origin when "fully scrolled"
+        // multiply by 2 because the texture goes from -1 to 1, not 0 to 1
+        float fx = 2.f * (vp[2] - m_windowWidth) / (float) vp[2];
+        float fy = 2.f * (vp[3] - m_windowHeight) / (float) vp[3];
+
+        // finally, compute translation values
+        float dx = m_px * fx;
+        float dy = m_py * fy;
+
         //
         // render the color buffer to the window
         //
         if (m_zRot != 0.0f) {
             s_gles2.glClear(GL_COLOR_BUFFER_BIT);
         }
-        ret = (*c).second.cb->post(m_zRot);
+        ret = (*c).second.cb->post(m_zRot, dx, dy);
         if (ret) {
             s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
         }
@@ -1024,8 +1064,8 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
     if (m_onPost) {
         (*c).second.cb->readback(m_fbImage);
         m_onPost(m_onPostContext,
-                 m_width,
-                 m_height,
+                 m_framebufferWidth,
+                 m_framebufferHeight,
                  -1,
                  GL_RGBA,
                  GL_UNSIGNED_BYTE,

@@ -11,6 +11,7 @@
 */
 #include "android/skin/window.h"
 
+#include "android/config/config.h"
 #include "android/skin/charmap.h"
 #include "android/skin/event.h"
 #include "android/skin/image.h"
@@ -1004,9 +1005,15 @@ struct SkinWindow {
 
     int           x_pos;
     int           y_pos;
-
     double        scale;
+
+    // Zoom-related parameters
     double        zoom;
+    SkinRect      subwindow;
+    SkinSize      scrollbar;
+    SkinPos       subwindow_original;
+    SkinSize      framebuffer;
+    SkinSize      container;
 };
 
 static void
@@ -1203,20 +1210,24 @@ skin_window_hide_opengles( SkinWindow* window )
 typedef struct {
     SkinWindow* window;
     void* handle;
-    int x;
-    int y;
-    int w;
-    int h;
+    int wx;
+    int wy;
+    int ww;
+    int wh;
+    int fbw;
+    int fbh;
     float rot;
 } gles_show_data;
 
 static void skin_window_run_opengles_show(void* p) {
     const gles_show_data* data = (const gles_show_data*)p;
     data->window->win_funcs->opengles_show(data->handle,
-                                           data->x,
-                                           data->y,
-                                           data->w,
-                                           data->h,
+                                           data->wx,
+                                           data->wy,
+                                           data->ww,
+                                           data->wh,
+                                           data->fbw,
+                                           data->fbh,
                                            data->rot);
 }
 
@@ -1225,21 +1236,50 @@ static void
 skin_window_show_opengles( SkinWindow* window )
 {
     ADisplay* disp = window->layout.displays;
-    SkinRect drect = disp->rect;
     void* winhandle = skin_winsys_get_window_handle();
-
-    skin_surface_get_scaled_rect(window->surface, &drect, &drect);
 
     gles_show_data data;
     data.window = window;
     data.handle = winhandle;
-    data.x = drect.pos.x;
-    data.y = drect.pos.y;
-    data.w = drect.size.w;
-    data.h = drect.size.h;
+    data.wx = window->subwindow.pos.x;
+    data.wy = window->subwindow.pos.y;
+    data.ww = window->subwindow.size.w;
+    data.wh = window->subwindow.size.h;
+    data.fbw = window->framebuffer.w;
+    data.fbh = window->framebuffer.h;
     data.rot = disp->rotation * -90.;
 
+    // The native GL subwindow for OSX (using Cocoa) uses cartesian (y-up) coordinates. We
+    // have code to transform window (y-down) coordinates into cartesian coordinates at that
+    // level, but Qt seems to do this transformation on its own. This means the transformation
+    // is done *twice* with Qt + OSX, resulting in the incorrect y value. The following "undoes"
+    // the transformation by doing it a third time.
+#if defined(__APPLE__) && CONFIG_QT
+    data.wy = window->container.h - (data.wy + data.wh);
+#endif
+
     skin_winsys_run_ui_update(&skin_window_run_opengles_show, &data);
+}
+
+static void skin_window_run_opengles_move(void* p) {
+    const gles_show_data* data = (const gles_show_data*)p;
+    data->window->win_funcs->opengles_move(data->wx,
+                                           data->wy,
+                                           data->ww,
+                                           data->wh);
+}
+
+static void
+skin_window_move_opengles( SkinWindow* window )
+{
+    gles_show_data data;
+    data.window = window;
+    data.wx = window->subwindow.pos.x;
+    data.wy = window->subwindow.pos.y;
+    data.ww = window->subwindow.size.w;
+    data.wh = window->subwindow.size.h;
+
+    skin_winsys_run_ui_update(&skin_window_run_opengles_move, &data);
 }
 
 static void
@@ -1295,7 +1335,6 @@ skin_window_create(SkinLayout* slayout,
 
     window->win_funcs    = win_funcs;
     window->scale = scale;
-    window->zoom = 1.0;
     window->no_display   = no_display;
 
     /* enable everything by default */
@@ -1395,6 +1434,78 @@ skin_window_position_changed( SkinWindow* window, int x, int y )
     window->y_pos = y;
 }
 
+int
+skin_window_recompute_subwindow_rect( SkinWindow* window, int new_x, int new_y )
+{
+    // The full subwindow must be intersected with the container to compute the actual subwindow
+    SkinRect result;
+
+    SkinRect subwindow;
+    subwindow.pos.x = new_x;
+    subwindow.pos.y = new_y;
+    subwindow.size.w = window->framebuffer.w;
+    subwindow.size.h = window->framebuffer.h;
+
+    SkinRect container;
+    container.pos.x = 0;
+    container.pos.y = 0;
+    container.size.w = window->container.w;
+    container.size.h = window->container.h;
+
+    skin_rect_intersect(&result, &subwindow, &container);
+
+    if (skin_rect_equals(&window->subwindow, &result)) {
+        return 0;
+    }
+
+    window->subwindow.pos.x = result.pos.x;
+    window->subwindow.pos.y = result.pos.y;
+    window->subwindow.size.w = result.size.w;
+    window->subwindow.size.h = result.size.h;
+
+    return 1;
+}
+
+void
+skin_window_scroll_updated( SkinWindow* window, int dx, int xmax, int dy, int ymax )
+{
+    // Pretend the subwindow has moved by the appropriate amount
+    if (skin_window_recompute_subwindow_rect(window,
+                                             window->subwindow_original.x - dx,
+                                             window->subwindow_original.y - dy)) {
+        skin_window_move_opengles(window);
+    }
+
+
+    // Compute the margins around the sub-window, then transform the current scroll values
+    // to take into account these margins. Values outside of [0,1] will be clamped by the
+    // sub-window as a sanity check.
+    int left_buf = window->subwindow_original.x;
+    int right_buf = skin_surface_width(window->surface)
+                        - (window->framebuffer.w + left_buf);
+    float px;
+    if (left_buf + right_buf >= xmax) {
+        // The subwindow fits entirely in the container, so there are no intermediate translations
+        px = dx < left_buf ? 0 : 1;
+    } else {
+        px = (float) (dx - left_buf) / (float) (xmax - (left_buf + right_buf));
+    }
+
+    int top_buf = window->subwindow_original.y;
+    int bottom_buf = skin_surface_height(window->surface)
+                         - (window->framebuffer.h + top_buf);
+    float py;
+    if (top_buf + bottom_buf >= ymax) {
+        // The subwindow fits entirely in the container, so there are no intermediate translations
+        py = dy < top_buf ? 1 : 0;
+    } else {
+        // Use (ymax - dy) instead of (dy) since OGL coordinates are Y-up
+        py = (float) ((ymax - dy) - bottom_buf) / (float) (ymax - (bottom_buf + top_buf));
+    }
+
+    window->win_funcs->opengles_setTranslation(px, py);
+}
+
 static void
 skin_window_resize( SkinWindow*  window )
 {
@@ -1414,6 +1525,10 @@ skin_window_resize( SkinWindow*  window )
         double        scale = window->scale;
         int           fullscreen = window->fullscreen;
 
+        // Pre-record the container dimensions
+        window->container.w = (int) ceil(layout_w * scale) - window->scrollbar.w;
+        window->container.h = (int) ceil(layout_h * scale) - window->scrollbar.h;
+
         if (window->zoom != 1.0) {
             scale *= window->zoom;
         }
@@ -1431,6 +1546,20 @@ skin_window_resize( SkinWindow*  window )
                                                      layout_h,
                                                      fullscreen);
 
+        // Calculate the framebuffer and window sizes and locations
+        ADisplay* disp = window->layout.displays;
+        SkinRect drect = disp->rect;
+        skin_surface_get_scaled_rect(window->surface, &drect, &drect);
+
+        // Store original values to use for scrolling later
+        window->subwindow_original.x = drect.pos.x;
+        window->subwindow_original.y = drect.pos.y;
+
+        window->framebuffer.w = drect.size.w;
+        window->framebuffer.h = drect.size.h;
+
+        skin_window_recompute_subwindow_rect(window, drect.pos.x, drect.pos.y);
+
         skin_window_show_opengles(window);
     }
 }
@@ -1446,6 +1575,11 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
 
     layout_done( &window->layout );
     window->layout = layout;
+
+    // Reset viewport parameters
+    window->zoom = 1.0;
+    window->framebuffer.w = 0;
+    window->framebuffer.h = 0;
 
     disp = window->layout.displays;
     if (disp != NULL) {
@@ -1547,18 +1681,32 @@ void
 skin_window_set_scale(SkinWindow* window, double scale)
 {
     window->scale = scale;
-    window->zoom = 1.0; // Scaling the window should reset zoom
+    window->zoom = 1.0;      // Scaling the window should reset all "viewport" parameters
+    window->scrollbar.w = 0; // Scroll bars won't appear, so ignore them
+    window->scrollbar.h = 0;
 
     skin_window_resize( window );
     skin_window_redraw( window, NULL );
 }
 
 void
-skin_window_set_zoom(SkinWindow* window, double zoom)
+skin_window_set_zoom(SkinWindow* window, double zoom, int dw, int dh)
 {
+    // When zoom is 1.0, we don't actually want scroll bars, so just re-scale the window
+    if (zoom == 1.0) {
+        skin_window_set_scale(window, window->scale);
+        return;
+    }
+
     window->zoom = zoom;
+    window->scrollbar.w = dw; // Remember scroll bar dimensions
+    window->scrollbar.h = dh;
 
     skin_window_resize( window );
+
+    // Align to the top left corner. While we don't know how large the scroll bars will be
+    // yet, so enter sufficiently large maximum values to ensure alignment.
+    skin_window_scroll_updated( window, 0, 100000, 0, 100000 );
     skin_window_redraw( window, NULL );
 }
 

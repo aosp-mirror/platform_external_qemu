@@ -24,6 +24,13 @@ static Bool WaitForMapNotify(Display *d, XEvent *e, char *arg) {
     return 0;
 }
 
+static Bool WaitForConfigureNotify(Display *d, XEvent *e, char *arg) {
+    if (e->type == ConfigureNotify && e->xmap.window == (Window)arg) {
+        return 1;
+    }
+    return 0;
+}
+
 static Display *s_display = NULL;
 
 EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
@@ -39,6 +46,7 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
 
     XSetWindowAttributes wa;
     wa.event_mask = StructureNotifyMask;
+    wa.override_redirect = True;
     Window win = XCreateWindow(s_display,
                                p_window,
                                x,
@@ -62,4 +70,29 @@ void destroySubWindow(EGLNativeWindowType win) {
         return;
     }
     XDestroyWindow(s_display, win);
+}
+
+int moveSubWindow(FBNativeWindowType p_window,
+                  int x,
+                  int y,
+                  int width,
+                  int height) {
+    // This value is set during create, so if it is still null, simply
+    // return because the global state is corrupted
+    if (!s_display) {
+        return false;
+    }
+
+    int ret = XMoveResizeWindow(
+                s_display,
+                p_window,
+                x,
+                y,
+                width,
+                height);
+
+    XEvent e;
+    XIfEvent(s_display, &e, WaitForConfigureNotify, (char *)p_window);
+
+    return ret;
 }

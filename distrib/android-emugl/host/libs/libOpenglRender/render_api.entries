@@ -77,14 +77,16 @@ void setPostCallback(OnPostFn onPost, void* onPostContext);
 # createOpenGLSubwindow -
 #     Create a native subwindow which is a child of 'window'
 #     to be used for framebuffer display.
-#     x,y,width,height are the dimensions of the rendering subwindow.
+#     wx,wy is the top left corner of the rendering subwindow.
+#     ww,wh are the dimensions of the rendering subwindow.
+#     fbw,fbh are the dimensions of the underlying guest framebuffer.
 #     zRot is the rotation to apply on the framebuffer display image.
 #
 #     Return true on success, false on failure, which can happen when using
 #     a software-only renderer like OSMesa. In this case, the client should
 #     call setPostCallback to get the content of each new frame when it is
 #     posted, and will be responsible for displaying it.
-bool createOpenGLSubwindow(FBNativeWindowType window, int x, int y, int width, int height, float zRot);
+bool createOpenGLSubwindow(FBNativeWindowType window, int wx, int wy, int ww, int wh, int fbw, int fbh, float zRot);
 
 # destroyOpenGLSubwindow -
 #   destroys the created native subwindow. Once destroyed,
@@ -93,10 +95,23 @@ bool createOpenGLSubwindow(FBNativeWindowType window, int x, int y, int width, i
 #   Return true on success, false otherwise.
 bool destroyOpenGLSubwindow(void);
 
+# moveOpenGLSubwindow
+#   moves and resizes the created native subwindow
+bool moveOpenGLSubwindow(int x, int y, int width, int height);
+
 # setOpenGLDisplayRotation -
 #    set the framebuffer display image rotation in units
 #    of degrees around the z axis
 void setOpenGLDisplayRotation(float zRot);
+
+# setOpenGLDisplayTranslation
+#    change what coordinate of the guest framebuffer will be displayed at the
+#    corner of the GPU sub-window. Specifically, |px| and |py| = 0 means
+#    align the bottom-left of the framebuffer with the bottom-left of the
+#    sub-window, and |px| and |py| = 1 means align the top right of the
+#    framebuffer with the top right of the sub-window. Intermediate values
+#    interpolate between these states.
+void setOpenGLDisplayTranslation(float px, float py);
 
 # repaintOpenGLDisplay -
 #    causes the OpenGL subwindow to get repainted with the

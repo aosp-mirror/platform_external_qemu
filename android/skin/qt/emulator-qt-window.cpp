@@ -22,6 +22,7 @@
 #include <QPixmap>
 #include <QPushButton>
 #include <QScreen>
+#include <QScrollBar>
 #include <QSemaphore>
 
 #include "android/base/files/PathUtils.h"
@@ -88,6 +89,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
 
     QObject::connect(&mScreencapProcess, SIGNAL(finished(int)), this, SLOT(slot_screencapFinished(int)));
     QObject::connect(&mScreencapPullProcess, SIGNAL(finished(int)), this, SLOT(slot_screencapPullFinished(int)));
+
+    QObject::connect(mContainer.horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_horizontalScrollChanged(int)));
+    QObject::connect(mContainer.verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_verticalScrollChanged(int)));
 }
 
 EmulatorQtWindow::~EmulatorQtWindow()
@@ -296,6 +300,17 @@ void EmulatorQtWindow::slot_pollEvent(SkinEvent *event, bool *hasEvent, QSemapho
     } else {
         *hasEvent = true;
         SkinEvent *newEvent = event_queue.dequeue();
+
+        // Skip multiple scroll events in a row to avoid visual lag
+        while (!event_queue.isEmpty() && newEvent->type == kEventScrollBarChanged) {
+            if (event_queue.head()->type == kEventScrollBarChanged) {
+                delete newEvent;
+                newEvent = event_queue.dequeue();
+            } else {
+                break;
+            }
+        }
+
         memcpy(event, newEvent, sizeof(SkinEvent));
         delete newEvent;
     }
@@ -356,6 +371,11 @@ void EmulatorQtWindow::slot_setWindowTitle(const QString *title, QSemaphore *sem
 
 void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, int is_fullscreen, QSemaphore *semaphore)
 {
+    // Zooming forces the scroll bar to be visible for sizing purpose, so reset them
+    // back to the default policy.
+    mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
     backing_surface = surface;
     if (is_fullscreen) {
         showFullScreen();
@@ -373,6 +393,16 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, 
     }
     show();
     if (semaphore != NULL) semaphore->release();
+}
+
+void EmulatorQtWindow::slot_horizontalScrollChanged(int value)
+{
+    simulateScrollBarChanged(value, mContainer.verticalScrollBar()->value());
+}
+
+void EmulatorQtWindow::slot_verticalScrollChanged(int value)
+{
+    simulateScrollBarChanged(mContainer.horizontalScrollBar()->value(), value);
 }
 
 void EmulatorQtWindow::screenshot()
@@ -597,8 +627,8 @@ void EmulatorQtWindow::handleEvent(SkinEventType type, QMouseEvent *event)
 
 void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *pEvent)
 {
-    // See if there is a Qt-specific handler for this event
-    if (handleQtKeyEvent(type, pEvent)) return;
+    // See if there is a Qt-specific handler for this key-down event
+    if (pEvent->type() == QKeyEvent::KeyPress && handleQtKeyEvent(type, pEvent)) return;
 
     SkinEvent *skin_event = createSkinEvent(type);
     SkinEventKeyData *keyData = &skin_event->u.key;
@@ -642,8 +672,21 @@ void EmulatorQtWindow::simulateKeyPress(int keyCode, int modifiers)
     slot_queueEvent(event);
 }
 
+void EmulatorQtWindow::simulateScrollBarChanged(int x, int y)
+{
+    SkinEvent *event = createSkinEvent(kEventScrollBarChanged);
+    event->u.scroll.x = x;
+    event->u.scroll.xmax = mContainer.horizontalScrollBar()->maximum();
+    event->u.scroll.y = y;
+    event->u.scroll.ymax = mContainer.verticalScrollBar()->maximum();
+    slot_queueEvent(event);
+}
+
 void EmulatorQtWindow::simulateSetScale(double scale)
 {
+    // Reset our local copy of zoom factor
+    mZoomFactor = 1.0;
+
     SkinEvent *event = createSkinEvent(kEventSetScale);
     event->u.window.x = mContainer.pos().x();
     event->u.window.y = mContainer.pos().y();
@@ -655,9 +698,18 @@ void EmulatorQtWindow::simulateSetZoom(double zoom)
 {
     mNextIsZoom = true;
 
+    simulateWindowMoved(mContainer.pos());
+
+    // Reset the scroll bars to avoid offset issues
+    QScrollBar *vertical = mContainer.verticalScrollBar();
+    vertical->setValue(0);
+
+    QScrollBar *horizontal = mContainer.horizontalScrollBar();
+    horizontal->setValue(0);
+
     SkinEvent *event = createSkinEvent(kEventSetZoom);
-    event->u.window.x = mContainer.pos().x();
-    event->u.window.y = mContainer.pos().y();
+    event->u.window.x = vertical->width();
+    event->u.window.y = horizontal->height();
     event->u.window.scale = zoom;
     slot_queueEvent(event);
 }
@@ -681,8 +733,15 @@ void EmulatorQtWindow::zoom()
     if (backing_surface) {
         bool pressedOk;
         mZoomFactor = QInputDialog::getDouble(this, tr("Zoom Factor"), tr("Enter a zoom factor:"),
-                                              1.0, 1.0, 3.0, 1, &pressedOk);
+                                              1.0, 1.0, 3.0, 2, &pressedOk);
         if (pressedOk) {
+
+            // Qt Widgets do not get properly sized unless they appear at least once. The scroll bars
+            // *must* be properly sized in order for zoom to create the correct GLES subwindow, so this
+            // ensures they will be. This is reset as soon as the window is shown.
+            mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+            mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+
             simulateSetZoom(mZoomFactor);
         }
     }

@@ -373,6 +373,15 @@ _skin_ui_handle_key_command(void* opaque, SkinKeyCommand command, int  down)
 bool skin_ui_process_events(SkinUI* ui) {
     SkinEvent ev;
 
+    // If a scrolled window is zoomed or resized while the scroll bars
+    // are moved, Qt window scroll events are created as the window resizes.
+    // They will be in the event queue behind the set-scale or set-zoom. Because
+    // scroll events work by "moving" the GL sub-window when using host GPU and
+    // finding its intersection with the Qt window, scroll events produced by a
+    // resize should be ignored, since they may move the GL sub-window far enough
+    // that it no longer intersects the Qt window at its current size.
+    bool ignoreScroll = false;
+
     while(skin_event_poll(&ev)) {
         switch(ev.type) {
         case kEventVideoExpose:
@@ -438,14 +447,21 @@ bool skin_ui_process_events(SkinUI* ui) {
             }
             break;
 
+        case kEventScrollBarChanged:
+            if (!ignoreScroll) {
+                skin_window_scroll_updated(ui->window, ev.u.scroll.x, ev.u.scroll.xmax, ev.u.scroll.y, ev.u.scroll.ymax);
+            }
+            break;
+
         case kEventSetScale:
+            ignoreScroll = true;
             skin_window_position_changed(ui->window, ev.u.window.x, ev.u.window.y);
             skin_window_set_scale(ui->window, ev.u.window.scale);
             break;
 
         case kEventSetZoom:
-            skin_window_position_changed(ui->window, ev.u.window.x, ev.u.window.y);
-            skin_window_set_zoom(ui->window, ev.u.window.scale);
+            ignoreScroll = true;
+            skin_window_set_zoom(ui->window, ev.u.window.scale, ev.u.window.x, ev.u.window.y);
             break;
 
         case kEventQuit:
