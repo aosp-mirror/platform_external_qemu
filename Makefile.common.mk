@@ -11,22 +11,21 @@ ifeq ($(HOST_OS),windows)
   # unfortunately, our build system doesn't help us much, so we need
   # to use some weird pathnames to make this work...
 
-  # Usage: $(eval $(call insert-windows-icon))
-  define insert-windows-icon
-    LOCAL_PREBUILT_OBJ_FILES += images/emulator_icon$(HOST_BITS).o
-  endef
-
 WINDRES_CPU_32 := i386
 WINDRES_CPU_64 := x86-64
 
-# This seems to be the only way to add an object file that was not generated from
-# a C/C++/Java source file to our build system. and very unfortunately,
-# $(TOPDIR)/$(LOCALPATH) will always be prepended to this value, which forces
-# us to put the object file in the source directory.
-$(LOCAL_PATH)/images/emulator_icon$(HOST_BITS).o: $(LOCAL_PATH)/images/android_icon.rc
-	@echo "Windres (x86): $@"
-	$(MY_WINDRES) --target=pe-$(WINDRES_CPU_$(HOST_BITS)) $< -I $(LOCAL_PATH)/images -o $@
-endif
+EMULATOR_ICON_OBJ := $(OBJS_DIR)/build/emulator_icon$(HOST_BITS).o
+$(EMULATOR_ICON_OBJ): PRIVATE_TARGET := $(WINDRES_CPU_$(HOST_BITS))
+$(EMULATOR_ICON_OBJ): $(LOCAL_PATH)/images/android_icon.rc
+	@echo "Windres ($(PRIVATE_TARGET)): $@"
+	$(hide) $(MY_WINDRES) --target=pe-$(PRIVATE_TARGET) $< -I $(LOCAL_PATH)/images -o $@
+
+# Usage: $(eval $(call insert-windows-icon))
+define insert-windows-icon
+    LOCAL_PREBUILT_OBJ_FILES += $(EMULATOR_ICON_OBJ)
+endef
+
+endif  # HOST_OS == windows
 
 # We want to build all variants of the emulator binaries. This makes
 # it easier to catch target-specific regressions during emulator development.
