@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "791716fc_75db4876",
+        "filename": "android/skin/window.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1256,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-20T18:40:19Z",
+      "side": 1,
+      "message": "Crazy situation. Good comment.\n\nNit: No \u0027 in possessive its",
+      "revId": "57f19f08981621cb8c93dbc6fb9536ad0fb377e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99f3ea1a_b8782983",
+        "filename": "android/skin/window.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1491,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-20T18:40:19Z",
+      "side": 1,
+      "message": "OK. I see we\u0027re safe from divide by zero. But is the (xmax\u003d\u003d0) test needed?",
+      "revId": "57f19f08981621cb8c93dbc6fb9536ad0fb377e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f91146d4_9c886cee",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_cocoa.m",
+        "patchSetId": 11
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-20T18:40:19Z",
+      "side": 1,
+      "message": "Super nit: We\u0027re trying for \"type* name\" rather than \"type *name\"",
+      "revId": "57f19f08981621cb8c93dbc6fb9536ad0fb377e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
