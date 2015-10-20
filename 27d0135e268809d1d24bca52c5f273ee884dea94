@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "39de7e5b_6a56123f",
+        "filename": "android/skin/keyset.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-20T21:29:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b90b4ea8_1f2c6ecf",
+      "range": {
+        "startLine": 221,
+        "startChar": 13,
+        "endLine": 221,
+        "endChar": 17
+      },
+      "revId": "27d0135e268809d1d24bca52c5f273ee884dea94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "79d47637_d6db7500",
         "filename": "android/skin/keyset.c",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-10-19T22:51:24Z",
       "side": 1,
       "message": "close the fd?",
+      "range": {
+        "startLine": 229,
+        "startChar": 8,
+        "endLine": 229,
+        "endChar": 14
+      },
+      "revId": "27d0135e268809d1d24bca52c5f273ee884dea94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d90802ae_e30b49aa",
+        "filename": "android/skin/keyset.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-20T21:29:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "79d47637_d6db7500",
       "range": {
         "startLine": 229,
         "startChar": 8,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "79d47637_ca74e2fc",
+        "filename": "android/skin/keyset.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-20T21:29:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "99020a8c_600bce69",
+      "range": {
+        "startLine": 233,
+        "startChar": 65,
+        "endLine": 233,
+        "endChar": 73
+      },
+      "revId": "27d0135e268809d1d24bca52c5f273ee884dea94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "39de7e5b_e527da81",
         "filename": "android/skin/keyset.c",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2015-10-19T22:51:24Z",
       "side": 1,
       "message": "why is it indented twice?",
+      "range": {
+        "startLine": 233,
+        "startChar": 0,
+        "endLine": 245,
+        "endChar": 29
+      },
+      "revId": "27d0135e268809d1d24bca52c5f273ee884dea94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99f3ea1a_93ef0e6f",
+        "filename": "android/skin/keyset.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-20T21:29:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "39de7e5b_e527da81",
       "range": {
         "startLine": 233,
         "startChar": 0,
