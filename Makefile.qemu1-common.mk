@@ -58,6 +58,7 @@ EMULATOR_USE_QT := $(strip $(filter true,$(EMULATOR_USE_QT)))
 ###
 
 common_LOCAL_CFLAGS =
+common_LOCAL_LDFLAGS =
 common_LOCAL_SRC_FILES =
 
 EMULATOR_COMMON_CFLAGS := -Werror=implicit-function-declaration
@@ -95,6 +96,8 @@ ifeq ($(HOST_OS),darwin)
 else
     CXX_STD_LIB := -lstdc++
 endif
+
+EMULATOR_COMMON_LDFLAGS := -static-libstdc++
 
 ###########################################################
 # Zlib sources
@@ -287,6 +290,7 @@ endif
 
 
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
+common_LOCAL_LDFLAGS += $(EMULATOR_COMMON_LDFLAGS)
 
 common_LOCAL_CFLAGS += $(LIBXML2_CFLAGS)
 common_LOCAL_CFLAGS += -I$(LIBEXT4_UTILS_INCLUDES)
@@ -298,6 +302,7 @@ $(call start-emulator-library, emulator-common)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES)
 LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES)
 LOCAL_CFLAGS += -I$(BREAKPAD_INCLUDES)
+LOCAL_LDFLAGS += $(common_LOCAL_LDFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
     LOCAL_IGNORE_BITNESS := true
@@ -314,10 +319,12 @@ $(call end-emulator-library)
 ###
 
 common_LOCAL_CFLAGS =
+common_LOCAL_LDFLAGS =
 common_LOCAL_SRC_FILES =
 common_LOCAL_QT_MOC_SRC_FILES =
 common_LOCAL_QT_RESOURCES =
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
+common_LOCAL_LDFLAGS += $(EMULATOR_COMMON_LDFLAGS)
 
 EMULATOR_LIBUI_CFLAGS :=
 EMULATOR_LIBUI_LDLIBS :=
@@ -429,6 +436,7 @@ endif
 ## one for 32-bit
 $(call start-emulator-library, emulator-libui)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) $(ANDROID_SKIN_CFLAGS)
+LOCAL_LDFLAGS += $(common_LOCAL_LDFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
@@ -445,12 +453,14 @@ $(call end-emulator-library)
 ###
 
 common_LOCAL_CFLAGS =
+common_LOCAL_LDFLAGS =
 common_LOCAL_SRC_FILES =
 
 
 EMULATOR_LIBQEMU_CFLAGS :=
 
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
+common_LOCAL_LDFLAGS += $(EMULATOR_COMMON_LDFLAGS)
 
 AUDIO_SOURCES := noaudio.c wavaudio.c wavcapture.c mixeng.c
 AUDIO_CFLAGS  := -I$(LOCAL_PATH)/audio -DHAS_AUDIO
@@ -720,6 +730,7 @@ $(QEMU_GDBSTUB_XML_C): $(QEMU_TARGET_XML_SOURCES) $(LOCAL_PATH)/feature_to_c.sh
 	$(transform-generated-source)
 LOCAL_GENERATED_SOURCES += $(QEMU_GDBSTUB_XML_C)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(intermediates)
+LOCAL_LDFLAGS += $(common_LOCAL_LDFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
@@ -749,6 +760,7 @@ else
 endif
 
 BLOCK_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
+BLOCK_LDFLAGS := $(EMULATOR_COMMON_LDFLAGS)
 BLOCK_CFLAGS += -DCONFIG_BDRV_WHITELIST=\"\"
 
 ##############################################################################

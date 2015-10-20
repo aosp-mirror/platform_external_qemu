@@ -42,9 +42,11 @@ EMULATOR_TARGET_CFLAGS += \
 
 
 common_LOCAL_CFLAGS =
+common_LOCAL_LDFLAGS =
 common_LOCAL_SRC_FILES =
 
 common_LOCAL_CFLAGS += -I$(GLIB_INCLUDE_DIR) $(EMULATOR_COMMON_CFLAGS)
+common_LOCAL_LDFLAGS += $(EMULATOR_COMMON_LDFLAGS)
 
 # The following is to ensure that "config.h" will map to a target-specific
 # configuration file header.
@@ -248,6 +250,7 @@ endif
 ## one for 32-bit
 $(call start-emulator-library, emulator-target-$(EMULATOR_TARGET_CPU))
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_LDFLAGS += $(common_LOCAL_LDFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call gen-hw-config-defs)
 $(call gen-hx-header,qemu-options.hx,qemu-options.def,os-posix.c os-win32.c)
@@ -263,6 +266,7 @@ $(call end-emulator-library)
 common_LOCAL_LDFLAGS =
 common_LOCAL_LDLIBS =
 common_LOCAL_CFLAGS =
+common_LOCAL_LDFLAGS =
 common_LOCAL_SRC_FILES =
 
 common_LOCAL_LDFLAGS += \
@@ -279,6 +283,9 @@ common_LOCAL_CFLAGS += \
     $(EMULATOR_COMMON_CFLAGS) \
     $(EMULATOR_LIBQEMU_CFLAGS) \
     $(EMULATOR_LIBUI_CFLAGS)
+
+common_LOCAL_LDFLAGS += \
+    $(EMULATOR_COMMON_LDFLAGS)
 
 common_LOCAL_SRC_FILES := \
     audio/audio.c \
@@ -343,10 +350,10 @@ LOCAL_STATIC_LIBRARIES += \
 LOCAL_LDLIBS += $(common_LOCAL_LDLIBS) $(ANDROID_SKIN_LDLIBS) $(LIBCURL_LDLIBS)
 LOCAL_LDLIBS += $(LIBXML2_LDLIBS)
 LOCAL_LDLIBS += $(BREAKPAD_LDLIBS)
-LOCAL_LDFLAGS += $(common_LOCAL_LDFLAGS)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES)
 LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES)
 LOCAL_CFLAGS += -I$(BREAKPAD_INCLUDES)
+LOCAL_LDFLAGS += $(common_LOCAL_LDFLAGS)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 LOCAL_GENERATE_SYMBOLS := true
 $(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)
