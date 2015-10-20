@@ -16,6 +16,24 @@
       "revId": "88878c1217674e6b2e6ddc7cd6deefdd1d3d3861",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b90b4ea8_89703057",
+        "filename": "android/skin/window.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1481,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-20T19:05:33Z",
+      "side": 1,
+      "message": "Yep, but it\u0027s better solved by changing the \"\u003e\" to \"\u003e\u003d\" I think - basically, if the denominator won\u0027t be positive, we shouldn\u0027t do that division.",
+      "parentUuid": "b9ec2e3d_059e16a9",
+      "revId": "88878c1217674e6b2e6ddc7cd6deefdd1d3d3861",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
