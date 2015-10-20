@@ -44,6 +44,9 @@ for OPT; do
         --help|-?)
             VERBOSE=2
             ;;
+        --debug)
+            OPTDEBUG=true
+            ;;
     esac
 done
 
@@ -188,13 +191,18 @@ run make -j$HOST_NUM_CPUS OBJS_DIR="$OUT_DIR" ||
     panic "Could not build sources, please run 'make' to see why."
 
 if [ "$BUILD_QEMU_ANDROID" ]; then
+    if [ "$OPTDEBUG" ]; then
+        DEBUG_FLAG=--debug
+    fi
+
     # Rebuild qemu-android binaries.
     echo "Building qemu-android binaries."
     unset ANDROID_EMULATOR_DARWIN_SSH &&
     $PROGDIR/android/scripts/build-qemu-android.sh \
         --verbosity=$VERBOSE \
         --host=$HOST_SYSTEM-x86_64 \
-        --force
+        --force \
+        $DEBUG_FLAG
 fi
 
 # Copy qemu-android binaries, if any.
