@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "595892e5_849da6ae",
+        "filename": "Makefile.qemu-launcher.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-20T12:21:28Z",
+      "side": 1,
+      "message": "this is neat but isn\u0027t used below :-/",
+      "revId": "ea933342602505aafc2a7d5ec26ff078826b10a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f91146d4_26e96fb1",
         "filename": "Makefile.qemu1-common.mk",
         "patchSetId": 1
@@ -13,6 +30,30 @@
       "writtenOn": "2015-10-20T01:10:17Z",
       "side": 1,
       "message": "is it possible to move this into the .sh script which generates the wrapper compiler and linker?",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 100,
+        "endChar": 23
+      },
+      "revId": "ea933342602505aafc2a7d5ec26ff078826b10a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "595172a7_ff82fbfe",
+        "filename": "Makefile.qemu1-common.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-20T12:21:28Z",
+      "side": 1,
+      "message": "I prefer not, we don\u0027t want to use this when generating shared libraries for example, otherwise each one of them is going to have its own copy of libstdc++ which can become rapidly problematic in the future.\n\nI\u0027m actually concerned about this use case, are we sure the DLLs will always link with the libstdc++ symbols in the executable that links them? It looks like a better solution would be to provide our own libstdc++ DLL so everything can link against the same, single, instance.",
+      "parentUuid": "f91146d4_26e96fb1",
       "range": {
         "startLine": 100,
         "startChar": 0,
