@@ -115,6 +115,7 @@ private:
 
     const QAndroidBatteryAgent* mBatteryAgent;
     const QAndroidCellularAgent* mCellularAgent;
+    const QAndroidEmulatorWindowAgent* mEmulatorWindow;
     const QAndroidFingerAgent* mFingerAgent;
     const QAndroidLocationAgent* mLocationAgent;
     const QAndroidSensorsAgent* mSensorsAgent;
