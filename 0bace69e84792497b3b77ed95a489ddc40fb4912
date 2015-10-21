@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "194a9a42_5808356b",
+        "filename": "android/emulation/control/window_agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-21T18:37:44Z",
+      "side": 1,
+      "message": "We\u0027re using this format in all ..._agent.h files in android/emulation/control",
+      "parentUuid": "d90802ae_d96dd4c3",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 2
+      },
+      "revId": "0bace69e84792497b3b77ed95a489ddc40fb4912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "99f3ea1a_c5cb89db",
         "filename": "android/emulation/control/window_agent.h",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2015-10-21T00:18:23Z",
       "side": 1,
       "message": "include android/utils/compiler.h for these macros",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 20
+      },
+      "revId": "0bace69e84792497b3b77ed95a489ddc40fb4912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19337ad8_6a619738",
+        "filename": "android/emulation/control/window_agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-21T18:37:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "99f3ea1a_c5cb89db",
       "range": {
         "startLine": 18,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "194a9a42_75a8a24e",
+        "filename": "android/emulation/control/window_agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-21T18:37:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d90802ae_99a19c6e",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 4
+      },
+      "revId": "0bace69e84792497b3b77ed95a489ddc40fb4912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b9f26ee4_d10b77aa",
         "filename": "android/skin/qt/ext-keyboard-shortcuts.cpp",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2015-10-21T00:18:23Z",
       "side": 1,
       "message": "we always use paths starting from android/",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 24
+      },
+      "revId": "0bace69e84792497b3b77ed95a489ddc40fb4912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99784a71_5934a7bf",
+        "filename": "android/skin/qt/ext-keyboard-shortcuts.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-21T18:37:44Z",
+      "side": 1,
+      "message": "This is a generated file, its placed in objs/intermediates o think...",
+      "parentUuid": "b9f26ee4_d10b77aa",
       "range": {
         "startLine": 12,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "b9618ebd_5aabb14b",
+        "filename": "android/skin/qt/ext-keyboard-shortcuts.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-21T18:37:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "79d47637_e0db3f00",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 51
+      },
+      "revId": "0bace69e84792497b3b77ed95a489ddc40fb4912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b9ec2e3d_410929ff",
         "filename": "android/skin/qt/ext-keyboard-shortcuts.cpp",
         "patchSetId": 2
@@ -128,6 +248,30 @@
       "writtenOn": "2015-10-21T00:18:23Z",
       "side": 1,
       "message": "do you actually use it here?",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 19
+      },
+      "revId": "0bace69e84792497b3b77ed95a489ddc40fb4912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9618ebd_3a9efd2e",
+        "filename": "android/skin/qt/ext-keyboard-shortcuts.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-21T18:37:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9ec2e3d_410929ff",
       "range": {
         "startLine": 19,
         "startChar": 0,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "99784a71_f9c65378",
+        "filename": "android/skin/qt/ext-keyboard-shortcuts.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-21T18:37:44Z",
+      "side": 1,
+      "message": "This shouldn\u0027t be inclusive. SKIN_KEY_COMMAND_MAX doesn\u0027t actually correspond to any commands - it just marks the end of the list.",
+      "parentUuid": "39111e0a_522d752f",
+      "range": {
+        "startLine": 27,
+        "startChar": 14,
+        "endLine": 27,
+        "endChar": 34
+      },
+      "revId": "0bace69e84792497b3b77ed95a489ddc40fb4912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "79d47637_60b98fb0",
         "filename": "android/skin/qt/ext-keyboard-shortcuts.cpp",
         "patchSetId": 2
@@ -174,6 +342,30 @@
       "writtenOn": "2015-10-21T00:18:23Z",
       "side": 1,
       "message": "a separate function?",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 12
+      },
+      "revId": "0bace69e84792497b3b77ed95a489ddc40fb4912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "993daaa1_316f0aea",
+        "filename": "android/skin/qt/ext-keyboard-shortcuts.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-21T18:37:44Z",
+      "side": 1,
+      "message": "this block of code is just 8 lines and only used here, is it really worth a separate function?",
+      "parentUuid": "79d47637_60b98fb0",
       "range": {
         "startLine": 35,
         "startChar": 0,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "59725292_947524fc",
+        "filename": "android/skin/qt/ext-keyboard-shortcuts.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-21T18:37:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9ec2e3d_413be992",
+      "range": {
+        "startLine": 47,
+        "startChar": 6,
+        "endLine": 47,
+        "endChar": 46
+      },
+      "revId": "0bace69e84792497b3b77ed95a489ddc40fb4912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "99f3ea1a_05d6117f",
         "filename": "android/skin/qt/ext-keyboard-shortcuts.cpp",
         "patchSetId": 2
@@ -220,6 +436,30 @@
       "writtenOn": "2015-10-21T00:18:23Z",
       "side": 1,
       "message": "spaces",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 11
+      },
+      "revId": "0bace69e84792497b3b77ed95a489ddc40fb4912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3942fe30_6be6014b",
+        "filename": "android/skin/qt/ext-keyboard-shortcuts.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-21T18:37:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "99f3ea1a_05d6117f",
       "range": {
         "startLine": 48,
         "startChar": 0,
@@ -255,6 +495,30 @@
     },
     {
       "key": {
+        "uuid": "3942fe30_ae49d7a5",
+        "filename": "android/skin/qt/extended-window-styles.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-21T18:37:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9ec2e3d_212d0563",
+      "range": {
+        "startLine": 115,
+        "startChar": 61,
+        "endLine": 115,
+        "endChar": 66
+      },
+      "revId": "0bace69e84792497b3b77ed95a489ddc40fb4912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "99020a8c_06a1cfcf",
         "filename": "android/skin/qt/extended-window.cpp",
         "patchSetId": 2
@@ -266,6 +530,24 @@
       "writtenOn": "2015-10-21T00:18:23Z",
       "side": 1,
       "message": "?",
+      "revId": "0bace69e84792497b3b77ed95a489ddc40fb4912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59725292_d7db1e00",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-21T18:37:44Z",
+      "side": 1,
+      "message": "Oops",
+      "parentUuid": "99020a8c_06a1cfcf",
       "revId": "0bace69e84792497b3b77ed95a489ddc40fb4912",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -295,6 +577,30 @@
     },
     {
       "key": {
+        "uuid": "b9618ebd_7a9955eb",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-21T18:37:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "99020a8c_43645949",
+      "range": {
+        "startLine": 118,
+        "startChar": 37,
+        "endLine": 118,
+        "endChar": 39
+      },
+      "revId": "0bace69e84792497b3b77ed95a489ddc40fb4912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d90802ae_b9446031",
         "filename": "android/skin/qt/extended.ui",
         "patchSetId": 2
@@ -306,6 +612,30 @@
       "writtenOn": "2015-10-21T00:18:23Z",
       "side": 1,
       "message": "is this intentional?",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 14
+      },
+      "revId": "0bace69e84792497b3b77ed95a489ddc40fb4912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b956eeeb_d23fa29f",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-21T18:37:44Z",
+      "side": 1,
+      "message": "no, just Qt creator thinking its smarter than humans...",
+      "parentUuid": "d90802ae_b9446031",
       "range": {
         "startLine": 63,
         "startChar": 0,
