@@ -669,6 +669,9 @@ skin_charmap_reverse_map_unicode(const SkinCharmap* cmap,
 {
     int                 n;
 
+    if (cmap == NULL)
+        return 0;
+
     if (unicode == 0)
         return 0;
 
