@@ -633,16 +633,16 @@ init_sdl_ui(AConfig*          skinConfig,
 #ifndef _WIN32
         // NOTE: On Windows, the program icon is embedded as a resource inside
         //       the executable, and there is no need to actually set it
-        //       explictly, so do not call android_icon_find() on this
+        //       explictly, so do not call android_emulator_icon_find() on this
         //       platform.
 #  if defined(__APPLE__)
-        static const char kIconFile[] = "android_icon_256.png";
+        static const char kIconFile[] = "emulator_icon_256.png";
 #  else
-        static const char kIconFile[] = "android_icon_128.png";
+        static const char kIconFile[] = "emulator_icon_128.png";
 #  endif
         size_t icon_size;
         const unsigned char* icon_data =
-                android_icon_find(kIconFile, &icon_size);
+                android_emulator_icon_find(kIconFile, &icon_size);
 
         if (icon_data) {
             skin_winsys_set_window_icon(icon_data, icon_size);

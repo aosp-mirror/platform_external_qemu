@@ -16,7 +16,7 @@ WINDRES_CPU_64 := x86-64
 
 EMULATOR_ICON_OBJ := $(OBJS_DIR)/build/emulator_icon$(HOST_BITS).o
 $(EMULATOR_ICON_OBJ): PRIVATE_TARGET := $(WINDRES_CPU_$(HOST_BITS))
-$(EMULATOR_ICON_OBJ): $(LOCAL_PATH)/images/android_icon.rc
+$(EMULATOR_ICON_OBJ): $(LOCAL_PATH)/images/emulator_icon.rc
 	@echo "Windres ($(PRIVATE_TARGET)): $@"
 	$(hide) $(MY_WINDRES) --target=pe-$(PRIVATE_TARGET) $< -I $(LOCAL_PATH)/images -o $@
 
