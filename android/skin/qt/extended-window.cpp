@@ -55,7 +55,6 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     initSettings();
     initSms();
     initTelephony();
-    initSettings();
     initVirtualSensors();
 
     move(mParentWindow->geometry().right() + 40,
