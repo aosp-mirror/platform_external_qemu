@@ -276,6 +276,29 @@ EOF
                 ;;
         esac
 
+        # Create a linking program that will capture its command-line to a file.
+        cat > link-prog <<EOF
+#!/bin/sh
+
+# Extract target file.
+seen_o=
+target=
+for opt; do
+    if [ "\$opt" = "-o" ]; then
+      seen_o=true
+    elif [ "\$seen_o" ]; then
+      target=\$opt
+      seen_o=
+    fi
+done
+
+if [ "\$target" ]; then
+  printf "%s\n" "\$@" > $BUILD_DIR/LINK-\$target
+fi
+$(builder_gnu_config_host_prefix)g++ "\$@"
+EOF
+        chmod a+x link-prog
+
         SDL_CONFIG=$PREFIX/bin/sdl2-config
         export SDL_CONFIG
 
@@ -344,7 +367,7 @@ EOF
             esac
 
             # Now build everything else in parallel.
-            run make -j$NUM_JOBS $BUILD_FLAGS
+            run make -j$NUM_JOBS $BUILD_FLAGS LINKPROG=$BUILD_DIR/link-prog
 
             for QEMU_EXE in $QEMU_TARGET_BUILDS; do
                 if [ ! -f "$QEMU_EXE" ]; then
@@ -369,6 +392,15 @@ EOF
         if [ -z "$OPT_DEBUG" ]; then
             run ${GNU_CONFIG_HOST_PREFIX}strip "$BINARY_DIR"/$QEMU_EXE
         fi
+    done
+
+    # Copy LINK-* files, adjusting hard-coded paths in them.
+    for LINK_FILE in "$BUILD_DIR"/LINK-qemu-system-*; do
+        sed \
+            -e 's|'${PREBUILTS_DIR}'|@PREBUILTS_DIR@|g' \
+            -e 's|'${QEMU_ANDROID}'|@SRC_DIR@|g' \
+            -e 's|'${BUILD_DIR}'||g' \
+            "$LINK_FILE" > $INSTALL_DIR/$1/$(basename "$LINK_FILE")
     done
 
     unset PKG_CONFIG PKG_CONFIG_PATH PKG_CONFIG_LIBDIR SDL_CONFIG
@@ -422,7 +454,10 @@ EOF
         dump "[$SYSTEM] Retrieving remote darwin binaries."
         run mkdir -p "$BINARY_DIR" ||
                 panic "Could not create installation directory: $BINARY_DIR"
-        run scp -r "$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM/qemu-system-* $BINARY_DIR/
+        run scp -r \
+            "$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM/qemu-system-* \
+            "$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM/LINK-qemu-system-* \
+            $BINARY_DIR/
 
         timestamp_set "$INSTALL_DIR/$SYSTEM" qemu-android
     done
