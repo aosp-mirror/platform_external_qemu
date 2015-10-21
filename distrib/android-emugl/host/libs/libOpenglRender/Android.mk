@@ -15,6 +15,7 @@ endif
 
 ifeq ($(HOST_OS),windows)
     host_OS_SRCS = NativeSubWindow_win32.cpp
+    host_common_LDLIBS += -lgdi32
 endif
 
 host_common_SRC_FILES := \

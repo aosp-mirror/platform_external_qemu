@@ -26,7 +26,7 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
         wc.lpfnWndProc = &DefWindowProc;               // points to window procedure
         wc.cbWndExtra = sizeof(void*);                 // save extra window memory, to store VasWindow instance
         wc.lpszClassName = className;                  // name of window class
-
+        wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH); // set a black background
         RegisterClass(&wc);
     }
 
@@ -41,6 +41,7 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                         NULL,
                         NULL,
                         NULL);
+
     ShowWindow(ret, SW_SHOW);
     return ret;
 }
