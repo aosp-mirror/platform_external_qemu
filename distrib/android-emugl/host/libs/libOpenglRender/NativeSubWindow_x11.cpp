@@ -60,6 +60,7 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                CWEventMask,
                                &wa);
     XMapWindow(s_display,win);
+    XSetWindowBackground(s_display, win, 0);
     XEvent e;
     XIfEvent(s_display, &e, WaitForMapNotify, (char *)win);
     return win;
