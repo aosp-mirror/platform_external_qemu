@@ -1,4 +1,4 @@
-/* Copyright 2014 The Android Open Source Project
+/* Copyright 2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -12,10 +12,10 @@
 
 // DO NOT EDIT
 
-// Auto-generated on 2014-12-08 with the following command:
-//     distrib/generate-android-icons.sh images/android_icon_128.png images/android_icon_256.png
+// Auto-generated on 2015-10-21 with the following command:
+//     android/scripts/generate-android-icons.sh images/emulator_icon_128.png images/emulator_icon_256.png
 
-static const unsigned char images_android_icon_128_png[] = {
+static const unsigned char images_emulator_icon_128_png[] = {
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
   0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x80,
   0x08, 0x06, 0x00, 0x00, 0x00, 0xc3, 0x3e, 0x61, 0xcb, 0x00, 0x00, 0x00,
@@ -1943,7 +1943,7 @@ static const unsigned char images_android_icon_128_png[] = {
   0x44, 0xae, 0x42, 0x60, 0x82
 };
 
-static const unsigned char images_android_icon_256_png[] = {
+static const unsigned char images_emulator_icon_256_png[] = {
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
   0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00,
   0x08, 0x06, 0x00, 0x00, 0x00, 0x5c, 0x72, 0xa8, 0x66, 0x00, 0x00, 0x00,
@@ -4322,13 +4322,13 @@ static const unsigned char images_android_icon_256_png[] = {
 
 static const FileEntry  _file_entries[] = {
     {
-        "android_icon_128.png",
-        images_android_icon_128_png,
-        sizeof(images_android_icon_128_png)
+        "emulator_icon_128.png",
+        images_emulator_icon_128_png,
+        sizeof(images_emulator_icon_128_png)
     },
     {
-        "android_icon_256.png",
-        images_android_icon_256_png,
-        sizeof(images_android_icon_256_png)
+        "emulator_icon_256.png",
+        images_emulator_icon_256_png,
+        sizeof(images_emulator_icon_256_png)
     },
 };  //  _file_entries[]

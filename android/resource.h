@@ -18,6 +18,5 @@ extern const unsigned char*
 android_resource_find( const char*    name,
                        size_t        *psize );
 
-extern const unsigned char*
-android_icon_find( const char*   name,
-                   size_t       *psize );
+extern const unsigned char* android_emulator_icon_find(const char* name,
+                                                       size_t* psize);

@@ -38,10 +38,8 @@ _resource_find( const char*       name,
 #undef   _file_entries
 #define  _file_entries  _icon_entries
 
-const unsigned char*
-android_icon_find( const char*  name,
-                   size_t      *psize )
-{
+const unsigned char* android_emulator_icon_find(const char* name,
+                                                size_t* psize) {
 #ifdef _WIN32
     // NOTE: On Windows, the icon is embedded within the executable program
     //       as a multi-image resource, so this is not needed.
