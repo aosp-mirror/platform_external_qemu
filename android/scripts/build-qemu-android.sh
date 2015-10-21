@@ -371,6 +371,10 @@ EOF
         fi
     done
 
+    # Generate object list file.
+    find "$BUILD_DIR" -name "*.o" | sed -e 's|'$BUILD_DIR'/||g' | \
+            sort -u | cat > $INSTALL_DIR/$1/OBJECTS-LIST.TXT
+
     unset PKG_CONFIG PKG_CONFIG_PATH PKG_CONFIG_LIBDIR SDL_CONFIG
     unset LIBFFI_CFLAGS LIBFFI_LIBS GLIB_CFLAGS GLIB_LIBS
 
@@ -422,7 +426,10 @@ EOF
         dump "[$SYSTEM] Retrieving remote darwin binaries."
         run mkdir -p "$BINARY_DIR" ||
                 panic "Could not create installation directory: $BINARY_DIR"
-        run scp -r "$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM/qemu-system-* $BINARY_DIR/
+        run scp -r \
+            "$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM/qemu-system-* \
+            "$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM/OBJECTS-LIST.TXT \
+            $BINARY_DIR/
 
         timestamp_set "$INSTALL_DIR/$SYSTEM" qemu-android
     done
