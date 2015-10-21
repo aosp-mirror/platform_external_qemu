@@ -556,6 +556,10 @@ extern "C" int main(int argc, char **argv, char **envp) {
         kernelCommandLine += " qemu.gles=0";
     }
 
+    if (opts->no_boot_anim) {
+        kernelCommandLine += " android.bootanim=0";
+    }
+
     args[n++] = kernelCommandLine.c_str();
 
     // Support for changing default lcd-density
