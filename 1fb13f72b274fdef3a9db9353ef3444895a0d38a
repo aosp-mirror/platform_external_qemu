@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "99f3ea1a_087d889f",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 560,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2015-10-21T01:40:31Z",
+      "side": 1,
+      "message": "the ro.kernel.android.bootanim is set to 0 ; however, I still see the bootanimation going on...",
+      "revId": "1fb13f72b274fdef3a9db9353ef3444895a0d38a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
