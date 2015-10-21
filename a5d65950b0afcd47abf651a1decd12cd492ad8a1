@@ -22,6 +22,30 @@
       "revId": "a5d65950b0afcd47abf651a1decd12cd492ad8a1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b956eeeb_f2482628",
+        "filename": "android/skin/qt/ext-keyboard-shortcuts.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-21T18:46:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "99784a71_39860ba8",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 11
+      },
+      "revId": "a5d65950b0afcd47abf651a1decd12cd492ad8a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
