@@ -73,7 +73,8 @@ void destroySubWindow(EGLNativeWindowType win) {
     XDestroyWindow(s_display, win);
 }
 
-int moveSubWindow(FBNativeWindowType p_window,
+int moveSubWindow(FBNativeWindowType p_parent_window,
+                  EGLNativeWindowType p_sub_window,
                   int x,
                   int y,
                   int width,
@@ -85,18 +86,18 @@ int moveSubWindow(FBNativeWindowType p_window,
     }
 
     // This prevents flicker on resize.
-    XSetWindowBackgroundPixmap(s_display, p_window, None);
+    XSetWindowBackgroundPixmap(s_display, p_sub_window, None);
 
     int ret = XMoveResizeWindow(
                 s_display,
-                p_window,
+                p_sub_window,
                 x,
                 y,
                 width,
                 height);
 
     XEvent e;
-    XIfEvent(s_display, &e, WaitForConfigureNotify, (char *)p_window);
+    XIfEvent(s_display, &e, WaitForConfigureNotify, (char *)p_sub_window);
 
     return ret;
 }

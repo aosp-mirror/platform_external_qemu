@@ -49,12 +49,13 @@ void destroySubWindow(EGLNativeWindowType win){
     PostMessage(win, WM_CLOSE, 0, 0);
 }
 
-int moveSubWindow(FBNativeWindowType p_window,
+int moveSubWindow(FBNativeWindowType p_parent_window,
+                  EGLNativeWindowType p_sub_window,
                   int x,
                   int y,
                   int width,
                   int height) {
-    BOOL ret = MoveWindow(p_window,
+    BOOL ret = MoveWindow(p_sub_window,
                           x,
                           y,
                           width,
