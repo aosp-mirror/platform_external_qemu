@@ -565,7 +565,7 @@ bool FrameBuffer::moveSubWindow(int x, int y, int width, int height) {
     if (m_subWin) {
         m_windowWidth = width;
         m_windowHeight = height;
-        success = ::moveSubWindow(m_subWin, x, y, width, height);
+        success = ::moveSubWindow(m_nativeWindow, m_subWin, x, y, width, height);
     }
     m_lock.unlock();
     return success;
