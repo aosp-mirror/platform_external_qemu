@@ -65,12 +65,13 @@ void destroySubWindow(EGLNativeWindowType win) {
     }
 }
 
-int moveSubWindow(FBNativeWindowType p_window,
+int moveSubWindow(FBNativeWindowType p_parent_window,
+                  FBNativeWindowType p_sub_window,
                   int x,
                   int y,
                   int width,
                   int height) {
-    NSWindow *win = (NSWindow *)p_window;
+    NSWindow *win = (NSWindow *)p_parent_window;
     if (!win) {
         return 0;
     }
@@ -78,10 +79,10 @@ int moveSubWindow(FBNativeWindowType p_window,
     /* (x,y) assume an upper-left origin, but Cocoa uses a lower-left origin */
     NSRect content_rect = [win contentRectForFrameRect:[win frame]];
     int cocoa_y = (int)content_rect.size.height - (y + height);
-    NSRect contentRect = NSMakeRect(x, cocoa_y, width, height);
+    NSRect newFrame = NSMakeRect(x, cocoa_y, width, height);
 
-    NSView *glView = [win contentView];
-    [glView setFrame:contentRect];
+    NSView *glView = (NSView *)p_sub_window;
+    [glView setFrame:newFrame];
 
     return 1;
 }
