@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "16d269e7_3531fabb",
+        "filename": "android/skin/window.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1396,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-22T23:48:49Z",
+      "side": 1,
+      "message": "While I\u0027m fine with this, skin_window_reset_internal (which is called above) calls skin_window_resize, so I\u0027m surprised that calling it here solves the problem. Maybe it needs to be called *after* skin_window_show_opengles, which needs a resize to work in the first place, in which case this would be the best place for it.",
+      "revId": "3c9ade1b79f22ba35a92d0666a82f60d764635d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
