@@ -1291,6 +1291,7 @@ skin_window_redraw_opengles( SkinWindow* window )
 }
 
 static int  skin_window_reset_internal (SkinWindow*, SkinLayout*);
+static void skin_window_resize (SkinWindow*);
 
 SkinWindow*
 skin_window_create(SkinLayout* slayout,
@@ -1392,6 +1393,9 @@ skin_window_create(SkinLayout* slayout,
     }
 
     skin_window_show_opengles(window);
+
+    /* Force a resize to make sure everything is synchronized */
+    skin_window_resize(window);
 
     return window;
 }
