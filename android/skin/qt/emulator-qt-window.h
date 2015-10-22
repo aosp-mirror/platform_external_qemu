@@ -58,6 +58,7 @@ public:
     virtual ~EmulatorQtWindow();
 
     static EmulatorQtWindow *getInstance();
+    void closeEvent(QCloseEvent *event);
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
     void keyPressEvent(QKeyEvent *event);
@@ -248,6 +249,11 @@ private:
             return QScrollArea::event(e);
         }
 
+        void closeEvent(QCloseEvent *event)
+        {
+            mEmulatorWindow->closeEvent(event);
+        }
+
         void keyPressEvent(QKeyEvent *event)
         {
             mEmulatorWindow->keyPressEvent(event);
@@ -273,9 +279,11 @@ private:
     EmulatorWindowContainer mContainer;
     double mZoomFactor;
     bool mNextIsZoom;
+    bool mCloseRequested;
 
     QProcess mScreencapProcess;
     QProcess mScreencapPullProcess;
+    MainLoopThread *mMainLoopThread;
 };
 
 struct SkinSurface {

@@ -54,7 +54,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         QFrame(parent),
         mContainer(this),
         mZoomFactor(1.0),
-        mNextIsZoom(false)
+        mNextIsZoom(false),
+        mCloseRequested(false),
+        mMainLoopThread(nullptr)
 {
     instance = this;
     backing_surface = NULL;
@@ -97,11 +99,22 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
 EmulatorQtWindow::~EmulatorQtWindow()
 {
     delete tool_window;
+    delete mMainLoopThread;
 }
 
 EmulatorQtWindow *EmulatorQtWindow::getInstance()
 {
     return instance;
+}
+
+void EmulatorQtWindow::closeEvent(QCloseEvent *event)
+{
+    if (mMainLoopThread && mMainLoopThread->isRunning()) {
+        mCloseRequested = true;
+        event->ignore();
+    } else {
+        event->accept();
+    }
 }
 
 void EmulatorQtWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -198,8 +211,13 @@ void EmulatorQtWindow::show()
 
 void EmulatorQtWindow::startThread(StartFunction f, int argc, char **argv)
 {
-    MainLoopThread *t = new MainLoopThread(f, argc, argv);
-    t->start();
+    if (!mMainLoopThread) {
+        mMainLoopThread = new MainLoopThread(f, argc, argv);
+        QObject::connect(mMainLoopThread, &QThread::finished, &mContainer, &EmulatorWindowContainer::close);
+        mMainLoopThread->start();
+    } else {
+        D("mMainLoopThread already started");
+    }
 }
 
 void EmulatorQtWindow::wheelEvent(QWheelEvent *event)
@@ -295,7 +313,10 @@ void EmulatorQtWindow::slot_isWindowFullyVisible(bool *out_value, QSemaphore *se
 
 void EmulatorQtWindow::slot_pollEvent(SkinEvent *event, bool *hasEvent, QSemaphore *semaphore)
 {
-    if (event_queue.isEmpty()) {
+    if (mCloseRequested) {
+        *hasEvent = true;
+        event->type = kEventQuit;
+    } else if (event_queue.isEmpty()) {
         *hasEvent = false;
     } else {
         *hasEvent = true;

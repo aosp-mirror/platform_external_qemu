@@ -160,7 +160,6 @@ void enter_qemu_main_loop(int argc, char **argv) {
     D("Starting QEMU main loop");
     qemu_main(argc, argv);
     D("Done with QEMU main loop");
-    exit(0);
 }
 
 #if CONFIG_QT && defined(_WIN32)
