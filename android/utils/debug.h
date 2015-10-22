@@ -13,6 +13,7 @@
 #pragma once
 
 #include <stdarg.h>
+#include <stdint.h>
 
 #include "android/utils/compiler.h"
 
@@ -60,7 +61,7 @@ typedef enum {
 } VerboseTag;
 #undef  _VERBOSE_TAG
 
-extern unsigned long long  android_verbose;
+extern uint64_t android_verbose;
 
 #define  VERBOSE_ENABLE(tag)    \
     android_verbose |= (1ULL << VERBOSE_##tag)

@@ -10,11 +10,13 @@
 ** GNU General Public License for more details.
 */
 #include "android/utils/debug.h"
+
+#include <fcntl.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <fcntl.h>
 
-unsigned long long android_verbose = 0;
+uint64_t android_verbose = 0;
 
 void
 dprint( const char*  format,  ... )
