@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
+/* Copyright (C) 2007-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -1130,6 +1130,7 @@ skin_window_move_mouse( SkinWindow*  window,
                 case kKeyCodeVolumeDown:
                 case kKeyCodePower:
                 case kKeyCodeHome:
+                case kKeyCodeHomePage:
                 case kKeyCodeBack:
                 case kKeyCodeCall:
                 case kKeyCodeEndCall:

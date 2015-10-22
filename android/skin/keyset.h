@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
+/* Copyright (C) 2007-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -26,6 +26,7 @@ typedef struct SkinKeyset  SkinKeyset;
 #define  SKIN_KEY_COMMAND_LIST                  \
     _SKIN_KEY_COMMAND(NONE,"no key")            \
     _SKIN_KEY_COMMAND(BUTTON_HOME,"Home button")              \
+    _SKIN_KEY_COMMAND(BUTTON_HOMEPAGE,"Home page button")     \
     _SKIN_KEY_COMMAND(BUTTON_MENU,"Menu (Soft-Left) button")   \
     _SKIN_KEY_COMMAND(BUTTON_STAR,"Star (Soft-Right) button")  \
     _SKIN_KEY_COMMAND(BUTTON_BACK,"Back button")              \

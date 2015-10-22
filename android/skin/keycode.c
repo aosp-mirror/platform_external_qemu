@@ -1,4 +1,4 @@
-/* Copyright (C) 2009 The Android Open Source Project
+/* Copyright (C) 2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -113,6 +113,7 @@ SkinKeyCode skin_keycode_rotate(SkinKeyCode code, int  rotation) {
     _KEYSYM_(INSERT,Insert) \
     _KEYSYM_(DELETE,Delete) \
     _KEYSYM_(HOME,Home) \
+    _KEYSYM_(HOMEPAGE,HomePage) \
     _KEYSYM_(END,End) \
     _KEYSYM_(PAGEUP,PageUp) \
     _KEYSYM_(PAGEDOWN,PageDown) \
