@@ -2378,7 +2378,7 @@ font-family: &quot;Roboto&quot;</string>
       </property>
      </item>
     </widget>
-    <widget class="QPlainTextEdit" name="set_imageVersionBox">
+    <widget class="QPlainTextEdit" name="set_androidVersionBox">
      <property name="enabled">
       <bool>false</bool>
      </property>
@@ -2409,10 +2409,10 @@ font-family: &quot;Roboto&quot;</string>
       <bool>false</bool>
      </property>
      <property name="plainText">
-      <string>Android 5.1 - API 22 (Rev 2)</string>
+      <string>Unknown API version</string>
      </property>
     </widget>
-    <widget class="QGroupBox" name="imageVertionTitle">
+    <widget class="QGroupBox" name="androidVersionTitle">
      <property name="geometry">
       <rect>
        <x>360</x>
@@ -2430,7 +2430,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>System image version</string>
+      <string>Android version</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Title</string>
@@ -2487,9 +2487,9 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QPushButton" name="set_updateButton">
      <property name="geometry">
       <rect>
-       <x>260</x>
-       <y>320</y>
-       <width>111</width>
+       <x>240</x>
+       <y>350</y>
+       <width>201</width>
        <height>36</height>
       </rect>
      </property>
@@ -2505,13 +2505,71 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">text-align: left;</string>
      </property>
      <property name="text">
-      <string>UPDATE TO 1.5</string>
+      <string>UPDATE NOT AVAILABLE</string>
      </property>
      <property name="flat">
       <bool>true</bool>
      </property>
      <property name="ColorGroup" stdset="0">
       <string notr="true">Tool</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="availVersionTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>320</y>
+       <width>221</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Latest available emulator version</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QPlainTextEdit" name="set_latestVersionBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>350</y>
+       <width>181</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="accessibleName">
+      <string notr="true"/>
+     </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="undoRedoEnabled">
+      <bool>false</bool>
+     </property>
+     <property name="plainText">
+      <string>Unavailable</string>
      </property>
     </widget>
    </widget>
@@ -3080,7 +3138,7 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>set_adbPortBox</tabstop>
   <tabstop>set_versionBox</tabstop>
   <tabstop>set_themeBox</tabstop>
-  <tabstop>set_imageVersionBox</tabstop>
+  <tabstop>set_androidVersionBox</tabstop>
   <tabstop>bat_levelSlider</tabstop>
   <tabstop>bat_chargeCkBox</tabstop>
   <tabstop>cell_sigStrengthText</tabstop>

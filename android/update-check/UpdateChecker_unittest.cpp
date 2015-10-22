@@ -172,6 +172,18 @@ TEST(UpdateChecker, needsCheck) {
     EXPECT_EQ(2, test.mTimeStorage->mGetTimeCallCount);
 }
 
+TEST(UpdateChecker, getVersion) {
+    TestData test;
+
+    // Set the version number
+    test.mVersionExtractor->mGetCurrentVersionResult = Version(4, 5, 6);
+
+    // Get the version as a string
+    Version returnedVersion = test.mVersionExtractor->getCurrentVersion();
+
+    EXPECT_TRUE( returnedVersion.toString().equals("4.5.6") );
+}
+
 TEST(UpdateChecker, asyncWorker) {
     TestData test;
 

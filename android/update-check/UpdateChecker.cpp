@@ -190,7 +190,7 @@ time_t UpdateChecker::clearHMS(time_t t) {
 
 void UpdateChecker::asyncWorker() {
     Version current = mVersionExtractor->getCurrentVersion();
-    Version last = loadLatestVersion();
+    Version last = getLatestVersion();
 
     if (!last.isValid()) {
         // don't record the last check time if we were not able to retrieve
@@ -211,7 +211,7 @@ void UpdateChecker::asyncWorker() {
     mTimeStorage->setTime(android::base::System::get()->getUnixTime());
 }
 
-Version UpdateChecker::loadLatestVersion() {
+Version UpdateChecker::getLatestVersion() {
     const std::string xml = mDataLoader->load();
     const Version ver = mVersionExtractor->extractVersion(xml);
     return ver;
