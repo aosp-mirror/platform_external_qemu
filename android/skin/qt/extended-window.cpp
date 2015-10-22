@@ -93,14 +93,11 @@ void ExtendedWindow::closeEvent(QCloseEvent *ce)
 
 // Tab buttons. Each raises its stacked pane to the top.
 void ExtendedWindow::on_batteryButton_clicked()     { adjustTabs(mExtendedUi->batteryButton,     PANE_IDX_BATTERY); }
-void ExtendedWindow::on_cameraButton_clicked()      { adjustTabs(mExtendedUi->cameraButton,      PANE_IDX_CAMERA); }
 void ExtendedWindow::on_cellularButton_clicked()    { adjustTabs(mExtendedUi->cellularButton,    PANE_IDX_CELLULAR); }
 void ExtendedWindow::on_dpadButton_clicked()        { adjustTabs(mExtendedUi->dpadButton,        PANE_IDX_DPAD); }
 void ExtendedWindow::on_fingerButton_clicked()      { adjustTabs(mExtendedUi->fingerButton,      PANE_IDX_FINGER); }
-void ExtendedWindow::on_hwSensorsButton_clicked()   { adjustTabs(mExtendedUi->hwSensorsButton,   PANE_IDX_HW_SENSORS); }
 void ExtendedWindow::on_kbdShortsButton_clicked()   { adjustTabs(mExtendedUi->kbdShortsButton,   PANE_IDX_KBD_SHORTS); }
 void ExtendedWindow::on_locationButton_clicked()    { adjustTabs(mExtendedUi->locationButton,    PANE_IDX_LOCATION); }
-void ExtendedWindow::on_recordScrButton_clicked()   { adjustTabs(mExtendedUi->recordScrButton,   PANE_IDX_RECORD_SCR); }
 void ExtendedWindow::on_settingsButton_clicked()    { adjustTabs(mExtendedUi->settingsButton,    PANE_IDX_SETTINGS); }
 void ExtendedWindow::on_telephoneButton_clicked()   { adjustTabs(mExtendedUi->telephoneButton,   PANE_IDX_TELEPHONE); }
 void ExtendedWindow::on_virtSensorsButton_clicked() { adjustTabs(mExtendedUi->virtSensorsButton, PANE_IDX_VIRT_SENSORS); }
@@ -118,14 +115,11 @@ void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
 
     // Omit "additionalButton" -- The main style sheet handles it
     mExtendedUi->batteryButton    ->setStyleSheet(colorStyle);
-    mExtendedUi->cameraButton     ->setStyleSheet(colorStyle);
     mExtendedUi->cellularButton   ->setStyleSheet(colorStyle);
     mExtendedUi->dpadButton       ->setStyleSheet(colorStyle);
     mExtendedUi->fingerButton     ->setStyleSheet(colorStyle);
-    mExtendedUi->hwSensorsButton  ->setStyleSheet(colorStyle);
     mExtendedUi->kbdShortsButton  ->setStyleSheet(colorStyle);
     mExtendedUi->locationButton   ->setStyleSheet(colorStyle);
-    mExtendedUi->recordScrButton  ->setStyleSheet(colorStyle);
     mExtendedUi->settingsButton   ->setStyleSheet(colorStyle);
     // Omit "spacer buttons" -- The main style sheet handles them
     mExtendedUi->telephoneButton  ->setStyleSheet(colorStyle);
@@ -141,14 +135,11 @@ void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
 
     mExtendedUi->additionalButton ->setAutoFillBackground(true);
     mExtendedUi->batteryButton    ->setAutoFillBackground(true);
-    mExtendedUi->cameraButton     ->setAutoFillBackground(true);
     mExtendedUi->cellularButton   ->setAutoFillBackground(true);
     mExtendedUi->dpadButton       ->setAutoFillBackground(true);
     mExtendedUi->fingerButton     ->setAutoFillBackground(true);
-    mExtendedUi->hwSensorsButton  ->setAutoFillBackground(true);
     mExtendedUi->kbdShortsButton  ->setAutoFillBackground(true);
     mExtendedUi->locationButton   ->setAutoFillBackground(true);
-    mExtendedUi->recordScrButton  ->setAutoFillBackground(true);
     mExtendedUi->settingsButton   ->setAutoFillBackground(true);
     mExtendedUi->spacer1Button    ->setAutoFillBackground(true);
     mExtendedUi->spacer2Button    ->setAutoFillBackground(true);

@@ -153,14 +153,11 @@ private:
 private slots:
     // Master tabs
     void on_batteryButton_clicked();
-    void on_cameraButton_clicked();
     void on_cellularButton_clicked();
     void on_dpadButton_clicked();
     void on_fingerButton_clicked();
-    void on_hwSensorsButton_clicked();
     void on_kbdShortsButton_clicked();
     void on_locationButton_clicked();
-    void on_recordScrButton_clicked();
     void on_settingsButton_clicked();
     void on_telephoneButton_clicked();
     void on_virtSensorsButton_clicked();

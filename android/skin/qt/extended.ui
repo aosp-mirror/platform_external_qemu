@@ -2520,7 +2520,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>196</y>
+     <y>152</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -2696,7 +2696,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>372</y>
+     <y>284</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -2736,55 +2736,11 @@ font-family: &quot;Roboto&quot;</string>
     <string>MajorTab</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="cameraButton">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>152</y>
-     <width>220</width>
-     <height>44</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-   <property name="autoFillBackground">
-    <bool>false</bool>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
-   </property>
-   <property name="text">
-    <string>  Camera</string>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/camera_iris</normaloff>:/light/camera_iris</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>20</width>
-     <height>20</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string>camera_iris</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>MajorTab</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="virtSensorsButton">
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>240</y>
+     <y>196</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -2824,55 +2780,11 @@ font-family: &quot;Roboto&quot;</string>
     <string>MajorTab</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="hwSensorsButton">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>284</y>
-     <width>220</width>
-     <height>44</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-   <property name="autoFillBackground">
-    <bool>false</bool>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
-   </property>
-   <property name="text">
-    <string>  Hardware sensors</string>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/hwSensors</normaloff>:/light/hwSensors</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>20</width>
-     <height>20</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string>hwSensors</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>MajorTab</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="dpadButton">
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>328</y>
+     <y>240</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -2938,7 +2850,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>548</y>
+     <y>410</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -2985,9 +2897,9 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>592</y>
+     <y>452</y>
      <width>220</width>
-     <height>151</height>
+     <height>300</height>
     </rect>
    </property>
    <property name="autoFillBackground">
@@ -3019,7 +2931,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>416</y>
+     <y>326</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -3056,7 +2968,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>504</y>
+     <y>366</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -3091,50 +3003,6 @@ font-family: &quot;Roboto&quot;</string>
    </property>
    <property name="themeIconName" stdset="0">
     <string>keyboard</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>MajorTab</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="recordScrButton">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>460</y>
-     <width>220</width>
-     <height>44</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-   <property name="autoFillBackground">
-    <bool>false</bool>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
-   </property>
-   <property name="text">
-    <string>  Record screen</string>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/vidCam</normaloff>:/light/vidCam</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>20</width>
-     <height>20</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string>vidCam</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>MajorTab</string>
@@ -3187,13 +3055,10 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>locationButton</tabstop>
   <tabstop>cellularButton</tabstop>
   <tabstop>batteryButton</tabstop>
-  <tabstop>cameraButton</tabstop>
   <tabstop>telephoneButton</tabstop>
   <tabstop>virtSensorsButton</tabstop>
-  <tabstop>hwSensorsButton</tabstop>
   <tabstop>dpadButton</tabstop>
   <tabstop>fingerButton</tabstop>
-  <tabstop>recordScrButton</tabstop>
   <tabstop>kbdShortsButton</tabstop>
   <tabstop>settingsButton</tabstop>
   <tabstop>spacer2Button</tabstop>
