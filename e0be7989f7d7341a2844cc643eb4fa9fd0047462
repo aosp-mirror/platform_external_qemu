@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "369ccd29_fee03d81",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-22T21:01:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1959ba73_83fd849b",
+      "revId": "e0be7989f7d7341a2844cc643eb4fa9fd0047462",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "369ccd29_bbec07ea",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 1
@@ -30,6 +48,30 @@
       "writtenOn": "2015-10-22T18:08:46Z",
       "side": 1,
       "message": "This seems a little sketchy to depend on, but it sounds like there is no alternative (or at least the alternative isn\u0027t much better).",
+      "range": {
+        "startLine": 189,
+        "startChar": 10,
+        "endLine": 189,
+        "endChar": 60
+      },
+      "revId": "e0be7989f7d7341a2844cc643eb4fa9fd0047462",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6699de6_fad92555",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-22T21:01:59Z",
+      "side": 1,
+      "message": "I agree is a bit sketchy.\nThe most robust way would be to get the charmap,\nconstruct the file name, read the file (via ADB?),\nand parse the setting for HOME.\nBecause these charmaps almost never change, basing\nthe decision on the name string seems safe and probably\nless prone to failure.",
+      "parentUuid": "369ccd29_bbec07ea",
       "range": {
         "startLine": 189,
         "startChar": 10,
