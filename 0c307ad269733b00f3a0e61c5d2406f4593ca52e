@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "968019c6_19418f22",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_cocoa.m",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-22T21:46:39Z",
+      "side": 1,
+      "message": "As I mentioned to Jim, this line seems to be misbehaving. Specifically, it would appear that the \"origin\" portion of setting the frame is working, since the sub-window does move itself as the scroll bars are moved. However, the subwindow is not resized, even though printing it\u0027s frame rectangle on subsequent moves states that it has.",
+      "revId": "0c307ad269733b00f3a0e61c5d2406f4593ca52e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
