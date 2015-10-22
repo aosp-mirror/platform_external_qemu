@@ -1291,6 +1291,7 @@ skin_window_redraw_opengles( SkinWindow* window )
 }
 
 static int  skin_window_reset_internal (SkinWindow*, SkinLayout*);
+static void skin_window_resize (SkinWindow*);
 
 SkinWindow*
 skin_window_create(SkinLayout* slayout,
@@ -1313,11 +1314,9 @@ skin_window_create(SkinLayout* slayout,
         int       win_h = slayout->size.h;
         double    scale_w, scale_h;
 
-        /* To account for things like menu bars, window decorations etc..
-         * We only compute 95% of the real screen size. */
         skin_winsys_get_monitor_rect(&monitor);
-        screen_w = monitor.size.w * 0.95;
-        screen_h = monitor.size.h * 0.95;
+        screen_w = monitor.size.w;
+        screen_h = monitor.size.h;
 
         scale_w = 1.0;
         scale_h = 1.0;
@@ -1392,6 +1391,9 @@ skin_window_create(SkinLayout* slayout,
     }
 
     skin_window_show_opengles(window);
+
+    /* Force a resize to make sure everything is synchronized */
+    skin_window_resize(window);
 
     return window;
 }
