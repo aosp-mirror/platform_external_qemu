@@ -1,0 +1,7 @@
+Code-Review+2: Evan Birenbaum <birenbaum@google.com>
+Verified+1: Grigory Dzhavadyan <grigoryj@google.com>
+Submitted-by: Grigory Dzhavadyan <grigoryj@google.com>
+Submitted-at: Thu, 22 Oct 2015 23:51:24 +0000
+Reviewed-on: https://android-review.googlesource.com/178214
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
