@@ -60,7 +60,7 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                CWEventMask,
                                &wa);
     XMapWindow(s_display,win);
-    XSetWindowBackground(s_display, win, 0);
+    XSetWindowBackground(s_display, win, BlackPixel(s_display, 0));
     XEvent e;
     XIfEvent(s_display, &e, WaitForMapNotify, (char *)win);
     return win;
@@ -83,6 +83,9 @@ int moveSubWindow(FBNativeWindowType p_window,
     if (!s_display) {
         return false;
     }
+
+    // This prevents flicker on resize.
+    XSetWindowBackgroundPixmap(s_display, p_window, None);
 
     int ret = XMoveResizeWindow(
                 s_display,
