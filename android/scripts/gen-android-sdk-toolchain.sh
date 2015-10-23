@@ -45,7 +45,9 @@ or path, *instead* of creating a toolchain. Valid values for <tool> are:
    binprefix       -> Print the binprefix (e.g. 'x86_64-linux-')
    cc              -> Print the compiler name (e.g. 'x86_64_linux-cc')
    c++             -> Print the c++ compiler name.
-   ld, ar, as, ... -> Same for other tools."
+   ld, ar, as, ... -> Same for other tools.
+   sysroot         -> Print the path to directory corresponding to the current
+                      toolchain."
 
 aosp_dir_register_option
 
@@ -423,6 +425,13 @@ prepare_build_for_host () {
         case $OPT_PRINT in
             binprefix)
                 printf "%s\n" "$BINPREFIX"
+                ;;
+            sysroot)
+                local SUBDIR
+                SUBDIR="$(aosp_prebuilt_toolchain_sysroot_subdir_for "${CURRENT_HOST}")"
+                if [ -n "${SUBDIR}" ]; then
+                    printf "${AOSP_DIR}/${SUBDIR}"
+                fi
                 ;;
             *)
                 printf "%s\n" "${BINPREFIX}$OPT_PRINT"

@@ -426,6 +426,7 @@ CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}g++"
 AR="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ar"
 LD=$CC
 OBJCOPY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}objcopy"
+TOOLCHAIN_SYSROOT="$("${GEN_SDK}" $GEN_SDK_FLAGS --print=sysroot "${SDK_TOOLCHAIN_DIR}")"
 
 if [ -n "$OPTION_CC" ]; then
     echo "Using specified C compiler: $OPTION_CC"
@@ -706,6 +707,7 @@ echo "HOST_AR     := $AR" >> $config_mk
 echo "HOST_OBJCOPY := $OBJCOPY" >> $config_mk
 echo "HOST_WINDRES:= $WINDRES" >> $config_mk
 echo "HOST_DUMPSYMS:= $DUMPSYMS" >> $config_mk
+echo "TOOLCHAIN_SYSROOT := $TOOLCHAIN_SYSROOT" >> $config_mk
 echo "OBJS_DIR    := $OUT_DIR" >> $config_mk
 echo "" >> $config_mk
 echo "HOST_PREBUILT_TAG := $HOST_TAG" >> $config_mk

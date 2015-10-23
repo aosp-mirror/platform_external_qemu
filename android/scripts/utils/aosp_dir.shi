@@ -92,6 +92,25 @@ aosp_prebuilt_toolchain_subdir_for () {
     esac
 }
 
+# Return the AOSP subdirectory corresponding to the toolchain's sysroot.
+# $1: System name (e.g. 'linux' or 'linux-x86_64')
+aosp_prebuilt_toolchain_sysroot_subdir_for () {
+    local PREBUILT_DIR
+    PREBUILT_DIR="$(aosp_prebuilt_toolchain_subdir_for "$1")"
+    case $1 in
+        linux*)
+            printf "${PREBUILT_DIR}/x86_64-linux"
+            ;;
+        darwin*)
+            # We use the developer machine's system SDK.
+            printf ""
+            ;;
+        windows*)
+            printf "${PREBUILT_DIR}/x86_64-w64-mingw32"
+            ;;
+    esac
+}
+
 aosp_prebuilt_toolchain_prefix_for () {
     case $1 in
         linux*)
