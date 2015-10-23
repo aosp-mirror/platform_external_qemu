@@ -279,7 +279,6 @@ private:
     EmulatorWindowContainer mContainer;
     double mZoomFactor;
     bool mNextIsZoom;
-    bool mCloseRequested;
 
     QProcess mScreencapProcess;
     QProcess mScreencapPullProcess;
