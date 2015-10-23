@@ -109,7 +109,7 @@ EmulatorQtWindow *EmulatorQtWindow::getInstance()
 void EmulatorQtWindow::closeEvent(QCloseEvent *event)
 {
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
-        event_queue.enqueue(createSkinEvent(kEventQuit));
+        queueEvent(createSkinEvent(kEventQuit));
         event->ignore();
     } else {
         event->accept();
