@@ -55,7 +55,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         mContainer(this),
         mZoomFactor(1.0),
         mNextIsZoom(false),
-        mCloseRequested(false),
         mMainLoopThread(nullptr)
 {
     instance = this;
@@ -110,7 +109,7 @@ EmulatorQtWindow *EmulatorQtWindow::getInstance()
 void EmulatorQtWindow::closeEvent(QCloseEvent *event)
 {
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
-        mCloseRequested = true;
+        event_queue.enqueue(createSkinEvent(kEventQuit));
         event->ignore();
     } else {
         event->accept();
@@ -313,10 +312,7 @@ void EmulatorQtWindow::slot_isWindowFullyVisible(bool *out_value, QSemaphore *se
 
 void EmulatorQtWindow::slot_pollEvent(SkinEvent *event, bool *hasEvent, QSemaphore *semaphore)
 {
-    if (mCloseRequested) {
-        *hasEvent = true;
-        event->type = kEventQuit;
-    } else if (event_queue.isEmpty()) {
+    if (event_queue.isEmpty()) {
         *hasEvent = false;
     } else {
         *hasEvent = true;
