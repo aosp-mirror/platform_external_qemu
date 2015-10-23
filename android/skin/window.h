@@ -23,16 +23,12 @@ typedef struct SkinWindowFuncs {
     void (*mouse_event)(unsigned x, unsigned y, unsigned state);
     void (*generic_event)(int event_type, int event_code, int event_value);
     int (*opengles_show)(void* winhandle,
-                         int wx,
-                         int wy,
-                         int ww,
-                         int wh,
-                         int fbw,
-                         int fbh,
+                         int x,
+                         int y,
+                         int width,
+                         int height,
                          float rotation_degrees);
     int (*opengles_hide)(void);
-    void (*opengles_move)(int x, int y, int width, int height);
-    void (*opengles_setTranslation)(float px, float py);
     void (*opengles_redraw)(void);
     void (*opengles_free)(void);
 } SkinWindowFuncs;
@@ -68,16 +64,10 @@ extern void             skin_window_set_scale( SkinWindow*  window,
                                                double       scale );
 
 extern void             skin_window_set_zoom( SkinWindow*  window,
-                                              double       zoom,
-                                              int          dw,
-                                              int          dh );
+                                              double       zoom );
 
 extern void             skin_window_position_changed( SkinWindow*   window,
                                                       int x, int y );
-
-extern void             skin_window_scroll_updated( SkinWindow*    window,
-                                                    int dx, int xmax,
-                                                    int dy, int ymax );
 
 extern void             skin_window_set_title( SkinWindow*  window,
                                                const char*  title );
