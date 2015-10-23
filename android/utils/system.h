@@ -155,11 +155,6 @@ extern  void   restore_sigalrm( signal_state_t  *state );
 
 extern  void   sleep_ms( int  timeout );
 
-/** Get system / user time for the current process, in milliseconds **/
-/* Type duplicated from android/base/system/System.h */
-extern int64_t get_user_time_ms();
-extern int64_t get_system_time_ms();
-
 /** FORMATTING int64_t in printf() statements
  **
  ** Normally defined in <inttypes.h> except on Windows and maybe others.
@@ -175,6 +170,19 @@ extern int64_t get_system_time_ms();
 #  define PRIu64  "llu"
 #endif
 
-/* */
+/** ****************************************************************************
+ ** Various system functions exposed from the modern
+ ** android/base/system/System.h implementation.
+ **/
+
+/** Get system / user time for the current process, in milliseconds **/
+/* Type duplicated from android/base/system/System.h */
+extern int64_t get_user_time_ms();
+extern int64_t get_system_time_ms();
+
+// Caller must free the returned string.
+extern char* get_program_directory();
+extern void add_library_search_dir(const char* dirPath);
+
 
 ANDROID_END_HEADER

@@ -21,6 +21,8 @@
 // types.
 #include "android/utils/system.h"
 
+#include <string.h>
+
 using android::base::System;
 
 int64_t get_user_time_ms() {
@@ -29,4 +31,12 @@ int64_t get_user_time_ms() {
 
 int64_t get_system_time_ms() {
     return static_cast<int64_t>(System::get()->getProcessTimes().systemMs);
+}
+
+char* get_program_directory() {
+    return strdup(System::get()->getProgramDirectory().c_str());
+}
+
+void add_library_search_dir(const char* dirPath) {
+    System::get()->addLibrarySearchDir(dirPath);
 }

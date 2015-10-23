@@ -170,27 +170,18 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
         return;
     }
 
-    // Prepend $EXEC_DIR/<lib>/ to LD_LIBRARY_PATH to ensure that
-    // the EmuGL libraries are found here.
+    // $EXEC_DIR/<lib>/ is already added to the library search path by default,
+    // since generic libraries are bundled there. We may need more though:
     resetBackendList(config->bitness);
-
-    const char* libSubDir = (config->bitness == 64) ? "lib64" : "lib";
-
-    String newDirs = StringFormat("%s/%s",
-                                  System::get()->getProgramDirectory().c_str(),
-                                  libSubDir);
     if (strcmp(config->backend, "host") != 0) {
         // If the backend is not 'host', we also need to add the
         // backend directory.
         String dir = sBackendList->getLibDirPath(config->backend);
         if (dir.size()) {
-            newDirs += System::kPathSeparator;
-            newDirs += dir;
+            D("Adding to the library search path: %s\n", newDirs.c_str());
+            system->addLibrarySearchDir(dir.c_str());
         }
     }
-
-    D("Adding to the library search path: %s\n", newDirs.c_str());
-    system->addLibrarySearchDir(newDirs.c_str());
 
     if (!strcmp(config->backend, "host")) {
         // Nothing more to do for the 'host' backend.
