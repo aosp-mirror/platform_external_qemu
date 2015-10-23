@@ -76,10 +76,10 @@ local-executable-path = $(call intermediates-dir-for,$(HOST_BITS),$(1))/$(1)$(ca
 local-shared-library-path = $(call intermediates-dir-for,$(HOST_BITS),$(1))/$(1)$(call local-host-tool,DLLEXT)
 
 # Location of final (potentially stripped) executables.
-local-executable-install-path = $(OBJS_DIR)/$(1)$(call local-host-tool,EXEEXT)
+local-executable-install-path = $(OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)$(1)$(call local-host-tool,EXEEXT)
 
 # Location of final (potentially stripped) shared libraries.
-local-shared-library-install-path = $(OBJS_DIR)/lib$(HOST_SUFFIX)/$(1)$(call local-host-tool,DLLEXT)
+local-shared-library-install-path = $(OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR),lib$(HOST_SUFFIX))/$(1)$(call local-host-tool,DLLEXT)
 
 # Expand to a shell statement that changes the runtime library search path.
 # Note that this is only used for Qt-related stuff, and on Windows, the
