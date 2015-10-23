@@ -11,6 +11,7 @@
 */
 #include "android/skin/file.h"
 
+#include "android/globals.h"
 #include "android/skin/keycode.h"
 #include "android/utils/path.h"
 #include "android/utils/bufprint.h"
@@ -134,7 +135,7 @@ skin_button_free( SkinButton*  button )
     }
 }
 
-static unsigned translate_button_name(const char* name) {
+static unsigned translate_button_name(const char* name, bool genericKeymap) {
     typedef struct {
         const char*     name;
         SkinKeyCode  code;
@@ -226,18 +227,50 @@ static unsigned translate_button_name(const char* name) {
         { 0, 0 },
     };
 
+    // The keyinfo_table[] above is based on "qwerty" keymapping.
+    // If we are using "Generic" keymapping, some of the values
+    // need to be different.
+    typedef struct {
+        SkinKeyCode  codeFrom;
+        SkinKeyCode  codeTo;
+    } KeyRemap;
+
+    static const KeyRemap remapGeneric_table[] = {
+        { kKeyCodeHome,     kKeyCodeHomePage },
+        { kKeyCodeSoftLeft, kKeyCodeSym  },
+        { 0, 0 }
+    };
+
+    ////////////////////////////////////////////////////////////
+
+    SkinKeyCode retVal = 0;
     const KeyInfo *ki = keyinfo_table;
     while(ki->name) {
-        if(!strcmp(name, ki->name))
-            return ki->code;
+        if(!strcmp(name, ki->name)) {
+            retVal = ki->code;
+            break;
+        }
         ki++;
     }
-    return 0;
+
+    // If the Generic keymap is being used, check for remapping
+    if (genericKeymap) {
+        const KeyRemap *kr = remapGeneric_table;
+        while(kr->codeFrom) {
+            if (kr->codeFrom == retVal) {
+                retVal = kr->codeTo;
+                break;
+            }
+            kr++;
+        }
+    }
+    return retVal;
 }
 
 static SkinButton*
 skin_button_create_from(AConfig* node,
-                        const char* basepath)
+                        const char* basepath,
+                        bool genericKeymap)
 {
     SkinButton*  button;
     ANEW0(button);
@@ -261,7 +294,7 @@ skin_button_create_from(AConfig* node,
         button->rect.size.w = skin_image_w( button->image );
         button->rect.size.h = skin_image_h( button->image );
 
-        button->keycode = translate_button_name(button->name);
+        button->keycode = translate_button_name(button->name, genericKeymap);
         if (button->keycode == 0) {
             dprint("Warning: skin file button uses unknown key name '%s'",
                    button->name);
@@ -341,12 +374,14 @@ skin_part_create_from_v1(AConfig* root,
     if (node)
         skin_display_init_from(part->display, node, fb_funcs);
 
+    bool genericKeymap = !strcmp("Generic", android_hw->hw_keyboard_charmap);
+
     node = aconfig_find(root, "button");
     if (node) {
         for (node = node->first_child; node != NULL; node = node->next)
         {
             SkinButton*  button = skin_button_create_from(
-                    node, basepath);
+                    node, basepath, genericKeymap);
 
             if (button != NULL) {
                 button->next  = part->buttons;
@@ -395,12 +430,14 @@ skin_part_create_from_v2(AConfig* root,
     if (node)
         skin_display_init_from(part->display, node, fb_funcs);
 
+    bool genericKeymap = !strcmp("Generic", android_hw->hw_keyboard_charmap);
+
     node = aconfig_find(root, "buttons");
     if (node) {
         for (node = node->first_child; node != NULL; node = node->next)
         {
             SkinButton*  button = skin_button_create_from(
-                    node, basepath);
+                    node, basepath, genericKeymap);
 
             if (button != NULL) {
                 button->next  = part->buttons;

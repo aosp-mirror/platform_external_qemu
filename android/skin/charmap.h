@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
+/* Copyright (C) 2007-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -54,20 +54,12 @@ void kcm_extract_charmap_name(const char* kcm_file_path,
 /* Gets a pointer to the default hard-coded charmap */
 const SkinCharmap* android_get_default_charmap(void);
 
-/* Parse a charmap file and add it to our list.
- * Key charmap array always contains two maps: one for qwerty, and
- * another for qwerty2 keyboard layout. However, a custom layout can
- * be requested with -charmap option. In tha case kcm_file_path
- * parameter contains path to a .kcm file that defines that custom
- * layout, and as the result, key charmap array will contain another
- * entry built from that file. If -charmap option was not specified,
- * kcm_file_path is NULL and final key charmap array will contain only
- * two default entries.
- * Returns a zero value on success, or -1 on failure.
+/* Set the name of a charmap
  *
- * Note: on success, the charmap will be returned by skin_charmap_get()
+ * Note 1: This code does not read the map.
+ * Note 2: The charmap can be retrieved by skin_charmap_get()
  */
-int skin_charmap_setup(const char* kcm_file_path);
+void skin_charmap_setup(const char* kcm_file_path);
 
 /* Cleanups initialization performed in skin_charmap_setup routine. */
 void skin_charmap_done(void);

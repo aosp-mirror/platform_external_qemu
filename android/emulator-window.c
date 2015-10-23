@@ -204,6 +204,10 @@ emulator_window_setup( EmulatorWindow*  emulator )
         return;
     }
 
+    if ( !(emulator->opts->charmap) ) {
+        emulator->opts->charmap = skin_charmap_get()->name;
+    }
+
     SkinUIParams my_ui_params = {
         .enable_touch = !androidHwConfig_isScreenNoTouch(android_hw),
         .enable_dpad = android_hw->hw_dPad != 0,

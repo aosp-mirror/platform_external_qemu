@@ -1,7 +1,7 @@
 /*
  * QEMU System Emulator
  *
- * Copyright (c) 2003-2008 Fabrice Bellard
+ * Copyright (c) 2003-2015 Fabrice Bellard
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -3086,16 +3086,7 @@ int main(int argc, char **argv, char **envp)
     }
 
     /* Initialize character map. */
-    if (skin_charmap_setup(op_charmap_file)) {
-        if (op_charmap_file) {
-            PANIC(
-                    "Unable to initialize character map from file %s.",
-                    op_charmap_file);
-        } else {
-            PANIC(
-                    "Unable to initialize default character map.");
-        }
-    }
+    skin_charmap_setup(op_charmap_file);
 
     /* If no data_dir is specified then try to find it relative to the
        executable path.  */

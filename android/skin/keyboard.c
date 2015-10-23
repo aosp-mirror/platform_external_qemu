@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
+/* Copyright (C) 2007-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -45,7 +45,7 @@ struct SkinKeyboard {
     SkinKeycodeBuffer   keycodes[1];
 };
 
-#define DEFAULT_ANDROID_CHARMAP  "qwerty2"
+#define DEFAULT_ANDROID_CHARMAP  "Generic"
 
 static bool skin_key_code_is_arrow(int code) {
     return code == kKeyCodeDpadLeft ||

@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2008 The Android Open Source Project
+/* Copyright (C) 2006-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -323,9 +323,7 @@ int main(int argc, char **argv) {
 
     /* -charmap is incompatible with -attach-core, because particular
      * charmap gets set up in the running core. */
-    if (skin_charmap_setup(opts->charmap)) {
-        exit(1);
-    }
+    skin_charmap_setup(opts->charmap);
 
     /* Parses options and builds an appropriate AVD. */
     avd = android_avdInfo = createAVD(opts, &inAndroidBuild);
@@ -762,21 +760,15 @@ int main(int argc, char **argv) {
     }
 
     if (!opts->charmap) {
-        /* Try to find a valid charmap name */
-        char* charmap = avdInfo_getCharmapFile(avd, hw->hw_keyboard_charmap);
-        if (charmap != NULL) {
-            D("autoconfig: -charmap %s", charmap);
-            opts->charmap = charmap;
-        }
+        // There is no keyboard mapping specified on the command
+        // line. Load the mapping from the hw config file.
+        opts->charmap = hw->hw_keyboard_charmap;
+        skin_charmap_setup(opts->charmap);
     }
 
     if (opts->charmap) {
         char charmap_name[SKIN_CHARMAP_NAME_SIZE];
 
-        if (!path_exists(opts->charmap)) {
-            derror("Charmap file does not exist: %s", opts->charmap);
-            exit(1);
-        }
         /* We need to store the charmap name in the hardware configuration.
          * However, the charmap file itself is only used by the UI component
          * and doesn't need to be set to the emulation engine.
