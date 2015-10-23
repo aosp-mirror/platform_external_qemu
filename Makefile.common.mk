@@ -82,6 +82,12 @@ ifeq ($(HOST_OS),windows)
 $(eval $(call insert-windows-icon))
 endif
 
+# This launcher program sets up certain library search paths so that the
+# rexec'ed target specific emulator can load those shared libraries. OTOH, this
+# program itself does not have that luxury. So, link in everything statically.
+LOCAL_CFLAGS += $(BUILD_STATIC_FLAGS)
+LOCAL_LDFLAGS += $(BUILD_STATIC_FLAGS)
+
 $(call end-emulator-program)
 endif  # HOST_BITS == EMULATOR_PROGRAM_BITNESS
 
