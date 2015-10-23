@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "d6db7104_b0d3b833",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-23T08:00:01Z",
+      "side": 1,
+      "message": "nit: Please document what |p_sub_window| is. For example, is it the value returned by createSubWindow (if so, maybe use an EGLNativeWindowType parameter type instead to make it more explicit?).",
+      "revId": "0c307ad269733b00f3a0e61c5d2406f4593ca52e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "968019c6_19418f22",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_cocoa.m",
         "patchSetId": 2
