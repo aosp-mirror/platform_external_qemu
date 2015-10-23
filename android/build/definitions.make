@@ -81,6 +81,30 @@ local-executable-install-path = $(OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_IN
 # Location of final (potentially stripped) shared libraries.
 local-shared-library-install-path = $(OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR),lib$(HOST_SUFFIX))/$(1)$(call local-host-tool,DLLEXT)
 
+ldlibs_start_whole := -Wl,--whole-archive
+ldlibs_end_whole := -Wl,--no-whole-archive
+ldlibs_force_load := -Wl,-force_load,
+
+# Return the list of local static libraries
+local-static-libraries-ldlibs-darwin = $(strip \
+   $(foreach lib,$(LOCAL_WHOLE_STATIC_LIBRARIES),\
+       $(ldlibs_force_load)$(call local-library-path,$(lib)))\
+   $(foreach lib,$(LOCAL_STATIC_LIBRARIES),\
+       $(call local-library-path,$(lib))))
+
+local-static-libraries-ldlibs-linux = $(strip \
+    $(if $(LOCAL_WHOLE_STATIC_LIBRARIES), \
+        $(ldlibs_start_whole) \
+        $(foreach lib,$(LOCAL_WHOLE_STATIC_LIBRARIES),$(call local-library-path,$(lib))) \
+        $(ldlibs_end_whole) \
+    ) \
+    $(foreach lib,$(LOCAL_STATIC_LIBRARIES),$(call local-library-path,$(lib))) \
+    )
+
+local-static-libraries-ldlibs-windows =  $(local-static-libraries-ldlibs-linux)
+
+local-static-libraries-ldlibs = $(local-static-libraries-ldlibs-$(HOST_OS))
+
 # Expand to a shell statement that changes the runtime library search path.
 # Note that this is only used for Qt-related stuff, and on Windows, the
 # Windows libraries are placed under bin/ instead of lib/ so there is no
