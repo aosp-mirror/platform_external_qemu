@@ -16,6 +16,24 @@
       "revId": "3c9ade1b79f22ba35a92d0666a82f60d764635d2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6d4f5d4_f785b8d4",
+        "filename": "android/skin/window.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1396,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-10-23T00:27:04Z",
+      "side": 1,
+      "message": "This is really weird. With the 0.95 resize forces the window to readjust, but not without the 0.95. But if I manually resize afterwards, it still readjusts just fine.",
+      "parentUuid": "16d269e7_3531fabb",
+      "revId": "3c9ade1b79f22ba35a92d0666a82f60d764635d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
