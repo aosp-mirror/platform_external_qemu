@@ -449,6 +449,14 @@ BUILD_CFLAGS=$CFLAGS
 BUILD_CXXFLAGS=$CXXFLAGS
 BUILD_LDFLAGS=$LDFLAGS
 
+# Teach make to build static executables where this makes sense. Darwin doesn't
+# have a sane way of linking statically against system libraries at all.
+if [ "$HOST_OS" == "darwin" ]; then
+  BUILD_STATIC_FLAGS=
+else
+  BUILD_STATIC_FLAGS="-static"
+fi
+
 if [ "$OPTION_MINGW" = "yes" ] ; then
     # Are we on Linux ?
     log "Mingw      : Checking for Linux host"
@@ -709,6 +717,7 @@ echo "HOST_WINDRES:= $WINDRES" >> $config_mk
 echo "HOST_DUMPSYMS:= $DUMPSYMS" >> $config_mk
 echo "TOOLCHAIN_SYSROOT := $TOOLCHAIN_SYSROOT" >> $config_mk
 echo "OBJS_DIR    := $OUT_DIR" >> $config_mk
+
 echo "" >> $config_mk
 echo "HOST_PREBUILT_TAG := $HOST_TAG" >> $config_mk
 echo "HOST_EXEEXT       := $HOST_EXEEXT" >> $config_mk
@@ -727,6 +736,7 @@ echo "BUILD_OBJCOPY     := $BUILD_OBJCOPY" >> $config_mk
 echo "BUILD_CFLAGS      := $BUILD_CFLAGS" >> $config_mk
 echo "BUILD_LDFLAGS     := $BUILD_LDFLAGS" >> $config_mk
 echo "BUILD_DUMPSYMS    := $DUMPSYMS" >> $config_mk
+echo "BUILD_STATIC_FLAGS := $BUILD_STATIC_FLAGS" >> $config_mk
 
 PWD=`pwd`
 echo "SRC_PATH          := $PWD" >> $config_mk
