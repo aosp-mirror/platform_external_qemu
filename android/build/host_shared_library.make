@@ -17,9 +17,11 @@
 LOCAL_BUILT_MODULE := $(call local-shared-library-path,$(LOCAL_MODULE))
 include $(BUILD_SYSTEM)/binary.make
 
-LOCAL_LIBRARIES := $(foreach lib,$(LOCAL_STATIC_LIBRARIES),$(call local-library-path,$(lib)))
+LOCAL_LIBRARIES := $(foreach lib,\
+    $(LOCAL_WHOLE_STATIC_LIBRARIES) $(LOCAL_STATIC_LIBRARIES),\
+    $(call local-library-path,$(lib)))
 
-LOCAL_LDLIBS := $(foreach lib,$(LOCAL_STATIC_LIBRARIES),$(call local-library-path,$(lib))) $(LOCAL_LDLIBS)
+LOCAL_LDLIBS := $(call local-static-libraries-ldlibs) $(LOCAL_LDLIBS)
 
 $(LOCAL_BUILT_MODULE): PRIVATE_LDFLAGS := $(LDFLAGS) $(LOCAL_LDFLAGS)
 $(LOCAL_BUILT_MODULE): PRIVATE_LDLIBS  := $(LOCAL_LDLIBS)
