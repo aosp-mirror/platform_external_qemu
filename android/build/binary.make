@@ -23,8 +23,15 @@ $(call local-host-define,CC)
 $(call local-host-define,LD)
 LOCAL_C_SOURCES := $(filter  %.c,$(LOCAL_SRC_FILES))
 LOCAL_GENERATED_C_SOURCES := $(filter %.c,$(LOCAL_GENERATED_SOURCES))
-LOCAL_GENERATED_CXX_SOURCES := $(filter %$(LOCAL_CPP_EXTENSION),$(LOCAL_GENERATED_SOURCES))
-LOCAL_CXX_SOURCES := $(filter %$(LOCAL_CPP_EXTENSION),$(LOCAL_SRC_FILES))
+
+LOCAL_GENERATED_CXX_SOURCES := \
+    $(filter %.cc,$(LOCAL_GENERATED_SOURCES)) \
+    $(filter %.cpp,$(LOCAL_GENERATED_SOURCES)) \
+    $(filter %.cxx,$(LOCAL_GENERATED_SOURCES))
+LOCAL_CXX_SOURCES := \
+    $(filter %.cc,$(LOCAL_SRC_FILES)) \
+    $(filter %.cpp,$(LOCAL_SRC_FILES)) \
+    $(filter %.cxx,$(LOCAL_SRC_FILES))
 LOCAL_OBJC_SOURCES := $(filter %.m %.mm,$(LOCAL_SRC_FILES))
 
 LOCAL_CFLAGS := $(strip $(patsubst %,-I%,$(LOCAL_C_INCLUDES)) $(LOCAL_CFLAGS))
