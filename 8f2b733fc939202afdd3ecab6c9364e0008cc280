@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1698a98e_021beabb",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-25T13:45:13Z",
+      "side": 1,
+      "message": "nit: s/luxary/luxury/",
+      "revId": "8f2b733fc939202afdd3ecab6c9364e0008cc280",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
