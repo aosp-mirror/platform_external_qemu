@@ -142,7 +142,9 @@ endef
 #
 define  compile-cxx-source
 SRC:=$(1)
-OBJ:=$$(LOCAL_OBJS_DIR)/$$(SRC:%$(LOCAL_CPP_EXTENSION)=%.o)
+OBJ:=$$(LOCAL_OBJS_DIR)/$$(SRC:%.cc=%.o)
+OBJ:=$$(OBJ:%.cpp=%.o)
+OBJ:=$$(OBJ:%.cxx=%.o)
 LOCAL_OBJECTS += $$(OBJ)
 DEPENDENCY_DIRS += $$(dir $$(OBJ))
 $$(OBJ): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
@@ -200,7 +202,9 @@ endef
 
 define compile-generated-cxx-source
 SRC:=$(1)
-OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%$$(LOCAL_CPP_EXTENSION)=%.o))
+OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%.cc=%.o))
+OBJ:=$$(OBJ:%.cpp=%.o)
+OBJ:=$$(OBJ:%.cxx=%.o)
 LOCAL_OBJECTS += $$(OBJ)
 DEPENDENCY_DIRS += $$(dir $$(OBJ))
 $$(OBJ): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
@@ -314,7 +318,7 @@ symbol-file-linker-flags = $(EXPORTED_SYMBOL_LIST_$(HOST_OS))$1
 # NOTE: This expects QT_MOC_TOOL to be defined.
 define compile-qt-moc-source
 SRC:=$(1)
-MOC_SRC:=$$(LOCAL_OBJS_DIR)/moc_$$(notdir $$(SRC:%.h=%$$(LOCAL_CPP_EXTENSION)))
+MOC_SRC:=$$(LOCAL_OBJS_DIR)/moc_$$(notdir $$(SRC:%.h=%.cpp))
 ifeq (,$$(strip $$(QT_MOC_TOOL)))
 $$(error QT_MOC_TOOL is not defined when trying to generate $$(MOC_SRC) !!)
 endif
@@ -337,7 +341,7 @@ endef
 # NOTE: This expects QT_RCC_TOOL to be defined.
 define compile-qt-resources
 SRC := $(1)
-RCC_SRC := $$(LOCAL_OBJS_DIR)/rcc_$$(notdir $$(SRC:%.qrc=%$$(LOCAL_CPP_EXTENSION)))
+RCC_SRC := $$(LOCAL_OBJS_DIR)/rcc_$$(notdir $$(SRC:%.qrc=%.cpp))
 ifeq (,$$(strip $$(QT_RCC_TOOL)))
 $$(error QT_RCC_TOOL is not defined when trying to generate $$(RCC_SRC) !!)
 endif
