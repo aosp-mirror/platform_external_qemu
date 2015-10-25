@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 The Android Open Source Project
+/* Copyright (C) 2009-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -13,6 +13,7 @@
 #pragma once
 
 #include "android/utils/compiler.h"
+#include "android/skin/android_keycodes.h"
 #include "android/skin/linux_keycodes.h"
 
 #include <stdbool.h>
@@ -129,6 +130,7 @@ typedef enum {
     kKeyCodeCycleWindows            = KEY_CYCLEWINDOWS,
     kKeyCodeChannelUp               = KEY_CHANNELUP,
     kKeyCodeChannelDown             = KEY_CHANNELDOWN,
+    kKeyCodeAppSwitch               = KEY_APPSWITCH,
 
 } SkinKeyCode;
 

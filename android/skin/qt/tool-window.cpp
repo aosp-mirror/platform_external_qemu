@@ -214,9 +214,7 @@ void ToolWindow::on_volume_down_button_clicked()
 }
 void ToolWindow::on_recents_button_clicked()
 {
-    // TODO: This key simulation does not perform "Recents."
-    //       (It seems to have no effect.)
-    emulator_window->simulateKeyPress(KEY_F2, kKeyModLShift);
+    emulator_window->simulateKeyPress(KEY_APPSWITCH, 0);
 }
 void ToolWindow::on_rotate_CW_button_clicked()
 {
