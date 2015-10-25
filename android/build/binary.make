@@ -16,6 +16,9 @@
 # definitions shared by host_executable.make and host_static_library.make
 #
 
+LOCAL_CPP_EXTENSIONS := .cpp .cc .C .cxx .c++
+LOCAL_CXX_EXTENSION_PATTERNS := $(foreach pattern,$(LOCAL_CPP_EXTENSIONS),%$(pattern))
+
 # the directory where we're going to place our object files
 LOCAL_OBJS_DIR  := $(call local-intermediates-dir)
 LOCAL_OBJECTS   :=
@@ -23,8 +26,12 @@ $(call local-host-define,CC)
 $(call local-host-define,LD)
 LOCAL_C_SOURCES := $(filter  %.c,$(LOCAL_SRC_FILES))
 LOCAL_GENERATED_C_SOURCES := $(filter %.c,$(LOCAL_GENERATED_SOURCES))
-LOCAL_GENERATED_CXX_SOURCES := $(filter %$(LOCAL_CPP_EXTENSION),$(LOCAL_GENERATED_SOURCES))
-LOCAL_CXX_SOURCES := $(filter %$(LOCAL_CPP_EXTENSION),$(LOCAL_SRC_FILES))
+LOCAL_GENERATED_CXX_SOURCES := \
+    $(filter $(LOCAL_CXX_EXTENSION_PATTERNS),\
+        $(LOCAL_GENERATED_SOURCES))
+LOCAL_CXX_SOURCES := \
+    $(filter $(LOCAL_CXX_EXTENSION_PATTERNS),\
+        $(LOCAL_SRC_FILES))
 LOCAL_OBJC_SOURCES := $(filter %.m %.mm,$(LOCAL_SRC_FILES))
 
 LOCAL_CFLAGS := $(strip $(patsubst %,-I%,$(LOCAL_C_INCLUDES)) $(LOCAL_CFLAGS))
