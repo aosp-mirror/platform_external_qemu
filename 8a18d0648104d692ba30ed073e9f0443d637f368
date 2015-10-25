@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b6b19df3_3763f8d1",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-25T13:39:18Z",
+      "side": 1,
+      "message": "please don\u0027t use Bash-ism in this script. I.e. drop the \"-r\" and replace [[ .. ]] with [ .. ]",
+      "revId": "8a18d0648104d692ba30ed073e9f0443d637f368",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56b5c1f6_3cf051bc",
+        "filename": "android/scripts/utils/aosp_dir.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-25T13:39:18Z",
+      "side": 1,
+      "message": "same here.",
+      "revId": "8a18d0648104d692ba30ed073e9f0443d637f368",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
