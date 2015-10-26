@@ -89,11 +89,19 @@ EMULATOR_UNITTESTS_SOURCES += \
 
 endif
 
+# Link in everything statically into the unittest binaries.
+# - This is required because we have custom path manipulation logic for the
+#   emulator launcher program that isn't involved in unittests -- we can not
+#   pick up the correct dynamic libraries.
+LOCAL_CFLAGS += $(BUILD_STATIC_FLAGS)
+LOCAL_LDFLAGS += $(BUILD_STATIC_FLAGS)
+
 $(call start-emulator-program, emulator$(HOST_SUFFIX)_unittests)
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include  $(LIBXML2_INCLUDES)
 LOCAL_LDLIBS += $(EMULATOR_GTEST_LDLIBS) $(LIBCURL_LDLIBS) $(LIBXML2_LDLIBS)
 LOCAL_SRC_FILES := $(EMULATOR_UNITTESTS_SOURCES)
-LOCAL_CFLAGS += -O0 -I$(LIBCURL_INCLUDES)
+LOCAL_CFLAGS += -O0 -I$(LIBCURL_INCLUDES) $(UNITTEST_CFLAGS)
+LOCAL_LDFLAGS += $(UNITTEST_LDFLAGS)
 LOCAL_STATIC_LIBRARIES += \
     libandroid-wear-agent \
     emulator-common \
@@ -117,6 +125,8 @@ $(call start-emulator-program, android$(HOST_SUFFIX)_skin_unittests)
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include
 LOCAL_LDLIBS += $(EMULATOR_GTEST_LDLIBS) $(LIBCURL_LDLIBS)
 LOCAL_SRC_FILES := $(ANDROID_SKIN_UNITTESTS)
+LOCAL_CFLAGS += $(UNITTEST_CFLAGS)
+LOCAL_LDFLAGS += $(UNITTEST_LDFLAGS)
 
 ifdef EMULATOR_USE_QT
 LOCAL_SRC_FILES += \
