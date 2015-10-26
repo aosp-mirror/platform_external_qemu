@@ -389,12 +389,7 @@ static void hax_region_add(MemoryListener * listener,
 static void hax_region_del(MemoryListener * listener,
                            MemoryRegionSection * section)
 {
-    int ret = hax_set_phys_mem(section);
-    if (ret) {
-        fprintf(stderr, "Failed to delete memory region section (error: %d)\n",
-                ret);
-        exit(1);
-    }
+    // Memory mappings will be removed at VM close.
 }
 
 /* currently we fake the dirty bitmap sync, always dirty */
