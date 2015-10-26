@@ -105,8 +105,7 @@ font-family: &quot;Roboto&quot;</string>
      </property>
      <property name="icon">
       <iconset resource="resources.qrc">
-       <normaloff>:/light/stop</normaloff>
-       <disabledoff>:/light/stop_disabled</disabledoff>:/light/stop</iconset>
+       <normaloff>:/light/stop</normaloff>:/light/stop</iconset>
      </property>
      <property name="flat">
       <bool>true</bool>
