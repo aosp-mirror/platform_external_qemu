@@ -173,7 +173,6 @@ common_LOCAL_SRC_FILES += \
 	android/base/containers/PointerSet.cpp \
 	android/base/containers/HashUtils.cpp \
 	android/base/containers/StringVector.cpp \
-	android/base/files/IniFile.cpp \
 	android/base/files/PathUtils.cpp \
 	android/base/files/StdioStream.cpp \
 	android/base/files/Stream.cpp \
