@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "36e4cdf6_b5cff0b3",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-10-26T17:38:52Z",
+      "side": 1,
+      "message": "This script is actually just sh.",
+      "range": {
+        "startLine": 1,
+        "startChar": 7,
+        "endLine": 1,
+        "endChar": 11
+      },
+      "revId": "2373f79316e224072b125d81fa7d469b1b2338eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
