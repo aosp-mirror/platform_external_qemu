@@ -728,7 +728,7 @@ static void adb_pipe_wake_on(void *opaque, int flags)
     DPRINTF("%s: setting flags 0x%x->0x%x\n", __func__, apipe->flags, flags);
     apipe->flags |= flags;
 
-    if (flags & PIPE_WAKE_READ) {
+    if (flags & PIPE_WAKE_READ && adb_state.data_in) {
         android_pipe_wake(apipe->hwpipe, PIPE_WAKE_READ);
     }
 
