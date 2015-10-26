@@ -70,6 +70,8 @@ static char* getTargetEmulatorPath(const char* progDir,
                                    const int force_32bit,
                                    bool* is_64bit);
 
+static void updateLibrarySearchPath(bool is_64bit);
+
 /* The execv() definition in older mingw is slightly bogus.
  * It takes a second argument of type 'const char* const*'
  * while POSIX mandates char** instead.
@@ -244,6 +246,11 @@ int main(int argc, char** argv)
 
     /* Replace it in our command-line */
     argv[0] = emulatorPath;
+
+    /* Setup library paths so that bundled standard shared libraries are picked
+     * up by the re-exec'ed emulator
+     */
+    updateLibrarySearchPath(is_64bit);
 
     /* We need to find the location of the GLES emulation shared libraries
      * and modify either LD_LIBRARY_PATH or PATH accordingly
@@ -532,4 +539,22 @@ getTargetEmulatorPath(const char* progDir,
     /* Otherwise, the program is missing */
     APANIC("Missing emulator engine program for '%s' CPUS.\n", avdArch);
     return NULL;
+}
+
+static void updateLibrarySearchPath(bool is_64bit) {
+    const char* libSubDir = is_64bit ? "lib64" : "lib";
+    char fullPath[PATH_MAX];
+    char* tail = fullPath;
+
+    char* programDir = get_program_directory();
+    tail = bufprint(fullPath, fullPath + sizeof(fullPath),
+                    "%s/%s", programDir, libSubDir);
+    free(programDir);
+
+    if (tail >= fullPath + sizeof(fullPath)) {
+        APANIC("Custom library path too long (clipped) [%s]. "
+               "Can not use bundled libraries. ",
+               fullPath);
+    }
+    add_library_search_dir(fullPath);
 }
