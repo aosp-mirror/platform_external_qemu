@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # this script is used to rebuild all QEMU binaries for the host
 # platforms.
@@ -352,6 +352,68 @@ else
         fi
         run cp -a "$E2FS_SRCDIR"/sbin/* "$E2FS_DSTDIR" || "Could not copy e2fsprogs binaries!"
     done
+fi
+
+# Copy the requested library from the toolchain sysroot.
+# This function
+#   - resolves symlinks to find the actual library
+#   - copies the actual library with the resolved name.
+#   - copies all the symlinks found in $SRCDIR to that library as well.
+# This way, linking against generic/specific version works on systems that
+# do/don't understand symlinks.
+#   $1: Destination directory.
+#   $2: Source directory.
+#   $3: Name of the library (without the .so suffix).
+function copy_toolchain_lib() {
+    local DESTDIR SRCDIR NAME
+    local FROM REALNAME
+    local SYMLINK SYMNAME
+    DESTDIR="$1"
+    SRCDIR="$2"
+    NAME="$3.so"
+
+    mkdir -p "${DESTDIR}" || panic "Failed to created ${DESTDIR}"
+
+    FROM="$(readlink -qnm "${SRCDIR}/${NAME}")" ||
+            panic "Coulnd't resolve ${SRCDIR}/${NAME}"
+    REALNAME="$(basename "${FROM}")"
+
+    cp -f "${FROM}" "${DESTDIR}/${REALNAME}" ||
+            panic "Cound't copy ${FROM} --> ${DESTDIR}/${REALNAME}"
+
+    # Now re-create all the symlinks as relative path symlinks.
+    for SYMLINK in "${SRCDIR}/${NAME}".*; do
+        if [ "${SYMLINK}" = "${FROM}" -o "$(readlink -qnm "${SYMLINK}")" != "${FROM}" ]; then
+            continue
+        fi
+        SYMNAME="$(basename "${SYMLINK}")"
+        if [ ! -e "${DESTDIR}/${SYMNAME}" -o "$(readlink -qnm "${DESTDIR}/${SYMNAME}")" != "${DESTDIR}/${REALNAME}" ]; then
+            rm -f "${DESTDIR}/${SYMNAME}"
+            ln -s "${REALNAME}" "${DESTDIR}/${SYMNAME}" || \
+                    panic "Failed to create symlink ${DESTDIR}/${SYMNAME} --> ${REALNAME}"
+        fi
+    done
+}
+
+# Copy libraries from the toolchain that are to be bundled with the executables.
+TOOLCHAIN_SYSROOT="$(awk '$1 == "TOOLCHAIN_SYSROOT" { print $3; }' \
+        $CONFIG_MAKE 2>/dev/null || true)"
+if [ -n "${TOOLCHAIN_SYSROOT}" ]; then
+    # We currently only bundle libraries for linux
+    # - mingw: Statically links all libraries (b.android.com/191369)
+    # - darwin: We use the development machine's installed SDK. No point
+    #       bundling, since we don't have a uniform libraries to begin with.
+    case $TARGET_OS in
+        linux*)
+            log "Copying toolchain libraries to bundle with the program"
+            for BUNDLED_LIB in libstdc++; do
+                log "  Bundling ${BUNDLED_LIB}"
+                copy_toolchain_lib "${OUT_DIR}/lib" "${TOOLCHAIN_SYSROOT}/lib32" "${BUNDLED_LIB}"
+                copy_toolchain_lib "${OUT_DIR}/lib64" "${TOOLCHAIN_SYSROOT}/lib64" "${BUNDLED_LIB}"
+            done
+        ;;
+        *) log "Not copying toolchain libraries for ${TARGET_OS}";;
+    esac
 fi
 
 RUN_32BIT_TESTS=
