@@ -59,7 +59,7 @@ typedef void* FBNativeWindowType;
   X(int, initOpenGLRenderer, (int width, int height, bool useSubWindow, char* addr, size_t addrLen), (width, height, addr, addrLen)) \
   X(void, getHardwareStrings, (const char** vendors, const char** renderer, const char** version), (vendors, renderer, version)) \
   X(void, setPostCallback, (OnPostFunc onPost, void* onPostContext), (onPost, onPostContext)) \
-  X(bool, createOpenGLSubwindow, (FBNativeWindowType window, int x, int y, int width, int height, float zRot), (window, x, y, width, height, zRot)) \
+  X(bool, createOpenGLSubwindow, (FBNativeWindowType window, int wx, int wy, int ww, int wh, int fbw, int fbh, float zRot), (window, wx, wy, ww, wh, fbw, fbh, zRot)) \
   X(bool, destroyOpenGLSubwindow, (void), ()) \
   X(void, setOpenGLDisplayRotation, (float zRot), (zRot)) \
   X(void, repaintOpenGLDisplay, (void), ()) \
@@ -268,10 +268,12 @@ void android_stopOpenglesRenderer(void)
 }
 
 int android_showOpenglesWindow(void* window,
-                               int x,
-                               int y,
-                               int width,
-                               int height,
+                               int wx,
+                               int wy,
+                               int ww,
+                               int wh,
+                               int fbw,
+                               int fbh,
                                float rotation)
 {
     if (!rendererStarted) {
@@ -279,7 +281,7 @@ int android_showOpenglesWindow(void* window,
     }
     FBNativeWindowType win = (FBNativeWindowType)(uintptr_t)window;
     bool success = createOpenGLSubwindow(
-            win, x, y, width, height, rotation);
+            win, wx, wy, ww, wh, fbw, fbh, rotation);
     return success ? 0 : -1;
 }
 
