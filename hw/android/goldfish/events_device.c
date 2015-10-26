@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
+/* Copyright (C) 2007-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -265,7 +265,7 @@ static void events_put_keycode(void *x, int keycode)
 {
     events_state *s = (events_state *) x;
 
-    enqueue_event(s, EV_KEY, keycode&0x1ff, (keycode&0x200) ? 1 : 0);
+    enqueue_event(s, EV_KEY, keycode&0x3ff, (keycode&0x400) ? 1 : 0);
 }
 
 static void events_put_mouse(void *opaque, int dx, int dy, int dz, int buttons_state)
@@ -383,6 +383,7 @@ void events_dev_init(uint32_t base, qemu_irq irq)
      */
     events_set_bit (s, EV_SYN, EV_KEY );
 
+    events_set_bit(s, EV_KEY, KEY_APPSWITCH);
     events_set_bit(s, EV_KEY, KEY_HOME);
     events_set_bit(s, EV_KEY, KEY_BACK);
     events_set_bit(s, EV_KEY, KEY_SEND);

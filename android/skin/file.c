@@ -223,6 +223,7 @@ static unsigned translate_button_name(const char* name) {
         { "window",       kKeyCodeCycleWindows },
         { "channel-up",   kKeyCodeChannelUp },
         { "channel-down", kKeyCodeChannelDown },
+        { "app-switch",   kKeyCodeAppSwitch },
         { 0, 0 },
     };
 

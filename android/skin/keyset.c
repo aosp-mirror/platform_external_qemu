@@ -293,6 +293,8 @@ skin_keyset_get_default_text( void )
     "BUTTON_DPAD_RIGHT   Keypad_6\n"
     "BUTTON_DPAD_DOWN    Keypad_2\n"
 
+    "BUTTON_APPSWITCH    AppSwitch\n"
+
     "TOGGLE_TRACKBALL    F6\n"
     "SHOW_TRACKBALL      Delete\n"
 

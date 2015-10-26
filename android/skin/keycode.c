@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 The Android Open Source Project
+/* Copyright (C) 2009-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -134,6 +134,7 @@ SkinKeyCode skin_keycode_rotate(SkinKeyCode code, int  rotation) {
     _KEYSYM1_(F15) \
     _KEYSYM1_(PRINT) \
     _KEYSYM1_(BREAK) \
+    _KEYSYM1_(APPSWITCH) \
 
 #define _KEYSYM_(x,y)   { KEY_##x, #y },
 static const struct { int  _sym; const char*  _str; }  keysym_names[] =

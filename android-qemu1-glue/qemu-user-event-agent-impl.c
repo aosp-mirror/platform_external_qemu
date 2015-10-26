@@ -1,4 +1,4 @@
-/* Copyright (C) 2010 The Android Open Source Project
+/* Copyright (C) 2010-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -34,9 +34,9 @@ static void user_event_key(unsigned code, bool down) {
         return;
     }
     if (VERBOSE_CHECK(keys))
-        printf(">> KEY [0x%03x,%s]\n", (code & 0x1ff), down ? "down" : " up ");
+        printf(">> KEY [0x%03x,%s]\n", (code & 0x3ff), down ? "down" : " up ");
 
-    kbd_put_keycode((code & 0x1ff) | (down ? 0x200 : 0));
+    kbd_put_keycode((code & 0x3ff) | (down ? 0x400 : 0));
 }
 
 static void user_event_generic(int type, int code, int value) {

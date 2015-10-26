@@ -65,6 +65,7 @@ typedef struct SkinKeyset  SkinKeyset;
     _SKIN_KEY_COMMAND(BUTTON_WINDOW,"Window button")         \
     _SKIN_KEY_COMMAND(BUTTON_CHANNELUP,"Channel up button")         \
     _SKIN_KEY_COMMAND(BUTTON_CHANNELDOWN,"Channel down button")         \
+    _SKIN_KEY_COMMAND(BUTTON_APPSWITCH, "Recents")   \
 
 
 /* the list of commands in the emulator */
