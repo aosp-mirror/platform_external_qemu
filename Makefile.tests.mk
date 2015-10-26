@@ -93,8 +93,8 @@ endif
 # - This is required because we have custom path manipulation logic for the
 #   emulator launcher program that isn't involved in unittests -- we can not
 #   pick up the correct dynamic libraries.
-LOCAL_CFLAGS += $(BUILD_STATIC_FLAGS)
-LOCAL_LDFLAGS += $(BUILD_STATIC_FLAGS)
+UNITTEST_CFLAGS += $(BUILD_STATIC_FLAGS)
+UNITTEST_LDFLAGS += $(BUILD_STATIC_FLAGS)
 
 $(call start-emulator-program, emulator$(HOST_SUFFIX)_unittests)
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include  $(LIBXML2_INCLUDES)
