@@ -19,6 +19,7 @@
 #include "android/utils/dirscanner.h"
 #include "android/utils/file_data.h"
 #include "android/utils/filelock.h"
+#include "android/utils/ini.h"
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
 #include "android/utils/tempfile.h"
@@ -116,9 +117,9 @@ struct AvdInfo {
     char*     searchPaths[ MAX_SEARCH_PATHS ];
     int       numSearchPaths;
     char*     contentPath;
-    IniFile*  rootIni;      /* root <foo>.ini file, empty if missing */
-    IniFile*  configIni;    /* virtual device's config.ini, NULL if missing */
-    IniFile*  skinHardwareIni;  /* skin-specific hardware.ini */
+    CIniFile* rootIni;   /* root <foo>.ini file, empty if missing */
+    CIniFile* configIni; /* virtual device's config.ini, NULL if missing */
+    CIniFile* skinHardwareIni; /* skin-specific hardware.ini */
 
     /* for both */
     int       apiLevel;
@@ -213,12 +214,10 @@ static const char*  const  _imageFileNames[ AVD_IMAGE_MAX ] = {
  * 'searchPaths' must be an array of char* pointers of at most 'maxSearchPaths'
  * entries.
  */
-static int
-_getSearchPaths( IniFile*    configIni,
-                 const char* sdkRootPath,
-                 int         maxSearchPaths,
-                 char**      searchPaths )
-{
+static int _getSearchPaths(CIniFile* configIni,
+                           const char* sdkRootPath,
+                           int maxSearchPaths,
+                           char** searchPaths) {
     char  temp[PATH_MAX], *p = temp, *end= p+sizeof temp;
     int   nn, count = 0;
 

@@ -99,7 +99,7 @@ static char*
 _getAvdContentPath(const char* avdName)
 {
     char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
-    IniFile* ini = NULL;
+    CIniFile* ini = NULL;
     char*    iniPath = path_getRootIniPath(avdName);
     char*    avdPath = NULL;
 
@@ -297,7 +297,7 @@ _getAvdConfigValue(const char* avdPath,
                    const char* key,
                    const char* defaultValue)
 {
-    IniFile* ini;
+    CIniFile* ini;
     char* result = NULL;
     char temp[PATH_MAX], *p = temp, *end = p + sizeof(temp);
     p = bufprint(temp, end, "%s" PATH_SEP "config.ini", avdPath);

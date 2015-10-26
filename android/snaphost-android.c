@@ -37,9 +37,7 @@
  *  0 if files are equal, or 1 if they are not equal, or -1 if an error has
  * occurred.
  */
-static int
-_cmp_hw_config(IniFile* current, IniFile* saved)
-{
+static int _cmp_hw_config(CIniFile* current, CIniFile* saved) {
     int n, ret = 0;
     const int num_pairs = iniFile_getPairCount(current);
 
@@ -110,9 +108,7 @@ _build_hwcfg_path(const char* name)
     return bkp_path;
 }
 
-int
-snaphost_match_configs(IniFile* hw_ini, const char* name)
-{
+int snaphost_match_configs(CIniFile* hw_ini, const char* name) {
     /* Make sure that snapshot storage path is valid. */
     if (android_hw->disk_snapStorage_path == NULL ||
         *android_hw->disk_snapStorage_path == '\0') {
@@ -126,7 +122,7 @@ snaphost_match_configs(IniFile* hw_ini, const char* name)
     }
 
     /* Load HW config from the previous emulator launch. */
-    IniFile* hwcfg_bkp = iniFile_newFromFile(bkp_path);
+    CIniFile* hwcfg_bkp = iniFile_newFromFile(bkp_path);
 
     if (hwcfg_bkp != NULL) {
         if (_cmp_hw_config(hw_ini, hwcfg_bkp)) {
@@ -164,7 +160,7 @@ snaphost_save_config(const char* name)
     }
 
     /* Create HW config backup file from the current HW config settings. */
-    IniFile* hwcfg_bkp = iniFile_newEmpty(bkp_path);
+    CIniFile* hwcfg_bkp = iniFile_newEmpty(bkp_path);
     if (hwcfg_bkp == NULL) {
         W("Unable to create backup HW config file '%s'. Error: %s",
           bkp_path, strerror(errno));

@@ -246,7 +246,7 @@ common_LOCAL_SRC_FILES += \
 	android/utils/host_bitness.cpp \
 	android/utils/http_utils.cpp \
 	android/utils/iolooper.cpp \
-	android/utils/ini.c \
+	android/utils/ini.cpp \
 	android/utils/intmap.c \
 	android/utils/ipaddr.cpp \
 	android/utils/lineinput.c \
