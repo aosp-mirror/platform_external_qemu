@@ -10,6 +10,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/containers/StringVector_unittest.cpp \
   android/base/containers/TailQueueList_unittest.cpp \
   android/base/EintrWrapper_unittest.cpp \
+  android/base/files/IniFile_unittest.cpp \
   android/base/files/PathUtils_unittest.cpp \
   android/base/files/ScopedFd_unittest.cpp \
   android/base/files/ScopedStdioFile_unittest.cpp \
