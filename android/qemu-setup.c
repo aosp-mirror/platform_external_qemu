@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2010 The Android Open Source Project
+/* Copyright (C) 2006-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -42,6 +42,8 @@ char* android_op_report_console = NULL;
 char* op_http_proxy = NULL;
 /* Base port for the emulated system. */
 int    android_base_port;
+/* ADB port */
+int    android_adb_port = 5037; // Default
 
 enum {
     REPORT_CONSOLE_SERVER = (1 << 0),
@@ -224,7 +226,6 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
 {
     int   tries     = MAX_ANDROID_EMULATORS;
     int   base_port = 5554;
-    int   adb_host_port = 5037; // adb's default
     int   success   = 0;
     int   adb_port = -1;
     uint32_t  guest_ip;
@@ -233,8 +234,8 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
          * machine */
     char* adb_host_port_str = getenv( "ANDROID_ADB_SERVER_PORT" );
     if ( adb_host_port_str && strlen( adb_host_port_str ) > 0 ) {
-        adb_host_port = (int) strtol( adb_host_port_str, NULL, 0 );
-        if ( adb_host_port <= 0 ) {
+        android_adb_port = (int) strtol( adb_host_port_str, NULL, 0 );
+        if ( android_adb_port <= 0 ) {
             derror( "env var ANDROID_ADB_SERVER_PORT must be a number > 0. Got \"%s\"\n",
                     adb_host_port_str );
             exit(1);
@@ -361,7 +362,7 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
     /* send a simple message to the ADB host server to tell it we just started.
      * it should be listening on port 5037. if we can't reach it, don't bother
      */
-    int s = socket_loopback_client(adb_host_port, SOCKET_STREAM);
+    int s = socket_loopback_client(android_adb_port, SOCKET_STREAM);
     if (s < 0) {
         D("can't connect to ADB server: %s (errno = %d)", errno_str, errno );
     } else {

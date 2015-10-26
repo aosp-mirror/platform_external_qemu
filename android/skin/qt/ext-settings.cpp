@@ -12,6 +12,7 @@
 
 #include "ui_extended.h"
 
+#include "android/android.h"
 #include "android/base/String.h"
 #include "android/base/Version.h"
 #include "android/emulation/bufprint_config_dirs.h"
@@ -39,6 +40,9 @@ void ExtendedWindow::initSettings()
 
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
     mExtendedUi->set_androidVersionBox->setPlainText(apiVersionString(apiLevel));
+
+    // Show the ADB port number
+    mExtendedUi->set_adbPortBox->setPlainText( QString::number(android_adb_port) );
 
     // Get latest version that is available on line
 
