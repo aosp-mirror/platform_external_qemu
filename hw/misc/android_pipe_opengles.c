@@ -175,7 +175,9 @@ static void* net_pipe_init_from_address(void* hwpipe, const char* address) {
     pipe->hwpipe = hwpipe;
     pipe->state  = STATE_CONNECTING;
     if (address[0] == ':') {
-        pipe->fd = inet_nonblocking_connect(address, net_pipe_handle_connect,
+        char full_address[64];
+        snprintf(full_address, sizeof(full_address), "127.0.0.1%s", address);
+        pipe->fd = inet_nonblocking_connect(full_address, net_pipe_handle_connect,
                                             pipe, NULL);
     } else {
         pipe->fd = unix_nonblocking_connect(address, net_pipe_handle_connect,

@@ -210,10 +210,14 @@ listen:
 
 #ifdef _WIN32
 #define QEMU_SOCKET_RC_INPROGRESS(rc) \
-    ((rc) == -EINPROGRESS || (rc) == -EWOULDBLOCK || (rc) == -WSAEALREADY)
+    ((rc) == -WSAEINPROGRESS || (rc) ==  -WSAEWOULDBLOCK || (rc) == -WSAEALREADY)
+#define QEMU_SOCKET_RC_INTR(rc) \
+    ((rc) == -WSAEINTR)
 #else
 #define QEMU_SOCKET_RC_INPROGRESS(rc) \
     ((rc) == -EINPROGRESS)
+#define QEMU_SOCKET_RC_INTR(rc) \
+    ((rc) == -EINTR)
 #endif
 
 /* Struct to store connect state for non blocking connect */
@@ -304,7 +308,7 @@ static int inet_connect_addr(struct addrinfo *addr, bool *in_progress,
         if (connect(sock, addr->ai_addr, addr->ai_addrlen) < 0) {
             rc = -socket_error();
         }
-    } while (rc == -EINTR);
+    } while (rc == QEMU_SOCKET_RC_INTR(rc));
 
     if (connect_state != NULL && QEMU_SOCKET_RC_INPROGRESS(rc)) {
         connect_state->fd = sock;
