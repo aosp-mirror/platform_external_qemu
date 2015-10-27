@@ -195,7 +195,12 @@ void EmulatorQtWindow::paintEvent(QPaintEvent *)
         painter.fillRect(bg, Qt::black);
 
         QRect r(0, 0, backing_surface->w, backing_surface->h);
-        painter.drawImage(r, *backing_surface->bitmap);
+        // Rescale with smooth transformation to avoid aliasing
+        QImage scaled_bitmap =
+                backing_surface->bitmap->scaled(r.size(),
+                                                Qt::KeepAspectRatio,
+                                                Qt::SmoothTransformation);
+        painter.drawImage(r, scaled_bitmap);
     } else {
         D("Painting emulator window, but no backing bitmap");
     }
