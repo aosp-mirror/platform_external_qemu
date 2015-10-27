@@ -395,7 +395,7 @@ if [ "$USE_CCACHE" != 0 ]; then
 fi
 
 if [ -n "$CCACHE" -a -f "$CCACHE" ]; then
-    if [ "$HOST_OS" == "darwin" -a "$OPTION_DEBUG" == "yes" ]; then
+    if [ "$HOST_OS" = "darwin" -a "$OPTION_DEBUG" = "yes" ]; then
         # http://llvm.org/bugs/show_bug.cgi?id=20297
         # ccache works for mingw/gdb, therefore probably works for gcc/gdb
         log "Prebuilt   : CCACHE disabled for OSX debug builds"
@@ -451,7 +451,7 @@ BUILD_LDFLAGS=$LDFLAGS
 
 # Teach make to build static executables where this makes sense. Darwin doesn't
 # have a sane way of linking statically against system libraries at all.
-if [ "$HOST_OS" == "darwin" ]; then
+if [ "$HOST_OS" = "darwin" ]; then
   BUILD_STATIC_FLAGS=
 else
   BUILD_STATIC_FLAGS="-static"
