@@ -573,6 +573,11 @@ void cpu_synchronize_all_states(void)
 
     CPU_FOREACH(cpu) {
         cpu_synchronize_state(cpu);
+#ifdef CONFIG_HAX
+        if (hax_enabled() && hax_ug_platform()) {
+            hax_cpu_synchronize_state(cpu);
+        }
+#endif
     }
 }
 
