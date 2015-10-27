@@ -399,6 +399,12 @@ static void hax_log_sync(MemoryListener * listener,
                          MemoryRegionSection * section)
 {
     MemoryRegion *mr = section->mr;
+
+    if (!memory_region_is_ram(mr)) {
+        /* Skip MMIO regions */
+        return;
+    }
+
     unsigned long c;
     unsigned int len =
         ((int128_get64(section->size) / TARGET_PAGE_SIZE) + HOST_LONG_BITS -
