@@ -421,31 +421,8 @@ bool skin_ui_process_events(SkinUI* ui) {
             DE("EVENT: kEventMouseButton x=%d y=%d xrel=%d yrel=%d button=%d\n",
                ev.u.mouse.x, ev.u.mouse.y, ev.u.mouse.xrel, ev.u.mouse.yrel,
                ev.u.mouse.button);
-            {
-                int  down = (ev.type == kEventMouseButtonDown);
-                if (ev.u.mouse.button == kMouseButtonScrollUp)
-                {
-                    /* scroll-wheel simulates DPad up */
-                    SkinKeyCode  kcode;
-
-                    kcode = skin_keycode_rotate(kKeyCodeDpadUp,
-                                                skin_layout_get_dpad_rotation(
-                                                        ui->layout));
-                    ui->ui_funcs->keyboard_event(NULL, kcode, down);
-                }
-                else if (ev.u.mouse.button == kMouseButtonScrollDown)
-                {
-                    /* scroll-wheel simulates DPad down */
-                    SkinKeyCode  kcode;
-
-                    kcode = skin_keycode_rotate(kKeyCodeDpadDown,
-                                                skin_layout_get_dpad_rotation(
-                                                        ui->layout));
-                    ui->ui_funcs->keyboard_event(NULL, kcode, down);
-                }
-                else if (ev.u.mouse.button == kMouseButtonLeft) {
-                    skin_window_process_event(ui->window, &ev);
-                }
+            if (ev.u.mouse.button == kMouseButtonLeft) {
+                skin_window_process_event(ui->window, &ev);
             }
             break;
 
@@ -462,7 +439,6 @@ bool skin_ui_process_events(SkinUI* ui) {
             break;
 
         case kEventSetZoom:
-            ignoreScroll = true;
             skin_window_set_zoom(ui->window, ev.u.window.scale, ev.u.window.x, ev.u.window.y);
             break;
 
@@ -473,6 +449,10 @@ bool skin_ui_process_events(SkinUI* ui) {
 
         case kEventWindowMoved:
             skin_window_position_changed(ui->window, ev.u.window.x, ev.u.window.y);
+            break;
+
+        case kEventZoomedWindowResized:
+            skin_window_zoomed_window_resized(ui->window, ev.u.scroll.x, ev.u.scroll.y, ev.u.scroll.xmax, ev.u.scroll.ymax);
             break;
         }
     }
