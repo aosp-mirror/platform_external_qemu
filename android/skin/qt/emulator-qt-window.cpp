@@ -11,6 +11,8 @@
  */
 
 #include <QtCore>
+#include <QAbstractSlider>
+#include <QCursor>
 #include <QDesktopWidget>
 #include <QFileDialog>
 #include <QGraphicsView>
@@ -22,7 +24,6 @@
 #include <QPixmap>
 #include <QPushButton>
 #include <QScreen>
-#include <QScrollBar>
 #include <QSemaphore>
 
 #include "android/base/files/PathUtils.h"
@@ -44,6 +45,7 @@
 #define  D(...)   ((void)0)
 #endif
 
+#define MAX(a,b) (a > b ? a : b)
 #define MIN(a,b) (a < b ? a : b)
 
 using namespace android::base;
@@ -54,6 +56,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         QFrame(parent),
         mContainer(this),
         mZoomFactor(1.0),
+        mInZoomMode(false),
         mNextIsZoom(false),
         mMainLoopThread(nullptr)
 {
@@ -64,6 +67,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     tool_window = new ToolWindow(this, &mContainer);
 
     mContainer.setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
+    mCursorPixmap.load(":/dark/zoom");
 
     this->setAcceptDrops(true);
 
@@ -173,17 +177,17 @@ void EmulatorQtWindow::minimize()
 
 void EmulatorQtWindow::mouseMoveEvent(QMouseEvent *event)
 {
-    handleEvent(kEventMouseMotion, event);
+    handleMouseEvent(kEventMouseMotion, event);
 }
 
 void EmulatorQtWindow::mousePressEvent(QMouseEvent *event)
 {
-    handleEvent(kEventMouseButtonDown, event);
+    handleMouseEvent(kEventMouseButtonDown, event);
 }
 
 void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent *event)
 {
-    handleEvent(kEventMouseButtonUp, event);
+    handleMouseEvent(kEventMouseButtonUp, event);
 }
 
 void EmulatorQtWindow::paintEvent(QPaintEvent *)
@@ -222,18 +226,6 @@ void EmulatorQtWindow::startThread(StartFunction f, int argc, char **argv)
     } else {
         D("mMainLoopThread already started");
     }
-}
-
-void EmulatorQtWindow::wheelEvent(QWheelEvent *event)
-{
-    int delta = event->delta();
-    SkinEvent *skin_event = createSkinEvent(kEventMouseButtonDown);
-    skin_event->u.mouse.button = delta >= 0 ? kMouseButtonScrollUp : kMouseButtonScrollDown;
-    skin_event->u.mouse.x = event->globalX();
-    skin_event->u.mouse.y = event->globalY();
-    skin_event->u.mouse.xrel = event->x();
-    skin_event->u.mouse.yrel = event->y();
-    queueEvent(skin_event);
 }
 
 void EmulatorQtWindow::slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore)
@@ -322,14 +314,18 @@ void EmulatorQtWindow::slot_pollEvent(SkinEvent *event, bool *hasEvent, QSemapho
     } else {
         *hasEvent = true;
         SkinEvent *newEvent = event_queue.dequeue();
+        SkinEventType skipType = newEvent->type;
 
-        // Skip multiple scroll events in a row to avoid visual lag
-        while (!event_queue.isEmpty() && newEvent->type == kEventScrollBarChanged) {
-            if (event_queue.head()->type == kEventScrollBarChanged) {
-                delete newEvent;
-                newEvent = event_queue.dequeue();
-            } else {
-                break;
+        // Skip multiple scroll events in a row to avoid visual lag. Likewise with window resizes
+        // when the window is zoomed.
+        if (skipType == kEventScrollBarChanged || skipType == kEventZoomedWindowResized) {
+            while (!event_queue.isEmpty() && newEvent->type == skipType) {
+                if (event_queue.head()->type == skipType) {
+                    delete newEvent;
+                    newEvent = event_queue.dequeue();
+                } else {
+                    break;
+                }
             }
         }
 
@@ -405,9 +401,11 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, 
         showNormal();
         setFixedSize(rect->size());
 
-        // If this was the result of a zoom, don't change the overall window size
+        // If this was the result of a zoom, don't change the overall window size, and adjust the
+        // scroll bars to reflect the desired focus point.
         if (mNextIsZoom) {
             mContainer.move(rect->topLeft());
+            recenterFocusPoint();
         } else {
             mContainer.setGeometry(*rect);
         }
@@ -641,35 +639,75 @@ void EmulatorQtWindow::doResize(const QSize &size)
 }
 
 
-void EmulatorQtWindow::handleEvent(SkinEventType type, QMouseEvent *event)
+void EmulatorQtWindow::handleMouseEvent(SkinEventType type, QMouseEvent *event)
 {
+    // See if there is a Qt-specific handler for this mouse event
+    if (handleQtMouseEvent(type, event)) return;
+
     SkinEvent *skin_event = createSkinEvent(type);
     skin_event->u.mouse.button = event->button() == Qt::RightButton ? kMouseButtonRight : kMouseButtonLeft;
     skin_event->u.mouse.x = event->x();
     skin_event->u.mouse.y = event->y();
     skin_event->u.mouse.xrel = 0;
     skin_event->u.mouse.yrel = 0;
+
     queueEvent(skin_event);
 }
 
-void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *pEvent)
+bool EmulatorQtWindow::handleQtMouseEvent(SkinEventType type, QMouseEvent *event)
 {
-    // See if there is a Qt-specific handler for this key-down event
-    if (pEvent->type() == QKeyEvent::KeyPress && handleQtKeyEvent(type, pEvent)) return;
+    // Qt-specific mouse actions will only be mouse down events.
+    if (type != kEventMouseButtonDown) return false;
+
+    int button = event->button();
+    Qt::KeyboardModifiers modifiers = event->modifiers();
+
+    // TODO: add more Qt-specific mouse combinations
+
+    if (mInZoomMode && button == Qt::LeftButton && (modifiers & Qt::ControlModifier)) {
+        zoomIn(event->pos());
+        return true;
+    } else if (mInZoomMode && button == Qt::RightButton && (modifiers & Qt::ControlModifier)) {
+        zoomOut(event->pos());
+        return true;
+    }
+
+    return false;
+}
+
+void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
+{
+    // When in zoom mode, the cursor should change when control is held
+    if (mInZoomMode) {
+        if (event->key() == Qt::Key_Control) {
+            if (type == kEventKeyDown) {
+                mContainer.setCursor(QCursor(mCursorPixmap));
+            } else if (type == kEventKeyUp) {
+                mContainer.setCursor(QCursor(Qt::ArrowCursor));
+            }
+        }
+    }
+
+    // See if there is a Qt-specific handler for this key event
+    if (handleQtKeyEvent(type, event)) return;
 
     SkinEvent *skin_event = createSkinEvent(type);
     SkinEventKeyData *keyData = &skin_event->u.key;
-    keyData->keycode = convertKeyCode(pEvent->key());
-    Qt::KeyboardModifiers modifiers = pEvent->modifiers();
+    keyData->keycode = convertKeyCode(event->key());
+
+    Qt::KeyboardModifiers modifiers = event->modifiers();
     if (modifiers & Qt::ShiftModifier) keyData->mod |= kKeyModLShift;
     if (modifiers & Qt::ControlModifier) keyData->mod |= kKeyModLCtrl;
     if (modifiers & Qt::AltModifier) keyData->mod |= kKeyModLAlt;
+
     queueEvent(skin_event);
 }
 
 bool EmulatorQtWindow::handleQtKeyEvent(SkinEventType type, QKeyEvent *event)
 {
-    bool usedEvent = false;
+    // Qt-specific keyboard shortcuts will only be keypress events.
+    if (type != kEventKeyDown) return false;
+
     int key = event->key();
     Qt::KeyboardModifiers modifiers = event->modifiers();
 
@@ -677,13 +715,21 @@ bool EmulatorQtWindow::handleQtKeyEvent(SkinEventType type, QKeyEvent *event)
 
     if (key == Qt::Key_F10 && (modifiers & Qt::ControlModifier)) {
         screenshot();
-        usedEvent = true;
+        return true;
     } else if (key == Qt::Key_F9 && (modifiers & Qt::ControlModifier)) {
-        zoom();
-        usedEvent = true;
-    }
+        toggleZoomMode();
+        return true;
+    }/* else if (mInZoomMode && Qt::Key_Up) {
+        QScrollBar *vertical = mContainer.verticalScrollBar();
+        vertical->triggerAction(QAbstractSlider::SliderSingleStepSub);
+        return true;
+    } else if (mInZoomMode && Qt::Key_Down) {
+        QScrollBar *vertical = mContainer.verticalScrollBar();
+        vertical->triggerAction(QAbstractSlider::SliderSingleStepAdd);
+        return true;
+    }*/
 
-    return usedEvent;
+    return false;
 }
 
 void EmulatorQtWindow::simulateKeyPress(int keyCode, int modifiers)
@@ -734,9 +780,11 @@ void EmulatorQtWindow::simulateSetZoom(double zoom)
     QScrollBar *horizontal = mContainer.horizontalScrollBar();
     horizontal->setValue(0);
 
+    QSize viewport = mContainer.viewportSize();
+
     SkinEvent *event = createSkinEvent(kEventSetZoom);
-    event->u.window.x = vertical->width();
-    event->u.window.y = horizontal->height();
+    event->u.window.x = viewport.width();
+    event->u.window.y = viewport.height();
     event->u.window.scale = zoom;
     slot_queueEvent(event);
 }
@@ -749,27 +797,74 @@ void EmulatorQtWindow::simulateWindowMoved(const QPoint &pos)
     slot_queueEvent(event);
 }
 
+void EmulatorQtWindow::simulateZoomedWindowResized(const QSize &size)
+{
+    SkinEvent *event = createSkinEvent(kEventZoomedWindowResized);
+    event->u.scroll.x = mContainer.horizontalScrollBar()->value();
+    event->u.scroll.y = mContainer.verticalScrollBar()->value();
+    event->u.scroll.xmax = size.width();
+    event->u.scroll.ymax = size.height();
+    slot_queueEvent(event);
+}
+
 
 void EmulatorQtWindow::slot_runOnUiThread(SkinGenericFunction* f, void* data, QSemaphore* semaphore) {
     (*f)(data);
     if (semaphore) semaphore->release();
 }
 
-void EmulatorQtWindow::zoom()
+void EmulatorQtWindow::toggleZoomMode()
 {
-    if (backing_surface) {
-        bool pressedOk;
-        mZoomFactor = QInputDialog::getDouble(this, tr("Zoom Factor"), tr("Enter a zoom factor:"),
-                                              1.0, 1.0, 3.0, 2, &pressedOk);
-        if (pressedOk) {
+    mInZoomMode = !mInZoomMode;
 
-            // Qt Widgets do not get properly sized unless they appear at least once. The scroll bars
-            // *must* be properly sized in order for zoom to create the correct GLES subwindow, so this
-            // ensures they will be. This is reset as soon as the window is shown.
-            mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-            mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    // Exiting zoom mode snaps back to aspect ratio
+    if (!mInZoomMode) {
+        doResize(mContainer.size());
+    }
+}
 
-            simulateSetZoom(mZoomFactor);
-        }
+void EmulatorQtWindow::recenterFocusPoint()
+{
+    mContainer.horizontalScrollBar()->setValue(mFocus.x() * width() - mViewportFocus.x());
+    mContainer.verticalScrollBar()->setValue(mFocus.y() * height() - mViewportFocus.y());
+
+    mFocus = QPointF();
+    mViewportFocus = QPoint();
+}
+
+void EmulatorQtWindow::saveZoomPoints(const QPoint &focus)
+{
+    // The underlying frame will change sizes, so get what "percentage" of the frame was
+    // clicked, where (0,0) is the top-left corner and (1,1) is the bottom right corner.
+    mFocus = QPointF((float) focus.x() / this->width(),
+                     (float) focus.y() / this->height());
+
+    // Save to re-align the container with the underlying frame.
+    mViewportFocus = mContainer.mapFromGlobal(QCursor::pos());
+}
+
+void EmulatorQtWindow::zoomIn(const QPoint &focus)
+{
+    saveZoomPoints(focus);
+
+    // Qt Widgets do not get properly sized unless they appear at least once. The scroll bars
+    // *must* be properly sized in order for zoom to create the correct GLES subwindow, so this
+    // ensures they will be. This is reset as soon as the window is shown.
+    mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+
+    // TODO: is there a limit to how "large" the subwindow / skin can be?
+    if (mZoomFactor < 4) {
+        mZoomFactor += .25;
+        simulateSetZoom(mZoomFactor);
+    }
+}
+
+void EmulatorQtWindow::zoomOut(const QPoint &focus)
+{
+    saveZoomPoints(focus);
+    if (mZoomFactor > 1) {
+        mZoomFactor -= .25;
+        simulateSetZoom(mZoomFactor);
     }
 }
