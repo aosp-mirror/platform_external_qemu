@@ -16,10 +16,14 @@
 
 #include <gtest/gtest.h>
 
+#include <wchar.h>
+
 namespace android {
 namespace base {
 
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
+
+typedef Win32Utils::UnicodeString UnicodeString;
 
 TEST(Win32Utils, quoteCommandLine) {
   static const struct {
@@ -41,6 +45,46 @@ TEST(Win32Utils, quoteCommandLine) {
       String out = Win32Utils::quoteCommandLine(input);
       EXPECT_STREQ(expected, out.c_str()) << "Quoting '" << input << "'";
   }
+}
+
+TEST(Win32Utils, UnicodeStringDefaultConstructor) {
+    UnicodeString str;
+    EXPECT_EQ(0u, str.size());
+    EXPECT_STREQ(L"", str.c_str());
+    EXPECT_EQ(nullptr, str.data());
+}
+
+TEST(Win32Utils, UnicodeStringConstructors) {
+    static const struct {
+        const char* utf8;
+        const wchar_t* utf16;
+    } kData[] = {
+        { "", L"" },
+        { "Hello World!", L"Hello World!" },
+        { "T\xC3\xA9l\xC3\xA9vision", L"T\xE9l\xE9vision" },
+        { "foo\xE1\x80\x80 bar", L"foo\x1000 bar" },
+    };
+    const size_t kDataSize = ARRAY_SIZE(kData);
+
+    for (size_t n = 0; n < kDataSize; ++n) {
+        UnicodeString str1(kData[n].utf8);
+        EXPECT_EQ(wcslen(kData[n].utf16), str1.size());
+        EXPECT_STREQ(kData[n].utf16, str1.c_str());
+
+        UnicodeString str2(kData[n].utf8, strlen(kData[n].utf8));
+        EXPECT_EQ(wcslen(kData[n].utf16), str2.size());
+        EXPECT_STREQ(kData[n].utf16, str2.c_str());
+
+        String baseStr(kData[n].utf8);
+        UnicodeString str3(baseStr);
+        EXPECT_EQ(wcslen(kData[n].utf16), str3.size());
+        EXPECT_STREQ(kData[n].utf16, str3.c_str());
+
+        size_t utf16Len = wcslen(kData[n].utf16);
+        UnicodeString str4(kData[n].utf16);
+        EXPECT_EQ(utf16Len, str4.size());
+        EXPECT_STREQ(kData[n].utf16, str4.c_str());
+    }
 }
 
 }  // namespace base

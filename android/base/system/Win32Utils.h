@@ -14,7 +14,10 @@
 
 #pragma once
 
+#include "android/base/Compiler.h"
 #include "android/base/String.h"
+
+#include <wchar.h>
 
 #ifndef _WIN32
 #error "Only include this file when compiling for Windows!"
@@ -46,6 +49,70 @@ public:
 // backslashes. The function returns a new String that contains a version
 // of |commandLine| that can be decoded properly by CommandLineToArgv().
 static String quoteCommandLine(const char* commandLine);
+
+// Helper class used to model a Windows Unicode string, which stores
+// text as a zero-terminated array of UTF-16 code points. This is very
+// intentionally _only_ used to perform conversions from/to String instances
+// that hold the corresponding UTF-8 text. As such, you cannot assign, copy,
+// append to them.
+class UnicodeString {
+public:
+    // Default constructor.
+    UnicodeString();
+
+    // Initialize a new instance from UTF-8 text at |str| of |len| bytes.
+    // This doesn't try to validate the input, i.e. on error, the instance's
+    // content is undefined.
+    UnicodeString(const char* str, size_t len);
+
+    // Initialize a new instance from an existing String instance |str|.
+    explicit UnicodeString(const String& str);
+
+    // Initialize by reserving enough room for a string of |size| UTF-16
+    // codepoints.
+    explicit UnicodeString(size_t size);
+
+    // Initialize from a zero-terminated wchar_t array.
+    explicit UnicodeString(const wchar_t* str);
+
+    // Destructor.
+    ~UnicodeString();
+
+    // Return pointer to first wchar_t in the string.
+    const wchar_t* c_str() const { return mStr ? mStr : L""; }
+
+    // Return pointer to writable wchar_t array. Only use with caution.
+    wchar_t* data() { return mStr; }
+
+    // Return size of the string, this is the number of UTF-16 code points
+    // stored by the string, which may be larger than the number of actual
+    // Unicode characters in it.
+    size_t size() const { return mSize; }
+
+    // Convert to a String instance holding the corresponding UTF-8 text.
+    String toString() const;
+
+    // Reset content from UTF-8 text at |str| or |len| bytes.
+    void reset(const char* str, size_t len);
+
+    // Reset content from UTF-8 text at |str|.
+    void reset(const String& str);
+
+    // Resize array.
+    void resize(size_t newSize);
+
+    // Append at the end of a UnicodeString.
+    void append(const wchar_t* other);
+    void append(const wchar_t* other, size_t len);
+    void append(const UnicodeString& other);
+
+    // Release the Unicode string array to the caller.
+    wchar_t* release();
+
+private:
+    wchar_t* mStr;
+    size_t mSize;
+};
 
 };
 
