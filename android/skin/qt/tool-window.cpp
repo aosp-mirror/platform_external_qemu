@@ -230,7 +230,7 @@ void ToolWindow::on_scrShot_button_clicked()
 }
 void ToolWindow::on_zoom_button_clicked()
 {
-    emulator_window->zoom();
+    emulator_window->toggleZoomMode();
 }
 
 void ToolWindow::on_more_button_clicked()
