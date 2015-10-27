@@ -276,6 +276,7 @@ ifeq (windows,$(HOST_OS))
 common_LOCAL_SRC_FILES += \
     android/base/synchronization/ConditionVariable_win32.cpp \
     android/base/threads/Thread_win32.cpp \
+    android/base/system/Win32UnicodeString.cpp \
     android/base/system/Win32Utils.cpp \
     android/utils/win32_cmdline_quote.cpp \
 
