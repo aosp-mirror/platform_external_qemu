@@ -399,6 +399,12 @@ static void hax_log_sync(MemoryListener * listener,
                          MemoryRegionSection * section)
 {
     MemoryRegion *mr = section->mr;
+
+    if (!memory_region_is_ram(mr)) {
+        /* Skip MMIO regions */
+        return;
+    }
+
     unsigned long c;
     unsigned int len =
         ((int128_get64(section->size) / TARGET_PAGE_SIZE) + HOST_LONG_BITS -
@@ -826,18 +832,52 @@ static int hax_vcpu_hax_exec(CPUArchState * env, int ug_platform)
     return ret;
 }
 
+static void do_hax_cpu_synchronize_state(void *arg)
+{
+    CPUState *cpu = arg;
+    CPUArchState *env = cpu->env_ptr;
+
+    hax_arch_get_registers(env);
+    cpu->hax_vcpu_dirty = true;
+}
+
+void hax_cpu_synchronize_state(CPUState *cpu)
+{
+    /* TODO: Do not sync if cpu->hax_vcpu_dirty is true. (Cf
+     * kvm_cpu_synchronize_state() in kvm-all.c)
+     * This would require that this flag be updated properly and consistently
+     * wherever a vCPU state sync between QEMU and HAX takes place. For now,
+     * just perform the sync regardless of hax_vcpu_dirty.
+     */
+    run_on_cpu(cpu, do_hax_cpu_synchronize_state, cpu);
+}
+
+static void do_hax_cpu_synchronize_post_reset(void *arg)
+{
+    CPUState *cpu = arg;
+    CPUArchState *env = cpu->env_ptr;
+
+    hax_vcpu_sync_state(env, 1);
+    cpu->hax_vcpu_dirty = false;
+}
+
 void hax_cpu_synchronize_post_reset(CPUState * cpu)
 {
-    CPUArchState *env = (CPUArchState *) (cpu->env_ptr);
+    run_on_cpu(cpu, do_hax_cpu_synchronize_post_reset, cpu);
+}
+
+static void do_hax_cpu_synchronize_post_init(void *arg)
+{
+    CPUState *cpu = arg;
+    CPUArchState *env = cpu->env_ptr;
+
     hax_vcpu_sync_state(env, 1);
     cpu->hax_vcpu_dirty = false;
 }
 
 void hax_cpu_synchronize_post_init(CPUState * cpu)
 {
-    CPUArchState *env = (CPUArchState *) (cpu->env_ptr);
-    hax_vcpu_sync_state(env, 1);
-    cpu->hax_vcpu_dirty = false;
+    run_on_cpu(cpu, do_hax_cpu_synchronize_post_init, cpu);
 }
 
 /*
