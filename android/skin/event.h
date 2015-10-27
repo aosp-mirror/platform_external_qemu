@@ -33,14 +33,13 @@ typedef enum {
     kEventVideoExpose,
     kEventWindowMoved,
     kEventScreenChanged,
+    kEventZoomedWindowResized,
 } SkinEventType;
 
 typedef enum {
     kMouseButtonLeft = 1,
     kMouseButtonRight,
     kMouseButtonCenter,
-    kMouseButtonScrollUp,
-    kMouseButtonScrollDown,
 } SkinMouseButtonType;
 
 typedef struct {
@@ -65,6 +64,7 @@ typedef struct {
 typedef struct {
     int x; // Send current window coordinates to maintain window location
     int y;
+    int scroll_h; // Height of the scrollbar, needed for OSX
     double scale;
 } SkinEventWindowData;
 
