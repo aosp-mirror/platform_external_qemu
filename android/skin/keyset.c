@@ -270,39 +270,12 @@ const char*
 skin_keyset_get_default_text( void )
 {
     return
-    "BUTTON_CALL         F3\n"
-    "BUTTON_HANGUP       F4\n"
-    "BUTTON_HOME         Home\n"
-    "BUTTON_HOMEPAGE     HomePage\n"
-    "BUTTON_BACK         Escape\n"
-    "BUTTON_MENU         F2, PageUp\n"
-    "BUTTON_STAR         Shift-F2, PageDown\n"
-    "BUTTON_POWER        F7\n"
-    "BUTTON_SEARCH       F5\n"
-    "BUTTON_CAMERA       Ctrl-Keypad_5, Ctrl-F3\n"
-    "BUTTON_VOLUME_UP    Keypad_Plus, Ctrl-F5\n"
-    "BUTTON_VOLUME_DOWN  Keypad_Minus, Ctrl-F6\n"
-
-    "TOGGLE_NETWORK      F8\n"
-    "TOGGLE_TRACING      F9\n"
-    "TOGGLE_FULLSCREEN   Alt-Enter\n"
-
-    "BUTTON_DPAD_CENTER  Keypad_5\n"
-    "BUTTON_DPAD_UP      Keypad_8\n"
-    "BUTTON_DPAD_LEFT    Keypad_4\n"
-    "BUTTON_DPAD_RIGHT   Keypad_6\n"
-    "BUTTON_DPAD_DOWN    Keypad_2\n"
-
-    "BUTTON_APPSWITCH    AppSwitch\n"
-
-    "TOGGLE_TRACKBALL    F6\n"
-    "SHOW_TRACKBALL      Delete\n"
-
-    "CHANGE_LAYOUT_PREV  Keypad_7, Ctrl-F11\n"
-    "CHANGE_LAYOUT_NEXT  Keypad_9, Ctrl-F12\n"
-    "ONION_ALPHA_UP      Keypad_Multiply\n"
-    "ONION_ALPHA_DOWN    Keypad_Divide\n"
-    ;
+    "BUTTON_POWER        Ctrl-Escape\n"
+    "BUTTON_VOLUME_UP    Ctrl-Equal\n"
+    "BUTTON_VOLUME_DOWN  Ctrl-Minus\n"
+    "BUTTON_BACK         Ctrl-Backspace\n"
+    "BUTTON_HOME         Ctrl-H\n"
+    "BUTTON_MENU         Ctrl-M\n";
 }
 
 static SkinKeyset* s_default = NULL;

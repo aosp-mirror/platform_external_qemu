@@ -41,6 +41,7 @@ SkinKeyCode skin_keycode_rotate(SkinKeyCode code, int  rotation) {
     _KEYSYM_(TAB,Tab)         \
     _KEYSYM_(CLEAR,Clear)     \
     _KEYSYM_(ENTER,Return)    \
+    _KEYSYM_(EQUAL,Equal)    \
     _KEYSYM_(PAUSE,Pause)    \
     _KEYSYM_(ESC,Esc)        \
     _KEYSYM_(SPACE,Space)    \

@@ -48,8 +48,6 @@ void ExtendedWindow::initKbdShorts() {
            table_widget->setItem(table_row, 1, new QTableWidgetItem(binding_str));
        }
    }
-   table_widget->sortItems(1);
-   
-
+   table_widget->sortItems(0);
 }
 
