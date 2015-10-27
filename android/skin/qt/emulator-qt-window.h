@@ -21,9 +21,11 @@
 #include <QMoveEvent>
 #include <QObject>
 #include <QPainter>
+#include <QPixmap>
 #include <QProcess>
 #include <QResizeEvent>
 #include <QScrollArea>
+#include <QScrollBar>
 #include <QTimer>
 #include <QWidget>
 
@@ -70,7 +72,6 @@ public:
     void paintEvent(QPaintEvent *event);
     void show();
     void startThread(StartFunction f, int argc, char **argv);
-    void wheelEvent(QWheelEvent *event);
 
     /*
      In Qt, signals are normally events of interest that a class can emit, which can be hooked up to arbitrary slots. Here
@@ -112,13 +113,18 @@ signals:
     void runOnUiThread(SkinGenericFunction* f, void* data, QSemaphore* semaphore = NULL);
 
 public:
+    void recenterFocusPoint();
+    void saveZoomPoints(const QPoint &focus);
     void screenshot();
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateScrollBarChanged(int x, int y);
     void simulateSetScale(double scale);
     void simulateSetZoom(double zoom);
     void simulateWindowMoved(const QPoint &pos);
-    void zoom();
+    void simulateZoomedWindowResized(const QSize &size);
+    void toggleZoomMode();
+    void zoomIn(const QPoint &focus);
+    void zoomOut(const QPoint &focus);
 
 private slots:
     void slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore = NULL);
@@ -146,6 +152,8 @@ private slots:
     void slot_horizontalScrollChanged(int value);
     void slot_verticalScrollChanged(int value);
 
+    void slot_scrollRangeChanged(int min, int max);
+
     /*
      Here are conventional slots that perform interesting high-level functions in the emulator. These can be hooked up to signals
      from UI elements or called independently.
@@ -158,10 +166,10 @@ public slots:
 private:
     void doResize(const QSize &size);
 
-    void handleEvent(SkinEventType type, QMouseEvent *event);
     SkinEvent *createSkinEvent(SkinEventType type);
-    void handleKeyEvent(SkinEventType type, QKeyEvent *pEvent);
-
+    void handleKeyEvent(SkinEventType type, QKeyEvent *event);
+    void handleMouseEvent(SkinEventType type, QMouseEvent *event);
+    bool handleQtMouseEvent(SkinEventType type, QMouseEvent *event);
     QString getTmpImagePath();
 
     void             *batteryState;
@@ -183,8 +191,10 @@ private:
 
         bool event(QEvent *e)
         {
-            // Ignore MetaCall and UpdateRequest events
-            if (e->type() == QEvent::MetaCall || e->type() == QEvent::UpdateRequest) {
+            // Ignore MetaCall and UpdateRequest events, and don't snap in zoom mode.
+            if (mEmulatorWindow->mInZoomMode ||
+                e->type() == QEvent::MetaCall ||
+                e->type() == QEvent::UpdateRequest) {
                 return QScrollArea::event(e);
             }
 
@@ -271,13 +281,37 @@ private:
             mEmulatorWindow->tool_window->dockMainWindow();
         }
 
+        void resizeEvent(QResizeEvent *event)
+        {
+            QScrollArea::resizeEvent(event);
+            mEmulatorWindow->tool_window->dockMainWindow();
+            mEmulatorWindow->simulateZoomedWindowResized(this->viewportSize());
+        }
+
+        QSize viewportSize() const
+        {
+            QSize output = this->size();
+
+            QScrollBar *vertical = this->verticalScrollBar();
+            output.setWidth(output.width() - (vertical->isVisible() ? vertical->width() : 0));
+
+            QScrollBar *horizontal = this->horizontalScrollBar();
+            output.setHeight(output.height() - (horizontal->isVisible() ? horizontal->height() : 0));
+
+            return output;
+        }
+
     private:
         EmulatorQtWindow *mEmulatorWindow;
         QList<QEvent::Type> mEventBuffer;
     }; // EmulatorWindowContainer
 
     EmulatorWindowContainer mContainer;
+    QPixmap mZoomPixmap;
+    QPointF mFocus;
+    QPoint mViewportFocus;
     double mZoomFactor;
+    bool mInZoomMode;
     bool mNextIsZoom;
 
     QProcess mScreencapProcess;

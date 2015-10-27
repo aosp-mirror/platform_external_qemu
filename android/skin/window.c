@@ -1010,10 +1010,10 @@ struct SkinWindow {
     // Zoom-related parameters
     double        zoom;
     SkinRect      subwindow;
-    SkinSize      scrollbar;
     SkinPos       subwindow_original;
     SkinSize      framebuffer;
     SkinSize      container;
+    int           scroll_h; // Needed for OSX
 };
 
 static void
@@ -1265,7 +1265,7 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
     // as well. At the end of this function, data->wy will equal the bottom coordinate of the
     // subwindow (in units from the bottom of the overall window) if this is the Qt OSX emulator.
     data->wy = window->container.h - (data->wy + data->wh);
-    data->wy += window->scrollbar.h;
+    data->wy += window->scroll_h;
 #endif
 }
 
@@ -1365,6 +1365,7 @@ skin_window_create(SkinLayout* slayout,
 
     window->x_pos = x;
     window->y_pos = y;
+    window->scroll_h = 0;
 
     if (skin_window_reset_internal(window, slayout) < 0) {
         skin_window_free(window);
@@ -1457,16 +1458,10 @@ skin_window_position_changed( SkinWindow* window, int x, int y )
 }
 
 int
-skin_window_recompute_subwindow_rect( SkinWindow* window, int new_x, int new_y )
+skin_window_recompute_subwindow_rect( SkinWindow* window, SkinRect* subwindow )
 {
     // The full subwindow must be intersected with the container to compute the actual subwindow
     SkinRect result;
-
-    SkinRect subwindow;
-    subwindow.pos.x = new_x;
-    subwindow.pos.y = new_y;
-    subwindow.size.w = window->framebuffer.w;
-    subwindow.size.h = window->framebuffer.h;
 
     SkinRect container;
     container.pos.x = 0;
@@ -1474,7 +1469,13 @@ skin_window_recompute_subwindow_rect( SkinWindow* window, int new_x, int new_y )
     container.size.w = window->container.w;
     container.size.h = window->container.h;
 
-    skin_rect_intersect(&result, &subwindow, &container);
+    // If the emulator window is so small that the native subwindow wouldn't even appear,
+    // force the subwindow to at least have positive size, else the native window managers
+    // may crash. For example, on Linux, X11 crashes when told to create a window with 0 size.
+    if (!skin_rect_intersect(&result, subwindow, &container)) {
+        result.size.w = 1;
+        result.size.h = 1;
+    }
 
     if (skin_rect_equals(&window->subwindow, &result)) {
         return 0;
@@ -1492,12 +1493,15 @@ void
 skin_window_scroll_updated( SkinWindow* window, int dx, int xmax, int dy, int ymax )
 {
     // Pretend the subwindow has moved by the appropriate amount
-    if (skin_window_recompute_subwindow_rect(window,
-                                             window->subwindow_original.x - dx,
-                                             window->subwindow_original.y - dy)) {
+    SkinRect subwindow;
+    subwindow.pos.x = window->subwindow_original.x - dx;
+    subwindow.pos.y = window->subwindow_original.y - dy;
+    subwindow.size.w = window->framebuffer.w;
+    subwindow.size.h = window->framebuffer.h;
+
+    if (skin_window_recompute_subwindow_rect(window, &subwindow)) {
         skin_window_move_opengles(window);
     }
-
 
     // Compute the margins around the sub-window, then transform the current scroll values
     // to take into account these margins.
@@ -1535,7 +1539,7 @@ skin_window_scroll_updated( SkinWindow* window, int dx, int xmax, int dy, int ym
 }
 
 static void
-skin_window_resize( SkinWindow*  window )
+skin_window_resize( SkinWindow*  window, int resize_container )
 {
     if ( !window->no_display )
         skin_window_hide_opengles(window);
@@ -1554,8 +1558,10 @@ skin_window_resize( SkinWindow*  window )
         int           fullscreen = window->fullscreen;
 
         // Pre-record the container dimensions
-        window->container.w = (int) ceil(layout_w * scale) - window->scrollbar.w;
-        window->container.h = (int) ceil(layout_h * scale) - window->scrollbar.h;
+        if (resize_container) {
+            window->container.w = (int) ceil(layout_w * scale);
+            window->container.h = (int) ceil(layout_h * scale);
+        }
 
         if (window->zoom != 1.0) {
             scale *= window->zoom;
@@ -1586,7 +1592,7 @@ skin_window_resize( SkinWindow*  window )
         window->framebuffer.w = drect.size.w;
         window->framebuffer.h = drect.size.h;
 
-        skin_window_recompute_subwindow_rect(window, window->subwindow_original.x, window->subwindow_original.y);
+        skin_window_recompute_subwindow_rect(window, &drect);
 
         skin_window_show_opengles(window);
     }
@@ -1626,7 +1632,7 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
         }
     }
 
-    skin_window_resize(window);
+    skin_window_resize(window, 1);
 
     finger_state_reset( &window->finger );
     button_state_reset( &window->button );
@@ -1654,6 +1660,26 @@ skin_window_reset ( SkinWindow*  window, SkinLayout*  slayout )
         return -1;
 
     return 0;
+}
+
+void
+skin_window_zoomed_window_resized( SkinWindow* window, int dx, int dy, int w, int h, int scroll_h )
+{
+    // Pretend the subwindow has moved by the appropriate amount
+    SkinRect subwindow;
+    subwindow.pos.x = window->subwindow_original.x - dx;
+    subwindow.pos.y = window->subwindow_original.y - dy;
+    subwindow.size.w = window->framebuffer.w;
+    subwindow.size.h = window->framebuffer.h;
+
+    window->container.w = w;
+    window->container.h = h;
+    window->scroll_h = scroll_h;
+
+    if (skin_window_recompute_subwindow_rect(window, &subwindow)) {
+        skin_window_move_opengles(window);
+        skin_window_redraw_opengles(window);
+    }
 }
 
 void
@@ -1710,31 +1736,21 @@ skin_window_set_scale(SkinWindow* window, double scale)
 {
     window->scale = scale;
     window->zoom = 1.0;      // Scaling the window should reset all "viewport" parameters
-    window->scrollbar.w = 0; // Scroll bars won't appear, so ignore them
-    window->scrollbar.h = 0;
 
-    skin_window_resize( window );
+    skin_window_resize( window, 1 );
     skin_window_redraw( window, NULL );
 }
 
 void
-skin_window_set_zoom(SkinWindow* window, double zoom, int dw, int dh)
+skin_window_set_zoom(SkinWindow* window, double zoom, int dw, int dh, int scroll_h)
 {
-    // When zoom is 1.0, we don't actually want scroll bars, so just re-scale the window
-    if (zoom == 1.0) {
-        skin_window_set_scale(window, window->scale);
-        return;
-    }
-
+    // Pre-record the container dimensions
+    window->container.w = dw;
+    window->container.h = dh;
+    window->scroll_h = scroll_h;
     window->zoom = zoom;
-    window->scrollbar.w = dw; // Remember scroll bar dimensions
-    window->scrollbar.h = dh;
 
-    skin_window_resize( window );
-
-    // Align to the top left corner. While we don't know how large the scroll bars will be
-    // yet, so enter sufficiently large maximum values to ensure alignment.
-    skin_window_scroll_updated( window, 0, 100000, 0, 100000 );
+    skin_window_resize( window, 0 );
     skin_window_redraw( window, NULL );
 }
 
@@ -1795,7 +1811,7 @@ skin_window_toggle_fullscreen( SkinWindow*  window )
             skin_winsys_get_window_pos(&window->x_pos, &window->y_pos);
         }
         window->fullscreen = !window->fullscreen;
-        skin_window_resize( window );
+        skin_window_resize( window, 1 );
         skin_window_redraw( window, NULL );
     }
 }

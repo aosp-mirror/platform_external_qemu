@@ -421,49 +421,33 @@ bool skin_ui_process_events(SkinUI* ui) {
             DE("EVENT: kEventMouseButton x=%d y=%d xrel=%d yrel=%d button=%d\n",
                ev.u.mouse.x, ev.u.mouse.y, ev.u.mouse.xrel, ev.u.mouse.yrel,
                ev.u.mouse.button);
-            {
-                int  down = (ev.type == kEventMouseButtonDown);
-                if (ev.u.mouse.button == kMouseButtonScrollUp)
-                {
-                    /* scroll-wheel simulates DPad up */
-                    SkinKeyCode  kcode;
-
-                    kcode = skin_keycode_rotate(kKeyCodeDpadUp,
-                                                skin_layout_get_dpad_rotation(
-                                                        ui->layout));
-                    ui->ui_funcs->keyboard_event(NULL, kcode, down);
-                }
-                else if (ev.u.mouse.button == kMouseButtonScrollDown)
-                {
-                    /* scroll-wheel simulates DPad down */
-                    SkinKeyCode  kcode;
-
-                    kcode = skin_keycode_rotate(kKeyCodeDpadDown,
-                                                skin_layout_get_dpad_rotation(
-                                                        ui->layout));
-                    ui->ui_funcs->keyboard_event(NULL, kcode, down);
-                }
-                else if (ev.u.mouse.button == kMouseButtonLeft) {
-                    skin_window_process_event(ui->window, &ev);
-                }
+            if (ev.u.mouse.button == kMouseButtonLeft) {
+                skin_window_process_event(ui->window, &ev);
             }
             break;
 
         case kEventScrollBarChanged:
+            DE("EVENT: kEventScrollBarChanged x=%d xmax=%d y=%d ymax=%d ignored=%d\n",
+               ev.u.scroll.x, ev.u.scroll.xmax, ev.u.scroll.y, ev.u.scroll.ymax, ignoreScroll);
             if (!ignoreScroll) {
-                skin_window_scroll_updated(ui->window, ev.u.scroll.x, ev.u.scroll.xmax, ev.u.scroll.y, ev.u.scroll.ymax);
+                skin_window_scroll_updated(ui->window, ev.u.scroll.x, ev.u.scroll.xmax,
+                                                       ev.u.scroll.y, ev.u.scroll.ymax);
             }
             break;
 
         case kEventSetScale:
+            DE("EVENT: kEventSetScale x=%d y=%d scale=%f\n",
+               ev.u.window.x, ev.u.window.y, ev.u.window.scale);
             ignoreScroll = true;
             skin_window_position_changed(ui->window, ev.u.window.x, ev.u.window.y);
             skin_window_set_scale(ui->window, ev.u.window.scale);
             break;
 
         case kEventSetZoom:
-            ignoreScroll = true;
-            skin_window_set_zoom(ui->window, ev.u.window.scale, ev.u.window.x, ev.u.window.y);
+            DE("EVENT: kEventSetZoom x=%d y=%d zoom=%f scroll_h=%d\n",
+               ev.u.window.x, ev.u.window.y, ev.u.window.scale, ev.u.window.scroll_h);
+            skin_window_set_zoom(ui->window, ev.u.window.scale, ev.u.window.x, ev.u.window.y,
+                                             ev.u.window.scroll_h);
             break;
 
         case kEventQuit:
@@ -472,12 +456,21 @@ bool skin_ui_process_events(SkinUI* ui) {
             return true;
 
         case kEventWindowMoved:
+            DE("EVENT: kEventWindowMoved x=%d y=%d\n", ev.u.window.x, ev.u.window.y);
             skin_window_position_changed(ui->window, ev.u.window.x, ev.u.window.y);
             break;
 
         case kEventScreenChanged:
             DE("EVENT: kEventScreenChanged\n");
             skin_window_process_event(ui->window, &ev);
+            break;
+
+        case kEventZoomedWindowResized:
+            DE("EVENT: kEventZoomedWindowResized dx=%d dy=%d w=%d h=%d\n",
+               ev.u.scroll.x, ev.u.scroll.y, ev.u.scroll.xmax, ev.u.scroll.ymax);
+            skin_window_zoomed_window_resized(ui->window, ev.u.scroll.x, ev.u.scroll.y,
+                                                          ev.u.scroll.xmax, ev.u.scroll.ymax,
+                                                          ev.u.scroll.scroll_h);
             break;
         }
     }

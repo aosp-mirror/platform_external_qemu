@@ -164,4 +164,8 @@
      <file alias="stop_disabled">images/dark/ic_stop_155_48dp.svg</file>
      <file alias="virtSensors">images/dark/Virtual_Sensors_677.svg</file>
  </qresource>
+
+ <qresource prefix="/cursor">
+     <file alias="zoom_cursor">images/cursor/zoom_cursor.svg</file>
+ </qresource>
 </RCC>
