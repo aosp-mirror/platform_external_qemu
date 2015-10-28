@@ -325,28 +325,37 @@ extern "C" int main(int argc, char **argv, char **envp) {
         return 1;
     }
 
-    AndroidOptions opts[1];
-
-    if (android_parse_options(&argc, &argv, opts) < 0) {
-        return 1;
-    }
-
     String qemuExecutable = getQemuExecutablePath(argv[0]);
-    // TODO(digit): This code is very similar to the one in main.c,
-    // refactor everything so that it fits into a single shared source
-    // file, if possible, with the least amount of dependencies.
+
+    static const char* args[128] = {};
+
+    int argIdx = 1;
 
     while (argc-- > 1) {
         const char* opt = (++argv)[0];
 
-        if(!strcmp(opt, "-qemu")) {
-            argc--;
-            argv++;
-            break;
+        if(!strcmp(opt, "-version")) {
+            printf("Android emulator version %s\n"
+                   "Copyright (C) 2006-2015 The Android Open Source Project and many others.\n"
+                   "This program is a derivative of the QEMU CPU emulator (www.qemu.org).\n\n",
+    #if defined ANDROID_BUILD_ID
+                   VERSION_STRING " (build_id " STRINGIFY(ANDROID_BUILD_ID) ")" );
+    #else
+                   VERSION_STRING);
+    #endif
+            printf("  This software is licensed under the terms of the GNU General Public\n"
+                   "  License version 2, as published by the Free Software Foundation, and\n"
+                   "  may be copied, distributed, and modified under those terms.\n\n"
+                   "  This program is distributed in the hope that it will be useful,\n"
+                   "  but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+                   "  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+                   "  GNU General Public License for more details.\n\n");
+
+            exit(0);
         }
 
         if (!strcmp(opt, "-help")) {
-            emulator_help();
+            emulator_help(); // doesn't return
         }
 
         if (!strncmp(opt, "-help-",6)) {
@@ -372,305 +381,11 @@ extern "C" int main(int argc, char **argv, char **envp) {
             exit(1);
         }
 
-        if (opt[0] == '-') {
-            fprintf(stderr, "unknown option: %s\n", opt);
-            fprintf(stderr, "please use -help for a list of valid options\n");
-            exit(1);
-        }
-
-        fprintf(stderr, "invalid command-line parameter: %s.\n", opt);
-        fprintf(stderr, "Hint: use '@foo' to launch a virtual device named 'foo'.\n");
-        fprintf(stderr, "please use -help for more information\n");
-        exit(1);
+        assert(argIdx < (sizeof(args)/sizeof(args[0])));
+        args[argIdx++] = opt;
     }
 
-    if (opts->version) {
-        printf("Android emulator version %s\n"
-               "Copyright (C) 2006-2011 The Android Open Source Project and many others.\n"
-               "This program is a derivative of the QEMU CPU emulator (www.qemu.org).\n\n",
-#if defined ANDROID_BUILD_ID
-               VERSION_STRING " (build_id " STRINGIFY(ANDROID_BUILD_ID) ")" );
-#else
-               VERSION_STRING);
-#endif
-        printf("  This software is licensed under the terms of the GNU General Public\n"
-               "  License version 2, as published by the Free Software Foundation, and\n"
-               "  may be copied, distributed, and modified under those terms.\n\n"
-               "  This program is distributed in the hope that it will be useful,\n"
-               "  but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-               "  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
-               "  GNU General Public License for more details.\n\n");
-
-        exit(0);
-    }
-
-    sanitizeOptions(opts);
-
-    // Ignore snapshot storage here.
-
-    int inAndroidBuild = 0;
-    AvdInfo* avd = createAVD(opts, &inAndroidBuild);
-
-    // Ignore skin options here.
-
-    // Read hardware configuration, apply overrides from options.
-    AndroidHwConfig* hw = android_hw;
-    if (avdInfo_initHwConfig(avd, hw) < 0) {
-        derror("could not read hardware configuration ?");
-        exit(1);
-    }
-
-    /* Update CPU architecture for HW configs created from build dir. */
-    if (inAndroidBuild) {
-        reassign_string(&android_hw->hw_cpu_arch, kTarget.androidArch);
-    }
-
-    handleCommonEmulatorOptions(opts, hw, avd);
-
-    {
-        EmuglConfig emuglConfig;
-
-        if (!emuglConfig_init(&emuglConfig,
-                              hw->hw_gpu_enabled,
-                              hw->hw_gpu_mode,
-                              opts->gpu,
-                              0,
-                              opts->no_window)) {
-            derror("%s", emuglConfig.status);
-            exit(1);
-        }
-        hw->hw_gpu_enabled = emuglConfig.enabled;
-        if (hw->hw_gpu_enabled) {
-            reassign_string(&hw->hw_gpu_mode, emuglConfig.backend);
-        }
-        D("%s", emuglConfig.status);
-    }
-
-    hw->avd_name = ASTRDUP(avdInfo_getName(avd));
-
-    D("QEMU EXECUTABLE=%s\n", qemuExecutable.c_str());
-
-    // Create userdata file from init version if needed.
-    if (!path_exists(hw->disk_dataPartition_path)) {
-        if (!path_exists(hw->disk_dataPartition_initPath)) {
-            derror("Missing initial data partition file: %s",
-                   hw->disk_dataPartition_initPath);
-            exit(1);
-        }
-        D("Creating: %s\n", hw->disk_dataPartition_path);
-
-        if (path_copy_file(hw->disk_dataPartition_path,
-                           hw->disk_dataPartition_initPath) < 0) {
-            derror("Could not create %s: %s", hw->disk_dataPartition_path,
-                   strerror(errno));
-            exit(1);
-        }
-    }
-
-    // Create cache partition image if it doesn't exist already.
-    if (!path_exists(hw->disk_cachePartition_path)) {
-        D("Creating empty ext4 cache partition: %s",
-          hw->disk_cachePartition_path);
-        int ret = android_createEmptyExt4Image(
-                hw->disk_cachePartition_path,
-                hw->disk_cachePartition_size,
-                "cache");
-        if (ret < 0) {
-            derror("Could not create %s: %s", hw->disk_cachePartition_path,
-                   strerror(-ret));
-            exit(1);
-        }
-    }
-
-    // Now build the QEMU parameters.
-    const char* args[128];
-    int n = 0;
-
-    args[n++] = qemuExecutable.c_str();
-
-#if defined(TARGET_X86_64) || defined(TARGET_X86)
-    char* accel_status = NULL;
-    CpuAccelMode accel_mode = ACCEL_AUTO;
-    const bool accel_ok = handleCpuAcceleration(opts, avd, &accel_mode, accel_status);
-
-    if (accel_mode == ACCEL_OFF) {  // 'accel off' is specified'
-        args[n++] = "-cpu";
-        args[n++] = kTarget.qemuCpu;
-    } else if (accel_mode == ACCEL_ON) {  // 'accel on' is specified'
-        if (!accel_ok) {
-            derror("CPU acceleration is not supported on this machine!");
-            derror("Reason: %s", accel_status);
-            exit(1);
-        }
-        args[n++] = ASTRDUP(kEnableAccelerator);
-    } else {  // ACCEL_AUTO
-        if (accel_ok) {
-            args[n++] = ASTRDUP(kEnableAccelerator);
-        } else {
-            args[n++] = "-cpu";
-            args[n++] = kTarget.qemuCpu;
-        }
-    }
-
-    AFREE(accel_status);
-#else   // !TARGET_X86_64 && !TARGET_X86
-    args[n++] = "-cpu";
-    args[n++] = kTarget.qemuCpu;
-    args[n++] = "-machine";
-    args[n++] = "type=ranchu";
-#endif  // !TARGET_X86_64 && !TARGET_X86
-
-    // SMP Support.
-    if (hw->hw_cpu_ncore > 1) {
-        args[n++] = "-smp";
-        String ncores = StringFormat("cores=%ld", hw->hw_cpu_ncore);
-        args[n++] = strdup(ncores.c_str());
-    }
-
-    // Memory size
-    args[n++] = "-m";
-    String memorySize = StringFormat("%ld", hw->hw_ramSize);
-    args[n++] = memorySize.c_str();
-
-    // Command-line
-    args[n++] = "-append";
-
-    String kernelCommandLine = "qemu=1";
-
-    if (opts->show_kernel) {
-        kernelCommandLine += StringFormat(" console=%s0,38400",
-                                          kTarget.ttyPrefix);
-    }
-
-    if (kTarget.kernelExtraArgs) {
-        kernelCommandLine += kTarget.kernelExtraArgs;
-    }
-    if (opts->selinux) {
-        kernelCommandLine += StringFormat(
-                " androidboot.selinux=%s", opts->selinux);
-    }
-
-    if (hw->hw_gpu_enabled) {
-        kernelCommandLine += " qemu.gles=1";
-    } else {
-        kernelCommandLine += " qemu.gles=0";
-    }
-
-    if (opts->no_boot_anim) {
-        kernelCommandLine += " android.bootanim=0";
-    }
-
-    args[n++] = kernelCommandLine.c_str();
-
-    // Support for changing default lcd-density
-    String lcd_density;
-    if (hw->hw_lcd_density) {
-        args[n++] = "-lcd-density";
-        lcd_density = StringFormat("%d", hw->hw_lcd_density);
-        args[n++] = lcd_density.c_str();
-    }
-
-    args[n++] = "-serial";
-    args[n++] = "mon:stdio";
-
-    // Kernel image
-    args[n++] = "-kernel";
-    args[n++] = hw->kernel_path;
-
-    // Ramdisk
-    args[n++] = "-initrd";
-    args[n++] = hw->disk_ramdisk_path;
-
-    /*
-     * add partition parameters with the seqeuence
-     * pre-defined in targetInfo.imagePartitionTypes
-     */
-    int s;
-    int drvIndex = 0;
-    for (s = 0; s < kMaxPartitions; s++) {
-        makePartitionCmd(args, &n, &drvIndex, hw,
-                         kTarget.imagePartitionTypes[s]);
-    }
-
-    // Network
-    args[n++] = "-netdev";
-    args[n++] = "user,id=mynet";
-    args[n++] = "-device";
-    String netDevice =
-            StringFormat("%s,netdev=mynet", kTarget.networkDeviceType);
-    args[n++] = netDevice.c_str();
-    args[n++] = "-show-cursor";
-
-    // Graphics
-    if (opts->no_window) {
-        args[n++] = "-nographic";
-    }
-
-    // Data directory (for keymaps and PC Bios).
-    args[n++] = "-L";
-    String dataDir = getNthParentDir(qemuExecutable.c_str(), 3U);
-    if (dataDir.empty()) {
-        dataDir = "lib/pc-bios";
-    } else {
-        dataDir += "/lib/pc-bios";
-    }
-    args[n++] = dataDir.c_str();
-
-    /* append extra qemu parameters if any */
-    for (int idx = 0; kTarget.qemuExtraArgs[idx] != NULL; idx++) {
-        args[n++] = kTarget.qemuExtraArgs[idx];
-    }
-
-    /* append the options after -qemu */
-    for (int i = 0; i < argc; ++i) {
-        args[n++] = argv[i];
-    }
-
-    args[n] = NULL;
-    // We allocated only 128 slots in |args|.
-    assert(n < 128);
-
-    if(VERBOSE_CHECK(init)) {
-        int i;
-        printf("QEMU options list:\n");
-        for(i = 0; i < n; i++) {
-            printf("emulator: argv[%02d] = \"%s\"\n", i, args[i]);
-        }
-        /* Dump final command-line option to make debugging the core easier */
-        printf("Concatenated QEMU options:\n");
-        for (i = 0; i < n; i++) {
-            /* To make it easier to copy-paste the output to a command-line,
-             * quote anything that contains spaces.
-             */
-            if (strchr(args[i], ' ') != NULL) {
-                printf(" '%s'", args[i]);
-            } else {
-                printf(" %s", args[i]);
-            }
-        }
-        printf("\n");
-    }
-
-    if (!path_exists(qemuExecutable.c_str())) {
-        fprintf(stderr, "Missing QEMU executable: %s\n",
-                qemuExecutable.c_str());
-        return 1;
-    }
-
-    // Now launch executable.
-#ifdef _WIN32
-    // Take care of quoting all parameters before sending them to execv().
-    // See the "Eveyone quotes command line arguments the wrong way" on
-    // MSDN.
-    int i;
-    for (i = 0; i < n; ++i) {
-        // Technically, this leaks the quoted strings, but we don't care
-        // since this process will terminate after the execv() anyway.
-        args[i] = win32_cmdline_quote(args[i]);
-        D("Quoted param: [%s]\n", args[i]);
-    }
-#endif
-
+    args[0] = qemuExecutable.c_str();
     safe_execv(qemuExecutable.c_str(), (char* const*)args);
 
     fprintf(stderr,
