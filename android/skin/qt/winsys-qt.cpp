@@ -236,6 +236,16 @@ extern void skin_winsys_set_window_pos(int x, int y)
     semaphore.acquire();
 }
 
+void skin_winsys_get_window_borders(int *left, int *right, int *top, int *bottom) {
+    // this function is for backward compatibility with SDL windows,
+    // where window border is not accounted for in window dimensions
+    // and is required when re-positioning windows in _WIN32
+    *left = *right = *top = *bottom = 0;
+
+    return;
+}
+
+
 extern void skin_winsys_set_window_title(const char *title)
 {
     D("skin_winsys_set_window_title [%s]", title);
