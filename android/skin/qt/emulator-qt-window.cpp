@@ -376,12 +376,12 @@ void EmulatorQtWindow::slot_setWindowPos(int x, int y, QSemaphore *semaphore)
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorQtWindow::slot_setWindowIcon(const unsigned char *, int, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_setWindowIcon(const unsigned char *data, int size, QSemaphore *semaphore)
 {
-    //    QPixmap image;
-    //    image.loadFromData(data, size);
-    //    QIcon icon(image);
-    //    setWindowIcon(icon);
+    QPixmap image;
+    image.loadFromData(data, size);
+    QIcon icon(image);
+    mContainer.setWindowIcon(icon);
     if (semaphore != NULL) semaphore->release();
 }
 
