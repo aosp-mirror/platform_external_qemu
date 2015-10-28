@@ -38,7 +38,7 @@ $(QEMU_HW_CONFIG_DEFS_H): $(QEMU_HARDWARE_PROPERTIES_INI) $(LOCAL_PATH)/android/
 	$(hide) rm -f $@
 	$(transform-generated-source)
 
-QEMU_HW_CONFIG_DEFS_INCLUDES := $(intermediates)
+QEMU_HW_CONFIG_DEFS_INCLUDES := $(SRC_PATH)/$(intermediates)
 
 # Second, define a function that needs to be called inside each module that contains
 # a source file that includes the generated header file.
