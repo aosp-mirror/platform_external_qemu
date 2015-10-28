@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "56c4e1d1_0ab11f1a",
+        "filename": "android-configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-10-28T20:15:28Z",
+      "side": 1,
+      "message": "Pasting comment from abandoned CL:\nIn regards to having OPTION_CRASHUPLOAD select between no upload , staging and production.\n\nI originally had it as you suggested, but then I ran into issues with the following workflow:\nI want to generate crash dumps without auto uploading them.\nI inspect the crashdump files locally\nI then manually upload the crashdump\nThe problem was that I can\u0027t since I didn\u0027t build for staging or production.",
+      "range": {
+        "startLine": 298,
+        "startChar": 2,
+        "endLine": 305,
+        "endChar": 4
+      },
+      "revId": "5616daca07b948aa028353da6d076cefca95ff43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56ab01f0_4f59711a",
+        "filename": "android/crashreport/BreakpadUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-10-28T20:15:28Z",
+      "side": 1,
+      "message": "Pasting comment from abandoned CL:\nIn regards to passing in c_str instead of instantiating String.\n\nWhen I change this to just c_str I get an ambiguity error:\n./android/base/containers/StringVector.h:48:10: note: void android::base::StringVector::append(const android::base::String\u0026)\n     void append(const String\u0026 str);\n          ^\n./android/base/containers/StringVector.h:61:10: note: void android::base::StringVector::append(const android::base::StringView\u0026)\n     void append(const StringView\u0026 view);",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 62,
+        "endChar": 56
+      },
+      "revId": "5616daca07b948aa028353da6d076cefca95ff43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
