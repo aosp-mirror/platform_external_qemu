@@ -563,9 +563,28 @@ bool FrameBuffer::moveSubWindow(int x, int y, int width, int height) {
     bool success = false;
     m_lock.lock();
     if (m_subWin) {
-        m_windowWidth = width;
-        m_windowHeight = height;
-        success = ::moveSubWindow(m_subWin, x, y, width, height);
+        if (bindSubwin_locked()) {
+            m_windowWidth = width;
+            m_windowHeight = height;
+
+#ifdef __APPLE__
+            // The OSX-specific implementation of moveSubWindow doesn't behave nicely. In order
+            // to force the sub-window NSView to resize properly, you must remove it from the view
+            // hierarchy entirely and re-add it. However, this improperly resets the GL viewport
+            // of the subwindow to match the sub-window frame, so to counteract this, we get the
+            // original viewport before moving the subwindow, then reset it afterwards.
+            GLint vp[4];
+            s_gles2.glGetIntegerv(GL_VIEWPORT, vp);
+#endif
+
+            success = ::moveSubWindow(m_nativeWindow, m_subWin, x, y, width, height);
+
+#ifdef __APPLE__
+            s_gles2.glViewport(vp[0], vp[1], vp[2], vp[3]);
+#endif
+
+            unbind_locked();
+        }
     }
     m_lock.unlock();
     return success;

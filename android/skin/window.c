@@ -1233,6 +1233,29 @@ static void skin_window_run_opengles_show(void* p) {
                                            data->rot);
 }
 
+static void
+skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
+{
+    data->window = window;
+    data->wx = window->subwindow.pos.x;
+    data->wy = window->subwindow.pos.y;
+    data->ww = window->subwindow.size.w;
+    data->wh = window->subwindow.size.h;
+
+    // The native GL subwindow for OSX (using Cocoa) uses cartesian (y-up) coordinates. We
+    // have code to transform window (y-down) coordinates into cartesian coordinates at that
+    // level, but Qt seems to do this transformation on its own. This means the transformation
+    // is done *twice* with Qt + OSX, resulting in the incorrect y value. The following "undoes"
+    // the transformation by doing it a third time. Additionally, because the scroll bar now
+    // affects the relative coordinate system inside the window, it must be taken into account
+    // as well. At the end of this function, data->wy will equal the bottom coordinate of the
+    // subwindow (in units from the bottom of the overall window) if this is the Qt OSX emulator.
+#if defined(__APPLE__) && CONFIG_QT
+    data->wy = window->container.h - (data->wy + data->wh);
+    data->wy += window->scrollbar.h;
+#endif
+}
+
 /* Show the OpenGL ES framebuffer window */
 static void
 skin_window_show_opengles( SkinWindow* window )
@@ -1241,24 +1264,12 @@ skin_window_show_opengles( SkinWindow* window )
     void* winhandle = skin_winsys_get_window_handle();
 
     gles_show_data data;
-    data.window = window;
+    skin_window_setup_opengles_subwindow(window, &data);
+
     data.handle = winhandle;
-    data.wx = window->subwindow.pos.x;
-    data.wy = window->subwindow.pos.y;
-    data.ww = window->subwindow.size.w;
-    data.wh = window->subwindow.size.h;
     data.fbw = window->framebuffer.w;
     data.fbh = window->framebuffer.h;
     data.rot = disp->rotation * -90.;
-
-    // The native GL subwindow for OSX (using Cocoa) uses cartesian (y-up) coordinates. We
-    // have code to transform window (y-down) coordinates into cartesian coordinates at that
-    // level, but Qt seems to do this transformation on its own. This means the transformation
-    // is done *twice* with Qt + OSX, resulting in the incorrect y value. The following "undoes"
-    // the transformation by doing it a third time.
-#if defined(__APPLE__) && CONFIG_QT
-    data.wy = window->container.h - (data.wy + data.wh);
-#endif
 
     skin_winsys_run_ui_update(&skin_window_run_opengles_show, &data);
 }
@@ -1275,11 +1286,7 @@ static void
 skin_window_move_opengles( SkinWindow* window )
 {
     gles_show_data data;
-    data.window = window;
-    data.wx = window->subwindow.pos.x;
-    data.wy = window->subwindow.pos.y;
-    data.ww = window->subwindow.size.w;
-    data.wh = window->subwindow.size.h;
+    skin_window_setup_opengles_subwindow(window, &data);
 
     skin_winsys_run_ui_update(&skin_window_run_opengles_move, &data);
 }
@@ -1315,10 +1322,10 @@ skin_window_create(SkinLayout* slayout,
         double    scale_w, scale_h;
 
         /* To account for things like menu bars, window decorations etc..
-         * We only compute 95% of the real screen size. */
+         * We only compute 85% of the real screen size. */
         skin_winsys_get_monitor_rect(&monitor);
-        screen_w = monitor.size.w * 0.95;
-        screen_h = monitor.size.h * 0.95;
+        screen_w = monitor.size.w * 0.85;
+        screen_h = monitor.size.h * 0.85;
 
         scale_w = 1.0;
         scale_h = 1.0;
@@ -1562,7 +1569,7 @@ skin_window_resize( SkinWindow*  window )
         window->framebuffer.w = drect.size.w;
         window->framebuffer.h = drect.size.h;
 
-        skin_window_recompute_subwindow_rect(window, drect.pos.x, drect.pos.y);
+        skin_window_recompute_subwindow_rect(window, window->subwindow_original.x, window->subwindow_original.y);
 
         skin_window_show_opengles(window);
     }

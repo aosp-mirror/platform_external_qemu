@@ -43,7 +43,12 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
 void destroySubWindow(EGLNativeWindowType win);
 
 // Moves a sub-window previously created through createSubWindow() above.
-int moveSubWindow(FBNativeWindowType p_window,
+// |p_parent_window| is the platform-specific handle to the main UI window.
+// |p_sub_window| is the platform-specific handle to the EGL subwindow.
+// |x|,|y|,|width|,|height| are the new location and dimensions of the
+// subwindow.
+int moveSubWindow(FBNativeWindowType p_parent_window,
+                  EGLNativeWindowType p_sub_window,
                   int x,
                   int y,
                   int width,

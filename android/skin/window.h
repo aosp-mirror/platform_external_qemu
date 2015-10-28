@@ -31,7 +31,7 @@ typedef struct SkinWindowFuncs {
                          int fbh,
                          float rotation_degrees);
     int (*opengles_hide)(void);
-    void (*opengles_move)(int x, int y, int width, int height);
+    int (*opengles_move)(int x, int y, int width, int height);
     void (*opengles_setTranslation)(float px, float py);
     void (*opengles_redraw)(void);
     void (*opengles_free)(void);
