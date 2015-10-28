@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b688bda5_7f030f27",
+        "filename": "android/base/system/Win32Utils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T23:07:49Z",
+      "side": 1,
+      "message": "no, otherwise you can\u0027t delete [] it later.",
+      "parentUuid": "56c4e1d1_0d8659e0",
+      "range": {
+        "startLine": 70,
+        "startChar": 50,
+        "endLine": 70,
+        "endChar": 57
+      },
+      "revId": "cb5a7478e1b230924da53d78f74d53fa379a8ac9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96cad9dc_af8bb9f3",
         "filename": "android/base/system/Win32Utils.cpp",
         "patchSetId": 1
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "768ac5a0_dd26ebee",
+        "filename": "android/base/system/Win32Utils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T23:07:49Z",
+      "side": 1,
+      "message": "this is supposed to be a rarely used feature, I don\u0027t think we want to add a |mCapacity| field, so just resize and be done with it.",
+      "parentUuid": "36a68d28_14f93a79",
+      "range": {
+        "startLine": 150,
+        "startChar": 0,
+        "endLine": 150,
+        "endChar": 26
+      },
+      "revId": "cb5a7478e1b230924da53d78f74d53fa379a8ac9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56c4e1d1_4da7b17e",
         "filename": "android/base/system/Win32Utils.h",
         "patchSetId": 1
@@ -82,6 +130,30 @@
       "writtenOn": "2015-10-28T22:45:50Z",
       "side": 1,
       "message": "This one deserves its own .h/.cpp IMHO",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 21
+      },
+      "revId": "cb5a7478e1b230924da53d78f74d53fa379a8ac9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f67eb54f_01a54aa9",
+        "filename": "android/base/system/Win32Utils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T23:07:49Z",
+      "side": 1,
+      "message": "Actually, this is here to dis-encourage people from using it, it should only be used for very specific needs.",
+      "parentUuid": "56c4e1d1_4da7b17e",
       "range": {
         "startLine": 53,
         "startChar": 0,
@@ -117,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "d685318b_208a4a1d",
+        "filename": "android/base/system/Win32Utils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T23:07:49Z",
+      "side": 1,
+      "message": "I don\u0027t want to turn this into a general-purpose class, so only implement what we need. I\u0027d rather add a DISALLOW_COPY_AND_ASSIGN() than implement these.",
+      "parentUuid": "b6d35d95_0da0150f",
+      "range": {
+        "startLine": 67,
+        "startChar": 0,
+        "endLine": 76,
+        "endChar": 47
+      },
+      "revId": "cb5a7478e1b230924da53d78f74d53fa379a8ac9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96cad9dc_2fd7c9d4",
         "filename": "android/base/system/Win32Utils.h",
         "patchSetId": 1
@@ -128,6 +224,30 @@
       "writtenOn": "2015-10-28T22:45:50Z",
       "side": 1,
       "message": "can you make mStr always to point to something instead? Otherwise data() is really dangerous and will cause some pain once",
+      "range": {
+        "startLine": 82,
+        "startChar": 1,
+        "endLine": 82,
+        "endChar": 62
+      },
+      "revId": "cb5a7478e1b230924da53d78f74d53fa379a8ac9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "768ac5a0_fd2ba7b3",
+        "filename": "android/base/system/Win32Utils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T23:07:49Z",
+      "side": 1,
+      "message": "That\u0027s why it\u0027s \"use with caution\" :) Making mStr always point to something means a dynamic allocation or some even uglier special-case in code paths.",
+      "parentUuid": "96cad9dc_2fd7c9d4",
       "range": {
         "startLine": 82,
         "startChar": 1,
