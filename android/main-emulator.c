@@ -64,6 +64,13 @@ bool ranchu = false;
 #define GLES_EMULATION_LIB64  "lib64OpenglRender" DLL_EXTENSION
 
 /* Forward declarations */
+static char* probeTargetEmulatorPath(const char* progDir,
+                                     const char* variant,
+                                     const char* archSuffix,
+                                     bool search_for_64bit_emulator,
+                                     bool try_current_path,
+                                     bool* is_64bit);
+
 static char* getTargetEmulatorPath(const char* progDir,
                                    bool tryCurrentPath,
                                    const char* avdArch,
@@ -94,6 +101,8 @@ int main(int argc, char** argv)
     char*       emulatorPath;
     int         force_32bit = 0;
     bool        no_window = false;
+    bool process_crash = false;
+    const char* crash_arg = NULL;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -111,6 +120,15 @@ int main(int argc, char** argv)
     int  nn;
     for (nn = 1; nn < argc; nn++) {
         const char* opt = argv[nn];
+
+        if (!strcmp(opt, "-process-crash")) {
+            process_crash = true;
+            if (nn + 1 < argc) {
+                crash_arg = argv[nn + 1];
+                nn++;
+            }
+            break;
+        }
 
         if (!strcmp(opt,"-qemu"))
             break;
@@ -165,6 +183,42 @@ int main(int argc, char** argv)
                 avdName = opt+1;
             }
         }
+    }
+
+    /* Find program directory. */
+    char* progDir = NULL;
+    path_split(argv[0], &progDir, NULL);
+
+/* Only search in current path if there is no directory separator
+ * in |progName|. */
+#ifdef _WIN32
+    bool tryCurrentPath = (!strchr(argv[0], '/') && !strchr(argv[0], '\\'));
+#else
+    bool tryCurrentPath = !strchr(argv[0], '/');
+#endif
+
+#if CONFIG_QT
+    /* For Qt-based UI backends, add <lib>/qt/ to the library search path. */
+    androidQtSetupEnv();
+#endif
+
+    if (process_crash) {
+        bool is_64bit;
+        emulatorPath =
+                probeTargetEmulatorPath(progDir,          // progDir
+                                        NULL,             // variant
+                                        "crash-service",  // archSuffix
+                                        true,  // search_for_64bit_emulator
+                                        true,  // try_current_path
+                                        &is_64bit);  // is_64bit
+
+        char* crashargv[] = {emulatorPath, "-dumpfile", crash_arg, NULL};
+        safe_execv(emulatorPath, crashargv);
+
+        /* We could not launch the program ! */
+        fprintf(stderr, "Could not launch '%s': %s\n", emulatorPath,
+                strerror(errno));
+        return errno;
     }
 
     /* If ANDROID_EMULATOR_FORCE_32BIT is set to 'true' or '1' in the
@@ -223,17 +277,6 @@ int main(int argc, char** argv)
         D("Can't determine target AVD architecture: defaulting to %s\n", avdArch);
     }
 
-    /* Find program directory. */
-    char* progDir = NULL;
-    path_split(argv[0], &progDir, NULL);
-
-    /* Only search in current path if there is no directory separator
-     * in |progName|. */
-#ifdef _WIN32
-    bool tryCurrentPath = (!strchr(argv[0], '/') && !strchr(argv[0], '\\'));
-#else
-    bool tryCurrentPath = !strchr(argv[0], '/');
-#endif
 
     /* Find the architecture-specific program in the same directory */
     bool is_64bit = false;
@@ -273,11 +316,6 @@ int main(int argc, char** argv)
     D("%s\n", config.status);
 
     emuglConfig_setupEnv(&config);
-
-#if CONFIG_QT
-    /* For Qt-based UI backends, add <lib>/qt/ to the library search path. */
-    androidQtSetupEnv();
-#endif
 
 #ifdef _WIN32
     // Take care of quoting all parameters before sending them to execv().
