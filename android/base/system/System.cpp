@@ -372,7 +372,6 @@ public:
             command += android::base::Win32Utils::quoteCommandLine(commandLine[n].c_str());
         }
 
-        fprintf(stderr, "COMMAND [%s]\n", command.c_str());
         if (!CreateProcess(comspec,                /* program path */
                             (char*)command.c_str(), /* command line args */
                             NULL,             /* process handle is not inheritable */

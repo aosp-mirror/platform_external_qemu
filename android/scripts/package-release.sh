@@ -344,6 +344,18 @@ OPT_BUILD_QEMU2=
 option_register_var "--build-qemu2" OPT_BUILD_QEMU2 \
        "Build QEMU2 directly from sources."
 
+OPT_CRASHUPLOAD=
+option_register_var "--crash-upload" OPT_CRASHUPLOAD \
+       "Do not upload crashes."
+
+OPT_CRASH_STAGING=
+option_register_var "--crash-staging" OPT_CRASH_STAGING \
+       "Upload crashes to staging."
+
+OPT_CRASH_PROD=
+option_register_var "--crash-prod" OPT_CRASH_PROD \
+       "Upload crashes to production."
+
 package_builder_register_options
 aosp_prebuilts_dir_register_options
 prebuilts_dir_register_option
@@ -676,6 +688,14 @@ build_darwin_binaries_on () {
     fi
     if [ "$OPT_BUILD_QEMU2" ]; then
         var_append DARWIN_BUILD_FLAGS "--build-qemu2"
+    fi
+    if [ "$OPT_CRASHUPLOAD" ]; then
+        var_append DARWIN_BUILD_FLAGS "--crash-upload"
+    fi
+    if [ "$OPT_CRASH_STAGING" ]; then
+        var_append DARWIN_BUILD_FLAGS "--crash-staging"
+    elif [ "$OPT_CRASH_PROD" ]; then
+        var_append DARWIN_BUILD_FLAGS "--crash-prod"
     fi
 
     cat > $DARWIN_PKG_DIR/build.sh <<EOF
