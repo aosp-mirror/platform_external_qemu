@@ -37,6 +37,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/threads/ThreadStore_unittest.cpp \
   android/base/Uri_unittest.cpp \
   android/base/Version_unittest.cpp \
+  android/crashreport/CrashSystem_unittest.cpp \
   android/emulation/bufprint_config_dirs_unittest.cpp \
   android/emulation/ConfigDirs_unittest.cpp \
   android/emulation/control/LineConsumer_unittest.cpp \
