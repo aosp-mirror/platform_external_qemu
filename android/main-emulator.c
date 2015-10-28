@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <android/crashreport/crash-processor.h>
 #include <android/utils/compiler.h>
 #include <android/utils/host_bitness.h>
 #include <android/utils/panic.h>
@@ -94,6 +95,8 @@ int main(int argc, char** argv)
     char*       emulatorPath;
     int         force_32bit = 0;
     bool        no_window = false;
+    bool        process_crashes = false;
+    const char * crash_path = NULL;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -111,6 +114,15 @@ int main(int argc, char** argv)
     int  nn;
     for (nn = 1; nn < argc; nn++) {
         const char* opt = argv[nn];
+
+        if (!strcmp(opt,"-process-crash") ) {
+            process_crashes = true;
+            if (nn + 1 < argc) {
+              crash_path = argv[nn + 1];
+              nn++;
+            }
+            break;
+        }
 
         if (!strcmp(opt,"-qemu"))
             break;
@@ -165,6 +177,20 @@ int main(int argc, char** argv)
                 avdName = opt+1;
             }
         }
+    }
+
+    if (process_crashes)
+    {
+        if (crash_path == NULL) {
+            fprintf(stderr, "ERROR: Must provide a crash path. Available crashes:\n");
+            list_crashes();
+            exit(1);
+        } else if (!process_crash(crash_path)) {
+            fprintf(stderr, "ERROR: Couldn't process crash %s. Available crashes:\n", crash_path);
+            list_crashes();
+            exit(1);
+        }
+        exit(0);
     }
 
     /* If ANDROID_EMULATOR_FORCE_32BIT is set to 'true' or '1' in the
