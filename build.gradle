@@ -88,6 +88,11 @@ sdk {
             executable true
             builtBy buildDefaultEmulator
         }
+
+        item("$buildDefaultEmulator.output/emulator64-crash-service") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
     }
 
     // 32 bit binaries are linux only
@@ -121,6 +126,10 @@ sdk {
             builtBy buildDefaultEmulator
         }
         item("$buildDefaultEmulator.output/emulator-ranchu-mips64") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
+        item("$buildDefaultEmulator.output/emulator-crash-service") {
             executable true
             builtBy buildDefaultEmulator
         }
@@ -186,6 +195,10 @@ sdk {
         item("$buildWindowsEmulator.output/emulator-x86.exe") {
             builtBy buildWindowsEmulator
         }
+        item("$buildWindowsEmulator.output/emulator-crash-service.exe") {
+            builtBy buildWindowsEmulator
+        }
+
 
 /*
 XAV(2014-06-17): DISABLE win64 exe until it's ready
@@ -198,6 +211,10 @@ XAV(2014-06-17): DISABLE win64 exe until it's ready
         }
 
         item("$buildWindowsEmulator.output/emulator64-x86.exe") {
+            builtBy buildWindowsEmulator
+        }
+
+        item("$buildWindowsEmulator.output/emulator64-crash-service.exe") {
             builtBy buildWindowsEmulator
         }
 */
