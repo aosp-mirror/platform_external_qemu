@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "167c2956_e29f865a",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T22:40:44Z",
+      "side": 1,
+      "message": "The / won\u0027t appear in the result of GetModuleFileNameW as far as I understand. And that\u0027s what the previous code did. We may address that in a different patch.",
+      "parentUuid": "36a68d28_b4430685",
+      "range": {
+        "startLine": 103,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 53
+      },
+      "revId": "e02fc0df70959cce03ac5cbae2901a0373779603",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7621e584_cb4d29af",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "569941f8_3cd431cd",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T22:40:44Z",
+      "side": 1,
+      "message": "Because SHGetFolderPathW() expects a buffer that is exactly MAX_PATH items, and cannot return a longer string, so avoid un-necessary dynamic allocation.",
+      "parentUuid": "7621e584_cb4d29af",
+      "range": {
+        "startLine": 120,
+        "startChar": 12,
+        "endLine": 120,
+        "endChar": 19
+      },
+      "revId": "e02fc0df70959cce03ac5cbae2901a0373779603",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "769c85d8_b674ae8f",
         "filename": "android/base/system/System.h",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2015-10-28T22:36:35Z",
       "side": 1,
       "message": "AFAIK there\u0027s no such thing as empty environment variable on Windows. Do we really want to make it possible to have different behavior on different platforms?",
+      "range": {
+        "startLine": 131,
+        "startChar": 61,
+        "endLine": 131,
+        "endChar": 74
+      },
+      "revId": "e02fc0df70959cce03ac5cbae2901a0373779603",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "768ac5a0_7d5f974f",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T22:40:44Z",
+      "side": 1,
+      "message": "It doesn\u0027t really matter because every time we use getenv() in our code, we checked that the result was not NULL and not empty, i.e. we always consider the two cases to be equivalent.",
+      "parentUuid": "769c85d8_b674ae8f",
       "range": {
         "startLine": 131,
         "startChar": 61,
