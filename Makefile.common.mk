@@ -5,7 +5,7 @@ include $(LOCAL_PATH)/distrib/libxml2.mk
 include $(LOCAL_PATH)/distrib/libsparse/sources.mk
 include $(LOCAL_PATH)/distrib/libselinux/sources.mk
 include $(LOCAL_PATH)/distrib/ext4_utils/sources.mk
-include $(LOCAL_PATH)/distrib/libbreakpad_client.mk
+include $(LOCAL_PATH)/distrib/libbreakpad.mk
 include $(LOCAL_PATH)/distrib/Qt5.mk
 include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
 include $(LOCAL_PATH)/distrib/libpng.mk
@@ -91,6 +91,7 @@ ifdef EMULATOR_USE_QT
 endif
 
 LOCAL_STATIC_LIBRARIES := emulator-common $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1)
+
 # Ensure this is always built, even if 32-bit binaries are disabled.
 LOCAL_IGNORE_BITNESS := true
 
@@ -110,6 +111,68 @@ $(call local-link-static-c++lib)
 
 $(call end-emulator-program)
 endif  # HOST_BITS == EMULATOR_PROGRAM_BITNESS
+
+##############################################################################
+##############################################################################
+###
+###  emulator-crash-service: Service for emulator crash dumps
+###
+
+# NOTE: Build as 32-bit or 64-bit executable, depending on the value of
+#       EMULATOR_PROGRAM_BITNESS.
+$(call start-emulator-program, emulator$(HOST_SUFFIX)-crash-service)
+LOCAL_SRC_FILES := \
+    android/crashreport/main-crash-service.cpp \
+    android/crashreport/CrashSystem.cpp \
+    android/crashreport/CrashService_common.cpp \
+    android/crashreport/CrashService_$(HOST_OS).cpp \
+    android/crashreport/ui/ConfirmDialog.cpp \
+    android/curl-support.c \
+    android/emulation/ConfigDirs.cpp \
+    android/resource.c \
+    android/skin/resource.c \
+
+LOCAL_STATIC_LIBRARIES += \
+    android-emu-base \
+    emulator-libui \
+    emulator-common \
+    $(LIBCURL_STATIC_LIBRARIES) \
+    $(EMULATOR_LIBUI_STATIC_LIBRARIES) \
+    $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
+    $(BREAKPAD_STATIC_LIBRARIES) \
+
+
+LOCAL_QT_MOC_SRC_FILES := \
+    android/crashreport/ui/ConfirmDialog.h \
+
+ifeq ($(HOST_OS),windows)
+LOCAL_LDFLAGS += -L$(QT_TOP_DIR)/bin
+else
+LOCAL_LDFLAGS += $(EMULATOR_LIBUI_LDFLAGS)
+endif
+LOCAL_LDLIBS += $(EMULATOR_LIBUI_LDLIBS)
+LOCAL_LDLIBS += $(LIBCURL_LDLIBS)
+LOCAL_LDLIBS += $(BREAKPAD_CLIENT_LDLIBS)
+LOCAL_LDLIBS += $(BREAKPAD_LDLIBS)
+ifdef EMULATOR_CRASHUPLOAD
+    LOCAL_CFLAGS += -DCRASHUPLOAD=$(EMULATOR_CRASHUPLOAD)
+endif
+LOCAL_CFLAGS += -DCONFIG_QT
+LOCAL_CFLAGS += $(LIBCURL_CFLAGS)
+LOCAL_C_INCLUDES += \
+    $(BREAKPAD_INCLUDES) \
+    $(BREAKPAD_CLIENT_INCLUDES) \
+    $(EMULATOR_LIBUI_INCLUDES) \
+    $(LIBCURL_INCLUDES) \
+LOCAL_CFLAGS += $(EMULATOR_LIBUI_CFLAGS)
+
+LOCAL_LDLIBS += $(CXX_STD_LIB)
+
+ifeq ($(HOST_OS),windows)
+$(eval $(call insert-windows-icon))
+endif
+
+$(call end-emulator-program)
 
 include $(LOCAL_PATH)/Makefile.tests.mk
 
