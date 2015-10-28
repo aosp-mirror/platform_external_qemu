@@ -117,13 +117,19 @@ public:
     static String findBundledExecutable(const char* programName);
 
     // Retrieve the value of a given environment variable.
-    // Equivalent to getenv().
-    virtual const char* envGet(const char* varname) const = 0;
+    // Equivalent to getenv() but returns a String instance.
+    // If the variable is not defined, return an empty string.
+    // NOTE: On Windows, this uses _wgetenv() and returns the corresponding
+    // UTF-8 text string.
+    virtual String envGet(const char* varname) const = 0;
 
     // Set the value of a given environment variable.
     // If |varvalue| is NULL or empty, this unsets the variable.
     // Equivalent to setenv().
     virtual void envSet(const char* varname, const char* varvalue) = 0;
+
+    // Returns true if environment variable |varname| is set and non-empty.
+    virtual bool envTest(const char* varname) const = 0;
 
     // Return true iff |path| exists on the file system.
     virtual bool pathExists(const char* path) = 0;
