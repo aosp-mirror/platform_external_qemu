@@ -1,0 +1,7 @@
+Code-Review+2: Jim Kaye <jameskaye@google.com>
+Verified+1: Bo Hu <bohu@google.com>
+Submitted-by: Bo Hu <bohu@google.com>
+Submitted-at: Wed, 28 Oct 2015 20:41:11 +0000
+Reviewed-on: https://android-review.googlesource.com/177188
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
