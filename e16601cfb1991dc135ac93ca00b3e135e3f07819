@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "768ac5a0_5d62db18",
+        "filename": "android/build/binary.make",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T23:16:22Z",
+      "side": 1,
+      "message": "I would suggest generating a pattern list instead, e.g.:\n\n  \n  LOCAL_CXX_EXTENSION_PATTERNS :\u003d $(foreach pattern,$(LOCAL_CPP_EXTENSION),%$(pattern))\n\n  LOCAL_GENERATED_CXX_SOURCES :\u003d \\\n    $(filter $(LOCAL_CXX_EXTENSION_PATTERNS),\\\n      $(LOCAL_GENERATED_SOURCES))\n  LOCAL_CXX_SOURCES :\u003d \\\n    $(filter $(LOCAL_CXX_EXTENSION_PATTERNS),\\\n      $(LOCAL_SRC_FILES))\n  \n\nLOCAL_CXX_EXTENSION_PATTERNS can be also used in definitions.mk\n\nThis allows to define LOCAL_CPP_EXTENSION to \u0027.cpp .cc .C .cxx .c++\u0027 by default.",
+      "revId": "e16601cfb1991dc135ac93ca00b3e135e3f07819",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "166509c4_faf6498b",
+        "filename": "android/build/definitions.make",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T23:16:22Z",
+      "side": 1,
+      "message": "or:\n\n  OBJ :\u003d $$(LOCAL_OBJS_DIR)/$$(call local-cxx-src-to-obj,$$(SRC))\n\nwith a definition:\n\n  local-cxx-src-to-obj \u003d $(strip \\\n    $(eval _local_cxx_src :\u003d $1)\\\n    $(foreach pattern,$(LOCAL_CXX_EXTENSION_PATTERNS),\\\n      $(eval _local_cxx_src :\u003d $$(_local_cxx_src:$(pattern)\u003d%.o)))\\\n    $(_local_cxx_src))",
+      "revId": "e16601cfb1991dc135ac93ca00b3e135e3f07819",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
