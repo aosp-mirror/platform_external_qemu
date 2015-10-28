@@ -5,7 +5,7 @@ include $(LOCAL_PATH)/distrib/libxml2.mk
 include $(LOCAL_PATH)/distrib/libsparse/sources.mk
 include $(LOCAL_PATH)/distrib/libselinux/sources.mk
 include $(LOCAL_PATH)/distrib/ext4_utils/sources.mk
-include $(LOCAL_PATH)/distrib/libbreakpad_client.mk
+include $(LOCAL_PATH)/distrib/libbreakpad.mk
 include $(LOCAL_PATH)/distrib/Qt5.mk
 include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
 include $(LOCAL_PATH)/distrib/libpng.mk
@@ -83,7 +83,9 @@ ifdef EMULATOR_USE_QT
     LOCAL_CFLAGS += -DCONFIG_QT
 endif
 
-LOCAL_STATIC_LIBRARIES := emulator-common
+LOCAL_STATIC_LIBRARIES := \
+    emulator-common \
+
 # Ensure this is always built, even if 32-bit binaries are disabled.
 LOCAL_IGNORE_BITNESS := true
 
@@ -102,6 +104,55 @@ LOCAL_LDFLAGS += $(BUILD_STATIC_FLAGS)
 
 $(call end-emulator-program)
 endif  # HOST_BITS == EMULATOR_PROGRAM_BITNESS
+
+##############################################################################
+##############################################################################
+###
+###  emulator-crash-service: Service for emulator crash dumps
+###
+
+# NOTE: Build as 32-bit or 64-bit executable, depending on the value of
+#       EMULATOR_PROGRAM_BITNESS.
+$(call start-emulator-program, emulator$(HOST_SUFFIX)-crash-service)
+LOCAL_SRC_FILES := \
+    android/crashreport/CrashService.cpp \
+    android/utils/system.c \
+
+LOCAL_STATIC_LIBRARIES += \
+    emulator-libui \
+    emulator-common \
+    $(LIBCURL_STATIC_LIBRARIES) \
+    $(EMULATOR_LIBUI_STATIC_LIBRARIES) \
+    $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
+    $(BREAKPAD_STATIC_LIBRARIES) \
+
+ifeq ($(HOST_OS),windows)
+LOCAL_LDFLAGS += -L$(QT_TOP_DIR)/bin
+else
+LOCAL_LDFLAGS += $(EMULATOR_LIBUI_LDFLAGS)
+endif
+LOCAL_LDLIBS += $(EMULATOR_LIBUI_LDLIBS)
+LOCAL_LDLIBS += $(LIBCURL_LDLIBS)
+LOCAL_LDLIBS += $(BREAKPAD_CLIENT_LDLIBS)
+LOCAL_LDLIBS += $(BREAKPAD_LDLIBS)
+LOCAL_CFLAGS += -DCONFIG_QT -DCURL_STATICLIB
+LOCAL_CFLAGS += -I$(LIBCURL_INCLUDES)
+LOCAL_CFLAGS += -I$(BREAKPAD_CLIENT_INCLUDES)
+LOCAL_CFLAGS += -I$(BREAKPAD_INCLUDES)
+LOCAL_CFLAGS += $(EMULATOR_LIBUI_CFLAGS)
+LOCAL_GENERATE_SYMBOLS := true
+
+# Ensure this is always built, even if 32-bit binaries are disabled.
+LOCAL_IGNORE_BITNESS := true
+
+LOCAL_LDLIBS += $(CXX_STD_LIB)
+LOCAL_GENERATE_SYMBOLS := true
+
+ifeq ($(HOST_OS),windows)
+$(eval $(call insert-windows-icon))
+endif
+
+$(call end-emulator-program)
 
 include $(LOCAL_PATH)/Makefile.tests.mk
 

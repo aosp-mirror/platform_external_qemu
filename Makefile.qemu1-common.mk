@@ -79,6 +79,11 @@ ifdef ANDROID_SDK_TOOLS_REVISION
     EMULATOR_COMMON_CFLAGS += -DANDROID_SDK_TOOLS_REVISION=$(ANDROID_SDK_TOOLS_REVISION)
 endif
 
+ANDROID_BUILD_NUMBER := $(strip $(BUILD_NUMBER))
+ifdef ANDROID_BUILD_NUMBER
+    EMULATOR_COMMON_CFLAGS += -DANDROID_BUILD_NUMBER=$(ANDROID_BUILD_NUMBER)
+endif
+
 # Enable large-file support (i.e. make off_t a 64-bit value)
 ifeq ($(HOST_OS),linux)
 EMULATOR_COMMON_CFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
@@ -105,6 +110,11 @@ EMULATOR_COMMON_CFLAGS += -I$(GLIB_INCLUDE_DIR)
 common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
 
 EMULATOR_COMMON_CFLAGS += $(LIBCURL_CFLAGS)
+
+EMULATOR_CRASHUPLOAD := $(strip $(EMULATOR_CRASHUPLOAD))
+ifdef EMULATOR_CRASHUPLOAD
+    EMULATOR_COMMON_CFLAGS += -DCRASHUPLOAD=$(EMULATOR_CRASHUPLOAD)
+endif
 
 ###########################################################
 # Android utility functions
@@ -147,6 +157,8 @@ common_LOCAL_SRC_FILES += \
     android/base/threads/ThreadStore.cpp \
     android/base/Uri.cpp \
     android/base/Version.cpp \
+    android/crashreport/CrashPaths.cpp \
+    android/crashreport/CrashReporter.cpp \
     android/emulation/android_pipe.c \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
@@ -253,7 +265,7 @@ include $(LOCAL_PATH)/android/wear-agent/sources.mk
 $(call start-emulator-library, emulator-common)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES)
 LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES)
-LOCAL_CFLAGS += -I$(BREAKPAD_INCLUDES)
+LOCAL_CFLAGS += -I$(BREAKPAD_CLIENT_INCLUDES)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
     LOCAL_IGNORE_BITNESS := true
