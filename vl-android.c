@@ -49,6 +49,7 @@
 #include "android-qemu1-glue/qemu-setup.h"
 #include "android/android.h"
 #include "android/camera/camera-service.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/curl-support.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/filesystems/partition_config.h"
@@ -1966,6 +1967,10 @@ int main(int argc, char **argv, char **envp)
     STRALLOC_DEFINE(kernel_params);
     STRALLOC_DEFINE(kernel_config);
     int    dns_count = 0;
+
+    if (!crashhandler_init()) {
+        VERBOSE_PRINT(init, "Crash handling not initialized\n");
+    }
 
     // libcurl initialization is thread-unsafe, so let's call it first
     // to make sure no other thread could be doing the same
