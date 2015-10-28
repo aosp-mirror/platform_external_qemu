@@ -37,6 +37,8 @@
 
 static double get_default_scale( AndroidOptions*  opts );
 
+int qemu_net_disable = 0;
+
 /* EmulatorWindow structure instance. */
 static EmulatorWindow   qemulator[1];
 
@@ -142,11 +144,9 @@ static int emulator_window_opengles_hide_window(void) {
     }
 }
 
-static int emulator_window_opengles_move_window(int x, int y, int width, int height) {
+static void emulator_window_opengles_move_window(int x, int y, int width, int height) {
     if (s_use_emugl_subwindow) {
-        return android_moveOpenglesWindow(x, y, width, height);
-    } else {
-        return 0;
+        android_moveOpenglesWindow(x, y, width, height);
     }
 }
 
@@ -257,9 +257,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
                           emulator->onion_alpha);
     }
 
-#if CONFIG_QT
     setUiEmuAgent(emulator->uiEmuAgent);
-#endif
 
     // Determine whether to use an EmuGL sub-window or not.
     if (!s_use_emugl_subwindow) {
