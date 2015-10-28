@@ -52,6 +52,10 @@ namespace base {
 
 namespace {
 
+#ifdef _WIN32
+using UnicodeString = android::base::Win32Utils::UnicodeString;
+#endif
+
 class HostSystem : public System {
 public:
     HostSystem() : mProgramDir(), mHomeDir(), mAppDataDir() {}
@@ -88,15 +92,19 @@ public:
                 mProgramDir.assign("<unknown-application-dir>");
             }
 #elif defined(_WIN32)
-            char appDir[PATH_MAX];
-            int len = GetModuleFileName(0, appDir, sizeof(appDir)-1);
+            UnicodeString appDir(PATH_MAX);
+            int len = GetModuleFileNameW(0, appDir.data(), appDir.size());
             mProgramDir.assign("<unknown-application-dir>");
-            if (len > 0 && len < (int)sizeof(appDir)) {
-                appDir[len] = 0;
-                char* sep = ::strrchr(appDir, '\\');
+            if (len > 0) {
+                if (len > (int)appDir.size()) {
+                    appDir.resize(static_cast<size_t>(len));
+                    GetModuleFileNameW(0, appDir.data(), appDir.size());
+                }
+                String dir = appDir.toString();
+                char* sep = ::strrchr(&dir[0], '\\');
                 if (sep) {
                     *sep = '\0';
-                    mProgramDir.assign(appDir);
+                    mProgramDir.assign(dir.c_str());
                 }
             }
 #else
@@ -109,17 +117,17 @@ public:
     virtual const String& getHomeDirectory() const {
         if (mHomeDir.empty()) {
 #if defined(_WIN32)
-            char path[MAX_PATH] = { 0 };
+            wchar_t path[MAX_PATH] = { 0 };
             // Query Windows shell for known folder paths.
             // SHGetFolderPath acts as a wrapper to KnownFolders;
             // this is preferred for simplicity and XP compatibility
-            if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PROFILE, NULL, 0, path))) {
-                mHomeDir.assign(path);
+            if(SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, path))) {
+                mHomeDir = UnicodeString(path).toString();
             } else {
                 // Fallback to windows-equivalent of HOME env var
-                const char *homedrive = getenv("HOMEDRIVE");
-                const char *homepath  = getenv("HOMEPATH");
-                if(homedrive != NULL && homepath != NULL) {
+                String homedrive = envGet("HOMEDRIVE");
+                String homepath = envGet("HOMEPATH");
+                if(!homedrive.empty() && !homepath.empty()) {
                     mHomeDir.assign(homedrive);
                     mHomeDir.append(homepath);
                 }
@@ -147,13 +155,13 @@ public:
     virtual const String& getAppDataDirectory() const {
 #if defined(_WIN32)
         if (mAppDataDir.empty()) {
-            char path[MAX_PATH] = { 0 };
-            if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path))) {
-                mAppDataDir.assign(path);
+            wchar_t path[MAX_PATH] = { 0 };
+            if(SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, 0, path))) {
+                mAppDataDir = UnicodeString(path).toString();
             } else {
-                const char *appdata = getenv("APPDATA");
+                const wchar_t* appdata = _wgetenv(L"APPDATA");
                 if(appdata != NULL) {
-                    mAppDataDir.assign(appdata);
+                    mAppDataDir = UnicodeString(appdata).toString();
                 }
             }
         }
@@ -249,8 +257,22 @@ public:
         return result;
     }
 
-    virtual const char* envGet(const char* varname) const {
-        return getenv(varname);
+    virtual String envGet(const char* varname) const {
+#ifdef _WIN32
+        UnicodeString varname_unicode(varname);
+        const wchar_t* value = _wgetenv(varname_unicode.c_str());
+        if (!value) {
+            return String();
+        } else {
+            return UnicodeString(value).toString();
+        }
+#else
+        const char* value = getenv(varname);
+        if (!value) {
+            value = "";
+        }
+        return String(value);
+#endif
     }
 
     virtual void envSet(const char* varname, const char* varvalue) {
@@ -258,10 +280,9 @@ public:
         if (!varvalue || !varvalue[0]) {
             varvalue = "";
         }
-        size_t length = ::strlen(varname) + ::strlen(varvalue) + 2;
-        char* string = static_cast<char*>(malloc(length));
-        snprintf(string, length, "%s=%s", varname, varvalue);
-        putenv(string);
+        String envStr = StringFormat("%s=%s", varname, varvalue);
+        // Note: this leaks the result of release().
+        _wputenv(UnicodeString(envStr).release());
 #else
         if (!varvalue || !varvalue[0]) {
             unsetenv(varname);
@@ -271,14 +292,25 @@ public:
 #endif
     }
 
+    virtual bool envTest(const char* varname) const {
+#ifdef _WIN32
+        UnicodeString varname_unicode(varname);
+        const wchar_t* value = _wgetenv(varname_unicode.c_str());
+        return value && value[0] != L'\0';
+#else
+        const char* value = getenv(varname);
+        return value && value[0] != '\0';
+#endif
+    }
+
     virtual bool isRemoteSession(String* sessionType) const {
-        if (getenv("NX_TEMP") != NULL) {
+        if (envTest("NX_TEMP")) {
             if (sessionType) {
                 *sessionType = "NX";
             }
             return true;
         }
-        if (getenv("CHROME_REMOTE_DESKTOP_SESSION") != NULL) {
+        if (envTest("CHROME_REMOTE_DESKTOP_SESSION")) {
             if (sessionType) {
                 *sessionType = "Chrome Remote Desktop";
             }
@@ -351,7 +383,7 @@ public:
         }
 
 #ifdef _WIN32
-        STARTUPINFO startup;
+        STARTUPINFOW startup;
         ZeroMemory(&startup, sizeof(startup));
         startup.cb = sizeof(startup);
         startup.dwFlags = STARTF_USESHOWWINDOW;
@@ -360,9 +392,9 @@ public:
         PROCESS_INFORMATION pinfo;
         ZeroMemory(&pinfo, sizeof(pinfo));
 
-        const char* comspec = ::getenv("COMSPEC");
-        if (!comspec) {
-            comspec = "cmd.exe";
+        const wchar_t* comspec = _wgetenv(L"COMSPEC");
+        if (!comspec || !comspec[0]) {
+            comspec = L"cmd.exe";
         }
 
         // Run the command.
@@ -372,9 +404,12 @@ public:
             command += android::base::Win32Utils::quoteCommandLine(commandLine[n].c_str());
         }
 
-        fprintf(stderr, "COMMAND [%s]\n", command.c_str());
-        if (!CreateProcess(comspec,                /* program path */
-                            (char*)command.c_str(), /* command line args */
+        UnicodeString command_unicode(command);
+
+        // NOTE: CreateProcessW expects a _writable_ pointer as its second
+        // parameter, so use .data() instead of .c_str().
+        if (!CreateProcessW(comspec,                /* program path */
+                            command_unicode.data(), /* command line args */
                             NULL,             /* process handle is not inheritable */
                             NULL,             /* thread handle is not inheritable */
                             FALSE,            /* no, don't inherit any handles */
@@ -418,18 +453,21 @@ public:
 
     virtual String getTempDir() const {
 #ifdef _WIN32
-        char path[PATH_MAX];
-        DWORD retval = GetTempPath(sizeof(path), path);
-        if (retval > sizeof(path) || retval == 0) {
+        UnicodeString path(PATH_MAX);
+        DWORD retval = GetTempPathW(path.size(), path.data());
+        if (!retval) {
             // Best effort!
             return String("C:\\Temp");
         }
+        if (retval > path.size()) {
+            path.resize(static_cast<size_t>(retval));
+            GetTempPathW(path.size(), path.data());
+        }
         // The result of GetTempPath() is already user-dependent
         // so don't append the username or userid to the result.
-        String result(path);
-        result += "\\AndroidEmulator";
-        ::mkdir(result.c_str());
-        return result;
+        path.append(L"\\AndroidEmulator");
+        ::_wmkdir(path.c_str());
+        return path.toString();
 #else   // !_WIN32
         String result;
         const char* tmppath = getenv("ANDROID_TMP");
@@ -508,15 +546,16 @@ StringVector System::scanDirInternal(const char* dirPath) {
     String root(dirPath);
     root = PathUtils::addTrailingDirSeparator(root);
     root += '*';
-    struct _finddata_t findData;
-    intptr_t findIndex = _findfirst(root.c_str(), &findData);
+    UnicodeString rootUnicode(root);
+    struct _wfinddata_t findData;
+    intptr_t findIndex = _wfindfirst(rootUnicode.c_str(), &findData);
     if (findIndex >= 0) {
         do {
-            const char* name = findData.name;
-            if (strcmp(name, ".") != 0 && strcmp(name, "..") != 0) {
-                result.append(String(name));
+            const wchar_t* name = findData.name;
+            if (wcscmp(name, L".") != 0 && wcscmp(name, L"..") != 0) {
+                result.append(UnicodeString(name).toString());
             }
-        } while (_findnext(findIndex, &findData) >= 0);
+        } while (_wfindnext(findIndex, &findData) >= 0);
         _findclose(findIndex);
     }
 #else  // !_WIN32
@@ -544,7 +583,11 @@ bool System::pathExistsInternal(const char* path) {
     if (!path) {
         return false;
     }
+#ifdef _WIN32
+    int ret = _waccess(UnicodeString(path).c_str(), F_OK);
+#else
     int ret = HANDLE_EINTR(access(path, F_OK));
+#endif
     return (ret == 0) || (errno != ENOENT);
 }
 
@@ -553,8 +596,13 @@ bool System::pathIsFileInternal(const char* path) {
     if (!path) {
         return false;
     }
+#ifdef _WIN32
+    struct _stat st;
+    int ret = _wstat(UnicodeString(path).c_str(), &st);
+#else
     struct stat st;
     int ret = HANDLE_EINTR(stat(path, &st));
+#endif
     if (ret < 0) {
         return false;
     }
@@ -566,8 +614,13 @@ bool System::pathIsDirInternal(const char* path) {
     if (!path) {
         return false;
     }
+#ifdef _WIN32
+    struct _stat st;
+    int ret = _wstat(UnicodeString(path).c_str(), &st);
+#else
     struct stat st;
     int ret = HANDLE_EINTR(stat(path, &st));
+#endif
     if (ret < 0) {
         return false;
     }
@@ -579,8 +632,7 @@ void System::addLibrarySearchDir(const char* path) {
     System* system = System::get();
     const char* varName = kLibrarySearchListEnvVarName;
 
-    const char* env = system->envGet(varName);
-    String libSearchPath = env ? env : "";
+    String libSearchPath = system->envGet(varName);
     if (libSearchPath.size()) {
         libSearchPath = StringFormat("%s%c%s",
                                      path,

@@ -140,11 +140,14 @@ TEST(System, envGetAndSet) {
     const char kVarName[] = "FOO_BAR_TESTING_STUFF";
     const char kVarValue[] = "SomethingCompletelyRandomForYou!";
 
-    EXPECT_FALSE(sys->envGet(kVarName));
+    EXPECT_FALSE(sys->envTest(kVarName));
+    EXPECT_STREQ("", sys->envGet(kVarName).c_str());
     sys->envSet(kVarName, kVarValue);
-    EXPECT_STREQ(kVarValue, sys->envGet(kVarName));
+    EXPECT_TRUE(sys->envTest(kVarName));
+    EXPECT_STREQ(kVarValue, sys->envGet(kVarName).c_str());
     sys->envSet(kVarName, NULL);
-    EXPECT_FALSE(sys->envGet(kVarName));
+    EXPECT_FALSE(sys->envTest(kVarName));
+    EXPECT_STREQ("", sys->envGet(kVarName).c_str());
 }
 
 TEST(System, scanDirEntriesWithFullPaths) {

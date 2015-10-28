@@ -70,14 +70,14 @@ public:
         return mHostBitness;
     }
 
-    virtual const char* envGet(const char* varname) const {
+    virtual String envGet(const char* varname) const {
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
             const String& name = mEnvPairs[n];
             if (name == varname) {
-                return mEnvPairs[n + 1].c_str();
+                return mEnvPairs[n + 1];
             }
         }
-        return NULL;
+        return String();
     }
 
     virtual void envSet(const char* varname, const char* varvalue) {
@@ -106,6 +106,17 @@ public:
             }
         }
     }
+
+    virtual bool envTest(const char* varname) const {
+        for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
+            const String& name = mEnvPairs[n];
+            if (name == varname) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     virtual bool pathExists(const char* path) {
         return pathExistsInternal(toTempRoot(path).c_str());
