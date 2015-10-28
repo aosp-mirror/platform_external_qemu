@@ -38,6 +38,8 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/threads/ThreadStore_unittest.cpp \
   android/base/Uri_unittest.cpp \
   android/base/Version_unittest.cpp \
+  android/crashreport/CrashService_unittest.cpp \
+  android/crashreport/CrashSystem_unittest.cpp \
   android/emulation/bufprint_config_dirs_unittest.cpp \
   android/emulation/ConfigDirs_unittest.cpp \
   android/emulation/control/LineConsumer_unittest.cpp \
@@ -100,10 +102,22 @@ EMULATOR_UNITTESTS_SOURCES += \
 endif
 
 $(call start-emulator-program, emulator$(HOST_SUFFIX)_unittests)
-LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include  $(LIBXML2_INCLUDES)
-LOCAL_LDLIBS += $(LIBCURL_LDLIBS)
-LOCAL_SRC_FILES := $(EMULATOR_UNITTESTS_SOURCES)
-LOCAL_CFLAGS += -O0 -I$(LIBCURL_INCLUDES) $(EMULATOR_UNITTESTS_CFLAGS)
+LOCAL_C_INCLUDES += \
+    $(EMULATOR_GTEST_INCLUDES) \
+    $(LOCAL_PATH)/include \
+    $(LIBCURL_INCLUDES) \
+    $(LIBXML2_INCLUDES) \
+    $(BREAKPAD_INCLUDES) \
+
+LOCAL_LDLIBS += \
+    $(LIBCURL_LDLIBS) \
+
+LOCAL_SRC_FILES := \
+    $(EMULATOR_UNITTESTS_SOURCES) \
+    android/crashreport/CrashService_common.cpp \
+    android/crashreport/CrashService_$(HOST_OS).cpp \
+
+LOCAL_CFLAGS += -O0 $(LIBCURL_CFLAGS) $(EMULATOR_UNITTESTS_CFLAGS)
 LOCAL_LDFLAGS += $(EMULATOR_UNITTESTS_LDFLAGS)
 LOCAL_STATIC_LIBRARIES += \
     libandroid-wear-agent \
@@ -115,6 +129,8 @@ LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
     $(LIBCURL_STATIC_LIBRARIES) \
     $(LIBXML2_STATIC_LIBRARIES) \
+    $(BREAKPAD_STATIC_LIBRARIES) \
+    $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
     emulator-libext4_utils \
     emulator-libsparse \
     emulator-libselinux \
