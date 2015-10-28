@@ -1,0 +1,514 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d61611dc_78b12119",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: please respect alphabetical ordering. Also keep a trailing \\ on the last line to simplify future diffs.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d68b716e_90a954b8",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: remove tab here and below.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3625ad43_b3aef8bb",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "since this is repeated, it might be worthwhile to create a Make function for this, as in:\n\n  EMULATOR_CRASH_CFLAGS :\u003d $(strip \\\n    $(if $(EMULATOR_CRASHUPLOAD),-DCRASHUPLOAD\u003d$(EMULATOR_CRASHUPLOAD)) \\\n    $(if $(EMULATOR_CRASHSERVER),-DCRASHSERVER\u003d$(EMULATOR_CRASHSERVER))\\\n    )\n\n  ...\n\n  LOCAL_CFLAGS +\u003d $(EMULATOR_CRASH_CFLAGS)",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f684f55e_91a95cb8",
+        "filename": "Makefile.qemu1-common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: alphabetical order",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3625ad43_53b4440a",
+        "filename": "Makefile.top.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this be MY_LDFLAGS instead?",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3625ad43_73b14019",
+        "filename": "android-configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: Documented as --crash-no-upload, but see below",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d68b716e_b0aed8bb",
+        "filename": "android-configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: Use --crash-upload\u003d\u003cmode\u003e with \u003cmode\u003e in [ \u0027none\u0027, \u0027staging\u0027, \u0027prod\u0027 ] instead.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d68b716e_50b44c0a",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "Only use ALL_CAPS_STYLE for C macros, just use |process_flags| here.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3625ad43_13becce8",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "we probably want to remove this.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3625ad43_33bbc8f9",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "same here actually ;)",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16826951_b2aee0bb",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "what about stdin?",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16826951_92a95cb8",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "This needs documentation. Also do you really want a non-silent version of this function? This is going to pollute the emulator\u0027s stdout/stderr unless the caller has redirected the stream (which doesn\u0027t happen in your patch).\n\nAlso, if necessary, move this to its own CL please.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762ba517_95a964b8",
+        "filename": "android/base/testing/TestSystem.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: remove extra line",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762ba517_b5aee0bb",
+        "filename": "android/crashreport/BreakpadHandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: Add copyright disclaimer here.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f684f55e_b1aee0bb",
+        "filename": "android/crashreport/BreakpadHandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: header inclusion order, please follow coding style whenever possible.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f684f55e_51b4540a",
+        "filename": "android/crashreport/BreakpadHandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: remove trailing space",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "562a2115_54b42c0a",
+        "filename": "android/crashreport/BreakpadHandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "that\u0027s not gonna work. Actually we really need helper functions to convert between UTF-8 and Windows Unicode paths. I\u0027ll add something and add you as a reviewer.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f684f55e_71b15819",
+        "filename": "android/crashreport/BreakpadProcessor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: header ordering.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6199d10_f7a460e1",
+        "filename": "android/crashreport/BreakpadProcessor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: two spaces before //",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762ba517_55b42c0a",
+        "filename": "android/crashreport/BreakpadProcessor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: no ; after this.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d68b716e_70b15019",
+        "filename": "android/crashreport/BreakpadUtils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "ordering + copyright",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762ba517_15beb4e8",
+        "filename": "android/crashreport/BreakpadUtils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: You can append a \u0027const char *\u0027 directly without creating a temporary String() instance.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762ba517_75b12819",
+        "filename": "android/crashreport/BreakpadUtils.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: header ordering + missing copyright disclaimer",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16826951_52b4540a",
+        "filename": "android/crashreport/BreakpadUtils.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "never put \"using\" in top-level public headers, this affect all source files that include it.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16826951_72b15819",
+        "filename": "android/crashreport/BreakpadUtils.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "if a struct, public: here is not needed, or change definition to \u0027class\u0027",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d68b716e_10bec4e8",
+        "filename": "android/crashreport/crash-handler.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "this need a little documentation here.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6199d10_97a964b8",
+        "filename": "android/crashreport/crash-handler.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "same here.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f684f55e_11becce8",
+        "filename": "android/crashreport/crash-processor.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "documentation?",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6199d10_b7aee8bb",
+        "filename": "android/scripts/upload-symbols.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: Add copyright disclaimer below + a modicus amount of documentation.",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3625ad43_d3c8548a",
+        "filename": "include/elf.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 1440,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "This is good but should go into its own CL",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
