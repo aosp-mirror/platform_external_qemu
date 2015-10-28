@@ -167,7 +167,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         case $SYSTEM in
             windows*)
-                build_breakpad_package --disable-processor
+                build_breakpad_package
                 ;;
             linux*)
                 build_breakpad_package
@@ -183,7 +183,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         copy_directory_files \
                 "$(builder_install_prefix)" \
                 "$INSTALL_DIR/$SYSTEM" \
-                lib/libbreakpad_client.a
+                lib/libbreakpad_client.a \
+                lib/libbreakpad.a \
+                lib/libdisasm.a \
 
         copy_directory \
                 "$(builder_install_prefix)/include/breakpad" \
