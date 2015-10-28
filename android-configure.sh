@@ -529,7 +529,11 @@ probe_prebuilts_dir () {
     local PREBUILTS_DIR
     PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/$3
     if [ ! -d "$PREBUILTS_DIR" ]; then
-        panic "Missing prebuilts directory: $PREBUILTS_DIR"
+        if [ -z "$4"]; then
+            panic "Missing prebuilts directory: $PREBUILTS_DIR"
+        else
+            echo "WARNING: Missing prebuilts directory: $PREBUILTS_DIR"
+        fi
     fi
     log "$1 prebuilts dir: $PREBUILTS_DIR"
     eval $2=\$PREBUILTS_DIR
@@ -590,7 +594,7 @@ fi
 ###
 ###  e2fsprogs probe
 ###
-probe_prebuilts_dir "e2fsprogs" E2FSPROGS_PREBUILTS_DIR common/e2fsprogs
+probe_prebuilts_dir "e2fsprogs" E2FSPROGS_PREBUILTS_DIR common/e2fsprogs 0
 
 # create the objs directory that is going to contain all generated files
 # including the configuration ones

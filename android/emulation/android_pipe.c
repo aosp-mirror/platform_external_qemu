@@ -44,7 +44,7 @@
  *****
  *****/
 
-#define MAX_PIPE_SERVICES  8
+#define MAX_PIPE_SERVICES  16
 typedef struct {
     const char* name;
     void* opaque;

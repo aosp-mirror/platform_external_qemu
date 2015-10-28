@@ -256,6 +256,8 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
     }
 
     int legacy_adb = avdInfo_getAdbdCommunicationMode(android_avdInfo) ? 0 : 1;
+    // TODO: fix
+    legacy_adb = 0;
 
     if (android_op_ports) {
         char* comma_location;
