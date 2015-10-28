@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "36920d67_ab85c9d5",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: Please respect alphabetical order, i.e.:\n\n  android/crashreport/BreakpadProcessor.cpp \\\n  android/crashreport/BreakpadUtils.cpp \\\n  android/main-emulator.c \\\n\nIt also helps to keep a trailing \\ on the last line, to reduce the diffs in the future when adding / removing lines. Though not necessary.",
+      "revId": "9663ba241da7bbd936d132e32aa8d238752f2425",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6b19df3_5a27b1eb",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: please remove the tab here.",
+      "revId": "9663ba241da7bbd936d132e32aa8d238752f2425",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16c1896c_1a323dd5",
+        "filename": "Makefile.qemu1-common.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: ordering.",
+      "revId": "9663ba241da7bbd936d132e32aa8d238752f2425",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56b5c1f6_1ca7d57f",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: Make it --crash-upload\u003d\u003cmode\u003e instead, with \u003cmode\u003e in [\u0027none\u0027, \u0027staging\u0027, \u0027prod\u0027]",
+      "revId": "9663ba241da7bbd936d132e32aa8d238752f2425",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1698a98e_623876b5",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: ALL_CAPS_STYLE is reserved for macros, just use |process_flags| here instead, it\u0027s less confusing.",
+      "revId": "9663ba241da7bbd936d132e32aa8d238752f2425",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d67c51f3_abd95556",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "Please remove this line.",
+      "revId": "9663ba241da7bbd936d132e32aa8d238752f2425",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36920d67_cb8215cb",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: should you update this comment (e.g. move it to the declaration of process_flags)?",
+      "revId": "9663ba241da7bbd936d132e32aa8d238752f2425",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7671e51a_653146bb",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "This needs documentation. Also, do you really want a non-silent version? This will likely pollute the emulator\u0027s output/error streams in unexpected ways, unless the caller has already redirected them (which you don\u0027t in this patch).\n\nIf you still need this, please move this change to its own CL first. And don\u0027t forget to add",
+      "revId": "9663ba241da7bbd936d132e32aa8d238752f2425",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f69a3588_81deda74",
+        "filename": "android/base/testing/TestSystem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: remove extra line",
+      "revId": "9663ba241da7bbd936d132e32aa8d238752f2425",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d67c51f3_cbd68925",
+        "filename": "android/crashreport/BreakpadHandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "nit: trailing space here.",
+      "revId": "9663ba241da7bbd936d132e32aa8d238752f2425",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36920d67_0b5edd0a",
+        "filename": "android/crashreport/BreakpadHandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "Are you sure you can use standard library functions in this function, which is called in the context of a signal handler?\n\nFrom the Breakpad wiki [1]:\n\nNote: You should do as little work as possible in the callback function. Your application is in an unsafe state. It may not be safe to allocate memory or call functions from other shared libraries. The safest thing to do is fork and exec a new process to do any work you need to do. If you must do some work in the callback, the Breakpad source contains some simple reimplementations of libc functions, to avoid calling directly into libc, as well as a header file for making Linux system calls (in src/third_party/lss) to avoid calling into other shared libraries.\n\n[1] https://code.google.com/p/google-breakpad/wiki/LinuxStarterGuide",
+      "revId": "9663ba241da7bbd936d132e32aa8d238752f2425",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56b5c1f6_7c8939ef",
+        "filename": "android/crashreport/BreakpadHandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T01:07:22Z",
+      "side": 1,
+      "message": "that\u0027s probably not what we want to do here. A better solution would be to:\n\n- Provide a utility function to convert from Windows 16-bit wchar_t to a String containing the equivalent UTF-8 text.\n\n- Ensure the implementation of runCommand() takes UTF-8 strings as input, and calls CreateProcessW() explicitly (instead of CreateProcess() which will translate to CreateProcessA() by default), converting the input to wchar_t strings as expected.\n\nThis probably belongs to a different CL, I\u0027ll provide one.",
+      "revId": "9663ba241da7bbd936d132e32aa8d238752f2425",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
