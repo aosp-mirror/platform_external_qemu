@@ -239,12 +239,9 @@ static String parseStudioXML(const StudioXml* const match) {
 
     System* sys = System::get();
     // Get path to .AndroidStudio
-    String studio;
-    const char* env_studio = sys->envGet("ANDROID_STUDIO_PREFERENCES");
-    if (env_studio != NULL) {
-        studio = String(env_studio);
-    } else {
-        String appDataPath;
+    String appDataPath;
+    String studio = sys->envGet("ANDROID_STUDIO_PREFERENCES");
+    if (studio.empty()) {
 #ifdef __APPLE__
         appDataPath = sys->getAppDataDirectory();
 #else
