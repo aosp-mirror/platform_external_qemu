@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "36a68d28_b4430685",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-28T22:36:35Z",
+      "side": 1,
+      "message": "Windows allows the / path separator, so this may not find it",
+      "range": {
+        "startLine": 103,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 53
+      },
+      "revId": "e02fc0df70959cce03ac5cbae2901a0373779603",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7621e584_cb4d29af",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-28T22:36:35Z",
+      "side": 1,
+      "message": "why not UnicodeString at once?",
+      "range": {
+        "startLine": 120,
+        "startChar": 12,
+        "endLine": 120,
+        "endChar": 19
+      },
+      "revId": "e02fc0df70959cce03ac5cbae2901a0373779603",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "769c85d8_b674ae8f",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-28T22:36:35Z",
+      "side": 1,
+      "message": "AFAIK there\u0027s no such thing as empty environment variable on Windows. Do we really want to make it possible to have different behavior on different platforms?",
+      "range": {
+        "startLine": 131,
+        "startChar": 61,
+        "endLine": 131,
+        "endChar": 74
+      },
+      "revId": "e02fc0df70959cce03ac5cbae2901a0373779603",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
