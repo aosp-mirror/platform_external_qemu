@@ -28,23 +28,23 @@ String ConfigDirs::getUserDirectory() {
     // Name of the Android configuration directory under $HOME.
     static const char kAndroidSubDir[] = ".android";
     System* system = System::get();
-    const char* home = system->envGet("ANDROID_EMULATOR_HOME");
-    if (home) {
-        return String(home);
+    String home = system->envGet("ANDROID_EMULATOR_HOME");
+    if (home.size()) {
+        return home;
     }
     home = system->envGet("ANDROID_SDK_HOME");
-    if (home) {
-        return StringFormat("%s%c%s", home, System::kDirSeparator,
+    if (home.size()) {
+        return StringFormat("%s%c%s", home.c_str(), System::kDirSeparator,
                             kAndroidSubDir);
     }
-    String homeDir = system->getHomeDirectory();
-    if (homeDir.empty()) {
-        homeDir = system->getTempDir();
-        if (homeDir.empty()) {
-            homeDir = "/tmp";
+    home = system->getHomeDirectory();
+    if (home.empty()) {
+        home = system->getTempDir();
+        if (home.empty()) {
+            home = "/tmp";
         }
     }
-    return StringFormat("%s%c%s", homeDir.c_str(), System::kDirSeparator,
+    return StringFormat("%s%c%s", home.c_str(), System::kDirSeparator,
                         kAndroidSubDir);
 }
 
@@ -52,9 +52,9 @@ String ConfigDirs::getUserDirectory() {
 String ConfigDirs::getAvdRootDirectory() {
     static const char kAvdSubDir[] = "avd";
     System* system = System::get();
-    const char* home = system->envGet("ANDROID_AVD_HOME");
-    if (home) {
-        return String(home);
+    String home = system->envGet("ANDROID_AVD_HOME");
+    if (home.size()) {
+        return home;
     }
     String result = getUserDirectory();
     result += System::kDirSeparator;
