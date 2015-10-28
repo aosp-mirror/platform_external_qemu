@@ -10,10 +10,18 @@
 // GNU General Public License for more details.
 
 #include "android/looper-qemu.h"
-#include "android-qemu1-glue/base/async/Looper.h"
+
+#include "android/base/async/Looper.h"
 #include "android/utils/looper.h"
 
 typedef ::Looper CLooper;
+
+namespace android { namespace qemu {
+
+// to be defined by a glue code
+extern android::base::Looper* createLooper();
+
+}}
 
 void qemu_looper_setForThread(void) {
     looper_setForThread(
