@@ -211,6 +211,24 @@
     },
     {
       "key": {
+        "uuid": "f67eb54f_218a4e1d",
+        "filename": "android-configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T23:13:37Z",
+      "side": 1,
+      "message": "What about --crash-upload\u003dmanual then?",
+      "parentUuid": "b640bdd4_e517d2e5",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d68b716e_50b44c0a",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 3
@@ -730,6 +748,24 @@
       "side": 1,
       "message": "When I change this to just c_str I get an ambiguity error:\n\n./android/base/containers/StringVector.h:48:10: note: void android::base::StringVector::append(const android::base::String\u0026)\n     void append(const String\u0026 str);\n          ^\n./android/base/containers/StringVector.h:61:10: note: void android::base::StringVector::append(const android::base::StringView\u0026)\n     void append(const StringView\u0026 view);",
       "parentUuid": "762ba517_15beb4e8",
+      "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "569941f8_7cceb93e",
+        "filename": "android/crashreport/BreakpadUtils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-28T23:13:37Z",
+      "side": 1,
+      "message": "Interesting, we should probably get rid of StringView since we don\u0027t really use it, even Chrome is getting rid of base::StringPiece because they noticed it created too many hidden calls to strlen() when passing const char* parameters.\n\nIn other word, add an android::base::String::append(const char*) method. Let\u0027s do this in a future patch, and let allow this code above. Thanks for the clarification",
+      "parentUuid": "76fd65bf_eb1a05b6",
       "revId": "af55cf4bb6315f4eaa44cf30fb6491d199561469",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
