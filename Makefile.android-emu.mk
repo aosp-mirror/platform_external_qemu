@@ -45,6 +45,7 @@ endif
 ANDROID_EMU_INTERNAL_INCLUDES := \
     $(OBJS_DIR)/build \
     $(ANDROID_EMU_INCLUDES) \
+    $(BREAKPAD_CLIENT_INCLUDES) \
     $(LIBCURL_INCLUDES) \
     $(LIBXML2_INCLUDES) \
     $(LIBEXT4_UTILS_INCLUDES) \
@@ -166,6 +167,8 @@ ANDROID_EMU_SOURCES := \
     android/async-utils.c \
     android/boot-properties.c \
     android/console.c \
+    android/crashreport/CrashSystem.cpp \
+    android/crashreport/CrashReporter.cpp \
     android/curl-support.c \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
