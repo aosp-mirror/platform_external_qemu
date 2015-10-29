@@ -216,6 +216,7 @@ ANDROID_EMU_DEPENDENT_SOURCES := \
     android/opengl/EmuglBackendList.cpp \
     android/opengl/EmuglBackendScanner.cpp \
     android/opengl/emugl_config.cpp \
+    android/windows_installer.cpp \
 
 ifeq (windows,$(HOST_OS))
 ANDROID_EMU_DEPENDENT_SOURCES += \

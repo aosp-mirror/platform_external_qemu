@@ -12,6 +12,9 @@
 #pragma once
 
 #include "android/base/String.h"
+#include "android/cpu_accelerator.h"
+#include <string>
+#include <stdlib.h>
 
 namespace android {
 
@@ -47,9 +50,16 @@ CpuAccelerator  GetCurrentCpuAccelerator();
 // the accelerator cannot be used.
 String GetCurrentCpuAcceleratorStatus();
 
+// Return an status code describing the state of the current CPU
+// acceleration on this machine. If GetCurrentCpuAccelerator() returns
+// CPU_ACCELERATOR_NONE this will contain a small explanation why
+// the accelerator cannot be used.
+AndroidCpuAcceleration GetCurrentCpuAcceleratorStatusCode();
+
 // For unit testing/debugging purpose only, must be called before
 // GetCurrentCpuAccelerator().
 void SetCurrentCpuAcceleratorForTesting(CpuAccelerator accel,
+                                        AndroidCpuAcceleration status_code,
                                         const char* status);
 
 }  // namespace android
