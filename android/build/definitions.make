@@ -38,6 +38,14 @@ endef
 hide :=
 endif
 
+# Replace all extensions in files from $1 matching any of
+# $(LOCAL_CXX_EXTENSION_PATTERNS) with .o
+local-cxx-src-to-obj = $(strip \
+    $(eval _local_cxx_src := $1)\
+    $(foreach pattern,$(LOCAL_CXX_EXTENSION_PATTERNS),\
+        $(eval _local_cxx_src := $$(_local_cxx_src:$(pattern)=%.o)))\
+    $(_local_cxx_src))
+
 # Return the parent directory of a given path.
 # $1: path
 parent-dir = $(dir $1)
@@ -142,7 +150,7 @@ endef
 #
 define  compile-cxx-source
 SRC:=$(1)
-OBJ:=$$(LOCAL_OBJS_DIR)/$$(SRC:%$(LOCAL_CPP_EXTENSION)=%.o)
+OBJ:=$$(LOCAL_OBJS_DIR)/$$(call local-cxx-src-to-obj,$$(SRC))
 LOCAL_OBJECTS += $$(OBJ)
 DEPENDENCY_DIRS += $$(dir $$(OBJ))
 $$(OBJ): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
@@ -200,7 +208,7 @@ endef
 
 define compile-generated-cxx-source
 SRC:=$(1)
-OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%$$(LOCAL_CPP_EXTENSION)=%.o))
+OBJ:=$$(LOCAL_OBJS_DIR)/$$(call local-cxx-src-to-obj,$$(notdir $$(SRC)))
 LOCAL_OBJECTS += $$(OBJ)
 DEPENDENCY_DIRS += $$(dir $$(OBJ))
 $$(OBJ): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
@@ -314,7 +322,7 @@ symbol-file-linker-flags = $(EXPORTED_SYMBOL_LIST_$(HOST_OS))$1
 # NOTE: This expects QT_MOC_TOOL to be defined.
 define compile-qt-moc-source
 SRC:=$(1)
-MOC_SRC:=$$(LOCAL_OBJS_DIR)/moc_$$(notdir $$(SRC:%.h=%$$(LOCAL_CPP_EXTENSION)))
+MOC_SRC:=$$(LOCAL_OBJS_DIR)/moc_$$(notdir $$(SRC:%.h=%.cpp))
 ifeq (,$$(strip $$(QT_MOC_TOOL)))
 $$(error QT_MOC_TOOL is not defined when trying to generate $$(MOC_SRC) !!)
 endif
@@ -337,7 +345,7 @@ endef
 # NOTE: This expects QT_RCC_TOOL to be defined.
 define compile-qt-resources
 SRC := $(1)
-RCC_SRC := $$(LOCAL_OBJS_DIR)/rcc_$$(notdir $$(SRC:%.qrc=%$$(LOCAL_CPP_EXTENSION)))
+RCC_SRC := $$(LOCAL_OBJS_DIR)/rcc_$$(notdir $$(SRC:%.qrc=%.cpp))
 ifeq (,$$(strip $$(QT_RCC_TOOL)))
 $$(error QT_RCC_TOOL is not defined when trying to generate $$(RCC_SRC) !!)
 endif
