@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7643a650_d2c9c2d2",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-29T23:53:53Z",
+      "side": 1,
+      "message": "nit: there are several places where one could actually get rid of one dynamic allocation and copying with a new Win32UnicodeString().attach(wchar_t*) method.",
+      "range": {
+        "startLine": 270,
+        "startChar": 19,
+        "endLine": 270,
+        "endChar": 37
+      },
+      "revId": "aed3b2d75eac42426bd992ab1119bc5ae35718f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
