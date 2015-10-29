@@ -49,6 +49,54 @@
     },
     {
       "key": {
+        "uuid": "96cad9dc_00a9fafd",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-29T17:16:13Z",
+      "side": 1,
+      "message": ":-)",
+      "parentUuid": "7673a594_758fa8b9",
+      "range": {
+        "startLine": 62,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 68
+      },
+      "revId": "9f2014cff21d4151c3b29686e845abdbf56b7d8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96cad9dc_a0b3c66d",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-29T17:16:13Z",
+      "side": 1,
+      "message": "I thought using those was verboten by our coding standard :) nice to learn that\u0027s not the case",
+      "parentUuid": "f6d955b5_be43ed84",
+      "range": {
+        "startLine": 62,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 68
+      },
+      "revId": "9f2014cff21d4151c3b29686e845abdbf56b7d8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "76c565cc_d49ccaa8",
         "filename": "android/skin/qt/extended-window.cpp",
         "patchSetId": 1
@@ -72,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "96cad9dc_e05bfedd",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-29T17:16:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "76c565cc_d49ccaa8",
+      "range": {
+        "startLine": 121,
+        "startChar": 4,
+        "endLine": 121,
+        "endChar": 62
+      },
+      "revId": "9f2014cff21d4151c3b29686e845abdbf56b7d8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56c4e1d1_7906ab38",
         "filename": "android/skin/qt/extended-window.h",
         "patchSetId": 1
@@ -83,6 +155,30 @@
       "writtenOn": "2015-10-29T16:13:37Z",
       "side": 1,
       "message": "unordered_map ?",
+      "range": {
+        "startLine": 132,
+        "startChar": 9,
+        "endLine": 132,
+        "endChar": 12
+      },
+      "revId": "9f2014cff21d4151c3b29686e845abdbf56b7d8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36a68d28_606a78d7",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-29T17:16:13Z",
+      "side": 1,
+      "message": "unfortunately, you can\u0027t use enums as keys in unordered_map without specifying a std::hash\u003c\u003e template for them... I think this was addressed in c++14, but I\u0027m getting a compiler error with our current toolchain. The map is so small and used so infrequently that I doubt it will make a difference anyway.",
+      "parentUuid": "56c4e1d1_7906ab38",
       "range": {
         "startLine": 132,
         "startChar": 9,
