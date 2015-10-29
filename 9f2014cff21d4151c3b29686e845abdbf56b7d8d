@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f6d955b5_be43ed84",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-29T16:13:37Z",
+      "side": 1,
+      "message": "mPaneButtonMap \u003d {\n { PANE_IDX_LOCATION, mExtendedUi-\u003elocationButton },\n { ... },\n ...\n};\n\nthis is more efficient",
+      "range": {
+        "startLine": 62,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 68
+      },
+      "revId": "9f2014cff21d4151c3b29686e845abdbf56b7d8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76c565cc_d49ccaa8",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-29T16:13:37Z",
+      "side": 1,
+      "message": "auto?",
+      "range": {
+        "startLine": 121,
+        "startChar": 4,
+        "endLine": 121,
+        "endChar": 62
+      },
+      "revId": "9f2014cff21d4151c3b29686e845abdbf56b7d8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56c4e1d1_7906ab38",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-10-29T16:13:37Z",
+      "side": 1,
+      "message": "unordered_map ?",
+      "range": {
+        "startLine": 132,
+        "startChar": 9,
+        "endLine": 132,
+        "endChar": 12
+      },
+      "revId": "9f2014cff21d4151c3b29686e845abdbf56b7d8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
