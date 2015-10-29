@@ -22,22 +22,27 @@
 
 #include <QtWidgets>
 
-ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmuAgent *agentPtr) :
+ExtendedWindow::ExtendedWindow(
+    EmulatorQtWindow *eW,
+    ToolWindow *tW,
+    const UiEmuAgent *agentPtr,
+    const ShortcutKeyStore<QtUICommand>* shortcuts) :
     QFrame(eW),
     mParentWindow(eW),
     mToolWindow(tW),
-    mBatteryAgent  (agentPtr ? agentPtr->battery   : NULL),
-    mCellularAgent (agentPtr ? agentPtr->cellular  : NULL),
-    mEmulatorWindow(agentPtr ? agentPtr->window    : NULL),
-    mFingerAgent   (agentPtr ? agentPtr->finger    : NULL),
-    mLocationAgent (agentPtr ? agentPtr->location  : NULL),
-    mSensorsAgent  (agentPtr ? agentPtr->sensors   : NULL),
-    mTelephonyAgent(agentPtr ? agentPtr->telephony : NULL),
-    mSettingsAgent (agentPtr ? agentPtr->settings  : NULL),
+    mBatteryAgent  (agentPtr ? agentPtr->battery   : nullptr),
+    mCellularAgent (agentPtr ? agentPtr->cellular  : nullptr),
+    mEmulatorWindow(agentPtr ? agentPtr->window    : nullptr),
+    mFingerAgent   (agentPtr ? agentPtr->finger    : nullptr),
+    mLocationAgent (agentPtr ? agentPtr->location  : nullptr),
+    mSensorsAgent  (agentPtr ? agentPtr->sensors   : nullptr),
+    mTelephonyAgent(agentPtr ? agentPtr->telephony : nullptr),
+    mSettingsAgent (agentPtr ? agentPtr->settings  : nullptr),
     mLoc_mSecRemaining(-1),
     mLoc_nowPaused(false),
     mLoc_nowPlaying(false),
     mLoc_rowToSend(-1),
+    mQtUIShortcuts(shortcuts),
     mExtendedUi(new Ui::ExtendedControls)
 {
     Q_INIT_RESOURCE(resources);
@@ -68,7 +73,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
         {PANE_IDX_DPAD , mExtendedUi->dpadButton},
         {PANE_IDX_FINGER, mExtendedUi->fingerButton},
         {PANE_IDX_KBD_SHORTS, mExtendedUi->kbdShortsButton},
-        {PANE_IDX_SETTINGS, mExtendedUi->locationButton},
+        {PANE_IDX_SETTINGS, mExtendedUi->settingsButton},
     };
 
     move(mParentWindow->geometry().right() + 40,
