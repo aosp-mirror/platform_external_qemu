@@ -351,7 +351,7 @@ fi
 #   $1: Destination directory.
 #   $2: Source directory.
 #   $3: Name of the library (without the .so suffix).
-function copy_toolchain_lib() {
+copy_toolchain_lib () {
     local DESTDIR SRCDIR NAME
     local FROM REALNAME
     local SYMLINK SYMNAME
