@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "161fca56_542dac84",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-29T21:04:11Z",
+      "side": 1,
+      "message": "As long as you\u0027re here, I\u0027d prefer more parentheses.\nI don\u0027t want to rely on operator precedence.\n\n(((a) \u003e (b)) ? (a) : (b))",
+      "revId": "a25846b9d550611d9c2f761ac129ed8b8fb53ea3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
