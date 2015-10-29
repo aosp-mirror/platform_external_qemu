@@ -655,7 +655,8 @@ void EmulatorQtWindow::handleEvent(SkinEventType type, QMouseEvent *event)
 void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *pEvent)
 {
     // See if there is a Qt-specific handler for this key-down event
-    if (pEvent->type() == QKeyEvent::KeyPress && handleQtKeyEvent(type, pEvent)) return;
+    if (pEvent->type() == QKeyEvent::KeyPress &&
+        tool_window->handleQtKeyEvent(pEvent)) return;
 
     SkinEvent *skin_event = createSkinEvent(type);
     SkinEventKeyData *keyData = &skin_event->u.key;
@@ -665,25 +666,6 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *pEvent)
     if (modifiers & Qt::ControlModifier) keyData->mod |= kKeyModLCtrl;
     if (modifiers & Qt::AltModifier) keyData->mod |= kKeyModLAlt;
     queueEvent(skin_event);
-}
-
-bool EmulatorQtWindow::handleQtKeyEvent(SkinEventType type, QKeyEvent *event)
-{
-    bool usedEvent = false;
-    int key = event->key();
-    Qt::KeyboardModifiers modifiers = event->modifiers();
-
-    // TODO: add more Qt-specific keyboard shortcuts
-
-    if (key == Qt::Key_F10 && (modifiers & Qt::ControlModifier)) {
-        screenshot();
-        usedEvent = true;
-    } else if (key == Qt::Key_F9 && (modifiers & Qt::ControlModifier)) {
-        zoom();
-        usedEvent = true;
-    }
-
-    return usedEvent;
 }
 
 void EmulatorQtWindow::simulateKeyPress(int keyCode, int modifiers)
