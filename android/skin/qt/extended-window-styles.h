@@ -18,18 +18,17 @@
 // This gives the order of the tabbed panes on the extended window.
 // This must correspond to the ordering that is set from within
 // QtDesigner and written to extended.ui.
-enum { PANE_IDX_LOCATION = 0,
-       PANE_IDX_CELLULAR,
-       PANE_IDX_BATTERY,
-       PANE_IDX_CAMERA,
-       PANE_IDX_TELEPHONE,
-       PANE_IDX_VIRT_SENSORS,
-       PANE_IDX_HW_SENSORS,
-       PANE_IDX_DPAD,
-       PANE_IDX_FINGER,
-       PANE_IDX_RECORD_SCR,
-       PANE_IDX_KBD_SHORTS,
-       PANE_IDX_SETTINGS };
+enum ExtendedWindowPane {
+    PANE_IDX_LOCATION = 0,
+    PANE_IDX_CELLULAR,
+    PANE_IDX_BATTERY,
+    PANE_IDX_TELEPHONE,
+    PANE_IDX_VIRT_SENSORS,
+    PANE_IDX_DPAD,
+    PANE_IDX_FINGER,
+    PANE_IDX_KBD_SHORTS,
+    PANE_IDX_SETTINGS,
+};
 
 // Style sheets
 //

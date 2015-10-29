@@ -59,8 +59,22 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmu
     initTelephony();
     initVirtualSensors();
 
+    mPaneButtonMap[PANE_IDX_LOCATION] = mExtendedUi->locationButton;
+    mPaneButtonMap[PANE_IDX_CELLULAR] = mExtendedUi->cellularButton;
+    mPaneButtonMap[PANE_IDX_BATTERY] = mExtendedUi->batteryButton;
+    mPaneButtonMap[PANE_IDX_TELEPHONE] = mExtendedUi->telephoneButton;
+    mPaneButtonMap[PANE_IDX_VIRT_SENSORS] = mExtendedUi->virtSensorsButton;
+    mPaneButtonMap[PANE_IDX_DPAD] = mExtendedUi->dpadButton;
+    mPaneButtonMap[PANE_IDX_FINGER] = mExtendedUi->fingerButton;
+    mPaneButtonMap[PANE_IDX_KBD_SHORTS] = mExtendedUi->kbdShortsButton;
+    mPaneButtonMap[PANE_IDX_SETTINGS] = mExtendedUi->locationButton;
+
     move(mParentWindow->geometry().right() + 40,
          mParentWindow->geometry().top()   + 40 );
+}
+
+void ExtendedWindow::showPane(ExtendedWindowPane pane) {
+    adjustTabs(pane);
 }
 
 void ExtendedWindow::completeInitialization()
@@ -92,18 +106,24 @@ void ExtendedWindow::closeEvent(QCloseEvent *ce)
 }
 
 // Tab buttons. Each raises its stacked pane to the top.
-void ExtendedWindow::on_batteryButton_clicked()     { adjustTabs(mExtendedUi->batteryButton,     PANE_IDX_BATTERY); }
-void ExtendedWindow::on_cellularButton_clicked()    { adjustTabs(mExtendedUi->cellularButton,    PANE_IDX_CELLULAR); }
-void ExtendedWindow::on_dpadButton_clicked()        { adjustTabs(mExtendedUi->dpadButton,        PANE_IDX_DPAD); }
-void ExtendedWindow::on_fingerButton_clicked()      { adjustTabs(mExtendedUi->fingerButton,      PANE_IDX_FINGER); }
-void ExtendedWindow::on_kbdShortsButton_clicked()   { adjustTabs(mExtendedUi->kbdShortsButton,   PANE_IDX_KBD_SHORTS); }
-void ExtendedWindow::on_locationButton_clicked()    { adjustTabs(mExtendedUi->locationButton,    PANE_IDX_LOCATION); }
-void ExtendedWindow::on_settingsButton_clicked()    { adjustTabs(mExtendedUi->settingsButton,    PANE_IDX_SETTINGS); }
-void ExtendedWindow::on_telephoneButton_clicked()   { adjustTabs(mExtendedUi->telephoneButton,   PANE_IDX_TELEPHONE); }
-void ExtendedWindow::on_virtSensorsButton_clicked() { adjustTabs(mExtendedUi->virtSensorsButton, PANE_IDX_VIRT_SENSORS); }
+void ExtendedWindow::on_batteryButton_clicked()     { adjustTabs(PANE_IDX_BATTERY); }
+void ExtendedWindow::on_cellularButton_clicked()    { adjustTabs(PANE_IDX_CELLULAR); }
+void ExtendedWindow::on_dpadButton_clicked()        { adjustTabs(PANE_IDX_DPAD); }
+void ExtendedWindow::on_fingerButton_clicked()      { adjustTabs(PANE_IDX_FINGER); }
+void ExtendedWindow::on_kbdShortsButton_clicked()   { adjustTabs(PANE_IDX_KBD_SHORTS); }
+void ExtendedWindow::on_locationButton_clicked()    { adjustTabs(PANE_IDX_LOCATION); }
+void ExtendedWindow::on_settingsButton_clicked()    { adjustTabs(PANE_IDX_SETTINGS); }
+void ExtendedWindow::on_telephoneButton_clicked()   { adjustTabs(PANE_IDX_TELEPHONE); }
+void ExtendedWindow::on_virtSensorsButton_clicked() { adjustTabs(PANE_IDX_VIRT_SENSORS); }
 
-void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
+void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
 {
+    std::map<ExtendedWindowPane, QPushButton*>::const_iterator it = mPaneButtonMap.find(thisIndex);
+    if (it == mPaneButtonMap.end()) {
+        return;
+    }
+    QPushButton* thisButton = it->second;
+
     // Make all the tab buttons the same except for the one whose
     // pane is on top.
     QString colorStyle("text-align: left; color:");
@@ -147,7 +167,7 @@ void ExtendedWindow::adjustTabs(QPushButton *thisButton, int thisIndex)
     mExtendedUi->virtSensorsButton->setAutoFillBackground(true);
 
     thisButton->clearFocus(); // It looks better when not highlighted
-    mExtendedUi->stackedWidget->setCurrentIndex(thisIndex);
+    mExtendedUi->stackedWidget->setCurrentIndex(static_cast<int>(thisIndex));
 }
 
 ////////////////////////////////////////////////////////////

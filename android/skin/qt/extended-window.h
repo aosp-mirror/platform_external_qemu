@@ -49,7 +49,8 @@ class ExtendedWindow : public QFrame
 public:
     explicit ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmuAgent *agentPtr);
 
-    void     completeInitialization();
+    void completeInitialization();
+    void showPane(ExtendedWindowPane pane);
 
     static void switchAllIconsForTheme(SettingsTheme theme);
 
@@ -128,10 +129,11 @@ private:
     int      mLoc_rowToSend;
     QTimer   mLoc_timer;
     QDoubleValidator mMagFieldValidator;
+    std::map<ExtendedWindowPane, QPushButton*> mPaneButtonMap;
 
     Ui::ExtendedControls *mExtendedUi;
 
-    void    adjustTabs(QPushButton *thisButton, int thisIndex);
+    void    adjustTabs(ExtendedWindowPane thisIndex);
     void    loc_appendToTable(std::string lat,
                               std::string lon,
                               std::string elev,
