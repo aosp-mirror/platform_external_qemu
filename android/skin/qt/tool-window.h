@@ -20,6 +20,9 @@
 #include <QFrame>
 #include <QGridLayout>
 #include <QHash>
+#include <QKeyEvent>
+#include <QMap>
+#include <QPair>
 #include <QProcess>
 #include <QProgressDialog>
 #include <QToolButton>
@@ -45,6 +48,17 @@ class ToolWindow : public QFrame
 {
     Q_OBJECT
 
+    enum QtUICommand {
+        UI_CMD_NONE,
+        UI_CMD_SHOW_PANE_LOCATION,
+        UI_CMD_SHOW_PANE_CELLULAR,
+        UI_CMD_SHOW_PANE_BATTERY,
+        UI_CMD_SHOW_PANE_PHONE,
+        UI_CMD_SHOW_PANE_VIRTSENSORS,
+        UI_CMD_SHOW_PANE_DPAD,
+        UI_CMD_SHOW_PANE_SETTINGS
+    };
+
 public:
     explicit ToolWindow(EmulatorQtWindow *emulatorWindow, QWidget *parent);
     void show();
@@ -62,7 +76,10 @@ public:
     void runAdbInstall(const QString &path);
     void runAdbPush(const QList<QUrl> &urls);
 
+    bool handleQtKeyEvent(QKeyEvent* event);
+
 private:
+    QtUICommand lookupUICommand(int key, Qt::KeyboardModifiers mods);
     QToolButton *addButton(QGridLayout *layout, int row, int col,
                            const char *iconPath, QString tip,
                            EmulatorQtWindowSlot slot);
@@ -83,6 +100,7 @@ private:
     QProcess mPushProcess;
     QProgressDialog mPushDialog;
     QQueue<QUrl> mFilesToPush;
+    QMap<QPair<int, Qt::KeyboardModifiers>, QtUICommand> mQtUIShortcuts;
 
 private slots:
     void on_back_button_clicked();

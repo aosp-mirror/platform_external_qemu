@@ -78,6 +78,21 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     } else {
         this->setStyleSheet(QT_STYLE(LIGHT));
     }
+
+    mQtUIShortcuts[qMakePair(Qt::Key_L, Qt::ControlModifier | Qt::ShiftModifier)] =
+       UI_CMD_SHOW_PANE_LOCATION;
+    mQtUIShortcuts[qMakePair(Qt::Key_C, Qt::ControlModifier | Qt::ShiftModifier)] =
+       UI_CMD_SHOW_PANE_CELLULAR ;
+    mQtUIShortcuts[qMakePair(Qt::Key_B, Qt::ControlModifier | Qt::ShiftModifier)] =
+       UI_CMD_SHOW_PANE_BATTERY;
+    mQtUIShortcuts[qMakePair(Qt::Key_P, Qt::ControlModifier | Qt::ShiftModifier)] =
+       UI_CMD_SHOW_PANE_PHONE;
+    mQtUIShortcuts[qMakePair(Qt::Key_V, Qt::ControlModifier | Qt::ShiftModifier)] =
+       UI_CMD_SHOW_PANE_VIRTSENSORS;
+    mQtUIShortcuts[qMakePair(Qt::Key_D, Qt::ControlModifier | Qt::ShiftModifier)] =
+       UI_CMD_SHOW_PANE_DPAD;
+    mQtUIShortcuts[qMakePair(Qt::Key_S, Qt::ControlModifier | Qt::ShiftModifier)] =
+       UI_CMD_SHOW_PANE_SETTINGS;
 }
 
 void ToolWindow::show()
@@ -169,6 +184,55 @@ void ToolWindow::runAdbPush(const QList<QUrl> &urls)
         // Begin the cascading push
         slot_pushFinished(0);
     }
+}
+
+ToolWindow::QtUICommand ToolWindow::lookupUICommand(int key, Qt::KeyboardModifiers mods) {
+    QtUICommand result = UI_CMD_NONE;
+    QMap<QPair<int, Qt::KeyboardModifiers>, QtUICommand>::const_iterator it =
+        mQtUIShortcuts.find(qMakePair(key, mods));
+    if (it != mQtUIShortcuts.end()) {
+        result = it.value();
+    }
+    return result;
+}
+
+bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
+    QtUICommand cmd = lookupUICommand(event->key(), event->modifiers());
+    bool event_handled = true;
+    switch (cmd) {
+    case UI_CMD_SHOW_PANE_LOCATION:
+        on_more_button_clicked();
+        extendedWindow->showPane(PANE_IDX_LOCATION);
+        break;
+    case UI_CMD_SHOW_PANE_CELLULAR:
+        on_more_button_clicked();
+        extendedWindow->showPane(PANE_IDX_CELLULAR);
+        break;
+    case UI_CMD_SHOW_PANE_BATTERY:
+        on_more_button_clicked();
+        extendedWindow->showPane(PANE_IDX_BATTERY);
+        break;
+    case UI_CMD_SHOW_PANE_PHONE: 
+        on_more_button_clicked();
+        extendedWindow->showPane(PANE_IDX_TELEPHONE);
+        break;
+    case UI_CMD_SHOW_PANE_VIRTSENSORS: 
+        on_more_button_clicked();
+        extendedWindow->showPane(PANE_IDX_VIRT_SENSORS);
+        break;
+    case UI_CMD_SHOW_PANE_DPAD: 
+        on_more_button_clicked();
+        extendedWindow->showPane(PANE_IDX_DPAD);
+        break;
+    case UI_CMD_SHOW_PANE_SETTINGS: 
+        on_more_button_clicked();
+        extendedWindow->showPane(PANE_IDX_SETTINGS);
+        break;
+
+    default:
+        event_handled = false;
+    }
+    return event_handled;
 }
 
 void ToolWindow::dockMainWindow()
