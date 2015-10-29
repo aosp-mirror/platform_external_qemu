@@ -19,6 +19,16 @@
 
 ANDROID_BEGIN_HEADER
 
+enum BatteryCharger {
+    BATTERY_CHARGER_NONE,
+    BATTERY_CHARGER_AC,
+    // TODO: The UI only allows NONE and AC.
+    //       Need to also allow and implement USB and WIRELESS.
+    BATTERY_CHARGER_USB,
+    BATTERY_CHARGER_WIRELESS,
+    BATTERY_CHARGER_NUM_ENTRIES
+};
+
 enum BatteryHealth {
     BATTERY_HEALTH_GOOD,
     BATTERY_HEALTH_FAILED,
@@ -44,6 +54,9 @@ typedef struct QAndroidBatteryAgent {
 
     // Sets whether the battery is charging or not
     void (*setIsCharging)(bool isCharging);
+
+    // Set what type of charger is being used
+    void (*setCharger)(enum BatteryCharger charger);
 
     // Sets the current charge level
     // Input: |percentFull| integer percentage, 0 .. 100

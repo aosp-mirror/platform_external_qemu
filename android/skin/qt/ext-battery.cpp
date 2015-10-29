@@ -20,11 +20,15 @@
 void ExtendedWindow::initBattery()
 { }
 
-void ExtendedWindow::on_bat_chargeCkBox_toggled(bool checked)
+void ExtendedWindow::on_bat_chargerBox_currentIndexChanged(int index)
 {
-    mBatteryState.mIsCharging = checked;
-    if (mBatteryAgent && mBatteryAgent->setIsCharging) {
-        mBatteryAgent->setIsCharging(checked);
+    BatteryCharger bCharger = (BatteryCharger)index;
+    if (bCharger >= 0 && bCharger < BATTERY_CHARGER_NUM_ENTRIES) {
+        mBatteryState.mCharger = bCharger;
+
+        if (mBatteryAgent && mBatteryAgent->setCharger) {
+            mBatteryAgent->setCharger(bCharger);
+        }
     }
 }
 

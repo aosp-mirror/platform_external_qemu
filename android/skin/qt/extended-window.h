@@ -64,14 +64,14 @@ private:
 
     class BatteryState {
     public:
-        bool          mIsCharging;
-        int           mChargeLevel; // Percent
-        BatteryHealth mHealth;
-        BatteryStatus mStatus;
+        int            mChargeLevel; // Percent
+        BatteryCharger mCharger;
+        BatteryHealth  mHealth;
+        BatteryStatus  mStatus;
 
         BatteryState() :
-            mIsCharging(true),
             mChargeLevel(50),
+            mCharger(BATTERY_CHARGER_AC),
             mHealth(BATTERY_HEALTH_GOOD),
             mStatus(BATTERY_STATUS_CHARGING) { }
     };
@@ -167,13 +167,12 @@ private slots:
     void on_virtSensorsButton_clicked();
 
     // Battery
-    void on_bat_chargeCkBox_toggled(bool checked);
+    void on_bat_chargerBox_currentIndexChanged(int value);
     void on_bat_levelSlider_valueChanged(int value);
     void on_bat_healthBox_currentIndexChanged(int index);
     void on_bat_statusBox_currentIndexChanged(int index);
 
     // Cellular
-    void on_cell_signalStrengthSlider_valueChanged(int value);
     void on_cell_standardBox_currentIndexChanged(int index);
     void on_cell_voiceStatusBox_currentIndexChanged(int index);
     void on_cell_dataStatusBox_currentIndexChanged(int index);

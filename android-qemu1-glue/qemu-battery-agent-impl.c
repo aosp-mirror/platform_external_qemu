@@ -24,6 +24,12 @@ static void battery_setIsCharging(bool isCharging) {
     goldfish_battery_set_prop(1, POWER_SUPPLY_PROP_ONLINE, isCharging);
 }
 
+static void battery_setCharger(enum BatteryCharger charger) {
+    battery_setIsCharging( charger != BATTERY_CHARGER_NONE );
+
+    // TODO: Need to save the full enum and convey it to the AVD
+}
+
 static void battery_setChargeLevel(int percentFull) {
     goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_CAPACITY, percentFull);
 }
@@ -64,6 +70,7 @@ static void battery_setStatus(enum BatteryStatus status) {
 static const QAndroidBatteryAgent sQAndroidBatteryAgent = {
         .setIsBatteryPresent = battery_setIsBatteryPresent,
         .setIsCharging = battery_setIsCharging,
+        .setCharger = battery_setCharger,
         .setChargeLevel = battery_setChargeLevel,
         .setHealth = battery_setHealth,
         .setStatus = battery_setStatus,

@@ -61,7 +61,7 @@ font-family: &quot;Roboto&quot;</string>
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="currentIndex">
-    <number>7</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="location_page">
     <widget class="QGroupBox" name="locationGroup">
@@ -588,53 +588,6 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">Title</string>
      </property>
     </widget>
-    <widget class="QSlider" name="cell_signalStrengthSlider">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>80</y>
-       <width>160</width>
-       <height>29</height>
-      </rect>
-     </property>
-     <property name="maximum">
-      <number>31</number>
-     </property>
-     <property name="pageStep">
-      <number>5</number>
-     </property>
-     <property name="value">
-      <number>24</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="tickPosition">
-      <enum>QSlider::NoTicks</enum>
-     </property>
-     <property name="tickInterval">
-      <number>0</number>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="cell_strengthGroupBox">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>40</y>
-       <width>111</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Signal strength</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string notr="true">Title</string>
-     </property>
-    </widget>
     <widget class="QComboBox" name="cell_standardBox">
      <property name="geometry">
       <rect>
@@ -705,49 +658,6 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">Title</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="cell_sigStrengthText">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>360</x>
-       <y>80</y>
-       <width>41</width>
-       <height>29</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>11</pointsize>
-      </font>
-     </property>
-     <property name="mouseTracking">
-      <bool>false</bool>
-     </property>
-     <property name="acceptDrops">
-      <bool>false</bool>
-     </property>
-     <property name="toolTip">
-      <string notr="true"/>
-     </property>
-     <property name="text">
-      <string notr="true">24</string>
-     </property>
-     <property name="frame">
-      <bool>false</bool>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
    </widget>
    <widget class="QWidget" name="batteryPage">
     <widget class="QGroupBox" name="batteryBox">
@@ -755,7 +665,7 @@ font-family: &quot;Roboto&quot;</string>
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>311</width>
+       <width>281</width>
        <height>101</height>
       </rect>
      </property>
@@ -868,8 +778,8 @@ font-family: &quot;Roboto&quot;</string>
       <rect>
        <x>300</x>
        <y>40</y>
-       <width>61</width>
-       <height>61</height>
+       <width>131</width>
+       <height>21</height>
       </rect>
      </property>
      <property name="font">
@@ -881,27 +791,11 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>AC on</string>
+      <string>Charger connection</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string notr="true">Title</string>
      </property>
-     <widget class="QCheckBox" name="bat_chargeCkBox">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>30</y>
-        <width>24</width>
-        <height>24</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
     </widget>
     <widget class="QGroupBox" name="bat_statusGroup">
      <property name="geometry">
@@ -921,7 +815,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Power status</string>
+      <string>Battery status</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string notr="true">Title</string>
@@ -945,7 +839,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Power health</string>
+      <string>Battery health</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string notr="true">Title</string>
@@ -1032,6 +926,35 @@ font-family: &quot;Roboto&quot;</string>
      <item>
       <property name="text">
        <string>Full</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QComboBox" name="bat_chargerBox">
+     <property name="geometry">
+      <rect>
+       <x>300</x>
+       <y>70</y>
+       <width>241</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
+     <property name="maxVisibleItems">
+      <number>4</number>
+     </property>
+     <item>
+      <property name="text">
+       <string>None</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>AC charger</string>
       </property>
      </item>
     </widget>
@@ -3052,7 +2975,6 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>cell_standardBox</tabstop>
   <tabstop>cell_voiceStatusBox</tabstop>
   <tabstop>cell_dataStatusBox</tabstop>
-  <tabstop>cell_signalStrengthSlider</tabstop>
   <tabstop>finger_IdBox</tabstop>
   <tabstop>bat_healthBox</tabstop>
   <tabstop>additionalButton</tabstop>
@@ -3061,8 +2983,6 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>set_themeBox</tabstop>
   <tabstop>set_androidVersionBox</tabstop>
   <tabstop>bat_levelSlider</tabstop>
-  <tabstop>bat_chargeCkBox</tabstop>
-  <tabstop>cell_sigStrengthText</tabstop>
   <tabstop>bat_chargeLevelText</tabstop>
   <tabstop>spacer1Button</tabstop>
   <tabstop>tel_startCallButton</tabstop>
