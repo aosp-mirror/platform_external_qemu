@@ -12,7 +12,10 @@
 
 #pragma once
 
+#include "android/skin/qt/extended-window-styles.h"
+#include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/set-ui-emu-agent.h"
+#include "android/skin/qt/shortcut-key-store.h"
 #include "android/utils/compiler.h"
 
 #include <QDir>
@@ -20,6 +23,9 @@
 #include <QFrame>
 #include <QGridLayout>
 #include <QHash>
+#include <QKeyEvent>
+#include <QMap>
+#include <QPair>
 #include <QProcess>
 #include <QProgressDialog>
 #include <QToolButton>
@@ -62,10 +68,16 @@ public:
     void runAdbInstall(const QString &path);
     void runAdbPush(const QList<QUrl> &urls);
 
+    bool handleQtKeyEvent(QKeyEvent* event);
+
 private:
+    void handleUICommand(QtUICommand cmd);
+
     QToolButton *addButton(QGridLayout *layout, int row, int col,
                            const char *iconPath, QString tip,
                            EmulatorQtWindowSlot slot);
+
+    void showOrRaiseExtendedWindow(ExtendedWindowPane pane);
 
     QWidget          *button_area;
     EmulatorQtWindow *emulator_window;
@@ -83,6 +95,7 @@ private:
     QProcess mPushProcess;
     QProgressDialog mPushDialog;
     QQueue<QUrl> mFilesToPush;
+    ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
 
 private slots:
     void on_back_button_clicked();

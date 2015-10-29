@@ -159,9 +159,6 @@ private:
     SkinEvent *createSkinEvent(SkinEventType type);
     void handleKeyEvent(SkinEventType type, QKeyEvent *pEvent);
 
-    // Allow for the Qt window to eat keyboard shortcuts before sending them to the skin
-    bool handleQtKeyEvent(SkinEventType type, QKeyEvent *event);
-
     QString getTmpImagePath();
 
     void             *batteryState;
