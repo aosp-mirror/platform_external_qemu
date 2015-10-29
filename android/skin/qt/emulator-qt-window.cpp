@@ -141,7 +141,7 @@ void EmulatorQtWindow::dropEvent(QDropEvent *event)
             if (urls[i].path().endsWith(".apk")) {
                 tool_window->showErrorDialog(tr("Drag-and-drop can either install a single APK"
                                                 " file or copy one or more non-APK files to the"
-                                                " SD card."),
+                                                " Emulator SD card."),
                                              tr("Drag and Drop"));
                 return;
             }
@@ -455,8 +455,10 @@ void EmulatorQtWindow::screenshot()
 void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
 {
     if (exitStatus) {
-        tool_window->showErrorDialog(tr("The screenshot could not be captured."),
-                                     tr("Screenshot"));
+        QByteArray er = mScreencapProcess.readAllStandardError();
+        er = er.replace('\n', "<br/>");
+        QString msg = tr("The screenshot could not be captured. Output:<br/><br/>") + QString(er);
+        tool_window->showErrorDialog(msg, tr("Screenshot"));
     } else {
 
         // Pull the image from its remote location to the designated tmp directory
@@ -480,8 +482,11 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
 void EmulatorQtWindow::slot_screencapPullFinished(int exitStatus)
 {
     if (exitStatus) {
-        tool_window->showErrorDialog(tr("The image could not be loaded properly"),
-                                     tr("Screenshot"));
+        QByteArray er = mScreencapPullProcess.readAllStandardError();
+        er = er.replace('\n', "<br/>");
+        QString msg = tr("The screenshot could not be loaded from the device. Output:<br/><br/>")
+                        + QString(er);
+        tool_window->showErrorDialog(msg, tr("Screenshot"));
     } else {
 
         // Load the data into an image

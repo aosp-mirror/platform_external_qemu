@@ -128,7 +128,8 @@ QString ToolWindow::getAdbFullPath(QStringList *args)
 void ToolWindow::runAdbInstall(const QString &path)
 {
     if (mInstallProcess.state() != QProcess::NotRunning) {
-        showErrorDialog(tr("Another install is currently pending.<br>Try again when it completes."),
+        showErrorDialog(tr("Another APK install is currently pending.<br/>"
+                           "Try again after current APK installation completes."),
                         tr("APK Installer"));
         return;
     }
@@ -258,9 +259,23 @@ void ToolWindow::slot_installCanceled()
 void ToolWindow::slot_installFinished(int exitStatus)
 {
     mInstallDialog.close();
+
     if (exitStatus) {
-        showErrorDialog(tr("The installation failed."),
+        showErrorDialog(tr("The APK failed to install: adb could not connect to the emulator."),
                         tr("APK Installer"));
+        return;
+    }
+
+    // "adb install" does not return a helpful exit status, so instead we parse the standard
+    // output of the process looking for "Failure \[(.*)\]"
+
+    QString output = QString(mInstallProcess.readAllStandardOutput());
+    QRegularExpression regex("Failure \\[(\.*)\\]");
+    QRegularExpressionMatch match = regex.match(output);
+
+    if (match.hasMatch()) {
+        QString msg = tr("The APK failed to install. Error code: ") + match.captured(1);
+        showErrorDialog(msg, tr("APK Installer"));
     }
 }
 
@@ -275,8 +290,10 @@ void ToolWindow::slot_pushCanceled()
 void ToolWindow::slot_pushFinished(int exitStatus)
 {
     if (exitStatus) {
-        showErrorDialog(tr("The file copy failed."),
-                        tr("File Copy"));
+        QByteArray er = mPushProcess.readAllStandardError();
+        er = er.replace('\n', "<br/>");
+        QString msg = tr("Unable to copy files. Output:<br/><br/>") + QString(er);
+        showErrorDialog(msg, tr("File Copy"));
     }
 
     if (mFilesToPush.isEmpty()) {
