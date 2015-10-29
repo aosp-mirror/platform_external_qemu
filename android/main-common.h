@@ -14,6 +14,7 @@
 
 #include <stdint.h>
 #include "android/avd/hw-config.h"
+#include "android/avd/info.h"
 #include "android/cmdline-option.h"
 #include "android/skin/keyset.h"
 #include "android/ui-emu-agent.h"
