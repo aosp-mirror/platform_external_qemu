@@ -61,7 +61,7 @@ font-family: &quot;Roboto&quot;</string>
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>7</number>
    </property>
    <widget class="QWidget" name="location_page">
     <widget class="QGroupBox" name="locationGroup">
@@ -1036,32 +1036,6 @@ font-family: &quot;Roboto&quot;</string>
      </item>
     </widget>
    </widget>
-   <widget class="QWidget" name="page">
-    <widget class="QGroupBox" name="cameraBox">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>101</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Camera</string>
-     </property>
-    </widget>
-   </widget>
    <widget class="QWidget" name="telephonyPage">
     <widget class="QGroupBox" name="telephonyBox">
      <property name="geometry">
@@ -1694,33 +1668,7 @@ font-family: &quot;Roboto&quot;</string>
      </widget>
     </widget>
    </widget>
-   <widget class="QWidget" name="page_3">
-    <widget class="QGroupBox" name="hardwareSensorsBox">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>181</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Hardware sensors</string>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="page_4">
+   <widget class="QWidget" name="dpadPage">
     <widget class="QGroupBox" name="hardwareSensorsBox_2">
      <property name="geometry">
       <rect>
@@ -2111,33 +2059,7 @@ font-family: &quot;Roboto&quot;</string>
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="page_6">
-    <widget class="QGroupBox" name="recordScrGroup">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>121</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Record screen</string>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="page_7">
+   <widget class="QWidget" name="kbdShortcutsPage">
     <widget class="QGroupBox" name="kbdShortsGroup">
      <property name="geometry">
       <rect>
@@ -2222,7 +2144,7 @@ font-family: &quot;Roboto&quot;</string>
      </column>
     </widget>
    </widget>
-   <widget class="QWidget" name="page_5">
+   <widget class="QWidget" name="settingsPage">
     <widget class="QGroupBox" name="sd_group_2">
      <property name="geometry">
       <rect>

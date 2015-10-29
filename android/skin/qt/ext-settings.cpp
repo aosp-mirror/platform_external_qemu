@@ -140,7 +140,7 @@ void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
     this->update();
 
     // Make the Settings pane active (still)
-    adjustTabs(mExtendedUi->settingsButton, PANE_IDX_SETTINGS);
+    adjustTabs(PANE_IDX_SETTINGS);
 }
 
 // static member function
