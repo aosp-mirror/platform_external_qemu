@@ -270,7 +270,7 @@ void ToolWindow::slot_installFinished(int exitStatus)
     // output of the process looking for "Failure \[(.*)\]"
 
     QString output = QString(mInstallProcess.readAllStandardOutput());
-    QRegularExpression regex("Failure \\[(\.*)\\]");
+    QRegularExpression regex("Failure \\[(.*)\\]");
     QRegularExpressionMatch match = regex.match(output);
 
     if (match.hasMatch()) {
