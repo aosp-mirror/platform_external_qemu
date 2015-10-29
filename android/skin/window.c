@@ -1315,25 +1315,20 @@ skin_window_create(SkinLayout* slayout,
      * a new scale to ensure it is.
      */
     if (scale <= 0) {
-        SkinRect  monitor;
-        int       screen_w, screen_h;
+        SkinRect  screen;
         int       win_w = slayout->size.w;
         int       win_h = slayout->size.h;
         double    scale_w, scale_h;
 
-        /* To account for things like menu bars, window decorations etc..
-         * We only compute 85% of the real screen size. */
-        skin_winsys_get_monitor_rect(&monitor);
-        screen_w = monitor.size.w * 0.85;
-        screen_h = monitor.size.h * 0.85;
+        skin_winsys_get_screen_rect(&screen);
 
         scale_w = 1.0;
         scale_h = 1.0;
 
-        if (screen_w < win_w && win_w > 1.)
-            scale_w = 1.0 * screen_w / win_w;
-        if (screen_h < win_h && win_h > 1.)
-            scale_h = 1.0 * screen_h / win_h;
+        if (screen.size.w < win_w && win_w > 1.)
+            scale_w = 1.0 * screen.size.w / win_w;
+        if (screen.size.h < win_h && win_h > 1.)
+            scale_h = 1.0 * screen.size.h / win_h;
 
         scale = (scale_w <= scale_h) ? scale_w : scale_h;
 

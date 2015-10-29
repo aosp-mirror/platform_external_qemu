@@ -108,6 +108,25 @@ extern void skin_winsys_get_monitor_rect(SkinRect *rect)
         D("%s: Could not get window handle", __FUNCTION__);
         return;
     }
+    window->getMonitorDimensions(&qrect, &semaphore);
+    semaphore.acquire();
+    rect->pos.x = qrect.left();
+    rect->pos.y = qrect.top();
+    rect->size.w = qrect.width();
+    rect->size.h = qrect.height();
+    D("%s: (%d,%d) %dx%d", __FUNCTION__, rect->pos.x, rect->pos.y,
+      rect->size.w, rect->size.h);
+}
+
+extern void skin_winsys_get_screen_rect(SkinRect *rect)
+{
+    QRect qrect;
+    QSemaphore semaphore;
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return;
+    }
     window->getScreenDimensions(&qrect, &semaphore);
     semaphore.acquire();
     rect->pos.x = qrect.left();

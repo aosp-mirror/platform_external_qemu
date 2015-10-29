@@ -32,6 +32,9 @@ void* skin_winsys_get_window_handle(void);
 // Return rectangle of current monitor in pixels.
 void skin_winsys_get_monitor_rect(SkinRect* rect);
 
+// Return rectangle of current available screen in pixels.
+void skin_winsys_get_screen_rect(SkinRect* rect);
+
 // Return the monitor's horizontal and vertical resolution in dots per
 // inches. Return 0 in case of success, -1 in case of failure.
 int skin_winsys_get_monitor_dpi(int* x_dpi, int* y_dpi);

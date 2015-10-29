@@ -72,6 +72,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(this, &EmulatorQtWindow::fill, this, &EmulatorQtWindow::slot_fill);
     QObject::connect(this, &EmulatorQtWindow::getBitmapInfo, this, &EmulatorQtWindow::slot_getBitmapInfo);
     QObject::connect(this, &EmulatorQtWindow::getMonitorDpi, this, &EmulatorQtWindow::slot_getMonitorDpi);
+    QObject::connect(this, &EmulatorQtWindow::getMonitorDimensions, this, &EmulatorQtWindow::slot_getMonitorDimensions);
     QObject::connect(this, &EmulatorQtWindow::getScreenDimensions, this, &EmulatorQtWindow::slot_getScreenDimensions);
     QObject::connect(this, &EmulatorQtWindow::getWindowId, this, &EmulatorQtWindow::slot_getWindowId);
     QObject::connect(this, &EmulatorQtWindow::getWindowPos, this, &EmulatorQtWindow::slot_getWindowPos);
@@ -280,9 +281,19 @@ void EmulatorQtWindow::slot_getMonitorDpi(int *out_dpi, QSemaphore *semaphore)
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorQtWindow::slot_getScreenDimensions(QRect *out_rect, QSemaphore *semaphore)
+void EmulatorQtWindow::slot_getMonitorDimensions(QRect *out_rect, QSemaphore *semaphore)
 {
     QRect rect = ((QApplication*)QApplication::instance())->desktop()->screenGeometry();
+    out_rect->setX(rect.x());
+    out_rect->setY(rect.y());
+    out_rect->setWidth(rect.width());
+    out_rect->setHeight(rect.height());
+    if (semaphore != NULL) semaphore->release();
+}
+
+void EmulatorQtWindow::slot_getScreenDimensions(QRect *out_rect, QSemaphore *semaphore)
+{
+    QRect rect = ((QApplication*)QApplication::instance())->desktop()->availableGeometry();
     out_rect->setX(rect.x());
     out_rect->setY(rect.y());
     out_rect->setWidth(rect.width());

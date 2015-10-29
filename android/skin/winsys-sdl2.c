@@ -149,6 +149,15 @@ void skin_winsys_get_monitor_rect(SkinRect* rect) {
     rect->size.h = monitor.h - borders->bottom;
 }
 
+void skin_winsys_get_screen_rect(SkinRect* rect) {
+    skin_winsys_get_monitor_rect(rect);
+
+    /* To account for thigs like menu bars, window decorations etc..
+     * We only compute 85% of the real screen size. */
+    rect->size.w *= 0.85;
+    rect->size.h *= 0.85;
+}
+
 int skin_winsys_get_monitor_dpi(int* x_dpi, int* y_dpi) {
     // SDL2 doesn't provide this information.
     return 96;
