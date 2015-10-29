@@ -10,6 +10,8 @@
  ** GNU General Public License for more details.
  */
 
+#include <iostream>
+
 #include <QPushButton>
 #include <QtWidgets>
 
@@ -35,7 +37,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     emulator_window(window),
     extendedWindow(NULL),
     uiEmuAgent(NULL),
-    toolsUi(new Ui::ToolControls)
+    toolsUi(new Ui::ToolControls),
+    mShortcutKeyStore(parseQtUICommand)
 {
     Q_INIT_RESOURCE(resources);
 
@@ -78,6 +81,19 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     } else {
         this->setStyleSheet(QT_STYLE(LIGHT));
     }
+
+    QString default_shortcuts = 
+        "Ctrl+Shift+L SHOW_PANE_LOCATION\n"
+        "Ctrl+Shift+C SHOW_PANE_CELLULAR\n"
+        "Ctrl+Shift+B SHOW_PANE_BATTERY\n"
+        "Ctrl+Shift+P SHOW_PANE_PHONE\n"
+        "Ctrl+Shift+V SHOW_PANE_VIRTSENSORS\n"
+        "Ctrl+Shift+D SHOW_PANE_DPAD\n"
+        "Ctrl+Shift+S SHOW_PANE_SETTINGS\n"
+        "Ctrl+S       TAKE_SCREENSHOT\n"
+        "Ctrl+Z       ENTER_ZOOM\n";
+    QTextStream stream(&default_shortcuts);
+    mShortcutKeyStore.populateFromTextStream(stream);
 }
 
 void ToolWindow::show()
@@ -172,6 +188,51 @@ void ToolWindow::runAdbPush(const QList<QUrl> &urls)
     }
 }
 
+void ToolWindow::handleUICommand(QtUICommand cmd) {
+    switch (cmd) {
+    case QtUICommand::SHOW_PANE_LOCATION:
+        on_more_button_clicked();
+        extendedWindow->showPane(PANE_IDX_LOCATION);
+        break;
+    case QtUICommand::SHOW_PANE_CELLULAR:
+        on_more_button_clicked();
+        extendedWindow->showPane(PANE_IDX_CELLULAR);
+        break;
+    case QtUICommand::SHOW_PANE_BATTERY:
+        on_more_button_clicked();
+        extendedWindow->showPane(PANE_IDX_BATTERY);
+        break;
+    case QtUICommand::SHOW_PANE_PHONE: 
+        on_more_button_clicked();
+        extendedWindow->showPane(PANE_IDX_TELEPHONE);
+        break;
+    case QtUICommand::SHOW_PANE_VIRTSENSORS: 
+        on_more_button_clicked();
+        extendedWindow->showPane(PANE_IDX_VIRT_SENSORS);
+        break;
+    case QtUICommand::SHOW_PANE_DPAD: 
+        on_more_button_clicked();
+        extendedWindow->showPane(PANE_IDX_DPAD);
+        break;
+    case QtUICommand::SHOW_PANE_SETTINGS: 
+        on_more_button_clicked();
+        extendedWindow->showPane(PANE_IDX_SETTINGS);
+        break;
+    case QtUICommand::TAKE_SCREENSHOT:
+        emulator_window->screenshot();
+        break;
+    case QtUICommand::ENTER_ZOOM:
+        emulator_window->zoom();
+        break;
+    }
+}
+
+bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
+    return mShortcutKeyStore.handle(
+        QKeySequence(event->key() | event->modifiers()),
+        [this](QtUICommand cmd) { handleUICommand(cmd); });
+}
+
 void ToolWindow::dockMainWindow()
 {
     move(parentWidget()->geometry().right() + 10, parentWidget()->geometry().top() + 10);
@@ -243,7 +304,7 @@ void ToolWindow::on_more_button_clicked()
         extendedWindow->raise();
         return;
     }
-    extendedWindow = new ExtendedWindow(emulator_window, this, uiEmuAgent);
+    extendedWindow = new ExtendedWindow(emulator_window, this, uiEmuAgent, &mShortcutKeyStore);
     extendedWindow->show();
     // completeInitialization() must be called AFTER show()
     extendedWindow->completeInitialization();

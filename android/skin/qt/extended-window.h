@@ -22,6 +22,8 @@
 #include "android/hw-sensors.h"
 #include "android/settings-agent.h"
 #include "android/skin/qt/extended-window-styles.h"
+#include "android/skin/qt/shortcut-key-store.h"
+#include "android/skin/qt/qt-ui-commands.h"
 #include "android/ui-emu-agent.h"
 
 #include <QFile>
@@ -47,10 +49,17 @@ class ExtendedWindow : public QFrame
     Q_OBJECT
 
 public:
-    explicit ExtendedWindow(EmulatorQtWindow *eW, ToolWindow *tW, const UiEmuAgent *agentPtr);
+    explicit ExtendedWindow(
+        EmulatorQtWindow *eW,
+        ToolWindow *tW,
+        const UiEmuAgent *agentPtr,
+        ShortcutKeyStore<QtUICommand>* shortcuts);
 
     void completeInitialization();
     void showPane(ExtendedWindowPane pane);
+    void setQtUiShortcuts(const ShortcutKeyStore<QtUICommand>* shortcuts) {
+        mQtUIShortcuts = shortcuts;
+    }
 
     static void switchAllIconsForTheme(SettingsTheme theme);
 
@@ -130,7 +139,7 @@ private:
     QTimer   mLoc_timer;
     QDoubleValidator mMagFieldValidator;
     std::map<ExtendedWindowPane, QPushButton*> mPaneButtonMap;
-
+    const ShortcutKeyStore<QtUICommand>* mQtUIShortcuts;
     Ui::ExtendedControls *mExtendedUi;
 
     void    adjustTabs(ExtendedWindowPane thisIndex);
