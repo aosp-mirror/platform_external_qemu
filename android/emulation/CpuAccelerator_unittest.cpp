@@ -9,6 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#define CPU_ACCELERATOR_PRIVATE
 #include "android/emulation/CpuAccelerator.h"
 
 #include <stdio.h>
@@ -27,10 +28,12 @@ public:
     ~CpuAcceleratorTest() {
         // Restore previous state.
         SetCurrentCpuAcceleratorForTesting(saved_accel_,
+                                           saved_status_code_,
                                            saved_status_.c_str());
     }
 private:
     CpuAccelerator saved_accel_;
+    VMAccelerationCapability saved_status_code_;
     String saved_status_;
 };
 
@@ -58,5 +61,50 @@ TEST_F(CpuAcceleratorTest, Default) {
     }
     printf("Status: %s\n", status.c_str());
 }
+
+#ifdef __APPLE__
+
+TEST(CpuAccelerator_Darwin_GetHaxVersion, Test) {
+    const char* kext_dir[] = {
+        "this-directory-does-not-exist",
+        "android", // this directory exists but doesn't contain the file
+        "android/emulation",
+    };
+
+    // this is a real version from from HAXM 1.2.1
+    ASSERT_EQ(0x01020001, CpuAccelerator_Darwin_GetHaxVersion(kext_dir, 3, "CpuAccelerator_unittest.dat2"));
+
+    // this is a real version from from HAXM 1.1.4
+    const char* version_file = "CpuAccelerator_unittest.dat";
+
+    ASSERT_EQ(0x01010004, CpuAccelerator_Darwin_GetHaxVersion(kext_dir, 3, version_file));
+
+    // only looking in the first directory, won't be found
+    ASSERT_EQ(0, CpuAccelerator_Darwin_GetHaxVersion(kext_dir, 1, version_file));
+
+    // the second directory will be found but the version file will be missing
+    ASSERT_EQ(-1, CpuAccelerator_Darwin_GetHaxVersion(kext_dir, 2, version_file));
+
+    // this file will have "VERSION=" but not a valid number following it
+    ASSERT_EQ(-1, CpuAccelerator_Darwin_GetHaxVersion(kext_dir, 3, "CpuAccelerator_unittest.cpp"));
+}
+
+TEST(CpuAccelerator_Darwin_ParseVersionScript, Test) {
+    ASSERT_EQ(0x01020004, CpuAccelerator_Darwin_ParseVersionScript("VERSION=1.2.4"));
+    ASSERT_EQ(0x0203000a, CpuAccelerator_Darwin_ParseVersionScript("VERSION=2.3.10\r"));
+    ASSERT_EQ(0x04010000, CpuAccelerator_Darwin_ParseVersionScript("VERSION=4.1"));
+    ASSERT_EQ(0x03000000, CpuAccelerator_Darwin_ParseVersionScript("VERSION=3\n"));
+    ASSERT_EQ(0x7fffffff, CpuAccelerator_Darwin_ParseVersionScript("VERSION=127.255.65535"));
+    ASSERT_EQ(-1, CpuAccelerator_Darwin_ParseVersionScript("VERSION=.1"));
+    ASSERT_EQ(-1, CpuAccelerator_Darwin_ParseVersionScript("VERSION=128.0.0"));
+    ASSERT_EQ(-1, CpuAccelerator_Darwin_ParseVersionScript("VERSION=0"));
+    ASSERT_EQ(-1, CpuAccelerator_Darwin_ParseVersionScript("VERSION=1.256.3"));
+    ASSERT_EQ(-1, CpuAccelerator_Darwin_ParseVersionScript("VERSION=1.2.65536"));
+    ASSERT_EQ(-1, CpuAccelerator_Darwin_ParseVersionScript("VERSION=\n"));
+    ASSERT_EQ(-1, CpuAccelerator_Darwin_ParseVersionScript("asdf"));
+    ASSERT_EQ(-1, CpuAccelerator_Darwin_ParseVersionScript(""));
+}
+
+#endif // __APPLE__
 
 }  // namespace android

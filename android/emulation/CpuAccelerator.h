@@ -12,6 +12,9 @@
 #pragma once
 
 #include "android/base/String.h"
+#include "android/cpu_accelerator.h"
+#include <string>
+#include <stdlib.h>
 
 namespace android {
 
@@ -47,9 +50,46 @@ CpuAccelerator  GetCurrentCpuAccelerator();
 // the accelerator cannot be used.
 String GetCurrentCpuAcceleratorStatus();
 
+// Return an status code describing the state of the current CPU
+// acceleration on this machine. If GetCurrentCpuAccelerator() returns
+// CPU_ACCELERATOR_NONE this will contain a small explanation why
+// the accelerator cannot be used.
+VMAccelerationCapability GetCurrentCpuAcceleratorStatusCode();
+
 // For unit testing/debugging purpose only, must be called before
 // GetCurrentCpuAccelerator().
 void SetCurrentCpuAcceleratorForTesting(CpuAccelerator accel,
+                                        VMAccelerationCapability status_code,
                                         const char* status);
+
+#ifdef CPU_ACCELERATOR_PRIVATE // private function declarations
+
+// This function takes a string in the format "VERSION=1.2.3" and returns an
+// integer that represents the dotted version number.  Invalid strings are
+// converted to -1.
+// Any characters before "VERSION=" are ignored.
+// Non-numeric characters at the end are ignored.
+//
+// Examples:
+//   "VERSION=1.2.4" -> 0x01020004
+//   "VERSION=1.2"   -> 0x01020000
+//   "1.2.4"         -> -1
+//   "asfd"          -> -1
+int32_t CpuAccelerator_Darwin_ParseVersionScript(const std::string& version_script);
+
+// This function searches one or more kernel extension directories for the
+// specified version file.
+// The version file is read and parsed if found
+// CpuAccelerator_Darwin_ParseVersionScript
+// returns 0 - HAXM not installed
+// returns -1 - HAXM corrupt or too old
+// returns 0x01020004 for version version number e.g. "1.2.4"
+int32_t CpuAccelerator_Darwin_GetHaxVersion(
+                                            const char* kext_dir[],
+                                            const size_t kext_dir_count,
+                                            const char* version_file
+                                            );
+
+#endif // UNIT_TEST_API
 
 }  // namespace android

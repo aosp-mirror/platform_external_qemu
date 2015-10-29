@@ -270,7 +270,8 @@ common_LOCAL_SRC_FILES += \
 	android/utils/uri.cpp \
 	android/utils/utf8_utils.cpp \
 	android/utils/vector.c \
-	android/utils/x86_cpuid.c \
+	android/utils/windows_installer.cpp \
+	android/utils/x86_cpuid.cpp \
 
 ifeq (windows,$(HOST_OS))
 common_LOCAL_SRC_FILES += \

@@ -17,10 +17,33 @@
 
 ANDROID_BEGIN_HEADER
 
-// Returns true if CPU acceleration is possible on this machine.
-// If |status| is not NULL, on exit, |*status| will be set to a
-// heap-allocated string describing the status of acceleration,
-// to be freed by the caller.
-bool android_hasCpuAcceleration(char** status);
+// don't change these numbers
+// Android Studio depends on them
+typedef enum {
+    ANDROID_VM_ACCELERATION_READY                    = 0, // Acceleration is available
+    ANDROID_VM_ACCELERATION_NESTED_NOT_SUPPORTED     = 1, // HAXM doesn't support nested VM
+    ANDROID_VM_ACCELERATION_INTEL_REQUIRED           = 2, // HAXM requires GeniuneIntel processor
+    ANDROID_VM_ACCELERATION_NO_CPU_SUPPORT           = 3, // CPU doesn't support required features (VT-x or SVM)
+    ANDROID_VM_ACCELERATION_NO_CPU_VTX_SUPPORT       = 4, // CPU doesn't support VT-x
+    ANDROID_VM_ACCELERATION_NO_CPU_NX_SUPPORT        = 5, // CPU doesn't support NX
+    ANDROID_VM_ACCELERATION_ACCEL_NOT_INSTALLED      = 6, // KVM/HAXM package not installed
+    ANDROID_VM_ACCELERATION_ACCEL_OBSOLETE           = 7, // HAXM package is obsolete
+    ANDROID_VM_ACCELERATION_DEV_NOT_FOUND            = 8, // /dev/kvm is not found: VT disabled in BIOS or KVM kernel module not loaded
+    ANDROID_VM_ACCELERATION_VT_DISABLED              = 9, // HAXM is installed but VT disabled in BIOS
+    ANDROID_VM_ACCELERATION_NX_DISABLED              = 10, // HAXM is installed but NX disabled in BIOS
+    ANDROID_VM_ACCELERATION_DEV_PERMISSION           = 11, // /dev/kvm or HAXM device: permission denied
+    ANDROID_VM_ACCELERATION_DEV_OPEN_FAILED          = 12, // /dev/kvm or HAXM device: open failed
+    ANDROID_VM_ACCELERATION_DEV_IOCTL_FAILED         = 13, // /dev/kvm or HAXM device: ioctl failed
+    ANDROID_VM_ACCELERATION_DEV_OBSOLETE             = 14, // KVM or HAXM supported API is too old
+    ANDROID_VM_ACCELERATION_HYPERV_ENABLED           = 15, // HyperV must be disabled
+    ANDROID_VM_ACCELERATION_ERROR                    = 138, // Some other error occurred
+} VMAccelerationCapability;
+
+/* Returns ANDROID_VM_ACCELERATION_READY if CPU acceleration is
+ *  possible on this machine.  If |status| is not NULL, on exit,
+ * |*status| will be set to a heap-allocated string describing
+ * the status of acceleration, to be freed by the caller.
+ */
+VMAccelerationCapability android_hasCpuAcceleration(char** status);
 
 ANDROID_END_HEADER
