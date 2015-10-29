@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "569941f8_dc3a6d60",
+        "filename": "android/build/definitions.make",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-29T17:59:40Z",
+      "side": 1,
+      "message": "nit: trailing space",
+      "revId": "b916fc7d2d904ede2b0f97b7cb14fcf96eb71ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
