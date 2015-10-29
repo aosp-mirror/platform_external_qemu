@@ -38,7 +38,7 @@ $(QEMU_HW_CONFIG_DEFS_H): $(QEMU_HARDWARE_PROPERTIES_INI) $(LOCAL_PATH)/android/
 	$(hide) rm -f $@
 	$(transform-generated-source)
 
-QEMU_HW_CONFIG_DEFS_INCLUDES := $(intermediates)
+QEMU_HW_CONFIG_DEFS_INCLUDES := $(SRC_PATH)/$(intermediates)
 
 # Second, define a function that needs to be called inside each module that contains
 # a source file that includes the generated header file.
@@ -473,8 +473,12 @@ CORE_MISC_SOURCES = \
     qemu-char.c \
     qemu-log.c \
     savevm.c \
-    android/boot-properties.c \
     android-qemu1-glue/emulation/charpipe.c \
+    android-qemu1-glue/emulation/serial_line.cpp \
+    android-qemu1-glue/base/async/Looper.cpp \
+    android-qemu1-glue/emulation/CharSerialLine.cpp \
+    android-qemu1-glue/qemu-setup.cpp \
+    android/boot-properties.c \
     android/core-init-utils.c   \
     android/ext4_resize.cpp   \
     android/gps.c \
@@ -487,11 +491,7 @@ CORE_MISC_SOURCES = \
     android/hw-qemud.cpp \
     android/looper-qemu.cpp \
     android/hw-pipe-net.c \
-    android-qemu1-glue/emulation/serial_line.cpp \
-    android-qemu1-glue/base/async/Looper.cpp \
-    android-qemu1-glue/emulation/CharSerialLine.cpp \
     android/qemu-setup.c \
-    android-qemu1-glue/qemu-setup.cpp \
     android/qemu-tcpdump.c \
     android/shaper.c \
     android/snapshot.c \

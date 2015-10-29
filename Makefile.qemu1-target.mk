@@ -291,12 +291,13 @@ common_LOCAL_SRC_FILES := \
     android/cmdline-option.c \
     android/console.c \
     android/cpu_accelerator.cpp \
-    android-qemu1-glue/display.c \
     android/help.c \
     android/main-common.c \
     android/main-common-ui.c \
-    android-qemu1-glue/main.c \
     android/opengles.c \
+    android/qt/qt_path.cpp \
+    android-qemu1-glue/display.c \
+    android-qemu1-glue/main.c \
     android-qemu1-glue/qemu-battery-agent-impl.c \
     android-qemu1-glue/qemu-cellular-agent-impl.c \
     android-qemu1-glue/qemu-display-agent-impl.cpp \
@@ -308,7 +309,6 @@ common_LOCAL_SRC_FILES := \
     android-qemu1-glue/qemu-user-event-agent-impl.c \
     android-qemu1-glue/qemu-vm-operations-impl.c \
     android-qemu1-glue/qemu-window-agent-impl.c \
-    android/qt/qt_path.cpp \
     hw/core/loader.c \
     ui/keymaps.c \
     util/bitmap.c \
