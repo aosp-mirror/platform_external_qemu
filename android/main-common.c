@@ -997,7 +997,8 @@ bool handleCpuAcceleration(AndroidOptions* opts, AvdInfo* avd,
         }
     }
 
-    bool accel_ok = android_hasCpuAcceleration(&accel_status);
+    AndroidCpuAcceleration accel_capability = androidCpuAcceleration_getStatus(&accel_status);
+    bool accel_ok = (accel_capability == ANDROID_CPU_ACCELERATION_READY);
     // Dump CPU acceleration status.
     if (VERBOSE_CHECK(init)) {
         const char* accel_str = "DISABLED";

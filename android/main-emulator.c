@@ -24,15 +24,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <android/utils/compiler.h>
-#include <android/utils/host_bitness.h>
-#include <android/utils/panic.h>
-#include <android/utils/path.h>
-#include <android/utils/bufprint.h>
-#include <android/utils/win32_cmdline_quote.h>
-#include <android/opengl/emugl_config.h>
-#include <android/avd/scanner.h>
-#include <android/avd/util.h>
+
+#include "android/avd/scanner.h"
+#include "android/avd/util.h"
+#include "android/cpu_accelerator.h"
+#include "android/opengl/emugl_config.h"
+#include "android/utils/compiler.h"
+#include "android/utils/host_bitness.h"
+#include "android/utils/panic.h"
+#include "android/utils/path.h"
+#include "android/utils/bufprint.h"
+#include "android/utils/win32_cmdline_quote.h"
 
 #if CONFIG_QT
 #include <android/qt/qt_setup.h>
@@ -111,6 +113,22 @@ int main(int argc, char** argv)
     int  nn;
     for (nn = 1; nn < argc; nn++) {
         const char* opt = argv[nn];
+
+        if (!strcmp(opt, "-accel-check")) {
+            // check ability to launch haxm/kvm accelerated VM and exit
+            // designed for use by Android Studio
+            char* status = 0;
+            AndroidCpuAcceleration capability =
+                    androidCpuAcceleration_getStatus(&status);
+            if (status) {
+                FILE* out = stderr;
+                if (capability == ANDROID_CPU_ACCELERATION_READY)
+                    out = stdout;
+                fprintf(out, "%s\n", status);
+                free(status);
+            }
+            exit(capability);
+        }
 
         if (!strcmp(opt,"-qemu"))
             break;
