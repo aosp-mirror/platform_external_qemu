@@ -65,9 +65,11 @@ TEST(ScopedHandle, Swap) {
     ScopedHandle h2(OpenNull());
     EXPECT_FALSE(h1.valid());
     EXPECT_TRUE(h2.valid());
+    HANDLE handle = h2.get();
     h1.swap(&h2);
     EXPECT_FALSE(h2.valid());
     EXPECT_TRUE(h1.valid());
+    EXPECT_EQ(handle, h1.get());
 }
 
 }  // namespace base

@@ -66,9 +66,11 @@ TEST(ScopedFd, Swap) {
     ScopedFd f2(OpenNull());
     EXPECT_FALSE(f1.valid());
     EXPECT_TRUE(f2.valid());
+    int fd = f2.get();
     f1.swap(&f2);
     EXPECT_FALSE(f2.valid());
     EXPECT_TRUE(f1.valid());
+    EXPECT_EQ(fd, f1.get());
 }
 
 
