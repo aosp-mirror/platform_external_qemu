@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7673a594_758fa8b9",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-10-29T16:41:40Z",
+      "side": 1,
+      "message": "Nice",
+      "parentUuid": "f6d955b5_be43ed84",
+      "range": {
+        "startLine": 62,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 68
+      },
+      "revId": "9f2014cff21d4151c3b29686e845abdbf56b7d8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "76c565cc_d49ccaa8",
         "filename": "android/skin/qt/extended-window.cpp",
         "patchSetId": 1
