@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 The Android Open Source Project
+/* Copyright (C) 2007-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -93,6 +93,10 @@ extern SkinRotation  android_framebuffer_rotation;
 /* this is the port used for the control console in this emulator instance.
  * starts at 5554, with increments of 2 */
 extern int   android_base_port;
+
+/* this is the port used to connect ADB (Android Debug Bridge)
+ * default is 5037 */
+extern int   android_adb_port;
 
 /* parses a network speed parameter and sets qemu_net_upload_speed and
  * qemu_net_download_speed accordingly. returns -1 on failure, 0 on success */
