@@ -16,11 +16,12 @@
 
 #include "android/base/String.h"
 #include "android/emulation/CpuAccelerator.h"
+#include "android/cpu_accelerator.h"
 
 #include "android/utils/system.h"
 
-extern "C" bool android_hasCpuAcceleration(char** status_p) {
-    android::CpuAccelerator accel = android::GetCurrentCpuAccelerator();
+extern "C" VMAccelerationCapability android_hasCpuAcceleration(char** status_p) {
+    VMAccelerationCapability result = android::GetCurrentCpuAcceleratorStatusCode();
 
     if (status_p) {
         android::base::String status =
@@ -28,5 +29,5 @@ extern "C" bool android_hasCpuAcceleration(char** status_p) {
         *status_p = ASTRDUP(status.c_str());
     }
 
-    return accel != android::CPU_ACCELERATOR_NONE;
+    return result;
 }

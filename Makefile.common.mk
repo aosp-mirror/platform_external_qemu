@@ -61,6 +61,7 @@ ifeq ($(HOST_BITS),$(EMULATOR_PROGRAM_BITNESS))
 $(call start-emulator-program, emulator)
 LOCAL_SRC_FILES := \
     android/main-emulator.c \
+    android/cpu_accelerator.cpp \
 
 ifdef EMULATOR_USE_QT
     LOCAL_SRC_FILES += \

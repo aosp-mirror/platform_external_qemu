@@ -54,6 +54,27 @@ utf16_to_utf8(const wchar_t* wstring, int wstring_len)
   return result;
 }
 
+wchar_t*
+utf8_to_utf16(const char* string, int string_len)
+{
+  int utf16_len = MultiByteToWideChar(CP_UTF8,         // CodePage
+                                     0,                // dwFlags
+                                     (LPCSTR) string,  // lpMultiByteStr
+                                     string_len,       // cbMultiByte
+                                     NULL,             // lpWideCharStr
+                                     0                 // cchWideChar
+                                     );
+  if (utf16_len == 0)
+    return _wcsdup(L"");
+
+  wchar_t* result = g_malloc((utf16_len + 1) * sizeof(wchar_t));
+
+  MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)string, string_len,
+                      result, utf16_len);
+  result[utf16_len] = L'\0';
+  return result;
+}
+
 char *
 g_win32_error_message (int error)
 {
