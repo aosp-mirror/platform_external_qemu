@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "36204e91_a4628c55",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-10-30T21:19:58Z",
+      "side": 1,
+      "message": "Ah right, because I stole the OS X part. Sorry!",
+      "parentUuid": "f6195673_4245ec96",
+      "range": {
+        "startLine": 9,
+        "startChar": 12,
+        "endLine": 9,
+        "endChar": 15
+      },
+      "revId": "ade06772579c3548c14f70a1d2d9843f0250d7e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5625c29e_ca235383",
         "filename": "android/resource.c",
         "patchSetId": 2
