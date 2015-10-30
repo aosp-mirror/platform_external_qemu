@@ -112,6 +112,18 @@ typedef struct {
 } Proximity;
 
 typedef struct {
+    float value;
+} Light;
+
+typedef struct {
+    float value;
+} Pressure;
+
+typedef struct {
+    float value;
+} Humidity;
+
+typedef struct {
     char       enabled;
     union {
         SensorValues   value;
@@ -120,6 +132,9 @@ typedef struct {
         Orientation    orientation;
         Temperature    temperature;
         Proximity      proximity;
+        Light          light;
+        Pressure       pressure;
+        Humidity       humidity;
     } u;
 } Sensor;
 
@@ -157,6 +172,9 @@ typedef struct {
  *      magnetic-field:<x>:<y>:<z>
  *      orientation:<azimuth>:<pitch>:<roll>
  *      temperature:<celsius>
+ *      light:<lux>
+ *      pressure:<hpa>
+ *      humidity:<percent>
  *      sync:<time_us>
  *
  *   Where each line before the sync:<time_us> is optional and will only
@@ -339,6 +357,27 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
         sensor = &hw->sensors[ANDROID_SENSOR_PROXIMITY];
         snprintf(buffer, sizeof buffer, "proximity:%g",
                  sensor->u.proximity.value);
+        _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
+    }
+
+    if (_hwSensorClient_enabled(cl, ANDROID_SENSOR_LIGHT)) {
+        sensor = &hw->sensors[ANDROID_SENSOR_LIGHT];
+        snprintf(buffer, sizeof buffer, "light:%g",
+                 sensor->u.light.value);
+        _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
+    }
+
+    if (_hwSensorClient_enabled(cl, ANDROID_SENSOR_PRESSURE)) {
+        sensor = &hw->sensors[ANDROID_SENSOR_PRESSURE];
+        snprintf(buffer, sizeof buffer, "pressure:%g",
+                 sensor->u.pressure.value);
+        _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
+    }
+
+    if (_hwSensorClient_enabled(cl, ANDROID_SENSOR_HUMIDITY)) {
+        sensor = &hw->sensors[ANDROID_SENSOR_HUMIDITY];
+        snprintf(buffer, sizeof buffer, "humidity:%g",
+                 sensor->u.humidity.value);
         _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
     }
 
@@ -545,6 +584,16 @@ static void _hwSensors_save(Stream* f, QemudService* sv, void* opaque) {
         case ANDROID_SENSOR_PROXIMITY:
             stream_put_float(f, s->u.proximity.value);
             break;
+        case ANDROID_SENSOR_LIGHT:
+            stream_put_float(f, s->u.light.value);
+            break;
+        case ANDROID_SENSOR_PRESSURE:
+            stream_put_float(f, s->u.pressure.value);
+            break;
+        case ANDROID_SENSOR_HUMIDITY:
+            stream_put_float(f, s->u.humidity.value);
+            break;
+
         case MAX_SENSORS:
             break;
         }
@@ -592,6 +641,15 @@ static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
             break;
         case ANDROID_SENSOR_PROXIMITY:
             s->u.proximity.value = stream_get_float(f);
+            break;
+        case ANDROID_SENSOR_LIGHT:
+            s->u.light.value = stream_get_float(f);
+            break;
+        case ANDROID_SENSOR_PRESSURE:
+            s->u.pressure.value = stream_get_float(f);
+            break;
+        case ANDROID_SENSOR_HUMIDITY:
+            s->u.humidity.value = stream_get_float(f);
             break;
         case MAX_SENSORS:
             break;
@@ -680,6 +738,18 @@ _hwSensors_init( HwSensors*  h )
 
     if (android_hw->hw_sensors_temperature) {
         h->sensors[ANDROID_SENSOR_TEMPERATURE].enabled = 1;
+    }
+
+    if (android_hw->hw_sensors_light) {
+        h->sensors[ANDROID_SENSOR_LIGHT].enabled = 1;
+    }
+
+    if (android_hw->hw_sensors_pressure) {
+        h->sensors[ANDROID_SENSOR_PRESSURE].enabled = 1;
+    }
+
+    if (android_hw->hw_sensors_humidity) {
+        h->sensors[ANDROID_SENSOR_HUMIDITY].enabled = 1;
     }
 
     /* XXX: TODO: Add other tests when we add the corresponding

@@ -48,6 +48,9 @@ typedef enum{
     SENSOR_(ORIENTATION,"orientation") \
     SENSOR_(TEMPERATURE,"temperature") \
     SENSOR_(PROXIMITY,"proximity") \
+    SENSOR_(LIGHT,"light") \
+    SENSOR_(PRESSURE,"pressure") \
+    SENSOR_(HUMIDITY,"humidity")
 
 typedef enum {
 #define  SENSOR_(x,y)  ANDROID_SENSOR_##x,
