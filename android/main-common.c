@@ -483,7 +483,9 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
         int    kernelFileLen;
 
         if (kernelFile == NULL) {
-            kernelFile = avdInfo_getKernelPath(avd);
+            kernelFile = opts->ranchu ?
+                    avdInfo_getRanchuKernelPath(avd) :
+                    avdInfo_getKernelPath(avd);
             if (kernelFile == NULL) {
                 derror( "This AVD's configuration is missing a kernel file!!" );
                 const char* sdkRootDir = getenv("ANDROID_SDK_ROOT");
