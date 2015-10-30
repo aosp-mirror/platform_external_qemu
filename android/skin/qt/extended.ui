@@ -61,7 +61,7 @@ font-family: &quot;Roboto&quot;</string>
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="currentIndex">
-    <number>7</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="location_page">
     <widget class="QGroupBox" name="locationGroup">
@@ -1230,7 +1230,7 @@ font-family: &quot;Roboto&quot;</string>
      </item>
      <item>
       <property name="text">
-       <string>+1.650.555-6789</string>
+       <string>+1 650 555-6789</string>
       </property>
      </item>
     </widget>
@@ -1242,6 +1242,9 @@ font-family: &quot;Roboto&quot;</string>
        <width>381</width>
        <height>140</height>
       </rect>
+     </property>
+     <property name="plainText">
+      <string>Don't forget the marshmallows!</string>
      </property>
     </widget>
     <widget class="QPushButton" name="sms_sendButton">
@@ -2671,99 +2674,11 @@ font-family: &quot;Roboto&quot;</string>
     <string>MajorTab</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="fingerButton">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>284</y>
-     <width>220</width>
-     <height>44</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-   <property name="autoFillBackground">
-    <bool>false</bool>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
-   </property>
-   <property name="text">
-    <string>  Fingerprint</string>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/fingerprint</normaloff>:/light/fingerprint</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>20</width>
-     <height>20</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string>fingerprint</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>MajorTab</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="virtSensorsButton">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>196</y>
-     <width>220</width>
-     <height>44</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-   <property name="autoFillBackground">
-    <bool>false</bool>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
-   </property>
-   <property name="text">
-    <string>  Virtual sensors</string>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/virtSensors</normaloff>:/light/virtSensors</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>20</width>
-     <height>20</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string>virtSensors</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>MajorTab</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="dpadButton">
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>240</y>
+     <y>196</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -2829,7 +2744,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>410</y>
+     <y>328</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -2876,9 +2791,9 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>452</y>
+     <y>372</y>
      <width>220</width>
-     <height>300</height>
+     <height>373</height>
     </rect>
    </property>
    <property name="autoFillBackground">
@@ -2910,7 +2825,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>326</y>
+     <y>240</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -2947,7 +2862,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>366</y>
+     <y>284</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -3035,9 +2950,7 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>cellularButton</tabstop>
   <tabstop>batteryButton</tabstop>
   <tabstop>telephoneButton</tabstop>
-  <tabstop>virtSensorsButton</tabstop>
   <tabstop>dpadButton</tabstop>
-  <tabstop>fingerButton</tabstop>
   <tabstop>kbdShortsButton</tabstop>
   <tabstop>settingsButton</tabstop>
   <tabstop>spacer2Button</tabstop>
