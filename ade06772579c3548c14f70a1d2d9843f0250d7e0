@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f6195673_6240e888",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-10-30T21:18:23Z",
+      "side": 1,
+      "message": "Typo?",
+      "range": {
+        "startLine": 7,
+        "startChar": 20,
+        "endLine": 7,
+        "endChar": 23
+      },
+      "revId": "ade06772579c3548c14f70a1d2d9843f0250d7e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6195673_4245ec96",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-10-30T21:18:23Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 9,
+        "startChar": 12,
+        "endLine": 9,
+        "endChar": 15
+      },
+      "revId": "ade06772579c3548c14f70a1d2d9843f0250d7e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5625c29e_ca235383",
+        "filename": "android/resource.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-10-30T21:18:23Z",
+      "side": 1,
+      "message": "Move this to a normal place (top) now that it\u0027s not in an ifdef?",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 43,
+        "endChar": 29
+      },
+      "revId": "ade06772579c3548c14f70a1d2d9843f0250d7e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
