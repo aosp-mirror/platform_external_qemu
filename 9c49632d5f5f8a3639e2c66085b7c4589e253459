@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "562a227b_54cb8476",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2015-10-30T03:03:08Z",
+      "side": 1,
+      "message": "Two questions:\n\n1. Why use different paths (kernel-ranchu vs.ranchu/kernel-qemu) for SDK system-images and AOSP prebuilts?\n\n2. Technically arm64 and mips64 kernels are also ranchu kernels, but are currently just named kernel-qemu. Is it your intention not to have to rename them after this change? I guess so, since that would be convenient, but please see my comment in main-common.c...",
+      "revId": "9c49632d5f5f8a3639e2c66085b7c4589e253459",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7643a650_551b7c50",
+        "filename": "android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 486,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2015-10-30T03:03:08Z",
+      "side": 1,
+      "message": "IIUC, this \"-ranchu\" option is currently required for launching an x86/x86_64 AVD with qemu2, but optional for arm64 and mips64. So 1) \"emulator -avd \u003carm64_avd\u003e\" and 2) \"emulator -avd \u003carm64_avd\u003e -ranchu\" should both work for arm64?\n\nNow with this change, the emulator will go look for arm64/kernel-qemu in case 1, but arm64/ranchu/kernel-qemu or arm64/kernel-ranchu in case 2... Is that a problem?",
+      "revId": "9c49632d5f5f8a3639e2c66085b7c4589e253459",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
