@@ -22,6 +22,30 @@
       "revId": "aed3b2d75eac42426bd992ab1119bc5ae35718f9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "768ac5a0_7d8f97b9",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T12:37:13Z",
+      "side": 1,
+      "message": "Done, see Win32UnicodeString::convertToUtf8() as a static method in previous patch.",
+      "parentUuid": "7643a650_d2c9c2d2",
+      "range": {
+        "startLine": 270,
+        "startChar": 19,
+        "endLine": 270,
+        "endChar": 37
+      },
+      "revId": "aed3b2d75eac42426bd992ab1119bc5ae35718f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
