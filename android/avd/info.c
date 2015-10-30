@@ -1004,6 +1004,39 @@ avdInfo_getKernelPath( AvdInfo*  i )
     return kernelPath;
 }
 
+char*
+avdInfo_getRanchuKernelPath( AvdInfo*  i )
+{
+    const char* imageName = _imageFileNames[ AVD_IMAGE_KERNELRANCHU ];
+
+    char*  kernelPath = _avdInfo_getContentOrSdkFilePath(i, imageName);
+
+    do {
+        if (kernelPath || !i->inAndroidBuild)
+            break;
+
+        /* When in the Android build, look into the prebuilt directory
+         * for our target architecture.
+         */
+        char temp[PATH_MAX], *p = temp, *end = p + sizeof(temp);
+
+        p = bufprint(temp, end, "%s/prebuilts/qemu-kernel/%s/ranchu/kernel-qemu",
+                     i->androidBuildRoot, i->targetArch);
+        if (p >= end || !path_exists(temp)) {
+            /* arm64 and mips64 are special: their kernel-qemu is actually kernel-ranchu */
+            if (!strcmp(i->targetArch, "arm64") || !strcmp(i->targetArch, "mips64")) {
+                return avdInfo_getKernelPath(i);
+            } else {
+                derror("bad workspace: cannot find prebuilt ranchu kernel in: %s", temp);
+                exit(1);
+            }
+        }
+        kernelPath = ASTRDUP(temp);
+    } while (0);
+
+    return kernelPath;
+}
+
 
 char*
 avdInfo_getRamdiskPath( AvdInfo* i )
