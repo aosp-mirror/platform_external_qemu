@@ -55,6 +55,7 @@ ANDROID_BEGIN_HEADER
  */
 #define  AVD_IMAGE_LIST \
     _AVD_IMG(KERNEL,"kernel-qemu","kernel") \
+    _AVD_IMG(KERNELRANCHU,"kernel-ranchu","kernel") \
     _AVD_IMG(RAMDISK,"ramdisk.img","ramdisk") \
     _AVD_IMG(INITSYSTEM,"system.img","init system") \
     _AVD_IMG(INITDATA,"userdata.img","init data") \
@@ -147,6 +148,7 @@ int    avdInfo_getApiLevel( AvdInfo*  i );
  * by the caller.
  */
 char*  avdInfo_getKernelPath( AvdInfo*  i );
+char*  avdInfo_getRanchuKernelPath( AvdInfo*  i );
 char*  avdInfo_getRamdiskPath( AvdInfo*  i );
 char*  avdInfo_getSdCardPath( AvdInfo* i );
 char*  avdInfo_getSnapStoragePath( AvdInfo* i );
