@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "166509c4_3a044197",
+        "filename": "android/avd/info.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1020,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T08:57:26Z",
+      "side": 1,
+      "message": "what about fixing the prebuilts/ directory instead? I.e.:\n\n1) rename .../ranchu/kernel-qemu to .../kernel-ranchu\n2) for MIPS64 and ARM64, just create a symlink from kernel-qemu to kernel-ranchu ?",
+      "revId": "5003e82d42075bf6f3096fd7aa14c4687d10ec82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b688bda5_c2cd2498",
+        "filename": "android/avd/info.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T08:57:26Z",
+      "side": 1,
+      "message": "nit: what about KERNELRANCHU instead?",
+      "revId": "5003e82d42075bf6f3096fd7aa14c4687d10ec82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
