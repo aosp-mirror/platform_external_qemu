@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f6195673_6227c8f6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-30T21:23:56Z",
+      "side": 1,
+      "message": "Yep! Will update this message.",
+      "parentUuid": "f6195673_6240e888",
+      "range": {
+        "startLine": 7,
+        "startChar": 20,
+        "endLine": 7,
+        "endChar": 23
+      },
+      "revId": "ade06772579c3548c14f70a1d2d9843f0250d7e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f6195673_4245ec96",
         "filename": "/COMMIT_MSG",
         "patchSetId": 2
@@ -72,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "d63612de_0c584b07",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-30T21:23:56Z",
+      "side": 1,
+      "message": "No problem! I should remove it.",
+      "parentUuid": "36204e91_a4628c55",
+      "range": {
+        "startLine": 9,
+        "startChar": 12,
+        "endLine": 9,
+        "endChar": 15
+      },
+      "revId": "ade06772579c3548c14f70a1d2d9843f0250d7e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5625c29e_ca235383",
         "filename": "android/resource.c",
         "patchSetId": 2
@@ -83,6 +131,30 @@
       "writtenOn": "2015-10-30T21:18:23Z",
       "side": 1,
       "message": "Move this to a normal place (top) now that it\u0027s not in an ifdef?",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 43,
+        "endChar": 29
+      },
+      "revId": "ade06772579c3548c14f70a1d2d9843f0250d7e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d63612de_ac4edf3e",
+        "filename": "android/resource.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-10-30T21:23:56Z",
+      "side": 1,
+      "message": "Doing so makes the compile fail for whatever reason - something to do with the #undef _file_entires \\ #define _file_entires _icon_entires above. I think we should just leave it.",
+      "parentUuid": "5625c29e_ca235383",
       "range": {
         "startLine": 43,
         "startChar": 0,
