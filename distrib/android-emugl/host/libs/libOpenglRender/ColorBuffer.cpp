@@ -146,7 +146,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     ::free(zBuff);
 
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
@@ -350,6 +350,9 @@ bool ColorBuffer::bindToRenderbuffer() {
 
 bool ColorBuffer::post(float rotation, float dx, float dy) {
     // NOTE: Do not call m_helper->setupContext() here!
+    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+    s_gles2.glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
+    s_gles2.glGenerateMipmap(GL_TEXTURE_2D);
     return m_helper->getTextureDraw()->draw(m_tex, rotation, dx, dy);
 }
 
