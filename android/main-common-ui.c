@@ -630,12 +630,12 @@ init_sdl_ui(AConfig*          skinConfig,
         signal(SIGTTOU, SIG_IGN);
 #endif
     } else {
-#ifndef _WIN32
         // NOTE: On Windows, the program icon is embedded as a resource inside
-        //       the executable, and there is no need to actually set it
-        //       explictly, so do not call android_emulator_icon_find() on this
-        //       platform.
-#  if defined(__APPLE__)
+        //       the executable. However, this only changes the icon that appears
+        //       with the executable in a file browser. To change the icon that
+        //       appears both in the application title bar and the taskbar, the
+        //       window icon still must be set.
+#  if defined(__APPLE__) || defined(_WIN32)
         static const char kIconFile[] = "emulator_icon_256.png";
 #  else
         static const char kIconFile[] = "emulator_icon_128.png";
@@ -651,7 +651,6 @@ init_sdl_ui(AConfig*          skinConfig,
                     "### Error: could not find emulator icon resource: %s\n",
                     kIconFile);
         }
-#endif  // !_WIN32
     }
     atexit(android_ui_at_exit);
 
