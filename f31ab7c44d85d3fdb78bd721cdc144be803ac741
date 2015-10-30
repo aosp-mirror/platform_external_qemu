@@ -22,6 +22,30 @@
       "revId": "f31ab7c44d85d3fdb78bd721cdc144be803ac741",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7643a650_2921c1de",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-30T21:39:25Z",
+      "side": 1,
+      "message": "fixed - leftover old code got in the way",
+      "parentUuid": "161fca56_ce86c7f8",
+      "range": {
+        "startLine": 304,
+        "startChar": 0,
+        "endLine": 307,
+        "endChar": 5
+      },
+      "revId": "f31ab7c44d85d3fdb78bd721cdc144be803ac741",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
