@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "36204e91_9eefe118",
+        "filename": "android/skin/qt/ext-keyboard-shortcuts.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-30T21:14:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "36204e91_9b12533c",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 7
+      },
+      "revId": "cb7e1d7cecba3dc86e431044bc535479abef8485",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7643a650_95d0c41d",
         "filename": "android/skin/qt/extended-window.cpp",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "562a227b_74aa00b1",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-30T21:14:28Z",
+      "side": 1,
+      "message": ":)",
+      "parentUuid": "7643a650_95d0c41d",
+      "range": {
+        "startLine": 76,
+        "startChar": 41,
+        "endLine": 76,
+        "endChar": 55
+      },
+      "revId": "cb7e1d7cecba3dc86e431044bc535479abef8485",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "562a227b_d137868a",
         "filename": "android/skin/qt/extended-window.h",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2015-10-30T01:22:38Z",
       "side": 1,
       "message": "explicit isn\u0027t needed anymore",
+      "range": {
+        "startLine": 52,
+        "startChar": 4,
+        "endLine": 52,
+        "endChar": 12
+      },
+      "revId": "cb7e1d7cecba3dc86e431044bc535479abef8485",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7643a650_03bedef1",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-30T21:14:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "562a227b_d137868a",
       "range": {
         "startLine": 52,
         "startChar": 4,
@@ -117,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "760e462a_fde81f14",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-30T21:14:28Z",
+      "side": 1,
+      "message": "should have removed this, don\u0027t need it",
+      "parentUuid": "7643a650_75ed60e6",
+      "range": {
+        "startLine": 60,
+        "startChar": 26,
+        "endLine": 60,
+        "endChar": 31
+      },
+      "revId": "cb7e1d7cecba3dc86e431044bc535479abef8485",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5625c29e_5921672f",
         "filename": "android/skin/qt/qt-ui-commands.cpp",
         "patchSetId": 2
@@ -128,6 +224,30 @@
       "writtenOn": "2015-10-30T01:22:38Z",
       "side": 1,
       "message": "copyright header?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 43
+      },
+      "revId": "cb7e1d7cecba3dc86e431044bc535479abef8485",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7643a650_c3b9f697",
+        "filename": "android/skin/qt/qt-ui-commands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-30T21:14:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5625c29e_5921672f",
       "range": {
         "startLine": 1,
         "startChar": 0,
@@ -163,6 +283,30 @@
     },
     {
       "key": {
+        "uuid": "760e462a_9d5803d7",
+        "filename": "android/skin/qt/qt-ui-commands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-30T21:14:28Z",
+      "side": 1,
+      "message": "this won\u0027t make any noticeable difference since these functions are called maybe once during the whole lifetime of the program but changed it anyway",
+      "parentUuid": "760e462a_fa0265e5",
+      "range": {
+        "startLine": 7,
+        "startChar": 17,
+        "endLine": 7,
+        "endChar": 25
+      },
+      "revId": "cb7e1d7cecba3dc86e431044bc535479abef8485",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96401a44_5346f656",
         "filename": "android/skin/qt/shortcut-key-store.h",
         "patchSetId": 2
@@ -174,6 +318,30 @@
       "writtenOn": "2015-10-30T01:22:38Z",
       "side": 1,
       "message": "space",
+      "range": {
+        "startLine": 2,
+        "startChar": 0,
+        "endLine": 2,
+        "endChar": 1
+      },
+      "revId": "cb7e1d7cecba3dc86e431044bc535479abef8485",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "765c8636_e73ac274",
+        "filename": "android/skin/qt/shortcut-key-store.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-30T21:14:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "96401a44_5346f656",
       "range": {
         "startLine": 2,
         "startChar": 0,
@@ -209,6 +377,30 @@
     },
     {
       "key": {
+        "uuid": "562a227b_7789e20d",
+        "filename": "android/skin/qt/shortcut-key-store.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-30T21:14:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b6399ed2_f4e83614",
+      "range": {
+        "startLine": 34,
+        "startChar": 50,
+        "endLine": 34,
+        "endChar": 52
+      },
+      "revId": "cb7e1d7cecba3dc86e431044bc535479abef8485",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "36204e91_7b16572a",
         "filename": "android/skin/qt/shortcut-key-store.h",
         "patchSetId": 2
@@ -220,6 +412,30 @@
       "writtenOn": "2015-10-30T01:22:38Z",
       "side": 1,
       "message": "just making sure it won\u0027t lose the last line\ndo you have a UT for this class?",
+      "range": {
+        "startLine": 49,
+        "startChar": 15,
+        "endLine": 49,
+        "endChar": 62
+      },
+      "revId": "cb7e1d7cecba3dc86e431044bc535479abef8485",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "765c8636_47c86ea1",
+        "filename": "android/skin/qt/shortcut-key-store.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-30T21:14:28Z",
+      "side": 1,
+      "message": "Good catch, it worked only because I had a newline at the end of stream. if I remove the newline, it would ignore the last line.",
+      "parentUuid": "36204e91_7b16572a",
       "range": {
         "startLine": 49,
         "startChar": 15,
@@ -255,6 +471,30 @@
     },
     {
       "key": {
+        "uuid": "d63612de_26044ea2",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-30T21:14:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "161fca56_ba0989b2",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 1
+      },
+      "revId": "cb7e1d7cecba3dc86e431044bc535479abef8485",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7643a650_d5dd2c31",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 2
@@ -266,6 +506,30 @@
       "writtenOn": "2015-10-30T01:22:38Z",
       "side": 1,
       "message": "by the coding convention system headers go last (qt ones should be just before the system ones)",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 19
+      },
+      "revId": "cb7e1d7cecba3dc86e431044bc535479abef8485",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36204e91_c915a127",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-30T21:14:28Z",
+      "side": 1,
+      "message": "Removed - that was added for debugging",
+      "parentUuid": "7643a650_d5dd2c31",
       "range": {
         "startLine": 13,
         "startChar": 0,
@@ -301,6 +565,30 @@
     },
     {
       "key": {
+        "uuid": "5625c29e_2afe4723",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-30T21:14:28Z",
+      "side": 1,
+      "message": "changed the way this is handled",
+      "parentUuid": "161fca56_9addad60",
+      "range": {
+        "startLine": 195,
+        "startChar": 8,
+        "endLine": 195,
+        "endChar": 22
+      },
+      "revId": "cb7e1d7cecba3dc86e431044bc535479abef8485",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "562a227b_b1f2ba00",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 2
@@ -324,6 +612,30 @@
     },
     {
       "key": {
+        "uuid": "96401a44_d682d46c",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-30T21:14:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "562a227b_b1f2ba00",
+      "range": {
+        "startLine": 205,
+        "startChar": 0,
+        "endLine": 217,
+        "endChar": 42
+      },
+      "revId": "cb7e1d7cecba3dc86e431044bc535479abef8485",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5625c29e_19a9afb7",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 2
@@ -335,6 +647,30 @@
       "writtenOn": "2015-10-30T01:22:38Z",
       "side": 1,
       "message": "AFAIK lambdas are not OK. Imho this is a good time to check if we want to keep them banned\nIs there anyone who doesn\u0027t understand this code?",
+      "range": {
+        "startLine": 233,
+        "startChar": 8,
+        "endLine": 233,
+        "endChar": 57
+      },
+      "revId": "cb7e1d7cecba3dc86e431044bc535479abef8485",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "161fca56_a32cc4d4",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-10-30T21:14:28Z",
+      "side": 1,
+      "message": "IMO this is a case where simple lambda expressions make the code easier to read and less verbose. Unless there\u0027s a \"hard\" technical reason to not use lambdas (like one of the target compilers doesn\u0027t support them) I don\u0027t think we should settle for ugly code just for the sake of convention. I think we should revisit our stance on lambdas...",
+      "parentUuid": "5625c29e_19a9afb7",
       "range": {
         "startLine": 233,
         "startChar": 8,
