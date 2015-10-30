@@ -381,7 +381,7 @@ void EmulatorQtWindow::slot_setWindowIcon(const unsigned char *data, int size, Q
     QPixmap image;
     image.loadFromData(data, size);
     QIcon icon(image);
-    mContainer.setWindowIcon(icon);
+    QApplication::setWindowIcon(icon);
     if (semaphore != NULL) semaphore->release();
 }
 
