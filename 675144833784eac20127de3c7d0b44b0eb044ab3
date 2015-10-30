@@ -22,6 +22,30 @@
       "revId": "675144833784eac20127de3c7d0b44b0eb044ab3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f66795cb_9940fbd2",
+        "filename": "android/base/system/win32/UnicodeString.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T12:35:38Z",
+      "side": 1,
+      "message": "Done, thanks.",
+      "parentUuid": "f6195673_56425222",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 53
+      },
+      "revId": "675144833784eac20127de3c7d0b44b0eb044ab3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
