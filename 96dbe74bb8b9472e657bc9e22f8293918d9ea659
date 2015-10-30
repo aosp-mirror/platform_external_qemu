@@ -1,0 +1,424 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b688bda5_e2dce8f9",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: alphabetical ordering.",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "166509c4_5daacf47",
+        "filename": "Makefile.qemu1-common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: android/utils/ is supposed to be a wrapper above system APIs, and should not be concerned about QEMU / emulation / something else. Maybe move this to android/windows_installer.cpp instead?",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d685318b_80e5d63f",
+        "filename": "android/cpu_accelerator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: alphabetical ordering",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f66795cb_5cbe51e9",
+        "filename": "android/cpu_accelerator.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: For the sake of consistency better name the enum and macros similarly, e.g.:\n\n  typedef enum {\n      ANDROID_CPU_ACCELERATION_OK \u003d 0,\n      ANDROID_CPU_ACCELERATION_NESTED_NOT_SUPPORTED \u003d 1,\n     ....\n  } AndroidCpuAcceleration;",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f66795cb_7cbb15f8",
+        "filename": "android/cpu_accelerator.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: The name is now confusing because it will return non-0 if there is *no* possible CPU acceleration. Maybe change it to androidCpuAcceleration_getStatus() instead?",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "768ac5a0_3ddb4f87",
+        "filename": "android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: spaces around binary operator like \"+\". git clang-format will take care of these.",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "167c2956_226b2e1e",
+        "filename": "android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: for C++ constants, prefer kValueCountMax format.",
+      "range": {
+        "startLine": 483,
+        "startChar": 14,
+        "endLine": 483,
+        "endChar": 29
+      },
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6627eec_e98615ca",
+        "filename": "android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: this assignment doesn\u0027t seem to serve any purpose.",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "166509c4_7da7937e",
+        "filename": "android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "NOTE: you could completely avoid un-necessary dynamic allocation and copy-construction by just using a const char* pointer to do all this.",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "569941f8_3fd423cd",
+        "filename": "android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 512,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "the documentation doesn\u0027t indicate that VERSION\u003d0.0.0 is invalid. Is this really what you mean?",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "167c2956_4268321f",
+        "filename": "android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: formatting, use git clang-format to get it correct.",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "768ac5a0_fdf807e9",
+        "filename": "android/emulation/CpuAccelerator.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "Oh please, no, don\u0027t do this in header files. It\u0027s simpler to either create android/emulation/CpuAcceleratorInternal.h or android/emulation/internal/CpuAccelerator.h instead.",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "768ac5a0_1dde9376",
+        "filename": "android/emulation/CpuAccelerator.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: C++ function names are smallCamelCase() with a possible underscore to separate a type name and a verb/method name, otherwise all_small_caps() for C code only.\n\nDon\u0027t put Darwin in the name, use #ifdef __APPLE__ in the declaration instead to hide this from non-Darwin builds.",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "968f39ad_9e761d06",
+        "filename": "android/emulation/CpuAccelerator.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: inconsistent comment here ;) And there should be two spaces after the \"endif\" and before the \"//\". Use \"git clang-format\" to help.",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b688bda5_02e2acb2",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: space after comma.",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "569941f8_7fceab3e",
+        "filename": "android/utils/windows_installer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: Recommend moving this to its own CL.",
+      "range": {
+        "startLine": 10,
+        "startChar": 15,
+        "endLine": 10,
+        "endChar": 21
+      },
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "569941f8_5fd1efdb",
+        "filename": "android/utils/windows_installer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "shouldn\u0027t you call RegCloseKey(hProductsKey) here? What about a helper ScopedRegKey class to perform that automatically on scope exit?",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3694cdc0_9e40d9d2",
+        "filename": "android/utils/windows_installer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: kMaxKeyLength",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "166509c4_9d746790",
+        "filename": "android/utils/windows_installer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "what about RegCloseKey(hProductsKey) ?",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d685318b_a012dadd",
+        "filename": "android/utils/windows_installer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "android/utils/ should only contain C headers, that wrap low-level system APIs, please move this to android/ or android/emulation/",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6627eec_c98351b8",
+        "filename": "android/utils/windows_installer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: getVersion()",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6627eec_297d4d97",
+        "filename": "android/utils/x86_cpuid.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: const char* const ?",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "569941f8_9f8b77f4",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "nit: Move this to its own CL",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "968f39ad_be7bd9ec",
+        "filename": "distrib/mini-glib/src/glib-mini-win32.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-10-30T22:03:53Z",
+      "side": 1,
+      "message": "This doesn\u0027t seem to be used anymore?",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
