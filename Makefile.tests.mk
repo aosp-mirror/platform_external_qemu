@@ -85,6 +85,7 @@ EMULATOR_UNITTESTS_SOURCES := \
 ifeq (windows,$(HOST_OS))
 EMULATOR_UNITTESTS_SOURCES += \
   android/base/files/ScopedHandle_unittest.cpp \
+  android/base/system/Win32UnicodeString_unittest.cpp \
   android/base/system/Win32Utils_unittest.cpp \
   android/utils/win32_cmdline_quote_unittest.cpp \
 
