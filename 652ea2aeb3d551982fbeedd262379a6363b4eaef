@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b6399ed2_14717a78",
+        "filename": "android/looper-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-10-30T00:18:44Z",
+      "side": 1,
+      "message": "nit: other places in the code, each namespace gets its own line",
+      "revId": "652ea2aeb3d551982fbeedd262379a6363b4eaef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
