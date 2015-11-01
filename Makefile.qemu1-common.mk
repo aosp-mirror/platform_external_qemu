@@ -113,18 +113,6 @@ common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
 EMULATOR_COMMON_CFLAGS += $(LIBCURL_CFLAGS)
 
 ##############################################################################
-# Libxml2 definitions
-#
-LIBXML2_TOP_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
-LIBXML2_INCLUDES := $(LIBXML2_TOP_DIR)/include
-LIBXML2_LDLIBS := $(LIBXML2_TOP_DIR)/lib/libxml2.a
-
-# Required on Windows to indicate that the code will link against a static
-# version of libxml2. Otherwise, the linker complains about undefined
-# references to '_imp__xmlFree'.
-LIBXML2_CFLAGS := -DLIBXML_STATIC
-
-##############################################################################
 # breakpad  definitions
 #
 BREAKPAD_TOP_DIR := $(BREAKPAD_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
