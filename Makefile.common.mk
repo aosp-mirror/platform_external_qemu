@@ -6,6 +6,7 @@ include $(LOCAL_PATH)/distrib/libsparse/sources.mk
 include $(LOCAL_PATH)/distrib/libselinux/sources.mk
 include $(LOCAL_PATH)/distrib/ext4_utils/sources.mk
 include $(LOCAL_PATH)/distrib/libbreakpad_client.mk
+include $(LOCAL_PATH)/distrib/Qt5.mk
 
 include $(LOCAL_PATH)/Makefile.qemu1-common.mk
 

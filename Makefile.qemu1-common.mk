@@ -328,40 +328,9 @@ endif  # EMULATOR_USE_SDL2
 # Qt-related definitions
 #
 ifdef EMULATOR_USE_QT
-    QT_TOP_DIR := $(QT_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
-    QT_TOP64_DIR := $(QT_PREBUILTS_DIR)/$(HOST_OS)-x86_64
-    QT_MOC_TOOL := $(QT_TOP64_DIR)/bin/moc
-    QT_RCC_TOOL := $(QT_TOP64_DIR)/bin/rcc
-    # Special-case: the 'uic' tool depends on Qt5Core: always ensure that the
-    # version that is being used is from the prebuilts directory. Otherwise
-    # the executable may fail to start due to dynamic linking problems.
-    QT_UIC_TOOL_LDPATH := $(QT_TOP64_DIR)/lib
-    QT_UIC_TOOL := $(QT_TOP64_DIR)/bin/uic
-
-    EMULATOR_QT_LIBS := Qt5Widgets Qt5Gui Qt5Core
-    EMULATOR_QT_LDLIBS := $(foreach lib,$(EMULATOR_QT_LIBS),-l$(lib))
-    ifeq ($(HOST_OS),windows)
-        # On Windows, linking to mingw32 is required. The library is provided
-        # by the toolchain, and depends on a main() function provided by qtmain
-        # which itself depends on qMain(). These must appear in LDFLAGS and
-        # not LDLIBS since qMain() is provided by object/libraries that
-        # appear after these in the link command-line.
-        EMULATOR_QT_LDFLAGS += \
-                -L$(QT_TOP_DIR)/bin \
-                -lmingw32 \
-                $(QT_TOP_DIR)/lib/libqtmain.a
-    else
-        EMULATOR_QT_LDFLAGS := -L$(QT_TOP_DIR)/lib
-    endif
-    QT_INCLUDE := $(QT_PREBUILTS_DIR)/common/include
-    EMULATOR_LIBUI_CFLAGS += \
-            -I$(QT_INCLUDE) \
-            -I$(QT_INCLUDE)/QtCore \
-            -I$(QT_INCLUDE)/QtGui \
-            -I$(QT_INCLUDE)/QtWidgets
-    EMULATOR_LIBUI_LDFLAGS += $(EMULATOR_QT_LDFLAGS)
-    EMULATOR_LIBUI_LDLIBS += $(EMULATOR_QT_LDLIBS)
-
+    EMULATOR_LIBUI_CFLAGS += $(foreach inc,$(QT_INCLUDES),-I$(inc))
+    EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
+    EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
     EMULATOR_LIBUI_CFLAGS += $(LIBXML2_CFLAGS)
 endif  # EMULATOR_USE_QT
 
