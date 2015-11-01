@@ -112,18 +112,6 @@ common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
 
 EMULATOR_COMMON_CFLAGS += $(LIBCURL_CFLAGS)
 
-##############################################################################
-# breakpad  definitions
-#
-BREAKPAD_TOP_DIR := $(BREAKPAD_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
-
-BREAKPAD_INCLUDES := $(BREAKPAD_TOP_DIR)/include/breakpad
-BREAKPAD_LDLIBS := $(BREAKPAD_TOP_DIR)/lib/libbreakpad_client.a
-
-ifeq ($(HOST_OS),windows)
-  BREAKPAD_LDLIBS += -lstdc++
-endif
-
 ###########################################################
 # Android utility functions
 #
