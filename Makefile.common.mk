@@ -1,6 +1,7 @@
 # Build libext4_utils and related modules/
 include $(LOCAL_PATH)/distrib/zlib.mk
 include $(LOCAL_PATH)/distrib/libcurl.mk
+include $(LOCAL_PATH)/distrib/libxml2.mk
 include $(LOCAL_PATH)/distrib/libsparse/sources.mk
 include $(LOCAL_PATH)/distrib/libselinux/sources.mk
 include $(LOCAL_PATH)/distrib/ext4_utils/sources.mk
