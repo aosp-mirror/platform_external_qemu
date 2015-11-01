@@ -8,6 +8,12 @@ include $(LOCAL_PATH)/distrib/ext4_utils/sources.mk
 include $(LOCAL_PATH)/distrib/libbreakpad_client.mk
 include $(LOCAL_PATH)/distrib/Qt5.mk
 
+ifeq ($(HOST_OS),darwin)
+    CXX_STD_LIB := -lc++
+else
+    CXX_STD_LIB := -lstdc++
+endif
+
 include $(LOCAL_PATH)/Makefile.qemu1-common.mk
 
 ifeq ($(HOST_OS),windows)

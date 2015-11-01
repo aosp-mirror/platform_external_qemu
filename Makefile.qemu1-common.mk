@@ -90,12 +90,6 @@ else
     EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=0
 endif
 
-ifeq ($(HOST_OS),darwin)
-    CXX_STD_LIB := -lc++
-else
-    CXX_STD_LIB := -lstdc++
-endif
-
 ###########################################################
 # Zlib sources
 #
