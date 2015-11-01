@@ -110,8 +110,9 @@ LOCAL_STATIC_LIBRARIES += \
     emulator-libext4_utils \
     emulator-libsparse \
     emulator-libselinux \
-    emulator-zlib \
-    emulator-libgtest
+    emulator-libgtest \
+    $(LIBCURL_STATIC_LIBRARIES)
+
 $(call end-emulator-program)
 
 
@@ -125,7 +126,7 @@ ANDROID_SKIN_UNITTESTS := \
 
 $(call start-emulator-program, android$(HOST_SUFFIX)_skin_unittests)
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include
-LOCAL_LDLIBS += $(EMULATOR_GTEST_LDLIBS) $(LIBCURL_LDLIBS)
+LOCAL_LDLIBS += $(EMULATOR_GTEST_LDLIBS)
 LOCAL_SRC_FILES := $(ANDROID_SKIN_UNITTESTS)
 LOCAL_CFLAGS += $(EMULATOR_UNITTESTS_CFLAGS)
 LOCAL_LDFLAGS += $(EMULATOR_UNITTESTS_LDFLAGS)
@@ -145,5 +146,7 @@ LOCAL_CFLAGS += -O0 -I$(LIBCURL_INCLUDES)
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
     emulator-common \
-    emulator-libgtest
+    emulator-libgtest \
+    $(LIBCURL_STATIC_LIBRARIES)
+
 $(call end-emulator-program)

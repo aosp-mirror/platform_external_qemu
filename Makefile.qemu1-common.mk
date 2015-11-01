@@ -110,23 +110,7 @@ EMULATOR_COMMON_CFLAGS += -I$(GLIB_INCLUDE_DIR)
 
 common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
 
-
-##############################################################################
-# Libcurl definitions
-#
-LIBCURL_TOP_DIR := $(LIBCURL_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
-
-LIBCURL_INCLUDES := $(LIBCURL_TOP_DIR)/include
-LIBCURL_LDLIBS := $(LIBCURL_TOP_DIR)/lib/libcurl.a \
-    $(LIBCURL_TOP_DIR)/lib/libssl.a \
-    $(LIBCURL_TOP_DIR)/lib/libz.a \
-    $(LIBCURL_TOP_DIR)/lib/libcrypto.a
-
-ifneq ($(HOST_OS),windows)
-  LIBCURL_LDLIBS += -ldl
-endif
-
-EMULATOR_COMMON_CFLAGS += -DCURL_STATICLIB
+EMULATOR_COMMON_CFLAGS += $(LIBCURL_CFLAGS)
 
 ##############################################################################
 # Libxml2 definitions

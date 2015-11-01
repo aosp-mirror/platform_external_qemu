@@ -338,7 +338,7 @@ LOCAL_STATIC_LIBRARIES += \
     emulator-libext4_utils \
     emulator-libsparse \
     emulator-libselinux \
-    emulator-zlib \
+    $(LIBCURL_STATIC_LIBRARIES) \
     $(EMULATOR_LIBUI_STATIC_LIBRARIES)
 
 LOCAL_LDLIBS += $(common_LOCAL_LDLIBS) $(ANDROID_SKIN_LDLIBS) $(LIBCURL_LDLIBS)
