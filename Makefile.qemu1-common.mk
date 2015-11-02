@@ -283,7 +283,6 @@ EMULATOR_LIBUI_STATIC_LIBRARIES :=
 ###########################################################
 # Libpng configuration
 #
-include $(LOCAL_PATH)/distrib/libpng.mk
 EMULATOR_LIBUI_CFLAGS += $(LIBPNG_CFLAGS)
 EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libpng
 common_LOCAL_SRC_FILES += android/loadpng.c
@@ -291,7 +290,6 @@ common_LOCAL_SRC_FILES += android/loadpng.c
 ###########################################################
 # Libjpeg configuration
 #
-include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
 EMULATOR_LIBUI_CFLAGS += $(LIBJPEG_CFLAGS)
 EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libjpeg
 
