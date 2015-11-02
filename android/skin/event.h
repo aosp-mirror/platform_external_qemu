@@ -32,6 +32,7 @@ typedef enum {
     kEventSetZoom,
     kEventVideoExpose,
     kEventWindowMoved,
+    kEventScreenChanged,
 } SkinEventType;
 
 typedef enum {

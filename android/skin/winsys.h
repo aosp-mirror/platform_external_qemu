@@ -32,6 +32,10 @@ void* skin_winsys_get_window_handle(void);
 // Return rectangle of current monitor in pixels.
 void skin_winsys_get_monitor_rect(SkinRect* rect);
 
+// Returns the ratio between physical pixels and device-independent pixels for
+// the window. Return 0 in case of success, -1 in case of failure.
+int skin_winsys_get_device_pixel_ratio(double* dpr);
+
 // Return the monitor's horizontal and vertical resolution in dots per
 // inches. Return 0 in case of success, -1 in case of failure.
 int skin_winsys_get_monitor_dpi(int* x_dpi, int* y_dpi);
