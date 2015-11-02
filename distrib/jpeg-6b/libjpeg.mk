@@ -66,6 +66,5 @@ LOCAL_CFLAGS += \
 $(call end-emulator-library)
 
 LIBJPEG_INCLUDES := $(LOCAL_PATH)
-LIBJPEG_CFLAGS := -I$(LOCAL_PATH)
 
 LOCAL_PATH := $(OLD_LOCAL_PATH)
