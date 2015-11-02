@@ -118,6 +118,21 @@ extern void skin_winsys_get_monitor_rect(SkinRect *rect)
       rect->size.w, rect->size.h);
 }
 
+extern int skin_winsys_get_device_pixel_ratio(double *dpr)
+{
+    D("skin_winsys_get_device_pixel_ratio");
+    QSemaphore semaphore;
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return -1;
+    }
+    window->getDevicePixelRatio(dpr, &semaphore);
+    semaphore.acquire();
+    D("%s: result=%f", __FUNCTION__, *dpr);
+    return 0;
+}
+
 extern int skin_winsys_get_monitor_dpi(int *x, int *y)
 {
     D("skin_winsys_get_monitor_dpi");
