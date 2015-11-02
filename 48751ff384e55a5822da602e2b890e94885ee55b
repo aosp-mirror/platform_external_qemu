@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "36204e91_41fe0524",
+        "filename": "android/skin/qt/ext-keyboard-shortcuts.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-02T18:07:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "760e462a_e6189061",
+      "revId": "48751ff384e55a5822da602e2b890e94885ee55b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "36204e91_01612d14",
         "filename": "android/skin/qt/qt-ui-commands.cpp",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "f6195673_fcba58fb",
+        "filename": "android/skin/qt/qt-ui-commands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-02T18:07:32Z",
+      "side": 1,
+      "message": "Good catch",
+      "parentUuid": "36204e91_01612d14",
+      "revId": "48751ff384e55a5822da602e2b890e94885ee55b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5625c29e_6b19e1c6",
         "filename": "android/skin/qt/shortcut-key-store.h",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2015-11-02T15:50:24Z",
       "side": 1,
       "message": "Perhaps note that the second argument is unmodified if the return is \u0027false\u0027",
+      "revId": "48751ff384e55a5822da602e2b890e94885ee55b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5625c29e_8b5afd33",
+        "filename": "android/skin/qt/shortcut-key-store.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-02T18:07:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5625c29e_6b19e1c6",
       "revId": "48751ff384e55a5822da602e2b890e94885ee55b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
