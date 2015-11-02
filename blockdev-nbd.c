@@ -40,7 +40,7 @@ void qmp_nbd_server_start(SocketAddress *addr, Error **errp)
         return;
     }
 
-    server_fd = socket_listen(addr, errp);
+    server_fd = socket_listen_addr(addr, errp);
     if (server_fd != -1) {
         qemu_set_fd_handler2(server_fd, NULL, nbd_accept, NULL, NULL);
     }

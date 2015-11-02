@@ -3114,12 +3114,12 @@ static bool qemu_chr_open_socket_fd(CharDriverState *chr, Error **errp)
     int fd;
 
     if (s->is_listen) {
-        fd = socket_listen(s->addr, errp);
+        fd = socket_listen_addr(s->addr, errp);
     } else if (s->reconnect_time) {
-        fd = socket_connect(s->addr, errp, qemu_chr_socket_connected, chr);
+        fd = socket_connect_addr(s->addr, errp, qemu_chr_socket_connected, chr);
         return fd >= 0;
     } else {
-        fd = socket_connect(s->addr, errp, NULL, NULL);
+        fd = socket_connect_addr(s->addr, errp, NULL, NULL);
     }
     if (fd < 0) {
         return false;

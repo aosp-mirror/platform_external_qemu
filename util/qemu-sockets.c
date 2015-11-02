@@ -308,7 +308,7 @@ static int inet_connect_addr(struct addrinfo *addr, bool *in_progress,
         if (connect(sock, addr->ai_addr, addr->ai_addrlen) < 0) {
             rc = -socket_error();
         }
-    } while (rc == QEMU_SOCKET_RC_INTR(rc));
+    } while (QEMU_SOCKET_RC_INTR(rc));
 
     if (connect_state != NULL && QEMU_SOCKET_RC_INPROGRESS(rc)) {
         connect_state->fd = sock;
@@ -911,8 +911,8 @@ fail:
     return NULL;
 }
 
-int socket_connect(SocketAddress *addr, Error **errp,
-                   NonBlockingConnectHandler *callback, void *opaque)
+int socket_connect_addr(SocketAddress *addr, Error **errp,
+                        NonBlockingConnectHandler *callback, void *opaque)
 {
     QemuOpts *opts;
     int fd;
@@ -944,7 +944,7 @@ int socket_connect(SocketAddress *addr, Error **errp,
     return fd;
 }
 
-int socket_listen(SocketAddress *addr, Error **errp)
+int socket_listen_addr(SocketAddress *addr, Error **errp)
 {
     QemuOpts *opts;
     int fd;
