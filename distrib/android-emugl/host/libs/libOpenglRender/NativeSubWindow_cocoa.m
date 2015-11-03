@@ -50,6 +50,7 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
 
     NSView *glView = [[EmuGLView alloc] initWithFrame:contentRect];
     if (glView) {
+        [glView setWantsBestResolutionOpenGLSurface:YES];
         [[win contentView] addSubview:glView];
         [win makeKeyAndOrderFront:nil];
     }

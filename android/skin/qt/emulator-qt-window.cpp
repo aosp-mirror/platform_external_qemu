@@ -24,6 +24,7 @@
 #include <QScreen>
 #include <QScrollBar>
 #include <QSemaphore>
+#include <QWindow>
 
 #include "android/base/files/PathUtils.h"
 #include "android/skin/event.h"
@@ -71,6 +72,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(this, &EmulatorQtWindow::createBitmap, this, &EmulatorQtWindow::slot_createBitmap);
     QObject::connect(this, &EmulatorQtWindow::fill, this, &EmulatorQtWindow::slot_fill);
     QObject::connect(this, &EmulatorQtWindow::getBitmapInfo, this, &EmulatorQtWindow::slot_getBitmapInfo);
+    QObject::connect(this, &EmulatorQtWindow::getDevicePixelRatio, this, &EmulatorQtWindow::slot_getDevicePixelRatio);
     QObject::connect(this, &EmulatorQtWindow::getMonitorDpi, this, &EmulatorQtWindow::slot_getMonitorDpi);
     QObject::connect(this, &EmulatorQtWindow::getScreenDimensions, this, &EmulatorQtWindow::slot_getScreenDimensions);
     QObject::connect(this, &EmulatorQtWindow::getWindowId, this, &EmulatorQtWindow::slot_getWindowId);
@@ -211,6 +213,8 @@ void EmulatorQtWindow::show()
     mContainer.show();
     QFrame::show();
     tool_window->show();
+
+    QObject::connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen *)), this, SLOT(slot_screenChanged(QScreen *)));
 }
 
 void EmulatorQtWindow::startThread(StartFunction f, int argc, char **argv)
@@ -271,6 +275,12 @@ void EmulatorQtWindow::slot_getBitmapInfo(SkinSurface *s, SkinSurfacePixels *pix
     pix->w = s->original_w;
     pix->h = s->original_h;
     pix->pitch = s->bitmap->bytesPerLine();
+    if (semaphore != NULL) semaphore->release();
+}
+
+void EmulatorQtWindow::slot_getDevicePixelRatio(double *out_dpr, QSemaphore *semaphore)
+{
+    *out_dpr = devicePixelRatio();
     if (semaphore != NULL) semaphore->release();
 }
 
@@ -415,6 +425,11 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, 
     }
     show();
     if (semaphore != NULL) semaphore->release();
+}
+
+void EmulatorQtWindow::slot_screenChanged(QScreen*)
+{
+    queueEvent(createSkinEvent(kEventScreenChanged));
 }
 
 void EmulatorQtWindow::slot_horizontalScrollChanged(int value)

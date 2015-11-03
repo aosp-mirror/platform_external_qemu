@@ -1242,6 +1242,18 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
     data->ww = window->subwindow.size.w;
     data->wh = window->subwindow.size.h;
 
+    data->fbw = window->framebuffer.w;
+    data->fbh = window->framebuffer.h;
+
+#if defined(__APPLE__) && CONFIG_QT
+    // If the window is on a retina monitor, the framebuffer size needs to be
+    // adjusted to the actual number of pixels.
+    double dpr;
+    if (skin_winsys_get_device_pixel_ratio(&dpr) == 0) {
+        data->fbw *= dpr;
+        data->fbh *= dpr;
+    }
+
     // The native GL subwindow for OSX (using Cocoa) uses cartesian (y-up) coordinates. We
     // have code to transform window (y-down) coordinates into cartesian coordinates at that
     // level, but Qt seems to do this transformation on its own. This means the transformation
@@ -1250,7 +1262,6 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
     // affects the relative coordinate system inside the window, it must be taken into account
     // as well. At the end of this function, data->wy will equal the bottom coordinate of the
     // subwindow (in units from the bottom of the overall window) if this is the Qt OSX emulator.
-#if defined(__APPLE__) && CONFIG_QT
     data->wy = window->container.h - (data->wy + data->wh);
     data->wy += window->scrollbar.h;
 #endif
@@ -1267,8 +1278,6 @@ skin_window_show_opengles( SkinWindow* window )
     skin_window_setup_opengles_subwindow(window, &data);
 
     data.handle = winhandle;
-    data.fbw = window->framebuffer.w;
-    data.fbh = window->framebuffer.h;
     data.rot = disp->rotation * -90.;
 
     skin_winsys_run_ui_update(&skin_window_run_opengles_show, &data);
@@ -1909,6 +1918,13 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
 
     case kEventVideoExpose:
         skin_window_redraw_opengles(window);
+        break;
+
+    case kEventScreenChanged:
+        // Re-setup the OpenGL ES subwindow with a potentially different
+        // framebuffer size (e.g., 2x for retina screens).
+        skin_window_hide_opengles(window);
+        skin_window_show_opengles(window);
         break;
 
     default:

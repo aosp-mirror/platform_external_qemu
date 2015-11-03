@@ -474,6 +474,11 @@ bool skin_ui_process_events(SkinUI* ui) {
         case kEventWindowMoved:
             skin_window_position_changed(ui->window, ev.u.window.x, ev.u.window.y);
             break;
+
+        case kEventScreenChanged:
+            DE("EVENT: kEventScreenChanged\n");
+            skin_window_process_event(ui->window, &ev);
+            break;
         }
     }
 
