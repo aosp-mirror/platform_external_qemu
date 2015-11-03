@@ -69,6 +69,10 @@ enum power_supply_property {
 };
 
 extern void goldfish_battery_display(Monitor *mon);
+
+typedef void (*BatteryLineCallback)(void* opaque, const char* line, int len);
+extern void goldfish_battery_display_cb(void* opaque,
+                                        BatteryLineCallback callback);
 void goldfish_battery_set_prop(int ac, int property, int value);
 
 #endif /* _HW_GOLDFISH_BATTERY_H */
