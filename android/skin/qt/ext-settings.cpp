@@ -75,6 +75,44 @@ void ExtendedWindow::initSettings()
                      allowUpgrade);
 }
 
+void ExtendedWindow::completeSettingsInitialization()
+{
+    // Get the latest user selections from the
+    // user-config code.
+
+    // "Screen shot" and "Record screen" destination folder
+    strncpy(mSettingsState.mSavePath, user_config_get_ui_savePath(), MAX_PATH);
+    if (mSettingsState.mSavePath[0] == '\0') {
+        // We have no path. Try to determine the path to the desktop.
+        QStringList paths = QStandardPaths::standardLocations(QStandardPaths::DesktopLocation);
+        if (paths.size() > 0) {
+            printf("===== ext-settings.cpp: Init save path to \"%s\"\n", paths[0].toStdString().c_str());
+            strncpy(mSettingsState.mSavePath, paths[0].toStdString().c_str(), MAX_PATH);
+            user_config_set_ui_savePath(mSettingsState.mSavePath);
+        }
+    }
+
+    if (mSettingsState.mSavePath[0] != '\0') {
+        // Elide part of the displayed path if the path is long
+        QString displayName = mSettingsState.mSavePath;
+        if (displayName.size() > 150) {
+            displayName = displayName.left(75) + " ... " + displayName.right(75);
+        }
+        mExtendedUi->set_saveLocBox->setPlainText(displayName);
+    } else {
+        mExtendedUi->set_saveLocBox->setPlainText("None");
+    }
+
+    SettingsTheme theme = (SettingsTheme)user_config_get_ui_theme();
+    if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
+        theme = (SettingsTheme)0;
+    }
+    mSettingsState.mTheme = theme;
+    // Set the theme to the initial selection
+    // (by pretending the theme setting got changed)
+    on_set_themeBox_currentIndexChanged(theme);
+}
+
 QString ExtendedWindow::apiVersionString(int apiVersion)
 {
     // This information was taken from the SDK Manager:
@@ -141,6 +179,37 @@ void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
 
     // Make the Settings pane active (still)
     adjustTabs(PANE_IDX_SETTINGS);
+}
+
+void ExtendedWindow::on_set_folderButton_clicked()
+{
+    QString dirName = QFileDialog::getExistingDirectory(
+                                      this,
+                                      tr("Save location"),
+                                      mSettingsState.mSavePath,
+                                      QFileDialog::ShowDirsOnly);
+
+    if (dirName.size() > MAX_PATH) {
+        QString errStr = tr("The path is too long.<br>"
+                            "The maximum is ")
+                         + QString::number(MAX_PATH)
+                         + tr(" characters.");
+
+        mToolWindow->showErrorDialog(errStr, tr("Save location"));
+    } else if ( !dirName.isNull() ) {
+        strncpy(mSettingsState.mSavePath,
+                dirName.toStdString().c_str(),
+                MAX_PATH);
+
+        user_config_set_ui_savePath(mSettingsState.mSavePath);
+
+        // Elide part of the displayed path if the path is long
+        QString displayName = dirName;
+        if (displayName.size() > 150) {
+            displayName = dirName.left(75) + " ... " + dirName.right(75);
+        }
+        mExtendedUi->set_saveLocBox->setPlainText(displayName);
+    }
 }
 
 // static member function

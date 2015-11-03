@@ -17,6 +17,7 @@
 #include "android/utils/system.h"
 #include "android/utils/path.h"
 #include <stdlib.h>
+#include <stdio.h> // ??
 #include <errno.h>
 #include <sys/time.h>
 
@@ -30,6 +31,7 @@
 
 struct ui_s {
     int          theme;
+    char         savePath[MAX_PATH+1];
 };
 
 struct AUserConfig {
@@ -44,7 +46,8 @@ struct AUserConfig {
 /* Name of the user-config file */
 #define  USER_CONFIG_FILE  "emulator-user.ini"
 
-#define  KEY_UI_THEME  "ui.theme"
+#define  KEY_UI_SAVEPATH  "ui.savePath"
+#define  KEY_UI_THEME     "ui.theme"
 
 #define  KEY_WINDOW_X  "window.x"
 #define  KEY_WINDOW_Y  "window.y"
@@ -53,7 +56,8 @@ struct AUserConfig {
 #define  DEFAULT_X  100
 #define  DEFAULT_Y  100
 
-#define  DEFAULT_UI_THEME 0
+#define  DEFAULT_UI_SAVEPATH ""
+#define  DEFAULT_UI_THEME    0
 
 /* Create a new AUserConfig object from a given AvdInfo */
 AUserConfig*
@@ -131,6 +135,11 @@ auserConfig_new( AvdInfo*  info )
         uc->windowY = iniFile_getInteger(ini, KEY_WINDOW_Y, DEFAULT_Y);
         DD("    found %s = %d", KEY_WINDOW_Y, uc->windowY);
 
+        char *tempStr = iniFile_getString(ini, KEY_UI_SAVEPATH, DEFAULT_UI_SAVEPATH);
+        strncpy(uc->ui.savePath, tempStr, MAX_PATH);
+        free(tempStr);
+        DD("    found %s = \"%s\"", KEY_UI_SAVEPATH, uc->ui.savePath);
+
         uc->ui.theme = iniFile_getInteger(ini, KEY_UI_THEME, DEFAULT_UI_THEME);
         DD("    found %s = %d", KEY_UI_THEME, uc->ui.theme);
 
@@ -145,7 +154,9 @@ auserConfig_new( AvdInfo*  info )
     else {
         uc->windowX  = DEFAULT_X;
         uc->windowY  = DEFAULT_Y;
+        strncpy(uc->ui.savePath, DEFAULT_UI_SAVEPATH, MAX_PATH);
         uc->ui.theme = DEFAULT_UI_THEME;
+
         uc->changed  = 1;
     }
 
@@ -189,6 +200,21 @@ auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y )
     }
 }
 
+char*
+auserConfig_getUiSavePath( AUserConfig*  uconfig)
+{
+    return uconfig->ui.savePath;
+}
+
+void
+auserConfig_setUiSavePath( AUserConfig*  uconfig, char* path )
+{
+    if ( strcmp(path, uconfig->ui.savePath) ) {
+        strncpy(uconfig->ui.savePath, path, MAX_PATH);
+        uconfig->changed = 1;
+    }
+}
+
 int
 auserConfig_getUiTheme( AUserConfig*  uconfig)
 {
@@ -225,6 +251,7 @@ auserConfig_save( AUserConfig*  uconfig )
     iniFile_setInteger(ini, KEY_WINDOW_X, uconfig->windowX);
     iniFile_setInteger(ini, KEY_WINDOW_Y, uconfig->windowY);
     iniFile_setInt64(ini, KEY_UUID, uconfig->uuid);
+    iniFile_setString(ini, KEY_UI_SAVEPATH, uconfig->ui.savePath);
     iniFile_setInteger(ini, KEY_UI_THEME, uconfig->ui.theme);
     if (iniFile_saveToFile(ini, uconfig->iniPath) < 0) {
         dwarning("could not save user configuration: %s: %s",

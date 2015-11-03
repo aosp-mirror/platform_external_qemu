@@ -25,6 +25,7 @@
 #include "android/skin/qt/shortcut-key-store.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/ui-emu-agent.h"
+#include "android/utils/path.h"
 
 #include <QFile>
 #include <QFrame>
@@ -87,10 +88,13 @@ private:
     class SettingsState {
     public:
         SettingsTheme mTheme;
+        char          mSavePath[MAX_PATH+1];
 
         SettingsState() :
             mTheme(SETTINGS_THEME_LIGHT)
-            { }
+            {
+                mSavePath[0] = '\0';
+            }
     };
 
     class TelephonyState {
@@ -115,6 +119,8 @@ private:
     void initSms();
     void initTelephony();
     void initVirtualSensors();
+
+    void completeSettingsInitialization();
 
     BatteryState    mBatteryState;
     SettingsState   mSettingsState;
@@ -214,6 +220,7 @@ private slots:
     void loc_slot_timeout();
 
     // Settings
+    void on_set_folderButton_clicked();
     void on_set_themeBox_currentIndexChanged(int index);
 
     // Sensors

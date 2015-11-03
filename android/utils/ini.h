@@ -1,4 +1,4 @@
-/* Copyright (C) 2008 The Android Open Source Project
+/* Copyright (C) 2008-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -114,5 +114,6 @@ void iniFile_setInt64(CIniFile* f, const char* key, int64_t value);
 void iniFile_setDouble(CIniFile* f, const char* key, double value);
 void iniFile_setBoolean(CIniFile* f, const char* key, int value);
 void iniFile_setDiskSize(CIniFile* f, const char* key, int64_t size);
+void iniFile_setString(CIniFile* f, const char* key, const char* str);
 
 ANDROID_END_HEADER
