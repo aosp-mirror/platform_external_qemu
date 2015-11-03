@@ -630,12 +630,14 @@ init_sdl_ui(AConfig*          skinConfig,
         signal(SIGTTOU, SIG_IGN);
 #endif
     } else {
+#  if defined(__APPLE__)
+        static const char kIconFile[] = "emulator_icon_1024.png";
+#  elif defined(_WIN32)
         // NOTE: On Windows, the program icon is embedded as a resource inside
         //       the executable. However, this only changes the icon that appears
         //       with the executable in a file browser. To change the icon that
         //       appears both in the application title bar and the taskbar, the
         //       window icon still must be set.
-#  if defined(__APPLE__) || defined(_WIN32)
         static const char kIconFile[] = "emulator_icon_256.png";
 #  else
         static const char kIconFile[] = "emulator_icon_128.png";
