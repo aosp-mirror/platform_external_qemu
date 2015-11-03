@@ -101,7 +101,7 @@ private:
 
         TelephonyState() :
             mActivity(Call_Inactive),
-            mPhoneNumber("6505551212") // TODO: Change to "(650) 555-1212"
+            mPhoneNumber("6505551212")
         { }
     };
 
@@ -165,12 +165,10 @@ private slots:
     void on_batteryButton_clicked();
     void on_cellularButton_clicked();
     void on_dpadButton_clicked();
-    void on_fingerButton_clicked();
     void on_kbdShortsButton_clicked();
     void on_locationButton_clicked();
     void on_settingsButton_clicked();
     void on_telephoneButton_clicked();
-    void on_virtSensorsButton_clicked();
 
     // Battery
     void on_bat_chargerBox_currentIndexChanged(int value);

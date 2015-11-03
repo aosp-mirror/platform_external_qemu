@@ -69,9 +69,7 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_CELLULAR, mExtendedUi->cellularButton},
         {PANE_IDX_BATTERY, mExtendedUi->batteryButton},
         {PANE_IDX_TELEPHONE, mExtendedUi->telephoneButton},
-        {PANE_IDX_VIRT_SENSORS, mExtendedUi->virtSensorsButton},
         {PANE_IDX_DPAD , mExtendedUi->dpadButton},
-        {PANE_IDX_FINGER, mExtendedUi->fingerButton},
         {PANE_IDX_KBD_SHORTS, mExtendedUi->kbdShortsButton},
         {PANE_IDX_SETTINGS, mExtendedUi->settingsButton},
     };
@@ -116,12 +114,10 @@ void ExtendedWindow::closeEvent(QCloseEvent *ce)
 void ExtendedWindow::on_batteryButton_clicked()     { adjustTabs(PANE_IDX_BATTERY); }
 void ExtendedWindow::on_cellularButton_clicked()    { adjustTabs(PANE_IDX_CELLULAR); }
 void ExtendedWindow::on_dpadButton_clicked()        { adjustTabs(PANE_IDX_DPAD); }
-void ExtendedWindow::on_fingerButton_clicked()      { adjustTabs(PANE_IDX_FINGER); }
 void ExtendedWindow::on_kbdShortsButton_clicked()   { adjustTabs(PANE_IDX_KBD_SHORTS); }
 void ExtendedWindow::on_locationButton_clicked()    { adjustTabs(PANE_IDX_LOCATION); }
 void ExtendedWindow::on_settingsButton_clicked()    { adjustTabs(PANE_IDX_SETTINGS); }
 void ExtendedWindow::on_telephoneButton_clicked()   { adjustTabs(PANE_IDX_TELEPHONE); }
-void ExtendedWindow::on_virtSensorsButton_clicked() { adjustTabs(PANE_IDX_VIRT_SENSORS); }
 
 void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
 {
@@ -144,13 +140,11 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
     mExtendedUi->batteryButton    ->setStyleSheet(colorStyle);
     mExtendedUi->cellularButton   ->setStyleSheet(colorStyle);
     mExtendedUi->dpadButton       ->setStyleSheet(colorStyle);
-    mExtendedUi->fingerButton     ->setStyleSheet(colorStyle);
     mExtendedUi->kbdShortsButton  ->setStyleSheet(colorStyle);
     mExtendedUi->locationButton   ->setStyleSheet(colorStyle);
     mExtendedUi->settingsButton   ->setStyleSheet(colorStyle);
     // Omit "spacer buttons" -- The main style sheet handles them
     mExtendedUi->telephoneButton  ->setStyleSheet(colorStyle);
-    mExtendedUi->virtSensorsButton->setStyleSheet(colorStyle);
 
     QString activeStyle("text-align: left; color:");
     activeStyle += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
@@ -164,14 +158,12 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
     mExtendedUi->batteryButton    ->setAutoFillBackground(true);
     mExtendedUi->cellularButton   ->setAutoFillBackground(true);
     mExtendedUi->dpadButton       ->setAutoFillBackground(true);
-    mExtendedUi->fingerButton     ->setAutoFillBackground(true);
     mExtendedUi->kbdShortsButton  ->setAutoFillBackground(true);
     mExtendedUi->locationButton   ->setAutoFillBackground(true);
     mExtendedUi->settingsButton   ->setAutoFillBackground(true);
     mExtendedUi->spacer1Button    ->setAutoFillBackground(true);
     mExtendedUi->spacer2Button    ->setAutoFillBackground(true);
     mExtendedUi->telephoneButton  ->setAutoFillBackground(true);
-    mExtendedUi->virtSensorsButton->setAutoFillBackground(true);
 
     thisButton->clearFocus(); // It looks better when not highlighted
     mExtendedUi->stackedWidget->setCurrentIndex(static_cast<int>(thisIndex));
