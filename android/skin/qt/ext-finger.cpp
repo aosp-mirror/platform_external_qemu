@@ -22,17 +22,22 @@ void ExtendedWindow::initFinger()
 
 void ExtendedWindow::on_finger_touchButton_pressed()
 {
-    bool OK = false;
-    int  id = mExtendedUi->finger_IdBox->toPlainText().toInt(&OK);
+    // The ID that this code associates with each "finger"
+    // is a fixed value (that is essentially random).
+    static const int fingerID[10] =
+            { 45146572, 192618075, 84807873, 189675793, 132710472,
+              36321043, 139425534, 15301340, 105702233,  87754286  };
 
-    if ( !OK || id <= 0 ) {
-        mToolWindow->showErrorDialog(tr("The \"Fingerprint ID\" number is invalid."),
-                                     tr("Finger ID"));
+    int idx = mExtendedUi->finger_pickBox->currentIndex();
+
+    if (idx < 0  ||  idx > 10) {
+        mToolWindow->showErrorDialog(tr("The finger index is invalid"),
+                                     tr("Fingerprint"));
         return;
     }
 
     if (mFingerAgent && mFingerAgent->setTouch) {
-        mFingerAgent->setTouch(true, id);
+        mFingerAgent->setTouch(true, fingerID[idx]);
     }
 }
 

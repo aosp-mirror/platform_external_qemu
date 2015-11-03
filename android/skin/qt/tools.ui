@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>94</width>
-    <height>590</height>
+    <height>524</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,15 +18,367 @@
 color: #f0f0f0</string>
   </property>
   <property name="frameShape">
-   <enum>QFrame::NoFrame</enum>
+   <enum>QFrame::Panel</enum>
   </property>
   <property name="frameShadow">
    <enum>QFrame::Raised</enum>
   </property>
+  <widget class="QPushButton" name="power_button">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>28</y>
+     <width>36</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Power</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/power_settings</normaloff>:/light/power_settings</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">power_settings</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="volume_up_button">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>72</y>
+     <width>36</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Volume up</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/volume_up</normaloff>:/light/volume_up</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">volume_up</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="volume_down_button">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>116</y>
+     <width>36</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Volume down</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/volume_down</normaloff>:/light/volume_down</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">volume_down</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="rotate_CCW_button">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>160</y>
+     <width>36</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Rotate left</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/screen_rotation_left</normaloff>:/light/screen_rotation_left</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">screen_rotation_left</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="rotate_CW_button">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>204</y>
+     <width>36</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Rotate right</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/screen_rotation_right</normaloff>:/light/screen_rotation_right</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">screen_rotation_right</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="back_button">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>336</y>
+     <width>36</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Back</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/back</normaloff>:/light/back</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">back</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="zoom_button">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>292</y>
+     <width>36</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Full screen</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/zoom</normaloff>:/light/zoom</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">zoom</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="more_button">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>468</y>
+     <width>36</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>More</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/more</normaloff>:/light/more</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">more</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="scrShot_button">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>248</y>
+     <width>36</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Screen shot</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/screen_shot</normaloff>:/light/screen_shot</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">screen_shot</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="home_button">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>380</y>
+     <width>36</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Home</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/home</normaloff>:/light/home</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">home</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="recents_button">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>424</y>
+     <width>36</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Recents</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/recents</normaloff>:/light/recents</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">recents</string>
+   </property>
+  </widget>
   <widget class="QPushButton" name="close_button">
    <property name="geometry">
     <rect>
-     <x>16</x>
+     <x>11</x>
      <y>6</y>
      <width>16</width>
      <height>16</height>
@@ -55,298 +407,10 @@ color: #f0f0f0</string>
     <string notr="true">close</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="power_button">
-   <property name="geometry">
-    <rect>
-     <x>18</x>
-     <y>34</y>
-     <width>34</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Power</string>
-   </property>
-   <property name="text">
-    <string notr="true"/>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/power_settings</normaloff>:/light/power_settings</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>30</width>
-     <height>30</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">power_settings</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="volume_up_button">
-   <property name="geometry">
-    <rect>
-     <x>18</x>
-     <y>84</y>
-     <width>34</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Volume up</string>
-   </property>
-   <property name="text">
-    <string notr="true"/>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/volume_up</normaloff>:/light/volume_up</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>30</width>
-     <height>30</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">volume_up</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="volume_down_button">
-   <property name="geometry">
-    <rect>
-     <x>18</x>
-     <y>134</y>
-     <width>34</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Volume down</string>
-   </property>
-   <property name="text">
-    <string notr="true"/>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/volume_down</normaloff>:/light/volume_down</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>30</width>
-     <height>30</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">volume_down</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="rotate_CCW_button">
-   <property name="geometry">
-    <rect>
-     <x>18</x>
-     <y>184</y>
-     <width>34</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Rotate left</string>
-   </property>
-   <property name="text">
-    <string notr="true"/>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/screen_rotation_left</normaloff>:/light/screen_rotation_left</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>30</width>
-     <height>30</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">screen_rotation_left</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="rotate_CW_button">
-   <property name="geometry">
-    <rect>
-     <x>18</x>
-     <y>234</y>
-     <width>34</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Rotate right</string>
-   </property>
-   <property name="text">
-    <string notr="true"/>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/screen_rotation_right</normaloff>:/light/screen_rotation_right</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>30</width>
-     <height>30</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">screen_rotation_right</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="back_button">
-   <property name="geometry">
-    <rect>
-     <x>18</x>
-     <y>384</y>
-     <width>34</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Back</string>
-   </property>
-   <property name="text">
-    <string notr="true"/>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/back</normaloff>:/light/back</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>30</width>
-     <height>30</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">back</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="zoom_button">
-   <property name="geometry">
-    <rect>
-     <x>18</x>
-     <y>334</y>
-     <width>34</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Full screen</string>
-   </property>
-   <property name="text">
-    <string notr="true"/>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/zoom</normaloff>:/light/zoom</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>30</width>
-     <height>30</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">zoom</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="more_button">
-   <property name="geometry">
-    <rect>
-     <x>18</x>
-     <y>534</y>
-     <width>34</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>More</string>
-   </property>
-   <property name="text">
-    <string notr="true"/>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/more</normaloff>:/light/more</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>30</width>
-     <height>30</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">more</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="scrShot_button">
-   <property name="geometry">
-    <rect>
-     <x>18</x>
-     <y>284</y>
-     <width>34</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Screen shot</string>
-   </property>
-   <property name="text">
-    <string notr="true"/>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/screen_shot</normaloff>:/light/screen_shot</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>30</width>
-     <height>30</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">screen_shot</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="minimize_button">
    <property name="geometry">
     <rect>
-     <x>38</x>
+     <x>33</x>
      <y>6</y>
      <width>16</width>
      <height>16</height>
@@ -375,70 +439,6 @@ color: #f0f0f0</string>
     <string notr="true">minimize</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="home_button">
-   <property name="geometry">
-    <rect>
-     <x>18</x>
-     <y>434</y>
-     <width>34</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Home</string>
-   </property>
-   <property name="text">
-    <string notr="true"/>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/home</normaloff>:/light/home</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>30</width>
-     <height>30</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">home</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="recents_button">
-   <property name="geometry">
-    <rect>
-     <x>18</x>
-     <y>484</y>
-     <width>34</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Recents</string>
-   </property>
-   <property name="text">
-    <string notr="true"/>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/recents</normaloff>:/light/recents</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>30</width>
-     <height>30</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string notr="true">recents</string>
-   </property>
-  </widget>
  </widget>
  <tabstops>
   <tabstop>power_button</tabstop>
@@ -452,8 +452,6 @@ color: #f0f0f0</string>
   <tabstop>home_button</tabstop>
   <tabstop>recents_button</tabstop>
   <tabstop>more_button</tabstop>
-  <tabstop>close_button</tabstop>
-  <tabstop>minimize_button</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>

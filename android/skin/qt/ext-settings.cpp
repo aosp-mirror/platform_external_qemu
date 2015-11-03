@@ -59,22 +59,6 @@ void ExtendedWindow::initSettings()
     android::base::String  availStr = availableVersion.isValid() ?
                                   availableVersion.toString() : "Unknown";
     mExtendedUi->set_latestVersionBox->setPlainText(availStr.c_str());
-
-    // Enable the "Upgrade" button if the versions are different
-    bool allowUpgrade = availableVersion.isValid()
-                            && ( !curVersion.isValid() ||
-                                 (curVersion < availableVersion) );
-
-    QString upgradeText(tr("UPDATE NOT AVAILBLE"));
-    if (allowUpgrade) {
-        // Include the available version in the button's text
-        upgradeText = tr("UPDATE TO ") + availStr.c_str();
-    }
-    mExtendedUi->set_updateButton->setText(upgradeText);
-
-    setButtonEnabled(mExtendedUi->set_updateButton,
-                     mSettingsState.mTheme,
-                     allowUpgrade);
 }
 
 void ExtendedWindow::completeSettingsInitialization()
@@ -151,18 +135,34 @@ void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
     // Switch to the icon images that are appropriate for this theme.
     switchAllIconsForTheme(theme);
 
+    // Set the Qt style.
+
+    // The first part is based on the display's pixel density.
+    // Most displays give 1.0; high density displays give 2.0.
+    double densityFactor = 1.0;
+    if (skin_winsys_get_device_pixel_ratio(&densityFactor) != 0) {
+        // Failed: use 1.0
+        densityFactor = 1.0;
+    }
+    QString styleString = (densityFactor > 1.5) ? QT_FONTS(HI) : QT_FONTS(LO);
+
+
+    // The second part is based on the theme
     // Set the style for this theme
     switch (theme) {
         case SETTINGS_THEME_DARK:
-            this->setStyleSheet(QT_STYLE(DARK));
-            mToolWindow->setStyleSheet(QT_STYLE(DARK));
+            styleString += QT_STYLE(DARK);
             break;
         case SETTINGS_THEME_LIGHT:
         default:
-            this->setStyleSheet(QT_STYLE(LIGHT));
-            mToolWindow->setStyleSheet(QT_STYLE(LIGHT));
+            styleString += QT_STYLE(LIGHT);
             break;
     }
+
+    // Apply this style to the extended window (this),
+    // and to the main tool-bar.
+    this->setStyleSheet(styleString);
+    mToolWindow->setStyleSheet(styleString);
 
     // Force a re-draw to make the new style take effect
     this->style()->unpolish(mExtendedUi->stackedWidget);
