@@ -67,6 +67,7 @@ int formatGAPostData(char** ptr, const AndroidMetrics* metrics) {
 
     const char* label = metrics->is_dirty ? ga_event_label_crash_detected
                                           : ga_event_label_clean_exit;
+
     char* ga_client_id = android_studio_get_installation_id();
 
     // TODO(pprabhu) Decide whether we want to report gpu_enabled.
