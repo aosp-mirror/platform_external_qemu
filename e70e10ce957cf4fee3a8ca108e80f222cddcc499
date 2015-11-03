@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d6bb729e_caea439b",
+        "filename": "android/metrics/metrics_reporter_ga.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-03T20:41:38Z",
+      "side": 1,
+      "message": "Ok; I\u0027ll just leave this here for now on the off chance people want to use it.",
+      "parentUuid": "36aa0e54_a5f13e8e",
+      "range": {
+        "startLine": 64,
+        "startChar": 54,
+        "endLine": 64,
+        "endChar": 83
+      },
+      "revId": "e70e10ce957cf4fee3a8ca108e80f222cddcc499",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "36aa0e54_c511da6c",
         "filename": "android/metrics/metrics_reporter_toolbar.c",
         "patchSetId": 6
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "76df26f3_6f69f1a0",
+        "filename": "android/metrics/metrics_reporter_toolbar.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-03T20:41:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "36aa0e54_c511da6c",
+      "range": {
+        "startLine": 46,
+        "startChar": 44,
+        "endLine": 46,
+        "endChar": 50
+      },
+      "revId": "e70e10ce957cf4fee3a8ca108e80f222cddcc499",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d6bb729e_8a5d2b59",
         "filename": "vl-android.c",
         "patchSetId": 6
@@ -59,6 +107,30 @@
       "writtenOn": "2015-11-03T20:33:04Z",
       "side": 1,
       "message": "Please uncomment this.",
+      "range": {
+        "startLine": 2121,
+        "startChar": 0,
+        "endLine": 2124,
+        "endChar": 8
+      },
+      "revId": "e70e10ce957cf4fee3a8ca108e80f222cddcc499",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6bb729e_eae707d0",
+        "filename": "vl-android.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2124,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-03T20:41:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d6bb729e_8a5d2b59",
       "range": {
         "startLine": 2121,
         "startChar": 0,
