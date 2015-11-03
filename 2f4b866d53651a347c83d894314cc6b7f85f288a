@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "56c6a231_0e314b99",
+        "filename": "vl-android.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 3497,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-11-03T21:38:23Z",
+      "side": 1,
+      "message": "Could you simple use opengl_alive in the if condition directly below; and drop this variable?\n\nRight now, we have two variables to track very similar things: qemu_gles \u003d\u003d (android_hw-\u003ehw_gpu_enabled \u0026\u0026 opengl_alive)",
+      "range": {
+        "startLine": 3497,
+        "startChar": 8,
+        "endLine": 3497,
+        "endChar": 17
+      },
+      "revId": "2f4b866d53651a347c83d894314cc6b7f85f288a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6bb729e_aa37cfb8",
+        "filename": "vl-android.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 3507,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-11-03T21:38:23Z",
+      "side": 1,
+      "message": "This else clause is superfluous.",
+      "range": {
+        "startLine": 3505,
+        "startChar": 9,
+        "endLine": 3507,
+        "endChar": 9
+      },
+      "revId": "2f4b866d53651a347c83d894314cc6b7f85f288a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
