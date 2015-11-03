@@ -140,3 +140,7 @@ void iniFile_setBoolean(CIniFile* f, const char* key, int value) {
 void iniFile_setDiskSize(CIniFile* f, const char* key, int64_t size) {
     asBaseIniFile(f)->setDiskSize(key, size);
 }
+
+void iniFile_setString(CIniFile* f, const char* key, const char* str) {
+    asBaseIniFile(f)->setString(key, str);
+}
