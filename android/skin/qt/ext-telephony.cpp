@@ -10,7 +10,6 @@
  ** GNU General Public License for more details.
  */
 
-// TODO: Allow special characters in the phone number
 // TODO: Allow a second initiated call to test call waiting on the device.
 // TODO: Spawn a task to listen for call actions from the device: outgoing
 //       call, answer, hang up, reject, ...
@@ -30,63 +29,71 @@ void ExtendedWindow::initTelephony()
     mExtendedUi->tel_numberBox->setValidator(new phoneNumberValidator);
 }
 
-void ExtendedWindow::on_tel_startCallButton_clicked()
+void ExtendedWindow::on_tel_startEndButton_clicked()
 {
-    if (mTelephonyAgent && mTelephonyAgent->telephonyCmd) {
-        // Command the emulator
-        TelephonyResponse tResp;
+    if (mTelephonyState.mActivity == Call_Inactive) {
+        // Start a call
+        if (mTelephonyAgent && mTelephonyAgent->telephonyCmd) {
+            // Command the emulator
+            TelephonyResponse tResp;
 
-        // Get rid of spurious characters from the phone number
-        // (Allow only '+' and '0'..'9')
-        QString cleanNumber = mExtendedUi->tel_numberBox->currentText().
-                                 remove(QRegularExpression("[^+0-9]"));
+            // Get rid of spurious characters from the phone number
+            // (Allow only '+' and '0'..'9')
+            // Note: phoneNumberValidator validates the user's input, but
+            // allows some human-readable characters like '.' and ')'.
+            // Here we remove that meaningless punctuation.
+            QString cleanNumber = mExtendedUi->tel_numberBox->currentText().
+                                     remove(QRegularExpression("[^+0-9]"));
 
-        tResp = mTelephonyAgent->telephonyCmd(Tel_Op_Init_Call,
-                                              cleanNumber.toStdString().c_str());
-        if (tResp != Tel_Resp_OK) {
-            mToolWindow->showErrorDialog(tr("The call failed."),
-                                         tr("Telephony"));
-            return;
+            tResp = mTelephonyAgent->telephonyCmd(Tel_Op_Init_Call,
+                                                  cleanNumber.toStdString().c_str());
+            if (tResp != Tel_Resp_OK) {
+                mToolWindow->showErrorDialog(tr("The call failed."),
+                                             tr("Telephony"));
+                return;
+            }
         }
-    }
 
-    // Success: Update the state and the UI buttons
-    mTelephonyState.mActivity = Call_Active;
-    mTelephonyState.mPhoneNumber = mExtendedUi->tel_numberBox->currentText();
+        // Success: Update the state and the UI buttons
+        mTelephonyState.mActivity = Call_Active;
+        mTelephonyState.mPhoneNumber = mExtendedUi->tel_numberBox->currentText();
 
-    mExtendedUi->tel_numberBox->setEnabled(false);
+        mExtendedUi->tel_numberBox->setEnabled(false);
 
-    SettingsTheme theme = mSettingsState.mTheme;
-    setButtonEnabled(mExtendedUi->tel_startCallButton, theme, false);
-    setButtonEnabled(mExtendedUi->tel_endCallButton,   theme, true);
-    setButtonEnabled(mExtendedUi->tel_holdCallButton,  theme, true);
-}
+        SettingsTheme theme = mSettingsState.mTheme;
+        setButtonEnabled(mExtendedUi->tel_holdCallButton, theme, true);
+        // Change the icon and text to "END CALL"
+        QIcon theIcon(":/dark/call_end"); // Same for light and dark
+        mExtendedUi->tel_startEndButton->setIcon(theIcon);
+        mExtendedUi->tel_startEndButton->setText(tr("END CALL"));
+    } else {
+        // End a call
+        // Update the state and the UI buttons
+        mTelephonyState.mActivity = Call_Inactive;
 
-void ExtendedWindow::on_tel_endCallButton_clicked()
-{
-    // Update the state and the UI buttons
-    mTelephonyState.mActivity = Call_Inactive;
+        mExtendedUi->tel_numberBox->setEnabled(true);
 
-    mExtendedUi->tel_numberBox->setEnabled(true);
+        mExtendedUi->tel_holdCallButton->setProperty("themeIconName", "phone_paused");
 
-    mExtendedUi->tel_holdCallButton->setProperty("themeIconName", "phone_paused");
+        SettingsTheme theme = mSettingsState.mTheme;
+        setButtonEnabled(mExtendedUi->tel_holdCallButton, theme, false);
+        // Change the icon and text to "CALL DEVICE"
+        QIcon theIcon(":/dark/phone_button"); // Same for light and dark
+        mExtendedUi->tel_startEndButton->setIcon(theIcon);
+        mExtendedUi->tel_startEndButton->setText(tr("CALL DEVICE"));
 
-    SettingsTheme theme = mSettingsState.mTheme;
-    setButtonEnabled(mExtendedUi->tel_startCallButton, theme, true);
-    setButtonEnabled(mExtendedUi->tel_endCallButton,   theme, false);
-    setButtonEnabled(mExtendedUi->tel_holdCallButton,  theme, false);
-
-    if (mTelephonyAgent && mTelephonyAgent->telephonyCmd) {
-        // Command the emulator
-        QString cleanNumber = mExtendedUi->tel_numberBox->currentText().
-                                remove(QRegularExpression("[^+0-9]"));
-        TelephonyResponse tResp;
-        tResp = mTelephonyAgent->telephonyCmd(Tel_Op_Disconnect_Call,
-                                              cleanNumber.toStdString().c_str());
-        if (tResp != Tel_Resp_OK) {
-            mToolWindow->showErrorDialog(tr("The end-call failed."),
-                                         tr("Telephony"));
-            return;
+        if (mTelephonyAgent && mTelephonyAgent->telephonyCmd) {
+            // Command the emulator
+            QString cleanNumber = mExtendedUi->tel_numberBox->currentText().
+                                    remove(QRegularExpression("[^+0-9]"));
+            TelephonyResponse tResp;
+            tResp = mTelephonyAgent->telephonyCmd(Tel_Op_Disconnect_Call,
+                                                  cleanNumber.toStdString().c_str());
+            if (tResp != Tel_Resp_OK) {
+                mToolWindow->showErrorDialog(tr("The end-call failed."),
+                                             tr("Telephony"));
+                return;
+            }
         }
     }
 }
@@ -102,8 +109,6 @@ void ExtendedWindow::on_tel_holdCallButton_clicked()
             mExtendedUi->tel_holdCallButton->
                 setProperty("themeIconName", "phone_in_talk");
 
-            setButtonEnabled(mExtendedUi->tel_startCallButton, theme, false);
-            setButtonEnabled(mExtendedUi->tel_endCallButton,   theme, true);
             setButtonEnabled(mExtendedUi->tel_holdCallButton,  theme, true);
             break;
         case Call_Held:
@@ -115,8 +120,6 @@ void ExtendedWindow::on_tel_holdCallButton_clicked()
             mExtendedUi->tel_holdCallButton->
                 setProperty("themeIconName_disabled", "phone_paused_disabled");
 
-            setButtonEnabled(mExtendedUi->tel_startCallButton, theme, false);
-            setButtonEnabled(mExtendedUi->tel_endCallButton,   theme, true);
             setButtonEnabled(mExtendedUi->tel_holdCallButton,  theme, true);
             break;
         default:

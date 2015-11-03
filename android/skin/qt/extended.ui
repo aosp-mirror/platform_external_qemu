@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>820</width>
     <height>600</height>
    </rect>
   </property>
@@ -18,13 +18,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>800</width>
+    <width>820</width>
     <height>600</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>800</width>
+    <width>820</width>
     <height>600</height>
    </size>
   </property>
@@ -51,50 +51,26 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="QStackedWidget" name="stackedWidget">
    <property name="geometry">
     <rect>
-     <x>230</x>
+     <x>198</x>
      <y>20</y>
-     <width>691</width>
-     <height>721</height>
+     <width>622</width>
+     <height>580</height>
     </rect>
    </property>
    <property name="layoutDirection">
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="currentIndex">
-    <number>7</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="location_page">
-    <widget class="QGroupBox" name="locationGroup">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>101</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>GPS Point</string>
-     </property>
-    </widget>
     <widget class="QTableWidget" name="loc_pathTable">
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>328</y>
-       <width>530</width>
-       <height>201</height>
+       <y>270</y>
+       <width>584</width>
+       <height>251</height>
       </rect>
      </property>
      <property name="font">
@@ -142,7 +118,7 @@ font-family: &quot;Roboto&quot;</string>
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignTrailing|AlignVCenter</set>
+       <set>AlignRight|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -157,7 +133,7 @@ font-family: &quot;Roboto&quot;</string>
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignTrailing|AlignVCenter</set>
+       <set>AlignRight|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -172,7 +148,7 @@ font-family: &quot;Roboto&quot;</string>
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignTrailing|AlignVCenter</set>
+       <set>AlignRight|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -187,7 +163,7 @@ font-family: &quot;Roboto&quot;</string>
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignTrailing|AlignVCenter</set>
+       <set>AlignRight|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -202,7 +178,7 @@ font-family: &quot;Roboto&quot;</string>
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignTrailing|AlignVCenter</set>
+       <set>AlignRight|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -217,16 +193,16 @@ font-family: &quot;Roboto&quot;</string>
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignTrailing|AlignVCenter</set>
+       <set>AlignRight|AlignVCenter</set>
       </property>
      </column>
     </widget>
     <widget class="QPushButton" name="loc_GpxKmlButton">
      <property name="geometry">
       <rect>
-       <x>420</x>
+       <x>500</x>
        <y>530</y>
-       <width>130</width>
+       <width>111</width>
        <height>36</height>
       </rect>
      </property>
@@ -251,7 +227,7 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QPushButton" name="loc_playStopButton">
      <property name="geometry">
       <rect>
-       <x>20</x>
+       <x>10</x>
        <y>530</y>
        <width>36</width>
        <height>36</height>
@@ -283,8 +259,8 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QGroupBox" name="locationGroup_2">
      <property name="geometry">
       <rect>
-       <x>0</x>
-       <y>280</y>
+       <x>20</x>
+       <y>230</y>
        <width>180</width>
        <height>31</height>
       </rect>
@@ -292,24 +268,27 @@ font-family: &quot;Roboto&quot;</string>
      <property name="font">
       <font>
        <family>Roboto</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
+       <pointsize>10</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
       </font>
      </property>
      <property name="styleSheet">
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>GPS Data Playback</string>
+      <string>GPS data points</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
      </property>
     </widget>
     <widget class="AngleInputWidget" name="loc_latitudeInput" native="true">
      <property name="geometry">
       <rect>
-       <x>280</x>
-       <y>70</y>
-       <width>270</width>
+       <x>324</x>
+       <y>50</y>
+       <width>280</width>
        <height>21</height>
       </rect>
      </property>
@@ -317,9 +296,9 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="AngleInputWidget" name="loc_longitudeInput" native="true">
      <property name="geometry">
       <rect>
-       <x>280</x>
-       <y>140</y>
-       <width>270</width>
+       <x>324</x>
+       <y>110</y>
+       <width>280</width>
        <height>21</height>
       </rect>
      </property>
@@ -327,8 +306,8 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QPushButton" name="loc_sendPointButton">
      <property name="geometry">
       <rect>
-       <x>500</x>
-       <y>240</y>
+       <x>560</x>
+       <y>200</y>
        <width>51</width>
        <height>36</height>
       </rect>
@@ -351,13 +330,13 @@ font-family: &quot;Roboto&quot;</string>
       <string>Tool</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_9">
+    <widget class="QLabel" name="label_12">
      <property name="geometry">
       <rect>
-       <x>280</x>
-       <y>50</y>
-       <width>59</width>
-       <height>15</height>
+       <x>324</x>
+       <y>30</y>
+       <width>140</width>
+       <height>16</height>
       </rect>
      </property>
      <property name="text">
@@ -367,13 +346,13 @@ font-family: &quot;Roboto&quot;</string>
       <string>Title</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_10">
+    <widget class="QLabel" name="label_13">
      <property name="geometry">
       <rect>
-       <x>280</x>
-       <y>120</y>
-       <width>59</width>
-       <height>15</height>
+       <x>324</x>
+       <y>90</y>
+       <width>140</width>
+       <height>16</height>
       </rect>
      </property>
      <property name="text">
@@ -387,7 +366,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>60</y>
+       <y>40</y>
        <width>109</width>
        <height>25</height>
       </rect>
@@ -395,11 +374,10 @@ font-family: &quot;Roboto&quot;</string>
      <property name="font">
       <font>
        <family>Roboto</family>
-       <pointsize>11</pointsize>
+       <pointsize>10</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
       </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">font-size: 11pt</string>
      </property>
      <property name="text">
       <string>Decimal</string>
@@ -412,7 +390,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>130</y>
+       <y>70</y>
        <width>130</width>
        <height>25</height>
       </rect>
@@ -420,11 +398,8 @@ font-family: &quot;Roboto&quot;</string>
      <property name="font">
       <font>
        <family>Roboto</family>
-       <pointsize>11</pointsize>
+       <pointsize>10</pointsize>
       </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">font-size: 11pt</string>
      </property>
      <property name="text">
       <string>Sexagesimal</string>
@@ -433,9 +408,9 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QLineEdit" name="loc_altitudeInput">
      <property name="geometry">
       <rect>
-       <x>280</x>
-       <y>210</y>
-       <width>270</width>
+       <x>324</x>
+       <y>170</y>
+       <width>280</width>
        <height>21</height>
       </rect>
      </property>
@@ -446,17 +421,17 @@ font-family: &quot;Roboto&quot;</string>
       <string>EditableValue</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_11">
+    <widget class="QLabel" name="label_14">
      <property name="geometry">
       <rect>
-       <x>280</x>
-       <y>190</y>
-       <width>59</width>
-       <height>15</height>
+       <x>324</x>
+       <y>150</y>
+       <width>140</width>
+       <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>Altitude</string>
+      <string>Altitude (meters)</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Title</string>
@@ -465,7 +440,7 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QComboBox" name="loc_playbackSpeed">
      <property name="geometry">
       <rect>
-       <x>60</x>
+       <x>110</x>
        <y>535</y>
        <width>90</width>
        <height>27</height>
@@ -497,40 +472,49 @@ font-family: &quot;Roboto&quot;</string>
       </property>
      </item>
     </widget>
-   </widget>
-   <widget class="QWidget" name="cellular_page">
-    <widget class="QGroupBox" name="cell_groupBox">
+    <widget class="QGroupBox" name="locationGroup_3">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>20</x>
        <y>0</y>
-       <width>181</width>
+       <width>180</width>
        <height>31</height>
       </rect>
      </property>
      <property name="font">
       <font>
        <family>Roboto</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
+       <pointsize>10</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
       </font>
      </property>
      <property name="styleSheet">
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Cellular network</string>
+      <string>GPS data points</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
      </property>
     </widget>
+   </widget>
+   <widget class="QWidget" name="cellular_page">
     <widget class="QComboBox" name="cell_dataStatusBox">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>250</y>
-       <width>241</width>
+       <x>324</x>
+       <y>92</y>
+       <width>280</width>
        <height>31</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
      </property>
      <property name="styleSheet">
       <string notr="true">padding: 3px 3px 3px 3px;</string>
@@ -564,10 +548,10 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QGroupBox" name="cell_dStatusGroupBox">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>220</y>
+       <x>324</x>
+       <y>74</y>
        <width>91</width>
-       <height>21</height>
+       <height>24</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -584,10 +568,16 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>170</y>
-       <width>241</width>
+       <y>92</y>
+       <width>280</width>
        <height>31</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
      </property>
      <property name="styleSheet">
       <string notr="true">padding: 3px 3px 3px 3px;</string>
@@ -622,9 +612,9 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>140</y>
+       <y>74</y>
        <width>111</width>
-       <height>21</height>
+       <height>24</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -641,10 +631,16 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>80</y>
-       <width>121</width>
+       <y>18</y>
+       <width>280</width>
        <height>31</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
      </property>
      <property name="styleSheet">
       <string notr="true">padding: 3px 3px 3px 3px;</string>
@@ -692,96 +688,98 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>40</y>
+       <y>0</y>
        <width>131</width>
-       <height>31</height>
+       <height>24</height>
       </rect>
      </property>
      <property name="styleSheet">
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Cellular standard</string>
+      <string>Network type</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string notr="true">Title</string>
      </property>
     </widget>
-   </widget>
-   <widget class="QWidget" name="batteryPage">
-    <widget class="QGroupBox" name="batteryBox">
+    <widget class="QGroupBox" name="cell_delayGroupBox">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>324</x>
        <y>0</y>
-       <width>281</width>
-       <height>101</height>
+       <width>161</width>
+       <height>24</height>
       </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
      </property>
      <property name="styleSheet">
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Battery</string>
+      <string>Network delay (msec)</string>
      </property>
-     <property name="flat">
-      <bool>false</bool>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
      </property>
-     <widget class="QLineEdit" name="bat_chargeLevelText">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>190</x>
-        <y>70</y>
-        <width>51</width>
-        <height>29</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <family>Roboto</family>
-        <pointsize>11</pointsize>
-       </font>
-      </property>
-      <property name="mouseTracking">
-       <bool>false</bool>
-      </property>
-      <property name="acceptDrops">
-       <bool>false</bool>
-      </property>
-      <property name="toolTip">
-       <string notr="true"/>
-      </property>
-      <property name="text">
-       <string notr="true">50%</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
     </widget>
+    <widget class="QComboBox" name="cell_delayBox">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>18</y>
+       <width>280</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <item>
+      <property name="text">
+       <string>0</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>35-200 (UMTS/3G)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>150-500 (GPRS)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>80-400 (EDGE/EGPRS)</string>
+      </property>
+     </item>
+    </widget>
+    <zorder>cell_dStatusGroupBox</zorder>
+    <zorder>cell_vStatusGroupBox</zorder>
+    <zorder>cell_stdGroupBox</zorder>
+    <zorder>cell_standardBox</zorder>
+    <zorder>cell_voiceStatusBox</zorder>
+    <zorder>cell_dataStatusBox</zorder>
+    <zorder>cell_delayGroupBox</zorder>
+    <zorder>cell_delayBox</zorder>
+   </widget>
+   <widget class="QWidget" name="batteryPage">
     <widget class="QGroupBox" name="bat_chargeGroup">
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>40</y>
-       <width>160</width>
+       <y>0</y>
+       <width>280</width>
        <height>61</height>
       </rect>
      </property>
@@ -803,8 +801,8 @@ font-family: &quot;Roboto&quot;</string>
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>30</y>
-        <width>160</width>
+        <y>18</y>
+        <width>221</width>
         <height>29</height>
        </rect>
       </property>
@@ -821,12 +819,52 @@ font-family: &quot;Roboto&quot;</string>
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
+     <widget class="QLineEdit" name="bat_chargeLevelText">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>229</x>
+        <y>18</y>
+        <width>51</width>
+        <height>29</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="mouseTracking">
+       <bool>false</bool>
+      </property>
+      <property name="acceptDrops">
+       <bool>false</bool>
+      </property>
+      <property name="toolTip">
+       <string notr="true"/>
+      </property>
+      <property name="text">
+       <string notr="true">50%</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
     </widget>
     <widget class="QGroupBox" name="bat_acGroup">
      <property name="geometry">
       <rect>
-       <x>300</x>
-       <y>40</y>
+       <x>324</x>
+       <y>0</y>
        <width>131</width>
        <height>21</height>
       </rect>
@@ -849,8 +887,8 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QGroupBox" name="bat_statusGroup">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>220</y>
+       <x>324</x>
+       <y>74</y>
        <width>251</width>
        <height>21</height>
       </rect>
@@ -874,7 +912,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>140</y>
+       <y>74</y>
        <width>241</width>
        <height>21</height>
       </rect>
@@ -898,10 +936,16 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>170</y>
-       <width>241</width>
+       <y>92</y>
+       <width>280</width>
        <height>31</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
      </property>
      <property name="styleSheet">
       <string notr="true">padding: 3px 3px 3px 3px;</string>
@@ -940,11 +984,17 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QComboBox" name="bat_statusBox">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>250</y>
-       <width>241</width>
+       <x>324</x>
+       <y>92</y>
+       <width>280</width>
        <height>31</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
      </property>
      <property name="styleSheet">
       <string notr="true">padding: 3px 3px 3px 3px;</string>
@@ -981,11 +1031,17 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QComboBox" name="bat_chargerBox">
      <property name="geometry">
       <rect>
-       <x>300</x>
-       <y>70</y>
-       <width>241</width>
+       <x>324</x>
+       <y>18</y>
+       <width>280</width>
        <height>31</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
      </property>
      <property name="styleSheet">
       <string notr="true">padding: 3px 3px 3px 3px;</string>
@@ -1009,79 +1065,11 @@ font-family: &quot;Roboto&quot;</string>
     </widget>
    </widget>
    <widget class="QWidget" name="telephonyPage">
-    <widget class="QGroupBox" name="telephonyBox">
+    <widget class="QPushButton" name="tel_startEndButton">
      <property name="geometry">
       <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>101</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Telephone</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="tel_endCallButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>150</x>
-       <y>100</y>
-       <width>111</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>10</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="toolTip">
-      <string>End call</string>
-     </property>
-     <property name="text">
-      <string>HANG UP</string>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/light/call_end</normaloff>
-       <disabledoff>:/light/call_end_disabled</disabledoff>:/light/call_end</iconset>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string>call_end</string>
-     </property>
-     <property name="themeIconName_disabled" stdset="0">
-      <string>call_end_disabled</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Tool</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="tel_startCallButton">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>100</y>
+       <x>190</x>
+       <y>50</y>
        <width>111</width>
        <height>36</height>
       </rect>
@@ -1121,7 +1109,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>40</y>
+       <y>0</y>
        <width>51</width>
        <height>21</height>
       </rect>
@@ -1142,8 +1130,8 @@ font-family: &quot;Roboto&quot;</string>
      </property>
      <property name="geometry">
       <rect>
-       <x>280</x>
-       <y>100</y>
+       <x>70</x>
+       <y>50</y>
        <width>111</width>
        <height>36</height>
       </rect>
@@ -1184,10 +1172,16 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>60</y>
-       <width>221</width>
-       <height>25</height>
+       <y>18</y>
+       <width>280</width>
+       <height>31</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
      </property>
      <property name="editable">
       <bool>true</bool>
@@ -1210,21 +1204,27 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>200</y>
-       <width>381</width>
+       <y>110</y>
+       <width>280</width>
        <height>140</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 4px 2px 2px 2px;</string>
+     </property>
      <property name="plainText">
       <string>Don't forget the marshmallows!</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>SmsBox</string>
      </property>
     </widget>
     <widget class="QPushButton" name="sms_sendButton">
      <property name="geometry">
       <rect>
-       <x>270</x>
-       <y>350</y>
-       <width>141</width>
+       <x>180</x>
+       <y>250</y>
+       <width>121</width>
        <height>36</height>
       </rect>
      </property>
@@ -1258,36 +1258,12 @@ font-family: &quot;Roboto&quot;</string>
     </widget>
    </widget>
    <widget class="QWidget" name="virtualSensorsPage">
-    <widget class="QGroupBox" name="virtualSensorsBox">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>161</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Virtual sensors</string>
-     </property>
-    </widget>
     <widget class="QTabWidget" name="tabWidget">
      <property name="geometry">
       <rect>
        <x>-1</x>
        <y>40</y>
-       <width>681</width>
+       <width>580</width>
        <height>491</height>
       </rect>
      </property>
@@ -1506,8 +1482,8 @@ font-family: &quot;Roboto&quot;</string>
       <widget class="QLabel" name="label_4">
        <property name="geometry">
         <rect>
-         <x>360</x>
-         <y>150</y>
+         <x>10</x>
+         <y>30</y>
          <width>170</width>
          <height>15</height>
         </rect>
@@ -1519,8 +1495,8 @@ font-family: &quot;Roboto&quot;</string>
       <widget class="EditableSliderWidget" name="temperatureSensorValueWidget" native="true">
        <property name="geometry">
         <rect>
-         <x>350</x>
-         <y>170</y>
+         <x>0</x>
+         <y>50</y>
          <width>320</width>
          <height>80</height>
         </rect>
@@ -1529,8 +1505,8 @@ font-family: &quot;Roboto&quot;</string>
       <widget class="QLabel" name="label_5">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>150</y>
+         <x>10</x>
+         <y>140</y>
          <width>90</width>
          <height>15</height>
         </rect>
@@ -1542,8 +1518,8 @@ font-family: &quot;Roboto&quot;</string>
       <widget class="EditableSliderWidget" name="proximitySensorValueWidget" native="true">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>170</y>
+         <x>0</x>
+         <y>160</y>
          <width>320</width>
          <height>80</height>
         </rect>
@@ -1552,7 +1528,7 @@ font-family: &quot;Roboto&quot;</string>
       <widget class="QLabel" name="label_7">
        <property name="geometry">
         <rect>
-         <x>10</x>
+         <x>350</x>
          <y>30</y>
          <width>170</width>
          <height>15</height>
@@ -1565,7 +1541,7 @@ font-family: &quot;Roboto&quot;</string>
       <widget class="QWidget" name="horizontalLayoutWidget">
        <property name="geometry">
         <rect>
-         <x>10</x>
+         <x>350</x>
          <y>50</y>
          <width>220</width>
          <height>40</height>
@@ -1713,35 +1689,11 @@ font-family: &quot;Roboto&quot;</string>
     </widget>
    </widget>
    <widget class="QWidget" name="dpadPage">
-    <widget class="QGroupBox" name="hardwareSensorsBox_2">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>181</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Directional pad</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="dpad_upButton">
      <property name="geometry">
       <rect>
-       <x>208</x>
-       <y>129</y>
+       <x>241</x>
+       <y>122</y>
        <width>141</width>
        <height>100</height>
       </rect>
@@ -1772,8 +1724,8 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QPushButton" name="dpad_downButton">
      <property name="geometry">
       <rect>
-       <x>208</x>
-       <y>232</y>
+       <x>241</x>
+       <y>225</y>
        <width>141</width>
        <height>100</height>
       </rect>
@@ -1804,8 +1756,8 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QPushButton" name="dpad_leftButton">
      <property name="geometry">
       <rect>
-       <x>177</x>
-       <y>160</y>
+       <x>210</x>
+       <y>153</y>
        <width>100</width>
        <height>141</height>
       </rect>
@@ -1836,8 +1788,8 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QPushButton" name="dpad_rightButton">
      <property name="geometry">
       <rect>
-       <x>280</x>
-       <y>160</y>
+       <x>313</x>
+       <y>153</y>
        <width>100</width>
        <height>141</height>
       </rect>
@@ -1868,8 +1820,8 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QPushButton" name="dpad_selectButton">
      <property name="geometry">
       <rect>
-       <x>235</x>
-       <y>188</y>
+       <x>268</x>
+       <y>181</y>
        <width>85</width>
        <height>85</height>
       </rect>
@@ -1900,8 +1852,8 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QPushButton" name="dpad_playButton">
      <property name="geometry">
       <rect>
-       <x>253</x>
-       <y>367</y>
+       <x>286</x>
+       <y>360</y>
        <width>50</width>
        <height>50</height>
       </rect>
@@ -1932,8 +1884,8 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QPushButton" name="dpad_backButton">
      <property name="geometry">
       <rect>
-       <x>175</x>
-       <y>367</y>
+       <x>208</x>
+       <y>360</y>
        <width>50</width>
        <height>50</height>
       </rect>
@@ -1964,8 +1916,8 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QPushButton" name="dpad_forwardButton">
      <property name="geometry">
       <rect>
-       <x>331</x>
-       <y>367</y>
+       <x>364</x>
+       <y>360</y>
        <width>50</width>
        <height>50</height>
       </rect>
@@ -1993,7 +1945,6 @@ font-family: &quot;Roboto&quot;</string>
       <string>dpad_forward_pressed</string>
      </property>
     </widget>
-    <zorder>hardwareSensorsBox_2</zorder>
     <zorder>dpad_upButton</zorder>
     <zorder>dpad_downButton</zorder>
     <zorder>dpad_leftButton</zorder>
@@ -2004,35 +1955,11 @@ font-family: &quot;Roboto&quot;</string>
     <zorder>dpad_selectButton</zorder>
    </widget>
    <widget class="QWidget" name="finger_page">
-    <widget class="QGroupBox" name="finger_group">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>211</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Fingerprint detection</string>
-     </property>
-    </widget>
     <widget class="QGroupBox" name="finger_IdGroup">
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>40</y>
+       <y>0</y>
        <width>111</width>
        <height>21</height>
       </rect>
@@ -2041,43 +1968,18 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Fingerprint ID</string>
+      <string>Fingerprint</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string notr="true">Title</string>
      </property>
     </widget>
-    <widget class="QPlainTextEdit" name="finger_IdBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>70</y>
-       <width>121</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="plainText">
-      <string>12345</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="finger_touchButton">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>110</y>
-       <width>111</width>
+       <x>200</x>
+       <y>50</y>
+       <width>101</width>
        <height>36</height>
       </rect>
      </property>
@@ -2102,6 +2004,31 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">Tool</string>
      </property>
     </widget>
+    <widget class="QComboBox" name="finger_pickBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>18</y>
+       <width>280</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <property name="currentIndex">
+      <number>-1</number>
+     </property>
+     <property name="maxVisibleItems">
+      <number>10</number>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="helpPage">
     <widget class="QTabWidget" name="help_tabs">
@@ -2123,10 +2050,10 @@ font-family: &quot;Roboto&quot;</string>
       <widget class="QTableWidget" name="shortcutsTableWidget">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>540</width>
-         <height>520</height>
+         <x>20</x>
+         <y>50</y>
+         <width>650</width>
+         <height>660</height>
         </rect>
        </property>
        <property name="focusPolicy">
@@ -2167,7 +2094,7 @@ font-family: &quot;Roboto&quot;</string>
          <string>Command</string>
         </property>
         <property name="textAlignment">
-         <set>AlignLeading|AlignVCenter</set>
+         <set>AlignLeft|AlignVCenter</set>
         </property>
        </column>
        <column>
@@ -2175,7 +2102,7 @@ font-family: &quot;Roboto&quot;</string>
          <string>Key</string>
         </property>
         <property name="textAlignment">
-         <set>AlignLeading|AlignVCenter</set>
+         <set>AlignLeft|AlignVCenter</set>
         </property>
        </column>
       </widget>
@@ -2278,30 +2205,6 @@ font-family: &quot;Roboto&quot;</string>
     </widget>
    </widget>
    <widget class="QWidget" name="settingsPage">
-    <widget class="QGroupBox" name="sd_group_2">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>91</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Settings</string>
-     </property>
-    </widget>
     <widget class="QPlainTextEdit" name="set_adbPortBox">
      <property name="enabled">
       <bool>false</bool>
@@ -2309,8 +2212,8 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>170</y>
-       <width>181</width>
+       <y>166</y>
+       <width>280</width>
        <height>31</height>
       </rect>
      </property>
@@ -2319,6 +2222,12 @@ font-family: &quot;Roboto&quot;</string>
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
      </property>
      <property name="verticalScrollBarPolicy">
       <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -2334,7 +2243,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>40</y>
+       <y>74</y>
        <width>181</width>
        <height>21</height>
       </rect>
@@ -2358,7 +2267,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>240</y>
+       <y>222</y>
        <width>181</width>
        <height>21</height>
       </rect>
@@ -2385,8 +2294,8 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>270</y>
-       <width>181</width>
+       <y>240</y>
+       <width>280</width>
        <height>31</height>
       </rect>
      </property>
@@ -2395,6 +2304,12 @@ font-family: &quot;Roboto&quot;</string>
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
      </property>
      <property name="accessibleName">
       <string notr="true"/>
@@ -2416,10 +2331,19 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>70</y>
-       <width>181</width>
+       <y>92</y>
+       <width>280</width>
        <height>31</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
      </property>
      <item>
       <property name="text">
@@ -2438,9 +2362,9 @@ font-family: &quot;Roboto&quot;</string>
      </property>
      <property name="geometry">
       <rect>
-       <x>230</x>
-       <y>270</y>
-       <width>180</width>
+       <x>324</x>
+       <y>240</y>
+       <width>280</width>
        <height>31</height>
       </rect>
      </property>
@@ -2449,6 +2373,12 @@ font-family: &quot;Roboto&quot;</string>
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
      </property>
      <property name="accessibleName">
       <string notr="true"/>
@@ -2469,8 +2399,8 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QGroupBox" name="androidVersionTitle">
      <property name="geometry">
       <rect>
-       <x>230</x>
-       <y>240</y>
+       <x>324</x>
+       <y>222</y>
        <width>181</width>
        <height>21</height>
       </rect>
@@ -2493,9 +2423,9 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QGroupBox" name="saveLocationTitle">
      <property name="geometry">
       <rect>
-       <x>230</x>
-       <y>140</y>
-       <width>261</width>
+       <x>324</x>
+       <y>74</y>
+       <width>280</width>
        <height>21</height>
       </rect>
      </property>
@@ -2518,7 +2448,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>140</y>
+       <y>148</y>
        <width>181</width>
        <height>21</height>
       </rect>
@@ -2538,41 +2468,11 @@ font-family: &quot;Roboto&quot;</string>
       <string>Title</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="set_updateButton">
-     <property name="geometry">
-      <rect>
-       <x>240</x>
-       <y>350</y>
-       <width>201</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>10</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">text-align: left;</string>
-     </property>
-     <property name="text">
-      <string>UPDATE NOT AVAILABLE</string>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string notr="true">Tool</string>
-     </property>
-    </widget>
     <widget class="QGroupBox" name="availVersionTitle">
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>320</y>
+       <y>296</y>
        <width>221</width>
        <height>21</height>
       </rect>
@@ -2599,8 +2499,8 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>350</y>
-       <width>181</width>
+       <y>314</y>
+       <width>280</width>
        <height>31</height>
       </rect>
      </property>
@@ -2609,6 +2509,12 @@ font-family: &quot;Roboto&quot;</string>
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
      </property>
      <property name="accessibleName">
       <string notr="true"/>
@@ -2632,9 +2538,9 @@ font-family: &quot;Roboto&quot;</string>
      </property>
      <property name="geometry">
       <rect>
-       <x>230</x>
-       <y>170</y>
-       <width>251</width>
+       <x>324</x>
+       <y>92</y>
+       <width>240</width>
        <height>61</height>
       </rect>
      </property>
@@ -2660,8 +2566,8 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QPushButton" name="set_folderButton">
      <property name="geometry">
       <rect>
-       <x>510</x>
-       <y>168</y>
+       <x>572</x>
+       <y>92</y>
        <width>32</width>
        <height>32</height>
       </rect>
@@ -2692,15 +2598,15 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>152</y>
-     <width>220</width>
-     <height>44</height>
+     <y>138</y>
+     <width>194</width>
+     <height>42</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Roboto</family>
-     <pointsize>14</pointsize>
+     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="autoFillBackground">
@@ -2736,15 +2642,17 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>108</y>
-     <width>220</width>
-     <height>44</height>
+     <y>96</y>
+     <width>194</width>
+     <height>42</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Roboto</family>
-     <pointsize>14</pointsize>
+     <pointsize>10</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
     </font>
    </property>
    <property name="autoFillBackground">
@@ -2780,15 +2688,15 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>20</y>
-     <width>220</width>
-     <height>44</height>
+     <y>12</y>
+     <width>194</width>
+     <height>42</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Roboto</family>
-     <pointsize>14</pointsize>
+     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="autoFillBackground">
@@ -2824,15 +2732,15 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>64</y>
-     <width>220</width>
-     <height>44</height>
+     <y>54</y>
+     <width>194</width>
+     <height>42</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Roboto</family>
-     <pointsize>14</pointsize>
+     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="autoFillBackground">
@@ -2864,19 +2772,63 @@ font-family: &quot;Roboto&quot;</string>
     <string>MajorTab</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="dpadButton">
+  <widget class="QPushButton" name="fingerButton">
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>196</y>
-     <width>220</width>
-     <height>44</height>
+     <y>222</y>
+     <width>194</width>
+     <height>42</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Roboto</family>
-     <pointsize>14</pointsize>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
+   </property>
+   <property name="text">
+    <string>  Fingerprint</string>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/fingerprint</normaloff>:/light/fingerprint</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>fingerprint</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>MajorTab</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="dpadButton">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>180</y>
+     <width>194</width>
+     <height>42</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="autoFillBackground">
@@ -2911,10 +2863,10 @@ font-family: &quot;Roboto&quot;</string>
   <widget class="Line" name="VertDivider">
    <property name="geometry">
     <rect>
-     <x>220</x>
+     <x>194</x>
      <y>0</y>
-     <width>2</width>
-     <height>790</height>
+     <width>4</width>
+     <height>600</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -2924,25 +2876,28 @@ font-family: &quot;Roboto&quot;</string>
     <enum>QFrame::Plain</enum>
    </property>
    <property name="lineWidth">
-    <number>2</number>
+    <number>10</number>
    </property>
    <property name="orientation">
     <enum>Qt::Vertical</enum>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string notr="true">GradientDivider</string>
    </property>
   </widget>
   <widget class="QPushButton" name="settingsButton">
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>328</y>
-     <width>220</width>
-     <height>44</height>
+     <y>336</y>
+     <width>194</width>
+     <height>42</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Roboto</family>
-     <pointsize>14</pointsize>
+     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="autoFillBackground">
@@ -2981,9 +2936,9 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>370</y>
-     <width>220</width>
-     <height>220</height>
+     <y>378</y>
+     <width>194</width>
+     <height>222</height>
     </rect>
    </property>
    <property name="autoFillBackground">
@@ -3015,15 +2970,15 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>240</y>
-     <width>220</width>
-     <height>44</height>
+     <y>264</y>
+     <width>194</width>
+     <height>42</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Roboto</family>
-     <pointsize>12</pointsize>
+     <pointsize>8</pointsize>
     </font>
    </property>
    <property name="autoFillBackground">
@@ -3052,15 +3007,15 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>284</y>
-     <width>220</width>
-     <height>44</height>
+     <y>294</y>
+     <width>194</width>
+     <height>42</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Roboto</family>
-     <pointsize>14</pointsize>
+     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="autoFillBackground">
@@ -3100,8 +3055,8 @@ font-family: &quot;Roboto&quot;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>220</width>
-     <height>20</height>
+     <width>194</width>
+     <height>12</height>
     </rect>
    </property>
    <property name="autoFillBackground">
@@ -3126,6 +3081,19 @@ font-family: &quot;Roboto&quot;</string>
     <string>MajorTabTitle</string>
    </property>
   </widget>
+  <zorder>additionalButton</zorder>
+  <zorder>spacer2Button</zorder>
+  <zorder>spacer1Button</zorder>
+  <zorder>settingsButton</zorder>
+  <zorder>helpButton</zorder>
+  <zorder>fingerButton</zorder>
+  <zorder>dpadButton</zorder>
+  <zorder>telephoneButton</zorder>
+  <zorder>batteryButton</zorder>
+  <zorder>cellularButton</zorder>
+  <zorder>locationButton</zorder>
+  <zorder>stackedWidget</zorder>
+  <zorder>VertDivider</zorder>
  </widget>
  <customwidgets>
   <customwidget>
@@ -3147,18 +3115,16 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>batteryButton</tabstop>
   <tabstop>telephoneButton</tabstop>
   <tabstop>dpadButton</tabstop>
-  <tabstop>helpButton</tabstop>
+  <tabstop>fingerButton</tabstop>
   <tabstop>settingsButton</tabstop>
   <tabstop>spacer2Button</tabstop>
   <tabstop>bat_statusBox</tabstop>
   <tabstop>tel_numberBox</tabstop>
-  <tabstop>tel_endCallButton</tabstop>
   <tabstop>tel_holdCallButton</tabstop>
   <tabstop>loc_pathTable</tabstop>
   <tabstop>cell_standardBox</tabstop>
   <tabstop>cell_voiceStatusBox</tabstop>
   <tabstop>cell_dataStatusBox</tabstop>
-  <tabstop>finger_IdBox</tabstop>
   <tabstop>bat_healthBox</tabstop>
   <tabstop>additionalButton</tabstop>
   <tabstop>set_adbPortBox</tabstop>
@@ -3168,11 +3134,10 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>bat_levelSlider</tabstop>
   <tabstop>bat_chargeLevelText</tabstop>
   <tabstop>spacer1Button</tabstop>
-  <tabstop>tel_startCallButton</tabstop>
+  <tabstop>tel_startEndButton</tabstop>
   <tabstop>sms_messageBox</tabstop>
   <tabstop>sms_sendButton</tabstop>
   <tabstop>finger_touchButton</tabstop>
-  <tabstop>set_updateButton</tabstop>
   <tabstop>dpad_upButton</tabstop>
   <tabstop>dpad_leftButton</tabstop>
   <tabstop>dpad_selectButton</tabstop>

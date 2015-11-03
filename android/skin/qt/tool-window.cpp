@@ -49,7 +49,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus);
     toolsUi->setupUi(this);
     // Make this more narrow than QtDesigner likes
-    this->resize(70, this->height());
+    this->resize(60, this->height());
 
     mErrorMessage.setWindowModality(Qt::ApplicationModal);
 
@@ -280,7 +280,7 @@ bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
 
 void ToolWindow::dockMainWindow()
 {
-    move(parentWidget()->geometry().right() + 10, parentWidget()->geometry().top() + 10);
+    move(parentWidget()->geometry().right() + 10, parentWidget()->geometry().top() );
 }
 
 void ToolWindow::on_back_button_clicked()
