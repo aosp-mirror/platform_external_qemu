@@ -126,7 +126,7 @@ void loc_set_none(void)
 /*
  * Change the current location to argument ARGV[IDX..IDX+CNT-1].
  */
-void loc_set_cmdline(char **argv, int idx, int cnt)
+void loc_set_cmdline(const char **argv, int idx, int cnt)
 {
     cur_loc->kind = LOC_CMDLINE;
     cur_loc->num = cnt;

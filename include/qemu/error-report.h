@@ -31,7 +31,7 @@ Location *loc_pop(Location *loc);
 Location *loc_save(Location *loc);
 void loc_restore(Location *loc);
 void loc_set_none(void);
-void loc_set_cmdline(char **argv, int idx, int cnt);
+void loc_set_cmdline(const char **argv, int idx, int cnt);
 void loc_set_file(const char *fname, int lno);
 
 void error_vprintf(const char *fmt, va_list ap) GCC_FMT_ATTR(1, 0);
