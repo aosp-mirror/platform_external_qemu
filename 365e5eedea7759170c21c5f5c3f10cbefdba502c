@@ -22,6 +22,30 @@
       "revId": "365e5eedea7759170c21c5f5c3f10cbefdba502c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "166509c4_a0f1fec8",
+        "filename": "distrib/libbreakpad_client.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-03T02:34:14Z",
+      "side": 1,
+      "message": "You\u0027re right, I was just shuffling things around, but I\u0027ll fix it at the same time.",
+      "parentUuid": "562a227b_8878ab11",
+      "range": {
+        "startLine": 13,
+        "startChar": 25,
+        "endLine": 13,
+        "endChar": 31
+      },
+      "revId": "365e5eedea7759170c21c5f5c3f10cbefdba502c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
