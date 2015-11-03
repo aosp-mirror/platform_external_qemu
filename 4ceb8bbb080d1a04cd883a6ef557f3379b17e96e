@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "161fca56_00824325",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-03T19:09:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7643a650_4e540606",
+      "range": {
+        "startLine": 376,
+        "startChar": 0,
+        "endLine": 376,
+        "endChar": 1
+      },
+      "revId": "4ceb8bbb080d1a04cd883a6ef557f3379b17e96e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "765c8636_a1203277",
         "filename": "android/hw-sensors.c",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-02T19:29:10Z",
       "side": 1,
       "message": "can we make it configurable in avd, like the rest of the sensors?",
+      "range": {
+        "startLine": 743,
+        "startChar": 0,
+        "endLine": 745,
+        "endChar": 52
+      },
+      "revId": "4ceb8bbb080d1a04cd883a6ef557f3379b17e96e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "760e462a_63cd8db0",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 745,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-03T19:09:28Z",
+      "side": 1,
+      "message": "Yeah, I forgot to add the ini file to the commit",
+      "parentUuid": "765c8636_a1203277",
       "range": {
         "startLine": 743,
         "startChar": 0,
