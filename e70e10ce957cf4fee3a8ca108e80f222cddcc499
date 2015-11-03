@@ -49,6 +49,54 @@
     },
     {
       "key": {
+        "uuid": "16a98a5f_c4bd5ef6",
+        "filename": "android/metrics/metrics_reporter_ga.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-03T22:43:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d6bb729e_caea439b",
+      "range": {
+        "startLine": 64,
+        "startChar": 54,
+        "endLine": 64,
+        "endChar": 83
+      },
+      "revId": "e70e10ce957cf4fee3a8ca108e80f222cddcc499",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36aa0e54_45788a10",
+        "filename": "android/metrics/metrics_reporter_ga.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-03T22:43:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d6bb729e_caea439b",
+      "range": {
+        "startLine": 64,
+        "startChar": 54,
+        "endLine": 64,
+        "endChar": 83
+      },
+      "revId": "e70e10ce957cf4fee3a8ca108e80f222cddcc499",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "36aa0e54_c511da6c",
         "filename": "android/metrics/metrics_reporter_toolbar.c",
         "patchSetId": 6
