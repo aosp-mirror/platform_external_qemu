@@ -1,8 +1,20 @@
 # Build libext4_utils and related modules/
 include $(LOCAL_PATH)/distrib/zlib.mk
+include $(LOCAL_PATH)/distrib/libcurl.mk
+include $(LOCAL_PATH)/distrib/libxml2.mk
 include $(LOCAL_PATH)/distrib/libsparse/sources.mk
 include $(LOCAL_PATH)/distrib/libselinux/sources.mk
 include $(LOCAL_PATH)/distrib/ext4_utils/sources.mk
+include $(LOCAL_PATH)/distrib/libbreakpad_client.mk
+include $(LOCAL_PATH)/distrib/Qt5.mk
+include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
+include $(LOCAL_PATH)/distrib/libpng.mk
+
+ifeq ($(HOST_OS),darwin)
+    CXX_STD_LIB := -lc++
+else
+    CXX_STD_LIB := -lstdc++
+endif
 
 include $(LOCAL_PATH)/Makefile.qemu1-common.mk
 

@@ -90,12 +90,6 @@ else
     EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=0
 endif
 
-ifeq ($(HOST_OS),darwin)
-    CXX_STD_LIB := -lc++
-else
-    CXX_STD_LIB := -lstdc++
-endif
-
 ###########################################################
 # Zlib sources
 #
@@ -110,167 +104,127 @@ EMULATOR_COMMON_CFLAGS += -I$(GLIB_INCLUDE_DIR)
 
 common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
 
-
-##############################################################################
-# Libcurl definitions
-#
-LIBCURL_TOP_DIR := $(LIBCURL_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
-
-LIBCURL_INCLUDES := $(LIBCURL_TOP_DIR)/include
-LIBCURL_LDLIBS := $(LIBCURL_TOP_DIR)/lib/libcurl.a \
-    $(LIBCURL_TOP_DIR)/lib/libssl.a \
-    $(LIBCURL_TOP_DIR)/lib/libz.a \
-    $(LIBCURL_TOP_DIR)/lib/libcrypto.a
-
-ifneq ($(HOST_OS),windows)
-  LIBCURL_LDLIBS += -ldl
-endif
-
-EMULATOR_COMMON_CFLAGS += -DCURL_STATICLIB
-
-##############################################################################
-# Libxml2 definitions
-#
-LIBXML2_TOP_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
-LIBXML2_INCLUDES := $(LIBXML2_TOP_DIR)/include
-LIBXML2_LDLIBS := $(LIBXML2_TOP_DIR)/lib/libxml2.a
-
-# Required on Windows to indicate that the code will link against a static
-# version of libxml2. Otherwise, the linker complains about undefined
-# references to '_imp__xmlFree'.
-LIBXML2_CFLAGS := -DLIBXML_STATIC
-
-##############################################################################
-# breakpad  definitions
-#
-BREAKPAD_TOP_DIR := $(BREAKPAD_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
-
-BREAKPAD_INCLUDES := $(BREAKPAD_TOP_DIR)/include/breakpad
-BREAKPAD_LDLIBS := $(BREAKPAD_TOP_DIR)/lib/libbreakpad_client.a
-
-ifeq ($(HOST_OS),windows)
-  BREAKPAD_LDLIBS += -lstdc++
-endif
+EMULATOR_COMMON_CFLAGS += $(LIBCURL_CFLAGS)
 
 ###########################################################
 # Android utility functions
 #
 common_LOCAL_SRC_FILES += \
-	android/android-constants.c \
-	android/async-console.c \
-	android/async-utils.c \
-	android/curl-support.c \
-	android/framebuffer.c \
-	android/avd/hw-config.c \
-	android/avd/info.c \
-	android/avd/scanner.c \
-	android/avd/util.c \
-	android/base/async/AsyncReader.cpp \
-	android/base/async/AsyncWriter.cpp \
-	android/base/async/Looper.cpp \
-	android/base/async/ThreadLooper.cpp \
-	android/base/containers/PodVector.cpp \
-	android/base/containers/PointerSet.cpp \
-	android/base/containers/HashUtils.cpp \
-	android/base/containers/StringVector.cpp \
-	android/base/files/IniFile.cpp \
-	android/base/files/PathUtils.cpp \
-	android/base/files/StdioStream.cpp \
-	android/base/files/Stream.cpp \
-	android/base/misc/HttpUtils.cpp \
-	android/base/misc/StringUtils.cpp \
-	android/base/misc/Utf8Utils.cpp \
-	android/base/sockets/SocketDrainer.cpp \
-	android/base/sockets/SocketUtils.cpp \
-	android/base/sockets/SocketWaiter.cpp \
-	android/base/synchronization/MessageChannel.cpp \
-	android/base/Log.cpp \
-	android/base/memory/LazyInstance.cpp \
-	android/base/String.cpp \
-	android/base/StringFormat.cpp \
-	android/base/StringView.cpp \
-	android/base/system/System.cpp \
-	android/base/threads/ThreadStore.cpp \
-	android/base/Uri.cpp \
-	android/base/Version.cpp \
-	android/emulation/android_pipe.c \
-	android/emulation/android_pipe_pingpong.c \
-	android/emulation/android_pipe_throttle.c \
-	android/emulation/android_pipe_zero.c \
-	android/emulation/android_qemud.cpp \
-	android/emulation/qemud/android_qemud_sink.cpp \
-	android/emulation/qemud/android_qemud_serial.cpp \
-	android/emulation/qemud/android_qemud_client.cpp \
-	android/emulation/qemud/android_qemud_service.cpp \
-	android/emulation/qemud/android_qemud_multiplexer.cpp \
-	android/emulation/bufprint_config_dirs.cpp \
-	android/emulation/ConfigDirs.cpp \
-	android/emulation/control/LineConsumer.cpp \
-	android/emulation/CpuAccelerator.cpp \
-	android/emulation/serial_line.cpp \
-	android/filesystems/ext4_utils.cpp \
-	android/filesystems/fstab_parser.cpp \
-	android/filesystems/partition_types.cpp \
-	android/filesystems/ramdisk_extractor.cpp \
-	android/kernel/kernel_utils.cpp \
-	android/metrics/metrics_reporter.c \
-	android/metrics/metrics_reporter_ga.c \
-	android/metrics/metrics_reporter_toolbar.c \
-	android/metrics/StudioHelper.cpp \
-	android-qemu1-glue/android_qemud.cpp \
-	android-qemu1-glue/base/async/Looper.cpp \
-	android-qemu1-glue/base/files/QemuFileStream.cpp \
-	android-qemu1-glue/utils/stream.cpp \
-	android/opengl/EmuglBackendList.cpp \
-	android/opengl/EmuglBackendScanner.cpp \
-	android/opengl/emugl_config.cpp \
-	android/opengl/GpuFrameBridge.cpp \
-	android/proxy/proxy_common.c \
-	android/proxy/proxy_http.c \
-	android/proxy/proxy_http_connector.c \
-	android/proxy/proxy_http_rewriter.c \
-	android/update-check/UpdateChecker.cpp \
-	android/update-check/VersionExtractor.cpp \
-	android/utils/aconfig-file.c \
-	android/utils/assert.c \
-	android/utils/bufprint.c \
-	android/utils/bufprint_system.cpp \
-	android/utils/cbuffer.c \
-	android/utils/debug.c \
-	android/utils/dll.c \
-	android/utils/dirscanner.cpp \
-	android/utils/eintr_wrapper.c \
-	android/utils/filelock.c \
-	android/utils/file_data.c \
-	android/utils/format.cpp \
-	android/utils/host_bitness.cpp \
-	android/utils/http_utils.cpp \
-	android/utils/iolooper.cpp \
-	android/utils/ini.cpp \
-	android/utils/intmap.c \
-	android/utils/ipaddr.cpp \
-	android/utils/lineinput.c \
-	android/utils/looper.cpp \
-	android/utils/mapfile.c \
-	android/utils/misc.c \
-	android/utils/panic.c \
-	android/utils/path.c \
-	android/utils/property_file.c \
-	android/utils/reflist.c \
-	android/utils/refset.c \
-	android/utils/socket_drainer.cpp \
-	android/utils/sockets.c \
-	android/utils/stralloc.c \
-	android/utils/stream.cpp \
-	android/utils/string.cpp \
-	android/utils/system.c \
-	android/utils/system_wrapper.cpp \
-	android/utils/tempfile.c \
-	android/utils/uncompress.cpp \
-	android/utils/uri.cpp \
-	android/utils/utf8_utils.cpp \
-	android/utils/vector.c \
-	android/utils/x86_cpuid.c \
+    android/android-constants.c \
+    android/async-console.c \
+    android/async-utils.c \
+    android/curl-support.c \
+    android/framebuffer.c \
+    android/avd/hw-config.c \
+    android/avd/info.c \
+    android/avd/scanner.c \
+    android/avd/util.c \
+    android/base/async/AsyncReader.cpp \
+    android/base/async/AsyncWriter.cpp \
+    android/base/async/Looper.cpp \
+    android/base/async/ThreadLooper.cpp \
+    android/base/containers/PodVector.cpp \
+    android/base/containers/PointerSet.cpp \
+    android/base/containers/HashUtils.cpp \
+    android/base/containers/StringVector.cpp \
+    android/base/files/IniFile.cpp \
+    android/base/files/PathUtils.cpp \
+    android/base/files/StdioStream.cpp \
+    android/base/files/Stream.cpp \
+    android/base/misc/HttpUtils.cpp \
+    android/base/misc/StringUtils.cpp \
+    android/base/misc/Utf8Utils.cpp \
+    android/base/sockets/SocketDrainer.cpp \
+    android/base/sockets/SocketUtils.cpp \
+    android/base/sockets/SocketWaiter.cpp \
+    android/base/synchronization/MessageChannel.cpp \
+    android/base/Log.cpp \
+    android/base/memory/LazyInstance.cpp \
+    android/base/String.cpp \
+    android/base/StringFormat.cpp \
+    android/base/StringView.cpp \
+    android/base/system/System.cpp \
+    android/base/threads/ThreadStore.cpp \
+    android/base/Uri.cpp \
+    android/base/Version.cpp \
+    android/emulation/android_pipe.c \
+    android/emulation/android_pipe_pingpong.c \
+    android/emulation/android_pipe_throttle.c \
+    android/emulation/android_pipe_zero.c \
+    android/emulation/android_qemud.cpp \
+    android/emulation/qemud/android_qemud_sink.cpp \
+    android/emulation/qemud/android_qemud_serial.cpp \
+    android/emulation/qemud/android_qemud_client.cpp \
+    android/emulation/qemud/android_qemud_service.cpp \
+    android/emulation/qemud/android_qemud_multiplexer.cpp \
+    android/emulation/bufprint_config_dirs.cpp \
+    android/emulation/ConfigDirs.cpp \
+    android/emulation/control/LineConsumer.cpp \
+    android/emulation/CpuAccelerator.cpp \
+    android/emulation/serial_line.cpp \
+    android/filesystems/ext4_utils.cpp \
+    android/filesystems/fstab_parser.cpp \
+    android/filesystems/partition_types.cpp \
+    android/filesystems/ramdisk_extractor.cpp \
+    android/kernel/kernel_utils.cpp \
+    android/metrics/metrics_reporter.c \
+    android/metrics/metrics_reporter_ga.c \
+    android/metrics/metrics_reporter_toolbar.c \
+    android/metrics/StudioHelper.cpp \
+    android-qemu1-glue/android_qemud.cpp \
+    android-qemu1-glue/base/async/Looper.cpp \
+    android-qemu1-glue/base/files/QemuFileStream.cpp \
+    android-qemu1-glue/utils/stream.cpp \
+    android/opengl/EmuglBackendList.cpp \
+    android/opengl/EmuglBackendScanner.cpp \
+    android/opengl/emugl_config.cpp \
+    android/opengl/GpuFrameBridge.cpp \
+    android/proxy/proxy_common.c \
+    android/proxy/proxy_http.c \
+    android/proxy/proxy_http_connector.c \
+    android/proxy/proxy_http_rewriter.c \
+    android/update-check/UpdateChecker.cpp \
+    android/update-check/VersionExtractor.cpp \
+    android/utils/aconfig-file.c \
+    android/utils/assert.c \
+    android/utils/bufprint.c \
+    android/utils/bufprint_system.cpp \
+    android/utils/cbuffer.c \
+    android/utils/debug.c \
+    android/utils/dll.c \
+    android/utils/dirscanner.cpp \
+    android/utils/eintr_wrapper.c \
+    android/utils/filelock.c \
+    android/utils/file_data.c \
+    android/utils/format.cpp \
+    android/utils/host_bitness.cpp \
+    android/utils/http_utils.cpp \
+    android/utils/iolooper.cpp \
+    android/utils/ini.cpp \
+    android/utils/intmap.c \
+    android/utils/ipaddr.cpp \
+    android/utils/lineinput.c \
+    android/utils/looper.cpp \
+    android/utils/mapfile.c \
+    android/utils/misc.c \
+    android/utils/panic.c \
+    android/utils/path.c \
+    android/utils/property_file.c \
+    android/utils/reflist.c \
+    android/utils/refset.c \
+    android/utils/socket_drainer.cpp \
+    android/utils/sockets.c \
+    android/utils/stralloc.c \
+    android/utils/stream.cpp \
+    android/utils/string.cpp \
+    android/utils/system.c \
+    android/utils/system_wrapper.cpp \
+    android/utils/tempfile.c \
+    android/utils/uncompress.cpp \
+    android/utils/uri.cpp \
+    android/utils/utf8_utils.cpp \
+    android/utils/vector.c \
+    android/utils/x86_cpuid.c \
 
 ifeq (windows,$(HOST_OS))
 common_LOCAL_SRC_FILES += \
@@ -329,7 +283,6 @@ EMULATOR_LIBUI_STATIC_LIBRARIES :=
 ###########################################################
 # Libpng configuration
 #
-include $(LOCAL_PATH)/distrib/libpng.mk
 EMULATOR_LIBUI_CFLAGS += $(LIBPNG_CFLAGS)
 EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libpng
 common_LOCAL_SRC_FILES += android/loadpng.c
@@ -337,7 +290,6 @@ common_LOCAL_SRC_FILES += android/loadpng.c
 ###########################################################
 # Libjpeg configuration
 #
-include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
 EMULATOR_LIBUI_CFLAGS += $(LIBJPEG_CFLAGS)
 EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libjpeg
 
@@ -368,40 +320,9 @@ endif  # EMULATOR_USE_SDL2
 # Qt-related definitions
 #
 ifdef EMULATOR_USE_QT
-    QT_TOP_DIR := $(QT_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
-    QT_TOP64_DIR := $(QT_PREBUILTS_DIR)/$(HOST_OS)-x86_64
-    QT_MOC_TOOL := $(QT_TOP64_DIR)/bin/moc
-    QT_RCC_TOOL := $(QT_TOP64_DIR)/bin/rcc
-    # Special-case: the 'uic' tool depends on Qt5Core: always ensure that the
-    # version that is being used is from the prebuilts directory. Otherwise
-    # the executable may fail to start due to dynamic linking problems.
-    QT_UIC_TOOL_LDPATH := $(QT_TOP64_DIR)/lib
-    QT_UIC_TOOL := $(QT_TOP64_DIR)/bin/uic
-
-    EMULATOR_QT_LIBS := Qt5Widgets Qt5Gui Qt5Core
-    EMULATOR_QT_LDLIBS := $(foreach lib,$(EMULATOR_QT_LIBS),-l$(lib))
-    ifeq ($(HOST_OS),windows)
-        # On Windows, linking to mingw32 is required. The library is provided
-        # by the toolchain, and depends on a main() function provided by qtmain
-        # which itself depends on qMain(). These must appear in LDFLAGS and
-        # not LDLIBS since qMain() is provided by object/libraries that
-        # appear after these in the link command-line.
-        EMULATOR_QT_LDFLAGS += \
-                -L$(QT_TOP_DIR)/bin \
-                -lmingw32 \
-                $(QT_TOP_DIR)/lib/libqtmain.a
-    else
-        EMULATOR_QT_LDFLAGS := -L$(QT_TOP_DIR)/lib
-    endif
-    QT_INCLUDE := $(QT_PREBUILTS_DIR)/common/include
-    EMULATOR_LIBUI_CFLAGS += \
-            -I$(QT_INCLUDE) \
-            -I$(QT_INCLUDE)/QtCore \
-            -I$(QT_INCLUDE)/QtGui \
-            -I$(QT_INCLUDE)/QtWidgets
-    EMULATOR_LIBUI_LDFLAGS += $(EMULATOR_QT_LDFLAGS)
-    EMULATOR_LIBUI_LDLIBS += $(EMULATOR_QT_LDLIBS)
-
+    EMULATOR_LIBUI_CFLAGS += $(foreach inc,$(QT_INCLUDES),-I$(inc))
+    EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
+    EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
     EMULATOR_LIBUI_CFLAGS += $(LIBXML2_CFLAGS)
 endif  # EMULATOR_USE_QT
 
