@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "76df26f3_7290f6c2",
+        "filename": "vl-android.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 3497,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-03T22:43:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "56c6a231_0e314b99",
+      "range": {
+        "startLine": 3497,
+        "startChar": 8,
+        "endLine": 3497,
+        "endChar": 17
+      },
+      "revId": "2f4b866d53651a347c83d894314cc6b7f85f288a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d6bb729e_aa37cfb8",
         "filename": "vl-android.c",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-03T21:38:23Z",
       "side": 1,
       "message": "This else clause is superfluous.",
+      "range": {
+        "startLine": 3505,
+        "startChar": 9,
+        "endLine": 3507,
+        "endChar": 9
+      },
+      "revId": "2f4b866d53651a347c83d894314cc6b7f85f288a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6335e1f_4191b276",
+        "filename": "vl-android.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 3507,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-03T22:43:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d6bb729e_aa37cfb8",
       "range": {
         "startLine": 3505,
         "startChar": 9,
