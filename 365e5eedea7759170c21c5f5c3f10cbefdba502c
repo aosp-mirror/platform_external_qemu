@@ -46,6 +46,30 @@
       "revId": "365e5eedea7759170c21c5f5c3f10cbefdba502c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "166509c4_c0f6f2bd",
+        "filename": "distrib/libbreakpad_client.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-03T02:39:44Z",
+      "side": 1,
+      "message": "Actually, I\u0027ll fix it later, I\u0027d like to submit this stack of patches ASAP.",
+      "parentUuid": "166509c4_a0f1fec8",
+      "range": {
+        "startLine": 13,
+        "startChar": 25,
+        "endLine": 13,
+        "endChar": 31
+      },
+      "revId": "365e5eedea7759170c21c5f5c3f10cbefdba502c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
