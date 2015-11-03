@@ -53,11 +53,6 @@ void ExtendedWindow::on_loc_addRowButton_clicked()
 
     // Scroll to bottom to make the newly added item visible.
     mExtendedUi->loc_pathTable->scrollToBottom();
-
-    // We must have more than one row. Allow deletion.
-    setButtonEnabled(mExtendedUi->loc_removeRowButton,
-                     mSettingsState.mTheme,
-                     true);
 }
 
 struct SelectionRangeComparator {
@@ -95,13 +90,6 @@ void ExtendedWindow::on_loc_removeRowButton_clicked()
     }
     // Re-check the delay in the new top row
     on_loc_pathTable_cellChanged(0, 0);
-
-    // If there's only one row left, disable the Delete button
-    if (mExtendedUi->loc_pathTable->rowCount() <= 1) {
-        setButtonEnabled(mExtendedUi->loc_removeRowButton,
-                         mSettingsState.mTheme,
-                         false);
-    }
 }
 
 void ExtendedWindow::on_loc_pathTable_cellChanged(int row, int col)
@@ -138,8 +126,6 @@ void ExtendedWindow::on_loc_playButton_clicked()
         mLoc_timer.start();
         SettingsTheme theme = mSettingsState.mTheme;
         setButtonEnabled(mExtendedUi->loc_GpxKmlButton,  theme, false);
-        setButtonEnabled(mExtendedUi->loc_addRowButton,  theme, false);
-        setButtonEnabled(mExtendedUi->loc_removeRowButton,  theme, false);
         setButtonEnabled(mExtendedUi->loc_playButton,  theme, false);
         setButtonEnabled(mExtendedUi->loc_stopButton,  theme, true);
         setButtonEnabled(mExtendedUi->loc_stopButton,  theme, true);
@@ -258,9 +244,6 @@ void ExtendedWindow::on_loc_stopButton_clicked()
     mLoc_nowPlaying = mLoc_nowPaused = false;
     SettingsTheme theme = mSettingsState.mTheme;
     setButtonEnabled(mExtendedUi->loc_GpxKmlButton,  theme, true);
-    setButtonEnabled(mExtendedUi->loc_addRowButton,  theme, true);
-    setButtonEnabled(mExtendedUi->loc_removeRowButton,  theme,
-                     mExtendedUi->loc_pathTable->rowCount() > 1);
     setButtonEnabled(mExtendedUi->loc_playButton,  theme, true);
     setButtonEnabled(mExtendedUi->loc_pauseButton,  theme, false);
     setButtonEnabled(mExtendedUi->loc_stopButton,  theme, false);
@@ -355,11 +338,6 @@ void ExtendedWindow::on_loc_GpxKmlButton_clicked()
         mExtendedUi->loc_pathTable->setItem(0, 4, new QTableWidgetItem("" )); // Name
         mExtendedUi->loc_pathTable->setItem(0, 5, new QTableWidgetItem("" )); // Description
     }
-
-    setButtonEnabled(mExtendedUi->loc_removeRowButton,
-                     mSettingsState.mTheme,
-                     mExtendedUi->loc_pathTable->rowCount() > 1 );
-
 }
 
 void ExtendedWindow::loc_populateTable(GpsFixArray *fixes)
