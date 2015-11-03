@@ -23,6 +23,7 @@
  */
 #include "qemu-common.h"
 #include "ui/console.h"
+#include "ui/input.h"
 #include "hw/qdev-core.h"
 #include "qemu/timer.h"
 #include "qmp-commands.h"
@@ -169,6 +170,7 @@ struct DisplayState {
     bool have_text;
 
     QLIST_HEAD(, DisplayChangeListener) listeners;
+    DisplayUpdateListener* update_listener;
 };
 
 static DisplayState *display_state;
@@ -233,6 +235,9 @@ static void gui_setup_refresh(DisplayState *ds)
         if (dcl->ops->dpy_text_update != NULL) {
             have_text = true;
         }
+    }
+    if (ds->update_listener && ds->update_listener->dpy_gfx_update) {
+        have_gfx = true;
     }
 
     if (need_timer && ds->gui_timer == NULL) {
@@ -1361,6 +1366,12 @@ void register_displaychangelistener(DisplayChangeListener *dcl)
     text_console_update_cursor(NULL);
 }
 
+void register_displayupdatelistener(DisplayUpdateListener *dul) {
+    DisplayState* ds = get_alloc_displaystate();
+    ds->update_listener = dul;
+    gui_setup_refresh(ds);
+}
+
 void update_displaychangelistener(DisplayChangeListener *dcl,
                                   uint64_t interval)
 {
@@ -1416,6 +1427,13 @@ void dpy_gfx_update(QemuConsole *con, int x, int y, int w, int h)
         }
         if (dcl->ops->dpy_gfx_update) {
             dcl->ops->dpy_gfx_update(dcl, x, y, w, h);
+        }
+    }
+
+    if (s->update_listener && s->update_listener->dpy_gfx_update) {
+        if (con == (s->update_listener->con
+                        ? s->update_listener->con : active_console)) {
+            s->update_listener->dpy_gfx_update(s->update_listener, x, y, w, h);
         }
     }
 }

@@ -184,6 +184,14 @@ struct DisplayChangeListener {
     QLIST_ENTRY(DisplayChangeListener) next;
 };
 
+struct DisplayUpdateListener {
+    void* opaque;
+    QemuConsole* con;
+
+    void (*dpy_gfx_update)(DisplayUpdateListener *dcl,
+                           int x, int y, int w, int h);
+};
+
 DisplayState *init_displaystate(void);
 DisplaySurface *qemu_create_displaysurface_from(int width, int height,
                                                 pixman_format_code_t format,
@@ -212,6 +220,8 @@ static inline int is_buffer_shared(DisplaySurface *surface)
 {
     return !(surface->flags & QEMU_ALLOCATED_FLAG);
 }
+
+void register_displayupdatelistener(DisplayUpdateListener *dul);
 
 void register_displaychangelistener(DisplayChangeListener *dcl);
 void update_displaychangelistener(DisplayChangeListener *dcl,

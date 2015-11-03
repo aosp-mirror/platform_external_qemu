@@ -41,6 +41,7 @@ typedef struct BlockDriverState BlockDriverState;
 typedef struct DriveInfo DriveInfo;
 typedef struct DisplayState DisplayState;
 typedef struct DisplayChangeListener DisplayChangeListener;
+typedef struct DisplayUpdateListener DisplayUpdateListener;
 typedef struct DisplaySurface DisplaySurface;
 typedef struct PixelFormat PixelFormat;
 typedef struct QemuConsole QemuConsole;
