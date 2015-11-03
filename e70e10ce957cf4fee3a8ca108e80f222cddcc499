@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "36aa0e54_a5f13e8e",
+        "filename": "android/metrics/metrics_reporter_ga.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-11-03T20:33:04Z",
+      "side": 1,
+      "message": "This manual event multiplexing is yucky.\n\nWe\u0027re not using GA for any graphing atm. I would recommend skipping any ga updates at all. Toolbar is what matters.",
+      "range": {
+        "startLine": 64,
+        "startChar": 54,
+        "endLine": 64,
+        "endChar": 83
+      },
+      "revId": "e70e10ce957cf4fee3a8ca108e80f222cddcc499",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36aa0e54_c511da6c",
+        "filename": "android/metrics/metrics_reporter_toolbar.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-11-03T20:33:04Z",
+      "side": 1,
+      "message": "nit: suggest renaming to opengl_alive (\"opengl\" makes it sound like you\u0027re noting whether we used opengl or not, not whether opengl worked properly or not)",
+      "range": {
+        "startLine": 46,
+        "startChar": 44,
+        "endLine": 46,
+        "endChar": 50
+      },
+      "revId": "e70e10ce957cf4fee3a8ca108e80f222cddcc499",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6bb729e_8a5d2b59",
+        "filename": "vl-android.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2124,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-11-03T20:33:04Z",
+      "side": 1,
+      "message": "Please uncomment this.",
+      "range": {
+        "startLine": 2121,
+        "startChar": 0,
+        "endLine": 2124,
+        "endChar": 8
+      },
+      "revId": "e70e10ce957cf4fee3a8ca108e80f222cddcc499",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
