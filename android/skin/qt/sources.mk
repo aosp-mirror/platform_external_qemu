@@ -16,6 +16,7 @@ ANDROID_SKIN_LDLIBS += $(LIBXML2_LDLIBS)
 ANDROID_SKIN_SOURCES += \
     android/gps/GpxParser.cpp \
     android/gps/KmlParser.cpp \
+    android/skin/qt/angle-input-widget.cpp \
     android/skin/qt/editable-slider-widget.cpp \
     android/skin/qt/emulator-qt-window.cpp \
     android/skin/qt/ext-battery.cpp \
@@ -33,6 +34,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/tool-window.cpp \
 
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
+    android/skin/qt/angle-input-widget.h \
     android/skin/qt/editable-slider-widget.h \
     android/skin/qt/emulator-qt-window.h \
     android/skin/qt/extended-window.h \
