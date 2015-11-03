@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "36c12e1a_2d6f6d06",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-03T21:17:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "161fca56_e641a0e7",
+      "revId": "938a8835d5324ec5d46374db7a107eb0a7ddfb95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56c6a231_eed63f1b",
         "filename": "android/skin/qt/angle-input-widget.cpp",
         "patchSetId": 2
@@ -30,6 +48,30 @@
       "writtenOn": "2015-11-03T19:32:01Z",
       "side": 1,
       "message": "nit: unneeded space",
+      "range": {
+        "startLine": 5,
+        "startChar": 11,
+        "endLine": 5,
+        "endChar": 12
+      },
+      "revId": "938a8835d5324ec5d46374db7a107eb0a7ddfb95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56c6a231_2e6f6706",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-03T21:17:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "56c6a231_eed63f1b",
       "range": {
         "startLine": 5,
         "startChar": 11,
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "b6335e1f_01eb2ace",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-03T21:17:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "96401a44_da655261",
+      "range": {
+        "startLine": 11,
+        "startChar": 22,
+        "endLine": 11,
+        "endChar": 40
+      },
+      "revId": "938a8835d5324ec5d46374db7a107eb0a7ddfb95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "161fca56_065c9cc9",
         "filename": "android/skin/qt/angle-input-widget.cpp",
         "patchSetId": 2
@@ -76,6 +142,30 @@
       "writtenOn": "2015-11-03T19:32:01Z",
       "side": 1,
       "message": "helper method?",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 62
+      },
+      "revId": "938a8835d5324ec5d46374db7a107eb0a7ddfb95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6335e1f_61fdd65d",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-03T21:17:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "161fca56_065c9cc9",
       "range": {
         "startLine": 23,
         "startChar": 0,
@@ -111,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "d6bb729e_6a40f788",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-03T21:17:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "36c12e1a_4dc67970",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 4
+      },
+      "revId": "938a8835d5324ec5d46374db7a107eb0a7ddfb95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96401a44_4dc08e4f",
         "filename": "android/skin/qt/angle-input-widget.cpp",
         "patchSetId": 2
@@ -122,6 +236,30 @@
       "writtenOn": "2015-11-03T19:32:01Z",
       "side": 1,
       "message": "Is it possible to group these on some panel to make this a single widget\u0027s method call?",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 35
+      },
+      "revId": "938a8835d5324ec5d46374db7a107eb0a7ddfb95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36aa0e54_05f9323a",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-03T21:17:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "96401a44_4dc08e4f",
       "range": {
         "startLine": 59,
         "startChar": 0,
@@ -157,6 +295,30 @@
     },
     {
       "key": {
+        "uuid": "b65c3e65_59e6c3d8",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-03T21:17:41Z",
+      "side": 1,
+      "message": "implemented better version of sign function",
+      "parentUuid": "f6195673_e6d64372",
+      "range": {
+        "startLine": 75,
+        "startChar": 42,
+        "endLine": 75,
+        "endChar": 55
+      },
+      "revId": "938a8835d5324ec5d46374db7a107eb0a7ddfb95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "161fca56_06f37c07",
         "filename": "android/skin/qt/angle-input-widget.cpp",
         "patchSetId": 2
@@ -168,6 +330,30 @@
       "writtenOn": "2015-11-03T19:32:01Z",
       "side": 1,
       "message": "why q...? C has the same floor/fabs methods afaik",
+      "range": {
+        "startLine": 76,
+        "startChar": 22,
+        "endLine": 76,
+        "endChar": 31
+      },
+      "revId": "938a8835d5324ec5d46374db7a107eb0a7ddfb95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6a3167e_c36d56dc",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-03T21:17:41Z",
+      "side": 1,
+      "message": "standard floor returns a double while qFloor returns int. assigning double to int might generate an annoying warning if done without an explicit cast, so i opted for qFloor...",
+      "parentUuid": "161fca56_06f37c07",
       "range": {
         "startLine": 76,
         "startChar": 22,
@@ -203,6 +389,30 @@
     },
     {
       "key": {
+        "uuid": "56c6a231_6e1b2f51",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-03T21:17:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "16d0aae3_0cf717b8",
+      "range": {
+        "startLine": 99,
+        "startChar": 15,
+        "endLine": 99,
+        "endChar": 35
+      },
+      "revId": "938a8835d5324ec5d46374db7a107eb0a7ddfb95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "161fca56_463bb479",
         "filename": "android/skin/qt/angle-input-widget.h",
         "patchSetId": 2
@@ -214,6 +424,30 @@
       "writtenOn": "2015-11-03T19:32:01Z",
       "side": 1,
       "message": "AFAIK we don\u0027t use ALL CAPS for the C++ enums",
+      "range": {
+        "startLine": 33,
+        "startChar": 8,
+        "endLine": 33,
+        "endChar": 15
+      },
+      "revId": "938a8835d5324ec5d46374db7a107eb0a7ddfb95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6335e1f_a1dd1e32",
+        "filename": "android/skin/qt/angle-input-widget.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-03T21:17:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "161fca56_463bb479",
       "range": {
         "startLine": 33,
         "startChar": 8,
@@ -249,6 +483,30 @@
     },
     {
       "key": {
+        "uuid": "36c12e1a_4d70b9e7",
+        "filename": "android/skin/qt/angle-input-widget.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-03T21:17:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "76df26f3_cfe01dec",
+      "range": {
+        "startLine": 37,
+        "startChar": 48,
+        "endLine": 37,
+        "endChar": 49
+      },
+      "revId": "938a8835d5324ec5d46374db7a107eb0a7ddfb95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d63612de_83107e2a",
         "filename": "android/skin/qt/sources.mk",
         "patchSetId": 2
@@ -260,6 +518,30 @@
       "writtenOn": "2015-11-03T19:32:01Z",
       "side": 1,
       "message": "tab, and on the other changed line",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 1
+      },
+      "revId": "938a8835d5324ec5d46374db7a107eb0a7ddfb95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6335e1f_21f2aec7",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-03T21:17:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d63612de_83107e2a",
       "range": {
         "startLine": 37,
         "startChar": 0,
