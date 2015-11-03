@@ -439,7 +439,7 @@ static inline QEMUTimer *timer_new_tl(QEMUTimerList *timer_list,
                                       QEMUTimerCB *cb,
                                       void *opaque)
 {
-    QEMUTimer *ts = g_malloc0(sizeof(QEMUTimer));
+    QEMUTimer *ts = (QEMUTimer*)g_malloc0(sizeof(QEMUTimer));
     timer_init(ts, timer_list, scale, cb, opaque);
     return ts;
 }
@@ -861,7 +861,7 @@ static inline int64_t cpu_get_real_ticks (void)
 #define MIPS_RDHWR(rd, value) {                         \
         __asm__ __volatile__ (".set   push\n\t"         \
                               ".set mips32r2\n\t"       \
-                              "rdhwr  %0, "rd"\n\t"     \
+                              "rdhwr  %0, " rd "\n\t"     \
                               ".set   pop"              \
                               : "=r" (value));          \
     }
