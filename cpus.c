@@ -43,6 +43,10 @@
 #include "qapi-event.h"
 #include "hw/nmi.h"
 
+#if defined(USE_ANDROID_EMU)
+#include "android-qemu2-glue/looper-qemu.h"
+#endif
+
 #ifndef _WIN32
 #include "qemu/compatfd.h"
 #endif
@@ -966,6 +970,10 @@ static void *qemu_kvm_cpu_thread_fn(void *arg)
         fprintf(stderr, "kvm_init_vcpu failed: %s\n", strerror(-r));
         exit(1);
     }
+
+#if defined(USE_ANDROID_EMU)
+    qemu_looper_setForThread();
+#endif
 
     qemu_kvm_init_cpu_signals(cpu);
 

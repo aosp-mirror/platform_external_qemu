@@ -33,6 +33,9 @@ QEMU2_DEPS_LDFLAGS := -L$(QEMU2_DEPS_TOP_DIR)/lib
 QEMU2_GLIB_INCLUDES := $(QEMU2_DEPS_TOP_DIR)/include/glib-2.0 \
                        $(QEMU2_DEPS_TOP_DIR)/lib/glib-2.0/include
 
+# make sure we set up the AndroidEmu include path
+ANDROID_EMULIB_INCLUDES := $(LOCAL_PATH)/../qemu/
+
 QEMU2_GLIB_LDLIBS := \
     -lglib-2.0 \
     $(call qemu2-if-darwin, -liconv -lintl) \
@@ -45,8 +48,10 @@ QEMU2_PIXMAN_LDLIBS := -lpixman-1
 QEMU2_INCLUDES := $(LOCAL_PATH)/android-qemu2-glue/config/$(HOST_OS)-$(HOST_ARCH)
 # Ensure QEMU2 headers are found.
 QEMU2_INCLUDES += \
+    $(LOCAL_PATH) \
     $(LOCAL_PATH)/include \
-    $(QEMU2_AUTO_GENERATED_DIR)
+    $(QEMU2_AUTO_GENERATED_DIR) \
+    $(LIBEXT4_UTILS_INCLUDES) \
 
 ifndef EMULATOR_USE_SDL2
 include $(QEMU2_OLD_LOCAL_PATH)/distrib/libsdl2.mk
@@ -62,8 +67,19 @@ QEMU2_CFLAGS := \
         -mms-bitfields) \
     -fno-strict-aliasing \
     -fno-common \
+    $(LIBCURL_CFLAGS) \
     -D_GNU_SOURCE \
     -D_FILE_OFFSET_BITS=64 \
+    -DANDROID_QEMU2_SPECIFIC \
+    -DANDROID_QEMU2_INTEGRATED_BUILD \
+    -DCONFIG_ANDROID \
+
+ifdef EMULATOR_USE_QT
+    QEMU2_CFLAGS += -DUSE_ANDROID_EMU
+
+    include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
+    include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-qt.mk
+endif
 
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-sources.mk
 
@@ -71,10 +87,8 @@ include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-sources.mk
 QEMU2_COMMON_SOURCES += \
     stubs/kvm.c
 
-# A static library containing target-independent
+# A static library containing target-independent code
 $(call start-emulator-library,libqemu2_common)
-
-LOCAL_CPP_EXTENSION := .cc
 
 LOCAL_CFLAGS += $(QEMU2_CFLAGS)
 
@@ -84,6 +98,7 @@ LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/slirp \
     $(LOCAL_PATH)/tcg \
     $(SDL2_INCLUDES) \
+    $(ANDROID_EMULIB_INCLUDES)
 
 LOCAL_SRC_FILES += \
     $(QEMU2_COMMON_SOURCES) \
@@ -173,6 +188,23 @@ LOCAL_SRC_FILES += \
     $(call qemu2-if-posix, \
         util/shared-library-posix.c \
         ) \
+
+$(call gen-hw-config-defs)
+QEMU2_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES)
+
+ifdef EMULATOR_USE_QT
+    # everything needed to build Qt UI
+    LOCAL_CFLAGS += \
+        $(ANDROID_SKIN_CFLAGS)
+
+    LOCAL_SRC_FILES += \
+        $(ANDROID_SKIN_SOURCES:%=../qemu/%) \
+        $(QEMU2_GLUE_SOURCES)
+
+    LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES:%=../qemu/%)
+    LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES:%=../qemu/%)
+    LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES:%=../qemu/%)
+endif
 
 $(call end-emulator-library)
 

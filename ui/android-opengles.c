@@ -12,6 +12,8 @@
 
 #include "android/opengles.h"
 
+#if !defined(CONFIG_ANDROID) || !defined(USE_ANDROID_EMU)
+
 #include "config-host.h"
 #include "qemu-common.h"
 #include "qemu/shared-library.h"
@@ -306,3 +308,5 @@ void android_gles_server_path(char* buff, size_t buffsize)
 {
     pstrcpy(buff, buffsize, rendererAddress);
 }
+
+#endif // !CONFIG_ANDROID || !USE_ANDROID_EMU

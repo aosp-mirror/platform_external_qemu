@@ -18,6 +18,8 @@
 
 #include "qemu/typedefs.h"
 
+#include <stdbool.h>
+
 /*
  * pixman image formats are defined to be native endian,
  * that means host byte order on qemu.  So we go define

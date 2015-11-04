@@ -48,6 +48,8 @@ void qemu_remove_led_event_handler(QEMUPutLEDEntry *entry);
 
 void kbd_put_ledstate(int ledstate);
 
+void kbd_mouse_event(int dx, int dy, int dz, int buttonsState);
+
 struct MouseTransformInfo {
     /* Touchscreen resolution */
     int x;
@@ -85,6 +87,7 @@ void kbd_put_keysym_console(QemuConsole *s, int keysym);
 bool kbd_put_qcode_console(QemuConsole *s, int qcode);
 void kbd_put_string_console(QemuConsole *s, const char *str, int len);
 void kbd_put_keysym(int keysym);
+void kbd_put_keycode(int keycode, bool down);
 
 /* consoles */
 

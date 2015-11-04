@@ -10,8 +10,9 @@ struct aes_key_st {
 };
 typedef struct aes_key_st AES_KEY;
 
-/* FreeBSD has its own AES_set_decrypt_key in -lcrypto, avoid conflicts */
-#ifdef __FreeBSD__
+// FreeBSD has its own AES_set_decrypt_key in -lcrypto, avoid conflicts
+// AndroidEmu library also links against libcrypto
+#if defined(__FreeBSD__) || (defined(USE_ANDROID_EMU))
 #define AES_set_encrypt_key QEMU_AES_set_encrypt_key
 #define AES_set_decrypt_key QEMU_AES_set_decrypt_key
 #define AES_encrypt QEMU_AES_encrypt

@@ -104,6 +104,156 @@ typedef struct {
     PipeDevice *dev;
 } AndroidPipeState;
 
+/***********************************************************************
+ ***********************************************************************
+ *****
+ *****    P I P E   C O N N E C T I O N S
+ *****
+ *****/
+
+typedef struct HwPipe {
+    struct HwPipe               *next;
+    struct HwPipe               *next_waked;
+    PipeDevice                  *device;
+    uint64_t                    channel; /* opaque kernel handle */
+    unsigned char               wanted;
+    char                        closed;
+    void                        *pipe;
+} HwPipe;
+
+#ifndef USE_ANDROID_EMU
+
+typedef struct PipeInternal PipeInternal;
+
+PipeInternal* android_pipe_new(HwPipe* pipe);
+void android_pipe_free(void* pipe);
+
+#endif
+
+
+static HwPipe*
+pipe_new0(PipeDevice* dev)
+{
+    HwPipe*  pipe;
+    pipe = g_malloc0(sizeof(HwPipe));
+    pipe->device = dev;
+    return pipe;
+}
+
+static HwPipe*
+pipe_new(uint64_t channel, PipeDevice* dev)
+{
+    HwPipe*  pipe = pipe_new0(dev);
+    pipe->channel = channel;
+    pipe->pipe  = android_pipe_new(pipe);
+    return pipe;
+}
+
+static HwPipe**
+pipe_list_findp_channel(HwPipe **list, uint64_t channel)
+{
+    HwPipe** pnode = list;
+    for (;;) {
+        HwPipe* node = *pnode;
+        if (node == NULL || node->channel == channel) {
+            break;
+        }
+        pnode = &node->next;
+    }
+    return pnode;
+}
+
+static HwPipe**
+pipe_list_findp_waked(HwPipe **list, HwPipe *pipe)
+{
+    HwPipe** pnode = list;
+    for (;;) {
+        HwPipe* node = *pnode;
+        if (node == NULL || node == pipe) {
+            break;
+        }
+        pnode = &node->next_waked;
+    }
+    return pnode;
+}
+
+
+static void pipe_list_remove_waked(HwPipe **list, HwPipe *pipe)
+{
+    HwPipe** lookup = pipe_list_findp_waked(list, pipe);
+    HwPipe*  node   = *lookup;
+
+    if (node != NULL) {
+        (*lookup) = node->next_waked;
+        node->next_waked = NULL;
+    }
+}
+
+static void pipe_free(HwPipe* pipe)
+{
+    android_pipe_free(pipe->pipe);
+    /* Free stuff */
+    g_free(pipe);
+}
+
+#ifndef USE_ANDROID_EMU
+
+// create a compatibility layer with the AndroidEmu implementation
+
+typedef struct PipeService PipeService;
+typedef struct HwPipe HwPipe;
+
+typedef struct PipeInternal {
+    void                        *opaque;
+    const AndroidPipeFuncs      *funcs;
+    const PipeService           *service;
+    char*                       args;
+    HwPipe*                     hwPipe;
+} PipeInternal;
+
+static void* pipeConnector_new(HwPipe* pipe);
+
+PipeInternal* android_pipe_new(HwPipe* pipe) {
+    PipeInternal* res = pipe->pipe = g_malloc0(sizeof(PipeInternal));
+    res->opaque = pipeConnector_new(pipe);
+    res->hwPipe = pipe;
+    return res;
+}
+
+void android_pipe_free(void* pipe_) {
+    if (!pipe_) {
+        return;
+    }
+
+    PipeInternal* pipe = pipe_;
+    /* Call close callback */
+    if (pipe->funcs->close) {
+        pipe->funcs->close(pipe->opaque);
+    }
+    /* Free stuff */
+    free(pipe->args);
+    free(pipe);
+}
+
+unsigned android_pipe_poll(void* pipe_) {
+    PipeInternal* pipe = pipe_;
+    return pipe->funcs->poll(pipe->opaque);
+}
+
+int android_pipe_recv(void* pipe_, AndroidPipeBuffer* buffers, int numBuffers) {
+    PipeInternal* pipe = pipe_;
+    return pipe->funcs->recvBuffers(pipe->opaque, buffers, numBuffers);
+}
+
+int android_pipe_send(void* pipe_, const AndroidPipeBuffer* buffers, int numBuffers) {
+    PipeInternal* pipe = pipe_;
+    return pipe->funcs->sendBuffers(pipe->opaque, buffers, numBuffers);
+}
+
+void android_pipe_wake_on(void* pipe_, unsigned wakes) {
+    PipeInternal* pipe = pipe_;
+    pipe->funcs->wakeOn(pipe->opaque, wakes);
+}
 
 /***********************************************************************
  ***********************************************************************
@@ -113,7 +263,7 @@ typedef struct {
  *****/
 
 #define MAX_PIPE_SERVICES  8
-typedef struct {
+typedef struct PipeService {
     const char          *name;
     void                *opaque;        /* pipe specific data */
     AndroidPipeFuncs    funcs;
@@ -139,7 +289,7 @@ android_pipe_add_type(const char *pipeName,
     }
 
     if (strlen(pipeName) > MAX_PIPE_SERVICE_NAME_SIZE) {
-        APANIC("Pipe service name too long: '%s'", pipeName);
+        APANIC("HwPipe service name too long: '%s'", pipeName);
     }
 
     list->services[count].name   = pipeName;
@@ -163,99 +313,6 @@ static const PipeService* android_pipe_find_type(const char *pipeName)
     return NULL;
 }
 
-
-/***********************************************************************
- ***********************************************************************
- *****
- *****    P I P E   C O N N E C T I O N S
- *****
- *****/
-
-typedef struct Pipe {
-    struct Pipe                 *next;
-    struct Pipe                 *next_waked;
-    PipeDevice                  *device;
-    uint64_t                    channel; /* opaque kernel handle */
-    void                        *opaque;
-    const AndroidPipeFuncs      *funcs;
-    const PipeService           *service;
-    char*                       args;
-    unsigned char               wanted;
-    char                        closed;
-} Pipe;
-
-/* Forward */
-static void*  pipeConnector_new(Pipe*  pipe);
-
-static Pipe*
-pipe_new0(PipeDevice* dev)
-{
-    Pipe*  pipe;
-    pipe = g_malloc0(sizeof(Pipe));
-    pipe->device = dev;
-    return pipe;
-}
-
-static Pipe*
-pipe_new(uint64_t channel, PipeDevice* dev)
-{
-    Pipe*  pipe = pipe_new0(dev);
-    pipe->channel = channel;
-    pipe->opaque  = pipeConnector_new(pipe);
-    return pipe;
-}
-
-static Pipe**
-pipe_list_findp_channel(Pipe **list, uint64_t channel)
-{
-    Pipe** pnode = list;
-    for (;;) {
-        Pipe* node = *pnode;
-        if (node == NULL || node->channel == channel) {
-            break;
-        }
-        pnode = &node->next;
-    }
-    return pnode;
-}
-
-static Pipe**
-pipe_list_findp_waked(Pipe **list, Pipe *pipe)
-{
-    Pipe** pnode = list;
-    for (;;) {
-        Pipe* node = *pnode;
-        if (node == NULL || node == pipe) {
-            break;
-        }
-        pnode = &node->next_waked;
-    }
-    return pnode;
-}
-
-
-static void pipe_list_remove_waked(Pipe **list, Pipe *pipe)
-{
-    Pipe** lookup = pipe_list_findp_waked(list, pipe);
-    Pipe*  node   = *lookup;
-
-    if (node != NULL) {
-        (*lookup) = node->next_waked;
-        node->next_waked = NULL;
-    }
-}
-
-static void pipe_free(Pipe* pipe)
-{
-    /* Call close callback */
-    if (pipe->funcs->close) {
-        pipe->funcs->close(pipe->opaque);
-    }
-    /* Free stuff */
-    g_free(pipe->args);
-    g_free(pipe);
-}
-
 /***********************************************************************
  ***********************************************************************
  *****
@@ -268,7 +325,7 @@ static void pipe_free(Pipe* pipe)
  * connect to, followed by a terminating zero.
  */
 typedef struct {
-    Pipe*  pipe;
+    HwPipe*  pipe;
     char   buffer[128];
     int    buffpos;
 } PipeConnector;
@@ -276,13 +333,15 @@ typedef struct {
 static const AndroidPipeFuncs  pipeConnector_funcs;  // forward
 
 void*
-pipeConnector_new(Pipe*  pipe)
+pipeConnector_new(HwPipe* pipe)
 {
     PipeConnector*  pcon;
 
     pcon = g_malloc0(sizeof(PipeConnector));
     pcon->pipe  = pipe;
-    pipe->funcs = &pipeConnector_funcs;
+    PipeInternal* pi = pipe->pipe;
+    assert(pi);
+    pi->funcs = &pipeConnector_funcs;
     return pcon;
 }
 
@@ -365,7 +424,7 @@ pipeConnector_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int n
                 pipeArgs = NULL;
         }
 
-        Pipe* pipe = pcon->pipe;
+        HwPipe* pipe = pcon->pipe;
         const PipeService* svc = android_pipe_find_type(pipeName);
         if (svc == NULL) {
             qemu_log_mask(LOG_UNIMP, "%s: Couldn't find service: '%s'\n",
@@ -381,10 +440,11 @@ pipeConnector_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int n
         }
 
         /* Do the evil switch now */
-        pipe->opaque = peer;
-        pipe->service = svc;
-        pipe->funcs  = &svc->funcs;
-        pipe->args   = g_strdup(pipeArgs);
+        PipeInternal* pi = pipe->pipe;
+        pi->opaque = peer;
+        pi->service = svc;
+        pi->funcs  = &svc->funcs;
+        pi->args   = g_strdup(pipeArgs);
         g_free(pcon);
     }
 
@@ -446,6 +506,8 @@ static const AndroidPipeFuncs  pipeConnector_funcs = {
     pipeConnector_load,
 };
 
+#endif // USE_ANDROID_EMU
+
 
 /***********************************************************************
  ***********************************************************************
@@ -458,10 +520,10 @@ struct PipeDevice {
     AndroidPipeState *ps;       /* FIXME: backlink to instance state */
 
     /* the list of all pipes */
-    Pipe*  pipes;
+    HwPipe*  pipes;
 
     /* the list of signalled pipes */
-    Pipe*  signaled_pipes;
+    HwPipe*  signaled_pipes;
 
     /* i/o registers */
     uint64_t  address;
@@ -507,8 +569,8 @@ static void *map_guest_buffer(hwaddr phys, size_t size, int is_write)
 static void
 pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
 {
-    Pipe** lookup = pipe_list_findp_channel(&dev->pipes, dev->channel);
-    Pipe*  pipe   = *lookup;
+    HwPipe** lookup = pipe_list_findp_channel(&dev->pipes, dev->channel);
+    HwPipe*  pipe   = *lookup;
 
     /* Check that we're referring a known pipe channel */
     if (command != PIPE_CMD_OPEN && pipe == NULL) {
@@ -545,7 +607,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         break;
 
     case PIPE_CMD_POLL:
-        dev->status = pipe->funcs->poll(pipe->opaque);
+        dev->status = android_pipe_poll(pipe->pipe);
         DD("%s: CMD_POLL > status=%d", __FUNCTION__, dev->status);
         break;
 
@@ -558,7 +620,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
             break;
         }
         buffer.size = dev->size;
-        dev->status = pipe->funcs->recvBuffers(pipe->opaque, &buffer, 1);
+        dev->status = android_pipe_recv(pipe->pipe, &buffer, 1);
         DD("%s: CMD_READ_BUFFER channel=0x%llx address=0x%16llx size=%d > status=%d",
            __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
            dev->size, dev->status);
@@ -575,7 +637,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
             break;
         }
         buffer.size = dev->size;
-        dev->status = pipe->funcs->sendBuffers(pipe->opaque, &buffer, 1);
+        dev->status = android_pipe_send(pipe->pipe, &buffer, 1);
         DD("%s: CMD_WRITE_BUFFER channel=0x%llx address=0x%16llx size=%d > status=%d",
            __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
            dev->size, dev->status);
@@ -587,7 +649,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         DD("%s: CMD_WAKE_ON_READ channel=0x%llx", __FUNCTION__, (unsigned long long)dev->channel);
         if ((pipe->wanted & PIPE_WAKE_READ) == 0) {
             pipe->wanted |= PIPE_WAKE_READ;
-            pipe->funcs->wakeOn(pipe->opaque, pipe->wanted);
+            android_pipe_wake_on(pipe->pipe, pipe->wanted);
         }
         dev->status = 0;
         break;
@@ -596,7 +658,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         DD("%s: CMD_WAKE_ON_WRITE channel=0x%llx", __FUNCTION__, (unsigned long long)dev->channel);
         if ((pipe->wanted & PIPE_WAKE_WRITE) == 0) {
             pipe->wanted |= PIPE_WAKE_WRITE;
-            pipe->funcs->wakeOn(pipe->opaque, pipe->wanted);
+            android_pipe_wake_on(pipe->pipe, pipe->wanted);
         }
         dev->status = 0;
         break;
@@ -717,7 +779,7 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
 
     case PIPE_REG_CHANNEL:
         if (dev->signaled_pipes != NULL) {
-            Pipe* pipe = dev->signaled_pipes;
+            HwPipe* pipe = dev->signaled_pipes;
             DR("%s: channel=0x%llx wanted=%d", __FUNCTION__,
                (unsigned long long)pipe->channel, pipe->wanted);
             dev->wakes = pipe->wanted;
@@ -736,7 +798,7 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
 
     case PIPE_REG_CHANNEL_HIGH:
         if (dev->signaled_pipes != NULL) {
-            Pipe* pipe = dev->signaled_pipes;
+            HwPipe* pipe = dev->signaled_pipes;
             DR("%s: channel_high=0x%llx wanted=%d", __FUNCTION__,
                (unsigned long long)pipe->channel, pipe->wanted);
             return (uint32_t)(pipe->channel >> 32);
@@ -770,6 +832,24 @@ static const MemoryRegionOps android_pipe_iomem_ops = {
     .endianness = DEVICE_NATIVE_ENDIAN
 };
 
+static void qemu2_android_pipe_wake(void* hwpipe, unsigned flags);
+static void qemu2_android_pipe_close(void* hwpipe);
+
+#ifdef CONFIG_QT
+static const AndroidPipeHwFuncs qemu2_android_pipe_hw_funcs = {
+    .closeFromHost = qemu2_android_pipe_close,
+    .signalWake = qemu2_android_pipe_wake,
+};
+#else
+void android_pipe_close(void* hwpipe) {
+    qemu2_android_pipe_close(hwpipe);
+}
+
+void android_pipe_wake(void* hwpipe, unsigned flags) {
+    qemu2_android_pipe_wake(hwpipe, flags);
+}
+#endif
+
 static void android_pipe_realize(DeviceState *dev, Error **errp)
 {
     SysBusDevice *sbdev = SYS_BUS_DEVICE(dev);
@@ -779,16 +859,20 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
     s->dev->ps = s; /* HACK: backlink */
 
     memory_region_init_io(&s->iomem, OBJECT(s), &android_pipe_iomem_ops, s,
-                          "android_pipe", 0x1000 /*TODO: ?how big?*/);
+                          "android_pipe", 0x2000 /*TODO: ?how big?*/);
     sysbus_init_mmio(sbdev, &s->iomem);
     sysbus_init_irq(sbdev, &s->irq);
 
     android_zero_pipe_init();
     android_pingpong_init();
     android_throttle_init();
+    android_net_pipes_init();
+
+#ifdef CONFIG_QT
+    android_pipe_set_hw_funcs(&qemu2_android_pipe_hw_funcs);
+#else
     android_sensors_init();
     android_boot_properties_init();
-    android_net_pipes_init();
 
     /* TODO: This may be a complete hack and there may be beautiful QOM ways
      * to accomplish this.
@@ -796,14 +880,13 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
      * Initialize android pipe backends
      */
     android_adb_dbg_backend_init();
-
+#endif
 }
 
-void
-android_pipe_wake( void* hwpipe, unsigned flags )
+static void qemu2_android_pipe_wake( void* hwpipe, unsigned flags )
 {
-    Pipe*  pipe = hwpipe;
-    Pipe** lookup;
+    HwPipe*  pipe = hwpipe;
+    HwPipe** lookup;
     PipeDevice*  dev = pipe->device;
 
     DD("%s: channel=0x%llx flags=%d", __FUNCTION__, (unsigned long long)pipe->channel, flags);
@@ -822,16 +905,15 @@ android_pipe_wake( void* hwpipe, unsigned flags )
     DD("%s: raising IRQ", __FUNCTION__);
 }
 
-void
-android_pipe_close( void* hwpipe )
+static void qemu2_android_pipe_close( void* hwpipe )
 {
-    Pipe* pipe = hwpipe;
+    HwPipe* pipe = hwpipe;
 
     D("%s: channel=0x%llx (closed=%d)", __FUNCTION__, (unsigned long long)pipe->channel, pipe->closed);
 
     if (!pipe->closed) {
         pipe->closed = 1;
-        android_pipe_wake( hwpipe, PIPE_WAKE_CLOSED );
+        qemu2_android_pipe_wake( hwpipe, PIPE_WAKE_CLOSED );
     }
 }
 

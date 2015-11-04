@@ -12,6 +12,15 @@
 #ifndef ANDROID_OPENGLES_H
 #define ANDROID_OPENGLES_H
 
+#if defined(USE_ANDROID_EMU)
+
+// this path has to be relative as AndroidEmu include paths go after the qemu2
+// ones, and android/opengles.h resolves to the very same this file
+#include "../qemu/android/opengles.h"
+
+#else
+
+
 #include <stddef.h>
 
 /* Call this function to initialize the hardware opengles emulation.
@@ -58,5 +67,7 @@ void android_stopOpenglesRenderer(void);
  * For UNIX and Win32 pipes it is the full pathname of the pipe.
  */
 void android_gles_server_path(char* buff, size_t buffsize);
+
+#endif
 
 #endif /* ANDROID_OPENGLES_H */

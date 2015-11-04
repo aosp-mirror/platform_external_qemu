@@ -21,9 +21,9 @@ qemu2-if-target-arch = $(if $(filter $1,$(QEMU2_TARGET_CPU)),$2)
 
 $(call start-emulator-program,qemu-system-$(QEMU2_TARGET_CPU))
 
-LOCAL_CPP_EXTENSION := .cc
-
-LOCAL_CFLAGS += $(QEMU2_CFLAGS)
+LOCAL_CFLAGS += \
+    $(QEMU2_CFLAGS) \
+    $(ANDROID_SKIN_CFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(QEMU2_INCLUDES) \
@@ -34,10 +34,12 @@ LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/tcg \
     $(LOCAL_PATH)/tcg/i386 \
     $(LOCAL_PATH)/target-$(QEMU2_TARGET_TARGET) \
+    $(ANDROID_EMULIB_INCLUDES)
 
 LOCAL_CFLAGS += -DNEED_CPU_H
 
 LOCAL_SRC_FILES += \
+    main-android.cpp \
     $(QEMU2_TARGET_SOURCES) \
     $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES) \
     $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES_$(HOST_OS)-$(HOST_ARCH))
@@ -62,11 +64,22 @@ LOCAL_PREBUILTS_OBJ_FILES += \
 
 LOCAL_WHOLE_STATIC_LIBRARIES += \
     libqemu2_common \
+    emulator-libext4_utils \
+    emulator-libsparse \
+    emulator-libselinux \
     $(call qemu2-if-target,arm64, libqemu2_common_aarch64) \
 
-LOCAL_STATIC_LIBRARIES += $(SDL2_STATIC_LIBRARIES)
+LOCAL_STATIC_LIBRARIES += \
+    $(SDL2_STATIC_LIBRARIES) \
+    $(ANDROID_SKIN_STATIC_LIBRARIES) \
 
-LOCAL_LDFLAGS += $(QEMU2_DEPS_LDFLAGS)
+ifndef EMULATOR_USE_QT
+    LOCAL_STATIC_LIBRARIES += $(ANDROID_EMU_BASE_STATIC_LIBRARIES_QEMU2)
+endif
+
+LOCAL_LDFLAGS += \
+    $(QEMU2_DEPS_LDFLAGS) \
+    $(ANDROID_SKIN_LDFLAGS)
 
 LOCAL_LDLIBS += \
     $(QEMU2_GLIB_LDLIBS) \
@@ -76,6 +89,7 @@ LOCAL_LDLIBS += \
     -lfdt \
     -lz \
     $(call qemu2-if-linux, -lpulse) \
+    $(ANDROID_SKIN_LDLIBS) \
 
 LOCAL_INSTALL_DIR := qemu/$(HOST_OS)-$(HOST_ARCH)
 

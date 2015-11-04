@@ -3397,6 +3397,19 @@ STEXI
 Select lcd display density value (default is 160)
 ETEXI
 
+#ifdef CONFIG_ANDROID
+
+DEF("android-hw", HAS_ARG, QEMU_OPTION_android_hw,
+    "-android-hw <file>\n"
+    "                specify the hw config ini file location\n", QEMU_ARCH_ALL)
+STEXI
+@item -android-hw @var{file}
+@findex -android-hw
+Specify the hw config ini file location
+ETEXI
+
+#endif
+
 HXCOMM This is the last statement. Insert new options before this line!
 STEXI
 @end table

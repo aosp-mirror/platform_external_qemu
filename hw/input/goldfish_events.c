@@ -21,6 +21,10 @@
 
 #include "hw/input/goldfish_events.h"
 
+#if defined(USE_ANDROID_EMU)
+#include "android-qemu2-glue/qemu-control-impl.h"
+#endif
+
 /* Multitouch specific code is defined out via EVDEV_MULTITOUCH currently,
  * because upstream has no multitouch related APIs.
  */
@@ -157,7 +161,7 @@ static const GoldfishEventCodeInfo ev_rel_codes_table[] = {
 #define BTN_TOOL_TRIPLETAP 0x14e
 #define BTN_WHEEL 0x150
 #define BTN_GEAR_DOWN 0x150
-#define BTN_GEAR_UP  0x150
+#define BTN_GEAR_UP  0x151
 
 #define KEY_CODE(_name, _val) {#_name, _val}
 #define BTN_CODE(_code) {#_code, (_code)}
@@ -1280,6 +1284,12 @@ static void gf_evdev_realize(DeviceState *dev, Error **errp)
         events_set_bit(s, EV_SYN, EV_SW);
         events_set_bit(s, EV_SW, 0);
     }
+
+#if defined(USE_ANDROID_EMU)
+    // The android control agent might fire buffered events to the device, so
+    // ensure that it is enabled after the initialization is complete.
+    qemu_control_setEventDevice(s);
+#endif
 }
 
 static void gf_evdev_reset(DeviceState *dev)

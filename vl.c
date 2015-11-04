@@ -38,24 +38,6 @@
 #include <libvdeplug.h>
 #endif
 
-#ifdef CONFIG_SDL
-#if defined(__APPLE__) || defined(main)
-#include <SDL.h>
-int qemu_main(int argc, char **argv, char **envp);
-int main(int argc, char **argv)
-{
-    return qemu_main(argc, argv, NULL);
-}
-#undef main
-#define main qemu_main
-#endif
-#endif /* CONFIG_SDL */
-
-#ifdef CONFIG_COCOA
-#undef main
-#define main qemu_main
-#endif /* CONFIG_COCOA */
-
 #include <glib.h>
 
 #include "qemu/sockets.h"
@@ -121,7 +103,49 @@ int main(int argc, char **argv)
 #include "qapi-event.h"
 
 #ifdef CONFIG_ANDROID
-#include "hw/misc/android_boot_properties.h"
+
+#ifdef USE_ANDROID_EMU
+#include "config.h"
+
+#include "android/boot-properties.h"
+#include "android/utils/debug.h"
+#include "android/utils/path.h"
+#include "android/utils/property_file.h"
+#include "android/utils/lineinput.h"
+#include "android/utils/bufprint.h"
+#include "android/utils/filelock.h"
+#include "android/utils/ini.h"
+#include "android/utils/tempfile.h"
+#include "android/skin/winsys.h"
+#include "android/main-common.h"
+#include "android/opengl/emugl_config.h"
+#include "android/ui-emu-agent.h"
+#include "android/globals.h"
+#include "android/help.h"
+#include "android-qemu2-glue/looper-qemu.h"
+#include "android/hw-control.h"
+#include "android/hw-kmsg.h"
+#include "android/utils/socket_drainer.h"
+#include "android/wear-agent/android_wear_agent.h"
+#include "android-qemu2-glue/android_qemud.h"
+#include "android-qemu2-glue/qemu-control-impl.h"
+#include "android-qemu2-glue/qemu-setup.h"
+#include "android/snapshot.h"
+#include "android/snaphost-android.h"
+#include "android/android.h"
+#include "android/opengles.h"
+
+int android_display_width  = 640;
+int android_display_height = 480;
+int android_display_bpp    = 32;
+
+#else
+
+static void boot_property_add(const char* name, const char* value) {
+    android_boot_property_add(name, value);
+}
+
+#endif
 
 #define  LCD_DENSITY_LDPI      120
 #define  LCD_DENSITY_MDPI      160
@@ -188,6 +212,7 @@ int cursor_hide = 1;
 int graphic_rotate = 0;
 #ifdef CONFIG_ANDROID
 int lcd_density = LCD_DENSITY_MDPI;
+static const char* android_hw_file = NULL;
 #endif
 const char *watchdog;
 QEMUOptionRom option_rom[MAX_OPTION_ROMS];
@@ -2057,8 +2082,12 @@ static DisplayType select_display(const char *p)
     DisplayType display = DT_DEFAULT;
 
     if (strstart(p, "sdl", &opts)) {
-#ifdef CONFIG_SDL
+#if defined(CONFIG_SDL) || defined(CONFIG_QT)
+#ifdef CONFIG_QT
+        display = DT_QT;
+#else
         display = DT_SDL;
+#endif
         while (*opts) {
             const char *nextopt;
 
@@ -2614,12 +2643,12 @@ static void qemu_run_machine_init_done_notifiers(void)
     notifier_list_notify(&machine_init_done_notifiers, NULL);
 }
 
-static const QEMUOption *lookup_opt(int argc, char **argv,
+static const QEMUOption *lookup_opt(int argc, const char **argv,
                                     const char **poptarg, int *poptind)
 {
     const QEMUOption *popt;
     int optind = *poptind;
-    char *r = argv[optind];
+    const char *r = argv[optind];
     const char *optarg;
 
     loc_set_cmdline(argv, optind, 1);
@@ -2761,7 +2790,13 @@ out:
     return 0;
 }
 
-int main(int argc, char **argv, char **envp)
+#ifndef ANDROID_QEMU2_INTEGRATED_BUILD
+// We don't use the AndroidEmu library in the original qemu2 build,
+// so let's return their main function back
+#define run_qemu_main main
+#endif
+
+int run_qemu_main(int argc, const char **argv)
 {
     int i;
     int snapshot, linux_boot;
@@ -3488,13 +3523,15 @@ int main(int argc, char **argv, char **envp)
                 no_quit = 1;
                 break;
             case QEMU_OPTION_sdl:
-#ifdef CONFIG_SDL
+#ifdef CONFIG_QT
+                display_type = DT_QT;
+#elif defined(CONFIG_SDL)
                 display_type = DT_SDL;
-                break;
 #else
                 fprintf(stderr, "SDL support is disabled\n");
                 exit(1);
 #endif
+                break;
             case QEMU_OPTION_pidfile:
                 pid_file = optarg;
                 break;
@@ -3855,20 +3892,15 @@ int main(int argc, char **argv, char **envp)
                         exit(1);
                 }
                 break;
+            case QEMU_OPTION_android_hw:
+                android_hw_file = optarg;
+                break;
 #endif // CONFIG_ANDROID
             default:
                 os_parse_cmd_args(popt->index, optarg);
             }
         }
     }
-
-#ifdef CONFIG_ANDROID
-    if (lcd_density) {
-        char temp[8];
-        snprintf(temp, sizeof(temp), "%d", lcd_density);
-        android_boot_property_add("qemu.sf.lcd_density", temp);
-    }
-#endif // CONFIG_ANDROID
 
     loc_set_none();
 
@@ -3878,6 +3910,99 @@ int main(int argc, char **argv, char **envp)
         error_report("%s", error_get_pretty(main_loop_err));
         exit(1);
     }
+
+#ifdef CONFIG_ANDROID
+
+#ifdef USE_ANDROID_EMU
+    /* Ensure Looper implementation for this thread is based on the QEMU
+     * main loop. */
+    qemu_looper_setForThread();
+
+    /* make sure qemud is initialized before any calls to it */
+    android_qemu2_qemud_init();
+
+    boot_property_init_service();
+    android_hw_control_init();
+
+    socket_drainer_start(looper_getForThread());
+    android_wear_agent_start(looper_getForThread());
+
+    if (!android_hw_file) {
+        error_report("Missing -android-hw <file> option!");
+        exit(1);
+    }
+
+    CIniFile* hw_ini = iniFile_newFromFile(android_hw_file);
+    if (hw_ini == NULL) {
+        error_report("Could not find %s file.", android_hw_file);
+        exit(1);
+    }
+
+    androidHwConfig_init(android_hw, 0);
+    androidHwConfig_read(android_hw, hw_ini);
+
+    /* If we're loading VM from a snapshot, make sure that the current HW config
+     * matches the one with which the VM has been saved. */
+    if (loadvm && *loadvm && !snaphost_match_configs(hw_ini, loadvm)) {
+        error_report("HW config doesn't match the one in the snapshot");
+        exit(0);
+    }
+
+    iniFile_free(hw_ini);
+
+    {
+        int width  = android_hw->hw_lcd_width;
+        int height = android_hw->hw_lcd_height;
+        int depth  = android_hw->hw_lcd_depth;
+
+        /* A bit of sanity checking */
+        if (width <= 0 || height <= 0    ||
+            (depth != 16 && depth != 32) ||
+            ((width & 1) != 0)  )
+        {
+            error_report("Invalid display configuration (%d,%d,%d)",
+                  width, height, depth);
+            exit(1);
+        }
+        android_display_width  = width;
+        android_display_height = height;
+        android_display_bpp    = depth;
+    }
+
+    /* qemu.gles will be read by the OpenGL ES emulation libraries.
+     * If set to 0, the software GL ES renderer will be used as a fallback.
+     * If the parameter is undefined, this means the system image runs
+     * inside an emulator that doesn't support GPU emulation at all.
+     *
+     * The GL ES renderer cannot start properly if GPU emulation is disabled
+     * because this requires changing the LD_LIBRARY_PATH before launching
+     * the emulation engine. */
+    int qemu_gles = 0;
+    if (android_hw->hw_gpu_enabled) {
+        if (android_initOpenglesEmulation() != 0 ||
+            android_startOpenglesRenderer(android_hw->hw_lcd_width,
+                                          android_hw->hw_lcd_height) != 0)
+        {
+            derror("Could not initialize OpenglES emulation, use '-gpu off' to disable it.");
+            exit(1);
+        }
+        qemu_gles = 1;
+    }
+    if (qemu_gles) {
+        char  tmp[64];
+        snprintf(tmp, sizeof(tmp), "%d", 0x20000);
+        boot_property_add("ro.opengles.version", tmp);
+    }
+
+#endif // USE_ANDROID_EMU
+
+    if (lcd_density) {
+        char temp[8];
+        snprintf(temp, sizeof(temp), "%d", lcd_density);
+        boot_property_add("qemu.sf.lcd_density", temp);
+    }
+
+#endif // CONFIG_ANDROID
 
     if (qemu_opts_foreach(qemu_find_opts("sandbox"), parse_sandbox, NULL, 0)) {
         exit(1);
@@ -4076,8 +4201,12 @@ int main(int argc, char **argv, char **envp)
     if (display_type == DT_DEFAULT && !display_remote) {
 #if defined(CONFIG_GTK)
         display_type = DT_GTK;
-#elif defined(CONFIG_SDL) || defined(CONFIG_COCOA)
+#elif defined(CONFIG_SDL) || defined(CONFIG_COCOA) || defined(CONFIG_QT)
+#ifdef CONFIG_QT
+        display_type = DT_QT;
+#else
         display_type = DT_SDL;
+#endif
 #elif defined(CONFIG_VNC)
         vnc_display = "localhost:0,to=99";
         show_vnc_port = 1;
@@ -4179,10 +4308,7 @@ int main(int argc, char **argv, char **envp)
         boot_strict = qemu_opt_get_bool(opts, "strict", false);
     }
 
-    if (!kernel_cmdline) {
-        kernel_cmdline = "";
-        current_machine->kernel_cmdline = (char *)kernel_cmdline;
-    }
+    current_machine->kernel_cmdline = kernel_cmdline ? (char *)kernel_cmdline : "";
 
     linux_boot = (kernel_filename != NULL);
 
@@ -4366,7 +4492,10 @@ int main(int argc, char **argv, char **envp)
         curses_display_init(ds, full_screen);
         break;
 #endif
-#if defined(CONFIG_SDL)
+#if defined(CONFIG_SDL) || defined(CONFIG_QT)
+#if defined(CONFIG_QT)
+    case DT_QT:
+#endif
     case DT_SDL:
         sdl_display_init(ds, full_screen, no_frame);
         break;
@@ -4421,6 +4550,14 @@ int main(int argc, char **argv, char **envp)
         fprintf(stderr, "rom loading failed\n");
         exit(1);
     }
+
+#if defined(USE_ANDROID_EMU)
+    /* call android-specific setup function */
+    qemu_android_emulation_setup();
+
+    extern void android_emulator_set_base_port(int);
+    android_emulator_set_base_port(android_base_port);
+#endif
 
     /* TODO: once all bus devices are qdevified, this should be done
      * when bus is created by qdev.c */

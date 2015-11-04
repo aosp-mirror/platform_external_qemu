@@ -16,6 +16,12 @@
 #include <stdint.h>
 #include "hw/hw.h"
 
+#if defined(USE_ANDROID_EMU)
+
+#include "android/emulation/android_pipe.h"
+
+#else
+
 /* TECHNICAL NOTE:
  *
  * A android pipe is a very fast communication channel between the guest
@@ -137,6 +143,8 @@ extern void android_pipe_close( void* hwpipe );
  * PIPE_WAKE_READ and PIPE_WAKE_WRITE.
  */
 extern void android_pipe_wake( void* hwpipe, unsigned flags );
+
+#endif // USE_ANDROID_EMU
 
 /* The following definitions must match those in the kernel driver:
  *

@@ -1149,6 +1149,12 @@ void kbd_put_keysym(int keysym)
     kbd_put_keysym_console(active_console, keysym);
 }
 
+void kbd_put_keycode(int keycode, bool down)
+{
+    qemu_input_event_send_key_number(
+                active_console, keycode, down);
+}
+
 static void text_console_invalidate(void *opaque)
 {
     QemuConsole *s = (QemuConsole *) opaque;
@@ -1703,14 +1709,24 @@ void graphic_console_set_hwops(QemuConsole *con,
     con->hw = opaque;
 }
 
+#if defined(USE_ANDROID_EMU)
+extern int android_display_width;
+extern int android_display_height;
+#endif
+
 QemuConsole *graphic_console_init(DeviceState *dev, uint32_t head,
                                   const GraphicHwOps *hw_ops,
                                   void *opaque)
 {
     static const char noinit[] =
         "Guest has not initialized the display (yet).";
+#if defined(USE_ANDROID_EMU)
+    int width = android_display_width;
+    int height = android_display_height;
+#else
     int width = 640;
     int height = 480;
+#endif
     QemuConsole *s;
     DisplayState *ds;
 
@@ -2062,5 +2078,51 @@ static void register_types(void)
     type_register_static(&qemu_console_info);
     register_char_driver("vc", CHARDEV_BACKEND_KIND_VC, qemu_chr_parse_vc);
 }
+
+#if defined(USE_ANDROID_EMU)
+
+extern int graphic_rotate;
+extern int graphic_width;
+
+void kbd_mouse_event(int dx, int dy, int dz, int buttonsState) {
+
+    assert(active_console && qemu_console_is_graphic(active_console));
+
+    static uint32_t bmap[INPUT_BUTTON_MAX] = {
+        [INPUT_BUTTON_LEFT]       = MOUSE_EVENT_LBUTTON,
+        [INPUT_BUTTON_MIDDLE]     = MOUSE_EVENT_MBUTTON,
+        [INPUT_BUTTON_RIGHT]      = MOUSE_EVENT_RBUTTON,
+    };
+    static uint32_t prev_state;
+
+    if (prev_state != buttonsState) {
+        qemu_input_update_buttons(active_console, bmap, prev_state, buttonsState);
+        prev_state = (uint32_t)buttonsState;
+    }
+
+    const bool isAbsolute = qemu_input_is_absolute();
+    int y;
+    if (graphic_rotate) {
+        const int width = isAbsolute ? INPUT_EVENT_ABS_SIZE : graphic_width;
+        y = width - 1 - dy;
+    } else {
+        y = dy;
+    }
+
+    if (isAbsolute) {
+        int w = surface_width(qemu_console_surface(active_console));
+        int h = surface_height(qemu_console_surface(active_console));
+
+        qemu_input_queue_abs(active_console, INPUT_AXIS_X, dx, w);
+        qemu_input_queue_abs(active_console, INPUT_AXIS_Y, y, h);
+    } else {
+        qemu_input_queue_rel(active_console, INPUT_AXIS_X, dx);
+        qemu_input_queue_rel(active_console, INPUT_AXIS_Y, y);
+    }
+
+    qemu_input_event_sync();
+}
+
+#endif // USE_ANDROID_EMU
 
 type_init(register_types);

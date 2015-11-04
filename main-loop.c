@@ -30,6 +30,10 @@
 #include "qemu/main-loop.h"
 #include "block/aio.h"
 
+#if defined(USE_ANDROID_EMU)
+#include "android-qemu2-glue/emulation/charpipe.h"
+#endif
+
 #ifndef _WIN32
 
 #include "qemu/compatfd.h"
@@ -495,6 +499,10 @@ int main_loop_wait(int nonblocking)
     qemu_iohandler_poll(gpollfds, ret);
 #ifdef CONFIG_SLIRP
     slirp_pollfds_poll(gpollfds, (ret < 0));
+#endif
+
+#if defined(USE_ANDROID_EMU)
+    charpipe_poll();
 #endif
 
     qemu_clock_run_all_timers();

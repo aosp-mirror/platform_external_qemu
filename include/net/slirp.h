@@ -47,6 +47,8 @@ void do_info_usernet(Monitor *mon, const QDict *qdict);
  */
 Slirp *net_slirp_lookup(const char *vlan, const char *stack, Error **errp);
 
+int net_slirp_is_inited();
+
 #endif
 
 #endif /* QEMU_NET_SLIRP_H */
