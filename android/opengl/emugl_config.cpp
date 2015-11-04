@@ -63,25 +63,6 @@ bool emuglConfig_init(EmuglConfig* config,
     // zero all fields first.
     memset(config, 0, sizeof(*config));
 
-    // The value of '-gpu <mode>' overrides the hardware properties,
-    // except if <mode> is 'auto'.
-    if (gpu_option) {
-        if (!strcmp(gpu_option, "on") || !strcmp(gpu_option, "enable")) {
-            gpu_enabled = true;
-            if (!gpu_mode || !strcmp(gpu_mode, "auto")) {
-                gpu_mode = "host";
-            }
-        } else if (!strcmp(gpu_option, "off") ||
-                   !strcmp(gpu_option, "disable")) {
-            gpu_enabled = false;
-        } else if (!strcmp(gpu_option, "auto")) {
-            // Nothing to do
-        } else {
-            gpu_enabled = true;
-            gpu_mode = gpu_option;
-        }
-    }
-
     if (!gpu_enabled) {
         config->enabled = false;
         snprintf(config->status, sizeof(config->status),
