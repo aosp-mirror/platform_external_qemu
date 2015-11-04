@@ -247,8 +247,6 @@ QEMU2_COMMON_SOURCES := \
     ui/input.c \
     ui/keymaps.c \
     ui/qemu-pixman.c \
-    ui/sdl.c \
-    ui/sdl2.c \
     ui/sdl_zoom.c \
     ui/vnc-enc-hextile.c \
     ui/vnc-enc-tight.c \
@@ -258,9 +256,16 @@ QEMU2_COMMON_SOURCES := \
     ui/vnc-palette.c \
     ui/vnc.c \
     ui/x_keymap.c \
-    vl.c \
     vmstate.c \
     xbzrle.c \
+
+ifndef EMULATOR_USE_QT
+
+QEMU2_COMMON_SOURCES += \
+    ui/sdl.c \
+    ui/sdl2.c \
+
+endif  # !EMULATOR_USE_QT
 
 QEMU2_COMMON_SOURCES_linux-x86_64 := \
     aio-posix.c \
@@ -361,11 +366,7 @@ QEMU2_TARGET_SOURCES := \
     hw/input/goldfish_events.c \
     hw/input/goldfish_sensors.c \
     hw/intc/goldfish_pic.c \
-    hw/misc/android_adb.c \
-    hw/misc/android_adb_dbg.c \
-    hw/misc/android_boot_properties.c \
     hw/misc/android_pipe.c \
-    hw/misc/android_pipe_opengles.c \
     hw/misc/android_pipe_test.c \
     hw/misc/android_qemud.c \
     hw/misc/goldfish_battery.c \
@@ -386,8 +387,19 @@ QEMU2_TARGET_SOURCES := \
     tcg/optimize.c \
     tcg/tcg.c \
     translate-all.c \
+    vl.c \
     xen-common-stub.c \
     xen-hvm-stub.c \
+
+ifndef EMULATOR_USE_QT
+
+QEMU2_TARGET_SOURCES += \
+    hw/misc/android_adb.c \
+    hw/misc/android_adb_dbg.c \
+    hw/misc/android_boot_properties.c \
+    hw/misc/android_pipe_opengles.c \
+
+endif  # !EMULATOR_USE_QT
 
 QEMU2_TARGET_aarch64_SOURCES := \
     disas/arm.c \
