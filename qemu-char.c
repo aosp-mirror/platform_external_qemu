@@ -763,6 +763,50 @@ int recv_all(int fd, void *_buf, int len1, bool single_read)
 
 #else
 
+int opengl_send_all(int fd, const void *_buf, int len1)
+{
+    int ret, len;
+    const uint8_t *buf = _buf;
+
+    len = len1;
+    while (len > 0) {
+        ret = write(fd, buf, len);
+        if (ret < 0) {
+            if (errno != EINTR)
+                return -1;
+        } else if (ret == 0) {
+            break;
+        } else {
+            buf += ret;
+            len -= ret;
+        }
+    }
+    return len1 - len;
+}
+
+int opengl_recv_all(int fd, void *_buf, int len1, bool single_read)
+{
+    int ret, len;
+    uint8_t *buf = _buf;
+
+    len = len1;
+    while ((len > 0) && (ret = recv(fd, buf, len, 0)) != 0) {
+        if (ret < 0) {
+            if (errno != EINTR) {
+                return -1;
+            }
+            continue;
+        } else {
+            if (single_read) {
+                return ret;
+            }
+            buf += ret;
+            len -= ret;
+        }
+    }
+    return len1 - len;
+}
+
 int send_all(int fd, const void *_buf, int len1)
 {
     int ret, len;
@@ -790,7 +834,7 @@ int recv_all(int fd, void *_buf, int len1, bool single_read)
     uint8_t *buf = _buf;
 
     len = len1;
-    while ((len > 0) && (ret = read(fd, buf, len)) != 0) {
+    while ((len > 0) && (ret = recv(fd, buf, len, 0)) != 0) {
         if (ret < 0) {
             if (errno != EINTR && errno != EAGAIN) {
                 return -1;

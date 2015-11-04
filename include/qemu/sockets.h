@@ -44,6 +44,9 @@ int socket_set_fast_reuse(int fd);
 int send_all(int fd, const void *buf, int len1);
 int recv_all(int fd, void *buf, int len1, bool single_read);
 
+int opengl_send_all(int fd, const void *buf, int len1);
+int opengl_recv_all(int fd, void *buf, int len1, bool single_read);
+
 /* callback function for nonblocking connect
  * valid fd on success, negative error code on failure
  */
