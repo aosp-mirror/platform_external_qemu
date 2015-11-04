@@ -20,7 +20,6 @@
 #define CONFIG_BDRV_RO_WHITELIST\
     NULL
 #define CONFIG_VNC 1
-#define CONFIG_VNC_SASL 1
 #define CONFIG_FNMATCH 1
 #define CONFIG_UUID 1
 #define QEMU_VERSION "2.2.0"

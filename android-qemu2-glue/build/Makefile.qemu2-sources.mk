@@ -338,7 +338,6 @@ QEMU2_COMMON_SOURCES_darwin-x86_64 := \
     net/tap.c \
     net/vhost-user.c \
     os-posix.c \
-    ui/vnc-auth-sasl.c \
 
 QEMU2_TARGET_SOURCES := \
     android-console.c \
