@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/qt/qt_setup.h"
+#include "android/qt/qt_path.h"
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
