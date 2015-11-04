@@ -222,11 +222,17 @@ else
 endif
 
 ifeq ($(HOST_OS),darwin)
-  QEMU_SYSTEM_LDLIBS += -Wl,-framework,Cocoa,-framework,QTKit,-framework,CoreVideo,-framework,AVFoundation
+  QEMU_SYSTEM_FRAMEWORKS := \
+      AudioUnit \
+      AVFoundation \
+      Cocoa \
+      CoreAudio \
+      CoreMedia \
+      CoreVideo \
+      ForceFeedback \
+      QTKit \
 
-  # SDK 10.6+ doesn't have __dyld_func_lookup anymore. Dynamic library lookup
-  # symbols are instead resolved at runtime
-  QEMU_SYSTEM_LDLIBS += -undefined dynamic_lookup
+  QEMU_SYSTEM_LDLIBS += $(QEMU_SYSTEM_FRAMEWORKS:%=-Wl,-framework,%)
 endif
 
 ifdef EMULATOR_BUILD_32BITS
