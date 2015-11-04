@@ -77,7 +77,7 @@ ifdef EMULATOR_USE_QT
     LOCAL_CFLAGS += -DCONFIG_QT
 endif
 
-LOCAL_STATIC_LIBRARIES := emulator-common
+LOCAL_STATIC_LIBRARIES := emulator-common $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1)
 # Ensure this is always built, even if 32-bit binaries are disabled.
 LOCAL_IGNORE_BITNESS := true
 

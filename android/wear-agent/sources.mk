@@ -22,7 +22,7 @@ WEAR_AGENT_SOURCES := \
     android/wear-agent/PairUpWearPhone.cpp \
     android/wear-agent/WearAgent.cpp \
 
-WEAR_AGENT_LIBS := emulator-common
+WEAR_AGENT_LIBS := emulator-common $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1)
 
 $(call start-emulator-program, wear-agent$(HOST_SUFFIX))
 LOCAL_SRC_FILES := $(WEAR_AGENT_SOURCES)
