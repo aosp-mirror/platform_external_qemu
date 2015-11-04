@@ -403,7 +403,7 @@ path_get_size( const char*  path, uint64_t  *psize )
 #endif
 }
 
-
+#ifndef ANDROID_QEMU2_SPECIFIC
 ABool
 path_is_absolute( const char*  path )
 {
@@ -426,6 +426,7 @@ path_is_absolute( const char*  path )
     return (path != NULL && path[0] == '/');
 #endif
 }
+#endif
 
 char*
 path_get_absolute( const char* path )

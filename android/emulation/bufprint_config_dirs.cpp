@@ -56,12 +56,3 @@ char* bufprint_config_file(char* buff, char* end, const char* suffix) {
     p = bufprint(p, end, "%c%s", System::kDirSeparator, suffix);
     return p;
 }
-
-char* bufprint_temp_dir(char* buff, char* end) {
-    return bufprint(buff, end, "%s", System::get()->getTempDir().c_str());
-}
-
-char* bufprint_temp_file(char* buff, char* end, const char* suffix) {
-    return bufprint(buff, end, "%s%c%s", System::get()->getTempDir().c_str(),
-                    System::kDirSeparator, suffix);
-}

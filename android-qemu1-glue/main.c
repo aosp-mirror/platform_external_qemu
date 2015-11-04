@@ -434,7 +434,7 @@ int main(int argc, char **argv) {
         }
         ret = path_mkdir_if_needed( profilePath, 0755 );
         if (ret < 0) {
-            fprintf(stderr, "could not create directory '%s'\n", tmp);
+            fprintf(stderr, "could not create directory '%s'\n", profilePath);
             exit(2);
         }
         opts->code_profile = profilePath;
