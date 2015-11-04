@@ -84,6 +84,8 @@ public:
     // parent |window| id. |wx|, |wy|, |ww| and |wh| are the position
     // and dimension of the sub-window, relative to its parent.
     // |fbw| and |fbh| are the dimensions of the underlying guest framebuffer.
+    // |dpr| is the device pixel ratio for the monitor, which is required for
+    // higher-density displays (such as retina).
     // |rotation| is a clockwise-rotation for the content. Only multiples of
     // 90. are accepted. Returns true on success, false otherwise.
     //
@@ -95,6 +97,7 @@ public:
                         int wh,
                         int fbw,
                         int fbh,
+                        float dpr,
                         float rotation);
 
     // Remove the sub-window created by calling setupSubWindow().

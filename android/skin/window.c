@@ -1218,6 +1218,7 @@ typedef struct {
     int wh;
     int fbw;
     int fbh;
+    float dpr;
     float rot;
 } gles_show_data;
 
@@ -1230,6 +1231,7 @@ static void skin_window_run_opengles_show(void* p) {
                                            data->wh,
                                            data->fbw,
                                            data->fbh,
+                                           data->dpr,
                                            data->rot);
 }
 
@@ -1244,14 +1246,14 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
 
     data->fbw = window->framebuffer.w;
     data->fbh = window->framebuffer.h;
+    data->dpr = 1.0;
 
 #if defined(__APPLE__) && CONFIG_QT
     // If the window is on a retina monitor, the framebuffer size needs to be
     // adjusted to the actual number of pixels.
     double dpr;
     if (skin_winsys_get_device_pixel_ratio(&dpr) == 0) {
-        data->fbw *= dpr;
-        data->fbh *= dpr;
+        data->dpr = dpr;
     }
 
     // The native GL subwindow for OSX (using Cocoa) uses cartesian (y-up) coordinates. We
@@ -1498,8 +1500,7 @@ skin_window_scroll_updated( SkinWindow* window, int dx, int xmax, int dy, int ym
 
 
     // Compute the margins around the sub-window, then transform the current scroll values
-    // to take into account these margins. Values outside of [0,1] will be clamped by the
-    // sub-window as a sanity check.
+    // to take into account these margins.
     int left_buf = window->subwindow_original.x;
     int right_buf = skin_surface_width(window->surface)
                         - (window->framebuffer.w + left_buf);
@@ -1522,6 +1523,13 @@ skin_window_scroll_updated( SkinWindow* window, int dx, int xmax, int dy, int ym
         // Use (ymax - dy) instead of (dy) since OGL coordinates are Y-up
         py = (float) ((ymax - dy) - bottom_buf) / (float) (ymax - (bottom_buf + top_buf));
     }
+
+    // Clamp the values to [0,1]. (dx,dy) = (0,0) indicates to align the bottom left corner of the
+    // framebuffer with the bottom left corner of the subwindow. (1,1) indicates to align the
+    // top right corner of the framebuffer with the top right corner of the subwindow. All
+    // intermediate values are an interpolation between these two states.
+    px = px > 1 ? 1 : (px < 0 ? 0 : px);
+    py = py > 1 ? 1 : (py < 0 ? 0 : py);
 
     window->win_funcs->opengles_setTranslation(px, py);
 }

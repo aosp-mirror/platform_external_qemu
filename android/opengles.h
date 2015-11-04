@@ -50,7 +50,7 @@ void android_getOpenglesHardwareStrings(char** vendor,
                                         char** version);
 
 int android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
-                               int fbw, int fbh, float rotation);
+                               int fbw, int fbh, float dpr, float rotation);
 
 int android_hideOpenglesWindow(void);
 
