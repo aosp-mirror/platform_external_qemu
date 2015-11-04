@@ -787,7 +787,8 @@ int main(int argc, char **argv) {
         reassign_string(&hw->hw_keyboard_charmap, charmap_name);
     }
 
-    {
+    // Initialize emugl if we're not using a guest-side GLES implementation
+    if (strcmp(opts->gpu, "guest") != 0) {
         EmuglConfig config;
 
         if (!emuglConfig_init(&config,
@@ -817,7 +818,8 @@ int main(int argc, char **argv) {
      * can be properly saved / resored in snapshot file. */
     if (hw->hw_gpu_enabled && opts->snapstorage && (!opts->no_snapshot_load ||
                                                     !opts->no_snapshot_save)) {
-        derror("Snapshots and gpu are mutually exclusive at this point. Please turn one of them off, and restart the emulator.");
+        derror("Snapshots and host-side GPU are mutually exclusive at this point. "
+               "Please turn one of them off or use guest-side GPU emulation, and restart the emulator.");
         exit(1);
     }
 
