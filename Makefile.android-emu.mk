@@ -98,6 +98,7 @@ ANDROID_EMU_BASE_SOURCES := \
     android/utils/mapfile.c \
     android/utils/misc.c \
     android/utils/panic.c \
+    android/utils/path.c \
     android/utils/property_file.c \
     android/utils/reflist.c \
     android/utils/refset.c \
@@ -127,9 +128,6 @@ else
     ANDROID_EMU_BASE_SOURCES += \
         android/base/threads/Thread_pthread.cpp
 endif
-
-ANDROID_EMU_BASE_DEPENDENT_SOURCES := \
-    android/utils/path.c
 
 ANDROID_EMU_SOURCES := \
     android/adb-qemud.c \
@@ -239,20 +237,14 @@ $(call start-emulator-library,android-emu)
 $(call end-emulator-library)
 
 $(call start-emulator-library,android-emu-qemu1)
-    LOCAL_SRC_FILES := \
-        $(ANDROID_EMU_DEPENDENT_SOURCES) \
-        $(ANDROID_EMU_BASE_DEPENDENT_SOURCES)
-
+    LOCAL_SRC_FILES := $(ANDROID_EMU_DEPENDENT_SOURCES)
     LOCAL_CFLAGS := $(ANDROID_EMU_INTERNAL_CFLAGS)
     LOCAL_C_INCLUDES := $(ANDROID_EMU_INTERNAL_INCLUDES)
     $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
 $(call start-emulator-library,android-emu-qemu2)
-    LOCAL_SRC_FILES :=  \
-        $(ANDROID_EMU_DEPENDENT_SOURCES) \
-        $(ANDROID_EMU_BASE_DEPENDENT_SOURCES)
-
+    LOCAL_SRC_FILES := $(ANDROID_EMU_DEPENDENT_SOURCES)
     LOCAL_CFLAGS := \
         $(ANDROID_EMU_INTERNAL_CFLAGS) \
         $(ANDROID_EMU_INTERNAL_QEMU2_CFLAGS)
