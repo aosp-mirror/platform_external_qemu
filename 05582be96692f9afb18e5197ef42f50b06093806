@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "56c6a231_54f5a4ee",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-04T04:49:07Z",
+      "side": 1,
+      "message": "there\u0027s a callback in qemu2 which wants function pointer with void return type. I\u0027m just changing it here at once - anyway no one ever used this return value",
+      "parentUuid": "b6335e1f_27f2bec7",
+      "range": {
+        "startLine": 147,
+        "startChar": 7,
+        "endLine": 147,
+        "endChar": 11
+      },
+      "revId": "05582be96692f9afb18e5197ef42f50b06093806",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d6bb729e_90bc7ce0",
         "filename": "android/qemu-setup.c",
         "patchSetId": 2
