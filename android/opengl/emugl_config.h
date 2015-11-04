@@ -48,7 +48,6 @@ typedef struct {
 bool emuglConfig_init(EmuglConfig* config,
                       bool gpu_enabled,
                       const char* gpu_mode,
-                      const char* gpu_option,
                       int bitness,
                       bool no_window);
 

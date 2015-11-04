@@ -965,6 +965,28 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
     }
 
     D("Physical RAM size: %dMB\n", hw->hw_ramSize);
+
+    // The value of '-gpu <mode>' overrides the hardware properties,
+    // except if <mode> is 'auto'.
+    if (opts->gpu) {
+        if (!strcmp(opts->gpu, "on") || !strcmp(opts->gpu, "enable")) {
+            hw->hw_gpu_enabled = true;
+            if (!hw->hw_gpu_mode || !strcmp(hw->hw_gpu_mode, "auto")) {
+                reassign_string(&hw->hw_gpu_mode, "host");
+            }
+        } else if (!strcmp(opts->gpu, "off") ||
+                   !strcmp(opts->gpu, "disable")) {
+            hw->hw_gpu_enabled = false;
+        } else if (!strcmp(opts->gpu, "auto")) {
+            // Nothing to do
+        } else {
+            hw->hw_gpu_enabled = true;
+            reassign_string(&hw->hw_gpu_mode, opts->gpu);
+        }
+    }
+    if (!hw->hw_gpu_enabled) {
+        reassign_string(&hw->hw_gpu_mode, "off");
+    }
 }
 
 bool handleCpuAcceleration(AndroidOptions* opts, AvdInfo* avd,

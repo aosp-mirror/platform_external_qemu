@@ -57,14 +57,14 @@ TEST(EmuglConfig, init) {
 
     {
         EmuglConfig config;
-        EXPECT_TRUE(emuglConfig_init(&config, false, "host", NULL, 0, false));
+        EXPECT_TRUE(emuglConfig_init(&config, false, "host", 0, false));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
 
     {
         EmuglConfig config;
-        EXPECT_TRUE(emuglConfig_init(&config, true, "host", NULL, 0, false));
+        EXPECT_TRUE(emuglConfig_init(&config, true, "host", 0, false));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("host", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
@@ -72,7 +72,7 @@ TEST(EmuglConfig, init) {
 
     {
         EmuglConfig config;
-        EXPECT_TRUE(emuglConfig_init(&config, true, "mesa", NULL, 0, false));
+        EXPECT_TRUE(emuglConfig_init(&config, true, "mesa", 0, false));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("mesa", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'mesa' mode", config.status);
@@ -80,67 +80,28 @@ TEST(EmuglConfig, init) {
 
     {
         EmuglConfig config;
-        EXPECT_TRUE(emuglConfig_init(&config, true, "host", "off", 0, false));
+        EXPECT_TRUE(emuglConfig_init(&config, false, "mesa", 0, false));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
 
     {
         EmuglConfig config;
-        EXPECT_TRUE(emuglConfig_init(
-                &config, true, "host", "disable", 0, false));
+        EXPECT_TRUE(emuglConfig_init(&config, false, "auto", 0, false));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
 
     {
         EmuglConfig config;
-        EXPECT_TRUE(emuglConfig_init(&config, false, "host", "on", 0, false));
-        EXPECT_TRUE(config.enabled);
-        EXPECT_STREQ("host", config.backend);
-        EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
-    }
-
-    {
-        EmuglConfig config;
-        EXPECT_TRUE(emuglConfig_init(&config, false, NULL, "on", 0, false));
-        EXPECT_TRUE(config.enabled);
-        EXPECT_STREQ("host", config.backend);
-        EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
-    }
-
-    {
-        EmuglConfig config;
-        EXPECT_TRUE(emuglConfig_init(
-                &config, false, "mesa", "enable", 0, false));
-        EXPECT_TRUE(config.enabled);
-        EXPECT_STREQ("mesa", config.backend);
-        EXPECT_STREQ("GPU emulation enabled using 'mesa' mode", config.status);
-    }
-
-
-    {
-        EmuglConfig config;
-        EXPECT_TRUE(emuglConfig_init(
-                &config, true, "vendor", "auto", 0, false));
-        EXPECT_TRUE(config.enabled);
-        EXPECT_STREQ("vendor", config.backend);
-        EXPECT_STREQ("GPU emulation enabled using 'vendor' mode",
-                     config.status);
-    }
-
-    {
-        EmuglConfig config;
-        EXPECT_TRUE(emuglConfig_init(
-                &config, false, "vendor", "auto", 0, false));
+        EXPECT_TRUE(emuglConfig_init(&config, false, "vendor", 0, false));
         EXPECT_FALSE(config.enabled);
         EXPECT_STREQ("GPU emulation is disabled", config.status);
     }
 
     {
         EmuglConfig config;
-        EXPECT_TRUE(emuglConfig_init(
-                &config, true, "host", "vendor", 0, false));
+        EXPECT_TRUE(emuglConfig_init(&config, true, "vendor", 0, false));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("vendor", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'vendor' mode", config.status);
@@ -159,7 +120,7 @@ TEST(EmuglConfig, initNxWithMesa) {
     testSys.setRemoteSessionType("NX");
 
     EmuglConfig config;
-    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", NULL, 0, false));
+    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", 0, false));
     EXPECT_TRUE(config.enabled);
     EXPECT_STREQ("mesa", config.backend);
     EXPECT_STREQ("GPU emulation enabled using 'mesa' mode", config.status);
@@ -174,7 +135,7 @@ TEST(EmuglConfig, initNxWithoutMesa) {
     testSys.setRemoteSessionType("NX");
 
     EmuglConfig config;
-    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", NULL, 0, false));
+    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", 0, false));
     EXPECT_FALSE(config.enabled);
     EXPECT_STREQ("GPU emulation is disabled under NX without Mesa", config.status);
 }
@@ -191,7 +152,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithMesa) {
     testSys.setRemoteSessionType("Chrome Remote Desktop");
 
     EmuglConfig config;
-    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", NULL, 0, false));
+    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", 0, false));
     EXPECT_TRUE(config.enabled);
     EXPECT_STREQ("mesa", config.backend);
     EXPECT_STREQ("GPU emulation enabled using 'mesa' mode", config.status);
@@ -206,7 +167,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithoutMesa) {
     testSys.setRemoteSessionType("Chrome Remote Desktop");
 
     EmuglConfig config;
-    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", NULL, 0, false));
+    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", 0, false));
     EXPECT_FALSE(config.enabled);
     EXPECT_STREQ("GPU emulation is disabled under Chrome Remote Desktop without Mesa", config.status);
 }
@@ -221,7 +182,7 @@ TEST(EmuglConfig, initNoWindowWithMesa) {
     makeLibSubFile(myDir, "gles_mesa/libGLES.so");
 
     EmuglConfig config;
-    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", NULL, 0, true));
+    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", 0, true));
     EXPECT_TRUE(config.enabled);
     EXPECT_STREQ("mesa", config.backend);
     EXPECT_STREQ("GPU emulation enabled using 'mesa' mode", config.status);
@@ -234,7 +195,7 @@ TEST(EmuglConfig, initNoWindowWithoutMesa) {
     makeLibSubDir(myDir, "");
 
     EmuglConfig config;
-    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", NULL, 0, true));
+    EXPECT_TRUE(emuglConfig_init(&config, true, "auto", 0, true));
     EXPECT_FALSE(config.enabled);
     EXPECT_STREQ("GPU emulation is disabled (-no-window without Mesa)",
                  config.status);

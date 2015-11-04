@@ -427,13 +427,13 @@ extern "C" int main(int argc, char **argv, char **envp) {
 
     handleCommonEmulatorOptions(opts, hw, avd);
 
-    {
+    // Initialize emugl if we're not using a guest-side GLES implementation
+    if (strcmp(android_hw->hw_gpu_mode, "guest") != 0) {
         EmuglConfig emuglConfig;
 
         if (!emuglConfig_init(&emuglConfig,
                               hw->hw_gpu_enabled,
                               hw->hw_gpu_mode,
-                              opts->gpu,
                               0,
                               opts->no_window)) {
             derror("%s", emuglConfig.status);
@@ -551,7 +551,11 @@ extern "C" int main(int argc, char **argv, char **envp) {
     }
 
     if (hw->hw_gpu_enabled) {
-        kernelCommandLine += " qemu.gles=1";
+        if (strcmp(android_hw->hw_gpu_mode, "guest") != 0) {
+            kernelCommandLine += " qemu.gles=1";   // Using emugl
+        } else {
+            kernelCommandLine += " qemu.gles=2";   // Using guest
+        }
     } else {
         kernelCommandLine += " qemu.gles=0";
     }

@@ -57,30 +57,10 @@ static bool stringVectorContains(const StringVector& list,
 bool emuglConfig_init(EmuglConfig* config,
                       bool gpu_enabled,
                       const char* gpu_mode,
-                      const char* gpu_option,
                       int bitness,
                       bool no_window) {
     // zero all fields first.
     memset(config, 0, sizeof(*config));
-
-    // The value of '-gpu <mode>' overrides the hardware properties,
-    // except if <mode> is 'auto'.
-    if (gpu_option) {
-        if (!strcmp(gpu_option, "on") || !strcmp(gpu_option, "enable")) {
-            gpu_enabled = true;
-            if (!gpu_mode || !strcmp(gpu_mode, "auto")) {
-                gpu_mode = "host";
-            }
-        } else if (!strcmp(gpu_option, "off") ||
-                   !strcmp(gpu_option, "disable")) {
-            gpu_enabled = false;
-        } else if (!strcmp(gpu_option, "auto")) {
-            // Nothing to do
-        } else {
-            gpu_enabled = true;
-            gpu_mode = gpu_option;
-        }
-    }
 
     if (!gpu_enabled) {
         config->enabled = false;
@@ -99,7 +79,7 @@ bool emuglConfig_init(EmuglConfig* config,
     // the best mode depending on the environment. Its purpose is to
     // enable 'mesa' mode automatically when NX or Chrome Remote Desktop
     // is detected.
-    if (!strcmp(gpu_mode, "auto") && !gpu_option) {
+    if (!strcmp(gpu_mode, "auto")) {
         // The default will be 'host' unless NX or Chrome Remote Desktop
         // is detected, or |no_window| is true.
         String sessionType;
