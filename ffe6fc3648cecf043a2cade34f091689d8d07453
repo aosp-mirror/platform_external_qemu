@@ -16,6 +16,24 @@
       "revId": "ffe6fc3648cecf043a2cade34f091689d8d07453",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1698aa84_5247b430",
+        "filename": "android/skin/ui.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-04T22:29:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "36aa0e54_6bcb1577",
+      "revId": "ffe6fc3648cecf043a2cade34f091689d8d07453",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
