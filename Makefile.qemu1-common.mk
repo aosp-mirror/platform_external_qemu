@@ -107,140 +107,17 @@ common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
 EMULATOR_COMMON_CFLAGS += $(LIBCURL_CFLAGS)
 
 ###########################################################
+# build the android-emu libraries
+include $(LOCAL_PATH)/Makefile.android-emu.mk
+
+###########################################################
 # Android utility functions
 #
 common_LOCAL_SRC_FILES += \
-    android/android-constants.c \
-    android/async-console.c \
-    android/async-utils.c \
-    android/curl-support.c \
-    android/framebuffer.c \
-    android/avd/hw-config.c \
-    android/avd/info.c \
-    android/avd/scanner.c \
-    android/avd/util.c \
-    android/base/async/AsyncReader.cpp \
-    android/base/async/AsyncWriter.cpp \
-    android/base/async/Looper.cpp \
-    android/base/async/ThreadLooper.cpp \
-    android/base/containers/PodVector.cpp \
-    android/base/containers/PointerSet.cpp \
-    android/base/containers/HashUtils.cpp \
-    android/base/containers/StringVector.cpp \
-    android/base/files/IniFile.cpp \
-    android/base/files/PathUtils.cpp \
-    android/base/files/StdioStream.cpp \
-    android/base/files/Stream.cpp \
-    android/base/misc/HttpUtils.cpp \
-    android/base/misc/StringUtils.cpp \
-    android/base/misc/Utf8Utils.cpp \
-    android/base/sockets/SocketDrainer.cpp \
-    android/base/sockets/SocketUtils.cpp \
-    android/base/sockets/SocketWaiter.cpp \
-    android/base/synchronization/MessageChannel.cpp \
-    android/base/Log.cpp \
-    android/base/memory/LazyInstance.cpp \
-    android/base/String.cpp \
-    android/base/StringFormat.cpp \
-    android/base/StringView.cpp \
-    android/base/system/System.cpp \
-    android/base/threads/ThreadStore.cpp \
-    android/base/Uri.cpp \
-    android/base/Version.cpp \
-    android/emulation/android_pipe.c \
-    android/emulation/android_pipe_pingpong.c \
-    android/emulation/android_pipe_throttle.c \
-    android/emulation/android_pipe_zero.c \
-    android/emulation/android_qemud.cpp \
-    android/emulation/qemud/android_qemud_sink.cpp \
-    android/emulation/qemud/android_qemud_serial.cpp \
-    android/emulation/qemud/android_qemud_client.cpp \
-    android/emulation/qemud/android_qemud_service.cpp \
-    android/emulation/qemud/android_qemud_multiplexer.cpp \
-    android/emulation/bufprint_config_dirs.cpp \
-    android/emulation/ConfigDirs.cpp \
-    android/emulation/control/LineConsumer.cpp \
-    android/emulation/CpuAccelerator.cpp \
-    android/emulation/serial_line.cpp \
-    android/filesystems/ext4_utils.cpp \
-    android/filesystems/fstab_parser.cpp \
-    android/filesystems/partition_types.cpp \
-    android/filesystems/ramdisk_extractor.cpp \
-    android/kernel/kernel_utils.cpp \
-    android/metrics/metrics_reporter.c \
-    android/metrics/metrics_reporter_ga.c \
-    android/metrics/metrics_reporter_toolbar.c \
-    android/metrics/StudioHelper.cpp \
     android-qemu1-glue/android_qemud.cpp \
     android-qemu1-glue/base/async/Looper.cpp \
     android-qemu1-glue/base/files/QemuFileStream.cpp \
     android-qemu1-glue/utils/stream.cpp \
-    android/opengl/EmuglBackendList.cpp \
-    android/opengl/EmuglBackendScanner.cpp \
-    android/opengl/emugl_config.cpp \
-    android/opengl/GpuFrameBridge.cpp \
-    android/proxy/proxy_common.c \
-    android/proxy/proxy_http.c \
-    android/proxy/proxy_http_connector.c \
-    android/proxy/proxy_http_rewriter.c \
-    android/update-check/UpdateChecker.cpp \
-    android/update-check/VersionExtractor.cpp \
-    android/utils/aconfig-file.c \
-    android/utils/assert.c \
-    android/utils/bufprint.c \
-    android/utils/bufprint_system.cpp \
-    android/utils/cbuffer.c \
-    android/utils/debug.c \
-    android/utils/dll.c \
-    android/utils/dirscanner.cpp \
-    android/utils/eintr_wrapper.c \
-    android/utils/filelock.c \
-    android/utils/file_data.c \
-    android/utils/format.cpp \
-    android/utils/host_bitness.cpp \
-    android/utils/http_utils.cpp \
-    android/utils/iolooper.cpp \
-    android/utils/ini.cpp \
-    android/utils/intmap.c \
-    android/utils/ipaddr.cpp \
-    android/utils/lineinput.c \
-    android/utils/looper.cpp \
-    android/utils/mapfile.c \
-    android/utils/misc.c \
-    android/utils/panic.c \
-    android/utils/path.c \
-    android/utils/property_file.c \
-    android/utils/reflist.c \
-    android/utils/refset.c \
-    android/utils/socket_drainer.cpp \
-    android/utils/sockets.c \
-    android/utils/stralloc.c \
-    android/utils/stream.cpp \
-    android/utils/string.cpp \
-    android/utils/system.c \
-    android/utils/system_wrapper.cpp \
-    android/utils/tempfile.c \
-    android/utils/uncompress.cpp \
-    android/utils/uri.cpp \
-    android/utils/utf8_utils.cpp \
-    android/utils/vector.c \
-    android/utils/x86_cpuid.c \
-
-ifeq (windows,$(HOST_OS))
-common_LOCAL_SRC_FILES += \
-    android/base/synchronization/ConditionVariable_win32.cpp \
-    android/base/threads/Thread_win32.cpp \
-    android/base/system/Win32UnicodeString.cpp \
-    android/base/system/Win32Utils.cpp \
-    android/utils/win32_cmdline_quote.cpp \
-
-else
-common_LOCAL_SRC_FILES += \
-    android/base/threads/Thread_pthread.cpp \
-
-endif
-
-
 
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
@@ -473,41 +350,6 @@ CORE_MISC_SOURCES = \
     qemu-char.c \
     qemu-log.c \
     savevm.c \
-    android-qemu1-glue/emulation/charpipe.c \
-    android-qemu1-glue/emulation/serial_line.cpp \
-    android-qemu1-glue/base/async/Looper.cpp \
-    android-qemu1-glue/emulation/CharSerialLine.cpp \
-    android-qemu1-glue/qemu-setup.cpp \
-    android/boot-properties.c \
-    android/core-init-utils.c   \
-    android/ext4_resize.cpp   \
-    android/gps.c \
-    android/hw-kmsg.c \
-    android/hw-lcd.c \
-    android/hw-events.c \
-    android/hw-control.c \
-    android/hw-fingerprint.c \
-    android/hw-sensors.c \
-    android/hw-qemud.cpp \
-    android/looper-qemu.cpp \
-    android/hw-pipe-net.c \
-    android/qemu-setup.c \
-    android/qemu-tcpdump.c \
-    android/shaper.c \
-    android/snapshot.c \
-    android/async-socket-connector.c \
-    android/async-socket.c \
-    android/sdk-controller-socket.c \
-    android/sensors-port.c \
-    android/utils/timezone.c \
-    android/camera/camera-format-converters.c \
-    android/camera/camera-service.c \
-    android/adb-server.c \
-    android/adb-qemud.c \
-    android/snaphost-android.c \
-    android/multitouch-screen.c \
-    android/multitouch-port.c \
-    android/utils/jpeg-compress.c \
     net/net-android.c \
     qobject/qerror.c \
     qom/container.c \
@@ -532,6 +374,21 @@ CORE_MISC_SOURCES = \
     util/qemu-sockets-android.c \
     util/unicode.c \
     util/yield-android.c \
+    android/camera/camera-format-converters.c \
+    android/camera/camera-service.c \
+    android/core-init-utils.c   \
+    android/multitouch-screen.c \
+    android/multitouch-port.c \
+    android/hw-kmsg.c \
+    android/utils/jpeg-compress.c \
+    android/looper-qemu.cpp \
+    android/hw-lcd.c \
+    android/ext4_resize.cpp   \
+    android-qemu1-glue/emulation/charpipe.c \
+    android-qemu1-glue/emulation/serial_line.cpp \
+    android-qemu1-glue/base/async/Looper.cpp \
+    android-qemu1-glue/emulation/CharSerialLine.cpp \
+    android-qemu1-glue/qemu-setup.cpp
 
 ifeq ($(HOST_ARCH),x86)
     CORE_MISC_SOURCES += disas/i386.c

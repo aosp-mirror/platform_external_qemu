@@ -335,14 +335,15 @@ LOCAL_STATIC_LIBRARIES += \
     emulator-libjpeg \
     libandroid-wear-agent \
     emulator-common \
-    emulator-libext4_utils \
-    emulator-libsparse \
-    emulator-libselinux \
+    $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
     $(ANDROID_SKIN_STATIC_LIBRARIES) \
     $(LIBCURL_STATIC_LIBRARIES) \
     $(EMULATOR_LIBUI_STATIC_LIBRARIES) \
     $(LIBXML2_STATIC_LIBRARIES) \
     $(BREAKPAD_STATIC_LIBRARIES) \
+    emulator-libext4_utils \
+    emulator-libsparse \
+    emulator-libselinux \
 
 LOCAL_LDLIBS += $(common_LOCAL_LDLIBS) $(ANDROID_SKIN_LDLIBS) $(LIBCURL_LDLIBS)
 LOCAL_LDLIBS += $(BREAKPAD_LDLIBS)
