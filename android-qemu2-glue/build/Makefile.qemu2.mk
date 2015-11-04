@@ -33,10 +33,10 @@ QEMU2_DEPS_LDFLAGS := -L$(QEMU2_DEPS_TOP_DIR)/lib
 QEMU2_GLIB_INCLUDES := $(QEMU2_DEPS_TOP_DIR)/include/glib-2.0 \
                        $(QEMU2_DEPS_TOP_DIR)/lib/glib-2.0/include
 
-QEMU2_GLIB_LDLIBS := -lglib-2.0
-ifeq (linux,$(HOST_OS))
-    QEMU2_GLIB_LDLIBS += -lpthread -lrt
-endif
+QEMU2_GLIB_LDLIBS := \
+    -lglib-2.0 \
+    $(call qemu2-if-darwin, -liconv -lintl) \
+    $(call qemu2-if-linux, -lpthread -lrt)
 
 QEMU2_PIXMAN_INCLUDES := $(QEMU2_DEPS_TOP_DIR)/include/pixman-1
 QEMU2_PIXMAN_LDLIBS := -lpixman-1
