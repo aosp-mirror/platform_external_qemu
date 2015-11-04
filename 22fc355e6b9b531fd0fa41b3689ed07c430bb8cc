@@ -22,6 +22,30 @@
       "revId": "22fc355e6b9b531fd0fa41b3689ed07c430bb8cc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6bb729e_9051dce3",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-04T06:40:24Z",
+      "side": 1,
+      "message": "Do you mean the draw() call on line 308? If you do, then the answer is no. That draw call is what modifies the texture. The point is to regenerate mipmaps for the modified texture.",
+      "parentUuid": "b65c3e65_c2bf787c",
+      "range": {
+        "startLine": 313,
+        "startChar": 4,
+        "endLine": 313,
+        "endChar": 27
+      },
+      "revId": "22fc355e6b9b531fd0fa41b3689ed07c430bb8cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
