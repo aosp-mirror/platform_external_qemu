@@ -92,6 +92,7 @@ struct RenderWindowMessage {
             int wh;
             int fbw;
             int fbh;
+            float dpr;
             float rotation;
         } subwindow;
 
@@ -137,7 +138,7 @@ struct RenderWindowMessage {
                 break;
 
             case CMD_SETUP_SUBWINDOW:
-                D("CMD_SETUP_SUBWINDOW: parent=%p wx=%d wy=%d ww=%d wh=%d fbw=%d fbh=%d rotation=%f\n",
+                D("CMD_SETUP_SUBWINDOW: parent=%p wx=%d wy=%d ww=%d wh=%d fbw=%d fbh=%d dpr=%f rotation=%f\n",
                     (void*)msg.subwindow.parent,
                     msg.subwindow.wx,
                     msg.subwindow.wy,
@@ -145,6 +146,7 @@ struct RenderWindowMessage {
                     msg.subwindow.wh,
                     msg.subwindow.fbw,
                     msg.subwindow.fbh,
+                    msg.subwindow.dpr,
                     msg.subwindow.rotation);
                 result = FrameBuffer::getFB()->setupSubWindow(
                         msg.subwindow.parent,
@@ -154,6 +156,7 @@ struct RenderWindowMessage {
                         msg.subwindow.wh,
                         msg.subwindow.fbw,
                         msg.subwindow.fbh,
+                        msg.subwindow.dpr,
                         msg.subwindow.rotation);
                 break;
 
@@ -386,6 +389,7 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
                                   int wh,
                                   int fbw,
                                   int fbh,
+                                  float dpr,
                                   float zRot) {
     D("Entering mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
     if (mHasSubWindow) {
@@ -401,6 +405,7 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
     msg.subwindow.wh = wh;
     msg.subwindow.fbw = fbw;
     msg.subwindow.fbh = fbh;
+    msg.subwindow.dpr = dpr;
     msg.subwindow.rotation = zRot;
 
     mHasSubWindow = processMessage(msg);

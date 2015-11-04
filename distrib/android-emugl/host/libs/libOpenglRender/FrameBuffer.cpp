@@ -478,6 +478,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                  int wh,
                                  int fbw,
                                  int fbh,
+                                 float dpr,
                                  float zRot) {
     bool success = false;
 
@@ -509,9 +510,10 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                     // Subwin creation was successfull,
                     // update viewport and z rotation and draw
                     // the last posted color buffer.
-                    s_gles2.glViewport(0, 0, fbw, fbh);
+                    s_gles2.glViewport(0, 0, fbw * dpr, fbh * dpr);
                     m_windowWidth = ww;
                     m_windowHeight = wh;
+                    m_dpr = dpr;
                     m_zRot = zRot;
                     m_px = 0;
                     m_py = 0;
@@ -1034,6 +1036,11 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
         // get the viewport
         GLint vp[4];
         s_gles2.glGetIntegerv(GL_VIEWPORT, vp);
+
+        // divide by device pixel ratio because windowing coordinates ignore DPR,
+        // but the framebuffer includes DPR
+        vp[2] = vp[2] / m_dpr;
+        vp[3] = vp[3] / m_dpr;
 
         // find the x and y values at the origin when "fully scrolled"
         // multiply by 2 because the texture goes from -1 to 1, not 0 to 1

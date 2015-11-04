@@ -82,6 +82,8 @@ public:
     // coordinate. |fbw| and |fbh| are the dimensions used to initialize
     // the framebuffer, which may be different from the dimensions of the
     // sub-window (in which case scaling will be applied automatically).
+    // |dpr| is the device pixel ratio of the monitor, which is needed for
+    // proper panning on high-density displays (like retina)
     // |zRot| is a rotation angle in degrees, (clockwise in the Y-upwards GL
     // coordinate space).
     // Return true on success, false otherwise.
@@ -90,7 +92,7 @@ public:
     bool setupSubWindow(FBNativeWindowType p_window,
                         int wx, int wy,
                         int ww, int wh,
-                        int fbw, int fbh, float zRot);
+                        int fbw, int fbh, float dpr, float zRot);
 
     // Remove the sub-window created by setupSubWindow(), if any.
     // Return true on success, false otherwise.
@@ -280,6 +282,8 @@ public:
     // framebuffer with the top right of the sub-window. Intermediate values
     // interpolate between these states.
     void setDisplayTranslation(float px, float py) {
+
+        // Sanity check the values to ensure they are between 0 and 1
         m_px = px > 1 ? 1 : (px < 0 ? 0 : px);
         m_py = py > 1 ? 1 : (py < 0 ? 0 : py);
         repost();
@@ -309,6 +313,7 @@ private:
     int m_framebufferHeight;
     int m_windowWidth;
     int m_windowHeight;
+    float m_dpr;
     bool m_useSubWindow;
     emugl::Mutex m_lock;
     FbConfigList* m_configs;

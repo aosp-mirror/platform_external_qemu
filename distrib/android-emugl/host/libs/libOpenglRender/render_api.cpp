@@ -193,12 +193,13 @@ RENDER_APICALL bool RENDER_APIENTRY createOpenGLSubwindow(
         int wh,
         int fbw,
         int fbh,
+        float dpr,
         float zRot)
 {
     RenderWindow* window = s_renderWindow;
 
     if (window) {
-       return window->setupSubWindow(window_id,wx,wy,ww,wh,fbw,fbh,zRot);
+       return window->setupSubWindow(window_id,wx,wy,ww,wh,fbw,fbh,dpr,zRot);
     }
     // XXX: should be implemented by sending the renderer process
     //      a request
