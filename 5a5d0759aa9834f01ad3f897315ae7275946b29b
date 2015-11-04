@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b6cfde71_e42f14c8",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-04T23:39:41Z",
+      "side": 1,
+      "message": "Pick one:\nnit: long line\nOR\nsneaky printf that shouldn\u0027t actually be there? If it is supposed to be here, replace with a debug print?",
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36c4ce60_f855ed45",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-04T23:39:41Z",
+      "side": 1,
+      "message": "Are these numbers arbitrary, or is there a way to know exactly how many characters can fit on the page? I assume if there are too many, they get cut off?",
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f60f9676_8c376b8b",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-04T23:39:41Z",
+      "side": 1,
+      "message": "This implies it\u0027s possible for there to be a NULL save path?",
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96d65a0b_a0025ae4",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-04T23:39:41Z",
+      "side": 1,
+      "message": "Same as above.",
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
