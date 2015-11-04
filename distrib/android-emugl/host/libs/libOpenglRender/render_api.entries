@@ -80,13 +80,15 @@ void setPostCallback(OnPostFn onPost, void* onPostContext);
 #     wx,wy is the top left corner of the rendering subwindow.
 #     ww,wh are the dimensions of the rendering subwindow.
 #     fbw,fbh are the dimensions of the underlying guest framebuffer.
+#     dpr is the device pixel ratio, which is needed for higher density
+#     displays like retina.
 #     zRot is the rotation to apply on the framebuffer display image.
 #
 #     Return true on success, false on failure, which can happen when using
 #     a software-only renderer like OSMesa. In this case, the client should
 #     call setPostCallback to get the content of each new frame when it is
 #     posted, and will be responsible for displaying it.
-bool createOpenGLSubwindow(FBNativeWindowType window, int wx, int wy, int ww, int wh, int fbw, int fbh, float zRot);
+bool createOpenGLSubwindow(FBNativeWindowType window, int wx, int wy, int ww, int wh, int fbw, int fbh, float dpr, float zRot);
 
 # destroyOpenGLSubwindow -
 #   destroys the created native subwindow. Once destroyed,
