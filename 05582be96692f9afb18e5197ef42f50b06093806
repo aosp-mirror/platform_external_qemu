@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "36c12e1a_b3b980ef",
+        "filename": "Makefile.qemu1-common.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-11-04T01:31:52Z",
+      "side": 1,
+      "message": "Note that the way qemu2 build is currently setup, we call a Makefile.mk inside qemu2 from the qemu2 Makefile\n\n- The output directory remains qemu/objs/* for qemu{1,2} builds\n- In fact, SRC_PATH remains .../external/qemu for both builds\n\nThis means that your change above has no effect whatsoever (and is not needed).",
+      "range": {
+        "startLine": 41,
+        "startChar": 34,
+        "endLine": 41,
+        "endChar": 42
+      },
+      "revId": "05582be96692f9afb18e5197ef42f50b06093806",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36aa0e54_4bef3970",
+        "filename": "android-configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-11-04T01:31:52Z",
+      "side": 1,
+      "message": "Please, please make this 1, just to no mess with my head :D",
+      "range": {
+        "startLine": 597,
+        "startChar": 73,
+        "endLine": 597,
+        "endChar": 74
+      },
+      "revId": "05582be96692f9afb18e5197ef42f50b06093806",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6335e1f_27f2bec7",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-11-04T01:31:52Z",
+      "side": 1,
+      "message": "how is this related to this CL?",
+      "range": {
+        "startLine": 147,
+        "startChar": 7,
+        "endLine": 147,
+        "endChar": 11
+      },
+      "revId": "05582be96692f9afb18e5197ef42f50b06093806",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6bb729e_90bc7ce0",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-11-04T01:31:52Z",
+      "side": 1,
+      "message": "Let\u0027s rename this macro to something that\u0027s more obviously claiming that these are transitional ifdefs -- something we _don\u0027t_ want living long term in the AndroidEmu library.",
+      "range": {
+        "startLine": 259,
+        "startChar": 7,
+        "endLine": 259,
+        "endChar": 12
+      },
+      "revId": "05582be96692f9afb18e5197ef42f50b06093806",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
