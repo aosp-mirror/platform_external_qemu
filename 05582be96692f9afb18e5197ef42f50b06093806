@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "568ea242_f45890d7",
+        "filename": "Makefile.qemu1-common.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-04T23:15:39Z",
+      "side": 1,
+      "message": "yeah, but we change LOCAL_PATH, and that\u0027s what is used as a general prefix (or we just change the current directory - I\u0027m not really sure)\nanyway, the build fails for me with \u0027file not found\u0027 if this path is not absolute",
+      "parentUuid": "36c12e1a_b3b980ef",
+      "range": {
+        "startLine": 41,
+        "startChar": 34,
+        "endLine": 41,
+        "endChar": 42
+      },
+      "revId": "05582be96692f9afb18e5197ef42f50b06093806",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "36aa0e54_4bef3970",
         "filename": "android-configure.sh",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-04T01:31:52Z",
       "side": 1,
       "message": "Please, please make this 1, just to no mess with my head :D",
+      "range": {
+        "startLine": 597,
+        "startChar": 73,
+        "endLine": 597,
+        "endChar": 74
+      },
+      "revId": "05582be96692f9afb18e5197ef42f50b06093806",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1698aa84_75049aa3",
+        "filename": "android-configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-04T23:15:39Z",
+      "side": 1,
+      "message": "I actually meant \u0027fatal \u003d 0\u0027, but why not :)",
+      "parentUuid": "36aa0e54_4bef3970",
       "range": {
         "startLine": 597,
         "startChar": 73,
