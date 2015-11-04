@@ -345,6 +345,7 @@ EOF
             --disable-vde \
             --disable-vhdx \
             --disable-vhost-net \
+            --disable-vnc-sasl \
             --disable-werror \
             $ENABLE_ANDROID \
             --enable-sdl \
