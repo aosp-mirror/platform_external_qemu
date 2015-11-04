@@ -25,7 +25,8 @@
 #define CONFIG_UUID 1
 #define QEMU_VERSION "2.2.0"
 #define QEMU_PKGVERSION ""
-#define CONFIG_COCOA 1
+#define CONFIG_SDL 1
+#define CONFIG_SDLABI 2.0
 #define CONFIG_IOVEC 1
 #define CONFIG_FDT 1
 #define CONFIG_MADVISE 1
