@@ -29,6 +29,7 @@ necessary.
 IMPORTANT: You need to use 'git-config' to ensure 'git clang-format' works
            correctly, see dedicated section below.
 
+
 I. History:
 -----------
 
@@ -671,4 +672,30 @@ MAX_INT. Other features not mentioned here
   If there's some missing feature you need, just add it to the list and send a
   code review to the team.
 
+
+V. Contributing code
+-----------------------------
+
+CL descriptions should follow the form (copied off of [2]):
+
+submodule: Summary of change preferably < 65 chars, surely < 80
+
+Longer description of change addressing as appropriate: why the change is made,
+context if it is part of many changes, description of previous behavior and
+newly introduced differences, etc.
+
+Long lines should be wrapped to 80 columns for easier log message viewing in
+terminals.
+
+BUG=b.android.com/123456
+TEST=Optional description of test steps to be performed by a human to verify
+     this patch. This helps cherry-pick changes later.
+     For bug fixes, it's a manual regression test (or preferably, just "Run
+     (new) unittests" :) ). For new features, some sanity checks.
+
+
+M. Appendix
+-----------------------------
+
 [1] https://www.chromium.org/developers/coding-style
+[2] https://www.chromium.org/developers/contributing-code
