@@ -256,7 +256,11 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
         exit(1);
     }
 
+#ifdef ANDROID_QEMU2_SPECIFIC
+    int legacy_adb = 0;
+#else
     int legacy_adb = avdInfo_getAdbdCommunicationMode(android_avdInfo) ? 0 : 1;
+#endif
 
     if (android_op_ports) {
         char* comma_location;

@@ -684,7 +684,6 @@ double   qemu_net_upload_speed   = 0.;
 double   qemu_net_download_speed = 0.;
 int      qemu_net_min_latency = 0;
 int      qemu_net_max_latency = 0;
-int      qemu_net_disable = 0;
 
 int
 ip_packet_is_internal( const uint8_t*  data, size_t  size )
