@@ -310,6 +310,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
     // Restore previous viewport.
     s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
     unbindFbo();
+    regenerateTexMipmaps();
 
     return true;
 }
@@ -350,9 +351,7 @@ bool ColorBuffer::bindToRenderbuffer() {
 
 bool ColorBuffer::post(float rotation, float dx, float dy) {
     // NOTE: Do not call m_helper->setupContext() here!
-    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
-    s_gles2.glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
-    s_gles2.glGenerateMipmap(GL_TEXTURE_2D);
+    regenerateTexMipmaps();
     return m_helper->getTextureDraw()->draw(m_tex, rotation, dx, dy);
 }
 
@@ -367,3 +366,11 @@ void ColorBuffer::readback(unsigned char* img) {
         unbindFbo();
     }
 }
+
+void ColorBuffer::regenerateTexMipmaps() {
+    s_gles2.glActiveTexture(GL_TEXTURE0);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+    s_gles2.glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
+    s_gles2.glGenerateMipmap(GL_TEXTURE_2D);
+}
+

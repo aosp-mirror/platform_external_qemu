@@ -137,6 +137,7 @@ private:
     ColorBuffer();  // no default constructor.
 
     explicit ColorBuffer(EGLDisplay display, Helper* helper);
+    void regenerateTexMipmaps();
 
 private:
     GLuint m_tex;
