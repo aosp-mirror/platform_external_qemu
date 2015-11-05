@@ -22,6 +22,30 @@
       "revId": "23037335400ebc2d51ee12548ef938cf2b299919",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76b806a7_e704225b",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-05T10:23:15Z",
+      "side": 0,
+      "message": "Yep, looks like a bug from copy-and-paste. Please add a line in the commit message about this. I tend to put these little \u0027extras\u0027 on a line that begins with a \u0027+\u0027 as in:\n\n    + Fix tiny bug on directory creation error for -code-profile",
+      "parentUuid": "b6335e1f_e7d0d61e",
+      "range": {
+        "startLine": 438,
+        "startChar": 65,
+        "endLine": 438,
+        "endChar": 68
+      },
+      "revId": "23037335400ebc2d51ee12548ef938cf2b299919",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

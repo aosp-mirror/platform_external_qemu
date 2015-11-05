@@ -96,6 +96,47 @@
     },
     {
       "key": {
+        "uuid": "f6ca3638_0bc05d4e",
+        "filename": "android-configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-05T10:23:15Z",
+      "side": 1,
+      "message": "Why is this optional anyway?",
+      "parentUuid": "36aa0e54_4bef3970",
+      "range": {
+        "startLine": 597,
+        "startChar": 73,
+        "endLine": 597,
+        "endChar": 74
+      },
+      "revId": "05582be96692f9afb18e5197ef42f50b06093806",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96b57aae_a8d03b1d",
+        "filename": "android/emulation/android_pipe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-05T10:23:15Z",
+      "side": 1,
+      "message": "Again, it would be nice to have a line in the commit message that explains why this change is needed.",
+      "revId": "05582be96692f9afb18e5197ef42f50b06093806",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b6335e1f_27f2bec7",
         "filename": "android/emulator-window.c",
         "patchSetId": 2
@@ -137,6 +178,47 @@
         "endLine": 147,
         "endChar": 11
       },
+      "revId": "05582be96692f9afb18e5197ef42f50b06093806",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76b806a7_8701a649",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-05T10:23:15Z",
+      "side": 1,
+      "message": "Can I ask you to put this information in the commit message? It always make it easier to understand the context of such changes.",
+      "parentUuid": "56c6a231_54f5a4ee",
+      "range": {
+        "startLine": 147,
+        "startChar": 7,
+        "endLine": 147,
+        "endChar": 11
+      },
+      "revId": "05582be96692f9afb18e5197ef42f50b06093806",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d630d214_02d4ca10",
+        "filename": "android/looper-qemu.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-05T10:23:15Z",
+      "side": 1,
+      "message": "nice, but we should definitely move this file to android-qemu1-glue/ apparently.",
       "revId": "05582be96692f9afb18e5197ef42f50b06093806",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
