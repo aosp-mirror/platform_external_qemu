@@ -139,6 +139,24 @@
       "revId": "5c549a9dfce9ae68758d500be35e3f751378024d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d60ff2af_6a2a975d",
+        "filename": "android/utils/path.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-05T23:11:53Z",
+      "side": 1,
+      "message": "The thing is this will be part of AndroidEmu, and I don\u0027t want two variants of the library, one compiled for QEMU1, and the other for QEMU2. A single library is easier to maintain unit-test properly in the long run.\n\nIf this means we need to rename this function (e.g. to path_check_absolute()), then so be it.",
+      "parentUuid": "d683721b_f320a278",
+      "revId": "5c549a9dfce9ae68758d500be35e3f751378024d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

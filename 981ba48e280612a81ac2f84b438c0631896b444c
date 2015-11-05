@@ -34,6 +34,24 @@
       "revId": "981ba48e280612a81ac2f84b438c0631896b444c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d61d32f8_baad71ad",
+        "filename": "android/emulation/bufprint_config_dirs.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-05T23:11:53Z",
+      "side": 0,
+      "message": "Oh, all right then.",
+      "parentUuid": "d69a9277_4cdc7308",
+      "revId": "981ba48e280612a81ac2f84b438c0631896b444c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
