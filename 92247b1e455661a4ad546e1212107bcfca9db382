@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1698aa84_29cc7a3e",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-05T22:12:20Z",
+      "side": 1,
+      "message": "is it possible to do this through the .ui file?",
+      "range": {
+        "startLine": 75,
+        "startChar": 0,
+        "endLine": 80,
+        "endChar": 43
+      },
+      "revId": "92247b1e455661a4ad546e1212107bcfca9db382",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96a49abb_6a7d9b96",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-05T22:12:20Z",
+      "side": 1,
+      "message": "why \"-\" is only for zero?\ncould you please add a short comment stating how the result is supposed to look like, with some examples?",
+      "range": {
+        "startLine": 121,
+        "startChar": 25,
+        "endLine": 121,
+        "endChar": 61
+      },
+      "revId": "92247b1e455661a4ad546e1212107bcfca9db382",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d683721b_beba71fa",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-05T22:12:20Z",
+      "side": 1,
+      "message": "timeval timeVal \u003d {};",
+      "range": {
+        "startLine": 353,
+        "startChar": 4,
+        "endLine": 354,
+        "endChar": 41
+      },
+      "revId": "92247b1e455661a4ad546e1212107bcfca9db382",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6923665_4521ae2f",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-05T22:12:20Z",
+      "side": 1,
+      "message": "nullptr",
+      "range": {
+        "startLine": 355,
+        "startChar": 27,
+        "endLine": 355,
+        "endChar": 31
+      },
+      "revId": "92247b1e455661a4ad546e1212107bcfca9db382",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d69a9277_07f084f7",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-05T22:12:20Z",
+      "side": 1,
+      "message": "can we just return if these are not set as a first thing in the function?",
+      "range": {
+        "startLine": 357,
+        "startChar": 0,
+        "endLine": 357,
+        "endChar": 53
+      },
+      "revId": "92247b1e455661a4ad546e1212107bcfca9db382",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
