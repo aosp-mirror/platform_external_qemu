@@ -139,6 +139,7 @@ private:
     int      mLoc_rowToSend;
     QTimer   mLoc_timer;
     QDoubleValidator mMagFieldValidator;
+    QDoubleValidator mAltitudeValidator;
     std::map<ExtendedWindowPane, QPushButton*> mPaneButtonMap;
     const ShortcutKeyStore<QtUICommand>* mQtUIShortcuts;
     Ui::ExtendedControls *mExtendedUi;
@@ -205,14 +206,14 @@ private slots:
     void on_finger_touchButton_released();
 
     // Location
-    void on_loc_addRowButton_clicked();
     void on_loc_GpxKmlButton_clicked();
     void on_loc_pathTable_cellChanged(int row, int col);
-    void on_loc_removeRowButton_clicked();
     void on_loc_stopButton_clicked();
     void on_loc_pauseButton_clicked();
     void on_loc_playButton_clicked();
-
+    void on_loc_decimalModeSwitch_toggled(bool checked);
+    void on_loc_sexagesimalModeSwitch_toggled(bool checked);
+    void on_loc_sendPointButton_clicked();
     bool loc_cellIsValid(QTableWidget *table, int row, int col);
     void loc_populateTable(GpsFixArray *fixes);
     void loc_slot_timeout();
