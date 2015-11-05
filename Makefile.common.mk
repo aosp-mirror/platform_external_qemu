@@ -10,12 +10,6 @@ include $(LOCAL_PATH)/distrib/Qt5.mk
 include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
 include $(LOCAL_PATH)/distrib/libpng.mk
 
-ifeq ($(HOST_OS),darwin)
-    CXX_STD_LIB := -lc++
-else
-    CXX_STD_LIB := -lstdc++
-endif
-
 include $(LOCAL_PATH)/Makefile.qemu1-common.mk
 
 ifeq ($(HOST_OS),windows)
@@ -87,18 +81,19 @@ LOCAL_STATIC_LIBRARIES := emulator-common
 # Ensure this is always built, even if 32-bit binaries are disabled.
 LOCAL_IGNORE_BITNESS := true
 
-LOCAL_LDLIBS += $(CXX_STD_LIB)
 LOCAL_GENERATE_SYMBOLS := true
 
 ifeq ($(HOST_OS),windows)
 $(eval $(call insert-windows-icon))
 endif
 
-# This launcher program sets up certain library search paths so that the
-# rexec'ed target specific emulator can load those shared libraries. OTOH, this
-# program itself does not have that luxury. So, link in everything statically.
-LOCAL_CFLAGS += $(BUILD_STATIC_FLAGS)
-LOCAL_LDFLAGS += $(BUILD_STATIC_FLAGS)
+# To avoid runtime linking issues on Linux and Windows, a custom copy of the
+# C++ standard library is copied to $(OBJS_DIR)/lib[64], a path that is added
+# to the runtime library search path by the top-level 'emulator' launcher
+# program before it spawns the emulation engine. However, 'emulator' cannot
+# use these versions of the library, so statically link it against the
+# executable instead.
+$(call local-link-static-c++lib)
 
 $(call end-emulator-program)
 endif  # HOST_BITS == EMULATOR_PROGRAM_BITNESS

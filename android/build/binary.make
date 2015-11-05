@@ -22,8 +22,6 @@ LOCAL_CXX_EXTENSION_PATTERNS := $(foreach pattern,$(LOCAL_CPP_EXTENSIONS),%$(pat
 # the directory where we're going to place our object files
 LOCAL_OBJS_DIR  := $(call local-intermediates-dir)
 LOCAL_OBJECTS   :=
-$(call local-host-define,CC)
-$(call local-host-define,LD)
 LOCAL_C_SOURCES := $(filter  %.c,$(LOCAL_SRC_FILES))
 LOCAL_GENERATED_C_SOURCES := $(filter %.c,$(LOCAL_GENERATED_SOURCES))
 LOCAL_GENERATED_CXX_SOURCES := \
