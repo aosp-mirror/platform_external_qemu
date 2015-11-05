@@ -123,8 +123,6 @@ MY_CFLAGS += -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 # Needed to build block.c on Linux/x86_64.
 MY_CFLAGS += -D_GNU_SOURCE=1
 
-my-host-tool = $(if $(strip $(LOCAL_HOST_BUILD)),$(BUILD_$1),$(MY_$1))
-
 # A useful function that can be used to start the declaration of a host
 # module. Avoids repeating the same stuff again and again.
 # Usage:
@@ -165,26 +163,26 @@ end-emulator-program = \
     $(eval $(end-emulator-module-ev)) \
 
 define end-emulator-module-ev
-LOCAL_CC := $$(call my-host-tool,CC)
-LOCAL_CXX := $$(call my-host-tool,CXX)
-LOCAL_AR := $$(call my-host-tool,AR)
-LOCAL_LD := $$(call my-host-tool,LD)
-LOCAL_SYMTOOL := $$(call my-host-tool,DUMPSYMS)
+LOCAL_CC := $$(call local-host-tool,CC)
+LOCAL_CXX := $$(call local-host-tool,CXX)
+LOCAL_AR := $$(call local-host-tool,AR)
+LOCAL_LD := $$(call local-host-tool,LD)
+LOCAL_SYMTOOL := $$(call local-host-tool,DUMPSYMS)
 
 LOCAL_CFLAGS := \
-    $$(call my-host-tool,CFLAGS$$(HOST_BITS)) \
-    $$(call my-host-tool,CFLAGS) \
+    $$(call local-host-tool,CFLAGS$$(HOST_BITS)) \
+    $$(call local-host-tool,CFLAGS) \
     $$(LOCAL_CFLAGS)
 
 LOCAL_LDFLAGS := \
-    $$(call my-host-tool,LDFLAGS$$(HOST_BITS)) \
-    $$(call my-host-tool,LDFLAGS) \
+    $$(call local-host-tool,LDFLAGS$$(HOST_BITS)) \
+    $$(call local-host-tool,LDFLAGS) \
     $$(LOCAL_LDFLAGS)
 
 LOCAL_LDLIBS := \
     $$(LOCAL_LDLIBS) \
-    $$(call my-host-tool,LDLIBS) \
-    $$(call my-host-tool,LDLIBS$$(HOST_BITS))
+    $$(call local-host-tool,LDLIBS) \
+    $$(call local-host-tool,LDLIBS$$(HOST_BITS))
 
 # Ensure only one of -m32 or -m64 is being used and place it first.
 LOCAL_CFLAGS := \
