@@ -233,6 +233,24 @@ ifeq ($(HOST_OS),darwin)
   QEMU_SYSTEM_LDLIBS += $(QEMU_SYSTEM_FRAMEWORKS:%=-Wl,-framework,%)
 endif
 
+ifeq ($(HOST_OS),darwin)
+    CXX_STD_LIB := -lc++
+else
+    CXX_STD_LIB := -lstdc++
+endif
+
+# Call this function to force a module to link statically to the C++ standard
+# library on platforms that support it (i.e. Linux and Windows).
+local-link-static-c++lib = $(eval $(ev-local-link-static-c++lib))
+define ev-local-link-static-c++lib
+ifeq (darwin,$(HOST_OS))
+LOCAL_LDLIBS += $(CXX_STD_LIB)
+else  # HOST_OS != darwin
+LOCAL_LD := $$(call local-host-tool,CXX)
+LOCAL_LDLIBS += -static-libstdc++
+endif  # HOST_OS != darwin
+endef
+
 ifdef EMULATOR_BUILD_32BITS
 HOST_BITS := 32
 HOST_ARCH := x86

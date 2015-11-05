@@ -91,12 +91,9 @@ EMULATOR_UNITTESTS_SOURCES += \
 
 endif
 
-# Link in everything statically into the unittest binaries.
-# - This is required because we have custom path manipulation logic for the
-#   emulator launcher program that isn't involved in unittests -- we can not
-#   pick up the correct dynamic libraries.
-EMULATOR_UNITTESTS_CFLAGS += $(BUILD_STATIC_FLAGS)
-EMULATOR_UNITTESTS_LDFLAGS += $(BUILD_STATIC_FLAGS)
+# Link against static libstdc++ on Linux and Windows since the unit-tests
+# cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/
+$(call local-link-static-c++lib)
 
 $(call start-emulator-program, emulator$(HOST_SUFFIX)_unittests)
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include  $(LIBXML2_INCLUDES)
