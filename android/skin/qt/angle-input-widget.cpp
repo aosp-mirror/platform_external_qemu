@@ -34,14 +34,16 @@ AngleInputWidget::AngleInputWidget(QWidget* parent) :
     mDecimalDegreeValidator.setTop(180.0);
     mIntegerDegreeValidator.setBottom(-180);
     mIntegerDegreeValidator.setTop(180);
-    mMinSecValidator.setBottom(0);
-    mMinSecValidator.setTop(60);
+    mMinValidator.setBottom(0);
+    mMinValidator.setTop(60);
+    mSecValidator.setBottom(0.0);
+    mSecValidator.setTop(60.0);
 
     // Set up the editors.
     setUpLineEdit(&mDecimalValueEditor, &mDecimalDegreeValidator);
     setUpLineEdit(&mDegreesValueEditor, &mIntegerDegreeValidator);
-    setUpLineEdit(&mMinutesValueEditor, &mMinSecValidator);
-    setUpLineEdit(&mSecondsValueEditor, &mMinSecValidator);
+    setUpLineEdit(&mMinutesValueEditor, &mMinValidator);
+    setUpLineEdit(&mSecondsValueEditor, &mSecValidator);
 
     // Lay out the subwidgets horizontally.
     mDecimalFrameLayout.addWidget(&mDecimalValueEditor);
@@ -66,6 +68,16 @@ AngleInputWidget::AngleInputWidget(QWidget* parent) :
             this, SLOT(updateValueFromSexagesimalInput()));
     connect(&mSecondsValueEditor, SIGNAL(editingFinished()),
             this, SLOT(updateValueFromSexagesimalInput()));
+
+    // The line edit controls must not be squished by the spacing
+    // introduced by additional box layouts. The spacing is removed
+    // by setting margins to 0.
+    setContentsMargins(0, 0, 0, 0);
+    mDecimalModeFrame.setContentsMargins(0, 0, 0, 0);
+    mSexagesimalModeFrame.setContentsMargins(0, 0, 0, 0);
+    mSexagesimalFrameLayout.setContentsMargins(0, 0, 0, 0);
+    mDecimalFrameLayout.setContentsMargins(0, 0, 0, 0);
+    mLayout.setContentsMargins(0, 0, 0, 0);
 }
 
 const int MINUTES_IN_DEGREE = 60;
@@ -95,14 +107,19 @@ void AngleInputWidget::setInputMode(AngleInputWidget::InputMode mode) {
 
         // Convert the decimal value to sexagesimal representation.
         int sign = sgn(mDecimalValue);
-        int seconds = qFloor(qFabs(mDecimalValue) * SECONDS_IN_DEGREE);
-        int degrees = sign * seconds / SECONDS_IN_DEGREE;
-        seconds = seconds % SECONDS_IN_DEGREE;
-        int minutes = seconds / SECONDS_IN_MINUTE;
-        seconds = seconds % SECONDS_IN_MINUTE;
+        double seconds = qFabs(mDecimalValue) * SECONDS_IN_DEGREE;
+        int whole_seconds = qFloor(seconds);
+        double remainder_seconds = seconds - whole_seconds;
+
+        int degrees = sign * whole_seconds / SECONDS_IN_DEGREE;
+        whole_seconds = whole_seconds % SECONDS_IN_DEGREE;
+        int minutes = whole_seconds / SECONDS_IN_MINUTE;
+        seconds = whole_seconds % SECONDS_IN_MINUTE + remainder_seconds;
 
         // Ensure the correct value is displayed in the editor.
-        mDegreesValueEditor.setText(QString::number(degrees));
+        mDegreesValueEditor.setText(
+                QString(degrees == 0 && sign == -1 ? "-" : "") +
+                QString::number(degrees));
         mMinutesValueEditor.setText(QString::number(minutes));
         mSecondsValueEditor.setText(QString::number(seconds));
         break;
@@ -117,10 +134,13 @@ void AngleInputWidget::updateValueFromDecimalInput() {
 void AngleInputWidget::updateValueFromSexagesimalInput() {
     int degrees = mDegreesValueEditor.text().toInt();
     int minutes = mMinutesValueEditor.text().toInt();
-    int seconds = mSecondsValueEditor.text().toInt();
-    int sign = sgn(degrees);
+    double seconds = mSecondsValueEditor.text().toDouble();
+    int sign =
+        degrees == 0 && mDegreesValueEditor.text()[0] == '-'
+            ? -1
+            : sgn(degrees);
     mDecimalValue =
-        sign * (abs(degrees) +
+        (sign == 0 ? 1 : sign) * (abs(degrees) +
                 minutes / static_cast<double>(MINUTES_IN_DEGREE) +
                 seconds / static_cast<double>(SECONDS_IN_DEGREE));
 

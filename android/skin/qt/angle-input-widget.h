@@ -70,7 +70,8 @@ private:
     QLineEdit mSecondsValueEditor;
     QDoubleValidator mDecimalDegreeValidator;
     QIntValidator mIntegerDegreeValidator;
-    QIntValidator mMinSecValidator;
+    QIntValidator mMinValidator;
+    QDoubleValidator mSecValidator;
     QHBoxLayout mLayout;
     double mDecimalValue;
     InputMode mCurrentInputMode;
