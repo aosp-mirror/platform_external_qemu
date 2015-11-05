@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d61d32f8_7ab03903",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-05T23:21:49Z",
+      "side": 1,
+      "message": "can you clarify the circular dependency that requires repeating the android-emu-qemu1 library here?\n\nAlso, why separate android-emu and android-emu-base exactly ? I\u0027m curious :)",
+      "revId": "35c6e4fd170f8806fc40a4d1881ad5203075ad81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9609fab1_6be17ded",
+        "filename": "Makefile.qemu1-common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-05T23:21:49Z",
+      "side": 1,
+      "message": "any specific reason why these files are not part of AndroidEmu ?",
+      "revId": "35c6e4fd170f8806fc40a4d1881ad5203075ad81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36fe8ebd_651c0655",
+        "filename": "Makefile.qemu1-target.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-05T23:21:49Z",
+      "side": 1,
+      "message": "shouldn\u0027t these 3 libraries above be listed in ANDROID_EMU_STATIC_LIBRARIES_XXX ?",
+      "revId": "35c6e4fd170f8806fc40a4d1881ad5203075ad81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
