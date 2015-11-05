@@ -246,7 +246,7 @@ static int path_has_protocol(const char *path)
     return *p == ':';
 }
 
-int path_is_absolute(const char *path)
+static int path_check_absolute(const char *path)
 {
 #ifdef _WIN32
     /* specific case for names like: "\\.\d:" */
@@ -271,7 +271,7 @@ void path_combine(char *dest, int dest_size,
 
     if (dest_size <= 0)
         return;
-    if (path_is_absolute(filename)) {
+    if (path_check_absolute(filename)) {
         pstrcpy(dest, dest_size, filename);
     } else {
         p = strchr(base_path, ':');

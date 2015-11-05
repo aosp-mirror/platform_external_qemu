@@ -399,7 +399,6 @@ void bdrv_get_full_backing_filename(BlockDriverState *bs,
                                     char *dest, size_t sz);
 int bdrv_is_snapshot(BlockDriverState *bs);
 
-int path_is_absolute(const char *path);
 void path_combine(char *dest, int dest_size,
                   const char *base_path,
                   const char *filename);
