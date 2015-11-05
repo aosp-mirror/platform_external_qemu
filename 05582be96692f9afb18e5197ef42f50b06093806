@@ -144,6 +144,30 @@
     },
     {
       "key": {
+        "uuid": "9609fab1_8bfb91a2",
+        "filename": "android-configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-05T23:11:53Z",
+      "side": 1,
+      "message": "Thanks :)",
+      "parentUuid": "568ea242_5da427e0",
+      "range": {
+        "startLine": 597,
+        "startChar": 73,
+        "endLine": 597,
+        "endChar": 74
+      },
+      "revId": "05582be96692f9afb18e5197ef42f50b06093806",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96b57aae_a8d03b1d",
         "filename": "android/emulation/android_pipe.c",
         "patchSetId": 2
