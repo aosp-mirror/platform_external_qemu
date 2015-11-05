@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "b69d1e72_e0f44c80",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-05T22:15:55Z",
+      "side": 1,
+      "message": "The non-integer degrees is good with [-180.0, +180.0]\nThe non-integer seconds: good with [0.0, +60.0]\n\nThe integer values should be\nDegrees Longitude: [-179, +179]\nDegrees Latitude:  [ -89,  +89]\nMinutes: [0, +59]",
+      "revId": "92247b1e455661a4ad546e1212107bcfca9db382",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1698aa84_29cc7a3e",
         "filename": "android/skin/qt/angle-input-widget.cpp",
         "patchSetId": 1
@@ -42,6 +59,23 @@
         "endLine": 121,
         "endChar": 61
       },
+      "revId": "92247b1e455661a4ad546e1212107bcfca9db382",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b686fe2b_235ae635",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-05T22:15:55Z",
+      "side": 1,
+      "message": "Good catch!",
       "revId": "92247b1e455661a4ad546e1212107bcfca9db382",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
