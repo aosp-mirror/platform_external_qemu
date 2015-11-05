@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f6f796df_63e1a2ed",
+        "filename": "android/emulation/bufprint_config_dirs.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-05T10:23:15Z",
+      "side": 0,
+      "message": "hmmm, it looks like these functions are actually used by android/utils/tempfile.c ?",
+      "revId": "981ba48e280612a81ac2f84b438c0631896b444c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
