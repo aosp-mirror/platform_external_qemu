@@ -33,8 +33,13 @@ static const char kVersionUrl[] =
         "https://dl.google.com/android/repository/repository-10.xml";
 
 static const char kNewerVersionMessage[] =
-        "Your emulator is out of date, please update by launching Android "
-        "Studio";
+R"(Your emulator is out of date, please update by launching Android Studio:
+ - Start Android Studio
+ - Select menu "Tools > Android > SDK Manager"
+ - Click "SDK Tools" tab
+ - Check "Android SDK Tools" checkbox
+ - Click "OK"
+)";
 
 using android::base::Version;
 using android::update_check::UpdateChecker;
