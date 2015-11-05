@@ -61,7 +61,7 @@ RenderServer *RenderServer::create(char* addr, size_t addrLen)
 #ifdef _WIN32
         server->m_listenSock = new Win32PipeStream();
 #else
-        server->m_listenSock = new UnixStream();
+        server->m_listenSock = new TcpStream();
 #endif
     }
 
