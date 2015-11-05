@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f6923665_7f155718",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-05T22:27:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1698aa84_80a9c6b9",
+      "range": {
+        "startLine": 85,
+        "startChar": 4,
+        "endLine": 85,
+        "endChar": 6
+      },
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b6cfde71_e42f14c8",
         "filename": "android/skin/qt/ext-settings.cpp",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2015-11-04T23:39:41Z",
       "side": 1,
       "message": "Pick one:\nnit: long line\nOR\nsneaky printf that shouldn\u0027t actually be there? If it is supposed to be here, replace with a debug print?",
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6923665_1f5a9335",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-05T22:27:57Z",
+      "side": 1,
+      "message": "Should have been deleted. Is gone now.",
+      "parentUuid": "b6cfde71_e42f14c8",
       "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -82,6 +124,30 @@
     },
     {
       "key": {
+        "uuid": "f6923665_9f292369",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-05T22:27:57Z",
+      "side": 1,
+      "message": "I made the display area \"scroll if needed\" and removed this test.",
+      "parentUuid": "568ea242_1770bee6",
+      "range": {
+        "startLine": 98,
+        "startChar": 12,
+        "endLine": 98,
+        "endChar": 30
+      },
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f60f9676_8c376b8b",
         "filename": "android/skin/qt/ext-settings.cpp",
         "patchSetId": 1
@@ -99,6 +165,24 @@
     },
     {
       "key": {
+        "uuid": "1698aa84_53f253c8",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-05T22:27:57Z",
+      "side": 1,
+      "message": "Possible. And even though I check that the path is\nwritable (now), your write (later) could still\nfail.",
+      "parentUuid": "f60f9676_8c376b8b",
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d69a9277_188b8d98",
         "filename": "android/skin/qt/ext-settings.cpp",
         "patchSetId": 1
@@ -110,6 +194,30 @@
       "writtenOn": "2015-11-05T00:04:10Z",
       "side": 1,
       "message": "Another reason to use QSettings instead of AVD ini files - won\u0027t have to deal with path length limitations",
+      "range": {
+        "startLine": 193,
+        "startChar": 29,
+        "endLine": 196,
+        "endChar": 45
+      },
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b686fe2b_7da0ffc2",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-05T22:27:57Z",
+      "side": 1,
+      "message": "I wanted to use the existing mechanism for saving user preferences.",
+      "parentUuid": "d69a9277_188b8d98",
       "range": {
         "startLine": 193,
         "startChar": 29,
@@ -162,6 +270,30 @@
     },
     {
       "key": {
+        "uuid": "568ea242_7da9e3b6",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-05T22:27:57Z",
+      "side": 1,
+      "message": "This code has been removed.",
+      "parentUuid": "d69a9277_789ad9e3",
+      "range": {
+        "startLine": 208,
+        "startChar": 8,
+        "endLine": 208,
+        "endChar": 39
+      },
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96a49abb_f637b8b7",
         "filename": "android/skin/qt/extended-window.h",
         "patchSetId": 1
@@ -185,6 +317,47 @@
     },
     {
       "key": {
+        "uuid": "f6923665_df23ab82",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-05T22:27:57Z",
+      "side": 1,
+      "message": "Good idea.\nDone.",
+      "parentUuid": "96a49abb_f637b8b7",
+      "range": {
+        "startLine": 91,
+        "startChar": 0,
+        "endLine": 91,
+        "endChar": 44
+      },
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b69d1e72_57afa455",
+        "filename": "android/user-config.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-05T22:27:57Z",
+      "side": 1,
+      "message": "Remove this.\nDone.",
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1698aa84_402c3e42",
         "filename": "android/user-config.c",
         "patchSetId": 1
@@ -196,6 +369,30 @@
       "writtenOn": "2015-11-05T00:04:10Z",
       "side": 1,
       "message": "Do we really need to have this setting defined for each AVD? I think we can store these types of settings using QSettings (which also eliminate the need to fiddle with C strings and will probably just work for paths containing non-english unicode chars)",
+      "range": {
+        "startLine": 64,
+        "startChar": 17,
+        "endLine": 64,
+        "endChar": 24
+      },
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76a726c0_7e6f1d05",
+        "filename": "android/user-config.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-05T22:27:57Z",
+      "side": 1,
+      "message": "I agree we should switch this over to something\nthat applies to all AVDs.\nLater...?",
+      "parentUuid": "1698aa84_402c3e42",
       "range": {
         "startLine": 64,
         "startChar": 17,
