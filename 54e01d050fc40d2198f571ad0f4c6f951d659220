@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "16e42a25_4c5fffc0",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-05T23:23:32Z",
+      "side": 1,
+      "message": "can you clarify why this can\u0027t be in android-emu or android-emu-base ?",
+      "revId": "54e01d050fc40d2198f571ad0f4c6f951d659220",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
