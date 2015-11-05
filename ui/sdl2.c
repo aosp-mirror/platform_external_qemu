@@ -242,7 +242,7 @@ static void do_sdl_resize(struct sdl2_state *scon, int width, int height,
                     android_gpu_started && android_gpu_use_subwindow) {
                 // TODO(digit): Set rotation?
                 void* window = sdl_window_get_handle(scon->real_window);
-                android_showOpenglesWindow(window, 0, 0, width, height, width, height, 0.);
+                android_showOpenglesWindow(window, 0, 0, width, height, width, height, 1.0, 0.);
             }
 #endif  // CONFIG_ANDROID
         } else {
@@ -285,7 +285,7 @@ static void do_sdl_resize(struct sdl2_state *scon, int width, int height,
                     D("Initializing GPU sub-window %dx%d\n", width, height);
                     android_showOpenglesWindow(
                             sdl_window_get_handle(scon->real_window),
-                            0, 0, width, height, width, height, 0.);
+                            0, 0, width, height, width, height, 1.0, 0.);
 
                     // Disable sending framebuffer updates to the window
                     // since everything will appear in the native sub-window
