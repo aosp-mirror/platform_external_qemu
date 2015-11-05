@@ -13,7 +13,6 @@ export LC_ALL=C
 PROGDIR=$(dirname "$0")
 VERBOSE=1
 
-BUILD_QEMU2=
 MINGW=
 NO_TESTS=
 OUT_DIR=objs
@@ -22,9 +21,6 @@ for OPT; do
     case $OPT in
         --aosp-prebuilts-dir=*)
             ANDROID_EMULATOR_PREBUILTS_DIR=${OPT##--aosp-prebuilts-dir=}
-            ;;
-        --build-qemu2)
-            BUILD_QEMU2=true
             ;;
         --mingw)
             MINGW=true
