@@ -165,12 +165,11 @@ void enter_qemu_main_loop(int argc, char **argv) {
 
 #if CONFIG_QT && defined(_WIN32)
 // On Windows, link against qtmain.lib which provides a WinMain()
-// implementation, that latter calls qMain().
+// implementation, that later calls qMain().
 #define main qt_main
 #endif
 
 int main(int argc, char **argv) {
-    char   tmp[MAX_PATH];
     char*  args[128];
     int    n;
     char*  opt;
