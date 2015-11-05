@@ -17,7 +17,6 @@ endif
 
 EMULATOR_GTEST_INCLUDES := $(EMULATOR_GTEST_SOURCES_DIR)/include
 EMULATOR_GTEST_SOURCES := src/gtest-all.cc src/gtest_main.cc
-EMULATOR_GTEST_LDLIBS := $(CXX_STD_LIB)
 
 old_LOCAL_PATH := $(LOCAL_PATH)
 
