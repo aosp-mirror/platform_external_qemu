@@ -497,7 +497,8 @@ if [ "$PCBIOS_PROBE" = "yes" ]; then
         mkdir -p $OUT_DIR/lib/pc-bios
         for BIOS_FILE in bios.bin vgabios-cirrus.bin bios-256k.bin efi-virtio.rom kvmvapic.bin linuxboot.bin; do
             log "PC Bios    : Copying $BIOS_FILE"
-            cp -f $PCBIOS_DIR/$BIOS_FILE $OUT_DIR/lib/pc-bios/$BIOS_FILE
+            cp -f $PCBIOS_DIR/$BIOS_FILE $OUT_DIR/lib/pc-bios/$BIOS_FILE ||
+                panic "Missing BIOS file: $PCBIOS_DIR/$BIOS_FILE"
         done
     fi
 fi
