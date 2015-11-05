@@ -163,11 +163,11 @@ end-emulator-program = \
     $(eval $(end-emulator-module-ev)) \
 
 define end-emulator-module-ev
-LOCAL_CC := $$(call local-host-tool,CC)
-LOCAL_CXX := $$(call local-host-tool,CXX)
-LOCAL_AR := $$(call local-host-tool,AR)
-LOCAL_LD := $$(call local-host-tool,LD)
-LOCAL_SYMTOOL := $$(call local-host-tool,DUMPSYMS)
+$(call local-host-define,CC)
+$(call local-host-define,CXX)
+$(call local-host-define,AR)
+$(call local-host-define,LD)
+$(call local-host-define,SYMTOOL)
 
 LOCAL_CFLAGS := \
     $$(call local-host-tool,CFLAGS$$(HOST_BITS)) \
