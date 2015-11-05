@@ -110,11 +110,14 @@ EMULATOR_COMMON_CFLAGS += $(LIBCURL_CFLAGS)
 # Android utility functions
 #
 common_LOCAL_SRC_FILES += \
+    android/adb-qemud.c \
+    android/adb-server.c \
     android/android-constants.c \
     android/async-console.c \
+    android/async-socket.c \
+    android/async-socket-connector.c \
     android/async-utils.c \
-    android/curl-support.c \
-    android/framebuffer.c \
+    android/audio-test.c \
     android/avd/hw-config.c \
     android/avd/info.c \
     android/avd/scanner.c \
@@ -147,6 +150,12 @@ common_LOCAL_SRC_FILES += \
     android/base/threads/ThreadStore.cpp \
     android/base/Uri.cpp \
     android/base/Version.cpp \
+    android/boot-properties.c \
+    android/cmdline-option.c \
+    android/console.c \
+    android/core-init-utils.c   \
+    android/cpu_accelerator.cpp \
+    android/curl-support.c \
     android/emulation/android_pipe.c \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
@@ -162,19 +171,31 @@ common_LOCAL_SRC_FILES += \
     android/emulation/control/LineConsumer.cpp \
     android/emulation/CpuAccelerator.cpp \
     android/emulation/serial_line.cpp \
+    android/ext4_resize.cpp   \
+    android/framebuffer.c \
     android/filesystems/ext4_utils.cpp \
     android/filesystems/fstab_parser.cpp \
     android/filesystems/partition_types.cpp \
     android/filesystems/ramdisk_extractor.cpp \
+    android/gps.c \
+    android/help.c \
+    android/hw-control.c \
+    android/hw-events.c \
+    android/hw-fingerprint.c \
+    android/hw-kmsg.c \
+    android/hw-lcd.c \
+    android/hw-pipe-net.c \
+    android/hw-qemud.cpp \
+    android/hw-sensors.c \
     android/kernel/kernel_utils.cpp \
+    android/looper-qemu.cpp \
+    android/main-common.c \
+    android/main-common-ui.c \
     android/metrics/metrics_reporter.c \
     android/metrics/metrics_reporter_ga.c \
     android/metrics/metrics_reporter_toolbar.c \
     android/metrics/StudioHelper.cpp \
-    android-qemu1-glue/android_qemud.cpp \
-    android-qemu1-glue/base/async/Looper.cpp \
-    android-qemu1-glue/base/files/QemuFileStream.cpp \
-    android-qemu1-glue/utils/stream.cpp \
+    android/opengles.c \
     android/opengl/EmuglBackendList.cpp \
     android/opengl/EmuglBackendScanner.cpp \
     android/opengl/emugl_config.cpp \
@@ -183,8 +204,30 @@ common_LOCAL_SRC_FILES += \
     android/proxy/proxy_http.c \
     android/proxy/proxy_http_connector.c \
     android/proxy/proxy_http_rewriter.c \
+    android/qemu-setup.c \
+    android/qemu-tcpdump.c \
+    android/camera/camera-format-converters.c \
+    android/camera/camera-service.c \
+    android/multitouch-screen.c \
+    android/multitouch-port.c \
+    android/snaphost-android.c \
+    android/qt/qt_path.cpp \
+    android/resource.c \
+    android/sdk-controller-socket.c \
+    android/sensors-port.c \
+    android/shaper.c \
+    android/snapshot.c \
+    android/telephony/debug.c \
+    android/telephony/gsm.c \
+    android/telephony/modem.c \
+    android/telephony/modem_driver.c \
+    android/telephony/remote_call.c \
+    android/telephony/sim_card.c \
+    android/telephony/sms.c \
+    android/telephony/sysdeps.c \
     android/update-check/UpdateChecker.cpp \
     android/update-check/VersionExtractor.cpp \
+    android/user-config.c \
     android/utils/aconfig-file.c \
     android/utils/assert.c \
     android/utils/bufprint.c \
@@ -203,6 +246,7 @@ common_LOCAL_SRC_FILES += \
     android/utils/ini.cpp \
     android/utils/intmap.c \
     android/utils/ipaddr.cpp \
+    android/utils/jpeg-compress.c \
     android/utils/lineinput.c \
     android/utils/looper.cpp \
     android/utils/mapfile.c \
@@ -220,6 +264,7 @@ common_LOCAL_SRC_FILES += \
     android/utils/system.c \
     android/utils/system_wrapper.cpp \
     android/utils/tempfile.c \
+    android/utils/timezone.c \
     android/utils/uncompress.cpp \
     android/utils/uri.cpp \
     android/utils/utf8_utils.cpp \
@@ -251,10 +296,17 @@ include $(LOCAL_PATH)/android/wear-agent/sources.mk
 
 ## one for 32-bit
 $(call start-emulator-library, emulator-common)
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(LIBCURL_INCLUDES)
-LOCAL_CFLAGS += -I$(LIBXML2_INCLUDES)
-LOCAL_CFLAGS += -I$(BREAKPAD_INCLUDES)
+
+LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+
+LOCAL_C_INCLUDES += \
+    $(LIBCURL_INCLUDES) \
+    $(LIBXML2_INCLUDES) \
+    $(BREAKPAD_INCLUDES) \
+    $(LIBJPEG_INCLUDES) \
+
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+
 ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
     LOCAL_IGNORE_BITNESS := true
 endif
@@ -276,6 +328,7 @@ common_LOCAL_QT_RESOURCES =
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
 EMULATOR_LIBUI_CFLAGS :=
+EMULATOR_LIBUI_INCLUDES :=
 EMULATOR_LIBUI_LDLIBS :=
 EMULATOR_LIBUI_LDFLAGS :=
 EMULATOR_LIBUI_STATIC_LIBRARIES :=
@@ -283,14 +336,14 @@ EMULATOR_LIBUI_STATIC_LIBRARIES :=
 ###########################################################
 # Libpng configuration
 #
-EMULATOR_LIBUI_CFLAGS += $(LIBPNG_CFLAGS)
+EMULATOR_LIBUI_INCLUDES += $(LIBPNG_INCLUDES)
 EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libpng
 common_LOCAL_SRC_FILES += android/loadpng.c
 
 ###########################################################
 # Libjpeg configuration
 #
-EMULATOR_LIBUI_CFLAGS += $(LIBJPEG_CFLAGS)
+EMULATOR_LIBUI_INCLUDES += $(LIBJPEG_INCLUDES)
 EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libjpeg
 
 ##############################################################################
@@ -300,7 +353,8 @@ EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libjpeg
 ifdef EMULATOR_USE_SDL2
     include $(LOCAL_PATH)/distrib/libsdl2.mk
 
-    EMULATOR_LIBUI_CFLAGS += $(SDL2_CFLAGS) $(foreach inc,$(SDL2_INCLUDES),-I$(inc))
+    EMULATOR_LIBUI_CFLAGS += $(SDL2_CFLAGS)
+    EMULATOR_LIBUI_INCLUDES += $(SDL2_INCLUDES)
     EMULATOR_LIBUI_LDLIBS += $(SDL2_LDLIBS)
     EMULATOR_LIBUI_STATIC_LIBRARIES += $(SDL2_STATIC_LIBRARIES)
 
@@ -320,7 +374,7 @@ endif  # EMULATOR_USE_SDL2
 # Qt-related definitions
 #
 ifdef EMULATOR_USE_QT
-    EMULATOR_LIBUI_CFLAGS += $(foreach inc,$(QT_INCLUDES),-I$(inc))
+    EMULATOR_LIBUI_INCLUDES += $(QT_INCLUDES)
     EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
     EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
     EMULATOR_LIBUI_CFLAGS += $(LIBXML2_CFLAGS)
@@ -332,10 +386,10 @@ include $(LOCAL_PATH)/android/skin/sources.mk
 common_LOCAL_SRC_FILES += $(ANDROID_SKIN_SOURCES)
 
 common_LOCAL_SRC_FILES += \
-             android/gpu_frame.cpp \
-             android/emulator-window.c \
-             android/resource.c \
-             android/user-config.c \
+    android/gpu_frame.cpp \
+    android/emulator-window.c \
+    android/resource.c \
+    android/user-config.c \
 
 # enable MMX code for our skin scaler
 ifeq ($(HOST_ARCH),x86)
@@ -343,6 +397,7 @@ common_LOCAL_CFLAGS += -DUSE_MMX=1 -mmmx
 endif
 
 common_LOCAL_CFLAGS += $(EMULATOR_LIBUI_CFLAGS)
+
 
 ifeq ($(HOST_OS),windows)
 # For capCreateCaptureWindow used in camera-capture-windows.c
@@ -352,6 +407,7 @@ endif
 ## one for 32-bit
 $(call start-emulator-library, emulator-libui)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) $(ANDROID_SKIN_CFLAGS)
+LOCAL_C_INCLUDES := $(EMULATOR_LIBUI_INCLUDES)
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
@@ -373,13 +429,9 @@ common_LOCAL_SRC_FILES =
 
 EMULATOR_LIBQEMU_CFLAGS :=
 
-common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
-
 AUDIO_SOURCES := noaudio.c wavaudio.c wavcapture.c mixeng.c
 AUDIO_CFLAGS  := -I$(LOCAL_PATH)/audio -DHAS_AUDIO
 AUDIO_LDLIBS  :=
-
-common_LOCAL_CFLAGS += -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 
 ifeq ($(HOST_OS),darwin)
   CONFIG_COREAUDIO ?= yes
@@ -437,19 +489,6 @@ endif
 
 AUDIO_SOURCES := $(call sort,$(AUDIO_SOURCES:%=audio/%))
 
-common_LOCAL_CFLAGS += -Wno-sign-compare \
-                -fno-strict-aliasing -W -Wall -Wno-unused-parameter \
-
-# this is very important, otherwise the generated binaries may
-# not link properly on our build servers
-ifeq ($(HOST_OS),linux)
-common_LOCAL_CFLAGS += -fno-stack-protector
-endif
-
-common_LOCAL_SRC_FILES += $(AUDIO_SOURCES)
-common_LOCAL_SRC_FILES += \
-    android/audio-test.c
-
 # other flags
 ifneq ($(HOST_OS),windows)
     AUDIO_LDLIBS += -ldl
@@ -460,59 +499,116 @@ endif
 EMULATOR_LIBQEMU_CFLAGS += $(AUDIO_CFLAGS)
 EMULATOR_LIBQEMU_LDLIBS += $(AUDIO_LDLIBS)
 
-common_LOCAL_CFLAGS += $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
+ifeq ($(QEMU_TARGET_XML_SOURCES),)
+    QEMU_TARGET_XML_SOURCES := arm-core arm-neon arm-vfp arm-vfp3
+    QEMU_TARGET_XML_SOURCES := $(QEMU_TARGET_XML_SOURCES:%=$(LOCAL_PATH)/gdb-xml/%.xml)
+endif
 
-# misc. sources
+$(call start-emulator-library, emulator-libqemu)
+
+# gdbstub-xml.c contains C-compilable arrays corresponding to the content
+# of $(LOCAL_PATH)/gdb-xml/, and is generated with the 'feature_to_c.sh' script.
 #
-CORE_MISC_SOURCES = \
+intermediates = $(call local-intermediates-dir)
+QEMU_GDBSTUB_XML_C = $(intermediates)/gdbstub-xml.c
+$(QEMU_GDBSTUB_XML_C): PRIVATE_PATH := $(LOCAL_PATH)
+$(QEMU_GDBSTUB_XML_C): PRIVATE_SOURCES := $(TARGET_XML_SOURCES)
+$(QEMU_GDBSTUB_XML_C): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/feature_to_c.sh $@ $(QEMU_TARGET_XML_SOURCES)
+$(QEMU_GDBSTUB_XML_C): $(QEMU_TARGET_XML_SOURCES) $(LOCAL_PATH)/feature_to_c.sh
+	$(hide) rm -f $@
+	$(transform-generated-source)
+LOCAL_GENERATED_SOURCES += $(QEMU_GDBSTUB_XML_C)
+
+LOCAL_C_INCLUDES += \
+    $(LOCAL_PATH)/slirp-android \
+    $(intermediates) \
+    $(LIBJPEG_INCLUDES) \
+
+LOCAL_CFLAGS := \
+    $(EMULATOR_COMMON_CFLAGS) \
+    -W \
+    -Wall \
+    $(GCC_W_NO_MISSING_FIELD_INITIALIZERS) \
+    -Wno-sign-compare \
+    -fno-strict-aliasing \
+    -Wno-unused-parameter \
+    -D_XOPEN_SOURCE=600 \
+    -D_BSD_SOURCE=1 \
+    -DCONFIG_BDRV_WHITELIST=\"\" \
+    $(EMULATOR_LIBQEMU_CFLAGS) \
+    $(AUDIO_CFLAGS) \
+
+# this is very important, otherwise the generated binaries may
+# not link properly on our build servers
+ifeq ($(HOST_OS),linux)
+LOCAL_CFLAGS += -fno-stack-protector
+endif
+
+LOCAL_SRC_FILES += \
+    $(AUDIO_SOURCES) \
     aio-android.c \
+    android-qemu1-glue/android_qemud.cpp \
+    android-qemu1-glue/base/async/Looper.cpp \
+    android-qemu1-glue/base/files/QemuFileStream.cpp \
+    android-qemu1-glue/display.c \
+    android-qemu1-glue/emulation/charpipe.c \
+    android-qemu1-glue/emulation/CharSerialLine.cpp \
+    android-qemu1-glue/emulation/serial_line.cpp \
+    android-qemu1-glue/qemu-cellular-agent-impl.c \
+    android-qemu1-glue/qemu-display-agent-impl.cpp \
+    android-qemu1-glue/qemu-finger-agent-impl.c \
+    android-qemu1-glue/qemu-location-agent-impl.c \
+    android-qemu1-glue/qemu-net-agent-impl.c \
+    android-qemu1-glue/qemu-sensors-agent-impl.c \
+    android-qemu1-glue/qemu-setup.cpp \
+    android-qemu1-glue/qemu-telephony-agent-impl.c \
+    android-qemu1-glue/qemu-window-agent-impl.c \
+    android-qemu1-glue/telephony/modem_init.cpp \
+    android-qemu1-glue/utils/stream.cpp \
     async.c \
+    block.c \
+    blockdev.c \
+    block/qcow2.c \
+    block/qcow2-refcount.c \
+    block/qcow2-snapshot.c \
+    block/qcow2-cluster.c \
+    block/raw.c \
     iohandler.c \
     ioport.c \
     migration-dummy-android.c \
+    net/net-android.c \
     qemu-char.c \
     qemu-log.c \
-    savevm.c \
-    android/boot-properties.c \
-    android-qemu1-glue/emulation/charpipe.c \
-    android/core-init-utils.c   \
-    android/ext4_resize.cpp   \
-    android/gps.c \
-    android/hw-kmsg.c \
-    android/hw-lcd.c \
-    android/hw-events.c \
-    android/hw-control.c \
-    android/hw-fingerprint.c \
-    android/hw-sensors.c \
-    android/hw-qemud.cpp \
-    android/looper-qemu.cpp \
-    android/hw-pipe-net.c \
-    android-qemu1-glue/emulation/serial_line.cpp \
-    android-qemu1-glue/base/async/Looper.cpp \
-    android-qemu1-glue/emulation/CharSerialLine.cpp \
-    android/qemu-setup.c \
-    android-qemu1-glue/qemu-setup.cpp \
-    android/qemu-tcpdump.c \
-    android/shaper.c \
-    android/snapshot.c \
-    android/async-socket-connector.c \
-    android/async-socket.c \
-    android/sdk-controller-socket.c \
-    android/sensors-port.c \
-    android/utils/timezone.c \
-    android/camera/camera-format-converters.c \
-    android/camera/camera-service.c \
-    android/adb-server.c \
-    android/adb-qemud.c \
-    android/snaphost-android.c \
-    android/multitouch-screen.c \
-    android/multitouch-port.c \
-    android/utils/jpeg-compress.c \
-    net/net-android.c \
+    qobject/json-lexer.c \
+    qobject/json-parser.c \
+    qobject/json-streamer.c \
+    qobject/qjson.c \
+    qobject/qbool.c \
+    qobject/qdict.c \
     qobject/qerror.c \
-    qom/container.c \
-    qom/object.c \
-    qom/qom-qobject.c \
+    qobject/qfloat.c \
+    qobject/qint.c \
+    qobject/qlist.c \
+    qobject/qstring.c \
+    savevm.c \
+    slirp-android/bootp.c \
+    slirp-android/cksum.c \
+    slirp-android/debug.c \
+    slirp-android/if.c \
+    slirp-android/ip_icmp.c \
+    slirp-android/ip_input.c \
+    slirp-android/ip_output.c \
+    slirp-android/mbuf.c \
+    slirp-android/misc.c \
+    slirp-android/sbuf.c \
+    slirp-android/slirp.c \
+    slirp-android/socket.c \
+    slirp-android/tcp_input.c \
+    slirp-android/tcp_output.c \
+    slirp-android/tcp_subr.c \
+    slirp-android/tcp_timer.c \
+    slirp-android/tftp.c \
+    slirp-android/udp.c \
     ui/console.c \
     ui/d3des.c \
     ui/input.c \
@@ -534,145 +630,38 @@ CORE_MISC_SOURCES = \
     util/yield-android.c \
 
 ifeq ($(HOST_ARCH),x86)
-    CORE_MISC_SOURCES += disas/i386.c
+    LOCAL_SRC_FILES += disas/i386.c
 endif
 ifeq ($(HOST_ARCH),x86_64)
-    CORE_MISC_SOURCES += disas/i386.c
-endif
-ifeq ($(HOST_ARCH),ppc)
-    CORE_MISC_SOURCES += disas/ppc.c \
-                         util/cache-utils.c
+    LOCAL_SRC_FILES += disas/i386.c
 endif
 
 ifeq ($(HOST_OS),linux)
-    CORE_MISC_SOURCES += util/compatfd.c \
-                         util/qemu-thread-posix.c \
-                         android/camera/camera-capture-linux.c
-endif
-
-ifeq ($(HOST_OS),windows)
-  CORE_MISC_SOURCES   += tap-win32.c \
-                         android/camera/camera-capture-windows.c \
-                         util/qemu-thread-win32.c
-
-else
-  CORE_MISC_SOURCES   += posix-aio-compat.c
+    LOCAL_SRC_FILES += android/camera/camera-capture-linux.c
 endif
 
 ifeq ($(HOST_OS),darwin)
-  CORE_MISC_SOURCES   += android/camera/camera-capture-mac.m \
-                         util/compatfd.c \
-                         util/qemu-thread-posix.c
+    LOCAL_SRC_FILES += android/camera/camera-capture-mac.m
 endif
 
-common_LOCAL_SRC_FILES += $(CORE_MISC_SOURCES)
+ifeq ($(HOST_OS),windows)
+    LOCAL_SRC_FILES += \
+        block/raw-win32.c \
+        android/camera/camera-capture-windows.c \
+        util/qemu-thread-win32.c \
 
-# Required
-common_LOCAL_CFLAGS += -D_XOPEN_SOURCE=600 -D_BSD_SOURCE=1 -I$(LOCAL_PATH)/distrib/jpeg-6b
+else
+    LOCAL_SRC_FILES += \
+        block/raw-posix.c \
+        posix-aio-compat.c \
+        util/compatfd.c \
+        util/qemu-thread-posix.c \
 
-SLIRP_SOURCES := \
-    bootp.c \
-    cksum.c \
-    debug.c \
-    if.c \
-    ip_icmp.c \
-    ip_input.c \
-    ip_output.c \
-    mbuf.c \
-    misc.c \
-    sbuf.c \
-    slirp.c \
-    socket.c \
-    tcp_input.c \
-    tcp_output.c \
-    tcp_subr.c \
-    tcp_timer.c \
-    tftp.c \
-    udp.c
-
-common_LOCAL_SRC_FILES += $(SLIRP_SOURCES:%=slirp-android/%)
-EMULATOR_LIBQEMU_CFLAGS += -I$(LOCAL_PATH)/slirp-android
-
-# include telephony stuff
-#
-common_LOCAL_SRC_FILES += \
-    android/telephony/debug.c \
-    android/telephony/gsm.c \
-    android/telephony/modem.c \
-    android/telephony/modem_driver.c \
-    android/telephony/remote_call.c \
-    android/telephony/sim_card.c \
-    android/telephony/sms.c \
-    android/telephony/sysdeps.c \
-    android-qemu1-glue/telephony/modem_init.cpp
-
-# sources inherited from upstream, but not fully
-# integrated into android emulator
-#
-common_LOCAL_SRC_FILES += \
-    qobject/json-lexer.c \
-    qobject/json-parser.c \
-    qobject/json-streamer.c \
-    qobject/qjson.c \
-    qobject/qbool.c \
-    qobject/qdict.c \
-    qobject/qfloat.c \
-    qobject/qint.c \
-    qobject/qlist.c \
-    qobject/qstring.c \
-
-ifeq ($(QEMU_TARGET_XML_SOURCES),)
-    QEMU_TARGET_XML_SOURCES := arm-core arm-neon arm-vfp arm-vfp3
-    QEMU_TARGET_XML_SOURCES := $(QEMU_TARGET_XML_SOURCES:%=$(LOCAL_PATH)/gdb-xml/%.xml)
 endif
 
-common_LOCAL_CFLAGS += $(EMULATOR_LIBQEMU_CFLAGS)
-
-
-$(call start-emulator-library, emulator-libqemu)
-# gdbstub-xml.c contains C-compilable arrays corresponding to the content
-# of $(LOCAL_PATH)/gdb-xml/, and is generated with the 'feature_to_c.sh' script.
-#
-intermediates = $(call local-intermediates-dir)
-QEMU_GDBSTUB_XML_C = $(intermediates)/gdbstub-xml.c
-$(QEMU_GDBSTUB_XML_C): PRIVATE_PATH := $(LOCAL_PATH)
-$(QEMU_GDBSTUB_XML_C): PRIVATE_SOURCES := $(TARGET_XML_SOURCES)
-$(QEMU_GDBSTUB_XML_C): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/feature_to_c.sh $@ $(QEMU_TARGET_XML_SOURCES)
-$(QEMU_GDBSTUB_XML_C): $(QEMU_TARGET_XML_SOURCES) $(LOCAL_PATH)/feature_to_c.sh
-	$(hide) rm -f $@
-	$(transform-generated-source)
-LOCAL_GENERATED_SOURCES += $(QEMU_GDBSTUB_XML_C)
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) -I$(intermediates)
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
-
-# Block sources, we must compile them with each executable because they
-# are only referenced by the rest of the code using constructor functions.
-# If their object files are put in a static library, these are never compiled
-# into the final linked executable that uses them.
-#
-# Normally, one would solve thus using LOCAL_WHOLE_STATIC_LIBRARIES, but
-# the Darwin linker doesn't support -Wl,--whole-archive or equivalent :-(
-#
-BLOCK_SOURCES := \
-    block.c \
-    blockdev.c \
-    block/qcow2.c \
-    block/qcow2-refcount.c \
-    block/qcow2-snapshot.c \
-    block/qcow2-cluster.c \
-    block/raw.c
-
-ifeq ($(HOST_OS),windows)
-    BLOCK_SOURCES += block/raw-win32.c
-else
-    BLOCK_SOURCES += block/raw-posix.c
-endif
-
-BLOCK_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
-BLOCK_CFLAGS += -DCONFIG_BDRV_WHITELIST=\"\"
 
 ##############################################################################
 ##############################################################################
