@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d683721b_be04315a",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-05T19:55:27Z",
+      "side": 1,
+      "message": "tr(\"None\")?",
+      "range": {
+        "startLine": 103,
+        "startChar": 51,
+        "endLine": 103,
+        "endChar": 55
+      },
+      "revId": "4530b943a5e1d86a28fa54006f7b1f54de1b4fab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
