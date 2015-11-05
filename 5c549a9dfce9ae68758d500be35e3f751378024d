@@ -157,6 +157,24 @@
       "revId": "5c549a9dfce9ae68758d500be35e3f751378024d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d683721b_19d717e6",
+        "filename": "android/utils/path.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-05T23:21:54Z",
+      "side": 1,
+      "message": "I see your point\nThe issue is that we\u0027ve taken most of Qemu1 utility stuff and put it into AndroidEmu. Now qemu2 still has a lot of the same stuff, maybe implemented slightly differently.\nThis means that we either need to exclude it from qemu2 when we build it with the emu lib, or we have to rename it in the lib and whole qemu1. I don\u0027t really see any third option here\nI\u0027m ok with renaming this one in emu lib (and will do it now), but there are more",
+      "parentUuid": "d60ff2af_6a2a975d",
+      "revId": "5c549a9dfce9ae68758d500be35e3f751378024d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
