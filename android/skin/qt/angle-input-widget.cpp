@@ -10,11 +10,18 @@
 
 #include "android/skin/qt/angle-input-widget.h"
 #include <QtMath>
+#include <iostream>
 
 // Helper function for AngleInputWidget ctor
 static void setUpLineEdit(QLineEdit* editor, const QValidator* validator) {
     editor->setValidator(validator);
     editor->setProperty("class", "EditableValue");
+}
+
+// Another helper
+static void setUpLabel(QLabel* label, const QString& title) {
+    label->setText(title);
+    label->setProperty("ColorGroup", "Title");
 }
 
 AngleInputWidget::AngleInputWidget(QWidget* parent) :
@@ -25,30 +32,41 @@ AngleInputWidget::AngleInputWidget(QWidget* parent) :
     mDegreesValueEditor(&mSexagesimalModeFrame),
     mMinutesValueEditor(&mSexagesimalModeFrame),
     mSecondsValueEditor(&mSexagesimalModeFrame),
+    mDegreesLabel(&mSexagesimalModeFrame),
+    mMinutesLabel(&mSexagesimalModeFrame),
+    mSecondsLabel(&mSexagesimalModeFrame),
+    mMinValue(0.0),
+    mMaxValue(0.0),
     mDecimalValue(0.0),
     mCurrentInputMode(InputMode::Decimal) {
 
     // Set up validators for the editors.
+    setMinValue(-180.0);
+    setMaxValue(180.0);
     mDecimalDegreeValidator.setDecimals(100);
-    mDecimalDegreeValidator.setBottom(-180.0);
-    mDecimalDegreeValidator.setTop(180.0);
-    mIntegerDegreeValidator.setBottom(-180);
-    mIntegerDegreeValidator.setTop(180);
-    mMinSecValidator.setBottom(0);
-    mMinSecValidator.setTop(60);
+    mMinValidator.setBottom(0);
+    mMinValidator.setTop(59);
+    mSecValidator.setBottom(0.0);
+    mSecValidator.setTop(59.0);
 
     // Set up the editors.
     setUpLineEdit(&mDecimalValueEditor, &mDecimalDegreeValidator);
     setUpLineEdit(&mDegreesValueEditor, &mIntegerDegreeValidator);
-    setUpLineEdit(&mMinutesValueEditor, &mMinSecValidator);
-    setUpLineEdit(&mSecondsValueEditor, &mMinSecValidator);
+    setUpLineEdit(&mMinutesValueEditor, &mMinValidator);
+    setUpLineEdit(&mSecondsValueEditor, &mSecValidator);
+    setUpLabel(&mDegreesLabel, QString("\u00B0"));
+    setUpLabel(&mMinutesLabel, QString("'"));
+    setUpLabel(&mSecondsLabel, QString("''"));
 
     // Lay out the subwidgets horizontally.
     mDecimalFrameLayout.addWidget(&mDecimalValueEditor);
     mDecimalModeFrame.setLayout(&mDecimalFrameLayout);
     mSexagesimalFrameLayout.addWidget(&mDegreesValueEditor);
+    mSexagesimalFrameLayout.addWidget(&mDegreesLabel);
     mSexagesimalFrameLayout.addWidget(&mMinutesValueEditor);
+    mSexagesimalFrameLayout.addWidget(&mMinutesLabel);
     mSexagesimalFrameLayout.addWidget(&mSecondsValueEditor);
+    mSexagesimalFrameLayout.addWidget(&mSecondsLabel);
     mSexagesimalModeFrame.setLayout(&mSexagesimalFrameLayout);
     mLayout.addWidget(&mDecimalModeFrame);
     mLayout.addWidget(&mSexagesimalModeFrame);
@@ -66,6 +84,42 @@ AngleInputWidget::AngleInputWidget(QWidget* parent) :
             this, SLOT(updateValueFromSexagesimalInput()));
     connect(&mSecondsValueEditor, SIGNAL(editingFinished()),
             this, SLOT(updateValueFromSexagesimalInput()));
+
+    // The line edit controls must not be squished by the spacing
+    // introduced by additional box layouts. The spacing is removed
+    // by setting margins to 0.
+    setContentsMargins(0, 0, 0, 0);
+    mDecimalModeFrame.setContentsMargins(0, 0, 0, 0);
+    mSexagesimalModeFrame.setContentsMargins(0, 0, 0, 0);
+    mSexagesimalFrameLayout.setContentsMargins(0, 0, 0, 0);
+    mDecimalFrameLayout.setContentsMargins(0, 0, 0, 0);
+    mLayout.setContentsMargins(0, 0, 0, 0);
+}
+
+void AngleInputWidget::setMinValue(double value) {
+   if (value > mMaxValue) {
+       return;
+   } else {
+       mMinValue = value;
+       mDecimalDegreeValidator.setBottom(mMinValue);
+       mIntegerDegreeValidator.setBottom(qFloor(mMinValue));
+       if (mDecimalValue < mMinValue) {
+           mDecimalValue = mMinValue;
+       }
+   }
+}
+
+void AngleInputWidget::setMaxValue(double value) {
+   if (value < mMinValue) {
+       return;
+   } else {
+       mMaxValue = value;
+       mDecimalDegreeValidator.setTop(mMaxValue);
+       mIntegerDegreeValidator.setTop(qFloor(mMinValue));
+       if (mDecimalValue > mMaxValue) {
+           mDecimalValue = mMaxValue;
+       }
+   }
 }
 
 const int MINUTES_IN_DEGREE = 60;
@@ -76,9 +130,8 @@ static int sgn(double x) {
     return (x > 0.0) - (x < 0.0);
 }
 
-void AngleInputWidget::setInputMode(AngleInputWidget::InputMode mode) {
-    mCurrentInputMode = mode;
-    switch(mode) {
+void AngleInputWidget::updateView() {
+    switch(mCurrentInputMode) {
     case InputMode::Decimal:
         // Update the visible sub-widgets.
         mDecimalModeFrame.show();
@@ -95,34 +148,65 @@ void AngleInputWidget::setInputMode(AngleInputWidget::InputMode mode) {
 
         // Convert the decimal value to sexagesimal representation.
         int sign = sgn(mDecimalValue);
-        int seconds = qFloor(qFabs(mDecimalValue) * SECONDS_IN_DEGREE);
-        int degrees = sign * seconds / SECONDS_IN_DEGREE;
-        seconds = seconds % SECONDS_IN_DEGREE;
-        int minutes = seconds / SECONDS_IN_MINUTE;
-        seconds = seconds % SECONDS_IN_MINUTE;
+        double seconds = qFabs(mDecimalValue) * SECONDS_IN_DEGREE;
+        int whole_seconds = qFloor(seconds);
+        double remainder_seconds = seconds - whole_seconds;
+
+        int degrees = sign * whole_seconds / SECONDS_IN_DEGREE;
+        whole_seconds = whole_seconds % SECONDS_IN_DEGREE;
+        int minutes = whole_seconds / SECONDS_IN_MINUTE;
+        seconds = whole_seconds % SECONDS_IN_MINUTE + remainder_seconds;
 
         // Ensure the correct value is displayed in the editor.
-        mDegreesValueEditor.setText(QString::number(degrees));
+        // There is a slight tweak to handle the case of negative angles
+        // whose absolute value is > 0 and < 1. We want to display the
+        // always display the "-" sign in the first box, even if degrees
+        // is 0.
+        mDegreesValueEditor.setText(
+                QString(degrees == 0 && sign == -1 ? "-" : "") +
+                QString::number(degrees));
         mMinutesValueEditor.setText(QString::number(minutes));
         mSecondsValueEditor.setText(QString::number(seconds));
         break;
     }
 }
 
+void AngleInputWidget::setInputMode(AngleInputWidget::InputMode mode) {
+    mCurrentInputMode = mode;
+    updateView();
+}
+
 void AngleInputWidget::updateValueFromDecimalInput() {
-    mDecimalValue = mDecimalValueEditor.text().toDouble();
-    emit(valueChanged(mDecimalValue));
+    validateAndUpdateValue(mDecimalValueEditor.text().toDouble());
 }
 
 void AngleInputWidget::updateValueFromSexagesimalInput() {
     int degrees = mDegreesValueEditor.text().toInt();
     int minutes = mMinutesValueEditor.text().toInt();
-    int seconds = mSecondsValueEditor.text().toInt();
-    int sign = sgn(degrees);
-    mDecimalValue =
-        sign * (abs(degrees) +
-                minutes / static_cast<double>(MINUTES_IN_DEGREE) +
-                seconds / static_cast<double>(SECONDS_IN_DEGREE));
+    double seconds = mSecondsValueEditor.text().toDouble();
 
-    emit(valueChanged(mDecimalValue));
+    // Again, there's a tweak to handle the case when the abs
+    // value of a negative angle is between 0 and 1 degrees,
+    // i.e. 0 deg 30 min 25 sec. "-" sign is always in the "degrees"
+    // box, even if "degrees" is 0.
+    int sign =
+        degrees == 0 && mDegreesValueEditor.text()[0] == '-'
+            ? -1
+            : sgn(degrees);
+
+    std::cout << "Updated value, seconds value " << seconds << std::endl;
+    validateAndUpdateValue(
+        (sign == 0 ? 1 : sign) * (abs(degrees) +
+                minutes / static_cast<double>(MINUTES_IN_DEGREE) +
+                seconds / static_cast<double>(SECONDS_IN_DEGREE)));
+}
+
+void AngleInputWidget::validateAndUpdateValue(double new_value) {
+    if (new_value >= mMinValue && new_value <= mMaxValue) {
+        mDecimalValue = new_value;
+        emit(valueChanged(mDecimalValue));
+    } else {
+        // Force display the old value if the provided value was out of range.
+        updateView();
+    }
 }

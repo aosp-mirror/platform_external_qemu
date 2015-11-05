@@ -12,6 +12,7 @@
 
 #include <QDoubleValidator>
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QLineEdit>
 #include <QIntValidator>
 #include <QWidget>
@@ -23,6 +24,8 @@
 // In sexagesimal mode, it allows the user to specify the value
 // in terms of degrees, minutes and seconds, i.e. 10 degrees and
 // 30 minutes.
+// The widget limits the input values to a certain range. The
+// default range is [-180; +180].
 class AngleInputWidget : public QWidget
 {
     Q_OBJECT
@@ -42,6 +45,28 @@ public:
     // Indicates which input mode the widget is currently in.
     InputMode currentMode() const { return mCurrentInputMode; }
 
+    // Modify the range of input values allowed by the widget by
+    // setting the minimum allowed value.
+    // If the provided argument is greater than the current max value,
+    // the range is not modified.
+    // If at the time of the call, the current value is less than the
+    // provided argument, it is set to the provided argument.
+    void setMinValue(double value);
+
+    // Modify the range of input values allowed by the widget by
+    // setting the maximum allowed value.
+    // If the provided argument is less than the current min value,
+    // the range is not modified.
+    // If at the time of the call, the current value is greater than
+    // the provided argument, it is set to the provided argument.
+    void setMaxValue(double value);
+
+    // Get the current minimum value allowed by the widget.
+    double minValue() const { return mMinValue; }
+
+    // Get the current maximum value allowed by the widget.
+    double maxValue() const { return mMaxValue; }
+
 public slots:
     // Sets the widget's current input mode to either decimal or sexagesimal.
     void setInputMode(InputMode);
@@ -59,6 +84,14 @@ private slots:
     // Updates the internal value based on the sexagesimal editor.
     void updateValueFromSexagesimalInput();
 
+    // Checks that the provided argument fits into the range permitted
+    // by the widget. If it does, updates the internal value and emits
+    // the appropriate signal.
+    void validateAndUpdateValue(double new_value);
+
+    // Updates the currently displayed set of widgets (depending on the
+    // input mode) to correctly display the current value.
+    void updateView();
 private:
     QFrame mDecimalModeFrame;
     QFrame mSexagesimalModeFrame;
@@ -68,10 +101,17 @@ private:
     QLineEdit mDegreesValueEditor;
     QLineEdit mMinutesValueEditor;
     QLineEdit mSecondsValueEditor;
+    QLabel mDegreesLabel;
+    QLabel mMinutesLabel;
+    QLabel mSecondsLabel;
     QDoubleValidator mDecimalDegreeValidator;
     QIntValidator mIntegerDegreeValidator;
-    QIntValidator mMinSecValidator;
+    QIntValidator mMinValidator;
+    QDoubleValidator mSecValidator;
     QHBoxLayout mLayout;
+    QDoubleValidator* mValueValidator;
+    double mMinValue;
+    double mMaxValue;
     double mDecimalValue;
     InputMode mCurrentInputMode;
 };
