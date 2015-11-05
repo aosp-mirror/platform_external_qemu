@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "568ea242_a8bdc7f6",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-05T19:07:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b637de6a_41d1d21f",
+      "revId": "5c549a9dfce9ae68758d500be35e3f751378024d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d60ff2af_0ad1db20",
         "filename": "android/looper-qemu.cpp",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-05T10:23:15Z",
       "side": 1,
       "message": "It looks like this file should be moved to android-qemu1-glue/ !!",
+      "revId": "5c549a9dfce9ae68758d500be35e3f751378024d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96a49abb_bf7983d9",
+        "filename": "android/looper-qemu.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-05T19:07:06Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "d60ff2af_0ad1db20",
       "revId": "5c549a9dfce9ae68758d500be35e3f751378024d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "f6923665_ff206778",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-05T19:07:06Z",
+      "side": 1,
+      "message": "It currently just returns 1 unconditionally",
+      "parentUuid": "9609fab1_08568751",
+      "revId": "5c549a9dfce9ae68758d500be35e3f751378024d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16e42a25_4c337f38",
         "filename": "android/utils/path.c",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2015-11-05T10:23:15Z",
       "side": 1,
       "message": "we really shouldn\u0027t need these conditional defines. Better rename the function and update the call sites then :-/",
+      "revId": "5c549a9dfce9ae68758d500be35e3f751378024d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d683721b_f320a278",
+        "filename": "android/utils/path.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-05T19:07:06Z",
+      "side": 1,
+      "message": "The function in AndroidEmu/base is exactly the same, so I want to use it when it\u0027s present.",
+      "parentUuid": "16e42a25_4c337f38",
       "revId": "5c549a9dfce9ae68758d500be35e3f751378024d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
