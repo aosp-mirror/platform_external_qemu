@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "1698aa84_80a9c6b9",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-05T00:04:10Z",
+      "side": 1,
+      "message": "I think it might be a good idea to check if the path is valid (i.e. well formed, actually exists and is a directory) and if not, fall back to default.",
+      "range": {
+        "startLine": 85,
+        "startChar": 4,
+        "endLine": 85,
+        "endChar": 6
+      },
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b6cfde71_e42f14c8",
         "filename": "android/skin/qt/ext-settings.cpp",
         "patchSetId": 1
@@ -36,6 +59,29 @@
     },
     {
       "key": {
+        "uuid": "568ea242_1770bee6",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-05T00:04:10Z",
+      "side": 1,
+      "message": "It is better to use QFontMetrics to measure the length of the text and compare it to the width of the widget it will be displayed in. \n\nThis will actually be slightly trickier if we decide to make the path field editable - you will have to replace the shortened path with the full path when the widget receives focus, and then replace it back with the shortened version again when it loses focus",
+      "range": {
+        "startLine": 98,
+        "startChar": 12,
+        "endLine": 98,
+        "endChar": 30
+      },
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f60f9676_8c376b8b",
         "filename": "android/skin/qt/ext-settings.cpp",
         "patchSetId": 1
@@ -53,6 +99,29 @@
     },
     {
       "key": {
+        "uuid": "d69a9277_188b8d98",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-05T00:04:10Z",
+      "side": 1,
+      "message": "Another reason to use QSettings instead of AVD ini files - won\u0027t have to deal with path length limitations",
+      "range": {
+        "startLine": 193,
+        "startChar": 29,
+        "endLine": 196,
+        "endChar": 45
+      },
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96d65a0b_a0025ae4",
         "filename": "android/skin/qt/ext-settings.cpp",
         "patchSetId": 1
@@ -64,6 +133,75 @@
       "writtenOn": "2015-11-04T23:39:41Z",
       "side": 1,
       "message": "Same as above.",
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d69a9277_789ad9e3",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-05T00:04:10Z",
+      "side": 1,
+      "message": "Isolate this code into a helper function?",
+      "range": {
+        "startLine": 208,
+        "startChar": 8,
+        "endLine": 208,
+        "endChar": 39
+      },
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96a49abb_f637b8b7",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-05T00:04:10Z",
+      "side": 1,
+      "message": "Make this a QString",
+      "range": {
+        "startLine": 91,
+        "startChar": 0,
+        "endLine": 91,
+        "endChar": 44
+      },
+      "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1698aa84_402c3e42",
+        "filename": "android/user-config.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-05T00:04:10Z",
+      "side": 1,
+      "message": "Do we really need to have this setting defined for each AVD? I think we can store these types of settings using QSettings (which also eliminate the need to fiddle with C strings and will probably just work for paths containing non-english unicode chars)",
+      "range": {
+        "startLine": 64,
+        "startChar": 17,
+        "endLine": 64,
+        "endChar": 24
+      },
       "revId": "5a5d0759aa9834f01ad3f897315ae7275946b29b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
