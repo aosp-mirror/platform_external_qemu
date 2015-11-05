@@ -65,7 +65,7 @@
 #include "android-qemu1-glue/android_qemud.h"
 #include "android/hw-sensors.h"
 #include "android/log-rotate.h"
-#include "android/looper-qemu.h"
+#include "android-qemu1-glue/looper-qemu.h"
 #include "android/metrics/metrics_reporter.h"
 #include "android/metrics/studio-helper.h"
 #include "android/multitouch-port.h"

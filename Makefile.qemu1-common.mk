@@ -188,7 +188,6 @@ common_LOCAL_SRC_FILES += \
     android/hw-qemud.cpp \
     android/hw-sensors.c \
     android/kernel/kernel_utils.cpp \
-    android/looper-qemu.cpp \
     android/main-common.c \
     android/main-common-ui.c \
     android/metrics/metrics_reporter.c \
@@ -554,6 +553,7 @@ LOCAL_SRC_FILES += \
     android-qemu1-glue/emulation/charpipe.c \
     android-qemu1-glue/emulation/CharSerialLine.cpp \
     android-qemu1-glue/emulation/serial_line.cpp \
+    android-qemu1-glue/looper-qemu.cpp \
     android-qemu1-glue/qemu-cellular-agent-impl.c \
     android-qemu1-glue/qemu-display-agent-impl.cpp \
     android-qemu1-glue/qemu-finger-agent-impl.c \

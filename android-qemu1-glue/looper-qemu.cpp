@@ -9,8 +9,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/looper-qemu.h"
+#include "android-qemu1-glue/looper-qemu.h"
+
 #include "android-qemu1-glue/base/async/Looper.h"
+#include "android/base/async/Looper.h"
 #include "android/utils/looper.h"
 
 typedef ::Looper CLooper;
