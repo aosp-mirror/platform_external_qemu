@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "96a49abb_44428e22",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-05T16:58:15Z",
+      "side": 1,
+      "message": "why is it true by default?",
+      "range": {
+        "startLine": 300,
+        "startChar": 42,
+        "endLine": 300,
+        "endChar": 46
+      },
+      "revId": "61ee452165fb265a542793e11181beb2f5188df3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
