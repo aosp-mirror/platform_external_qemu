@@ -47,7 +47,7 @@
      <file alias="call_end_disabled">images/light/ic_call_end_BEE_48dp.svg</file>
      <file alias="camera_iris">images/light/ic_camera_678_48dp.svg</file>
      <file alias="check_yes">images/light/ic_check_box_0BA_24dp.svg</file>
-     <file alias="check_no">images/light/ic_check_box_outline_blank_0BA_24dp.svg</file>
+     <file alias="check_no">images/light/ic_check_box_outline_blank_777_24dp.svg</file>
      <file alias="dpad">images/light/Remote_678.svg</file>
      <file alias="dpad_back">images/light/dpad_back.svg</file>
      <file alias="dpad_back_pressed">images/light/dpad_back_pressed.svg</file>
@@ -84,6 +84,8 @@
      <file alias="phone_paused_disabled">images/light/ic_phone_paused_BEE_48dp.svg</file>
      <file alias="play_arrow">images/light/ic_play_arrow_0BA_48dp.svg</file>
      <file alias="play_arrow_disabled">images/light/ic_play_arrow_BEE_48dp.svg</file>
+     <file alias="radio_off">images/light/ic_radio_button_unchecked_777_24dp.svg</file>
+     <file alias="radio_on">images/light/ic_radio_button_checked_0BA_24dp.svg</file>
      <file alias="remove">images/light/ic_remove_0BA_48dp.svg</file>
      <file alias="remove_disabled">images/light/ic_remove_BEE_48dp.svg</file>
      <file alias="send">images/light/ic_send_0BA_48dp.svg</file>
@@ -91,6 +93,8 @@
      <file alias="signal_cellular_3_bar">images/light/ic_signal_cellular_3_bar_678_48dp.svg</file>
      <file alias="stop">images/light/ic_stop_0BA_48dp.svg</file>
      <file alias="stop_disabled">images/light/ic_stop_BEE_48dp.svg</file>
+     <file alias="toggle_off">images/light/toggle_off_light.png</file>
+     <file alias="toggle_on">images/light/toggle_on.png</file>
      <file alias="virtSensors">images/light/Virtual_Sensors_678.svg</file>
  </qresource>
 
@@ -118,7 +122,7 @@
      <file alias="call_end_disabled">images/dark/ic_call_end_155_48dp.svg</file>
      <file alias="camera_iris">images/dark/ic_camera_677_48dp.svg</file>
      <file alias="check_yes">images/dark/ic_check_box_0BA_24dp.svg</file>
-     <file alias="check_no">images/dark/ic_check_box_outline_blank_0BA_24dp.svg</file>
+     <file alias="check_no">images/dark/ic_check_box_outline_blank_BCC_24dp.svg</file>
      <file alias="dpad">images/dark/Remote_677.svg</file>
      <file alias="dpad_back">images/dark/dpad_back.svg</file>
      <file alias="dpad_back_pressed">images/dark/dpad_back_pressed.svg</file>
@@ -155,6 +159,8 @@
      <file alias="phone_paused_disabled">images/dark/ic_phone_paused_155_48dp.svg</file>
      <file alias="play_arrow">images/dark/ic_play_arrow_0BA_48dp.svg</file>
      <file alias="play_arrow_disabled">images/dark/ic_play_arrow_155_48dp.svg</file>
+     <file alias="radio_off">images/dark/ic_radio_button_unchecked_BCC_24dp.svg</file>
+     <file alias="radio_on">images/dark/ic_radio_button_checked_0BA_24dp.svg</file>
      <file alias="remove">images/dark/ic_remove_0BA_48dp.svg</file>
      <file alias="remove_disabled">images/dark/ic_remove_155_48dp.svg</file>
      <file alias="send">images/dark/ic_send_0BA_48dp.svg</file>
@@ -162,6 +168,8 @@
      <file alias="signal_cellular_3_bar">images/dark/ic_signal_cellular_3_bar_677_48dp.svg</file>
      <file alias="stop">images/dark/ic_stop_0BA_48dp.svg</file>
      <file alias="stop_disabled">images/dark/ic_stop_155_48dp.svg</file>
+     <file alias="toggle_off">images/dark/toggle_off_dark.png</file>
+     <file alias="toggle_on">images/dark/toggle_on.png</file>
      <file alias="virtSensors">images/dark/Virtual_Sensors_677.svg</file>
  </qresource>
 </RCC>
