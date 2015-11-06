@@ -219,6 +219,9 @@ private slots:
     // Sensors
     void on_temperatureSensorValueWidget_valueChanged(double value);
     void on_proximitySensorValueWidget_valueChanged(double value);
+    void on_lightSensorValueWidget_valueChanged(double value);
+    void on_pressureSensorValueWidget_valueChanged(double value);
+    void on_humiditySensorValueWidget_valueChanged(double value);
     void onPhoneRotationChanged();
 
     // SMS messaging
