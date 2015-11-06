@@ -135,7 +135,7 @@ bool emuglConfig_init(EmuglConfig* config,
 
     // 'host' is a special value corresponding to the default translation
     // to desktop GL, anything else must be checked against existing backends.
-    if (strcmp(gpu_mode, "host") != 0) {
+    if (strcmp(gpu_mode, "host") != 0 && strcmp(gpu_mode, "vendor") != 0) {
         const StringVector& backends = sBackendList->names();
         if (!stringVectorContains(backends, gpu_mode)) {
             String error = StringFormat(
