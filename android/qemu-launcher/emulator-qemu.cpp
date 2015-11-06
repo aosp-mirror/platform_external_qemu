@@ -431,9 +431,7 @@ extern "C" int main(int argc, char **argv, char **envp) {
         EmuglConfig emuglConfig;
 
         if (!emuglConfig_init(&emuglConfig,
-                              hw->hw_gpu_enabled,
                               hw->hw_gpu_mode,
-                              opts->gpu,
                               0,
                               opts->no_window)) {
             derror("%s", emuglConfig.status);

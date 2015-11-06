@@ -1451,7 +1451,7 @@ help_gpu(stralloc_t* out)
 
     "     on       -> enable GPU emulation\n"
     "     off      -> disable GPU emulation\n"
-    "     auto     -> use the setting from the AVD\n"
+    "     auto     -> use the setting from the AVD (default)\n"
     "     enabled  -> same as 'on'\n"
     "     disabled -> same as 'off'\n\n"
 

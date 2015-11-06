@@ -266,7 +266,7 @@ int main(int argc, char** argv)
     EmuglConfig config;
     int bitness = is_64bit ? 64 : 32;
     if (!emuglConfig_init(
-                &config, gpuEnabled, gpuMode, gpu, bitness, no_window)) {
+                &config, gpuMode, bitness, no_window)) {
         fprintf(stderr, "ERROR: %s\n", config.status);
         exit(1);
     }
