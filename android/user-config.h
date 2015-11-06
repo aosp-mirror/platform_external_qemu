@@ -39,11 +39,6 @@ void           auserConfig_getWindowPos( AUserConfig*  uconfig, int  *pX, int  *
 /* Change the stored window position for this AVD */
 void           auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y );
 
-char*          auserConfig_getUiSavePath( AUserConfig*  uconfig);
-int            auserConfig_getUiTheme( AUserConfig*  uconfig);
-void           auserConfig_setUiSavePath( AUserConfig*  uconfig, const char* path );
-void           auserConfig_setUiTheme( AUserConfig*  uconfig, int theme );
-
 /* Save the user configuration back to the content directory.
  * Should be used in an atexit() handler. This will effectively
  * only save the user configuration to disk if its content

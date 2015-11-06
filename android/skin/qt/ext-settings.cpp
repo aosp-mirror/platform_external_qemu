@@ -25,6 +25,7 @@
 #include "extended-window.h"
 #include "extended-window-styles.h"
 
+#include <QSettings>
 #include <QtWidgets>
 
 void ExtendedWindow::initSettings()
@@ -80,8 +81,11 @@ void ExtendedWindow::completeSettingsInitialization()
     // Get the latest user selections from the
     // user-config code.
 
+    QSettings settings;
+
     // "Screen shot" and "Record screen" destination folder
-    mSettingsState.mSavePath = user_config_get_ui_savePath();
+    // Note: The "set/" here is because we're in "ext-settings"
+    mSettingsState.mSavePath = settings.value("set/savePath", "").toString();
 
     // Check if this path is writable
     QFileInfo fInfo(mSettingsState.mSavePath);
@@ -95,7 +99,7 @@ void ExtendedWindow::completeSettingsInitialization()
         QStringList paths = QStandardPaths::standardLocations(QStandardPaths::DesktopLocation);
         if (paths.size() > 0) {
             mSettingsState.mSavePath = paths[0];
-            user_config_set_ui_savePath(mSettingsState.mSavePath.toStdString().c_str());
+            settings.setValue("set/savePath", mSettingsState.mSavePath);
         }
     }
 
@@ -105,7 +109,8 @@ void ExtendedWindow::completeSettingsInitialization()
         mExtendedUi->set_saveLocBox->setPlainText(mSettingsState.mSavePath);
     }
 
-    SettingsTheme theme = (SettingsTheme)user_config_get_ui_theme();
+    // Dark/Light theme
+    SettingsTheme theme = (SettingsTheme)settings.value("set/theme", 0).toInt();
     if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
         theme = (SettingsTheme)0;
     }
@@ -156,7 +161,8 @@ void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
 
     // Save a valid selection
     mSettingsState.mTheme = theme;
-    user_config_set_ui_theme(theme);
+    QSettings settings;
+    settings.setValue("set/theme", (int)theme);
 
     // Switch to the icon images that are appropriate for this theme.
     switchAllIconsForTheme(theme);
@@ -215,7 +221,9 @@ void ExtendedWindow::on_set_folderButton_clicked()
     // Everything looks OK
     mSettingsState.mSavePath = dirName;
 
-    user_config_set_ui_savePath(dirName.toStdString().c_str());
+    QSettings settings;
+    settings.setValue("set/savePath", dirName);
+
     mExtendedUi->set_saveLocBox->setPlainText(dirName.toStdString().c_str());
 }
 
