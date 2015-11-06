@@ -119,4 +119,6 @@ void ExtendedWindow::dpad_setReleased(QPushButton* button)
         resName += iconName;
         button->setIcon(QIcon(resName));
     }
+    // De-select the button (it looks better)
+    button->clearFocus();
 }
