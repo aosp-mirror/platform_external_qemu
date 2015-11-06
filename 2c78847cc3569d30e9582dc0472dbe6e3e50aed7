@@ -22,6 +22,30 @@
       "revId": "2c78847cc3569d30e9582dc0472dbe6e3e50aed7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b686fe2b_32edd1e7",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-06T02:50:02Z",
+      "side": 1,
+      "message": "The scroll only appears if the path has more than ~160 characters.\nIf the path is longer than that, I think it\u0027s better to\nhave the ugly scroll bars than to truncate the displayed\npath.\n(It\u0027s only a vertical scroll, and Qt breaks the lines\nat \u0027/\u0027, so it actually doesn\u0027t look that bad.)",
+      "parentUuid": "96a49abb_852710a3",
+      "range": {
+        "startLine": 105,
+        "startChar": 7,
+        "endLine": 105,
+        "endChar": 76
+      },
+      "revId": "2c78847cc3569d30e9582dc0472dbe6e3e50aed7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
