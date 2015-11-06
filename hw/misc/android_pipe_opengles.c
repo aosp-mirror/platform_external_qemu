@@ -230,7 +230,11 @@ static int net_pipe_send_buffers(void* opaque,
     buff = buffers;
     while (count > 0) {
         int  avail = buff->size - buffStart;
+#ifdef _WIN32
         int  len = send_all(pipe->fd, buff->data + buffStart, avail);
+#else
+        int  len = opengl_send_all(pipe->fd, buff->data + buffStart, avail);
+#endif
 
         /* the write succeeded */
         if (len > 0) {
@@ -294,7 +298,11 @@ static int net_pipe_recv_buffers(void *opaque,
     buff = buffers;
     while (count > 0) {
         int avail = buff->size - buffStart;
+#ifdef _WIN32
         int len = recv_all(pipe->fd, buff->data + buffStart, avail, true);
+#else
+        int len = opengl_recv_all(pipe->fd, buff->data + buffStart, avail, true);
+#endif
 
         /* the read succeeded */
         if (len > 0) {
@@ -447,7 +455,7 @@ openglesPipe_init( void* hwpipe, void* _looper, const char* args )
         // Disable TCP nagle algorithm to improve throughput of small packets
         socket_set_nodelay(pipe->fd);
 
-    // On Win32, adjust buffer sizes
+    // Adjust buffer sizes
 #ifdef _WIN32
         {
             int sndbuf = 128 * 1024;
@@ -456,6 +464,15 @@ openglesPipe_init( void* hwpipe, void* _looper, const char* args )
                         (char*)&sndbuf, len) == SOCKET_ERROR) {
                 D("Failed to set SO_SNDBUF to %d error=0x%x\n",
                 sndbuf, WSAGetLastError());
+            }
+        }
+#else
+        {
+            int sndbuf = 128 * 8192;
+            socklen_t len = sizeof(sndbuf);
+            if (setsockopt(pipe->fd, SOL_SOCKET, SO_SNDBUF, &sndbuf, len) == -1) {
+                D("opengles pipe: failed to set SO_SNDBUF to %d error=0x%x\n",sndbuf, errno);
+                exit(1);
             }
         }
 #endif /* _WIN32 */
