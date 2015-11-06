@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "568ea242_1fd44c68",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-06T21:35:50Z",
+      "side": 1,
+      "message": "Ensure that we set application name and organization name because they will be used to access the settings. For example, the path to the appropriate location in the Windows registry will use them. Refer to these docs for more info: http://doc.qt.io/qt-4.8/qsettings.html#QSettings-5",
+      "range": {
+        "startLine": 84,
+        "startChar": 14,
+        "endLine": 84,
+        "endChar": 22
+      },
+      "revId": "f80f9de8fd7163d37da955e48ba45b658df3f1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b69d1e72_5afa64e1",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-06T21:35:50Z",
+      "side": 1,
+      "message": "Use constants for these strings?",
+      "range": {
+        "startLine": 81,
+        "startChar": 27,
+        "endLine": 81,
+        "endChar": 36
+      },
+      "revId": "f80f9de8fd7163d37da955e48ba45b658df3f1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
