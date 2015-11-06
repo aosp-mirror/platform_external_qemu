@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "b69d1e72_9a1becfd",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-06T21:42:35Z",
+      "side": 1,
+      "message": "Refer to Prathmesh\u0027s CL about formatting commit messages - might as well get into good habits now.",
+      "revId": "f80f9de8fd7163d37da955e48ba45b658df3f1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1698aa84_b80fceb6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-06T21:42:35Z",
+      "side": 1,
+      "message": "Verified through Studio as well? I really don\u0027t think it will be a problem, but it\u0027s worth checking...",
+      "revId": "f80f9de8fd7163d37da955e48ba45b658df3f1b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "568ea242_1fd44c68",
         "filename": "android/skin/qt/ext-settings.cpp",
         "patchSetId": 1
