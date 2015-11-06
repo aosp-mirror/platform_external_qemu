@@ -172,6 +172,7 @@ private:
     bool handleQtMouseEvent(SkinEventType type, QMouseEvent *event);
     QString getTmpImagePath();
 
+
     void             *batteryState;
 
     SkinSurface *backing_surface;
