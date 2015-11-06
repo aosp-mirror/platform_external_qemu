@@ -134,12 +134,13 @@ bool emuglConfig_init(EmuglConfig* config,
     }
 
     // 'host' is a special value corresponding to the default translation
-    // to desktop GL, anything else must be checked against existing backends.
-    if (strcmp(gpu_mode, "host") != 0) {
+    // to desktop GL, 'guest' does not use host-side emulation,
+    // anything else must be checked against existing host-side backends.
+    if (strcmp(gpu_mode, "host") != 0 && strcmp(gpu_mode, "guest") != 0) {
         const StringVector& backends = sBackendList->names();
         if (!stringVectorContains(backends, gpu_mode)) {
             String error = StringFormat(
-                "Invalid GPU mode '%s', use one of: on off host", gpu_mode);
+                "Invalid GPU mode '%s', use one of: on off host guest", gpu_mode);
             for (size_t n = 0; n < backends.size(); ++n) {
                 error += " ";
                 error += backends[n];

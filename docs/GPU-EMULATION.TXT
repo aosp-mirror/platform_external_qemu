@@ -31,6 +31,10 @@ At this time, the following modes are supported:
             Another benefit of 'mesa' mode is that it can be run on headless
             servers which do not have a GPU, or OpenGL libraries installed.
 
+  'auto'    Uses 'host' mode if not remoting (NX or CRD), 'mesa' otherwise.
+
+  'guest'   Use a guest-side OpenGL ES implementation.
+
 Alternatively, one can use the '-gpu <mode>' option to force a specific mode.
 Values 'on', 'off' and 'auto' are also recognized. See -help-gpu for details.
 

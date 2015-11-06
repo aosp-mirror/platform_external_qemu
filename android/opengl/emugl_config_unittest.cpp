@@ -145,6 +145,33 @@ TEST(EmuglConfig, init) {
         EXPECT_STREQ("vendor", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'vendor' mode", config.status);
     }
+
+    {
+        EmuglConfig config;
+        EXPECT_TRUE(emuglConfig_init(
+                &config, true, "guest", "auto", 0, false));
+        EXPECT_TRUE(config.enabled);
+        EXPECT_STREQ("guest", config.backend);
+        EXPECT_STREQ("GPU emulation enabled using 'guest' mode",
+                     config.status);
+    }
+
+    {
+        EmuglConfig config;
+        EXPECT_TRUE(emuglConfig_init(
+                &config, false, "guest", "auto", 0, false));
+        EXPECT_FALSE(config.enabled);
+        EXPECT_STREQ("GPU emulation is disabled", config.status);
+    }
+
+    {
+        EmuglConfig config;
+        EXPECT_TRUE(emuglConfig_init(
+                &config, true, "host", "guest", 0, false));
+        EXPECT_TRUE(config.enabled);
+        EXPECT_STREQ("guest", config.backend);
+        EXPECT_STREQ("GPU emulation enabled using 'guest' mode", config.status);
+    }
 }
 
 TEST(EmuglConfig, initNxWithMesa) {
