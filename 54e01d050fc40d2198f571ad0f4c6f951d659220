@@ -16,6 +16,24 @@
       "revId": "54e01d050fc40d2198f571ad0f4c6f951d659220",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36892e3b_c70e824a",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-06T01:42:08Z",
+      "side": 1,
+      "message": "oh, looks like I lost a comment about that (or just forgot which CL has it):\nthese (well, most of them) depend on some macro which is different for qemu1 and qemu2. Here:\n\nANDROID_EMU_INTERNAL_QEMU2_CFLAGS :\u003d -DQEMU2\nifndef EMULATOR_USE_QT\n    # skin is only used in QT version of QEMU2 for now, so let\u0027s make sure\n    # it\u0027s not compiled into the non-QT one\n    ANDROID_EMU_INTERNAL_QEMU2_CFLAGS +\u003d -DNO_SKIN\nendif\n\nSo we can\u0027t build them just once and use for everything. The goal is to refactor the things so one can just build these once",
+      "parentUuid": "16e42a25_4c5fffc0",
+      "revId": "54e01d050fc40d2198f571ad0f4c6f951d659220",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
