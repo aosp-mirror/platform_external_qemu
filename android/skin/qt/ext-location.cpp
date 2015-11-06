@@ -27,81 +27,10 @@
 void ExtendedWindow::initLocation()
 {
     mLoc_timer.setSingleShot(true);
+    mExtendedUi->loc_altitudeInput->setValidator(&mAltitudeValidator);
+    mExtendedUi->loc_latitudeInput->setMinValue(-90.0);
+    mExtendedUi->loc_latitudeInput->setMaxValue(90.0);
     QObject::connect(&mLoc_timer, &QTimer::timeout, this, &ExtendedWindow::loc_slot_timeout);
-}
-
-void ExtendedWindow::on_loc_addRowButton_clicked()
-{
-    // Add a row below the currently-highlighted row
-    int currentRow = mExtendedUi->loc_pathTable->currentRow();
-    if (currentRow < 0) {
-        // Nothing selected, act as if the last is selected
-        currentRow = mExtendedUi->loc_pathTable->rowCount() - 1;
-    }
-    mExtendedUi->loc_pathTable->insertRow(currentRow + 1);
-    // Initialize it the same as the row above
-    for (int col = 0; col< mExtendedUi->loc_pathTable->columnCount(); col++) {
-        QTableWidgetItem* new_item =
-            mExtendedUi->loc_pathTable->item(currentRow, col)->clone();
-        if (col == 0 && new_item->text() == "0") {
-            // Make sure the delay value of the newly added item is valid.
-            // Only the very first item can have a delay value of 0.
-            new_item->setText("1");
-        }
-        mExtendedUi->loc_pathTable->setItem(currentRow+1, col, new_item);
-    }
-
-    // Scroll to bottom to make the newly added item visible.
-    mExtendedUi->loc_pathTable->scrollToBottom();
-
-    // We must have more than one row. Allow deletion.
-    setButtonEnabled(mExtendedUi->loc_removeRowButton,
-                     mSettingsState.mTheme,
-                     true);
-}
-
-struct SelectionRangeComparator {
-    bool operator()(const QTableWidgetSelectionRange& rhs,
-                    const QTableWidgetSelectionRange& lhs) const {
-        return rhs.bottomRow() > lhs.topRow();
-    }
-};
-
-void ExtendedWindow::on_loc_removeRowButton_clicked()
-{
-    // Get a list of selected ranges.
-    QList<QTableWidgetSelectionRange> selectedRowsRanges =
-        mExtendedUi->loc_pathTable->selectedRanges();
-
-    // Make sure the bottom-most range appears first in the list.
-    std::sort(selectedRowsRanges.begin(),
-              selectedRowsRanges.end(),
-              SelectionRangeComparator());
-
-    // Remove all rows in all ranges, but make sure at least one row remains.
-    // The rows are removed from bottom to top, to avoid having to account for
-    // changed indexes.
-    for (int r = 0;
-         r < selectedRowsRanges.size() &&
-            mExtendedUi->loc_pathTable->rowCount() > 1;
-         ++r) {
-        const QTableWidgetSelectionRange& range = selectedRowsRanges[r];
-        for (int row = range.bottomRow();
-             row >= range.topRow() &&
-                mExtendedUi->loc_pathTable->rowCount() > 1;
-             --row) {
-            mExtendedUi->loc_pathTable->removeRow(row);
-        }
-    }
-    // Re-check the delay in the new top row
-    on_loc_pathTable_cellChanged(0, 0);
-
-    // If there's only one row left, disable the Delete button
-    if (mExtendedUi->loc_pathTable->rowCount() <= 1) {
-        setButtonEnabled(mExtendedUi->loc_removeRowButton,
-                         mSettingsState.mTheme,
-                         false);
-    }
 }
 
 void ExtendedWindow::on_loc_pathTable_cellChanged(int row, int col)
@@ -138,8 +67,6 @@ void ExtendedWindow::on_loc_playButton_clicked()
         mLoc_timer.start();
         SettingsTheme theme = mSettingsState.mTheme;
         setButtonEnabled(mExtendedUi->loc_GpxKmlButton,  theme, false);
-        setButtonEnabled(mExtendedUi->loc_addRowButton,  theme, false);
-        setButtonEnabled(mExtendedUi->loc_removeRowButton,  theme, false);
         setButtonEnabled(mExtendedUi->loc_playButton,  theme, false);
         setButtonEnabled(mExtendedUi->loc_stopButton,  theme, true);
         setButtonEnabled(mExtendedUi->loc_stopButton,  theme, true);
@@ -258,9 +185,6 @@ void ExtendedWindow::on_loc_stopButton_clicked()
     mLoc_nowPlaying = mLoc_nowPaused = false;
     SettingsTheme theme = mSettingsState.mTheme;
     setButtonEnabled(mExtendedUi->loc_GpxKmlButton,  theme, true);
-    setButtonEnabled(mExtendedUi->loc_addRowButton,  theme, true);
-    setButtonEnabled(mExtendedUi->loc_removeRowButton,  theme,
-                     mExtendedUi->loc_pathTable->rowCount() > 1);
     setButtonEnabled(mExtendedUi->loc_playButton,  theme, true);
     setButtonEnabled(mExtendedUi->loc_pauseButton,  theme, false);
     setButtonEnabled(mExtendedUi->loc_stopButton,  theme, false);
@@ -355,11 +279,6 @@ void ExtendedWindow::on_loc_GpxKmlButton_clicked()
         mExtendedUi->loc_pathTable->setItem(0, 4, new QTableWidgetItem("" )); // Name
         mExtendedUi->loc_pathTable->setItem(0, 5, new QTableWidgetItem("" )); // Description
     }
-
-    setButtonEnabled(mExtendedUi->loc_removeRowButton,
-                     mSettingsState.mTheme,
-                     mExtendedUi->loc_pathTable->rowCount() > 1 );
-
 }
 
 void ExtendedWindow::loc_populateTable(GpsFixArray *fixes)
@@ -415,4 +334,32 @@ void ExtendedWindow::loc_appendToTable(std::string lat,
     mExtendedUi->loc_pathTable->setItem(newRow, 4, itemForTable(QString::fromStdString(name)));
     mExtendedUi->loc_pathTable->setItem(newRow, 5, itemForTable(QString::fromStdString(description)));
 
+}
+
+
+void ExtendedWindow::on_loc_decimalModeSwitch_toggled(bool checked) {
+    if (checked) {
+        mExtendedUi->loc_latitudeInput->setInputMode(AngleInputWidget::InputMode::Decimal);
+        mExtendedUi->loc_longitudeInput->setInputMode(AngleInputWidget::InputMode::Decimal);
+    }
+}
+
+void ExtendedWindow::on_loc_sexagesimalModeSwitch_toggled(bool checked) {
+    if (checked) {
+        mExtendedUi->loc_latitudeInput->setInputMode(AngleInputWidget::InputMode::Sexagesimal);
+        mExtendedUi->loc_longitudeInput->setInputMode(AngleInputWidget::InputMode::Sexagesimal);
+    }
+}
+
+void ExtendedWindow::on_loc_sendPointButton_clicked() {
+    if (mLocationAgent == nullptr || mLocationAgent->gpsCmd == nullptr) {
+        return;
+    }
+    timeval timeVal = {};
+    gettimeofday(&timeVal, nullptr);
+    mLocationAgent->gpsCmd(mExtendedUi->loc_latitudeInput->value(),
+                           mExtendedUi->loc_longitudeInput->value(),
+                           mExtendedUi->loc_altitudeInput->text().toDouble(),
+                           4,
+                           &timeVal);
 }
