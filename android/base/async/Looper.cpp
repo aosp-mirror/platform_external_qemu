@@ -43,7 +43,6 @@ public:
     virtual ~GenLooper() {}
 
     virtual Duration nowMs(ClockType clockType = ClockType::kHost) {
-        DCHECK(clockType == ClockType::kHost);
 
         const DurationNs nsTime = nowNs(clockType);
         return nsTime == static_cast<DurationNs>(-1)
@@ -52,7 +51,6 @@ public:
     }
 
     virtual DurationNs nowNs(ClockType clockType = ClockType::kHost) {
-        DCHECK(clockType == ClockType::kHost);
 
         struct timeval time_now;
         return gettimeofday(&time_now, NULL)
@@ -194,8 +192,6 @@ public:
                 mDeadline(kDurationInfinite),
                 mPending(false),
                 mPendingLink() {
-            // this implementation only supports a host clock
-            DCHECK(clock == ClockType::kHost);
             DCHECK(mCallback);
             looper->addTimer(this);
         }
