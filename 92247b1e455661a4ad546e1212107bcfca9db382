@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "568ea242_cb04ca5b",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-06T00:00:44Z",
+      "side": 1,
+      "message": "Implemented the different ranges for longitude and latitude",
+      "parentUuid": "b69d1e72_e0f44c80",
+      "revId": "92247b1e455661a4ad546e1212107bcfca9db382",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1698aa84_29cc7a3e",
         "filename": "android/skin/qt/angle-input-widget.cpp",
         "patchSetId": 1
@@ -30,6 +48,30 @@
       "writtenOn": "2015-11-05T22:12:20Z",
       "side": 1,
       "message": "is it possible to do this through the .ui file?",
+      "range": {
+        "startLine": 75,
+        "startChar": 0,
+        "endLine": 80,
+        "endChar": 43
+      },
+      "revId": "92247b1e455661a4ad546e1212107bcfca9db382",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "568ea242_954d831a",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-06T00:00:44Z",
+      "side": 1,
+      "message": "Unfortunately, no",
+      "parentUuid": "1698aa84_29cc7a3e",
       "range": {
         "startLine": 75,
         "startChar": 0,
@@ -82,6 +124,30 @@
     },
     {
       "key": {
+        "uuid": "76a726c0_2473c8cd",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-06T00:00:44Z",
+      "side": 1,
+      "message": "This is to properly handle the case of negative angles with absolute value \u003c 1 degrees, i.e. \"-0 degrees 25 minutes\". The idea is that the \"-\" sign, if present, should only appear in the first box, even if the degrees are zero.",
+      "parentUuid": "96a49abb_6a7d9b96",
+      "range": {
+        "startLine": 121,
+        "startChar": 25,
+        "endLine": 121,
+        "endChar": 61
+      },
+      "revId": "92247b1e455661a4ad546e1212107bcfca9db382",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d683721b_beba71fa",
         "filename": "android/skin/qt/ext-location.cpp",
         "patchSetId": 1
@@ -93,6 +159,30 @@
       "writtenOn": "2015-11-05T22:12:20Z",
       "side": 1,
       "message": "timeval timeVal \u003d {};",
+      "range": {
+        "startLine": 353,
+        "startChar": 4,
+        "endLine": 354,
+        "endChar": 41
+      },
+      "revId": "92247b1e455661a4ad546e1212107bcfca9db382",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6923665_a0e080ea",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-06T00:00:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d683721b_beba71fa",
       "range": {
         "startLine": 353,
         "startChar": 4,
@@ -128,6 +218,30 @@
     },
     {
       "key": {
+        "uuid": "f6923665_c0dd8c31",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-06T00:00:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f6923665_4521ae2f",
+      "range": {
+        "startLine": 355,
+        "startChar": 27,
+        "endLine": 355,
+        "endChar": 31
+      },
+      "revId": "92247b1e455661a4ad546e1212107bcfca9db382",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d69a9277_07f084f7",
         "filename": "android/skin/qt/ext-location.cpp",
         "patchSetId": 1
@@ -139,6 +253,30 @@
       "writtenOn": "2015-11-05T22:12:20Z",
       "side": 1,
       "message": "can we just return if these are not set as a first thing in the function?",
+      "range": {
+        "startLine": 357,
+        "startChar": 0,
+        "endLine": 357,
+        "endChar": 53
+      },
+      "revId": "92247b1e455661a4ad546e1212107bcfca9db382",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6923665_e0ea88c8",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-06T00:00:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d69a9277_07f084f7",
       "range": {
         "startLine": 357,
         "startChar": 0,
