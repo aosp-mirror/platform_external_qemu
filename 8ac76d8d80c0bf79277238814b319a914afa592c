@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d69a9277_9ca92aba",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-06T19:41:48Z",
+      "side": 1,
+      "message": "It\u0027s the degree sign in Unicode. Added comment.",
+      "parentUuid": "d69a9277_bc850e78",
+      "range": {
+        "startLine": 57,
+        "startChar": 40,
+        "endLine": 57,
+        "endChar": 46
+      },
+      "revId": "8ac76d8d80c0bf79277238814b319a914afa592c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b686fe2b_3e53ddc0",
         "filename": "android/skin/qt/angle-input-widget.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-06T02:04:26Z",
       "side": 1,
       "message": "else doesn\u0027t mean anything here :)",
+      "range": {
+        "startLine": 102,
+        "startChar": 5,
+        "endLine": 102,
+        "endChar": 11
+      },
+      "revId": "8ac76d8d80c0bf79277238814b319a914afa592c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d69a9277_7c9ba697",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-06T19:41:48Z",
+      "side": 1,
+      "message": "changed here and below",
+      "parentUuid": "b686fe2b_3e53ddc0",
       "range": {
         "startLine": 102,
         "startChar": 5,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "568ea242_7ff710b7",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-06T19:41:48Z",
+      "side": 1,
+      "message": "I just assumed that QLineEdit::text() would always return a \"valid\" version of the content, but upon closer investigation, this is not the case. I\u0027ve added a check at the beginning of the function that ensures all the input boxes have a valid value.",
+      "parentUuid": "b69d1e72_cb3129e8",
+      "range": {
+        "startLine": 193,
+        "startChar": 24,
+        "endLine": 193,
+        "endChar": 49
+      },
+      "revId": "8ac76d8d80c0bf79277238814b319a914afa592c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "76a726c0_d8c9fcd2",
         "filename": "android/skin/qt/angle-input-widget.cpp",
         "patchSetId": 2
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "d69a9277_1c8c5a57",
+        "filename": "android/skin/qt/angle-input-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-06T19:41:48Z",
+      "side": 1,
+      "message": "oops",
+      "parentUuid": "76a726c0_d8c9fcd2",
+      "range": {
+        "startLine": 197,
+        "startChar": 0,
+        "endLine": 197,
+        "endChar": 73
+      },
+      "revId": "8ac76d8d80c0bf79277238814b319a914afa592c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "568ea242_4e5f0825",
         "filename": "android/skin/qt/ext-location.cpp",
         "patchSetId": 2
@@ -105,6 +201,30 @@
       "writtenOn": "2015-11-06T02:04:26Z",
       "side": 1,
       "message": "curious, why \u0027struct\u0027?",
+      "range": {
+        "startLine": 358,
+        "startChar": 4,
+        "endLine": 358,
+        "endChar": 10
+      },
+      "revId": "8ac76d8d80c0bf79277238814b319a914afa592c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d683721b_84b47aaa",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-06T19:41:48Z",
+      "side": 1,
+      "message": "Because copy-paste :)",
+      "parentUuid": "568ea242_4e5f0825",
       "range": {
         "startLine": 358,
         "startChar": 4,
