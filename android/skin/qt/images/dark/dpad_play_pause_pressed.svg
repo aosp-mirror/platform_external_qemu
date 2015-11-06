@@ -6,10 +6,10 @@
     <defs></defs>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
         <g id="Artboard-1" sketch:type="MSArtboardGroup">
-            <circle id="Oval-2" fill="#C0C0C0" sketch:type="MSShapeGroup" cx="25" cy="25" r="25"></circle>
+            <circle id="Oval-2" fill="#3d5059" sketch:type="MSShapeGroup" cx="25" cy="25" r="25"></circle>
             <g id="Rectangle-1670-+-ic_pause_black_24dp-(1)-+-ic_play_arrow_black_24dp-copy-7" sketch:type="MSLayerGroup" transform="translate(13.000000, 13.000000)">
                 <rect id="Rectangle-1670" sketch:type="MSShapeGroup" x="0" y="0" width="24" height="24"></rect>
-                <g id="ic_pause_black_24dp-(1)-+-ic_play_arrow_black_24dp-copy-7" transform="translate(2.000000, 6.000000)" fill="#9E9E9E" sketch:type="MSShapeGroup">
+                <g id="ic_pause_black_24dp-(1)-+-ic_play_arrow_black_24dp-copy-7" transform="translate(2.000000, 6.000000)" fill="#FFFFFF" sketch:type="MSShapeGroup">
                     <g id="ic_pause_black_24dp-(1)" transform="translate(10.000000, 0.000000)">
                         <path d="M0.5,11.25 L3.5,11.25 L3.5,0.75 L0.5,0.75 L0.5,11.25 L0.5,11.25 Z M6.5,0.75 L6.5,11.25 L9.5,11.25 L9.5,0.75 L6.5,0.75 L6.5,0.75 Z" id="Shape"></path>
                     </g>
