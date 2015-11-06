@@ -21,6 +21,12 @@ void ExtendedWindow::initVirtualSensors()
     mExtendedUi->rollAngleWidget->setRange(-180, 180);
     mExtendedUi->temperatureSensorValueWidget->setRange(-273.1, 100.0);
     mExtendedUi->temperatureSensorValueWidget->setValue(25.0);
+    mExtendedUi->lightSensorValueWidget->setRange(0, 40000.0);
+    mExtendedUi->lightSensorValueWidget->setValue(20000.0);
+    mExtendedUi->pressureSensorValueWidget->setRange(300, 1100);
+    mExtendedUi->pressureSensorValueWidget->setValue(1013.25);
+    mExtendedUi->humiditySensorValueWidget->setRange(0, 100);
+    mExtendedUi->humiditySensorValueWidget->setValue(50);
     mExtendedUi->proximitySensorValueWidget->setRange(0, 10);
     mExtendedUi->magNorthWidget->setValidator(&mMagFieldValidator);
     mExtendedUi->magNorthWidget->setTextMargins(0, 0, 0, 4);
@@ -45,6 +51,18 @@ void ExtendedWindow::on_temperatureSensorValueWidget_valueChanged(double value) 
 
 void ExtendedWindow::on_proximitySensorValueWidget_valueChanged(double value) {
     mSensorsAgent->setSensor(ANDROID_SENSOR_PROXIMITY, static_cast<float>(value), .0f, .0f);
+}
+
+void ExtendedWindow::on_lightSensorValueWidget_valueChanged(double value) {
+    mSensorsAgent->setSensor(ANDROID_SENSOR_LIGHT, static_cast<float>(value), .0f, .0f);
+}
+
+void ExtendedWindow::on_pressureSensorValueWidget_valueChanged(double value) {
+    mSensorsAgent->setSensor(ANDROID_SENSOR_PRESSURE, static_cast<float>(value), .0f, .0f);
+}
+
+void ExtendedWindow::on_humiditySensorValueWidget_valueChanged(double value) {
+    mSensorsAgent->setSensor(ANDROID_SENSOR_HUMIDITY, static_cast<float>(value), .0f, .0f);
 }
 
 // Helper function.
