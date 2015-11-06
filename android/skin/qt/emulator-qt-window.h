@@ -162,8 +162,6 @@ private:
     SkinEvent *createSkinEvent(SkinEventType type);
     void handleKeyEvent(SkinEventType type, QKeyEvent *pEvent);
 
-    QString getTmpImagePath();
-
     void             *batteryState;
 
     SkinSurface *backing_surface;

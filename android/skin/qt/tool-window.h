@@ -34,8 +34,6 @@
 #include <QQueue>
 
 #define REMOTE_DOWNLOADS_DIR "/sdcard/Download"
-
-#define LOCAL_SCREENSHOT_FILE "screen.png"
 #define REMOTE_SCREENSHOT_FILE "/data/local/tmp/screen.png"
 
 namespace Ui {
@@ -64,6 +62,8 @@ public:
 
     QString getAndroidSdkRoot();
     QString getAdbFullPath(QStringList *args);
+    QString getScreenshotSaveDirectory();
+    QString getScreenshotSaveFile();
 
     void runAdbInstall(const QString &path);
     void runAdbPush(const QList<QUrl> &urls);

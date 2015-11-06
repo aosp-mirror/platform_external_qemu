@@ -82,29 +82,8 @@ void ExtendedWindow::completeSettingsInitialization()
     // Get the latest user selections from the
     // user-config code.
 
-    QSettings settings;
-
     // "Screen shot" and "Record screen" destination folder
-    mSettingsState.mSavePath = settings.value(Ui::Settings::SAVE_PATH, "")
-                                             .toString();
-
-    // Check if this path is writable
-    QFileInfo fInfo(mSettingsState.mSavePath);
-    if ( !fInfo.isDir() || !fInfo.isWritable() ) {
-        // Clear this, so we'll try the default instead
-        mSettingsState.mSavePath = "";
-    }
-
-    if (mSettingsState.mSavePath.isEmpty()) {
-        // We have no path. Try to determine the path to the desktop.
-        QStringList paths = QStandardPaths::
-                            standardLocations(QStandardPaths::DesktopLocation);
-        if (paths.size() > 0) {
-            mSettingsState.mSavePath = paths[0];
-            settings.setValue(Ui::Settings::SAVE_PATH,
-                              mSettingsState.mSavePath);
-        }
-    }
+    mSettingsState.mSavePath = mToolWindow->getScreenshotSaveDirectory();
 
     if (mSettingsState.mSavePath.isEmpty()) {
         mExtendedUi->set_saveLocBox->setPlainText(tr("None"));
@@ -113,6 +92,7 @@ void ExtendedWindow::completeSettingsInitialization()
     }
 
     // Dark/Light theme
+    QSettings settings;
     SettingsTheme theme = (SettingsTheme)settings.
                              value(Ui::Settings::UI_THEME, 0).toInt();
     if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
