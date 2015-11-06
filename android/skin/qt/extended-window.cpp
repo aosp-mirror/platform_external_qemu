@@ -84,16 +84,10 @@ void ExtendedWindow::showPane(ExtendedWindowPane pane) {
 
 void ExtendedWindow::completeInitialization()
 {
-    // Get the latest user selections from the
-    // user-config code.
-    SettingsTheme theme = (SettingsTheme)user_config_get_ui_theme();
-    if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
-        theme = (SettingsTheme)0;
-    }
-    mSettingsState.mTheme = theme;
-    // Set the theme to the initial selection
-    // (by pretending the theme setting got changed)
-    on_set_themeBox_currentIndexChanged(theme);
+    // This function has things that must be performed
+    // after the ctor and after show() is called
+
+    completeSettingsInitialization();
 
     // Set the first tab active
     on_locationButton_clicked();

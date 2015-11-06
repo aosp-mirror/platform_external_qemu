@@ -36,8 +36,10 @@ void user_config_done( void );
 
 void user_config_get_window_pos( int *window_x, int *window_y );
 
-int  user_config_get_ui_theme();
-void user_config_set_ui_theme(int theme);
+char* user_config_get_ui_savePath();
+int   user_config_get_ui_theme();
+void  user_config_set_ui_savePath(const char* path);
+void  user_config_set_ui_theme(int theme);
 
 #define  ONE_MB  (1024*1024)
 
