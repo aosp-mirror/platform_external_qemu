@@ -104,8 +104,12 @@ LOCAL_STATIC_LIBRARIES += \
     emulator-libsparse \
     emulator-libselinux \
     emulator-libgtest \
+    $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
     $(LIBCURL_STATIC_LIBRARIES) \
     $(LIBXML2_STATIC_LIBRARIES) \
+    emulator-libext4_utils \
+    emulator-libsparse \
+    emulator-libselinux \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/
@@ -143,8 +147,12 @@ LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
     emulator-common \
     emulator-libgtest \
+    $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
     $(LIBCURL_STATIC_LIBRARIES) \
     $(LIBXML2_STATIC_LIBRARIES) \
+    emulator-libext4_utils \
+    emulator-libsparse \
+    emulator-libselinux \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/

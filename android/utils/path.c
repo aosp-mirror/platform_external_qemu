@@ -403,27 +403,40 @@ path_get_size( const char*  path, uint64_t  *psize )
 #endif
 }
 
+#ifdef _WIN32
+static int is_windows_drive_prefix(const char *filename)
+{
+    return (((filename[0] >= 'a' && filename[0] <= 'z') ||
+             (filename[0] >= 'A' && filename[0] <= 'Z')) &&
+            filename[1] == ':');
+}
+
+static int is_windows_drive(const char *filename)
+{
+    if (is_windows_drive_prefix(filename) &&
+        filename[2] == '\0')
+        return 1;
+    if (strncmp(filename, "\\\\.\\", strlen("\\\\.\\")) == 0 ||
+        strncmp(filename, "//./", strlen("//./")) == 0)
+        return 1;
+    return 0;
+}
+#endif
 
 ABool
 path_is_absolute( const char*  path )
 {
-#ifdef _WIN32
     if (path == NULL)
         return 0;
 
-    if (path[0] == '/' || path[0] == '\\')
+#ifdef _WIN32
+    /* specific case for names like: "\\.\d:" */
+    if (is_windows_drive(path) || is_windows_drive_prefix(path)) {
         return 1;
-
-    /* 'C:' is always considered to be absolute
-     * even if used with a relative path like C:foo which
-     * is different from C:\foo
-     */
-    if (path[0] != 0 && path[1] == ':')
-        return 1;
-
-    return 0;
+    }
+    return (*path == '/' || *path == '\\');
 #else
-    return (path != NULL && path[0] == '/');
+    return (*path == '/');
 #endif
 }
 

@@ -49,6 +49,7 @@ $(call start-emulator-library, emulator-target-$(EMULATOR_TARGET_CPU))
 LOCAL_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
     $(EMULATOR_TARGET_CFLAGS) \
+    $(EMULATOR_LIBUI_CFLAGS) \
     $(ZLIB_CFLAGS) \
 
 # These are required by the TCG engine.
@@ -239,14 +240,15 @@ LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
     libandroid-wear-agent \
     emulator-common \
-    emulator-libext4_utils \
-    emulator-libsparse \
-    emulator-libselinux \
+    $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
     $(ANDROID_SKIN_STATIC_LIBRARIES) \
     $(LIBCURL_STATIC_LIBRARIES) \
     $(EMULATOR_LIBUI_STATIC_LIBRARIES) \
     $(LIBXML2_STATIC_LIBRARIES) \
     $(BREAKPAD_STATIC_LIBRARIES) \
+    emulator-libext4_utils \
+    emulator-libsparse \
+    emulator-libselinux \
 
 LOCAL_WHOLE_STATIC_LIBRARIES := \
     emulator-libqemu \
