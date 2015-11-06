@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "96a49abb_852710a3",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-06T00:42:57Z",
+      "side": 1,
+      "message": "I don\u0027t think scrolling is going to look good...\nYou can obtain the shortened version of the text with QFontMetrics easily:\n\nQFontMetrics font_metrics(mExtendedUI-\u003eset_saveLocBox-\u003efont());\nmExtendedUI-\u003eset_saveLocBox-\u003esetText(font_metrics.elidedText(mSettingsState.mSavePath, Qt::ElideRight, mExtendedUI-\u003eset_saveLocBox-\u003ewidth());\n\nThis will give you a string just wide enough to fit into the control, with the ellipsis at the end if necessary.\n\n(if you do this, make set_saveLocBox a QLabel)",
+      "range": {
+        "startLine": 105,
+        "startChar": 7,
+        "endLine": 105,
+        "endChar": 76
+      },
+      "revId": "2c78847cc3569d30e9582dc0472dbe6e3e50aed7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
