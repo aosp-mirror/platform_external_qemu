@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "9609fab1_4b27d991",
+        "filename": "Makefile.qemu1-common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-06T16:22:44Z",
+      "side": 1,
+      "message": "Ok, let\u0027s allow it for now, but we will need to move them to AndroidEmu, I think we will have to deal with the dependencies one way or the other. I plan to update the build system to support LOCAL_EXPORT_CFLAGS/LDFLAGS/STATIC_LIBRARIES/etc to considerably simplify the way dependencies are currently handled, but that will happen later.",
+      "parentUuid": "b69d1e72_8bfe4121",
+      "revId": "35c6e4fd170f8806fc40a4d1881ad5203075ad81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "36fe8ebd_651c0655",
         "filename": "Makefile.qemu1-target.mk",
         "patchSetId": 3
