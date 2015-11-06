@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "b686fe2b_bee50d3b",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-06T02:16:21Z",
+      "side": 1,
+      "message": "emu-base doesn\u0027t depend on anything but itself, so it can be used separately by anyone. emu depends on 3rdparty and brings a lot of emulator specifics.\nCurrently there\u0027s a qemu2 launcher app which just parses the parameters and passes them through. It depends on emu-base but doesn\u0027t need anything from the \u0027real\u0027 AndroidEmu\n\nCircular dependency - utils/path.c used to be in android-emu-qemu?, so it had both in and out dependencies on emu-base. Now it\u0027s not the case - I will update this",
+      "parentUuid": "d61d32f8_7ab03903",
+      "revId": "35c6e4fd170f8806fc40a4d1881ad5203075ad81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9609fab1_6be17ded",
         "filename": "Makefile.qemu1-common.mk",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "b69d1e72_8bfe4121",
+        "filename": "Makefile.qemu1-common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-06T02:16:21Z",
+      "side": 1,
+      "message": "qemu2 doesn\u0027t need them :)\nI didn\u0027t want to bring in any stuff not needed there - especially if it may bring other dependencies, all not really needed.",
+      "parentUuid": "9609fab1_6be17ded",
+      "revId": "35c6e4fd170f8806fc40a4d1881ad5203075ad81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "36fe8ebd_651c0655",
         "filename": "Makefile.qemu1-target.mk",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2015-11-05T23:21:49Z",
       "side": 1,
       "message": "shouldn\u0027t these 3 libraries above be listed in ANDROID_EMU_STATIC_LIBRARIES_XXX ?",
+      "revId": "35c6e4fd170f8806fc40a4d1881ad5203075ad81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36892e3b_4227e0f5",
+        "filename": "Makefile.qemu1-target.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-06T02:16:21Z",
+      "side": 1,
+      "message": "sometimes those aren\u0027t needed - if the binary doesn\u0027t use anything related to ext4. e.g. tests",
+      "parentUuid": "36fe8ebd_651c0655",
       "revId": "35c6e4fd170f8806fc40a4d1881ad5203075ad81",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
