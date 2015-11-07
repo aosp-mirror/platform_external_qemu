@@ -27,7 +27,7 @@ ExtendedWindow::ExtendedWindow(
     ToolWindow *tW,
     const UiEmuAgent *agentPtr,
     const ShortcutKeyStore<QtUICommand>* shortcuts) :
-    QFrame(eW),
+    QFrame(nullptr),
     mParentWindow(eW),
     mToolWindow(tW),
     mBatteryAgent  (agentPtr ? agentPtr->battery   : nullptr),
