@@ -209,7 +209,6 @@ private slots:
     void on_loc_GpxKmlButton_clicked();
     void on_loc_pathTable_cellChanged(int row, int col);
     void on_loc_stopButton_clicked();
-    void on_loc_pauseButton_clicked();
     void on_loc_playButton_clicked();
     void on_loc_decimalModeSwitch_toggled(bool checked);
     void on_loc_sexagesimalModeSwitch_toggled(bool checked);
