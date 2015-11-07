@@ -51,8 +51,10 @@ class ToolWindow : public QFrame
 
 public:
     explicit ToolWindow(EmulatorQtWindow *emulatorWindow, QWidget *parent);
+    void mousePressEvent(QMouseEvent *event);
     void show();
     void dockMainWindow();
+    void raiseMainWindow();
     void extendedIsClosing() { extendedWindow = NULL; }
 
     void setToolEmuAgent(const UiEmuAgent *agPtr)
