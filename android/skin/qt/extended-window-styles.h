@@ -101,6 +101,12 @@ enum ExtendedWindowPane {
     "QCheckBox::indicator:unchecked {" \
             "image: url(:/" THEME##_PATH "/check_no); " \
             "icon-size: 24px; height: 24 px; width: 24 px }" \
+    "QRadioButton::indicator:unchecked {" \
+            "image: url(:/" THEME##_PATH "/radio_off); " \
+            "icon-size: 24px; height: 24 px; width: 24 px }" \
+    "QRadioButton::indicator:checked {" \
+            "image: url(:/" THEME##_PATH "/radio_on); " \
+            "icon-size: 24px; height: 24 px; width: 24 px }" \
     "QSlider::groove {border: 1px ;height: 2px}" \
     "QSlider::handle {background: solid " THEME##_TOOL_COLOR ";" \
         "border: 1px solid " THEME##_TOOL_COLOR ";width: 12px;" \

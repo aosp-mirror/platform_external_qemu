@@ -39,7 +39,6 @@ ExtendedWindow::ExtendedWindow(
     mTelephonyAgent(agentPtr ? agentPtr->telephony : nullptr),
     mSettingsAgent (agentPtr ? agentPtr->settings  : nullptr),
     mLoc_mSecRemaining(-1),
-    mLoc_nowPaused(false),
     mLoc_nowPlaying(false),
     mLoc_rowToSend(-1),
     mQtUIShortcuts(shortcuts),
