@@ -134,7 +134,6 @@ private:
     const SettingsAgent* mSettingsAgent;
 
     int      mLoc_mSecRemaining;
-    bool     mLoc_nowPaused;
     bool     mLoc_nowPlaying;
     int      mLoc_rowToSend;
     QTimer   mLoc_timer;
@@ -208,15 +207,16 @@ private slots:
     // Location
     void on_loc_GpxKmlButton_clicked();
     void on_loc_pathTable_cellChanged(int row, int col);
-    void on_loc_stopButton_clicked();
-    void on_loc_pauseButton_clicked();
-    void on_loc_playButton_clicked();
+    void on_loc_playStopButton_clicked();
     void on_loc_decimalModeSwitch_toggled(bool checked);
     void on_loc_sexagesimalModeSwitch_toggled(bool checked);
     void on_loc_sendPointButton_clicked();
     bool loc_cellIsValid(QTableWidget *table, int row, int col);
     void loc_populateTable(GpsFixArray *fixes);
     void loc_slot_timeout();
+
+    void locationPlaybackStart();
+    void locationPlaybackStop();
 
     // Settings
     void on_set_folderButton_clicked();

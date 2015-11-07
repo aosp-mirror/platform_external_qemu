@@ -61,7 +61,7 @@ font-family: &quot;Roboto&quot;</string>
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="currentIndex">
-    <number>8</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="location_page">
     <widget class="QGroupBox" name="locationGroup">
@@ -86,35 +86,6 @@ font-family: &quot;Roboto&quot;</string>
      </property>
      <property name="title">
       <string>GPS Point</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="loc_stopButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>100</x>
-       <y>530</y>
-       <width>36</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/light/stop</normaloff>:/light/stop</iconset>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string>stop</string>
-     </property>
-     <property name="themeIconName_disabled" stdset="0">
-      <string>stop_disabled</string>
      </property>
     </widget>
     <widget class="QTableWidget" name="loc_pathTable">
@@ -249,54 +220,6 @@ font-family: &quot;Roboto&quot;</string>
        <set>AlignTrailing|AlignVCenter</set>
       </property>
      </column>
-     <item row="0" column="0">
-      <property name="text">
-       <string>0</string>
-      </property>
-      <property name="textAlignment">
-       <set>AlignTrailing|AlignVCenter</set>
-      </property>
-     </item>
-     <item row="0" column="1">
-      <property name="text">
-       <string>37.42228990140251</string>
-      </property>
-      <property name="textAlignment">
-       <set>AlignTrailing|AlignVCenter</set>
-      </property>
-     </item>
-     <item row="0" column="2">
-      <property name="text">
-       <string>-122.0822035425683</string>
-      </property>
-      <property name="textAlignment">
-       <set>AlignTrailing|AlignVCenter</set>
-      </property>
-     </item>
-     <item row="0" column="3">
-      <property name="text">
-       <string>0</string>
-      </property>
-      <property name="textAlignment">
-       <set>AlignTrailing|AlignVCenter</set>
-      </property>
-     </item>
-     <item row="0" column="4">
-      <property name="text">
-       <string/>
-      </property>
-      <property name="textAlignment">
-       <set>AlignTrailing|AlignVCenter</set>
-      </property>
-     </item>
-     <item row="0" column="5">
-      <property name="text">
-       <string/>
-      </property>
-      <property name="textAlignment">
-       <set>AlignTrailing|AlignVCenter</set>
-      </property>
-     </item>
     </widget>
     <widget class="QPushButton" name="loc_GpxKmlButton">
      <property name="geometry">
@@ -325,7 +248,7 @@ font-family: &quot;Roboto&quot;</string>
       <string>Tool</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="loc_playButton">
+    <widget class="QPushButton" name="loc_playStopButton">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -355,41 +278,6 @@ font-family: &quot;Roboto&quot;</string>
      </property>
      <property name="themeIconName_disabled" stdset="0">
       <string>play_arrow_disabled</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="loc_pauseButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>60</x>
-       <y>530</y>
-       <width>36</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/dark/pause</normaloff>:/dark/pause</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>32</width>
-       <height>32</height>
-      </size>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string>pause</string>
-     </property>
-     <property name="themeIconName_disabled" stdset="0">
-      <string>pause_disabled</string>
      </property>
     </widget>
     <widget class="QGroupBox" name="locationGroup_2">
@@ -439,9 +327,9 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QPushButton" name="loc_sendPointButton">
      <property name="geometry">
       <rect>
-       <x>510</x>
+       <x>500</x>
        <y>240</y>
-       <width>41</width>
+       <width>51</width>
        <height>36</height>
       </rect>
      </property>
@@ -499,7 +387,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>70</y>
+       <y>60</y>
        <width>109</width>
        <height>25</height>
       </rect>
@@ -524,8 +412,8 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>140</y>
-       <width>109</width>
+       <y>130</y>
+       <width>130</width>
        <height>25</height>
       </rect>
      </property>
@@ -573,6 +461,41 @@ font-family: &quot;Roboto&quot;</string>
      <property name="ColorGroup" stdset="0">
       <string>Title</string>
      </property>
+    </widget>
+    <widget class="QComboBox" name="loc_playbackSpeed">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>535</y>
+       <width>90</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <item>
+      <property name="text">
+       <string>Speed 1X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 2X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 3X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 4X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 5X</string>
+      </property>
+     </item>
     </widget>
    </widget>
    <widget class="QWidget" name="cellular_page">
@@ -3142,7 +3065,6 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>tel_numberBox</tabstop>
   <tabstop>tel_endCallButton</tabstop>
   <tabstop>tel_holdCallButton</tabstop>
-  <tabstop>loc_stopButton</tabstop>
   <tabstop>loc_pathTable</tabstop>
   <tabstop>cell_standardBox</tabstop>
   <tabstop>cell_voiceStatusBox</tabstop>
