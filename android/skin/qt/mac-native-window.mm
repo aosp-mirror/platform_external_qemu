@@ -28,3 +28,11 @@ void* getNSWindow(void* ns_view) {
     }
 
 }
+
+void nsWindowRemoveMaximizeButton(void* ns_window) {
+    NSWindow *window = (NSWindow *)ns_window;
+    if (!window) {
+        return;
+    }
+    [[window standardWindowButton:NSWindowZoomButton] setEnabled:false];
+}

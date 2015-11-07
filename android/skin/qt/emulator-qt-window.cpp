@@ -34,10 +34,6 @@
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/winsys-qt.h"
 
-#if defined(__APPLE__)
-#include "android/skin/qt/mac-native-window.h"
-#endif
-
 #define  DEBUG  1
 
 #if DEBUG
@@ -69,8 +65,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     batteryState    = NULL;
 
     tool_window = new ToolWindow(this, &mContainer);
-
-    mContainer.setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
 
     mZoomPixmap.load(":/cursor/zoom_cursor");
 
@@ -181,11 +175,6 @@ void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
     }
 }
 
-void EmulatorQtWindow::minimize()
-{
-    mContainer.showMinimized();
-}
-
 void EmulatorQtWindow::mouseMoveEvent(QMouseEvent *event)
 {
     handleMouseEvent(kEventMouseMotion, event);
@@ -223,13 +212,30 @@ void EmulatorQtWindow::paintEvent(QPaintEvent *)
     }
 }
 
+void EmulatorQtWindow::activateWindow()
+{
+    mContainer.activateWindow();
+}
+
+void EmulatorQtWindow::raise()
+{
+    mContainer.raise();
+    tool_window->raise();
+}
+
 void EmulatorQtWindow::show()
 {
     mContainer.show();
     QFrame::show();
     tool_window->show();
+    tool_window->dockMainWindow();
 
     QObject::connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen *)), this, SLOT(slot_screenChanged(QScreen *)));
+}
+
+void EmulatorQtWindow::showMinimized()
+{
+    mContainer.showMinimized();
 }
 
 void EmulatorQtWindow::startThread(StartFunction f, int argc, char **argv)
