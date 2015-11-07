@@ -66,7 +66,7 @@ private:
     ~ExtendedWindow();
     void closeEvent(QCloseEvent *ce);
 
-    EmulatorQtWindow   *mParentWindow;
+    EmulatorQtWindow   *mEmulatorWindow;
     ToolWindow         *mToolWindow;
 
     class BatteryState {
@@ -126,7 +126,7 @@ private:
 
     const QAndroidBatteryAgent* mBatteryAgent;
     const QAndroidCellularAgent* mCellularAgent;
-    const QAndroidEmulatorWindowAgent* mEmulatorWindow;
+    const QAndroidEmulatorWindowAgent* mEmulatorWindowAgent;
     const QAndroidFingerAgent* mFingerAgent;
     const QAndroidLocationAgent* mLocationAgent;
     const QAndroidSensorsAgent* mSensorsAgent;

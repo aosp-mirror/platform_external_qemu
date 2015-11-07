@@ -65,12 +65,10 @@ public:
     void dropEvent(QDropEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
-    void minimize();
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void paintEvent(QPaintEvent *event);
-    void show();
     void startThread(StartFunction f, int argc, char **argv);
 
     /*
@@ -163,6 +161,11 @@ public slots:
     void slot_screencapFinished(int exitStatus);
     void slot_screencapPullFinished(int exitStatus);
 
+    void activateWindow();
+    void raise();
+    void show();
+    void showMinimized();
+
     void slot_screenChanged(QScreen* screen);
 private:
     void doResize(const QSize &size);
@@ -189,6 +192,9 @@ private:
         {
             setFrameShape(QFrame::NoFrame);
             setWidget(window);
+
+            // The following hints prevent the minimize/maximize/close buttons from appearing.
+            setWindowFlags(Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::Window);
         }
 
         bool event(QEvent *e)
@@ -266,6 +272,16 @@ private:
             mEmulatorWindow->closeEvent(event);
         }
 
+        void focusInEvent(QFocusEvent *event)
+        {
+            mEmulatorWindow->tool_window->raise();
+        }
+
+        void hideEvent(QHideEvent *event)
+        {
+            mEmulatorWindow->tool_window->hide();
+        }
+
         void keyPressEvent(QKeyEvent *event)
         {
             mEmulatorWindow->keyPressEvent(event);
@@ -301,6 +317,11 @@ private:
             output.setHeight(output.height() - (horizontal->isVisible() ? horizontal->height() : 0));
 
             return output;
+        }
+
+        void showEvent(QShowEvent *event)
+        {
+            mEmulatorWindow->tool_window->show();
         }
 
     private:

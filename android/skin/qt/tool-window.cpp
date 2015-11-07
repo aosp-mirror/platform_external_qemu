@@ -46,7 +46,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
 
     twInstance = this;
 
-    setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus);
+    setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
     toolsUi->setupUi(this);
     // Make this more narrow than QtDesigner likes
     this->resize(70, this->height());
@@ -106,11 +106,27 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     mShortcutKeyStore.populateFromTextStream(stream);
 }
 
+void ToolWindow::hide()
+{
+    if (extendedWindow) {
+        extendedWindow->hide();
+    }
+    QFrame::hide();
+}
+
+void ToolWindow::mousePressEvent(QMouseEvent *event)
+{
+    raiseMainWindow();
+    QFrame::mousePressEvent(event);
+}
+
 void ToolWindow::show()
 {
     dockMainWindow();
-    QFrame::show();
     setFixedSize(size());
+    QFrame::show();
+
+    if (extendedWindow) extendedWindow->show();
 }
 
 void ToolWindow::showErrorDialog(const QString &message, const QString &title)
@@ -283,9 +299,16 @@ void ToolWindow::dockMainWindow()
     move(parentWidget()->geometry().right() + 10, parentWidget()->geometry().top() + 10);
 }
 
+void ToolWindow::raiseMainWindow()
+{
+    emulator_window->raise();
+    emulator_window->activateWindow();
+}
+
 void ToolWindow::on_back_button_clicked()
 {
     emulator_window->simulateKeyPress(KEY_ESC, 0);
+    raiseMainWindow();
 }
 void ToolWindow::on_close_button_clicked()
 {
@@ -302,43 +325,56 @@ void ToolWindow::on_home_button_clicked()
         // send HOME.
         emulator_window->simulateKeyPress(KEY_HOME, 0);
     }
+    raiseMainWindow();
 }
 void ToolWindow::on_minimize_button_clicked()
 {
-    emulator_window->minimize();
+    if (extendedWindow) {
+        extendedWindow->hide();
+    }
+    this->hide();
+    emulator_window->showMinimized();
 }
 void ToolWindow::on_power_button_clicked()
 {
     emulator_window->simulateKeyPress(KEY_F7, 0);
+    raiseMainWindow();
 }
 void ToolWindow::on_volume_up_button_clicked()
 {
     emulator_window->simulateKeyPress(KEY_F5, kKeyModLCtrl);
+    raiseMainWindow();
 }
 void ToolWindow::on_volume_down_button_clicked()
 {
     emulator_window->simulateKeyPress(KEY_F6, kKeyModLCtrl);
+    raiseMainWindow();
 }
 void ToolWindow::on_recents_button_clicked()
 {
     emulator_window->simulateKeyPress(KEY_APPSWITCH, 0);
+    raiseMainWindow();
 }
 void ToolWindow::on_rotate_CW_button_clicked()
 {
     emulator_window->simulateKeyPress(KEY_F12, kKeyModLCtrl);
+    raiseMainWindow();
 }
 void ToolWindow::on_rotate_CCW_button_clicked()
 {
     emulator_window->simulateKeyPress(KEY_F11, kKeyModLCtrl);
+    raiseMainWindow();
 }
 void ToolWindow::on_scrShot_button_clicked()
 {
     emulator_window->screenshot();
+    raiseMainWindow();
 }
 void ToolWindow::on_zoom_button_clicked()
 {
     emulator_window->toggleZoomMode();
     toolsUi->zoom_button->setDown(emulator_window->isInZoomMode());
+    raiseMainWindow();
 }
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
@@ -356,6 +392,7 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
     extendedWindow->showPane(pane);
     // completeInitialization() must be called AFTER show()
     extendedWindow->completeInitialization();
+    extendedWindow->raise();
 }
 
 void ToolWindow::on_more_button_clicked()
