@@ -22,7 +22,7 @@
 #define ON_CLICKED(buttonName, key, modifiers) \
     void ExtendedWindow::on_dpad_ ## buttonName ## Button_clicked() \
     { \
-        mParentWindow->simulateKeyPress(key, modifiers); \
+        mEmulatorWindow->simulateKeyPress(key, modifiers); \
     }
 
 #define ON_PRESSED(buttonName) \

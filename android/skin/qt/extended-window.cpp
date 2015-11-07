@@ -27,17 +27,17 @@ ExtendedWindow::ExtendedWindow(
     ToolWindow *tW,
     const UiEmuAgent *agentPtr,
     const ShortcutKeyStore<QtUICommand>* shortcuts) :
-    QFrame(eW),
-    mParentWindow(eW),
+    QFrame(nullptr),
+    mEmulatorWindow(eW),
     mToolWindow(tW),
-    mBatteryAgent  (agentPtr ? agentPtr->battery   : nullptr),
-    mCellularAgent (agentPtr ? agentPtr->cellular  : nullptr),
-    mEmulatorWindow(agentPtr ? agentPtr->window    : nullptr),
-    mFingerAgent   (agentPtr ? agentPtr->finger    : nullptr),
-    mLocationAgent (agentPtr ? agentPtr->location  : nullptr),
-    mSensorsAgent  (agentPtr ? agentPtr->sensors   : nullptr),
-    mTelephonyAgent(agentPtr ? agentPtr->telephony : nullptr),
-    mSettingsAgent (agentPtr ? agentPtr->settings  : nullptr),
+    mBatteryAgent       (agentPtr ? agentPtr->battery   : nullptr),
+    mCellularAgent      (agentPtr ? agentPtr->cellular  : nullptr),
+    mEmulatorWindowAgent(agentPtr ? agentPtr->window    : nullptr),
+    mFingerAgent        (agentPtr ? agentPtr->finger    : nullptr),
+    mLocationAgent      (agentPtr ? agentPtr->location  : nullptr),
+    mSensorsAgent       (agentPtr ? agentPtr->sensors   : nullptr),
+    mTelephonyAgent     (agentPtr ? agentPtr->telephony : nullptr),
+    mSettingsAgent      (agentPtr ? agentPtr->settings  : nullptr),
     mLoc_mSecRemaining(-1),
     mLoc_nowPlaying(false),
     mLoc_rowToSend(-1),
@@ -78,8 +78,8 @@ ExtendedWindow::ExtendedWindow(
     help_tabs_font.setPointSize(11);
     mExtendedUi->help_tabs->setFont(help_tabs_font);
 
-    move(mParentWindow->geometry().right() + 40,
-         mParentWindow->geometry().top()   + 40 );
+    move(mEmulatorWindow->geometry().right() + 40,
+         mEmulatorWindow->geometry().top()   + 40 );
 }
 
 void ExtendedWindow::showPane(ExtendedWindowPane pane) {
