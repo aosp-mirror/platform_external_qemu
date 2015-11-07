@@ -48,7 +48,16 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
 
     twInstance = this;
 
-    setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus);
+    // "Tool" type windows live in another layer on top of everything in OSX, which is undesirable
+    // because it means the extended window must be on top of the emulator window. However, on
+    // Windows and Linux, "Tool" type windows are the only way to make a window that does not have
+    // its own taskbar item.
+#ifdef __APPLE__
+    Qt::WindowFlags flag = Qt::Dialog;
+#else
+    Qt::WindowFlags flag = Qt::Tool;
+#endif
+    setWindowFlags(flag | Qt::FramelessWindowHint);
     toolsUi->setupUi(this);
     // Make this more narrow than QtDesigner likes
     this->resize(60, this->height());
@@ -121,11 +130,27 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
             QtUICommand::UNGRAB_KEYBOARD);
 }
 
+void ToolWindow::hide()
+{
+    if (extendedWindow) {
+        extendedWindow->hide();
+    }
+    QFrame::hide();
+}
+
+void ToolWindow::mousePressEvent(QMouseEvent *event)
+{
+    raiseMainWindow();
+    QFrame::mousePressEvent(event);
+}
+
 void ToolWindow::show()
 {
     dockMainWindow();
-    QFrame::show();
     setFixedSize(size());
+    QFrame::show();
+
+    if (extendedWindow) extendedWindow->show();
 }
 
 void ToolWindow::showErrorDialog(const QString &message, const QString &title)
@@ -376,56 +401,77 @@ void ToolWindow::dockMainWindow()
     move(parentWidget()->geometry().right() + 10, parentWidget()->geometry().top() + 10);
 }
 
+void ToolWindow::raiseMainWindow()
+{
+    emulator_window->raise();
+    emulator_window->activateWindow();
+}
+
 void ToolWindow::on_back_button_clicked()
 {
     handleUICommand(QtUICommand::BACK);
+    raiseMainWindow();
 }
 
 void ToolWindow::on_close_button_clicked()
 {
     parentWidget()->close();
 }
+
 void ToolWindow::on_home_button_clicked()
 {
     handleUICommand(QtUICommand::HOME);
+    raiseMainWindow();
 }
 
 void ToolWindow::on_minimize_button_clicked()
 {
-    emulator_window->minimize();
+    if (extendedWindow) {
+        extendedWindow->hide();
+    }
+    this->hide();
+    emulator_window->showMinimized();
 }
 
 void ToolWindow::on_power_button_clicked()
 {
     handleUICommand(QtUICommand::POWER);
+    raiseMainWindow();
 }
 void ToolWindow::on_volume_up_button_clicked()
 {
     handleUICommand(QtUICommand::VOLUME_UP);
+    raiseMainWindow();
 }
 void ToolWindow::on_volume_down_button_clicked()
 {
     handleUICommand(QtUICommand::VOLUME_DOWN);
+    raiseMainWindow();
 }
 void ToolWindow::on_recents_button_clicked()
 {
     handleUICommand(QtUICommand::RECENTS);
+    raiseMainWindow();
 }
 void ToolWindow::on_rotate_CW_button_clicked()
 {
     handleUICommand(QtUICommand::ROTATE_RIGHT, true);
+    raiseMainWindow();
 }
 void ToolWindow::on_rotate_CCW_button_clicked()
 {
     handleUICommand(QtUICommand::ROTATE_LEFT, true);
+    raiseMainWindow();
 }
 void ToolWindow::on_scrShot_button_clicked()
 {
     handleUICommand(QtUICommand::TAKE_SCREENSHOT, true);
+    raiseMainWindow();
 }
 void ToolWindow::on_zoom_button_clicked()
 {
     handleUICommand(QtUICommand::ENTER_ZOOM, true);
+    raiseMainWindow();
 }
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
@@ -443,6 +489,7 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
     extendedWindow->showPane(pane);
     // completeInitialization() must be called AFTER show()
     extendedWindow->completeInitialization();
+    extendedWindow->raise();
 }
 
 void ToolWindow::on_more_button_clicked()
