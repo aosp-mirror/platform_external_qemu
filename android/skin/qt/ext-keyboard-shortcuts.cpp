@@ -27,8 +27,8 @@ static void addShortcutsTableRow(QTableWidget* table_widget,
 }
 
 void ExtendedWindow::initKbdShorts() {
-    EmulatorWindow* emu_win = mEmulatorWindow->getEmulatorWindow();
-    SkinKeyset* kset = mEmulatorWindow->getCurrentKeyset(emu_win->ui);
+    EmulatorWindow* emu_win = mEmulatorWindowAgent->getEmulatorWindow();
+    SkinKeyset* kset = mEmulatorWindowAgent->getCurrentKeyset(emu_win->ui);
     SkinKeyBinding bindings[SKIN_KEY_COMMAND_MAX_BINDINGS];
     QTableWidget* table_widget = mExtendedUi->shortcutsTableWidget;
 
