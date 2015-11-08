@@ -26,7 +26,6 @@ enum ExtendedWindowPane {
     PANE_IDX_VIRT_SENSORS,
     PANE_IDX_DPAD,
     PANE_IDX_FINGER,
-    PANE_IDX_KBD_SHORTS,
     PANE_IDX_SETTINGS,
 };
 

@@ -61,7 +61,7 @@ font-family: &quot;Roboto&quot;</string>
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="currentIndex">
-    <number>4</number>
+    <number>7</number>
    </property>
    <widget class="QWidget" name="location_page">
     <widget class="QGroupBox" name="locationGroup">
@@ -2054,91 +2054,6 @@ font-family: &quot;Roboto&quot;</string>
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="kbdShortcutsPage">
-    <widget class="QGroupBox" name="kbdShortsGroup">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>151</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Keyboard shortcuts</string>
-     </property>
-    </widget>
-    <widget class="QTableWidget" name="shortcutsTableWidget">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>50</y>
-       <width>650</width>
-       <height>660</height>
-      </rect>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
-     </property>
-     <property name="editTriggers">
-      <set>QAbstractItemView::NoEditTriggers</set>
-     </property>
-     <property name="selectionMode">
-      <enum>QAbstractItemView::NoSelection</enum>
-     </property>
-     <property name="selectionBehavior">
-      <enum>QAbstractItemView::SelectRows</enum>
-     </property>
-     <property name="showGrid">
-      <bool>false</bool>
-     </property>
-     <property name="cornerButtonEnabled">
-      <bool>false</bool>
-     </property>
-     <attribute name="horizontalHeaderDefaultSectionSize">
-      <number>190</number>
-     </attribute>
-     <attribute name="horizontalHeaderStretchLastSection">
-      <bool>true</bool>
-     </attribute>
-     <attribute name="verticalHeaderVisible">
-      <bool>false</bool>
-     </attribute>
-     <attribute name="verticalHeaderDefaultSectionSize">
-      <number>48</number>
-     </attribute>
-     <attribute name="verticalHeaderHighlightSections">
-      <bool>false</bool>
-     </attribute>
-     <column>
-      <property name="text">
-       <string>Command</string>
-      </property>
-      <property name="textAlignment">
-       <set>AlignLeading|AlignVCenter</set>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Key</string>
-      </property>
-      <property name="textAlignment">
-       <set>AlignLeading|AlignVCenter</set>
-      </property>
-     </column>
-    </widget>
-   </widget>
    <widget class="QWidget" name="settingsPage">
     <widget class="QGroupBox" name="sd_group_2">
      <property name="geometry">
@@ -2164,389 +2079,476 @@ font-family: &quot;Roboto&quot;</string>
       <string>Settings</string>
      </property>
     </widget>
-    <widget class="QPlainTextEdit" name="set_adbPortBox">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
+    <widget class="QTabWidget" name="set_tabWidget">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>170</y>
-       <width>181</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="plainText">
-      <string>5037</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="themeTitle">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
+       <x>0</x>
        <y>40</y>
-       <width>181</width>
-       <height>21</height>
+       <width>680</width>
+       <height>670</height>
       </rect>
      </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Emulator window theme</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="versionTitle">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>240</y>
-       <width>181</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Emulator version</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-    <widget class="QPlainTextEdit" name="set_versionBox">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>270</y>
-       <width>181</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="accessibleName">
-      <string notr="true"/>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="undoRedoEnabled">
-      <bool>false</bool>
-     </property>
-     <property name="plainText">
-      <string>1.4</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="set_themeBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>70</y>
-       <width>181</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <item>
-      <property name="text">
-       <string>Light</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Dark</string>
-      </property>
-     </item>
-    </widget>
-    <widget class="QPlainTextEdit" name="set_androidVersionBox">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>360</x>
-       <y>270</y>
-       <width>301</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="accessibleName">
-      <string notr="true"/>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="undoRedoEnabled">
-      <bool>false</bool>
-     </property>
-     <property name="plainText">
-      <string>Unknown API version</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="androidVersionTitle">
-     <property name="geometry">
-      <rect>
-       <x>360</x>
-       <y>240</y>
-       <width>181</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Android version</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="saveLocationTitle">
-     <property name="geometry">
-      <rect>
-       <x>360</x>
-       <y>140</y>
-       <width>261</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Screenshot / record screen save location</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="adbPortTitle">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>140</y>
-       <width>181</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Emulator ADB port</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="set_updateButton">
-     <property name="geometry">
-      <rect>
-       <x>240</x>
-       <y>350</y>
-       <width>201</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>10</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">text-align: left;</string>
-     </property>
-     <property name="text">
-      <string>UPDATE NOT AVAILABLE</string>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string notr="true">Tool</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="availVersionTitle">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>320</y>
-       <width>221</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Latest available emulator version</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-    <widget class="QPlainTextEdit" name="set_latestVersionBox">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>350</y>
-       <width>181</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="accessibleName">
-      <string notr="true"/>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="undoRedoEnabled">
-      <bool>false</bool>
-     </property>
-     <property name="plainText">
-      <string>Unavailable</string>
-     </property>
-    </widget>
-    <widget class="QPlainTextEdit" name="set_saveLocBox">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>360</x>
-       <y>170</y>
-       <width>251</width>
-       <height>61</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAsNeeded</enum>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-     <property name="plainText">
-      <string>Invalid</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="set_folderButton">
-     <property name="geometry">
-      <rect>
-       <x>630</x>
-       <y>168</y>
-       <width>32</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string notr="true"/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/dark/folder</normaloff>:/dark/folder</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>32</width>
-       <height>32</height>
-      </size>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string notr="true">folder</string>
-     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab_3">
+      <attribute name="title">
+       <string>General</string>
+      </attribute>
+      <widget class="QPlainTextEdit" name="set_adbPortBox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>142</y>
+         <width>181</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="plainText">
+        <string>5037</string>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="themeTitle">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>12</y>
+         <width>181</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Roboto</family>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border: 0px;</string>
+       </property>
+       <property name="title">
+        <string>Emulator window theme</string>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string>Title</string>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="adbPortTitle">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>112</y>
+         <width>181</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Roboto</family>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border: 0px;</string>
+       </property>
+       <property name="title">
+        <string>Emulator ADB port</string>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string>Title</string>
+       </property>
+      </widget>
+      <widget class="QPlainTextEdit" name="set_saveLocBox">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>370</x>
+         <y>42</y>
+         <width>251</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAsNeeded</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+       <property name="plainText">
+        <string>Invalid</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="set_folderButton">
+       <property name="geometry">
+        <rect>
+         <x>640</x>
+         <y>40</y>
+         <width>32</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string notr="true"/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/dark/folder</normaloff>:/dark/folder</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+       <property name="themeIconName" stdset="0">
+        <string notr="true">folder</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="set_themeBox">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>42</y>
+         <width>181</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <item>
+        <property name="text">
+         <string>Light</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Dark</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QGroupBox" name="saveLocationTitle">
+       <property name="geometry">
+        <rect>
+         <x>370</x>
+         <y>12</y>
+         <width>261</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Roboto</family>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border: 0px;</string>
+       </property>
+       <property name="title">
+        <string>Screenshot / record screen save location</string>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string>Title</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="tab_4">
+      <attribute name="title">
+       <string>About</string>
+      </attribute>
+      <widget class="QPushButton" name="set_updateButton">
+       <property name="geometry">
+        <rect>
+         <x>230</x>
+         <y>140</y>
+         <width>201</width>
+         <height>36</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Roboto</family>
+         <pointsize>10</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">text-align: left;</string>
+       </property>
+       <property name="text">
+        <string>UPDATE NOT AVAILABLE</string>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string notr="true">Tool</string>
+       </property>
+      </widget>
+      <widget class="QPlainTextEdit" name="set_versionBox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>60</y>
+         <width>181</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="accessibleName">
+        <string notr="true"/>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="undoRedoEnabled">
+        <bool>false</bool>
+       </property>
+       <property name="plainText">
+        <string>1.4</string>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="androidVersionTitle">
+       <property name="geometry">
+        <rect>
+         <x>370</x>
+         <y>30</y>
+         <width>181</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Roboto</family>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border: 0px;</string>
+       </property>
+       <property name="title">
+        <string>Android version</string>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string>Title</string>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="availVersionTitle">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>110</y>
+         <width>221</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Roboto</family>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border: 0px;</string>
+       </property>
+       <property name="title">
+        <string>Latest available emulator version</string>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string>Title</string>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="versionTitle">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>181</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Roboto</family>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border: 0px;</string>
+       </property>
+       <property name="title">
+        <string>Emulator version</string>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string>Title</string>
+       </property>
+      </widget>
+      <widget class="QPlainTextEdit" name="set_latestVersionBox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>140</y>
+         <width>181</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="accessibleName">
+        <string notr="true"/>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="undoRedoEnabled">
+        <bool>false</bool>
+       </property>
+       <property name="plainText">
+        <string>Unavailable</string>
+       </property>
+      </widget>
+      <widget class="QPlainTextEdit" name="set_androidVersionBox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>370</x>
+         <y>60</y>
+         <width>301</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="accessibleName">
+        <string notr="true"/>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="undoRedoEnabled">
+        <bool>false</bool>
+       </property>
+       <property name="plainText">
+        <string>Unknown API version</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="tab_5">
+      <attribute name="title">
+       <string>Keyboard Shortcuts</string>
+      </attribute>
+      <widget class="QTableWidget" name="shortcutsTableWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>650</width>
+         <height>620</height>
+        </rect>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::NoSelection</enum>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <property name="showGrid">
+        <bool>false</bool>
+       </property>
+       <property name="cornerButtonEnabled">
+        <bool>false</bool>
+       </property>
+       <attribute name="horizontalHeaderDefaultSectionSize">
+        <number>190</number>
+       </attribute>
+       <attribute name="horizontalHeaderStretchLastSection">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="verticalHeaderDefaultSectionSize">
+        <number>48</number>
+       </attribute>
+       <attribute name="verticalHeaderHighlightSections">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Command</string>
+        </property>
+        <property name="textAlignment">
+         <set>AlignLeading|AlignVCenter</set>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Key</string>
+        </property>
+        <property name="textAlignment">
+         <set>AlignLeading|AlignVCenter</set>
+        </property>
+       </column>
+      </widget>
+     </widget>
     </widget>
    </widget>
   </widget>
@@ -2796,7 +2798,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>328</y>
+     <y>284</y>
      <width>220</width>
      <height>44</height>
     </rect>
@@ -2843,9 +2845,9 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>372</y>
+     <y>328</y>
      <width>220</width>
-     <height>373</height>
+     <height>421</height>
     </rect>
    </property>
    <property name="autoFillBackground">
@@ -2910,50 +2912,6 @@ font-family: &quot;Roboto&quot;</string>
     <string>MajorTabTitle</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="kbdShortsButton">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>284</y>
-     <width>220</width>
-     <height>44</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-   <property name="autoFillBackground">
-    <bool>false</bool>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">text-align: left; padding: 0px 0px 0px 16px;</string>
-   </property>
-   <property name="text">
-    <string>  Keyboard shortcuts</string>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/light/keyboard</normaloff>:/light/keyboard</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>20</width>
-     <height>20</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string>keyboard</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>MajorTab</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="spacer1Button">
    <property name="enabled">
     <bool>false</bool>
@@ -3003,7 +2961,6 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>batteryButton</tabstop>
   <tabstop>telephoneButton</tabstop>
   <tabstop>dpadButton</tabstop>
-  <tabstop>kbdShortsButton</tabstop>
   <tabstop>settingsButton</tabstop>
   <tabstop>spacer2Button</tabstop>
   <tabstop>bat_statusBox</tabstop>
@@ -3020,9 +2977,7 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>finger_IdBox</tabstop>
   <tabstop>bat_healthBox</tabstop>
   <tabstop>additionalButton</tabstop>
-  <tabstop>set_adbPortBox</tabstop>
   <tabstop>set_versionBox</tabstop>
-  <tabstop>set_themeBox</tabstop>
   <tabstop>set_androidVersionBox</tabstop>
   <tabstop>bat_levelSlider</tabstop>
   <tabstop>bat_chargeLevelText</tabstop>

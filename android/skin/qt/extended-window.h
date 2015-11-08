@@ -169,7 +169,6 @@ private slots:
     void on_batteryButton_clicked();
     void on_cellularButton_clicked();
     void on_dpadButton_clicked();
-    void on_kbdShortsButton_clicked();
     void on_locationButton_clicked();
     void on_settingsButton_clicked();
     void on_telephoneButton_clicked();
