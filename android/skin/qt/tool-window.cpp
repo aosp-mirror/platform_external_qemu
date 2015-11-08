@@ -19,8 +19,10 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/globals.h"
 #include "android/main-common.h"
+#include "android/metrics/MetricsUploader.h"
 #include "android/metrics/studio-helper.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -104,13 +106,20 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     if (android_studio_get_optins()) {
         // TODO(pprabhu) This is not the right place to set looper.
         ThreadLooper::setLooper(android::qt::createLooper());
+        android::metrics::MetricsUploader qtToolUploader(
+                android::metrics::MetricsType::kQtToolWindow,
+                android::ConfigDirs::getAvdRootDirectory().c_str());
 
-        // TODO(pprabhu) Use the real path.
-        mMetricsCollector.reset(new QMetricsCollector(ThreadLooper::get(), this,
-                                                    "/tmp/blah.metrics"));
+        mMetricsCollector.reset(new QMetricsCollector(
+                    ThreadLooper::get(),
+                    this,
+                    qtToolUploader.generateUniquePath()));
         if (!mMetricsCollector->Init()) {
             qDebug("Could not initialize metrics reporting for UI.");
         }
+
+        // Blgrgrufg
+        qtToolUploader.uploadCompletedMetrics(android::metrics::DefaultMetricsFileProcessor());
     } else {
         qDebug("Not reporting Qt metrics. No user opt-in.");
     }
