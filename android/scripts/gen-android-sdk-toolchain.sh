@@ -277,7 +277,7 @@ gen_wrapper_toolchain () {
     fi
 
     for PROG in $PROGRAMS; do
-        gen_wrapper_program $PROG "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR" "$CLANG_BINDIR"
+        gen_wrapper_program $PROG "" "$DST_PREFIX" "$DST_DIR" ""
     done
 
     EXTRA_CFLAGS=

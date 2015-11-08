@@ -431,6 +431,7 @@ build_qemu_android_deps () {
 
     do_autotools_package pixman \
         --disable-gtk \
+	--disable-mmx \
         --disable-libpng
 
     # Handle SDL2

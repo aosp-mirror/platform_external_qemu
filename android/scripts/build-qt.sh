@@ -60,9 +60,9 @@ if [ ! -d "$ARCHIVE_DIR" ]; then
         panic "Could not create directory: $ARCHIVE_DIR"
 fi
 
-QT_SRC_NAME=qt-everywhere-opensource-src-5.5.0
+QT_SRC_NAME=qt-everywhere-opensource-src-5.5.1
 QT_SRC_PACKAGE=$QT_SRC_NAME.tar.xz
-QT_SRC_URL=http://download.qt.io/archive/qt/5.5/5.5.0/single/$QT_SRC_PACKAGE
+QT_SRC_URL=http://download.qt.io/archive/qt/5.5/5.5.1/single/$QT_SRC_PACKAGE
 QT_SRC_PACKAGE_SHA1=4409ef12d1017a9b5e6733ea27596a6ca637a88c
 
 if [ -z "$OPT_DOWNLOAD" -a ! -f "$ARCHIVE_DIR/$QT_SRC_PACKAGE" ]; then
@@ -300,7 +300,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             darwin*)
                 var_append EXTRA_CONFIGURE_FLAGS \
                     -no-framework \
-                    -sdk macosx10.9
+                    -sdk macosx10.11
                 var_append CFLAGS -mmacosx-version-min=10.8
                 var_append CXXFLAGS -mmacosx-version-min=10.8
                 var_append LDFLAGS -mmacosx-version-min=10.8
