@@ -290,7 +290,9 @@ extern void skin_winsys_start(bool, bool)
 {
     GlobalState* g = globalState();
     g->app = new QApplication(g->argc, g->argv);
+    D("[xkcd] Creating emulator window\n\n");
     new EmulatorQtWindow(NULL);
+    D("[xkcd] Done creating emulator window\n\n");
 }
 
 extern void skin_winsys_run_ui_update(SkinGenericFunction f, void* data) {

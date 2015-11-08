@@ -64,6 +64,9 @@ color: #f0f0f0</string>
      <height>34</height>
     </rect>
    </property>
+   <property name="sendMetrics" stdset="0">
+    <bool>true</bool>
+   </property>
    <property name="toolTip">
     <string>Power</string>
    </property>

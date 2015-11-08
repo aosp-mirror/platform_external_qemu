@@ -45,6 +45,7 @@ bool AutoFlushedIniFile::start(unique_ptr<IniFile> iniFile) {
 
 // static
 void AutoFlushedIniFile::writeCallback(void* opaqueThis, Looper::Timer* timer) {
+    LOG(WARNING) << "[xkcd] writeCallback. Who called me? ;)";
     auto thisPtr = static_cast<AutoFlushedIniFile*>(opaqueThis);
     if (!thisPtr->mIniFile->writeIfChanged()) {
         LOG(VERBOSE) << "Attempt to auto flush IniFile "
@@ -54,6 +55,7 @@ void AutoFlushedIniFile::writeCallback(void* opaqueThis, Looper::Timer* timer) {
 }
 
 AutoFlushedIniFile::~AutoFlushedIniFile() {
+    LOG(WARNING) << "[xkcd] OK, let's do the final flush now folks!";
     if (mTimer.get()) {
         mTimer->stop();
         mTimer.reset();
