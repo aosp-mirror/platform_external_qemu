@@ -51,6 +51,24 @@
       "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "365a0ede_c8408f3c",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-09T18:03:07Z",
+      "side": 1,
+      "message": "I actually just want the test around the gpsCmd() call--no\nreturn at all.\n\nIf there\u0027s no device, I can still test the GUI behavior.\nI can watch it step through the locations and see if it\nis obeying the delay values as modified by the speed.\nI can watch the buttons enable/disable and I can check\nwhat happens at the end of the list.",
+      "parentUuid": "b620be2e_68b4eb3f",
+      "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
