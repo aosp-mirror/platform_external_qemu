@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "369daed4_eda8259f",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-09T22:12:09Z",
+      "side": 1,
+      "message": "outdated comment",
+      "range": {
+        "startLine": 71,
+        "startChar": 4,
+        "endLine": 71,
+        "endChar": 62
+      },
+      "revId": "da81c51caeeda9163c39bff47da3a15cae65430a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "369daed4_4dba19e4",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-09T22:12:09Z",
+      "side": 1,
+      "message": "why don\u0027t we just have a constant timeout?",
+      "range": {
+        "startLine": 133,
+        "startChar": 6,
+        "endLine": 138,
+        "endChar": 96
+      },
+      "revId": "da81c51caeeda9163c39bff47da3a15cae65430a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96b81a3f_96a36cc1",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-09T22:12:09Z",
+      "side": 1,
+      "message": "Is this intentional?",
+      "range": {
+        "startLine": 64,
+        "startChar": 12,
+        "endLine": 64,
+        "endChar": 14
+      },
+      "revId": "da81c51caeeda9163c39bff47da3a15cae65430a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
