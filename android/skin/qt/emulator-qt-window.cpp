@@ -199,9 +199,10 @@ void EmulatorQtWindow::paintEvent(QPaintEvent *)
         QRect r(0, 0, backing_surface->w, backing_surface->h);
         // Rescale with smooth transformation to avoid aliasing
         QImage scaled_bitmap =
-                backing_surface->bitmap->scaled(r.size(),
+                backing_surface->bitmap->scaled(r.size() * devicePixelRatio(),
                                                 Qt::KeepAspectRatio,
                                                 Qt::SmoothTransformation);
+        scaled_bitmap.setDevicePixelRatio(devicePixelRatio());
         painter.drawImage(r, scaled_bitmap);
     } else {
         D("Painting emulator window, but no backing bitmap");
