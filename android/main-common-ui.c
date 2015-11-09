@@ -75,40 +75,6 @@ user_config_get_window_pos( int *window_x, int *window_y )
         auserConfig_getWindowPos(userConfig, window_x, window_y);
 }
 
-void
-user_config_set_ui_savePath( const char* path )
-{
-    if (userConfig) {
-        auserConfig_setUiSavePath(userConfig, path);
-    }
-}
-
-char*
-user_config_get_ui_savePath( )
-{
-    if (userConfig) {
-        return auserConfig_getUiSavePath(userConfig);
-    }
-    return 0;
-}
-
-void
-user_config_set_ui_theme( int theme )
-{
-    if (userConfig) {
-        auserConfig_setUiTheme(userConfig, theme);
-    }
-}
-
-int
-user_config_get_ui_theme( )
-{
-    if (userConfig) {
-        return auserConfig_getUiTheme(userConfig);
-    }
-    return 0;
-}
-
 /***********************************************************************/
 /***********************************************************************/
 /*****                                                             *****/

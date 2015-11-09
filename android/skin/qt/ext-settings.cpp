@@ -20,11 +20,13 @@
 #include "android/main-common.h"
 #include "android/settings-agent.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/qt-settings.h"
 #include "android/update-check/UpdateChecker.h"
 #include "android/update-check/VersionExtractor.h"
 #include "extended-window.h"
 #include "extended-window-styles.h"
 
+#include <QSettings>
 #include <QtWidgets>
 
 void ExtendedWindow::initSettings()
@@ -80,8 +82,11 @@ void ExtendedWindow::completeSettingsInitialization()
     // Get the latest user selections from the
     // user-config code.
 
+    QSettings settings;
+
     // "Screen shot" and "Record screen" destination folder
-    mSettingsState.mSavePath = user_config_get_ui_savePath();
+    mSettingsState.mSavePath = settings.value(Ui::Settings::SAVE_PATH, "")
+                                             .toString();
 
     // Check if this path is writable
     QFileInfo fInfo(mSettingsState.mSavePath);
@@ -92,10 +97,12 @@ void ExtendedWindow::completeSettingsInitialization()
 
     if (mSettingsState.mSavePath.isEmpty()) {
         // We have no path. Try to determine the path to the desktop.
-        QStringList paths = QStandardPaths::standardLocations(QStandardPaths::DesktopLocation);
+        QStringList paths = QStandardPaths::
+                            standardLocations(QStandardPaths::DesktopLocation);
         if (paths.size() > 0) {
             mSettingsState.mSavePath = paths[0];
-            user_config_set_ui_savePath(mSettingsState.mSavePath.toStdString().c_str());
+            settings.setValue(Ui::Settings::SAVE_PATH,
+                              mSettingsState.mSavePath);
         }
     }
 
@@ -105,7 +112,9 @@ void ExtendedWindow::completeSettingsInitialization()
         mExtendedUi->set_saveLocBox->setPlainText(mSettingsState.mSavePath);
     }
 
-    SettingsTheme theme = (SettingsTheme)user_config_get_ui_theme();
+    // Dark/Light theme
+    SettingsTheme theme = (SettingsTheme)settings.
+                             value(Ui::Settings::UI_THEME, 0).toInt();
     if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
         theme = (SettingsTheme)0;
     }
@@ -156,7 +165,8 @@ void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
 
     // Save a valid selection
     mSettingsState.mTheme = theme;
-    user_config_set_ui_theme(theme);
+    QSettings settings;
+    settings.setValue(Ui::Settings::UI_THEME, (int)theme);
 
     // Switch to the icon images that are appropriate for this theme.
     switchAllIconsForTheme(theme);
@@ -215,7 +225,9 @@ void ExtendedWindow::on_set_folderButton_clicked()
     // Everything looks OK
     mSettingsState.mSavePath = dirName;
 
-    user_config_set_ui_savePath(dirName.toStdString().c_str());
+    QSettings settings;
+    settings.setValue(Ui::Settings::SAVE_PATH, dirName);
+
     mExtendedUi->set_saveLocBox->setPlainText(dirName.toStdString().c_str());
 }
 

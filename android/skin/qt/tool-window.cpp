@@ -10,7 +10,9 @@
  ** GNU General Public License for more details.
  */
 
+#include <QCoreApplication>
 #include <QPushButton>
+#include <QSettings>
 #include <QtWidgets>
 
 #include "android/android.h"
@@ -22,6 +24,7 @@
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/extended-window-styles.h"
+#include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/tool-window.h"
 
 #include "ui_tools.h"
@@ -49,6 +52,12 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
 
     mErrorMessage.setWindowModality(Qt::ApplicationModal);
 
+    // Initialize some values in the QCoreApplication so we can easily
+    // and consistently access QSettings to save and restore user settings
+    QCoreApplication::setOrganizationName(Ui::Settings::ORG_NAME);
+    QCoreApplication::setOrganizationDomain(Ui::Settings::ORG_DOMAIN);
+    QCoreApplication::setApplicationName(Ui::Settings::APP_NAME);
+
     // TODO: make this affected by themes and changes
     mInstallDialog.setWindowTitle(tr("APK Installer"));
     mInstallDialog.setLabelText(tr("Installing APK..."));
@@ -66,10 +75,12 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
 
     // Get the latest user selections from the
     // user-config code.
-    SettingsTheme theme = (SettingsTheme)user_config_get_ui_theme();
+    QSettings settings;
+    SettingsTheme theme = (SettingsTheme)settings.
+                            value(Ui::Settings::UI_THEME, 0).toInt();
     if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
         theme = (SettingsTheme)0;
-        user_config_set_ui_theme(theme);
+        settings.setValue(Ui::Settings::UI_THEME, 0);
     }
 
     ExtendedWindow::switchAllIconsForTheme(theme);
