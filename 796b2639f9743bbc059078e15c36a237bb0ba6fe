@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "b6e35e49_81021a4b",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1084468
+      },
+      "writtenOn": "2015-11-09T19:00:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b637de6a_84b12851",
+      "revId": "796b2639f9743bbc059078e15c36a237bb0ba6fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96173ad8_f81a114c",
         "filename": "docs/GPU-EMULATION.TXT",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-09T17:08:26Z",
       "side": 1,
       "message": "can we name this \u0027guest\u0027 instead? I undertand the need to document that this is a proprietary feature though, but I think that it makes more sense as a configuration value.",
+      "revId": "796b2639f9743bbc059078e15c36a237bb0ba6fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96eada1e_80eb36cd",
+        "filename": "docs/GPU-EMULATION.TXT",
+        "patchSetId": 7
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1084468
+      },
+      "writtenOn": "2015-11-09T19:00:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "96173ad8_f81a114c",
       "revId": "796b2639f9743bbc059078e15c36a237bb0ba6fe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
