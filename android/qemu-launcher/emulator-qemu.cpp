@@ -44,7 +44,15 @@ using android::base::PathUtils;
 #ifdef __i386__
 static const char kHostArch[] = "x86";
 #elif defined(__x86_64__)
+
+// always use the 32-bit version on Windows as as 64-bit one just
+// doesn't work with QT (also see System::getHostBitness())
+#ifdef _WIN32
+static const char kHostArch[] = "x86";
+#else
 static const char kHostArch[] = "x86_64";
+#endif
+
 #else
 #error "Your host CPU is not supported!"
 #endif
