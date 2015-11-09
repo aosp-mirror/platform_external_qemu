@@ -1122,7 +1122,11 @@ extern "C" int main(int argc, char **argv) {
     }
 
     if (hw->hw_gpu_enabled) {
-        kernelCommandLine += " qemu.gles=1";
+        if (strcmp(android_hw->hw_gpu_mode, "guest") != 0) {
+            kernelCommandLine += " qemu.gles=1";   // Using emugl
+        } else {
+            kernelCommandLine += " qemu.gles=2";   // Using guest
+        }
     } else {
         kernelCommandLine += " qemu.gles=0";
     }

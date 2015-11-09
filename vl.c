@@ -3979,14 +3979,18 @@ int run_qemu_main(int argc, const char **argv)
      * the emulation engine. */
     int qemu_gles = 0;
     if (android_hw->hw_gpu_enabled) {
-        if (android_initOpenglesEmulation() != 0 ||
-            android_startOpenglesRenderer(android_hw->hw_lcd_width,
-                                          android_hw->hw_lcd_height) != 0)
-        {
-            derror("Could not initialize OpenglES emulation, use '-gpu off' to disable it.");
-            exit(1);
+        if (strcmp(android_hw->hw_gpu_mode, "guest") != 0) {
+            if (android_initOpenglesEmulation() != 0 ||
+                android_startOpenglesRenderer(android_hw->hw_lcd_width,
+                                              android_hw->hw_lcd_height) != 0)
+            {
+                derror("Could not initialize OpenglES emulation, use '-gpu off' to disable it.");
+                exit(1);
+            }
+            qemu_gles = 1;   // Using emugl
+        } else {
+            qemu_gles = 2;   // Using guest
         }
-        qemu_gles = 1;
     }
     if (qemu_gles) {
         char  tmp[64];
