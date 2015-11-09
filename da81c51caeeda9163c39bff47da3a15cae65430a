@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "16ac2a06_cc128fa1",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-09T22:21:12Z",
+      "side": 1,
+      "message": "updated",
+      "parentUuid": "369daed4_eda8259f",
+      "range": {
+        "startLine": 71,
+        "startChar": 4,
+        "endLine": 71,
+        "endChar": 62
+      },
+      "revId": "da81c51caeeda9163c39bff47da3a15cae65430a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "369daed4_4dba19e4",
         "filename": "android/skin/qt/ext-location.cpp",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "56a22212_f11be2ad",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-09T22:21:12Z",
+      "side": 1,
+      "message": "GPX files have timestamped data",
+      "parentUuid": "369daed4_4dba19e4",
+      "range": {
+        "startLine": 133,
+        "startChar": 6,
+        "endLine": 138,
+        "endChar": 96
+      },
+      "revId": "da81c51caeeda9163c39bff47da3a15cae65430a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96b81a3f_96a36cc1",
         "filename": "android/skin/qt/extended.ui",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2015-11-09T22:12:09Z",
       "side": 1,
       "message": "Is this intentional?",
+      "range": {
+        "startLine": 64,
+        "startChar": 12,
+        "endLine": 64,
+        "endChar": 14
+      },
+      "revId": "da81c51caeeda9163c39bff47da3a15cae65430a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6a6b626_6bd42112",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-09T22:21:12Z",
+      "side": 1,
+      "message": "Not really, Qt designer changes this depending on which page was active when I saved. It doesnt matter though because currentIndex is set to 0 in code explicitly on initialization",
+      "parentUuid": "96b81a3f_96a36cc1",
       "range": {
         "startLine": 64,
         "startChar": 12,
