@@ -16,6 +16,10 @@
 #include <assert.h>
 #include <limits.h>
 
+#ifdef CONFIG_ANDROID
+#include "android-qemu2-glue/looper-qemu.h"
+#endif
+
 static bool name_threads;
 
 void qemu_thread_naming(bool enable)
@@ -288,6 +292,10 @@ static unsigned __stdcall win32_start_routine(void *arg)
         data = NULL;
     }
     qemu_thread_data = data;
+#ifdef CONFIG_ANDROID
+    /* Ensure AndroidEmu timers and looper work correctly on this thread. */
+    qemu_looper_setForThread();
+#endif
     qemu_thread_exit(start_routine(thread_arg));
     abort();
 }

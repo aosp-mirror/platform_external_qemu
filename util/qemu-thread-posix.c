@@ -27,6 +27,10 @@
 #include "qemu/thread.h"
 #include "qemu/atomic.h"
 
+#ifdef CONFIG_ANDROID
+#include "android-qemu2-glue/looper-qemu.h"
+#endif
+
 static bool name_threads;
 
 void qemu_thread_naming(bool enable)
@@ -411,6 +415,37 @@ static void qemu_thread_set_name(QemuThread *thread, const char *name)
 #endif
 }
 
+#ifdef CONFIG_ANDROID
+/* A small data structure to group the thread startup parameters.
+ * This is passed to the trampoline function below which will first
+ * setup AndroidEmu to use the QEMU-based looper implementation before
+ * calling the thread's start routine. This ensures that any QEMU code
+ * that calls into AndroidEmu functions work properly when it uses
+ * timers and file i/o watches.
+ *
+ * Note that the ThreadStartData instance is created on the heap by
+ * qemu_thread_create() and its pointer passed to the trampoline through
+ * pthread_create(). This effectively transfers ownership of the object
+ * to the trampoline which is responsible for freeing it.
+ */
+typedef struct {
+    void *(*start_routine)(void*);
+    void* arg;
+} ThreadStartData;
+
+static void* qemu_thread_trampoline(void* data_) {
+    /* Copy heap-allocated data to stack then release it. */
+    ThreadStartData data = *(ThreadStartData*)data_;
+    free(data_);
+
+    /* Ensure AndroidEmu timers / looper work on this thread. */
+    qemu_looper_setForThread();
+
+    /* Start the thread. */
+    return (*data.start_routine)(data.arg);
+}
+#endif  // CONFIG_ANDROID
+
 void qemu_thread_create(QemuThread *thread, const char *name,
                        void *(*start_routine)(void*),
                        void *arg, int mode)
@@ -433,9 +468,23 @@ void qemu_thread_create(QemuThread *thread, const char *name,
     /* Leave signal handling to the iothread.  */
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, &oldset);
+#ifdef CONFIG_ANDROID
+    /* Create heap-allocated ThreadStartData object and pass its ownership
+     * to the trampoline. */
+    ThreadStartData* data = malloc(sizeof(*data));
+    data->start_routine = start_routine;
+    data->arg = arg;
+
+    err = pthread_create(&thread->thread, &attr, qemu_thread_trampoline, data);
+    if (err) {
+        free(data);
+        error_exit(err, __func__);
+    }
+#else  /* !CONFIG_ANDROID */
     err = pthread_create(&thread->thread, &attr, start_routine, arg);
     if (err)
         error_exit(err, __func__);
+#endif  /* !CONFIG_ANDROID */
 
     if (name_threads) {
         qemu_thread_set_name(thread, name);
