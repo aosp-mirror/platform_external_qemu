@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "36712e54_33baf0e3",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-09T17:02:13Z",
+      "side": 1,
+      "message": "See comment below",
+      "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d66b7268_0a80db62",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-09T17:02:13Z",
+      "side": 1,
+      "message": "I\u0027d rather have the \"if (!mLocationAgent || !...-\u003egpsCmd)\"\ntest here. Then the behavior will be the same in a UI-only\nconfiguration without a device.",
+      "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
