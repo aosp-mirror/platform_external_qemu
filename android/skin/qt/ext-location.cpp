@@ -26,6 +26,7 @@
 
 void ExtendedWindow::initLocation()
 {
+    mLoc_nowPlaying = false;
     mLoc_timer.setSingleShot(true);
     mExtendedUi->loc_altitudeInput->setValidator(&mAltitudeValidator);
     mExtendedUi->loc_latitudeInput->setMinValue(-90.0);
@@ -43,96 +44,82 @@ void ExtendedWindow::on_loc_pathTable_cellChanged(int row, int col)
     mExtendedUi->loc_pathTable->item(row, col)->setForeground(QBrush(newColor));
 }
 
-void ExtendedWindow::on_loc_playButton_clicked()
+void ExtendedWindow::locationPlaybackStart()
 {
-    if (!mLoc_nowPlaying) {
-        // Validate all the table's values
-        for (int row = 0; row < mExtendedUi->loc_pathTable->rowCount(); row++) {
-            for (int col = 0; col < mExtendedUi->loc_pathTable->columnCount(); col++) {
-                if (!loc_cellIsValid(mExtendedUi->loc_pathTable, row, col)) {
-                    mToolWindow->showErrorDialog(tr("The table contains errors.<br>No locations were sent."),
-                                                 tr("GPS Playback"));
-                    mExtendedUi->loc_pathTable->scrollToItem(mExtendedUi->loc_pathTable->item(row, 0));
-                    return;
-                }
+    // Validate all the values in the table.
+    for (int row = 0; row < mExtendedUi->loc_pathTable->rowCount(); row++) {
+        for (int col = 0; col < mExtendedUi->loc_pathTable->columnCount(); col++) {
+            if (!loc_cellIsValid(mExtendedUi->loc_pathTable, row, col)) {
+                mToolWindow->showErrorDialog(tr("The table contains errors.<br>No locations were sent."),
+                                             tr("GPS Playback"));
+                mExtendedUi->loc_pathTable->scrollToItem(mExtendedUi->loc_pathTable->item(row, 0));
+                return;
             }
         }
-
-        mExtendedUi->loc_pathTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-        mLoc_rowToSend = 0;
-        mLoc_nowPlaying = true;
-        setButtonEnabled(mExtendedUi->loc_playButton, mSettingsState.mTheme, false);
-        setButtonEnabled(mExtendedUi->loc_pauseButton, mSettingsState.mTheme, true);
-        mLoc_timer.setInterval(0); // Fire when I return
-        mLoc_timer.start();
-        SettingsTheme theme = mSettingsState.mTheme;
-        setButtonEnabled(mExtendedUi->loc_GpxKmlButton,  theme, false);
-        setButtonEnabled(mExtendedUi->loc_playButton,  theme, false);
-        setButtonEnabled(mExtendedUi->loc_stopButton,  theme, true);
-        setButtonEnabled(mExtendedUi->loc_stopButton,  theme, true);
-    } else if (mLoc_nowPaused) {
-        // Resume
-        if (mLoc_mSecRemaining < 0) {
-            // Nothing more to do. Treat this as a Stop.
-            on_loc_stopButton_clicked();
-            return;
-        }
-
-        // Re-start the timer to span
-        // the remaining time
-        mLoc_timer.setInterval(mLoc_mSecRemaining);
-        mLoc_timer.start();
-        mLoc_mSecRemaining = -1;
-        mLoc_nowPaused = false;
-        setButtonEnabled(mExtendedUi->loc_playButton, mSettingsState.mTheme, false);
-        setButtonEnabled(mExtendedUi->loc_pauseButton, mSettingsState.mTheme, true);
     }
+
+    mLoc_rowToSend = std::max(0, mExtendedUi->loc_pathTable->currentRow());
+
+    SettingsTheme theme = mSettingsState.mTheme;
+
+    // Disable editing the data in the table while playback is in progress.
+    mExtendedUi->loc_pathTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    // Disable loading a new dataset while playback is in progress.
+    setButtonEnabled(mExtendedUi->loc_GpxKmlButton,  theme, false);
+
+    // Change the icon on the play/stop button.
+    mExtendedUi->loc_playStopButton->setIcon(getIconForCurrentTheme("stop"));
+    mExtendedUi->loc_playStopButton->setProperty("themeIconName", "stop");
+
+
+    // The timer will be triggered for the first row after this
+    // function returns.
+    mLoc_timer.setInterval(0);
+    mLoc_timer.start();
+    mLoc_nowPlaying = true;
 }
 
 
 void ExtendedWindow::loc_slot_timeout()
 {
-    bool              cellOK;
+    bool cellOK;
     QTableWidgetItem *theItem;
 
-    if (mLoc_rowToSend < 0  ||  mLoc_rowToSend >= mExtendedUi->loc_pathTable->rowCount()) {
+    // Check if we've reached the end of the dataset.
+    if (mLoc_rowToSend < 0  ||
+        mLoc_rowToSend >= mExtendedUi->loc_pathTable->rowCount()) {
         // No more to send. Same as clicking Stop.
-        on_loc_stopButton_clicked();
+        locationPlaybackStop();
         return;
     }
 
-    if (mLoc_nowPaused) {
-        // We shouldn't get a timeout if we're paused,
-        // so if we're here it's probably because of
-        // some time sliver.
-        // Just ignore this timer event and stay paused.
-        return;
-    }
-
+    // Get the data for the point we're about to send.
     theItem = mExtendedUi->loc_pathTable->item(mLoc_rowToSend, 1);
     double lat = theItem->text().toDouble(&cellOK);
-
     theItem = mExtendedUi->loc_pathTable->item(mLoc_rowToSend, 2);
     double lon = theItem->text().toDouble(&cellOK);
-
     theItem = mExtendedUi->loc_pathTable->item(mLoc_rowToSend, 3);
     double alt = theItem->text().toDouble(&cellOK);
-
     int nSats = 4;  // Just say that we see 4 GPS satellites
+    timeval timeVal = {};
+    gettimeofday(&timeVal, nullptr);
 
-    struct timeval timeVal;
-    memset(&timeVal, 0, sizeof(timeVal));
-    gettimeofday(&timeVal, NULL);
-
+    // Update the appearance of the table:
+    // 1. Clear the "play arrow" icon from the previous point, if necessary.
+    // 2. Set the "play arrow" icon near the point we're about to send.
+    // 3. Scroll to the point that is being sent.
+    // 4. Make it selected.
     if (mLoc_rowToSend > 0) {
         mExtendedUi->loc_pathTable->item(mLoc_rowToSend - 1, 0)->setIcon(QIcon());
     }
     QTableWidgetItem* currentItem = mExtendedUi->loc_pathTable->item(mLoc_rowToSend, 0);
-    currentItem->setIcon(
-            getIconForCurrentTheme("play_arrow"));
+    currentItem->setIcon(getIconForCurrentTheme("play_arrow"));
     mExtendedUi->loc_pathTable->scrollToItem(currentItem);
+    mExtendedUi->loc_pathTable->setCurrentItem(currentItem);
 
-    if (mLocationAgent  &&  mLocationAgent->gpsCmd) {
+    // Send the command.
+    if (mLocationAgent  && mLocationAgent->gpsCmd) {
         mLocationAgent->gpsCmd(lat, lon, alt, nSats, &timeVal);
     }
 
@@ -140,57 +127,46 @@ void ExtendedWindow::loc_slot_timeout()
     mLoc_rowToSend++;
     if (mLoc_rowToSend >= mExtendedUi->loc_pathTable->rowCount()) {
         // No more to send. Same as clicking Stop.
-        on_loc_stopButton_clicked();
-        return;
-    }
-
-    // Set a timer for when this row should be sent
-    theItem = mExtendedUi->loc_pathTable->item(mLoc_rowToSend, 0);
-    double dTime = theItem->text().toDouble();
-    int mSec = dTime * 1000.0;
-    if (mSec < 0) mSec = 0;
-    mLoc_timer.setInterval(mSec);
-    mLoc_timer.start();
-    mLoc_nowPaused = false;
-}
-
-void ExtendedWindow::on_loc_pauseButton_clicked()
-{
-    if (!mLoc_nowPaused) {
-        // Pause the timer operation
-        if (!mLoc_timer.isActive()) {
-            // Nothing more to do. Treat this as a Stop.
-            on_loc_stopButton_clicked();
-            return;
-        }
-        // Determine how much time remains on
-        // the timer
-        mLoc_mSecRemaining = mLoc_timer.remainingTime();
-        if (mLoc_mSecRemaining < 0) mLoc_mSecRemaining = 0;
-        mLoc_timer.stop();
-        mLoc_nowPaused = true;
-        setButtonEnabled(mExtendedUi->loc_playButton, mSettingsState.mTheme, true);
-        setButtonEnabled(mExtendedUi->loc_pauseButton, mSettingsState.mTheme, false);
+        locationPlaybackStop();
+    } else {
+        // Set a timer for when this row should be sent
+        theItem = mExtendedUi->loc_pathTable->item(mLoc_rowToSend, 0);
+        double dTime = theItem->text().toDouble();
+        int mSec = dTime * 1000.0;
+        if (mSec < 0) mSec = 0;
+        mLoc_timer.setInterval(
+                mSec / static_cast<double>(mExtendedUi->loc_playbackSpeed->currentIndex() + 1));
+        mLoc_timer.start();
     }
 }
 
-void ExtendedWindow::on_loc_stopButton_clicked()
+void ExtendedWindow::locationPlaybackStop()
 {
     mLoc_timer.stop();
-    mLoc_nowPaused = false;
-    if (mLoc_rowToSend > 0) {
+    if (mLoc_rowToSend > 0 &&
+        mLoc_rowToSend <= mExtendedUi->loc_pathTable->rowCount()) {
+        if (mLoc_rowToSend == mExtendedUi->loc_pathTable->rowCount()) {
+            mExtendedUi->loc_pathTable->setCurrentItem(nullptr);
+        }
         mExtendedUi->loc_pathTable->item(mLoc_rowToSend - 1, 0)->setIcon(QIcon());
     }
     mLoc_rowToSend = -1;
-    mLoc_nowPlaying = mLoc_nowPaused = false;
     SettingsTheme theme = mSettingsState.mTheme;
     setButtonEnabled(mExtendedUi->loc_GpxKmlButton,  theme, true);
-    setButtonEnabled(mExtendedUi->loc_playButton,  theme, true);
-    setButtonEnabled(mExtendedUi->loc_pauseButton,  theme, false);
-    setButtonEnabled(mExtendedUi->loc_stopButton,  theme, false);
+    mExtendedUi->loc_playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
+    mExtendedUi->loc_playStopButton->setProperty("themeIconName", "play_arrow");
     mExtendedUi->loc_pathTable->setEditTriggers(QAbstractItemView::DoubleClicked |
                                                 QAbstractItemView::EditKeyPressed |
                                                 QAbstractItemView::AnyKeyPressed);
+    mLoc_nowPlaying = false;
+}
+
+void ExtendedWindow::on_loc_playStopButton_clicked() {
+    if (mLoc_nowPlaying) {
+        locationPlaybackStop();
+    } else {
+        locationPlaybackStart();
+    }
 }
 
 bool ExtendedWindow::loc_cellIsValid(QTableWidget *table, int row, int col)
@@ -266,18 +242,6 @@ void ExtendedWindow::on_loc_GpxKmlButton_clicked()
                 tr((fileInfo.suffix().toUpper() + " Parser").toStdString().c_str()));
     } else {
         loc_populateTable(&fixes);
-    }
-
-    // Ensure that we have at least one row
-    if (mExtendedUi->loc_pathTable->rowCount() == 0) {
-        mExtendedUi->loc_pathTable->insertRow(0);
-
-        mExtendedUi->loc_pathTable->setItem(0, 0, new QTableWidgetItem("0")); // Delay
-        mExtendedUi->loc_pathTable->setItem(0, 1, new QTableWidgetItem("0")); // Latitude
-        mExtendedUi->loc_pathTable->setItem(0, 2, new QTableWidgetItem("0")); // Longitude
-        mExtendedUi->loc_pathTable->setItem(0, 3, new QTableWidgetItem("0")); // Elevation
-        mExtendedUi->loc_pathTable->setItem(0, 4, new QTableWidgetItem("" )); // Name
-        mExtendedUi->loc_pathTable->setItem(0, 5, new QTableWidgetItem("" )); // Description
     }
 }
 
