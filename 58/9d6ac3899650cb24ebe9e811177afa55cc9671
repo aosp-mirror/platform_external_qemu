@@ -1,0 +1,7 @@
+Code-Review+2: Evan Birenbaum <birenbaum@google.com>
+Verified+1: Evan Birenbaum <birenbaum@google.com>
+Submitted-by: Chaoren Lin <chaorenl@google.com>
+Submitted-at: Mon, 09 Nov 2015 19:27:12 +0000
+Reviewed-on: https://android-review.googlesource.com/180270
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
