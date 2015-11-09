@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "760646d1_3a99bd3d",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-09T21:34:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b66efe78_cc13bfa7",
+      "range": {
+        "startLine": 60,
+        "startChar": 2,
+        "endLine": 63,
+        "endChar": 5
+      },
+      "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "36712e54_33baf0e3",
         "filename": "android/skin/qt/ext-location.cpp",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2015-11-09T17:02:13Z",
       "side": 1,
       "message": "See comment below",
+      "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b60c3eef_5963e35b",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-09T21:34:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "36712e54_33baf0e3",
       "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -125,6 +167,96 @@
       "side": 1,
       "message": "I *might* agree if we\u0027re talking about a device that doesn\u0027t\nsupport GPS.\n\nI feel pretty strongly that we should be able to run the\nGUI with no device at all and that it should not \nshort-circuit its work just because the final command goes \nnowhere.",
       "parentUuid": "d683721b_0a5b3063",
+      "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96b81a3f_733ffab3",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-09T21:34:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d683721b_0a5b3063",
+      "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6b19e59_31b4503f",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-09T21:34:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b620be2e_68b4eb3f",
+      "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1617cafd_f753da1c",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-09T21:34:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d66b7268_0a80db62",
+      "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6ae12f9_1282ec25",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-09T21:34:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "365a0ede_c8408f3c",
+      "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6b19e59_11b14c4f",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-09T21:34:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "96b81a3f_d0c4dc64",
       "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
