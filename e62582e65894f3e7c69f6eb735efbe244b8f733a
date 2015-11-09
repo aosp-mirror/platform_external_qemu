@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "96d1fa8e_482ddfce",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 2499,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-09T22:40:35Z",
+      "side": 1,
+      "message": "Updated this until we actually have screen record working.",
+      "revId": "e62582e65894f3e7c69f6eb735efbe244b8f733a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
