@@ -27,6 +27,7 @@
      <!-- Main list of tool buttons -->
      <file alias="back">images/light/System_Back_678.svg</file>
      <file alias="close">images/light/ic_close_678_48px.svg</file>
+     <file alias="help">images/light/ic_help_678_48dp.svg</file>
      <file alias="home">images/light/System_Home_678.svg</file>
      <file alias="minimize">images/light/ic_remove_678_48dp.svg</file>
      <file alias="more">images/light/ic_more_horiz_678_48dp.svg</file>
@@ -103,6 +104,7 @@
      <!-- Main list of tool buttons -->
      <file alias="back">images/dark/System_Back_white.svg</file>
      <file alias="close">images/dark/ic_close_48px.svg</file>
+     <file alias="help">images/dark/ic_help_white_48dp.svg</file>
      <file alias="home">images/dark/System_Home_white.svg</file>
      <file alias="minimize">images/dark/ic_remove_white_48dp.svg</file>
      <file alias="more">images/dark/ic_more_horiz_white_48dp.svg</file>
