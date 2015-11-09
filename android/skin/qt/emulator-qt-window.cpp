@@ -485,7 +485,7 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
         tool_window->showErrorDialog(msg, tr("Screenshot"));
     } else {
 
-        // Pull the image from its remote location to the designated tmp directory
+        // Pull the image from its remote location to the desired location
         QStringList args;
         QString command = tool_window->getAdbFullPath(&args);
         if (command.isNull()) {
@@ -495,7 +495,17 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
         // Add the arguments
         args << "pull";                 // Pulling a file
         args << REMOTE_SCREENSHOT_FILE; // Which file to pull
-        args << getTmpImagePath();      // Where to place the temp file
+
+        QString fileName = tool_window->getScreenshotSaveFile();
+        if (fileName.isEmpty()) {
+            tool_window->showErrorDialog(tr("The screenshot save location is invalid.<br/>"
+                                            "Check the settings page and ensure the directory "
+                                            "exists and is writeable."),
+                                         tr("Screenshot"));
+            return;
+        }
+
+        args << fileName;
 
         // Use a different process to avoid infinite looping when pulling the file
         mScreencapPullProcess.start(command, args);
@@ -511,50 +521,7 @@ void EmulatorQtWindow::slot_screencapPullFinished(int exitStatus)
         QString msg = tr("The screenshot could not be loaded from the device. Output:<br/><br/>")
                         + QString(er);
         tool_window->showErrorDialog(msg, tr("Screenshot"));
-    } else {
-
-        // Load the data into an image
-        QPixmap screencap;
-        bool isOk = screencap.load(getTmpImagePath(), "PNG");
-        if (!isOk) {
-            tool_window->showErrorDialog(tr("The image could not be loaded properly."),
-                                         tr("Screenshot"));
-            return;
-        }
-
-        // Show a preview image - falls out of scope and disappears when the function exits
-        QPixmap preview = screencap.scaled(size(), Qt::KeepAspectRatio);
-        QGraphicsScene scene;
-        scene.addPixmap(preview);
-
-        QGraphicsView view(&scene);
-        view.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        view.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        view.setWindowTitle(tr("Screenshot Preview"));
-        view.setFixedSize(preview.size());
-        view.show();
-
-        // Pop up the save file dialog, and save the file if a name is given
-        QString fileName = QFileDialog::getSaveFileName(this,
-                                                        tr("Screenshot Save File"),
-                                                        ".",
-                                                        tr("PNG files (*.png);;All files (*)"));
-        if (fileName.isNull()) return;
-
-        // Qt doesn't force-append .png, so ensure it's there or the save may fail
-        if (!fileName.endsWith(".png")) {
-            fileName.append(".png");
-        }
-        screencap.save(fileName);
     }
-}
-
-QString EmulatorQtWindow::getTmpImagePath()
-{
-    StringVector imageVector;
-    imageVector.push_back(String(QDir::tempPath().toStdString().data()));
-    imageVector.push_back(String(LOCAL_SCREENSHOT_FILE));
-    return QString(PathUtils::recompose(imageVector).c_str());
 }
 
 // Convert a Qt::Key_XXX code into the corresponding Linux keycode value.

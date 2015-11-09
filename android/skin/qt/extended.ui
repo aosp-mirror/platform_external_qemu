@@ -2419,7 +2419,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Screenshot / record screen save location</string>
+      <string>Screenshot save location</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Title</string>
