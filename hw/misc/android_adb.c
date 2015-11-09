@@ -255,7 +255,6 @@ static gboolean tcp_adb_connect(adb_backend_state *bs, int fd)
 
         qemu_set_nonblock(fd);
         bs->chan = io_channel_from_socket(fd);
-        g_io_add_watch(bs->chan, G_IO_IN|G_IO_ERR|G_IO_HUP, tcp_adb_server_data, bs);
 
         /* If we don't have a pipe to use for the tcp backend, then find one in
          * the accept state.  Note, this can happen, for example, if the previous
@@ -285,6 +284,7 @@ static gboolean tcp_adb_connect(adb_backend_state *bs, int fd)
                 abort();
             }
             adb_reply(apipe, _ok_resp);
+            android_pipe_wake(bs->connected_pipe->hwpipe, PIPE_WAKE_READ);
         }
 
         return TRUE;
@@ -640,7 +640,6 @@ static int adb_pipe_proxy_recv(adb_pipe *apipe, AndroidPipeBuffer *buffers,
 
         if (status == G_IO_STATUS_EOF) {
             bs->data_in = FALSE;
-            tcp_adb_server_close(bs);
             return 0;
         }
 
@@ -690,8 +689,10 @@ static int adb_pipe_recv(void *opaque, AndroidPipeBuffer *buffers,
 
     ret = pipe_recv_data(apipe, apipe->out_next, apipe->out_cnt, buffers, cnt);
     apipe->out_cnt -= ret;
-    if (ret == apipe->out_cnt) {
+    if (apipe->out_cnt == 0) {
         apipe->out_next = NULL;
+        // ready for adbserver to connect now
+        g_io_add_watch(bs->chan, G_IO_IN|G_IO_ERR|G_IO_HUP, tcp_adb_server_data, bs);
     } else {
         apipe->out_next += ret;
     }
