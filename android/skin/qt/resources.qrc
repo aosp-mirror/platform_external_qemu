@@ -176,4 +176,8 @@
      <file alias="toggle_on">images/dark/toggle_on.png</file>
      <file alias="virtSensors">images/dark/Virtual_Sensors_677.svg</file>
  </qresource>
+
+ <qresource prefix="/cursor">
+     <file alias="zoom_cursor">images/cursor/zoom_cursor.svg</file>
+ </qresource>
 </RCC>

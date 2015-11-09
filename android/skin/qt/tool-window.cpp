@@ -224,7 +224,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd) {
         emulator_window->screenshot();
         break;
     case QtUICommand::ENTER_ZOOM:
-        emulator_window->zoom();
+        emulator_window->toggleZoomMode();
         break;
     }
 }
@@ -294,7 +294,7 @@ void ToolWindow::on_scrShot_button_clicked()
 }
 void ToolWindow::on_zoom_button_clicked()
 {
-    emulator_window->zoom();
+    emulator_window->toggleZoomMode();
 }
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
