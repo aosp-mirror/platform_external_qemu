@@ -33,6 +33,24 @@
       "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b620be2e_68b4eb3f",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-09T17:04:46Z",
+      "side": 1,
+      "message": "well, isn\u0027t it the same now? It either sends a command or does nothing - if there\u0027s no device to send to\nI\u0027m curious what useful could be done prior to this line if there\u0027s no device",
+      "parentUuid": "d66b7268_0a80db62",
+      "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
