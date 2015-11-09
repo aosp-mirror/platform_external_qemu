@@ -131,7 +131,8 @@ enum ExtendedWindowPane {
         "border: none; width: 24px; height: 24px; }" \
     "QTabWidget::pane {border: none;}" \
     "QTabWidget::tab-bar {left: 0px;}" \
-    "QTabBar::tab {background:" THEME##_BKG_COLOR "; padding-bottom:8px; font-size: 11pt; width: 150px; text-align: left}" \
+    "QTabBar::tab {background:" THEME##_BKG_COLOR "; padding: 4; padding-bottom:8;" \
+                   " font-size: 11pt; min-width: 4ex; text-align: left; margin-left: 10}" \
     "QTabBar::tab:selected {color:" THEME##_TEXT_COLOR ";" \
         "border-bottom: 4px solid " THEME##_TOOL_COLOR "}" \
     "QTabBar::tab:!selected{color:" THEME##_TITLE_COLOR ";" \
