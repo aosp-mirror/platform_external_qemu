@@ -110,6 +110,24 @@
       "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96b81a3f_d0c4dc64",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-09T19:36:28Z",
+      "side": 1,
+      "message": "I *might* agree if we\u0027re talking about a device that doesn\u0027t\nsupport GPS.\n\nI feel pretty strongly that we should be able to run the\nGUI with no device at all and that it should not \nshort-circuit its work just because the final command goes \nnowhere.",
+      "parentUuid": "d683721b_0a5b3063",
+      "revId": "0d522cb9f60ee98bd9c364f72e25ae311da3064f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
