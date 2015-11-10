@@ -22,6 +22,30 @@
       "revId": "d2cc90b1b91c7b2c5ab908440e7f72746e204814",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56cb02e2_e09f7e80",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-10T22:53:15Z",
+      "side": 1,
+      "message": "Auto-refactor for the win! Fixed",
+      "parentUuid": "f6a6b626_5fde3b5b",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 67
+      },
+      "revId": "d2cc90b1b91c7b2c5ab908440e7f72746e204814",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
