@@ -205,7 +205,7 @@ static void initialize_console_and_adb(void)
             continue;
         }
 
-        if (!adb_server_init(baseport + 1)) {
+        if (!qemu2_adb_server_init(baseport + 1)) {
             qemu_chr_delete(chr);
             chr = NULL;
             continue;

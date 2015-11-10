@@ -174,7 +174,7 @@ static void android_init_console_and_adb(int console_baseport,
             continue;
         }
 
-        if (!adb_server_init(baseport + 1)) {
+        if (!qemu2_adb_server_init(baseport + 1)) {
             qemu_chr_delete(chr);
             chr = NULL;
             continue;

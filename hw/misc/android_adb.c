@@ -751,7 +751,7 @@ static const AndroidPipeFuncs adb_pipe_funcs = {
  * Note that there's no way to undo this, so the board must
  * set up the console port first and the adb port second.
  */
-bool adb_server_init(int port)
+bool qemu2_adb_server_init(int port)
 {
     if (!pipe_backend_initialized) {
         adb_state.chan = NULL;

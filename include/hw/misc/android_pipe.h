@@ -16,6 +16,8 @@
 #include <stdint.h>
 #include "hw/hw.h"
 
+extern bool qemu2_adb_server_init(int port);
+
 #if defined(USE_ANDROID_EMU)
 
 #include "android/emulation/android_pipe.h"
@@ -239,7 +241,5 @@ extern void android_adb_dbg_backend_init(void);
 extern void android_adb_backend_init(void);
 extern void android_sensors_init(void);
 extern void android_net_pipes_init(void);
-
-extern bool adb_server_init(int port);
 
 #endif /* _HW_ANDROID_PIPE_H */
