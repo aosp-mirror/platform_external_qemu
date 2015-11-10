@@ -70,7 +70,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         builder_build_autotools_package libxml2 \
                 --disable-shared \
-                --without-debug \
                 --without-docbook \
                 --without-ftp \
                 --without-http \

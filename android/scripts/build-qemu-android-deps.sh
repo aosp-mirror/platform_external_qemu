@@ -106,6 +106,9 @@ do_windows_zlib_package () {
             LDFLAGS=-m64
             ;;
     esac
+    if [ "$OPT_DEBUG" ]; then
+        var_append LOC "-DDEBUG -g"
+    fi
     ZLIB_VERSION=$(package_list_get_version zlib)
     dump "$(builder_text) Building zlib-$ZLIB_VERSION"
     ZLIB_PACKAGE=$(package_list_get_filename zlib)
@@ -140,9 +143,14 @@ do_zlib_package () {
     dump "$(builder_text) Building zlib-$ZLIB_VERSION"
     ZLIB_PACKAGE=$(package_list_get_filename zlib)
     unpack_archive "$(builder_archive_dir)/$ZLIB_PACKAGE" "$BUILD_DIR"
+    local CFLAGS
+    if [ "$OPT_DEBUG" ]; then
+        var_append CFLAGS "-O0 -g"
+    fi
     (
         run cd "$BUILD_DIR/zlib-$ZLIB_VERSION" &&
         export CROSS_PREFIX=$(builder_gnu_config_host_prefix) &&
+        export CFLAGS &&
         run ./configure --prefix=$(builder_install_prefix) &&
         run make -j$NUM_JOBS &&
         run make install
@@ -182,6 +190,12 @@ do_windows_glib_package () {
     require_program GLIB_GENMARSHAL glib-genmarshal
     require_program GLIB_COMPILE_SCHEMAS glib-compile-schemas
     require_program GLIB_COMPILE_RESOURCES glib-compile-resources
+    local DEBUG_FLAGS
+    if [ "$OPT_DEBUG" ]; then
+        DEBUG_FLAGS="--enable-debug"
+    else
+        DEBUG_FLAGS="--disable-debug"
+    fi
     (
         run cd "$GLIB_DIR" &&
         export LDFLAGS="-L$PREFIX/lib -L$PREFIX/lib$1" &&
@@ -196,7 +210,7 @@ do_windows_glib_package () {
             --disable-shared \
             --with-threads=win32 \
             --with-pcre=internal \
-            --disable-debug \
+            $DEBUG_FLAGS \
             --disable-man \
             --with-libiconv=no \
             GLIB_GENMARSHAL=$GLIB_GENMARSHAL \
@@ -244,6 +258,11 @@ do_dtc_package () {
         CCFLAGS=
         LIBNAME=libfdt.a
         var_append CCFLAGS "-Ilibfdt"
+        if [ "$OPT_DEBUG" ]; then
+            var_append CCFLAGS "-O0 -g"
+        else
+            var_append CCFLAGS "-O2"
+        fi
         case $(builder_host) in
             linux-*|darwin-*)
                 var_append CCFLAGS "-fPIC"
@@ -338,7 +357,6 @@ build_qemu_android_deps () {
         *)
             do_autotools_package glib \
                 --disable-always-build-tests \
-                --disable-debug \
                 --disable-fam \
                 --disable-included-printf \
                 --disable-installed-tests \

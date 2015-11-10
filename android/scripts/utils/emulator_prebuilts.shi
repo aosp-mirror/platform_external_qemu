@@ -22,9 +22,11 @@ prebuilts_dir_register_option () {
 prebuilts_dir_parse_option () {
     if [ "$OPT_PREBUILTS_DIR" ]; then
         PREBUILTS_DIR=$OPT_PREBUILTS_DIR
+        PREBUILTS_DEBUG_DIR=$PREBUILTS_DIR
         log "Using prebuilts dir: $PREBUILTS_DIR"
     elif [ "$ANDROID_EMULATOR_PREBUILTS_DIR" ]; then
         PREBUILTS_DIR=$ANDROID_EMULATOR_PREBUILTS_DIR
+        PREBUILTS_DEBUG_DIR=$PREBUILTS_DIR
         log "Auto-config: --prebuilts-dir=$PREBUILTS_DIR  [environment]"
     else
         local AOSP_TOP
@@ -33,6 +35,7 @@ prebuilts_dir_parse_option () {
             panic "Could not find AOSP top-level directory. Please use --prebuilts-dir=<dir>."
         fi
         PREBUILTS_DIR=$AOSP_TOP/prebuilts/android-emulator-build
+        PREBUILTS_DEBUG_DIR=$AOSP_TOP/prebuilts/android-emulator-build-debug
         if [ ! -d "$PREBUILTS_DIR" ]; then
             panic "Missing directory, please use --prebuilts-dir=<dir>: [$PREBUILTS_DIR]"
         fi
