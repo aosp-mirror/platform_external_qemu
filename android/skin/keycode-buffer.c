@@ -1,4 +1,4 @@
-/* Copyright (C) 2010 The Android Open Source Project
+/* Copyright (C) 2010-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -27,7 +27,7 @@ void skin_keycode_buffer_add(SkinKeycodeBuffer* keycodes,
                               bool down) {
     if (code != 0 && keycodes->keycode_count < MAX_KEYCODES) {
         keycodes->keycodes[(int)keycodes->keycode_count++] =
-                ( (code & 0x1ff) | (down ? 0x200 : 0) );
+                ( (code & 0x3ff) | (down ? 0x400 : 0) );
     }
 }
 
@@ -39,7 +39,7 @@ void skin_keycode_buffer_flush(SkinKeycodeBuffer* keycodes) {
             for (nn = 0; nn < keycodes->keycode_count; nn++) {
                 int  code = keycodes->keycodes[nn];
                 printf(" [0x%03x,%s]",
-                       (code & 0x1ff), (code & 0x200) ? "down" : " up ");
+                       (code & 0x3ff), (code & 0x400) ? "down" : " up ");
             }
             printf("\n");
         }
