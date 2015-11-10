@@ -1,0 +1,344 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "169a6aee_dca8ad9f",
+        "filename": "android/crashreport/CrashPaths.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "Please add unit tests to this class!",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56278298_869eca77",
+        "filename": "android/crashreport/CrashPaths.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "It looks like most of these constants don\u0027t have to be exposed as class-coped static variables, just define them internally in this file, e.g. as static const char kVariable[] \u003d \"....\" instead. Simplifying the class declaration.",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96865a95_00ae26a8",
+        "filename": "android/crashreport/CrashPaths.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "you don\u0027t need this as class-scoped static vairable, just define const char kDumpSuffix[] in ::isDump() instead.",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "169a6aee_fcad69ac",
+        "filename": "android/crashreport/CrashPaths.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "Please provide documentation for this class (purpose + small usage example).",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "169a6aee_bca3e1c0",
+        "filename": "android/crashreport/CrashPaths.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "nit: Make this and all below \u0027static const char* const\u0027 instead.",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "569062ca_dea8a59f",
+        "filename": "android/crashreport/CrashPaths.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "nit: avoid static C++ global variables, they introduce static C++ constructors that run before main() and can have surprising results (one of them is slowly down library loading).",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d67c5259_c2a362c0",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "nit: Can you add a comment here explaining why you didn\u0027t use android::base::System-\u003erunSlientCommand() here or create a variant, since this seems very similar.",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d67c5259_e2a8669f",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "is this a debugging message? Since it is only printed on Linux I guess so.\nAlso can you really call printf() in the dumpCallback?",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "569062ca_fead61ac",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "please don\u0027t use sprintf(), snprintf() is much better, or just:\n\n  ::android::base::String server_fd_str \u003d ::android::base::StringFormat(\"%d\",  server_fd);",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36220e8b_859ec277",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "same here, use snprintf() instead. or change the code below to be:\n\n  cndline.append(::android::base::StringFormat(\"......\", getpid());",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6bf9630_0333ce38",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "can you handle the case where i \u003d\u003d 10 at the end of the loop?",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "169a6aee_3cb0b102",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "same here ?",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56278298_a6a3c6c0",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "is this intentional? why define the method then?",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "169a6aee_1cb3f511",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "Please provide documentation for the class and its methods. By the way do you want to put that into an android:: namespace?",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "169a6aee_9cc54564",
+        "filename": "android/crashreport/crash-handler.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "typo s/exectuables/executables/, also can you try to make this comment clearer, for example:\n\n    // Iniitalize and attach crash handlers to the process. Return true on\n    // success, or false on failure, which may happen if required executables\n    // and directories have valid paths.",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "169a6aee_7cba39e4",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "nit: start next to the type (i.e. \"const char*  crash_arh\u0027). ProTip: Use \u0027git clang-format\u0027.",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "169a6aee_5cbd7dd9",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "nit, no space between two ending parens.",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56278298_c6a8c29f",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "nit: indent, use \u0027git clang-format\u0027 to fix all this.",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6bf9630_432dc6ce",
+        "filename": "distrib/libbreakpad.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "nit: remove tab here.",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56278298_e6adbeac",
+        "filename": "distrib/libbreakpad.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T03:39:58Z",
+      "side": 1,
+      "message": "nit: and here.",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
