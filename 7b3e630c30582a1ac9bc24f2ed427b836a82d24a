@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "d67c5259_625e1655",
+        "filename": "android/metrics/AutoFlushedIniFile.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T16:02:37Z",
+      "side": 1,
+      "message": "nit: This doesn\u0027t need to be a class-scoped static constant.",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56278298_665b8e63",
         "filename": "android/metrics/AutoFlushedIniFile.h",
         "patchSetId": 4
@@ -47,6 +64,24 @@
       "writtenOn": "2015-11-10T15:58:23Z",
       "side": 1,
       "message": "s/expirs/expires/",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96865a95_40966e0c",
+        "filename": "android/metrics/AutoFlushedIniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T16:02:37Z",
+      "side": 1,
+      "message": "Also I\u0027m not sure this description is correct, from the code:\n\n- Every minute, check if the |iniFile| content change, and\n  write it to disk if this is true.\n\n- Always write to disk in the destructor.\n\nFrankly, it would be better if we didn\u0027t write anything in the destructor if nothing changed.\n\nCan we have a unit-test for this (e.g. by injecting specific timeout for testing purpose).",
+      "parentUuid": "368beea4_7d2dd7ce",
       "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
