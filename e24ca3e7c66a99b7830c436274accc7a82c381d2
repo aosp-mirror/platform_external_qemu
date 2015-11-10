@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f6bf9630_a3591a43",
+        "filename": "android/qemu-launcher/emulator-qemu.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T16:03:27Z",
+      "side": 1,
+      "message": "nit: s/QT/Qt/\nquestion: Do we have a bug related to te 32-bit Qt issue.",
+      "revId": "e24ca3e7c66a99b7830c436274accc7a82c381d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
