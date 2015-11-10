@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 The Android Open Source Project
+/* Copyright (C) 2014-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -45,10 +45,10 @@ TEST(keycode_buffer,skin_keycode_buffer_flush) {
         unsigned code;
         bool down;
     } kData[] = {
-        { KEY_F1|0x200, KEY_F1, true },
+        { KEY_F1|0x400, KEY_F1, true },
         { KEY_F1, KEY_F1, false },
         { KEY_COMPOSE, KEY_COMPOSE, false },
-        { KEY_COMPOSE|0x200, KEY_COMPOSE, true },
+        { KEY_COMPOSE|0x400, KEY_COMPOSE, true },
     };
     const size_t kDataLen = ARRAYLEN(kData);
 
