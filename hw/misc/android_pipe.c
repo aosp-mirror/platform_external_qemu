@@ -873,14 +873,13 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
 #else
     android_sensors_init();
     android_boot_properties_init();
-
+#endif
     /* TODO: This may be a complete hack and there may be beautiful QOM ways
      * to accomplish this.
      *
-     * Initialize android pipe backends
+     * Initialize adb pipe backends
      */
     android_adb_dbg_backend_init();
-#endif
 }
 
 static void qemu2_android_pipe_wake( void* hwpipe, unsigned flags )

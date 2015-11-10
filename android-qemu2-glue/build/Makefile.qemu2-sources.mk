@@ -366,6 +366,8 @@ QEMU2_TARGET_SOURCES := \
     hw/input/goldfish_events.c \
     hw/input/goldfish_sensors.c \
     hw/intc/goldfish_pic.c \
+    hw/misc/android_adb.c \
+    hw/misc/android_adb_dbg.c \
     hw/misc/android_pipe.c \
     hw/misc/android_pipe_test.c \
     hw/misc/android_qemud.c \
@@ -394,8 +396,6 @@ QEMU2_TARGET_SOURCES := \
 ifndef EMULATOR_USE_QT
 
 QEMU2_TARGET_SOURCES += \
-    hw/misc/android_adb.c \
-    hw/misc/android_adb_dbg.c \
     hw/misc/android_boot_properties.c \
     hw/misc/android_pipe_opengles.c \
 

@@ -80,8 +80,7 @@ static bool smbios_uuid_encoded = true;
 static bool gigabyte_align = true;
 static bool has_reserved_memory = true;
 
-// this is only needed when we don't use the AndroidEmu library
-#if defined(CONFIG_ANDROID) && !defined(USE_ANDROID_EMU)
+#if defined(CONFIG_ANDROID)
 
 /* android specific device init */
 static CharDriverState *android_try_create_console_chardev(int portno)
@@ -198,9 +197,8 @@ static void android_init_console_and_adb(int console_baseport,
     exit(1);
 }
 
-#endif // CONFIG_ANDROID && !USE_ANDROID_EMU
-
 /* end of android device init */
+#endif // CONFIG_ANDROID
 
 /* PC hardware initialisation */
 static void pc_init1(MachineState *machine,
@@ -443,7 +441,7 @@ static void pc_init1(MachineState *machine,
         pc_pci_device_init(pci_bus);
     }
 
-#if defined(CONFIG_ANDROID) && !defined(USE_ANDROID_EMU)
+#if defined(CONFIG_ANDROID)
 /* Android initialization */
     #define ANDROID_CONSOLE_BASEPORT 5554
     #define MAX_ANDROID_EMULATORS 64

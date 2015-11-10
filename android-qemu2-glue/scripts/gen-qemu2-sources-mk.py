@@ -55,8 +55,6 @@ FORCE_TARGET_OBJECTS = [
 NON_QT_OBJECTS = [
     '../ui/sdl.o',
     '../ui/sdl2.o',
-    'hw/misc/android_adb.o',
-    'hw/misc/android_adb_dbg.o',
     'hw/misc/android_boot_properties.o',
     'hw/misc/android_pipe_opengles.o'
     ]
