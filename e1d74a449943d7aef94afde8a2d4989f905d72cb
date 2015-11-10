@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d67c5259_22996e3d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T17:22:33Z",
+      "side": 1,
+      "message": "nit: these don\u0027t look like SDL-specific. I assume a future patch will add code that uses them. Why not submit it with this change then?",
+      "revId": "e1d74a449943d7aef94afde8a2d4989f905d72cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
