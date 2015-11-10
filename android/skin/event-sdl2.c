@@ -232,9 +232,6 @@ static int sdl_mouse_button_to_button(int sdl_button) {
         case SDL_BUTTON_LEFT: return kMouseButtonLeft;
         case SDL_BUTTON_RIGHT: return kMouseButtonRight;
         case SDL_BUTTON_MIDDLE: return kMouseButtonCenter;
-        // scroll-wheel
-        case 4: return kMouseButtonScrollUp;
-        case 5: return kMouseButtonScrollDown;
         default: return -1;
     }
 }
