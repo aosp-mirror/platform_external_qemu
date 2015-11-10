@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "56278298_665b8e63",
+        "filename": "android/metrics/AutoFlushedIniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T15:58:23Z",
+      "side": 1,
+      "message": "typo: s/routintely/routinely/",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "569062ca_de7c259d",
+        "filename": "android/metrics/AutoFlushedIniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T15:58:23Z",
+      "side": 1,
+      "message": "s/recieve/receive/",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "368beea4_7d2dd7ce",
+        "filename": "android/metrics/AutoFlushedIniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T15:58:23Z",
+      "side": 1,
+      "message": "s/expirs/expires/",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d67c5259_42611214",
+        "filename": "android/metrics/AutoFlushedIniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T15:58:23Z",
+      "side": 1,
+      "message": "s/destructed/destroyed/",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b67fde4b_c145224a",
+        "filename": "android/metrics/AutoFlushedIniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T15:58:23Z",
+      "side": 1,
+      "message": "nit: Add one empty line between the constructor and destructor declarations.",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56278298_86d6cae6",
+        "filename": "android/metrics/AutoFlushedIniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-10T15:58:23Z",
+      "side": 1,
+      "message": "should this be const ?",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
