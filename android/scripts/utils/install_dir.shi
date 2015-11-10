@@ -39,6 +39,9 @@ install_dir_parse_option () {
     if [ "$OPT_INSTALL_DIR" ]; then
         INSTALL_DIR=$OPT_INSTALL_DIR
         log "Using install dir: $INSTALL_DIR"
+    elif [ "$OPT_DEBUG" ]; then
+        INSTALL_DIR=$PREBUILTS_DEBUG_DIR/$DEFAULT_INSTALL_SUBDIR
+        log "Auto-config: --install-dir=$INSTALL_DIR  [default with --debug]"
     else
         INSTALL_DIR=$PREBUILTS_DIR/$DEFAULT_INSTALL_SUBDIR
         log "Auto-config: --install-dir=$INSTALL_DIR  [default]"

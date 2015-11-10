@@ -95,6 +95,9 @@ build_package () {
                 builder_disable_verbose_install
                 ;;
         esac
+
+        builder_set_debug_flags "--without-debug" "--with-debug"
+
         builder_build_autotools_package \
             "$PKG_SRC_DIR" \
             "$PKG_BUILD_DIR" \
@@ -165,7 +168,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         build_package libxml2 \
                 --disable-shared \
-                --without-debug \
                 --without-docbook \
                 --without-ftp \
                 --without-http \

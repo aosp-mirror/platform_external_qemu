@@ -120,6 +120,9 @@ build_windows_zlib_package () {
             LDFLAGS=-m64
             ;;
     esac
+    if [ "$OPT_DEBUG" ]; then
+        var_append LOC "-g"
+    fi
     ZLIB_VERSION=$(package_list_get_version zlib)
     dump "$(builder_text) Building zlib-$ZLIB_VERSION"
     ZLIB_PACKAGE=$(package_list_get_filename zlib)
@@ -155,6 +158,9 @@ build_zlib_package () {
             LDFLAGS=-m64
             ;;
     esac
+    if [ "$OPT_DEBUG" ]; then
+        var_append LOC "-g"
+    fi
     ZLIB_VERSION=$(package_list_get_version zlib)
     dump "$(builder_text) Building zlib-$ZLIB_VERSION"
     ZLIB_PACKAGE=$(package_list_get_filename zlib)
@@ -223,14 +229,23 @@ build_package_openssl () {
           ;;
       esac
 
+      if [ "$OPT_DEBUG" ]; then
+          CONFIG_FLAGS="debug-$CONFIG_FLAGS"
+      fi
+
       # NOTE: Parallel builds sometimes fail on Darwin and Linux.
       NUM_JOBS=1
 
+      local PKG_CFLAGS
+      if [ "$OPT_DEBUG" ]; then
+          PKG_CFLAGS="-O0 -g"
+      fi
       (
         run mkdir -p "$PKG_BUILD_DIR" &&
         run cd "$PKG_SRC_DIR" &&
         export LDFLAGS="-L$_SHU_BUILDER_PREFIX/lib" &&
         export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
+        export CFLAGS="${CFLAGS:-$PKG_CFLAGS}" &&
         export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
         export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
         run "$PKG_SRC_DIR"/Configure \
@@ -319,14 +334,15 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         build_package_openssl
 
-       dump "$(builder_text) Building libcurl"
+        dump "$(builder_text) Building libcurl"
+
+        builder_set_debug_flags \
+                "--disable-debug --enable-optimize --disable-curldebug" \
+                "--enable-debug --disable-optimize --enable-curldebug"
 
         build_package curl \
-            --disable-debug \
-            --enable-optimize \
             --disable-warnings \
             --disable-werror \
-            --disable-curldebug \
             --enable-symbol-hiding \
             --disable-ares \
             --enable-dependency-tracking \

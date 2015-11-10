@@ -525,8 +525,16 @@ case "$HOST_OS" in
 esac
 
 probe_prebuilts_dir () {
-    local PREBUILTS_DIR
+    local PREBUILTS_DIR DEBUG_PREBUILTS_DIR
     PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/$3
+    if [ "$OPTION_DEBUG" = "yes" ]; then
+        DEBUG_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build-debug/$3
+        if [ -d "$DEBUG_PREBUILTS_DIR" ]; then
+            PREBUILTS_DIR=$DEBUG_PREBUILTS_DIR
+        else
+            log "WARNING: Could not find debug prebuilts for $1, using release ones."
+        fi
+    fi
     if [ ! -d "$PREBUILTS_DIR" ]; then
         panic "Missing prebuilts directory: $PREBUILTS_DIR"
     fi
