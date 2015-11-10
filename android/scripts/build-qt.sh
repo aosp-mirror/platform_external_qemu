@@ -287,11 +287,16 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         # Configuring the build. This takes a lot of time due to QMake.
         dump "$(builder_text) Configuring Qt build"
 
-        EXTRA_CONFIGURE_FLAGS=
+        if [ "$OPT_DEBUG" ]; then
+            QT_RELEASE_MODE="-debug"
+        else
+            QT_RELEASE_MODE="-release"
+        fi
+
         var_append EXTRA_CONFIGURE_FLAGS \
                 -opensource \
                 -confirm-license \
-                -release \
+                $QT_RELEASE_MODE \
                 -no-c++11 \
                 -no-rpath \
                 -no-gtkstyle \

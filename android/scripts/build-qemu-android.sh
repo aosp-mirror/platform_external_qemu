@@ -305,6 +305,8 @@ EOF
         DEBUG_FLAGS=
         if [ "$OPT_DEBUG" ]; then
             DEBUG_FLAGS="--enable-debug"
+        else
+            DEBUG_FLAGS="--disable-debug"
         fi
 
         # A future version of qemu-android/configure will require

@@ -66,6 +66,9 @@ package_builder_register_options () {
 
   OPT_HOST=
   option_register_var "--host=<host>" OPT_HOST "Specify host system of generated binaries [$DEFAULT_HOST_SYSTEMS]"
+
+  OPT_DEBUG=
+  option_register_var "--debug" OPT_DEBUG "Generate debug version of binaries"
 }
 
 _shu_builder_cleanup_temp_dir () {
@@ -217,6 +220,11 @@ package_builder_process_options () {
     if [ "$BAD_SYSTEMS" ]; then
         panic "Invalid host system name(s): [$BAD_SYSTEMS], use one of: $_SHU_VALID_HOST_SYSTEMS"
     fi
+
+    # Default autotools 'configure' script debugging flags.
+    # Note that not all packages use the same set of flags, thus use
+    # builder_set_debug_flags() to set a different set.
+    _SHU_BUILDER_DEBUG_FLAGS=
 
     # Compute the list of darwin host systems.
     _shu_builder_setup_local_systems "$HOST_SYSTEMS"
@@ -563,6 +571,18 @@ builder_disable_parallel_install () {
     _SHU_BUILDER_DISABLE_PARALLEL_INSTALL=true
 }
 
+# Set the debug flags used during the 'configure' script invokation.
+# By default, it is --enable-debug / --disable-debug, but different
+# packages have different flags (e.g. --with-debug / --without-debug).
+# $1: Release (non-debug) flags
+# $2: Debug flags.
+builder_set_debug_flags () {
+    if [ "$OPT_DEBUG" ]; then
+        shift
+    fi
+    _SHU_BUILDER_DEBUG_FLAGS=$1
+}
+
 # Build a given autotools based package
 #
 # $1: Source directory.
@@ -574,7 +594,7 @@ builder_build_autotools_package () {
 
     local PKG_SRC_DIR="$1"
     local PKG_BUILD_DIR="$2"
-    local INSTALL_FLAGS
+    local INSTALL_FLAGS DEBUG_FLAGS
     if [ -z "$_SHU_BUILDER_DISABLE_PARALLEL_INSTALL" ]; then
         var_append INSTALL_FLAGS "-j$NUM_JOBS"
     fi
@@ -582,17 +602,23 @@ builder_build_autotools_package () {
         var_append INSTALL_FLAGS "V=1";
     fi
     shift; shift;
+    local PKG_CFLAGS
+    if [ "$OPT_DEBUG" ]; then
+        PKG_CFLAGS="-O0 -g"
+    fi
     (
         run mkdir -p "$PKG_BUILD_DIR" &&
         run cd "$PKG_BUILD_DIR" &&
         export LDFLAGS="-L$_SHU_BUILDER_PREFIX/lib" &&
         export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
+        export CFLAGS="${CFLAGS:-$PKG_CFLAGS}" &&
         export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
         export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
         run "$PKG_SRC_DIR"/configure \
             --prefix=$_SHU_BUILDER_PREFIX \
             $_SHU_BUILDER_GNU_CONFIG_HOST_FLAG \
             $_SHU_BUILDER_CONFIGURE_FLAGS \
+            $_SHU_BUILDER_DEBUG_FLAGS \
             "$@" &&
         run make -j$NUM_JOBS V=1 &&
         run make install $INSTALL_FLAGS
