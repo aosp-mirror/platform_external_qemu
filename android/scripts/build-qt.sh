@@ -65,6 +65,8 @@ QT_SRC_PACKAGE=$QT_SRC_NAME.tar.xz
 QT_SRC_URL=http://download.qt.io/archive/qt/5.5/5.5.0/single/$QT_SRC_PACKAGE
 QT_SRC_PACKAGE_SHA1=4409ef12d1017a9b5e6733ea27596a6ca637a88c
 
+QT_SRC_PATCH_TARBALL=${QT_SRC_NAME}-patches.tar.xz
+
 if [ -z "$OPT_DOWNLOAD" -a ! -f "$ARCHIVE_DIR/$QT_SRC_PACKAGE" ]; then
     if [ -z "$OPT_DOWNLOAD" ]; then
         echo "The following tarball is missing: $ARCHIVE_DIR/$QT_SRC_PACKAGE"
@@ -241,6 +243,36 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             run mkdir -p "$BUILD_SRC_DIR" &&
             unpack_archive "$ARCHIVE_DIR/$QT_SRC_PACKAGE" "$BUILD_SRC_DIR" ||
                 panic "Failed to unpack source package: $QT_SRC_PACKAGE"
+
+            PATCHES_TARBALL=$(program_directory)/../dependencies/$QT_SRC_PATCH_TARBALL
+            unpack_archive "$PATCHES_TARBALL" "$BUILD_SRC_DIR" ||
+                panic "Failed to unpack Qt source patch tarball: $PATCHES_TARBALL"
+
+            PATCHES_DIR=$BUILD_SRC_DIR/${QT_SRC_NAME}-patches
+            if [ ! -d "$PATCHES_DIR" ]; then
+                panic "Failed to find patches directory: $PATCHES_DIR"
+            fi
+            for PATCH in $(ls "$PATCHES_DIR"/*.patch 2>/dev/null); do
+                dump "Applying patch: $(basename $PATCH)"
+                (cd "$BUILD_SRC_DIR"/$QT_SRC_NAME && patch -p1) < "$PATCH" ||
+                    panic "Could not apply patch: $PATCH"
+            done
+#     PKG_PATCHES_DIR=$PKG_FULLNAME-patches
+#     PKG_PATCHES_FILE=$SRC_DIR/${PKG_PATCHES_DIR}.tar.xz
+#     if [ -f "$PKG_PATCHES_FILE" ]; then
+#         log "Patching $PKG_FULLNAME"
+#         unpack_archive "$PKG_PATCHES_FILE" "$DST_DIR"
+#         for PATCH in $(cd "$DST_DIR" && ls "$PKG_PATCHES_DIR"/*.patch); do
+#             log "Applying patch: $PATCH"
+#             (cd "$PKG_DIR" && run patch -p1 < "../$PATCH") ||
+#                     panic "Could not apply $PATCH"
+#         done
+#     fi
+#     PKG_DST_DIR=$DST_DIR/$(package_list_get_src_dir $PKG_NAME)
+#     if [ "$PKG_DST_DIR" != "$PKG_DIR" ]; then
+#         log "Copying sources from $PKG_DIR into $PKG_DST_DIR"
+#         copy_directory "$PKG_DIR" "$PKG_DST_DIR"
+#     fi
 
             # Need to patch this file to avoid install syncqt.pl which will
             # fail horribly with an error like:
