@@ -356,10 +356,12 @@ extern "C" int main(int argc, char **argv) {
     int n = 1;  // next parameter index
 
     AndroidOptions opts[1];
-
     if (android_parse_options(&argc, &argv, opts) < 0) {
         return 1;
     }
+
+    // just because we know that we're in the new emulator as we got here
+    opts->ranchu = 1;
 
     // TODO(digit): This code is very similar to the one in main.c,
     // refactor everything so that it fits into a single shared source
