@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 The Android Open Source Project
+/* Copyright (C) 2014-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -79,17 +79,17 @@ extern void skin_winsys_enter_main_loop(int argc, char **argv)
     QFontDatabase  fontDb;
     int fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto");
     if (fontId < 0) {
-        D("Count not load font resource: \":/lib/fonts/Roboto");
+        D("Could not load font resource: \":/lib/fonts/Roboto");
     }
 
     fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto-Bold");
     if (fontId < 0) {
-        D("Count not load font resource: \":/lib/fonts/Roboto-Bold");
+        D("Could not load font resource: \":/lib/fonts/Roboto-Bold");
     }
 
     fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto-Medium");
     if (fontId < 0) {
-        D("Count not load font resource: \":/lib/fonts/Roboto-Medium");
+        D("Could not load font resource: \":/lib/fonts/Roboto-Medium");
     }
 
     GlobalState* g = globalState();
