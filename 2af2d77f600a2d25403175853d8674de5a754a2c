@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f6a6b626_ff4a8758",
+        "filename": "android/skin/qt/ext-cellular.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-10T22:01:45Z",
+      "side": 1,
+      "message": "is this going to be implemented in this release?",
+      "range": {
+        "startLine": 36,
+        "startChar": 4,
+        "endLine": 36,
+        "endChar": 10
+      },
+      "revId": "2af2d77f600a2d25403175853d8674de5a754a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76d4867d_d6b32ac0",
+        "filename": "android/skin/qt/ext-finger.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-10T22:01:45Z",
+      "side": 1,
+      "message": "no need for \"10\" here, just fingerID[] \u003d \"...\" is fine",
+      "range": {
+        "startLine": 27,
+        "startChar": 30,
+        "endLine": 27,
+        "endChar": 32
+      },
+      "revId": "2af2d77f600a2d25403175853d8674de5a754a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96d1fa8e_31be12f2",
+        "filename": "android/skin/qt/ext-finger.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-10T22:01:45Z",
+      "side": 1,
+      "message": "finger_pickBox is a QComboBox. QComboBox allows associating arbitrary data with its items. I suggest the following:\n\n* don\u0027t add any items to it in Qt Designed\n* in initFinger, use QComboBox::addItem to populate the combo box with items. Use this: http://doc.qt.io/qt-5.5/qcombobox.html#addItem (the second argument will be the data you want to associate with the given item)\n* in on_finger_touchButton_pressed, use QComboBox::currentData to get the data associated with the currently selected finger",
+      "range": {
+        "startLine": 33,
+        "startChar": 4,
+        "endLine": 37,
+        "endChar": 5
+      },
+      "revId": "2af2d77f600a2d25403175853d8674de5a754a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96d1fa8e_718fea4d",
+        "filename": "android/skin/qt/ext-telephony.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-10T22:01:45Z",
+      "side": 1,
+      "message": "This will still allow numbers that are not correct, e.g. \"28468+++++53846\". Is that okay?",
+      "range": {
+        "startLine": 40,
+        "startChar": 12,
+        "endLine": 41,
+        "endChar": 44
+      },
+      "revId": "2af2d77f600a2d25403175853d8674de5a754a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6da7ea7_b872e5c6",
+        "filename": "android/skin/qt/ext-telephony.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-10T22:01:45Z",
+      "side": 1,
+      "message": "Do we have some way to notify the UI that the call was hung up from the emulator? I think right now if you make a call, pick it up from the emulator and hang up from the emulator, the UI will still appear as if the call is going on.",
+      "range": {
+        "startLine": 66,
+        "startChar": 6,
+        "endLine": 66,
+        "endChar": 10
+      },
+      "revId": "2af2d77f600a2d25403175853d8674de5a754a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16c50ace_b840213b",
+        "filename": "android/skin/qt/extended-window-styles.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-10T22:01:45Z",
+      "side": 1,
+      "message": "That reminds me, can you take a look at how the emulator looks on Windows with increased DPI? Yesterday Yurii checked it out and it was pretty bad. Maybe this patch fixes this?",
+      "range": {
+        "startLine": 185,
+        "startChar": 0,
+        "endLine": 188,
+        "endChar": 74
+      },
+      "revId": "2af2d77f600a2d25403175853d8674de5a754a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6da7ea7_18e851a1",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-10T22:01:45Z",
+      "side": 1,
+      "message": "this is weird, looks like your version of the UI still has the add/remove buttons for location playback stuff.\n\nPlease resync your branch to the latest version...",
+      "range": {
+        "startLine": 126,
+        "startChar": 38,
+        "endLine": 126,
+        "endChar": 54
+      },
+      "revId": "2af2d77f600a2d25403175853d8674de5a754a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
