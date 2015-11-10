@@ -140,7 +140,6 @@ ANDROID_EMU_SOURCES := \
     android/boot-properties.c \
     android/console.c \
     android/curl-support.c \
-    android/emulation/android_pipe.c \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
     android/emulation/android_pipe_zero.c \
@@ -209,6 +208,7 @@ ANDROID_EMU_DEPENDENT_SOURCES := \
     android/avd/info.c \
     android/avd/scanner.c \
     android/avd/util.c \
+    android/emulation/android_pipe.c \
     android/emulation/bufprint_config_dirs.cpp \
     android/emulation/ConfigDirs.cpp \
     android/emulation/CpuAccelerator.cpp \
