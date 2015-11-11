@@ -32,6 +32,7 @@ void ExtendedWindow::initLocation()
     mExtendedUi->loc_latitudeInput->setMinValue(-90.0);
     mExtendedUi->loc_latitudeInput->setMaxValue(90.0);
     QObject::connect(&mLoc_timer, &QTimer::timeout, this, &ExtendedWindow::loc_slot_timeout);
+    setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, false);
 }
 
 void ExtendedWindow::on_loc_pathTable_cellChanged(int row, int col)
@@ -46,6 +47,10 @@ void ExtendedWindow::on_loc_pathTable_cellChanged(int row, int col)
 
 void ExtendedWindow::locationPlaybackStart()
 {
+    if (mExtendedUi->loc_pathTable->rowCount() <= 0) {
+        return;
+    }
+
     // Validate all the values in the table.
     for (int row = 0; row < mExtendedUi->loc_pathTable->rowCount(); row++) {
         for (int col = 0; col < mExtendedUi->loc_pathTable->columnCount(); col++) {
@@ -267,6 +272,7 @@ void ExtendedWindow::loc_populateTable(GpsFixArray *fixes)
 
         previousTime = fix.time;
     }
+    setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, true);
 }
 
 ////////////////////////////////////////////////////////////
