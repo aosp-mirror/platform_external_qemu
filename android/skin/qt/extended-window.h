@@ -169,7 +169,7 @@ private slots:
     void on_batteryButton_clicked();
     void on_cellularButton_clicked();
     void on_dpadButton_clicked();
-    void on_kbdShortsButton_clicked();
+    void on_helpButton_clicked();
     void on_locationButton_clicked();
     void on_settingsButton_clicked();
     void on_telephoneButton_clicked();
@@ -221,6 +221,11 @@ private slots:
     // Settings
     void on_set_folderButton_clicked();
     void on_set_themeBox_currentIndexChanged(int index);
+
+    // Help
+    void on_help_docs_clicked();
+    void on_help_fileBug_clicked();
+    void on_help_sendFeedback_clicked();
 
     // Sensors
     void on_temperatureSensorValueWidget_valueChanged(double value);
