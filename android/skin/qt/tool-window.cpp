@@ -338,6 +338,7 @@ void ToolWindow::on_scrShot_button_clicked()
 void ToolWindow::on_zoom_button_clicked()
 {
     emulator_window->toggleZoomMode();
+    toolsUi->zoom_button->setDown(emulator_window->isInZoomMode());
 }
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {

@@ -797,6 +797,11 @@ void EmulatorQtWindow::slot_runOnUiThread(SkinGenericFunction* f, void* data, QS
     if (semaphore) semaphore->release();
 }
 
+bool EmulatorQtWindow::isInZoomMode()
+{
+    return mInZoomMode;
+}
+
 void EmulatorQtWindow::toggleZoomMode()
 {
     mInZoomMode = !mInZoomMode;

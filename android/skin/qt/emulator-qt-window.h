@@ -113,6 +113,7 @@ signals:
     void runOnUiThread(SkinGenericFunction* f, void* data, QSemaphore* semaphore = NULL);
 
 public:
+    bool isInZoomMode();
     void recenterFocusPoint();
     void saveZoomPoints(const QPoint &focus);
     void screenshot();
