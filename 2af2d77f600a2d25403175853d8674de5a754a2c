@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "369daed4_7c66a56d",
+        "filename": "android/skin/qt/ext-cellular.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-11T19:13:31Z",
+      "side": 1,
+      "message": "That is the plan",
+      "parentUuid": "f6a6b626_ff4a8758",
+      "range": {
+        "startLine": 36,
+        "startChar": 4,
+        "endLine": 36,
+        "endChar": 10
+      },
+      "revId": "2af2d77f600a2d25403175853d8674de5a754a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "76d4867d_d6b32ac0",
         "filename": "android/skin/qt/ext-finger.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-10T22:01:45Z",
       "side": 1,
       "message": "no need for \"10\" here, just fingerID[] \u003d \"...\" is fine",
+      "range": {
+        "startLine": 27,
+        "startChar": 30,
+        "endLine": 27,
+        "endChar": 32
+      },
+      "revId": "2af2d77f600a2d25403175853d8674de5a754a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96d1fa8e_82520ee5",
+        "filename": "android/skin/qt/ext-finger.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-11T19:13:31Z",
+      "side": 1,
+      "message": "Deleted this block of code",
+      "parentUuid": "76d4867d_d6b32ac0",
       "range": {
         "startLine": 27,
         "startChar": 30,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "369daed4_07c0ea4e",
+        "filename": "android/skin/qt/ext-finger.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-11T19:13:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "96d1fa8e_31be12f2",
+      "range": {
+        "startLine": 33,
+        "startChar": 4,
+        "endLine": 37,
+        "endChar": 5
+      },
+      "revId": "2af2d77f600a2d25403175853d8674de5a754a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96d1fa8e_718fea4d",
         "filename": "android/skin/qt/ext-telephony.cpp",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2015-11-10T22:01:45Z",
       "side": 1,
       "message": "This will still allow numbers that are not correct, e.g. \"28468+++++53846\". Is that okay?",
+      "range": {
+        "startLine": 40,
+        "startChar": 12,
+        "endLine": 41,
+        "endChar": 44
+      },
+      "revId": "2af2d77f600a2d25403175853d8674de5a754a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56cb02e2_436c994e",
+        "filename": "android/skin/qt/ext-telephony.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-11T19:13:31Z",
+      "side": 1,
+      "message": "I expanded the comment to indicate that this is not the\nmain validation function.",
+      "parentUuid": "96d1fa8e_718fea4d",
       "range": {
         "startLine": 40,
         "startChar": 12,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "96d1fa8e_02957eb1",
+        "filename": "android/skin/qt/ext-telephony.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-11T19:13:31Z",
+      "side": 1,
+      "message": "Currently, no.\nI have a TODO at the top of this file to listen for those\nevents.\nI don\u0027t know if there is a way to do this.",
+      "parentUuid": "b6da7ea7_b872e5c6",
+      "range": {
+        "startLine": 66,
+        "startChar": 6,
+        "endLine": 66,
+        "endChar": 10
+      },
+      "revId": "2af2d77f600a2d25403175853d8674de5a754a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16c50ace_b840213b",
         "filename": "android/skin/qt/extended-window-styles.h",
         "patchSetId": 1
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "b6da7ea7_9287fdf3",
+        "filename": "android/skin/qt/extended-window-styles.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-11T19:13:31Z",
+      "side": 1,
+      "message": "This *should* address that.\nI\u0027ll try to find a Windows machine where I can test this.",
+      "parentUuid": "16c50ace_b840213b",
+      "range": {
+        "startLine": 185,
+        "startChar": 0,
+        "endLine": 188,
+        "endChar": 74
+      },
+      "revId": "2af2d77f600a2d25403175853d8674de5a754a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b6da7ea7_18e851a1",
         "filename": "android/skin/qt/extended.ui",
         "patchSetId": 1
@@ -151,6 +295,30 @@
       "writtenOn": "2015-11-10T22:01:45Z",
       "side": 1,
       "message": "this is weird, looks like your version of the UI still has the add/remove buttons for location playback stuff.\n\nPlease resync your branch to the latest version...",
+      "range": {
+        "startLine": 126,
+        "startChar": 38,
+        "endLine": 126,
+        "endChar": 54
+      },
+      "revId": "2af2d77f600a2d25403175853d8674de5a754a2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7689e6a7_ae3c87a5",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-11T19:13:31Z",
+      "side": 1,
+      "message": "Good catch. During my merge I brought the Add, Remove, and\nStop buttons back from the dead.\n\nI have killed those zombies.",
+      "parentUuid": "b6da7ea7_18e851a1",
       "range": {
         "startLine": 126,
         "startChar": 38,
