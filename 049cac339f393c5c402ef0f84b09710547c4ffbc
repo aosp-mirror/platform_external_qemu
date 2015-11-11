@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7b0e2f2a_00848c31",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-11T19:45:58Z",
+      "side": 1,
+      "message": "I would prefer ElideMiddle, but your preference is as\ngood as mine.",
+      "revId": "049cac339f393c5c402ef0f84b09710547c4ffbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
