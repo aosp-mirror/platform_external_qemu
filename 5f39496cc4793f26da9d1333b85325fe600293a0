@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f642362f_cb30d598",
+        "filename": "android/skin/qt/ext-help.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-11T15:32:53Z",
+      "side": 1,
+      "message": "Line length",
+      "revId": "5f39496cc4793f26da9d1333b85325fe600293a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b636fec5_accacb70",
+        "filename": "android/skin/qt/ext-help.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-11T15:32:53Z",
+      "side": 1,
+      "message": "Line length",
+      "revId": "5f39496cc4793f26da9d1333b85325fe600293a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "962d7a79_a8771bb6",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-11T15:32:53Z",
+      "side": 1,
+      "message": "I have added font sizes to extended-window-styles.h\nI hope that makes this code unnecessary. We either need to remember\nto try removing this after my CL lands, or remove it now and remember\nto verify the look after my CL lands. (I\u0027d vote for Plan B.)",
+      "revId": "5f39496cc4793f26da9d1333b85325fe600293a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "765726ea_439cc6db",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-11T15:32:53Z",
+      "side": 1,
+      "message": "Tab vs. spaces",
+      "revId": "5f39496cc4793f26da9d1333b85325fe600293a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
