@@ -92,7 +92,8 @@ enum ExtendedWindowPane {
                                       "background-color: " THEME##_BKG_COLOR "}" \
     "QPlainTextEdit:disabled, QTextEdit:disabled, QLineEdit:disabled {" \
             "border: 0px}" \
-    "QPlainTextEdit, QTextEdit, QLineEdit {" \
+    "QPlainTextEdit { border: 2 solid " THEME##_MAJOR_TITLE_COLOR ";}"\
+    "QTextEdit, QLineEdit {" \
             "border-top: 0px; "\
             "border-bottom: 2px solid " THEME##_DIVIDER_COLOR "}" \
     "QCheckBox::indicator:checked {" \

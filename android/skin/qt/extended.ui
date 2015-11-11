@@ -61,7 +61,7 @@ font-family: &quot;Roboto&quot;</string>
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>3</number>
    </property>
    <widget class="QWidget" name="location_page">
     <widget class="QGroupBox" name="locationGroup">
@@ -1185,7 +1185,7 @@ font-family: &quot;Roboto&quot;</string>
       <rect>
        <x>20</x>
        <y>60</y>
-       <width>221</width>
+       <width>370</width>
        <height>25</height>
       </rect>
      </property>
@@ -1210,8 +1210,8 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>200</y>
-       <width>381</width>
+       <y>170</y>
+       <width>370</width>
        <height>140</height>
       </rect>
      </property>
@@ -1222,9 +1222,9 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QPushButton" name="sms_sendButton">
      <property name="geometry">
       <rect>
-       <x>270</x>
-       <y>350</y>
-       <width>141</width>
+       <x>250</x>
+       <y>320</y>
+       <width>140</width>
        <height>36</height>
       </rect>
      </property>
