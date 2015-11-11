@@ -24,6 +24,7 @@
 #include <QPixmap>
 #include <QProcess>
 #include <QResizeEvent>
+#include <QRubberBand>
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QTimer>
@@ -120,7 +121,7 @@ signals:
 public:
     bool isInZoomMode();
     void recenterFocusPoint();
-    void saveZoomPoints(const QPoint &focus);
+    void saveZoomPoints(const QPoint &focus, const QPoint &viewportFocus);
     void screenshot();
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateScrollBarChanged(int x, int y);
@@ -129,8 +130,10 @@ public:
     void simulateWindowMoved(const QPoint &pos);
     void simulateZoomedWindowResized(const QSize &size);
     void toggleZoomMode();
-    void zoomIn(const QPoint &focus);
-    void zoomOut(const QPoint &focus);
+    void zoomIn(const QPoint &focus, const QPoint &viewportFocus);
+    void zoomOut(const QPoint &focus, const QPoint &viewportFocus);
+    void zoomReset();
+    void zoomTo(const QPoint &focus, const QSize &rectSize);
 
 private slots:
     void slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore = NULL);
@@ -181,7 +184,6 @@ private:
     SkinEvent *createSkinEvent(SkinEventType type);
     void handleKeyEvent(SkinEventType type, QKeyEvent *event);
     void handleMouseEvent(SkinEventType type, QMouseEvent *event);
-    bool handleQtMouseEvent(SkinEventType type, QMouseEvent *event);
     QString getTmpImagePath();
 
 
@@ -360,8 +362,133 @@ private:
         QList<QEvent::Type> mEventBuffer;
     }; // EmulatorWindowContainer
 
+    class EmulatorWindowZoomOverlay : public QFrame
+    {
+    public:
+        explicit EmulatorWindowZoomOverlay(EmulatorQtWindow *window, EmulatorWindowContainer *container)
+            : QFrame(container),
+              mEmulatorWindow(window),
+              mContainer(container),
+              mRubberBand(QRubberBand::Rectangle, this)
+        {
+            setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
+            setAttribute(Qt::WA_TranslucentBackground);
+
+            // Without the hint below, X11 window systems will prevent this window from being moved
+            // into a position where they are not fully visible. It is required so that when the
+            // emulator container is moved partially offscreen, this overlay is "permitted" to
+            // follow it offscreen.
+#ifdef __linux__
+            setWindowFlags(windowFlags() | Qt::X11BypassWindowManagerHint);
+#endif
+
+            QPixmap cursor(":/cursor/zoom_cursor");
+            setCursor(QCursor(cursor));
+
+            mRubberBand.hide();
+        }
+
+        void hide()
+        {
+            QFrame::hide();
+            mContainer->setFocus();
+            mContainer->activateWindow();
+        }
+
+        void hideEvent(QHideEvent *event)
+        {
+            mRubberBand.hide();
+        }
+
+        void keyPressEvent(QKeyEvent *event)
+        {
+            mEmulatorWindow->keyPressEvent(event);
+        }
+
+        void keyReleaseEvent(QKeyEvent *event)
+        {
+            if (event->key() == Qt::Key_Control) {
+                this->hide();
+            }
+        }
+
+        void mouseMoveEvent(QMouseEvent *event)
+        {
+            mRubberBand.setGeometry(QRect(mOrigin, event->pos()).normalized()
+                                        .intersected(QRect(0, 0, this->width(), this->height())));
+        }
+
+        void mousePressEvent(QMouseEvent *event)
+        {
+            mOrigin = event->pos();
+            mRubberBand.setGeometry(QRect(mOrigin, QSize()));
+            mRubberBand.show();
+        }
+
+        void mouseReleaseEvent(QMouseEvent *event)
+        {
+            QRect geom = mRubberBand.geometry();
+            QPoint localPoint = mEmulatorWindow->mapFromGlobal(this->mapToGlobal(geom.center()));
+
+            // Assume that very, very small dragged rectangles were actually just clicks that
+            // slipped a bit
+            int areaSq = geom.width() * geom.width() + geom.height() * geom.height();
+
+            // Left click zooms in
+            if (event->button() == Qt::LeftButton) {
+
+                // Click events (with no drag) keep the mouse focused on the same pixel
+                if (areaSq < 20) {
+                    mEmulatorWindow->zoomIn(localPoint, mContainer->mapFromGlobal(QCursor::pos()));
+
+                // Dragged rectangles will center said rectangle and zoom in as much as possible
+                } else {
+                    mEmulatorWindow->zoomTo(localPoint, geom.size());
+                }
+
+            // Right click zooms out
+            } else if (event->button() == Qt::RightButton) {
+
+                // Click events (with no drag) keep the mouse focused on the same pixel
+                if (areaSq < 20) {
+                    mEmulatorWindow->zoomOut(localPoint, mContainer->mapFromGlobal(QCursor::pos()));
+
+                // Dragged rectangles will reset zoom to 1
+                } else {
+                    mEmulatorWindow->zoomReset();
+                }
+            }
+            mRubberBand.hide();
+        }
+
+        void paintEvent(QPaintEvent *e)
+        {
+            // A frameless and translucent window (AKA a totally invisible one like this) will
+            // actually not appear at all on some systems. To circumvent this, we draw a
+            // window-sized quad that is basically invisible, forcing the window to be drawn.
+            // Because this is not strange enough, the alpha value of said quad *must* be above a
+            // certain threshold on OSX, else the window will simply not appear. This threshold is
+            // apparently 12, and thus, the alpha is set to 13.
+            QPainter painter(this);
+            QRect bg(QPoint(0, 0), this->size());
+            painter.fillRect(bg, QColor(0,0,0,13));
+        }
+
+        void showEvent(QShowEvent *event)
+        {
+            this->setFocus();
+            this->activateWindow();
+        }
+
+    private:
+        EmulatorQtWindow *mEmulatorWindow;
+        EmulatorWindowContainer *mContainer;
+        QRubberBand mRubberBand;
+        QPoint mOrigin;
+    };
+
     EmulatorWindowContainer mContainer;
-    QPixmap mZoomPixmap;
+    EmulatorWindowZoomOverlay mOverlay;
     QPointF mFocus;
     QPoint mViewportFocus;
     double mZoomFactor;
