@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "7b0e2f2a_60a348c3",
+        "filename": "android/skin/qt/ext-help.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-11T17:06:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f642362f_cb30d598",
+      "revId": "5f39496cc4793f26da9d1333b85325fe600293a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "962d7a79_a8771bb6",
         "filename": "android/skin/qt/extended-window.cpp",
         "patchSetId": 1
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "f6a6b626_606558ee",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-11T17:06:30Z",
+      "side": 1,
+      "message": "I\u0027d rather leave this in since it can\u0027t hurt anything, but in case we forget to check, we\u0027ll still end up with the proper look. I\u0027ll make sure to check though.",
+      "parentUuid": "962d7a79_a8771bb6",
+      "revId": "5f39496cc4793f26da9d1333b85325fe600293a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "765726ea_439cc6db",
         "filename": "android/skin/qt/sources.mk",
         "patchSetId": 1
@@ -64,6 +100,24 @@
       "writtenOn": "2015-11-11T15:32:53Z",
       "side": 1,
       "message": "Tab vs. spaces",
+      "revId": "5f39496cc4793f26da9d1333b85325fe600293a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76d4867d_f3cabb1f",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-11T17:06:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "765726ea_439cc6db",
       "revId": "5f39496cc4793f26da9d1333b85325fe600293a0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
