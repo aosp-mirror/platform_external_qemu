@@ -79,6 +79,8 @@ ANDROID_EMU_BASE_SOURCES := \
     android/filesystems/ext4_resize.cpp \
     android/filesystems/ext4_utils.cpp \
     android/filesystems/fstab_parser.cpp \
+    android/filesystems/internal/PartitionConfigBackend.cpp \
+    android/filesystems/partition_config.cpp \
     android/filesystems/partition_types.cpp \
     android/filesystems/ramdisk_extractor.cpp \
     android/utils/aconfig-file.c \
