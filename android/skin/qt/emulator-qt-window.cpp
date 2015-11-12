@@ -688,8 +688,9 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
     }
 
     // See if there is a Qt-specific handler for this key event
-    if (event->type() == QKeyEvent::KeyPress &&
-        tool_window->handleQtKeyEvent(event)) return;
+    if (tool_window->handleQtKeyEvent(event)) {
+        return;
+    }
 
     SkinEvent *skin_event = createSkinEvent(type);
     SkinEventKeyData *keyData = &skin_event->u.key;
