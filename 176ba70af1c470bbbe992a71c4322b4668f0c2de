@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5b25eb9e_0ae02be9",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-12T18:56:18Z",
+      "side": 1,
+      "message": "@digit: is this actually used for anything? If not, we should do a blanket re-naming of this pipeline so that \"device rotation\" isn\u0027t handled by a function called \"generic event\".",
+      "range": {
+        "startLine": 101,
+        "startChar": 4,
+        "endLine": 101,
+        "endChar": 76
+      },
+      "revId": "176ba70af1c470bbbe992a71c4322b4668f0c2de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b25eb9e_8a155b8f",
+        "filename": "android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1051,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-12T18:56:18Z",
+      "side": 1,
+      "message": "Why did these initially have a -rotation?",
+      "range": {
+        "startLine": 1051,
+        "startChar": 12,
+        "endLine": 1051,
+        "endChar": 74
+      },
+      "revId": "176ba70af1c470bbbe992a71c4322b4668f0c2de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96d1fa8e_289ce0da",
+        "filename": "android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1090,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-12T18:56:18Z",
+      "side": 1,
+      "message": "See above",
+      "range": {
+        "startLine": 1090,
+        "startChar": 8,
+        "endLine": 1090,
+        "endChar": 70
+      },
+      "revId": "176ba70af1c470bbbe992a71c4322b4668f0c2de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb2e9f8f_8e82fbe2",
+        "filename": "android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1283,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-12T18:56:18Z",
+      "side": 1,
+      "message": "See above",
+      "range": {
+        "startLine": 1283,
+        "startChar": 4,
+        "endLine": 1283,
+        "endChar": 36
+      },
+      "revId": "176ba70af1c470bbbe992a71c4322b4668f0c2de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
