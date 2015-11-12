@@ -144,10 +144,11 @@ static int emulator_window_opengles_hide_window(void) {
     }
 }
 
-static void emulator_window_opengles_move_window(int x, int y, int width, int height) {
+static int emulator_window_opengles_move_window(int x, int y, int width, int height) {
     if (s_use_emugl_subwindow) {
         android_moveOpenglesWindow(x, y, width, height);
     }
+    return 0;
 }
 
 static void emulator_window_opengles_set_translation(float dx, float dy) {
