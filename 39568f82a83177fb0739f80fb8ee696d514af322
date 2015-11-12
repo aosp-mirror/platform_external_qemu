@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bb3987d2_2b97752c",
+        "filename": "android/base/files/ScopedRegKey.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-12T23:11:23Z",
+      "side": 1,
+      "message": "there are ScopedPtr and ScopedHandle classes. Is it possible to use either of those (maybe with a custom deleter or new template argument) instead?",
+      "range": {
+        "startLine": 30,
+        "startChar": 6,
+        "endLine": 30,
+        "endChar": 18
+      },
+      "revId": "39568f82a83177fb0739f80fb8ee696d514af322",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96d1fa8e_3e19b664",
+        "filename": "android/base/files/ScopedRegKey.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-12T23:11:23Z",
+      "side": 1,
+      "message": "can we just use NULL or INVALID_HANDLE_VALUE instead?",
+      "range": {
+        "startLine": 33,
+        "startChar": 31,
+        "endLine": 33,
+        "endChar": 37
+      },
+      "revId": "39568f82a83177fb0739f80fb8ee696d514af322",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
