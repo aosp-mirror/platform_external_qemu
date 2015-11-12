@@ -89,6 +89,10 @@ EMULATOR_UNITTESTS_SOURCES += \
   android/base/system/Win32Utils_unittest.cpp \
   android/utils/win32_cmdline_quote_unittest.cpp \
 
+else
+EMULATOR_UNITTESTS_SOURCES += \
+  android/emulation/nand_limits_unittest.cpp \
+
 endif
 
 $(call start-emulator-program, emulator$(HOST_SUFFIX)_unittests)
