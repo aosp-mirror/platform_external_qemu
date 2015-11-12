@@ -367,6 +367,19 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
+#if CONFIG_QT
+    /* The Qt UI handles keyboard shortcuts on its own. Don't load any keyset. */
+    SkinKeyset* keyset = skin_keyset_new_from_text("");
+    if (!keyset) {
+        fprintf(stderr, "PANIC: default keyset file is corrupted !!\n" );
+        fprintf(stderr, "PANIC: please update the code in android/skin/keyset.c\n" );
+        exit(1);
+    }
+    skin_keyset_set_default(keyset);
+    if (!opts->keyset) {
+        write_default_keyset();
+    }
+#else
     SkinKeyset* keyset = NULL;
     if (opts->keyset) {
         parse_keyset(opts->keyset, opts);
@@ -394,7 +407,7 @@ int main(int argc, char **argv) {
                 write_default_keyset();
         }
     }
-
+#endif
     if (opts->shared_net_id) {
         char*  end;
         long   shared_net_id = strtol(opts->shared_net_id, &end, 0);
