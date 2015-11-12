@@ -11,6 +11,7 @@
  */
 
 #include <QtCore>
+#include <QCursor>
 #include <QAbstractSlider>
 #include <QCursor>
 #include <QDesktopWidget>
@@ -59,6 +60,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         mZoomFactor(1.0),
         mInZoomMode(false),
         mNextIsZoom(false),
+        mGrabKeyboardInput(true),
+        mMouseInside(false),
         mMainLoopThread(nullptr)
 {
     instance = this;
@@ -167,11 +170,13 @@ void EmulatorQtWindow::keyPressEvent(QKeyEvent *event)
 void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
 {
     handleKeyEvent(kEventKeyUp, event);
-    if (event->text().length() > 0) {
-        SkinEvent *skin_event = createSkinEvent(kEventTextInput);
-        skin_event->u.text.down = false;
-        strncpy((char*)skin_event->u.text.text, (const char*)event->text().constData(), 32);
-        queueEvent(skin_event);
+    if (mGrabKeyboardInput && mouseInside()) {
+        if (event->text().length() > 0) {
+            SkinEvent *skin_event = createSkinEvent(kEventTextInput);
+            skin_event->u.text.down = false;
+            strncpy((char*)skin_event->u.text.text, (const char*)event->text().constData(), 32);
+            queueEvent(skin_event);
+        }
     }
 }
 
@@ -187,6 +192,7 @@ void EmulatorQtWindow::mouseMoveEvent(QMouseEvent *event)
 
 void EmulatorQtWindow::mousePressEvent(QMouseEvent *event)
 {
+    mGrabKeyboardInput = true;
     handleMouseEvent(kEventMouseButtonDown, event);
 }
 
@@ -687,20 +693,26 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
         }
     }
 
-    // See if there is a Qt-specific handler for this key event
-    if (event->type() == QKeyEvent::KeyPress &&
-        tool_window->handleQtKeyEvent(event)) return;
+    bool must_ungrab = event->key() == Qt::Key_Alt &&
+                       event->modifiers() == (Qt::ControlModifier + Qt::AltModifier);
+    if (mGrabKeyboardInput && must_ungrab) {
+        mGrabKeyboardInput = false;
+    }
 
-    SkinEvent *skin_event = createSkinEvent(type);
-    SkinEventKeyData *keyData = &skin_event->u.key;
-    keyData->keycode = convertKeyCode(event->key());
+    if (mGrabKeyboardInput && mouseInside()) {
+        SkinEvent *skin_event = createSkinEvent(type);
+        SkinEventKeyData *keyData = &skin_event->u.key;
+        keyData->keycode = convertKeyCode(event->key());
 
-    Qt::KeyboardModifiers modifiers = event->modifiers();
-    if (modifiers & Qt::ShiftModifier) keyData->mod |= kKeyModLShift;
-    if (modifiers & Qt::ControlModifier) keyData->mod |= kKeyModLCtrl;
-    if (modifiers & Qt::AltModifier) keyData->mod |= kKeyModLAlt;
+        Qt::KeyboardModifiers modifiers = event->modifiers();
+        if (modifiers & Qt::ShiftModifier) keyData->mod |= kKeyModLShift;
+        if (modifiers & Qt::ControlModifier) keyData->mod |= kKeyModLCtrl;
+        if (modifiers & Qt::AltModifier) keyData->mod |= kKeyModLAlt;
 
-    queueEvent(skin_event);
+        queueEvent(skin_event);
+    } else {
+        tool_window->handleQtKeyEvent(event);
+    }
 }
 
 void EmulatorQtWindow::simulateKeyPress(int keyCode, int modifiers)
@@ -855,3 +867,12 @@ void EmulatorQtWindow::zoomOut(const QPoint &focus)
         simulateSetZoom(mZoomFactor);
     }
 }
+
+bool EmulatorQtWindow::mouseInside() {
+    QPoint widget_cursor_coords = mapFromGlobal(QCursor::pos());
+    return widget_cursor_coords.x() >= 0 &&
+           widget_cursor_coords.x() < width() &&
+           widget_cursor_coords.y() >= 0 &&
+           widget_cursor_coords.y() < height();
+}
+

@@ -39,8 +39,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     emulator_window(window),
     extendedWindow(NULL),
     uiEmuAgent(NULL),
-    toolsUi(new Ui::ToolControls),
-    mShortcutKeyStore(parseQtUICommand)
+    toolsUi(new Ui::ToolControls)
 {
     Q_INIT_RESOURCE(resources);
 
@@ -93,17 +92,30 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     }
 
     QString default_shortcuts =
-        "Ctrl+Shift+L SHOW_PANE_LOCATION\n"
-        "Ctrl+Shift+C SHOW_PANE_CELLULAR\n"
-        "Ctrl+Shift+B SHOW_PANE_BATTERY\n"
-        "Ctrl+Shift+P SHOW_PANE_PHONE\n"
-        "Ctrl+Shift+V SHOW_PANE_VIRTSENSORS\n"
-        "Ctrl+Shift+D SHOW_PANE_DPAD\n"
-        "Ctrl+Shift+S SHOW_PANE_SETTINGS\n"
-        "Ctrl+S       TAKE_SCREENSHOT\n"
-        "Ctrl+Z       ENTER_ZOOM\n";
+        "Ctrl+Alt+L SHOW_PANE_LOCATION\n"
+        "Ctrl+Alt+C SHOW_PANE_CELLULAR\n"
+        "Ctrl+Alt+B SHOW_PANE_BATTERY\n"
+        "Ctrl+Alt+P SHOW_PANE_PHONE\n"
+        "Ctrl+Alt+V SHOW_PANE_VIRTSENSORS\n"
+        "Ctrl+Alt+D SHOW_PANE_DPAD\n"
+        "Ctrl+Alt+S SHOW_PANE_SETTINGS\n"
+        "Ctrl+S     TAKE_SCREENSHOT\n"
+        "Ctrl+Z     ENTER_ZOOM\n"
+        "Ctrl+G     GRAB_KEYBOARD\n"
+        "Ctrl+=     VOLUME_UP\n"
+        "Ctrl+-     VOLUME_DOWN\n"
+        "Ctrl+P     POWER\n"
+        "Ctrl+M     MENU\n"
+        "Ctrl+H     HOME\n"
+        "Ctrl+R     RECENTS\n"
+        "Ctrl+Backspace BACK\n";
+          
     QTextStream stream(&default_shortcuts);
-    mShortcutKeyStore.populateFromTextStream(stream);
+    mShortcutKeyStore.populateFromTextStream(stream, parseQtUICommand);
+
+    // Need to add this one separately because QKeySequence cannot parse
+    // the string "Ctrl+Alt".
+    mShortcutKeyStore.add(QKeySequence(Qt::Key_Alt | Qt::AltModifier | Qt::ControlModifier), QtUICommand::UNGRAB_KEYBOARD);
 }
 
 void ToolWindow::show()
@@ -240,89 +252,151 @@ void ToolWindow::runAdbPush(const QList<QUrl> &urls)
     }
 }
 
-void ToolWindow::handleUICommand(QtUICommand cmd) {
+void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
     switch (cmd) {
     case QtUICommand::SHOW_PANE_LOCATION:
-        showOrRaiseExtendedWindow(PANE_IDX_LOCATION);
+        if (down) {
+            showOrRaiseExtendedWindow(PANE_IDX_LOCATION);
+        }
         break;
     case QtUICommand::SHOW_PANE_CELLULAR:
-        showOrRaiseExtendedWindow(PANE_IDX_CELLULAR);
+        if (down) {
+            showOrRaiseExtendedWindow(PANE_IDX_CELLULAR);
+        }
         break;
     case QtUICommand::SHOW_PANE_BATTERY:
-        showOrRaiseExtendedWindow(PANE_IDX_BATTERY);
+        if (down) {
+            showOrRaiseExtendedWindow(PANE_IDX_BATTERY);
+        }
         break;
     case QtUICommand::SHOW_PANE_PHONE:
-        showOrRaiseExtendedWindow(PANE_IDX_TELEPHONE);
+        if (down) {
+            showOrRaiseExtendedWindow(PANE_IDX_TELEPHONE);
+        }
         break;
     case QtUICommand::SHOW_PANE_VIRTSENSORS:
-        showOrRaiseExtendedWindow(PANE_IDX_VIRT_SENSORS);
+        if (down) {
+            showOrRaiseExtendedWindow(PANE_IDX_VIRT_SENSORS);
+        }
         break;
     case QtUICommand::SHOW_PANE_DPAD:
-        showOrRaiseExtendedWindow(PANE_IDX_DPAD);
+        if (down) {
+            showOrRaiseExtendedWindow(PANE_IDX_DPAD);
+        }
         break;
     case QtUICommand::SHOW_PANE_SETTINGS:
-        showOrRaiseExtendedWindow(PANE_IDX_SETTINGS);
+        if (down) {
+            showOrRaiseExtendedWindow(PANE_IDX_SETTINGS);
+        }
         break;
     case QtUICommand::TAKE_SCREENSHOT:
-        emulator_window->screenshot();
+        if (down) {
+            emulator_window->screenshot();
+        }
         break;
     case QtUICommand::ENTER_ZOOM:
-        emulator_window->toggleZoomMode();
-        toolsUi->zoom_button->setDown(emulator_window->isInZoomMode());
+        if (down) {
+            emulator_window->toggleZoomMode();
+            toolsUi->zoom_button->setDown(emulator_window->isInZoomMode());
+        }
         break;
+    case QtUICommand::GRAB_KEYBOARD:
+        if (down) {
+            emulator_window->setGrabKeyboardInput(true);
+        }
+        break;
+    case QtUICommand::VOLUME_UP:
+        uiEmuAgent->userEvents->sendKey(kKeyCodeVolumeUp, down);
+        break;
+    case QtUICommand::VOLUME_DOWN:
+        uiEmuAgent->userEvents->sendKey(kKeyCodeVolumeDown, down);
+        break;
+    case QtUICommand::POWER:
+        uiEmuAgent->userEvents->sendKey(kKeyCodePower, down);
+        break;
+    case QtUICommand::MENU:
+        uiEmuAgent->userEvents->sendKey(kKeyCodeMenu, down);
+        break;
+    case QtUICommand::HOME:
+		if ( !strcmp("Generic", android_hw->hw_keyboard_charmap) ) {
+			// The 'Generic' keyboard moved the HOME key! 'Generic' has HOME
+			// on we call HOMEPAGE. Beause 'Generic' is in use, send HOMEPAGE.
+            uiEmuAgent->userEvents->sendKey(kKeyCodeHomePage, down);
+		} else {
+			// Not 'Generic'. Assume 'qwerty' (or 'qwerty2') and
+			// send HOME.
+            uiEmuAgent->userEvents->sendKey(kKeyCodeHome, down);
+		}
+        break;
+    case QtUICommand::BACK:
+        uiEmuAgent->userEvents->sendKey(kKeyCodeBack, down);
+        break;
+    case QtUICommand::RECENTS:
+        uiEmuAgent->userEvents->sendKey(kKeyCodeAppSwitch, down);
+        break;
+    case QtUICommand::UNGRAB_KEYBOARD:
+        // Ungrabbing is handled in EmulatorQtWindow, and doesn't
+        // really need an element in the QtUICommand enum. This
+        // enum element exists solely for the purpose of displaying
+        // it in the list of keyboard shortcuts in the Help page.
+    default:;
     }
 }
 
-bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
-    return mShortcutKeyStore.handle(
-        QKeySequence(event->key() | event->modifiers()),
-        [this](QtUICommand cmd) { handleUICommand(cmd); });
+void ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
+    QKeySequence event_key_sequence(event->key() + event->modifiers());
+    bool down = event->type() == QEvent::KeyPress;
+    mShortcutKeyStore.handle(event_key_sequence,
+                             [this, down](QtUICommand cmd) {
+                                handleUICommand(cmd, down);
+                             });
 }
 
 void ToolWindow::dockMainWindow()
 {
-    move(parentWidget()->geometry().right() + 10, parentWidget()->geometry().top() );
+    move(parentWidget()->geometry().right() + 10, parentWidget()->geometry().top() + 10);
 }
 
 void ToolWindow::on_back_button_clicked()
 {
-    emulator_window->simulateKeyPress(KEY_ESC, 0);
+    handleUICommand(QtUICommand::BACK, true);
+    handleUICommand(QtUICommand::BACK, false);
 }
+
 void ToolWindow::on_close_button_clicked()
 {
     parentWidget()->close();
 }
 void ToolWindow::on_home_button_clicked()
 {
-    if ( !strcmp("Generic", android_hw->hw_keyboard_charmap) ) {
-        // The 'Generic' keyboard moved the HOME key! 'Generic' has HOME
-        // on we call HOMEPAGE. Beause 'Generic' is in use, send HOMEPAGE.
-        emulator_window->simulateKeyPress(KEY_HOMEPAGE, 0);
-    } else {
-        // Not 'Generic'. Assume 'qwerty' (or 'qwerty2') and
-        // send HOME.
-        emulator_window->simulateKeyPress(KEY_HOME, 0);
-    }
+    handleUICommand(QtUICommand::HOME, true);
+    handleUICommand(QtUICommand::HOME, false);
 }
+
 void ToolWindow::on_minimize_button_clicked()
 {
     emulator_window->minimize();
 }
+
 void ToolWindow::on_power_button_clicked()
 {
-    emulator_window->simulateKeyPress(KEY_F7, 0);
+    handleUICommand(QtUICommand::POWER, true);
+    handleUICommand(QtUICommand::POWER, false);
 }
 void ToolWindow::on_volume_up_button_clicked()
 {
-    emulator_window->simulateKeyPress(KEY_F5, kKeyModLCtrl);
+    handleUICommand(QtUICommand::VOLUME_UP, true);
+    handleUICommand(QtUICommand::VOLUME_UP, false);
 }
 void ToolWindow::on_volume_down_button_clicked()
 {
-    emulator_window->simulateKeyPress(KEY_F6, kKeyModLCtrl);
+    handleUICommand(QtUICommand::VOLUME_DOWN, true);
+    handleUICommand(QtUICommand::VOLUME_DOWN, false);
 }
 void ToolWindow::on_recents_button_clicked()
 {
-    emulator_window->simulateKeyPress(KEY_APPSWITCH, 0);
+    handleUICommand(QtUICommand::RECENTS, true);
+    handleUICommand(QtUICommand::RECENTS, false);
 }
 void ToolWindow::on_rotate_CW_button_clicked()
 {
@@ -334,11 +408,12 @@ void ToolWindow::on_rotate_CCW_button_clicked()
 }
 void ToolWindow::on_scrShot_button_clicked()
 {
+    handleUICommand(QtUICommand::TAKE_SCREENSHOT, true);
     emulator_window->screenshot();
 }
 void ToolWindow::on_zoom_button_clicked()
 {
-    emulator_window->toggleZoomMode();
+    handleUICommand(QtUICommand::ENTER_ZOOM, true);
     toolsUi->zoom_button->setDown(emulator_window->isInZoomMode());
 }
 

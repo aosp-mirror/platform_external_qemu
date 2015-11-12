@@ -68,32 +68,26 @@ public:
     void runAdbInstall(const QString &path);
     void runAdbPush(const QList<QUrl> &urls);
 
-    bool handleQtKeyEvent(QKeyEvent* event);
+    void handleQtKeyEvent(QKeyEvent* event);
 
 private:
-    void handleUICommand(QtUICommand cmd);
-
+    void handleUICommand(QtUICommand cmd, bool down);
     QToolButton *addButton(QGridLayout *layout, int row, int col,
                            const char *iconPath, QString tip,
                            EmulatorQtWindowSlot slot);
-
     void showOrRaiseExtendedWindow(ExtendedWindowPane pane);
 
-    QWidget          *button_area;
+    QWidget *button_area;
     EmulatorQtWindow *emulator_window;
-    ExtendedWindow   *extendedWindow;
-    QBoxLayout       *top_layout;
+    ExtendedWindow *extendedWindow;
+    QBoxLayout *top_layout;
     const struct UiEmuAgent *uiEmuAgent;
-
-    Ui::ToolControls  *toolsUi;
-
+    Ui::ToolControls *toolsUi;
     QErrorMessage mErrorMessage;
-
     QProcess mInstallProcess;
-    QProgressDialog mInstallDialog;
-
     QProcess mPushProcess;
     QProgressDialog mPushDialog;
+    QProgressDialog mInstallDialog;
     QQueue<QUrl> mFilesToPush;
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
 

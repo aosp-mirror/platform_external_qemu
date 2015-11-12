@@ -26,7 +26,16 @@ bool parseQtUICommand(const QString& string, QtUICommand* command) {
         NAME_TO_CMD(SHOW_PANE_DPAD),
         NAME_TO_CMD(SHOW_PANE_SETTINGS),
         NAME_TO_CMD(TAKE_SCREENSHOT),
-        NAME_TO_CMD(ENTER_ZOOM)
+        NAME_TO_CMD(ENTER_ZOOM),
+        NAME_TO_CMD(GRAB_KEYBOARD),
+        NAME_TO_CMD(VOLUME_UP),
+        NAME_TO_CMD(VOLUME_DOWN),
+        NAME_TO_CMD(POWER),
+        NAME_TO_CMD(MENU),
+        NAME_TO_CMD(HOME),
+        NAME_TO_CMD(BACK),
+        NAME_TO_CMD(RECENTS),
+        NAME_TO_CMD(UNGRAB_KEYBOARD)
     };
 #undef NAME_TO_CMD
     auto it = std::find_if(std::begin(name_to_cmd),
@@ -54,7 +63,16 @@ QString getQtUICommandDescription(QtUICommand command) {
         CMD_TO_DESC(SHOW_PANE_DPAD, "D-Pad"),
         CMD_TO_DESC(SHOW_PANE_SETTINGS, "Settings"),
         CMD_TO_DESC(TAKE_SCREENSHOT, "Take screenshot"),
-        CMD_TO_DESC(ENTER_ZOOM, "Enter zoom mode")
+        CMD_TO_DESC(ENTER_ZOOM, "Enter zoom mode"),
+        CMD_TO_DESC(GRAB_KEYBOARD, "Let Android grab the keyboard input"),
+        CMD_TO_DESC(VOLUME_UP, "Volume up"),
+        CMD_TO_DESC(VOLUME_DOWN, "Volume down"),
+        CMD_TO_DESC(POWER, "Power"),
+        CMD_TO_DESC(HOME, "Home"),
+        CMD_TO_DESC(BACK, "Back"),
+        CMD_TO_DESC(MENU, "Menu"),
+        CMD_TO_DESC(RECENTS, "Recents"),
+        CMD_TO_DESC(UNGRAB_KEYBOARD, "Stop grabbing keyboard input")
     };
 #undef CMD_TO_DESC
 
