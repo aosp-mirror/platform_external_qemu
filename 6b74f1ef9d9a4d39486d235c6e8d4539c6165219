@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "96d1fa8e_08547c04",
+        "filename": "android/skin/qt/qt-ui-commands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-12T18:54:26Z",
+      "side": 1,
+      "message": "Nit: lower case \"up\" and \"down\"",
+      "revId": "6b74f1ef9d9a4d39486d235c6e8d4539c6165219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b2597a9_d06b02c4",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-12T18:54:26Z",
+      "side": 1,
+      "message": "I\u0027m confused by this. It looks like the Alt key modified\nby (Alt+Ctrl).\n\n+Nit: line length",
+      "revId": "6b74f1ef9d9a4d39486d235c6e8d4539c6165219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b2a4b7b_71ffb259",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-12T18:54:26Z",
+      "side": 1,
+      "message": "Acting on Pressed rather than Clicked is a change.\nIt\u0027s probably OK. What do you think?\n\n(Normally, Pressed is generated when the key is pressed, and Released and Clicked are generated when it is released.\nIf you press and move off a button, though, you get Pressed and Released, but not Clicked.)",
+      "revId": "6b74f1ef9d9a4d39486d235c6e8d4539c6165219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6da7ea7_3c5540cf",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-12T18:54:26Z",
+      "side": 1,
+      "message": "I generally don\u0027t like returning the result of an assignment.\nHere it add confusion about whether you meant \"\u003d\u003d\".",
+      "revId": "6b74f1ef9d9a4d39486d235c6e8d4539c6165219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
