@@ -104,7 +104,7 @@
      <!-- Main list of tool buttons -->
      <file alias="back">images/dark/System_Back_white.svg</file>
      <file alias="close">images/dark/ic_close_48px.svg</file>
-     <file alias="help">images/dark/ic_help_white_48dp.svg</file>
+     <file alias="help">images/dark/ic_help_677_48dp.svg</file>
      <file alias="home">images/dark/System_Home_white.svg</file>
      <file alias="minimize">images/dark/ic_remove_white_48dp.svg</file>
      <file alias="more">images/dark/ic_more_horiz_white_48dp.svg</file>
