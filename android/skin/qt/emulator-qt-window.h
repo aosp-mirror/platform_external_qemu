@@ -279,7 +279,7 @@ private:
         void moveEvent(QMoveEvent *event)
         {
             QScrollArea::moveEvent(event);
-            mEmulatorWindow->simulateWindowMoved(this->pos());
+            mEmulatorWindow->simulateWindowMoved(event->pos());
             mEmulatorWindow->tool_window->dockMainWindow();
         }
 
