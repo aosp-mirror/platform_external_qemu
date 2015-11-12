@@ -146,6 +146,7 @@ ANDROID_EMU_SOURCES := \
     android/emulation/android_pipe_zero.c \
     android/emulation/android_qemud.cpp \
     android/emulation/control/LineConsumer.cpp \
+    android/emulation/nand_limits.c \
     android/emulation/qemud/android_qemud_client.cpp \
     android/emulation/qemud/android_qemud_multiplexer.cpp \
     android/emulation/qemud/android_qemud_serial.cpp \

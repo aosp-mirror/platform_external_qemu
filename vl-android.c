@@ -3154,7 +3154,7 @@ int main(int argc, char **argv, char **envp)
 #ifdef CONFIG_NAND_LIMITS
     /* Init nand stuff. */
     if (android_op_nand_limits) {
-        parse_nand_limits(android_op_nand_limits);
+        nand_parse_limits(android_op_nand_limits);
     }
 #endif  // CONFIG_NAND_LIMITS
 

@@ -15,6 +15,10 @@
 #include "hw/android/goldfish/nand.h"
 #include "hw/android/goldfish/vmem.h"
 #include "hw/hw.h"
+
+#ifdef CONFIG_NAND_LIMITS
+#include "android/emulation/nand_limits.h"
+#endif
 #include "android/utils/path.h"
 #include "android/utils/tempfile.h"
 #include "android/qemu-debug.h"
@@ -68,41 +72,16 @@ typedef struct {
                               * file may be smaller. */
 } nand_dev;
 
-nand_threshold    android_nand_write_threshold;
-nand_threshold    android_nand_read_threshold;
+#ifdef CONFIG_NAND_LIMITS
 
-#ifdef CONFIG_NAND_THRESHOLD
+static AndroidNandLimit nand_read_limit = ANDROID_NAND_LIMIT_INIT;
+static AndroidNandLimit nand_write_limit = ANDROID_NAND_LIMIT_INIT;
 
-/* update a threshold, return 1 if limit is hit, 0 otherwise */
-static void
-nand_threshold_update( nand_threshold*  t, uint32_t  len )
-{
-    if (t->counter < t->limit) {
-        uint64_t  avail = t->limit - t->counter;
-        if (avail > len)
-            avail = len;
+#define NAND_UPDATE_READ_THRESHOLD(len) \
+  android_nand_limit_update(&nand_write_limit, (uint32_t)(len))
 
-        if (t->counter == 0) {
-            T("%s: starting threshold counting to %lld",
-              __FUNCTION__, t->limit);
-        }
-        t->counter += avail;
-        if (t->counter >= t->limit) {
-            /* threshold reach, send a signal to an external process */
-            T( "%s: sending signal %d to pid %d !",
-               __FUNCTION__, t->signal, t->pid );
-
-            kill( t->pid, t->signal );
-        }
-    }
-    return;
-}
-
-#define  NAND_UPDATE_READ_THRESHOLD(len)  \
-    nand_threshold_update( &android_nand_read_threshold, (uint32_t)(len) )
-
-#define  NAND_UPDATE_WRITE_THRESHOLD(len)  \
-    nand_threshold_update( &android_nand_write_threshold, (uint32_t)(len) )
+#define NAND_UPDATE_WRITE_THRESHOLD(len) \
+  android_nand_limit_update(&nand_read_limit, (uint32_t)(len))
 
 #else /* !NAND_THRESHOLD */
 
@@ -932,108 +911,9 @@ bad_arg_and_value:
 }
 
 #ifdef CONFIG_NAND_LIMITS
-
-static uint64_t
-parse_nand_rw_limit( const char*  value )
-{
-    char*     end;
-    uint64_t  val = strtoul( value, &end, 0 );
-
-    if (end == value) {
-        derror( "bad parameter value '%s': expecting unsigned integer", value );
-        exit(1);
-    }
-
-    switch (end[0]) {
-        case 'K':  val <<= 10; break;
-        case 'M':  val <<= 20; break;
-        case 'G':  val <<= 30; break;
-        case 0: break;
-        default:
-            derror( "bad read/write limit suffix: use K, M or G" );
-            exit(1);
-    }
-    return val;
+void nand_parse_limits(const char* limits) {
+    android_nand_limits_parse(limits,
+                              &nand_write_limit,
+                              &nand_read_limit);
 }
-
-void
-parse_nand_limits(char*  limits)
-{
-    int      pid = -1, signal = -1;
-    int64_t  reads = 0, writes = 0;
-    char*    item = limits;
-
-    /* parse over comma-separated items */
-    while (item && *item) {
-        char*  next = strchr(item, ',');
-        char*  end;
-
-        if (next == NULL) {
-            next = item + strlen(item);
-        } else {
-            *next++ = 0;
-        }
-
-        if ( !memcmp(item, "pid=", 4) ) {
-            pid = strtol(item+4, &end, 10);
-            if (end == NULL || *end) {
-                derror( "bad parameter, expecting pid=<number>, got '%s'",
-                        item );
-                exit(1);
-            }
-            if (pid <= 0) {
-                derror( "bad parameter: process identifier must be > 0" );
-                exit(1);
-            }
-        }
-        else if ( !memcmp(item, "signal=", 7) ) {
-            signal = strtol(item+7,&end, 10);
-            if (end == NULL || *end) {
-                derror( "bad parameter: expecting signal=<number>, got '%s'",
-                        item );
-                exit(1);
-            }
-            if (signal <= 0) {
-                derror( "bad parameter: signal number must be > 0" );
-                exit(1);
-            }
-        }
-        else if ( !memcmp(item, "reads=", 6) ) {
-            reads = parse_nand_rw_limit(item+6);
-        }
-        else if ( !memcmp(item, "writes=", 7) ) {
-            writes = parse_nand_rw_limit(item+7);
-        }
-        else {
-            derror( "bad parameter '%s' (see -help-nand-limits)", item );
-            exit(1);
-        }
-        item = next;
-    }
-    if (pid < 0) {
-        derror( "bad paramater: missing pid=<number>" );
-        exit(1);
-    }
-    else if (signal < 0) {
-        derror( "bad parameter: missing signal=<number>" );
-        exit(1);
-    }
-    else if (reads == 0 && writes == 0) {
-        dwarning( "no read or write limit specified. ignoring -nand-limits" );
-    } else {
-        nand_threshold*  t;
-
-        t  = &android_nand_read_threshold;
-        t->pid     = pid;
-        t->signal  = signal;
-        t->counter = 0;
-        t->limit   = reads;
-
-        t  = &android_nand_write_threshold;
-        t->pid     = pid;
-        t->signal  = signal;
-        t->counter = 0;
-        t->limit   = writes;
-    }
-}
-#endif /* CONFIG_NAND_LIMITS */
+#endif  // CONFIG_NAND_LIMITS
