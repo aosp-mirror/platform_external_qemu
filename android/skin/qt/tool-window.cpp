@@ -268,6 +268,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd) {
         break;
     case QtUICommand::ENTER_ZOOM:
         emulator_window->toggleZoomMode();
+        toolsUi->zoom_button->setDown(emulator_window->isInZoomMode());
         break;
     }
 }
