@@ -18,21 +18,28 @@
 #include <QtWidgets>
 
 void ExtendedWindow::initFinger()
-{ }
+{
+    // Initialize 10 "fingers", each with a fixed
+    // random fingerprint ID value
+    mExtendedUi->finger_pickBox->addItem("Finger 1",   45146572);
+    mExtendedUi->finger_pickBox->addItem("Finger 2",  192618075);
+    mExtendedUi->finger_pickBox->addItem("Finger 3",   84807873);
+    mExtendedUi->finger_pickBox->addItem("Finger 4",  189675793);
+    mExtendedUi->finger_pickBox->addItem("Finger 5",  132710472);
+    mExtendedUi->finger_pickBox->addItem("Finger 6",   36321043);
+    mExtendedUi->finger_pickBox->addItem("Finger 7",  139425534);
+    mExtendedUi->finger_pickBox->addItem("Finger 8",   15301340);
+    mExtendedUi->finger_pickBox->addItem("Finger 9",  105702233);
+    mExtendedUi->finger_pickBox->addItem("Finger 10",  87754286);
+}
 
 void ExtendedWindow::on_finger_touchButton_pressed()
 {
-    bool OK = false;
-    int  id = mExtendedUi->finger_IdBox->toPlainText().toInt(&OK);
-
-    if ( !OK || id <= 0 ) {
-        mToolWindow->showErrorDialog(tr("The \"Fingerprint ID\" number is invalid."),
-                                     tr("Finger ID"));
-        return;
-    }
+    // Send the ID associated with the selected fingerprint
+    int fingerID = mExtendedUi->finger_pickBox->currentData().toInt();
 
     if (mFingerAgent && mFingerAgent->setTouch) {
-        mFingerAgent->setTouch(true, id);
+        mFingerAgent->setTouch(true, fingerID);
     }
 }
 

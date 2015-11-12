@@ -69,6 +69,7 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_BATTERY, mExtendedUi->batteryButton},
         {PANE_IDX_TELEPHONE, mExtendedUi->telephoneButton},
         {PANE_IDX_DPAD , mExtendedUi->dpadButton},
+        {PANE_IDX_FINGER , mExtendedUi->fingerButton},
         {PANE_IDX_HELP, mExtendedUi->helpButton},
         {PANE_IDX_SETTINGS, mExtendedUi->settingsButton},
     };
@@ -111,6 +112,7 @@ void ExtendedWindow::closeEvent(QCloseEvent *ce)
 void ExtendedWindow::on_batteryButton_clicked()     { adjustTabs(PANE_IDX_BATTERY); }
 void ExtendedWindow::on_cellularButton_clicked()    { adjustTabs(PANE_IDX_CELLULAR); }
 void ExtendedWindow::on_dpadButton_clicked()        { adjustTabs(PANE_IDX_DPAD); }
+void ExtendedWindow::on_fingerButton_clicked()      { adjustTabs(PANE_IDX_FINGER); }
 void ExtendedWindow::on_helpButton_clicked()   { adjustTabs(PANE_IDX_HELP); }
 void ExtendedWindow::on_locationButton_clicked()    { adjustTabs(PANE_IDX_LOCATION); }
 void ExtendedWindow::on_settingsButton_clicked()    { adjustTabs(PANE_IDX_SETTINGS); }
@@ -137,6 +139,7 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
     mExtendedUi->batteryButton    ->setStyleSheet(colorStyle);
     mExtendedUi->cellularButton   ->setStyleSheet(colorStyle);
     mExtendedUi->dpadButton       ->setStyleSheet(colorStyle);
+    mExtendedUi->fingerButton     ->setStyleSheet(colorStyle);
     mExtendedUi->helpButton       ->setStyleSheet(colorStyle);
     mExtendedUi->locationButton   ->setStyleSheet(colorStyle);
     mExtendedUi->settingsButton   ->setStyleSheet(colorStyle);
@@ -148,13 +151,14 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
                       DARK_MAJOR_TAB_COLOR : LIGHT_MAJOR_TAB_COLOR;
     activeStyle += "; background-color:";
     activeStyle += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
-                      DARK_BKG_COLOR : LIGHT_BKG_COLOR;
+                      DARK_TAB_SELECTED_COLOR : LIGHT_TAB_SELECTED_COLOR;
     thisButton->setStyleSheet(activeStyle);
 
     mExtendedUi->additionalButton ->setAutoFillBackground(true);
     mExtendedUi->batteryButton    ->setAutoFillBackground(true);
     mExtendedUi->cellularButton   ->setAutoFillBackground(true);
     mExtendedUi->dpadButton       ->setAutoFillBackground(true);
+    mExtendedUi->fingerButton     ->setAutoFillBackground(true);
     mExtendedUi->helpButton       ->setAutoFillBackground(true);
     mExtendedUi->locationButton   ->setAutoFillBackground(true);
     mExtendedUi->settingsButton   ->setAutoFillBackground(true);

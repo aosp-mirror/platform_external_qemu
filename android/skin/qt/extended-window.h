@@ -169,6 +169,7 @@ private slots:
     void on_batteryButton_clicked();
     void on_cellularButton_clicked();
     void on_dpadButton_clicked();
+    void on_fingerButton_clicked();
     void on_helpButton_clicked();
     void on_locationButton_clicked();
     void on_settingsButton_clicked();
@@ -181,9 +182,10 @@ private slots:
     void on_bat_statusBox_currentIndexChanged(int index);
 
     // Cellular
+    void on_cell_dataStatusBox_currentIndexChanged(int index);
+    void on_cell_delayBox_currentIndexChanged(int index);
     void on_cell_standardBox_currentIndexChanged(int index);
     void on_cell_voiceStatusBox_currentIndexChanged(int index);
-    void on_cell_dataStatusBox_currentIndexChanged(int index);
 
     // DPad
 #define ON_PRESS_RELEASE_CLICK(button) \
@@ -239,8 +241,7 @@ private slots:
     void on_sms_sendButton_clicked();
 
     // Telephony
-    void on_tel_startCallButton_clicked();
-    void on_tel_endCallButton_clicked();
+    void on_tel_startEndButton_clicked();
     void on_tel_holdCallButton_clicked();
 };
 
