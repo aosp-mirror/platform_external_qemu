@@ -63,6 +63,8 @@ static const char kQemuArch[] =
     "aarch64"
 #elif defined(TARGET_MIPS64)
     "mips64el"
+#elif defined(TARGET_MIPS)
+    "mipsel"
 #elif defined(TARGET_X86)
     "i386"
 #elif defined(TARGET_X86_64)
