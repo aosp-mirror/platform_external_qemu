@@ -99,11 +99,7 @@ static void emulator_window_window_generic_event(int event_type,
                                            int event_code,
                                            int event_value) {
     user_event_agent->sendGenericEvent(event_type, event_code, event_value);
-    /* XXX: hack, replace by better code here */
-    if (event_value != 0)
-        android_sensors_set_coarse_orientation(ANDROID_COARSE_PORTRAIT);
-    else
-        android_sensors_set_coarse_orientation(ANDROID_COARSE_LANDSCAPE);
+    android_sensors_set_coarse_orientation((AndroidCoarseOrientation) event_value);
 }
 
 static bool emulator_window_network_toggle(void) {

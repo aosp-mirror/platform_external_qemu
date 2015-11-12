@@ -705,6 +705,14 @@ _hwSensors_setCoarseOrientation( HwSensors*  h, AndroidCoarseOrientation  orient
     case ANDROID_COARSE_LANDSCAPE:
         _hwSensors_setSensorValue( h, ANDROID_SENSOR_ACCELERATION, g*cos_angle, 0., g*sin_angle );
         break;
+
+    case ANDROID_COARSE_REVERSE_PORTRAIT:
+        _hwSensors_setSensorValue( h, ANDROID_SENSOR_ACCELERATION, 0., -g*cos_angle, -g*sin_angle );
+        break;
+
+    case ANDROID_COARSE_REVERSE_LANDSCAPE:
+        _hwSensors_setSensorValue( h, ANDROID_SENSOR_ACCELERATION, -g*cos_angle, 0., -g*sin_angle );
+        break;
     default:
         ;
     }
