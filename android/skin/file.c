@@ -613,7 +613,7 @@ skin_file_load_from_v1(SkinFile* file,
     if (part == NULL)
         return -1;
 
-    for (nn = 0; nn < 2; nn++)
+    for (nn = 0; nn < 4; nn++)
     {
         ANEW0(layout);
 
@@ -623,7 +623,7 @@ skin_file_load_from_v1(SkinFile* file,
 
         layout->event_type  = 0x05;  /* close keyboard by default */
         layout->event_code  = 0;
-        layout->event_value = 1;
+        layout->event_value = 0;
 
         location->part     = part;
         switch (nn) {
@@ -634,14 +634,12 @@ skin_file_load_from_v1(SkinFile* file,
                 layout->size       = part->rect.size;
                 break;
 
-#if 0
             case 1:
                 location->anchor.x = part->rect.size.h;
                 location->anchor.y = 0;
                 location->rotation = SKIN_ROTATION_90;
                 layout->size.w     = part->rect.size.h;
                 layout->size.h     = part->rect.size.w;
-                layout->event_value = 0;
                 break;
 
             case 2:
@@ -650,14 +648,13 @@ skin_file_load_from_v1(SkinFile* file,
                 location->rotation = SKIN_ROTATION_180;
                 layout->size       = part->rect.size;
                 break;
-#endif
+
             default:
                 location->anchor.x = 0;
                 location->anchor.y = part->rect.size.w;
                 location->rotation = SKIN_ROTATION_270;
                 layout->size.w     = part->rect.size.h;
                 layout->size.h     = part->rect.size.w;
-                layout->event_value = 0;
                 break;
         }
         layout->locations = location;

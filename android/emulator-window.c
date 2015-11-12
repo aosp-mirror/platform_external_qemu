@@ -99,11 +99,10 @@ static void emulator_window_window_generic_event(int event_type,
                                            int event_code,
                                            int event_value) {
     user_event_agent->sendGenericEvent(event_type, event_code, event_value);
-    /* XXX: hack, replace by better code here */
-    if (event_value != 0)
-        android_sensors_set_coarse_orientation(ANDROID_COARSE_PORTRAIT);
-    else
-        android_sensors_set_coarse_orientation(ANDROID_COARSE_LANDSCAPE);
+}
+
+static void emulator_window_set_device_orientation(SkinRotation rotation) {
+    android_sensors_set_coarse_orientation((AndroidCoarseOrientation) rotation);
 }
 
 static bool emulator_window_network_toggle(void) {
@@ -183,6 +182,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .key_event = &emulator_window_window_key_event,
         .mouse_event = &emulator_window_window_mouse_event,
         .generic_event = &emulator_window_window_generic_event,
+        .set_device_orientation = &emulator_window_set_device_orientation,
         .opengles_show = &emulator_window_opengles_show_window,
         .opengles_hide = &emulator_window_opengles_hide_window,
         .opengles_move = &emulator_window_opengles_move_window,

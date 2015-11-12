@@ -124,8 +124,8 @@ static int adisplay_init(ADisplay* disp,
             break;
 
         case SKIN_ROTATION_90:
-            disp->origin.x = disp->rect.pos.x + disp->rect.size.w;
-            disp->origin.y = disp->rect.pos.y;
+            disp->origin.x = disp->rect.pos.x;
+            disp->origin.y = disp->rect.pos.y + disp->rect.size.h;
             break;
 
         case SKIN_ROTATION_180:
@@ -134,8 +134,8 @@ static int adisplay_init(ADisplay* disp,
             break;
 
         default:
-            disp->origin.x = disp->rect.pos.x;
-            disp->origin.y = disp->rect.pos.y + disp->rect.size.h;
+            disp->origin.x = disp->rect.pos.x + disp->rect.size.w;
+            disp->origin.y = disp->rect.pos.y;
             break;
     }
     skin_size_rotate( &disp->datasize, &sdisp->rect.size, sdisp->rotation );
@@ -202,8 +202,8 @@ static void adisplay_set_onion(ADisplay* disp,
             break;
 
         case SKIN_ROTATION_90:
-            orect->pos.x = rect->pos.x + rect->size.w - onion_w;
-            orect->pos.y = rect->pos.y;
+            orect->pos.x = rect->pos.x;
+            orect->pos.y = rect->pos.y + rect->size.h - onion_h;
             break;
 
         case SKIN_ROTATION_180:
@@ -212,8 +212,8 @@ static void adisplay_set_onion(ADisplay* disp,
             break;
 
         default:
-            orect->pos.x = rect->pos.x;
-            orect->pos.y = rect->pos.y + rect->size.h - onion_h;
+            orect->pos.x = rect->pos.x + rect->size.w - onion_w;
+            orect->pos.y = rect->pos.y;
     }
     orect->size.w = onion_w;
     orect->size.h = onion_h;
@@ -1048,7 +1048,7 @@ skin_window_find_finger( SkinWindow*  window,
             finger->pos.x    = x - disp->origin.x;
             finger->pos.y    = y - disp->origin.y;
 
-            skin_pos_rotate( &finger->pos, &finger->pos, -disp->rotation );
+            skin_pos_rotate( &finger->pos, &finger->pos, disp->rotation );
             break;
         }
     LAYOUT_LOOP_END_DISPLAYS
@@ -1087,7 +1087,7 @@ skin_window_move_mouse( SkinWindow*  window,
         finger->pos.x  = dx + (disp->rect.pos.x - disp->origin.x);
         finger->pos.y  = dy + (disp->rect.pos.y - disp->origin.y);
 
-        skin_pos_rotate( &finger->pos, &finger->pos, -disp->rotation );
+        skin_pos_rotate( &finger->pos, &finger->pos, disp->rotation );
     }
 
     {
@@ -1280,7 +1280,7 @@ skin_window_show_opengles( SkinWindow* window )
     skin_window_setup_opengles_subwindow(window, &data);
 
     data.handle = winhandle;
-    data.rot = disp->rotation * -90.;
+    data.rot = disp->rotation * 90.;
 
     skin_winsys_run_ui_update(&skin_window_run_opengles_show, &data);
 }
@@ -1640,11 +1640,8 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
 
     skin_window_redraw( window, NULL );
 
-    if (slayout->event_type != 0) {
-        window->win_funcs->generic_event(
-                slayout->event_type,
-                slayout->event_code,
-                slayout->event_value);
+    if ( layout.displays ) {
+        window->win_funcs->set_device_orientation(layout.displays->rotation);
     }
 
     return 0;
