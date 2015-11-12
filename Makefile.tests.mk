@@ -44,6 +44,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/emulation/serial_line_unittest.cpp \
   android/filesystems/ext4_utils_unittest.cpp \
   android/filesystems/fstab_parser_unittest.cpp \
+  android/filesystems/partition_config_unittest.cpp \
   android/filesystems/partition_types_unittest.cpp \
   android/filesystems/ramdisk_extractor_unittest.cpp \
   android/filesystems/testing/TestSupport.cpp \
