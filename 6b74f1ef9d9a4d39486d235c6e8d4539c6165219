@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "76d4867d_9cf26790",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-12T23:38:57Z",
+      "side": 1,
+      "message": "It\u0027s a quirk of Qt. If I do this, QKeySequence::toString will return the proper form (\"Ctrl+Alt\"), but if  I don\u0027t specify a key, \"Ctrl+Alt+\" will be returned (note the \"+\" on the end).",
+      "parentUuid": "3b2597a9_d06b02c4",
+      "revId": "6b74f1ef9d9a4d39486d235c6e8d4539c6165219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b2a4b7b_71ffb259",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 6
@@ -64,6 +82,24 @@
       "writtenOn": "2015-11-12T18:54:26Z",
       "side": 1,
       "message": "I generally don\u0027t like returning the result of an assignment.\nHere it add confusion about whether you meant \"\u003d\u003d\".",
+      "revId": "6b74f1ef9d9a4d39486d235c6e8d4539c6165219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b2a4b7b_17705ee4",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-12T23:38:57Z",
+      "side": 1,
+      "message": "This portion of the code has been changed",
+      "parentUuid": "b6da7ea7_3c5540cf",
       "revId": "6b74f1ef9d9a4d39486d235c6e8d4539c6165219",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
