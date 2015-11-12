@@ -2020,10 +2020,8 @@ void android_nand_add_image(const char* part_name,
     VERBOSE_PRINT(init, "%s partition format: %s", part_name,
                   androidPartitionType_toString(part_type));
 
-    snprintf(tmp, sizeof tmp, "%s,size=0x%" PRIx64, part_name, part_size);
-
     bool need_temp_partition = true;
-    bool need_make_empty =
+    bool need_make_empty = part_init_file ||
             (part_mode == ANDROID_PARTITION_OPEN_MODE_MUST_WIPE);
 
     if (part_file) {
@@ -2067,19 +2065,17 @@ void android_nand_add_image(const char* part_name,
         need_make_empty = true;
     }
 
-
-    // Escape special characters in the file name
-    char *escaped_part_file = path_escape_path(part_file);
-    if (escaped_part_file) {
-        pstrcat(tmp, sizeof tmp, ",file=");
-        pstrcat(tmp, sizeof tmp, escaped_part_file);
-        free(escaped_part_file);
+    // Do we need to copy the initial partition file into the real one?
+    if (part_init_file) {
+        if (path_copy_file(part_file, part_init_file) < 0) {
+            PANIC("Could not copy initial %s partition image to real one: %s\n",
+                  part_name, strerror(errno));
+        }
+        need_make_empty = false;
     }
 
     // Do we need to make the partition image empty?
-    // Do not do it if there is an initial file though since it will
-    // get copied directly by the NAND code into the image.
-    if (need_make_empty && !part_init_file) {
+    if (need_make_empty) {
         VERBOSE_PRINT(init,
                       "Creating empty %s partition image at: %s",
                       part_name,
@@ -2095,13 +2091,15 @@ void android_nand_add_image(const char* part_name,
         }
     }
 
-    if (part_init_file) {
-        char *escaped_part_init = path_escape_path(part_init_file);
-        if (escaped_part_init) {
-            pstrcat(tmp, sizeof tmp, ",initfile=");
-            pstrcat(tmp, sizeof tmp, escaped_part_init);
-            free(escaped_part_init);
-        }
+    // Create the configuration string for nand_add_dev().
+    // Take care of escaping special characters in file names.
+    snprintf(tmp, sizeof tmp, "%s,size=0x%" PRIx64, part_name, part_size);
+
+    char *escaped_part_file = path_escape_path(part_file);
+    if (escaped_part_file) {
+        pstrcat(tmp, sizeof tmp, ",file=");
+        pstrcat(tmp, sizeof tmp, escaped_part_file);
+        free(escaped_part_file);
     }
 
     if (part_type == ANDROID_PARTITION_TYPE_EXT4) {
