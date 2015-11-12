@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "96d1fa8e_4f7ddec3",
+        "filename": "android/crashreport/CrashPaths.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "Got it.",
+      "parentUuid": "56278298_869eca77",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96865a95_00ae26a8",
         "filename": "android/crashreport/CrashPaths.cpp",
         "patchSetId": 6
@@ -47,6 +65,24 @@
       "writtenOn": "2015-11-10T03:39:58Z",
       "side": 1,
       "message": "you don\u0027t need this as class-scoped static vairable, just define const char kDumpSuffix[] in ::isDump() instead.",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b0e2f2a_0b1dcd4f",
+        "filename": "android/crashreport/CrashPaths.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "Got it.",
+      "parentUuid": "96865a95_00ae26a8",
       "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +123,24 @@
     },
     {
       "key": {
+        "uuid": "16c50ace_ab8f2aa1",
+        "filename": "android/crashreport/CrashPaths.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "Got it.",
+      "parentUuid": "169a6aee_bca3e1c0",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "569062ca_dea8a59f",
         "filename": "android/crashreport/CrashPaths.h",
         "patchSetId": 6
@@ -98,6 +152,24 @@
       "writtenOn": "2015-11-10T03:39:58Z",
       "side": 1,
       "message": "nit: avoid static C++ global variables, they introduce static C++ constructors that run before main() and can have surprising results (one of them is slowly down library loading).",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "369daed4_a252a4b9",
+        "filename": "android/crashreport/CrashPaths.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "rewritten.",
+      "parentUuid": "569062ca_dea8a59f",
       "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -121,6 +193,24 @@
     },
     {
       "key": {
+        "uuid": "5b25eb9e_d92c576f",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "Adding comment.",
+      "parentUuid": "d67c5259_c2a362c0",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d67c5259_e2a8669f",
         "filename": "android/crashreport/CrashReporter.cpp",
         "patchSetId": 6
@@ -132,6 +222,24 @@
       "writtenOn": "2015-11-10T03:39:58Z",
       "side": 1,
       "message": "is this a debugging message? Since it is only printed on Linux I guess so.\nAlso can you really call printf() in the dumpCallback?",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b0e2f2a_6b6a0997",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "This was from the example code.  Changing to debug.",
+      "parentUuid": "d67c5259_e2a8669f",
       "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -155,6 +263,24 @@
     },
     {
       "key": {
+        "uuid": "7b0e2f2a_4b5f45f3",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "got it.",
+      "parentUuid": "569062ca_fead61ac",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "36220e8b_859ec277",
         "filename": "android/crashreport/CrashReporter.cpp",
         "patchSetId": 6
@@ -166,6 +292,24 @@
       "writtenOn": "2015-11-10T03:39:58Z",
       "side": 1,
       "message": "same here, use snprintf() instead. or change the code below to be:\n\n  cndline.append(::android::base::StringFormat(\"......\", getpid());",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56cb02e2_374c37c1",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "changing.",
+      "parentUuid": "36220e8b_859ec277",
       "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -223,6 +367,24 @@
     },
     {
       "key": {
+        "uuid": "56cb02e2_b72667f7",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "forgot to remove this.",
+      "parentUuid": "56278298_a6a3c6c0",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "169a6aee_1cb3f511",
         "filename": "android/crashreport/CrashReporter.h",
         "patchSetId": 6
@@ -234,6 +396,24 @@
       "writtenOn": "2015-11-10T03:39:58Z",
       "side": 1,
       "message": "Please provide documentation for the class and its methods. By the way do you want to put that into an android:: namespace?",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b2a4b7b_aef37796",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "rewriting",
+      "parentUuid": "169a6aee_1cb3f511",
       "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -257,6 +437,24 @@
     },
     {
       "key": {
+        "uuid": "96d1fa8e_6ff0a2f9",
+        "filename": "android/crashreport/crash-handler.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "got it.",
+      "parentUuid": "169a6aee_9cc54564",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "169a6aee_7cba39e4",
         "filename": "android/main-emulator.c",
         "patchSetId": 6
@@ -268,6 +466,24 @@
       "writtenOn": "2015-11-10T03:39:58Z",
       "side": 1,
       "message": "nit: start next to the type (i.e. \"const char*  crash_arh\u0027). ProTip: Use \u0027git clang-format\u0027.",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16ac2a06_49c046fe",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "fixing with clang-format",
+      "parentUuid": "169a6aee_7cba39e4",
       "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -291,6 +507,24 @@
     },
     {
       "key": {
+        "uuid": "7b0e2f2a_0b594d0b",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "got it.",
+      "parentUuid": "169a6aee_5cbd7dd9",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56278298_c6a8c29f",
         "filename": "android/main-emulator.c",
         "patchSetId": 6
@@ -302,6 +536,24 @@
       "writtenOn": "2015-11-10T03:39:58Z",
       "side": 1,
       "message": "nit: indent, use \u0027git clang-format\u0027 to fix all this.",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76d4867d_c915481d",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "got it.",
+      "parentUuid": "56278298_c6a8c29f",
       "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -325,6 +577,24 @@
     },
     {
       "key": {
+        "uuid": "7b0e2f2a_eb55f9d0",
+        "filename": "distrib/libbreakpad.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "got it",
+      "parentUuid": "f6bf9630_432dc6ce",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56278298_e6adbeac",
         "filename": "distrib/libbreakpad.mk",
         "patchSetId": 6
@@ -336,6 +606,24 @@
       "writtenOn": "2015-11-10T03:39:58Z",
       "side": 1,
       "message": "nit: and here.",
+      "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b0e2f2a_ab4f013b",
+        "filename": "distrib/libbreakpad.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-12T03:08:15Z",
+      "side": 1,
+      "message": "got it",
+      "parentUuid": "56278298_e6adbeac",
       "revId": "ab5bd7f90be4dc6c12489838065c60317bd707de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
