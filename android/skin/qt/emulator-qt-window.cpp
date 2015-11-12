@@ -736,8 +736,6 @@ void EmulatorQtWindow::simulateSetScale(double scale)
     mZoomFactor = 1.0;
 
     SkinEvent *event = createSkinEvent(kEventSetScale);
-    event->u.window.x = mContainer.pos().x();
-    event->u.window.y = mContainer.pos().y();
     event->u.window.scale = scale;
     slot_queueEvent(event);
 }

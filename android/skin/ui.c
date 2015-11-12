@@ -436,10 +436,8 @@ bool skin_ui_process_events(SkinUI* ui) {
             break;
 
         case kEventSetScale:
-            DE("EVENT: kEventSetScale x=%d y=%d scale=%f\n",
-               ev.u.window.x, ev.u.window.y, ev.u.window.scale);
+            DE("EVENT: kEventSetScale scale=%f\n", ev.u.window.scale);
             ignoreScroll = true;
-            skin_window_position_changed(ui->window, ev.u.window.x, ev.u.window.y);
             skin_window_set_scale(ui->window, ev.u.window.scale);
             break;
 
