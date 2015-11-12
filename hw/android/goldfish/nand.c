@@ -703,13 +703,9 @@ void nand_add_dev(const char *arg)
     nand_dev *new_devs, *dev;
     char *devname = NULL;
     size_t devname_len = 0;
-    char *initfilename = NULL;
     char *rwfilename = NULL;
-    int initfd = -1;
-    int rwfd = -1;
     int read_only = 0;
     int pad;
-    ssize_t read_size;
     uint32_t page_size = 2048;
     uint32_t extra_size = 64;
     uint32_t erase_pages = 64;
@@ -780,15 +776,6 @@ void nand_add_dev(const char *arg)
                 if(ep != value + value_len)
                     goto bad_arg_and_value;
             }
-            else if(arg_match("initfile", arg, arg_len)) {
-                initfilename = malloc(value_len + 1);
-                if(initfilename == NULL)
-                    goto out_of_memory;
-                memcpy(initfilename, value, value_len);
-                initfilename[value_len] = '\0';
-                // Restore unusual characters that confuse parsing
-                path_unescape_path(initfilename);
-            }
             else if(arg_match("file", arg, arg_len)) {
                 rwfilename = malloc(value_len + 1);
                 if(rwfilename == NULL)
@@ -806,54 +793,14 @@ void nand_add_dev(const char *arg)
         arg = next_arg;
     }
 
-    if (rwfilename == NULL) {
-        /* we create a temporary file to store everything */
-        TempFile*    tmp = tempfile_create();
-
-        if (tmp == NULL) {
-            XLOG("could not create temp file for %.*s NAND disk image: %s\n",
-                  devname_len, devname, strerror(errno));
-            exit(1);
-        }
-        rwfilename = (char*) tempfile_path(tmp);
-        if (VERBOSE_CHECK(init))
-            dprint( "mapping '%.*s' NAND image to %s", devname_len, devname, rwfilename);
+    if (!rwfilename) {
+        XLOG("Missing %.*s NAND disk image path!\n", devname_len, devname);
+        exit(1);
     }
 
-    if(rwfilename) {
-        if (initfilename) {
-            /* Overwrite with content of the 'initfilename'. */
-            if (read_only) {
-                /* Cannot be readonly when initializing the device from another file. */
-                XLOG("incompatible read only option is requested while initializing %.*s from %s\n",
-                     devname_len, devname, initfilename);
-                exit(1);
-            }
-            rwfd = open(rwfilename, O_BINARY | O_TRUNC | O_RDWR);
-        } else {
-            rwfd = open(rwfilename, O_BINARY | (read_only ? O_RDONLY : O_RDWR));
-        }
-        if(rwfd < 0) {
-            XLOG("could not open file %s, %s\n", rwfilename, strerror(errno));
-            exit(1);
-        }
-        /* this could be a writable temporary file. use atexit_close_fd to ensure
-         * that it is properly cleaned up at exit on Win32
-         */
-        if (!read_only)
-            atexit_close_fd(rwfd);
-    }
-
-    if(initfilename) {
-        initfd = open(initfilename, O_BINARY | O_RDONLY);
-        if(initfd < 0) {
-            XLOG("could not open file %s, %s\n", initfilename, strerror(errno));
-            exit(1);
-        }
-        if(dev_size == 0) {
-            dev_size = do_lseek(initfd, 0, SEEK_END);
-            do_lseek(initfd, 0, SEEK_SET);
-        }
+    if (!dev_size) {
+        XLOG("Missing %.*s NAND disk image size!\n", devname_len, devname);
+        exit(1);
     }
 
     new_devs = realloc(nand_devs, sizeof(nand_devs[0]) * (nand_dev_count + 1));
@@ -881,21 +828,16 @@ void nand_add_dev(const char *arg)
     dev->flags |= NAND_DEV_FLAG_BATCH_CAP;
 #endif
 
-    if (initfd >= 0) {
-        do {
-            read_size = do_read(initfd, dev->data, dev->erase_size);
-            if(read_size < 0) {
-                XLOG("could not read file %s, %s\n", initfilename, strerror(errno));
-                exit(1);
-            }
-            if(do_write(rwfd, dev->data, read_size) != read_size) {
-                XLOG("could not write file %s, %s\n", rwfilename, strerror(errno));
-                exit(1);
-            }
-        } while(read_size == dev->erase_size);
-        close(initfd);
+    dev->fd = open(rwfilename, O_BINARY | (read_only ? O_RDONLY : O_RDWR));
+    if(dev->fd < 0) {
+        XLOG("could not open file %s, %s\n", rwfilename, strerror(errno));
+        exit(1);
     }
-    dev->fd = rwfd;
+    /* this could be a writable temporary file. use atexit_close_fd to ensure
+     * that it is properly cleaned up at exit on Win32
+     */
+    if (!read_only)
+        atexit_close_fd(dev->fd);
 
     nand_dev_count++;
 
