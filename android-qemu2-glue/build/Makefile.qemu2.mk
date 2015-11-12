@@ -239,6 +239,9 @@ include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
 QEMU2_TARGET := arm64
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
 
+QEMU2_TARGET := mips
+include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
+
 QEMU2_TARGET := mips64
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
 

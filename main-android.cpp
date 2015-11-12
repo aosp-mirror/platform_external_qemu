@@ -132,6 +132,16 @@ const TargetInfo kTarget = {
     "virtio-net-device",
     {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
     {NULL},
+#elif defined(TARGET_MIPS)
+    "mips",
+    "mipsel",
+    "24Kf",
+    "ttyGF",
+    NULL,
+    "virtio-blk-device",
+    "virtio-net-device",
+    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+    {NULL},
 #elif defined(TARGET_I386)
     "x86",
     "i386",
