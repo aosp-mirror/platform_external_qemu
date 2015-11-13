@@ -29,8 +29,11 @@
 
 BUILD_SYSTEM := android/build
 OBJS_DIR     := objs
-SYMBOLS_DIR  := $(OBJS_DIR)/build/symbols
+BUILD_DIR    := $(OBJS_DIR)/build
 LIBS_DIR     := $(OBJS_DIR)/libs
+PREBUILT_DLLS_DIR   := $(OBJS_DIR)/build/prebuilt_dlls
+SYMBOLS_INTERMEDIATE_DIR := $(OBJS_DIR)/build/symbols_intermediate
+SYMBOLS_DIR  := $(OBJS_DIR)/build/symbols
 CONFIG_MAKE  := $(OBJS_DIR)/build/config.make
 CONFIG_H     := $(OBJS_DIR)/build/config-host.h
 
@@ -57,7 +60,7 @@ DEPENDENCY_DIRS :=
 
 all: libraries executables symbols
 EXECUTABLES :=
-SYMBOLS :=
+SYMBOLS     :=
 LIBRARIES   :=
 
 clean: clean-intermediates
