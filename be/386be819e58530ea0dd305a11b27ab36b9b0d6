@@ -1,0 +1,7 @@
+Code-Review+2: Bo Hu <bohu@google.com>
+Verified+1: Bjoern Johansson <bjoernj@google.com>
+Submitted-by: Bjoern Johansson <bjoernj@google.com>
+Submitted-at: Fri, 13 Nov 2015 23:50:23 +0000
+Reviewed-on: https://android-review.googlesource.com/182415
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
