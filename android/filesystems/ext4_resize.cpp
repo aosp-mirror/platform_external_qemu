@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "android/filesystems/ext4_resize.h"
+
+#include "android/base/String.h"
+#include "android/base/system/System.h"
+#include "android/utils/path.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -26,30 +32,29 @@ using android::base::Win32Utils;
 #include <sys/wait.h>
 #endif
 
-#include "android/base/String.h"
-#include "android/ext4_resize.h"
-#include "android/utils/path.h"
-#include "base/system/System.h"
-#include "main-common.h"
-
 using android::base::String;
 using android::base::System;
+
+static unsigned convertBytesToMB(uint64_t size) {
+    if (size == 0) {
+        return 0;
+    }
+    size = (size + (1ULL << 20) - 1ULL) >> 20;
+    if (size > UINT_MAX) {
+        size = UINT_MAX;
+    }
+    return static_cast<unsigned>(size);
+}
 
 // Convenience function for formatting and printing system call/library
 // function errors that show up regardless of host platform. Equivalent
 // to printing the stringified error code from errno or GetLastError()
 // (for windows).
-void explainSystemErrors (const char * msg) {
+void explainSystemErrors(const char* msg) {
 #ifdef _WIN32
-    char *pstr = NULL;
-    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM |
-        FORMAT_MESSAGE_ALLOCATE_BUFFER,
-        NULL,
-        GetLastError(),
-        0,
-        (LPTSTR) &pstr,
-        2,
-        NULL);
+    char* pstr = NULL;
+    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
+                  NULL, GetLastError(), 0, (LPTSTR)&pstr, 2, NULL);
     fprintf(stderr, "ERROR: %s - %s\n", msg, pstr);
     LocalFree(pstr);
 #else
@@ -57,7 +62,7 @@ void explainSystemErrors (const char * msg) {
 #endif
 }
 
-int resizeExt4Partition (const char * partitionPath, int64_t newByteSize) {
+int resizeExt4Partition(const char* partitionPath, int64_t newByteSize) {
     // sanity checks
     if (partitionPath == NULL || !checkExt4PartitionSize(newByteSize)) {
         return -1;
@@ -65,25 +70,24 @@ int resizeExt4Partition (const char * partitionPath, int64_t newByteSize) {
 
     // format common arguments once
     String executable = System::get()->findBundledExecutable("resize2fs");
-    if(executable.empty()) {
+    if (executable.empty()) {
         fprintf(stderr, "ERROR: couldn't get path to resize2fs binary\n");
         return -1;
     }
 
     char size_in_MB[50];
-    int copied = snprintf(size_in_MB, sizeof(size_in_MB),
-        "%uM", convertBytesToMB(newByteSize));
+    int copied = snprintf(size_in_MB, sizeof(size_in_MB), "%uM",
+                          convertBytesToMB(newByteSize));
     size_in_MB[sizeof(size_in_MB) - 1] = '\0';
-    if (copied < 0 || copied >= sizeof(size_in_MB)) {
+    if (copied < 0 || static_cast<size_t>(copied) >= sizeof(size_in_MB)) {
         fprintf(stderr, "ERROR: failed to format size in resize2fs command\n");
         return -1;
     }
 
-
 #ifdef _WIN32
-    STARTUPINFO           startup;
-    PROCESS_INFORMATION   pinfo;
-    DWORD                 exitCode;
+    STARTUPINFO startup;
+    PROCESS_INFORMATION pinfo;
+    DWORD exitCode;
 
     ZeroMemory(&startup, sizeof(startup));
     ZeroMemory(&pinfo, sizeof(pinfo));
@@ -91,8 +95,8 @@ int resizeExt4Partition (const char * partitionPath, int64_t newByteSize) {
 
     char args[PATH_MAX * 2 + 1];
     copied = snprintf(args, sizeof(args), "resize2fs.exe -f %s %s",
-                 Win32Utils::quoteCommandLine(partitionPath).c_str(),
-                 size_in_MB);
+                      Win32Utils::quoteCommandLine(partitionPath).c_str(),
+                      size_in_MB);
     args[sizeof(args) - 1] = '\0';
     if (copied < 0 || copied >= sizeof(args)) {
         fprintf(stderr, "ERROR: failed to format resize2fs command\n");
@@ -100,24 +104,27 @@ int resizeExt4Partition (const char * partitionPath, int64_t newByteSize) {
     }
 
     BOOL success = CreateProcess(
-        Win32Utils::quoteCommandLine(executable.c_str()).c_str(), /* program path */
-        args,                                                /* command line args */
-        NULL,                                /* process handle is not inheritable */
-        NULL,                                 /* thread handle is not inheritable */
-        FALSE,                                   /* no, don't inherit any handles */
-        CREATE_NO_WINDOW,               /* the new process doesn't have a console */
-        NULL,                                   /* use parent's environment block */
-        NULL,                                  /* use parent's starting directory */
-        &startup,                               /* startup info, i.e. std handles */
-        &pinfo);
+            Win32Utils::quoteCommandLine(executable.c_str())
+                    .c_str(), /* program path */
+            args,             /* command line args */
+            NULL,             /* process handle is not inheritable */
+            NULL,             /* thread handle is not inheritable */
+            FALSE,            /* no, don't inherit any handles */
+            CREATE_NO_WINDOW, /* the new process doesn't have a console */
+            NULL,             /* use parent's environment block */
+            NULL,             /* use parent's starting directory */
+            &startup,         /* startup info, i.e. std handles */
+            &pinfo);
     if (!success) {
-        explainSystemErrors("failed to create process while resizing partition");
+        explainSystemErrors(
+                "failed to create process while resizing partition");
         return -2;
     }
 
     WaitForSingleObject(pinfo.hProcess, INFINITE);
     if (!GetExitCodeProcess(pinfo.hProcess, &exitCode)) {
-        explainSystemErrors("couldn't get exit code from resizing partition process");
+        explainSystemErrors(
+                "couldn't get exit code from resizing partition process");
         CloseHandle(pinfo.hProcess);
         CloseHandle(pinfo.hThread);
         return -2;
@@ -131,11 +138,12 @@ int resizeExt4Partition (const char * partitionPath, int64_t newByteSize) {
     pid_t child = fork();
 
     if (child < 0) {
-        explainSystemErrors("couldn't create a child process to resize the partition");
+        explainSystemErrors(
+                "couldn't create a child process to resize the partition");
         return -2;
-    }else if (child == 0) {
+    } else if (child == 0) {
         execlp(executable.c_str(), executable.c_str(), "-f", partitionPath,
-            size_in_MB, NULL);
+               size_in_MB, NULL);
         exit(-1);
     }
 
@@ -146,19 +154,20 @@ int resizeExt4Partition (const char * partitionPath, int64_t newByteSize) {
         }
     }
 #endif
-    if(exitCode != 0) {
+    if (exitCode != 0) {
         fprintf(stderr, "ERROR: resizing partition failed with exit code %d\n",
-            exitCode);
+                exitCode);
         return exitCode;
     }
     return 0;
 }
 
-bool checkExt4PartitionSize (int64_t byteSize) {
-    uint64_t maxSizeMB = 16 * 1024 * 1024; // (16 TiB) * (1024 GiB / TiB) * (1024 MiB / GiB)
+bool checkExt4PartitionSize(int64_t byteSize) {
+    uint64_t maxSizeMB =
+            16 * 1024 * 1024;  // (16 TiB) * (1024 GiB / TiB) * (1024 MiB / GiB)
     uint64_t minSizeMB = 128;
     uint64_t sizeMB = convertBytesToMB(byteSize);
 
-    //compiler converts signed to unsigned
+    // compiler converts signed to unsigned
     return (sizeMB >= minSizeMB) && (sizeMB <= maxSizeMB);
 }

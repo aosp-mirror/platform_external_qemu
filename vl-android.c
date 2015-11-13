@@ -51,7 +51,7 @@
 #include "android/camera/camera-service.h"
 #include "android/curl-support.h"
 #include "android/emulation/bufprint_config_dirs.h"
-#include "android/ext4_resize.h"
+#include "android/filesystems/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
 #include "android/filesystems/fstab_parser.h"
 #include "android/filesystems/partition_types.h"

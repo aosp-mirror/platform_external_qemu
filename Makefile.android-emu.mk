@@ -76,7 +76,11 @@ ANDROID_EMU_BASE_SOURCES := \
     android/base/threads/ThreadStore.cpp \
     android/base/Uri.cpp \
     android/base/Version.cpp \
-    android/ext4_resize.cpp \
+    android/filesystems/ext4_resize.cpp \
+    android/filesystems/ext4_utils.cpp \
+    android/filesystems/fstab_parser.cpp \
+    android/filesystems/partition_types.cpp \
+    android/filesystems/ramdisk_extractor.cpp \
     android/utils/aconfig-file.c \
     android/utils/assert.c \
     android/utils/bufprint.c \
@@ -199,10 +203,6 @@ ANDROID_EMU_DEPENDENT_SOURCES := \
     android/android-constants.c \
     android/cmdline-option.c \
     android/cpu_accelerator.cpp \
-    android/filesystems/ext4_utils.cpp \
-    android/filesystems/fstab_parser.cpp \
-    android/filesystems/partition_types.cpp \
-    android/filesystems/ramdisk_extractor.cpp \
     android/help.c \
     android/main-common.c \
     android/qemu-setup.c \

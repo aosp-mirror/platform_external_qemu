@@ -33,7 +33,7 @@ ANDROID_BEGIN_HEADER
 //    -1 - indicating that formatting the arguments failed
 //    -2 - indicating a system call went wrong
 //    Otherwise the exit code of the resize2fs process is returned.
-int resizeExt4Partition(const char * partitionPath, int64_t newByteSize);
+int resizeExt4Partition(const char* partitionPath, int64_t newByteSize);
 
 // Returns true if |byteSize| is a valid ext4 partition size; i.e. within the
 // range of 128 MiB and 16 TiB inclusive, false otherwise.
@@ -42,6 +42,6 @@ int resizeExt4Partition(const char * partitionPath, int64_t newByteSize);
 // systems the partition limit is reduced to 16 TiB due to the data range
 // of 32-bits, so enforce 16 TiB to minimize differences between systems of
 // different bitness.  The minimum size of an ext4 partition is 128 MiB.
-bool checkExt4PartitionSize (int64_t byteSize);
+bool checkExt4PartitionSize(int64_t byteSize);
 
 ANDROID_END_HEADER
