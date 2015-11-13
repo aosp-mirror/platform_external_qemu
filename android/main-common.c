@@ -58,6 +58,8 @@ void reassign_string(char** string, const char* new_value) {
     *string = ASTRDUP(new_value);
 }
 
+#define ONE_MB (1024 * 1024)
+
 unsigned convertBytesToMB( uint64_t  size )
 {
     if (size == 0)
