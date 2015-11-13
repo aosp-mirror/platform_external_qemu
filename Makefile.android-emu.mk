@@ -116,7 +116,7 @@ ANDROID_EMU_BASE_SOURCES := \
     android/utils/uri.cpp \
     android/utils/utf8_utils.cpp \
     android/utils/vector.c \
-    android/utils/x86_cpuid.c \
+    android/utils/x86_cpuid.cpp \
 
 ifeq ($(HOST_OS),windows)
     ANDROID_EMU_BASE_SOURCES += \

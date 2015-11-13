@@ -71,5 +71,33 @@ TEST(x86_cpuid, Default) {
     }
 }
 
+TEST(android_get_x86_cpuid_vendor_id_is_vmhost,Test) {
+    EXPECT_TRUE(android_get_x86_cpuid_vendor_id_is_vmhost("KVMKVMKVM"));
+    EXPECT_TRUE(android_get_x86_cpuid_vendor_id_is_vmhost("Microsoft Hv"));
+    EXPECT_TRUE(android_get_x86_cpuid_vendor_id_is_vmhost("VMwareVMware"));
+    EXPECT_TRUE(android_get_x86_cpuid_vendor_id_is_vmhost("XenVMMXenVMM"));
+    EXPECT_FALSE(android_get_x86_cpuid_vendor_id_is_vmhost("GenuineIntel"));
+}
+
+TEST(android_get_x86_cpuid_vmx_support,Test) {
+    // These might fail if you have an AMD, Atom processor or an incredibly
+    // old Intel processor
+    EXPECT_LE(0x80000001, android_get_x86_cpuid_extended_function_max());
+    EXPECT_TRUE(android_get_x86_cpuid_vmx_support() ||
+                android_get_x86_cpuid_svm_support());
+    EXPECT_TRUE(android_get_x86_cpuid_nx_support());
+}
+
+TEST(android_get_x86_cpuid_vendor_id,Test) {
+    char vendor_id[16];
+    android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
+
+    EXPECT_TRUE(
+                android_get_x86_cpuid_vendor_id_is_vmhost(vendor_id) ||
+                strcmp(vendor_id, "GenuineIntel") == 0 ||
+                strcmp(vendor_id, "AuthenticAMD") == 0
+                );
+}
+
 }  // namespace utils
 }  // namespace android
