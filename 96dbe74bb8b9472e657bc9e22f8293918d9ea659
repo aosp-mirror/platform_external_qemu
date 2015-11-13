@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "b6da7ea7_955c07cc",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b688bda5_e2dce8f9",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "166509c4_5daacf47",
         "filename": "Makefile.qemu1-common.mk",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-30T22:03:53Z",
       "side": 1,
       "message": "nit: android/utils/ is supposed to be a wrapper above system APIs, and should not be concerned about QEMU / emulation / something else. Maybe move this to android/windows_installer.cpp instead?",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76d4867d_e6be7b21",
+        "filename": "Makefile.qemu1-common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "166509c4_5daacf47",
       "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "5b25eb9e_d60d44be",
+        "filename": "android/cpu_accelerator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d685318b_80e5d63f",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f66795cb_5cbe51e9",
         "filename": "android/cpu_accelerator.h",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2015-10-30T22:03:53Z",
       "side": 1,
       "message": "nit: For the sake of consistency better name the enum and macros similarly, e.g.:\n\n  typedef enum {\n      ANDROID_CPU_ACCELERATION_OK \u003d 0,\n      ANDROID_CPU_ACCELERATION_NESTED_NOT_SUPPORTED \u003d 1,\n     ....\n  } AndroidCpuAcceleration;",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b0e2f2a_cb30f52c",
+        "filename": "android/cpu_accelerator.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f66795cb_5cbe51e9",
       "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "b6da7ea7_d54ddf1b",
+        "filename": "android/cpu_accelerator.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f66795cb_7cbb15f8",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "768ac5a0_3ddb4f87",
         "filename": "android/emulation/CpuAccelerator.cpp",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2015-10-30T22:03:53Z",
       "side": 1,
       "message": "nit: spaces around binary operator like \"+\". git clang-format will take care of these.",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb2e9f8f_ce7803d5",
+        "filename": "android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "768ac5a0_3ddb4f87",
       "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -127,6 +235,30 @@
     },
     {
       "key": {
+        "uuid": "76d4867d_463b077a",
+        "filename": "android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "167c2956_226b2e1e",
+      "range": {
+        "startLine": 483,
+        "startChar": 14,
+        "endLine": 483,
+        "endChar": 29
+      },
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b6627eec_e98615ca",
         "filename": "android/emulation/CpuAccelerator.cpp",
         "patchSetId": 3
@@ -138,6 +270,24 @@
       "writtenOn": "2015-10-30T22:03:53Z",
       "side": 1,
       "message": "nit: this assignment doesn\u0027t seem to serve any purpose.",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6a6b626_77e87bd0",
+        "filename": "android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "It is used to confirm that at least one character was consumed.  Otherwise strtoul(\"a\", 0, 10); will return 0 and you won\u0027t know that\u0027s because no characters were consumed.",
+      "parentUuid": "b6627eec_e98615ca",
       "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -161,6 +311,24 @@
     },
     {
       "key": {
+        "uuid": "76d4867d_c96388c1",
+        "filename": "android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "166509c4_7da7937e",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "569941f8_3fd423cd",
         "filename": "android/emulation/CpuAccelerator.cpp",
         "patchSetId": 3
@@ -172,6 +340,24 @@
       "writtenOn": "2015-10-30T22:03:53Z",
       "side": 1,
       "message": "the documentation doesn\u0027t indicate that VERSION\u003d0.0.0 is invalid. Is this really what you mean?",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6da7ea7_95e1a71e",
+        "filename": "android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 512,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "569941f8_3fd423cd",
       "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -212,6 +398,24 @@
     },
     {
       "key": {
+        "uuid": "1b3453db_6f8a2d94",
+        "filename": "android/emulation/CpuAccelerator.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "768ac5a0_fdf807e9",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "768ac5a0_1dde9376",
         "filename": "android/emulation/CpuAccelerator.h",
         "patchSetId": 3
@@ -223,6 +427,24 @@
       "writtenOn": "2015-10-30T22:03:53Z",
       "side": 1,
       "message": "nit: C++ function names are smallCamelCase() with a possible underscore to separate a type name and a verb/method name, otherwise all_small_caps() for C code only.\n\nDon\u0027t put Darwin in the name, use #ifdef __APPLE__ in the declaration instead to hide this from non-Darwin builds.",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb3987d2_9a091141",
+        "filename": "android/emulation/CpuAccelerator.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "768ac5a0_1dde9376",
       "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -246,6 +468,24 @@
     },
     {
       "key": {
+        "uuid": "b6da7ea7_5c9f54d1",
+        "filename": "android/emulation/CpuAccelerator.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "968f39ad_9e761d06",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b688bda5_02e2acb2",
         "filename": "android/main-emulator.c",
         "patchSetId": 3
@@ -257,6 +497,42 @@
       "writtenOn": "2015-10-30T22:03:53Z",
       "side": 1,
       "message": "nit: space after comma.",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b25eb9e_aa7db74a",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b688bda5_02e2acb2",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b3453db_6fd8eda3",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b688bda5_02e2acb2",
       "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -286,6 +562,30 @@
     },
     {
       "key": {
+        "uuid": "96d1fa8e_a82bb029",
+        "filename": "android/utils/windows_installer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "569941f8_7fceab3e",
+      "range": {
+        "startLine": 10,
+        "startChar": 15,
+        "endLine": 10,
+        "endChar": 21
+      },
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "569941f8_5fd1efdb",
         "filename": "android/utils/windows_installer.cpp",
         "patchSetId": 3
@@ -297,6 +597,24 @@
       "writtenOn": "2015-10-30T22:03:53Z",
       "side": 1,
       "message": "shouldn\u0027t you call RegCloseKey(hProductsKey) here? What about a helper ScopedRegKey class to perform that automatically on scope exit?",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb2e9f8f_6e4fcf13",
+        "filename": "android/utils/windows_installer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "569941f8_5fd1efdb",
       "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -320,6 +638,24 @@
     },
     {
       "key": {
+        "uuid": "5b25eb9e_0a870b81",
+        "filename": "android/utils/windows_installer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3694cdc0_9e40d9d2",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "166509c4_9d746790",
         "filename": "android/utils/windows_installer.cpp",
         "patchSetId": 3
@@ -331,6 +667,24 @@
       "writtenOn": "2015-10-30T22:03:53Z",
       "side": 1,
       "message": "what about RegCloseKey(hProductsKey) ?",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b2597a9_b38520ef",
+        "filename": "android/utils/windows_installer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "166509c4_9d746790",
       "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -354,6 +708,24 @@
     },
     {
       "key": {
+        "uuid": "b6da7ea7_174bf75e",
+        "filename": "android/utils/windows_installer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d685318b_a012dadd",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b6627eec_c98351b8",
         "filename": "android/utils/windows_installer.h",
         "patchSetId": 3
@@ -365,6 +737,24 @@
       "writtenOn": "2015-10-30T22:03:53Z",
       "side": 1,
       "message": "nit: getVersion()",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb2e9f8f_6ef46ff5",
+        "filename": "android/utils/windows_installer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b6627eec_c98351b8",
       "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -388,6 +778,24 @@
     },
     {
       "key": {
+        "uuid": "fb2e9f8f_4ef9b3e9",
+        "filename": "android/utils/x86_cpuid.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b6627eec_297d4d97",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "569941f8_9f8b77f4",
         "filename": "android/utils/x86_cpuid.h",
         "patchSetId": 3
@@ -405,6 +813,24 @@
     },
     {
       "key": {
+        "uuid": "16c50ace_24d4073a",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "569941f8_9f8b77f4",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "968f39ad_be7bd9ec",
         "filename": "distrib/mini-glib/src/glib-mini-win32.c",
         "patchSetId": 3
@@ -416,6 +842,24 @@
       "writtenOn": "2015-10-30T22:03:53Z",
       "side": 1,
       "message": "This doesn\u0027t seem to be used anymore?",
+      "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b3453db_fb581b09",
+        "filename": "distrib/mini-glib/src/glib-mini-win32.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-11-13T04:26:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "968f39ad_be7bd9ec",
       "revId": "96dbe74bb8b9472e657bc9e22f8293918d9ea659",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
