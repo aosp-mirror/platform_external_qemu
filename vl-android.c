@@ -3494,18 +3494,23 @@ int main(int argc, char **argv, char **envp)
      * The GL ES renderer cannot start properly if GPU emulation is disabled
      * because this requires changing the LD_LIBRARY_PATH before launching
      * the emulation engine. */
+    int qemu_gles = 0;
     int opengl_alive = 1;
     if (android_hw->hw_gpu_enabled) {
-        if (android_initOpenglesEmulation() != 0 ||
-            android_startOpenglesRenderer(android_hw->hw_lcd_width,
-                                          android_hw->hw_lcd_height) != 0)
-        {
-            opengl_alive = 0;
+        if (strcmp(android_hw->hw_gpu_mode, "guest") != 0) {
+            if (android_initOpenglesEmulation() != 0 ||
+                android_startOpenglesRenderer(android_hw->hw_lcd_width,
+                                              android_hw->hw_lcd_height) != 0)
+            {
+                opengl_alive = 0;
+            }
+            qemu_gles = 1;   // Using emugl
+        } else {
+            qemu_gles = 2;   // Using guest
         }
     }
-
     if (android_hw->hw_gpu_enabled && opengl_alive) {
-        stralloc_add_str(kernel_params, " qemu.gles=1");
+        stralloc_add_format(kernel_params, " qemu.gles=%d", qemu_gles);
         char  tmp[64];
         snprintf(tmp, sizeof(tmp), "%d", 0x20000);
         boot_property_add("ro.opengles.version", tmp);
