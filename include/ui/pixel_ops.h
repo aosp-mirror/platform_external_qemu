@@ -43,11 +43,11 @@ static inline unsigned int rgb_to_pixel24bgr(unsigned int r, unsigned int g,
 static inline unsigned int rgb_to_pixel32(unsigned int r, unsigned int g,
                                           unsigned int b)
 {
-    return (r << 16) | (g << 8) | b;
+    return (r << 16) | (g << 8) | b | 0xFF000000;
 }
 
 static inline unsigned int rgb_to_pixel32bgr(unsigned int r, unsigned int g,
                                              unsigned int b)
 {
-    return (b << 16) | (g << 8) | r;
+    return (b << 16) | (g << 8) | r | 0xFF000000;
 }

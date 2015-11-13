@@ -22,22 +22,22 @@
  *
  */
 
-#if BITS == 8
+#if DEST_BITS == 8
 #define COPY_PIXEL(to, r, g, b)                    \
     do {                                           \
         *to = rgb_to_pixel8(r, g, b);              \
     } while (0)
-#elif BITS == 15
+#elif DEST_BITS == 15
 #define COPY_PIXEL(to, r, g, b)                    \
     do {                                           \
         *(uint16_t *)to = rgb_to_pixel15(r, g, b); \
     } while (0)
-#elif BITS == 16
+#elif DEST_BITS == 16
 #define COPY_PIXEL(to, r, g, b)                    \
     do {                                           \
         *(uint16_t *)to = rgb_to_pixel16(r, g, b); \
     } while (0)
-#elif BITS == 24
+#elif DEST_BITS == 24
 #define COPY_PIXEL(to, r, g, b)                    \
     do {                                           \
         uint32_t tmp = rgb_to_pixel24(r, g, b);    \
@@ -45,18 +45,19 @@
         to[1] =  (tmp >> 8) & 0xff;              \
         to[2] = (tmp >> 16) & 0xff;              \
     } while (0)
-#elif BITS == 32
+#elif DEST_BITS == 32
 #define COPY_PIXEL(to, r, g, b)                    \
     do {                                           \
         *(uint32_t *)to = rgb_to_pixel32(r, g, b); \
     } while (0)
 #else
-#error unknown bit depth
+#error unknown dest bit format
 #endif
 
-static void glue(draw_line_, BITS)(void *opaque, uint8_t *d, const uint8_t *s,
+static void glue(glue(draw_line_, SOURCE_BITS), glue(_, DEST_BITS))(void *opaque, uint8_t *d, const uint8_t *s,
         int width, int deststep)
 {
+#if SOURCE_BITS == 16
     uint16_t rgb565;
     uint8_t r, g, b;
 
@@ -69,7 +70,24 @@ static void glue(draw_line_, BITS)(void *opaque, uint8_t *d, const uint8_t *s,
         d += deststep;
         s += 2;
     }
+#elif SOURCE_BITS == 32
+    uint32_t rgbx8888;
+    uint8_t r, g, b;
+
+    while (width--) {
+        rgbx8888 = *(uint32_t*)(s);
+        b = ((rgbx8888 >> 16) & 0xff);
+        g = ((rgbx8888 >>  8) & 0xff);
+        r = ((rgbx8888 >>  0) & 0xff);
+        COPY_PIXEL(d, r, g, b);
+        d += deststep;
+        s += 4;
+    }
+#else
+#error unknown source bit format
+#endif
 }
 
-#undef BITS
+#undef DEST_BITS
+#undef SOURCE_BITS
 #undef COPY_PIXEL
