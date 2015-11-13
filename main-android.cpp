@@ -1311,7 +1311,7 @@ extern "C" int main(int argc, char **argv) {
     uiEmuAgent.settings = NULL;
 
     /* Setup SDL UI just before calling the code */
-#ifdef __linux__
+#ifndef _WIN32
     sigset_t set;
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, NULL);
