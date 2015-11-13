@@ -116,7 +116,7 @@ extern char*  path_dirname( const char*  path );
 extern char*  path_basename( const char*  path );
 
 /* look for a given executable in the system path and return its full path.
- * Returns NULL if not found. Note that on Windows this doesn't not append
+ * Returns NULL if not found. Note that on Windows this doesn't append
  * an .exe prefix, or other magical thing like Cygwin usually does.
  */
 extern char*  path_search_exec( const char* filename );

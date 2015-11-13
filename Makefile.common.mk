@@ -66,6 +66,7 @@ include $(LOCAL_PATH)/Makefile.qemu-launcher.mk
 ifeq ($(HOST_BITS),$(EMULATOR_PROGRAM_BITNESS))
 $(call start-emulator-program, emulator)
 LOCAL_SRC_FILES := \
+    android/cpu_accelerator.cpp \
     android/main-emulator.c \
 
 ifdef EMULATOR_USE_QT

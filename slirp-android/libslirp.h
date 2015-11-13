@@ -8,7 +8,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #ifdef _WIN32
-#  define WIN32_LEAN_AND_MEAN
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
 #  define socket_close  winsock2_socket_close3
 #  include <winsock2.h>
 #  undef socket_close
