@@ -60,7 +60,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         mZoomFactor(1.0),
         mInZoomMode(false),
         mNextIsZoom(false),
-        mGrabKeyboardInput(true),
+        mGrabKeyboardInput(false),
         mMouseInside(false),
         mMainLoopThread(nullptr)
 {
