@@ -83,7 +83,6 @@ private:
     QBoxLayout *top_layout;
     const struct UiEmuAgent *uiEmuAgent;
     Ui::ToolControls *toolsUi;
-    QErrorMessage mErrorMessage;
     QProcess mInstallProcess;
     QProcess mPushProcess;
     QProgressDialog mPushDialog;
