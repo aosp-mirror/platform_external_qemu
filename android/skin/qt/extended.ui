@@ -118,7 +118,7 @@ font-family: &quot;Roboto&quot;</string>
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignRight|AlignVCenter</set>
+       <set>AlignTrailing|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -133,7 +133,7 @@ font-family: &quot;Roboto&quot;</string>
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignRight|AlignVCenter</set>
+       <set>AlignTrailing|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -148,7 +148,7 @@ font-family: &quot;Roboto&quot;</string>
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignRight|AlignVCenter</set>
+       <set>AlignTrailing|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -163,7 +163,7 @@ font-family: &quot;Roboto&quot;</string>
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignRight|AlignVCenter</set>
+       <set>AlignTrailing|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -178,7 +178,7 @@ font-family: &quot;Roboto&quot;</string>
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignRight|AlignVCenter</set>
+       <set>AlignTrailing|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -193,7 +193,7 @@ font-family: &quot;Roboto&quot;</string>
        </font>
       </property>
       <property name="textAlignment">
-       <set>AlignRight|AlignVCenter</set>
+       <set>AlignTrailing|AlignVCenter</set>
       </property>
      </column>
     </widget>
@@ -2034,9 +2034,9 @@ font-family: &quot;Roboto&quot;</string>
     <widget class="QTabWidget" name="help_tabs">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>10</x>
        <y>0</y>
-       <width>560</width>
+       <width>600</width>
        <height>570</height>
       </rect>
      </property>
@@ -2050,10 +2050,10 @@ font-family: &quot;Roboto&quot;</string>
       <widget class="QTableWidget" name="shortcutsTableWidget">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>50</y>
-         <width>650</width>
-         <height>660</height>
+         <x>10</x>
+         <y>10</y>
+         <width>580</width>
+         <height>520</height>
         </rect>
        </property>
        <property name="focusPolicy">
@@ -2094,7 +2094,7 @@ font-family: &quot;Roboto&quot;</string>
          <string>Command</string>
         </property>
         <property name="textAlignment">
-         <set>AlignLeft|AlignVCenter</set>
+         <set>AlignLeading|AlignVCenter</set>
         </property>
        </column>
        <column>
@@ -2102,7 +2102,7 @@ font-family: &quot;Roboto&quot;</string>
          <string>Key</string>
         </property>
         <property name="textAlignment">
-         <set>AlignLeft|AlignVCenter</set>
+         <set>AlignLeading|AlignVCenter</set>
         </property>
        </column>
       </widget>
@@ -2114,8 +2114,8 @@ font-family: &quot;Roboto&quot;</string>
       <widget class="QPushButton" name="help_docs">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>20</y>
+         <x>10</x>
+         <y>10</y>
          <width>140</width>
          <height>36</height>
         </rect>
@@ -2144,8 +2144,8 @@ font-family: &quot;Roboto&quot;</string>
       <widget class="QPushButton" name="help_fileBug">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>60</y>
+         <x>10</x>
+         <y>50</y>
          <width>90</width>
          <height>36</height>
         </rect>
@@ -2174,8 +2174,8 @@ font-family: &quot;Roboto&quot;</string>
       <widget class="QPushButton" name="help_sendFeedback">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>100</y>
+         <x>10</x>
+         <y>90</y>
          <width>130</width>
          <height>36</height>
         </rect>
