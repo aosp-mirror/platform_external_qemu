@@ -89,6 +89,7 @@ EMULATOR_UNITTESTS_SOURCES += \
   android/base/system/Win32UnicodeString_unittest.cpp \
   android/base/system/Win32Utils_unittest.cpp \
   android/utils/win32_cmdline_quote_unittest.cpp \
+  android/windows_installer_unittest.cpp \
 
 endif
 
