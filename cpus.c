@@ -43,10 +43,6 @@
 #include "qapi-event.h"
 #include "hw/nmi.h"
 
-#if defined(USE_ANDROID_EMU)
-#include "android-qemu2-glue/looper-qemu.h"
-#endif
-
 #ifndef _WIN32
 #include "qemu/compatfd.h"
 #endif
@@ -971,10 +967,6 @@ static void *qemu_kvm_cpu_thread_fn(void *arg)
         exit(1);
     }
 
-#if defined(USE_ANDROID_EMU)
-    qemu_looper_setForThread();
-#endif
-
     qemu_kvm_init_cpu_signals(cpu);
 
     /* signal CPU creation */
@@ -1000,10 +992,6 @@ static void *qemu_dummy_cpu_thread_fn(void *arg)
     fprintf(stderr, "qtest is not supported under Windows\n");
     exit(1);
 #else
-
-#if defined(USE_ANDROID_EMU)
-    qemu_looper_setForThread();
-#endif
 
     CPUState *cpu = arg;
     sigset_t waitset;
@@ -1045,10 +1033,6 @@ static void tcg_exec_all(void);
 
 static void *qemu_tcg_cpu_thread_fn(void *arg)
 {
-#if defined(USE_ANDROID_EMU)
-    qemu_looper_setForThread();
-#endif
-
     CPUState *cpu = arg;
 
     qemu_tcg_init_cpu_signals();
@@ -1102,10 +1086,6 @@ static void *qemu_hax_cpu_thread_fn(void *arg)
 
     hax_init_vcpu(cpu);
     qemu_cond_signal(&qemu_cpu_cond);
-
-#if defined(USE_ANDROID_EMU)
-    qemu_looper_setForThread();
-#endif
 
     while (1) {
         if (cpu_can_run(cpu)) {
