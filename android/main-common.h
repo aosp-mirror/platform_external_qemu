@@ -37,8 +37,6 @@ void user_config_done( void );
 
 void user_config_get_window_pos( int *window_x, int *window_y );
 
-#define  ONE_MB  (1024*1024)
-
 unsigned convertBytesToMB( uint64_t  size );
 uint64_t convertMBToBytes( unsigned  megaBytes );
 
