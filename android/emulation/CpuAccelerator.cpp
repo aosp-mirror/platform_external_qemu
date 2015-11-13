@@ -41,6 +41,10 @@
 #include "android/windows_installer.h"
 #endif
 
+#ifdef __APPLE__
+#include "android/emulation/internal/CpuAccelerator.h"
+#endif
+
 // NOTE: This source file must be independent of the rest of QEMU, as such
 //       it should not include / reuse any QEMU source file or function
 //       related to KVM or HAX.
@@ -156,7 +160,7 @@ AndroidCpuAcceleration ProbeKVM(String* status) {
 
 #if HAVE_HAX
 
-#define HAXM_INSTALLER_VERSION_MINIMUM 0x06000001
+#define HAXM_INSTALLER_VERSION_MINIMUM 0x01001005
 
 std::string cpuAcceleratorFormatVersion(int32_t version) {
     if (version < 0) {
@@ -174,10 +178,12 @@ std::string cpuAcceleratorFormatVersion(int32_t version) {
 
 #ifdef __APPLE__
 
+}  // namespace
+
 int32_t cpuAcceleratorParseVersionScript(const std::string& version_script) {
     int32_t result = 0;
-    const char* ver = "VERSION=";
-    constexpr size_t ver_len = strlen(ver_len);
+    const char ver[] = "VERSION=";
+    const size_t ver_len = sizeof(ver) - 1U;
 
     size_t offset = version_script.find(ver);
     if (offset == std::string::npos) {
@@ -190,9 +196,12 @@ int32_t cpuAcceleratorParseVersionScript(const std::string& version_script) {
     const int value_max[kValueCountMax] = {127, 255, 65535};
     for (int i = 0; i < kValueCountMax; i++) {
         const char* end = pos;
-        unsigned long value = strtoul(version_string.c_str(), (char**)&end, 10);
+        unsigned long value = strtoul(pos, (char**)&end, 10);
         if (pos == end) {
-            // no number was found, ignore the rest
+            // no number was found, error if there was not at least one.
+            if (i == 0) {
+                result = -1;
+            }
             break;
         }
 
@@ -211,7 +220,11 @@ int32_t cpuAcceleratorParseVersionScript(const std::string& version_script) {
             break;
         }
         // advance to next number
-        version_string = std::string(end);
+        pos = end;
+    }
+    // 0 is an invalid version number.
+    if (result == 0) {
+        result = -1;
     }
     return result;
 }
@@ -264,6 +277,8 @@ int32_t cpuAcceleratorGetHaxVersion(const char* kext_dir[],
     // not installed
     return 0;
 }
+
+namespace {
 
 #endif  // __APPLE__
 
@@ -513,8 +528,6 @@ AndroidCpuAcceleration ProbeHAX(String* status) {
 
     if (version < HAXM_INSTALLER_VERSION_MINIMUM) {
         // HAXM was found but version number was too old or missing
-        char version_string[16];
-        char version_min_string[16];
         StringAppendFormat(
                 status, "HAXM must be updated (version %s < %s).",
                 cpuAcceleratorFormatVersion(version).c_str(),
