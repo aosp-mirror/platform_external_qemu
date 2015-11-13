@@ -1,0 +1,326 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b6da7ea7_0b590b3e",
+        "filename": "android/windows_installer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-13T18:40:15Z",
+      "side": 1,
+      "message": "it already includes a header that errors out if _WIN32 is not defined. IMHO this is overkill",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 13
+      },
+      "revId": "bbd6f6b3e56d27c6024a9844c2bc902f95d4cb35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b532b27_0c229be4",
+        "filename": "android/windows_installer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-13T18:40:15Z",
+      "side": 1,
+      "message": "we\u0027ve got a Win32UnicodeString class (recently added by David) which implements exactly this",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 13
+      },
+      "revId": "bbd6f6b3e56d27c6024a9844c2bc902f95d4cb35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b3453db_2699eaec",
+        "filename": "android/windows_installer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-13T18:40:15Z",
+      "side": 1,
+      "message": "this looks like a great candidate for a public Win32 utility method",
+      "range": {
+        "startLine": 53,
+        "startChar": 7,
+        "endLine": 53,
+        "endChar": 22
+      },
+      "revId": "bbd6f6b3e56d27c6024a9844c2bc902f95d4cb35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb3987d2_b07d114b",
+        "filename": "android/windows_installer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-13T18:40:15Z",
+      "side": 1,
+      "message": "this will be very misleading when combined into an outer error formatting:\n\n    if (result !\u003d ERROR_SUCCESS) {\n        String error_string \u003d GetWindowsError(result);\n        printf(\"RegOpenKeyEx failed %li %s\\n\", result, error_string.c_str());\n        return -1;\n    }",
+      "range": {
+        "startLine": 65,
+        "startChar": 7,
+        "endLine": 66,
+        "endChar": 42
+      },
+      "revId": "bbd6f6b3e56d27c6024a9844c2bc902f95d4cb35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b2597a9_a78cb6e7",
+        "filename": "android/windows_installer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-13T18:40:15Z",
+      "side": 1,
+      "message": "System class has something similar already. You could move this code there",
+      "range": {
+        "startLine": 77,
+        "startChar": 4,
+        "endLine": 80,
+        "endChar": 23
+      },
+      "revId": "bbd6f6b3e56d27c6024a9844c2bc902f95d4cb35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b25eb9e_4b6d059b",
+        "filename": "android/windows_installer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-13T18:40:15Z",
+      "side": 1,
+      "message": "please use nullptr (so it becomes 3-line call :) )",
+      "range": {
+        "startLine": 103,
+        "startChar": 50,
+        "endLine": 103,
+        "endChar": 54
+      },
+      "revId": "bbd6f6b3e56d27c6024a9844c2bc902f95d4cb35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b2a4b7b_9db58f0c",
+        "filename": "android/windows_installer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-13T18:40:15Z",
+      "side": 1,
+      "message": "do we really want to unconditionally print messages from this library method?",
+      "range": {
+        "startLine": 107,
+        "startChar": 8,
+        "endLine": 107,
+        "endChar": 14
+      },
+      "revId": "bbd6f6b3e56d27c6024a9844c2bc902f95d4cb35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6da7ea7_8b3cdbbe",
+        "filename": "android/windows_installer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-13T18:40:15Z",
+      "side": 1,
+      "message": "these magic numbers mean something (-1 \u003d failed to get a version, 0 - not present)\nCould you please create public named constants for them?",
+      "range": {
+        "startLine": 175,
+        "startChar": 23,
+        "endLine": 175,
+        "endChar": 25
+      },
+      "revId": "bbd6f6b3e56d27c6024a9844c2bc902f95d4cb35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b25eb9e_cb5235e7",
+        "filename": "android/windows_installer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-13T18:40:15Z",
+      "side": 1,
+      "message": "_WIN32 is defined for both x86 and x64 targets, so it\u0027s fine to only check it",
+      "range": {
+        "startLine": 15,
+        "startChar": 4,
+        "endLine": 15,
+        "endChar": 20
+      },
+      "revId": "bbd6f6b3e56d27c6024a9844c2bc902f95d4cb35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb3987d2_908a0d91",
+        "filename": "android/windows_installer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-13T18:40:15Z",
+      "side": 1,
+      "message": "wrong order of headers (system headers go last)",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 32
+      },
+      "revId": "bbd6f6b3e56d27c6024a9844c2bc902f95d4cb35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b2a4b7b_3da57bdd",
+        "filename": "android/windows_installer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-13T18:40:15Z",
+      "side": 1,
+      "message": "BTW, why do you need String here at all?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 19
+      },
+      "revId": "bbd6f6b3e56d27c6024a9844c2bc902f95d4cb35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b2597a9_67d24ede",
+        "filename": "android/windows_installer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-13T18:40:15Z",
+      "side": 1,
+      "message": "using in header makes String a part of that namespace for everyone including the header.\nAlso, as I remember, we were trying to move to std::string (digit@, please correct me if I\u0027m wrong)",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 19
+      },
+      "revId": "bbd6f6b3e56d27c6024a9844c2bc902f95d4cb35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76d4867d_4dd79b17",
+        "filename": "android/windows_installer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-13T18:40:15Z",
+      "side": 1,
+      "message": "we prefer line comments as per style guide",
+      "range": {
+        "startLine": 30,
+        "startChar": 3,
+        "endLine": 30,
+        "endChar": 6
+      },
+      "revId": "bbd6f6b3e56d27c6024a9844c2bc902f95d4cb35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6da7ea7_2b220f95",
+        "filename": "android/windows_installer_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-13T18:40:15Z",
+      "side": 1,
+      "message": "is this really a test? :)\ncould you please find some Windows app that\u0027s always present to test if getVersion() returns something different from (0, -1) for it?",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 44
+      },
+      "revId": "bbd6f6b3e56d27c6024a9844c2bc902f95d4cb35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
