@@ -26,8 +26,16 @@
 #include "extended-window.h"
 #include "extended-window-styles.h"
 
+#include <QFontMetrics>
 #include <QSettings>
 #include <QtWidgets>
+
+// Helper function to set the contents of a QLineEdit.
+static void setElidedText(QLineEdit* line_edit, const QString& text) {
+    QFontMetrics font_metrics(line_edit->font());
+    line_edit->setText(
+            font_metrics.elidedText(text, Qt::ElideRight, line_edit->width() * 0.9));
+}
 
 void ExtendedWindow::initSettings()
 {
@@ -59,6 +67,7 @@ void ExtendedWindow::initSettings()
     android::base::String  availStr = availableVersion.isValid() ?
                                   availableVersion.toString() : "Unknown";
     mExtendedUi->set_latestVersionBox->setPlainText(availStr.c_str());
+    mExtendedUi->set_saveLocBox->installEventFilter(this);
 }
 
 void ExtendedWindow::completeSettingsInitialization()
@@ -70,9 +79,9 @@ void ExtendedWindow::completeSettingsInitialization()
     mSettingsState.mSavePath = mToolWindow->getScreenshotSaveDirectory();
 
     if (mSettingsState.mSavePath.isEmpty()) {
-        mExtendedUi->set_saveLocBox->setPlainText(tr("None"));
+        mExtendedUi->set_saveLocBox->setText(tr("None"));
     } else {
-        mExtendedUi->set_saveLocBox->setPlainText(mSettingsState.mSavePath);
+        setElidedText(mExtendedUi->set_saveLocBox, mSettingsState.mSavePath);
     }
 
     // Dark/Light theme
@@ -183,16 +192,6 @@ void ExtendedWindow::on_set_folderButton_clicked()
 
     if ( dirName.isEmpty() ) return; // Operation was canceled
 
-    if (dirName.size() >= MAX_PATH) {
-        QString errStr = tr("The path is too long.<br>"
-                            "The maximum is ")
-                         + QString::number(MAX_PATH)
-                         + tr(" characters.");
-
-        mToolWindow->showErrorDialog(errStr, tr("Save location"));
-        return;
-    }
-
     // Check if this path is writable
     QFileInfo fInfo(dirName);
     if ( !fInfo.isDir() || !fInfo.isWritable() ) {
@@ -208,7 +207,7 @@ void ExtendedWindow::on_set_folderButton_clicked()
     QSettings settings;
     settings.setValue(Ui::Settings::SAVE_PATH, dirName);
 
-    mExtendedUi->set_saveLocBox->setPlainText(dirName.toStdString().c_str());
+    setElidedText(mExtendedUi->set_saveLocBox, dirName);
 }
 
 // static member function
@@ -258,4 +257,18 @@ void ExtendedWindow::setButtonEnabled(QPushButton*  theButton,
         QIcon theIcon(resName);
         theButton->setIcon(theIcon);
     }
+}
+
+
+void ExtendedWindow::on_set_saveLocBox_textEdited(const QString&) {
+    mExtendedUi->set_saveLocBox->setText(mSettingsState.mSavePath);
+}
+
+bool ExtendedWindow::eventFilter(QObject* object, QEvent* event) {
+    if (event->type() == QEvent::FocusIn && object == mExtendedUi->set_saveLocBox) {
+        mExtendedUi->set_saveLocBox->setText(mSettingsState.mSavePath);
+    } else if (event->type() == QEvent::FocusOut && object == mExtendedUi->set_saveLocBox) {
+        setElidedText(mExtendedUi->set_saveLocBox, mSettingsState.mSavePath);
+    }
+    return false;
 }

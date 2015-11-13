@@ -85,6 +85,8 @@ private:
 
     typedef enum { Call_Inactive, Call_Active, Call_Held } CallActivity;
 
+    bool eventFilter (QObject* object, QEvent* event) override;
+
     class SettingsState {
     public:
         SettingsTheme mTheme;
@@ -223,6 +225,7 @@ private slots:
     // Settings
     void on_set_folderButton_clicked();
     void on_set_themeBox_currentIndexChanged(int index);
+    void on_set_saveLocBox_textEdited(const QString&);
 
     // Help
     void on_help_docs_clicked();

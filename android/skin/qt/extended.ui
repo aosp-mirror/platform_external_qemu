@@ -1271,7 +1271,7 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -2532,7 +2532,7 @@ font-family: &quot;Roboto&quot;</string>
       <string>Unavailable</string>
      </property>
     </widget>
-    <widget class="QPlainTextEdit" name="set_saveLocBox">
+    <widget class="QLineEdit" name="set_saveLocBox">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -2541,7 +2541,7 @@ font-family: &quot;Roboto&quot;</string>
        <x>324</x>
        <y>92</y>
        <width>240</width>
-       <height>61</height>
+       <height>31</height>
       </rect>
      </property>
      <property name="sizePolicy">
@@ -2550,17 +2550,8 @@ font-family: &quot;Roboto&quot;</string>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAsNeeded</enum>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
      <property name="readOnly">
-      <bool>true</bool>
-     </property>
-     <property name="plainText">
-      <string>Invalid</string>
+      <bool>false</bool>
      </property>
     </widget>
     <widget class="QPushButton" name="set_folderButton">
