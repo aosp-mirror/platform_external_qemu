@@ -75,8 +75,15 @@ void ExtendedWindow::on_sms_sendButton_clicked()
     }
 
     if (mTelephonyAgent && mTelephonyAgent->getModem) {
+        AModem modem = mTelephonyAgent->getModem();
+        if (modem == NULL) {
+            mToolWindow->showErrorDialog(tr("Cannot send message, modem emulation not running."),
+                                         tr("SMS"));
+            return;
+        }
+
         for (int idx = 0; pdus[idx] != NULL; idx++) {
-            amodem_receive_sms(mTelephonyAgent->getModem(), pdus[idx]);
+            amodem_receive_sms(modem, pdus[idx]);
         }
     }
 
