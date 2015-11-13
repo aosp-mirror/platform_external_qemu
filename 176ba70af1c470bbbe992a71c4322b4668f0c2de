@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "fb2e9f8f_859e5677",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-13T21:53:36Z",
+      "side": 1,
+      "message": "Great. This will dramatically simplify things since we no longer have to depend on the \"event\" part of layout files, which may actually save us from the \"invalidation\" of old skin files.",
+      "parentUuid": "96865a95_49b05903",
+      "range": {
+        "startLine": 101,
+        "startChar": 4,
+        "endLine": 101,
+        "endChar": 76
+      },
+      "revId": "176ba70af1c470bbbe992a71c4322b4668f0c2de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b25eb9e_8a155b8f",
         "filename": "android/skin/window.c",
         "patchSetId": 1
