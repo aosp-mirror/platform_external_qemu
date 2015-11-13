@@ -146,7 +146,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     ::free(zBuff);
 
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
@@ -311,11 +311,6 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
     s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
     unbindFbo();
 
-    // TODO: re-generating mipmaps here fixes a very bad flickering issue
-    // in Google Maps app. It is not entirely clear why yet, see
-    // https://code.google.com/p/android/issues/detail?id=192514 for details.
-    regenerateTexMipmaps();
-
     return true;
 }
 
@@ -355,7 +350,6 @@ bool ColorBuffer::bindToRenderbuffer() {
 
 bool ColorBuffer::post(float rotation, float dx, float dy) {
     // NOTE: Do not call m_helper->setupContext() here!
-    regenerateTexMipmaps();
     return m_helper->getTextureDraw()->draw(m_tex, rotation, dx, dy);
 }
 
@@ -370,11 +364,3 @@ void ColorBuffer::readback(unsigned char* img) {
         unbindFbo();
     }
 }
-
-void ColorBuffer::regenerateTexMipmaps() {
-    s_gles2.glActiveTexture(GL_TEXTURE0);
-    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
-    s_gles2.glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
-    s_gles2.glGenerateMipmap(GL_TEXTURE_2D);
-}
-
