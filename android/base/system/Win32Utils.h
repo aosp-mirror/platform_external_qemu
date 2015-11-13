@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <windows.h>
+
 #include "android/base/String.h"
 
 #ifndef _WIN32
@@ -47,6 +49,9 @@ public:
 // of |commandLine| that can be decoded properly by CommandLineToArgv().
 static String quoteCommandLine(const char* commandLine);
 
+// Creates a UTF-8 encoded error message string from a Windows System Error
+// Code.  String returned depends on current language id.  See FormatMessage.
+static String getErrorString(DWORD error_code);
 };
 
 }  // namespace base

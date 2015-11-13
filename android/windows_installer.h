@@ -33,11 +33,20 @@ public:
      * Searches
      * "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\
      *    Installer\UserData\S-1-5-18\Products"
-     * For the first product with a "DisplayName" string that matches |productDisplayName|
+     * For the first product with a "DisplayName" string that matches
+     * |productDisplayName|
      * Returns the "Version" DWORD value of that product if found
-     * returns 0 if |productDisplayName| was not found in any DisplayName values
-     * returns -1 if an error occurred
+     * returns kNotInstalled if |productDisplayName| was not found in any
+     * DisplayName values
+     * returns kUnknown if an error occurred
      */
+    enum {
+        // Legal version numbers are positive.  These constants must be
+        // non-positive so (getVersion < min_version) will be true regardless of
+        // whether the package status is not-installed, obsolete or unknown
+        kNotInstalled = 0,
+        kUnknown = -1,  // some error occurred
+    };
     static int32_t getVersion(const char* productDisplayName);
 };
 
