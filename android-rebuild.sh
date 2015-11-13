@@ -182,9 +182,7 @@ export IN_ANDROID_REBUILD_SH=1
 run ./android-configure.sh --out-dir=$OUT_DIR "$@" ||
     panic "Configuration error, please run ./android-configure.sh to see why."
 
-echo "Building sources."
-run make -j$HOST_NUM_CPUS OBJS_DIR="$OUT_DIR" ||
-    panic "Could not build sources, please run 'make' to see why."
+DYLIBS_DIR=$OUT_DIR/build/dylibs
 
 # Copy qemu-android binaries, if any.
 PREBUILTS_DIR=$ANDROID_EMULATOR_PREBUILTS_DIR
@@ -239,7 +237,7 @@ if [ -d "$PREBUILTS_DIR/mesa" ]; then
             fi
             MESA_LIBRARY=$(ls "$PREBUILTS_DIR/mesa/$MESA_HOST-$MESA_ARCH/lib/$LIBNAME" 2>/dev/null || true)
             if [ "$MESA_LIBRARY" ]; then
-                MESA_DSTDIR="$OUT_DIR/$MESA_LIBDIR/gles_mesa"
+                MESA_DSTDIR="$DYLIBS_DIR/$MESA_LIBDIR/gles_mesa"
                 MESA_DSTLIB="$LIBNAME"
                 if [ "$LIBNAME" = "opengl32.dll" ]; then
                     MESA_DSTLIB="mesa_opengl32.dll"
@@ -278,8 +276,8 @@ if [ "$EMULATOR_USE_QT" = "true" ]; then
     for QT_ARCH in x86 x86_64; do
         QT_SRCDIR=$QT_PREBUILTS_DIR/$TARGET_OS-$QT_ARCH
         case $QT_ARCH in
-            x86) QT_DSTDIR=$OUT_DIR/lib/qt;;
-            x86_64) QT_DSTDIR=$OUT_DIR/lib64/qt;;
+            x86) QT_DSTDIR=$DYLIBS_DIR/lib/qt;;
+            x86_64) QT_DSTDIR=$DYLIBS_DIR/lib64/qt;;
             *) panic "Invalid Qt host architecture: $QT_ARCH";;
         esac
         run mkdir -p "$QT_DSTDIR" || panic "Could not create Qt library sub-directory!"
@@ -309,6 +307,11 @@ if [ "$EMULATOR_USE_QT" = "true" ]; then
         done
     done
 fi
+
+echo "Building sources."
+run make -j$HOST_NUM_CPUS OBJS_DIR="$OUT_DIR" ||
+    panic "Could not build sources, please run 'make' to see why."
+
 
 # Copy e2fsprogs binaries.
 E2FSPROGS_DIR=$PREBUILTS_DIR/common/e2fsprogs
