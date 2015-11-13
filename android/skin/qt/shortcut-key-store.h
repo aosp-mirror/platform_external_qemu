@@ -17,22 +17,12 @@
 
 // Provides a generic way of mapping keyboard shortcuts to commands.
 // CommandType must be DefaultConstructable.
-// CommandParser is used to convert QStrings into values of CommandType.
-// Objects of type CommandParser should be callable with a QString and
-// a pointer to CommandType. The result of the call shall be "true" if
-// conversion from QString was successful, false otherwise.
-// The result of the conversion shall be placed into the object pointed
-// to by the second argument. The object pointed to by the second argument
-// shall remain unmodified if the call returns false.
-template <class CommandType, class CommandParser = bool(*)(const QString&, CommandType*)>
+template <class CommandType>
 class ShortcutKeyStore {
     using Container = std::map<QKeySequence, CommandType>;
 public:
     using iterator = typename Container::iterator;
     using const_iterator = typename Container::const_iterator;
-
-    explicit ShortcutKeyStore (const CommandParser& command_parser) :
-        mCommandParser(command_parser) {}
 
     // Initialize the shortcut key store from a text stream.
     // The stream should contain zero or more shortcut specifications.
@@ -41,17 +31,26 @@ public:
     //  <KEY_SEQUENCE> <COMMAND>
     // where <KEY_SEQUENCE> is a string representation of a key sequence
     // parsable by QKeySequence and <COMMAND> is a string parsable by
-    // a CommandParser.
+    // invoking operator() on an instance of CommandParser.
+    // CommandParser is used to convert QStrings into values of CommandType.
+    // Objects of type CommandParser should be callable with a QString and
+    // a pointer to CommandType. The result of the call shall be "true" if
+    // conversion from QString was successful, false otherwise.
+    // The result of the conversion shall be placed into the object pointed
+    // to by the second argument. The object pointed to by the second argument
+    // shall remain unmodified if the call returns false.
     // This function will continue reading shortcut specifications from
     // the stream until the stream ends or it encounters an error.
-    void populateFromTextStream(QTextStream& stream) {
+    template <class CommandParser = bool(*)(const QString&, CommandType*)>
+    void populateFromTextStream(QTextStream& stream,
+                                const CommandParser& command_parser) {
         QString key_seq_str, command_str;
         while (!stream.atEnd()) {
             stream >> key_seq_str >> command_str;
             auto key_seq = QKeySequence::fromString(key_seq_str);
             CommandType command;
             bool command_parse_result =
-                mCommandParser(command_str, &command);
+                command_parser(command_str, &command);
             if (!command_parse_result || key_seq.isEmpty()) {
                 break;
             } else {
@@ -86,7 +85,6 @@ public:
     const_iterator end() const { return mKeySequenceToCommandMap.end(); }
 
 private:
-    CommandParser mCommandParser;
     Container mKeySequenceToCommandMap;
 };
 

@@ -21,7 +21,16 @@ enum class QtUICommand {
     SHOW_PANE_DPAD,
     SHOW_PANE_SETTINGS,
     TAKE_SCREENSHOT,
-    ENTER_ZOOM
+    ENTER_ZOOM,
+    GRAB_KEYBOARD,
+    VOLUME_UP,
+    VOLUME_DOWN,
+    POWER,
+    MENU,
+    HOME,
+    BACK,
+    RECENTS,
+    UNGRAB_KEYBOARD
 };
 
 bool parseQtUICommand(const QString& string, QtUICommand* command);

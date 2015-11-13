@@ -72,6 +72,9 @@ public:
     void paintEvent(QPaintEvent *event);
     void show();
     void startThread(StartFunction f, int argc, char **argv);
+    void setGrabKeyboardInput(bool grab) {
+        mGrabKeyboardInput = true;
+    }
 
     /*
      In Qt, signals are normally events of interest that a class can emit, which can be hooked up to arbitrary slots. Here
@@ -165,6 +168,7 @@ public slots:
 
     void slot_screenChanged(QScreen* screen);
 private:
+    bool mouseInside();
     void doResize(const QSize &size);
 
     SkinEvent *createSkinEvent(SkinEventType type);
@@ -321,6 +325,8 @@ private:
     double mZoomFactor;
     bool mInZoomMode;
     bool mNextIsZoom;
+    bool mGrabKeyboardInput;
+    bool mMouseInside;
 
     QProcess mScreencapProcess;
     QProcess mScreencapPullProcess;
