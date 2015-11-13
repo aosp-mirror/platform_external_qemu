@@ -288,6 +288,38 @@ else  # EMULATOR_STRIP_BINARIES != true
 endif # EMULATOR_STRIP_BINARIES != true
 endef
 
+define install-symlink
+_SRC := $(1)
+_DST := $(2)
+EXECUTABLES += $$(_DST)
+$$(_DST): PRIVATE_DST := $$(_DST)
+$$(_DST): PRIVATE_SRC := $$(_SRC)
+$$(_DST): $$(_SRC)
+	@mkdir -p $$(dir $$(PRIVATE_DST))
+	@echo "Install Link: $$(PRIVATE_DST)"
+	$(hide) cp -a $$(PRIVATE_SRC) $$(PRIVATE_DST)
+endef
+
+define install-symbol
+_MODULE := $(1)
+_SYMBOL := $$(patsubst $(BUILD_DIR)/%,$(SYMBOLS_INTERMEDIATE_DIR)/%,$$(_MODULE)).sym
+ifeq (true,$(EMULATOR_GENERATE_SYMBOLS))
+SYMBOLS += $$(_SYMBOL)
+$$(_SYMBOL): PRIVATE_DUMPSYMS := $$(HOST_DUMPSYMS)
+$$(_SYMBOL): PRIVATE_MODULE  := $$(_MODULE)
+$$(_SYMBOL): PRIVATE_SYMBOL  := $$(_SYMBOL)
+$$(_SYMBOL): $$(_MODULE)
+	@echo "Install Symbol: $$(_SYMBOL)"
+	@mkdir -p $$(dir $$(PRIVATE_SYMBOL))
+	$(hide) $$(PRIVATE_DUMPSYMS) $$(PRIVATE_MODULE) > $$(PRIVATE_SYMBOL)
+	SYMB_CODE=`head -n1 $$(PRIVATE_SYMBOL) | cut -d" " -f4` && \
+	SYMB_NAME=`head -n1 $$(PRIVATE_SYMBOL) | cut -d" " -f5` && \
+	echo $$$$SYMB_NAME && \
+	mkdir -p $(SYMBOLS_DIR)/$$$$SYMB_NAME/$$$$SYMB_CODE && \
+	cp $$(PRIVATE_SYMBOL) $(SYMBOLS_DIR)/$$$$SYMB_NAME/$$$$SYMB_CODE
+endif # EMULATOR_GENERATE_SYMBOLS == true
+endef
+
 install-executable = $(eval $(call install-stripped-binary,$1,$2,--strip-all))
 install-shared-library = $(eval $(call install-stripped-binary,$1,$2,--strip-unneeded))
 
