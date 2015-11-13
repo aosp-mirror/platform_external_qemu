@@ -521,6 +521,7 @@ struct PipeDevice {
 
     /* the list of all pipes */
     HwPipe*  pipes;
+    HwPipe*  save_pipes;
 
     /* the list of signalled pipes */
     HwPipe*  signaled_pipes;
@@ -594,6 +595,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         pipe = pipe_new(dev->channel, dev);
         pipe->next = dev->pipes;
         dev->pipes = pipe;
+        dev->save_pipes = dev->pipes;
         dev->status = 0;
         break;
 
@@ -603,6 +605,7 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         *lookup = pipe->next;
         pipe->next = NULL;
         pipe_list_remove_waked(&dev->signaled_pipes, pipe);
+        dev->save_pipes = dev->pipes;
         pipe_free(pipe);
         break;
 
@@ -778,21 +781,22 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
         return dev->status;
 
     case PIPE_REG_CHANNEL:
-        if (dev->signaled_pipes != NULL) {
-            HwPipe* pipe = dev->signaled_pipes;
+        if (dev->pipes != NULL) {
+            HwPipe* pipe = dev->pipes;
             DR("%s: channel=0x%llx wanted=%d", __FUNCTION__,
                (unsigned long long)pipe->channel, pipe->wanted);
             dev->wakes = pipe->wanted;
             pipe->wanted = 0;
-            dev->signaled_pipes = pipe->next_waked;
+            dev->pipes = pipe->next;
             pipe->next_waked = NULL;
-            if (dev->signaled_pipes == NULL) {
+            if (dev->pipes == NULL) {
                 /* android_device_set_irq(&dev->dev, 0, 0); */
                 qemu_set_irq(s->irq, 0);
                 DD("%s: lowering IRQ", __FUNCTION__);
             }
             return (uint32_t)(pipe->channel & 0xFFFFFFFFUL);
         }
+        dev->pipes = dev->save_pipes;
         DR("%s: no signaled channels", __FUNCTION__);
         return 0;
 
@@ -936,3 +940,4 @@ static void android_pipe_register(void)
 }
 
 type_init(android_pipe_register);
+
