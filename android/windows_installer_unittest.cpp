@@ -17,8 +17,12 @@
 namespace android {
 
 TEST(WindowsInstaller, getVersion) {
-    EXPECT_EQ(0, WindowsInstaller::getVersion("Google Play"));
+    EXPECT_EQ(WindowsInstaller::kNotInstalled,
+              WindowsInstaller::getVersion("Google Play"));
 
+    // I know of no package that can be depended on across all Windows versions
+    // especially considering Wine
+    // not really a unit test, visually inspect result
     int32_t version = WindowsInstaller::getVersion(u8"Intel® Hardware Accelerated Execution Manager");
     printf("HAXM version: %08x\n", version);
 }
