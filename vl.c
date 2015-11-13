@@ -4006,6 +4006,13 @@ int run_qemu_main(int argc, const char **argv)
         boot_property_add("qemu.sf.lcd_density", temp);
     }
 
+    /* Set the VM's max heap size, passed as a boot property */
+    if (android_hw->vm_heapSize > 0) {
+        char  temp[64];
+        snprintf(temp, sizeof(temp), "%dm", android_hw->vm_heapSize);
+        boot_property_add("dalvik.vm.heapsize",temp);
+    }
+
 #endif // CONFIG_ANDROID
 
     if (qemu_opts_foreach(qemu_find_opts("sandbox"), parse_sandbox, NULL, 0)) {
