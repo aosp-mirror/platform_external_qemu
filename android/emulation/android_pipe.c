@@ -377,6 +377,17 @@ pipeConnector_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int n
         pipeName = pcon->buffer + 5;
         pipeArgs = strchr(pipeName, ':');
 
+#ifdef ANDROID_QEMU2_SPECIFIC
+        // Qemu2 uses its own implementation of ADB connector, which talks
+        // through raw pipes; make sure the qemud:adb pipes don't go through
+        // qemud multiplexer
+        if (pipeArgs && pipeArgs - pipeName == 5
+                && strncmp(pipeName, "qemud", 5) == 0
+                && strncmp(pipeArgs + 1, "adb", 3) == 0) {
+            pipeArgs = strchr(pipeArgs + 1, ':');
+        }
+#endif
+
         if (pipeArgs != NULL) {
             *pipeArgs++ = '\0';
             if (!*pipeArgs)
@@ -386,13 +397,13 @@ pipeConnector_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int n
         Pipe* pipe = pcon->pipe;
         const PipeService* svc = android_pipe_service_find(pipeName);
         if (svc == NULL) {
-            D("%s: Unknown server!", __FUNCTION__);
+            D("%s: Unknown server with name %s!", __FUNCTION__, pipeName);
             return PIPE_ERROR_INVAL;
         }
 
-        void*  peer = svc->funcs.init(pipe->hwpipe, svc->opaque, pipeArgs);
+        void* peer = svc->funcs.init(pipe->hwpipe, svc->opaque, pipeArgs);
         if (peer == NULL) {
-            D("%s: Initialization failed!", __FUNCTION__);
+            D("%s: Initialization failed for pipe %s!", __FUNCTION__, pipeName);
             return PIPE_ERROR_INVAL;
         }
 
