@@ -45,8 +45,8 @@ int32_t cpuAcceleratorParseVersionScript(
 // returns -1 - HAXM corrupt or too old
 // returns 0x01020004 for version version number e.g. "1.2.4"
 int32_t cpuAcceleratorGetHaxVersion(const char* kext_dir[],
-                                            const size_t kext_dir_count,
-                                            const char* version_file);
+                                    const size_t kext_dir_count,
+                                    const char* version_file);
 
 #endif
 
