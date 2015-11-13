@@ -167,7 +167,7 @@ $(call local-host-define,CC)
 $(call local-host-define,CXX)
 $(call local-host-define,AR)
 $(call local-host-define,LD)
-$(call local-host-define,SYMTOOL)
+$(call local-host-define,DUMPSYMS)
 
 LOCAL_CFLAGS := \
     $$(call local-host-tool,CFLAGS$$(HOST_BITS)) \
@@ -265,5 +265,21 @@ HOST_SUFFIX := 64
 
 include $(LOCAL_PATH)/Makefile.common.mk
 endif
+
+##
+##   PREBUILT_DLLS
+##
+
+LOCAL_BUILD_PREBUILT_DLLS:=  $(shell find $(PREBUILT_DLLS_DIR) -type f -name '*.*')
+LOCAL_PREBUILT_DLLS      :=  $(LOCAL_BUILD_PREBUILT_DLLS:$(PREBUILT_DLLS_DIR)/%=%)
+LOCAL_BUILD_PREBUILT_DLLS_SYMLINKS:=  $(shell find $(PREBUILT_DLLS_DIR) -type l -name '*.*')
+LOCAL_PREBUILT_DLLS_SYMLINKS := $(LOCAL_BUILD_PREBUILT_DLLS_SYMLINKS:$(PREBUILT_DLLS_DIR)/%=%)
+$(foreach prebuilt_dll,$(LOCAL_PREBUILT_DLLS),$(eval $(call install-stripped-binary,\
+    $(PREBUILT_DLLS_DIR)/$(prebuilt_dll),$(OBJS_DIR)/$(prebuilt_dll),--strip-unneeded)))
+$(foreach prebuilt_dll,$(LOCAL_PREBUILT_DLLS_SYMLINKS),$(eval $(call install-symlink,\
+    $(PREBUILT_DLLS_DIR)/$(prebuilt_dll),$(OBJS_DIR)/$(prebuilt_dll))))
+LOCAL_GENERATE_SYMBOLS := true
+$(foreach prebuilt_dll,$(LOCAL_PREBUILT_DLLS),$(eval $(call install-symbol,\
+    $(PREBUILT_DLLS_DIR)/$(prebuilt_dll))))
 
 ## VOILA!!
