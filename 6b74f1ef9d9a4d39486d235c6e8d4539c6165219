@@ -71,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "3b2597a9_47f632bd",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-13T17:48:34Z",
+      "side": 1,
+      "message": "I can\u0027t really perceive any difference in behavior, so I believe this is OK",
+      "parentUuid": "5b2a4b7b_71ffb259",
+      "revId": "6b74f1ef9d9a4d39486d235c6e8d4539c6165219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b6da7ea7_3c5540cf",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 6
