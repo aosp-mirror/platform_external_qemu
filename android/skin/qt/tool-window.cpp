@@ -50,8 +50,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     // Make this more narrow than QtDesigner likes
     this->resize(60, this->height());
 
-    mErrorMessage.setWindowModality(Qt::ApplicationModal);
-
     // Initialize some values in the QCoreApplication so we can easily
     // and consistently access QSettings to save and restore user settings
     QCoreApplication::setOrganizationName(Ui::Settings::ORG_NAME);
@@ -127,8 +125,9 @@ void ToolWindow::show()
 
 void ToolWindow::showErrorDialog(const QString &message, const QString &title)
 {
-    mErrorMessage.setWindowTitle(title);
-    mErrorMessage.showMessage(message);
+    QErrorMessage *err = QErrorMessage::qtHandler();
+    err->setWindowTitle(title);
+    err->showMessage(message);
 }
 
 QString ToolWindow::getAndroidSdkRoot()
