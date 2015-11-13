@@ -29,16 +29,27 @@
 
 BUILD_SYSTEM := android/build
 OBJS_DIR     := objs
-SYMBOLS_DIR  := $(OBJS_DIR)/build/symbols
+BUILD_DIR    := $(OBJS_DIR)/build
 LIBS_DIR     := $(OBJS_DIR)/libs
 CONFIG_MAKE  := $(OBJS_DIR)/build/config.make
 CONFIG_H     := $(OBJS_DIR)/build/config-host.h
+SYMBOLS_DIR  := $(OBJS_DIR)/build/symbols
+PREBUILT_DLLS_DIR   := $(OBJS_DIR)/build/prebuilt_dlls
+PREBUILT_DLLS_MAKE   := $(PREBUILT_DLLS_DIR)/prebuilt_dlls.make
+SYMBOLS_INTERMEDIATE_DIR := $(OBJS_DIR)/build/symbols_intermediate
 
 ifeq ($(wildcard $(CONFIG_MAKE)),)
     $(error "The configuration file '$(CONFIG_MAKE)' doesn't exist, please run the 'android-configure.sh' script")
 endif
 
 include $(CONFIG_MAKE)
+
+ifeq ($(wildcard $(PREBUILT_DLLS_MAKE)),)
+    $(error "The configuration file '$(PREBUILT_DLLS_MAKE)' doesn't exist, please run the 'android-rebuild.sh' script")
+endif
+
+include $(PREBUILT_DLLS_MAKE)
+
 include $(BUILD_SYSTEM)/definitions.make
 
 VPATH := $(OBJS_DIR)
@@ -57,7 +68,7 @@ DEPENDENCY_DIRS :=
 
 all: libraries executables symbols
 EXECUTABLES :=
-SYMBOLS :=
+SYMBOLS     :=
 LIBRARIES   :=
 
 clean: clean-intermediates

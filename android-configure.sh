@@ -700,7 +700,6 @@ echo "BUILD_LD          := $BUILD_LD" >> $config_mk
 echo "BUILD_OBJCOPY     := $BUILD_OBJCOPY" >> $config_mk
 echo "BUILD_CFLAGS      := $BUILD_CFLAGS" >> $config_mk
 echo "BUILD_LDFLAGS     := $BUILD_LDFLAGS" >> $config_mk
-echo "BUILD_DUMPSYMS    := $DUMPSYMS" >> $config_mk
 echo "BUILD_STATIC_FLAGS := $BUILD_STATIC_FLAGS" >> $config_mk
 
 PWD=`pwd`

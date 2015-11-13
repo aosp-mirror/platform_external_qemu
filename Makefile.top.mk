@@ -38,7 +38,6 @@ MY_CXX := $(HOST_CXX)
 MY_LD  := $(HOST_LD)
 MY_AR  := $(HOST_AR)
 MY_WINDRES := $(HOST_WINDRES)
-MY_DUMPSYMS  := $(HOST_DUMPSYMS)
 
 MY_CFLAGS := -g -falign-functions=0
 ifeq ($(BUILD_DEBUG_EMULATOR),true)
@@ -167,7 +166,7 @@ $(call local-host-define,CC)
 $(call local-host-define,CXX)
 $(call local-host-define,AR)
 $(call local-host-define,LD)
-$(call local-host-define,SYMTOOL)
+$(call local-host-define,DUMPSYMS)
 
 LOCAL_CFLAGS := \
     $$(call local-host-tool,CFLAGS$$(HOST_BITS)) \
@@ -265,5 +264,18 @@ HOST_SUFFIX := 64
 
 include $(LOCAL_PATH)/Makefile.common.mk
 endif
+
+##
+##   PREBUILT_DLLS
+##
+
+$(foreach prebuilt_dll,$(PREBUILT_DLL_FILES),$(eval $(call install-stripped-binary,\
+    $(PREBUILT_DLLS_DIR)/$(prebuilt_dll),$(OBJS_DIR)/$(prebuilt_dll),--strip-unneeded)))
+
+$(foreach prebuilt_symlink,$(PREBUILT_DLL_SYMLINKS),$(eval $(call copy-symlink,\
+    $(PREBUILT_DLLS_DIR)/$(prebuilt_symlink),$(OBJS_DIR)/$(prebuilt_symlink))))
+
+$(foreach prebuilt_dll,$(PREBUILT_DLL_FILES),$(eval $(call install-symbol,\
+    $(PREBUILT_DLLS_DIR)/$(prebuilt_dll))))
 
 ## VOILA!!
