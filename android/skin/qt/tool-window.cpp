@@ -109,13 +109,15 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
         "Ctrl+H     HOME\n"
         "Ctrl+R     RECENTS\n"
         "Ctrl+Backspace BACK\n";
-          
+
     QTextStream stream(&default_shortcuts);
     mShortcutKeyStore.populateFromTextStream(stream, parseQtUICommand);
 
     // Need to add this one separately because QKeySequence cannot parse
     // the string "Ctrl+Alt".
-    mShortcutKeyStore.add(QKeySequence(Qt::Key_Alt | Qt::AltModifier | Qt::ControlModifier), QtUICommand::UNGRAB_KEYBOARD);
+    mShortcutKeyStore.add(
+            QKeySequence(Qt::Key_Alt | Qt::AltModifier | Qt::ControlModifier),
+            QtUICommand::UNGRAB_KEYBOARD);
 }
 
 void ToolWindow::show()
@@ -318,15 +320,15 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         uiEmuAgent->userEvents->sendKey(kKeyCodeMenu, down);
         break;
     case QtUICommand::HOME:
-		if ( !strcmp("Generic", android_hw->hw_keyboard_charmap) ) {
-			// The 'Generic' keyboard moved the HOME key! 'Generic' has HOME
-			// on we call HOMEPAGE. Beause 'Generic' is in use, send HOMEPAGE.
+        if ( !strcmp("Generic", android_hw->hw_keyboard_charmap) ) {
+            // The 'Generic' keyboard moved the HOME key! 'Generic' has HOME
+            // on we call HOMEPAGE. Beause 'Generic' is in use, send HOMEPAGE.
             uiEmuAgent->userEvents->sendKey(kKeyCodeHomePage, down);
-		} else {
-			// Not 'Generic'. Assume 'qwerty' (or 'qwerty2') and
-			// send HOME.
+        } else {
+            // Not 'Generic'. Assume 'qwerty' (or 'qwerty2') and
+            // send HOME.
             uiEmuAgent->userEvents->sendKey(kKeyCodeHome, down);
-		}
+        }
         break;
     case QtUICommand::BACK:
         uiEmuAgent->userEvents->sendKey(kKeyCodeBack, down);
@@ -359,8 +361,7 @@ void ToolWindow::dockMainWindow()
 
 void ToolWindow::on_back_button_clicked()
 {
-    handleUICommand(QtUICommand::BACK, true);
-    handleUICommand(QtUICommand::BACK, false);
+    handleUICommand(QtUICommand::BACK);
 }
 
 void ToolWindow::on_close_button_clicked()
@@ -369,8 +370,7 @@ void ToolWindow::on_close_button_clicked()
 }
 void ToolWindow::on_home_button_clicked()
 {
-    handleUICommand(QtUICommand::HOME, true);
-    handleUICommand(QtUICommand::HOME, false);
+    handleUICommand(QtUICommand::HOME);
 }
 
 void ToolWindow::on_minimize_button_clicked()
@@ -380,23 +380,19 @@ void ToolWindow::on_minimize_button_clicked()
 
 void ToolWindow::on_power_button_clicked()
 {
-    handleUICommand(QtUICommand::POWER, true);
-    handleUICommand(QtUICommand::POWER, false);
+    handleUICommand(QtUICommand::POWER);
 }
 void ToolWindow::on_volume_up_button_clicked()
 {
-    handleUICommand(QtUICommand::VOLUME_UP, true);
-    handleUICommand(QtUICommand::VOLUME_UP, false);
+    handleUICommand(QtUICommand::VOLUME_UP);
 }
 void ToolWindow::on_volume_down_button_clicked()
 {
-    handleUICommand(QtUICommand::VOLUME_DOWN, true);
-    handleUICommand(QtUICommand::VOLUME_DOWN, false);
+    handleUICommand(QtUICommand::VOLUME_DOWN);
 }
 void ToolWindow::on_recents_button_clicked()
 {
-    handleUICommand(QtUICommand::RECENTS, true);
-    handleUICommand(QtUICommand::RECENTS, false);
+    handleUICommand(QtUICommand::RECENTS);
 }
 void ToolWindow::on_rotate_CW_button_clicked()
 {
@@ -409,12 +405,10 @@ void ToolWindow::on_rotate_CCW_button_clicked()
 void ToolWindow::on_scrShot_button_clicked()
 {
     handleUICommand(QtUICommand::TAKE_SCREENSHOT, true);
-    emulator_window->screenshot();
 }
 void ToolWindow::on_zoom_button_clicked()
 {
     handleUICommand(QtUICommand::ENTER_ZOOM, true);
-    toolsUi->zoom_button->setDown(emulator_window->isInZoomMode());
 }
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {

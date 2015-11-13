@@ -367,12 +367,11 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-#if CONFIG_QT
+#ifdef CONFIG_QT
     /* The Qt UI handles keyboard shortcuts on its own. Don't load any keyset. */
     SkinKeyset* keyset = skin_keyset_new_from_text("");
     if (!keyset) {
-        fprintf(stderr, "PANIC: default keyset file is corrupted !!\n" );
-        fprintf(stderr, "PANIC: please update the code in android/skin/keyset.c\n" );
+        fprintf(stderr, "PANIC: unable to create empty default keyset!!\n" );
         exit(1);
     }
     skin_keyset_set_default(keyset);
