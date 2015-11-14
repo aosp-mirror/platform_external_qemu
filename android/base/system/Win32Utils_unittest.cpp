@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/system/Win32Utils.h"
+#define _WIN32_WINNT 0x0600
+#include <windows.h>
 
-#include <gtest/gtest.h>
+#include "android/base/system/Win32Utils.h"
+#include "gtest/gtest.h"
 
 namespace android {
 namespace base {
@@ -41,6 +43,24 @@ TEST(Win32Utils, quoteCommandLine) {
       String out = Win32Utils::quoteCommandLine(input);
       EXPECT_STREQ(expected, out.c_str()) << "Quoting '" << input << "'";
   }
+}
+
+TEST(Win32Utils, getErrorString) {
+    LANGID langid = ::GetThreadUILanguage();
+    LANGID kLangIdEnglishUS = 1033;
+    if (kLangIdEnglishUS != langid) {
+        // This test only has US English strings
+        fprintf(stderr,
+                "Win32Utils::getErrorString skipping tests on non-US English "
+                "system (LANGID %i)\n",
+                langid);
+        return;
+    }
+
+    String file_not_found = Win32Utils::getErrorString(2);
+    EXPECT_TRUE(0 == strcmp("The system cannot find the file specified.\r\n",
+                            file_not_found.c_str()) ||
+                0 == strcmp("File not found.\r\n", file_not_found.c_str()));
 }
 
 }  // namespace base

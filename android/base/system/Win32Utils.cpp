@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "android/base/String.h"
+#include "android/base/StringFormat.h"
+#include "android/base/system/Win32UnicodeString.h"
 #include "android/base/system/Win32Utils.h"
-
-#include <string.h>
 
 namespace android {
 namespace base {
@@ -62,6 +63,26 @@ String Win32Utils::quoteCommandLine(const char* commandLine) {
   // Add final quote.
   out += '"';
   return out;
+}
+
+// static
+String Win32Utils::getErrorString(DWORD error_code) {
+    String result;
+
+    LPWSTR error_string = nullptr;
+
+    DWORD format_result = FormatMessageW(
+            FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
+            nullptr, error_code, 0, (LPWSTR)&error_string, 2, nullptr);
+    if (error_string) {
+        result = Win32UnicodeString::convertToUtf8(error_string);
+        ::LocalFree(error_string);
+    } else {
+        StringAppendFormat(&result,
+                           "Error Code: %li (FormatMessage result: %li)",
+                           error_code, format_result);
+    }
+    return result;
 }
 
 }  // namespace base
