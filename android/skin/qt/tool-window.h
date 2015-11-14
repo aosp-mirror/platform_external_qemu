@@ -72,6 +72,14 @@ public:
 
 private:
     void handleUICommand(QtUICommand cmd, bool down);
+
+    // Helper method, calls handleUICommand with
+    // down equal to true and down equal to false.
+    void handleUICommand(QtUICommand cmd) {
+        handleUICommand(cmd, true);
+        handleUICommand(cmd, false);
+    }
+
     QToolButton *addButton(QGridLayout *layout, int row, int col,
                            const char *iconPath, QString tip,
                            EmulatorQtWindowSlot slot);
@@ -81,7 +89,7 @@ private:
     EmulatorQtWindow *emulator_window;
     ExtendedWindow *extendedWindow;
     QBoxLayout *top_layout;
-    const struct UiEmuAgent *uiEmuAgent;
+    const UiEmuAgent *uiEmuAgent;
     Ui::ToolControls *toolsUi;
     QProcess mInstallProcess;
     QProcess mPushProcess;
