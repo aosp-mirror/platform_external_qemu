@@ -523,8 +523,6 @@ struct PipeDevice {
     HwPipe*  pipes;
     HwPipe*  save_pipes;
 
-    /* the list of signalled pipes */
-    HwPipe*  signaled_pipes;
 
     /* i/o registers */
     uint64_t  address;
@@ -604,7 +602,6 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         /* Remove from device's lists */
         *lookup = pipe->next;
         pipe->next = NULL;
-        pipe_list_remove_waked(&dev->signaled_pipes, pipe);
         dev->save_pipes = dev->pipes;
         pipe_free(pipe);
         break;
@@ -801,8 +798,8 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
         return 0;
 
     case PIPE_REG_CHANNEL_HIGH:
-        if (dev->signaled_pipes != NULL) {
-            HwPipe* pipe = dev->signaled_pipes;
+        if (dev->pipes != NULL) {
+            HwPipe* pipe = dev->pipes;
             DR("%s: channel_high=0x%llx wanted=%d", __FUNCTION__,
                (unsigned long long)pipe->channel, pipe->wanted);
             return (uint32_t)(pipe->channel >> 32);
@@ -894,12 +891,6 @@ static void qemu2_android_pipe_wake( void* hwpipe, unsigned flags )
 
     DD("%s: channel=0x%llx flags=%d", __FUNCTION__, (unsigned long long)pipe->channel, flags);
 
-    /* If not already there, add to the list of signaled pipes */
-    lookup = pipe_list_findp_waked(&dev->signaled_pipes, pipe);
-    if (!*lookup) {
-        pipe->next_waked = dev->signaled_pipes;
-        dev->signaled_pipes = pipe;
-    }
     pipe->wanted |= (unsigned)flags;
 
     /* Raise IRQ to indicate there are items on our list ! */
