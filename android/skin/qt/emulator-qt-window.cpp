@@ -632,9 +632,17 @@ void EmulatorQtWindow::doResize(const QSize &size)
     }
 }
 
+#include <time.h>
+void printEventAndTime(SkinEventType type) {
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    printf("Ta9I %llu %llu %d\n", t.tv_sec, t.tv_nsec, type);
+}
 
 void EmulatorQtWindow::handleMouseEvent(SkinEventType type, QMouseEvent *event)
 {
+    printEventAndTime(type);
+
     // See if there is a Qt-specific handler for this mouse event
     if (handleQtMouseEvent(type, event)) return;
 
