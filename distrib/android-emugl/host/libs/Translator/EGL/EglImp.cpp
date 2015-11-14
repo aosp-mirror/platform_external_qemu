@@ -797,7 +797,15 @@ EGLAPI EGLBoolean EGLAPIENTRY eglQueryContext(EGLDisplay display, EGLContext con
     return EGL_TRUE;
 }
 
+#include <time.h>
+void printTime() {
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    printf("Ta9D %ld %ld\n", t.tv_sec, t.tv_nsec);
+}
+
 EGLAPI EGLBoolean EGLAPIENTRY eglSwapBuffers(EGLDisplay display, EGLSurface surface) {
+    printTime();
     VALIDATE_DISPLAY(display);
     VALIDATE_SURFACE(surface,Srfc);
     ThreadInfo* thread        = getThreadInfo();
