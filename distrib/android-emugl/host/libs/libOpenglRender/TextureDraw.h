@@ -42,7 +42,7 @@ public:
     // clockwise rotation angle in degrees (clockwise in the GL Y-upwards
     // coordinate space). |dx,dy| is the translation of the image towards the
     // origin.
-    bool draw(GLuint texture, float rotationDegrees, float dx, float dy);
+    bool draw(GLuint texture, float rotationDegrees, float dx, float dy, float width, float height);
 
 private:
     EGLDisplay mDisplay;
@@ -52,6 +52,8 @@ private:
     GLint mPositionSlot;
     GLint mInCoordSlot;
     GLint mTextureSlot;
+    GLint mWidthSlot;
+    GLint mHeightSlot;
     GLint mRotationSlot;
     GLint mTranslationSlot;
     GLuint mVertexBuffer;

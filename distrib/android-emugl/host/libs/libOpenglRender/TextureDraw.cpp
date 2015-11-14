@@ -77,11 +77,22 @@ const char kVertexShaderSource[] =
 const char kFragmentShaderSource[] =
     "varying lowp vec2 outCoord;\n"
     "uniform sampler2D texture;\n"
-
+    "uniform float width;\n"
+    "uniform float height;\n"
     "void main(void) {\n"
-    "  gl_FragColor = texture2D(texture, outCoord);\n"
-    "}\n";
-
+    "	lowp float step_w = 1.0/width;\n"
+    "	lowp float step_h = 1.0/height;\n"
+    "   lowp vec4 a = texture2D(texture, outCoord+vec2(0, step_h));\n"
+    "   lowp vec4 b = texture2D(texture, outCoord+vec2(step_w, 0));\n"
+    "   lowp vec4 c = texture2D(texture, outCoord+vec2(step_w, step_h));\n"
+    "   lowp vec4 d = texture2D(texture, outCoord);\n"
+    "   lowp float p = outCoord.x*width - floor(outCoord.x*width);\n"
+    "   lowp vec4 row1 = mix(a, c, p);\n"
+    "   lowp vec4 row2 = mix(d, b, p);\n"
+    "   lowp float q = outCoord.y*height - floor(outCoord.y*height);\n"
+    "   gl_FragColor = mix(row1, row2, q);\n"
+    "}";
+    
 // Hard-coded arrays of vertex information.
 struct Vertex {
     float pos[3];
@@ -143,6 +154,8 @@ TextureDraw::TextureDraw(EGLDisplay display) :
     mRotationSlot = s_gles2.glGetUniformLocation(mProgram, "rotation");
     mTranslationSlot = s_gles2.glGetUniformLocation(mProgram, "translation");
     mTextureSlot = s_gles2.glGetUniformLocation(mProgram, "texture");
+    mWidthSlot = s_gles2.glGetUniformLocation(mProgram, "width");
+    mHeightSlot = s_gles2.glGetUniformLocation(mProgram, "height");
 
 #if 0
     printf("SLOTS position=%d inCoord=%d texture=%d rotation=%d\n",
@@ -163,7 +176,7 @@ TextureDraw::TextureDraw(EGLDisplay display) :
                          GL_STATIC_DRAW);
 }
 
-bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
+bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy, float width, float height) {
     if (!mProgram) {
         ERR("%s: no program\n", __FUNCTION__);
         return false;
@@ -217,6 +230,9 @@ bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
     s_gles2.glActiveTexture(GL_TEXTURE0);
     s_gles2.glBindTexture(GL_TEXTURE_2D, texture);
     s_gles2.glUniform1i(mTextureSlot, 0);
+
+    s_gles2.glUniform1f(mWidthSlot, width);
+    s_gles2.glUniform1f(mHeightSlot,height);
 
     // setup the |rotation| uniform value.
     s_gles2.glUniform1f(mRotationSlot, rotation * M_PI / 180.);
