@@ -638,9 +638,17 @@ void EmulatorQtWindow::doResize(const QSize &size)
     }
 }
 
+#include <sys/time.h>
+void printTimeAndType(SkinEventType type) {
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    printf("Ta9I %ld %d %d\n", t.tv_sec, t.tv_usec, type);
+}
 
 void EmulatorQtWindow::handleMouseEvent(SkinEventType type, QMouseEvent *event)
 {
+    printTimeAndType(type);
+
     // See if there is a Qt-specific handler for this mouse event
     if (handleQtMouseEvent(type, event)) return;
 
