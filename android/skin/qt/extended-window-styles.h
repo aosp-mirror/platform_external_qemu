@@ -164,7 +164,7 @@ enum ExtendedWindowPane {
     "QTabWidget::pane {border: none;}" \
     "QTabWidget::tab-bar {left: 0px;}" \
     "QTabBar::tab {background:" THEME##_BKG_COLOR "; padding-bottom:8px;" \
-    "width: 150px; text-align: left}" \
+    "text-align: left; margin-left: 8}" \
     "QTabBar::tab:selected {color:" THEME##_TEXT_COLOR ";" \
         "border-bottom: 2px solid " THEME##_TOOL_COLOR "}" \
     "QTabBar::tab:!selected{color:" THEME##_TITLE_COLOR ";" \

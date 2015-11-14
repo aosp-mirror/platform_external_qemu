@@ -74,10 +74,6 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_SETTINGS, mExtendedUi->settingsButton},
     };
 
-    QFont help_tabs_font= mExtendedUi->help_tabs->font();
-    help_tabs_font.setPointSize(11);
-    mExtendedUi->help_tabs->setFont(help_tabs_font);
-
     move(mParentWindow->geometry().right() + 40,
          mParentWindow->geometry().top()   + 40 );
 }
