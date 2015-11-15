@@ -472,6 +472,28 @@ AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild)
     return ret;
 }
 
+/*
+ * handleCommonEmulatorOptions
+ *
+ * sets values in |hw| based on options set in |opts|
+ *
+ * Some values that may be set:
+ *
+ * kernel_path
+ * hw_cpu_model
+ * kernel_newDeviceNaming
+ * kernel_supportsYaffs2
+ * disk_ramdisk_path
+ * disk_systemPartition_path
+ * disk_systemPartition_initPath
+ * disk_dataPartition_size
+ * disk_cachePartition
+ * disk_cachePartition_path
+ * disk_cachePartition_size
+ * hw_sdCard
+ * hw_sdCard_path
+ * hw_ramSize
+ */
 void handleCommonEmulatorOptions(AndroidOptions* opts,
                                  AndroidHwConfig* hw,
                                  AvdInfo* avd) {

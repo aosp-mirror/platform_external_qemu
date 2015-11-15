@@ -74,7 +74,7 @@ int resizeExt4Partition (const char * partitionPath, int64_t newByteSize) {
     int copied = snprintf(size_in_MB, sizeof(size_in_MB),
         "%uM", convertBytesToMB(newByteSize));
     size_in_MB[sizeof(size_in_MB) - 1] = '\0';
-    if (copied < 0 || copied >= sizeof(size_in_MB)) {
+    if (copied < 0 || static_cast<size_t>(copied) >= sizeof(size_in_MB)) {
         fprintf(stderr, "ERROR: failed to format size in resize2fs command\n");
         return -1;
     }
