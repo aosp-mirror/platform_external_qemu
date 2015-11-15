@@ -17,9 +17,10 @@
 
 #include "android/avd/hw-config.h"
 #include "android/cmdline-option.h"
+#include "android/filesystems/ext4_resize.h"
+#include "android/filesystems/ext4_utils.h"
 #include "android/globals.h"
 #include "android/help.h"
-#include "android/filesystems/ext4_utils.h"
 #include "android/kernel/kernel_utils.h"
 #include "android/main-common.h"
 #include "android/opengl/emugl_config.h"
@@ -416,13 +417,15 @@ extern "C" int main(int argc, char **argv) {
     }
 
     if (opts->version) {
-        printf("Android emulator version %s\n"
-               "Copyright (C) 2006-2011 The Android Open Source Project and many others.\n"
-               "This program is a derivative of the QEMU CPU emulator (www.qemu.org).\n\n",
+      printf("Android emulator version %s\n"
+             "Copyright (C) 2006-2015 The Android Open Source Project and many "
+             "others.\n"
+             "This program is a derivative of the QEMU CPU emulator "
+             "(www.qemu.org).\n\n",
 #if defined ANDROID_BUILD_ID
-               VERSION_STRING " (build_id " STRINGIFY(ANDROID_BUILD_ID) ")" );
+             VERSION_STRING " (build_id " STRINGIFY(ANDROID_BUILD_ID) ")");
 #else
-               VERSION_STRING);
+             VERSION_STRING);
 #endif
         printf("  This software is licensed under the terms of the GNU General Public\n"
                "  License version 2, as published by the Free Software Foundation, and\n"
@@ -1029,6 +1032,9 @@ extern "C" int main(int argc, char **argv) {
                    strerror(errno));
             exit(1);
         }
+
+        resizeExt4Partition(android_hw->disk_dataPartition_path,
+                            android_hw->disk_dataPartition_size);
     }
 
     // Create cache partition image if it doesn't exist already.
