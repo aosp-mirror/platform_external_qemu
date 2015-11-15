@@ -12,8 +12,6 @@
 
 #include "ui_extended.h"
 
-#define __STDC_LIMIT_MACROS
-
 #include "extended-window.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/gps/GpxParser.h"
