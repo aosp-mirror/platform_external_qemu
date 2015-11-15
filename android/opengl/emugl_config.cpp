@@ -40,8 +40,7 @@ static EmuglBackendList* sBackendList = NULL;
 static void resetBackendList(int bitness) {
     delete sBackendList;
     sBackendList = new EmuglBackendList(
-            System::get()->getProgramDirectory().c_str(),
-            bitness);
+            System::get()->getLauncherDirectory().c_str(), bitness);
 }
 
 static bool stringVectorContains(const StringVector& list,

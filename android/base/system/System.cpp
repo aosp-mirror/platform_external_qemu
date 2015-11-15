@@ -111,6 +111,45 @@ public:
         return mProgramDir;
     }
 
+    virtual const String& getLauncherDirectory() const {
+        if (mLauncherDir.empty()) {
+            String programDir = getProgramDirectory();
+
+            String launcherName("emulator");
+#ifdef _WIN32
+            launcherName += ".exe";
+#endif
+            StringVector pathList;
+            pathList.push_back(programDir);
+            pathList.push_back(launcherName);
+            String launcherPath = PathUtils::recompose(pathList);
+
+            if (pathIsFile(launcherPath.c_str())) {
+                mLauncherDir = programDir;
+                return mLauncherDir;
+            }
+
+            // we are probably executing a qemu2 binary, which live in
+            // <launcher-dir>/qemu/<os>-<arch>/
+            // look for the launcher in grandparent directory
+            StringVector programDirVector =
+                    PathUtils::decompose(programDir.c_str());
+            if (programDirVector.size() >= 2) {
+                programDirVector.resize(programDirVector.size() - 2);
+                String grandparentDir = PathUtils::recompose(programDirVector);
+                programDirVector.push_back(launcherName);
+                String launcherPath = PathUtils::recompose(programDirVector);
+                if (pathIsFile(launcherPath.c_str())) {
+                    mLauncherDir = grandparentDir;
+                    return mLauncherDir;
+                }
+            }
+
+            mLauncherDir.assign("<unknown-launcher-dir>");
+        }
+        return mLauncherDir;
+    }
+
     virtual const String& getHomeDirectory() const {
         if (mHomeDir.empty()) {
 #if defined(_WIN32)
@@ -245,7 +284,7 @@ public:
     }
 
     virtual StringVector scanDirEntries(const char* dirPath,
-                                        bool fullPath = false) {
+                                        bool fullPath = false) const {
         StringVector result = scanDirInternal(dirPath);
         if (fullPath) {
             // Pre-pend |dirPath| to each entry.
@@ -330,15 +369,15 @@ public:
         return false;
     }
 
-    virtual bool pathExists(const char* path) {
+    virtual bool pathExists(const char* path) const {
         return pathExistsInternal(path);
     }
 
-    virtual bool pathIsFile(const char* path) {
+    virtual bool pathIsFile(const char* path) const {
         return pathIsFileInternal(path);
     }
 
-    virtual bool pathIsDir(const char* path) {
+    virtual bool pathIsDir(const char* path) const {
         return pathIsDirInternal(path);
     }
 
@@ -492,6 +531,7 @@ public:
 
 private:
     mutable String mProgramDir;
+    mutable String mLauncherDir;
     mutable String mHomeDir;
     mutable String mAppDataDir;
 };
@@ -657,7 +697,7 @@ String System::findBundledExecutable(const char* programName) {
     executableName += ".exe";
 #endif
     StringVector pathList;
-    pathList.push_back(system->getProgramDirectory());
+    pathList.push_back(system->getLauncherDirectory());
     pathList.push_back(kBinSubDir);
     pathList.push_back(executableName);
 
@@ -665,6 +705,7 @@ String System::findBundledExecutable(const char* programName) {
     if (!system->pathIsFile(executablePath.c_str())) {
         executablePath.clear();
     }
+
     return executablePath;
 }
 

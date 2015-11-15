@@ -564,10 +564,10 @@ static void updateLibrarySearchPath(bool is_64bit) {
     char fullPath[PATH_MAX];
     char* tail = fullPath;
 
-    char* programDir = get_program_directory();
-    tail = bufprint(fullPath, fullPath + sizeof(fullPath),
-                    "%s/%s", programDir, libSubDir);
-    free(programDir);
+    char* launcherDir = get_launcher_directory();
+    tail = bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s", launcherDir,
+                    libSubDir);
+    free(launcherDir);
 
     if (tail >= fullPath + sizeof(fullPath)) {
         APANIC("Custom library path too long (clipped) [%s]. "

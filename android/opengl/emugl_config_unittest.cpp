@@ -29,9 +29,8 @@ namespace base {
 
 static String makeLibSubPath(const char* name) {
     return StringFormat("%s/%s/%s",
-                        System::get()->getProgramDirectory().c_str(),
-                        System::kLibSubDir,
-                        name);
+                        System::get()->getLauncherDirectory().c_str(),
+                        System::kLibSubDir, name);
 }
 
 static void makeLibSubDir(TestTempDir* dir, const char* name) {
@@ -45,7 +44,7 @@ static void makeLibSubFile(TestTempDir* dir, const char* name) {
 TEST(EmuglConfig, init) {
     TestSystem testSys("foo", System::kProgramBitness);
     TestTempDir* myDir = testSys.getTempRoot();
-    myDir->makeSubDir(System::get()->getProgramDirectory().c_str());
+    myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
     makeLibSubDir(myDir, "gles_mesa");
@@ -177,7 +176,7 @@ TEST(EmuglConfig, init) {
 TEST(EmuglConfig, initNxWithMesa) {
     TestSystem testSys("foo", System::kProgramBitness);
     TestTempDir* myDir = testSys.getTempRoot();
-    myDir->makeSubDir(System::get()->getProgramDirectory().c_str());
+    myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
     makeLibSubDir(myDir, "gles_mesa");
@@ -195,7 +194,7 @@ TEST(EmuglConfig, initNxWithMesa) {
 TEST(EmuglConfig, initNxWithoutMesa) {
     TestSystem testSys("foo", System::kProgramBitness);
     TestTempDir* myDir = testSys.getTempRoot();
-    myDir->makeSubDir(System::get()->getProgramDirectory().c_str());
+    myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
     testSys.setRemoteSessionType("NX");
@@ -209,7 +208,7 @@ TEST(EmuglConfig, initNxWithoutMesa) {
 TEST(EmuglConfig, initChromeRemoteDesktopWithMesa) {
     TestSystem testSys("foo", System::kProgramBitness);
     TestTempDir* myDir = testSys.getTempRoot();
-    myDir->makeSubDir(System::get()->getProgramDirectory().c_str());
+    myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
     makeLibSubDir(myDir, "gles_mesa");
@@ -227,7 +226,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithMesa) {
 TEST(EmuglConfig, initChromeRemoteDesktopWithoutMesa) {
     TestSystem testSys("foo", System::kProgramBitness);
     TestTempDir* myDir = testSys.getTempRoot();
-    myDir->makeSubDir(System::get()->getProgramDirectory().c_str());
+    myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
     testSys.setRemoteSessionType("Chrome Remote Desktop");
@@ -241,7 +240,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithoutMesa) {
 TEST(EmuglConfig, initNoWindowWithMesa) {
     TestSystem testSys("foo", System::kProgramBitness);
     TestTempDir* myDir = testSys.getTempRoot();
-    myDir->makeSubDir(System::get()->getProgramDirectory().c_str());
+    myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
     makeLibSubDir(myDir, "gles_mesa");
@@ -257,7 +256,7 @@ TEST(EmuglConfig, initNoWindowWithMesa) {
 TEST(EmuglConfig, initNoWindowWithoutMesa) {
     TestSystem testSys("foo", System::kProgramBitness);
     TestTempDir* myDir = testSys.getTempRoot();
-    myDir->makeSubDir(System::get()->getProgramDirectory().c_str());
+    myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
     makeLibSubDir(myDir, "");
 
     EmuglConfig config;

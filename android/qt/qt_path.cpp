@@ -22,7 +22,7 @@ static String androidQtGetBaseDir()
     System* system = System::get();
     const char* libBitness = (system->getHostBitness() == 64) ? "lib64" : "lib";
     StringVector subDirVector;
-    subDirVector.push_back(system->getProgramDirectory());
+    subDirVector.push_back(system->getLauncherDirectory());
     subDirVector.push_back(String(libBitness));
     subDirVector.push_back(String("qt"));
     String qtDir = PathUtils::recompose(subDirVector);

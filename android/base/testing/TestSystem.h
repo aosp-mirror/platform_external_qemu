@@ -26,11 +26,12 @@ namespace base {
 
 class TestSystem : public System {
 public:
-    TestSystem(const char* programDir,
+    TestSystem(const char* launcherDir,
                int hostBitness,
                const char* homeDir = "/home",
                const char* appDataDir = "")
-        : mProgramDir(programDir),
+        : mLauncherDir(launcherDir),
+          mProgramDir(launcherDir),
           mHomeDir(homeDir),
           mAppDataDir(appDataDir),
           mHostBitness(hostBitness),
@@ -50,9 +51,25 @@ public:
         delete mTempDir;
     }
 
-    virtual const String& getProgramDirectory() const {
-        if (mProgramDir.size()) {
-            return mProgramDir;
+    virtual const String& getProgramDirectory() const { return mProgramDir; }
+
+    // Set directory of currently executing binary.  This must be a subdirectory
+    // of mLauncherDir and specified relative to mLauncherDir
+    void setProgramDir(const String& programDir) {
+        if (programDir.empty()) {
+            mProgramDir = mLauncherDir;
+            return;
+        }
+
+        StringVector pathList;
+        pathList.push_back(getLauncherDirectory());
+        pathList.push_back(programDir);
+        mProgramDir = PathUtils::recompose(pathList);
+    }
+
+    virtual const String& getLauncherDirectory() const {
+        if (mLauncherDir.size()) {
+            return mLauncherDir;
         } else {
             return mTempDir->pathString();
         }
@@ -117,20 +134,20 @@ public:
         return false;
     }
 
-    virtual bool pathExists(const char* path) {
+    virtual bool pathExists(const char* path) const {
         return pathExistsInternal(toTempRoot(path).c_str());
     }
 
-    virtual bool pathIsFile(const char* path) {
+    virtual bool pathIsFile(const char* path) const {
         return pathIsFileInternal(toTempRoot(path).c_str());
     }
 
-    virtual bool pathIsDir(const char* path) {
+    virtual bool pathIsDir(const char* path) const {
         return pathIsDirInternal(toTempRoot(path).c_str());
     }
 
     virtual StringVector scanDirEntries(const char* dirPath,
-                                        bool fullPath = false) {
+                                        bool fullPath = false) const {
         if (!mTempDir) {
             // Nothing to return for now.
             LOG(ERROR) << "No temp root yet!";
@@ -221,7 +238,7 @@ public:
     }
 
 private:
-    String toTempRoot(const char* path) {
+    String toTempRoot(const char* path) const {
         String result = mTempRootPrefix;
         result += path;
         return result;
@@ -236,6 +253,7 @@ private:
     }
 
     String mProgramDir;
+    String mLauncherDir;
     String mHomeDir;
     String mAppDataDir;
     int mHostBitness;
