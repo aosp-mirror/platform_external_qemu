@@ -33,8 +33,8 @@ int64_t get_system_time_ms() {
     return static_cast<int64_t>(System::get()->getProcessTimes().systemMs);
 }
 
-char* get_program_directory() {
-    return strdup(System::get()->getProgramDirectory().c_str());
+char* get_launcher_directory() {
+    return strdup(System::get()->getLauncherDirectory().c_str());
 }
 
 void add_library_search_dir(const char* dirPath) {

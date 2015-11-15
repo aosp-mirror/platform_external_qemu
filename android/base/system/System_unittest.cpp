@@ -70,8 +70,9 @@ TEST(System, getAppDataDirectory) {
     LOG(INFO) << "AppData directory: [" << dir.c_str() << "]";
 }
 
+// Tests case where program directory == launcher directory (QEMU1)
 TEST(TestSystem, getDirectory) {
-    const char  kProgramDir[] = "/foo/bar";
+    const char kLauncherDir[] = "/foo/bar";
     const char  kHomeDir[]    = "/mama/papa";
 #if defined(__linux__)
     const char *kAppDataDir   = "";
@@ -79,9 +80,11 @@ TEST(TestSystem, getDirectory) {
     // Mac OS X, Microsoft Windows
     const char  kAppDataDir[] = "/lala/kaka";
 #endif // __linux__
-    TestSystem testSys(kProgramDir, 32, kHomeDir, kAppDataDir);
+    TestSystem testSys(kLauncherDir, 32, kHomeDir, kAppDataDir);
+    String ldir = System::get()->getLauncherDirectory();
+    EXPECT_STREQ(kLauncherDir, ldir.c_str());
     String pdir = System::get()->getProgramDirectory();
-    EXPECT_STREQ(kProgramDir, pdir.c_str());
+    EXPECT_STREQ(kLauncherDir, pdir.c_str());
     String hdir = System::get()->getHomeDirectory();
     EXPECT_STREQ(kHomeDir, hdir.c_str());
     String adir = System::get()->getAppDataDirectory();
@@ -91,6 +94,24 @@ TEST(TestSystem, getDirectory) {
     // Mac OS X, Microsoft Windows
     EXPECT_STREQ(kAppDataDir, adir.c_str());
 #endif  // __linux__
+}
+
+// Tests case where program directory is a subdirectory of launcher directory
+// (QEMU2)
+TEST(TestSystem, getDirectoryProgramDir) {
+    const char kLauncherDir[] = "/foo/bar";
+    const char kProgramDir[] = "qemu/os-arch";
+    TestSystem testSys(kLauncherDir, 32, "/home", "/app");
+    testSys.setProgramDir(kProgramDir);
+
+    String ldir = System::get()->getLauncherDirectory();
+    EXPECT_STREQ(kLauncherDir, ldir.c_str());
+    String pdir = System::get()->getProgramDirectory();
+#ifdef _WIN32
+    EXPECT_STREQ("/foo/bar\\qemu/os-arch", pdir.c_str());
+#else
+    EXPECT_STREQ("/foo/bar/qemu/os-arch", pdir.c_str());
+#endif
 }
 
 TEST(System, getHostBitness) {
