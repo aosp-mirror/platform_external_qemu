@@ -3369,6 +3369,7 @@ int main(int argc, char **argv, char **envp)
     /* init the dynamic translator */
     cpu_exec_init_all(tb_size * 1024 * 1024);
 
+    /* init block driver */
     bdrv_init();
 
     /* we always create the cdrom drive, even if no disk is there */

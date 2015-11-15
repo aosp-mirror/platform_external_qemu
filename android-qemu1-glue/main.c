@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2008 The Android Open Source Project
+/* Copyright (C) 2006-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -256,8 +256,10 @@ int main(int argc, char **argv) {
 
     if (opts->version) {
         printf("Android emulator version %s\n"
-               "Copyright (C) 2006-2011 The Android Open Source Project and many others.\n"
-               "This program is a derivative of the QEMU CPU emulator (www.qemu.org).\n\n",
+               "Copyright (C) 2006-2015 The Android Open Source Project and many "
+               "others.\n"
+               "This program is a derivative of the QEMU CPU emulator "
+               "(www.qemu.org).\n\n",
 #if defined ANDROID_BUILD_ID
                EMULATOR_VERSION_STRING " (build_id " STRINGIFY(ANDROID_BUILD_ID) ")" );
 #else
