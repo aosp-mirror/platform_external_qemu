@@ -1290,18 +1290,6 @@ extern "C" int main(int argc, char **argv) {
     enter_qemu_main_loop(n, (char**)args);
 #else
 
-#ifdef _WIN32
-    // Take care of quoting all parameters before sending them to execv().
-    // See the "Eveyone quotes command line arguments the wrong way" on
-    // MSDN.
-    int i;
-    for (i = 0; i < n; ++i) {
-        // Technically, this leaks the quoted strings, but we don't care
-        // since this process will terminate after the execv() anyway.
-        args[i] = win32_cmdline_quote(args[i]);
-        D("Quoted param: [%s]\n", args[i]);
-    }
-#endif
 
     static UiEmuAgent uiEmuAgent;
     uiEmuAgent.battery = gQAndroidBatteryAgent;
