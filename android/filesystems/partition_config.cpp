@@ -346,20 +346,13 @@ bool android_partition_configuration_setup(
         return false;
     }
 
-    // For ext4, to extend an internal partition to more than the default size
-    // you need to initialize userdata-qemu.img to the desired size and restore
-    // it after moving the data in - yaffs is resilient enough for this not to
-    // matter.
-    if (config->wipe_data &&
-        userdata_partition_type == ANDROID_PARTITION_TYPE_EXT4) {
-        state->backend->makeEmptyPartition(userdata_partition_type,
-                                           config->data_partition.size,
-                                           config->data_partition.path);
-    }
-
     // Initialize data partition image.
+    AndroidPartitionOpenMode userdata_partition_mode = config->wipe_data ?
+            ANDROID_PARTITION_OPEN_MODE_MUST_WIPE :
+            ANDROID_PARTITION_OPEN_MODE_CREATE_IF_NEEDED;
+
     if (!addNandImage(state, "userdata", userdata_partition_type,
-                      ANDROID_PARTITION_OPEN_MODE_CREATE_IF_NEEDED,
+                      userdata_partition_mode,
                       config->data_partition.size, config->data_partition.path,
                       config->data_partition.init_path)) {
         return false;

@@ -349,7 +349,6 @@ TEST(PartitionConfig, wipeData) {
 
     static const char kExpectedCommands[] =
             "LOCK [/avd/system.img]\n"
-            "EMPTY_PARTITION format=ext4 size=400000 [/avd/userdata-qemu.img]\n"
             "LOCK [/avd/userdata-qemu.img]\n"
             "COPY [/avd/userdata-qemu.img] <- [/images/userdata.img]\n"
             "EXT4_RESIZE size=400000 [/avd/userdata-qemu.img]\n"
