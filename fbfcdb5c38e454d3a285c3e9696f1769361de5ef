@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b6da7ea7_99da7040",
+        "filename": "android/filesystems/partition_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-11-16T19:35:43Z",
+      "side": 0,
+      "message": "Is this hack not required any more? User-data is mounted read-write and I can\u0027t see (c/181878) the code path for the \"single instance running but asked to re-size\" scenario I see here, replicated there (in the form: first create empty partition of size x, then init with data from init_path). Sorry, had to give up after staring for a while.",
+      "range": {
+        "startLine": 349,
+        "startChar": 2,
+        "endLine": 352,
+        "endChar": 14
+      },
+      "revId": "fbfcdb5c38e454d3a285c3e9696f1769361de5ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
