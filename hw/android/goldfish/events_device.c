@@ -394,6 +394,9 @@ void events_dev_init(uint32_t base, qemu_irq irq)
     events_set_bit(s, EV_KEY, KEY_SOFT2);
     events_set_bit(s, EV_KEY, KEY_POWER);
     events_set_bit(s, EV_KEY, KEY_SEARCH);
+    events_set_bit(s, EV_KEY, KEY_FASTFORWARD);
+    events_set_bit(s, EV_KEY, KEY_PLAYPAUSE);
+    events_set_bit(s, EV_KEY, KEY_REWIND);
 
     if (config->hw_dPad) {
         events_set_bit(s, EV_KEY, KEY_DOWN);

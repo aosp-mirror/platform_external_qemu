@@ -249,6 +249,7 @@ _skin_ui_handle_key_command(void* opaque, SkinKeyCommand command, int  down)
         { SKIN_KEY_COMMAND_BUTTON_PREV,        kKeyCodePrevious },
         { SKIN_KEY_COMMAND_BUTTON_NEXT,        kKeyCodeNext },
         { SKIN_KEY_COMMAND_BUTTON_PLAY,        kKeyCodePlay },
+        { SKIN_KEY_COMMAND_BUTTON_PLAYPAUSE,   kKeyCodePlaypause },
         { SKIN_KEY_COMMAND_BUTTON_PAUSE,       kKeyCodePause },
         { SKIN_KEY_COMMAND_BUTTON_STOP,        kKeyCodeStop },
         { SKIN_KEY_COMMAND_BUTTON_REWIND,      kKeyCodeRewind },

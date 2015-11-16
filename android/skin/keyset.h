@@ -26,7 +26,7 @@ typedef struct SkinKeyset  SkinKeyset;
 #define  SKIN_KEY_COMMAND_LIST                  \
     _SKIN_KEY_COMMAND(NONE,"no key")            \
     _SKIN_KEY_COMMAND(BUTTON_HOME,"Home button")              \
-    _SKIN_KEY_COMMAND(BUTTON_HOMEPAGE,"Home page button")     \
+    _SKIN_KEY_COMMAND(BUTTON_HOMEPAGE,"Home page button")    \
     _SKIN_KEY_COMMAND(BUTTON_MENU,"Menu (Soft-Left) button")   \
     _SKIN_KEY_COMMAND(BUTTON_STAR,"Star (Soft-Right) button")  \
     _SKIN_KEY_COMMAND(BUTTON_BACK,"Back button")              \
@@ -57,6 +57,7 @@ typedef struct SkinKeyset  SkinKeyset;
     _SKIN_KEY_COMMAND(BUTTON_PREV,"Previous button")         \
     _SKIN_KEY_COMMAND(BUTTON_NEXT,"Next button")         \
     _SKIN_KEY_COMMAND(BUTTON_PLAY,"Play button")         \
+    _SKIN_KEY_COMMAND(BUTTON_PLAYPAUSE,"Play/pause button")  \
     _SKIN_KEY_COMMAND(BUTTON_PAUSE,"Pause button")         \
     _SKIN_KEY_COMMAND(BUTTON_STOP,"Stop button")         \
     _SKIN_KEY_COMMAND(BUTTON_REWIND,"Rewind button")         \

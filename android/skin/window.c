@@ -1140,6 +1140,7 @@ skin_window_move_mouse( SkinWindow*  window,
                 case kKeyCodePrevious:
                 case kKeyCodeNext:
                 case kKeyCodePlay:
+                case kKeyCodePlaypause:
                 case kKeyCodePause:
                 case kKeyCodeStop:
                 case kKeyCodeRewind:
