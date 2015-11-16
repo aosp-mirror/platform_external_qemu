@@ -15,6 +15,10 @@
 #include "hw/android/goldfish/nand.h"
 #include "hw/android/goldfish/vmem.h"
 #include "hw/hw.h"
+
+#ifdef CONFIG_NAND_LIMITS
+#include "android/emulation/nand_limits.h"
+#endif
 #include "android/utils/path.h"
 #include "android/utils/tempfile.h"
 #include "android/qemu-debug.h"
@@ -68,41 +72,16 @@ typedef struct {
                               * file may be smaller. */
 } nand_dev;
 
-nand_threshold    android_nand_write_threshold;
-nand_threshold    android_nand_read_threshold;
+#ifdef CONFIG_NAND_LIMITS
 
-#ifdef CONFIG_NAND_THRESHOLD
+static AndroidNandLimit nand_read_limit = ANDROID_NAND_LIMIT_INIT;
+static AndroidNandLimit nand_write_limit = ANDROID_NAND_LIMIT_INIT;
 
-/* update a threshold, return 1 if limit is hit, 0 otherwise */
-static void
-nand_threshold_update( nand_threshold*  t, uint32_t  len )
-{
-    if (t->counter < t->limit) {
-        uint64_t  avail = t->limit - t->counter;
-        if (avail > len)
-            avail = len;
+#define NAND_UPDATE_READ_THRESHOLD(len) \
+  android_nand_limit_update(&nand_write_limit, (uint32_t)(len))
 
-        if (t->counter == 0) {
-            T("%s: starting threshold counting to %lld",
-              __FUNCTION__, t->limit);
-        }
-        t->counter += avail;
-        if (t->counter >= t->limit) {
-            /* threshold reach, send a signal to an external process */
-            T( "%s: sending signal %d to pid %d !",
-               __FUNCTION__, t->signal, t->pid );
-
-            kill( t->pid, t->signal );
-        }
-    }
-    return;
-}
-
-#define  NAND_UPDATE_READ_THRESHOLD(len)  \
-    nand_threshold_update( &android_nand_read_threshold, (uint32_t)(len) )
-
-#define  NAND_UPDATE_WRITE_THRESHOLD(len)  \
-    nand_threshold_update( &android_nand_write_threshold, (uint32_t)(len) )
+#define NAND_UPDATE_WRITE_THRESHOLD(len) \
+  android_nand_limit_update(&nand_read_limit, (uint32_t)(len))
 
 #else /* !NAND_THRESHOLD */
 
@@ -724,13 +703,9 @@ void nand_add_dev(const char *arg)
     nand_dev *new_devs, *dev;
     char *devname = NULL;
     size_t devname_len = 0;
-    char *initfilename = NULL;
     char *rwfilename = NULL;
-    int initfd = -1;
-    int rwfd = -1;
     int read_only = 0;
     int pad;
-    ssize_t read_size;
     uint32_t page_size = 2048;
     uint32_t extra_size = 64;
     uint32_t erase_pages = 64;
@@ -801,15 +776,6 @@ void nand_add_dev(const char *arg)
                 if(ep != value + value_len)
                     goto bad_arg_and_value;
             }
-            else if(arg_match("initfile", arg, arg_len)) {
-                initfilename = malloc(value_len + 1);
-                if(initfilename == NULL)
-                    goto out_of_memory;
-                memcpy(initfilename, value, value_len);
-                initfilename[value_len] = '\0';
-                // Restore unusual characters that confuse parsing
-                path_unescape_path(initfilename);
-            }
             else if(arg_match("file", arg, arg_len)) {
                 rwfilename = malloc(value_len + 1);
                 if(rwfilename == NULL)
@@ -827,54 +793,14 @@ void nand_add_dev(const char *arg)
         arg = next_arg;
     }
 
-    if (rwfilename == NULL) {
-        /* we create a temporary file to store everything */
-        TempFile*    tmp = tempfile_create();
-
-        if (tmp == NULL) {
-            XLOG("could not create temp file for %.*s NAND disk image: %s\n",
-                  devname_len, devname, strerror(errno));
-            exit(1);
-        }
-        rwfilename = (char*) tempfile_path(tmp);
-        if (VERBOSE_CHECK(init))
-            dprint( "mapping '%.*s' NAND image to %s", devname_len, devname, rwfilename);
+    if (!rwfilename) {
+        XLOG("Missing %.*s NAND disk image path!\n", devname_len, devname);
+        exit(1);
     }
 
-    if(rwfilename) {
-        if (initfilename) {
-            /* Overwrite with content of the 'initfilename'. */
-            if (read_only) {
-                /* Cannot be readonly when initializing the device from another file. */
-                XLOG("incompatible read only option is requested while initializing %.*s from %s\n",
-                     devname_len, devname, initfilename);
-                exit(1);
-            }
-            rwfd = open(rwfilename, O_BINARY | O_TRUNC | O_RDWR);
-        } else {
-            rwfd = open(rwfilename, O_BINARY | (read_only ? O_RDONLY : O_RDWR));
-        }
-        if(rwfd < 0) {
-            XLOG("could not open file %s, %s\n", rwfilename, strerror(errno));
-            exit(1);
-        }
-        /* this could be a writable temporary file. use atexit_close_fd to ensure
-         * that it is properly cleaned up at exit on Win32
-         */
-        if (!read_only)
-            atexit_close_fd(rwfd);
-    }
-
-    if(initfilename) {
-        initfd = open(initfilename, O_BINARY | O_RDONLY);
-        if(initfd < 0) {
-            XLOG("could not open file %s, %s\n", initfilename, strerror(errno));
-            exit(1);
-        }
-        if(dev_size == 0) {
-            dev_size = do_lseek(initfd, 0, SEEK_END);
-            do_lseek(initfd, 0, SEEK_SET);
-        }
+    if (!dev_size) {
+        XLOG("Missing %.*s NAND disk image size!\n", devname_len, devname);
+        exit(1);
     }
 
     new_devs = realloc(nand_devs, sizeof(nand_devs[0]) * (nand_dev_count + 1));
@@ -902,21 +828,16 @@ void nand_add_dev(const char *arg)
     dev->flags |= NAND_DEV_FLAG_BATCH_CAP;
 #endif
 
-    if (initfd >= 0) {
-        do {
-            read_size = do_read(initfd, dev->data, dev->erase_size);
-            if(read_size < 0) {
-                XLOG("could not read file %s, %s\n", initfilename, strerror(errno));
-                exit(1);
-            }
-            if(do_write(rwfd, dev->data, read_size) != read_size) {
-                XLOG("could not write file %s, %s\n", rwfilename, strerror(errno));
-                exit(1);
-            }
-        } while(read_size == dev->erase_size);
-        close(initfd);
+    dev->fd = open(rwfilename, O_BINARY | (read_only ? O_RDONLY : O_RDWR));
+    if(dev->fd < 0) {
+        XLOG("could not open file %s, %s\n", rwfilename, strerror(errno));
+        exit(1);
     }
-    dev->fd = rwfd;
+    /* this could be a writable temporary file. use atexit_close_fd to ensure
+     * that it is properly cleaned up at exit on Win32
+     */
+    if (!read_only)
+        atexit_close_fd(dev->fd);
 
     nand_dev_count++;
 
@@ -932,108 +853,9 @@ bad_arg_and_value:
 }
 
 #ifdef CONFIG_NAND_LIMITS
-
-static uint64_t
-parse_nand_rw_limit( const char*  value )
-{
-    char*     end;
-    uint64_t  val = strtoul( value, &end, 0 );
-
-    if (end == value) {
-        derror( "bad parameter value '%s': expecting unsigned integer", value );
-        exit(1);
-    }
-
-    switch (end[0]) {
-        case 'K':  val <<= 10; break;
-        case 'M':  val <<= 20; break;
-        case 'G':  val <<= 30; break;
-        case 0: break;
-        default:
-            derror( "bad read/write limit suffix: use K, M or G" );
-            exit(1);
-    }
-    return val;
+void nand_parse_limits(const char* limits) {
+    android_nand_limits_parse(limits,
+                              &nand_write_limit,
+                              &nand_read_limit);
 }
-
-void
-parse_nand_limits(char*  limits)
-{
-    int      pid = -1, signal = -1;
-    int64_t  reads = 0, writes = 0;
-    char*    item = limits;
-
-    /* parse over comma-separated items */
-    while (item && *item) {
-        char*  next = strchr(item, ',');
-        char*  end;
-
-        if (next == NULL) {
-            next = item + strlen(item);
-        } else {
-            *next++ = 0;
-        }
-
-        if ( !memcmp(item, "pid=", 4) ) {
-            pid = strtol(item+4, &end, 10);
-            if (end == NULL || *end) {
-                derror( "bad parameter, expecting pid=<number>, got '%s'",
-                        item );
-                exit(1);
-            }
-            if (pid <= 0) {
-                derror( "bad parameter: process identifier must be > 0" );
-                exit(1);
-            }
-        }
-        else if ( !memcmp(item, "signal=", 7) ) {
-            signal = strtol(item+7,&end, 10);
-            if (end == NULL || *end) {
-                derror( "bad parameter: expecting signal=<number>, got '%s'",
-                        item );
-                exit(1);
-            }
-            if (signal <= 0) {
-                derror( "bad parameter: signal number must be > 0" );
-                exit(1);
-            }
-        }
-        else if ( !memcmp(item, "reads=", 6) ) {
-            reads = parse_nand_rw_limit(item+6);
-        }
-        else if ( !memcmp(item, "writes=", 7) ) {
-            writes = parse_nand_rw_limit(item+7);
-        }
-        else {
-            derror( "bad parameter '%s' (see -help-nand-limits)", item );
-            exit(1);
-        }
-        item = next;
-    }
-    if (pid < 0) {
-        derror( "bad paramater: missing pid=<number>" );
-        exit(1);
-    }
-    else if (signal < 0) {
-        derror( "bad parameter: missing signal=<number>" );
-        exit(1);
-    }
-    else if (reads == 0 && writes == 0) {
-        dwarning( "no read or write limit specified. ignoring -nand-limits" );
-    } else {
-        nand_threshold*  t;
-
-        t  = &android_nand_read_threshold;
-        t->pid     = pid;
-        t->signal  = signal;
-        t->counter = 0;
-        t->limit   = reads;
-
-        t  = &android_nand_write_threshold;
-        t->pid     = pid;
-        t->signal  = signal;
-        t->counter = 0;
-        t->limit   = writes;
-    }
-}
-#endif /* CONFIG_NAND_LIMITS */
+#endif  // CONFIG_NAND_LIMITS

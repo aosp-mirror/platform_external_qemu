@@ -76,7 +76,13 @@ ANDROID_EMU_BASE_SOURCES := \
     android/base/threads/ThreadStore.cpp \
     android/base/Uri.cpp \
     android/base/Version.cpp \
-    android/ext4_resize.cpp \
+    android/filesystems/ext4_resize.cpp \
+    android/filesystems/ext4_utils.cpp \
+    android/filesystems/fstab_parser.cpp \
+    android/filesystems/internal/PartitionConfigBackend.cpp \
+    android/filesystems/partition_config.cpp \
+    android/filesystems/partition_types.cpp \
+    android/filesystems/ramdisk_extractor.cpp \
     android/utils/aconfig-file.c \
     android/utils/assert.c \
     android/utils/bufprint.c \
@@ -146,6 +152,7 @@ ANDROID_EMU_SOURCES := \
     android/emulation/android_pipe_zero.c \
     android/emulation/android_qemud.cpp \
     android/emulation/control/LineConsumer.cpp \
+    android/emulation/nand_limits.c \
     android/emulation/qemud/android_qemud_client.cpp \
     android/emulation/qemud/android_qemud_multiplexer.cpp \
     android/emulation/qemud/android_qemud_serial.cpp \
@@ -198,10 +205,6 @@ ANDROID_EMU_DEPENDENT_SOURCES := \
     android/android-constants.c \
     android/cmdline-option.c \
     android/cpu_accelerator.cpp \
-    android/filesystems/ext4_utils.cpp \
-    android/filesystems/fstab_parser.cpp \
-    android/filesystems/partition_types.cpp \
-    android/filesystems/ramdisk_extractor.cpp \
     android/help.c \
     android/main-common.c \
     android/qemu-setup.c \

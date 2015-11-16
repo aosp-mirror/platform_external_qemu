@@ -44,6 +44,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/emulation/serial_line_unittest.cpp \
   android/filesystems/ext4_utils_unittest.cpp \
   android/filesystems/fstab_parser_unittest.cpp \
+  android/filesystems/partition_config_unittest.cpp \
   android/filesystems/partition_types_unittest.cpp \
   android/filesystems/ramdisk_extractor_unittest.cpp \
   android/filesystems/testing/TestSupport.cpp \
@@ -90,6 +91,10 @@ EMULATOR_UNITTESTS_SOURCES += \
   android/base/system/Win32Utils_unittest.cpp \
   android/utils/win32_cmdline_quote_unittest.cpp \
   android/windows_installer_unittest.cpp \
+
+else
+EMULATOR_UNITTESTS_SOURCES += \
+  android/emulation/nand_limits_unittest.cpp \
 
 endif
 
