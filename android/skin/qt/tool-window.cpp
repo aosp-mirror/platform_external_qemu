@@ -17,8 +17,10 @@
 #include <QtWidgets>
 
 #include "android/android.h"
+#include "android/avd/util.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/globals.h"
 #include "android/main-common.h"
 #include "android/skin/keycode.h"
@@ -134,14 +136,15 @@ void ToolWindow::showErrorDialog(const QString &message, const QString &title)
 
 QString ToolWindow::getAndroidSdkRoot()
 {
-    QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
-    if (!environment.contains("ANDROID_SDK_ROOT")) {
-        showErrorDialog(tr("The ANDROID_SDK_ROOT environment variable must be set to use this."),
+    char isFromEnv = 0;
+    const ScopedCPtr<const char> sdkRoot(path_getSdkRoot(&isFromEnv));
+    if (!sdkRoot) {
+        showErrorDialog(tr("The ANDROID_SDK_ROOT environment variable must be "
+                           "set to use this."),
                         tr("Android Sdk Root"));
         return QString::null;
     }
-
-    return environment.value("ANDROID_SDK_ROOT");
+    return QString::fromUtf8(sdkRoot.get());
 }
 
 QString ToolWindow::getAdbFullPath(QStringList *args)

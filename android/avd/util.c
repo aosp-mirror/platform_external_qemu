@@ -59,15 +59,30 @@ path_getSdkRoot( char *pFromEnv )
 
     *pFromEnv = 0;
 
-    /* We assume the emulator binary is under tools/ so use its
-     * parent as the Android SDK root.
-     */
+    // The emulator binary should be either under tools/ or under
+    // tools/qemu/<platform-host-specific>/
     (void) bufprint_app_dir(temp, end);
-    sdkPath = path_parent(temp, 1);
+    const char* const parent = path_basename(temp);
+    if (!parent) {
+        derror("can't find root of SDK directory: no parent name");
+        return NULL;
+    }
+
+    if (strcmp(parent, "tools") == 0) {
+        // we're right under tools/, go one directory up
+        sdkPath = path_parent(temp, 1);
+    } else {
+        // we're deeper
+        sdkPath = path_parent(temp, 3);
+    }
+
+    free(parent);
+
     if (sdkPath == NULL) {
         derror("can't find root of SDK directory");
         return NULL;
     }
+
     D("found SDK root at %s", sdkPath);
     return sdkPath;
 }
