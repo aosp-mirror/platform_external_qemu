@@ -52,6 +52,9 @@ public:
     // Return the path of the current program's directory.
     virtual const String& getProgramDirectory() const = 0;
 
+    // Return the path of the emulator launcher's directory.
+    virtual const String& getLauncherDirectory() const = 0;
+
     // Return the path to user's home directory (as defined in the
     // underlying platform) or an empty string if it can't be found
     virtual const String& getHomeDirectory() const = 0;
@@ -111,7 +114,7 @@ public:
     static void addLibrarySearchDir(const char* dirPath);
 
     // Find a bundled executable named |programName|, it must appear in the
-    // kBinSubDir of getProgramDirectory(). The name should not include the
+    // kBinSubDir of getLauncherDirectory(). The name should not include the
     // executable extension (.exe) on Windows.
     // Return an empty string if the file doesn't exist.
     static String findBundledExecutable(const char* programName);
@@ -132,19 +135,19 @@ public:
     virtual bool envTest(const char* varname) const = 0;
 
     // Return true iff |path| exists on the file system.
-    virtual bool pathExists(const char* path) = 0;
+    virtual bool pathExists(const char* path) const = 0;
 
     // Return true iff |path| exists and is a regular file on the file system.
-    virtual bool pathIsFile(const char* path) = 0;
+    virtual bool pathIsFile(const char* path) const = 0;
 
     // Return true iff |path| exists and is a directory on the file system.
-    virtual bool pathIsDir(const char* path) = 0;
+    virtual bool pathIsDir(const char* path) const = 0;
 
     // Scan directory |dirPath| for entries, and return them as a sorted
     // vector or entries. If |fullPath| is true, then each item of the
     // result vector contains a full path.
     virtual StringVector scanDirEntries(const char* dirPath,
-                                        bool fullPath = false) = 0;
+                                        bool fullPath = false) const = 0;
 
     // Checks the system to see if it is running under a remoting session
     // like Nomachine's NX, Chrome Remote Desktop or Windows Terminal Services.

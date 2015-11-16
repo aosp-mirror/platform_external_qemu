@@ -32,7 +32,7 @@ using android::ConfigDirs;
 // android::base::System to make them mockable during unit-testing.
 
 char* bufprint_app_dir(char* buff, char* end) {
-    String appDir = System::get()->getProgramDirectory();
+    String appDir = System::get()->getLauncherDirectory();
 
     if (appDir.empty()) {
         derror("Cannot locate application directory");

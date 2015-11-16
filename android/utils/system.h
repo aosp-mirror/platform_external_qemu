@@ -181,7 +181,7 @@ extern int64_t get_user_time_ms();
 extern int64_t get_system_time_ms();
 
 // Caller must free the returned string.
-extern char* get_program_directory();
+extern char* get_launcher_directory();
 extern void add_library_search_dir(const char* dirPath);
 
 
