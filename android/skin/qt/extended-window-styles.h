@@ -26,8 +26,8 @@ enum ExtendedWindowPane {
     PANE_IDX_VIRT_SENSORS,
     PANE_IDX_DPAD,
     PANE_IDX_FINGER,
-    PANE_IDX_HELP,
     PANE_IDX_SETTINGS,
+    PANE_IDX_HELP,
 };
 
 // Style sheets

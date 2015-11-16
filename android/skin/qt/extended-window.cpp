@@ -65,14 +65,14 @@ ExtendedWindow::ExtendedWindow(
     initVirtualSensors();
 
     mPaneButtonMap = {
-        {PANE_IDX_LOCATION, mExtendedUi->locationButton},
-        {PANE_IDX_CELLULAR, mExtendedUi->cellularButton},
-        {PANE_IDX_BATTERY, mExtendedUi->batteryButton},
+        {PANE_IDX_LOCATION,  mExtendedUi->locationButton},
+        {PANE_IDX_CELLULAR,  mExtendedUi->cellularButton},
+        {PANE_IDX_BATTERY,   mExtendedUi->batteryButton},
         {PANE_IDX_TELEPHONE, mExtendedUi->telephoneButton},
-        {PANE_IDX_DPAD , mExtendedUi->dpadButton},
-        {PANE_IDX_FINGER , mExtendedUi->fingerButton},
-        {PANE_IDX_HELP, mExtendedUi->helpButton},
-        {PANE_IDX_SETTINGS, mExtendedUi->settingsButton},
+        {PANE_IDX_DPAD,      mExtendedUi->dpadButton},
+        {PANE_IDX_FINGER,    mExtendedUi->fingerButton},
+        {PANE_IDX_SETTINGS,  mExtendedUi->settingsButton},
+        {PANE_IDX_HELP,      mExtendedUi->helpButton},
     };
 
     move(mParentWindow->geometry().right() + 40,
@@ -110,7 +110,7 @@ void ExtendedWindow::on_batteryButton_clicked()     { adjustTabs(PANE_IDX_BATTER
 void ExtendedWindow::on_cellularButton_clicked()    { adjustTabs(PANE_IDX_CELLULAR); }
 void ExtendedWindow::on_dpadButton_clicked()        { adjustTabs(PANE_IDX_DPAD); }
 void ExtendedWindow::on_fingerButton_clicked()      { adjustTabs(PANE_IDX_FINGER); }
-void ExtendedWindow::on_helpButton_clicked()   { adjustTabs(PANE_IDX_HELP); }
+void ExtendedWindow::on_helpButton_clicked()        { adjustTabs(PANE_IDX_HELP); }
 void ExtendedWindow::on_locationButton_clicked()    { adjustTabs(PANE_IDX_LOCATION); }
 void ExtendedWindow::on_settingsButton_clicked()    { adjustTabs(PANE_IDX_SETTINGS); }
 void ExtendedWindow::on_telephoneButton_clicked()   { adjustTabs(PANE_IDX_TELEPHONE); }
