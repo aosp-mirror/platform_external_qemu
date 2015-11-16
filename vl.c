@@ -4013,6 +4013,9 @@ int run_qemu_main(int argc, const char **argv)
         boot_property_add("dalvik.vm.heapsize",temp);
     }
 
+    /* Initialize presence of hardware nav button */
+    boot_property_add("qemu.hw.mainkeys", android_hw->hw_mainKeys ? "1" : "0");
+
 #endif // CONFIG_ANDROID
 
     if (qemu_opts_foreach(qemu_find_opts("sandbox"), parse_sandbox, NULL, 0)) {
