@@ -105,6 +105,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(mContainer.verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_verticalScrollChanged(int)));
     QObject::connect(mContainer.horizontalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(slot_scrollRangeChanged(int,int)));
     QObject::connect(mContainer.verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(slot_scrollRangeChanged(int,int)));
+    QObject::connect(tool_window, SIGNAL(skinUIEvent(SkinEvent*)), this, SLOT(slot_queueEvent(SkinEvent*)));
 }
 
 EmulatorQtWindow::~EmulatorQtWindow()

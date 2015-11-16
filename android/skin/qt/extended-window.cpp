@@ -38,6 +38,7 @@ ExtendedWindow::ExtendedWindow(
     mSensorsAgent  (agentPtr ? agentPtr->sensors   : nullptr),
     mTelephonyAgent(agentPtr ? agentPtr->telephony : nullptr),
     mSettingsAgent (agentPtr ? agentPtr->settings  : nullptr),
+    mUserEventsAgent(agentPtr ? agentPtr->userEvents : nullptr),
     mLoc_mSecRemaining(-1),
     mLoc_nowPlaying(false),
     mLoc_rowToSend(-1),

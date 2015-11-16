@@ -19,50 +19,41 @@
 
 #include <QBitmap>
 
-#define ON_CLICKED(buttonName, key, modifiers) \
-    void ExtendedWindow::on_dpad_ ## buttonName ## Button_clicked() \
-    { \
-        mParentWindow->simulateKeyPress(key, modifiers); \
-    }
-
-#define ON_PRESSED(buttonName) \
+#define ON_PRESSED(buttonName, keyCode) \
     void ExtendedWindow::on_dpad_ ## buttonName ## Button_pressed() \
     { \
+        if (mUserEventsAgent) { \
+            mUserEventsAgent->sendKey(keyCode, 1); \
+        } \
         dpad_setPressed(mExtendedUi->dpad_ ## buttonName ## Button); \
     }
 
-#define ON_RELEASED(buttonName) \
+#define ON_RELEASED(buttonName, keyCode) \
     void ExtendedWindow::on_dpad_ ## buttonName ## Button_released() \
     { \
+        if (mUserEventsAgent) { \
+            mUserEventsAgent->sendKey(keyCode, 0); \
+        } \
         dpad_setReleased(mExtendedUi->dpad_ ## buttonName ## Button); \
     }
 
-ON_CLICKED(back,    KEY_REWIND,      0);
-ON_CLICKED(down,    KEY_KP2,         0);
-ON_CLICKED(forward, KEY_FASTFORWARD, 0);
-ON_CLICKED(left,    KEY_KP4,         0);
-ON_CLICKED(play,    KEY_PLAY,        0);
-ON_CLICKED(right,   KEY_KP6,         0);
-ON_CLICKED(select,  KEY_KP5,         0);
-ON_CLICKED(up,      KEY_KP8,         0);
+ON_PRESSED(back, kKeyCodeRewind);
+ON_PRESSED(down, kKeyCodeDpadDown);
+ON_PRESSED(forward, kKeyCodeFastForward);
+ON_PRESSED(left, kKeyCodeDpadLeft);
+ON_PRESSED(play, kKeyCodePlay);
+ON_PRESSED(right, kKeyCodeDpadRight);
+ON_PRESSED(select, kKeyCodeDpadCenter);
+ON_PRESSED(up, kKeyCodeDpadUp);
 
-ON_PRESSED(back);
-ON_PRESSED(down);
-ON_PRESSED(forward);
-ON_PRESSED(left);
-ON_PRESSED(play);
-ON_PRESSED(right);
-ON_PRESSED(select);
-ON_PRESSED(up);
-
-ON_RELEASED(back);
-ON_RELEASED(down);
-ON_RELEASED(forward);
-ON_RELEASED(left);
-ON_RELEASED(play);
-ON_RELEASED(right);
-ON_RELEASED(select);
-ON_RELEASED(up);
+ON_RELEASED(back, kKeyCodeRewind);
+ON_RELEASED(down, kKeyCodeDpadDown);
+ON_RELEASED(forward, kKeyCodeFastForward);
+ON_RELEASED(left, kKeyCodeDpadLeft);
+ON_RELEASED(play, kKeyCodePlay);
+ON_RELEASED(right, kKeyCodeDpadRight);
+ON_RELEASED(select, kKeyCodeDpadCenter);
+ON_RELEASED(up, kKeyCodeDpadUp);
 
 void ExtendedWindow::initDPad()
 {

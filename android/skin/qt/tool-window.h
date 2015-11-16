@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "android/skin/event.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/set-ui-emu-agent.h"
@@ -69,6 +70,9 @@ public:
     void runAdbPush(const QList<QUrl> &urls);
 
     void handleQtKeyEvent(QKeyEvent* event);
+
+signals:
+    void skinUIEvent(SkinEvent* event);
 
 private:
     void handleUICommand(QtUICommand cmd, bool down);
