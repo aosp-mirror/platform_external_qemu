@@ -2266,6 +2266,24 @@ static void win_stdio_wait_func(void *opaque)
     DWORD              dwSize;
     int                i;
 
+    // On Windows QEMU may share its console window with other processes,
+    // e.g. cmd.exe which launched it. This means we can't be sure that
+    // any console event we were told about is still there (other process may
+    // have already handled it), and instead of getting the event QEMU might
+    // just block on the following ReadConsoleInput() call.
+    // So let's first check if there's anything left to read.
+    DWORD eventCount = 0;
+    BOOL getRet = GetNumberOfConsoleInputEvents(stdio->hStdIn, &eventCount);
+    if (!getRet) {
+        fprintf(stderr, "GetNumberOfConsoleInputEvents() API call failed,"
+                        " code %d\n", GetLastError());
+        return;
+    }
+    if (eventCount == 0) {
+        // we're too late, nothing to read
+        return;
+    }
+
     ret = ReadConsoleInput(stdio->hStdIn, buf, ARRAY_SIZE(buf), &dwSize);
 
     if (!ret) {
