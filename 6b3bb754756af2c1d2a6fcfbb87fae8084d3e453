@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "169a6aee_82e87ed1",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-16T09:26:53Z",
+      "side": 1,
+      "message": "technically, android::base::System is supposed to be a simple wrapper around system interfaces, and doesn\u0027t know / depend on emulation itself.\n\nWhat this means is that we should probably move getLauncherDirectory() and findBundledExecutable() to android/emulation/ instead. However, this is not a priority and can be done easily in a future patch, so let\u0027s allow this one. Thanks :)",
+      "revId": "6b3bb754756af2c1d2a6fcfbb87fae8084d3e453",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
