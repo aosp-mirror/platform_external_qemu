@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5b2a4b7b_a4ecabea",
+        "filename": "Makefile.top.mk",
+        "patchSetId": 5
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-16T21:37:42Z",
+      "side": 1,
+      "message": "could you please break longer lines?",
+      "range": {
+        "startLine": 269,
+        "startChar": 0,
+        "endLine": 271,
+        "endChar": 1
+      },
+      "revId": "1b08bae7034e17a724746c5f0c780161056c08b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b3453db_c7545d4c",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-16T21:37:42Z",
+      "side": 1,
+      "message": "do we really want to copy it into prebuilts every single time?",
+      "range": {
+        "startLine": 240,
+        "startChar": 0,
+        "endLine": 240,
+        "endChar": 71
+      },
+      "revId": "1b08bae7034e17a724746c5f0c780161056c08b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
