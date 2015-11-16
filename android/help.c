@@ -592,6 +592,23 @@ help_wipe_data(stralloc_t*  out)
 }
 
 static void
+help_writable_system(stralloc_t* out)
+{
+    PRINTF(
+    "  use -writable-system to have a writable system image during your\n"
+    "  emulation session. More specifically, one should:\n\n"
+
+    "  - Start the AVD with the '-writable-system' flag.\n"
+    "  - Use 'adb remount' from a host terminal to tell the guest system to\n"
+    "    remount /system as read/write (it is mounted as readonly by default).\n"
+    "\n"
+    "  Note that using this flag will create a temporary copy of the system\n"
+    "  image that can be very large (several hundreds of MBs), but will be\n"
+    "  destroyed at emulator exit.\n"
+    );
+}
+
+static void
 help_cache(stralloc_t*  out)
 {
     PRINTF(

@@ -52,6 +52,7 @@
 
 // TODO(digit): Remove this!
 bool android_op_wipe_data = false;
+bool android_op_writable_system = false;
 
 void reassign_string(char** string, const char* new_value) {
     free(*string);
@@ -776,6 +777,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
             hw->disk_dataPartition_initPath = NULL;
         }
         android_op_wipe_data = opts->wipe_data;
+        android_op_writable_system = opts->writable_system;
 
         uint64_t     defaultBytes =
                 hw->disk_dataPartition_size == 0 ?
