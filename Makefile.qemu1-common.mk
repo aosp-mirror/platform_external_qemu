@@ -116,7 +116,6 @@ include $(LOCAL_PATH)/Makefile.android-emu.mk
 common_LOCAL_SRC_FILES += \
     android/audio-test.c \
     android/core-init-utils.c \
-    android/ext4_resize.cpp \
     android/hw-kmsg.c \
     android/hw-lcd.c \
     android/multitouch-screen.c \

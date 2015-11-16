@@ -76,6 +76,7 @@ ANDROID_EMU_BASE_SOURCES := \
     android/base/threads/ThreadStore.cpp \
     android/base/Uri.cpp \
     android/base/Version.cpp \
+    android/ext4_resize.cpp \
     android/utils/aconfig-file.c \
     android/utils/assert.c \
     android/utils/bufprint.c \
