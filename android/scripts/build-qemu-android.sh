@@ -455,7 +455,7 @@ EOF
         dump "[$SYSTEM] Retrieving remote darwin binaries."
         run mkdir -p "$BINARY_DIR" ||
                 panic "Could not create installation directory: $BINARY_DIR"
-        run scp -r \
+        run $ANDROID_EMULATOR_SSH_WRAPPER scp -r \
             "$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM/qemu-system-* \
             "$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM/LINK-qemu-system-* \
             $BINARY_DIR/

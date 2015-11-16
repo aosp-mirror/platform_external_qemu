@@ -368,6 +368,9 @@ binaries on a remote host through ssh. Note that this forces --sources
 as well. You can also define ANDROID_EMULATOR_DARWIN_SSH in your
 environment to setup a default value for this option.
 
+Use --ssh-wrapper=<command> to prefix <command> to any SSH/SCP/RSYNC command
+performed by this script.
+
 Use --copy-prebuilts=<path> to specify the path of an AOSP workspace/checkout,
 and to copy 64-bit prebuilt binaries for all 3 host platforms to
 <path>/prebuilts/android-emulator/.
@@ -689,9 +692,11 @@ EOF
     dump "Retrieving Darwin binaries from: $HOST"
     # `pwd` == external/qemu
     rm -rf objs/*
-    run rsync -haz --delete --exclude=intermediates --exclude=libs $HOST:$DARWIN_REMOTE_DIR/qemu/objs .
+    run $ANDROID_EMULATOR_SSH_WRAPPER rsync -haz --delete \
+            --exclude=intermediates --exclude=libs \
+            $HOST:$DARWIN_REMOTE_DIR/qemu/objs .
     dump "Deleting files off darwin system"
-    run ssh $HOST rm -rf $DARWIN_REMOTE_DIR
+    run $ANDROID_EMULATOR_SSH_WRAPPER ssh $HOST rm -rf $DARWIN_REMOTE_DIR
 
     if [ ! -d "obj/qemu" ]; then
         QEMU_PREBUILTS_DIR=$PREBUILTS_DIR/qemu-android

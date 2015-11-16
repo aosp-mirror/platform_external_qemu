@@ -58,6 +58,9 @@ package_builder_register_options () {
   OPT_DARWIN_SSH=
   option_register_var "--darwin-ssh=<host>" OPT_DARWIN_SSH "Perform remote build through SSH."
 
+  OPT_SSH_WRAPPER=
+  option_register_var "--ssh-wrapper=<command>" OPT_SSH_WRAPPER "Prefix <command> to all SSH commands."
+
   OPT_FORCE=
   option_register_var "--force" OPT_FORCE "Always rebuild all."
 
@@ -171,6 +174,13 @@ package_builder_process_options () {
         log "Auto-config: --host=$(spaces_to_commas "$HOST_SYSTEMS")  [default]"
     fi
     HOST_SYSTEMS=$(commas_to_spaces "$HOST_SYSTEMS")
+
+    # An SSH wrapper is used
+    if [ "$OPT_SSH_WRAPPER" ]; then
+        ANDROID_EMULATOR_SSH_WRAPPER=$OPT_SSH_WRAPPER
+    elif [ "$ANDROID_EMULATOR_SSH_WRAPPER" ]; then
+        log "Auto-config: --ssh-wrapper=$ANDROID_EMULATOR_SSH_WRAPPER  [ANDROID_EMAULTOR_SSH_WRAPPER]"
+    fi
 
     # Special handling for Darwin target systems.
     ## Handle remote darwin build
@@ -310,14 +320,14 @@ builder_run_remote_darwin_build () {
 
     log "Copying files to remote darwin host"
     (tar cf - -C "$DARWIN_PKG_DIR"/.. "$DARWIN_PKG_NAME") |
-        (ssh "$DARWIN_SSH" tar xf - -C /tmp) ||
+        ($ANDROID_EMULATOR_SSH_WRAPPER ssh "$DARWIN_SSH" tar xf - -C /tmp) ||
             panic "Could not send files to remote darwin host"
 
     rm -rf "$DARWIN_PKG_DIR"
 
     log "Performing remote darwin build."
     log "COMMAND: ssh $DARWIN_SSH /tmp/$DARWIN_PKG_NAME/build.sh"
-    ssh "$DARWIN_SSH" $DARWIN_REMOTE_DIR/build.sh
+    $ANDROID_EMULATOR_SSH_WRAPPER ssh "$DARWIN_SSH" $DARWIN_REMOTE_DIR/build.sh
 }
 
 # Generate a small shell script that can be sourced to prepare the
