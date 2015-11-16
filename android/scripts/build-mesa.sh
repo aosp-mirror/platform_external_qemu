@@ -172,7 +172,8 @@ EOF
 
     for SYSTEM in $DARWIN_SYSTEMS; do
         dump "[$SYSTEM] Retrieving remote darwin binaries"
-        run scp -r "$DARWIN_SSH":$REMOTE_DIR/install-prefix/$SYSTEM \
+        run $ANDROID_EMULATOR_SSH_WRAPPER scp -r \
+                "$DARWIN_SSH":$REMOTE_DIR/install-prefix/$SYSTEM \
                 $BINARY_DIR/
 
         timestamp_set "$INSTALL_DIR/$SYSTEM" mesa
