@@ -14,6 +14,7 @@
 #include "android/base/Compiler.h"
 
 #include <stddef.h>
+#include <stdlib.h>
 
 namespace android {
 namespace base {
@@ -41,6 +42,13 @@ struct DefaultDelete {
     template <class T>
     void operator()(T ptr) const {
         delete ptr;
+    }
+};
+
+struct FreeDelete {
+    template <class T>
+    void operator()(T ptr) const {
+        free((void*)ptr);
     }
 };
 
@@ -91,6 +99,9 @@ private:
     DISALLOW_COPY_AND_ASSIGN(ScopedPtr);
     T* mPtr;
 };
+
+template <class T>
+using ScopedCPtr = ScopedPtr<T, FreeDelete>;
 
 }  // namespace base
 }  // namespace android
