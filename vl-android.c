@@ -406,6 +406,7 @@ char* android_op_avd_name = "unknown";
 
 // TODO(digit): Remove this
 extern bool android_op_wipe_data;
+extern bool android_op_writable_system;
 
 extern int android_display_width;
 extern int android_display_height;
@@ -1846,7 +1847,8 @@ serial_hds_add(const char* devname)
 // Callback for android_partition_config().
 static void android_add_nand_image(void *opaque, const char *part_name,
                                    uint64_t part_size, const char *part_file,
-                                   AndroidPartitionType part_type) {
+                                   AndroidPartitionType part_type,
+                                   bool readonly) {
   // Create the configuration string for nand_add_dev().
   // Take care of escaping special characters in file names.
   char tmp[PATH_MAX * 2 + 1];
@@ -1863,6 +1865,10 @@ static void android_add_nand_image(void *opaque, const char *part_name,
     // Using a nand device to approximate a block device until full
     // support is added.
     pstrcat(tmp, sizeof tmp, ",pagesize=512,extrasize=0");
+  }
+
+  if (readonly) {
+    pstrcat(tmp, sizeof(tmp), ",readonly");
   }
 
   nand_add_dev(tmp);
@@ -2948,6 +2954,7 @@ int main(int argc, char **argv, char **envp)
               androidHwConfig_getKernelYaffs2Support(android_hw) >= 1,
 
           .wipe_data = android_op_wipe_data,
+          .writable_system = android_op_writable_system,
       };
 
       char *error = NULL;

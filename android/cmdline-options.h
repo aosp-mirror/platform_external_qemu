@@ -65,6 +65,7 @@
 OPT_FLAG( list_avds, "list available AVDs")
 CFG_PARAM( sysdir,  "<dir>",  "search for system disk images in <dir>" )
 CFG_PARAM( system,  "<file>", "read initial system image from <file>" )
+CFG_FLAG ( writable_system, "make system image writable after 'adb remount'" )
 CFG_PARAM( datadir, "<dir>",  "write user data into <dir>" )
 CFG_PARAM( kernel,  "<file>", "use specific emulated kernel" )
 CFG_PARAM( ramdisk, "<file>", "ramdisk image (default <system>/ramdisk.img" )
