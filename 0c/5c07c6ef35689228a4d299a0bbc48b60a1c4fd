@@ -1,0 +1,7 @@
+Code-Review+2: Bo Hu <bohu@google.com>
+Verified+1: Yurii Zubrytskyi <zyy@google.com>
+Submitted-by: Yurii Zubrytskyi <zyy@google.com>
+Submitted-at: Mon, 16 Nov 2015 21:10:31 +0000
+Reviewed-on: https://android-review.googlesource.com/182694
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
