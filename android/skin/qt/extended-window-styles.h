@@ -112,6 +112,11 @@ enum ExtendedWindowPane {
     "*[class=\"EditableValue\"]  { color:" THEME##_TEXT_COLOR "}" \
     "*[ColorGroup=\"SliderLabel\"]  { color:" THEME##_DIVIDER_COLOR " }" \
     "*[ColorGroup=\"SmsBox\"] { border: 1px solid " THEME##_BOX_COLOR "}" \
+    "*[ColorGroup=\"HorizDivider\"] { background: " \
+            "qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1," \
+                            "stop: 0 " THEME##_LARGE_DIVIDER_COLOR \
+                            ", stop: 1 " THEME##_TAB_SELECTED_COLOR ");" \
+            "border: 0px }" \
     "*[ColorGroup=\"GradientDivider\"] { background:" \
             "qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0," \
                             "stop: 0 " THEME##_LARGE_DIVIDER_COLOR \
