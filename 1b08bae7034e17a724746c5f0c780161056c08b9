@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "db847bce_0b6cc5db",
+        "filename": "Makefile.top.mk",
+        "patchSetId": 5
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-16T21:49:08Z",
+      "side": 1,
+      "message": "Got it.  Will fix.",
+      "parentUuid": "5b2a4b7b_a4ecabea",
+      "range": {
+        "startLine": 269,
+        "startChar": 0,
+        "endLine": 271,
+        "endChar": 1
+      },
+      "revId": "1b08bae7034e17a724746c5f0c780161056c08b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b3453db_c7545d4c",
         "filename": "android-rebuild.sh",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-16T21:37:42Z",
       "side": 1,
       "message": "do we really want to copy it into prebuilts every single time?",
+      "range": {
+        "startLine": 240,
+        "startChar": 0,
+        "endLine": 240,
+        "endChar": 71
+      },
+      "revId": "1b08bae7034e17a724746c5f0c780161056c08b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96d1fa8e_892d07d2",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-16T21:49:08Z",
+      "side": 1,
+      "message": "Do you mean I should do a diff based copy on files already in the build directory?  I have only changed the directory where we are copying the prebuilts into (not directly into the final locations).",
+      "parentUuid": "1b3453db_c7545d4c",
       "range": {
         "startLine": 240,
         "startChar": 0,
