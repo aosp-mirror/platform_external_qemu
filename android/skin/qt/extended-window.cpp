@@ -131,7 +131,6 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
     colorStyle += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
                       DARK_TAB_BKG_COLOR : LIGHT_TAB_BKG_COLOR;
 
-    // Omit "additionalButton" -- The main style sheet handles it
     mExtendedUi->batteryButton    ->setStyleSheet(colorStyle);
     mExtendedUi->cellularButton   ->setStyleSheet(colorStyle);
     mExtendedUi->dpadButton       ->setStyleSheet(colorStyle);
@@ -150,7 +149,6 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
                       DARK_TAB_SELECTED_COLOR : LIGHT_TAB_SELECTED_COLOR;
     thisButton->setStyleSheet(activeStyle);
 
-    mExtendedUi->additionalButton ->setAutoFillBackground(true);
     mExtendedUi->batteryButton    ->setAutoFillBackground(true);
     mExtendedUi->cellularButton   ->setAutoFillBackground(true);
     mExtendedUi->dpadButton       ->setAutoFillBackground(true);
