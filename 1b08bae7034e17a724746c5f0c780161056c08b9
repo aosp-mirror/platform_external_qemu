@@ -93,6 +93,30 @@
       "revId": "1b08bae7034e17a724746c5f0c780161056c08b9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b2a4b7b_9f88dc0a",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-16T23:22:22Z",
+      "side": 1,
+      "message": "Oh, got it, then it\u0027s fine",
+      "parentUuid": "96d1fa8e_892d07d2",
+      "range": {
+        "startLine": 240,
+        "startChar": 0,
+        "endLine": 240,
+        "endChar": 71
+      },
+      "revId": "1b08bae7034e17a724746c5f0c780161056c08b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
