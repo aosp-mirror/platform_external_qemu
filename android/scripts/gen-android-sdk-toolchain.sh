@@ -269,7 +269,7 @@ gen_wrapper_toolchain () {
         # If this is clang, disable ccache-induced warnings and
         # restore colored diagnostics.
         # http://petereisentraut.blogspot.fr/2011/05/ccache-and-clang.html
-        if (${DST_PREFIX}gcc --version 2>/dev/null | grep -q clang); then
+        if (${DST_PREFIX}gcc --version 2>/dev/null | grep --color=never -q clang); then
             EXTRA_CLANG_FLAGS="-Qunused-arguments -fcolor-diagnostics"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $EXTRA_CLANG_FLAGS"
             EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS $EXTRA_CLANG_FLAGS"
@@ -310,7 +310,7 @@ prepare_build_for_host () {
             OSX_DEPLOYEMENT_TARGET=10.8
             OSX_SDK_SUPPORTED="10.6 10.7 10.8 10.9"
             OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | \
-                    grep macosx | sed -e "s/.*macosx10\.//g" | sort -n | \
+                    grep --color=never macosx | sed -e "s/.*macosx10\.//g" | sort -n | \
                     tr '\n' ' ' | sed -e 's/^/10./g')
             if [ -z "$OSX_SDK_INSTALLED_LIST" ]; then
                 panic "Please install XCode on this machine!"
