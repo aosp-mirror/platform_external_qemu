@@ -415,7 +415,14 @@ bool skin_ui_process_events(SkinUI* ui) {
                ev.u.mouse.button);
             skin_window_process_event(ui->window, &ev);
             break;
-
+        case kEventLayoutNext:
+            DE("EVENT: kEventLayoutNext\n");
+            _skin_ui_handle_key_command(ui, SKIN_KEY_COMMAND_CHANGE_LAYOUT_NEXT, 1);
+            break;
+        case kEventLayoutPrev:
+            DE("EVENT: kEventLayoutPrev\n");
+            _skin_ui_handle_key_command(ui, SKIN_KEY_COMMAND_CHANGE_LAYOUT_PREV, 1);
+            break;
         case kEventMouseButtonDown:
         case kEventMouseButtonUp:
             DE("EVENT: kEventMouseButton x=%d y=%d xrel=%d yrel=%d button=%d\n",

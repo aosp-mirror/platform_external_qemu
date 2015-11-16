@@ -18,6 +18,7 @@
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
+#include "android/emulation/control/user_event_agent.h"
 #include "android/gps/GpsFix.h"
 #include "android/hw-sensors.h"
 #include "android/settings-agent.h"
@@ -134,6 +135,7 @@ private:
     const QAndroidSensorsAgent* mSensorsAgent;
     const QAndroidTelephonyAgent* mTelephonyAgent;
     const SettingsAgent* mSettingsAgent;
+    const QAndroidUserEventAgent* mUserEventsAgent;
 
     int      mLoc_mSecRemaining;
     bool     mLoc_nowPlaying;
@@ -190,19 +192,18 @@ private slots:
     void on_cell_voiceStatusBox_currentIndexChanged(int index);
 
     // DPad
-#define ON_PRESS_RELEASE_CLICK(button) \
+#define ON_PRESS_RELEASE(button) \
     void on_dpad_ ## button ## Button_pressed(); \
     void on_dpad_ ## button ## Button_released(); \
-    void on_dpad_ ## button ## Button_clicked();
 
-    ON_PRESS_RELEASE_CLICK(back);
-    ON_PRESS_RELEASE_CLICK(down);
-    ON_PRESS_RELEASE_CLICK(forward);
-    ON_PRESS_RELEASE_CLICK(left);
-    ON_PRESS_RELEASE_CLICK(play);
-    ON_PRESS_RELEASE_CLICK(right);
-    ON_PRESS_RELEASE_CLICK(select);
-    ON_PRESS_RELEASE_CLICK(up);
+    ON_PRESS_RELEASE(back);
+    ON_PRESS_RELEASE(down);
+    ON_PRESS_RELEASE(forward);
+    ON_PRESS_RELEASE(left);
+    ON_PRESS_RELEASE(play);
+    ON_PRESS_RELEASE(right);
+    ON_PRESS_RELEASE(select);
+    ON_PRESS_RELEASE(up);
 
     // Fingerprint
     void on_finger_touchButton_pressed();

@@ -23,6 +23,8 @@ typedef enum {
     kEventKeyDown,
     kEventKeyUp,
     kEventTextInput,
+    kEventLayoutNext,
+    kEventLayoutPrev,
     kEventMouseButtonDown,
     kEventMouseButtonUp,
     kEventMouseMotion,
@@ -33,7 +35,7 @@ typedef enum {
     kEventVideoExpose,
     kEventWindowMoved,
     kEventScreenChanged,
-    kEventZoomedWindowResized,
+    kEventZoomedWindowResized
 } SkinEventType;
 
 typedef enum {

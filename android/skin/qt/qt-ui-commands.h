@@ -31,6 +31,8 @@ enum class QtUICommand {
     HOME,
     BACK,
     RECENTS,
+    ROTATE_RIGHT,
+    ROTATE_LEFT,
     UNGRAB_KEYBOARD
 };
 

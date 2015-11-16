@@ -21,6 +21,7 @@
 #include "android/base/system/System.h"
 #include "android/globals.h"
 #include "android/main-common.h"
+#include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-window.h"
@@ -335,6 +336,20 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
     case QtUICommand::RECENTS:
         uiEmuAgent->userEvents->sendKey(kKeyCodeAppSwitch, down);
         break;
+    case QtUICommand::ROTATE_RIGHT:
+        {
+            SkinEvent* skin_event = new SkinEvent();
+            skin_event->type = kEventLayoutNext;
+            skinUIEvent(skin_event);
+            break;
+        }
+    case QtUICommand::ROTATE_LEFT:
+        {
+            SkinEvent* skin_event = new SkinEvent();
+            skin_event->type = kEventLayoutPrev;
+            skinUIEvent(skin_event);
+            break;
+        }
     case QtUICommand::UNGRAB_KEYBOARD:
         // Ungrabbing is handled in EmulatorQtWindow, and doesn't
         // really need an element in the QtUICommand enum. This
@@ -395,11 +410,11 @@ void ToolWindow::on_recents_button_clicked()
 }
 void ToolWindow::on_rotate_CW_button_clicked()
 {
-    emulator_window->simulateKeyPress(KEY_F12, kKeyModLCtrl);
+    handleUICommand(QtUICommand::ROTATE_RIGHT, true);
 }
 void ToolWindow::on_rotate_CCW_button_clicked()
 {
-    emulator_window->simulateKeyPress(KEY_F11, kKeyModLCtrl);
+    handleUICommand(QtUICommand::ROTATE_LEFT, true);
 }
 void ToolWindow::on_scrShot_button_clicked()
 {
