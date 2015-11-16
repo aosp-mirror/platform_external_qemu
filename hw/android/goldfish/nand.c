@@ -500,8 +500,10 @@ uint32_t nand_dev_do_cmd(nand_dev_controller_state *s, uint32_t cmd)
         return size;
     case NAND_CMD_WRITE_BATCH:
     case NAND_CMD_WRITE:
-        if(dev->flags & NAND_DEV_FLAG_READ_ONLY)
+        if(dev->flags & NAND_DEV_FLAG_READ_ONLY) {
+            XLOG("Trying to write to read-only NAND disk\n");
             return 0;
+        }
         if(addr >= dev->max_size)
             return 0;
         if(size > dev->max_size - addr)
@@ -512,8 +514,10 @@ uint32_t nand_dev_do_cmd(nand_dev_controller_state *s, uint32_t cmd)
         return size;
     case NAND_CMD_ERASE_BATCH:
     case NAND_CMD_ERASE:
-        if(dev->flags & NAND_DEV_FLAG_READ_ONLY)
+        if(dev->flags & NAND_DEV_FLAG_READ_ONLY) {
+            XLOG("Trying to erase within a read-only NAND disk\n");
             return 0;
+        }
         if(addr >= dev->max_size)
             return 0;
         if(size > dev->max_size - addr)
@@ -525,8 +529,10 @@ uint32_t nand_dev_do_cmd(nand_dev_controller_state *s, uint32_t cmd)
     case NAND_CMD_BLOCK_BAD_GET: // no bad block support
         return 0;
     case NAND_CMD_BLOCK_BAD_SET:
-        if(dev->flags & NAND_DEV_FLAG_READ_ONLY)
+        if(dev->flags & NAND_DEV_FLAG_READ_ONLY) {
+            XLOG("Trying to set a bad block in a read-only NAND disk\n");
             return 0;
+        }
         return 0;
     default:
         cpu_abort(cpu_single_env, "nand_dev_do_cmd: Bad command %x\n", cmd);
@@ -613,7 +619,10 @@ static uint32_t nand_dev_read(void *opaque, hwaddr offset)
 
     switch (offset) {
     case NAND_DEV_FLAGS:
-        return dev->flags;
+        // Don't pass NAND_DEV_FLAG_READ_ONLY to the kernel, recent ones
+        // do not understand the flag properly and will refuse to mount
+        // the corresponding partition.
+        return (dev->flags & ~NAND_DEV_FLAG_READ_ONLY);
 
     case NAND_DEV_NAME_LEN:
         return dev->devname_len;

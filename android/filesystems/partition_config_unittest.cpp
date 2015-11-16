@@ -186,6 +186,7 @@ public:
         uint64_t size;
         std::string path;
         AndroidPartitionType format;
+        bool readonly;
     };
 
     // All virtual partitions, as a simple public vector.
@@ -198,20 +199,18 @@ public:
                                const char* name,
                                uint64_t size,
                                const char* path,
-                               AndroidPartitionType format) {
+                               AndroidPartitionType format,
+                               bool readonly) {
         auto collector = static_cast<PartitionCollector*>(opaque);
-        collector->add(name, size, path, format);
-    }
 
-private:
-    void add(const char* name,
-             uint64_t size,
-             const char* path,
-             AndroidPartitionType format) {
-        Partition part = {
-                .name = name, .size = size, .path = path, .format = format,
-        };
-        this->partitions.push_back(part);
+        Partition part;
+        part.name = name;
+        part.size = size;
+        part.path = path;
+        part.format = format;
+        part.readonly = readonly;
+
+        collector->partitions.push_back(part);
     }
 };
 
@@ -247,8 +246,9 @@ static void checkConfig(const AndroidPartitionConfiguration* config,
 
             EXPECT_EQ(expected.name, partitions[n].name);
             EXPECT_EQ(expected.size, partitions[n].size);
-            EXPECT_EQ(expected.path, partitions[n].path);
+            EXPECT_EQ(expected.path, partitions[n].path) << "#" << n;
             EXPECT_EQ(expected.format, partitions[n].format);
+            EXPECT_EQ(expected.readonly, partitions[n].readonly);
         }
     }
 
@@ -299,20 +299,20 @@ TEST(PartitionConfig, normalSetup) {
                     },
             .kernel_supports_yaffs2 = false,
             .wipe_data = false,
+            .writable_system = false,
     };
 
     static const char kExpectedCommands[] =
-            "TEMPFILE [/tmp/tempfile1]\n"
-            "COPY [/tmp/tempfile1] <- [/images/system.img]\n"
             "LOCK [/avd/userdata-qemu.img]\n"
             "LOCK [/avd/cache.img]\n";
 
     static const PartitionCollector::Partition kExpectedPartitions[] = {
-            {"system", 123456ULL, "/tmp/tempfile1",
-             ANDROID_PARTITION_TYPE_EXT4},
+            {"system", 123456ULL, "/images/system.img",
+             ANDROID_PARTITION_TYPE_EXT4, true},
             {"userdata", 400000ULL, "/avd/userdata-qemu.img",
-             ANDROID_PARTITION_TYPE_EXT4},
-            {"cache", 100000ULL, "/avd/cache.img", ANDROID_PARTITION_TYPE_EXT4},
+             ANDROID_PARTITION_TYPE_EXT4, false},
+            {"cache", 100000ULL, "/avd/cache.img", ANDROID_PARTITION_TYPE_EXT4,
+             false},
     };
 
     const size_t kExpectedPartitionsSize = ARRAY_SIZE(kExpectedPartitions);
@@ -345,6 +345,104 @@ TEST(PartitionConfig, wipeData) {
                     },
             .kernel_supports_yaffs2 = false,
             .wipe_data = true,
+            .writable_system = false,
+    };
+
+    static const char kExpectedCommands[] =
+            "LOCK [/avd/userdata-qemu.img]\n"
+            "COPY [/avd/userdata-qemu.img] <- [/images/userdata.img]\n"
+            "EXT4_RESIZE size=400000 [/avd/userdata-qemu.img]\n"
+            "LOCK [/avd/cache.img]\n"
+            "EMPTY_PARTITION format=ext4 size=100000 [/avd/cache.img]\n";
+
+    static const Partition kExpectedPartitions[3] = {
+            {"system", 123456ULL, "/avd/system.img",
+             ANDROID_PARTITION_TYPE_EXT4, true},
+            {"userdata", 400000ULL, "/avd/userdata-qemu.img",
+             ANDROID_PARTITION_TYPE_EXT4, false},
+            {"cache", 100000ULL, "/avd/cache.img", ANDROID_PARTITION_TYPE_EXT4,
+             false},
+    };
+
+    const size_t kExpectedPartitionsSize = ARRAY_SIZE(kExpectedPartitions);
+
+    checkConfig(&config, kExpectedCommands, kExpectedPartitions,
+                kExpectedPartitionsSize);
+}
+
+TEST(PartitionConfig, writableSystem) {
+    AndroidPartitionConfiguration config = {
+            .ramdisk_path = "/foo/ramdisk.img",
+            .fstab_name = "fstab.unittest",
+            .system_partition =
+                    {
+                            .size = 123456ULL,
+                            .path = nullptr,
+                            .init_path = "/images/system.img",
+                    },
+            .data_partition =
+                    {
+                            .size = 400000ULL,
+                            .path = "/avd/userdata-qemu.img",
+                            .init_path = nullptr,
+                    },
+            .cache_partition =
+                    {
+                            .size = 100000ULL,
+                            .path = "/avd/cache.img",
+                            .init_path = nullptr,
+                    },
+            .kernel_supports_yaffs2 = false,
+            .wipe_data = false,
+            .writable_system = true,
+    };
+
+    static const char kExpectedCommands[] =
+            "TEMPFILE [/tmp/tempfile1]\n"
+            "COPY [/tmp/tempfile1] <- [/images/system.img]\n"
+            "LOCK [/avd/userdata-qemu.img]\n"
+            "LOCK [/avd/cache.img]\n";
+
+    static const Partition kExpectedPartitions[3] = {
+            {"system", 123456ULL, "/tmp/tempfile1", ANDROID_PARTITION_TYPE_EXT4,
+             false},
+            {"userdata", 400000ULL, "/avd/userdata-qemu.img",
+             ANDROID_PARTITION_TYPE_EXT4, false},
+            {"cache", 100000ULL, "/avd/cache.img", ANDROID_PARTITION_TYPE_EXT4,
+             false},
+    };
+
+    const size_t kExpectedPartitionsSize = ARRAY_SIZE(kExpectedPartitions);
+
+    checkConfig(&config, kExpectedCommands, kExpectedPartitions,
+                kExpectedPartitionsSize);
+}
+
+TEST(PartitionConfig, persistentWritableSystem) {
+    AndroidPartitionConfiguration config = {
+            .ramdisk_path = "/foo/ramdisk.img",
+            .fstab_name = "fstab.unittest",
+            .system_partition =
+                    {
+                            .size = 123456ULL,
+                            .path = "/avd/system.img",
+                            .init_path = nullptr,
+                    },
+            .data_partition =
+                    {
+                            .size = 400000ULL,
+                            .path = "/avd/userdata-qemu.img",
+                            .init_path = "/images/userdata.img",
+                    },
+            .cache_partition =
+                    {
+                            .size = 100000ULL,
+                            .path = "/avd/cache.img",
+                            .init_path = nullptr,
+                    },
+            .kernel_supports_yaffs2 = false,
+            .wipe_data = true,
+            .writable_system = true,
     };
 
     static const char kExpectedCommands[] =
@@ -357,10 +455,62 @@ TEST(PartitionConfig, wipeData) {
 
     static const Partition kExpectedPartitions[3] = {
             {"system", 123456ULL, "/avd/system.img",
-             ANDROID_PARTITION_TYPE_EXT4},
+             ANDROID_PARTITION_TYPE_EXT4, false},
             {"userdata", 400000ULL, "/avd/userdata-qemu.img",
-             ANDROID_PARTITION_TYPE_EXT4},
-            {"cache", 100000ULL, "/avd/cache.img", ANDROID_PARTITION_TYPE_EXT4},
+             ANDROID_PARTITION_TYPE_EXT4, false},
+            {"cache", 100000ULL, "/avd/cache.img", ANDROID_PARTITION_TYPE_EXT4,
+             false},
+    };
+
+    const size_t kExpectedPartitionsSize = ARRAY_SIZE(kExpectedPartitions);
+
+    checkConfig(&config, kExpectedCommands, kExpectedPartitions,
+                kExpectedPartitionsSize);
+}
+
+TEST(PartitionConfig, persistentWritableSystemWithWipeData) {
+    AndroidPartitionConfiguration config = {
+            .ramdisk_path = "/foo/ramdisk.img",
+            .fstab_name = "fstab.unittest",
+            .system_partition =
+                    {
+                            .size = 123456ULL,
+                            .path = "/avd/system.img",
+                            .init_path = "/images/system.img",
+                    },
+            .data_partition =
+                    {
+                            .size = 400000ULL,
+                            .path = "/avd/userdata-qemu.img",
+                            .init_path = "/images/userdata.img",
+                    },
+            .cache_partition =
+                    {
+                            .size = 100000ULL,
+                            .path = "/avd/cache.img",
+                            .init_path = nullptr,
+                    },
+            .kernel_supports_yaffs2 = false,
+            .wipe_data = true,
+            .writable_system = true,
+    };
+
+    static const char kExpectedCommands[] =
+            "LOCK [/avd/system.img]\n"
+            "COPY [/avd/system.img] <- [/images/system.img]\n"
+            "LOCK [/avd/userdata-qemu.img]\n"
+            "COPY [/avd/userdata-qemu.img] <- [/images/userdata.img]\n"
+            "EXT4_RESIZE size=400000 [/avd/userdata-qemu.img]\n"
+            "LOCK [/avd/cache.img]\n"
+            "EMPTY_PARTITION format=ext4 size=100000 [/avd/cache.img]\n";
+
+    static const Partition kExpectedPartitions[3] = {
+            {"system", 123456ULL, "/avd/system.img",
+             ANDROID_PARTITION_TYPE_EXT4, false},
+            {"userdata", 400000ULL, "/avd/userdata-qemu.img",
+             ANDROID_PARTITION_TYPE_EXT4, false},
+            {"cache", 100000ULL, "/avd/cache.img", ANDROID_PARTITION_TYPE_EXT4,
+             false},
     };
 
     const size_t kExpectedPartitionsSize = ARRAY_SIZE(kExpectedPartitions);
@@ -372,6 +522,7 @@ TEST(PartitionConfig, wipeData) {
 TEST(PartitionConfig, LockedFiles) {
     static const char kLockedDataFile[] = CANNOT_LOCK_PREFIX "_data";
     static const char kLockedSystemFile[] = CANNOT_LOCK_PREFIX "_system";
+    static const char kLockedCacheFile[] = CANNOT_LOCK_PREFIX "_cache";
 
     AndroidPartitionConfiguration config = {
             .ramdisk_path = "/foo/ramdisk.img",
@@ -386,12 +537,12 @@ TEST(PartitionConfig, LockedFiles) {
                     {
                             .size = 400000ULL,
                             .path = kLockedDataFile,
-                            .init_path = "/images/userdata.img",
+                            .init_path = nullptr,
                     },
             .cache_partition =
                     {
                             .size = 100000ULL,
-                            .path = "/avd/cache.img",
+                            .path = kLockedCacheFile,
                             .init_path = nullptr,
                     },
             .kernel_supports_yaffs2 = false,
@@ -400,17 +551,17 @@ TEST(PartitionConfig, LockedFiles) {
 
     static const char kExpectedCommands[] =
             "TEMPFILE [/tmp/tempfile1]\n"
-            "COPY [/tmp/tempfile1] <- [/images/system.img]\n"
+            "EMPTY_PARTITION format=ext4 size=400000 [/tmp/tempfile1]\n"
             "TEMPFILE [/tmp/tempfile2]\n"
-            "COPY [/tmp/tempfile2] <- [/images/userdata.img]\n"
-            "LOCK [/avd/cache.img]\n";
+            "EMPTY_PARTITION format=ext4 size=100000 [/tmp/tempfile2]\n";
 
     static const Partition kExpectedPartitions[3] = {
-            {"system", 123456ULL, "/tmp/tempfile1",
-             ANDROID_PARTITION_TYPE_EXT4},
-            {"userdata", 400000ULL, "/tmp/tempfile2",
-             ANDROID_PARTITION_TYPE_EXT4},
-            {"cache", 100000ULL, "/avd/cache.img", ANDROID_PARTITION_TYPE_EXT4},
+            {"system", 123456ULL, kLockedSystemFile,
+             ANDROID_PARTITION_TYPE_EXT4, true},
+            {"userdata", 400000ULL, "/tmp/tempfile1",
+             ANDROID_PARTITION_TYPE_EXT4, false},
+            {"cache", 100000ULL, "/tmp/tempfile2", ANDROID_PARTITION_TYPE_EXT4,
+             false},
     };
 
     const size_t kExpectedPartitionsSize = ARRAY_SIZE(kExpectedPartitions);
@@ -445,22 +596,22 @@ TEST(PartitionConfig, MissingDataPartition) {
                     },
             .kernel_supports_yaffs2 = false,
             .wipe_data = false,
+            .writable_system = false,
     };
 
     static const char kExpectedCommands[] =
-            "TEMPFILE [/tmp/tempfile1]\n"
-            "COPY [/tmp/tempfile1] <- [/images/system.img]\n"
             "LOCK [/DOES_NOT_EXISTS_data]\n"
             "EMPTY [/DOES_NOT_EXISTS_data]\n"
             "EMPTY_PARTITION format=ext4 size=400000 [/DOES_NOT_EXISTS_data]\n"
             "LOCK [/avd/cache.img]\n";
 
     static const Partition kExpectedPartitions[3] = {
-            {"system", 123456ULL, "/tmp/tempfile1",
-             ANDROID_PARTITION_TYPE_EXT4},
+            {"system", 123456ULL, "/images/system.img",
+             ANDROID_PARTITION_TYPE_EXT4, true},
             {"userdata", 400000ULL, kMissingDataFile,
-             ANDROID_PARTITION_TYPE_EXT4},
-            {"cache", 100000ULL, "/avd/cache.img", ANDROID_PARTITION_TYPE_EXT4},
+             ANDROID_PARTITION_TYPE_EXT4, false},
+            {"cache", 100000ULL, "/avd/cache.img", ANDROID_PARTITION_TYPE_EXT4,
+             false},
     };
 
     const size_t kExpectedPartitionsSize = ARRAY_SIZE(kExpectedPartitions);
@@ -495,12 +646,13 @@ TEST(PartitionConfig, MissingSystemPartition) {
                     },
             .kernel_supports_yaffs2 = false,
             .wipe_data = false,
+            .writable_system = false,
     };
 
-    static const char kExpectedCommands[] = "LOCK [/DOES_NOT_EXISTS_system]\n";
+    static const char kExpectedCommands[] = "";
 
     static const char kExpectedError[] =
-            "Missing system partition image: /DOES_NOT_EXISTS_system";
+            "Missing read-only system partition image: /DOES_NOT_EXISTS_system";
 
     checkErrorConfig(&config, kExpectedCommands, kExpectedError);
 }
@@ -531,11 +683,10 @@ TEST(PartitionConfig, MissingCacheFile) {
                     },
             .kernel_supports_yaffs2 = false,
             .wipe_data = false,
+            .writable_system = false,
     };
 
     static const char kExpectedCommands[] =
-            "TEMPFILE [/tmp/tempfile1]\n"
-            "COPY [/tmp/tempfile1] <- [/images/system.img]\n"
             "LOCK [/avd/userdata-qemu.img]\n"
             "LOCK [/DOES_NOT_EXISTS_cache]\n"
             "EMPTY [/DOES_NOT_EXISTS_cache]\n"
@@ -543,12 +694,12 @@ TEST(PartitionConfig, MissingCacheFile) {
             "[/DOES_NOT_EXISTS_cache]\n";
 
     static const Partition kExpectedPartitions[3] = {
-            {"system", 123456ULL, "/tmp/tempfile1",
-             ANDROID_PARTITION_TYPE_EXT4},
+            {"system", 123456ULL, "/images/system.img",
+             ANDROID_PARTITION_TYPE_EXT4, true},
             {"userdata", 400000ULL, "/avd/userdata-qemu.img",
-             ANDROID_PARTITION_TYPE_EXT4},
-            {"cache", 100000ULL, kMissingCacheFile,
-             ANDROID_PARTITION_TYPE_EXT4},
+             ANDROID_PARTITION_TYPE_EXT4, false},
+            {"cache", 100000ULL, kMissingCacheFile, ANDROID_PARTITION_TYPE_EXT4,
+             false},
     };
 
     const size_t kExpectedPartitionsSize = ARRAY_SIZE(kExpectedPartitions);
@@ -584,21 +735,21 @@ TEST(PartitionConfig, Yaffs2Partitions) {
                     },
             .kernel_supports_yaffs2 = true,
             .wipe_data = false,
+            .writable_system = false,
     };
 
     static const char kExpectedCommands[] =
-            "LOCK [/YAFFS_FILE_system]\n"
             "LOCK [/YAFFS_FILE_data]\n"
             "LOCK [/avd/cache.img]\n"
             "EMPTY_PARTITION format=yaffs2 size=100000 [/avd/cache.img]\n";
 
     static const PartitionCollector::Partition kExpectedPartitions[] = {
             {"system", 123456ULL, kYaffsSystemImage,
-             ANDROID_PARTITION_TYPE_YAFFS2},
+             ANDROID_PARTITION_TYPE_YAFFS2, true},
             {"userdata", 400000ULL, kYaffsDataImage,
-             ANDROID_PARTITION_TYPE_YAFFS2},
+             ANDROID_PARTITION_TYPE_YAFFS2, false},
             {"cache", 100000ULL, "/avd/cache.img",
-             ANDROID_PARTITION_TYPE_YAFFS2},
+             ANDROID_PARTITION_TYPE_YAFFS2, false},
     };
 
     const size_t kExpectedPartitionsSize = ARRAY_SIZE(kExpectedPartitions);

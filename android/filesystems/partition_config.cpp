@@ -121,13 +121,18 @@ typedef enum {
 // the content of the main partition image. This is automatically handled
 // by the NAND code though.
 //
+// If |readonly| is true, then either the |part_file| or |part_init_file| will
+// be mounted as read-only devices. This also prevents locking the partition
+// image and creation of temporary copies.
+//
 static bool addNandImage(PartitionConfigState* state,
                          const char* part_name,
                          AndroidPartitionType part_type,
                          AndroidPartitionOpenMode part_mode,
                          uint64_t part_size,
                          const char* part_file,
-                         const char* part_init_file) {
+                         const char* part_init_file,
+                         bool readonly) {
     // Sanitize parameters, an empty string must be the same as NULL.
     if (part_file && !*part_file) {
         part_file = NULL;
@@ -145,6 +150,13 @@ static bool addNandImage(PartitionConfigState* state,
     if (part_init_file && !state->backend->pathExists(part_init_file)) {
         return partition_config_error(state, "Missing initial %s image: %s",
                                       part_name, part_init_file);
+    }
+
+    // In read-only mode, the initial partition image can be treated as
+    // the main one.
+    if (readonly && !part_file && part_init_file) {
+        part_file = part_init_file;
+        part_init_file = nullptr;
     }
 
     // As a special case, a |part_file| of '<temp>' means a temporary
@@ -218,59 +230,75 @@ static bool addNandImage(PartitionConfigState* state,
     VERBOSE_PRINT(init, "%s partition format: %s", part_name,
                   androidPartitionType_toString(part_type));
 
-    bool need_temp_partition = true;
-    bool need_make_empty = part_init_file ||
-                           (part_mode == ANDROID_PARTITION_OPEN_MODE_MUST_WIPE);
+    bool need_make_empty = (part_mode == ANDROID_PARTITION_OPEN_MODE_MUST_WIPE);
 
-    if (part_file) {
-        if (!state->backend->pathLockFile(part_file)) {
-            dwarning("%s image already in use, changes will not persist!\n",
-                     part_name);
-        } else {
-            need_temp_partition = false;
-
-            // If the partition image is missing, create it.
-            if (!state->backend->pathExists(part_file)) {
-                if (part_mode == ANDROID_PARTITION_OPEN_MODE_MUST_EXIST) {
-                    return partition_config_error(
-                            state, "Missing %s partition image: %s", part_name,
-                            part_file);
-                }
-                if (!state->backend->pathEmptyFile(part_file) < 0) {
-                    return partition_config_error(
-                            state, "Cannot create %s image file at %s: %s",
-                            part_name, part_file, strerror(errno));
-                }
-                need_make_empty = true;
-            }
-        }
-    }
-
-    // Do we need a temporary partition image ?
+    // Must be here to avoid freeing the string too early.
     std::string tempFile;
-    if (need_temp_partition) {
-        if (!state->backend->pathCreateTempFile(&tempFile)) {
+
+    if (readonly) {
+        if (!state->backend->pathExists(part_file)) {
             return partition_config_error(
-                    state,
-                    "Could not create temp file for %s partition image: %s\n",
-                    part_name);
-        }
-        part_file = tempFile.c_str();
-        VERBOSE_PRINT(init, "Mapping '%s' partition image to %s", part_name,
-                      part_file);
-
-        need_make_empty = true;
-    }
-
-    // Do we need to copy the initial partition file into the real one?
-    if (part_init_file) {
-        if (!state->backend->pathCopyFile(part_file, part_init_file)) {
-            return partition_config_error(state,
-                                          "Could not copy initial %s partition "
-                                          "image to real one: %s\n",
-                                          part_name, strerror(errno));
+                    state, "Missing read-only %s partition image: %s",
+                    part_name, part_file);
         }
         need_make_empty = false;
+    } else {
+        bool need_temp_partition = true;
+
+        if (part_init_file) {
+            need_make_empty = true;
+        }
+
+        if (part_file) {
+            if (!state->backend->pathLockFile(part_file)) {
+                dwarning("%s image already in use, changes will not persist!\n",
+                         part_name);
+            } else {
+                need_temp_partition = false;
+
+                // If the partition image is missing, create it.
+                if (!state->backend->pathExists(part_file)) {
+                    if (part_mode == ANDROID_PARTITION_OPEN_MODE_MUST_EXIST) {
+                        return partition_config_error(
+                                state, "Missing %s partition image: %s",
+                                part_name, part_file);
+                    }
+                    if (!state->backend->pathEmptyFile(part_file) < 0) {
+                        return partition_config_error(
+                                state, "Cannot create %s image file at %s: %s",
+                                part_name, part_file, strerror(errno));
+                    }
+                    need_make_empty = true;
+                }
+            }
+        }
+
+        // Do we need a temporary partition image ?
+        if (need_temp_partition) {
+            if (!state->backend->pathCreateTempFile(&tempFile)) {
+                return partition_config_error(state,
+                                              "Could not create temp file for "
+                                              "%s partition image: %s\n",
+                                              part_name);
+            }
+            part_file = tempFile.c_str();
+            VERBOSE_PRINT(init, "Mapping '%s' partition image to %s", part_name,
+                          part_file);
+
+            need_make_empty = true;
+        }
+
+        // Do we need to copy the initial partition file into the real one?
+        if (part_init_file) {
+            if (!state->backend->pathCopyFile(part_file, part_init_file)) {
+                return partition_config_error(
+                        state,
+                        "Could not copy initial %s partition "
+                        "image to real one: %s\n",
+                        part_name, strerror(errno));
+            }
+            need_make_empty = false;
+        }
     }
 
     // Do we need to make the partition image empty?
@@ -287,7 +315,7 @@ static bool addNandImage(PartitionConfigState* state,
     }
 
     (*state->setup_func)(state->setup_opaque, part_name, part_size, part_file,
-                         part_type);
+                         part_type, readonly);
 
     return true;
 }
@@ -338,11 +366,11 @@ bool android_partition_configuration_setup(
     }
 
     // Initialize system partition image.
-    if (!addNandImage(state, "system", system_partition_type,
-                      ANDROID_PARTITION_OPEN_MODE_MUST_EXIST,
-                      config->system_partition.size,
-                      config->system_partition.path,
-                      config->system_partition.init_path)) {
+    if (!addNandImage(
+                state, "system", system_partition_type,
+                ANDROID_PARTITION_OPEN_MODE_MUST_EXIST,
+                config->system_partition.size, config->system_partition.path,
+                config->system_partition.init_path, !config->writable_system)) {
         return false;
     }
 
@@ -352,9 +380,9 @@ bool android_partition_configuration_setup(
             ANDROID_PARTITION_OPEN_MODE_CREATE_IF_NEEDED;
 
     if (!addNandImage(state, "userdata", userdata_partition_type,
-                      userdata_partition_mode,
-                      config->data_partition.size, config->data_partition.path,
-                      config->data_partition.init_path)) {
+                      userdata_partition_mode, config->data_partition.size,
+                      config->data_partition.path,
+                      config->data_partition.init_path, false)) {
         return false;
     }
 
@@ -383,7 +411,7 @@ bool android_partition_configuration_setup(
 
         if (!addNandImage(state, "cache", cache_partition_type,
                           cache_partition_mode, config->cache_partition.size,
-                          config->cache_partition.path, NULL)) {
+                          config->cache_partition.path, NULL, false)) {
             return false;
         }
     }

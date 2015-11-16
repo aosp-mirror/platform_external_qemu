@@ -26,11 +26,13 @@ ANDROID_BEGIN_HEADER
 // |size| is its size in bytes.
 // |path| is the file path for the partition image.
 // |format| is the partition's type.
+// |readonly| is true to indicate that the image is read-only.
 typedef void (*AndroidPartitionSetupFunction)(void* opaque,
                                               const char* name,
                                               uint64_t size,
                                               const char* path,
-                                              AndroidPartitionType format);
+                                              AndroidPartitionType format,
+                                              bool readonly);
 
 // A structure used to model the information related to a given partition
 // image file that will have to be mounted at runtime as a virtual NAND
@@ -58,6 +60,8 @@ typedef struct {
 // YAFFS2 file system.
 // |wipe_data| can be true to indicate that the userdata partition needs to
 // be wiped.
+// |writable_system| can be true to indicate that a writable system partition
+// is desired. This may create a temporary copy of the system partition image.
 typedef struct {
     const char* ramdisk_path;
     const char* fstab_name;
@@ -66,6 +70,7 @@ typedef struct {
     AndroidPartitionInfo cache_partition;
     bool kernel_supports_yaffs2;
     bool wipe_data;
+    bool writable_system;
 } AndroidPartitionConfiguration;
 
 // Setup emulated NAND partition according to misc configuration parameters:

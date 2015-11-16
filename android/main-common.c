@@ -51,7 +51,13 @@
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
 // TODO(digit): Remove this!
+// The plan is to move the -wipe-data and -writable-system feature to the
+// top-level 'emulator' launcher program, so that the engines don't have
+// to meddle with partition images, except for mounting them. The alternative
+// is to add new QEMU1 and QEMU2 options to pass the corresponding flags,
+// which is overkill, given this plan.
 bool android_op_wipe_data = false;
+bool android_op_writable_system = false;
 
 void reassign_string(char** string, const char* new_value) {
     free(*string);
@@ -776,6 +782,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
             hw->disk_dataPartition_initPath = NULL;
         }
         android_op_wipe_data = opts->wipe_data;
+        android_op_writable_system = opts->writable_system;
 
         uint64_t     defaultBytes =
                 hw->disk_dataPartition_size == 0 ?
