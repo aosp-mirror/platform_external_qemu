@@ -253,6 +253,13 @@ static bool is_winsys_exit(SDL_Event* ev) {
 #endif
 }
 
+#include <sys/time.h>
+void printTimeAndType(SkinEventType type) {
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    printf("Ta9I %ld %d %d\n", t.tv_sec, t.tv_usec, type);
+}
+
 bool skin_event_poll(SkinEvent* event) {
     SDL_Event ev;
 
@@ -387,6 +394,7 @@ bool skin_event_poll(SkinEvent* event) {
                 return true;
 
             case SDL_MOUSEMOTION:
+                printTimeAndType(ev.type);
                 event->type = kEventMouseMotion;
                 event->u.mouse.x = ev.button.x;
                 event->u.mouse.y = ev.button.y;
@@ -401,6 +409,7 @@ bool skin_event_poll(SkinEvent* event) {
 
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
+                printTimeAndType(ev.type);
                 event->type = (ev.type == SDL_MOUSEBUTTONDOWN) ?
                         kEventMouseButtonDown :
                         kEventMouseButtonUp;
