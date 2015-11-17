@@ -22,6 +22,30 @@
       "revId": "e4e72e0b775aed5121c1d70536bd6246c8b2c650",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76d4867d_e3d4966a",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-17T22:58:01Z",
+      "side": 1,
+      "message": "I spoke with digit@, we\u0027re going to make an entirely different method for setting orientation and make it not tied to these event values at all. Will upload that shortly.",
+      "parentUuid": "96d1fa8e_619b8798",
+      "range": {
+        "startLine": 102,
+        "startChar": 4,
+        "endLine": 102,
+        "endChar": 42
+      },
+      "revId": "e4e72e0b775aed5121c1d70536bd6246c8b2c650",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
