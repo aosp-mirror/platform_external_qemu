@@ -283,7 +283,10 @@ emulator_window_fb_update( void*   _emulator, int  x, int  y, int  w, int  h )
     if (!emulator->ui) {
         emulator_window_setup(emulator);
     }
-    skin_ui_update_display(emulator->ui, x, y, w, h);
+
+    if (!s_use_emugl_subwindow) {
+        skin_ui_update_display(emulator->ui, x, y, w, h);
+    }
 }
 
 static void
