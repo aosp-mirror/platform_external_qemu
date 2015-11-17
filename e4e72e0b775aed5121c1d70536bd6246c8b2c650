@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "96d1fa8e_619b8798",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-17T22:18:21Z",
+      "side": 1,
+      "message": "shouldn\u0027t we be checking event_type here before calling set_coarse_orientation? Are we sure this function is always going to be called with orientation-related events?",
+      "range": {
+        "startLine": 102,
+        "startChar": 4,
+        "endLine": 102,
+        "endChar": 42
+      },
+      "revId": "e4e72e0b775aed5121c1d70536bd6246c8b2c650",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
