@@ -59,11 +59,12 @@ public:
             mFdWatches(),
             mPendingFdWatches(),
             mTimers() {
-        mQemuBh = qemu_bh_new(handleBottomHalf, this);
     }
 
     virtual ~QemuLooper() {
-        qemu_bh_delete(mQemuBh);
+        if (mQemuBh) {
+            qemu_bh_delete(mQemuBh);
+        }
     }
 
     static QEMUClockType toQemuClockType(ClockType clock) {
@@ -304,6 +305,9 @@ private:
         if (mPendingFdWatches.empty()) {
             // Ensure the bottom-half is triggered to act on pending
             // watches as soon as possible.
+            if (!mQemuBh) {
+                mQemuBh = qemu_bh_new(handleBottomHalf, this);
+            }
             qemu_bh_schedule(mQemuBh);
         }
 
