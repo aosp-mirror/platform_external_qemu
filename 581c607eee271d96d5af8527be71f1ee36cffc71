@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "169a6aee_c28fe6a0",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-17T07:15:11Z",
+      "side": 1,
+      "message": "nit: space between if and parens, and use !s_use_emugl_subwindow which is clearer, as in:\n\n  if (!s_use_emugl_subwindow) {\n      ...\n  }",
+      "revId": "581c607eee271d96d5af8527be71f1ee36cffc71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
