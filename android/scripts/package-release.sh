@@ -336,6 +336,10 @@ OPT_SYMBOLS=
 option_register_var "--symbols" OPT_SYMBOLS \
        "Generate Breakpad symbols."
 
+OPT_DEBUG=
+option_register_var "--debug" OPT_DEBUG \
+        "Build debug version of emulator binaries."
+
 OPT_PREBUILT_QEMU2=
 option_register_var "--prebuilt-qemu2" OPT_PREBUILT_QEMU2 \
        "Don't build QEMU2 from sources, use prebuilts."
@@ -443,9 +447,6 @@ fi
 ###
 
 REBUILD_FLAGS="--verbosity=$(get_verbosity)"
-if [ "$OPT_DEBUG" ]; then
-    var_append REBUILD_FLAGS "--debug"
-fi
 
 log "Building for the following systems: $HOST_SYSTEMS"
 
@@ -676,6 +677,9 @@ build_darwin_binaries_on () {
     if [ "$OPT_SYMBOLS" ]; then
         var_append DARWIN_BUILD_FLAGS "--symbols"
     fi
+    if [ "$OPT_DEBUG" ]; then
+        var_append DARWIN_BUILD_FLAGS "--debug"
+    fi
     if [ "$OPT_PREBUILT_QEMU2" ]; then
         var_append DARWIN_BUILD_FLAGS "--prebuilt-qemu2"
     fi
@@ -746,6 +750,10 @@ fi
 
 if [ "$OPT_SYMBOLS" ]; then
     var_append REBUILD_FLAGS "--symbols"
+fi
+
+if [ "$OPT_DEBUG" ]; then
+    var_append REBUILD_FLAGS "--debug"
 fi
 
 if [ "$OPT_PREBUILT_QEMU2" ]; then
