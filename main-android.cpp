@@ -17,6 +17,7 @@
 
 #include "android/avd/hw-config.h"
 #include "android/cmdline-option.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/filesystems/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
 #include "android/globals.h"
@@ -344,6 +345,10 @@ static void enter_qemu_main_loop(int argc, char **argv) {
 #endif
 
 extern "C" int main(int argc, char **argv) {
+    if (!crashhandler_init()) {
+        VERBOSE_PRINT(init, "Crash handling not initialized\n");
+    }
+
     if (argc < 1) {
         fprintf(stderr, "Invalid invocation (no program path)\n");
         return 1;
