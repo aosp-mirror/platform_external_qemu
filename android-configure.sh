@@ -344,7 +344,6 @@ EOF
     echo "  --strip                     Strip emulator executables (default)."
     echo "  --symbols                   Generating Breakpad symbol files."
     echo "  --no-symbols                Do not generate Breakpad symbol files (default)."
-    echo "  --debug                     Enable debug (-O0 -g) build"
     echo "  --ui=sdl2                   Use SDL2-based UI backend."
     echo "  --ui=qt                     Use Qt-based UI backend (default)."
     echo "  --gles=dgl                  Build the OpenGLES to Desktop OpenGL Translator (default)"
