@@ -302,6 +302,9 @@ QEMUGLContext dpy_gl_ctx_get_current(QemuConsole *con);
 
 bool console_has_gl(QemuConsole *con);
 
+/* Run the display update and input processing ASAP. */
+void dpy_run_update(QemuConsole* con);
+
 static inline int surface_stride(DisplaySurface *s)
 {
     return pixman_image_get_stride(s->image);
