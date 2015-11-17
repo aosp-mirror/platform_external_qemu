@@ -154,6 +154,15 @@ static mon_cmd_t rotate_cmd = {
     .mhandler.cmd = android_console_rotate_screen,
 };
 
+// android_base_port is used across AndroidEmu library to report
+// the control console and adb server ports
+#ifdef USE_ANDROID_EMU
+extern int android_base_port;
+#else
+// just a fake to reduce the number of conditionals
+static int android_base_port = 0;
+#endif
+
 static void android_init_console_and_adb(int console_baseport,
                                          int max_nb_emulators)
 {
@@ -188,6 +197,8 @@ static void android_init_console_and_adb(int console_baseport,
                                        MONITOR_USE_READLINE |
                                        MONITOR_DYNAMIC_CMDS);
         monitor_add_command(android_monitor, &rotate_cmd);
+
+        android_base_port = baseport;
 
         printf("console on port %d, ADB on port %d\n", baseport, baseport + 1);
         return;
