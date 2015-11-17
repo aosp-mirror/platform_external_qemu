@@ -698,18 +698,6 @@ EOF
     dump "Deleting files off darwin system"
     run $ANDROID_EMULATOR_SSH_WRAPPER ssh $HOST rm -rf $DARWIN_REMOTE_DIR
 
-    if [ ! -d "obj/qemu" ]; then
-        QEMU_PREBUILTS_DIR=$PREBUILTS_DIR/qemu-android
-        QEMU_BINARIES=$(list_files_under "$QEMU_PREBUILTS_DIR" "darwin-*/qemu-system-*")
-        if [ "$QEMU_BINARIES" ]; then
-            for QEMU_BINARY in $QEMU_BINARIES; do
-                dump "[$PKG_NAME] Copying $QEMU_BINARY"
-                copy_file_into "$QEMU_PREBUILTS_DIR"/$QEMU_BINARY \
-                               objs/qemu/$(dirname $QEMU_BINARY)
-            done
-        fi
-    fi
-
     create_binaries_package darwin
 }
 
