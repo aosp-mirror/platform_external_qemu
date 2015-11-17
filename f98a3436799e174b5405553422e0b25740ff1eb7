@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "96865a95_695c3dcb",
+        "filename": "android/scripts/package-release.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 701,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-17T09:22:12Z",
+      "side": 0,
+      "message": "Aargh, I\u0027d prefer if we could fix the typo instead. I\u0027m working on fixing build-qemu-android.sh right now, we still need it to help rebasing on top of QEMU 2.4.",
+      "revId": "f98a3436799e174b5405553422e0b25740ff1eb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
