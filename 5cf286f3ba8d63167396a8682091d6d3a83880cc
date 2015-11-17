@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1b3453db_21566add",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-17T23:44:16Z",
+      "side": 1,
+      "message": "It was not clear to me as this was almost a straight copy from android::base::system (see comments above function).  I wasn\u0027t sure if I should push this back into base::system or keep it specifically for breakpad.",
+      "parentUuid": "7b6aafda_ab85a1ee",
+      "range": {
+        "startLine": 80,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 5
+      },
+      "revId": "5cf286f3ba8d63167396a8682091d6d3a83880cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b816bc7_d986b783",
         "filename": "android/crashreport/CrashService.cpp",
         "patchSetId": 11
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-17T20:54:26Z",
       "side": 1,
       "message": "could you please make all non-exported functions static?",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 88,
+        "endChar": 6
+      },
+      "revId": "5cf286f3ba8d63167396a8682091d6d3a83880cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b2a4b7b_ffd59d67",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-17T23:44:16Z",
+      "side": 1,
+      "message": "changed.",
+      "parentUuid": "5b816bc7_d986b783",
       "range": {
         "startLine": 88,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "7b6aafda_8bd21ddb",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-17T23:44:16Z",
+      "side": 1,
+      "message": "got it.",
+      "parentUuid": "5b25eb9e_e44f583a",
+      "range": {
+        "startLine": 92,
+        "startChar": 28,
+        "endLine": 92,
+        "endChar": 44
+      },
+      "revId": "5cf286f3ba8d63167396a8682091d6d3a83880cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b25eb9e_04a814f6",
         "filename": "android/crashreport/CrashService.cpp",
         "patchSetId": 11
@@ -82,6 +154,30 @@
       "writtenOn": "2015-11-17T20:54:26Z",
       "side": 1,
       "message": "1. \u0027struct\u0027 isn\u0027t needed here\n2. underscore in the end is a common way of marking member variables in some coding conventions. Could you please remove it here?",
+      "range": {
+        "startLine": 102,
+        "startChar": 3,
+        "endLine": 102,
+        "endChar": 36
+      },
+      "revId": "5cf286f3ba8d63167396a8682091d6d3a83880cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db847bce_0c37f826",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-17T23:44:16Z",
+      "side": 1,
+      "message": "got it.",
+      "parentUuid": "5b25eb9e_04a814f6",
       "range": {
         "startLine": 102,
         "startChar": 3,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "db847bce_ac8dac1a",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-17T23:44:16Z",
+      "side": 1,
+      "message": "fixed",
+      "parentUuid": "3b2597a9_a1a378c1",
+      "range": {
+        "startLine": 178,
+        "startChar": 58,
+        "endLine": 178,
+        "endChar": 62
+      },
+      "revId": "5cf286f3ba8d63167396a8682091d6d3a83880cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96d1fa8e_0103ab26",
         "filename": "android/crashreport/CrashService.cpp",
         "patchSetId": 11
@@ -128,6 +248,30 @@
       "writtenOn": "2015-11-17T20:54:26Z",
       "side": 1,
       "message": "there\u0027s a ScopedFd class in AndroidEmu",
+      "range": {
+        "startLine": 194,
+        "startChar": 4,
+        "endLine": 194,
+        "endChar": 13
+      },
+      "revId": "5cf286f3ba8d63167396a8682091d6d3a83880cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b3453db_61c0f29f",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-17T23:44:16Z",
+      "side": 1,
+      "message": "The breakpad implementation below is using File * for fprintf\u0027ing.  I could fdopen the FD but it seems like  ScopedFd is using \u0027close\u0027.  Will this be compatible?",
+      "parentUuid": "96d1fa8e_0103ab26",
       "range": {
         "startLine": 194,
         "startChar": 4,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "5b2a4b7b_5fc0319f",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-17T23:44:16Z",
+      "side": 1,
+      "message": "fixed.",
+      "parentUuid": "5b25eb9e_649fc882",
+      "range": {
+        "startLine": 240,
+        "startChar": 0,
+        "endLine": 246,
+        "endChar": 17
+      },
+      "revId": "5cf286f3ba8d63167396a8682091d6d3a83880cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3b2597a9_a1cc988d",
         "filename": "android/crashreport/CrashService.cpp",
         "patchSetId": 11
@@ -174,6 +342,30 @@
       "writtenOn": "2015-11-17T20:54:26Z",
       "side": 1,
       "message": "all three look pretty much the same for me (with a conditional encoding conversion on Windows)\nIs it possible to have the same code for all platforms?",
+      "range": {
+        "startLine": 282,
+        "startChar": 0,
+        "endLine": 282,
+        "endChar": 22
+      },
+      "revId": "5cf286f3ba8d63167396a8682091d6d3a83880cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76d4867d_83c03a51",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-17T23:44:16Z",
+      "side": 1,
+      "message": "There are some differences in the prototypes for these functions.\nThe Apple version uses pass by reference instead of pointers.\nThe Windows version passes in wstring instead of string.\n\nShould I create a single set of ifdef\u0027d function definitions?\n\nvoid OnClientDumpRequest(void* context,\n#if defined(__linux__)\n             const google_breakpad::ClientInfo* client_info,\n             const std::string* file_path\n#elif defined(_WIN32)\n             const google_breakpad::ClientInfo* client_info,\n             const std::wstring* file_path\n#elif defined(__APPLE__)\n             const google_breakpad::ClientInfo\u0026 client_info,\n             const std::string\u0026 file_path\n#endif\n                    )",
+      "parentUuid": "3b2597a9_a1cc988d",
       "range": {
         "startLine": 282,
         "startChar": 0,
@@ -209,6 +401,53 @@
     },
     {
       "key": {
+        "uuid": "96d1fa8e_0169eba1",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-17T23:44:16Z",
+      "side": 1,
+      "message": "Changed.",
+      "parentUuid": "76d4867d_872a075a",
+      "range": {
+        "startLine": 288,
+        "startChar": 40,
+        "endLine": 288,
+        "endChar": 49
+      },
+      "revId": "5cf286f3ba8d63167396a8682091d6d3a83880cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76d4867d_a3057e56",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-17T23:44:16Z",
+      "side": 1,
+      "message": "This shouldn\u0027t be here.  I\u0027ll delete it.",
+      "range": {
+        "startLine": 432,
+        "startChar": 12,
+        "endLine": 432,
+        "endChar": 18
+      },
+      "revId": "5cf286f3ba8d63167396a8682091d6d3a83880cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fb75bfb9_59cdc338",
         "filename": "android/crashreport/CrashService.cpp",
         "patchSetId": 11
@@ -220,6 +459,30 @@
       "writtenOn": "2015-11-17T20:54:26Z",
       "side": 1,
       "message": "this gives quite noticeable delay to the user. What about 100ms?",
+      "range": {
+        "startLine": 439,
+        "startChar": 0,
+        "endLine": 439,
+        "endChar": 27
+      },
+      "revId": "5cf286f3ba8d63167396a8682091d6d3a83880cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b3453db_c1ab26b1",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-17T23:44:16Z",
+      "side": 1,
+      "message": "I wasn\u0027t sure how active the polling should be on this service process.  I can try this at the 100ms.",
+      "parentUuid": "fb75bfb9_59cdc338",
       "range": {
         "startLine": 439,
         "startChar": 0,
@@ -255,6 +518,30 @@
     },
     {
       "key": {
+        "uuid": "1b3453db_61aa32ad",
+        "filename": "android/crashreport/CrashSystem.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-17T23:44:16Z",
+      "side": 1,
+      "message": "Oh sorry, I fixed this in a later patch.",
+      "parentUuid": "7b6aafda_eb363929",
+      "range": {
+        "startLine": 71,
+        "startChar": 65,
+        "endLine": 71,
+        "endChar": 66
+      },
+      "revId": "5cf286f3ba8d63167396a8682091d6d3a83880cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96d1fa8e_21ccef3d",
         "filename": "android/crashreport/CrashSystem.cpp",
         "patchSetId": 11
@@ -278,6 +565,30 @@
     },
     {
       "key": {
+        "uuid": "5b2a4b7b_8523e698",
+        "filename": "android/crashreport/CrashSystem.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-17T23:44:16Z",
+      "side": 1,
+      "message": "Okay.",
+      "parentUuid": "96d1fa8e_21ccef3d",
+      "range": {
+        "startLine": 169,
+        "startChar": 0,
+        "endLine": 171,
+        "endChar": 6
+      },
+      "revId": "5cf286f3ba8d63167396a8682091d6d3a83880cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b3453db_a12eda7f",
         "filename": "android/crashreport/ui/ConfirmDialog.cpp",
         "patchSetId": 11
@@ -289,6 +600,30 @@
       "writtenOn": "2015-11-17T20:54:26Z",
       "side": 1,
       "message": "tr() ?",
+      "range": {
+        "startLine": 72,
+        "startChar": 28,
+        "endLine": 72,
+        "endChar": 42
+      },
+      "revId": "5cf286f3ba8d63167396a8682091d6d3a83880cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96d1fa8e_21c34f88",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-17T23:44:16Z",
+      "side": 1,
+      "message": "Fixed.",
+      "parentUuid": "1b3453db_a12eda7f",
       "range": {
         "startLine": 72,
         "startChar": 28,
