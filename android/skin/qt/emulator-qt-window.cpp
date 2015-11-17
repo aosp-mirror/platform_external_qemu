@@ -106,6 +106,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(mContainer.horizontalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(slot_scrollRangeChanged(int,int)));
     QObject::connect(mContainer.verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(slot_scrollRangeChanged(int,int)));
     QObject::connect(tool_window, SIGNAL(skinUIEvent(SkinEvent*)), this, SLOT(slot_queueEvent(SkinEvent*)));
+
+    setAttribute(Qt::WA_DeleteOnClose);
 }
 
 EmulatorQtWindow::~EmulatorQtWindow()
@@ -256,7 +258,6 @@ void EmulatorQtWindow::slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoin
 void EmulatorQtWindow::slot_clearInstance()
 {
     skin_winsys_save_window_pos();
-    delete instance;
     instance = NULL;
 }
 
@@ -876,4 +877,3 @@ bool EmulatorQtWindow::mouseInside() {
            widget_cursor_coords.y() >= 0 &&
            widget_cursor_coords.y() < height();
 }
-
