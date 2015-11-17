@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "56278298_8ceeeb71",
+        "filename": "android/filesystems/partition_config_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-17T12:46:09Z",
+      "side": 1,
+      "message": "I have no idea why, I tried to disassemble the code and couldn\u0027t find anything relevant. But it was all cryptic. Also it looks like we should compile with -fno-exceptions to make our code smaller, there is a ton of exception-related stuff otherwise in there :(",
+      "parentUuid": "5b2a4b7b_4ef648bd",
+      "range": {
+        "startLine": 206,
+        "startChar": 0,
+        "endLine": 214,
+        "endChar": 6
+      },
+      "revId": "dad0f69553650877e36970ee188bfcc2a3d9fb4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b532b27_a0e6e602",
         "filename": "android/filesystems/partition_config_unittest.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "d67c5259_08fe4b22",
+        "filename": "android/filesystems/partition_config_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-17T12:46:09Z",
+      "side": 1,
+      "message": "the unit-test fails because part.path becomes \u0027userdata\u0027 instead of \u0027/tmp/tempfile1\u0027, I have no idea why. Only reproducible on Linux.",
+      "parentUuid": "5b532b27_a0e6e602",
+      "range": {
+        "startLine": 216,
+        "startChar": 0,
+        "endLine": 217,
+        "endChar": 38
+      },
+      "revId": "dad0f69553650877e36970ee188bfcc2a3d9fb4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "db847bce_6588200a",
         "filename": "android/main-common.c",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2015-11-16T17:04:48Z",
       "side": 1,
       "message": "are you adding something you TODOed to remove? :)",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 28
+      },
+      "revId": "dad0f69553650877e36970ee188bfcc2a3d9fb4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96865a95_14c5845e",
+        "filename": "android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-17T12:46:09Z",
+      "side": 1,
+      "message": "Yes, the ultimate plan is to move this functionality to the top-level \u0027emulator\u0027 launcher, so we won\u0027t need global variables to communicate between the AndroidEmu and QEMU code. The alternative is to create two new QEMU options for this, which I don\u0027t want to do right now. I\u0027ll add a comment to clarify though.",
+      "parentUuid": "db847bce_6588200a",
       "range": {
         "startLine": 53,
         "startChar": 0,
@@ -128,6 +200,30 @@
       "writtenOn": "2015-11-16T17:04:48Z",
       "side": 1,
       "message": "can you remove the commmented code, leaving just the explanation?",
+      "range": {
+        "startLine": 835,
+        "startChar": 4,
+        "endLine": 835,
+        "endChar": 59
+      },
+      "revId": "dad0f69553650877e36970ee188bfcc2a3d9fb4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d67c5259_28030fec",
+        "filename": "hw/android/goldfish/nand.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 835,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-17T12:46:09Z",
+      "side": 1,
+      "message": "will do",
+      "parentUuid": "96d1fa8e_0341f63d",
       "range": {
         "startLine": 835,
         "startChar": 4,
