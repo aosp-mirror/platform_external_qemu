@@ -73,6 +73,74 @@
     },
     {
       "key": {
+        "uuid": "96d1fa8e_947d1a4c",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 691,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-17T19:12:55Z",
+      "side": 1,
+      "message": "(I can believe that phones are typically held 30 degrees away from vertical.)",
+      "revId": "176ba70af1c470bbbe992a71c4322b4668f0c2de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76d4867d_b6abffdb",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 693,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-17T19:12:55Z",
+      "side": 1,
+      "message": "I don\u0027t believe this. Maybe this line should say \"horizontal,\" but that doesn\u0027t deserve and exclamation point.",
+      "revId": "176ba70af1c470bbbe992a71c4322b4668f0c2de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b25eb9e_441dec4e",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 696,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-17T19:12:55Z",
+      "side": 1,
+      "message": "Should this be 30 degrees?",
+      "revId": "176ba70af1c470bbbe992a71c4322b4668f0c2de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b6aafda_a00b80ff",
+        "filename": "android/skin/file.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 630,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-17T19:12:55Z",
+      "side": 1,
+      "message": "I\u0027d recommend adding \u0027default:\u0027 here and using \u0027case 3:\u0027 below.",
+      "revId": "176ba70af1c470bbbe992a71c4322b4668f0c2de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b25eb9e_8a155b8f",
         "filename": "android/skin/window.c",
         "patchSetId": 1
