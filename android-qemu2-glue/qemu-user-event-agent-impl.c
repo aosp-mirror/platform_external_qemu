@@ -61,12 +61,17 @@ static void user_event_mouse(int dx, int dy, int dz, int buttonsState) {
     kbd_mouse_event(dx, dy, dz, buttonsState);
 }
 
+static void on_new_event(void) {
+    dpy_run_update(NULL);
+}
+
 static const QAndroidUserEventAgent sQAndroidUserEventAgent = {
         .sendKey = user_event_key,
         .sendKeyCode = user_event_keycode,
         .sendKeyCodes = user_event_keycodes,
         .sendMouseEvent = user_event_mouse,
-        .sendGenericEvent = user_event_generic
+        .sendGenericEvent = user_event_generic,
+        .onNewUserEvent = on_new_event
 };
 
 const QAndroidUserEventAgent* const gQAndroidUserEventAgent =

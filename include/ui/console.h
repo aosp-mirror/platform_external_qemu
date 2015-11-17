@@ -249,6 +249,9 @@ void dpy_gfx_update_dirty(QemuConsole *con,
                           uint64_t base,
                           bool invalidate);
 
+// run the display update and input processing ASAP
+void dpy_run_update(QemuConsole* con);
+
 static inline int surface_stride(DisplaySurface *s)
 {
     return pixman_image_get_stride(s->image);

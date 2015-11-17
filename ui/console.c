@@ -1659,6 +1659,17 @@ out:
     memory_region_unref(mem);
 }
 
+void dpy_run_update(QemuConsole *con) {
+    if (!con) {
+        con = active_console;
+    }
+    if (con && con->ds && con->ds->gui_timer) {
+        // rearm the timer to run right now; this will also interrupt the
+        // main loop waiting
+        timer_mod(con->ds->gui_timer, qemu_clock_get_ms(QEMU_CLOCK_REALTIME));
+    }
+}
+
 /***********************************************************/
 /* register display */
 
