@@ -22,6 +22,30 @@
       "revId": "fbfcdb5c38e454d3a285c3e9696f1769361de5ef",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56278298_ccf8e339",
+        "filename": "android/filesystems/partition_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-17T12:47:20Z",
+      "side": 0,
+      "message": "Yes, this is taken care of by addNandImage() now, and done properly under the file lock!",
+      "parentUuid": "b6da7ea7_99da7040",
+      "range": {
+        "startLine": 349,
+        "startChar": 2,
+        "endLine": 352,
+        "endChar": 14
+      },
+      "revId": "fbfcdb5c38e454d3a285c3e9696f1769361de5ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
