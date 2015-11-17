@@ -16,6 +16,24 @@
       "revId": "f98a3436799e174b5405553422e0b25740ff1eb7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96d1fa8e_af0c4b51",
+        "filename": "android/scripts/package-release.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 701,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2015-11-17T09:38:28Z",
+      "side": 0,
+      "message": "Sure. For the rebase I guess it would be a lot easier to fix build-qemu-android.sh than the new build-from-sources scripts.\n\nBut I just thought if you wanted to use build-qemu-android.sh to build qemu2, you could run package-release.sh with --prebuilt-qemu2, or does it not work?",
+      "parentUuid": "96865a95_695c3dcb",
+      "revId": "f98a3436799e174b5405553422e0b25740ff1eb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
