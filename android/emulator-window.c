@@ -235,6 +235,11 @@ emulator_window_setup( EmulatorWindow*  emulator )
     // Determine whether to use an EmuGL sub-window or not.
     const char* env = getenv("ANDROID_GL_SOFTWARE_RENDERER");
     s_use_emugl_subwindow = !env || !env[0] || env[0] == '0';
+    // for gpu off or gpu guest, we don't use the subwindow
+    if (!android_hw->hw_gpu_enabled || !strcmp(android_hw->hw_gpu_mode, "guest")) {
+        s_use_emugl_subwindow = 0;
+    }
+
 
     if (s_use_emugl_subwindow) {
         VERBOSE_PRINT(gles, "Using EmuGL sub-window for GPU display");
