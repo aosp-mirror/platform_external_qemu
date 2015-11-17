@@ -33,7 +33,7 @@
 #define AUDIO_CAP "coreaudio"
 #include "audio_int.h"
 
-#if 0
+#if 1
 #  define  D(...)  fprintf(stderr, __VA_ARGS__)
 #else
 #  define  D(...)  ((void)0)

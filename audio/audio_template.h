@@ -36,6 +36,19 @@
 #define HWBUF hw->conv_buf
 #endif
 
+#define DEBUG_AUDIO 1
+
+#ifdef DEBUG_AUDIO
+#ifndef _AUDIO_PRINT_INFO_
+#define _AUDIO_PRINT_INFO_
+static void audio_pcm_print_info (const char *cap, struct audio_pcm_info *info)
+{
+    dolog ("%s: bits %d, sign %d, freq %d, nchan %d\n",
+           cap, info->bits, info->sign, info->freq, info->nchannels);
+}
+#endif // _AUDIO_PRINT_INFO_
+#endif // DEBUG_AUDIO
+
 static void glue (audio_init_nb_voices_, TYPE) (struct audio_driver *drv)
 {
     AudioState *s = &glob_audio_state;
@@ -364,12 +377,14 @@ static SW *glue (audio_pcm_create_voice_pair_, TYPE) (
 
     hw = glue (audio_pcm_hw_add_, TYPE) (&hw_as);
     if (!hw) {
+        dolog ("%s !hw err2\n", __FUNCTION__);
         goto err2;
     }
 
     glue (audio_pcm_hw_add_sw_, TYPE) (hw, sw);
 
     if (glue (audio_pcm_sw_init_, TYPE) (sw, hw, sw_name, as)) {
+        dolog ("%s glue(sw, hw) err3\n", __FUNCTION__);
         goto err3;
     }
 
@@ -487,7 +502,7 @@ SW *glue (AUD_open_, TYPE) (
     else {
         sw = glue (audio_pcm_create_voice_pair_, TYPE) (name, as);
         if (!sw) {
-            dolog ("Failed to create voice `%s'\n", name);
+            dolog ("%s, Failed to create voice `%s'\n", __FUNCTION__, name);
             return NULL;
         }
     }

@@ -1177,14 +1177,6 @@ int audio_pcm_sw_write (SWVoiceOut *sw, void *buf, int size)
     return ret << sw->info.shift;
 }
 
-#ifdef DEBUG_AUDIO
-static void audio_pcm_print_info (const char *cap, struct audio_pcm_info *info)
-{
-    dolog ("%s: bits %d, sign %d, freq %d, nchan %d\n",
-           cap, info->bits, info->sign, info->freq, info->nchannels);
-}
-#endif
-
 #define DAC
 #include "audio_template.h"
 #undef DAC
