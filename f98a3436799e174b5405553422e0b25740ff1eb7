@@ -34,6 +34,24 @@
       "revId": "f98a3436799e174b5405553422e0b25740ff1eb7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d67c5259_a859df42",
+        "filename": "android/scripts/package-release.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 701,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-17T10:49:25Z",
+      "side": 0,
+      "message": "FWIW, I uploaded a fix for build-qemu-android.sh here: https://android-review.googlesource.com/#/c/181938/",
+      "parentUuid": "96d1fa8e_af0c4b51",
+      "revId": "f98a3436799e174b5405553422e0b25740ff1eb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
