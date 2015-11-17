@@ -100,8 +100,42 @@ private:
     T* mPtr;
 };
 
+// Helper scoped pointer template class for heap-allocated memory blocks.
+// Ensures that free() is called on scope exit, unless its release() method
+// has been called.
+//
+// Usage example:
+//    {
+//       const size_t kSize = 128;
+//       ScopedCPtr<char> ptr(static_cast<char*>(malloc(kSize + 1)));
+//       snprintf(ptr.get(), kSize, "message: %s", str);
+//       if (!doSomething(ptr.get()) {
+//           return nullptr;     // calls free() on the pointer.
+//       }
+//       return ptr.release();  // return pointer, without free().
+//    }
+//
+// NOTE: You can also use |foo[index]| to access the n-th item in a Foo array.
 template <class T>
-using ScopedCPtr = ScopedPtr<T, FreeDelete>;
+class ScopedCPtr : public ScopedPtr<T, FreeDelete> {
+public:
+    // Default constructor
+    ScopedCPtr() = default;
+
+    // Normal constructor, takes ownership of |ptr|.
+    explicit ScopedCPtr(T* ptr) : ScopedPtr<T, FreeDelete>(ptr) {}
+
+    // Return const reference to n-th item in array. used to implement
+    // foo[index].
+    const T& operator[](size_t index) const {
+        return ScopedPtr<T, FreeDelete>::get()[index];
+    }
+
+    // Return reference to n-th item in array. used to implement foo[index].
+    T& operator[](size_t index) {
+        return ScopedPtr<T, FreeDelete>::get()[index];
+    }
+};
 
 }  // namespace base
 }  // namespace android

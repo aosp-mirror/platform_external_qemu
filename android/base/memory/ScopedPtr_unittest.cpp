@@ -87,5 +87,31 @@ TEST_F(ScopedPtrTest, StarOperator) {
     EXPECT_EQ(1, mDestroyCount);
 }
 
+TEST(ScopedCPtrTest, EmptyConstructor) {
+    ScopedCPtr<Foo> foo;
+    EXPECT_FALSE(foo.get());
+}
+
+TEST(ScopedCPtrTest, SimpleConstructor) {
+    static const char kText[] = "Hello World";
+    char* str1;
+    {
+        ScopedCPtr<char> str(strdup(kText));
+        EXPECT_STREQ("Hello World", str.get());
+        str1 = str.release();
+        EXPECT_FALSE(str.get());
+    }
+    EXPECT_STREQ("Hello World", str1);
+    free(str1);
+}
+
+TEST(ScopedCPtrTest, ArrayAccess) {
+    static const char kText[] = "Hello World";
+    ScopedCPtr<char> str(strdup(kText));
+    str[0] = 'h';
+    str[6] = 'w';
+    EXPECT_STREQ("hello world", str.get());
+}
+
 }  // namespace base
 }  // namespace android
