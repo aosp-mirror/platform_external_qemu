@@ -70,14 +70,12 @@ QEMU2_CFLAGS := \
     $(LIBCURL_CFLAGS) \
     -D_GNU_SOURCE \
     -D_FILE_OFFSET_BITS=64 \
-    -DANDROID_QEMU2_SPECIFIC \
-    -DANDROID_QEMU2_INTEGRATED_BUILD \
     -DCONFIG_ANDROID \
+    -DUSE_ANDROID_EMU \
+
+include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 
 ifdef EMULATOR_USE_QT
-    QEMU2_CFLAGS += -DUSE_ANDROID_EMU
-
-    include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
     include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-qt.mk
 endif
 

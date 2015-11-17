@@ -87,7 +87,6 @@ LOCAL_LDLIBS += \
     $(SDL2_LDLIBS) \
     $(CXX_STD_LIB) \
     -lfdt \
-    -lz \
     $(call qemu2-if-linux, -lpulse) \
     $(ANDROID_SKIN_LDLIBS) \
 

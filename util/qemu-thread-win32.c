@@ -16,7 +16,7 @@
 #include <assert.h>
 #include <limits.h>
 
-#ifdef CONFIG_ANDROID
+#if defined(CONFIG_ANDROID) && defined(USE_ANDROID_EMU)
 #include "android-qemu2-glue/looper-qemu.h"
 #endif
 
@@ -292,7 +292,7 @@ static unsigned __stdcall win32_start_routine(void *arg)
         data = NULL;
     }
     qemu_thread_data = data;
-#ifdef CONFIG_ANDROID
+#if defined(CONFIG_ANDROID) && defined(USE_ANDROID_EMU)
     /* Ensure AndroidEmu timers and looper work correctly on this thread. */
     qemu_looper_setForThread();
 #endif

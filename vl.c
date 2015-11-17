@@ -139,13 +139,15 @@ int android_display_width  = 640;
 int android_display_height = 480;
 int android_display_bpp    = 32;
 
-#else
+#else  /* !USE_ANDROID_EMU */
+
+#include "hw/misc/android_boot_properties.h"
 
 static void boot_property_add(const char* name, const char* value) {
     android_boot_property_add(name, value);
 }
 
-#endif
+#endif  /* !USE_ANDROID_EMU */
 
 #define  LCD_DENSITY_LDPI      120
 #define  LCD_DENSITY_MDPI      160
@@ -212,8 +214,10 @@ int cursor_hide = 1;
 int graphic_rotate = 0;
 #ifdef CONFIG_ANDROID
 int lcd_density = LCD_DENSITY_MDPI;
+#ifdef USE_ANDROID_EMU
 static const char* android_hw_file = NULL;
-#endif
+#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 const char *watchdog;
 QEMUOptionRom option_rom[MAX_OPTION_ROMS];
 int nb_option_roms;
@@ -2790,7 +2794,7 @@ out:
     return 0;
 }
 
-#ifndef ANDROID_QEMU2_INTEGRATED_BUILD
+#if !defined(CONFIG_ANDROID) || !defined(USE_ANDROID_EMU)
 // We don't use the AndroidEmu library in the original qemu2 build,
 // so let's return their main function back
 #define run_qemu_main main
@@ -3892,10 +3896,12 @@ int run_qemu_main(int argc, const char **argv)
                         exit(1);
                 }
                 break;
+#ifdef USE_ANDROID_EMU
             case QEMU_OPTION_android_hw:
                 android_hw_file = optarg;
                 break;
-#endif // CONFIG_ANDROID
+#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
             default:
                 os_parse_cmd_args(popt->index, optarg);
             }
@@ -3998,14 +4004,6 @@ int run_qemu_main(int argc, const char **argv)
         boot_property_add("ro.opengles.version", tmp);
     }
 
-#endif // USE_ANDROID_EMU
-
-    if (lcd_density) {
-        char temp[8];
-        snprintf(temp, sizeof(temp), "%d", lcd_density);
-        boot_property_add("qemu.sf.lcd_density", temp);
-    }
-
     /* Set the VM's max heap size, passed as a boot property */
     if (android_hw->vm_heapSize > 0) {
         char  temp[64];
@@ -4015,6 +4013,15 @@ int run_qemu_main(int argc, const char **argv)
 
     /* Initialize presence of hardware nav button */
     boot_property_add("qemu.hw.mainkeys", android_hw->hw_mainKeys ? "1" : "0");
+
+#endif // USE_ANDROID_EMU
+
+    if (lcd_density) {
+        char temp[8];
+        snprintf(temp, sizeof(temp), "%d", lcd_density);
+        boot_property_add("qemu.sf.lcd_density", temp);
+    }
+
 
 #endif // CONFIG_ANDROID
 

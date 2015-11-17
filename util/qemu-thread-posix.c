@@ -27,7 +27,7 @@
 #include "qemu/thread.h"
 #include "qemu/atomic.h"
 
-#ifdef CONFIG_ANDROID
+#if defined(CONFIG_ANDROID) && defined(USE_ANDROID_EMU)
 #include "android-qemu2-glue/looper-qemu.h"
 #endif
 
@@ -415,7 +415,7 @@ static void qemu_thread_set_name(QemuThread *thread, const char *name)
 #endif
 }
 
-#ifdef CONFIG_ANDROID
+#if defined(CONFIG_ANDROID) && defined(USE_ANDROID_EMU)
 /* A small data structure to group the thread startup parameters.
  * This is passed to the trampoline function below which will first
  * setup AndroidEmu to use the QEMU-based looper implementation before
@@ -444,7 +444,7 @@ static void* qemu_thread_trampoline(void* data_) {
     /* Start the thread. */
     return (*data.start_routine)(data.arg);
 }
-#endif  // CONFIG_ANDROID
+#endif  // CONFIG_ANDROID_USE_ANDROIDEMU
 
 void qemu_thread_create(QemuThread *thread, const char *name,
                        void *(*start_routine)(void*),
@@ -468,7 +468,7 @@ void qemu_thread_create(QemuThread *thread, const char *name,
     /* Leave signal handling to the iothread.  */
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, &oldset);
-#ifdef CONFIG_ANDROID
+#if defined(CONFIG_ANDROID) && defined(USE_ANDROID_EMU)
     /* Create heap-allocated ThreadStartData object and pass its ownership
      * to the trampoline. */
     ThreadStartData* data = malloc(sizeof(*data));
@@ -480,11 +480,11 @@ void qemu_thread_create(QemuThread *thread, const char *name,
         free(data);
         error_exit(err, __func__);
     }
-#else  /* !CONFIG_ANDROID */
+#else  /* !CONFIG_ANDROID || !USE_ANDROID_EMU */
     err = pthread_create(&thread->thread, &attr, start_routine, arg);
     if (err)
         error_exit(err, __func__);
-#endif  /* !CONFIG_ANDROID */
+#endif  /* !CONFIG_ANDROID || !USE_ANDROID_EMU */
 
     if (name_threads) {
         qemu_thread_set_name(thread, name);
