@@ -63,7 +63,6 @@ const char kVertexShaderSource[] =
     "varying vec2 outCoord;\n"
     "uniform float rotation;\n"
     "uniform vec2 translation;\n"
-
     "void main(void) {\n"
     "  float cs = cos(rotation);\n"
     "  float sn = sin(rotation);\n"
@@ -77,6 +76,41 @@ const char kVertexShaderSource[] =
 const char kFragmentShaderSource[] =
     "varying lowp vec2 outCoord;\n"
     "uniform sampler2D texture;\n"
+    "uniform sampler2D cubic_kernel;\n"
+    "uniform float width;\n"
+    "uniform float height;\n"
+
+    "vec4 cubic(float x)\n"
+    "{\n"
+    "    float x2 = x * x;\n"
+    "    float x3 = x2 * x;\n"
+    "    vec4 w;\n"
+    "    w.x =   -x3 + 3*x2 - 3*x + 1;\n"
+    "    w.y =  3*x3 - 6*x2       + 4;\n"
+    "    w.z = -3*x3 + 3*x2 + 3*x + 1;\n"
+    "    w.w =  x3;\n"
+    "    return w / 6.f;\n"
+    "}\n"
+
+    "vec4 textureBicubic(sampler2D sampler, vec2 coords){\n"
+    "    vec2 tex_size = vec2(width, height);\n"
+    "    coords = coords * tex_size - 0.5;\n"
+    "    vec2 fxy = fract(coords);\n"
+    "    coords -= fxy;\n"
+    "    vec4 xcubic = cubic(fxy.x);\n"
+    "    vec4 ycubic = cubic(fxy.y);\n"
+    "    vec4 c = coords.xxyy + vec2(-0.5, +1.5).xyxy;\n"
+    "    vec4 s = vec4(xcubic.xz + xcubic.yw, ycubic.xz + ycubic.yw);\n"
+    "    vec4 offset = c + vec4(xcubic.yw, ycubic.yw) / s;\n"
+    "    offset *= (1/tex_size).xxyy;\n"
+    "    vec4 r0 = texture2D(sampler, offset.xz);\n"
+    "    vec4 r1 = texture2D(sampler, offset.yz);\n"
+    "    vec4 r2 = texture2D(sampler, offset.xw);\n"
+    "    vec4 r3 = texture2D(sampler, offset.yw);\n"
+    "    float sx = s.x / (s.x + s.y);\n"
+    "    float sy = s.z / (s.z + s.w);\n"
+    "    return mix(mix(r3, r2, sx), mix(r1, r0, sx), sy);\n"
+    "}\n"
 
     "void main(void) {\n"
     "  gl_FragColor = texture2D(texture, outCoord);\n"
@@ -108,6 +142,8 @@ TextureDraw::TextureDraw(EGLDisplay display) :
         mPositionSlot(-1),
         mInCoordSlot(-1),
         mTextureSlot(-1),
+        mWidthSlot(-1),
+        mHeightSlot(-1),
         mRotationSlot(-1),
         mTranslationSlot(-1) {
     // Create shaders and program.
@@ -143,7 +179,8 @@ TextureDraw::TextureDraw(EGLDisplay display) :
     mRotationSlot = s_gles2.glGetUniformLocation(mProgram, "rotation");
     mTranslationSlot = s_gles2.glGetUniformLocation(mProgram, "translation");
     mTextureSlot = s_gles2.glGetUniformLocation(mProgram, "texture");
-
+    mWidthSlot = s_gles2.glGetUniformLocation(mProgram, "width");
+    mHeightSlot = s_gles2.glGetUniformLocation(mProgram, "height");
 #if 0
     printf("SLOTS position=%d inCoord=%d texture=%d rotation=%d\n",
           mPositionSlot, mInCoordSlot, mTextureSlot, mRotationSlot);
@@ -163,7 +200,7 @@ TextureDraw::TextureDraw(EGLDisplay display) :
                          GL_STATIC_DRAW);
 }
 
-bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
+bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy, float width, float height) {
     if (!mProgram) {
         ERR("%s: no program\n", __FUNCTION__);
         return false;
@@ -221,7 +258,9 @@ bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
     // setup the |rotation| uniform value.
     s_gles2.glUniform1f(mRotationSlot, rotation * M_PI / 180.);
     s_gles2.glUniform2f(mTranslationSlot, dx, dy);
-
+    
+    s_gles2.glUniform1f(mWidthSlot, width);
+    s_gles2.glUniform1f(mHeightSlot, height);
 #if 1
     // Validate program, just to be sure.
     s_gles2.glValidateProgram(mProgram);
