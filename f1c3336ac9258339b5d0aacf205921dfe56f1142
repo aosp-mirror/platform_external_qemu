@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fb75bfb9_42fb8ca1",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-18T00:40:27Z",
+      "side": 1,
+      "message": "you could convert the encodings here, so getWCrashDirectory() won\u0027t be needed at all",
+      "range": {
+        "startLine": 385,
+        "startChar": 35,
+        "endLine": 386,
+        "endChar": 65
+      },
+      "revId": "f1c3336ac9258339b5d0aacf205921dfe56f1142",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
