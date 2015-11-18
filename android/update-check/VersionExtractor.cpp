@@ -14,6 +14,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/utils/debug.h"
+#include "android/version.h"
 #include "config-host.h"
 
 #include <libxml/tree.h>
@@ -22,15 +23,6 @@
 #include <stdlib.h>
 
 #include <memory>
-
-#define STRINGIFY(x) _STRINGIFY(x)
-#define _STRINGIFY(x) #x
-
-#ifdef ANDROID_SDK_TOOLS_REVISION
-#define SDK_VERSION_STRING STRINGIFY(ANDROID_SDK_TOOLS_REVISION)
-#else
-#define SDK_VERSION_STRING "standalone"
-#endif
 
 namespace android {
 namespace update_check {
@@ -147,7 +139,7 @@ Version VersionExtractor::extractVersion(const std::string& data) const {
 }
 
 Version VersionExtractor::getCurrentVersion() const {
-    static const Version currentVersion = Version(SDK_VERSION_STRING);
+    static const Version currentVersion = Version(VERSION_STRING_SHORT);
     return currentVersion;
 }
 
