@@ -19,7 +19,7 @@
 // based on CharDriverState
 
 namespace android {
-namespace qemu1 {
+namespace qemu2 {
 
 class CharSerialLine : public android::SerialLine {
 public:
@@ -47,5 +47,5 @@ private:
     CharDriverState* mCs;
 };
 
-}  // namespace qemu1
+}  // namespace qemu2
 }  // namespace android

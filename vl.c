@@ -123,8 +123,10 @@
 #include "android/globals.h"
 #include "android/help.h"
 #include "android-qemu2-glue/looper-qemu.h"
+#include "android/gps.h"
 #include "android/hw-control.h"
 #include "android/hw-kmsg.h"
+#include "android/hw-qemud.h"
 #include "android/utils/socket_drainer.h"
 #include "android/wear-agent/android_wear_agent.h"
 #include "android-qemu2-glue/android_qemud.h"
@@ -4026,6 +4028,14 @@ int run_qemu_main(int argc, const char **argv)
         boot_property_add("qemu.sf.lcd_density", temp);
     }
 
+
+    if (android_hw->hw_gps) {
+        if (android_qemud_get_channel(ANDROID_QEMUD_GPS,
+                                      &android_gps_serial_line) < 0) {
+            error_report("could not initialize qemud 'gps' channel");
+            exit(1);
+        }
+    }
 
 #endif // CONFIG_ANDROID
 

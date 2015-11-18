@@ -16,7 +16,7 @@ extern "C" {
 }
 
 namespace android {
-namespace qemu1 {
+namespace qemu2 {
 
 CharSerialLine::CharSerialLine(CharDriverState* cs) : mCs(cs) { }
 
@@ -34,5 +34,5 @@ int CharSerialLine::write(const uint8_t* data, int len) {
     return qemu_chr_fe_write(mCs, data, len);
 }
 
-}  // namespace qemu1
+}  // namespace qemu2
 }  // namespace android

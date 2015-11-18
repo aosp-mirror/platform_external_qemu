@@ -10,7 +10,7 @@
  ** GNU General Public License for more details.
  */
 
-#include "android-qemu1-glue/qemu-control-impl.h"
+#include "android-qemu2-glue/qemu-control-impl.h"
 
 #include "android/emulation/control/location_agent.h"
 #include "android/gps.h"
@@ -18,7 +18,7 @@
 #include <stdbool.h>
 
 static bool location_gpsIsSupported() {
-    return false;//android_gps_serial_line != NULL;
+    return android_gps_serial_line != NULL;
 }
 
 static const QAndroidLocationAgent sQAndroidLocationAgent = {

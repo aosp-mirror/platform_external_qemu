@@ -14,7 +14,7 @@
 #include "android-qemu2-glue/emulation/charpipe.h"
 #include "android-qemu2-glue/emulation/CharSerialLine.h"
 
-using android::qemu1::CharSerialLine;
+using android::qemu2::CharSerialLine;
 
 CSerialLine* android_serialline_from_cs(CharDriverState* cs) {
     return new CharSerialLine(cs);
