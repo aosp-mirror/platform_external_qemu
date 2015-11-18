@@ -76,6 +76,8 @@ ANDROID_EMU_BASE_SOURCES := \
     android/base/threads/ThreadStore.cpp \
     android/base/Uri.cpp \
     android/base/Version.cpp \
+    android/camera/camera-service.c \
+    android/camera/camera-format-converters.c \
     android/filesystems/ext4_resize.cpp \
     android/filesystems/ext4_utils.cpp \
     android/filesystems/fstab_parser.cpp \
@@ -124,6 +126,22 @@ ANDROID_EMU_BASE_SOURCES := \
     android/utils/utf8_utils.cpp \
     android/utils/vector.c \
     android/utils/x86_cpuid.cpp \
+
+# Platform-specific camera capture
+ifeq ($(HOST_OS),linux)
+    ANDROID_EMU_BASE_SOURCES += \
+        android/camera/camera-capture-linux.c
+endif
+
+ifeq ($(HOST_OS),darwin)
+    ANDROID_EMU_BASE_SOURCES += \
+        android/camera/camera-capture-mac.m
+endif
+
+ifeq ($(HOST_OS),windows)
+    ANDROID_EMU_BASE_SOURCES += \
+        android/camera/camera-capture-windows.c
+endif
 
 ifeq ($(HOST_OS),windows)
     ANDROID_EMU_BASE_SOURCES += \
