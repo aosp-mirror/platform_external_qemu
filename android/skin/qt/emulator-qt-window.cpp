@@ -29,10 +29,12 @@
 #include <QWindow>
 
 #include "android/base/files/PathUtils.h"
+#include "android/emulation/control/user_event_agent.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/winsys-qt.h"
+#include "android/ui-emu-agent.h"
 
 #if defined(__APPLE__)
 #include "android/skin/qt/mac-native-window.h"
@@ -344,6 +346,8 @@ void EmulatorQtWindow::slot_pollEvent(SkinEvent *event, bool *hasEvent, QSemapho
 
 void EmulatorQtWindow::slot_queueEvent(SkinEvent *event, QSemaphore *semaphore)
 {
+    const bool firstEvent = event_queue.isEmpty();
+
     // For the following two events, only the "last" example of said event matters, so ensure
     // that there is only one of them in the queue at a time.
     bool replaced = false;
@@ -360,6 +364,15 @@ void EmulatorQtWindow::slot_queueEvent(SkinEvent *event, QSemaphore *semaphore)
     }
 
     if (!replaced) event_queue.enqueue(event);
+
+    const auto uiAgent = tool_window->getUiEmuAgent();
+    if (firstEvent && uiAgent && uiAgent->userEvents
+            && uiAgent->userEvents->onNewUserEvent) {
+        // we know that as soon as emulator starts processing user events
+        // it processes them until there are none. So we can notify it only
+        // if this event is the first one
+        uiAgent->userEvents->onNewUserEvent();
+    }
 
     if (semaphore != NULL) semaphore->release();
 }

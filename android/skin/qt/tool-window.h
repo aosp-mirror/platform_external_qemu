@@ -56,8 +56,8 @@ public:
     void dockMainWindow();
     void extendedIsClosing() { extendedWindow = NULL; }
 
-    void setToolEmuAgent(const UiEmuAgent *agPtr)
-        { uiEmuAgent = agPtr; }
+    void setToolEmuAgent(const UiEmuAgent* agPtr) { uiEmuAgent = agPtr; }
+    const UiEmuAgent* getUiEmuAgent() const { return uiEmuAgent; }
 
     void showErrorDialog(const QString &message, const QString &title);
 
