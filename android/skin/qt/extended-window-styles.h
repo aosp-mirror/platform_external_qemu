@@ -187,7 +187,12 @@ enum ExtendedWindowPane {
 #define LO_FONT_MEDIUM  "10px"
 #define LO_FONT_LARGE   "12px"
 
+// The buttons (ColorGroup=Tool) look better with the larger size
+// in both cases. Don't adjust them for density.
+
 #define QT_FONTS(DENSITY) \
     "QGroupBox { font-weight: regular; font-size: " DENSITY##_FONT_MEDIUM "}" \
     "QComboBox, QLineEdit, QPlainTextEdit, QPushButton, QRadioButton " \
-            "{ font-weight: regular; font-size: " DENSITY##_FONT_LARGE "}"
+            "{ font-weight: regular; font-size: " DENSITY##_FONT_LARGE "}" \
+    "*[ColorGroup=\"Tool\"] " \
+            "{ font-weight: bold; font-size: " HI_FONT_MEDIUM "}"
