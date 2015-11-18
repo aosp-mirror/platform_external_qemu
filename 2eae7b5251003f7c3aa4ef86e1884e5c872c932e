@@ -16,6 +16,24 @@
       "revId": "2eae7b5251003f7c3aa4ef86e1884e5c872c932e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b25eb9e_1eff3f1d",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-18T22:32:07Z",
+      "side": 1,
+      "message": "I\u0027m not sure, but this doesn\u0027t have to do with this CL.",
+      "parentUuid": "3b2597a9_e4174924",
+      "revId": "2eae7b5251003f7c3aa4ef86e1884e5c872c932e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
