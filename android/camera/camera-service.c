@@ -24,6 +24,7 @@
 #include "android/camera/camera-format-converters.h"
 #include "android/emulation/android_qemud.h"
 #include "android/globals.h"  /* for android_hw */
+#include "android/boot-properties.h"  /* for android_hw */
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
@@ -1269,7 +1270,23 @@ _camera_service_connect(void*          opaque,
 
 void
 android_camera_service_init(void)
-{
+{ 
+    if (strcmp(android_hw->hw_camera_back, "emulated") &&
+        strcmp(android_hw->hw_camera_front, "emulated")) {
+        /* Fake camera is not used for camera emulation. */
+        boot_property_add("qemu.sf.fake_camera", "none");
+    } else {
+        if(!strcmp(android_hw->hw_camera_back, "emulated") &&
+           !strcmp(android_hw->hw_camera_front, "emulated")) {
+            /* Fake camera is used for both, front and back camera emulation. */
+            boot_property_add("qemu.sf.fake_camera", "both");
+        } else if (!strcmp(android_hw->hw_camera_back, "emulated")) {
+            boot_property_add("qemu.sf.fake_camera", "back");
+        } else {
+            boot_property_add("qemu.sf.fake_camera", "front");
+        }
+    }
+    
     static int _inited = 0;
 
     if (!_inited) {
