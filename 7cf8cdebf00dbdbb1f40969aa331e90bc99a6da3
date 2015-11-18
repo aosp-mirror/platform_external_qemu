@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5b2a4b7b_b6ff3a58",
+        "filename": "android/camera/camera-service.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-18T18:21:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fb75bfb9_a8d4bf13",
+      "range": {
+        "startLine": 27,
+        "startChar": 38,
+        "endLine": 27,
+        "endChar": 58
+      },
+      "revId": "7cf8cdebf00dbdbb1f40969aa331e90bc99a6da3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3b2597a9_b588520a",
         "filename": "android/camera/camera-service.c",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-18T17:48:56Z",
       "side": 1,
       "message": "I think the _inited check has to be first",
+      "range": {
+        "startLine": 1290,
+        "startChar": 0,
+        "endLine": 1290,
+        "endChar": 27
+      },
+      "revId": "7cf8cdebf00dbdbb1f40969aa331e90bc99a6da3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb75bfb9_e82f1761",
+        "filename": "android/camera/camera-service.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1290,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-18T18:21:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3b2597a9_b588520a",
       "range": {
         "startLine": 1290,
         "startChar": 0,
