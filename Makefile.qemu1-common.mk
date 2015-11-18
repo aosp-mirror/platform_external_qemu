@@ -73,11 +73,8 @@ EMULATOR_COMMON_CFLAGS += \
 # android-configure.sh
 EMULATOR_COMMON_CFLAGS += -I$(OBJS_DIR)/build/qemu1-qapi-auto-generated
 
-
-ANDROID_SDK_TOOLS_REVISION := $(strip $(ANDROID_SDK_TOOLS_REVISION))
-ifdef ANDROID_SDK_TOOLS_REVISION
-    EMULATOR_COMMON_CFLAGS += -DANDROID_SDK_TOOLS_REVISION=$(ANDROID_SDK_TOOLS_REVISION)
-endif
+# Include the emulator version definition from Makefile.common.mk
+EMULATOR_COMMON_CFLAGS += $(EMULATOR_VERSION_CFLAGS)
 
 # Enable large-file support (i.e. make off_t a 64-bit value)
 ifeq ($(HOST_OS),linux)

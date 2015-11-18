@@ -20,6 +20,7 @@
 
 #include "android/help.h"
 #include "android/utils/stralloc.h"
+#include "android/version.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -30,15 +31,6 @@ using android::base::String;
 using android::base::StringVector;
 using android::base::StringFormat;
 using android::base::PathUtils;
-
-#define  STRINGIFY(x)   _STRINGIFY(x)
-#define  _STRINGIFY(x)  #x
-
-#ifdef ANDROID_SDK_TOOLS_REVISION
-#  define  VERSION_STRING  STRINGIFY(ANDROID_SDK_TOOLS_REVISION)".0"
-#else
-#  define  VERSION_STRING  "standalone"
-#endif
 
 // The host CPU architecture.
 #ifdef __i386__
