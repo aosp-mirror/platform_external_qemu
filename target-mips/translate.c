@@ -1429,9 +1429,10 @@ static inline hwaddr translate_address(CPUMIPSState *env, target_ulong address) 
 int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
 {
     uint32_t opcode;
-    int rs, rt, rd, sa;
     uint32_t op, op1;
     int16_t imm;
+    int rs, rt, rd, sa;
+    int i;
 
     MIPSCPU *cpu = mips_env_get_cpu(env);
     CPUState *cs = CPU(cpu);
@@ -1448,6 +1449,10 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
     CPU.CP0_PageGrain = env->CP0_PageGrain;
     CPU.CP0_PageGrain_rw_bitmask = env->CP0_PageGrain_rw_bitmask;
     CPU.CP0_Index = env->CP0_Index;
+
+    for (i = 0; i < MIPS_KSCRATCH_NUM; i++) {
+        CPU.CP0_KScratch[i] = env->CP0_KScratch[i];
+    }
 
     while (1) {
 
@@ -1725,6 +1730,17 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                         break;
                     }
                     break;
+                case 13:
+                    switch (opcode & 0x7) {
+                    case 0:
+                        CPU.gpr_reg[rt] = CPU.CP0_Cause;
+                        DEBUG_DISSAS("mfc0 CP0_Cause");
+                        break;
+                    default:
+                        DEBUG_ERROR("mfc0 Unknown select");
+                        break;
+                    }
+                    break;
 #if defined(TARGET_MIPS64)
                 case 20:
                     switch (opcode & 0x7) {
@@ -1739,15 +1755,14 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                      }
                      break;
 #endif
-                case 13:
-                    switch (opcode & 0x7) {
-                    case 0:
-                        CPU.gpr_reg[rt] = CPU.CP0_Cause;
-                        DEBUG_DISSAS("mfc0 CP0_Cause");
-                        break;
-                    default:
-                        DEBUG_ERROR("mfc0 Unknown select");
-                        break;
+                case 31:
+                    switch(opcode & 0x7) {
+                        case 2 ... 7:
+                            CPU.gpr_reg[rt] = (int32_t)CPU.CP0_KScratch[(opcode & 0x7) - 2];
+                            DEBUG_DISSAS("mfc0 KScratch");
+                            break;
+                        default:
+                            DEBUG_ERROR("mfc0 Unknown sel");
                     }
                     break;
                 default:
@@ -1808,6 +1823,16 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                         break;
                     default:
                         DEBUG_ERROR("mtc0 reg 5 Unknown select");
+                    }
+                    break;
+                case 31:
+                    switch(opcode & 0x7) {
+                        case 2 ... 7:
+                            CPU.CP0_KScratch[(opcode & 0x7) - 2] = CPU.gpr_reg[rt];
+                            DEBUG_DISSAS("mtc0 KScratch");
+                            break;
+                        default:
+                            DEBUG_ERROR("mtc0 Unknown sel");
                     }
                     break;
                 default:
