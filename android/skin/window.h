@@ -22,6 +22,7 @@ typedef struct SkinWindowFuncs {
     void (*key_event)(unsigned keycode, int down);
     void (*mouse_event)(unsigned x, unsigned y, unsigned state);
     void (*generic_event)(int event_type, int event_code, int event_value);
+    void (*set_device_orientation)(SkinRotation rotation);
     int (*opengles_show)(void* winhandle,
                          int wx,
                          int wy,
