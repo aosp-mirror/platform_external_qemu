@@ -3095,26 +3095,6 @@ int main(int argc, char **argv, char **envp)
         setenv("QEMU_AUDIO_DRV", android_op_audio, 1);
     }
 
-    /* Initialize OpenGLES emulation */
-    //android_hw_opengles_init();
-
-    /* Initialize fake camera */
-    if (strcmp(android_hw->hw_camera_back, "emulated") &&
-        strcmp(android_hw->hw_camera_front, "emulated")) {
-        /* Fake camera is not used for camera emulation. */
-        boot_property_add("qemu.sf.fake_camera", "none");
-    } else {
-        /* Fake camera is used for at least one camera emulation. */
-        if (!strcmp(android_hw->hw_camera_back, "emulated") &&
-            !strcmp(android_hw->hw_camera_front, "emulated")) {
-            /* Fake camera is used for both, front and back camera emulation. */
-            boot_property_add("qemu.sf.fake_camera", "both");
-        } else if (!strcmp(android_hw->hw_camera_back, "emulated")) {
-            boot_property_add("qemu.sf.fake_camera", "back");
-        } else {
-            boot_property_add("qemu.sf.fake_camera", "front");
-        }
-    }
 
     /* Set LCD density (if required by -qemu, and AVD is missing it. */
     if (android_op_lcd_density && !android_hw->hw_lcd_density) {
@@ -3177,6 +3157,7 @@ int main(int argc, char **argv, char **envp)
         stralloc_add_format(kernel_config, " ndns=%d", dns_count);
     }
 
+    /* Initialize OpenGLES emulation */
     /* qemu.gles will be read by the OpenGL ES emulation libraries.
      * If set to 0, the software GL ES renderer will be used as a fallback.
      * If the parameter is undefined, this means the system image runs

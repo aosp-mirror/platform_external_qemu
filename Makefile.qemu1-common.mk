@@ -120,8 +120,6 @@ common_LOCAL_SRC_FILES += \
     android/hw-lcd.c \
     android/multitouch-screen.c \
     android/multitouch-port.c \
-    android/camera/camera-format-converters.c \
-    android/camera/camera-service.c \
     android/utils/jpeg-compress.c \
 
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
@@ -474,18 +472,9 @@ ifeq ($(HOST_ARCH),x86_64)
     LOCAL_SRC_FILES += disas/i386.c
 endif
 
-ifeq ($(HOST_OS),linux)
-    LOCAL_SRC_FILES += android/camera/camera-capture-linux.c
-endif
-
-ifeq ($(HOST_OS),darwin)
-    LOCAL_SRC_FILES += android/camera/camera-capture-mac.m
-endif
-
 ifeq ($(HOST_OS),windows)
     LOCAL_SRC_FILES += \
         block/raw-win32.c \
-        android/camera/camera-capture-windows.c \
         util/qemu-thread-win32.c \
 
 else
