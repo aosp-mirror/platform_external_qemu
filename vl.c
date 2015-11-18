@@ -133,6 +133,7 @@
 #include "android/snapshot.h"
 #include "android/snaphost-android.h"
 #include "android/android.h"
+#include "android/camera/camera-service.h"
 #include "android/opengles.h"
 
 int android_display_width  = 640;
@@ -3974,6 +3975,9 @@ int run_qemu_main(int argc, const char **argv)
         android_display_height = height;
         android_display_bpp    = depth;
     }
+
+    /* Initialize camera */
+    android_camera_service_init();
 
     /* qemu.gles will be read by the OpenGL ES emulation libraries.
      * If set to 0, the software GL ES renderer will be used as a fallback.
