@@ -24,6 +24,7 @@
 #include "android/camera/camera-format-converters.h"
 #include "android/emulation/android_qemud.h"
 #include "android/globals.h"  /* for android_hw */
+#include "android/boot-properties.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
@@ -1269,20 +1270,38 @@ _camera_service_connect(void*          opaque,
 
 void
 android_camera_service_init(void)
-{
+{ 
+    
     static int _inited = 0;
 
     if (!_inited) {
         _camera_service_init(&_camera_service_desc);
         QemudService*  serv = qemud_service_register( SERVICE_NAME, 0,
-                                                      &_camera_service_desc,
-                                                      _camera_service_connect,
-                                                      NULL, NULL);
+                &_camera_service_desc,
+                _camera_service_connect,
+                NULL, NULL);
         if (serv == NULL) {
             derror("%s: Could not register '%s' service",
-                   __FUNCTION__, SERVICE_NAME);
+                    __FUNCTION__, SERVICE_NAME);
             return;
         }
+
+        if (strcmp(android_hw->hw_camera_back, "emulated") &&
+                strcmp(android_hw->hw_camera_front, "emulated")) {
+            /* Fake camera is not used for camera emulation. */
+            boot_property_add("qemu.sf.fake_camera", "none");
+        } else {
+            if(!strcmp(android_hw->hw_camera_back, "emulated") &&
+                    !strcmp(android_hw->hw_camera_front, "emulated")) {
+                /* Fake camera is used for both, front and back camera emulation. */
+                boot_property_add("qemu.sf.fake_camera", "both");
+            } else if (!strcmp(android_hw->hw_camera_back, "emulated")) {
+                boot_property_add("qemu.sf.fake_camera", "back");
+            } else {
+                boot_property_add("qemu.sf.fake_camera", "front");
+            }
+        }
+
         D("%s: Registered '%s' qemud service", __FUNCTION__, SERVICE_NAME);
     }
 }
