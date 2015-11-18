@@ -70,17 +70,9 @@
 #include "android/utils/iolooper.h"
 
 #include "android/skin/winsys.h"
+#include "android/version.h"
 
 SkinRotation  android_framebuffer_rotation;
-
-#define  STRINGIFY(x)   _STRINGIFY(x)
-#define  _STRINGIFY(x)  #x
-
-#ifdef ANDROID_SDK_TOOLS_REVISION
-#  define  VERSION_STRING  STRINGIFY(ANDROID_SDK_TOOLS_REVISION)".0"
-#else
-#  define  VERSION_STRING  "standalone"
-#endif
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 

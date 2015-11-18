@@ -219,18 +219,10 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "android/audio-test.h"
 
 #include "android/snaphost-android.h"
+#include "android/version.h"
 
 /* in android/qemulator.c */
 extern void  android_emulator_set_base_port(int  port);
-
-#define STRINGIFY(x) _STRINGIFY(x)
-#define _STRINGIFY(x) #x
-
-#ifdef ANDROID_SDK_TOOLS_REVISION
-#define VERSION_STRING STRINGIFY(ANDROID_SDK_TOOLS_REVISION) ".0"
-#else
-#define VERSION_STRING "standalone"
-#endif
 
 #if defined(CONFIG_SKINS)
 #undef main
