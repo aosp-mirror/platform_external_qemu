@@ -52,6 +52,24 @@
       "revId": "f98a3436799e174b5405553422e0b25740ff1eb7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b2597a9_4f03db9c",
+        "filename": "android/scripts/package-release.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 701,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2015-11-18T03:30:11Z",
+      "side": 0,
+      "message": "My apologies for being so careless... I didn\u0027t really check how --prebuilt-qemu2 is implemented, and it turns out that I was removing the very implementation of it for remote darwin builds :(\n\nUploaded patch set 2 which only fixes the typo. Please review, thanks!",
+      "parentUuid": "d67c5259_a859df42",
+      "revId": "f98a3436799e174b5405553422e0b25740ff1eb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
