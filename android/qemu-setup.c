@@ -225,7 +225,6 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
                              const QAndroidNetAgent* netAgent)
 {
     int   tries     = MAX_ANDROID_EMULATORS;
-    int   base_port = 5554;
     int   success   = 0;
     int   adb_port = -1;
     uint32_t  guest_ip;
@@ -257,6 +256,7 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
     }
 
 #ifndef ANDROID_QEMU2_SPECIFIC
+    int base_port = 5554;
     int legacy_adb = avdInfo_getAdbdCommunicationMode(android_avdInfo) ? 0 : 1;
 
     if (android_op_ports) {
@@ -381,7 +381,7 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
     }
 #endif
 
-    telephonyAgent->initModem(base_port);
+    telephonyAgent->initModem(android_base_port);
 
     /* setup the http proxy, if any */
     if (VERBOSE_CHECK(proxy))
