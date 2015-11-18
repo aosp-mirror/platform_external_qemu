@@ -89,7 +89,7 @@ bool emuglConfig_init(EmuglConfig* config,
     }
 
     if (!bitness) {
-        bitness = System::kProgramBitness;
+        bitness = System::get()->getHostBitness();
     }
     config->bitness = bitness;
     resetBackendList(bitness);
