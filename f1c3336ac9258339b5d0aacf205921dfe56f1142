@@ -22,6 +22,30 @@
       "revId": "f1c3336ac9258339b5d0aacf205921dfe56f1142",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96d1fa8e_37fd4d5e",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-18T01:12:20Z",
+      "side": 1,
+      "message": "Okay.  I got rid of WCrashDirectory.  I changed the call in CrashReporter to a tmpdir as we don\u0027t support in process dumping anymore.",
+      "parentUuid": "fb75bfb9_42fb8ca1",
+      "range": {
+        "startLine": 385,
+        "startChar": 35,
+        "endLine": 386,
+        "endChar": 65
+      },
+      "revId": "f1c3336ac9258339b5d0aacf205921dfe56f1142",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
