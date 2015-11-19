@@ -16,3 +16,4 @@
 extern "C"
 #endif
 void* getNSWindow(void* ns_view);
+void nsWindowRemoveMaximizeButton(void* ns_window);

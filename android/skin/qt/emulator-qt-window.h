@@ -34,6 +34,10 @@
 #include "android/skin/winsys.h"
 #include "android/skin/qt/tool-window.h"
 
+#if defined(__APPLE__)
+#include "android/skin/qt/mac-native-window.h"
+#endif
+
 namespace Ui {
     class EmulatorWindow;
 }
@@ -65,12 +69,10 @@ public:
     void dropEvent(QDropEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
-    void minimize();
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void paintEvent(QPaintEvent *event);
-    void show();
     void startThread(StartFunction f, int argc, char **argv);
     void setGrabKeyboardInput(bool grab) {
         mGrabKeyboardInput = true;
@@ -166,6 +168,11 @@ public slots:
     void slot_screencapFinished(int exitStatus);
     void slot_screencapPullFinished(int exitStatus);
 
+    void activateWindow();
+    void raise();
+    void show();
+    void showMinimized();
+
     void slot_screenChanged(QScreen* screen);
 private:
     bool mouseInside();
@@ -193,6 +200,18 @@ private:
         {
             setFrameShape(QFrame::NoFrame);
             setWidget(window);
+
+            // The following hints prevent the minimize/maximize/close buttons from appearing.
+            setWindowFlags(Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::Window);
+
+            // Digging into the Qt source code reveals that if the above flags are set on OSX, the
+            // created window will be given a style mask that removes the resize handles from the
+            // window. The hint below is the specific customization flag that ensures the window
+            // will have resize handles. So, we add the button for now, then immediately disable
+            // it when the window is first shown.
+#ifdef __APPLE__
+            setWindowFlags(this->windowFlags() | Qt::WindowMaximizeButtonHint);
+#endif
         }
 
         ~EmulatorWindowContainer() {
@@ -276,6 +295,16 @@ private:
             mEmulatorWindow->closeEvent(event);
         }
 
+        void focusInEvent(QFocusEvent *event)
+        {
+            mEmulatorWindow->tool_window->raise();
+        }
+
+        void hideEvent(QHideEvent *event)
+        {
+            mEmulatorWindow->tool_window->hide();
+        }
+
         void keyPressEvent(QKeyEvent *event)
         {
             mEmulatorWindow->keyPressEvent(event);
@@ -311,6 +340,19 @@ private:
             output.setHeight(output.height() - (horizontal->isVisible() ? horizontal->height() : 0));
 
             return output;
+        }
+
+        void showEvent(QShowEvent *event)
+        {
+            // Disable to maximize button on OSX. See the comment in the constructor for an
+            // explanation of why this is necessary.
+#ifdef __APPLE__
+            WId wid;
+            mEmulatorWindow->slot_getWindowId(&wid);
+            nsWindowRemoveMaximizeButton((void *) wid);
+#endif
+
+            mEmulatorWindow->tool_window->show();
         }
 
     private:

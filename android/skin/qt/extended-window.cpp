@@ -27,18 +27,18 @@ ExtendedWindow::ExtendedWindow(
     ToolWindow *tW,
     const UiEmuAgent *agentPtr,
     const ShortcutKeyStore<QtUICommand>* shortcuts) :
-    QFrame(eW),
-    mParentWindow(eW),
+    QFrame(nullptr),
+    mEmulatorWindow(eW),
     mToolWindow(tW),
-    mBatteryAgent  (agentPtr ? agentPtr->battery   : nullptr),
-    mCellularAgent (agentPtr ? agentPtr->cellular  : nullptr),
-    mEmulatorWindow(agentPtr ? agentPtr->window    : nullptr),
-    mFingerAgent   (agentPtr ? agentPtr->finger    : nullptr),
-    mLocationAgent (agentPtr ? agentPtr->location  : nullptr),
-    mSensorsAgent  (agentPtr ? agentPtr->sensors   : nullptr),
-    mTelephonyAgent(agentPtr ? agentPtr->telephony : nullptr),
-    mSettingsAgent (agentPtr ? agentPtr->settings  : nullptr),
-    mUserEventsAgent(agentPtr ? agentPtr->userEvents : nullptr),
+    mBatteryAgent       (agentPtr ? agentPtr->battery   : nullptr),
+    mCellularAgent      (agentPtr ? agentPtr->cellular  : nullptr),
+    mEmulatorWindowAgent(agentPtr ? agentPtr->window    : nullptr),
+    mFingerAgent        (agentPtr ? agentPtr->finger    : nullptr),
+    mLocationAgent      (agentPtr ? agentPtr->location  : nullptr),
+    mSensorsAgent       (agentPtr ? agentPtr->sensors   : nullptr),
+    mTelephonyAgent     (agentPtr ? agentPtr->telephony : nullptr),
+    mSettingsAgent      (agentPtr ? agentPtr->settings  : nullptr),
+    mUserEventsAgent    (agentPtr ? agentPtr->userEvents : nullptr),
     mLoc_mSecRemaining(-1),
     mLoc_nowPlaying(false),
     mLoc_rowToSend(-1),
@@ -47,7 +47,17 @@ ExtendedWindow::ExtendedWindow(
 {
     Q_INIT_RESOURCE(resources);
 
-    setWindowFlags(Qt::Tool | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
+    // "Tool" type windows live in another layer on top of everything in OSX, which is undesirable
+    // because it means the extended window must be on top of the emulator window. However, on
+    // Windows and Linux, "Tool" type windows are the only way to make a window that does not have
+    // its own taskbar item.
+#ifdef __APPLE__
+    Qt::WindowFlags flag = Qt::Dialog;
+#else
+    Qt::WindowFlags flag = Qt::Tool;
+#endif
+
+    setWindowFlags(flag | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
     setAttribute(Qt::WA_DeleteOnClose);
 
     mExtendedUi->setupUi(this);
@@ -75,8 +85,8 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_HELP,      mExtendedUi->helpButton},
     };
 
-    move(mParentWindow->geometry().right() + 40,
-         mParentWindow->geometry().top()   + 40 );
+    move(mEmulatorWindow->geometry().right() + 40,
+         mEmulatorWindow->geometry().top()   + 40 );
 }
 
 void ExtendedWindow::showPane(ExtendedWindowPane pane) {
