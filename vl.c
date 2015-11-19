@@ -4020,21 +4020,20 @@ int run_qemu_main(int argc, const char **argv)
     /* Initialize presence of hardware nav button */
     boot_property_add("qemu.hw.mainkeys", android_hw->hw_mainKeys ? "1" : "0");
 
-#endif // USE_ANDROID_EMU
-
-    if (lcd_density) {
-        char temp[8];
-        snprintf(temp, sizeof(temp), "%d", lcd_density);
-        boot_property_add("qemu.sf.lcd_density", temp);
-    }
-
-
     if (android_hw->hw_gps) {
         if (android_qemud_get_channel(ANDROID_QEMUD_GPS,
                                       &android_gps_serial_line) < 0) {
             error_report("could not initialize qemud 'gps' channel");
             exit(1);
         }
+    }
+
+#endif // USE_ANDROID_EMU
+
+    if (lcd_density) {
+        char temp[8];
+        snprintf(temp, sizeof(temp), "%d", lcd_density);
+        boot_property_add("qemu.sf.lcd_density", temp);
     }
 
 #endif // CONFIG_ANDROID
