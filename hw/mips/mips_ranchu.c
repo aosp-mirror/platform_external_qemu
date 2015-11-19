@@ -188,6 +188,15 @@ static CharDriverState *try_to_create_console_chardev(int portno)
     return chr;
 }
 
+// android_base_port is used across AndroidEmu library to report
+// the control console and adb server ports
+#ifdef USE_ANDROID_EMU
+extern int android_base_port;
+#else
+// just a fake to reduce the number of conditionals
+static int android_base_port = 0;
+#endif
+
 static void initialize_console_and_adb(void)
 {
     /* Initialize the console and ADB, which must listen on two
@@ -222,6 +231,8 @@ static void initialize_console_and_adb(void)
                                        MONITOR_DYNAMIC_CMDS);
         monitor_add_command(android_monitor,
                             &rotate_cmd);
+
+        android_base_port = baseport;
 
         printf("console on port %d, ADB on port %d\n", baseport, baseport + 1);
         return;
