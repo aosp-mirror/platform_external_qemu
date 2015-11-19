@@ -399,6 +399,7 @@ LOCAL_SRC_FILES += \
     android-qemu1-glue/telephony/modem_init.cpp \
     android-qemu1-glue/utils/stream.cpp \
     async.c \
+    audio/audio.c \
     block.c \
     blockdev.c \
     block/qcow2.c \

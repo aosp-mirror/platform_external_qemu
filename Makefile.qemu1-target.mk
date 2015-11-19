@@ -72,7 +72,6 @@ LOCAL_SRC_FILES += \
     android-qemu1-glue/qemu-user-event-agent-impl.c \
     android-qemu1-glue/qemu-vm-operations-impl.c \
     arch_init.c \
-    audio/audio.c \
     backends/msmouse.c \
     code-profile.c \
     cpus.c \
