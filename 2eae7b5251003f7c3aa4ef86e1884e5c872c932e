@@ -81,6 +81,30 @@
       "revId": "2eae7b5251003f7c3aa4ef86e1884e5c872c932e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b25eb9e_594f1168",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-19T00:40:36Z",
+      "side": 1,
+      "message": "No, without this the selection box can\u0027t be created/drawn. Try getting rid of this code and see what happens. It basically doesn\u0027t allow anything to be drawn/interacted with on any pixel that isn\u0027t touched in this function (at least as far as I can tell).\n\nThis may actually be a \"hack\" in the sense that it\u0027s just resulting in the call of another function we\u0027re missing, but the internet hasn\u0027t revealed anything interesting.",
+      "parentUuid": "fb75bfb9_727211cb",
+      "range": {
+        "startLine": 430,
+        "startChar": 12,
+        "endLine": 432,
+        "endChar": 51
+      },
+      "revId": "2eae7b5251003f7c3aa4ef86e1884e5c872c932e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
