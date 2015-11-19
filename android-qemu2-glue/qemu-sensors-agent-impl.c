@@ -12,16 +12,14 @@
 
 #include "android/emulation/control/sensors_agent.h"
 
-//#include "hw-sensors.h"
+#include "android/hw-sensors.h"
 
 int sensor_set(int sensorId, float a, float b, float c) {
-    //return android_sensors_set(sensorId, a, b, c);
-    return 0;
+    return android_sensors_set(sensorId, a, b, c);
 }
 
 int sensor_get(int sensorId, float *a, float *b, float *c) {
-    //return android_sensors_get(sensorId, a, b, c);
-    return 0;
+    return android_sensors_get(sensorId, a, b, c);
 }
 
 static const QAndroidSensorsAgent sQAndroidSensorsAgent = {
