@@ -68,6 +68,7 @@ QEMU2_CFLAGS := \
     -fno-strict-aliasing \
     -fno-common \
     $(LIBCURL_CFLAGS) \
+    $(EMULATOR_VERSION_CFLAGS) \
     -D_GNU_SOURCE \
     -D_FILE_OFFSET_BITS=64 \
     -DCONFIG_ANDROID \
