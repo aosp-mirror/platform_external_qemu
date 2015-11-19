@@ -34,6 +34,29 @@
       "revId": "2eae7b5251003f7c3aa4ef86e1884e5c872c932e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b25eb9e_b9a4e57b",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-19T00:21:05Z",
+      "side": 1,
+      "message": "Can confirm that this is necessary - attempted to draw a single pixel in each of the corners of the screen, and only these pixels were \"part\" of the frame - if you hovered over them, the cursor would change, but anywhere else would not.",
+      "range": {
+        "startLine": 430,
+        "startChar": 12,
+        "endLine": 432,
+        "endChar": 51
+      },
+      "revId": "2eae7b5251003f7c3aa4ef86e1884e5c872c932e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
