@@ -10,6 +10,11 @@ include $(LOCAL_PATH)/distrib/Qt5.mk
 include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
 include $(LOCAL_PATH)/distrib/libpng.mk
 
+ANDROID_SDK_TOOLS_REVISION := $(strip $(ANDROID_SDK_TOOLS_REVISION))
+ifdef ANDROID_SDK_TOOLS_REVISION
+    EMULATOR_VERSION_CFLAGS := -DANDROID_SDK_TOOLS_REVISION=$(ANDROID_SDK_TOOLS_REVISION)
+endif
+
 include $(LOCAL_PATH)/Makefile.qemu1-common.mk
 
 ifeq ($(HOST_OS),windows)

@@ -23,14 +23,9 @@
 #include "android/utils/path.h"
 #include "android/utils/system.h"
 #include "android/utils/bufprint.h"
+#include "android/version.h"
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
-
-#ifdef ANDROID_SDK_TOOLS_REVISION
-#  define  VERSION_STRING  STRINGIFY(ANDROID_SDK_TOOLS_REVISION)".0"
-#else
-#  define  VERSION_STRING  "standalone"
-#endif
 
 /* Contains arguments for -android-ports option. */
 char* android_op_ports = NULL;
