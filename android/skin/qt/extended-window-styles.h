@@ -130,6 +130,12 @@ enum ExtendedWindowPane {
     "QPlainTextEdit, QTextEdit, QLineEdit {" \
             "border-top: 0px; "\
             "border-bottom: 1px solid " THEME##_EDIT_COLOR "}" \
+    "QCheckBox::indicator:checked[ColorGroup=\"Toggle\"] {" \
+            "image: url(:/" THEME##_PATH "/toggle_on);" \
+            "width: 36px; height: 24px }" \
+    "QCheckBox::indicator:unchecked[ColorGroup=\"Toggle\"] {" \
+            "image: url(:/" THEME##_PATH "/toggle_off);" \
+            "width: 36px; height: 24px }" \
     "QCheckBox::indicator:checked {" \
             "image: url(:/" THEME##_PATH "/check_yes) }" \
     "QCheckBox::indicator:unchecked {" \
