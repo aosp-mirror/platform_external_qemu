@@ -135,6 +135,9 @@ SkinKeyCode skin_keycode_rotate(SkinKeyCode code, int  rotation) {
     _KEYSYM1_(F15) \
     _KEYSYM1_(PRINT) \
     _KEYSYM1_(BREAK) \
+    _KEYSYM1_(PLAYPAUSE) \
+    _KEYSYM1_(REWIND) \
+    _KEYSYM1_(FASTFORWARD) \
     _KEYSYM1_(APPSWITCH) \
 
 #define _KEYSYM_(x,y)   { KEY_##x, #y },

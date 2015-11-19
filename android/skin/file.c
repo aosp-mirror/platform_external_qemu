@@ -215,6 +215,7 @@ static unsigned translate_button_name(const char* name) {
         { "prev",         kKeyCodePrevious },
         { "next",         kKeyCodeNext },
         { "play",         kKeyCodePlay },
+        { "playpause",    kKeyCodePlaypause },
         { "pause",        kKeyCodePause },
         { "stop",         kKeyCodeStop },
         { "rev",          kKeyCodeRewind },
