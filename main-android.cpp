@@ -1132,6 +1132,12 @@ extern "C" int main(int argc, char **argv) {
         kernelCommandLine += " qemu.gles=0";
     }
 
+    if (hw->hw_gsmModem) {
+        // rild checks for qemud, we can just set it to a dummy value instead of
+        // a serial port
+        kernelCommandLine += " android.qemud=1";
+    }
+
     if (opts->no_boot_anim) {
         kernelCommandLine += " android.bootanim=0";
     }
