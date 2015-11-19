@@ -2433,11 +2433,11 @@ font-family: &quot;Roboto&quot;</string>
       </rect>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_3">
       <attribute name="title">
-       <string>Keyboard Shortcuts</string>
+       <string>Keyboard shortcuts</string>
       </attribute>
       <widget class="QTableWidget" name="shortcutsTableWidget">
        <property name="geometry">
@@ -2501,7 +2501,7 @@ font-family: &quot;Roboto&quot;</string>
      </widget>
      <widget class="QWidget" name="tab_4">
       <attribute name="title">
-       <string>Emulator Help</string>
+       <string>Emulator help</string>
       </attribute>
       <widget class="QPushButton" name="help_docs">
        <property name="geometry">
