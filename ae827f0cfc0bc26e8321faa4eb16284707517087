@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "56278298_8f409d3b",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-19T11:01:13Z",
+      "side": 1,
+      "message": "nit: this file is parsed multiple times, you probably want to use :\u003d instead of +\u003d here.",
+      "revId": "ae827f0cfc0bc26e8321faa4eb16284707517087",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
