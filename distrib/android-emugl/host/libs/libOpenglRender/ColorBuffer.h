@@ -22,6 +22,7 @@
 #include "emugl/common/smart_ptr.h"
 
 class TextureDraw;
+class TextureResize;
 
 // A class used to model a guest color buffer, and used to implement several
 // related things:
@@ -149,6 +150,7 @@ private:
     GLenum m_internalFormat;
     EGLDisplay m_display;
     Helper* m_helper;
+    TextureResize* m_resizer;
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;
