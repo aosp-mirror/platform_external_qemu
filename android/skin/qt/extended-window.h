@@ -114,6 +114,7 @@ private:
     void initCellular();
     void initDPad();
     void initFinger();
+    void initHelp();
     void initKbdShorts();
     void initLocation();
     void initSettings();

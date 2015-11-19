@@ -12,17 +12,9 @@
 
 #include "ui_extended.h"
 
-#include "android/android.h"
-#include "android/base/String.h"
-#include "android/base/Version.h"
-#include "android/emulation/bufprint_config_dirs.h"
-#include "android/globals.h"
-#include "android/main-common.h"
 #include "android/settings-agent.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/qt-settings.h"
-#include "android/update-check/UpdateChecker.h"
-#include "android/update-check/VersionExtractor.h"
 #include "extended-window.h"
 #include "extended-window-styles.h"
 
@@ -38,37 +30,7 @@ static void setElidedText(QLineEdit* line_edit, const QString& text) {
 }
 
 void ExtendedWindow::initSettings()
-{
-    // Get the version of this code
-    android::update_check::VersionExtractor vEx;
-
-    android::base::Version curVersion = vEx.getCurrentVersion();
-    android::base::String  verStr =
-            curVersion.isValid() ? curVersion.toString() : "Unknown";
-
-    mExtendedUi->set_versionBox->setPlainText(verStr.c_str());
-
-    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
-    mExtendedUi->set_androidVersionBox->setPlainText(apiVersionString(apiLevel));
-
-    // Show the ADB port number
-    mExtendedUi->set_adbPortBox->setPlainText( QString::number(android_adb_port) );
-
-    // Get latest version that is available on line
-
-    char configPath[PATH_MAX];
-    bufprint_config_path(configPath, configPath + sizeof(configPath));
-    android::update_check::UpdateChecker upCheck(configPath);
-
-    // Do not run needsCheck() or runAsyncCheck().
-    // Just use the latest information that is
-    // already available.
-    android::base::Version availableVersion = upCheck.getLatestVersion();
-    android::base::String  availStr = availableVersion.isValid() ?
-                                  availableVersion.toString() : "Unknown";
-    mExtendedUi->set_latestVersionBox->setPlainText(availStr.c_str());
-    mExtendedUi->set_saveLocBox->installEventFilter(this);
-}
+{ }
 
 void ExtendedWindow::completeSettingsInitialization()
 {
@@ -96,31 +58,6 @@ void ExtendedWindow::completeSettingsInitialization()
     // (by pretending the theme setting got changed)
     on_set_themeBox_currentIndexChanged(theme);
 }
-
-QString ExtendedWindow::apiVersionString(int apiVersion)
-{
-    // This information was taken from the SDK Manager:
-    // Appearances & Behavior > System Settings > Android SDK > SDK Platforms
-    switch (apiVersion) {
-        case 15: return "4.0.3 (Ice Cream Sandwich) - API 15 (Rev 5)";
-        case 16: return "4.1 (Jelly Bean) - API 16 (Rev 5)";
-        case 17: return "4.2 (Jelly Bean) - API 17 (Rev 3)";
-        case 18: return "4.3 (Jelly Bean) - API 18 (Rev 3)";
-        case 19: return "4.4 (KitKat) - API 19 (Rev 4)";
-        case 20: return "4.4 (KitKat Wear) - API 20 (Rev 2)";
-        case 21: return "5.0 (Lollipop) - API 21 (Rev 2)";
-        case 22: return "5.1 (Lollipop) - API 22 (Rev 2)";
-        case 23: return "6.0 (Marshmallow) - API 23 (Rev 1)";
-
-        default:
-            if (apiVersion < 0 || apiVersion > 99) {
-                return tr("Unknown API version");
-            } else {
-                return "API " + QString::number(apiVersion);
-            }
-    }
-}
-
 
 void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
 {
