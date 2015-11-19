@@ -57,14 +57,7 @@ extern "C" {
 #include <stdio.h>
 #include <unistd.h>
 
-#define  STRINGIFY(x)   _STRINGIFY(x)
-#define  _STRINGIFY(x)  #x
-
-#ifdef ANDROID_SDK_TOOLS_REVISION
-#  define  VERSION_STRING  STRINGIFY(ANDROID_SDK_TOOLS_REVISION)".0"
-#else
-#  define  VERSION_STRING  "standalone"
-#endif
+#include "android/version.h"
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
