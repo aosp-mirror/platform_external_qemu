@@ -57,6 +57,30 @@
       "revId": "2eae7b5251003f7c3aa4ef86e1884e5c872c932e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb75bfb9_727211cb",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-11-19T00:38:17Z",
+      "side": 1,
+      "message": "We only need this for the cursor change right? Why not just use the main window?\n\nOr we can make it fancy, darken everything initially, and un-darken the selected region. That\u0027d be a bit weird for ctrl-click, but do we really need both drag and click?",
+      "parentUuid": "5b25eb9e_b9a4e57b",
+      "range": {
+        "startLine": 430,
+        "startChar": 12,
+        "endLine": 432,
+        "endChar": 51
+      },
+      "revId": "2eae7b5251003f7c3aa4ef86e1884e5c872c932e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
