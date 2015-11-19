@@ -108,6 +108,11 @@
 #include "config.h"
 
 #include "android/boot-properties.h"
+#include "android/curl-support.h"
+#include "android/emulation/bufprint_config_dirs.h"
+#include "android/metrics/metrics_reporter.h"
+#include "android/metrics/studio-helper.h"
+#include "android/update-check/update_check.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
@@ -137,10 +142,16 @@
 #include "android/android.h"
 #include "android/camera/camera-service.h"
 #include "android/opengles.h"
+#include "android/version.h"
 
 int android_display_width  = 640;
 int android_display_height = 480;
 int android_display_bpp    = 32;
+
+/////////////////////////////////////////////////////////////
+// Metrics reporting globals.
+static Looper* metrics_looper = NULL;
+/////////////////////////////////////////////////////////////
 
 #else  /* !USE_ANDROID_EMU */
 
@@ -2803,6 +2814,120 @@ out:
 #define run_qemu_main main
 #endif
 
+#if defined(USE_ANDROID_EMU)
+
+static int is_opengl_alive = 1;
+
+static void android_curl_setup(void)
+{
+    char cert_file[MAX_PATH];
+    char* p = cert_file;
+    char* end = cert_file + sizeof(cert_file);
+    p = bufprint_app_dir(p, end);
+    bufprint(p, end, "%c%s%c%s",
+             PATH_SEP_C, "lib", PATH_SEP_C, "ca-bundle.pem");
+    curl_init(cert_file);
+}
+
+static void android_check_for_updates()
+{
+    char configPath[MAX_PATH];
+    bufprint_config_path(configPath, configPath + sizeof(configPath));
+    android_checkForUpdates(configPath);
+}
+
+static void android_init_metrics()
+{
+    char path[MAX_PATH], *pathend=path, *bufend=pathend+sizeof(path);
+    AndroidMetrics metrics;
+
+    if (!android_studio_get_optins()) {
+        return;
+    }
+
+    pathend = bufprint_avd_home_path(path, bufend);
+    if (pathend >= bufend || !androidMetrics_moduleInit(path))
+    {
+        printf("Failed to initialize metrics reporting.\n");
+        return;
+    }
+
+    androidMetrics_init(&metrics);
+    // mark the qemu2-based emulator with special suffix
+    ANDROID_METRICS_STRASSIGN(metrics.emulator_version, VERSION_STRING "/2");
+    ANDROID_METRICS_STRASSIGN(metrics.guest_arch, android_hw->hw_cpu_arch);
+    metrics.guest_gpu_enabled = android_hw->hw_gpu_enabled;
+    if (android_hw->hw_gpu_enabled) {
+        free(metrics.guest_gl_vendor);
+        metrics.guest_gl_vendor = NULL;
+        free(metrics.guest_gl_renderer);
+        metrics.guest_gl_renderer = NULL;
+        free(metrics.guest_gl_version);
+        metrics.guest_gl_version = NULL;
+        // This call is only sensible after |android_startOpenglesRenderer| has
+        // been called.
+        android_getOpenglesHardwareStrings(&metrics.guest_gl_vendor,
+                                           &metrics.guest_gl_renderer,
+                                           &metrics.guest_gl_version);
+    }
+
+    metrics.opengl_alive = is_opengl_alive;
+    androidMetrics_write(&metrics);
+    androidMetrics_fini(&metrics);
+
+    androidMetrics_tryReportAll();
+
+    metrics_looper = looper_getForThread();
+    if (!metrics_looper) {
+        printf("Failed to initialize metrics looper (OOM?).\n");
+        return;
+    }
+    androidMetrics_keepAlive(metrics_looper);
+}
+
+static void android_teardown_metrics()
+{
+    // NB: It is safe to cleanup metrics reporting even if we never initialized
+    // it.
+    androidMetrics_seal();
+    looper_free(metrics_looper);
+    androidMetrics_moduleFini();
+}
+
+static void android_reporting_setup(void)
+{
+    android_init_metrics();
+    if (!is_opengl_alive) {
+        derror("Could not initialize OpenglES emulation, "
+               "use '-gpu off' to disable it.");
+        exit(1);
+    }
+
+    android_check_for_updates();
+}
+
+static void android_reporting_teardown(void)
+{
+    android_teardown_metrics();
+    curl_cleanup();
+}
+
+#else
+
+static void android_curl_setup(void)
+{
+}
+
+static void android_reporting_setup(void)
+{
+}
+
+static void android_reporting_teardown(void)
+{
+}
+
+#endif
+
 int run_qemu_main(int argc, const char **argv)
 {
     int i;
@@ -2844,6 +2969,10 @@ int run_qemu_main(int argc, const char **argv)
     uint64_t ram_slots = 0;
     FILE *vmstate_dump_file = NULL;
     Error *main_loop_err = NULL;
+
+    // libcurl initialization is thread-unsafe, so let's call it first
+    // to make sure no other thread could be doing the same
+    android_curl_setup();
 
     atexit(qemu_run_exit_notifiers);
     error_set_progname(argv[0]);
@@ -3990,16 +4119,16 @@ int run_qemu_main(int argc, const char **argv)
      * because this requires changing the LD_LIBRARY_PATH before launching
      * the emulation engine. */
     int qemu_gles = 0;
+    is_opengl_alive = 1;
     if (android_hw->hw_gpu_enabled) {
         if (strcmp(android_hw->hw_gpu_mode, "guest") != 0) {
             if (android_initOpenglesEmulation() != 0 ||
                 android_startOpenglesRenderer(android_hw->hw_lcd_width,
-                                              android_hw->hw_lcd_height) != 0)
-            {
-                derror("Could not initialize OpenglES emulation, use '-gpu off' to disable it.");
-                exit(1);
+                                              android_hw->hw_lcd_height) != 0) {
+                is_opengl_alive = 0;
+            } else {
+                qemu_gles = 1;   // Using emugl
             }
-            qemu_gles = 1;   // Using emugl
         } else {
             qemu_gles = 2;   // Using guest
         }
@@ -4636,6 +4765,11 @@ int run_qemu_main(int argc, const char **argv)
         }
     }
 
+    // Initialize reporting right before entering main loop.
+    // We want to track performance of a running emulator, ignoring any early
+    // exits as a result of incorrect setup.
+    android_reporting_setup();
+
     main_loop();
     bdrv_close_all();
     pause_all_vcpus();
@@ -4643,6 +4777,8 @@ int run_qemu_main(int argc, const char **argv)
 #ifdef CONFIG_TPM
     tpm_cleanup();
 #endif
+
+    android_reporting_teardown();
 
     return 0;
 }
