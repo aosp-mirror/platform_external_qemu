@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "db847bce_caf9e5eb",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-19T19:07:42Z",
+      "side": 1,
+      "message": "I mean you COULD.\n\nDone.",
+      "parentUuid": "7b6aafda_ca800667",
+      "revId": "9d7d0f66293ecdc54b6d77120dac4d8ebc7ea1a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3b2597a9_f8b7eaa0",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 15
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-19T18:44:23Z",
       "side": 1,
       "message": "s/Sdk/SDK/",
+      "revId": "9d7d0f66293ecdc54b6d77120dac4d8ebc7ea1a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db847bce_ea5ce9cb",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-19T19:07:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3b2597a9_f8b7eaa0",
       "revId": "9d7d0f66293ecdc54b6d77120dac4d8ebc7ea1a0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
