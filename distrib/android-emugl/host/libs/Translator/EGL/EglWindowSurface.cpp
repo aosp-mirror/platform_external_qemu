@@ -17,11 +17,17 @@
 #include "EglGlobalInfo.h"
 #include "EglOsApi.h"
 
-static std::set<EGLNativeWindowType> s_associatedWins;
+#include "emugl/common/lazy_instance.h"
+
+// this static member is accessed from a function registered in onexit()
+// for the emulator cleanup. As all static C++ objects are also being freed
+// from a system handler registered in onexit(), we can't have a class object
+// by value here - it would be prone to unstable deinitialization order issue;
+static emugl::LazyInstance<std::set<EGLNativeWindowType>>
+    s_associatedWins = LAZY_INSTANCE_INIT;
 
 bool EglWindowSurface::alreadyAssociatedWithConfig(EGLNativeWindowType win) {
-    return s_associatedWins.find(win) != s_associatedWins.end();
-
+    return s_associatedWins.get().find(win) != s_associatedWins.get().end();
 }
 
 EglWindowSurface::EglWindowSurface(EglDisplay* dpy,
@@ -30,15 +36,14 @@ EglWindowSurface::EglWindowSurface(EglDisplay* dpy,
                                    unsigned int width,
                                    unsigned int height) :
         EglSurface(dpy, WINDOW, config, width, height),
-        m_win(win)
-{
-    s_associatedWins.insert(win);
+        m_win(win) {
+    s_associatedWins.get().insert(win);
     EglOS::Engine* engine = EglGlobalInfo::getInstance()->getOsEngine();
     m_native = engine->createWindowSurface(win);
 }
 
-EglWindowSurface:: ~EglWindowSurface() {
-    s_associatedWins.erase(m_win);
+EglWindowSurface::~EglWindowSurface() {
+    s_associatedWins.get().erase(m_win);
 }
 
 bool  EglWindowSurface::getAttrib(EGLint attrib,EGLint* val) {
