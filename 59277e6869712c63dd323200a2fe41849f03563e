@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "3baaf753_65a346c3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-20T16:22:34Z",
+      "side": 1,
+      "message": "typo",
+      "range": {
+        "startLine": 17,
+        "startChar": 50,
+        "endLine": 17,
+        "endChar": 54
+      },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b25eb9e_7ac6386e",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
