@@ -18,7 +18,31 @@
 #include "ui_extended.h"
 
 void ExtendedWindow::initBattery()
-{ }
+{
+    int chargeLevel = 50;
+    if (mBatteryAgent &&  mBatteryAgent->chargeLevel) {
+        chargeLevel = mBatteryAgent->chargeLevel();
+    }
+    mExtendedUi->bat_levelSlider->setValue(chargeLevel);
+
+    BatteryCharger bCharger = BATTERY_CHARGER_AC;
+    if (mBatteryAgent &&  mBatteryAgent->charger) {
+        bCharger = mBatteryAgent->charger();
+    }
+    mExtendedUi->bat_chargerBox->setCurrentIndex((int)bCharger);
+
+    BatteryHealth bHealth = BATTERY_HEALTH_UNKNOWN;
+    if (mBatteryAgent &&  mBatteryAgent->health) {
+        bHealth = mBatteryAgent->health();
+    }
+    mExtendedUi->bat_healthBox->setCurrentIndex((int)bHealth);
+
+    BatteryStatus bStatus = BATTERY_STATUS_UNKNOWN;
+    if (mBatteryAgent &&  mBatteryAgent->status) {
+        bStatus = mBatteryAgent->status();
+    }
+    mExtendedUi->bat_statusBox->setCurrentIndex((int)bStatus);
+}
 
 void ExtendedWindow::on_bat_chargerBox_currentIndexChanged(int index)
 {
