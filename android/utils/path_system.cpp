@@ -13,7 +13,9 @@
 #include "android/utils/path.h"
 
 #include "android/base/system/System.h"
+#include "android/base/files/PathUtils.h"
 
+using android::base::PathUtils;
 using android::base::System;
 
 ABool path_exists(const char* path) {
@@ -26,4 +28,8 @@ ABool path_is_regular(const char* path) {
 
 ABool path_is_dir(const char*  path) {
     return System::get()->pathIsDir(path);
+}
+
+ABool path_is_absolute(const char* path) {
+    return PathUtils::isAbsolute(path);
 }

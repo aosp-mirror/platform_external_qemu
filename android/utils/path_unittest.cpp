@@ -15,6 +15,36 @@
 namespace android {
 namespace path {
 
+#define ARRAY_SIZE(x)  (sizeof(x)/sizeof(x[0]))
+
+TEST(Path, isAbsolute) {
+#ifdef _WIN32
+    const bool isWin32 = true;
+#else
+    const bool isWin32 = false;
+#endif
+    static const struct {
+        const char* path;
+        bool expected;
+    } kData[] = {
+        { "foo", false },
+        { "/foo", true },
+        { "\\foo", isWin32 },
+        { "/foo/bar", true },
+        { "\\foo\\bar", isWin32 },
+        { "C:foo", false },
+        { "C:/foo", isWin32 },
+        { "C:\\foo", isWin32 },
+        { "//server", !isWin32 },
+        { "//server/path", true },
+    };
+    for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
+        const char* path = kData[n].path;
+        EXPECT_EQ(kData[n].expected, path_is_absolute(path))
+                << "Testing '" << (path ? path : "<NULL>") << "'";
+    }
+}
+
 TEST(Path, EscapePath) {
     const char linuxInputPath[]    = "/Linux/style_with/various,special==character%s";
     const char linuxOutputPath[]   = "/Linux/style_with/various%Cspecial%E%Echaracter%Ps";
