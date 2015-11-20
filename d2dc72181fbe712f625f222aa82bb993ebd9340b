@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7bb8efa6_a7d14a23",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-20T16:35:28Z",
+      "side": 1,
+      "message": "my preference is to never use prefixes, but coding standard says something different :(",
+      "parentUuid": "569062ca_f2f83039",
+      "revId": "d2dc72181fbe712f625f222aa82bb993ebd9340b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d67c5259_f6a8289f",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "76d4867d_d6ab01db",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-20T16:35:28Z",
+      "side": 1,
+      "message": "yes, but there\u0027s usually a function call before the test in generated asm code, so explicit test is _much_ faster :)",
+      "parentUuid": "d67c5259_f6a8289f",
+      "revId": "d2dc72181fbe712f625f222aa82bb993ebd9340b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "db11db43_6e1a17bd",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2015-11-20T08:35:15Z",
       "side": 1,
       "message": "How many threads are going to call this function? This doesn\u0027t seem very thread-safe, but I\u0027m assuming only the Qt UI thread will access this. Any way to push this to the QtApplication instance instead then? I really don\u0027t like static variables, they make testing brittle.",
+      "revId": "d2dc72181fbe712f625f222aa82bb993ebd9340b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b6aafda_6fe22757",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-20T16:35:28Z",
+      "side": 1,
+      "message": "Actually, this is called exactly once on the startup. Yes, static variables are evil, and we\u0027d better get rid of them.",
+      "parentUuid": "db11db43_6e1a17bd",
       "revId": "d2dc72181fbe712f625f222aa82bb993ebd9340b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
