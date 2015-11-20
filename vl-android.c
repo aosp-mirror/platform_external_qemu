@@ -2500,8 +2500,10 @@ int main(int argc, char **argv, char **envp)
 #endif /* CONFIG_KVM */
             case QEMU_OPTION_smp:
                 smp_cpus = atoi(optarg);
-                if (smp_cpus < 1) {
-                    PANIC("Invalid number of CPUs");
+                if (smp_cpus != 1) {
+                    fprintf(stderr, "Classic qemu does not support SMP; '%s' option is ignored\n",
+                            optarg);
+                    smp_cpus = 1;
                 }
                 break;
 	    case QEMU_OPTION_vnc:
