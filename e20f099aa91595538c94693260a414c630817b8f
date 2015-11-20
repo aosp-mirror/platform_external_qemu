@@ -16,6 +16,24 @@
       "revId": "e20f099aa91595538c94693260a414c630817b8f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bed97ca_8d9ac1dd",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglWindowSurface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-20T20:35:47Z",
+      "side": 1,
+      "message": "I could, but it just feels not right to me: the instance isn\u0027t a smart pointer or so, it\u0027s much closer to std::reference_wrapper\n\u0027-\u003e\u0027 makes it feel like a pointer (to me)",
+      "parentUuid": "368beea4_11ae7ca8",
+      "revId": "e20f099aa91595538c94693260a414c630817b8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
