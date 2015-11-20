@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fba3ff7d_439e467a",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglWindowSurface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-20T16:28:59Z",
+      "side": 1,
+      "message": "and btw, unordered_set usually uses more memory because of the hash table large array",
+      "parentUuid": "569062ca_320378ec",
+      "revId": "953ff268b834d8e3a1ab950b7977946c2deab6bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "569062ca_12fe7c22",
         "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglWindowSurface.cpp",
         "patchSetId": 1
@@ -65,6 +83,24 @@
       "writtenOn": "2015-11-20T08:33:52Z",
       "side": 1,
       "message": "This is not thread-safe, use a LazyInstance\u003c\u003e instead to ensure thread-safe initialization of static globals. See external/qemu/distrib/android-emugl/shared/emugl/common/lazy_instance.h",
+      "revId": "953ff268b834d8e3a1ab950b7977946c2deab6bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76d4867d_96b18951",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglWindowSurface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-20T16:28:59Z",
+      "side": 1,
+      "message": "it\u0027s not supposed to be thread-safe here: the very next line calls set::insert() which would blow up in case of concurrent call\n\nAnyway, I will change the code to LazyInstance - I didn\u0027t know about that class, thanks!",
+      "parentUuid": "569062ca_12fe7c22",
       "revId": "953ff268b834d8e3a1ab950b7977946c2deab6bf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
