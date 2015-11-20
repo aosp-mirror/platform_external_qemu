@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "569062ca_f2f83039",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-20T08:20:32Z",
+      "side": 1,
+      "message": "nit: It\u0027s better to name static globals with a \u0027s\u0027 prefix, as in:\n\n  static EmulatorQtWindow::Ptr* sInstance \u003d nullptr;\n\nThis makes it clearer in the rest of the code that one is addressing what amounts to a global variable, not a local one or member field.",
+      "revId": "d2dc72181fbe712f625f222aa82bb993ebd9340b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d67c5259_f6a8289f",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-20T08:20:32Z",
+      "side": 1,
+      "message": "nit: delete already tests for nullptr, so this is equivalent to:\n\n  delete sInstance;\n  sInstance \u003d nullptr;",
+      "revId": "d2dc72181fbe712f625f222aa82bb993ebd9340b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
