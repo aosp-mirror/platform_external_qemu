@@ -33,6 +33,7 @@
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/winsys-qt.h"
 #include "android/ui-emu-agent.h"
 
@@ -167,13 +168,11 @@ void EmulatorQtWindow::keyPressEvent(QKeyEvent *event)
 void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
 {
     handleKeyEvent(kEventKeyUp, event);
-    if (mGrabKeyboardInput && mouseInside()) {
-        if (event->text().length() > 0) {
-            SkinEvent *skin_event = createSkinEvent(kEventTextInput);
-            skin_event->u.text.down = false;
-            strncpy((char*)skin_event->u.text.text, (const char*)event->text().constData(), 32);
-            queueEvent(skin_event);
-        }
+    if (event->text().length() > 0) {
+        SkinEvent *skin_event = createSkinEvent(kEventTextInput);
+        skin_event->u.text.down = false;
+        strncpy((char*)skin_event->u.text.text, (const char*)event->text().constData(), 32);
+        queueEvent(skin_event);
     }
 }
 
@@ -700,6 +699,21 @@ bool EmulatorQtWindow::handleQtMouseEvent(SkinEventType type, QMouseEvent *event
     return false;
 }
 
+void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event) {
+    SkinEvent *skin_event = createSkinEvent(type);
+    SkinEventKeyData *keyData = &skin_event->u.key;
+    keyData->keycode = convertKeyCode(event->key());
+
+    Qt::KeyboardModifiers modifiers = event->modifiers();
+    if (modifiers & Qt::ShiftModifier) keyData->mod |= kKeyModLShift;
+    if (modifiers & Qt::ControlModifier) keyData->mod |= kKeyModLCtrl;
+    if (modifiers & Qt::AltModifier) keyData->mod |= kKeyModLAlt;
+
+    queueEvent(skin_event);
+}
+
+#include <iostream>
+
 void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
 {
     // When in zoom mode, the cursor should change when control is held
@@ -719,20 +733,17 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
         mGrabKeyboardInput = false;
     }
 
-    if (mGrabKeyboardInput && mouseInside()) {
-        SkinEvent *skin_event = createSkinEvent(type);
-        SkinEventKeyData *keyData = &skin_event->u.key;
-        keyData->keycode = convertKeyCode(event->key());
-
-        Qt::KeyboardModifiers modifiers = event->modifiers();
-        if (modifiers & Qt::ShiftModifier) keyData->mod |= kKeyModLShift;
-        if (modifiers & Qt::ControlModifier) keyData->mod |= kKeyModLCtrl;
-        if (modifiers & Qt::AltModifier) keyData->mod |= kKeyModLAlt;
-
-        queueEvent(skin_event);
-    } else {
-        tool_window->handleQtKeyEvent(event);
-    }
+    QSettings s;
+    std::cout << "Allow grab " << s.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool() << "\n"
+              << "grabbing " << mGrabKeyboardInput << "\n"
+              << "mouse inside " << mouseInside() << "\n"
+              << std::endl;  
+              
+    if ((s.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool() &&
+         mGrabKeyboardInput && mouseInside()) ||
+         !tool_window->handleQtKeyEvent(event)) {
+        forwardKeyEventToEmulator(type, event);
+    } 
 }
 
 void EmulatorQtWindow::simulateKeyPress(int keyCode, int modifiers)

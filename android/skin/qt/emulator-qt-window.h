@@ -24,6 +24,7 @@
 #include <QPixmap>
 #include <QProcess>
 #include <QResizeEvent>
+#include <QSettings>
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QTimer>
@@ -179,6 +180,7 @@ private:
     void doResize(const QSize &size);
 
     SkinEvent *createSkinEvent(SkinEventType type);
+    void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void handleKeyEvent(SkinEventType type, QKeyEvent *event);
     void handleMouseEvent(SkinEventType type, QMouseEvent *event);
     bool handleQtMouseEvent(SkinEventType type, QMouseEvent *event);
@@ -370,6 +372,7 @@ private:
     bool mGrabKeyboardInput;
     bool mMouseInside;
 
+    QSettings mSettings;
     QProcess mScreencapProcess;
     QProcess mScreencapPullProcess;
     MainLoopThread *mMainLoopThread;

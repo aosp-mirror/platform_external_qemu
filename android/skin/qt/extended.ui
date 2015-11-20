@@ -61,7 +61,7 @@ font-family: &quot;Roboto&quot;</string>
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>7</number>
    </property>
    <widget class="QWidget" name="location_page">
     <widget class="QTableWidget" name="loc_pathTable">
@@ -2421,6 +2421,19 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">folder</string>
      </property>
     </widget>
+    <widget class="QCheckBox" name="set_allowKeyboardGrab">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>166</y>
+       <width>280</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Allow grabbing keyboard input</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="helpPage">
     <widget class="QTabWidget" name="help_tabs">
@@ -2486,7 +2499,7 @@ font-family: &quot;Roboto&quot;</string>
          <string>Command</string>
         </property>
         <property name="textAlignment">
-         <set>AlignLeft|AlignVCenter</set>
+         <set>AlignLeading|AlignVCenter</set>
         </property>
        </column>
        <column>
@@ -2494,7 +2507,7 @@ font-family: &quot;Roboto&quot;</string>
          <string>Key</string>
         </property>
         <property name="textAlignment">
-         <set>AlignLeft|AlignVCenter</set>
+         <set>AlignLeading|AlignVCenter</set>
         </property>
        </column>
       </widget>

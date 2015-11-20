@@ -95,6 +95,9 @@ void ExtendedWindow::completeSettingsInitialization()
     // Set the theme to the initial selection
     // (by pretending the theme setting got changed)
     on_set_themeBox_currentIndexChanged(theme);
+
+    mExtendedUi->set_allowKeyboardGrab->setChecked(
+            settings.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool());
 }
 
 QString ExtendedWindow::apiVersionString(int apiVersion)
@@ -271,4 +274,9 @@ bool ExtendedWindow::eventFilter(QObject* object, QEvent* event) {
         setElidedText(mExtendedUi->set_saveLocBox, mSettingsState.mSavePath);
     }
     return false;
+}
+
+void ExtendedWindow::on_set_allowKeyboardGrab_toggled(bool checked) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::ALLOW_KEYBOARD_GRAB, checked);
 }
