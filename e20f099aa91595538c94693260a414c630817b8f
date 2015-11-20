@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "368beea4_11ae7ca8",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglWindowSurface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-20T19:40:41Z",
+      "side": 1,
+      "message": "nit: you can actually just use s_associatedWins-\u003efind(), etc",
+      "revId": "e20f099aa91595538c94693260a414c630817b8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
