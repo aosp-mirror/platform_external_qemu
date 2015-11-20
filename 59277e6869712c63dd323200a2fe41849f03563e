@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "fba3ff7d_43888609",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-20T17:03:22Z",
+      "side": 1,
+      "message": "Check out Prathmesh\u0027s comment about CL formatting in docs/ANDROID-CODING-STYLE.TXT. It\u0027s at the bottom.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 62
+      },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3baaf753_65a346c3",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
@@ -174,6 +197,30 @@
       "writtenOn": "2015-11-20T16:21:26Z",
       "side": 1,
       "message": "why do we change these in a random manner every time the file is modified?",
+      "range": {
+        "startLine": 64,
+        "startChar": 12,
+        "endLine": 64,
+        "endChar": 13
+      },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb33471f_41ec12ea",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-20T17:03:22Z",
+      "side": 1,
+      "message": "I believe it has to do with which tab you\u0027re modifying if you do it through the QtCreator style editor. Since he was playing with the 7th tab, it got set to that.",
+      "parentUuid": "3baaf753_459e4a7a",
       "range": {
         "startLine": 64,
         "startChar": 12,
