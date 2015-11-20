@@ -80,6 +80,16 @@ ExtendedWindow::ExtendedWindow(
          mEmulatorWindow->geometry().top()   + 40 );
 }
 
+// Initialize all parts to saved settings.
+// Note: This is static and can be called when
+//       no EmulatorWindow object exists.
+
+void ExtendedWindow::initAvd(const UiEmuAgent *agentPtr) {
+    if (agentPtr) {
+        CellularPage::initCellAvd(agentPtr->cellular);
+    }
+}
+
 void ExtendedWindow::showPane(ExtendedWindowPane pane) {
     show();
     adjustTabs(pane);

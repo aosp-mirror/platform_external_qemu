@@ -60,7 +60,7 @@ public:
     void raiseMainWindow();
     void extendedIsClosing() { extendedWindow = NULL; }
 
-    void setToolEmuAgent(const UiEmuAgent* agPtr) { uiEmuAgent = agPtr; }
+    void setToolEmuAgent(const UiEmuAgent* agPtr);
     const UiEmuAgent* getUiEmuAgent() const { return uiEmuAgent; }
 
     QString getAdbFullPath(QStringList *args);

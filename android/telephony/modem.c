@@ -707,6 +707,11 @@ tech_from_network_type( ADataNetworkType type )
     return A_TECH_UNKNOWN;
 }
 
+ADataNetworkType
+amodem_get_data_network_type( AModem  modem ) {
+    return modem->data_network;
+}
+
 void
 amodem_set_data_network_type( AModem  modem, ADataNetworkType   type )
 {
@@ -915,6 +920,12 @@ amodem_set_signal_strength( AModem modem, int rssi, int ber )
 {
     modem->rssi = rssi;
     modem->ber = ber;
+}
+
+int
+amodem_get_signal_strength( AModem modem )
+{
+    return modem->rssi;
 }
 
 static void

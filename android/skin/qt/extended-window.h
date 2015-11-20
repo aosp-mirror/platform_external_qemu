@@ -58,7 +58,9 @@ public:
         const ShortcutKeyStore<QtUICommand>* shortcuts);
 
     void showPane(ExtendedWindowPane pane);
-   
+
+    static void initAvd(const UiEmuAgent *agentPtr);
+
 private slots:
     void switchOnTop(bool isOntop);
     void switchToTheme(SettingsTheme theme);
@@ -72,7 +74,7 @@ private slots:
     void on_locationButton_clicked();
     void on_settingsButton_clicked();
     void on_telephoneButton_clicked();
-    
+
 private:
     void closeEvent(QCloseEvent *ce) override;
     void adjustTabs(ExtendedWindowPane thisIndex);
@@ -85,4 +87,3 @@ private:
     Ui::ExtendedControls *mExtendedUi;
     bool mFirstShowEvent = true;
 };
-

@@ -710,6 +710,14 @@ void ToolWindow::on_zoom_button_clicked()
     handleUICommand(QtUICommand::ENTER_ZOOM, true);
 }
 
+void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
+    uiEmuAgent = agPtr;
+
+    // Now that we have the agents, command the device
+    // based on the settings we have.
+    ExtendedWindow::initAvd(agPtr);
+}
+
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
     // Show the tabbed pane
     if (extendedWindow) {

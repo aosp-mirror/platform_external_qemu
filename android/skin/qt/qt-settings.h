@@ -12,6 +12,17 @@
 
 // This file contains values that are used for saving and
 // restoring user settings associated with the Qt-based UI.
+//
+// Settings that apply generally to the Emulator should
+// use the names here directly. For example,
+//     settings.value(Ui::Settings::SHOW_AVD_ARCH_WARNING, true).toBool()
+//
+// Settings that apply only to the current AVD should use
+// the name here prefixed with "<AVD name>/". For example,
+//     QString key(android_hw->avd_name);
+//     key += "/" + Ui::Settings::CELLULAR_STANDARD;
+//     settings.value(key, ...
+
 #pragma once
 
 namespace Ui {
@@ -32,6 +43,10 @@ namespace Ui {
         const QString SAVE_PATH("set/savePath");
         const QString SDK_PATH("set/sdkPath");
         const QString UI_THEME("set/theme");
+
+        const QString CELLULAR_DATA_STATUS("cell/cell_data_status");
+        const QString CELLULAR_STANDARD("cell/cell_standard");
+        const QString CELLULAR_VOICE_STATUS("cell/cell_voice_status");
 
         const QString LOCATION_LATITUDE("loc/latitude");
         const QString LOCATION_LONGITUDE("loc/longitude");

@@ -24,6 +24,8 @@ public:
     explicit CellularPage(QWidget *parent = nullptr);
     void setCellularAgent(const QAndroidCellularAgent* agent);
 
+    static void initCellAvd(const QAndroidCellularAgent* agent);
+
 private slots:
     void on_cell_dataStatusBox_currentIndexChanged(int index);
     void on_cell_standardBox_currentIndexChanged(int index);
@@ -33,6 +35,18 @@ private slots:
     // http://developer.android.com/tools/devices/emulator.html#netdelay
 
 private:
+    bool mInitialized;
     std::unique_ptr<Ui::CellularPage> mUi;
     const QAndroidCellularAgent* mCellularAgent;
+
+    template <class T>
+    void populateListBox(
+        const std::vector<std::pair<T, std::string>>& associations,
+        QComboBox* list) {
+        list->clear();
+        for (const auto& a : associations) {
+            list->addItem(tr(a.second.c_str()), a.first);
+        }
+    }
+
 };
