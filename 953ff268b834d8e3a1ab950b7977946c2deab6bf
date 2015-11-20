@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "569062ca_320378ec",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglWindowSurface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-20T08:54:03Z",
+      "side": 1,
+      "message": "Oh, I realized you just tried to fix a bug, not introduce a new static variable. Let\u0027s forget about unordered_set\u003c\u003e for now then, and focus on the bug itself. The LazyInstance\u003c\u003e approach is still better in my opinion. Note that it will leak the object at library unload / program exit, which shouldn\u0027t be a concern for us. Otherwise, an alternative is to store the variable into the FrameBuffer instance, and pass a pointer to it in the EglWindowSurface constructor.",
+      "parentUuid": "96865a95_8f63415b",
+      "revId": "953ff268b834d8e3a1ab950b7977946c2deab6bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "569062ca_12fe7c22",
         "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglWindowSurface.cpp",
         "patchSetId": 1
