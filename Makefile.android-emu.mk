@@ -111,6 +111,7 @@ ANDROID_EMU_BASE_SOURCES := \
     android/utils/misc.c \
     android/utils/panic.c \
     android/utils/path.c \
+    android/utils/path_system.cpp \
     android/utils/property_file.c \
     android/utils/reflist.c \
     android/utils/refset.c \

@@ -28,7 +28,7 @@ TEST(Path, EscapePath) {
     result = path_escape_path(linuxInputPath);
     EXPECT_NE(result, (char*)NULL);
     EXPECT_STREQ(linuxOutputPath, result);
-    
+
     path_unescape_path(result);
     EXPECT_NE(result, (char*)NULL);
     EXPECT_STREQ(linuxInputPath, result);
@@ -39,7 +39,7 @@ TEST(Path, EscapePath) {
     result = path_escape_path(windowsInputPath);
     EXPECT_NE(result, (char*)NULL);
     EXPECT_STREQ(windowsOutputPath, result);
-    
+
     path_unescape_path(result);
     EXPECT_NE(result, (char*)NULL);
     EXPECT_STREQ(windowsInputPath, result);

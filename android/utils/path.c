@@ -208,47 +208,6 @@ path_dirname( const char*  path )
 /** MISC FILE AND DIRECTORY HANDLING
  **/
 
-ABool
-path_exists( const char*  path )
-{
-    if (!path)
-        return 0;
-
-    int ret = HANDLE_EINTR(access(path, F_OK));
-    return (ret == 0) || (errno != ENOENT);
-}
-
-/* checks that a path points to a regular file */
-ABool
-path_is_regular( const char*  path )
-{
-    if (path == NULL)
-        return 0;
-
-    struct stat  st;
-    int ret = HANDLE_EINTR(stat(path, &st));
-    if (ret < 0)
-        return 0;
-
-    return S_ISREG(st.st_mode);
-}
-
-
-/* checks that a path points to a directory */
-ABool
-path_is_dir( const char*  path )
-{
-    if (!path)
-        return 0;
-
-    struct stat  st;
-    int ret = HANDLE_EINTR(stat(path, &st));
-    if (ret < 0)
-        return 0;
-
-    return S_ISDIR(st.st_mode);
-}
-
 /* checks that one can read/write a given (regular) file */
 ABool
 path_can_read( const char*  path )
