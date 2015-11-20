@@ -47,6 +47,8 @@ typedef enum {
 extern ARadioState  amodem_get_radio_state( AModem modem );
 extern void         amodem_set_radio_state( AModem modem, ARadioState  state );
 
+/* Get the received signal strength indicator */
+extern int          amodem_get_signal_strength( AModem modem );
 /* Set the received signal strength indicator and bit error rate */
 extern void         amodem_set_signal_strength( AModem modem, int rssi, int ber );
 
@@ -104,6 +106,7 @@ extern void                amodem_set_voice_registration( AModem  modem, ARegist
 
 extern ARegistrationState  amodem_get_data_registration( AModem  modem );
 extern void                amodem_set_data_registration( AModem  modem, ARegistrationState    state );
+extern ADataNetworkType    amodem_get_data_network_type( AModem  modem );
 extern void                amodem_set_data_network_type( AModem  modem, ADataNetworkType   type );
 
 extern ADataNetworkType    android_parse_network_type( const char*  speed );

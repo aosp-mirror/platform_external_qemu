@@ -422,6 +422,7 @@ LOCAL_SRC_FILES := \
   android/qt/qt_path_unittest.cpp \
   android/qt/qt_setup_unittest.cpp \
   android/telephony/gsm_unittest.cpp \
+  android/telephony/modem_unittest.cpp \
   android/telephony/sms_unittest.cpp \
   android/update-check/UpdateChecker_unittest.cpp \
   android/update-check/VersionExtractor_unittest.cpp \

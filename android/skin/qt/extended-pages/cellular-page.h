@@ -35,4 +35,15 @@ private slots:
 private:
     std::unique_ptr<Ui::CellularPage> mUi;
     const QAndroidCellularAgent* mCellularAgent;
+
+    template <class T>
+    void populateListBox(
+        const std::vector<std::pair<T, std::string>>& associations,
+        QComboBox* list) {
+        list->clear();
+        for (const auto& a : associations) {
+            list->addItem(tr(a.second.c_str()), a.first);
+        }
+    }
+
 };
