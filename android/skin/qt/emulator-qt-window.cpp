@@ -50,7 +50,21 @@
 
 using namespace android::base;
 
-static EmulatorQtWindow *instance;
+// don't create a non-POD global, allocate in dynamically on demand instead
+static EmulatorQtWindow::Ptr* instance = nullptr;
+
+static void deleteInstance() {
+    if (instance) {
+        delete instance;
+        instance = nullptr;
+    }
+}
+
+EmulatorQtWindow* EmulatorQtWindow::create()
+{
+    deleteInstance();
+    instance = new Ptr(new EmulatorQtWindow());
+}
 
 EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         QFrame(parent),
@@ -63,7 +77,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         mMouseInside(false),
         mMainLoopThread(nullptr)
 {
-    instance = this;
     backing_surface = NULL;
     batteryState    = NULL;
 
@@ -103,15 +116,20 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(tool_window, SIGNAL(skinUIEvent(SkinEvent*)), this, SLOT(slot_queueEvent(SkinEvent*)));
 }
 
+EmulatorQtWindow* EmulatorQtWindow::getInstance()
+{
+    return getInstancePtr().get();
+}
+
+EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr()
+{
+    return instance ? *instance : EmulatorQtWindow::Ptr();
+}
+
 EmulatorQtWindow::~EmulatorQtWindow()
 {
     delete tool_window;
     delete mMainLoopThread;
-}
-
-EmulatorQtWindow *EmulatorQtWindow::getInstance()
-{
-    return instance;
 }
 
 void EmulatorQtWindow::closeEvent(QCloseEvent *event)
@@ -262,8 +280,7 @@ void EmulatorQtWindow::slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoin
 void EmulatorQtWindow::slot_clearInstance()
 {
     skin_winsys_save_window_pos();
-    delete instance;
-    instance = NULL;
+    deleteInstance();
 }
 
 void EmulatorQtWindow::slot_createBitmap(SkinSurface *s, int w, int h, QSemaphore *semaphore) {

@@ -97,6 +97,7 @@ extern void skin_winsys_enter_main_loop(int argc, char **argv)
     g->argv = argv;
     g->app->exec();
     D("Finished QT main loop\n");
+    delete g->app;
 }
 
 extern void skin_winsys_get_monitor_rect(SkinRect *rect)
@@ -290,7 +291,7 @@ extern void skin_winsys_start(bool, bool)
 {
     GlobalState* g = globalState();
     g->app = new QApplication(g->argc, g->argv);
-    new EmulatorQtWindow(NULL);
+    EmulatorQtWindow::create();
 }
 
 extern void skin_winsys_run_ui_update(SkinGenericFunction f, void* data) {
