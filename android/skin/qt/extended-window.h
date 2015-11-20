@@ -188,10 +188,10 @@ private slots:
     void on_telephoneButton_clicked();
 
     // Battery
-    void on_bat_chargerBox_currentIndexChanged(int value);
+    void on_bat_chargerBox_activated(int value);
+    void on_bat_healthBox_activated(int index);
     void on_bat_levelSlider_valueChanged(int value);
-    void on_bat_healthBox_currentIndexChanged(int index);
-    void on_bat_statusBox_currentIndexChanged(int index);
+    void on_bat_statusBox_activated(int index);
 
     // Cellular
     void on_cell_dataStatusBox_currentIndexChanged(int index);
@@ -275,7 +275,7 @@ class GeoDataLoaderThread : public QThread {
 Q_OBJECT
 public:
     // Loads geo data from a gpx or kml file specified
-    // by file_name into the GpsFixArray pointed to 
+    // by file_name into the GpsFixArray pointed to
     // by fixes
     void loadGeoDataFromFile(const QString& file_name, GpsFixArray* fixes);
 
