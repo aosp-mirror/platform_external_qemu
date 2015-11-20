@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1b4e13ac_bcbee1ee",
+        "filename": "android/skin/qt/winsys-qt.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-11-20T18:55:21Z",
+      "side": 0,
+      "message": "@digit, window position seems to be saved correctly even when not called from aboutToQuit. Is there a reason for this comment here?",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 22
+      },
+      "revId": "136a5c0975d3fb37486ffae2325f38f4a87ca309",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
