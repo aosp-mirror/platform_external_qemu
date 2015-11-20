@@ -55,6 +55,7 @@ static EmulatorQtWindow *instance;
 EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         QFrame(parent),
         mContainer(this),
+        mOverlay(this, &mContainer),
         mZoomFactor(1.0),
         mInZoomMode(false),
         mNextIsZoom(false),
@@ -67,8 +68,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     batteryState    = NULL;
 
     tool_window = new ToolWindow(this, &mContainer);
-
-    mZoomPixmap.load(":/cursor/zoom_cursor");
 
     this->setAcceptDrops(true);
 
@@ -184,7 +183,6 @@ void EmulatorQtWindow::mouseMoveEvent(QMouseEvent *event)
 
 void EmulatorQtWindow::mousePressEvent(QMouseEvent *event)
 {
-    mGrabKeyboardInput = true;
     handleMouseEvent(kEventMouseButtonDown, event);
 }
 
@@ -661,9 +659,6 @@ void EmulatorQtWindow::doResize(const QSize &size)
 
 void EmulatorQtWindow::handleMouseEvent(SkinEventType type, QMouseEvent *event)
 {
-    // See if there is a Qt-specific handler for this mouse event
-    if (handleQtMouseEvent(type, event)) return;
-
     SkinEvent *skin_event = createSkinEvent(type);
     skin_event->u.mouse.button = event->button() == Qt::RightButton ? kMouseButtonRight : kMouseButtonLeft;
     skin_event->u.mouse.x = event->x();
@@ -674,45 +669,8 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type, QMouseEvent *event)
     queueEvent(skin_event);
 }
 
-bool EmulatorQtWindow::handleQtMouseEvent(SkinEventType type, QMouseEvent *event)
-{
-    Qt::MouseButton button = event->button();
-    Qt::KeyboardModifiers modifiers = event->modifiers();
-
-    // If we're zoomed and control clicking, the event should be eaten no matter what.
-    if (mInZoomMode && (modifiers & Qt::ControlModifier)) {
-
-        // Fire zoom events only on mouse release. On OSX, hiding and re-showing this frame -
-        // which is done during the zooming process since the frame changes size - will result in
-        // a missed mouse release event, which in turn causes a missed mouse press event.
-        if (type == kEventMouseButtonUp) {
-            if (button == Qt::LeftButton) {
-                zoomIn(event->pos());
-
-            // RightButton is "secondary click" on OSX, which defaults to two-finger click.
-            } else if (button == Qt::RightButton) {
-                zoomOut(event->pos());
-            }
-        }
-        return true;
-    }
-
-    return false;
-}
-
 void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
 {
-    // When in zoom mode, the cursor should change when control is held
-    if (mInZoomMode) {
-        if (event->key() == Qt::Key_Control) {
-            if (type == kEventKeyDown) {
-                mContainer.setCursor(QCursor(mZoomPixmap));
-            } else if (type == kEventKeyUp) {
-                mContainer.setCursor(QCursor(Qt::ArrowCursor));
-            }
-        }
-    }
-
     bool must_ungrab = event->key() == Qt::Key_Alt &&
                        event->modifiers() == (Qt::ControlModifier + Qt::AltModifier);
     if (mGrabKeyboardInput && must_ungrab) {
@@ -731,6 +689,18 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
 
         queueEvent(skin_event);
     } else {
+
+        // When in zoom mode, the overlay should be toggled
+        if (mInZoomMode) {
+            if (event->key() == Qt::Key_Control) {
+                if (type == kEventKeyDown) {
+                    mOverlay.show();
+                } else if (type == kEventKeyUp) {
+                    mOverlay.hide();
+                }
+            }
+        }
+
         tool_window->handleQtKeyEvent(event);
     }
 }
@@ -776,7 +746,7 @@ void EmulatorQtWindow::simulateSetScale(double scale)
 void EmulatorQtWindow::simulateSetZoom(double zoom)
 {
     // Avoid zoom and scale events clobbering each other if the user rapidly changes zoom levels
-    if (mNextIsZoom) {
+    if (mNextIsZoom || mZoomFactor == zoom) {
         return;
     }
 
@@ -787,6 +757,7 @@ void EmulatorQtWindow::simulateSetZoom(double zoom)
     mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
     mNextIsZoom = true;
+    mZoomFactor = zoom;
 
     simulateWindowMoved(mContainer.pos());
 
@@ -808,6 +779,8 @@ void EmulatorQtWindow::simulateWindowMoved(const QPoint &pos)
     event->u.window.x = pos.x();
     event->u.window.y = pos.y();
     slot_queueEvent(event);
+
+    mOverlay.move(mContainer.mapToGlobal(QPoint()));
 }
 
 void EmulatorQtWindow::simulateZoomedWindowResized(const QSize &size)
@@ -820,6 +793,8 @@ void EmulatorQtWindow::simulateZoomedWindowResized(const QSize &size)
     event->u.scroll.ymax = size.height();
     event->u.scroll.scroll_h = horizontal->isVisible() ? horizontal->height() : 0;
     slot_queueEvent(event);
+
+    mOverlay.resize(size);
 }
 
 
@@ -841,6 +816,7 @@ void EmulatorQtWindow::toggleZoomMode()
     if (!mInZoomMode) {
         mContainer.setCursor(QCursor(Qt::ArrowCursor));
         doResize(mContainer.size());
+        mOverlay.hide();
     }
 }
 
@@ -853,7 +829,7 @@ void EmulatorQtWindow::recenterFocusPoint()
     mViewportFocus = QPoint();
 }
 
-void EmulatorQtWindow::saveZoomPoints(const QPoint &focus)
+void EmulatorQtWindow::saveZoomPoints(const QPoint &focus, const QPoint &viewportFocus)
 {
     // The underlying frame will change sizes, so get what "percentage" of the frame was
     // clicked, where (0,0) is the top-left corner and (1,1) is the bottom right corner.
@@ -861,31 +837,54 @@ void EmulatorQtWindow::saveZoomPoints(const QPoint &focus)
                      (float) focus.y() / this->height());
 
     // Save to re-align the container with the underlying frame.
-    mViewportFocus = mContainer.mapFromGlobal(QCursor::pos());
+    mViewportFocus = viewportFocus;
 }
 
-void EmulatorQtWindow::zoomIn(const QPoint &focus)
+void EmulatorQtWindow::zoomIn(const QPoint &focus, const QPoint &viewportFocus)
 {
-    saveZoomPoints(focus);
+    saveZoomPoints(focus, viewportFocus);
 
     // The below scale = x creates a skin equivalent to calling "window scale x" through the
-    // emulator console. At this point, the device should be at a 1:1 pixel mapping with the
-    // monitor, meaning further zooming does nothing.
+    // emulator console. At scale = 1, the device should be at a 1:1 pixel mapping with the
+    // monitor. We allow going to twice this size.
     double scale = ((double) size().width() / (double) backing_surface->original_w);
+    double maxZoom = mZoomFactor * 2.0 / scale;
 
-    if (scale < 1) {
-        mZoomFactor += .25;
-        simulateSetZoom(mZoomFactor);
+    if (scale < 2) {
+        simulateSetZoom(MIN(mZoomFactor + .25, maxZoom));
     }
 }
 
-void EmulatorQtWindow::zoomOut(const QPoint &focus)
+void EmulatorQtWindow::zoomOut(const QPoint &focus, const QPoint &viewportFocus)
 {
-    saveZoomPoints(focus);
+    saveZoomPoints(focus, viewportFocus);
     if (mZoomFactor > 1) {
-        mZoomFactor -= .25;
-        simulateSetZoom(mZoomFactor);
+        simulateSetZoom(MAX(mZoomFactor - .25, 1));
     }
+}
+
+void EmulatorQtWindow::zoomReset()
+{
+    simulateSetZoom(1);
+}
+
+void EmulatorQtWindow::zoomTo(const QPoint &focus, const QSize &rectSize)
+{
+    saveZoomPoints(focus, QPoint(mContainer.width() / 2, mContainer.height() / 2));
+
+    // The below scale = x creates a skin equivalent to calling "window scale x" through the
+    // emulator console. At scale = 1, the device should be at a 1:1 pixel mapping with the
+    // monitor. We allow going to twice this size.
+    double scale = ((double) size().width() / (double) backing_surface->original_w);
+
+    // Calculate the "ideal" zoom factor, which would perfectly frame this rectangle, and the
+    // "maximum" zoom factor, which makes scale = 1, and pick the smaller one.
+    // Adding 20 accounts for the scroll bars potentially cutting off parts of the selection
+    double maxZoom = mZoomFactor * 2.0 / scale;
+    double idealWidthZoom = mZoomFactor * (double) mContainer.width() / (double) (rectSize.width() + 20);
+    double idealHeightZoom = mZoomFactor * (double) mContainer.height() / (double) (rectSize.height() + 20);
+
+    simulateSetZoom(MIN(MIN(idealWidthZoom, idealHeightZoom), maxZoom));
 }
 
 bool EmulatorQtWindow::mouseInside() {
