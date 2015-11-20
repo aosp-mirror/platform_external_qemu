@@ -2507,10 +2507,6 @@ int main(int argc, char **argv, char **envp)
                 break;
 #endif /* CONFIG_KVM */
             case QEMU_OPTION_smp:
-                smp_cpus = atoi(optarg);
-                if (smp_cpus < 1) {
-                    PANIC("Invalid number of CPUs");
-                }
                 break;
 	    case QEMU_OPTION_vnc:
                 display_type = DT_VNC;

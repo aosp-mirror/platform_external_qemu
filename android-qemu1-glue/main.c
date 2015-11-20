@@ -913,12 +913,6 @@ int main(int argc, char **argv) {
     }
 #endif
 
-    if (hw->hw_cpu_ncore > 1) {
-        derror("Classic qemu does not support SMP. "
-               "Please remove the hw.cpu.ncore option from your config file.");
-        exit(1);
-    }
-
     /* Setup screen emulation */
     if (opts->screen) {
         if (strcmp(opts->screen, "touch") &&
