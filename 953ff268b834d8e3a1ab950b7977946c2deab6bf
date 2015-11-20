@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "169a6aee_102754a4",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglWindowSurface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-20T08:33:52Z",
+      "side": 1,
+      "message": "nit: C++ static constructors are evil due to their random order or initialization / deinitialization anyway, so please please never use them. The fact that this is accessed from onexit() only makes it clearer.\n\nConsider using an emugl::LazyInstance\u003c\u003e here, see comment below.",
+      "revId": "953ff268b834d8e3a1ab950b7977946c2deab6bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96865a95_8f63415b",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglWindowSurface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-20T08:33:52Z",
+      "side": 1,
+      "message": "nit: use std::unordered_set\u003c\u003e if you don\u0027t care about ordering, it will use less memory and be faster with simple types like EGLNativeWindowType.",
+      "revId": "953ff268b834d8e3a1ab950b7977946c2deab6bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "569062ca_12fe7c22",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglWindowSurface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-20T08:33:52Z",
+      "side": 1,
+      "message": "This is not thread-safe, use a LazyInstance\u003c\u003e instead to ensure thread-safe initialization of static globals. See external/qemu/distrib/android-emugl/shared/emugl/common/lazy_instance.h",
+      "revId": "953ff268b834d8e3a1ab950b7977946c2deab6bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
