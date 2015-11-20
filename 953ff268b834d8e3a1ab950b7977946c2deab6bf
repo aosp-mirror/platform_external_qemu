@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "169a6aee_9007e49a",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglWindowSurface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-20T16:44:48Z",
+      "side": 1,
+      "message": "mmm, the array doesn\u0027t need to be large. And even then a single std::set node is about 4*pointer_size, which is quite a large factor.",
+      "parentUuid": "fba3ff7d_439e467a",
+      "revId": "953ff268b834d8e3a1ab950b7977946c2deab6bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "569062ca_12fe7c22",
         "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglWindowSurface.cpp",
         "patchSetId": 1
@@ -101,6 +119,24 @@
       "side": 1,
       "message": "it\u0027s not supposed to be thread-safe here: the very next line calls set::insert() which would blow up in case of concurrent call\n\nAnyway, I will change the code to LazyInstance - I didn\u0027t know about that class, thanks!",
       "parentUuid": "569062ca_12fe7c22",
+      "revId": "953ff268b834d8e3a1ab950b7977946c2deab6bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "569062ca_520d64bc",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglWindowSurface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-20T16:44:48Z",
+      "side": 1,
+      "message": "ok, \"not supposed to be thread-safe\" is a little scary when using a global variable, but let\u0027s allow it :)",
+      "parentUuid": "76d4867d_96b18951",
       "revId": "953ff268b834d8e3a1ab950b7977946c2deab6bf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
