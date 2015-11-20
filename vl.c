@@ -129,7 +129,6 @@
 #include "android/help.h"
 #include "android-qemu2-glue/looper-qemu.h"
 #include "android/gps.h"
-#include "android/telephony/modem_driver.h"
 #include "android/hw-control.h"
 #include "android/hw-kmsg.h"
 #include "android/hw-qemud.h"
@@ -4149,14 +4148,6 @@ int run_qemu_main(int argc, const char **argv)
 
     /* Initialize presence of hardware nav button */
     boot_property_add("qemu.hw.mainkeys", android_hw->hw_mainKeys ? "1" : "0");
-
-    if (android_hw->hw_gsmModem) {
-        if (android_qemud_get_channel(ANDROID_QEMUD_GSM,
-                                      &android_modem_serial_line) < 0) {
-            error_report("could not initialize qemud 'gsm' channel");
-            exit(1);
-        }
-    }
 
     if (android_hw->hw_gps) {
         if (android_qemud_get_channel(ANDROID_QEMUD_GPS,
