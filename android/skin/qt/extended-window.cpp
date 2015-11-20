@@ -67,6 +67,7 @@ ExtendedWindow::ExtendedWindow(
     initCellular();
     initDPad();
     initFinger();
+    initHelp();
     initKbdShorts();
     initLocation();
     initSettings();
