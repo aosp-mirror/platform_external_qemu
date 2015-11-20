@@ -90,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "5b1b2bb8_66fe8ed4",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-20T20:40:54Z",
+      "side": 1,
+      "message": "(this code isn\u0027t here anymore, just an explanation)\nit usually compiles into\n\nif (not 0) \n   call delete(p)\n\nwhere delete(p) also has the check\n\nthere are two possible outcomes:\n1. compiler was able to inline the call.\n     in this case it is also able to get rid of the second check\n2. compiler couldn\u0027t inline the call\n     here we will get two checks, with no chance of optimizing any of those out. But first check is _much_ faster than a function call overhead (create stack frame, call, cleanup and return)",
+      "parentUuid": "3bed97ca_0da371c3",
+      "revId": "d2dc72181fbe712f625f222aa82bb993ebd9340b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "db11db43_6e1a17bd",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -136,6 +154,30 @@
       "writtenOn": "2015-11-20T19:03:37Z",
       "side": 1,
       "message": "Since we\u0027re in Qt-land, a QSharedPointer might be more appropriate.\n\nhttp://doc.qt.io/qt-5/qsharedpointer.html",
+      "range": {
+        "startLine": 66,
+        "startChar": 16,
+        "endLine": 66,
+        "endChar": 31
+      },
+      "revId": "d2dc72181fbe712f625f222aa82bb993ebd9340b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b1b2bb8_06f99aea",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-20T20:40:54Z",
+      "side": 1,
+      "message": "Might be; but IMHO all those qt-specific things are obsolete now when C++ has the same kind of things. I prefer to use the standard version if it exists and works",
+      "parentUuid": "fbf69f9c_ebbb71e4",
       "range": {
         "startLine": 66,
         "startChar": 16,
