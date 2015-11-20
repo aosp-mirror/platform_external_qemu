@@ -310,6 +310,21 @@ static void flatview_unref(FlatView *view)
     }
 }
 
+// NO_REGION_MERGING: On systems where
+// the hax/kvm set physical memory operation is expensive,
+// prematurely merging regions can cause thrashing
+// where the large user memory segment is remapped over and over
+// on startup, unnecessarily lengthening boot time.
+
+// To remove the hack, undef this.
+#define NO_REGION_MERGING
+
+#ifdef NO_REGION_MERGING
+
+static bool can_merge(FlatRange *r1, FlatRange *r2) { return false; }
+
+#else
+
 static bool can_merge(FlatRange *r1, FlatRange *r2)
 {
     return int128_eq(addrrange_end(r1->addr), r2->addr.start)
@@ -321,6 +336,8 @@ static bool can_merge(FlatRange *r1, FlatRange *r2)
         && r1->romd_mode == r2->romd_mode
         && r1->readonly == r2->readonly;
 }
+
+#endif
 
 /* Attempt to simplify a view by merging adjacent ranges */
 static void flatview_simplify(FlatView *view)
