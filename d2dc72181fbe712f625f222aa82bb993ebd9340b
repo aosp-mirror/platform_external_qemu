@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "3bed97ca_0da371c3",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-11-20T18:57:00Z",
+      "side": 1,
+      "message": "Don\u0027t you still do two checks in that case? Or does the implicit check get optimized away?",
+      "parentUuid": "76d4867d_d6ab01db",
+      "revId": "d2dc72181fbe712f625f222aa82bb993ebd9340b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "db11db43_6e1a17bd",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
