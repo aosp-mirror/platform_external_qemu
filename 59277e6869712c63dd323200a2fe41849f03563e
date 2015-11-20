@@ -274,6 +274,29 @@
     },
     {
       "key": {
+        "uuid": "1b153384_c4213e7d",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 2434,
+      "author": {
+        "id": 1044603
+      },
+      "writtenOn": "2015-11-20T20:19:26Z",
+      "side": 1,
+      "message": "See Mock for UI:\nhttps://docs.google.com/presentation/d/1aEE4rS_1bKMOEyPqLrYYMORnaBVAE5KYhG7jtDofIy0/edit#slide\u003did.gc556270cf_4_20",
+      "range": {
+        "startLine": 2434,
+        "startChar": 13,
+        "endLine": 2434,
+        "endChar": 44
+      },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1ba9b35f_44716eeb",
         "filename": "android/skin/qt/extended.ui",
         "patchSetId": 1
