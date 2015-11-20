@@ -29,6 +29,7 @@
 #include <QWindow>
 
 #include "android/base/files/PathUtils.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
@@ -50,7 +51,13 @@
 
 using namespace android::base;
 
-static EmulatorQtWindow *instance;
+// Make sure it is POD here
+static LazyInstance<EmulatorQtWindow::Ptr> sInstance = LAZY_INSTANCE_INIT;
+
+void EmulatorQtWindow::create()
+{
+    sInstance.get() = Ptr(new EmulatorQtWindow());
+}
 
 EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         QFrame(parent),
@@ -63,7 +70,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         mMouseInside(false),
         mMainLoopThread(nullptr)
 {
-    instance = this;
     backing_surface = NULL;
     batteryState    = NULL;
 
@@ -103,15 +109,20 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(tool_window, SIGNAL(skinUIEvent(SkinEvent*)), this, SLOT(slot_queueEvent(SkinEvent*)));
 }
 
+EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr()
+{
+    return sInstance.get();
+}
+
+EmulatorQtWindow* EmulatorQtWindow::getInstance()
+{
+    return getInstancePtr().get();
+}
+
 EmulatorQtWindow::~EmulatorQtWindow()
 {
     delete tool_window;
     delete mMainLoopThread;
-}
-
-EmulatorQtWindow *EmulatorQtWindow::getInstance()
-{
-    return instance;
 }
 
 void EmulatorQtWindow::closeEvent(QCloseEvent *event)
@@ -262,8 +273,7 @@ void EmulatorQtWindow::slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoin
 void EmulatorQtWindow::slot_clearInstance()
 {
     skin_winsys_save_window_pos();
-    delete instance;
-    instance = NULL;
+    sInstance.get().reset();
 }
 
 void EmulatorQtWindow::slot_createBitmap(SkinSurface *s, int w, int h, QSemaphore *semaphore) {
