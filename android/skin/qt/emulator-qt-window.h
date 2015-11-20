@@ -96,6 +96,7 @@ public:
      */
 signals:
     void blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore = NULL);
+    void clearInstance();
     void createBitmap(SkinSurface *s, int w, int h, QSemaphore *semaphore = NULL);
     void fill(SkinSurface *s, const QRect *rect, const QColor *color, QSemaphore *semaphore = NULL);
     void getBitmapInfo(SkinSurface *s, SkinSurfacePixels *pix, QSemaphore *semaphore = NULL);

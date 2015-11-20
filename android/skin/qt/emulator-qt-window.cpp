@@ -72,6 +72,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     this->setAcceptDrops(true);
 
     QObject::connect(this, &EmulatorQtWindow::blit, this, &EmulatorQtWindow::slot_blit);
+    QObject::connect(this, &EmulatorQtWindow::clearInstance, this, &EmulatorQtWindow::slot_clearInstance);
     QObject::connect(this, &EmulatorQtWindow::createBitmap, this, &EmulatorQtWindow::slot_createBitmap);
     QObject::connect(this, &EmulatorQtWindow::fill, this, &EmulatorQtWindow::slot_fill);
     QObject::connect(this, &EmulatorQtWindow::getBitmapInfo, this, &EmulatorQtWindow::slot_getBitmapInfo);
@@ -91,7 +92,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(this, &EmulatorQtWindow::setTitle, this, &EmulatorQtWindow::slot_setWindowTitle);
     QObject::connect(this, &EmulatorQtWindow::showWindow, this, &EmulatorQtWindow::slot_showWindow);
     QObject::connect(this, &EmulatorQtWindow::runOnUiThread, this, &EmulatorQtWindow::slot_runOnUiThread);
-    QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit, this, &EmulatorQtWindow::slot_clearInstance);
 
     QObject::connect(&mScreencapProcess, SIGNAL(finished(int)), this, SLOT(slot_screencapFinished(int)));
     QObject::connect(&mScreencapPullProcess, SIGNAL(finished(int)), this, SLOT(slot_screencapPullFinished(int)));
@@ -111,8 +111,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
 
 EmulatorQtWindow::~EmulatorQtWindow()
 {
-    delete tool_window;
-    delete mMainLoopThread;
+    tool_window->deleteLater();
+    mMainLoopThread->deleteLater();
 }
 
 EmulatorQtWindow *EmulatorQtWindow::getInstance()
@@ -127,6 +127,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent *event)
         event->ignore();
     } else {
         event->accept();
+        clearInstance();
     }
 }
 
@@ -267,9 +268,11 @@ void EmulatorQtWindow::slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoin
 
 void EmulatorQtWindow::slot_clearInstance()
 {
-    skin_winsys_save_window_pos();
-    delete instance;
-    instance = NULL;
+    if (instance) {
+        skin_winsys_save_window_pos();
+        instance->deleteLater();
+        instance = NULL;
+    }
 }
 
 void EmulatorQtWindow::slot_createBitmap(SkinSurface *s, int w, int h, QSemaphore *semaphore) {
