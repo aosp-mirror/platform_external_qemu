@@ -122,6 +122,29 @@
       "revId": "d2dc72181fbe712f625f222aa82bb993ebd9340b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbf69f9c_ebbb71e4",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-11-20T19:03:37Z",
+      "side": 1,
+      "message": "Since we\u0027re in Qt-land, a QSharedPointer might be more appropriate.\n\nhttp://doc.qt.io/qt-5/qsharedpointer.html",
+      "range": {
+        "startLine": 66,
+        "startChar": 16,
+        "endLine": 66,
+        "endChar": 31
+      },
+      "revId": "d2dc72181fbe712f625f222aa82bb993ebd9340b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
