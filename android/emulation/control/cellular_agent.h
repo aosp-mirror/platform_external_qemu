@@ -27,13 +27,25 @@ typedef struct QAndroidCellularAgent {
     // Input: 0(none) .. 31(very strong)
     void (*setSignalStrength)(int zeroTo31);
 
+    // Returns the cellular signal strength:
+    // 0(none) .. 31(very strong)
+    int (*signalStrength)();
+
     // Sets the status of the voice connectivity
     // Input: enum CellularStatus, above
     void (*setVoiceStatus)(enum CellularStatus);
 
+    // Returns the status of the voice connectivity:
+    // enum CellularStatus, above
+    enum CellularStatus (*voiceStatus)();
+
     // Sets the status of the data connectivity
     // Input: enum CellularStatus, above
     void (*setDataStatus)(enum CellularStatus);
+
+    // Returns the status of the data connectivity:
+    // enum CellularStatus, above
+    enum CellularStatus (*dataStatus)();
 
     // Sets the cellular data standard in use
     // Input: enum CellularStandard, above

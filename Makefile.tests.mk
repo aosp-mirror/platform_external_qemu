@@ -1,3 +1,14 @@
+# Copyright 2015 The Android Open Source Project
+#
+# This software is licensed under the terms of the GNU General Public
+# License version 2, as published by the Free Software Foundation, and
+# may be copied, distributed, and modified under those terms.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
 # First include the GoogleTest library module definitions.
 include $(LOCAL_PATH)/distrib/googletest/Android.mk
 
@@ -64,6 +75,8 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/telephony/debug.c \
   android/telephony/gsm_unittest.cpp \
   android/telephony/gsm.c \
+  android/telephony/modem.c \
+  android/telephony/modem_unittest.cpp \
   android/telephony/sms.c \
   android/telephony/sms_unittest.cpp \
   android/update-check/UpdateChecker_unittest.cpp \

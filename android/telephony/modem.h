@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
+/* Copyright (C) 2007-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -47,6 +47,8 @@ typedef enum {
 extern ARadioState  amodem_get_radio_state( AModem modem );
 extern void         amodem_set_radio_state( AModem modem, ARadioState  state );
 
+/* Get the received signal strength indicator */
+extern int          amodem_get_signal_strength( AModem modem );
 /* Set the received signal strength indicator and bit error rate */
 extern void         amodem_set_signal_strength( AModem modem, int rssi, int ber );
 

@@ -18,7 +18,28 @@
 #include <QtWidgets>
 
 void ExtendedWindow::initCellular()
-{ }
+{
+    CellularStandard cStandard = Cellular_Std_full;
+    // TODO: We have multiple overlapping enums for voice and data
+    //       standards (LTE, GSM, etc.). This makes it nearly
+    //       impossible to retrieve the standard in use.
+    //       This needs to be cleaned up.
+    mExtendedUi->cell_standardBox->setCurrentIndex((int)cStandard);
+
+    CellularStatus vStatus = Cellular_Stat_Home;
+    if (mCellularAgent && mCellularAgent->voiceStatus) {
+        vStatus = mCellularAgent->voiceStatus();
+    }
+    mExtendedUi->cell_voiceStatusBox->setCurrentIndex((int)vStatus);
+
+    CellularStatus dStatus = Cellular_Stat_Home;
+    if (mCellularAgent && mCellularAgent->dataStatus) {
+        dStatus = mCellularAgent->dataStatus();
+    }
+    mExtendedUi->cell_dataStatusBox->setCurrentIndex((int)dStatus);
+
+    // TODO: Network delay
+}
 
 void ExtendedWindow::on_cell_standardBox_currentIndexChanged(int index)
 {

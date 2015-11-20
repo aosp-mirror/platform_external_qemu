@@ -29,6 +29,16 @@ static void cellular_setSignalStrength(int zeroTo31)
     }
 }
 
+static int cellular_signalStrength()
+{
+    int strength = 31;
+
+    if (android_modem) {
+        strength = amodem_get_signal_strength(android_modem);
+    }
+    return strength;
+}
+
 static void cellular_setVoiceStatus(enum CellularStatus voiceStatus)
 {
     // (See do_gsm_voice() in android-qemu1-glue/console.c)
@@ -45,6 +55,25 @@ static void cellular_setVoiceStatus(enum CellularStatus voiceStatus)
 
         amodem_set_voice_registration(android_modem, state);
     }
+}
+
+static enum CellularStatus cellular_voiceStatus()
+{
+    // (See do_gsm_voice() in android-qemu1-glue/console.c)
+    enum CellularStatus cStatus = Cellular_Stat_Home;
+
+    if (android_modem) {
+        switch ( amodem_get_voice_registration(android_modem) ) {
+            case A_REGISTRATION_HOME:         cStatus = Cellular_Stat_Home;         break;
+            case A_REGISTRATION_ROAMING:      cStatus = Cellular_Stat_Roaming;      break;
+            case A_REGISTRATION_SEARCHING:    cStatus = Cellular_Stat_Searching;    break;
+            case A_REGISTRATION_DENIED:       cStatus = Cellular_Stat_Denied;       break;
+            case A_REGISTRATION_UNREGISTERED: cStatus = Cellular_Stat_Unregistered; break;
+
+            default:                          cStatus = Cellular_Stat_Home;         break;
+        }
+    }
+    return cStatus;
 }
 
 static void cellular_setDataStatus(enum CellularStatus dataStatus)
@@ -66,6 +95,25 @@ static void cellular_setDataStatus(enum CellularStatus dataStatus)
 
     qemu_net_disable = (state != A_REGISTRATION_HOME    &&
                         state != A_REGISTRATION_ROAMING );
+}
+
+static enum CellularStatus cellular_dataStatus()
+{
+    // (See do_gsm_data() in android-qemu1-glue/console.c)
+    enum CellularStatus dStatus = Cellular_Stat_Home;
+
+    if (android_modem) {
+        switch ( amodem_get_data_registration(android_modem) ) {
+            case A_REGISTRATION_HOME:          dStatus = Cellular_Stat_Home;         break;
+            case A_REGISTRATION_ROAMING:       dStatus = Cellular_Stat_Roaming;      break;
+            case A_REGISTRATION_SEARCHING:     dStatus = Cellular_Stat_Searching;    break;
+            case A_REGISTRATION_DENIED:        dStatus = Cellular_Stat_Denied;       break;
+            case A_REGISTRATION_UNREGISTERED:  dStatus = Cellular_Stat_Unregistered; break;
+
+            default:                           dStatus = Cellular_Stat_Home;         break;
+        }
+    }
+    return dStatus;
 }
 
 static void cellular_setStandard(enum CellularStandard cStandard)
@@ -102,8 +150,12 @@ static void cellular_setStandard(enum CellularStandard cStandard)
 
 static const QAndroidCellularAgent sQAndroidCellularAgent = {
     .setSignalStrength = cellular_setSignalStrength,
+    .signalStrength = cellular_signalStrength,
     .setVoiceStatus = cellular_setVoiceStatus,
+    .voiceStatus = cellular_voiceStatus,
     .setDataStatus = cellular_setDataStatus,
+    .dataStatus = cellular_dataStatus,
     .setStandard = cellular_setStandard};
+
 const QAndroidCellularAgent* const gQAndroidCellularAgent =
         &sQAndroidCellularAgent;
