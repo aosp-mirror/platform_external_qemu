@@ -362,62 +362,6 @@ path_get_size( const char*  path, uint64_t  *psize )
 #endif
 }
 
-char*
-path_get_absolute( const char* path )
-{
-    if (path_is_absolute(path)) {
-        return ASTRDUP(path);
-    }
-
-#ifdef _WIN32
-    {
-        char* result;
-        int   pathLen    = strlen(path);
-        int   currentLen = GetCurrentDirectory(0, NULL);
-
-        if (currentLen <= 0) {
-            /* Could not get size of working directory. something is
-             * really fishy here, return a simple copy */
-            return ASTRDUP(path);
-        }
-        result = malloc(currentLen + pathLen + 2);
-
-        GetCurrentDirectory(currentLen+1, result);
-        if (currentLen == 0 || result[currentLen-1] != '\\') {
-            result[currentLen++] = '\\';
-        }
-        memcpy(result + currentLen, path, pathLen+1);
-
-        return result;
-    }
-#else
-    {
-        int   pathLen    = strlen(path);
-        char  currentDir[PATH_MAX];
-        int   currentLen;
-        char* result;
-
-        if (getcwd(currentDir, sizeof(currentDir)) == NULL) {
-            /* Could not get the current working directory. something is really
-            * fishy here, so don't do anything and return a copy */
-            return ASTRDUP(path);
-        }
-
-        /* Make a new path with <current-path>/<path> */
-        currentLen = strlen(currentDir);
-        result     = malloc(currentLen + pathLen + 2);
-
-        memcpy(result, currentDir, currentLen);
-        if (currentLen == 0 || result[currentLen-1] != '/') {
-            result[currentLen++] = '/';
-        }
-        memcpy(result + currentLen, path, pathLen+1);
-
-        return result;
-    }
-#endif
-}
-
 /** OTHER FILE UTILITIES
  **
  **  path_empty_file() creates an empty file at a given path location.
