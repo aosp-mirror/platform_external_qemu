@@ -1,4 +1,4 @@
-// Copyright (C) 2014 The Android Open Source Project
+// Copyright (C) 2014-2015 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
 
 #pragma once
 
-#include <new>
-
 #ifdef _WIN32
 #  define WIN32_LEAN_AND_MEAN 1
 #  include <windows.h>
 #endif
+
+#include <new>
+#include <type_traits>
 
 namespace android {
 namespace base {
@@ -105,9 +106,6 @@ struct LazyInstanceState {
     volatile AtomicType mState;
 };
 
-#define LAZY_INSTANCE_STATE_INIT  \
-    { ::android::base::internal::LazyInstanceState::STATE_INIT }
-
 }  // namespace internal
 
 // LazyInstance template definition, see comment above for usage
@@ -120,35 +118,52 @@ template <class T>
 struct LazyInstance {
     bool hasInstance() const { return !mState.inInitState(); }
 
-    T& get() const { return *ptr(); }
-
-    T* ptr() const;
+    const T& get() const { return *ptr(); }
+    T& get() { return *ptr(); }
 
     const T* operator->() const { return ptr(); }
-
     T* operator->() { return ptr(); }
 
+    const T& operator*() const { return get(); }
     T& operator*() { return get(); }
 
-    // Really private, do not use.
-    union {
-        mutable internal::LazyInstanceState mState;
-        double mPadding;
-    };
-    mutable char mStorage[sizeof(T)];
+    T* ptr() { return ptrInternal(); }
+    const T* ptr() const { return ptrInternal(); }
+
+private:
+    T* ptrInternal() const;
+
+    using StorageT =
+            typename std::aligned_storage<
+                    sizeof(T),
+                    std::alignment_of<T>::value
+            >::type;
+
+    alignas(double) mutable internal::LazyInstanceState mState;
+    mutable StorageT mStorage;
 };
 
 // Initialization value, must resolve to all-0 to ensure the object
 // instance is actually placed in the .bss
-#define LAZY_INSTANCE_INIT  { { LAZY_INSTANCE_STATE_INIT }, { 0 } }
+#define LAZY_INSTANCE_INIT  { }
 
 template <class T>
-T* LazyInstance<T>::ptr() const {
+T* LazyInstance<T>::ptrInternal() const {
+    // make sure that LazyInstance<> instantiation remains POD
+    // NB: this can't go in a class scope - one needs a way of specifying
+    // current instantiation type without explicitly saying LazyInstance<T>
+    // which is a recursive instantiation and gives compiler error
+    // decltype(*this) is a way of doing it, but it only works in a function
+    static_assert(std::is_pod<
+                          typename std::decay<decltype(*this)>::type
+                  >::value,
+                  "LazyInstance<T> is not a POD type");
+
     if (mState.needConstruction()) {
-        new (mStorage) T();
+        new (&mStorage) T();
         mState.doneConstructing();
     }
-    return reinterpret_cast<T*>(mStorage);
+    return reinterpret_cast<T*>(&mStorage);
 }
 
 }  // namespace base
