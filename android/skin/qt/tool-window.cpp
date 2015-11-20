@@ -102,13 +102,13 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     }
 
     QString default_shortcuts =
-        "Ctrl+Alt+L SHOW_PANE_LOCATION\n"
-        "Ctrl+Alt+C SHOW_PANE_CELLULAR\n"
-        "Ctrl+Alt+B SHOW_PANE_BATTERY\n"
-        "Ctrl+Alt+P SHOW_PANE_PHONE\n"
-        "Ctrl+Alt+V SHOW_PANE_VIRTSENSORS\n"
-        "Ctrl+Alt+D SHOW_PANE_DPAD\n"
-        "Ctrl+Alt+S SHOW_PANE_SETTINGS\n"
+        "Ctrl+Shift+L SHOW_PANE_LOCATION\n"
+        "Ctrl+Shift+C SHOW_PANE_CELLULAR\n"
+        "Ctrl+Shift+B SHOW_PANE_BATTERY\n"
+        "Ctrl+Shift+P SHOW_PANE_PHONE\n"
+        "Ctrl+Shift+V SHOW_PANE_VIRTSENSORS\n"
+        "Ctrl+Shift+D SHOW_PANE_DPAD\n"
+        "Ctrl+Shift+S SHOW_PANE_SETTINGS\n"
         "Ctrl+S     TAKE_SCREENSHOT\n"
         "Ctrl+Z     ENTER_ZOOM\n"
         "Ctrl+G     GRAB_KEYBOARD\n"
@@ -387,13 +387,13 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
     }
 }
 
-void ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
+bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
     QKeySequence event_key_sequence(event->key() + event->modifiers());
     bool down = event->type() == QEvent::KeyPress;
-    mShortcutKeyStore.handle(event_key_sequence,
-                             [this, down](QtUICommand cmd) {
-                                handleUICommand(cmd, down);
-                             });
+    return mShortcutKeyStore.handle(event_key_sequence,
+                                    [this, down](QtUICommand cmd) {
+                                        handleUICommand(cmd, down);
+                                    });
 }
 
 void ToolWindow::dockMainWindow()

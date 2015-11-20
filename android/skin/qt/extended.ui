@@ -60,6 +60,9 @@ font-family: &quot;Roboto&quot;</string>
    <property name="layoutDirection">
     <enum>Qt::LeftToRight</enum>
    </property>
+   <property name="styleSheet">
+    <string notr="true">border:none</string>
+   </property>
    <property name="currentIndex">
     <number>0</number>
    </property>
@@ -2243,7 +2246,7 @@ font-family: &quot;Roboto&quot;</string>
       <string>Title</string>
      </property>
     </widget>
-    <widget class="QCheckBox" name="set_focusBox">
+    <widget class="QCheckBox" name="set_allowKeyboardGrab">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -2371,7 +2374,7 @@ font-family: &quot;Roboto&quot;</string>
     <zorder>themeTitle_2</zorder>
     <zorder>themeTitle_3</zorder>
     <zorder>themeTitle_4</zorder>
-    <zorder>set_focusBox</zorder>
+    <zorder>set_allowKeyboardGrab</zorder>
     <zorder>set_keyboardBox</zorder>
     <zorder>set_sdkPathBox</zorder>
     <zorder>set_sdkFolderButton</zorder>
@@ -2441,7 +2444,7 @@ font-family: &quot;Roboto&quot;</string>
          <string>Command</string>
         </property>
         <property name="textAlignment">
-         <set>AlignLeft|AlignVCenter</set>
+         <set>AlignLeading|AlignVCenter</set>
         </property>
        </column>
        <column>
@@ -2449,7 +2452,7 @@ font-family: &quot;Roboto&quot;</string>
          <string>Key</string>
         </property>
         <property name="textAlignment">
-         <set>AlignLeft|AlignVCenter</set>
+         <set>AlignLeading|AlignVCenter</set>
         </property>
        </column>
       </widget>

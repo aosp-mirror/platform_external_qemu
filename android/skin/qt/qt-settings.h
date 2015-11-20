@@ -26,5 +26,6 @@ namespace Ui {
 
         const QString SAVE_PATH("set/savePath");
         const QString UI_THEME("set/theme");
+        const QString ALLOW_KEYBOARD_GRAB("set/allow_keyboard_grab");
     }
 }
