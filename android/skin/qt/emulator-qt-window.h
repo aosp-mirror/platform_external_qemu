@@ -25,6 +25,7 @@
 #include <QProcess>
 #include <QResizeEvent>
 #include <QRubberBand>
+#include <QSettings>
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QTimer>
@@ -87,7 +88,7 @@ public:
     void paintEvent(QPaintEvent *event);
     void startThread(StartFunction f, int argc, char **argv);
     void setGrabKeyboardInput(bool grab) {
-        mGrabKeyboardInput = true;
+        mGrabKeyboardInput = grab;
     }
 
     /*
@@ -196,6 +197,7 @@ private:
     void doResize(const QSize &size);
 
     SkinEvent *createSkinEvent(SkinEventType type);
+    void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void handleKeyEvent(SkinEventType type, QKeyEvent *event);
     void handleMouseEvent(SkinEventType type, QMouseEvent *event);
     QString getTmpImagePath();
@@ -553,7 +555,6 @@ private:
     bool mMouseInside;
 
     QVariantAnimation mFlashAnimation;
-
     QProcess mScreencapProcess;
     QProcess mScreencapPullProcess;
     MainLoopThread *mMainLoopThread;
