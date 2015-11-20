@@ -163,6 +163,23 @@
     },
     {
       "key": {
+        "uuid": "1ba9b35f_a42dc2d0",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 744,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-20T17:37:01Z",
+      "side": 1,
+      "message": "OK, but I prefer not to have a function with side effect\ninside a Boolean expression.",
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "76d4867d_36c09da1",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -227,6 +244,47 @@
         "endLine": 64,
         "endChar": 13
       },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3baaf753_45888a09",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-20T17:37:01Z",
+      "side": 1,
+      "message": "Right.\nThis actually wants to show pane 7 initially, but we\nset the current pane explicitly when we create the window,\nso this has no effect.",
+      "parentUuid": "bb33471f_41ec12ea",
+      "range": {
+        "startLine": 64,
+        "startChar": 12,
+        "endLine": 64,
+        "endChar": 13
+      },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1ba9b35f_44716eeb",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 2502,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-20T17:37:01Z",
+      "side": 1,
+      "message": "(*This* spontaneous QtDesigner change annoys me more.)",
       "revId": "59277e6869712c63dd323200a2fe41849f03563e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
