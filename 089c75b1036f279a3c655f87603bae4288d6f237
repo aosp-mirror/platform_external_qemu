@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5b25eb9e_a46dd59d",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 435,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-20T00:28:01Z",
+      "side": 1,
+      "message": "Change name to \u0027distSq\u0027 to match the math?\n\nAnd maybe change \u0027dragged rectangles\u0027 to \u0027drags\u0027",
+      "revId": "089c75b1036f279a3c655f87603bae4288d6f237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
