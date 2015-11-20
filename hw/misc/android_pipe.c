@@ -804,6 +804,7 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
                (unsigned long long)pipe->channel, pipe->wanted);
             return (uint32_t)(pipe->channel >> 32);
         }
+        dev->pipes = dev->save_pipes;
         DR("%s: no signaled channels", __FUNCTION__);
         return 0;
 
