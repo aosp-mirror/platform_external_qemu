@@ -70,6 +70,12 @@ TEST(System, getAppDataDirectory) {
     LOG(INFO) << "AppData directory: [" << dir.c_str() << "]";
 }
 
+TEST(System, getCurrentDirectory) {
+    String dir = System::get()->getCurrentDirectory();
+    EXPECT_FALSE(dir.empty());
+    LOG(INFO) << "Current directory: [" << dir.c_str() << "]";
+}
+
 // Tests case where program directory == launcher directory (QEMU1)
 TEST(TestSystem, getDirectory) {
     const char kLauncherDir[] = "/foo/bar";

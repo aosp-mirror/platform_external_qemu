@@ -10,6 +10,9 @@
 // GNU General Public License for more details.
 
 #include "android/utils/path.h"
+
+#include "android/base/testing/TestSystem.h"
+
 #include "gtest/gtest.h"
 
 namespace android {
@@ -17,12 +20,14 @@ namespace path {
 
 #define ARRAY_SIZE(x)  (sizeof(x)/sizeof(x[0]))
 
-TEST(Path, isAbsolute) {
 #ifdef _WIN32
-    const bool isWin32 = true;
+#define IF_WIN32(x, y)  x
 #else
-    const bool isWin32 = false;
+#define IF_WIN32(x, y)  y
 #endif
+
+TEST(Path, isAbsolute) {
+    const bool isWin32 = IF_WIN32(true, false);
     static const struct {
         const char* path;
         bool expected;
@@ -42,6 +47,38 @@ TEST(Path, isAbsolute) {
         const char* path = kData[n].path;
         EXPECT_EQ(kData[n].expected, path_is_absolute(path))
                 << "Testing '" << (path ? path : "<NULL>") << "'";
+    }
+}
+
+TEST(Path, GetAbsolute) {
+    static const struct {
+        const char* path;
+        const char* expected;
+    } kData[] = {
+        { "foo", IF_WIN32("/home\\foo", "/home/foo") },
+        { "/foo", "/foo" },
+        { "\\foo", IF_WIN32("\\foo", "/home/\\foo") },
+        { "/foo/bar", "/foo/bar" },
+        { "\\foo\\bar", IF_WIN32("\\foo\\bar", "/home/\\foo\\bar") },
+        { "C:/foo", IF_WIN32("C:/foo", "/home/C:/foo") },
+        { "//server/path", "//server/path" },
+        // NOTE: Per definition, if |path| is not absolute, prepend the
+        // current directory. On Windows, C:foo and //server are not
+        // absolute paths, hence the funky results. There is no way to
+        // get a correct result otherwise.
+        { "C:foo", IF_WIN32("/home\\C:\\foo", "/home/C:foo") },
+        { "//server", IF_WIN32("/home\\//server", "//server") },
+    };
+
+    android::base::TestSystem testSystem("/bin", 32);
+    testSystem.setCurrentDirectoryForTesting("/home");
+
+    for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
+        const char* path = kData[n].path;
+        char* result = path_get_absolute(path);
+        EXPECT_STREQ(kData[n].expected, result)
+                << "Testing '" << (path ? path : "<NULL>") << "'";
+        free(result);
     }
 }
 

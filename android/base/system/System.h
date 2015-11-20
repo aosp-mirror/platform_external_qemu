@@ -63,6 +63,12 @@ public:
     // in Microsoft Windows) or an empty string if it can't be found
     virtual const String& getAppDataDirectory() const = 0;
 
+    // Return the current directory path. Because this can change at
+    // runtime, this returns a new String instance, not a const-reference
+    // to a constant one held by the object. Return an empty string if there is
+    // a problem with the system when getting the current directory.
+    virtual String getCurrentDirectory() const = 0;
+
     // Return the host bitness as an integer, either 32 or 64.
     // Note that this is different from the program's bitness. I.e. if
     // a 32-bit program runs under a 64-bit host, getProgramBitness()
