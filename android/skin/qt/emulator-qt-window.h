@@ -39,6 +39,7 @@
 #if defined(__APPLE__)
 #include "android/skin/qt/mac-native-window.h"
 #endif
+#include <memory>
 
 namespace Ui {
     class EmulatorWindow;
@@ -58,14 +59,23 @@ private:
     char **argv;
 };
 
-class EmulatorQtWindow : public QFrame
+class EmulatorQtWindow final : public QFrame
 {
     Q_OBJECT
+
 public:
+    using Ptr = std::shared_ptr<EmulatorQtWindow>;
+
+private:
     explicit EmulatorQtWindow(QWidget *parent = 0);
+
+public:
+    static void create();
+    static EmulatorQtWindow* getInstance();
+    static Ptr getInstancePtr();
+
     virtual ~EmulatorQtWindow();
 
-    static EmulatorQtWindow *getInstance();
     void closeEvent(QCloseEvent *event);
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
@@ -554,5 +564,5 @@ struct SkinSurface {
     int id;
     QImage *bitmap;
     int w, h, original_w, original_h;
-    EmulatorQtWindow *window;
+    EmulatorQtWindow::Ptr window;
 };

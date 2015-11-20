@@ -39,8 +39,8 @@ static int next_id = 0;
 
 static SkinSurface *create_surface(int w, int h, int original_w, int original_h)
 {
-    SkinSurface*  s = (SkinSurface*)malloc(sizeof(*s));
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    auto s = new SkinSurface();
+    auto window = EmulatorQtWindow::getInstancePtr();
     if (window == NULL) return NULL;
     if (s != NULL) {
         QSemaphore semaphore;
@@ -73,7 +73,7 @@ static void skin_surface_free(SkinSurface *s)
     QSemaphore semaphore;
     s->window->releaseBitmap(s, &semaphore);
     semaphore.acquire();
-    free(s);
+    delete s;
 }
 
 extern int skin_surface_height(SkinSurface *s)
