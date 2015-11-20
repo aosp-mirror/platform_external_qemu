@@ -101,6 +101,12 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(mContainer.horizontalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(slot_scrollRangeChanged(int,int)));
     QObject::connect(mContainer.verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(slot_scrollRangeChanged(int,int)));
     QObject::connect(tool_window, SIGNAL(skinUIEvent(SkinEvent*)), this, SLOT(slot_queueEvent(SkinEvent*)));
+
+    mFlashAnimation.setStartValue(250);
+    mFlashAnimation.setEndValue(0);
+    mFlashAnimation.setEasingCurve(QEasingCurve::Linear);
+    QObject::connect(&mFlashAnimation, SIGNAL(finished()), this, SLOT(slot_animationFinished()));
+    QObject::connect(&mFlashAnimation, SIGNAL(valueChanged(QVariant)), this, SLOT(slot_animationValueChanged(QVariant)));
 }
 
 EmulatorQtWindow::~EmulatorQtWindow()
@@ -476,6 +482,17 @@ void EmulatorQtWindow::slot_scrollRangeChanged(int min, int max)
                              mContainer.verticalScrollBar()->value());
 }
 
+void EmulatorQtWindow::slot_animationFinished()
+{
+    mOverlay.hide();
+}
+
+void EmulatorQtWindow::slot_animationValueChanged(const QVariant &value)
+{
+    mOverlay.setFlashValue(value.toDouble() / mFlashAnimation.startValue().toDouble());
+    mOverlay.repaint();
+}
+
 void EmulatorQtWindow::screenshot()
 {
     if (mScreencapProcess.state() != QProcess::NotRunning) {
@@ -494,6 +511,11 @@ void EmulatorQtWindow::screenshot()
     args << "screencap";            // Take a screen capture
     args << "-p";                   // Print it to a file
     args << REMOTE_SCREENSHOT_FILE; // The temporary screenshot file
+
+    // Display the flash animation immediately as feedback - if it fails, an error dialog will
+    // indicate as such.
+    mOverlay.showAsFlash();
+    mFlashAnimation.start();
 
     // Keep track of this process
     mScreencapProcess.start(command, args);
@@ -694,7 +716,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
         if (mInZoomMode) {
             if (event->key() == Qt::Key_Control) {
                 if (type == kEventKeyDown) {
-                    mOverlay.show();
+                    mOverlay.showForZoom();
                 } else if (type == kEventKeyUp) {
                     mOverlay.hide();
                 }

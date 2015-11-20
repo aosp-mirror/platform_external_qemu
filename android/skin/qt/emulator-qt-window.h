@@ -28,6 +28,7 @@
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QTimer>
+#include <QVariantAnimation>
 #include <QWidget>
 
 #include "android/skin/event.h"
@@ -162,6 +163,9 @@ private slots:
     void slot_verticalScrollChanged(int value);
 
     void slot_scrollRangeChanged(int min, int max);
+
+    void slot_animationFinished();
+    void slot_animationValueChanged(const QVariant &value);
 
     /*
      Here are conventional slots that perform interesting high-level functions in the emulator. These can be hooked up to signals
@@ -369,7 +373,9 @@ private:
             : QFrame(container),
               mEmulatorWindow(window),
               mContainer(container),
-              mRubberBand(QRubberBand::Rectangle, this)
+              mRubberBand(QRubberBand::Rectangle, this),
+              mCursor(":/cursor/zoom_cursor"),
+              mIsFlash(false)
         {
             setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
             setAttribute(Qt::WA_TranslucentBackground);
@@ -381,9 +387,6 @@ private:
 #ifdef __linux__
             setWindowFlags(windowFlags() | Qt::X11BypassWindowManagerHint);
 #endif
-
-            QPixmap cursor(":/cursor/zoom_cursor");
-            setCursor(QCursor(cursor));
 
             mRubberBand.hide();
         }
@@ -414,12 +417,16 @@ private:
 
         void mouseMoveEvent(QMouseEvent *event)
         {
+            if (mIsFlash) return;
+
             mRubberBand.setGeometry(QRect(mOrigin, event->pos()).normalized()
                                         .intersected(QRect(0, 0, this->width(), this->height())));
         }
 
         void mousePressEvent(QMouseEvent *event)
         {
+            if (mIsFlash) return;
+
             mOrigin = event->pos();
             mRubberBand.setGeometry(QRect(mOrigin, QSize()));
             mRubberBand.show();
@@ -427,6 +434,8 @@ private:
 
         void mouseReleaseEvent(QMouseEvent *event)
         {
+            if (mIsFlash) return;
+
             QRect geom = mRubberBand.geometry();
             QPoint localPoint = mEmulatorWindow->mapFromGlobal(this->mapToGlobal(geom.center()));
 
@@ -467,11 +476,24 @@ private:
             // actually not appear at all on some systems. To circumvent this, we draw a
             // window-sized quad that is basically invisible, forcing the window to be drawn.
             // Because this is not strange enough, the alpha value of said quad *must* be above a
-            // certain threshold on OSX, else the window will simply not appear. This threshold is
-            // apparently 12, and thus, the alpha is set to 13.
+            // certain threshold else the window will simply not appear.
+            int alpha = mFlashValue * 255;
+
+            // On OSX, this threshold is 12, so make alpha 13.
+            // On Windows, this threshold is 0, so make alpha 1.
+            // On Linux, this threshold is 0, so we don't even need to draw if alpha = 0.
+#if __APPLE__
+            if (alpha < 13) alpha = 13;
+#elif _WIN32
+            if (alpha < 1) alpha = 1;
+#elif __linux__
+            if (alpha == 0) return;
+#endif
+
+
             QPainter painter(this);
             QRect bg(QPoint(0, 0), this->size());
-            painter.fillRect(bg, QColor(0,0,0,13));
+            painter.fillRect(bg, QColor(255,255,255,alpha));
         }
 
         void showEvent(QShowEvent *event)
@@ -480,11 +502,34 @@ private:
             this->activateWindow();
         }
 
+        void setFlashValue(double val)
+        {
+            mFlashValue = val;
+        }
+
+        void showAsFlash()
+        {
+            mIsFlash = true;
+            setCursor(Qt::ArrowCursor);
+            show();
+        }
+
+        void showForZoom()
+        {
+            mIsFlash = false;
+            setCursor(QCursor(mCursor));
+            show();
+        }
+
     private:
         EmulatorQtWindow *mEmulatorWindow;
         EmulatorWindowContainer *mContainer;
         QRubberBand mRubberBand;
         QPoint mOrigin;
+        QPixmap mCursor;
+
+        double mFlashValue;
+        bool mIsFlash;
     };
 
     EmulatorWindowContainer mContainer;
@@ -496,6 +541,8 @@ private:
     bool mNextIsZoom;
     bool mGrabKeyboardInput;
     bool mMouseInside;
+
+    QVariantAnimation mFlashAnimation;
 
     QProcess mScreencapProcess;
     QProcess mScreencapPullProcess;
