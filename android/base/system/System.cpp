@@ -111,6 +111,34 @@ public:
         return mProgramDir;
     }
 
+    virtual String getCurrentDirectory() const {
+#if defined(_WIN32)
+        int currentLen = GetCurrentDirectoryW(0, nullptr);
+        if (currentLen < 0) {
+            // Could not get size of working directory. Something is really
+            // fishy here, return an empty string.
+            return String();
+        }
+        wchar_t* currentDir =
+                static_cast<wchar_t*>(calloc(currentLen + 1, sizeof(wchar_t)));
+        if (!GetCurrentDirectoryW(currentLen + 1, currentDir)) {
+            // Again, some unexpected problem. Can't do much here.
+            // Make the string empty.
+            currentDir[0] = L'0';
+        }
+
+        String result = Win32UnicodeString::convertToUtf8(currentDir);
+        ::free(currentDir);
+        return result;
+#else   // !_WIN32
+        char currentDir[PATH_MAX];
+        if (!getcwd(currentDir, sizeof(currentDir))) {
+            return String();
+        }
+        return String(currentDir);
+#endif  // !_WIN32
+    }
+
     virtual const String& getLauncherDirectory() const {
         if (mLauncherDir.empty()) {
             String programDir = getProgramDirectory();
