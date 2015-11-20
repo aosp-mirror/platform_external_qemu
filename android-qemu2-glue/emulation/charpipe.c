@@ -214,6 +214,7 @@ charpipehalf_init( CharPipeHalf*  ph, CharPipeHalf*  peer )
     cs->chr_fe_event         = NULL;
     cs->chr_close            = charpipehalf_close;
     cs->opaque               = ph;
+    qemu_mutex_init(&cs->chr_write_lock);
 }
 
 
