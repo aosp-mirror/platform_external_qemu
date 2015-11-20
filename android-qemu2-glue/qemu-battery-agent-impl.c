@@ -20,12 +20,35 @@ static void battery_setIsBatteryPresent(bool isPresent) {
     goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_PRESENT, isPresent);
 }
 
+static bool battery_present() {
+    return (bool)goldfish_battery_read_prop(POWER_SUPPLY_PROP_PRESENT);
+}
+
 static void battery_setIsCharging(bool isCharging) {
     goldfish_battery_set_prop(1, POWER_SUPPLY_PROP_ONLINE, isCharging);
 }
 
+static bool battery_charging() {
+    return (bool)goldfish_battery_read_prop(POWER_SUPPLY_PROP_ONLINE);
+}
+
+static void battery_setCharger(enum BatteryCharger charger) {
+    battery_setIsCharging( charger != BATTERY_CHARGER_NONE );
+
+    // TODO: Need to save the full enum and convey it to the AVD
+}
+
+static enum BatteryCharger battery_charger() {
+    return ( battery_charging() ? BATTERY_CHARGER_AC : BATTERY_CHARGER_NONE );
+    // TODO: Need to get the full enum from the AVD
+}
+
 static void battery_setChargeLevel(int percentFull) {
     goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_CAPACITY, percentFull);
+}
+
+static int battery_chargeLevel() {
+    return goldfish_battery_read_prop(POWER_SUPPLY_PROP_CAPACITY);
 }
 
 static void battery_setHealth(enum BatteryHealth health) {
@@ -45,6 +68,19 @@ static void battery_setHealth(enum BatteryHealth health) {
     goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HEALTH, value);
 }
 
+static enum BatteryHealth battery_health() {
+    switch ( goldfish_battery_read_prop(POWER_SUPPLY_PROP_HEALTH) ) {
+        case POWER_SUPPLY_HEALTH_GOOD:           return BATTERY_HEALTH_GOOD;
+        case POWER_SUPPLY_HEALTH_UNSPEC_FAILURE: return BATTERY_HEALTH_FAILED;
+        case POWER_SUPPLY_HEALTH_DEAD:           return BATTERY_HEALTH_DEAD;
+        case POWER_SUPPLY_HEALTH_OVERVOLTAGE:    return BATTERY_HEALTH_OVERVOLTAGE;
+        case POWER_SUPPLY_HEALTH_OVERHEAT:       return BATTERY_HEALTH_OVERHEATED;
+        case POWER_SUPPLY_HEALTH_UNKNOWN:        return BATTERY_HEALTH_UNKNOWN;
+
+        default:                                 return BATTERY_HEALTH_UNKNOWN;
+    }
+}
+
 static void battery_setStatus(enum BatteryStatus status) {
     int value;
 
@@ -61,14 +97,33 @@ static void battery_setStatus(enum BatteryStatus status) {
     goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_STATUS, value);
 }
 
+static enum BatteryStatus battery_status() {
+    switch ( goldfish_battery_read_prop(POWER_SUPPLY_PROP_STATUS) ) {
+        case POWER_SUPPLY_STATUS_UNKNOWN:       return BATTERY_STATUS_UNKNOWN;
+        case POWER_SUPPLY_STATUS_CHARGING:      return BATTERY_STATUS_CHARGING;
+        case POWER_SUPPLY_STATUS_DISCHARGING:   return BATTERY_STATUS_DISCHARGING;
+        case POWER_SUPPLY_STATUS_NOT_CHARGING:  return BATTERY_STATUS_NOT_CHARGING;
+        case POWER_SUPPLY_STATUS_FULL:          return BATTERY_STATUS_FULL;
+
+        default:                                return BATTERY_STATUS_UNKNOWN;
+    }
+}
+
 typedef void (*BatteryDisplayCb)(void* opaque, LineConsumerCallback outputCallback);
 
 static const QAndroidBatteryAgent sQAndroidBatteryAgent = {
         .setIsBatteryPresent = battery_setIsBatteryPresent,
+        .present = battery_present,
         .setIsCharging = battery_setIsCharging,
+        .charging = battery_charging,
+        .setCharger = battery_setCharger,
+        .charger = battery_charger,
         .setChargeLevel = battery_setChargeLevel,
+        .chargeLevel = battery_chargeLevel,
         .setHealth = battery_setHealth,
+        .health = battery_health,
         .setStatus = battery_setStatus,
+        .status = battery_status,
         .batteryDisplay = (BatteryDisplayCb)goldfish_battery_display_cb
 };
 const QAndroidBatteryAgent* const gQAndroidBatteryAgent =
