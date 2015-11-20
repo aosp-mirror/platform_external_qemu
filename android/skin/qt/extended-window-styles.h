@@ -172,6 +172,7 @@ enum ExtendedWindowPane {
     "QComboBox::drop-down { border-left-style: solid; }" \
     "QComboBox::down-arrow { image:url(:/" THEME##_PATH "/drop_down); " \
         "border: none; width: 24px; height: 24px; }" \
+    "QListView { min-height: 4em }" /* Required for OSX */ \
     "QTabWidget::pane {border: none;}" \
     "QTabWidget::tab-bar {left: 0px;}" \
     "QTabBar::tab {background:" THEME##_BKG_COLOR "; padding-bottom:8px;" \
