@@ -2171,6 +2171,211 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">folder</string>
      </property>
     </widget>
+    <widget class="QGroupBox" name="themeTitle_2">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>74</y>
+       <width>211</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Grab screen focus with mouse</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="themeTitle_3">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>148</y>
+       <width>211</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>On-screen keyboard</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="themeTitle_4">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>74</y>
+       <width>211</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Android SDK path</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="set_focusBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>92</y>
+       <width>211</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="set_keyboardBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>166</y>
+       <width>211</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="set_useStudioPathBox">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>92</y>
+       <width>211</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Use Android Studio path</string>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="set_sdkPathBox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>112</y>
+       <width>240</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="readOnly">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="set_sdkFolderButton">
+     <property name="geometry">
+      <rect>
+       <x>572</x>
+       <y>112</y>
+       <width>32</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string notr="true"/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/dark/folder</normaloff>:/dark/folder</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string notr="true">folder</string>
+     </property>
+    </widget>
+    <zorder>themeTitle</zorder>
+    <zorder>set_themeBox</zorder>
+    <zorder>saveLocationTitle</zorder>
+    <zorder>set_saveLocBox</zorder>
+    <zorder>set_folderButton</zorder>
+    <zorder>themeTitle_2</zorder>
+    <zorder>themeTitle_3</zorder>
+    <zorder>themeTitle_4</zorder>
+    <zorder>set_focusBox</zorder>
+    <zorder>set_keyboardBox</zorder>
+    <zorder>set_sdkPathBox</zorder>
+    <zorder>set_sdkFolderButton</zorder>
+    <zorder>set_useStudioPathBox</zorder>
    </widget>
    <widget class="QWidget" name="helpPage">
     <widget class="QTabWidget" name="help_tabs">
