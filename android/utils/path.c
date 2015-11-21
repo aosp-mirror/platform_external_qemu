@@ -208,34 +208,6 @@ path_dirname( const char*  path )
 /** MISC FILE AND DIRECTORY HANDLING
  **/
 
-/* checks that one can read/write a given (regular) file */
-ABool
-path_can_read( const char*  path )
-{
-    if (!path)
-        return 0;
-
-    return HANDLE_EINTR(access(path, R_OK)) == 0;
-}
-
-ABool
-path_can_write( const char*  path )
-{
-    if (!path)
-        return 0;
-
-    return HANDLE_EINTR(access(path, W_OK)) == 0;
-}
-
-ABool
-path_can_exec( const char* path )
-{
-    if (!path)
-        return 0;
-
-    return HANDLE_EINTR(access(path, X_OK)) == 0;
-}
-
 /* try to make a directory. returns 0 on success, -1 on failure
  * (error code in errno) */
 APosixStatus

@@ -149,6 +149,17 @@ public:
     // Return true iff |path| exists and is a directory on the file system.
     virtual bool pathIsDir(const char* path) const = 0;
 
+    // Return true iff |path| exists and can be read by the current user.
+    virtual bool pathCanRead(const char* path) const = 0;
+
+    // Return true iff |path| exists and can be written to by the current
+    // user.
+    virtual bool pathCanWrite(const char* path) const = 0;
+
+    // Return true iff |path| exists and can be executed to by the current
+    // user.
+    virtual bool pathCanExec(const char* path) const = 0;
+
     // Scan directory |dirPath| for entries, and return them as a sorted
     // vector or entries. If |fullPath| is true, then each item of the
     // result vector contains a full path.
@@ -189,6 +200,9 @@ protected:
     static bool pathExistsInternal(const char* path);
     static bool pathIsFileInternal(const char* path);
     static bool pathIsDirInternal(const char* path);
+    static bool pathCanReadInternal(const char* path);
+    static bool pathCanWriteInternal(const char* path);
+    static bool pathCanExecInternal(const char* path);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(System);

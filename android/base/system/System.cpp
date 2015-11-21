@@ -409,6 +409,18 @@ public:
         return pathIsDirInternal(path);
     }
 
+    virtual bool pathCanRead(const char* path) const override {
+        return pathCanReadInternal(path);
+    }
+
+    virtual bool pathCanWrite(const char* path) const override {
+        return pathCanWriteInternal(path);
+    }
+
+    virtual bool pathCanExec(const char* path) const override {
+        return pathCanExecInternal(path);
+    }
+
     Times getProcessTimes() const {
         Times res = {};
 
@@ -697,6 +709,30 @@ bool System::pathIsDirInternal(const char* path) {
         return false;
     }
     return S_ISDIR(st.st_mode);
+}
+
+// static
+bool System::pathCanReadInternal(const char* path) {
+    if (!path) {
+        return false;
+    }
+    return HANDLE_EINTR(access(path, R_OK)) == 0;
+}
+
+// static
+bool System::pathCanWriteInternal(const char* path) {
+    if (!path) {
+        return false;
+    }
+    return HANDLE_EINTR(access(path, W_OK)) == 0;
+}
+
+// static
+bool System::pathCanExecInternal(const char* path) {
+    if (!path) {
+        return false;
+    }
+    return HANDLE_EINTR(access(path, X_OK)) == 0;
 }
 
 // static

@@ -34,6 +34,18 @@ ABool path_is_dir(const char*  path) {
     return System::get()->pathIsDir(path);
 }
 
+ABool path_can_read(const char*  path) {
+    return System::get()->pathCanRead(path);
+}
+
+ABool path_can_write(const char*  path) {
+    return System::get()->pathCanWrite(path);
+}
+
+ABool path_can_exec(const char* path) {
+    return System::get()->pathCanExec(path);
+}
+
 ABool path_is_absolute(const char* path) {
     return PathUtils::isAbsolute(path);
 }
