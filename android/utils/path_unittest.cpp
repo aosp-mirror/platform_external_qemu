@@ -12,8 +12,11 @@
 #include "android/utils/path.h"
 
 #include "android/base/testing/TestSystem.h"
+#include "android/base/testing/TestTempDir.h"
 
 #include "gtest/gtest.h"
+
+using android::base::TestTempDir;
 
 namespace android {
 namespace path {
