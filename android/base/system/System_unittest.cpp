@@ -14,6 +14,7 @@
 
 #include "android/base/system/System.h"
 
+#include "android/base/EintrWrapper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
 #include "android/base/String.h"
@@ -175,6 +176,86 @@ TEST(System, envGetAndSet) {
     sys->envSet(kVarName, NULL);
     EXPECT_FALSE(sys->envTest(kVarName));
     EXPECT_STREQ("", sys->envGet(kVarName).c_str());
+}
+
+TEST(System, pathOperations) {
+    System* sys = System::get();
+    TestTempDir tempDir("path_opts");
+    String fooPath = tempDir.path();
+    fooPath += "/foo";
+
+    EXPECT_FALSE(sys->pathExists(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathIsFile(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathIsDir(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathCanRead(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathCanWrite(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathCanExec(fooPath.c_str()));
+
+    make_subfile(tempDir.path(), "foo");
+
+    EXPECT_TRUE(sys->pathExists(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathIsFile(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathIsDir(fooPath.c_str()));
+
+    // NOTE: Windows doesn't have 'execute' permission bits.
+    // Any readable file can be executed. Also any writable file
+    // is readable.
+    EXPECT_FALSE(HANDLE_EINTR(chmod(fooPath.c_str(), S_IRUSR|S_IWUSR|S_IXUSR)));
+    EXPECT_TRUE(sys->pathCanRead(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanWrite(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanExec(fooPath.c_str()));
+
+    EXPECT_FALSE(HANDLE_EINTR(chmod(fooPath.c_str(), S_IRUSR)));
+    EXPECT_TRUE(sys->pathCanRead(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathCanWrite(fooPath.c_str()));
+#ifdef _WIN32
+    EXPECT_TRUE(sys->pathCanExec(fooPath.c_str()));
+#else
+    EXPECT_FALSE(sys->pathCanExec(fooPath.c_str()));
+#endif
+
+    EXPECT_FALSE(HANDLE_EINTR(chmod(fooPath.c_str(), S_IWUSR)));
+#ifdef _WIN32
+    EXPECT_TRUE(sys->pathCanRead(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanWrite(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanExec(fooPath.c_str()));
+#else
+    EXPECT_FALSE(sys->pathCanRead(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanWrite(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathCanExec(fooPath.c_str()));
+#endif
+
+    EXPECT_FALSE(HANDLE_EINTR(chmod(fooPath.c_str(), S_IXUSR)));
+#ifdef _WIN32
+    EXPECT_TRUE(sys->pathCanRead(fooPath.c_str()));
+#else
+    EXPECT_FALSE(sys->pathCanRead(fooPath.c_str()));
+#endif
+    EXPECT_FALSE(sys->pathCanWrite(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanExec(fooPath.c_str()));
+
+    EXPECT_FALSE(HANDLE_EINTR(chmod(fooPath.c_str(), S_IRUSR|S_IWUSR)));
+    EXPECT_TRUE(sys->pathCanRead(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanWrite(fooPath.c_str()));
+#ifdef _WIN32
+    EXPECT_TRUE(sys->pathCanExec(fooPath.c_str()));
+#else
+    EXPECT_FALSE(sys->pathCanExec(fooPath.c_str()));
+#endif
+
+    EXPECT_FALSE(HANDLE_EINTR(chmod(fooPath.c_str(), S_IRUSR|S_IXUSR)));
+    EXPECT_TRUE(sys->pathCanRead(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathCanWrite(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanExec(fooPath.c_str()));
+
+    EXPECT_FALSE(HANDLE_EINTR(chmod(fooPath.c_str(), S_IWUSR|S_IXUSR)));
+#ifdef _WIN32
+    EXPECT_TRUE(sys->pathCanRead(fooPath.c_str()));
+#else
+    EXPECT_FALSE(sys->pathCanRead(fooPath.c_str()));
+#endif
+    EXPECT_TRUE(sys->pathCanWrite(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanExec(fooPath.c_str()));
 }
 
 TEST(System, scanDirEntriesWithFullPaths) {

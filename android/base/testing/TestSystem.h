@@ -152,6 +152,18 @@ public:
         return pathIsDirInternal(toTempRoot(path).c_str());
     }
 
+    virtual bool pathCanRead(const char* path) const override {
+        return pathCanReadInternal(toTempRoot(path).c_str());
+    }
+
+    virtual bool pathCanWrite(const char* path) const override {
+        return pathCanWriteInternal(toTempRoot(path).c_str());
+    }
+
+    virtual bool pathCanExec(const char* path) const override {
+        return pathCanExecInternal(toTempRoot(path).c_str());
+    }
+
     virtual StringVector scanDirEntries(const char* dirPath,
                                         bool fullPath = false) const {
         if (!mTempDir) {
