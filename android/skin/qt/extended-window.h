@@ -33,6 +33,7 @@
 #include <QPushButton>
 #include <QString>
 #include <QTableWidget>
+#include <QThread>
 #include <QTimer>
 #include <QDoubleValidator>
 
@@ -69,6 +70,7 @@ private:
 
     EmulatorQtWindow   *mEmulatorWindow;
     ToolWindow         *mToolWindow;
+    GpsFixArray         mGpsFixesArray;
 
     class BatteryState {
     public:
@@ -149,11 +151,12 @@ private:
     Ui::ExtendedControls *mExtendedUi;
 
     void    adjustTabs(ExtendedWindowPane thisIndex);
-    void    loc_appendToTable(std::string lat,
-                              std::string lon,
-                              std::string elev,
-                              std::string name,
-                              std::string description,
+    void    loc_appendToTable(int row,
+                              const std::string& lat,
+                              const std::string& lon,
+                              const std::string& elev,
+                              const std::string& name,
+                              const std::string& description,
                               time_t time);
 
     static void setButtonEnabled(QPushButton*  theButton,
@@ -217,9 +220,16 @@ private slots:
     void on_loc_decimalModeSwitch_toggled(bool checked);
     void on_loc_sexagesimalModeSwitch_toggled(bool checked);
     void on_loc_sendPointButton_clicked();
+    void on_loc_longitudeInput_valueChanged(double);
+    void on_loc_latitudeInput_valueChanged(double);
+    void on_loc_altitudeInput_editingFinished();
+    void on_loc_playbackSpeed_currentIndexChanged(int index);
     bool loc_cellIsValid(QTableWidget *table, int row, int col);
     void loc_populateTable(GpsFixArray *fixes);
     void loc_slot_timeout();
+    void loc_geoDataLoadingStarted();
+    void loc_geoDataLoadingFinished(QString file_name, bool ok, QString error);
+    void loc_startupGeoDataLoadingFinished(QString file_name, bool ok, QString error);
 
     void locationPlaybackStart();
     void locationPlaybackStop();
@@ -255,4 +265,31 @@ class phoneNumberValidator : public QValidator
 {
 public:
     State validate(QString &input, int &pos) const;
+};
+
+class GeoDataLoaderThread : public QThread {
+Q_OBJECT
+public:
+    // Loads geo data from a gpx or kml file specified
+    // by file_name into the GpsFixArray pointed to 
+    // by fixes
+    void loadGeoDataFromFile(const QString& file_name, GpsFixArray* fixes);
+
+
+    static GeoDataLoaderThread* newInstance(
+            const QObject* handler,
+            const char* started_slot,
+            const char* finished_slot);
+
+signals:
+    void loadingFinished(QString file_name, bool ok, QString error);
+
+protected:
+    // Reimplemented to load the file into the given fixes array.
+    void run() override;
+
+private:
+    GeoDataLoaderThread() : mFixes(nullptr) {}
+    QString mFileName;
+    GpsFixArray* mFixes;
 };
