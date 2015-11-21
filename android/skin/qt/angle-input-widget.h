@@ -39,6 +39,11 @@ public:
 
     explicit AngleInputWidget(QWidget* parent = nullptr);
 
+    // For setting the value programmatically.
+    // The value will be clipped to the current value range.
+    // This will NOT trigger a valueChanged signal.
+    void setValue(double value);
+
     // Returns the decimal measure of the angle, in degrees.
     double value() const { return mDecimalValue; }
 

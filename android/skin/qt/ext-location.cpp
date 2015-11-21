@@ -17,6 +17,7 @@
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/qt-settings.h"
 
 
 #include <QtWidgets>
@@ -31,6 +32,26 @@ void ExtendedWindow::initLocation()
     mExtendedUi->loc_latitudeInput->setMaxValue(90.0);
     QObject::connect(&mLoc_timer, &QTimer::timeout, this, &ExtendedWindow::loc_slot_timeout);
     setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, false);
+
+    // Restore previous values.
+    QSettings settings;
+    mExtendedUi->loc_altitudeInput->setText(
+            settings.value(Ui::Settings::LOCATION_ALTITUDE, "0.0").toString());
+    mExtendedUi->loc_longitudeInput->setValue(
+            settings.value(Ui::Settings::LOCATION_LONGITUDE, 0.0).toDouble());
+    mExtendedUi->loc_latitudeInput->setValue(
+            settings.value(Ui::Settings::LOCATION_LATITUDE, 0.0).toDouble());
+    mExtendedUi->loc_playbackSpeed->setCurrentIndex(
+            settings.value(Ui::Settings::LOCATION_PLAYBACK_SPEED, 0).toInt());
+    QString location_data_file =
+        settings.value(Ui::Settings::LOCATION_PLAYBACK_FILE, "").toString();
+    if (!location_data_file.isEmpty()) {
+        GpsFixArray fixes;
+        auto result_and_error = loadGpsFixesFromFile(location_data_file, &fixes);
+        if (result_and_error.first) {
+            loc_populateTable(&fixes);
+        }
+    }
 }
 
 void ExtendedWindow::on_loc_pathTable_cellChanged(int row, int col)
@@ -215,41 +236,49 @@ bool ExtendedWindow::loc_cellIsValid(QTableWidget *table, int row, int col)
     return cellOK;
 }
 
+std::pair<bool, std::string> ExtendedWindow::loadGpsFixesFromFile(
+        const QString& file,
+        GpsFixArray* fixes) {
+    QFileInfo fileInfo(file);
+    std::string errStr;
+    bool isOK;
+    if (fileInfo.suffix() == "gpx") {
+        isOK = GpxParser::parseFile(file.toStdString().c_str(),
+                                    fixes, &errStr);
+    } else if (fileInfo.suffix() == "kml") {
+        isOK = KmlParser::parseFile(file.toStdString().c_str(),
+                                    fixes, &errStr);
+    }
+    return std::make_pair(isOK, errStr);
+}
+
 void ExtendedWindow::on_loc_GpxKmlButton_clicked()
 {
-    bool isOK = false;
-
     // Use dialog to get file name
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open GPX or KML File"), ".",
                                                     tr("GPX and KML files (*.gpx *.kml)"));
 
     if (fileName.isNull()) return;
 
-    // Delete all rows in table
-    mExtendedUi->loc_pathTable->setRowCount(0);
-
     GpsFixArray fixes;
-    std::string errStr;
-    QFileInfo fileInfo(fileName);
-    if (fileInfo.suffix() == "gpx") {
-        isOK = GpxParser::parseFile(fileName.toStdString().c_str(),
-                                    &fixes, &errStr);
-    } else if (fileInfo.suffix() == "kml") {
-        isOK = KmlParser::parseFile(fileName.toStdString().c_str(),
-                                    &fixes, &errStr);
-    }
-
-    if (!isOK) {
+    auto result_and_error =
+        loadGpsFixesFromFile(fileName, &fixes);
+    if (!result_and_error.first) {
         mToolWindow->showErrorDialog(
-                tr(errStr.c_str()),
-                tr((fileInfo.suffix().toUpper() + " Parser").toStdString().c_str()));
+                tr(result_and_error.second.c_str()),
+                tr("Geo Data Parser"));
     } else {
+        QSettings settings;
+        settings.setValue(Ui::Settings::LOCATION_PLAYBACK_FILE, fileName);
         loc_populateTable(&fixes);
     }
 }
 
 void ExtendedWindow::loc_populateTable(GpsFixArray *fixes)
 {
+    // Delete all rows in table
+    mExtendedUi->loc_pathTable->setRowCount(0);
+
     // Special case, the first row will have delay 0
     time_t previousTime = fixes->at(0).time;
     for (unsigned i = 0; i < fixes->size(); i++) {
@@ -330,4 +359,24 @@ void ExtendedWindow::on_loc_sendPointButton_clicked() {
                            mExtendedUi->loc_altitudeInput->text().toDouble(),
                            4,
                            &timeVal);
+}
+
+void ExtendedWindow::on_loc_longitudeInput_valueChanged(double value) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::LOCATION_LONGITUDE, value);
+}
+
+void ExtendedWindow::on_loc_latitudeInput_valueChanged(double value) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::LOCATION_LATITUDE, value);
+}
+
+void ExtendedWindow::on_loc_altitudeInput_editingFinished() {
+    QSettings settings;
+    settings.setValue(Ui::Settings::LOCATION_ALTITUDE, mExtendedUi->loc_altitudeInput->text());
+}
+
+void ExtendedWindow::on_loc_playbackSpeed_currentIndexChanged(int index) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::LOCATION_PLAYBACK_SPEED, index);
 }

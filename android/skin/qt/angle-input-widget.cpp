@@ -95,6 +95,12 @@ AngleInputWidget::AngleInputWidget(QWidget* parent) :
     mLayout.setContentsMargins(0, 0, 0, 0);
 }
 
+void AngleInputWidget::setValue(double value) {
+    mDecimalValue =
+        (value <= mMinValue ? mMinValue : (value >= mMaxValue ? mMaxValue : value));
+    updateView();
+}
+
 void AngleInputWidget::setMinValue(double value) {
    if (value > mMaxValue) {
        return;

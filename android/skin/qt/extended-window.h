@@ -123,6 +123,8 @@ private:
     void initVirtualSensors();
 
     void completeSettingsInitialization();
+    std::pair<bool, std::string> loadGpsFixesFromFile(const QString& file,
+                                                  GpsFixArray* fixes);
 
     BatteryState    mBatteryState;
     SettingsState   mSettingsState;
@@ -217,6 +219,10 @@ private slots:
     void on_loc_decimalModeSwitch_toggled(bool checked);
     void on_loc_sexagesimalModeSwitch_toggled(bool checked);
     void on_loc_sendPointButton_clicked();
+    void on_loc_longitudeInput_valueChanged(double);
+    void on_loc_latitudeInput_valueChanged(double);
+    void on_loc_altitudeInput_editingFinished();
+    void on_loc_playbackSpeed_currentIndexChanged(int index);
     bool loc_cellIsValid(QTableWidget *table, int row, int col);
     void loc_populateTable(GpsFixArray *fixes);
     void loc_slot_timeout();
