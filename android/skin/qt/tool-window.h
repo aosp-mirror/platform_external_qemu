@@ -65,6 +65,7 @@ public:
     void showErrorDialog(const QString &message, const QString &title);
 
     QString getAndroidSdkRoot();
+    QString getAndroidStudioSdkPath();
     QString getAdbFullPath(QStringList *args);
     QString getScreenshotSaveDirectory();
     QString getScreenshotSaveFile();
@@ -87,6 +88,8 @@ private:
         handleUICommand(cmd, false);
     }
 
+    void initAndroidStudioSdkPath();
+
     QToolButton *addButton(QGridLayout *layout, int row, int col,
                            const char *iconPath, QString tip,
                            EmulatorQtWindowSlot slot);
@@ -104,6 +107,7 @@ private:
     QProgressDialog mInstallDialog;
     QQueue<QUrl> mFilesToPush;
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
+    QString mStudioSdkPath;
 
 private slots:
     void on_back_button_pressed();
