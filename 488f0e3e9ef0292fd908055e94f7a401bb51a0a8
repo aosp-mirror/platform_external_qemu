@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5b1b2bb8_7a7c619a",
+        "filename": "android/skin/qt/mac-native-window.mm",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-23T15:34:31Z",
+      "side": 1,
+      "message": "Cool. I learned something.\nIt\u0027s not \"minimize,\" it\u0027s \"miniaturize\"!",
+      "revId": "488f0e3e9ef0292fd908055e94f7a401bb51a0a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
