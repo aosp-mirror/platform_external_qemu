@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3bdbd73a_7d99d7eb",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-11-23T22:24:09Z",
+      "side": 1,
+      "message": "Might make more sense here. Tool window close should be triggered by main window close.",
+      "revId": "c89a514ef1865141863274d4417e82438cc53c0c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
