@@ -293,6 +293,9 @@ public:
     // and windows created by this instance.
     TextureDraw* getTextureDraw() const { return m_textureDraw; }
 
+    HandleType createClientImage(HandleType context, EGLenum target, GLuint buffer);
+    EGLBoolean destroyClientImage(HandleType image);
+
     // Used internally.
     bool bind_locked();
     bool unbind_locked();
