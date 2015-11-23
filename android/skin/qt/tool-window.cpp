@@ -12,6 +12,7 @@
 
 #include <QCoreApplication>
 #include <QDateTime>
+#include <QDomDocument>
 #include <QPushButton>
 #include <QSettings>
 #include <QtWidgets>
@@ -42,7 +43,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     emulator_window(window),
     extendedWindow(NULL),
     uiEmuAgent(NULL),
-    toolsUi(new Ui::ToolControls)
+    toolsUi(new Ui::ToolControls),
+    mStudioSdkPath()
 {
     Q_INIT_RESOURCE(resources);
     twInstance = this;
@@ -127,6 +129,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     mShortcutKeyStore.add(
             QKeySequence(Qt::Key_Alt | Qt::AltModifier | Qt::ControlModifier),
             QtUICommand::UNGRAB_KEYBOARD);
+
+    initAndroidStudioSdkPath();
 }
 
 void ToolWindow::hide()
@@ -170,6 +174,113 @@ QString ToolWindow::getAndroidSdkRoot()
         return QString::null;
     }
     return QString::fromUtf8(sdkRoot.get());
+}
+
+QString ToolWindow::getAndroidStudioSdkPath()
+{
+    return mStudioSdkPath;
+}
+
+void ToolWindow::initAndroidStudioSdkPath()
+{
+    QDir configDir = QDir::home();
+    QStringList entryFilter;
+
+#ifdef __APPLE__
+
+    entryFilter << "AndroidStudio?.?";
+    if (!configDir.cd("Library/Preferences")) return;
+
+#else // __linux__ && _WIN32
+
+    entryFilter << ".AndroidStudio?.?";
+
+#endif
+
+    QStringList studioDirs = configDir.entryList(entryFilter, QDir::Dirs |
+                                                              QDir::Hidden |
+                                                              QDir::Readable |
+                                                              QDir::Executable |
+                                                              QDir::NoDotAndDotDot,
+                                                              QDir::Name);
+    if (studioDirs.isEmpty()) return;
+    if (!configDir.cd(studioDirs.last())) return; // Go with the "latest" version
+
+#ifndef __APPLE__
+    if (!configDir.cd("config")) return;
+#endif
+    if (!configDir.cd("options")) return;
+
+    // At this point, configDir should contain a file called jdk.table.xml. We need to open this
+    // file and find the correct JDK for this emulator.
+    QDomDocument xmlDocument("jdktable");
+    QString filePath = QFileInfo(configDir, "jdk.table.xml").absoluteFilePath();
+    QFile xmlFile(filePath);
+    if (!xmlFile.open(QIODevice::ReadOnly))
+        return;
+    if (!xmlDocument.setContent(&xmlFile)) {
+        xmlFile.close();
+        return;
+    }
+    xmlFile.close();
+
+    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
+
+    QDomNodeList jdks = xmlDocument.elementsByTagName("jdk");
+    for (int i = 0; i < jdks.size(); i++) {
+        QDomNode jdkNode = jdks.at(i);
+
+        // First, sanity check that this "JDK" is actually an Android SDK
+        QDomNode typeNode = jdkNode.firstChildElement("type");
+        if (typeNode.isNull()) {
+            continue;
+        } else {
+            QDomNamedNodeMap attrs = typeNode.attributes();
+            typeNode = attrs.namedItem("value");
+            if (typeNode.isAttr()) {
+                QString typeName = typeNode.toAttr().value();
+                if (typeName != "Android SDK") {
+                    continue;
+                }
+            } else {
+                continue;
+            }
+        }
+
+        // Then check if this is in fact the correct API level of Android for this AVD
+        QDomNode nameNode = jdkNode.firstChildElement("name");
+        if (nameNode.isNull()) {
+            continue;
+        } else {
+            QDomNamedNodeMap attrs = nameNode.attributes();
+            nameNode = attrs.namedItem("value");
+            if (nameNode.isAttr()) {
+                QString jdkName = nameNode.toAttr().value();
+                if (!jdkName.contains(QString::number(apiLevel))) {
+                    continue;
+                }
+            } else {
+                continue;
+            }
+        }
+
+        // If we've gotten here, then this is the correct Android SDK, so get the root path
+        QDomNode homePathNode = jdkNode.firstChildElement("homePath");
+        if (homePathNode.isNull()) {
+            continue;
+        } else {
+            QDomNamedNodeMap attrs = homePathNode.attributes();
+            homePathNode = attrs.namedItem("value");
+            if (homePathNode.isAttr()) {
+                mStudioSdkPath = homePathNode.toAttr().value();
+                break;
+            } else {
+                continue;
+            }
+        }
+    }
+
+    mStudioSdkPath = mStudioSdkPath.replace(QString("$USER_HOME$"), QDir::homePath());
 }
 
 QString ToolWindow::getAdbFullPath(QStringList *args)
