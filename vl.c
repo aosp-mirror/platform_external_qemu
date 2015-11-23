@@ -172,6 +172,7 @@ static void boot_property_add(const char* name, const char* value) {
 #define  LCD_DENSITY_XHDPI     320
 #define  LCD_DENSITY_360DPI    360
 #define  LCD_DENSITY_400DPI    400
+#define  LCD_DENSITY_420DPI    420
 #define  LCD_DENSITY_XXHDPI    480
 #define  LCD_DENSITY_560DPI    560
 #define  LCD_DENSITY_XXXHDPI   640
@@ -4019,13 +4020,14 @@ int run_qemu_main(int argc, const char **argv)
                     case LCD_DENSITY_XHDPI:
                     case LCD_DENSITY_360DPI:
                     case LCD_DENSITY_400DPI:
+                    case LCD_DENSITY_420DPI:
                     case LCD_DENSITY_XXHDPI:
                     case LCD_DENSITY_560DPI:
                     case LCD_DENSITY_XXXHDPI:
                         break;
                     default:
                         fprintf(stderr, "qemu: available lcd densities are: "
-                                "120, 160, 213, 240, 280, 320, 360, 400, 480, 560, 640\n");
+                                "120, 160, 213, 240, 280, 320, 360, 400, 420, 480, 560, 640\n");
                         exit(1);
                 }
                 break;
