@@ -262,7 +262,7 @@ static void rcSetWindowColorBuffer(uint32_t windowSurface,
 
 static EGLint rcMakeCurrent(uint32_t context,
                             uint32_t drawSurf, uint32_t readSurf)
-{
+{fprintf(stderr, "IIII rcMakeCurrent %x\n", context);
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return EGL_FALSE;
@@ -342,6 +342,36 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
     return 0;
 }
 
+static uint32_t rcCreateImage(uint32_t context, uint32_t texture)
+{fprintf(stderr, "AAAA rcCreateImage %x %x\n", context, texture);
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return 0;
+    }
+/*
+RenderContextPtr ctx(NULL);
+
+    if (context) {
+        RenderContextMap::iterator r( m_contexts.find(context) );
+        if (r == m_contexts.end()) {
+            // bad context handle
+            return false;
+        }
+
+        ctx = (*r).second;
+    }
+
+EGLContext eglContext = ctx ? ctx->getEGLContext() : EGL_NO_CONTEXT;
+fprintf(stderr, "AAAA rcCreateImage ctx %x\n", eglContext);
+
+    EGLImageKHR image = s_egl.eglCreateImageKHR(fb->getDisplay(), eglContext, EGL_GL_TEXTURE_2D_KHR, (EGLClientBuffer)texture, NULL);
+
+	return (uint32_t)reinterpret_cast<uintptr_t>(image);
+*/
+
+    return fb->createImage(context, texture);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -370,4 +400,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcReadColorBuffer = rcReadColorBuffer;
     dec->rcUpdateColorBuffer = rcUpdateColorBuffer;
     dec->rcOpenColorBuffer2 = rcOpenColorBuffer2;
+    dec->rcCreateImage = rcCreateImage;
 }

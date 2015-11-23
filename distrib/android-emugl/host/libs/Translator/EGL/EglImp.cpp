@@ -694,7 +694,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroyContext(EGLDisplay display, EGLContext c
 EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
                                              EGLSurface draw,
                                              EGLSurface read,
-                                             EGLContext context) {
+                                             EGLContext context) {fprintf(stderr, "IIII eglMakeCurrent %p %p %p %p\n", display, draw, read, context);
     VALIDATE_DISPLAY(display);
 
     bool releaseContext = EglValidate::releaseContext(context, read, draw);
@@ -936,7 +936,7 @@ void detachEGLImage(unsigned int imageId)
 
 
 EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext context, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list)
-{
+{fprintf(stderr, "QQQQ eglCreateImageKHR %p %p %x %p %p\n", display, context, target, buffer, attrib_list);
     VALIDATE_DISPLAY(display);
     VALIDATE_CONTEXT(context);
 
@@ -948,26 +948,30 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
     ThreadInfo* thread  = getThreadInfo();
     ShareGroupPtr sg = thread->shareGroup;
     if (sg.Ptr() != NULL) {
+fprintf(stderr, "QQQQ eglCreateImageKHR 2\n");
         unsigned int globalTexName = sg->getGlobalName(TEXTURE, SafeUIntFromPointer(buffer));
         if (!globalTexName) return EGL_NO_IMAGE_KHR;
-
+fprintf(stderr, "QQQQ eglCreateImageKHR 3\n");
         ImagePtr img( new EglImage() );
         if (img.Ptr() != NULL) {
-
+fprintf(stderr, "QQQQ eglCreateImageKHR 4\n");
             ObjectDataPtr objData = sg->getObjectData(TEXTURE, SafeUIntFromPointer(buffer));
             if (!objData.Ptr()) return EGL_NO_IMAGE_KHR;
-
+fprintf(stderr, "QQQQ eglCreateImageKHR 5\n");
             TextureData *texData = (TextureData *)objData.Ptr();
             if(!texData->width || !texData->height) return EGL_NO_IMAGE_KHR;
+fprintf(stderr, "QQQQ eglCreateImageKHR 6\n");
             img->width = texData->width;
             img->height = texData->height;
             img->border = texData->border;
             img->internalFormat = texData->internalFormat;
             img->globalTexName = globalTexName;
-            return dpy->addImageKHR(img);
+            EGLImageKHR image = dpy->addImageKHR(img);
+fprintf(stderr, "QQQQ eglCreateImageKHR image %p\n", image);
+            return image;
         }
     }
-
+fprintf(stderr, "QQQQ eglCreateImageKHR 7\n");
     return EGL_NO_IMAGE_KHR;
 }
 
