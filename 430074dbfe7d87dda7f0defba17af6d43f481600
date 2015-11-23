@@ -16,6 +16,23 @@
       "revId": "430074dbfe7d87dda7f0defba17af6d43f481600",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbb05f0b_db7df3ff",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-23T18:32:16Z",
+      "side": 1,
+      "message": "What happens if we get homePath but not API level? Should this check isCorrect outside the loop?\n\nAlso, if we see homePath and then API level, should we \u0027goto FOUND_SDK\u0027 when we see the API level?",
+      "revId": "430074dbfe7d87dda7f0defba17af6d43f481600",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
