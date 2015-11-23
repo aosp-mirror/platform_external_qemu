@@ -19,6 +19,52 @@
     },
     {
       "key": {
+        "uuid": "fbf69f9c_3fee4f73",
+        "filename": "android/skin/qt/angle-input-widget.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-23T17:09:05Z",
+      "side": 1,
+      "message": "Hmm, isn\u0027t it too unsafe for a public function?",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 51
+      },
+      "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b1b2bb8_7a23c199",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-23T17:09:05Z",
+      "side": 1,
+      "message": "what\u0027s not very nice here is that we\u0027re loading data from the file in main thread - which means user may notice a \u0027hiccup\u0027 in responsiveness",
+      "range": {
+        "startLine": 239,
+        "startChar": 45,
+        "endLine": 239,
+        "endChar": 65
+      },
+      "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b153384_8d276992",
         "filename": "android/skin/qt/ext-location.cpp",
         "patchSetId": 1
@@ -36,6 +82,24 @@
     },
     {
       "key": {
+        "uuid": "bb2a67bd_72e2ce56",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-23T17:09:05Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "1b153384_8d276992",
+      "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b153384_ed241d8f",
         "filename": "android/skin/qt/ext-location.cpp",
         "patchSetId": 1
@@ -47,6 +111,24 @@
       "writtenOn": "2015-11-23T15:45:52Z",
       "side": 1,
       "message": "Would isEmpty( ) be safer?",
+      "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbf69f9c_1ff3935d",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-23T17:09:05Z",
+      "side": 1,
+      "message": "Qt docs:\n\u003e\u003e If the user presses Cancel, it returns a null string.",
+      "parentUuid": "1b153384_ed241d8f",
       "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
