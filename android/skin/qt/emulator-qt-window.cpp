@@ -137,6 +137,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent *event)
         queueEvent(createSkinEvent(kEventQuit));
         event->ignore();
     } else {
+        tool_window->close();
         event->accept();
     }
 }
