@@ -31,6 +31,8 @@
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/tool-window.h"
 
+#include <libxml/parser.h>
+
 #include "ui_tools.h"
 
 using namespace android::base;
@@ -42,7 +44,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     emulator_window(window),
     extendedWindow(NULL),
     uiEmuAgent(NULL),
-    toolsUi(new Ui::ToolControls)
+    toolsUi(new Ui::ToolControls),
+    mStudioSdkPath()
 {
     Q_INIT_RESOURCE(resources);
 
@@ -128,6 +131,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     mShortcutKeyStore.add(
             QKeySequence(Qt::Key_Alt | Qt::AltModifier | Qt::ControlModifier),
             QtUICommand::UNGRAB_KEYBOARD);
+
+    initAndroidStudioSdkPath();
 }
 
 void ToolWindow::hide()
@@ -171,6 +176,109 @@ QString ToolWindow::getAndroidSdkRoot()
         return QString::null;
     }
     return QString::fromUtf8(sdkRoot.get());
+}
+
+QString ToolWindow::getAndroidStudioSdkPath()
+{
+    return mStudioSdkPath;
+}
+
+void ToolWindow::initAndroidStudioSdkPath()
+{
+    QDir configDir;
+
+    QStringList entryFilter;
+    entryFilter << ".AndroidStudio?.?";
+    configDir = QDir::home();
+
+#ifdef __linux__
+
+    QStringList studioDirs = configDir.entryList(entryFilter, QDir::Dirs |
+                                                              QDir::Hidden |
+                                                              QDir::Readable |
+                                                              QDir::Executable |
+                                                              QDir::NoDotAndDotDot);
+    if (studioDirs.isEmpty()) return;
+
+    // Go with the latest version
+    if (!configDir.cd(studioDirs.last())) return;
+    if (!configDir.cd("config/options")) return;
+
+#elif __APPLE__
+
+    if (!configDir.cd("Library/Preferences")) return;
+
+    QStringList studioDirs = configDir.entryList(entryFilter, QDir::Dirs |
+                                                              QDir::Hidden |
+                                                              QDir::Readable |
+                                                              QDir::Executable |
+                                                              QDir::NoDotAndDotDot);
+    if (studioDirs.isEmpty()) return;
+
+    // Go with the latest version
+    if (!configDir.cd(studioDirs.last())) return;
+    if (!configDir.cd("options")) return;
+
+#elif _WIN32
+
+    // TODO: add the necessary pathing information
+
+#endif
+
+    // At this point, configDir should contain a file called jdk.table.xml. We need to open this
+    // file and find the correct JDK for this emulator.
+    QString filePath = QFileInfo(configDir, "jdk.table.xml").absoluteFilePath();
+    xmlDocPtr doc = xmlReadFile(filePath.toStdString().data(), NULL, 0);
+    if (doc == NULL) {
+        xmlFreeDoc(doc);
+        xmlCleanupParser();
+        return;
+    }
+
+    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
+    QString sdkPath = "";
+
+    xmlNode *root = xmlDocGetRootElement(doc);
+    for (xmlNode *component = root->children; component; component = component->next) {
+        for (xmlNode *jdk = component->children; jdk; jdk = jdk->next) {
+            bool isCorrect = false;
+            for (xmlNode *path = jdk->children; path; path = path->next) {
+
+                // If we find the right API level, stop looking
+                if (!strcmp((const char *) path->name, "name")) {
+                    xmlAttrPtr attr;
+                    xmlChar *tmpStr;
+                    attr = xmlHasProp(path, (const xmlChar *) "value");
+                    if (attr != NULL) {
+                        tmpStr = xmlGetProp(path, (const xmlChar *) "value");
+                        QString apiString((const char *) tmpStr);
+                        xmlFree(tmpStr); // Caller-freed
+
+                        if (apiString.contains(QString::number(apiLevel))) {
+                            isCorrect = true;
+                        }
+                    }
+                }
+
+                // Find the homePath fr the SDK location
+                if (!strcmp((const char *) path->name, "homePath")) {
+
+                    xmlAttrPtr attr;
+                    xmlChar *tmpStr;
+                    attr = xmlHasProp(path, (const xmlChar *) "value");
+                    if (attr != NULL) {
+                        tmpStr = xmlGetProp(path, (const xmlChar *) "value");
+                        sdkPath = QString((const char *) tmpStr);
+                        xmlFree(tmpStr); // Caller-freed
+                        if (isCorrect) goto FOUND_SDK;
+                    }
+                }
+            }
+        }
+    }
+
+FOUND_SDK:
+    mStudioSdkPath = sdkPath.replace(QString("$USER_HOME$"), QDir::homePath());
 }
 
 QString ToolWindow::getAdbFullPath(QStringList *args)
