@@ -348,15 +348,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         uiEmuAgent->userEvents->sendKey(kKeyCodeMenu, down);
         break;
     case QtUICommand::HOME:
-        if ( !strcmp("Generic", android_hw->hw_keyboard_charmap) ) {
-            // The 'Generic' keyboard moved the HOME key! 'Generic' has HOME
-            // on we call HOMEPAGE. Beause 'Generic' is in use, send HOMEPAGE.
-            uiEmuAgent->userEvents->sendKey(kKeyCodeHomePage, down);
-        } else {
-            // Not 'Generic'. Assume 'qwerty' (or 'qwerty2') and
-            // send HOME.
-            uiEmuAgent->userEvents->sendKey(kKeyCodeHome, down);
-        }
+        uiEmuAgent->userEvents->sendKey(kKeyCodeHome, down);
         break;
     case QtUICommand::BACK:
         uiEmuAgent->userEvents->sendKey(kKeyCodeBack, down);
