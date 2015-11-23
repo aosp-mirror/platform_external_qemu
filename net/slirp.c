@@ -37,7 +37,7 @@
 #include "slirp/libslirp.h"
 #include "sysemu/char.h"
 
-#if defined(CONFIG_ANDROID)
+#if defined(USE_ANDROID_EMU)
 #include "android-qemu2-glue/net-android.h"
 #endif
 
@@ -271,7 +271,7 @@ static int net_slirp_init(NetClientState *peer, const char *model,
     }
 #endif
 
-#if defined(CONFIG_ANDROID)
+#if defined(USE_ANDROID_EMU)
     slirp_init_shapers(s, s->slirp);
 #endif
 
