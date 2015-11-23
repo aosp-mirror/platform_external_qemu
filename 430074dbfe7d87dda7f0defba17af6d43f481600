@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fb0f7f76_23900a74",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-23T18:17:39Z",
+      "side": 1,
+      "message": "I\u0027m more than happy to finish this when I get back, but if someone else doesn\u0027t have any other urgent tasks on their plate, the information is all here: http://tools.android.com/tech-docs/configuration",
+      "revId": "430074dbfe7d87dda7f0defba17af6d43f481600",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
