@@ -165,6 +165,30 @@
       "revId": "4fb0e5f1288bed571ee926734bc8b79a8ccfa85f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b1b2bb8_5be7e764",
+        "filename": "android/hw-pipe-net.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-23T23:59:30Z",
+      "side": 1,
+      "message": "Yeah, I wasn\u0027t clear enough. I saw your change from EAGAIN to EINTR and thought that Bo just commented that Windows needs EAGAIN here\n:)",
+      "parentUuid": "5b1b2bb8_db7d974a",
+      "range": {
+        "startLine": 269,
+        "startChar": 25,
+        "endLine": 269,
+        "endChar": 39
+      },
+      "revId": "4fb0e5f1288bed571ee926734bc8b79a8ccfa85f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
