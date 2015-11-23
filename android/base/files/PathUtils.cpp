@@ -11,6 +11,8 @@
 
 #include "android/base/files/PathUtils.h"
 
+#include "android/base/system/System.h"
+
 #include <string.h>
 
 namespace android {
@@ -26,6 +28,15 @@ bool PathUtils::isDirSeparator(int ch, HostType hostType) {
 bool PathUtils::isPathSeparator(int ch, HostType hostType) {
     return (hostType == HOST_POSIX && ch == ':') ||
             (hostType == HOST_WIN32 && ch == ';');
+}
+
+// static
+char PathUtils::getDirSeparator(HostType hostType) {
+    switch (hostType) {
+        case HOST_POSIX: return '/';
+        case HOST_WIN32: return '\\';
+        default: return '?';
+    }
 }
 
 // static
@@ -91,6 +102,76 @@ String PathUtils::addTrailingDirSeparator(const String& path,
     if (result.size() > 0 && !isDirSeparator(result[result.size() - 1U])) {
         result += (hostType == HOST_WIN32) ? '\\' : '/';
     }
+    return result;
+}
+
+// static
+bool PathUtils::split(const char* path,
+                      HostType hostType,
+                      String* dirName,
+                      String* baseName) {
+    if (!path || !path[0]) {
+        return false;
+    }
+
+    // If there is a trailing directory separator, return an error.
+    size_t end = ::strlen(path);
+    if (isDirSeparator(path[end - 1U], hostType)) {
+        return false;
+    }
+
+    // Find last separator.
+    size_t prefixLen = rootPrefixSize(path, hostType);
+    size_t pos = end;
+    while (pos > prefixLen && !isDirSeparator(path[pos - 1U], hostType)) {
+        pos--;
+    }
+
+    // Handle common case.
+    if (pos > prefixLen) {
+        if (dirName) {
+            dirName->assign(path, pos);
+        }
+        if (baseName) {
+            baseName->assign(path + pos, end - pos);
+        }
+        return true;
+    }
+
+    // If there is no directory separator, the path is a single file name.
+    if (dirName) {
+        if (!prefixLen) {
+            dirName->assign(".");
+        } else {
+            dirName->assign(path, prefixLen);
+        }
+    }
+    if (baseName) {
+        baseName->assign(path + prefixLen, end - prefixLen);
+    }
+    return true;
+}
+
+// static
+String PathUtils::join(const char* path1,
+                       const char* path2,
+                       HostType hostType) {
+    if (!path1 || !path1[0]) {
+        return String(path2 ? path2 : "");
+    }
+    if (!path2 || !path2[0]) {
+        return String(path1 ? path1 : "");
+    }
+    if (isAbsolute(path2, hostType)) {
+        return String(path2);
+    }
+    size_t prefixLen = rootPrefixSize(path1, hostType);
+    String result(path1);
+    size_t end = result.size();
+    if (end > prefixLen && !isDirSeparator(result[end - 1U], hostType)) {
+        result += getDirSeparator(hostType);
+    }
+    result += path2;
     return result;
 }
 
