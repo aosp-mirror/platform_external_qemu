@@ -29,29 +29,29 @@ TEST(rect, skin_pos_rotate) {
         { { 0, 0 }, { 0, 0 }, SKIN_ROTATION_270 },
 
         { { 100, 0 }, { 100, 0 }, SKIN_ROTATION_0 },
-        { { 0, 100 }, { 100, 0 }, SKIN_ROTATION_90 },
+        { { 0, -100 }, { 100, 0 }, SKIN_ROTATION_90 },
         { { -100, 0 }, { 100, 0 }, SKIN_ROTATION_180 },
-        { { 0, -100 }, { 100, 0 }, SKIN_ROTATION_270 },
+        { { 0, 100 }, { 100, 0 }, SKIN_ROTATION_270 },
 
         { { 0, 100 }, { 0, 100 }, SKIN_ROTATION_0 },
-        { { -100, 0 }, { 0, 100 }, SKIN_ROTATION_90 },
+        { { 100, 0 }, { 0, 100 }, SKIN_ROTATION_90 },
         { { 0, -100 }, { 0, 100 }, SKIN_ROTATION_180 },
-        { { 100, 0 }, { 0, 100 }, SKIN_ROTATION_270 },
+        { { -100, 0 }, { 0, 100 }, SKIN_ROTATION_270 },
 
         { { -100, 0 }, { -100, 0 }, SKIN_ROTATION_0 },
-        { { 0, -100 }, { -100, 0 }, SKIN_ROTATION_90 },
+        { { 0, 100 }, { -100, 0 }, SKIN_ROTATION_90 },
         { { 100, 0 }, { -100, 0 }, SKIN_ROTATION_180 },
-        { { 0, 100 }, { -100, 0 }, SKIN_ROTATION_270 },
+        { { 0, -100 }, { -100, 0 }, SKIN_ROTATION_270 },
 
         { { 0, -100 }, { 0, -100 }, SKIN_ROTATION_0 },
-        { { 100, 0 }, { 0, -100 }, SKIN_ROTATION_90 },
+        { { -100, 0 }, { 0, -100 }, SKIN_ROTATION_90 },
         { { 0, 100 }, { 0, -100 }, SKIN_ROTATION_180 },
-        { { -100, 0 }, { 0, -100 }, SKIN_ROTATION_270 },
+        { { 100, 0 }, { 0, -100 }, SKIN_ROTATION_270 },
 
         { { 100, 200 }, { 100, 200 }, SKIN_ROTATION_0 },
-        { { -200, 100 }, { 100, 200 }, SKIN_ROTATION_90 },
+        { { 200, -100 }, { 100, 200 }, SKIN_ROTATION_90 },
         { { -100, -200 }, { 100, 200 }, SKIN_ROTATION_180 },
-        { { 200, -100 }, { 100, 200 }, SKIN_ROTATION_270 },
+        { { -200, 100 }, { 100, 200 }, SKIN_ROTATION_270 },
     };
     const size_t kDataLen = ARRAYLEN(kData);
     for (size_t n = 0; n < kDataLen; ++n) {
