@@ -293,6 +293,8 @@ public:
     // and windows created by this instance.
     TextureDraw* getTextureDraw() const { return m_textureDraw; }
 
+    HandleType createImage(HandleType context, uint32_t texture);
+
     // Used internally.
     bool bind_locked();
     bool unbind_locked();

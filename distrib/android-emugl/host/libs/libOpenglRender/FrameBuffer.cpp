@@ -953,6 +953,26 @@ bool FrameBuffer::bindContext(HandleType p_context,
     return true;
 }
 
+HandleType FrameBuffer::createImage(HandleType context, uint32_t texture)
+{
+    RenderContextPtr ctx(NULL);
+
+    if (context) {
+        RenderContextMap::iterator r( m_contexts.find(context) );
+        if (r == m_contexts.end()) {
+            // bad context handle
+            return false;
+        }
+
+        ctx = (*r).second;
+    }
+
+    EGLContext eglContext = ctx ? ctx->getEGLContext() : EGL_NO_CONTEXT;
+    EGLImageKHR image = s_egl.eglCreateImageKHR(m_eglDisplay, eglContext, EGL_GL_TEXTURE_2D_KHR, (EGLClientBuffer)texture, NULL);
+
+    return (HandleType)reinterpret_cast<uintptr_t>(image);
+}
+
 //
 // The framebuffer lock should be held when calling this function !
 //

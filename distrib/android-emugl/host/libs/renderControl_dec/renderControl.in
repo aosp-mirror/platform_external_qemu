@@ -24,3 +24,4 @@ GL_ENTRY(EGLint, rcColorBufferCacheFlush, uint32_t colorbuffer, EGLint postCount
 GL_ENTRY(void, rcReadColorBuffer, uint32_t colorbuffer, GLint x, GLint y, GLint width, GLint height, GLenum format, GLenum type, void *pixels)
 GL_ENTRY(int, rcUpdateColorBuffer, uint32_t colorbuffer, GLint x, GLint y, GLint width, GLint height, GLenum format, GLenum type, void *pixels)
 GL_ENTRY(int, rcOpenColorBuffer2, uint32_t colorbuffer)
+GL_ENTRY(uint32_t, rcCreateImage, uint32_t context, GLuint texture)
