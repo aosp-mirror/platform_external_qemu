@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9bd6830b_004146e7",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-23T20:46:16Z",
+      "side": 1,
+      "message": "Yep - these apply to a single \u003cjdk\u003e element and it\u0027s sub-elements, so they need to be re-initialized for each jdk.",
+      "parentUuid": "9b2123e5_5dad17aa",
+      "revId": "d9e28e5f4e0bfdaf41fb1328132d3709f1de396e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b1b2bb8_35903a74",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-23T20:41:06Z",
       "side": 1,
       "message": "Do you want to move this up one line, to break out of\nall 3 loops?",
+      "revId": "d9e28e5f4e0bfdaf41fb1328132d3709f1de396e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7bd9cf3d_7fc0ef9f",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-23T20:46:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5b1b2bb8_35903a74",
       "revId": "d9e28e5f4e0bfdaf41fb1328132d3709f1de396e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
