@@ -55,6 +55,11 @@ public:
         return isPathSeparator(ch, HOST_TYPE);
     }
 
+    // Return the directory separator character for a given |hostType|
+    static inline char getDirSeparator(HostType hostType) {
+        return (hostType == HOST_WIN32) ? '\\' : '/';
+    }
+
     // Remove trailing separators from a |path| string, for a given |hostType|.
     static String removeTrailingDirSeparator(const String& path,
                                              HostType hostType);
@@ -95,6 +100,45 @@ public:
     // Return true iff |path| is an absolute path for the current host.
     static inline bool isAbsolute(const char* path) {
         return isAbsolute(path, HOST_TYPE);
+    }
+
+    // Split |path| into a directory name and a file name. |dirName| and
+    // |baseName| are optional pointers to strings that will receive the
+    // corresponding components on success. |hostType| is a host type.
+    // Return true on success, or false on failure.
+    // Note that unlike the Unix 'basename' command, the command will fail
+    // if |path| ends with directory separator or is a single root prefix.
+    // Windows root prefixes are fully supported, which means the following:
+    //
+    //     /            -> error.
+    //     /foo         -> '/' + 'foo'
+    //     foo          -> '.' + 'foo'
+    //     <drive>:     -> error.
+    //     <drive>:foo  -> '<drive>:' + 'foo'
+    //     <drive>:\foo -> '<drive>:\' + 'foo'
+    //
+    static bool split(const char* path,
+                      HostType hostType,
+                      String* dirName,
+                      String* baseName);
+
+    // A variant of split() for the current process' host type.
+    static inline bool split(const char* path,
+                             String* dirName,
+                             String* baseName) {
+        return split(path, HOST_TYPE, dirName, baseName);
+    }
+
+    // Join two path components together. Note that if |path2| is an
+    // absolute path, this function returns a copy of |path2|, otherwise
+    // the result will be the concatenation of |path1| and |path2|, if
+    // |path1| doesn't end with a directory separator, a |hostType| specific
+    // one will be inserted between the two paths in the result.
+    static String join(const char* path1, const char* path2, HostType hostType);
+
+    // A variant of join() for the current process' host type.
+    static inline String join(const char* path1, const char* path2) {
+        return join(path1, path2, HOST_TYPE);
     }
 
     // Decompose |path| into individual components. If |path| has a root
