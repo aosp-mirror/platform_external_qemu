@@ -242,6 +242,8 @@ OPTION_UI=
 OPTION_GLES=
 OPTION_SDK_REV=
 OPTION_SYMBOLS=no
+ANDROID_SDK_TOOLS_REVISION=
+ANDROID_SDK_TOOLS_BUILDNUMBER=
 
 GLES_SUPPORT=no
 
@@ -321,6 +323,8 @@ for opt do
   --gles=*) echo "Unknown --gles value, try one of: dgl angle"
   ;;
   --sdk-revision=*) ANDROID_SDK_TOOLS_REVISION=$optarg
+  ;;
+  --sdk-buildnumber=*) ANDROID_SDK_TOOLS_BUILDNUMBER=$optarg
   ;;
   *)
     echo "unknown option '$opt', use --help"
@@ -743,9 +747,12 @@ if [ "$OPTION_SYMBOLS" = "yes" ]; then
     echo "EMULATOR_GENERATE_SYMBOLS := true" >> $config_mk
 fi
 
-ANDROID_SDK_TOOLS_REVSION=
 if [ "$ANDROID_SDK_TOOLS_REVISION" ] ; then
   echo "ANDROID_SDK_TOOLS_REVISION := $ANDROID_SDK_TOOLS_REVISION" >> $config_mk
+fi
+
+if [ "$ANDROID_SDK_TOOLS_BUILDNUMBER" ] ; then
+  echo "ANDROID_SDK_TOOLS_BUILDNUMBER := $ANDROID_SDK_TOOLS_BUILDNUMBER" >> $config_mk
 fi
 
 if [ "$config_mk" = "yes" ] ; then
