@@ -262,7 +262,7 @@ static void rcSetWindowColorBuffer(uint32_t windowSurface,
 
 static EGLint rcMakeCurrent(uint32_t context,
                             uint32_t drawSurf, uint32_t readSurf)
-{
+{fprintf(stderr, "IIII rcMakeCurrent %x\n", context);
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return EGL_FALSE;
@@ -342,6 +342,16 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
     return 0;
 }
 
+static uint32_t rcCreateImage(uint32_t context, uint32_t texture)
+{
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return 0;
+    }
+
+    return fb->createImage(context, texture);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -370,4 +380,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcReadColorBuffer = rcReadColorBuffer;
     dec->rcUpdateColorBuffer = rcUpdateColorBuffer;
     dec->rcOpenColorBuffer2 = rcOpenColorBuffer2;
+    dec->rcCreateImage = rcCreateImage;
 }

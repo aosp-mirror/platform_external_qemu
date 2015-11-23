@@ -950,13 +950,10 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
     if (sg.Ptr() != NULL) {
         unsigned int globalTexName = sg->getGlobalName(TEXTURE, SafeUIntFromPointer(buffer));
         if (!globalTexName) return EGL_NO_IMAGE_KHR;
-
         ImagePtr img( new EglImage() );
         if (img.Ptr() != NULL) {
-
             ObjectDataPtr objData = sg->getObjectData(TEXTURE, SafeUIntFromPointer(buffer));
             if (!objData.Ptr()) return EGL_NO_IMAGE_KHR;
-
             TextureData *texData = (TextureData *)objData.Ptr();
             if(!texData->width || !texData->height) return EGL_NO_IMAGE_KHR;
             img->width = texData->width;
