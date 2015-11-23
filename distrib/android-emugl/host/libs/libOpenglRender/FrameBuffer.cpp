@@ -967,11 +967,9 @@ RenderContextPtr ctx(NULL);
         ctx = (*r).second;
     }
 
-EGLContext eglContext = ctx ? ctx->getEGLContext() : EGL_NO_CONTEXT;
-fprintf(stderr, "BBBB FrameBuffer::createImage eglContext %x\n", eglContext);
-
+    EGLContext eglContext = ctx ? ctx->getEGLContext() : EGL_NO_CONTEXT;
 	EGLImageKHR image = s_egl.eglCreateImageKHR(m_eglDisplay, eglContext, EGL_GL_TEXTURE_2D_KHR, (EGLClientBuffer)texture, NULL);
-fprintf(stderr, "BBBB FrameBuffer::createImage image %p\n", image);
+fprintf(stderr, "BBBB FrameBuffer::createImage eglContext %x image %p\n", eglContext, image);
 	return (HandleType)reinterpret_cast<uintptr_t>(image);
 }
 

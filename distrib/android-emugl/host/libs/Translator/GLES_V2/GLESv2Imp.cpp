@@ -1932,21 +1932,29 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
 GL_APICALL void  GL_APIENTRY glTexParameterf(GLenum target, GLenum pname, GLfloat param){
     GET_CTX();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(target) && GLESv2Validate::textureParams(pname)),GL_INVALID_ENUM);
+if(pname == GL_TEXTURE_MAG_FILTER) param = GL_NEAREST;
+if(pname == GL_TEXTURE_MIN_FILTER) param = GL_NEAREST;
     ctx->dispatcher().glTexParameterf(target,pname,param);
 }
 GL_APICALL void  GL_APIENTRY glTexParameterfv(GLenum target, GLenum pname, const GLfloat* params){
     GET_CTX();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(target) && GLESv2Validate::textureParams(pname)),GL_INVALID_ENUM);
+//if(pname == GL_TEXTURE_MAG_FILTER) *params = GL_NEAREST;
+//if(pname == GL_TEXTURE_MIN_FILTER) *params = GL_NEAREST;
     ctx->dispatcher().glTexParameterfv(target,pname,params);
 }
 GL_APICALL void  GL_APIENTRY glTexParameteri(GLenum target, GLenum pname, GLint param){
     GET_CTX();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(target) && GLESv2Validate::textureParams(pname)),GL_INVALID_ENUM);
+if(pname == GL_TEXTURE_MAG_FILTER) param = GL_NEAREST;
+if(pname == GL_TEXTURE_MIN_FILTER) param = GL_NEAREST;
     ctx->dispatcher().glTexParameteri(target,pname,param);
 }
 GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const GLint* params){
     GET_CTX();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(target) && GLESv2Validate::textureParams(pname)),GL_INVALID_ENUM);
+//if(pname == GL_TEXTURE_MAG_FILTER) *params = GL_NEAREST;
+//if(pname == GL_TEXTURE_MIN_FILTER) *params = GL_NEAREST;
     ctx->dispatcher().glTexParameteriv(target,pname,params);
 }
 
@@ -2171,17 +2179,19 @@ GL_APICALL void  GL_APIENTRY glViewport(GLint x, GLint y, GLsizei width, GLsizei
 }
 
 GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
-{
+{fprintf(stderr, "glEGLImageTargetTexture2DOES imp %x\n", (uint32_t)reinterpret_cast<uintptr_t>(image));
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::textureTargetLimited(target),GL_INVALID_ENUM);
-    unsigned int imagehndl = SafeUIntFromPointer(image);
+    unsigned int imagehndl = SafeUIntFromPointer(image) & ~0x12300000;
     EglImage *img = s_eglIface->eglAttachEGLImage(imagehndl);
+fprintf(stderr, "glEGLImageTargetTexture2DOES img %p\n", img);
     if (img) {
         // Create the texture object in the underlying EGL implementation,
         // flag to the OpenGL layer to skip the image creation and map the
         // current binded texture object to the existing global object.
         if (ctx->shareGroup().Ptr()) {
             ObjectLocalName tex = TextureLocalName(target,ctx->getBindedTexture(target));
+fprintf(stderr, "glEGLImageTargetTexture2DOES tex %d\n", tex);
             unsigned int oldGlobal = ctx->shareGroup()->getGlobalName(TEXTURE, tex);
             // Delete old texture object but only if it is not a target of a EGLImage
             if (oldGlobal) {

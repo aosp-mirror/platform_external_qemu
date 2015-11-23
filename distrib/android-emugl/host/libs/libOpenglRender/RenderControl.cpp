@@ -262,7 +262,7 @@ static void rcSetWindowColorBuffer(uint32_t windowSurface,
 
 static EGLint rcMakeCurrent(uint32_t context,
                             uint32_t drawSurf, uint32_t readSurf)
-{fprintf(stderr, "IIII rcMakeCurrent %x\n", context);
+{//fprintf(stderr, "IIII rcMakeCurrent %x\n", context);
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return EGL_FALSE;
@@ -343,7 +343,7 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
 }
 
 static uint32_t rcCreateImage(uint32_t context, uint32_t texture)
-{fprintf(stderr, "AAAA rcCreateImage %x %x\n", context, texture);
+{//fprintf(stderr, "AAAA rcCreateImage %x %x\n", context, texture);
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
