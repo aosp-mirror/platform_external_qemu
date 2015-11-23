@@ -28,8 +28,13 @@
 
 #include "android/emulation/android_pipe.h"
 
+// Sockets includes
 #ifdef _WIN32
 #include <winsock2.h>
+#else
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #endif
 
 #include <stdlib.h>
@@ -252,6 +257,102 @@ static int netPipeReadySend(NetPipe *pipe)
         return PIPE_ERROR_IO;
 }
 
+#ifdef _WIN32
+int qemu2_send_all(int fd, const void *buf, int len1)
+{
+    int ret, len;
+
+    len = len1;
+    while (len > 0) {
+        ret = send(fd, buf, len, 0);
+        if (ret < 0) {
+            errno = WSAGetLastError();
+            if (errno != WSAEWOULDBLOCK) {
+                return -1;
+            }
+        } else if (ret == 0) {
+            break;
+        } else {
+            buf += ret;
+            len -= ret;
+        }
+    }
+    return len1 - len;
+}
+
+int qemu2_recv_all(int fd, void *_buf, int len1, bool single_read)
+{
+    int ret, len;
+    char *buf = _buf;
+
+    len = len1;
+    while (len > 0) {
+        ret = recv(fd, buf, len, 0);
+        if (ret < 0) {
+            errno = WSAGetLastError();
+            if (errno != WSAEWOULDBLOCK) {
+                return -1;
+            }
+            continue;
+        } else {
+            if (single_read) {
+                return ret;
+            }
+            buf += ret;
+            len -= ret;
+        }
+    }
+    return len1 - len;
+}
+
+#else
+
+int qemu2_send_all(int fd, const void *_buf, int len1)
+{
+    int ret, len;
+    const uint8_t *buf = _buf;
+
+    len = len1;
+    while (len > 0) {
+        ret = write(fd, buf, len);
+        if (ret < 0) {
+            if (errno != EINTR)
+                return -1;
+        } else if (ret == 0) {
+            break;
+        } else {
+            buf += ret;
+            len -= ret;
+        }
+    }
+    return len1 - len;
+}
+
+int qemu2_recv_all(int fd, void *_buf, int len1, bool single_read)
+{
+    int ret, len;
+    uint8_t *buf = _buf;
+
+    len = len1;
+    while ((len > 0) && (ret = recv(fd, buf, len, 0)) != 0) {
+        if (ret < 0) {
+            if (errno != EINTR) {
+                return -1;
+            }
+            continue;
+        } else {
+            if (single_read) {
+                return ret;
+            }
+            buf += ret;
+            len -= ret;
+        }
+    }
+    return len1 - len;
+}
+
+#endif
+
 static int
 netPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuffers )
 {
@@ -272,8 +373,7 @@ netPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuff
     buff = buffers;
     while (count > 0) {
         int  avail = buff->size - buffStart;
-        int  len = socket_send(
-                loopIo_fd(pipe->io), buff->data + buffStart, avail);
+        int  len = qemu2_send_all(loopIo_fd(pipe->io), buff->data + buffStart, avail);
 
         /* the write succeeded */
         if (len > 0) {
@@ -327,7 +427,7 @@ netPipe_recvBuffers( void* opaque, AndroidPipeBuffer*  buffers, int  numBuffers 
     buff = buffers;
     while (count > 0) {
         int  avail = buff->size - buffStart;
-        int  len = socket_recv(loopIo_fd(pipe->io), buff->data + buffStart, avail);
+        int  len = qemu2_recv_all(loopIo_fd(pipe->io), buff->data + buffStart, avail, true);
 
         /* the read succeeded */
         if (len > 0) {
@@ -517,10 +617,10 @@ openglesPipe_init( void* hwpipe, void* _looper, const char* args )
         // Disable TCP nagle algorithm to improve throughput of small packets
         socket_set_nodelay(loopIo_fd(pipe->io));
 
-    // On Win32, adjust buffer sizes
+    // Adjust buffer size to 2MB
 #ifdef _WIN32
         {
-            int sndbuf = 128 * 1024;
+            int sndbuf = 128 * 1024 * 16;
             int len = sizeof(sndbuf);
             if (setsockopt(loopIo_fd(pipe->io), SOL_SOCKET, SO_SNDBUF,
                         (char*)&sndbuf, len) == SOCKET_ERROR) {
@@ -528,7 +628,16 @@ openglesPipe_init( void* hwpipe, void* _looper, const char* args )
                 sndbuf, WSAGetLastError());
             }
         }
-#endif /* _WIN32 */
+#else
+        {
+            int sndbuf = 128 * 1024 * 16;
+            socklen_t len = sizeof(sndbuf);
+            if (setsockopt(loopIo_fd(pipe->io), SOL_SOCKET, SO_SNDBUF, &sndbuf, len) == -1) {
+                D("pipe: failed to set SO_SNDBUF to %d error=0x%x\n", sndbuf, errno);
+                exit(1);
+            }
+        }
+#endif /* !_WIN32 */
     }
 
     return pipe;
