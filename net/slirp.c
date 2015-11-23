@@ -37,6 +37,10 @@
 #include "slirp/libslirp.h"
 #include "sysemu/char.h"
 
+#if defined(CONFIG_ANDROID)
+#include "android-qemu2-glue/net-android.h"
+#endif
+
 static int get_str_sep(char *buf, int buf_size, const char **pp, int sep)
 {
     const char *p, *p1;
@@ -265,6 +269,10 @@ static int net_slirp_init(NetClientState *peer, const char *model,
         if (slirp_smb(s, smb_export, smbsrv) < 0)
             goto error;
     }
+#endif
+
+#if defined(CONFIG_ANDROID)
+    slirp_init_shapers(s, s->slirp);
 #endif
 
     return 0;

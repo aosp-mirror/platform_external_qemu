@@ -10,11 +10,10 @@
  ** GNU General Public License for more details.
  */
 
-#include "android-qemu1-glue/qemu-control-impl.h"
+#include "android-qemu2-glue/qemu-control-impl.h"
 
 #include "android/android.h"
 #include "android/emulation/control/cellular_agent.h"
-/*
 #include "android/shaper.h"
 #include "android/telephony/modem_driver.h"
 
@@ -106,6 +105,5 @@ static const QAndroidCellularAgent sQAndroidCellularAgent = {
     .setVoiceStatus = cellular_setVoiceStatus,
     .setDataStatus = cellular_setDataStatus,
     .setStandard = cellular_setStandard};
-    */
-const QAndroidCellularAgent* const gQAndroidCellularAgent = NULL;
-      //  &sQAndroidCellularAgent;
+const QAndroidCellularAgent* const gQAndroidCellularAgent =
+        &sQAndroidCellularAgent;
