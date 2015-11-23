@@ -65,3 +65,32 @@ char* path_get_absolute(const char* path) {
     return ASTRDUP(result.c_str());
 }
 
+int path_split(const char* path, char** dirname, char** basename) {
+    String dir, file;
+    if (!PathUtils::split(path, &dir, &file)) {
+        return -1;
+    }
+    if (dirname) {
+        *dirname = ASTRDUP(dir.c_str());
+    }
+    if (basename) {
+        *basename = ASTRDUP(file.c_str());
+    }
+    return 0;
+}
+
+char* path_dirname(const char* path) {
+    String dir;
+    if (!PathUtils::split(path, &dir, nullptr)) {
+        return nullptr;
+    }
+    return ASTRDUP(dir.c_str());
+}
+
+char* path_basename(const char* path) {
+    String file;
+    if (!PathUtils::split(path, nullptr, &file)) {
+        return nullptr;
+    }
+    return ASTRDUP(file.c_str());
+}
