@@ -141,6 +141,30 @@
       "revId": "4fb0e5f1288bed571ee926734bc8b79a8ccfa85f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b1b2bb8_db7d974a",
+        "filename": "android/hw-pipe-net.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-23T23:57:59Z",
+      "side": 1,
+      "message": "\"It\" referred to \"yes, spinning on EAGAIN\". I agree with Bo.",
+      "parentUuid": "1b153384_d3b57e0b",
+      "range": {
+        "startLine": 269,
+        "startChar": 25,
+        "endLine": 269,
+        "endChar": 39
+      },
+      "revId": "4fb0e5f1288bed571ee926734bc8b79a8ccfa85f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
