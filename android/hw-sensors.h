@@ -64,9 +64,9 @@ extern void  android_hw_sensor_enable( AndroidSensor  sensor );
 /* COARSE ORIENTATION VALUES */
 typedef enum {
     ANDROID_COARSE_PORTRAIT,            // 0 degrees
-    ANDROID_COARSE_LANDSCAPE,           // 90 degrees
+    ANDROID_COARSE_REVERSE_LANDSCAPE,   // 90 degrees
     ANDROID_COARSE_REVERSE_PORTRAIT,    // 180 degrees
-    ANDROID_COARSE_REVERSE_LANDSCAPE    // 270 degrees
+    ANDROID_COARSE_LANDSCAPE,           // 270 degrees
 } AndroidCoarseOrientation;
 
 /* change the coarse orientation value */

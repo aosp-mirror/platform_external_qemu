@@ -56,7 +56,8 @@ GLuint createShader(GLint shaderType, const char* shaderText) {
 }
 
 // No scaling / projection since we want to fill the whole viewport with
-// the texture, hence a trivial vertex shader that only supports rotation.
+// the texture, hence a trivial vertex shader that only supports clockwise
+// rotation.
 const char kVertexShaderSource[] =
     "attribute vec4 position;\n"
     "attribute vec2 inCoord;\n"
@@ -67,8 +68,8 @@ const char kVertexShaderSource[] =
     "void main(void) {\n"
     "  float cs = cos(rotation);\n"
     "  float sn = sin(rotation);\n"
-    "  gl_Position.x = position.x * cs - position.y * sn - translation.x;\n"
-    "  gl_Position.y = position.y * cs + position.x * sn - translation.y;\n"
+    "  gl_Position.x = position.x * cs + position.y * sn - translation.x;\n"
+    "  gl_Position.y = position.y * cs - position.x * sn - translation.y;\n"
     "  gl_Position.zw = position.zw;\n"
     "  outCoord = inCoord;\n"
     "}\n";
