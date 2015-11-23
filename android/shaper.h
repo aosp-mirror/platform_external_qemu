@@ -12,6 +12,10 @@
 #ifndef _SLIRP_SHAPER_H_
 #define _SLIRP_SHAPER_H_
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 #include <stddef.h>
 
 /* a NetShaper object is used to limit the throughput of data packets
@@ -47,5 +51,7 @@ void       netdelay_destroy( NetDelay  delay );
 extern NetShaper   slirp_shaper_in;
 extern NetShaper   slirp_shaper_out;
 extern NetDelay    slirp_delay_in;
+
+ANDROID_END_HEADER
 
 #endif /* _SLIRP_SHAPER_H_ */
