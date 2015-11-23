@@ -365,7 +365,7 @@ private:
 #ifdef __APPLE__
             WId wid;
             mEmulatorWindow->slot_getWindowId(&wid);
-            nsWindowRemoveMaximizeButton((void *) wid);
+            nsWindowHideWindowButtons((void *) wid);
 #endif
 
             mEmulatorWindow->tool_window->show();
