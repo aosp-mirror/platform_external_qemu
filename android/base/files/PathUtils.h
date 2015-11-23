@@ -97,6 +97,39 @@ public:
         return isAbsolute(path, HOST_TYPE);
     }
 
+    // Split |path| into a directory name and a file name. |dirName| and
+    // |baseName| are optional pointers to strings that will receive the
+    // corresponding components on success. |hostType| is a host type.
+    // Return true on success, or false on failure.
+    // Note that unlike the Unix 'basename' command, the command will fail
+    // if |path| ends with directory separator or is a single root prefix.
+    // Windows root prefixes are fully supported, which means the following:
+    //
+    //     /            -> error.
+    //     /foo         -> '/' + 'foo'
+    //     foo          -> '.' + 'foo'
+    //     <drive>:     -> error.
+    //     <drive>:foo  -> '<drive>:' + 'foo'
+    //     <drive>:\foo -> '<drive>:\' + 'foo'
+    //
+    static bool split(const char* path,
+                      HostType hostType,
+                      String* dirName,
+                      String* baseName);
+
+    // A variant of split() for the current process' host type.
+    static inline bool split(const char* path,
+                             String* dirName,
+                             String* baseName) {
+        return split(path, HOST_TYPE, dirName, baseName);
+    }
+
+    static String join(const char* path1, const char* path2, HostType hostType);
+
+    static inline String join(const char* path1, const char* path2) {
+        return join(path1, path2, HOST_TYPE);
+    }
+
     // Decompose |path| into individual components. If |path| has a root
     // prefix, it will always be the first component. I.e. for Posix
     // systems this will be '/' (for absolute paths). For Win32 systems,

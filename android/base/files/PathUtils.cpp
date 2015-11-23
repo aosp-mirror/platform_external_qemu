@@ -95,6 +95,76 @@ String PathUtils::addTrailingDirSeparator(const String& path,
 }
 
 // static
+bool PathUtils::split(const char* path,
+                      HostType hostType,
+                      String* dirName,
+                      String* baseName) {
+    if (!path || !path[0]) {
+        return false;
+    }
+
+    // If there is a trailing directory separator, return an error.
+    size_t end = ::strlen(path);
+    if (isDirSeparator(path[end - 1U], hostType)) {
+        return false;
+    }
+
+    // Find last separator.
+    size_t prefixLen = rootPrefixSize(path, hostType);
+    size_t pos = end;
+    while (pos > prefixLen && !isDirSeparator(path[pos - 1U], hostType)) {
+        pos--;
+    }
+
+    // Handle common case.
+    if (pos > prefixLen) {
+        if (dirName) {
+            dirName->assign(path, pos);
+        }
+        if (baseName) {
+            baseName->assign(path + pos, end - pos);
+        }
+        return true;
+    }
+
+    // If there is no directory separator, the path is a single file name.
+    if (dirName) {
+        if (!prefixLen) {
+            dirName->assign(".");
+        } else {
+            dirName->assign(path, prefixLen);
+        }
+    }
+    if (baseName) {
+        baseName->assign(path + prefixLen, end - prefixLen);
+    }
+    return true;
+}
+
+// static
+String PathUtils::join(const char* path1,
+                       const char* path2,
+                       HostType hostType) {
+    if (!path1 || !path1[0]) {
+        return String(path2 ? path2 : "");
+    }
+    if (!path2 || !path2[0]) {
+        return String(path1 ? path1 : "");
+    }
+    if (isAbsolute(path2, hostType)) {
+        return String(path2);
+    }
+    size_t prefixLen = rootPrefixSize(path1, hostType);
+    String result(path1);
+    size_t end = result.size();
+    if (end > prefixLen && !isDirSeparator(result[end - 1U], hostType)) {
+        result += (hostType == HOST_WIN32) ? '\\' : '/';
+    }
+    result += path2;
+    return result;
+}
+
+// static
 StringVector PathUtils::decompose(const char* path, HostType hostType) {
     StringVector result;
     if (!path || !path[0])
