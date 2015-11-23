@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b2123e5_5dad17aa",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-23T20:41:06Z",
+      "side": 1,
+      "message": "These need to be initialized here, right, and not prior\nto any of the loops?",
+      "revId": "d9e28e5f4e0bfdaf41fb1328132d3709f1de396e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b1b2bb8_35903a74",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-23T20:41:06Z",
+      "side": 1,
+      "message": "Do you want to move this up one line, to break out of\nall 3 loops?",
+      "revId": "d9e28e5f4e0bfdaf41fb1328132d3709f1de396e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
