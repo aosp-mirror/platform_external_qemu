@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fbf69f9c_bf335ff0",
+        "filename": "android/skin/qt/angle-input-widget.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-23T15:45:52Z",
+      "side": 1,
+      "message": "Good that it does not trigger valueChanged, but I understand that\nQSettings suppresses \"updates\" where the value hasn\u0027t changed.",
+      "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b153384_8d276992",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-23T15:45:52Z",
+      "side": 1,
+      "message": "Is this case sensitive?\n(I think it should not be.)",
+      "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b153384_ed241d8f",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-11-23T15:45:52Z",
+      "side": 1,
+      "message": "Would isEmpty( ) be safer?",
+      "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
