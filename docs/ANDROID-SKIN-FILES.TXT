@@ -122,7 +122,7 @@ Each layout can have the following keys (and corresponding values):
             - 'alpha' [optional]: How opaque the image should be, from 0 (not
               visible at all) to 100 (fully opaque). Default is 50.
             - 'rotation' [optional]: Integer in the 0..3 range, specifying the
-              rotation of the image in 90-degree increments.
+              clockwise rotation of the image in 90-degree increments.
 
 - 'part<n>': Individual part references for the layout. They are named
              in incremental numerical order, starting from 'part1', as in
@@ -137,14 +137,14 @@ Each layout can have the following keys (and corresponding values):
                - 'y':  Vertical offset where the part is displayed
 
                - 'rotation': An optional sub-key which value is a integer
-                             in the 0..3 range specifying the rotation
-                             (in 90-degrees increment) to apply to the part
-                             before display. 
+                             in the 0..3 range specifying the clockwise
+                             rotation (in 90-degrees increment) to apply to
+                             the part before display.
 
 - 'dpad-rotation': 
              An option integer in the 0..3 range indicating which
-             counter-rotation (in 90-degrees increments) to apply to the
-             D-Pad keys for proper usage.
+             counterclockwise rotation (in 90-degrees increments) to apply to
+             the D-Pad keys for proper usage.
 
              This is needed because the Android framework considers that
              the DPad is in landscape mode when the device is in landscape
