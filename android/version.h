@@ -21,3 +21,10 @@
 #  define  VERSION_STRING_SHORT  "standalone"
 #  define  VERSION_STRING        VERSION_STRING_SHORT
 #endif
+
+// Define the emulator build number string
+#ifdef ANDROID_SDK_TOOLS_BUILDNUMBER
+#  define EMULATOR_BUILD_STRING STRINGIFY(ANDROID_SDK_TOOLS_BUILDNUMBER)
+#else
+#  define EMULATOR_BUILD_STRING "0"
+#endif
