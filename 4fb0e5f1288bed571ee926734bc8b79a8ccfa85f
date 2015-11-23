@@ -69,6 +69,30 @@
       "revId": "4fb0e5f1288bed571ee926734bc8b79a8ccfa85f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb2a67bd_58e7e964",
+        "filename": "android/hw-pipe-net.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-23T23:37:16Z",
+      "side": 1,
+      "message": "Yes. Apparently, according to screencap and dEQP tests, Windows does not have the \"spin on EAGAIN\" lockup.",
+      "parentUuid": "3bed97ca_c7082270",
+      "range": {
+        "startLine": 269,
+        "startChar": 25,
+        "endLine": 269,
+        "endChar": 39
+      },
+      "revId": "4fb0e5f1288bed571ee926734bc8b79a8ccfa85f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
