@@ -19,6 +19,7 @@
 #ifdef CONFIG_NAND_LIMITS
 #include "android/emulation/nand_limits.h"
 #endif
+#include "android/utils/assert.h"
 #include "android/utils/path.h"
 #include "android/utils/tempfile.h"
 #include "android/qemu-debug.h"
@@ -46,6 +47,8 @@
 #endif
 
 #define  XLOG  xlog
+
+AASSERT_STATIC(sizeof(off_t) >= 8U)
 
 static void
 xlog( const char*  format, ... )

@@ -171,4 +171,13 @@ void __attribute__((noreturn)) android_assert_fail(const char*  messageFmt, ...)
 typedef void (*AAssertLogFunc)( const char*  fmt, va_list  args );
 void  android_assert_registerLog( AAssertLogFunc  logger );
 
+// Compile-time assertion. If |cond| is false at compile time, an
+// error message will be emitted by the compiler.
+#define AASSERT_STATIC(cond) \
+    typedef char _AASSERT_CONCAT(__android_assertion_failed_,__LINE__) \
+        [2*!!(cond) - 1];
+
+#define _AASSERT_CONCAT(x, y) _AASSERT_CONCAT_(x, y)
+#define _AASSERT_CONCAT_(x, y) x ## y
+
 ANDROID_END_HEADER
