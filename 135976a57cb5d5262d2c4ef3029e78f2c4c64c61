@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7b80ef13_27f91aeb",
+        "filename": "Makefile.top.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-24T13:25:51Z",
+      "side": 1,
+      "message": "it\u0027s generally a bad idea to use $(shell ...) in build scripts, because it makes a lot of things unreproducible. It might be better to have these files listed by android-configure.sh and written to objs/build/config.make, this will make things easier to diagnose in case of problem.",
+      "revId": "135976a57cb5d5262d2c4ef3029e78f2c4c64c61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbbdbfca_76fe4e5b",
+        "filename": "Makefile.top.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-24T13:25:51Z",
+      "side": 1,
+      "message": "This is rather complex, and I would strongly encourage you to write a comment explaining what this is supposed to do. In particular, what directory structure do you expect from $(PREBUILT_DLLS_DIR)\n\nAlso LOCAL_XXX definitions are supposed to happen inside a module definition only. You probably need something different, in particular to handle dependencies properly.",
+      "revId": "135976a57cb5d5262d2c4ef3029e78f2c4c64c61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbbdbfca_b60f0645",
+        "filename": "android/build/definitions.make",
+        "patchSetId": 6
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-24T13:25:51Z",
+      "side": 1,
+      "message": "The line above should use $$ not $:\n\n   $$(if $$(LOCAL_GENERATE_SYMBOLS), $$(eval SYMBOLS +\u003d $$(_SYMBOL)))",
+      "revId": "135976a57cb5d5262d2c4ef3029e78f2c4c64c61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
