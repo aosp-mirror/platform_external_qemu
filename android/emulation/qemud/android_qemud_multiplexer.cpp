@@ -26,6 +26,7 @@ void qemud_multiplexer_serial_recv(void* opaque,
                                    uint8_t* msg,
                                    int msglen) {
     QemudMultiplexer* m = (QemudMultiplexer*) opaque;
+    m->lock.lock();
     QemudClient* c = m->clients;
 
     /* dispatch to an existing client if possible
@@ -39,6 +40,7 @@ void qemud_multiplexer_serial_recv(void* opaque,
         }
     }
 
+    m->lock.unlock();
     D("%s: ignoring %d bytes for unknown channel %d",
       __FUNCTION__, msglen, channel);
 }
@@ -51,10 +53,12 @@ void qemud_multiplexer_serial_recv(void* opaque,
 int qemud_multiplexer_connect(QemudMultiplexer* m,
                               const char* service_name,
                               int channel_id) {
+    m->lock.lock();
     /* find the corresponding registered service by name */
     QemudService* sv = qemud_service_find(m->services, service_name);
     if (sv == NULL) {
         D("%s: no registered '%s' service", __FUNCTION__, service_name);
+        m->lock.unlock();
         return -1;
     }
 
@@ -62,13 +66,17 @@ int qemud_multiplexer_connect(QemudMultiplexer* m,
     if (sv->max_clients > 0 && sv->num_clients >= sv->max_clients) {
         D("%s: registration failed for '%s' service: too many clients (%d)",
           __FUNCTION__, service_name, sv->num_clients);
+        m->lock.unlock();
         return -2;
     }
 
     /* connect a new client to the service on the given channel */
-    if (qemud_service_connect_client(sv, channel_id, NULL) == NULL)
+    if (qemud_service_connect_client(sv, channel_id, NULL) == NULL) {
+        m->lock.unlock();
         return -1;
+    }
 
+    m->lock.unlock();
     return 0;
 }
 
@@ -131,6 +139,7 @@ void qemud_multiplexer_control_recv(void* opaque,
                                     int msglen,
                                     QemudClient* client) {
     QemudMultiplexer* mult = (QemudMultiplexer*) opaque;
+    mult->lock.lock();
     uint8_t* msgend = msg + msglen;
     char tmp[64], * p = tmp, * end = p + sizeof(tmp);
 
@@ -145,6 +154,7 @@ void qemud_multiplexer_control_recv(void* opaque,
         if (q == NULL || q + 3 != (char*) msgend) {
             D("%s: malformed connect message: '%.*s' (offset=%d)",
               __FUNCTION__, msglen, (const char*) msg, q ? q - (char*) msg : -1);
+            mult->lock.unlock();
             return;
         }
         *q++ = 0;  /* zero-terminate service name */
@@ -152,6 +162,7 @@ void qemud_multiplexer_control_recv(void* opaque,
         if (channel <= 0) {
             D("%s: malformed channel id '%.*s",
               __FUNCTION__, 2, q);
+            mult->lock.unlock();
             return;
         }
 
@@ -172,6 +183,7 @@ void qemud_multiplexer_control_recv(void* opaque,
             p = bufprint(tmp, end, "ok:connect:%02x", channel);
         }
         qemud_serial_send(mult->serial, 0, 0, (uint8_t*) tmp, p - tmp);
+        mult->lock.unlock();
         return;
     }
 
@@ -184,9 +196,11 @@ void qemud_multiplexer_control_recv(void* opaque,
         if (channel_id <= 0) {
             D("%s: malformed disconnect channel id: '%.*s'",
               __FUNCTION__, 2, msg + 11);
+            mult->lock.unlock();
             return;
         }
         qemud_multiplexer_disconnect(mult, channel_id);
+        mult->lock.unlock();
         return;
     }
 
@@ -206,6 +220,7 @@ void qemud_multiplexer_control_recv(void* opaque,
         if (q == NULL || q+3 != (char*)msgend) {
             D("%s: malformed legacy connect message: '%.*s' (offset=%d)",
               __FUNCTION__, msglen, (const char*)msg, q ? q-(char*)msg : -1);
+            mult->lock.unlock();
             return;
         }
         *q++ = 0;  /* zero-terminate service name */
@@ -213,6 +228,7 @@ void qemud_multiplexer_control_recv(void* opaque,
         if (channel <= 0) {
             D("%s: malformed legacy channel id '%.*s",
               __FUNCTION__, 2, q);
+            mult->lock.unlock();
             return;
         }
 
@@ -229,6 +245,7 @@ void qemud_multiplexer_control_recv(void* opaque,
         default:
             D("%s: weird, ignoring legacy qemud control message: '%.*s'",
               __FUNCTION__, msglen, msg);
+            mult->lock.unlock();
             return;
         }
 
@@ -239,17 +256,21 @@ void qemud_multiplexer_control_recv(void* opaque,
         }
 
         qemud_multiplexer_connect(mult, service_name, channel);
+        mult->lock.unlock();
         return;
     }
 
     /* anything else, don't answer for legacy */
-    if (mult->serial->version == QEMUD_VERSION_LEGACY)
+    if (mult->serial->version == QEMUD_VERSION_LEGACY) {
+        mult->lock.unlock();
         return;
+    }
 #endif /* SUPPORT_LEGACY_QEMUD */
 
     /* anything else is a problem */
     p = bufprint(tmp, end, "ko:unknown command");
     qemud_serial_send(mult->serial, 0, 0, (uint8_t*) tmp, p - tmp);
+    mult->lock.unlock();
 }
 
 /* initialize the global QemudMultiplexer.
@@ -308,6 +329,8 @@ static void qemud_service_save_count(Stream* f, QemudService* s) {
  * changes, there is no communication with the guest.
  */
 static int qemud_load_clients(Stream* f, QemudMultiplexer* m, int version) {
+    m->lock.lock();
+
     /* Remove all clients, except on the control channel.*/
     qemud_multiplexer_disconnect_noncontrol(m);
 
@@ -316,10 +339,12 @@ static int qemud_load_clients(Stream* f, QemudMultiplexer* m, int version) {
     int i, ret;
     for (i = 0; i < client_count; i++) {
         if ((ret = qemud_serial_client_load(f, m->services, version))) {
+            m->lock.unlock();
             return ret;
         }
     }
 
+    m->lock.unlock();
     return 0;
 }
 
@@ -342,17 +367,23 @@ int qemud_multiplexer_load(QemudMultiplexer* m,
                            int version) {
     int ret = 0;
 
+    m->lock.lock();
     ret = qemud_serial_load(stream, m->serial);
     if (!ret) {
         ret = qemud_load_services(stream, m->services);
+        m->lock.unlock();
         if (!ret) {
             ret = qemud_load_clients(stream, m, version);
         }
+    } else {
+        m->lock.unlock();
     }
     return ret;
 }
 
 void qemud_multiplexer_save(QemudMultiplexer* m, Stream* stream) {
+    m->lock.lock();
+
     /* save serial state if any */
     qemud_serial_save(stream, m->serial);
 
@@ -371,4 +402,5 @@ void qemud_multiplexer_save(QemudMultiplexer* m, Stream* stream) {
             qemud_serial_client_save(stream, c);
         }
     }
+    m->lock.unlock();
 }
