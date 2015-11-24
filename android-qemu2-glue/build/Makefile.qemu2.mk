@@ -1,33 +1,47 @@
 # Rules to build QEMU2 for the Android emulator from sources.
 # This file is included from external/qemu/Makefile or one of its sub-Makefiles.
 
+# NOTE: Previous versions of the build system defined HOST_OS and HOST_ARCH
+# instead of BUILD_TARGET_OS and BUILD_TARGET_ARCH, so take care of these to
+# ensure this continues to build with both versions.
+#
+# TODO: Remove this once the external/qemu build script changes are
+#       all submitted.
+BUILD_TARGET_OS ?= $(HOST_OS)
+BUILD_TARGET_ARCH ?= $(HOST_ARCH)
+BUILD_TARGET_TAG ?= $(BUILD_TARGET_OS)-$(BUILD_TARGET_ARCH)
+BUILD_TARGET_BITS ?= $(HOST_BITS)
+
+# Same for OBJS_DIR -> BUILD_OBJS_DIR
+BUILD_OBJS_DIR ?= $(OBJS_DIR)
+
 QEMU2_OLD_LOCAL_PATH := $(LOCAL_PATH)
 
 # Assume this is under android-qemu2-glue/build/ so get up two directories
 # to find the top-level one.
 LOCAL_PATH := $(QEMU2_TOP_DIR)
 
-# If $(HOST_OS) is $1, then return $2, otherwise $3
-qemu2-if-os = $(if $(filter $1,$(HOST_OS)),$2,$3)
+# If $(BUILD_TARGET_OS) is $1, then return $2, otherwise $3
+qemu2-if-os = $(if $(filter $1,$(BUILD_TARGET_OS)),$2,$3)
 
-# If $(HOST_ARCH) is $1, then return $2, otherwise $3
-qemu2-if-host-arch = $(if $(filter $1,$(HOST_ARCH)),$2,$3)
+# If $(BUILD_TARGET_ARCH) is $1, then return $2, otherwise $3
+qemu2-if-build-target-arch = $(if $(filter $1,$(BUILD_TARGET_ARCH)),$2,$3)
 
-# If $(HOST_OS) is not $1, then return $2, otherwise $3
-qemu2-ifnot-os = $(if $(filter-out $1,$(HOST_OS)),$2,$3)
+# If $(BUILD_TARGET_OS) is not $1, then return $2, otherwise $3
+qemu2-ifnot-os = $(if $(filter-out $1,$(BUILD_TARGET_OS)),$2,$3)
 
-# If $(HOST_OS) is windows, return $1, otherwise $2
+# If $(BUILD_TARGET_OS) is windows, return $1, otherwise $2
 qemu2-if-windows = $(call qemu2-if-os,windows,$1,$2)
 
-# If $(HOST_OS) is not windows, return $1, otherwise $2
+# If $(BUILD_TARGET_OS) is not windows, return $1, otherwise $2
 qemu2-if-posix = $(call qemu2-ifnot-os,windows,$1,$2)
 
 qemu2-if-darwin = $(call qemu2-if-os,darwin,$1,$2)
 qemu2-if-linux = $(call qemu2-if-os,linux,$1,$2)
 
-QEMU2_AUTO_GENERATED_DIR := $(OBJS_DIR)/build/qemu2-qapi-auto-generated
+QEMU2_AUTO_GENERATED_DIR := $(BUILD_OBJS_DIR)/build/qemu2-qapi-auto-generated
 
-QEMU2_DEPS_TOP_DIR := $(QEMU2_DEPS_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
+QEMU2_DEPS_TOP_DIR := $(QEMU2_DEPS_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
 QEMU2_DEPS_LDFLAGS := -L$(QEMU2_DEPS_TOP_DIR)/lib
 
 QEMU2_GLIB_INCLUDES := $(QEMU2_DEPS_TOP_DIR)/include/glib-2.0 \
@@ -43,7 +57,7 @@ QEMU2_PIXMAN_INCLUDES := $(QEMU2_DEPS_TOP_DIR)/include/pixman-1
 QEMU2_PIXMAN_LDLIBS := -lpixman-1
 
 # Ensure config-host.h can be found properly.
-QEMU2_INCLUDES := $(LOCAL_PATH)/android-qemu2-glue/config/$(HOST_OS)-$(HOST_ARCH)
+QEMU2_INCLUDES := $(LOCAL_PATH)/android-qemu2-glue/config/$(BUILD_TARGET_TAG)
 
 # Ensure QEMU2 headers are found.
 QEMU2_INCLUDES += \
@@ -91,7 +105,7 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SRC_FILES += \
     $(QEMU2_COMMON_SOURCES) \
-    $(QEMU2_COMMON_SOURCES_$(HOST_OS)-$(HOST_ARCH))
+    $(QEMU2_COMMON_SOURCES_$(BUILD_TARGET_TAG))
 
 LOCAL_GENERATED_SOURCES += \
     $(QEMU2_AUTO_GENERATED_DIR)/qapi-event.c \
@@ -145,7 +159,7 @@ LOCAL_SRC_FILES += \
     util/envlist.c \
     util/path.c \
     util/module.c \
-    $(call qemu2-if-host-arch,x86, util/host-utils.c) \
+    $(call qemu2-if-build-target-arch,x86, util/host-utils.c) \
     util/bitmap.c \
     util/bitops.c \
     util/hbitmap.c \
