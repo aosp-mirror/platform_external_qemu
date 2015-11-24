@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1b153384_fed5e167",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-24T07:21:15Z",
+      "side": 1,
+      "message": "this is horribly inefficient: it copies each parameter twice!\nalso, when inserting many items, it is _much_much_much_ faster to do setRowCount() and fill in the rows; one also needs to block signals to make it event faster\nin the end, if there\u0027s so much data that even setRowCount() is slow, split the data into batches and insert using incremental setRowCount()s\nnow it\u0027s ridiculously slow - as Qt reallocates and redraws way too often",
+      "range": {
+        "startLine": 333,
+        "startChar": 39,
+        "endLine": 338,
+        "endChar": 51
+      },
+      "revId": "a9749b5c8e1e76cd48a0ea90024a69ec5336074c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbf69f9c_74cc793b",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-24T07:21:15Z",
+      "side": 1,
+      "message": "what about moving this to \u0027else\u0027 condition and leaving it empty initially? it is allocated twice because of this default error message",
+      "range": {
+        "startLine": 412,
+        "startChar": 26,
+        "endLine": 412,
+        "endChar": 64
+      },
+      "revId": "a9749b5c8e1e76cd48a0ea90024a69ec5336074c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b153384_ded2a57d",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-24T07:21:15Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 275,
+        "startChar": 17,
+        "endLine": 275,
+        "endChar": 47
+      },
+      "revId": "a9749b5c8e1e76cd48a0ea90024a69ec5336074c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
