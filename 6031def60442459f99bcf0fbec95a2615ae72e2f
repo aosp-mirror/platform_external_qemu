@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3bed97ca_50d1924c",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 17
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "got it, renaming.",
+      "parentUuid": "5b1b2bb8_a9369927",
+      "range": {
+        "startLine": 126,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 5
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbf69f9c_0ea36bc3",
         "filename": "Makefile.common.mk",
         "patchSetId": 17
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "3bed97ca_c783022a",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 17
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "When I add EMULATOR_LIBUI_LDFLAGS to the windows build, I get multiple definitions of main.  Otherwise the required flag is already in EMULATOR_LIBUI_LDFLAGS",
+      "parentUuid": "fbf69f9c_0ea36bc3",
+      "range": {
+        "startLine": 150,
+        "startChar": 0,
+        "endLine": 152,
+        "endChar": 42
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3bed97ca_8d80011f",
         "filename": "Makefile.common.mk",
         "patchSetId": 17
@@ -59,6 +107,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "do we really need a 32-bit version if no other 32-bit binaries being built?",
+      "range": {
+        "startLine": 167,
+        "startChar": 0,
+        "endLine": 168,
+        "endChar": 28
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b2123e5_ce82f7e3",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 17
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "removing.",
+      "parentUuid": "3bed97ca_8d80011f",
       "range": {
         "startLine": 167,
         "startChar": 0,
@@ -117,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "5b1b2bb8_8c192b65",
+        "filename": "Makefile.tests.mk",
+        "patchSetId": 17
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Removing all hardtabs from CL",
+      "parentUuid": "9b2123e5_0b1a41bb",
+      "range": {
+        "startLine": 110,
+        "startChar": 0,
+        "endLine": 110,
+        "endChar": 35
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "db271bf3_4dad6daa",
         "filename": "Makefile.tests.mk",
         "patchSetId": 17
@@ -128,6 +224,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "same thing about CrashService_$(HOST_OS).cpp",
+      "range": {
+        "startLine": 133,
+        "startChar": 0,
+        "endLine": 141,
+        "endChar": 5
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bed97ca_30904674",
+        "filename": "Makefile.tests.mk",
+        "patchSetId": 17
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "db271bf3_4dad6daa",
       "range": {
         "startLine": 133,
         "startChar": 0,
@@ -163,6 +283,30 @@
     },
     {
       "key": {
+        "uuid": "1b153384_8afe2f1e",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "I\u0027ve changed this to an enum.",
+      "parentUuid": "3b167790_e857eb4d",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 17
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbf69f9c_0ef1abc3",
         "filename": "android/crashreport/CrashReporter.cpp",
         "patchSetId": 17
@@ -174,6 +318,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "is it possible to specify a precise source of this? e.g. path/url",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 6
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b167790_4bcc393b",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Added comments in src.",
+      "parentUuid": "fbf69f9c_0ef1abc3",
       "range": {
         "startLine": 38,
         "startChar": 0,
@@ -209,6 +377,30 @@
     },
     {
       "key": {
+        "uuid": "fbf69f9c_f1a1a065",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "fixed",
+      "parentUuid": "7b246ff3_ca54a34c",
+      "range": {
+        "startLine": 92,
+        "startChar": 64,
+        "endLine": 92,
+        "endChar": 68
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b2123e5_eb852dee",
         "filename": "android/crashreport/CrashReporter.cpp",
         "patchSetId": 17
@@ -220,6 +412,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "you\u0027re passing some pointers to strings which will go out of scope in the end of the statement. I just want to make sure the ExceptionHandler actually copies its parameters and won\u0027t store a dangling pointer",
+      "range": {
+        "startLine": 96,
+        "startChar": 11,
+        "endLine": 98,
+        "endChar": 29
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbf69f9c_518194b2",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Yes I confirmed that breakpad is doing a string copy to store it (actually its taking in a std::wstring\u0026 so theres another step happening here) after removing the CrashSystem instance of the WString.\n\nShould I go back to storing the path somewhere to be more safe?",
+      "parentUuid": "9b2123e5_eb852dee",
       "range": {
         "startLine": 96,
         "startChar": 11,
@@ -255,6 +471,30 @@
     },
     {
       "key": {
+        "uuid": "5b1b2bb8_0c6a5b95",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Okay.",
+      "parentUuid": "db271bf3_8d05a558",
+      "range": {
+        "startLine": 116,
+        "startChar": 11,
+        "endLine": 116,
+        "endChar": 24
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b1b2bb8_295bc939",
         "filename": "android/crashreport/CrashReporter.cpp",
         "patchSetId": 17
@@ -266,6 +506,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "combine these statements please",
+      "range": {
+        "startLine": 139,
+        "startChar": 41,
+        "endLine": 140,
+        "endChar": 14
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bed97ca_709ace93",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "fixed.",
+      "parentUuid": "5b1b2bb8_295bc939",
       "range": {
         "startLine": 139,
         "startChar": 41,
@@ -301,6 +565,30 @@
     },
     {
       "key": {
+        "uuid": "9b2123e5_ae12236f",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "fixed",
+      "parentUuid": "3bed97ca_70c12e54",
+      "range": {
+        "startLine": 161,
+        "startChar": 0,
+        "endLine": 163,
+        "endChar": 6
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "db271bf3_cdb83deb",
         "filename": "android/crashreport/CrashReporter.h",
         "patchSetId": 17
@@ -312,6 +600,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "can we have a separate exception_handler.h file (maybe under client/ ) to hide all macros from the user?",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 6
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bed97ca_73f93871",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Split into platform src files.",
+      "parentUuid": "db271bf3_cdb83deb",
       "range": {
         "startLine": 18,
         "startChar": 0,
@@ -370,6 +682,54 @@
     },
     {
       "key": {
+        "uuid": "3b167790_99bdeb85",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Changed to LazyInstance",
+      "parentUuid": "db271bf3_2dc7596d",
+      "range": {
+        "startLine": 49,
+        "startChar": 24,
+        "endLine": 49,
+        "endChar": 25
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b167790_b9c0a7ff",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Fixed.",
+      "parentUuid": "9b2123e5_8b4ab1a3",
+      "range": {
+        "startLine": 49,
+        "startChar": 30,
+        "endLine": 49,
+        "endChar": 34
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3bed97ca_cd63295b",
         "filename": "android/crashreport/CrashReporter.h",
         "patchSetId": 17
@@ -381,6 +741,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "nit: this goes before type IIRC",
+      "range": {
+        "startLine": 55,
+        "startChar": 33,
+        "endLine": 55,
+        "endChar": 38
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1bfc537c_1b2ba72a",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Changed to DISALLOW macro",
+      "parentUuid": "3bed97ca_cd63295b",
       "range": {
         "startLine": 55,
         "startChar": 33,
@@ -416,6 +800,30 @@
     },
     {
       "key": {
+        "uuid": "5b1b2bb8_95e64ed5",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "5b1b2bb8_092ecd81",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 9
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1bfc537c_2f8aa592",
         "filename": "android/crashreport/CrashService.h",
         "patchSetId": 17
@@ -427,6 +835,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "will you fill this before the checkin?",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 10
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b153384_b87b81cf",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Filled in.",
+      "parentUuid": "1bfc537c_2f8aa592",
       "range": {
         "startLine": 22,
         "startChar": 0,
@@ -462,6 +894,30 @@
     },
     {
       "key": {
+        "uuid": "3bed97ca_e1138e40",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Removing all the voids.",
+      "parentUuid": "7b246ff3_eaf36795",
+      "range": {
+        "startLine": 48,
+        "startChar": 28,
+        "endLine": 48,
+        "endChar": 32
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b153384_a797e408",
         "filename": "android/crashreport/CrashService.h",
         "patchSetId": 17
@@ -473,6 +929,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "reference?",
+      "range": {
+        "startLine": 63,
+        "startChar": 51,
+        "endLine": 63,
+        "endChar": 52
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1bfc537c_3b4f8314",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "1b153384_a797e408",
       "range": {
         "startLine": 63,
         "startChar": 51,
@@ -508,6 +988,30 @@
     },
     {
       "key": {
+        "uuid": "fbf69f9c_7a0f4579",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Removed",
+      "parentUuid": "1b153384_47b390c2",
+      "range": {
+        "startLine": 73,
+        "startChar": 4,
+        "endLine": 73,
+        "endChar": 9
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7b246ff3_2aff3f5a",
         "filename": "android/crashreport/CrashService_common.cpp",
         "patchSetId": 17
@@ -519,6 +1023,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "same thing, intermediate include file would really help here",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 6
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1bfc537c_3bf4a3f4",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Removed.",
+      "parentUuid": "7b246ff3_2aff3f5a",
       "range": {
         "startLine": 26,
         "startChar": 0,
@@ -554,6 +1082,30 @@
     },
     {
       "key": {
+        "uuid": "fbb05f0b_7e7c8dc7",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Changed.",
+      "parentUuid": "db271bf3_4de56dcb",
+      "range": {
+        "startLine": 63,
+        "startChar": 4,
+        "endLine": 63,
+        "endChar": 61
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bb2a67bd_ec02634c",
         "filename": "android/crashreport/CrashService_common.cpp",
         "patchSetId": 17
@@ -565,6 +1117,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "can you declare these right before the first use?",
+      "range": {
+        "startLine": 111,
+        "startChar": 0,
+        "endLine": 114,
+        "endChar": 21
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b153384_b86ee1d4",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bb2a67bd_ec02634c",
       "range": {
         "startLine": 111,
         "startChar": 0,
@@ -600,6 +1176,30 @@
     },
     {
       "key": {
+        "uuid": "5b1b2bb8_f524e28e",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Nope, fixed.",
+      "parentUuid": "1b153384_e7527ce6",
+      "range": {
+        "startLine": 150,
+        "startChar": 3,
+        "endLine": 151,
+        "endChar": 78
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbf69f9c_6e5f8ff3",
         "filename": "android/crashreport/CrashService_common.cpp",
         "patchSetId": 17
@@ -611,6 +1211,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "int64_t ?",
+      "range": {
+        "startLine": 221,
+        "startChar": 4,
+        "endLine": 221,
+        "endChar": 7
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b2123e5_8211ee30",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "fixed.",
+      "parentUuid": "fbf69f9c_6e5f8ff3",
       "range": {
         "startLine": 221,
         "startChar": 4,
@@ -646,6 +1270,30 @@
     },
     {
       "key": {
+        "uuid": "3bed97ca_816d6a9e",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": ":( fixed.",
+      "parentUuid": "fbf69f9c_ae585708",
+      "range": {
+        "startLine": 231,
+        "startChar": 12,
+        "endLine": 231,
+        "endChar": 23
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3b167790_086a4795",
         "filename": "android/crashreport/CrashService_darwin.cpp",
         "patchSetId": 17
@@ -657,6 +1305,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "return !clientpid || kill(clientpid, 0) \u003d\u003d 0\n?",
+      "range": {
+        "startLine": 88,
+        "startChar": 12,
+        "endLine": 88,
+        "endChar": 48
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1bfc537c_66c052a0",
+        "filename": "android/crashreport/CrashService_darwin.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "fixed.",
+      "parentUuid": "3b167790_086a4795",
       "range": {
         "startLine": 88,
         "startChar": 12,
@@ -692,6 +1364,30 @@
     },
     {
       "key": {
+        "uuid": "bb2a67bd_7d9a9f93",
+        "filename": "android/crashreport/CrashService_linux.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "overrides for all",
+      "parentUuid": "3bed97ca_50fd1224",
+      "range": {
+        "startLine": 63,
+        "startChar": 4,
+        "endLine": 63,
+        "endChar": 49
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1bfc537c_32ecc8e9",
         "filename": "android/crashreport/CrashService_linux.cpp",
         "patchSetId": 17
@@ -703,6 +1399,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "stoi?",
+      "range": {
+        "startLine": 64,
+        "startChar": 30,
+        "endLine": 64,
+        "endChar": 34
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b1b2bb8_407252ca",
+        "filename": "android/crashreport/CrashService_linux.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "changed.",
+      "parentUuid": "1bfc537c_32ecc8e9",
       "range": {
         "startLine": 64,
         "startChar": 30,
@@ -738,6 +1458,30 @@
     },
     {
       "key": {
+        "uuid": "3bed97ca_bcc08dff",
+        "filename": "android/crashreport/CrashService_win.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "fixed.",
+      "parentUuid": "1bfc537c_f257e04d",
+      "range": {
+        "startLine": 125,
+        "startChar": 3,
+        "endLine": 125,
+        "endChar": 26
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b1b2bb8_c963155b",
         "filename": "android/crashreport/CrashSystem.cpp",
         "patchSetId": 17
@@ -749,6 +1493,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "intermediate header?",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 6
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1bfc537c_86fe1ed1",
+        "filename": "android/crashreport/CrashSystem.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Only require the linux header. Removing rest.",
+      "parentUuid": "5b1b2bb8_c963155b",
       "range": {
         "startLine": 28,
         "startChar": 0,
@@ -784,6 +1552,30 @@
     },
     {
       "key": {
+        "uuid": "5b1b2bb8_c033e2ef",
+        "filename": "android/crashreport/CrashSystem.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "for debug, deleted.",
+      "parentUuid": "db271bf3_6d6dd19b",
+      "range": {
+        "startLine": 168,
+        "startChar": 22,
+        "endLine": 168,
+        "endChar": 58
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbf69f9c_4ed1f34c",
         "filename": "android/crashreport/CrashSystem.cpp",
         "patchSetId": 17
@@ -795,6 +1587,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "what this comment is for here? I don\u0027t see any parent process IDs here for other systems as well",
+      "range": {
+        "startLine": 241,
+        "startChar": 0,
+        "endLine": 254,
+        "endChar": 2
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bed97ca_3c72ddc9",
+        "filename": "android/crashreport/CrashSystem.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Rewrote the windows handle.  Got rid of this.",
+      "parentUuid": "fbf69f9c_4ed1f34c",
       "range": {
         "startLine": 241,
         "startChar": 0,
@@ -830,6 +1646,30 @@
     },
     {
       "key": {
+        "uuid": "bb2a67bd_d8e63904",
+        "filename": "android/crashreport/CrashSystem.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "Right, fixed.",
+      "parentUuid": "bb2a67bd_4c644fc8",
+      "range": {
+        "startLine": 271,
+        "startChar": 0,
+        "endLine": 282,
+        "endChar": 41
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b1b2bb8_0c76dbe4",
         "filename": "android/crashreport/CrashSystem.cpp",
         "patchSetId": 17
@@ -841,6 +1681,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "do we consider \".dmp\" to be a valid dump file? :)",
+      "range": {
+        "startLine": 329,
+        "startChar": 24,
+        "endLine": 329,
+        "endChar": 25
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1bfc537c_2622ca36",
+        "filename": "android/crashreport/CrashSystem.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "hm... fixed.",
+      "parentUuid": "5b1b2bb8_0c76dbe4",
       "range": {
         "startLine": 329,
         "startChar": 24,
@@ -876,6 +1740,30 @@
     },
     {
       "key": {
+        "uuid": "5b1b2bb8_c01c8256",
+        "filename": "android/crashreport/CrashSystem.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "fixed.",
+      "parentUuid": "5b1b2bb8_097ecdfb",
+      "range": {
+        "startLine": 42,
+        "startChar": 18,
+        "endLine": 42,
+        "endChar": 35
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3bed97ca_3065e6c7",
         "filename": "android/crashreport/CrashSystem.h",
         "patchSetId": 17
@@ -887,6 +1775,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "const",
+      "range": {
+        "startLine": 47,
+        "startChar": 25,
+        "endLine": 47,
+        "endChar": 27
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b167790_148d4219",
+        "filename": "android/crashreport/CrashSystem.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "fixed",
+      "parentUuid": "3bed97ca_3065e6c7",
       "range": {
         "startLine": 47,
         "startChar": 25,
@@ -945,6 +1857,30 @@
     },
     {
       "key": {
+        "uuid": "3bed97ca_9c195165",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "fixed",
+      "parentUuid": "9b2123e5_ced15723",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 6
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1bfc537c_b212786f",
         "filename": "android/crashreport/main-crash-service.cpp",
         "patchSetId": 17
@@ -962,6 +1898,24 @@
     },
     {
       "key": {
+        "uuid": "fbf69f9c_e55b9a5f",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "fixed.",
+      "parentUuid": "1bfc537c_b212786f",
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "db271bf3_cdee7d1b",
         "filename": "android/crashreport/main-crash-service.cpp",
         "patchSetId": 17
@@ -973,6 +1927,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "I\u0027d prefer to have this as a first branch",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 111,
+        "endChar": 1
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b153384_53e50ecb",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "swapped",
+      "parentUuid": "db271bf3_cdee7d1b",
       "range": {
         "startLine": 108,
         "startChar": 0,
@@ -1008,6 +1986,30 @@
     },
     {
       "key": {
+        "uuid": "fbb05f0b_2155ca45",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "fixed",
+      "parentUuid": "db271bf3_6d1791d4",
+      "range": {
+        "startLine": 172,
+        "startChar": 3,
+        "endLine": 172,
+        "endChar": 64
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7b246ff3_eaf1a7ff",
         "filename": "android/scripts/build-breakpad.sh",
         "patchSetId": 17
@@ -1019,6 +2021,30 @@
       "writtenOn": "2015-11-20T23:51:06Z",
       "side": 1,
       "message": "do you really need a case here? :)",
+      "range": {
+        "startLine": 168,
+        "startChar": 0,
+        "endLine": 178,
+        "endChar": 12
+      },
+      "revId": "6031def60442459f99bcf0fbec95a2615ae72e2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbf69f9c_514994b1",
+        "filename": "android/scripts/build-breakpad.sh",
+        "patchSetId": 17
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-24T02:59:26Z",
+      "side": 1,
+      "message": "fixed",
+      "parentUuid": "7b246ff3_eaf1a7ff",
       "range": {
         "startLine": 168,
         "startChar": 0,
