@@ -33,7 +33,7 @@ ifneq ($(words $(_BUILD_ROOT)),1)
     $(error,Please fix the problem by reinstalling to a different location.)
 endif
 
-include $(_BUILD_ROOT)/android/build/main.make
+include $(_BUILD_ROOT)/android/build/emulator/main.make
 
 # END OF FILE
 

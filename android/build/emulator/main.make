@@ -38,16 +38,16 @@ ifeq ($(wildcard $(_BUILD_CONFIG_MAKE)),)
 endif
 
 include $(_BUILD_CONFIG_MAKE)
-include $(_BUILD_CORE_DIR)/definitions.make
+include $(_BUILD_CORE_DIR)/emulator/definitions.make
 
 .PHONY: all libraries executables clean clean-config clean-objs-dir \
         clean-executables clean-libraries
 
-CLEAR_VARS                := $(_BUILD_CORE_DIR)/clear_vars.make
-BUILD_HOST_EXECUTABLE     := $(_BUILD_CORE_DIR)/host_executable.make
-BUILD_HOST_STATIC_LIBRARY := $(_BUILD_CORE_DIR)/host_static_library.make
-BUILD_HOST_SHARED_LIBRARY := $(_BUILD_CORE_DIR)/host_shared_library.make
-PREBUILT_STATIC_LIBRARY   := $(_BUILD_CORE_DIR)/prebuilt_static_library.make
+CLEAR_VARS                := $(_BUILD_CORE_DIR)/emulator/clear_vars.make
+BUILD_HOST_EXECUTABLE     := $(_BUILD_CORE_DIR)/emulator/host_executable.make
+BUILD_HOST_STATIC_LIBRARY := $(_BUILD_CORE_DIR)/emulator/host_static_library.make
+BUILD_HOST_SHARED_LIBRARY := $(_BUILD_CORE_DIR)/emulator/host_shared_library.make
+PREBUILT_STATIC_LIBRARY   := $(_BUILD_CORE_DIR)/emulator/prebuilt_static_library.make
 
 _BUILD_DEPENDENCY_DIRS :=
 
