@@ -275,7 +275,7 @@ if [ -z "$NO_TESTS" ]; then
             echo "FAIL: Could not find \$CONFIG_MAKE !?"
             FAILURES="$FAILURES out-dir-config-make"
         else
-            WINDRES=$(awk '/^HOST_WINDRES:=/ { print $2; } $1 == "HOST_WINDRES" { print $3; }' $CONFIG_MAKE) ||
+            WINDRES=$(awk '/^BUILD_TARGET_WINDRES:=/ { print $2; } $1 == "BUILD_TARGET_WINDRES" { print $3; }' $CONFIG_MAKE) ||
             if true; then
                 echo "FAIL: Could not find host 'windres' program"
                 FAILURES="$FAILURES host-windres"
