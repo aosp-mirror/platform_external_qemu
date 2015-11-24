@@ -22,6 +22,29 @@
       "revId": "3d3c0b842672caab4881405717b37ffdaf1e974f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b167790_da9e3121",
+        "filename": "android/utils/path_system.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-24T17:38:13Z",
+      "side": 1,
+      "message": "this will keep all the \u0027../../././../\u0027 items, is that ok?",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 51,
+        "endChar": 5
+      },
+      "revId": "3d3c0b842672caab4881405717b37ffdaf1e974f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
