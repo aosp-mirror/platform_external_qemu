@@ -164,7 +164,7 @@ include $(LOCAL_PATH)/Makefile.crash-service.mk
 ###
 ###  GPU emulation libraries
 ###
-include $(SRC_PATH)/distrib/android-emugl/Android.mk
+include $(LOCAL_PATH)/distrib/android-emugl/Android.mk
 
 ##############################################################################
 ##############################################################################
