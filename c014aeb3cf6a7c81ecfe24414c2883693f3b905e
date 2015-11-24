@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fbf69f9c_d4856dc0",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-24T07:42:41Z",
+      "side": 1,
+      "message": "else is actually harmful here - it makes the rest of the function to be under a block",
+      "range": {
+        "startLine": 41,
+        "startChar": 4,
+        "endLine": 41,
+        "endChar": 12
+      },
+      "revId": "c014aeb3cf6a7c81ecfe24414c2883693f3b905e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbf69f9c_b48261b4",
+        "filename": "android/crashreport/CrashReporter_linux.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-24T07:42:41Z",
+      "side": 1,
+      "message": "nit: extra line break",
+      "range": {
+        "startLine": 65,
+        "startChar": 16,
+        "endLine": 66,
+        "endChar": 20
+      },
+      "revId": "c014aeb3cf6a7c81ecfe24414c2883693f3b905e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b2123e5_0517c530",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-24T07:42:41Z",
+      "side": 1,
+      "message": "nit: combine into a single statement?",
+      "range": {
+        "startLine": 131,
+        "startChar": 4,
+        "endLine": 132,
+        "endChar": 12
+      },
+      "revId": "c014aeb3cf6a7c81ecfe24414c2883693f3b905e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb2a67bd_5e97d12a",
+        "filename": "android/crashreport/crash-handler.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-24T07:42:41Z",
+      "side": 1,
+      "message": "nit: well, in plain C (void) is actually meaningful and means \u0027no parameters\u0027 as opposed to () \u003d \u0027any parameters\u0027",
+      "revId": "c014aeb3cf6a7c81ecfe24414c2883693f3b905e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b2123e5_45eedd73",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-24T07:42:41Z",
+      "side": 1,
+      "message": "does it mean non-Qt version never does anything at all?",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 62,
+        "endChar": 1
+      },
+      "revId": "c014aeb3cf6a7c81ecfe24414c2883693f3b905e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
