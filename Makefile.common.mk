@@ -44,7 +44,7 @@ endif
 
 # Required to access config-host.h
 EMULATOR_COMMON_INCLUDES := \
-    $(OBJS_DIR)/build
+    $(BUILD_OBJS_DIR)/build
 
 ##############################################################################
 ##############################################################################
@@ -93,7 +93,7 @@ ifeq ($(BUILD_TARGET_OS),windows)
 WINDRES_CPU_32 := i386
 WINDRES_CPU_64 := x86-64
 
-EMULATOR_ICON_OBJ := $(OBJS_DIR)/build/emulator_icon$(BUILD_TARGET_BITS).o
+EMULATOR_ICON_OBJ := $(BUILD_OBJS_DIR)/build/emulator_icon$(BUILD_TARGET_BITS).o
 $(EMULATOR_ICON_OBJ): PRIVATE_TARGET := $(WINDRES_CPU_$(BUILD_TARGET_BITS))
 $(EMULATOR_ICON_OBJ): $(LOCAL_PATH)/images/emulator_icon.rc
 	@echo "Windres ($(PRIVATE_TARGET)): $@"
@@ -147,7 +147,7 @@ $(eval $(call insert-windows-icon))
 endif
 
 # To avoid runtime linking issues on Linux and Windows, a custom copy of the
-# C++ standard library is copied to $(OBJS_DIR)/lib[64], a path that is added
+# C++ standard library is copied to $(BUILD_OBJS_DIR)/lib[64], a path that is added
 # to the runtime library search path by the top-level 'emulator' launcher
 # program before it spawns the emulation engine. However, 'emulator' cannot
 # use these versions of the library, so statically link it against the
