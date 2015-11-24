@@ -26,14 +26,6 @@ typedef enum {
     MAX_GLES_VERSION //Must be last
 } GLESVersion;
 
-template <class T>
-void swap(T& x,T& y) {
-     T temp;
-     temp = x;
-     x = y;
-     y = temp;
-}
-
 bool isPowerOf2(int num);
 
 // <EGL/egl.h> defines many types as 'void*' while they're really
