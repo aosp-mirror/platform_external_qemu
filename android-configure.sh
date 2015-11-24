@@ -603,7 +603,6 @@ feature_check_header HAVE_MACHINE_BSWAP_H "<machine/bswap.h>"
 feature_check_header HAVE_FNMATCH_H       "<fnmatch.h>"
 
 # check for Mingw version.
-MINGW_VERSION=
 if [ "$HOST_OS" = "windows" ]; then
 log "Mingw      : Probing for GCC version."
 GCC_VERSION=$($CC -v 2>&1 | awk '$1 == "gcc" && $2 == "version" { print $3; }')
@@ -614,21 +613,6 @@ MINGW_GCC_VERSION=$(( $GCC_MAJOR * 100 + $GCC_MINOR ))
 fi
 # Build the config.make file
 #
-
-case $BUILD_OS in
-    windows)
-        BUILD_EXEEXT=.exe
-        BUILD_DLLEXT=.dll
-        ;;
-    darwin)
-        BUILD_EXEEXT=
-        BUILD_DLLEXT=.dylib
-        ;;
-    *)
-        BUILD_EXEEXT=
-        BUILD_DLLEXT=
-        ;;
-esac
 
 # Prebuilts
 PREBUILT_SYMBOLS=
@@ -924,8 +908,6 @@ echo "BUILD_HOST_CFLAGS      := $BUILD_CFLAGS" >> $config_mk
 echo "BUILD_HOST_LDFLAGS     := $BUILD_LDFLAGS" >> $config_mk
 echo "BUILD_HOST_DUMPSYMS    := $DUMPSYMS" >> $config_mk
 
-PWD=`pwd`
-echo "SRC_PATH          := $PWD" >> $config_mk
 echo "CONFIG_COREAUDIO  := $PROBE_COREAUDIO" >> $config_mk
 echo "CONFIG_WINAUDIO   := $PROBE_WINAUDIO" >> $config_mk
 echo "CONFIG_ESD        := $PROBE_ESD" >> $config_mk
