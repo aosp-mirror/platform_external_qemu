@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1b153384_99832772",
+        "filename": "docs/ANDROID-CODING-STYLE.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T19:09:26Z",
+      "side": 1,
+      "message": "We are totally disregarding that guideline btw, at least in the UI code. All of our headers are named with a dash, i.e. emulator-qt-window.cpp.\n\nShould we do something about it?",
+      "range": {
+        "startLine": 344,
+        "startChar": 16,
+        "endLine": 344,
+        "endChar": 32
+      },
+      "revId": "c0a97cecbcf360a59237bd71c12b66bfb148e540",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
