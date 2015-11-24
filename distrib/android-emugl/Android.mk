@@ -26,10 +26,8 @@ EMUGL_COMMON_INCLUDES := $(EMUGL_PATH)/host/libs/Translator/include
 # Needed to ensure SIZE_MAX is properly defined when including <stdint.h>
 EMUGL_COMMON_CFLAGS += -D__STDC_LIMIT_MACROS=1
 
-# Define EMUGL_BUILD_DEBUG=1 in your environment to build a
-# debug version of the EmuGL host binaries.
-ifneq (,$(strip $(EMUGL_BUILD_DEBUG)))
-EMUGL_COMMON_CFLAGS += -O0 -g -DEMUGL_DEBUG=1
+ifneq (,$(strip $(BUILD_DEBUG)))
+EMUGL_COMMON_CFLAGS += -DEMUGL_DEBUG=1
 endif
 
 EMUGL_COMMON_CFLAGS += -DEMUGL_BUILD=1
@@ -39,10 +37,6 @@ endif
 ifeq (darwin,$(BUILD_TARGET_OS))
 EMUGL_COMMON_CFLAGS += -fvisibility=hidden
 endif
-
-# Uncomment the following line if you want to enable debug traces
-# in the GLES emulation libraries.
-# EMUGL_COMMON_CFLAGS += -DEMUGL_DEBUG=1
 
 # Include common definitions used by all the modules included later
 # in this build file. This contains the definition of all useful

@@ -34,7 +34,7 @@ include-if-bitness-64 = \
         $(eval include $1))
 
 BUILD_TARGET_CFLAGS := -g -falign-functions=0
-ifeq ($(BUILD_DEBUG_EMULATOR),true)
+ifeq ($(BUILD_DEBUG),true)
     BUILD_TARGET_CFLAGS += -O0
 else
     BUILD_TARGET_CFLAGS += -O2
