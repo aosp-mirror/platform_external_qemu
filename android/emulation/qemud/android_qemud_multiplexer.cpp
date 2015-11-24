@@ -26,6 +26,7 @@ void qemud_multiplexer_serial_recv(void* opaque,
                                    uint8_t* msg,
                                    int msglen) {
     QemudMultiplexer* m = (QemudMultiplexer*) opaque;
+    android::base::AutoLock _lock(m->lock);
     QemudClient* c = m->clients;
 
     /* dispatch to an existing client if possible
@@ -51,6 +52,8 @@ void qemud_multiplexer_serial_recv(void* opaque,
 int qemud_multiplexer_connect(QemudMultiplexer* m,
                               const char* service_name,
                               int channel_id) {
+    android::base::AutoLock _lock(m->lock);
+
     /* find the corresponding registered service by name */
     QemudService* sv = qemud_service_find(m->services, service_name);
     if (sv == NULL) {
@@ -66,8 +69,9 @@ int qemud_multiplexer_connect(QemudMultiplexer* m,
     }
 
     /* connect a new client to the service on the given channel */
-    if (qemud_service_connect_client(sv, channel_id, NULL) == NULL)
+    if (qemud_service_connect_client(sv, channel_id, NULL) == NULL) {
         return -1;
+    }
 
     return 0;
 }
@@ -131,6 +135,7 @@ void qemud_multiplexer_control_recv(void* opaque,
                                     int msglen,
                                     QemudClient* client) {
     QemudMultiplexer* mult = (QemudMultiplexer*) opaque;
+    android::base::AutoLock(mult->lock);
     uint8_t* msgend = msg + msglen;
     char tmp[64], * p = tmp, * end = p + sizeof(tmp);
 
@@ -243,8 +248,9 @@ void qemud_multiplexer_control_recv(void* opaque,
     }
 
     /* anything else, don't answer for legacy */
-    if (mult->serial->version == QEMUD_VERSION_LEGACY)
+    if (mult->serial->version == QEMUD_VERSION_LEGACY) {
         return;
+    }
 #endif /* SUPPORT_LEGACY_QEMUD */
 
     /* anything else is a problem */
@@ -308,6 +314,7 @@ static void qemud_service_save_count(Stream* f, QemudService* s) {
  * changes, there is no communication with the guest.
  */
 static int qemud_load_clients(Stream* f, QemudMultiplexer* m, int version) {
+
     /* Remove all clients, except on the control channel.*/
     qemud_multiplexer_disconnect_noncontrol(m);
 
@@ -341,6 +348,7 @@ int qemud_multiplexer_load(QemudMultiplexer* m,
                            Stream* stream,
                            int version) {
     int ret = 0;
+    android::base::AutoLock(m->lock);
 
     ret = qemud_serial_load(stream, m->serial);
     if (!ret) {
@@ -353,6 +361,8 @@ int qemud_multiplexer_load(QemudMultiplexer* m,
 }
 
 void qemud_multiplexer_save(QemudMultiplexer* m, Stream* stream) {
+    android::base::AutoLock(m->lock);
+
     /* save serial state if any */
     qemud_serial_save(stream, m->serial);
 
