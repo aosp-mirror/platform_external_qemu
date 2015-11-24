@@ -1,8 +1,8 @@
 LOCAL_BUILT_MODULE_SYM := $(LOCAL_BUILT_MODULE).sym
-$(LOCAL_BUILT_MODULE_SYM): PRIVATE_SYMTOOL := $(LOCAL_SYMTOOL)
+$(LOCAL_BUILT_MODULE_SYM): PRIVATE_DUMPSYMS := $(HOST_DUMPSYMS)
 $(LOCAL_BUILT_MODULE_SYM): $(LOCAL_BUILT_MODULE)
 	@ echo "Symbol file: $@"
-	@ $(PRIVATE_SYMTOOL) $< > $@ && \
+	@ $(PRIVATE_DUMPSYMS) $< > $@ && \
 	SYMB_CODE=`head -n1 $@ | cut -d" " -f4` && \
 	SYMB_NAME=`head -n1 $@ | cut -d" " -f5` && \
 	mkdir -p $(SYMBOLS_DIR)/$$SYMB_NAME/$$SYMB_CODE && \
