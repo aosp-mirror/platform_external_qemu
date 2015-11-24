@@ -21,7 +21,7 @@
 LOCAL_BUILT_MODULE := $(call local-library-path,$(LOCAL_MODULE))
 LOCAL_CC ?= $(call local-host-tool,CC)
 LOCAL_CXX ?= $(call local-host-tool,CXX)
-include $(BUILD_SYSTEM)/binary.make
+include $(_BUILD_CORE_DIR)/binary.make
 
 LOCAL_AR := $(strip $(LOCAL_AR))
 ifndef LOCAL_AR
