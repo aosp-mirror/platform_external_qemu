@@ -28,16 +28,15 @@
 
 _BUILD_CORE_DIR  := android/build
 OBJS_DIR      := objs
-CONFIG_MAKE   := $(OBJS_DIR)/build/config.make
-CONFIG_HOST_H := $(OBJS_DIR)/build/config-host.h
+_BUILD_CONFIG_MAKE := $(OBJS_DIR)/build/config.make
+_BUILD_CONFIG_HOST_H := $(OBJS_DIR)/build/config-host.h
 _BUILD_SYMBOLS_DIR := $(OBJS_DIR)/build/symbols
 
-ifeq ($(wildcard $(CONFIG_MAKE)),)
-    $(error "The configuration file '$(CONFIG_MAKE)' doesn't exist, please run the 'android-configure.sh' script")
+ifeq ($(wildcard $(_BUILD_CONFIG_MAKE)),)
+    $(error "The configuration file '$(_BUILD_CONFIG_MAKE)' doesn't exist, please run the 'android-configure.sh' script")
 endif
 
-include $(CONFIG_MAKE)
-
+include $(_BUILD_CONFIG_MAKE)
 include $(_BUILD_CORE_DIR)/definitions.make
 
 .PHONY: all libraries executables clean clean-config clean-objs-dir \
@@ -47,15 +46,15 @@ CLEAR_VARS                := $(_BUILD_CORE_DIR)/clear_vars.make
 BUILD_HOST_EXECUTABLE     := $(_BUILD_CORE_DIR)/host_executable.make
 BUILD_HOST_STATIC_LIBRARY := $(_BUILD_CORE_DIR)/host_static_library.make
 BUILD_HOST_SHARED_LIBRARY := $(_BUILD_CORE_DIR)/host_shared_library.make
-PREBUILT_STATIC_LIBRARY := $(_BUILD_CORE_DIR)/prebuilt_static_library.make
+PREBUILT_STATIC_LIBRARY   := $(_BUILD_CORE_DIR)/prebuilt_static_library.make
 
-DEPENDENCY_DIRS :=
+_BUILD_DEPENDENCY_DIRS :=
 
 all: libraries executables symbols
-EXECUTABLES :=
-SYMBOLS     :=
-LIBRARIES   :=
-INTERMEDIATE_SYMBOLS :=
+_BUILD_EXECUTABLES :=
+_BUILD_SYMBOLS :=
+_BUILD_LIBRARIES   :=
+_BUILD_INTERMEDIATE_SYMBOLS :=
 
 clean: clean-intermediates
 
@@ -64,16 +63,17 @@ distclean: clean clean-config
 # let's roll
 include Makefile.top.mk
 
-libraries: $(LIBRARIES)
-executables: $(EXECUTABLES)
-symbols: $(INTERMEDIATE_SYMBOLS) $(SYMBOLS)
+libraries: $(_BUILD_LIBRARIES)
+executables: $(_BUILD_EXECUTABLES)
+symbols: $(_BUILD_INTERMEDIATE_SYMBOLS) $(_BUILD_SYMBOLS)
 
 clean-intermediates:
-	rm -rf $(OBJS_DIR)/intermediates $(EXECUTABLES) $(LIBRARIES) $(SYMBOLS) $(_BUILD_SYMBOLS_DIR)
+	rm -rf $(OBJS_DIR)/intermediates $(_BUILD_EXECUTABLES) \
+	    $(_BUILD_LIBRARIES) $(_BUILD_SYMBOLS) $(_BUILD_SYMBOLS_DIR)
 
 clean-config:
-	rm -f $(CONFIG_MAKE) $(CONFIG_HOST_H)
+	rm -f $(_BUILD_CONFIG_MAKE) $(_BUILD_CONFIG_HOST_H)
 
 # include dependency information
-DEPENDENCY_DIRS := $(sort $(DEPENDENCY_DIRS))
--include $(wildcard $(DEPENDENCY_DIRS:%=%/*.d))
+_BUILD_DEPENDENCY_DIRS := $(sort $(_BUILD_DEPENDENCY_DIRS))
+-include $(wildcard $(_BUILD_DEPENDENCY_DIRS:%=%/*.d))

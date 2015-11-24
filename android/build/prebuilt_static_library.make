@@ -21,4 +21,4 @@ $(LOCAL_BUILT_MODULE): $(LOCAL_SRC_FILES)
 	@echo "PrebuiltLibrary: $@"
 	$(hide) cp -f $< $@
 
-LIBRARIES += $(LOCAL_BUILT_MODULE)
+_BUILD_LIBRARIES += $(LOCAL_BUILT_MODULE)

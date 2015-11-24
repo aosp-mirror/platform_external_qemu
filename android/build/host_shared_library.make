@@ -43,7 +43,7 @@ $(LOCAL_BUILT_MODULE): $(LOCAL_OBJECTS) $(LOCAL_LIBRARIES)
 LOCAL_GENERATE_SYMBOLS := true
 include $(_BUILD_CORE_DIR)/symbols.make
 
-EXECUTABLES += $(LOCAL_BUILT_MODULE)
+_BUILD_EXECUTABLES += $(LOCAL_BUILT_MODULE)
 $(LOCAL_BUILT_MODULE): $(foreach lib,$(LOCAL_STATIC_LIBRARIES),$(call local-library-path,$(lib)))
 $(LOCAL_BUILT_MODULE): $(foreach lib,$(LOCAL_SHARED_LIBRARIES),$(call local-shared-library-path,$(lib)))
 
