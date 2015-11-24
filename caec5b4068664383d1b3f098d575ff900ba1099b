@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9b7da3ef_cb5209e7",
+        "filename": "android/base/files/PathUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-24T18:32:44Z",
+      "side": 1,
+      "message": "Actually this mimics os.path.join in Python and I think it makes sense.",
+      "parentUuid": "fbf69f9c_14a895f6",
+      "range": {
+        "startLine": 154,
+        "startChar": 0,
+        "endLine": 156,
+        "endChar": 5
+      },
+      "revId": "caec5b4068664383d1b3f098d575ff900ba1099b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3b167790_9a615918",
         "filename": "android/base/files/PathUtils.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-24T17:28:40Z",
       "side": 1,
       "message": "there has to be (or needs to be) a helper for this",
+      "range": {
+        "startLine": 161,
+        "startChar": 19,
+        "endLine": 161,
+        "endChar": 56
+      },
+      "revId": "caec5b4068664383d1b3f098d575ff900ba1099b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b80ef13_2af1dfc3",
+        "filename": "android/base/files/PathUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-24T18:32:44Z",
+      "side": 1,
+      "message": "Yes, android::base::System::kDirSeparator, will update.",
+      "parentUuid": "3b167790_9a615918",
       "range": {
         "startLine": 161,
         "startChar": 19,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "fbbdbfca_16735a86",
+        "filename": "android/utils/path_system.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-24T18:32:44Z",
+      "side": 1,
+      "message": "Yeah, that\u0027s an excellent idea for another patch :)",
+      "parentUuid": "3bed97ca_228f54a3",
+      "range": {
+        "startLine": 74,
+        "startChar": 19,
+        "endLine": 74,
+        "endChar": 26
+      },
+      "revId": "caec5b4068664383d1b3f098d575ff900ba1099b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bbc4277e_ff89b79e",
         "filename": "android/utils/path_system.cpp",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2015-11-24T17:28:40Z",
       "side": 1,
       "message": "AFAIK we were going to get rid of these, didn\u0027t we?",
+      "range": {
+        "startLine": 95,
+        "startChar": 11,
+        "endLine": 95,
+        "endChar": 18
+      },
+      "revId": "caec5b4068664383d1b3f098d575ff900ba1099b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbbdbfca_566dd29a",
+        "filename": "android/utils/path_system.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-24T18:32:44Z",
+      "side": 1,
+      "message": "yes, but better do this in a single specific patch. For now keep it. Same for ABool and a few others like that.",
+      "parentUuid": "bbc4277e_ff89b79e",
       "range": {
         "startLine": 95,
         "startChar": 11,
