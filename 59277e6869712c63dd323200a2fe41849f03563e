@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "3b167790_bf39a781",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T06:20:04Z",
+      "side": 1,
+      "message": "It means that the key event would\u0027ve generated text. I.e. Shift+a would\u0027ve generated text, but ctrl+f11 wouldn\u0027t have.",
+      "parentUuid": "5b25eb9e_7ac6386e",
+      "range": {
+        "startLine": 171,
+        "startChar": 8,
+        "endLine": 171,
+        "endChar": 34
+      },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "76d4867d_d6d4a16a",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -117,6 +141,54 @@
     },
     {
       "key": {
+        "uuid": "fbb05f0b_cf0e4d7c",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T06:20:04Z",
+      "side": 1,
+      "message": "apparently 32 is the size of the target buffer (dont ask why I dont know), so the whole line should be interpreted as \"copy up to 32 bytes of the text that this event would\u0027ve generated into the event\u0027s buffer, if there are not enough bytes, pad the rest of the buffer with zeros.\"",
+      "parentUuid": "76d4867d_d6d4a16a",
+      "range": {
+        "startLine": 174,
+        "startChar": 88,
+        "endLine": 174,
+        "endChar": 90
+      },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bed97ca_6222fce5",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T06:20:04Z",
+      "side": 1,
+      "message": "I did not write this code, but good catch.\nIf the user inputs text in some non-ascii encoding it might contain zero bytes which are not \"end-of-string\" markers.  UTF8 is safe in that regard, so I made sure to always convert to UTF8 before doing this copying.",
+      "parentUuid": "5b25eb9e_dac78c6a",
+      "range": {
+        "startLine": 174,
+        "startChar": 61,
+        "endLine": 174,
+        "endChar": 86
+      },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7bb8efa6_479e4e7a",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -128,6 +200,30 @@
       "writtenOn": "2015-11-20T16:21:26Z",
       "side": 1,
       "message": "hmm x 2",
+      "range": {
+        "startLine": 715,
+        "startChar": 0,
+        "endLine": 715,
+        "endChar": 19
+      },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbb05f0b_84bf0cec",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 715,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T06:20:04Z",
+      "side": 1,
+      "message": "removed",
+      "parentUuid": "7bb8efa6_479e4e7a",
       "range": {
         "startLine": 715,
         "startChar": 0,
@@ -163,6 +259,30 @@
     },
     {
       "key": {
+        "uuid": "db271bf3_1f45574a",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 741,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T06:20:04Z",
+      "side": 1,
+      "message": "removed",
+      "parentUuid": "5b2a4b7b_8d9424b8",
+      "range": {
+        "startLine": 737,
+        "startChar": 0,
+        "endLine": 741,
+        "endChar": 14
+      },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1ba9b35f_a42dc2d0",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -180,6 +300,24 @@
     },
     {
       "key": {
+        "uuid": "9b2123e5_e509d13f",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 744,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T06:20:04Z",
+      "side": 1,
+      "message": "Let\u0027s reconsider this\n\nThe alternative is \n\nif (s.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool() \u0026\u0026\n         mGrabKeyboardInput \u0026\u0026 mouseInside()) {\n   forwardKeyEventToEmulator(type, event);\n} else if (!tool_window-\u003ehandleQtKeyEvent(event)) {\n  forwardKeyEventToEmulator(type, event); \n}\n\nwhich looks repetitive and verbose to me. Short-circuit evaluation is standard behavior, and I think it helps keep the statement more concise and readable in this case.",
+      "parentUuid": "1ba9b35f_a42dc2d0",
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "76d4867d_36c09da1",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -191,6 +329,30 @@
       "writtenOn": "2015-11-20T16:21:26Z",
       "side": 1,
       "message": "nit",
+      "range": {
+        "startLine": 746,
+        "startChar": 5,
+        "endLine": 746,
+        "endChar": 6
+      },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbf69f9c_14037552",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 746,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T06:20:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "76d4867d_36c09da1",
       "range": {
         "startLine": 746,
         "startChar": 5,
@@ -274,6 +436,78 @@
     },
     {
       "key": {
+        "uuid": "5b1b2bb8_ed07f69a",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T06:20:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3baaf753_459e4a7a",
+      "range": {
+        "startLine": 64,
+        "startChar": 12,
+        "endLine": 64,
+        "endChar": 13
+      },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbc4277e_7f37e725",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T06:20:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3baaf753_45888a09",
+      "range": {
+        "startLine": 64,
+        "startChar": 12,
+        "endLine": 64,
+        "endChar": 13
+      },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b153384_3e73f986",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T06:20:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bb33471f_41ec12ea",
+      "range": {
+        "startLine": 64,
+        "startChar": 12,
+        "endLine": 64,
+        "endChar": 13
+      },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b153384_c4213e7d",
         "filename": "android/skin/qt/extended.ui",
         "patchSetId": 1
@@ -297,6 +531,30 @@
     },
     {
       "key": {
+        "uuid": "5b1b2bb8_2dc74e94",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 2434,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T06:20:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1b153384_c4213e7d",
+      "range": {
+        "startLine": 2434,
+        "startChar": 13,
+        "endLine": 2434,
+        "endChar": 44
+      },
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1ba9b35f_44716eeb",
         "filename": "android/skin/qt/extended.ui",
         "patchSetId": 1
@@ -308,6 +566,24 @@
       "writtenOn": "2015-11-20T17:37:01Z",
       "side": 1,
       "message": "(*This* spontaneous QtDesigner change annoys me more.)",
+      "revId": "59277e6869712c63dd323200a2fe41849f03563e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bed97ca_0231782e",
+        "filename": "android/skin/qt/extended.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 2502,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T06:20:04Z",
+      "side": 1,
+      "message": "should be fixed now",
+      "parentUuid": "1ba9b35f_44716eeb",
       "revId": "59277e6869712c63dd323200a2fe41849f03563e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
