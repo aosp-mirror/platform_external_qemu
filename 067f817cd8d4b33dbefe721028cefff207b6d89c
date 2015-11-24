@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "bbc4277e_5f9543fe",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 717,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T07:19:46Z",
+      "side": 1,
+      "message": "Because this code was moved here from elsewhere in the file :)",
+      "parentUuid": "db271bf3_7f461337",
+      "range": {
+        "startLine": 717,
+        "startChar": 3,
+        "endLine": 717,
+        "endChar": 23
+      },
+      "revId": "067f817cd8d4b33dbefe721028cefff207b6d89c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbb05f0b_cf6acdf4",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-24T06:47:09Z",
       "side": 1,
       "message": "this one should be first as it\u0027s the one which is easiest to check",
+      "range": {
+        "startLine": 739,
+        "startChar": 8,
+        "endLine": 739,
+        "endChar": 26
+      },
+      "revId": "067f817cd8d4b33dbefe721028cefff207b6d89c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb2a67bd_1e8d5919",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 739,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T07:19:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fbb05f0b_cf6acdf4",
       "range": {
         "startLine": 739,
         "startChar": 8,
