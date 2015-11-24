@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fbf69f9c_14a895f6",
+        "filename": "android/base/files/PathUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-24T17:28:40Z",
+      "side": 1,
+      "message": "this is a little bit unexpected",
+      "range": {
+        "startLine": 154,
+        "startChar": 0,
+        "endLine": 156,
+        "endChar": 5
+      },
+      "revId": "caec5b4068664383d1b3f098d575ff900ba1099b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b167790_9a615918",
+        "filename": "android/base/files/PathUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-24T17:28:40Z",
+      "side": 1,
+      "message": "there has to be (or needs to be) a helper for this",
+      "range": {
+        "startLine": 161,
+        "startChar": 19,
+        "endLine": 161,
+        "endChar": 56
+      },
+      "revId": "caec5b4068664383d1b3f098d575ff900ba1099b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bed97ca_228f54a3",
+        "filename": "android/utils/path_system.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-24T17:28:40Z",
+      "side": 1,
+      "message": "String::release() could be handy here - if it existed :)",
+      "range": {
+        "startLine": 74,
+        "startChar": 19,
+        "endLine": 74,
+        "endChar": 26
+      },
+      "revId": "caec5b4068664383d1b3f098d575ff900ba1099b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbc4277e_ff89b79e",
+        "filename": "android/utils/path_system.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-24T17:28:40Z",
+      "side": 1,
+      "message": "AFAIK we were going to get rid of these, didn\u0027t we?",
+      "range": {
+        "startLine": 95,
+        "startChar": 11,
+        "endLine": 95,
+        "endChar": 18
+      },
+      "revId": "caec5b4068664383d1b3f098d575ff900ba1099b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
