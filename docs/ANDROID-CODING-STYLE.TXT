@@ -347,18 +347,27 @@ ask on the public mailing list for information.
     'lower_underscore_spacing.h' instead. That's actually a simple way to
     differentiate between both header types.
 
-  - The header inclusion guard macro should reflect the location of the
-    file under external/qemu/, use ONLY_CAPITAL_LETTERS and end with a '_H'
-    suffix, and *no* leading/trailing underscores, e.g.:
+  - Don't use header inclusion guard macros, use '#pragma once' since it's
+    supported by all our compilers now. I.e.
 
-        external/qemu/android/stuff/FooBar.h:
+        // Copyright disclaimer blah blah
+        // ....
 
-          #ifndef ANDROID_STUFF_FOO_BAR_H
-          #define ANDROID_STUFF_FOO_BAR_H
+        #pragma once
 
-          ...
+        ... declarations
 
-          #endif  // ANDROID_STUFF_FOO_BAR_H
+    Instead of:
+
+        // Copyright disclaimer blah blah
+        // ....
+
+        #ifndef ANDROID_STUFF_FOO_BAR_H
+        #define ANDROID_STUFF_FOO_BAR_H
+
+        ... declarations
+
+        #endif  // ANDROID_STUFF_FOO_BAR_H
 
   - C++ namespace names are 'all_lowercase', and avoid using underscores
     if possible. Nested namespaces are ok, but use 'android' as the top-level
