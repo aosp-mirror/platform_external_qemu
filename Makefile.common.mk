@@ -95,7 +95,7 @@ EMULATOR_ICON_OBJ := $(OBJS_DIR)/build/emulator_icon$(HOST_BITS).o
 $(EMULATOR_ICON_OBJ): PRIVATE_TARGET := $(WINDRES_CPU_$(HOST_BITS))
 $(EMULATOR_ICON_OBJ): $(LOCAL_PATH)/images/emulator_icon.rc
 	@echo "Windres ($(PRIVATE_TARGET)): $@"
-	$(hide) $(MY_WINDRES) --target=pe-$(PRIVATE_TARGET) $< -I $(LOCAL_PATH)/images -o $@
+	$(hide) $(BUILD_TARGET_WINDRES) --target=pe-$(PRIVATE_TARGET) $< -I $(LOCAL_PATH)/images -o $@
 
 # Usage: $(eval $(call insert-windows-icon))
 define insert-windows-icon

@@ -60,11 +60,11 @@ my-dir = $(call parent-dir,$(lastword $(MAKEFILE_LIST)))
 intermediates-dir-for = $(OBJS_DIR)/build/intermediates$(1)/$(2)
 
 # Return the name of a given host tool, based on the value of
-# LOCAL_HOST_BUILD. If the variable is defined, return $(BUILD_$1),
-# otherwise return $(HOST_$1).
+# LOCAL_HOST_BUILD. If the variable is defined, return $(BUILD_HOST_$1),
+# otherwise return $(BUILD_TARGET_$1).
 # $1: Tool name (e.g. CC, LD, etc...)
 #
-local-host-tool = $(if $(strip $(LOCAL_HOST_BUILD)),$(BUILD_$1),$(MY_$1))
+local-host-tool = $(if $(strip $(LOCAL_HOST_BUILD)),$(BUILD_HOST_$1),$(BUILD_TARGET_$1))
 local-host-exe = $(call local-host-tool,EXEEXT)
 local-host-dll = $(call local-host-tool,DLLEXT)
 
@@ -258,7 +258,7 @@ _DST := $(2)
 _BUILD_EXECUTABLES += $$(_DST)
 $$(_DST): PRIVATE_DST := $$(_DST)
 $$(_DST): PRIVATE_SRC := $$(_SRC)
-$$(_DST): PRIVATE_OBJCOPY := $$(HOST_OBJCOPY)
+$$(_DST): PRIVATE_OBJCOPY := $$(BUILD_TARGET_OBJCOPY)
 $$(_DST): PRIVATE_OBJCOPY_FLAGS := $(3)
 $$(_DST): $$(_SRC)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
@@ -300,7 +300,7 @@ define build-install-symbol
 _MODULE := $(1)
 _INTERMEDIATE_SYMBOL := $$(_MODULE).sym
 _BUILD_INTERMEDIATE_SYMBOLS += $$(_INTERMEDIATE_SYMBOL)
-$$(_INTERMEDIATE_SYMBOL): PRIVATE_DUMPSYMS := $$(HOST_DUMPSYMS)
+$$(_INTERMEDIATE_SYMBOL): PRIVATE_DUMPSYMS := $$(BUILD_TARGET_DUMPSYMS)
 $$(_INTERMEDIATE_SYMBOL): PRIVATE_MODULE  := $$(_MODULE)
 $$(_INTERMEDIATE_SYMBOL): PRIVATE_INTERMEDIATE_SYMBOL := $$(_INTERMEDIATE_SYMBOL)
 $$(_INTERMEDIATE_SYMBOL): $$(_MODULE)

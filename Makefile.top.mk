@@ -33,73 +33,67 @@ include-if-bitness-64 = \
     $(if $(strip $(LOCAL_IGNORE_BITNESS)$(filter true,$(LOCAL_HOST_BUILD))$(EMULATOR_BUILD_64BITS)),\
         $(eval include $1))
 
-MY_CC  := $(HOST_CC)
-MY_CXX := $(HOST_CXX)
-MY_LD  := $(HOST_LD)
-MY_AR  := $(HOST_AR)
-MY_WINDRES := $(HOST_WINDRES)
-
-MY_CFLAGS := -g -falign-functions=0
+BUILD_TARGET_CFLAGS := -g -falign-functions=0
 ifeq ($(BUILD_DEBUG_EMULATOR),true)
-    MY_CFLAGS += -O0
+    BUILD_TARGET_CFLAGS += -O0
 else
-    MY_CFLAGS += -O2
+    BUILD_TARGET_CFLAGS += -O2
 endif
 
 # Generate position-independent binaries. Don't add -fPIC when targetting
 # Windows, because newer toolchain complain loudly about it, since all
 # Windows code is position-independent.
 ifneq (windows,$(HOST_OS))
-  MY_CFLAGS += -fPIC
+  BUILD_TARGET_CFLAGS += -fPIC
 endif
 
 # Ensure that <inttypes.h> always defines all interesting macros.
-MY_CFLAGS += -D__STDC_LIMIT_MACROS=1 -D__STDC_FORMAT_MACROS=1
+BUILD_TARGET_CFLAGS += -D__STDC_LIMIT_MACROS=1 -D__STDC_FORMAT_MACROS=1
 
-MY_CFLAGS32 :=
-MY_CFLAGS64 :=
+BUILD_TARGET_CFLAGS32 :=
+BUILD_TARGET_CFLAGS64 :=
 
-MY_LDLIBS :=
-MY_LDLIBS32 :=
-MY_LDLIBS64 :=
+BUILD_TARGET_LDLIBS :=
+BUILD_TARGET_LDLIBS32 :=
+BUILD_TARGET_LDLIBS64 :=
 
-MY_LDFLAGS :=
-MY_LDFLAGS32 :=
-MY_LDFLAGS64 :=
+BUILD_TARGET_LDFLAGS :=
+BUILD_TARGET_LDFLAGS32 :=
+BUILD_TARGET_LDFLAGS64 :=
 
 # Enable large-file support (i.e. make off_t a 64-bit value).
 # Fun fact: The mingw32 toolchain still uses 32-bit off_t values by default
 # even when generating Win64 binaries, so modify MY_CFLAGS instead of
 # MY_CFLAGS32.
-MY_CFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
+BUILD_TARGET_CFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
 
 ifeq ($(HOST_OS),freebsd)
-  MY_CFLAGS += -I /usr/local/include
+  BUILD_TARGET_CFLAGS += -I /usr/local/include
 endif
 
 ifeq ($(HOST_OS),windows)
   # we need Win32 features that are available since Windows 2000 Professional/Server (NT 5.0)
-  MY_CFLAGS += -DWINVER=0x501
+  BUILD_TARGET_CFLAGS += -DWINVER=0x501
   MY_LDFLAGS += -Xlinker --build-id
   # LARGEADDRESSAWARE gives more address space to 32-bit process
-  MY_LDFLAGS32 += -Xlinker --large-address-aware
+  BUILD_TARGET_LDFLAGS32 += -Xlinker --large-address-aware
 endif
 
 ifeq ($(HOST_OS),darwin)
-    MY_CFLAGS += -D_DARWIN_C_SOURCE=1
+    BUILD_TARGET_CFLAGS += -D_DARWIN_C_SOURCE=1
     # Clang complains about this flag being not useful anymore.
-    MY_CFLAGS := $(filter-out -falign-functions=0,$(MY_CFLAGS))
+    BUILD_TARGET_CFLAGS := $(filter-out -falign-functions=0,$(BUILD_TARGET_CFLAGS))
 endif
 
 # NOTE: The following definitions are only used by the standalone build.
-MY_EXEEXT :=
-MY_DLLEXT := .so
+BUILD_TARGET_EXEEXT :=
+BUILD_TARGET_DLLEXT := .so
 ifeq ($(HOST_OS),windows)
-  MY_EXEEXT := .exe
-  MY_DLLEXT := .dll
+  BUILD_TARGET_EXEEXT := .exe
+  BUILD_TARGET_DLLEXT := .dll
 endif
 ifeq ($(HOST_OS),darwin)
-  MY_DLLEXT := .dylib
+  BUILD_TARGET_DLLEXT := .dylib
 endif
 
 # Some CFLAGS below use -Wno-missing-field-initializers but this is not
@@ -118,16 +112,16 @@ ifeq ($(HOST_OS),windows)
   # Ensure that printf() et al use GNU printf format specifiers as required
   # by QEMU. This is important when using the newer Mingw64 cross-toolchain.
   # See http://sourceforge.net/apps/trac/mingw-w64/wiki/gnu%20printf
-  MY_CFLAGS += -D__USE_MINGW_ANSI_STDIO=1
+  BUILD_TARGET_CFLAGS += -D__USE_MINGW_ANSI_STDIO=1
 endif
 
 # Enable warning, except those related to missing field initializers
 # (the QEMU coding style loves using these).
 #
-MY_CFLAGS += -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
+BUILD_TARGET_CFLAGS += -Wall $(GCC_W_NO_MISSING_FIELD_INITIALIZERS)
 
 # Needed to build block.c on Linux/x86_64.
-MY_CFLAGS += -D_GNU_SOURCE=1
+BUILD_TARGET_CFLAGS += -D_GNU_SOURCE=1
 
 # A useful function that can be used to start the declaration of a host
 # module. Avoids repeating the same stuff again and again.

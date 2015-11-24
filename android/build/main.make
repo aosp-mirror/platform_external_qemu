@@ -26,8 +26,9 @@
 # even if we're not using the Android build system.
 #
 
+OBJS_DIR := objs
+
 _BUILD_CORE_DIR  := android/build
-OBJS_DIR      := objs
 _BUILD_CONFIG_MAKE := $(OBJS_DIR)/build/config.make
 _BUILD_CONFIG_HOST_H := $(OBJS_DIR)/build/config-host.h
 _BUILD_SYMBOLS_DIR := $(OBJS_DIR)/build/symbols
