@@ -162,7 +162,7 @@ end-emulator-program = \
     $(eval $(end-emulator-module-ev)) \
 
 define end-emulator-module-ev
-LOCAL_BITS := $$(HOST_BITS)
+LOCAL_BITS := $$(BUILD_TARGET_BITS)
 include $$(LOCAL_BUILD_FILE)
 endef
 
@@ -223,16 +223,16 @@ endif  # BUILD_TARGET_OS != darwin
 endef
 
 ifdef EMULATOR_BUILD_32BITS
-HOST_BITS := 32
+BUILD_TARGET_BITS := 32
 BUILD_TARGET_ARCH := x86
-HOST_SUFFIX :=
+BUILD_TARGET_SUFFIX :=
 include $(LOCAL_PATH)/Makefile.common.mk
 endif
 
 ifdef EMULATOR_BUILD_64BITS
-HOST_BITS := 64
+BUILD_TARGET_BITS := 64
 BUILD_TARGET_ARCH := x86_64
-HOST_SUFFIX := 64
+BUILD_TARGET_SUFFIX := 64
 
 include $(LOCAL_PATH)/Makefile.common.mk
 endif

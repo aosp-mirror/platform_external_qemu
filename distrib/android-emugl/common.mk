@@ -193,7 +193,7 @@ emugl-dump-module = \
 #    $(call emugl-gen-decoder,<input-dir>,<basename>)
 #
 emugl-gen-decoder = \
-    $(eval _emugl_out := $(call intermediates-dir-for,$(HOST_BITS),$2))\
+    $(eval _emugl_out := $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$2))\
     $(call emugl-gen-decoder-generic,$(_emugl_out),$1,$2)\
     $(call emugl-export,C_INCLUDES,$(_emugl_out))
 

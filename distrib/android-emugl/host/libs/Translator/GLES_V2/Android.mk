@@ -9,7 +9,7 @@ host_common_SRC_FILES := \
 
 
 ### GLES_V2 host implementation (On top of OpenGL) ########################
-$(call emugl-begin-host-shared-library,lib$(HOST_SUFFIX)GLES_V2_translator)
+$(call emugl-begin-host-shared-library,lib$(BUILD_TARGET_SUFFIX)GLES_V2_translator)
 $(call emugl-import, libGLcommon)
 
 LOCAL_SRC_FILES := $(host_common_SRC_FILES)

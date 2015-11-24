@@ -229,7 +229,7 @@ $(call end-emulator-library)
 ###
 ###
 
-$(call start-emulator-program, emulator$(HOST_SUFFIX)-$(EMULATOR_TARGET_ARCH))
+$(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)-$(EMULATOR_TARGET_ARCH))
 
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \

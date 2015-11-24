@@ -64,7 +64,7 @@ EMULATOR_COMMON_INCLUDES := \
 
 # First, define a rule to generate a dummy "emulator_hw_config_defs" module
 # which purpose is simply to host the generated header in its output directory.
-intermediates := $(call intermediates-dir-for,$(HOST_BITS),emulator_hw_config_defs)
+intermediates := $(call intermediates-dir-for,$(BUILD_TARGET_BITS),emulator_hw_config_defs)
 
 QEMU_HARDWARE_PROPERTIES_INI := $(LOCAL_PATH)/android/avd/hardware-properties.ini
 QEMU_HW_CONFIG_DEFS_H := $(intermediates)/android/avd/hw-config-defs.h
@@ -93,8 +93,8 @@ ifeq ($(BUILD_TARGET_OS),windows)
 WINDRES_CPU_32 := i386
 WINDRES_CPU_64 := x86-64
 
-EMULATOR_ICON_OBJ := $(OBJS_DIR)/build/emulator_icon$(HOST_BITS).o
-$(EMULATOR_ICON_OBJ): PRIVATE_TARGET := $(WINDRES_CPU_$(HOST_BITS))
+EMULATOR_ICON_OBJ := $(OBJS_DIR)/build/emulator_icon$(BUILD_TARGET_BITS).o
+$(EMULATOR_ICON_OBJ): PRIVATE_TARGET := $(WINDRES_CPU_$(BUILD_TARGET_BITS))
 $(EMULATOR_ICON_OBJ): $(LOCAL_PATH)/images/emulator_icon.rc
 	@echo "Windres ($(PRIVATE_TARGET)): $@"
 	$(hide) $(BUILD_TARGET_WINDRES) --target=pe-$(PRIVATE_TARGET) $< -I $(LOCAL_PATH)/images -o $@
@@ -126,7 +126,7 @@ include $(LOCAL_PATH)/Makefile.qemu1-target.mk
 
 # NOTE: Build as 32-bit or 64-bit executable, depending on the value of
 #       EMULATOR_PROGRAM_BITNESS.
-ifeq ($(HOST_BITS),$(EMULATOR_PROGRAM_BITNESS))
+ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
 $(call start-emulator-program, emulator)
 
 LOCAL_SRC_FILES := \
@@ -155,7 +155,7 @@ endif
 $(call local-link-static-c++lib)
 
 $(call end-emulator-program)
-endif  # HOST_BITS == EMULATOR_PROGRAM_BITNESS
+endif  # BUILD_TARGET_BITS == EMULATOR_PROGRAM_BITNESS
 
 include $(LOCAL_PATH)/Makefile.crash-service.mk
 

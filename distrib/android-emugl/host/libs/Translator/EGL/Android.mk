@@ -37,7 +37,7 @@ host_common_SRC_FILES :=      \
      ClientAPIExts.cpp
 
 ### EGL host implementation ########################
-$(call emugl-begin-host-shared-library,lib$(HOST_SUFFIX)EGL_translator)
+$(call emugl-begin-host-shared-library,lib$(BUILD_TARGET_SUFFIX)EGL_translator)
 $(call emugl-import,libGLcommon)
 
 LOCAL_LDLIBS += $(host_common_LDLIBS)

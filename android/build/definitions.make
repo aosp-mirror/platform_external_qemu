@@ -72,22 +72,22 @@ local-host-define = $(if $(strip $(LOCAL_$1)),,$(eval LOCAL_$1 := $$(call local-
 
 # Return the directory containing the intermediate files for the current
 # module. LOCAL_MODULE must be defined before calling this.
-local-intermediates-dir = $(call intermediates-dir-for,$(HOST_BITS),$(LOCAL_MODULE))
+local-intermediates-dir = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(LOCAL_MODULE))
 
 # Location of intermediate static libraries during build.
-local-library-path = $(call intermediates-dir-for,$(HOST_BITS),$(1))/$(1).a
+local-library-path = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(1))/$(1).a
 
 # Location of unstripped executables during build.
-local-executable-path = $(call intermediates-dir-for,$(HOST_BITS),$(1))/$(1)$(call local-host-tool,EXEEXT)
+local-executable-path = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(1))/$(1)$(call local-host-tool,EXEEXT)
 
 # Location of unstripped shared libraries during build.
-local-shared-library-path = $(call intermediates-dir-for,$(HOST_BITS),$(1))/$(1)$(call local-host-tool,DLLEXT)
+local-shared-library-path = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(1))/$(1)$(call local-host-tool,DLLEXT)
 
 # Location of final (potentially stripped) executables.
 local-executable-install-path = $(OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)$(1)$(call local-host-tool,EXEEXT)
 
 # Location of final (potentially stripped) shared libraries.
-local-shared-library-install-path = $(OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR),lib$(HOST_SUFFIX))/$(1)$(call local-host-tool,DLLEXT)
+local-shared-library-install-path = $(OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR),lib$(BUILD_TARGET_SUFFIX))/$(1)$(call local-host-tool,DLLEXT)
 
 ldlibs_start_whole := -Wl,--whole-archive
 ldlibs_end_whole := -Wl,--no-whole-archive
