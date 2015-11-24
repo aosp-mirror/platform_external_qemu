@@ -111,13 +111,13 @@ local-static-libraries-ldlibs-linux = $(strip \
 
 local-static-libraries-ldlibs-windows =  $(local-static-libraries-ldlibs-linux)
 
-local-static-libraries-ldlibs = $(local-static-libraries-ldlibs-$(HOST_OS))
+local-static-libraries-ldlibs = $(local-static-libraries-ldlibs-$(BUILD_TARGET_OS))
 
 # Expand to a shell statement that changes the runtime library search path.
 # Note that this is only used for Qt-related stuff, and on Windows, the
 # Windows libraries are placed under bin/ instead of lib/ so there is no
 # point in changing the PATH variable.
-set-host-library-search-path = $(call set-host-library-search-path-$(HOST_OS),$1)
+set-host-library-search-path = $(call set-host-library-search-path-$(BUILD_TARGET_OS),$1)
 set-host-library-search-path-linux = LD_LIBRARY_PATH=$1
 set-host-library-search-path-darwin = DYLD_LIBRARY_PATH=$1
 set-host-library-search-path-windows =
@@ -264,11 +264,11 @@ $$(_DST): $$(_SRC)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Install: $$(PRIVATE_DST)"
 ifeq (true,$$(EMULATOR_STRIP_BINARIES))
-ifeq (darwin,$$(HOST_OS))
+ifeq (darwin,$$(BUILD_TARGET_OS))
 	$(hide) strip -S -o $$(PRIVATE_DST) $$(PRIVATE_SRC)
-else  # HOST_OS != darwin
+else  # BUILD_TARGET_OS != darwin
 	$(hide) $$(PRIVATE_OBJCOPY) $$(PRIVATE_OBJCOPY_FLAGS) $$(PRIVATE_SRC) $$(PRIVATE_DST)
-endif  # HOST_OS != darwin
+endif  # BUILD_TARGET_OS != darwin
 else  # EMULATOR_STRIP_BINARIES != true
 	$(hide) cp -f $$(PRIVATE_SRC) $$(PRIVATE_DST)
 endif # EMULATOR_STRIP_BINARIES != true
@@ -329,7 +329,7 @@ OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%.entries=%.def))
 LOCAL_GENERATED_SYMBOL_FILE:=$$(OBJ)
 $$(OBJ): PRIVATE_SRC := $$(SRC)
 $$(OBJ): PRIVATE_DST := $$(OBJ)
-$$(OBJ): PRIVATE_MODE := $$(GEN_ENTRIES_MODE_$(HOST_OS))
+$$(OBJ): PRIVATE_MODE := $$(GEN_ENTRIES_MODE_$(BUILD_TARGET_OS))
 $$(OBJ): $$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Generate symbol file: $$(notdir $$(PRIVATE_DST))"
@@ -344,7 +344,7 @@ EXPORTED_SYMBOL_LIST_windows :=
 EXPORTED_SYMBOL_LIST_darwin := -Wl,-exported_symbols_list,
 EXPORTED_SYMBOL_LIST_linux := -Wl,--version-script=
 
-symbol-file-linker-flags = $(EXPORTED_SYMBOL_LIST_$(HOST_OS))$1
+symbol-file-linker-flags = $(EXPORTED_SYMBOL_LIST_$(BUILD_TARGET_OS))$1
 
 # Generate and compile source file through the Qt 'moc' tool
 # NOTE: This expects QT_MOC_TOOL to be defined.

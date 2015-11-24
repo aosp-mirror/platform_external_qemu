@@ -1,3 +1,5 @@
+BUILD_TARGET_TAG := $(BUILD_TARGET_OS)-$(BUILD_TARGET_ARCH)
+
 # Build libext4_utils and related modules/
 include $(LOCAL_PATH)/distrib/zlib.mk
 include $(LOCAL_PATH)/distrib/libcurl.mk
@@ -83,7 +85,7 @@ gen-hw-config-defs = \
 include $(LOCAL_PATH)/Makefile.android-emu.mk
 include $(LOCAL_PATH)/Makefile.qemu1-common.mk
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
   # on Windows, link the icon file as well into the executable
   # unfortunately, our build system doesn't help us much, so we need
   # to use some weird pathnames to make this work...
@@ -102,7 +104,7 @@ define insert-windows-icon
     LOCAL_PREBUILT_OBJ_FILES += $(EMULATOR_ICON_OBJ)
 endef
 
-endif  # HOST_OS == windows
+endif  # BUILD_TARGET_OS == windows
 
 # We want to build all variants of the emulator binaries. This makes
 # it easier to catch target-specific regressions during emulator development.
@@ -140,7 +142,7 @@ LOCAL_IGNORE_BITNESS := true
 
 LOCAL_GENERATE_SYMBOLS := true
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
 $(eval $(call insert-windows-icon))
 endif
 

@@ -5,7 +5,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/surface-qt.cpp \
     android/skin/qt/winsys-qt.cpp \
 
-ifeq (darwin,$(HOST_OS))
+ifeq (darwin,$(BUILD_TARGET_OS))
 ANDROID_SKIN_SOURCES += \
     android/skin/qt/mac-native-window.mm
 endif

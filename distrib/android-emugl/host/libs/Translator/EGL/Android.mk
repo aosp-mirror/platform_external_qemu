@@ -3,12 +3,12 @@ LOCAL_PATH := $(call my-dir)
 host_OS_SRCS :=
 host_common_LDLIBS :=
 
-ifeq ($(HOST_OS),linux)
+ifeq ($(BUILD_TARGET_OS),linux)
     host_OS_SRCS = EglOsApi_glx.cpp
     host_common_LDLIBS += -lGL -lX11 -ldl -lpthread
 endif
 
-ifeq ($(HOST_OS),darwin)
+ifeq ($(BUILD_TARGET_OS),darwin)
     host_OS_SRCS = EglOsApi_darwin.cpp \
                    MacNative.m   \
                    MacPixelFormatsAttribs.m
@@ -16,7 +16,7 @@ ifeq ($(HOST_OS),darwin)
     host_common_LDLIBS += -Wl,-framework,AppKit
 endif
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
     host_OS_SRCS = EglOsApi_wgl.cpp
     host_common_LDLIBS += -lgdi32
 endif

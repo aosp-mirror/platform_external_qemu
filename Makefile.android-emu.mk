@@ -131,7 +131,7 @@ LOCAL_SRC_FILES := \
     android/utils/vector.c \
     android/utils/x86_cpuid.cpp \
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
 LOCAL_SRC_FILES += \
     android/base/synchronization/ConditionVariable_win32.cpp \
     android/base/threads/Thread_win32.cpp \
@@ -206,7 +206,7 @@ LOCAL_SRC_FILES := \
     android/cpu_accelerator.cpp \
     android/crashreport/CrashSystem.cpp \
     android/crashreport/CrashReporter_common.cpp \
-    android/crashreport/CrashReporter_$(HOST_OS).cpp \
+    android/crashreport/CrashReporter_$(BUILD_TARGET_OS).cpp \
     android/curl-support.c \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
@@ -290,17 +290,17 @@ LOCAL_SRC_FILES := \
     android/wear-agent/PairUpWearPhone.cpp \
 
 # Platform-specific camera capture
-ifeq ($(HOST_OS),linux)
+ifeq ($(BUILD_TARGET_OS),linux)
     LOCAL_SRC_FILES += \
         android/camera/camera-capture-linux.c
 endif
 
-ifeq ($(HOST_OS),darwin)
+ifeq ($(BUILD_TARGET_OS),darwin)
     LOCAL_SRC_FILES += \
         android/camera/camera-capture-mac.m
 endif
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
     LOCAL_SRC_FILES += \
         android/camera/camera-capture-windows.cpp \
         android/windows_installer.cpp \
@@ -329,7 +329,7 @@ ANDROID_EMU_LDLIBS := \
     $(LIBCURL_LDLIBS) \
     $(BREAKPAD_CLIENT_LDLIBS) \
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
 # For capCreateCaptureWindow used in camera-capture-windows.cpp
 ANDROID_EMU_LDLIBS += -lvfw32
 endif
@@ -432,7 +432,7 @@ LOCAL_SRC_FILES := \
   android/wear-agent/testing/WearAgentTestUtils.cpp \
   android/wear-agent/WearAgent_unittest.cpp \
 
-ifeq (windows,$(HOST_OS))
+ifeq (windows,$(BUILD_TARGET_OS))
 LOCAL_SRC_FILES += \
   android/base/files/ScopedHandle_unittest.cpp \
   android/base/files/ScopedRegKey_unittest.cpp \
