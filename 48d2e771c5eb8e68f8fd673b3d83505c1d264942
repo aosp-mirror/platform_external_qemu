@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fbbdbfca_5644f29c",
+        "filename": "android/version.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-24T10:41:37Z",
+      "side": 1,
+      "message": "nit: would rather call it EMULATOR_BUILD_STRING for clarity.\nWe might also want VERSION_STRING -\u003e EMULATOR_VERSION_STRING",
+      "revId": "48d2e771c5eb8e68f8fd673b3d83505c1d264942",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
