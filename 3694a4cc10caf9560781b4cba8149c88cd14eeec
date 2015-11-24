@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fb921f65_8e4d7bc0",
+        "filename": "android/emulation/qemud/android_qemud_multiplexer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-24T22:31:53Z",
+      "side": 1,
+      "message": "ok, this is a little weird because this is a C-based header and this patch includes a C++ one, and casts a C++ object into a C structure (making it a class with a default constructor).\n\nI wonder if it wouldn\u0027t be a little cleaner to hide the QemudMultiplexer structure from the header/client (this would require changing the _init() into a _new() or _create()), but let\u0027s allow this for now. Can you put a TODO though, I\u0027d like to do that later.",
+      "revId": "3694a4cc10caf9560781b4cba8149c88cd14eeec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
