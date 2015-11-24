@@ -26,12 +26,12 @@
 # even if we're not using the Android build system.
 #
 
-OBJS_DIR := objs
+BUILD_OBJS_DIR := objs
 
 _BUILD_CORE_DIR  := android/build
-_BUILD_CONFIG_MAKE := $(OBJS_DIR)/build/config.make
-_BUILD_CONFIG_HOST_H := $(OBJS_DIR)/build/config-host.h
-_BUILD_SYMBOLS_DIR := $(OBJS_DIR)/build/symbols
+_BUILD_CONFIG_MAKE := $(BUILD_OBJS_DIR)/build/config.make
+_BUILD_CONFIG_HOST_H := $(BUILD_OBJS_DIR)/build/config-host.h
+_BUILD_SYMBOLS_DIR := $(BUILD_OBJS_DIR)/build/symbols
 
 ifeq ($(wildcard $(_BUILD_CONFIG_MAKE)),)
     $(error "The configuration file '$(_BUILD_CONFIG_MAKE)' doesn't exist, please run the 'android-configure.sh' script")
@@ -69,7 +69,7 @@ executables: $(_BUILD_EXECUTABLES)
 symbols: $(_BUILD_INTERMEDIATE_SYMBOLS) $(_BUILD_SYMBOLS)
 
 clean-intermediates:
-	rm -rf $(OBJS_DIR)/intermediates $(_BUILD_EXECUTABLES) \
+	rm -rf $(BUILD_OBJS_DIR)/intermediates $(_BUILD_EXECUTABLES) \
 	    $(_BUILD_LIBRARIES) $(_BUILD_SYMBOLS) $(_BUILD_SYMBOLS_DIR)
 
 clean-config:

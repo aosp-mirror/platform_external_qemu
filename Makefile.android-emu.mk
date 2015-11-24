@@ -454,7 +454,8 @@ LOCAL_STATIC_LIBRARIES += \
     emulator-libgtest \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
-# cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/
+# cannot pick up our custom versions of the library from
+# $(BUILD_OBJS_DIR)/lib[64]/
 $(call local-link-static-c++lib)
 
 $(call end-emulator-program)
@@ -577,7 +578,8 @@ LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
-# cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/
+# cannot pick up our custom versions of the library from
+# $(BUILD_OBJS_DIR)/lib[64]/
 $(call local-link-static-c++lib)
 
 $(call end-emulator-program)

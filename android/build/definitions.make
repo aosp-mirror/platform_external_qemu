@@ -57,7 +57,7 @@ my-dir = $(call parent-dir,$(lastword $(MAKEFILE_LIST)))
 # kind of executable
 # $1 = bitness (32 or 64)
 # $2 = module name
-intermediates-dir-for = $(OBJS_DIR)/build/intermediates$(1)/$(2)
+intermediates-dir-for = $(BUILD_OBJS_DIR)/build/intermediates$(1)/$(2)
 
 # Return the name of a given build-related variable that can be defined either
 # for the build host or build target. I.e. if LOCAL_HOST_BUILD is not defined,
@@ -83,10 +83,10 @@ local-executable-path = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(1))/
 local-shared-library-path = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(1))/$(1)$(call local-build-var,DLLEXT)
 
 # Location of final (potentially stripped) executables.
-local-executable-install-path = $(OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)$(1)$(call local-build-var,EXEEXT)
+local-executable-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)$(1)$(call local-build-var,EXEEXT)
 
 # Location of final (potentially stripped) shared libraries.
-local-shared-library-install-path = $(OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR),lib$(BUILD_TARGET_SUFFIX))/$(1)$(call local-build-var,DLLEXT)
+local-shared-library-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR),lib$(BUILD_TARGET_SUFFIX))/$(1)$(call local-build-var,DLLEXT)
 
 ldlibs_start_whole := -Wl,--whole-archive
 ldlibs_end_whole := -Wl,--no-whole-archive
@@ -262,15 +262,15 @@ $$(_DST): PRIVATE_OBJCOPY_FLAGS := $(3)
 $$(_DST): $$(_SRC)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Install: $$(PRIVATE_DST)"
-ifeq (true,$$(EMULATOR_STRIP_BINARIES))
+ifeq (true,$$(BUILD_STRIP_BINARIES))
 ifeq (darwin,$$(BUILD_TARGET_OS))
 	$(hide) strip -S -o $$(PRIVATE_DST) $$(PRIVATE_SRC)
 else  # BUILD_TARGET_OS != darwin
 	$(hide) $$(PRIVATE_OBJCOPY) $$(PRIVATE_OBJCOPY_FLAGS) $$(PRIVATE_SRC) $$(PRIVATE_DST)
 endif  # BUILD_TARGET_OS != darwin
-else  # EMULATOR_STRIP_BINARIES != true
+else  # BUILD_STRIP_BINARIES != true
 	$(hide) cp -f $$(PRIVATE_SRC) $$(PRIVATE_DST)
-endif # EMULATOR_STRIP_BINARIES != true
+endif # BUILD_STRIP_BINARIES != true
 endef
 
 # Install an existing symbol file into the symbols directory

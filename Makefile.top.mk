@@ -226,10 +226,10 @@ include $(LOCAL_PATH)/Makefile.common.mk
 endif
 
 ##
-##   PREBUILT_DLL_SYMBOLS
+##   BUILD_PREBUILT_SYMBOLS
 ##
-ifeq (true,$(EMULATOR_GENERATE_SYMBOLS))
-$(foreach prebuilt_symbol,$(EMULATOR_PREBUILT_SYMBOLS),$(eval $(call install-symbol,\
+ifeq (true,$(BUILD_GENERATE_SYMBOLS))
+$(foreach prebuilt_symbol,$(BUILD_PREBUILT_SYMBOLS),$(eval $(call install-symbol,\
     $(prebuilt_symbol))))
 endif
 ## VOILA!!
