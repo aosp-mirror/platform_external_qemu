@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "bbc4277e_edcb4d74",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T22:39:43Z",
+      "side": 1,
+      "message": "Huh, I wonder how this thing sneaked in, I remember modifying it to accept const references instead of copies.",
+      "parentUuid": "1b153384_fed5e167",
+      "range": {
+        "startLine": 333,
+        "startChar": 39,
+        "endLine": 338,
+        "endChar": 51
+      },
+      "revId": "a9749b5c8e1e76cd48a0ea90024a69ec5336074c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbf69f9c_74cc793b",
         "filename": "android/skin/qt/ext-location.cpp",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "fbb05f0b_9559740e",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T22:39:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fbf69f9c_74cc793b",
+      "range": {
+        "startLine": 412,
+        "startChar": 26,
+        "endLine": 412,
+        "endChar": 64
+      },
+      "revId": "a9749b5c8e1e76cd48a0ea90024a69ec5336074c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b153384_ded2a57d",
         "filename": "android/skin/qt/extended-window.h",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2015-11-24T07:21:15Z",
       "side": 1,
       "message": "?",
+      "range": {
+        "startLine": 275,
+        "startChar": 17,
+        "endLine": 275,
+        "endChar": 47
+      },
+      "revId": "a9749b5c8e1e76cd48a0ea90024a69ec5336074c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbb05f0b_d55edcf5",
+        "filename": "android/skin/qt/extended-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T22:39:43Z",
+      "side": 1,
+      "message": "Changed comment since the implementation no longer has a mutex",
+      "parentUuid": "1b153384_ded2a57d",
       "range": {
         "startLine": 275,
         "startChar": 17,
