@@ -340,7 +340,7 @@ endif
 #
 #
 
-$(call start-emulator-program, android_emu$(HOST_SUFFIX)_unittests)
+$(call start-emulator-program, android_emu$(BUILD_TARGET_SUFFIX)_unittests)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
@@ -555,7 +555,7 @@ $(call end-emulator-library)
 
 # emulator-libui unit tests
 
-$(call start-emulator-program, emulator$(HOST_SUFFIX)_libui_unittests)
+$(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)_libui_unittests)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \

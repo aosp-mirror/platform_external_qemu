@@ -8,7 +8,7 @@
 #       EMULATOR_PROGRAM_BITNESS.
 #
 
-$(call start-emulator-program, emulator$(HOST_SUFFIX)-crash-service)
+$(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)-crash-service)
 LOCAL_SRC_FILES := \
     android/crashreport/main-crash-service.cpp \
     android/crashreport/CrashService_common.cpp \
@@ -73,7 +73,7 @@ $(call end-emulator-program)
 #       EMULATOR_PROGRAM_BITNESS.
 #
 
-$(call start-emulator-program, emulator$(HOST_SUFFIX)_test_crasher)
+$(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)_test_crasher)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \

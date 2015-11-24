@@ -45,7 +45,7 @@ host_common_CFLAGS :=
 
 
 ### host libOpenglRender #################################################
-$(call emugl-begin-host-shared-library,lib$(HOST_SUFFIX)OpenglRender)
+$(call emugl-begin-host-shared-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender)
 
 $(call emugl-import,libGLESv1_dec libGLESv2_dec lib_renderControl_dec libOpenglCodecCommon)
 
