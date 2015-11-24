@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7bb2aff7_fa2de5cf",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-24T17:59:46Z",
+      "side": 1,
+      "message": "Oh interesting, I didn\u0027t know that, I\u0027ll update the comment then.",
+      "parentUuid": "db271bf3_91a81b9d",
+      "range": {
+        "startLine": 68,
+        "startChar": 46,
+        "endLine": 72,
+        "endChar": 37
+      },
+      "revId": "3d3c0b842672caab4881405717b37ffdaf1e974f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3b167790_da9e3121",
         "filename": "android/utils/path_system.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-24T17:38:13Z",
       "side": 1,
       "message": "this will keep all the \u0027../../././../\u0027 items, is that ok?",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 51,
+        "endChar": 5
+      },
+      "revId": "3d3c0b842672caab4881405717b37ffdaf1e974f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b80ef13_aad78f17",
+        "filename": "android/utils/path_system.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-24T17:59:46Z",
+      "side": 1,
+      "message": "Essentially, that\u0027s what the old implementation did, so I would say it\u0027s ok.",
+      "parentUuid": "3b167790_da9e3121",
       "range": {
         "startLine": 49,
         "startChar": 4,
