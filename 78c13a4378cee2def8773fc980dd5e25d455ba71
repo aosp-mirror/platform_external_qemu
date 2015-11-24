@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5b1b2bb8_060d0f4c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T19:04:59Z",
+      "side": 1,
+      "message": "Since the ColorBuffer owns the resizer, I would recommend using a smart pointer (i.e. std::unique_ptr\u003cTextureResize\u003e) instead of a naked pointer here. If you do that, you won\u0027t need to delete the resizer manually in the destructor.",
+      "range": {
+        "startLine": 153,
+        "startChar": 4,
+        "endLine": 153,
+        "endChar": 17
+      },
+      "revId": "78c13a4378cee2def8773fc980dd5e25d455ba71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbb05f0b_aafacf9b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureResize.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T19:04:59Z",
+      "side": 1,
+      "message": "Just in case, please verify that this works when launching the emulator via remote desktop (Chromoting). If the emulator is ran via chromoting, I believe we fall back to a software implementation of OpenGL which may have its own quirks.",
+      "range": {
+        "startLine": 28,
+        "startChar": 5,
+        "endLine": 28,
+        "endChar": 14
+      },
+      "revId": "78c13a4378cee2def8773fc980dd5e25d455ba71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbc4277e_0271b0ec",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureResize.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T19:04:59Z",
+      "side": 1,
+      "message": "We have similar code for compiling the shaders both here and in TextureDraw. It would be very nice to have some sort of common procedure that compiles and links shader code and returns the error messages, and share that procedure between TextureResizer and TextureDraw",
+      "range": {
+        "startLine": 136,
+        "startChar": 3,
+        "endLine": 136,
+        "endChar": 10
+      },
+      "revId": "78c13a4378cee2def8773fc980dd5e25d455ba71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
