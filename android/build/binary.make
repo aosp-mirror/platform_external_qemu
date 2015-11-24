@@ -22,26 +22,26 @@ ifneq (,$(filter-out 32 64,$(LOCAL_BITS)))
     $(error LOCAL_BITS should be defined to either 32 or 64))
 endif
 
-$(call local-host-define,CC)
-$(call local-host-define,CXX)
-$(call local-host-define,AR)
-$(call local-host-define,LD)
-$(call local-host-define,DUMPSYMS)
+$(call local-build-define,CC)
+$(call local-build-define,CXX)
+$(call local-build-define,AR)
+$(call local-build-define,LD)
+$(call local-build-define,DUMPSYMS)
 
 LOCAL_CFLAGS := \
-    $(call local-host-tool,CFLAGS$(LOCAL_BITS)) \
-    $(call local-host-tool,CFLAGS) \
+    $(call local-build-var,CFLAGS$(LOCAL_BITS)) \
+    $(call local-build-var,CFLAGS) \
     $(LOCAL_CFLAGS)
 
 LOCAL_LDFLAGS := \
-    $(call local-host-tool,LDFLAGS$(LOCAL_BITS)) \
-    $(call local-host-tool,LDFLAGS) \
+    $(call local-build-var,LDFLAGS$(LOCAL_BITS)) \
+    $(call local-build-var,LDFLAGS) \
     $(LOCAL_LDFLAGS)
 
 LOCAL_LDLIBS := \
     $(LOCAL_LDLIBS) \
-    $(call local-host-tool,LDLIBS) \
-    $(call local-host-tool,LDLIBS$(LOCAL_BITS))
+    $(call local-build-var,LDLIBS) \
+    $(call local-build-var,LDLIBS$(LOCAL_BITS))
 
 # Ensure only one of -m32 or -m64 is being used and place it first.
 LOCAL_CFLAGS := \
