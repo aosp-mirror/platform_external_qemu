@@ -42,6 +42,48 @@
     },
     {
       "key": {
+        "uuid": "1bfc537c_db13df40",
+        "filename": "android/skin/qt/angle-input-widget.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T02:02:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fbf69f9c_bf335ff0",
+      "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1bfc537c_fb3dfbba",
+        "filename": "android/skin/qt/angle-input-widget.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T02:02:44Z",
+      "side": 1,
+      "message": "It\u0027s safe - the value is clipped to the allowed value range and it updates the view to ensure the appearance of the widget is consistent with actual contents. It\u0027s as safe as QLineEdit::setText",
+      "parentUuid": "fbf69f9c_3fee4f73",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 51
+      },
+      "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b1b2bb8_7a23c199",
         "filename": "android/skin/qt/ext-location.cpp",
         "patchSetId": 1
@@ -53,6 +95,30 @@
       "writtenOn": "2015-11-23T17:09:05Z",
       "side": 1,
       "message": "what\u0027s not very nice here is that we\u0027re loading data from the file in main thread - which means user may notice a \u0027hiccup\u0027 in responsiveness",
+      "range": {
+        "startLine": 239,
+        "startChar": 45,
+        "endLine": 239,
+        "endChar": 65
+      },
+      "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbc4277e_5c9b11e4",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T02:02:44Z",
+      "side": 1,
+      "message": "Parsing file in a separate thread now",
+      "parentUuid": "5b1b2bb8_7a23c199",
       "range": {
         "startLine": 239,
         "startChar": 45,
@@ -100,6 +166,42 @@
     },
     {
       "key": {
+        "uuid": "5b1b2bb8_75a8f29b",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T02:02:44Z",
+      "side": 1,
+      "message": "see above",
+      "parentUuid": "bb2a67bd_72e2ce56",
+      "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b167790_d92da3d0",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T02:02:44Z",
+      "side": 1,
+      "message": "Qt docs don\u0027t state explicitly if the suffix returned will be exactly as it appears in the file name or case-converted, so added a call to QString::toLower",
+      "parentUuid": "1b153384_8d276992",
+      "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b153384_ed241d8f",
         "filename": "android/skin/qt/ext-location.cpp",
         "patchSetId": 1
@@ -129,6 +231,42 @@
       "side": 1,
       "message": "Qt docs:\n\u003e\u003e If the user presses Cancel, it returns a null string.",
       "parentUuid": "1b153384_ed241d8f",
+      "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b153384_0d7ed9fb",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T02:02:44Z",
+      "side": 1,
+      "message": "See Yurii\u0027s response",
+      "parentUuid": "1b153384_ed241d8f",
+      "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db271bf3_7ef619bd",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T02:02:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fbf69f9c_1ff3935d",
       "revId": "b09dd3f82d0b22b5070a109b41bdcbd3f97ba3a3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
