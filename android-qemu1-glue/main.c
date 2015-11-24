@@ -155,6 +155,28 @@ void enter_qemu_main_loop(int argc, char **argv) {
     D("Done with QEMU main loop");
 }
 
+/*
+ * Return true if software GPU is used and AVD screen is too large for it.
+ * Software GPU can boot 768 X 1280 (Nexus 4) or smaller due to software
+ * buffer size. (It may actually boot a slightly larger screen, but we set
+ * limit to this commonly seen resolution.)
+ */
+static bool use_software_gpu_and_screen_too_large(AndroidHwConfig *hw) {
+    if (!hw->hw_gpu_enabled) {
+        unsigned shorter = hw->hw_lcd_width;
+        unsigned longer = hw->hw_lcd_height;
+        if (shorter > longer) {
+            unsigned tmp = shorter;
+            shorter = longer;
+            longer = tmp;
+        }
+        if (shorter > 768 || longer > 1280) {
+            return true;
+        }
+    }
+    return false;
+}
+
 #if CONFIG_QT && defined(_WIN32)
 // On Windows, link against qtmain.lib which provides a WinMain()
 // implementation, that later calls qMain().
@@ -803,6 +825,12 @@ int main(int argc, char **argv) {
             exit(1);
         }
         hw->hw_gpu_enabled = config.enabled;
+        if (use_software_gpu_and_screen_too_large(hw)) {
+            derror("GPU emulation is disabled.\n"
+                   "Only screen size of 768 X 1280 or smaller is supported "
+                   "when GPU emulation is disabled.");
+            exit(1);
+        }
         if (config.enabled)
         {
             /* Only update hw_gpu_mode if emuglConfig_init determined that gpu
