@@ -189,6 +189,30 @@
       "revId": "4fb0e5f1288bed571ee926734bc8b79a8ccfa85f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b167790_3f73f786",
+        "filename": "android/hw-pipe-net.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-24T03:20:54Z",
+      "side": 1,
+      "message": "Yeah looks like I was confusing too, sorry. I didn\u0027t mean to leave the EAGAIN-\u003eEINTR change in (it was just to see if EINTR worked). I just put it back.",
+      "parentUuid": "5b1b2bb8_5be7e764",
+      "range": {
+        "startLine": 269,
+        "startChar": 25,
+        "endLine": 269,
+        "endChar": 39
+      },
+      "revId": "4fb0e5f1288bed571ee926734bc8b79a8ccfa85f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
