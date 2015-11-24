@@ -17,6 +17,7 @@
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/qt-settings.h"
 
 
 #include <QtWidgets>
@@ -31,6 +32,57 @@ void ExtendedWindow::initLocation()
     mExtendedUi->loc_latitudeInput->setMaxValue(90.0);
     QObject::connect(&mLoc_timer, &QTimer::timeout, this, &ExtendedWindow::loc_slot_timeout);
     setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, false);
+
+    // Restore previous values.
+    QSettings settings;
+    mExtendedUi->loc_altitudeInput->setText(
+            settings.value(Ui::Settings::LOCATION_ALTITUDE, "0.0").toString());
+    mExtendedUi->loc_longitudeInput->setValue(
+            settings.value(Ui::Settings::LOCATION_LONGITUDE, 0.0).toDouble());
+    mExtendedUi->loc_latitudeInput->setValue(
+            settings.value(Ui::Settings::LOCATION_LATITUDE, 0.0).toDouble());
+    mExtendedUi->loc_playbackSpeed->setCurrentIndex(
+            settings.value(Ui::Settings::LOCATION_PLAYBACK_SPEED, 0).toInt());
+    QString location_data_file =
+        settings.value(Ui::Settings::LOCATION_PLAYBACK_FILE, "").toString();
+    auto geo_data_loader = GeoDataLoaderThread::newInstance(
+            this,
+            SLOT(loc_geoDataLoadingStarted()),
+            SLOT(loc_startupGeoDataLoadingFinished(QString, bool, QString)));
+    geo_data_loader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
+}
+
+void ExtendedWindow::loc_geoDataLoadingStarted() {
+    mExtendedUi->loc_pathTable->setRowCount(0);
+
+    // Prevent the user from initiating a load gpx/kml while another load is already
+    // in progress
+    setButtonEnabled(mExtendedUi->loc_GpxKmlButton, mSettingsState.mTheme, false);
+    setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, false);
+}
+
+void ExtendedWindow::loc_startupGeoDataLoadingFinished(QString, bool ok, QString) {
+    // on startup, we silently ignore the previously remebered geo data file being
+    // missing or malformed.
+    if (ok) {
+        loc_populateTable(&mGpsFixesArray);
+    }
+    setButtonEnabled(mExtendedUi->loc_GpxKmlButton, mSettingsState.mTheme, true);
+    setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, true);
+}
+
+void ExtendedWindow::loc_geoDataLoadingFinished(QString file_name, bool ok, QString error) {
+    if (ok) {
+        QSettings settings;
+        settings.setValue(Ui::Settings::LOCATION_PLAYBACK_FILE, file_name);
+        loc_populateTable(&mGpsFixesArray);
+    } else {
+        mToolWindow->showErrorDialog(
+                error,
+                tr("Geo Data Parser"));
+    }
+    setButtonEnabled(mExtendedUi->loc_GpxKmlButton, mSettingsState.mTheme, true);
+    setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, true);
 }
 
 void ExtendedWindow::on_loc_pathTable_cellChanged(int row, int col)
@@ -217,41 +269,31 @@ bool ExtendedWindow::loc_cellIsValid(QTableWidget *table, int row, int col)
 
 void ExtendedWindow::on_loc_GpxKmlButton_clicked()
 {
-    bool isOK = false;
-
     // Use dialog to get file name
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open GPX or KML File"), ".",
                                                     tr("GPX and KML files (*.gpx *.kml)"));
 
     if (fileName.isNull()) return;
 
-    // Delete all rows in table
-    mExtendedUi->loc_pathTable->setRowCount(0);
-
-    GpsFixArray fixes;
-    std::string errStr;
-    QFileInfo fileInfo(fileName);
-    if (fileInfo.suffix() == "gpx") {
-        isOK = GpxParser::parseFile(fileName.toStdString().c_str(),
-                                    &fixes, &errStr);
-    } else if (fileInfo.suffix() == "kml") {
-        isOK = KmlParser::parseFile(fileName.toStdString().c_str(),
-                                    &fixes, &errStr);
-    }
-
-    if (!isOK) {
-        mToolWindow->showErrorDialog(
-                tr(errStr.c_str()),
-                tr((fileInfo.suffix().toUpper() + " Parser").toStdString().c_str()));
-    } else {
-        loc_populateTable(&fixes);
-    }
+    // Asynchronously parse the file with geo data.
+    // If the file is big enough, parsing it synchronously will cause a noticeable
+    // hiccup in the UI.
+    auto loader_thread = GeoDataLoaderThread::newInstance(this,
+                                                          SLOT(loc_geoDataLoadingStarted()),
+                                                          SLOT(loc_geoDataLoadingFinished(QString, bool, QString)));
+    loader_thread->loadGeoDataFromFile(fileName, &mGpsFixesArray);
 }
 
 void ExtendedWindow::loc_populateTable(GpsFixArray *fixes)
 {
+    // Delete all rows in table
+    mExtendedUi->loc_pathTable->setRowCount(0);
+
     // Special case, the first row will have delay 0
+
     time_t previousTime = fixes->at(0).time;
+    mExtendedUi->loc_pathTable->setRowCount(fixes->size());
+    mExtendedUi->loc_pathTable->blockSignals(true);
     for (unsigned i = 0; i < fixes->size(); i++) {
         GpsFix &fix = fixes->at(i);
         time_t delay = fix.time - previousTime; // In seconds
@@ -261,15 +303,23 @@ void ExtendedWindow::loc_populateTable(GpsFixArray *fixes)
             delay = 2;
         }
 
-        loc_appendToTable(fix.latitude,
+        loc_appendToTable(i,
+                          fix.latitude,
                           fix.longitude,
                           fix.elevation,
                           fix.name,
                           fix.description,
                           delay);
 
+        // If the fixes array contains a lot of elements, this loop can cause
+        // a lag in the UI. Just make sure we let the application handle UI 
+        // events for every few rows we add.
+        if (i % 100 == 0) {
+            qApp->processEvents();
+        }
         previousTime = fix.time;
     }
+    mExtendedUi->loc_pathTable->blockSignals(false);
     setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, true);
 }
 
@@ -285,22 +335,20 @@ static QTableWidgetItem* itemForTable(const QString& text) {
     return item;
 }
 
-void ExtendedWindow::loc_appendToTable(std::string lat,
-                                       std::string lon,
-                                       std::string elev,
-                                       std::string name,
-                                       std::string description,
+void ExtendedWindow::loc_appendToTable(int row,
+                                       const std::string& lat,
+                                       const std::string& lon,
+                                       const std::string& elev,
+                                       const std::string& name,
+                                       const std::string& description,
                                        time_t time)
 {
-    int newRow = mExtendedUi->loc_pathTable->rowCount();
-
-    mExtendedUi->loc_pathTable->insertRow(newRow);
-    mExtendedUi->loc_pathTable->setItem(newRow, 0, itemForTable(QString::number(time)));
-    mExtendedUi->loc_pathTable->setItem(newRow, 1, itemForTable(QString::fromStdString(lat)));
-    mExtendedUi->loc_pathTable->setItem(newRow, 2, itemForTable(QString::fromStdString(lon)));
-    mExtendedUi->loc_pathTable->setItem(newRow, 3, itemForTable(QString::fromStdString(elev)));
-    mExtendedUi->loc_pathTable->setItem(newRow, 4, itemForTable(QString::fromStdString(name)));
-    mExtendedUi->loc_pathTable->setItem(newRow, 5, itemForTable(QString::fromStdString(description)));
+    mExtendedUi->loc_pathTable->setItem(row, 0, itemForTable(QString::number(time)));
+    mExtendedUi->loc_pathTable->setItem(row, 1, itemForTable(QString::fromStdString(lat)));
+    mExtendedUi->loc_pathTable->setItem(row, 2, itemForTable(QString::fromStdString(lon)));
+    mExtendedUi->loc_pathTable->setItem(row, 3, itemForTable(QString::fromStdString(elev)));
+    mExtendedUi->loc_pathTable->setItem(row, 4, itemForTable(QString::fromStdString(name)));
+    mExtendedUi->loc_pathTable->setItem(row, 5, itemForTable(QString::fromStdString(description)));
 
 }
 
@@ -330,4 +378,70 @@ void ExtendedWindow::on_loc_sendPointButton_clicked() {
                            mExtendedUi->loc_altitudeInput->text().toDouble(),
                            4,
                            &timeVal);
+}
+
+void ExtendedWindow::on_loc_longitudeInput_valueChanged(double value) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::LOCATION_LONGITUDE, value);
+}
+
+void ExtendedWindow::on_loc_latitudeInput_valueChanged(double value) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::LOCATION_LATITUDE, value);
+}
+
+void ExtendedWindow::on_loc_altitudeInput_editingFinished() {
+    QSettings settings;
+    settings.setValue(Ui::Settings::LOCATION_ALTITUDE, mExtendedUi->loc_altitudeInput->text());
+}
+
+void ExtendedWindow::on_loc_playbackSpeed_currentIndexChanged(int index) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::LOCATION_PLAYBACK_SPEED, index);
+}
+
+void GeoDataLoaderThread::loadGeoDataFromFile(const QString& file_name, GpsFixArray* fixes) {
+    mFileName = file_name;
+    mFixes = fixes;
+    start();
+}
+
+void GeoDataLoaderThread::run() {
+    if (mFileName.isEmpty() || mFixes == nullptr) {
+        return;
+    }
+
+    bool ok = false;
+    std::string err_str;
+
+    {
+        QFileInfo file_info(mFileName);
+        mFixes->clear();
+        auto suffix = file_info.suffix().toLower();
+        if (suffix == "gpx") {
+            ok = GpxParser::parseFile(mFileName.toStdString().c_str(),
+                                      mFixes, &err_str);
+        } else if (suffix == "kml") {
+            ok = KmlParser::parseFile(mFileName.toStdString().c_str(),
+                                      mFixes, &err_str);
+        } else {
+            err_str = tr("Unknown file type").toStdString();
+        }
+    }
+
+    auto err_qstring = QString::fromStdString(err_str);
+    emit(loadingFinished(mFileName, ok, err_qstring));
+}
+
+GeoDataLoaderThread* GeoDataLoaderThread::newInstance(const QObject* handler,
+                                                      const char* started_slot,
+                                                      const char* finished_slot) {
+    GeoDataLoaderThread* new_instance = new GeoDataLoaderThread();
+    connect(new_instance, SIGNAL(started()), handler, started_slot);
+    connect(new_instance, SIGNAL(loadingFinished(QString, bool, QString)), handler, finished_slot);
+
+    // Make sure new_instance gets cleaned up after the thread exits.
+    connect(new_instance, &QThread::finished, new_instance, &QObject::deleteLater);
+
+    return new_instance;
 }

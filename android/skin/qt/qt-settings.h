@@ -27,5 +27,10 @@ namespace Ui {
         const QString SAVE_PATH("set/savePath");
         const QString UI_THEME("set/theme");
         const QString ALLOW_KEYBOARD_GRAB("set/allow_keyboard_grab");
+        const QString LOCATION_LATITUDE("loc/latitude");
+        const QString LOCATION_LONGITUDE("loc/longitude");
+        const QString LOCATION_ALTITUDE("loc/altitude");
+        const QString LOCATION_PLAYBACK_FILE("loc/playback_file_path");
+        const QString LOCATION_PLAYBACK_SPEED("loc/playback_speed");
     }
 }
