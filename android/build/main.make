@@ -22,7 +22,6 @@
 %:: SCCS/s.%
 %.c: %.w %.ch
 
-
 # this is a set of definitions that allow the usage of Makefile.android
 # even if we're not using the Android build system.
 #
