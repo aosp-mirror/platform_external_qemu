@@ -73,11 +73,6 @@ EMULATOR_COMMON_CFLAGS += -I$(OBJS_DIR)/build/qemu1-qapi-auto-generated
 # Include the emulator version definition from Makefile.common.mk
 EMULATOR_COMMON_CFLAGS += $(EMULATOR_VERSION_CFLAGS)
 
-# Enable large-file support (i.e. make off_t a 64-bit value)
-ifeq ($(HOST_OS),linux)
-EMULATOR_COMMON_CFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
-endif
-
 ifeq (true,$(BUILD_DEBUG_EMULATOR))
     EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=1
 else

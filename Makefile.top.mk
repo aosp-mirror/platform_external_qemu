@@ -68,6 +68,12 @@ MY_LDFLAGS :=
 MY_LDFLAGS32 :=
 MY_LDFLAGS64 :=
 
+# Enable large-file support (i.e. make off_t a 64-bit value).
+# Fun fact: The mingw32 toolchain still uses 32-bit off_t values by default
+# even when generating Win64 binaries, so modify MY_CFLAGS instead of
+# MY_CFLAGS32.
+MY_CFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
+
 ifeq ($(HOST_OS),freebsd)
   MY_CFLAGS += -I /usr/local/include
 endif
