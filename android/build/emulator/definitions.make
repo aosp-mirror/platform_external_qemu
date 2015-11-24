@@ -13,30 +13,19 @@
 # limitations under the License.
 #
 
-# this turns off the suffix rules built into make
-.SUFFIXES:
+BUILD_SYSTEM_ROOT := $(_BUILD_CORE_DIR)
 
-# this turns off the RCS / SCCS implicit rules of GNU Make
-% : RCS/%,v
-% : RCS/%
-% : %,v
-% : s.%
-% : SCCS/s.%
+# We use the GNU Make Standard Library
+include $(BUILD_SYSTEM_ROOT)/gmsl/gmsl
 
-# If a rule fails, delete $@.
-.DELETE_ON_ERROR:
-
-# shared definitions
-ifeq ($(strip $(SHOW)$(V)),)
-define pretty
-@echo $1
-endef
-hide := @
-else
-define pretty
-endef
-hide :=
-endif
+include $(_BUILD_CORE_DIR)/core/definitions-tests.mk
+include $(_BUILD_CORE_DIR)/core/definitions-init.mk
+include $(_BUILD_CORE_DIR)/core/definitions-utils.mk
+include $(_BUILD_CORE_DIR)/core/definitions-host.mk
+include $(_BUILD_CORE_DIR)/core/definitions-graph.mk
+include $(_BUILD_CORE_DIR)/core/definitions-modules.mk
+include $(_BUILD_CORE_DIR)/core/definitions-files.mk
+#include $(_BUILD_CORE_DIR)/core/definitions-build.mk
 
 # Replace all extensions in files from $1 matching any of
 # $(LOCAL_CXX_EXTENSION_PATTERNS) with .o
@@ -45,13 +34,6 @@ local-cxx-src-to-obj = $(strip \
     $(foreach pattern,$(LOCAL_CXX_EXTENSION_PATTERNS),\
         $(eval _local_cxx_src := $$(_local_cxx_src:$(pattern)=%.o)))\
     $(_local_cxx_src))
-
-# Return the parent directory of a given path.
-# $1: path
-parent-dir = $(dir $1)
-
-# Return the directory of the current Makefile / Android.mk.
-my-dir = $(call parent-dir,$(lastword $(MAKEFILE_LIST)))
 
 # Return the directory containing the intermediate files for a given
 # kind of executable
@@ -142,7 +124,7 @@ $$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
-	$(hide) $$(_BUILD_CORE_DIR)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
 # Compile a C++ source file
@@ -162,7 +144,7 @@ $$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CXX) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
-	$(hide) $$(_BUILD_CORE_DIR)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
 # Compile an Objective-C source file
@@ -182,7 +164,7 @@ $$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
-	$(hide) $$(_BUILD_CORE_DIR)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
 # Compile a generated C source files#
@@ -202,7 +184,7 @@ $$(OBJ): $$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
-	$(hide) $$(_BUILD_CORE_DIR)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
 define compile-generated-cxx-source
@@ -220,7 +202,7 @@ $$(OBJ): $$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CXX) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
-	$(hide) $$(_BUILD_CORE_DIR)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
 # Install a file
@@ -419,3 +401,7 @@ LOCAL_LD := $$(call local-build-var,CXX)
 LOCAL_LDLIBS += -static-libstdc++
 endif  # BUILD_TARGET_OS != darwin
 endef
+
+ifneq (,$(BUILD_SYSTEM_UNIT_TESTS))
+$(call -build-run-all-tests)
+endif

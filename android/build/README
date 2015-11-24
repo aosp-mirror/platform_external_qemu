@@ -1,0 +1,30 @@
+This directory contains many Makefile build scripts that implement
+the Android emulator's build system. This is heavily inspired from
+the Android platform build system, and the NDK build systems.
+
+The main goal is to make the .mk files describing all modules and their
+dependencies simple to write. This moves however a lot of complexity into
+the build system. For example, it must be capable of performing a topological
+sort of all modules and their dependencies to properly perform exports.
+
+The sub-directories here are:
+
+  gmsl/   The GNU Make Standard Library (http://gmsl.sourceforge.net/).
+          This provides many useful function to simplify the life of
+          Makefile programmers.
+
+  core/   Core build system infrastructure scripts. These are very generic and
+          do not contain anything that should be specific to building emulator
+          binaries.
+
+  awk/    A few awk scripts used by the build system, especially to support
+          building on Cygwin. While this is not currently supported for now,
+          this is inherited from the NDK build system, and may allow us to
+          build the emulator directly on Windows in the future.
+
+  emulator/  These build scripts contain all instructions specific to building
+             emulator binaries.
+
+The top-level GNUmakefile should include android/build/emulator/main.mk which
+will include all other files in the correct order, then parse the top-level
+project build files.
