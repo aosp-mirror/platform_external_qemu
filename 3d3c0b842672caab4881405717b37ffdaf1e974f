@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "db271bf3_91a81b9d",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-24T17:36:41Z",
+      "side": 1,
+      "message": "this is not true, each process has a single current directory on Windows\ncmd.exe emulates old DOS behavior for compatibility",
+      "range": {
+        "startLine": 68,
+        "startChar": 46,
+        "endLine": 72,
+        "endChar": 37
+      },
+      "revId": "3d3c0b842672caab4881405717b37ffdaf1e974f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
