@@ -143,7 +143,7 @@ $$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
-	$(hide) $$(BUILD_SYSTEM)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	$(hide) $$(_BUILD_CORE_DIR)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
 # Compile a C++ source file
@@ -163,7 +163,7 @@ $$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CXX) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
-	$(hide) $$(BUILD_SYSTEM)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	$(hide) $$(_BUILD_CORE_DIR)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
 # Compile an Objective-C source file
@@ -183,7 +183,7 @@ $$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
-	$(hide) $$(BUILD_SYSTEM)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	$(hide) $$(_BUILD_CORE_DIR)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
 # Compile a generated C source files#
@@ -203,7 +203,7 @@ $$(OBJ): $$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
-	$(hide) $$(BUILD_SYSTEM)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	$(hide) $$(_BUILD_CORE_DIR)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
 define compile-generated-cxx-source
@@ -221,7 +221,7 @@ $$(OBJ): $$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CXX) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
-	$(hide) $$(BUILD_SYSTEM)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	$(hide) $$(_BUILD_CORE_DIR)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
 # Install a file

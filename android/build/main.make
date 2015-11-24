@@ -26,7 +26,7 @@
 # even if we're not using the Android build system.
 #
 
-BUILD_SYSTEM := android/build
+_BUILD_CORE_DIR := android/build
 OBJS_DIR     := objs
 CONFIG_MAKE  := $(OBJS_DIR)/build/config.make
 CONFIG_HOST_H := $(OBJS_DIR)/build/config-host.h
@@ -38,16 +38,16 @@ endif
 
 include $(CONFIG_MAKE)
 
-include $(BUILD_SYSTEM)/definitions.make
+include $(_BUILD_CORE_DIR)/definitions.make
 
 .PHONY: all libraries executables clean clean-config clean-objs-dir \
         clean-executables clean-libraries
 
-CLEAR_VARS                := $(BUILD_SYSTEM)/clear_vars.make
-BUILD_HOST_EXECUTABLE     := $(BUILD_SYSTEM)/host_executable.make
-BUILD_HOST_STATIC_LIBRARY := $(BUILD_SYSTEM)/host_static_library.make
-BUILD_HOST_SHARED_LIBRARY := $(BUILD_SYSTEM)/host_shared_library.make
-PREBUILT_STATIC_LIBRARY := $(BUILD_SYSTEM)/prebuilt_static_library.make
+CLEAR_VARS                := $(_BUILD_CORE_DIR)/clear_vars.make
+BUILD_HOST_EXECUTABLE     := $(_BUILD_CORE_DIR)/host_executable.make
+BUILD_HOST_STATIC_LIBRARY := $(_BUILD_CORE_DIR)/host_static_library.make
+BUILD_HOST_SHARED_LIBRARY := $(_BUILD_CORE_DIR)/host_shared_library.make
+PREBUILT_STATIC_LIBRARY := $(_BUILD_CORE_DIR)/prebuilt_static_library.make
 
 DEPENDENCY_DIRS :=
 

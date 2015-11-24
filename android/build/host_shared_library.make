@@ -15,7 +15,7 @@
 
 # first, call a library containing all object files
 LOCAL_BUILT_MODULE := $(call local-shared-library-path,$(LOCAL_MODULE))
-include $(BUILD_SYSTEM)/binary.make
+include $(_BUILD_CORE_DIR)/binary.make
 
 LOCAL_LIBRARIES := $(foreach lib,\
     $(LOCAL_WHOLE_STATIC_LIBRARIES) $(LOCAL_STATIC_LIBRARIES),\
@@ -41,7 +41,7 @@ $(LOCAL_BUILT_MODULE): $(LOCAL_OBJECTS) $(LOCAL_LIBRARIES)
 	$(hide) $(PRIVATE_LD) $(PRIVATE_LDFLAGS) -shared -o $@ $(PRIVATE_LIBRARY) $(PRIVATE_OBJS) $(PRIVATE_LDLIBS)
 
 LOCAL_GENERATE_SYMBOLS := true
-include $(BUILD_SYSTEM)/symbols.make
+include $(_BUILD_CORE_DIR)/symbols.make
 
 EXECUTABLES += $(LOCAL_BUILT_MODULE)
 $(LOCAL_BUILT_MODULE): $(foreach lib,$(LOCAL_STATIC_LIBRARIES),$(call local-library-path,$(lib)))
