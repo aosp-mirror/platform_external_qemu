@@ -16,6 +16,42 @@
 # definitions shared by host_executable.make and host_static_library.make
 #
 
+# Sanity check
+LOCAL_BITS ?= 64
+ifneq (,$(filter-out 32 64,$(LOCAL_BITS)))
+    $(error LOCAL_BITS should be defined to either 32 or 64))
+endif
+
+$(call local-host-define,CC)
+$(call local-host-define,CXX)
+$(call local-host-define,AR)
+$(call local-host-define,LD)
+$(call local-host-define,DUMPSYMS)
+
+LOCAL_CFLAGS := \
+    $(call local-host-tool,CFLAGS$(LOCAL_BITS)) \
+    $(call local-host-tool,CFLAGS) \
+    $(LOCAL_CFLAGS)
+
+LOCAL_LDFLAGS := \
+    $(call local-host-tool,LDFLAGS$(LOCAL_BITS)) \
+    $(call local-host-tool,LDFLAGS) \
+    $(LOCAL_LDFLAGS)
+
+LOCAL_LDLIBS := \
+    $(LOCAL_LDLIBS) \
+    $(call local-host-tool,LDLIBS) \
+    $(call local-host-tool,LDLIBS$(LOCAL_BITS))
+
+# Ensure only one of -m32 or -m64 is being used and place it first.
+LOCAL_CFLAGS := \
+    -m$(LOCAL_BITS) \
+    $(filter-out -m32 -m64, $(LOCAL_CFLAGS))
+
+LOCAL_LDFLAGS := \
+    -m$(LOCAL_BITS) \
+    $(filter-out -m32 -m64, $(LOCAL_LDFLAGS))
+
 LOCAL_CPP_EXTENSIONS := .cpp .cc .C .cxx .c++
 LOCAL_CXX_EXTENSION_PATTERNS := $(foreach pattern,$(LOCAL_CPP_EXTENSIONS),%$(pattern))
 

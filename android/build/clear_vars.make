@@ -15,6 +15,7 @@
 
 # called multiple times to clear variables used to define a given 'module'
 #
+LOCAL_BITS :=
 LOCAL_CC :=
 LOCAL_CXX :=
 LOCAL_C_INCLUDES :=

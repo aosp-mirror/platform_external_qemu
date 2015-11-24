@@ -168,36 +168,7 @@ end-emulator-program = \
     $(eval $(end-emulator-module-ev)) \
 
 define end-emulator-module-ev
-$(call local-host-define,CC)
-$(call local-host-define,CXX)
-$(call local-host-define,AR)
-$(call local-host-define,LD)
-$(call local-host-define,DUMPSYMS)
-
-LOCAL_CFLAGS := \
-    $$(call local-host-tool,CFLAGS$$(HOST_BITS)) \
-    $$(call local-host-tool,CFLAGS) \
-    $$(LOCAL_CFLAGS)
-
-LOCAL_LDFLAGS := \
-    $$(call local-host-tool,LDFLAGS$$(HOST_BITS)) \
-    $$(call local-host-tool,LDFLAGS) \
-    $$(LOCAL_LDFLAGS)
-
-LOCAL_LDLIBS := \
-    $$(LOCAL_LDLIBS) \
-    $$(call local-host-tool,LDLIBS) \
-    $$(call local-host-tool,LDLIBS$$(HOST_BITS))
-
-# Ensure only one of -m32 or -m64 is being used and place it first.
-LOCAL_CFLAGS := \
-    -m$$(HOST_BITS) \
-    $$(filter-out -m32 -m64, $$(LOCAL_CFLAGS))
-
-LOCAL_LDFLAGS := \
-    -m$$(HOST_BITS) \
-    $$(filter-out -m32 -m64, $$(LOCAL_LDFLAGS))
-
+LOCAL_BITS := $$(HOST_BITS)
 include $$(LOCAL_BUILD_FILE)
 endef
 
