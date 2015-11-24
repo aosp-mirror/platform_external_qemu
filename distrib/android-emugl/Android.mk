@@ -33,10 +33,10 @@ EMUGL_COMMON_CFLAGS += -O0 -g -DEMUGL_DEBUG=1
 endif
 
 EMUGL_COMMON_CFLAGS += -DEMUGL_BUILD=1
-ifeq (linux,$(HOST_OS))
+ifeq (linux,$(BUILD_TARGET_OS))
 EMUGL_COMMON_CFLAGS += -fvisibility=internal
 endif
-ifeq (darwin,$(HOST_OS))
+ifeq (darwin,$(BUILD_TARGET_OS))
 EMUGL_COMMON_CFLAGS += -fvisibility=hidden
 endif
 

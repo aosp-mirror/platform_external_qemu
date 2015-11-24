@@ -10,7 +10,7 @@ LIBSELINUX_SOURCES := \
     src/label_file.c \
     src/label_android_property.c
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
     # This code doesn't not build on Windows, so create empty
     # libraries on this platform, this simplifies the build
     # configuration.
@@ -20,7 +20,7 @@ endif
 LIBSELINUX_INCLUDES := $(LOCAL_PATH)/include
 
 LIBSELINUX_CFLAGS := -DHOST
-ifeq (darwin,$(HOST_OS))
+ifeq (darwin,$(BUILD_TARGET_OS))
     LIBSELINUX_CFLAGS += -DDARWIN
 endif
 

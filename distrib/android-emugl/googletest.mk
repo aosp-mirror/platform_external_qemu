@@ -14,7 +14,7 @@ common_SRC_FILES := \
 
 common_CFLAGS := -O0
 
-ifneq (windows,$(HOST_OS))
+ifneq (windows,$(BUILD_TARGET_OS))
     common_LDLIBS += -lpthread
 endif
 

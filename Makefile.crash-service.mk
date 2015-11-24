@@ -12,7 +12,7 @@ $(call start-emulator-program, emulator$(HOST_SUFFIX)-crash-service)
 LOCAL_SRC_FILES := \
     android/crashreport/main-crash-service.cpp \
     android/crashreport/CrashService_common.cpp \
-    android/crashreport/CrashService_$(HOST_OS).cpp \
+    android/crashreport/CrashService_$(BUILD_TARGET_OS).cpp \
     android/crashreport/ui/ConfirmDialog.cpp \
     android/resource.c \
     android/skin/resource.c \
@@ -27,7 +27,7 @@ LOCAL_QT_MOC_SRC_FILES := \
     android/crashreport/ui/ConfirmDialog.h \
 
 LOCAL_LDFLAGS :=
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
 LOCAL_LDFLAGS += -L$(QT_TOP_DIR)/bin
 else
 LOCAL_LDFLAGS += $(EMULATOR_LIBUI_LDFLAGS)
@@ -57,7 +57,7 @@ LOCAL_C_INCLUDES += \
     $(BREAKPAD_INCLUDES) \
     $(BREAKPAD_CLIENT_INCLUDES) \
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
 $(eval $(call insert-windows-icon))
 endif
 
@@ -85,7 +85,7 @@ LOCAL_CFLAGS += -O0 $(LIBCURL_CFLAGS)
 
 LOCAL_SRC_FILES += \
     android/crashreport/CrashService_common.cpp \
-    android/crashreport/CrashService_$(HOST_OS).cpp \
+    android/crashreport/CrashService_$(BUILD_TARGET_OS).cpp \
     android/crashreport/CrashService_unittest.cpp \
     android/crashreport/CrashSystem_unittest.cpp \
     android/crashreport/testing/main-test-crasher.cpp \

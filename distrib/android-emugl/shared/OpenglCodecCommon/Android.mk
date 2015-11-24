@@ -15,7 +15,7 @@ host_commonSources := $(commonSources)
 
 host_commonLdLibs := $(CXX_STD_LIB)
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
     host_commonSources += Win32PipeStream.cpp
     host_commonLdLibs += -lws2_32 -lpsapi
 else

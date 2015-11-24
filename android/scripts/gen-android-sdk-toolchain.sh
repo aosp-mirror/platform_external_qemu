@@ -86,8 +86,8 @@ ORIGINAL_PATH=$PATH
 # Determine host system type.
 BUILD_HOST=$(get_build_os)
 BUILD_ARCH=$(get_build_arch)
-BUILD_HOST_TAG=${BUILD_HOST}-${BUILD_ARCH}
-log "Found current build machine: $BUILD_HOST_TAG"
+BUILD_BUILD_TARGET_TAG=${BUILD_HOST}-${BUILD_ARCH}
+log "Found current build machine: $BUILD_BUILD_TARGET_TAG"
 
 # Handle CCACHE related arguments.
 CCACHE=
@@ -126,7 +126,7 @@ if [ "$OPT_HOST" ]; then
     esac
     HOST=$OPT_HOST
 else
-    HOST=$BUILD_HOST_TAG
+    HOST=$BUILD_BUILD_TARGET_TAG
     log "Auto-config: --host=$HOST"
 fi
 

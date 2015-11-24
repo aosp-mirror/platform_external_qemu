@@ -16,4 +16,4 @@
 # used to return in 'dir' the name of the current operating system
 # we really get the value from the configuration script
 #
-dir := $(HOST_OS)
+dir := $(BUILD_TARGET_OS)

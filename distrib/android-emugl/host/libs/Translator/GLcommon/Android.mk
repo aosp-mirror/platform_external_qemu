@@ -18,13 +18,13 @@ host_GL_COMMON_LINKER_FLAGS :=
 host_common_LDLIBS :=
 host_common_LDFLAGS :=
 
-ifeq ($(HOST_OS),linux)
+ifeq ($(BUILD_TARGET_OS),linux)
 #    host_common_LDFLAGS += -Wl,--whole-archive
     host_common_LDLIBS += -ldl
     host_common_LDFLAGS += -Wl,-Bsymbolic
 endif
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
     host_common_LDLIBS += -lgdi32
     host_common_LDFLAGS += -Wl,--add-stdcall-alias
 endif

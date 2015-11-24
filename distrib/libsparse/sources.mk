@@ -14,7 +14,7 @@ LIBSPARSE_SOURCES := \
 
 LIBSPARSE_INCLUDES := $(LOCAL_PATH)/include $(ZLIB_INCLUDES)
 
-ifeq (windows,$(HOST_OS))
+ifeq (windows,$(BUILD_TARGET_OS))
 LIBSPARSE_CFLAGS := -DUSE_MINGW=1
 endif
 

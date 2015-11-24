@@ -4,7 +4,7 @@ BREAKPAD_OLD_LOCAL_PATH := $(LOCAL_PATH)
 
 LOCAL_PATH := $(call my-dir)
 
-BREAKPAD_TOP_DIR := $(BREAKPAD_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
+BREAKPAD_TOP_DIR := $(BREAKPAD_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
 
 $(call define-emulator-prebuilt-library,\
     emulator-libbreakpad_client, \

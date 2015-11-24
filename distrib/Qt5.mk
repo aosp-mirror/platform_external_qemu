@@ -1,5 +1,5 @@
-QT_TOP_DIR := $(QT_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
-QT_TOP64_DIR := $(QT_PREBUILTS_DIR)/$(HOST_OS)-x86_64
+QT_TOP_DIR := $(QT_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
+QT_TOP64_DIR := $(QT_PREBUILTS_DIR)/$(BUILD_TARGET_OS)-x86_64
 QT_MOC_TOOL := $(QT_TOP64_DIR)/bin/moc
 QT_RCC_TOOL := $(QT_TOP64_DIR)/bin/rcc
 # Special-case: the 'uic' tool depends on Qt5Core: always ensure that the
@@ -9,7 +9,7 @@ QT_UIC_TOOL_LDPATH := $(QT_TOP64_DIR)/lib
 QT_UIC_TOOL := $(QT_TOP64_DIR)/bin/uic
 
 QT_LDLIBS := -lQt5Widgets -lQt5Gui -lQt5Core
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
     # On Windows, linking to mingw32 is required. The library is provided
     # by the toolchain, and depends on a main() function provided by qtmain
     # which itself depends on qMain(). These must appear in LDFLAGS and

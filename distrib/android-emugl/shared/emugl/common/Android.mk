@@ -19,7 +19,7 @@ host_commonSources := $(commonSources)
 
 host_commonLdLibs := $(CXX_STD_LIB)
 
-ifneq (windows,$(HOST_OS))
+ifneq (windows,$(BUILD_TARGET_OS))
     host_commonSources += \
         thread_pthread.cpp \
 
