@@ -59,16 +59,15 @@ my-dir = $(call parent-dir,$(lastword $(MAKEFILE_LIST)))
 # $2 = module name
 intermediates-dir-for = $(OBJS_DIR)/build/intermediates$(1)/$(2)
 
-# Return the name of a given host tool, based on the value of
-# LOCAL_HOST_BUILD. If the variable is defined, return $(BUILD_HOST_$1),
-# otherwise return $(BUILD_TARGET_$1).
-# $1: Tool name (e.g. CC, LD, etc...)
-#
-local-host-tool = $(if $(strip $(LOCAL_HOST_BUILD)),$(BUILD_HOST_$1),$(BUILD_TARGET_$1))
-local-host-exe = $(call local-host-tool,EXEEXT)
-local-host-dll = $(call local-host-tool,DLLEXT)
+# Return the name of a given build-related variable that can be defined either
+# for the build host or build target. I.e. if LOCAL_HOST_BUILD is not defined,
+# return $(BUILD_TARGET_$1), or $(BUILD_HOST_$1) instead.
+# $1: Variable name suffix (e.g. CC, LD, etc...)
+local-build-var = $(if $(strip $(LOCAL_HOST_BUILD)),$(BUILD_HOST_$1),$(BUILD_TARGET_$1))
 
-local-host-define = $(if $(strip $(LOCAL_$1)),,$(eval LOCAL_$1 := $$(call local-host-tool,$1)))
+# If LOCAL_XXX is not defined, set it to the value of BUILD_TARGET_XXX or
+# BUILD_HOST_XXX depending on the definition of LOCAL_HOST_BUILD.
+local-build-define = $(if $(strip $(LOCAL_$1)),,$(eval LOCAL_$1 := $$(call local-build-var,$1)))
 
 # Return the directory containing the intermediate files for the current
 # module. LOCAL_MODULE must be defined before calling this.
@@ -78,16 +77,16 @@ local-intermediates-dir = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(LO
 local-library-path = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(1))/$(1).a
 
 # Location of unstripped executables during build.
-local-executable-path = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(1))/$(1)$(call local-host-tool,EXEEXT)
+local-executable-path = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(1))/$(1)$(call local-build-var,EXEEXT)
 
 # Location of unstripped shared libraries during build.
-local-shared-library-path = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(1))/$(1)$(call local-host-tool,DLLEXT)
+local-shared-library-path = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(1))/$(1)$(call local-build-var,DLLEXT)
 
 # Location of final (potentially stripped) executables.
-local-executable-install-path = $(OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)$(1)$(call local-host-tool,EXEEXT)
+local-executable-install-path = $(OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)$(1)$(call local-build-var,EXEEXT)
 
 # Location of final (potentially stripped) shared libraries.
-local-shared-library-install-path = $(OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR),lib$(BUILD_TARGET_SUFFIX))/$(1)$(call local-host-tool,DLLEXT)
+local-shared-library-install-path = $(OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR),lib$(BUILD_TARGET_SUFFIX))/$(1)$(call local-build-var,DLLEXT)
 
 ldlibs_start_whole := -Wl,--whole-archive
 ldlibs_end_whole := -Wl,--no-whole-archive
@@ -407,4 +406,16 @@ $$(UIC_SRC): $$(SRC) $$(QT_UIC_TOOL)
 	$(hide) $$(call set-host-library-search-path,$$(QT_UIC_TOOL_LDPATH)) $$(QT_UIC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC)
 
 LOCAL_GENERATED_SOURCES += $$(UIC_SRC)
+endef
+
+# Call this function to force a module to link statically to the C++ standard
+# library on platforms that support it (i.e. Linux and Windows).
+local-link-static-c++lib = $(eval $(ev-local-link-static-c++lib))
+define ev-local-link-static-c++lib
+ifeq (darwin,$(BUILD_TARGET_OS))
+LOCAL_LDLIBS += $(CXX_STD_LIB)
+else  # BUILD_TARGET_OS != darwin
+LOCAL_LD := $$(call local-build-var,CXX)
+LOCAL_LDLIBS += -static-libstdc++
+endif  # BUILD_TARGET_OS != darwin
 endef

@@ -210,18 +210,6 @@ else
     CXX_STD_LIB := -lstdc++
 endif
 
-# Call this function to force a module to link statically to the C++ standard
-# library on platforms that support it (i.e. Linux and Windows).
-local-link-static-c++lib = $(eval $(ev-local-link-static-c++lib))
-define ev-local-link-static-c++lib
-ifeq (darwin,$(BUILD_TARGET_OS))
-LOCAL_LDLIBS += $(CXX_STD_LIB)
-else  # BUILD_TARGET_OS != darwin
-LOCAL_LD := $$(call local-host-tool,CXX)
-LOCAL_LDLIBS += -static-libstdc++
-endif  # BUILD_TARGET_OS != darwin
-endef
-
 ifdef EMULATOR_BUILD_32BITS
 BUILD_TARGET_BITS := 32
 BUILD_TARGET_ARCH := x86
