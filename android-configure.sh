@@ -947,9 +947,8 @@ echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
 echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 
 if [ $OPTION_DEBUG = "yes" ] ; then
-    echo "BUILD_DEBUG_EMULATOR := true" >> $config_mk
+    echo "BUILD_DEBUG := true" >> $config_mk
 fi
-echo "EMULATOR_EMUGL_SOURCES_DIR := $GLES_DIR" >> $config_mk
 if [ "$OPTION_STRIP" = "yes" ]; then
     echo "EMULATOR_STRIP_BINARIES := true" >> $config_mk
 fi

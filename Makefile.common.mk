@@ -31,7 +31,7 @@ EMULATOR_COMMON_CFLAGS := -Werror=implicit-function-declaration
 # Include the emulator version definition from Makefile.common.mk
 EMULATOR_COMMON_CFLAGS += $(EMULATOR_VERSION_CFLAGS)
 
-ifeq (true,$(BUILD_DEBUG_EMULATOR))
+ifeq (true,$(BUILD_DEBUG))
     EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=1
 else
     EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=0
@@ -164,17 +164,13 @@ include $(LOCAL_PATH)/Makefile.crash-service.mk
 ###
 ###  GPU emulation libraries
 ###
-###  Build directly from sources when using the standalone build.
+include $(SRC_PATH)/distrib/android-emugl/Android.mk
+
+##############################################################################
+##############################################################################
 ###
-ifeq (,$(strip $(wildcard $(EMULATOR_EMUGL_SOURCES_DIR))))
-$(error Cannot find GPU emulation sources directory: $(EMULATOR_EMUGL_SOURCES_DIR))
-endif
-
-ifeq (true,$(BUILD_DEBUG_EMULATOR))
-EMUGL_BUILD_DEBUG := 1
-endif
-include $(EMULATOR_EMUGL_SOURCES_DIR)/Android.mk
-
+###  QEMU2
+###
 ifdef QEMU2_TOP_DIR
 include $(QEMU2_TOP_DIR)/android-qemu2-glue/build/Makefile.qemu2.mk
 endif
