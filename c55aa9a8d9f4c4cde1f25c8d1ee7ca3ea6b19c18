@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1b153384_6e97802b",
+        "filename": "android/skin/qt/ext-battery.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T23:19:44Z",
+      "side": 1,
+      "message": "prefer static_cast\u003c...\u003e to C-style casts",
+      "range": {
+        "startLine": 32,
+        "startChar": 50,
+        "endLine": 32,
+        "endChar": 53
+      },
+      "revId": "c55aa9a8d9f4c4cde1f25c8d1ee7ca3ea6b19c18",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbc4277e_6d561dde",
+        "filename": "android/skin/qt/ext-battery.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-24T23:19:44Z",
+      "side": 1,
+      "message": "This (and also the setCurrentIndex calls above and below) depend on the order of elements in the enum. So if it changes, the UI will be all wrong. If you want to make it less brittle, here is what you can do:\n\n1. Associate data - the value of the enum - with each element of the list (see http://doc.qt.io/qt-4.8/qcombobox.html for details)\n2. Use QComboBox::findData to find the index of an element that has a given piece of data, i.e. int idx \u003d bat_statusBox-\u003efindData(bStatus);\n3. Call QComboBox::setCurrentIndex with the index obtained above\n\nThis will future-proof the UI code, so even if someone neglects updating the UI after rearranging the enums, at least it will behave consistently",
+      "range": {
+        "startLine": 38,
+        "startChar": 32,
+        "endLine": 38,
+        "endChar": 47
+      },
+      "revId": "c55aa9a8d9f4c4cde1f25c8d1ee7ca3ea6b19c18",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
