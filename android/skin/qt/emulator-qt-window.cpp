@@ -34,6 +34,7 @@
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/winsys-qt.h"
 #include "android/ui-emu-agent.h"
 
@@ -184,13 +185,18 @@ void EmulatorQtWindow::keyPressEvent(QKeyEvent *event)
 void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
 {
     handleKeyEvent(kEventKeyUp, event);
-    if (mGrabKeyboardInput && mouseInside()) {
-        if (event->text().length() > 0) {
-            SkinEvent *skin_event = createSkinEvent(kEventTextInput);
-            skin_event->u.text.down = false;
-            strncpy((char*)skin_event->u.text.text, (const char*)event->text().constData(), 32);
-            queueEvent(skin_event);
-        }
+
+    // If the key event generated any text, we need
+    // to send an additional TextInput event to the emulator.
+    if (event->text().length() > 0) {
+        SkinEvent *skin_event = createSkinEvent(kEventTextInput);
+        skin_event->u.text.down = false;
+        strncpy((char*)skin_event->u.text.text,
+                (const char*)event->text().toUtf8().constData(),
+                sizeof(skin_event->u.text.text) - 1);
+        // Ensure the event's text is 0-terminated
+        skin_event->u.text.text[sizeof(skin_event->u.text.text)-1] = 0;
+        queueEvent(skin_event);
     }
 }
 
@@ -201,6 +207,10 @@ void EmulatorQtWindow::mouseMoveEvent(QMouseEvent *event)
 
 void EmulatorQtWindow::mousePressEvent(QMouseEvent *event)
 {
+    QSettings settings;
+    if (settings.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool()) {
+        mGrabKeyboardInput = true;
+    }
     handleMouseEvent(kEventMouseButtonDown, event);
 }
 
@@ -702,6 +712,19 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type, QMouseEvent *event)
     queueEvent(skin_event);
 }
 
+void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event) {
+    SkinEvent* skin_event = createSkinEvent(type);
+    SkinEventKeyData& keyData = skin_event->u.key;
+    keyData.keycode = convertKeyCode(event->key());
+
+    Qt::KeyboardModifiers modifiers = event->modifiers();
+    if (modifiers & Qt::ShiftModifier) keyData.mod |= kKeyModLShift;
+    if (modifiers & Qt::ControlModifier) keyData.mod |= kKeyModLCtrl;
+    if (modifiers & Qt::AltModifier) keyData.mod |= kKeyModLAlt;
+
+    queueEvent(skin_event);
+}
+
 void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
 {
     bool must_ungrab = event->key() == Qt::Key_Alt &&
@@ -710,31 +733,24 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
         mGrabKeyboardInput = false;
     }
 
-    if (mGrabKeyboardInput && mouseInside()) {
-        SkinEvent *skin_event = createSkinEvent(type);
-        SkinEventKeyData *keyData = &skin_event->u.key;
-        keyData->keycode = convertKeyCode(event->key());
+    QSettings settings;
+    bool grab = 
+        mGrabKeyboardInput &&
+        settings.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool() &&
+        mouseInside();
 
-        Qt::KeyboardModifiers modifiers = event->modifiers();
-        if (modifiers & Qt::ShiftModifier) keyData->mod |= kKeyModLShift;
-        if (modifiers & Qt::ControlModifier) keyData->mod |= kKeyModLCtrl;
-        if (modifiers & Qt::AltModifier) keyData->mod |= kKeyModLAlt;
-
-        queueEvent(skin_event);
-    } else {
-
-        // When in zoom mode, the overlay should be toggled
-        if (mInZoomMode) {
-            if (event->key() == Qt::Key_Control) {
-                if (type == kEventKeyDown) {
-                    mOverlay.showForZoom();
-                } else if (type == kEventKeyUp) {
-                    mOverlay.hide();
-                }
+    if (!grab && mInZoomMode) {
+        if (event->key() == Qt::Key_Control) {
+            if (type == kEventKeyDown) {
+                mOverlay.showForZoom();
+            } else if (type == kEventKeyUp) {
+                mOverlay.hide();
             }
         }
-
-        tool_window->handleQtKeyEvent(event);
+    }
+    if (grab ||
+         !tool_window->handleQtKeyEvent(event)) {
+        forwardKeyEventToEmulator(type, event);
     }
 }
 

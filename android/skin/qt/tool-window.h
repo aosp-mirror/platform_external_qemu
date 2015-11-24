@@ -72,7 +72,7 @@ public:
     void runAdbInstall(const QString &path);
     void runAdbPush(const QList<QUrl> &urls);
 
-    void handleQtKeyEvent(QKeyEvent* event);
+    bool handleQtKeyEvent(QKeyEvent* event);
 
 signals:
     void skinUIEvent(SkinEvent* event);
