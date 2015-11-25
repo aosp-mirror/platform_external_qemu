@@ -29,17 +29,17 @@ using android::base::System;
 
 // static
 StringVector EmuglBackendScanner::scanDir(const char* execDir,
-                                          int hostBitness) {
+                                          int programBitness) {
     StringVector names;
 
     if (!execDir || !System::get()->pathExists(execDir)) {
         LOG(ERROR) << "Invalid executable directory: " << execDir;
         return names;
     }
-    if (!hostBitness) {
-        hostBitness = System::kProgramBitness;
+    if (!programBitness) {
+        programBitness = System::get()->getProgramBitness();
     }
-    const char* subdir = (hostBitness == 64) ? "lib64" : "lib";
+    const char* subdir = (programBitness == 64) ? "lib64" : "lib";
     String subDir = StringFormat("%s/%s/", execDir, subdir);
 
     StringVector entries = System::get()->scanDirEntries(subDir.c_str());

@@ -72,7 +72,7 @@ public:
     // Return the host bitness as an integer, either 32 or 64.
     // Note that this is different from the program's bitness. I.e. if
     // a 32-bit program runs under a 64-bit host, getProgramBitness()
-    // shall return 32, byt getHostBitness() shall return 64.
+    // shall return 32, but getHostBitness() shall return 64.
     virtual int getHostBitness() const = 0;
 
     // Return the program bitness as an integer, either 32 or 64.
@@ -109,6 +109,9 @@ public:
     // for the current platform, i.e. "bin" or "bin64" depending
     // on the value of kProgramBitness.
     static const char* kBinSubDir;
+
+    // Name of the 32-bit binaries subdirectory
+    static const char* kBin32SubDir;
 
     // Return program's bitness, either 32 or 64.
     static int getProgramBitness() { return kProgramBitness; }

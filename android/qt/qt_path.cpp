@@ -17,10 +17,14 @@
 using namespace android::base;
 
 // Get the base directory for libraries and plugins.
-static String androidQtGetBaseDir()
+static String androidQtGetBaseDir(int bitness)
 {
+    if (!bitness) {
+        bitness = System::getProgramBitness();
+    }
+
     System* system = System::get();
-    const char* libBitness = (system->getHostBitness() == 64) ? "lib64" : "lib";
+    const char* const libBitness = bitness == 64 ? "lib64" : "lib";
     StringVector subDirVector;
     subDirVector.push_back(system->getLauncherDirectory());
     subDirVector.push_back(String(libBitness));
@@ -30,20 +34,20 @@ static String androidQtGetBaseDir()
     return qtDir;
 }
 
-String androidQtGetLibraryDir()
+String androidQtGetLibraryDir(int bitness)
 {
     StringVector subDirVector;
-    subDirVector.push_back(androidQtGetBaseDir());
+    subDirVector.push_back(androidQtGetBaseDir(bitness));
     subDirVector.push_back(String("lib"));
     String qtLibDir = PathUtils::recompose(subDirVector);
 
     return qtLibDir;
 }
 
-String androidQtGetPluginsDir()
+String androidQtGetPluginsDir(int bitness)
 {
     StringVector subDirVector;
-    subDirVector.push_back(androidQtGetBaseDir());
+    subDirVector.push_back(androidQtGetBaseDir(bitness));
     subDirVector.push_back(String("plugins"));
     String qtPluginsDir = PathUtils::recompose(subDirVector);
 

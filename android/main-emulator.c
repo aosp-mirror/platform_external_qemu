@@ -215,6 +215,9 @@ int main(int argc, char** argv)
         );
         exit(1);
     }
+#elif defined(_WIN32)
+    // Windows version of Qemu1 works only in x86 mode
+    force_32bit = !ranchu;
 #endif
 
     /* If there is an AVD name, we're going to extract its target architecture
@@ -294,7 +297,7 @@ int main(int argc, char** argv)
 
 #if CONFIG_QT
     /* For Qt-based UI backends, add <lib>/qt/ to the library search path. */
-    androidQtSetupEnv();
+    androidQtSetupEnv(bitness);
 #endif
 
 #ifdef _WIN32
@@ -496,14 +499,8 @@ getTargetEmulatorPath(const char* progDir,
 {
     char*  result;
     char* ranchu_result;
-#ifdef _WIN32
-    /* TODO: currently amd64-mingw32msvc-gcc doesn't work which prevents
-             generating 64-bit binaries for Windows */
-    bool search_for_64bit_emulator = false;
-#else
     bool search_for_64bit_emulator =
             !force_32bit && android_getHostBitness() == 64;
-#endif
 
     const char* emulatorSuffix;
 
@@ -570,5 +567,7 @@ static void updateLibrarySearchPath(bool is_64bit) {
                "Can not use bundled libraries. ",
                fullPath);
     }
+
+    D("Adding library search path: '%s'\n", fullPath);
     add_library_search_dir(fullPath);
 }

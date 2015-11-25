@@ -17,28 +17,32 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
 #include "android/qt/qt_path.h"
+#include "android/utils/debug.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
 using namespace android::base;
 
-bool androidQtSetupEnv() {
+bool androidQtSetupEnv(int bitness) {
     // Add <progdir>/<lib>/qt/lib if it exists to the library search path.
-    String  qtLibSubDir = androidQtGetLibraryDir();
+    String  qtLibSubDir = androidQtGetLibraryDir(bitness);
     System* system = System::get();
 
     if (!system->pathIsDir(qtLibSubDir.c_str())) {
         LOG(ERROR) << "Qt library not found at " << qtLibSubDir.c_str();
         return false;
     }
-    //LOG(INFO) << "Adding library search path [" << qtLibSubDir.c_str() << "]";
+    VERBOSE_PRINT(init,
+        "Adding library search path for Qt: '%s'", qtLibSubDir.c_str());
     system->addLibrarySearchDir(qtLibSubDir.c_str());
-    //const char* env = ::getenv(System::kLibrarySearchListEnvVarName);
-    //LOG(INFO) << "Library search list [" << (env ? env : "<empty>") << "]";
 
     // Set the platforms plugin path too.
-    String qtPluginsSubDir = androidQtGetPluginsDir();
+    String qtPluginsSubDir = androidQtGetPluginsDir(bitness);
+
+    VERBOSE_PRINT(init,
+        "Setting Qt plugin search path: QT_QPA_PLATFORM_PLUGIN_PATH=%s",
+        qtPluginsSubDir.c_str());
     system->envSet("QT_QPA_PLATFORM_PLUGIN_PATH", qtPluginsSubDir.c_str());
 
     return true;
