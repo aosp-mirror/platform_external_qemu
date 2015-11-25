@@ -1,0 +1,7 @@
+Code-Review+2: David Turner <digit@google.com>
+Verified+1: Lingfeng Yang <lfy@google.com>
+Submitted-by: Lingfeng Yang <lfy@google.com>
+Submitted-at: Wed, 25 Nov 2015 01:20:53 +0000
+Reviewed-on: https://android-review.googlesource.com/183903
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
