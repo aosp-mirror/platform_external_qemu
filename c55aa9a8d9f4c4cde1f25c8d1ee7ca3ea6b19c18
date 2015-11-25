@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "9b2123e5_dd83bd70",
+        "filename": "android/skin/qt/ext-battery.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-25T22:27:15Z",
+      "side": 1,
+      "message": "What happens if the extended window is opened before the guest system boots?",
+      "range": {
+        "startLine": 30,
+        "startChar": 34,
+        "endLine": 30,
+        "endChar": 41
+      },
+      "revId": "c55aa9a8d9f4c4cde1f25c8d1ee7ca3ea6b19c18",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b153384_6e97802b",
         "filename": "android/skin/qt/ext-battery.cpp",
         "patchSetId": 1
