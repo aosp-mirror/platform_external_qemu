@@ -38,7 +38,8 @@ void ExtendedWindow::completeSettingsInitialization()
     // user-config code.
 
     // "Screen shot" and "Record screen" destination folder
-    mSettingsState.mSavePath = mToolWindow->getScreenshotSaveDirectory();
+    mSettingsState.mSavePath =
+            QDir::toNativeSeparators(mToolWindow->getScreenshotSaveDirectory());
 
     if (mSettingsState.mSavePath.isEmpty()) {
         mExtendedUi->set_saveLocBox->setText(tr("None"));
@@ -131,6 +132,8 @@ void ExtendedWindow::on_set_folderButton_clicked()
                                       QFileDialog::ShowDirsOnly);
 
     if ( dirName.isEmpty() ) return; // Operation was canceled
+
+    dirName = QDir::toNativeSeparators(dirName);
 
     // Check if this path is writable
     QFileInfo fInfo(dirName);

@@ -209,9 +209,11 @@ QString ToolWindow::getScreenshotSaveDirectory()
     if (savePath.isEmpty()) {
 
         // We have no path. Try to determine the path to the desktop.
-        QStringList paths = QStandardPaths::standardLocations(QStandardPaths::DesktopLocation);
+        QStringList paths =
+                QStandardPaths::standardLocations(
+                    QStandardPaths::DesktopLocation);
         if (paths.size() > 0) {
-            savePath = paths[0];
+            savePath = QDir::toNativeSeparators(paths[0]);
 
             // Save this for future reference
             settings.setValue(Ui::Settings::SAVE_PATH, savePath);
@@ -232,7 +234,7 @@ QString ToolWindow::getScreenshotSaveFile()
         return dirName;
     }
 
-    return QDir(dirName).filePath(fileName);
+    return QDir::toNativeSeparators(QDir(dirName).filePath(fileName));
 }
 
 void ToolWindow::runAdbInstall(const QString &path)
