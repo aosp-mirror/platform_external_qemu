@@ -15,11 +15,11 @@
 
 // Define the common emulator version strings
 #ifdef ANDROID_SDK_TOOLS_REVISION
-#  define  VERSION_STRING_SHORT  STRINGIFY(ANDROID_SDK_TOOLS_REVISION)
-#  define  VERSION_STRING        VERSION_STRING_SHORT ".0"
+#  define  EMULATOR_VERSION_STRING_SHORT  STRINGIFY(ANDROID_SDK_TOOLS_REVISION)
+#  define  EMULATOR_VERSION_STRING        EMULATOR_VERSION_STRING_SHORT ".0"
 #else
-#  define  VERSION_STRING_SHORT  "standalone"
-#  define  VERSION_STRING        VERSION_STRING_SHORT
+#  define  EMULATOR_VERSION_STRING_SHORT  "standalone"
+#  define  EMULATOR_VERSION_STRING        EMULATOR_VERSION_STRING_SHORT
 #endif
 
 // Define the emulator build number string
