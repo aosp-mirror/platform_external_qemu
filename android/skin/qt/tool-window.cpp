@@ -433,20 +433,29 @@ void ToolWindow::on_minimize_button_clicked()
     emulator_window->showMinimized();
 }
 
-void ToolWindow::on_power_button_clicked()
-{
-    handleUICommand(QtUICommand::POWER);
-    raiseMainWindow();
+void ToolWindow::on_power_button_pressed() {
+    handleUICommand(QtUICommand::POWER, true);
 }
-void ToolWindow::on_volume_up_button_clicked()
-{
-    handleUICommand(QtUICommand::VOLUME_UP);
-    raiseMainWindow();
+
+void ToolWindow::on_power_button_released() {
+    handleUICommand(QtUICommand::POWER, false);
 }
-void ToolWindow::on_volume_down_button_clicked()
+
+void ToolWindow::on_volume_up_button_pressed()
 {
-    handleUICommand(QtUICommand::VOLUME_DOWN);
-    raiseMainWindow();
+    handleUICommand(QtUICommand::VOLUME_UP, true);
+}
+void ToolWindow::on_volume_up_button_released()
+{
+    handleUICommand(QtUICommand::VOLUME_UP, false);
+}
+void ToolWindow::on_volume_down_button_pressed()
+{
+    handleUICommand(QtUICommand::VOLUME_DOWN, true);
+}
+void ToolWindow::on_volume_down_button_released()
+{
+    handleUICommand(QtUICommand::VOLUME_DOWN, false);
 }
 void ToolWindow::on_recents_button_clicked()
 {
