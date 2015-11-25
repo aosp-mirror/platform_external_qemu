@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9bbbe3f1_7e65a921",
+        "filename": "android/skin/qt/ext-cellular.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-25T00:00:36Z",
+      "side": 1,
+      "message": "Is this change actually adding persistence though? Do the values of signal strength/voice status etc. set via cellularAgent actually persist across avd restarts?",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 1
+      },
+      "revId": "f33bfb5dec9f3ea25afeaf861ad55a225c40eabe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9bbbe3f1_de75d5d8",
+        "filename": "android/skin/qt/ext-cellular.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-25T00:00:36Z",
+      "side": 1,
+      "message": "See my comments about the similar change on the Battery page",
+      "range": {
+        "startLine": 39,
+        "startChar": 37,
+        "endLine": 39,
+        "endChar": 52
+      },
+      "revId": "f33bfb5dec9f3ea25afeaf861ad55a225c40eabe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
