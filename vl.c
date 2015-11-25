@@ -2856,7 +2856,7 @@ static void android_init_metrics()
 
     androidMetrics_init(&metrics);
     // mark the qemu2-based emulator with special suffix
-    ANDROID_METRICS_STRASSIGN(metrics.emulator_version, VERSION_STRING "/2");
+    ANDROID_METRICS_STRASSIGN(metrics.emulator_version, EMULATOR_VERSION_STRING "/2");
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, android_hw->hw_cpu_arch);
     metrics.guest_gpu_enabled = android_hw->hw_gpu_enabled;
     if (android_hw->hw_gpu_enabled) {
