@@ -66,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "3bed97ca_2fcc588c",
+        "filename": "android-configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-25T19:51:05Z",
+      "side": 1,
+      "message": "changed",
+      "parentUuid": "7b80ef13_aa330f37",
+      "revId": "7f8dbca3192361dfca7ad06cfb6d6fb11ca183ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bbb8a7d5_7c4f1568",
         "filename": "android-configure.sh",
         "patchSetId": 2
@@ -77,6 +95,24 @@
       "writtenOn": "2015-11-25T09:11:46Z",
       "side": 1,
       "message": "nit: /buildnumber/build-number/",
+      "revId": "7f8dbca3192361dfca7ad06cfb6d6fb11ca183ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5bd5eb28_b97b5ba2",
+        "filename": "android-configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-25T19:51:05Z",
+      "side": 1,
+      "message": "Changed",
+      "parentUuid": "bbb8a7d5_7c4f1568",
       "revId": "7f8dbca3192361dfca7ad06cfb6d6fb11ca183ae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
