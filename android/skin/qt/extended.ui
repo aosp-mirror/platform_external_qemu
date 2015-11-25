@@ -60,9 +60,6 @@ font-family: &quot;Roboto&quot;</string>
    <property name="layoutDirection">
     <enum>Qt::LeftToRight</enum>
    </property>
-   <property name="styleSheet">
-    <string notr="true">border:none</string>
-   </property>
    <property name="currentIndex">
     <number>0</number>
    </property>
