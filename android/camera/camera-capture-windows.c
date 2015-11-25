@@ -22,6 +22,8 @@
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
 
+#include "qemu/thread.h"
+
 #include <stdio.h>
 #include <vfw.h>
 #include <winsock2.h>
@@ -245,11 +247,11 @@ _on_captured_frame(HWND hwnd, LPVIDEOHDR hdr)
 }
 
 /*******************************************************************************
- *                     CameraDevice API
+ *                     CameraDevice API implementation
  ******************************************************************************/
 
 CameraDevice*
-camera_device_open(const char* name, int inp_channel)
+cmd_camera_device_open(const char* name, int inp_channel)
 {
     WndCameraDevice* wcd;
 
@@ -288,7 +290,7 @@ camera_device_open(const char* name, int inp_channel)
 }
 
 int
-camera_device_start_capturing(CameraDevice* cd,
+cmd_camera_device_start_capturing(CameraDevice* cd,
                               uint32_t pixel_format,
                               int frame_width,
                               int frame_height)
@@ -518,7 +520,7 @@ camera_device_start_capturing(CameraDevice* cd,
 }
 
 int
-camera_device_stop_capturing(CameraDevice* cd)
+cmd_camera_device_stop_capturing(CameraDevice* cd)
 {
     WndCameraDevice* wcd;
     if (cd == NULL || cd->opaque == NULL) {
@@ -642,7 +644,7 @@ _camera_device_read_frame_clipboard(WndCameraDevice* wcd,
 }
 
 int
-camera_device_read_frame(CameraDevice* cd,
+cmd_camera_device_read_frame(CameraDevice* cd,
                          ClientFrameBuffer* framebuffers,
                          int fbs_num,
                          float r_scale,
@@ -674,7 +676,7 @@ camera_device_read_frame(CameraDevice* cd,
 }
 
 void
-camera_device_close(CameraDevice* cd)
+cmd_camera_device_close(CameraDevice* cd)
 {
     /* Sanity checks. */
     if (cd == NULL || cd->opaque == NULL) {
@@ -686,7 +688,7 @@ camera_device_close(CameraDevice* cd)
 }
 
 int
-enumerate_camera_devices(CameraInfo* cis, int max)
+cmd_enumerate_camera_devices(CameraInfo* cis, int max)
 {
 /* Array containing emulated webcam frame dimensions.
  * capXxx API provides device independent frame dimensions, by scaling frames
@@ -711,13 +713,13 @@ static const CameraFrameDim _emulate_dims[] =
         CameraDevice* cd;
 
         snprintf(name, sizeof(name), "%s%d", _default_window_name, found);
-        cd = camera_device_open(name, inp_channel);
+        cd = cmd_camera_device_open(name, inp_channel);
         if (cd != NULL) {
             WndCameraDevice* wcd = (WndCameraDevice*)cd->opaque;
 
             /* Unfortunately, on Windows we have to start capturing in order to get the
              * actual frame properties. */
-            if (!camera_device_start_capturing(cd, V4L2_PIX_FMT_RGB32, 640, 480)) {
+            if (!cmd_camera_device_start_capturing(cd, V4L2_PIX_FMT_RGB32, 640, 480)) {
                 cis[found].frame_sizes = (CameraFrameDim*)malloc(sizeof(_emulate_dims));
                 if (cis[found].frame_sizes != NULL) {
                     char disp_name[24];
@@ -734,13 +736,13 @@ static const CameraFrameDim _emulate_dims[] =
                 } else {
                     E("%s: Unable to allocate dimensions", __FUNCTION__);
                 }
-                camera_device_stop_capturing(cd);
+                cmd_camera_device_stop_capturing(cd);
             } else {
                 /* No more cameras. */
-                camera_device_close(cd);
+                cmd_camera_device_close(cd);
                 break;
             }
-            camera_device_close(cd);
+            cmd_camera_device_close(cd);
         } else {
             /* No more cameras. */
             break;
@@ -749,3 +751,328 @@ static const CameraFrameDim _emulate_dims[] =
 
     return found;
 }
+
+
+
+typedef enum {
+  CAMERA_CMD_NOP,
+  CAMERA_CMD_OPEN,
+  CAMERA_CMD_START_CAPTURING,
+  CAMERA_CMD_STOP_CAPTURING,
+  CAMERA_CMD_READ_FRAME,
+  CAMERA_CMD_CLOSE,
+  CAMERA_CMD_ENUMERATE_DEVICES
+} camera_cmd_t;
+
+// Camera thread state
+typedef struct {
+// Currently executing command
+   camera_cmd_t cmd;
+// "Ready" or not
+// Bunch of stuff essential to most camera API calls
+  CameraDevice* device;
+  ClientFrameBuffer* fbs;
+  CameraInfo* info;
+  char* name;
+  int channel;
+
+// Individual "registers" for arguments like size/color
+  int int_reg0;
+  int int_reg1;
+  int int_reg2;
+
+  uint32_t uint_reg0;
+
+  float float_reg0;
+  float float_reg1;
+  float float_reg2;
+  float float_reg3;
+
+  BOOL exists;
+  BOOL avail;
+  BOOL rdy;
+
+  QemuMutex lock;
+  QemuCond cts_exists;
+  QemuCond cmd_available;
+  QemuCond cmd_ready;
+  QemuThread thread;
+
+} camera_thread_state_t;
+
+static camera_thread_state_t* cts = NULL;
+
+// State machine controlling the Windows camera thread.
+static void camera_thread_fn() {
+  qemu_mutex_lock(&cts->lock);
+
+  // Tell everyone the camera thread
+  // has the lock.
+  // Coordination with other threads can then proceed.
+  if(cts->exists == 0) {
+    cts->exists = 1;
+    qemu_cond_signal(&cts->cts_exists);
+  }
+
+  while (1) {
+
+    // Wait until another thread sets cts's registers
+    // and sets cts->avail to 1 (command is available for execution)
+    while (cts->avail == 0) {
+      qemu_cond_wait(&cts->cmd_available, &cts->lock);
+    }
+
+    // Execute the command
+    switch(cts->cmd) {
+      case CAMERA_CMD_NOP:
+        break;
+      case CAMERA_CMD_OPEN:
+        cts->device = cmd_camera_device_open(cts->name, cts->channel);
+        break;
+      case CAMERA_CMD_START_CAPTURING:
+        cts->int_reg2 = cmd_camera_device_start_capturing(cts->device, cts->uint_reg0, cts->int_reg0, cts->int_reg1);
+        break;
+      case CAMERA_CMD_STOP_CAPTURING:
+        cts->int_reg2 = cmd_camera_device_stop_capturing(cts->device);
+        break;
+      case CAMERA_CMD_READ_FRAME:
+        cts->int_reg2 = cmd_camera_device_read_frame(cts->device, cts->fbs, 
+                                                     cts->int_reg0,
+                                                     cts->float_reg0,
+                                                     cts->float_reg1,
+                                                     cts->float_reg2,
+                                                     cts->float_reg3);
+        break;
+      case CAMERA_CMD_CLOSE:
+        cmd_camera_device_close(cts->device);
+        break;
+      case CAMERA_CMD_ENUMERATE_DEVICES:
+        cts->int_reg2 = cmd_enumerate_camera_devices(cts->info, cts->int_reg0);
+        break;
+      default:
+        break;
+    }
+
+    // Unset available, set ready to 1 (command has executed),
+    // and tell this to other threads
+    cts->avail = 0; cts->rdy = 1;
+    qemu_cond_signal(&cts->cmd_ready);
+  }
+
+  qemu_mutex_unlock(&cts->lock);
+}
+
+int windows_camera_thread_init() {
+  if (cts) return 0;
+
+  cts = (camera_thread_state_t*)malloc(sizeof(camera_thread_state_t));
+  cts->cmd = CAMERA_CMD_NOP;
+
+  // Registers for the most common
+  // camera functions---they need pointers
+  // to the camera device, framebuffers, etc.
+  cts->device = NULL;
+  cts->fbs = NULL;
+  cts->info = NULL;
+  cts->name = NULL;
+  cts->channel = 0;
+
+  // Registers to handle functions
+  // with more int/uint/float arguments
+  // such as read_frame
+  cts->int_reg0 = 0;
+  cts->int_reg1 = 0;
+  cts->int_reg2 = 0;
+
+  cts->uint_reg0 = 0;
+
+  cts->float_reg0 = 0.0;
+  cts->float_reg1 = 0.0;
+  cts->float_reg2 = 0.0;
+  cts->float_reg3 = 0.0;
+
+  qemu_mutex_init(&cts->lock);
+
+  // Condition variables and state
+  // for synchronizing Windows camera thread
+  // with rest of system:
+  
+  cts->exists = 0; // CTS loop exists and has the lock (need this initial condition before anything else)
+  cts->avail = 0; // A command is ready to execute (all registers set)
+  cts->rdy = 0; // Command has executed and control can return to calling thread
+  qemu_cond_init(&cts->cts_exists);
+  qemu_cond_init(&cts->cmd_available);
+  qemu_cond_init(&cts->cmd_ready);
+
+  qemu_thread_create(&cts->thread, "windows_camera", camera_thread_fn, 0, QEMU_THREAD_DETACHED);
+
+  qemu_mutex_lock(&cts->lock);
+
+  while (0 && cts->exists == 0) {
+    qemu_cond_wait(&cts->cts_exists, &cts->lock);
+  }
+
+  qemu_mutex_unlock(&cts->lock);
+  return;
+}
+
+
+/*******************************************************************************
+ *                     CameraDevice API
+ ******************************************************************************/
+
+// The windows camera capture library (vfw32)
+// cannot be operated on from multiple threads,
+// or stranges freezes/crashes will result.
+
+// Therefore, all vfw32 calls will go through a single thread,
+// and the CameraDevice API on windows
+// merely sets arguments and signals that thread.
+
+CameraDevice* camera_device_open(const char* name, int channel) {
+  qemu_mutex_lock(&cts->lock);
+
+  cts->cmd = CAMERA_CMD_OPEN;
+  cts->name = name;
+  cts->channel = channel;
+
+  cts->avail = 1; cts->rdy = 0;
+
+  qemu_cond_signal(&cts->cmd_available);
+  while (cts->rdy == 0) {
+    qemu_cond_wait(&cts->cmd_ready, &cts->lock);
+  }
+
+  CameraDevice* ret = cts->device;
+
+  qemu_mutex_unlock(&cts->lock);
+  return ret;
+}
+
+
+int
+camera_device_start_capturing(CameraDevice* cd,
+                              uint32_t pixel_format,
+                              int frame_width,
+                              int frame_height)
+{
+  qemu_mutex_lock(&cts->lock);
+
+  cts->cmd = CAMERA_CMD_START_CAPTURING;
+  cts->device = cd;
+  cts->uint_reg0 = pixel_format;
+  cts->int_reg0 = frame_width;
+  cts->int_reg1 = frame_height;
+
+  cts->avail = 1; cts->rdy = 0;
+
+  qemu_cond_signal(&cts->cmd_available);
+  while (cts->rdy == 0) {
+    qemu_cond_wait(&cts->cmd_ready, &cts->lock);
+  }
+
+  int ret = cts->int_reg2;
+
+  qemu_mutex_unlock(&cts->lock);
+
+  return ret;
+}
+
+
+int
+camera_device_stop_capturing(CameraDevice* cd)
+{
+  qemu_mutex_lock(&cts->lock);
+
+  cts->cmd = CAMERA_CMD_STOP_CAPTURING;
+  cts->device = cd;
+
+  cts->avail = 1; cts->rdy = 0;
+
+  qemu_cond_signal(&cts->cmd_available);
+  while(cts->rdy == 0) {
+    qemu_cond_wait(&cts->cmd_ready, &cts->lock);
+  }
+
+  int ret = cts->int_reg2;
+  
+  qemu_mutex_unlock(&cts->lock);
+  return ret;
+}
+
+
+int
+camera_device_read_frame(CameraDevice* cd,
+                             ClientFrameBuffer* framebuffers,
+                             int fbs_num,
+                             float r_scale,
+                             float g_scale,
+                             float b_scale,
+                             float exp_comp)
+{
+  qemu_mutex_lock(&cts->lock);
+
+  cts->cmd = CAMERA_CMD_READ_FRAME;
+  cts->device = cd;
+  cts->fbs = framebuffers;
+  cts->int_reg0 = fbs_num;
+  cts->float_reg0 = r_scale;
+  cts->float_reg1 = g_scale;
+  cts->float_reg2 = b_scale;
+  cts->float_reg3 = exp_comp;
+
+  cts->avail = 1; cts->rdy = 0;
+
+  qemu_cond_signal(&cts->cmd_available);
+  while (cts->rdy == 0) {
+    qemu_cond_wait(&cts->cmd_ready, &cts->lock);
+  }
+
+  int ret = cts->int_reg2;
+  qemu_mutex_unlock(&cts->lock);
+
+  return ret;
+}
+
+void
+camera_device_close(CameraDevice* d) {
+  qemu_mutex_lock(&cts->lock);
+
+  cts->cmd = CAMERA_CMD_CLOSE;
+  cts->device = d;
+
+  cts->avail = 1; cts->rdy = 0;
+
+  qemu_cond_signal(&cts->cmd_available);
+  while (cts->rdy == 0) {
+    qemu_cond_wait(&cts->cmd_ready, &cts->lock);
+  }
+
+  qemu_mutex_unlock(&cts->lock);
+
+  return;
+}
+
+int
+enumerate_camera_devices(CameraInfo* cis, int max) {
+  qemu_mutex_lock(&cts->lock);
+
+  cts->cmd = CAMERA_CMD_ENUMERATE_DEVICES;
+  cts->info = cis;
+  cts->int_reg0 = max;
+
+  cts->avail = 1; cts->rdy = 0;
+
+  qemu_cond_signal(&cts->cmd_available);
+  while (cts->rdy == 0) {
+    qemu_cond_wait(&cts->cmd_ready, &cts->lock);
+  }
+
+  int ret = cts->int_reg2;
+  qemu_mutex_unlock(&cts->lock);
+
+  return ret;
+}
+
+
+
