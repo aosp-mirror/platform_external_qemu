@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "db271bf3_7178070d",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-25T01:13:03Z",
+      "side": 1,
+      "message": "Got it.",
+      "parentUuid": "fbf69f9c_d4856dc0",
+      "range": {
+        "startLine": 41,
+        "startChar": 4,
+        "endLine": 41,
+        "endChar": 12
+      },
+      "revId": "c014aeb3cf6a7c81ecfe24414c2883693f3b905e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbf69f9c_b48261b4",
         "filename": "android/crashreport/CrashReporter_linux.cpp",
         "patchSetId": 20
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-24T07:42:41Z",
       "side": 1,
       "message": "nit: extra line break",
+      "range": {
+        "startLine": 65,
+        "startChar": 16,
+        "endLine": 66,
+        "endChar": 20
+      },
+      "revId": "c014aeb3cf6a7c81ecfe24414c2883693f3b905e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b153384_6bfbf2a1",
+        "filename": "android/crashreport/CrashReporter_linux.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-25T01:13:03Z",
+      "side": 1,
+      "message": "Got it.",
+      "parentUuid": "fbf69f9c_b48261b4",
       "range": {
         "startLine": 65,
         "startChar": 16,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "db271bf3_b169df3e",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-25T01:13:03Z",
+      "side": 1,
+      "message": "combined.",
+      "parentUuid": "9b2123e5_0517c530",
+      "range": {
+        "startLine": 131,
+        "startChar": 4,
+        "endLine": 132,
+        "endChar": 12
+      },
+      "revId": "c014aeb3cf6a7c81ecfe24414c2883693f3b905e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bb2a67bd_5e97d12a",
         "filename": "android/crashreport/crash-handler.h",
         "patchSetId": 20
@@ -88,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "5b1b2bb8_bce6ced4",
+        "filename": "android/crashreport/crash-handler.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-25T01:13:03Z",
+      "side": 1,
+      "message": "Right, added it back.",
+      "parentUuid": "bb2a67bd_5e97d12a",
+      "revId": "c014aeb3cf6a7c81ecfe24414c2883693f3b905e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b2123e5_45eedd73",
         "filename": "android/crashreport/main-crash-service.cpp",
         "patchSetId": 20
@@ -99,6 +189,30 @@
       "writtenOn": "2015-11-24T07:42:41Z",
       "side": 1,
       "message": "does it mean non-Qt version never does anything at all?",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 62,
+        "endChar": 1
+      },
+      "revId": "c014aeb3cf6a7c81ecfe24414c2883693f3b905e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b167790_6ee5becb",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-25T01:13:03Z",
+      "side": 1,
+      "message": "Yes, at this point non-Qt has no way to opt-in and will not try to submit the crash report.  I\u0027m not sure if I should build a headless mode opt-in option in as that would help in any automated testing.\n\nAre you referring to other GUI platforms such as SDL2?",
+      "parentUuid": "9b2123e5_45eedd73",
       "range": {
         "startLine": 59,
         "startChar": 0,
