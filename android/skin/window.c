@@ -1249,7 +1249,7 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
     data->fbh = window->framebuffer.h;
     data->dpr = 1.0;
 
-#if defined(__APPLE__) && CONFIG_QT
+#if defined(__APPLE__)
     // If the window is on a retina monitor, the framebuffer size needs to be
     // adjusted to the actual number of pixels.
     double dpr;
@@ -1267,7 +1267,7 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
     // subwindow (in units from the bottom of the overall window) if this is the Qt OSX emulator.
     data->wy = window->container.h - (data->wy + data->wh);
     data->wy += window->scroll_h;
-#endif
+#endif  // __APPLE__
 }
 
 /* Show the OpenGL ES framebuffer window */

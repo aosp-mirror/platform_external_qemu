@@ -324,10 +324,6 @@ OPT_COPY_PREBUILTS=
 option_register_var "--copy-prebuilts=<dir>" OPT_COPY_PREBUILTS \
         "Copy final emulator binaries to <path>/prebuilts/android-emulator"
 
-OPT_UI="qt"
-option_register_var "--ui=<name>" OPT_UI \
-        "Specify UI backend ('sdl2' or 'qt')"
-
 OPT_GLES=
 option_register_var "--gles=<name>" OPT_GLES \
         "Specify GLES backend ('dgl' or 'angle')"
@@ -646,17 +642,15 @@ build_darwin_binaries_on () {
     copy_directory "$AOSP_BUILD_PREBUILTS"/common/breakpad/darwin-x86_64 \
             "$DARWIN_BUILD_PREBUILTS"/common/breakpad/darwin-x86_64
 
-    if [ "$OPT_UI" != "sdl2" ]; then
-        if [ ! -d "$AOSP_BUILD_PREBUILTS"/qt/darwin-x86_64 ]; then
-            panic "Missing Darwin Qt prebuilts required by --ui=qt !!"
-        fi
-
-        copy_directory "$AOSP_BUILD_PREBUILTS"/qt/common \
-                "$DARWIN_BUILD_PREBUILTS"/qt/common
-
-        copy_directory "$AOSP_BUILD_PREBUILTS"/qt/darwin-x86_64 \
-                "$DARWIN_BUILD_PREBUILTS"/qt/darwin-x86_64
+    if [ ! -d "$AOSP_BUILD_PREBUILTS"/qt/darwin-x86_64 ]; then
+        panic "Missing Darwin Qt prebuilts required by --ui=qt !!"
     fi
+
+    copy_directory "$AOSP_BUILD_PREBUILTS"/qt/common \
+            "$DARWIN_BUILD_PREBUILTS"/qt/common
+
+    copy_directory "$AOSP_BUILD_PREBUILTS"/qt/darwin-x86_64 \
+            "$DARWIN_BUILD_PREBUILTS"/qt/darwin-x86_64
 
     run tar xf "$PKG_FILE" -C "$DARWIN_PKG_DIR"/..
 
@@ -664,9 +658,6 @@ build_darwin_binaries_on () {
         var_append DARWIN_BUILD_FLAGS "--aosp-prebuilts-dir=$DARWIN_REMOTE_DIR/aosp/prebuilts"
     else
         var_append DARWIN_BUILD_FLAGS "--no-aosp-prebuilts"
-    fi
-    if [ "$OPT_UI" ]; then
-        var_append DARWIN_BUILD_FLAGS "--ui=$OPT_UI"
     fi
     if [ "$OPT_GLES" ]; then
         var_append DARWIN_BUILD_FLAGS "--gles=$OPT_GLES"
@@ -729,10 +720,6 @@ if [ "$AOSP_PREBUILTS_DIR" ]; then
     var_append REBUILD_FLAGS "--aosp-prebuilts-dir=$AOSP_PREBUILTS_DIR"
 else
     var_append REBUILD_FLAGS "--no-aosp-prebuilts-dir"
-fi
-
-if [ "$OPT_UI" ]; then
-    var_append REBUILD_FLAGS "--ui=$OPT_UI"
 fi
 
 if [ "$OPT_GLES" ]; then

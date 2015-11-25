@@ -269,10 +269,6 @@ $(call gen-hw-config-defs)
 
 ifeq ($(HOST_OS),windows)
   $(eval $(call insert-windows-icon))
-  # Special exception for Windows: -lmingw32 must appear before libSDLmain
-  # on the link command-line, because it depends on _WinMain@16 which is
-  # exported by the latter.
-  LOCAL_LDFLAGS += -lmingw32
 endif
 
 $(call end-emulator-program)

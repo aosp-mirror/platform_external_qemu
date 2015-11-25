@@ -1,6 +1,4 @@
 # Definitions related to the emulator's UI implementation.
-# Note that there are two possible backends, based on the definitions
-# of EMULATOR_USE_SDL2 or EMULATOR_USE_QT.
 
 ANDROID_SKIN_LDLIBS :=
 ANDROID_SKIN_CFLAGS :=
@@ -25,14 +23,4 @@ ANDROID_SKIN_SOURCES := \
     android/skin/scaler.c \
     android/skin/ui.c \
 
-ifdef EMULATOR_USE_SDL2
-ANDROID_SKIN_SOURCES += \
-    android/skin/event-sdl2.c \
-    android/skin/surface-sdl2.c \
-    android/skin/winsys-sdl2.c \
-
-endif  # EMULATOR_USE_SDL2
-
-ifdef EMULATOR_USE_QT
 include $(LOCAL_PATH)/android/skin/qt/sources.mk
-endif  # EMULATOR_USE_QT

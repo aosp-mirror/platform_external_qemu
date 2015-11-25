@@ -139,7 +139,6 @@ LOCAL_SRC_FILES := $(ANDROID_SKIN_UNITTESTS)
 LOCAL_CFLAGS += $(EMULATOR_UNITTESTS_CFLAGS)
 LOCAL_LDFLAGS += $(EMULATOR_UNITTESTS_LDFLAGS)
 
-ifdef EMULATOR_USE_QT
 LOCAL_SRC_FILES += \
     android/gps/GpxParser_unittest.cpp \
     android/gps/internal/GpxParserInternal_unittest.cpp \
@@ -147,7 +146,6 @@ LOCAL_SRC_FILES += \
     android/gps/KmlParser_unittest.cpp \
 
 LOCAL_C_INCLUDES += $(LIBXML2_INCLUDES)
-endif  # EMULATOR_USE_QT
 
 LOCAL_CFLAGS += -O0 -I$(LIBCURL_INCLUDES)
 LOCAL_STATIC_LIBRARIES += \
