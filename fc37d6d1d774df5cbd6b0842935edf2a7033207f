@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3b167790_67fb21a2",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-25T19:07:21Z",
+      "side": 1,
+      "message": "why here? I\u0027d expect it to be either in main window ctor or even right after the qapp creation",
+      "range": {
+        "startLine": 48,
+        "startChar": 4,
+        "endLine": 48,
+        "endChar": 47
+      },
+      "revId": "fc37d6d1d774df5cbd6b0842935edf2a7033207f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
