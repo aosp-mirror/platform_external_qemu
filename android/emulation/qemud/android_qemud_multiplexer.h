@@ -17,6 +17,8 @@
 #include "android/emulation/qemud/android_qemud_service.h"
 #include "android/utils/compiler.h"
 
+#include "android/base/synchronization/Lock.h"
+
 ANDROID_BEGIN_HEADER
 
 /* A QemudMultiplexer object maintains the global state of the
@@ -35,9 +37,12 @@ ANDROID_BEGIN_HEADER
  * connections and disconnections of clients.
  */
 typedef struct QemudMultiplexer {
+    // TODO: Hide QemudMultiplexer struct
+    // from the header/client.
     QemudSerial serial[1];
     QemudClient* clients;
     QemudService* services;
+    android::base::Lock lock;
 } QemudMultiplexer;
 
 /* this is the serial_recv callback that is called
