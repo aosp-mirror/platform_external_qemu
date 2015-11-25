@@ -1268,6 +1268,10 @@ _camera_service_connect(void*          opaque,
     return client;
 }
 
+#ifdef _WIN32
+extern windows_camera_thread_init();
+#endif
+
 void
 android_camera_service_init(void)
 { 
@@ -1304,6 +1308,9 @@ android_camera_service_init(void)
 
         D("%s: Registered '%s' qemud service", __FUNCTION__, SERVICE_NAME);
     }
+#ifdef _WIN32
+    windows_camera_thread_init();
+#endif
 }
 
 void
