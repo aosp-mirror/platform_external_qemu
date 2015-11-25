@@ -22,6 +22,30 @@
       "revId": "679b3f7252d685ee5db23905122ce81d1c529d03",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b7da3ef_0b26e163",
+        "filename": "android/base/files/PathUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-25T09:46:55Z",
+      "side": 1,
+      "message": "I simplified the implementation to get rid of the problem :)",
+      "parentUuid": "bbc4277e_2d8b8541",
+      "range": {
+        "startLine": 38,
+        "startChar": 17,
+        "endLine": 38,
+        "endChar": 28
+      },
+      "revId": "679b3f7252d685ee5db23905122ce81d1c529d03",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
