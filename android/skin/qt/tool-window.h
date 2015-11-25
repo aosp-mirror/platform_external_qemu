@@ -106,18 +106,24 @@ private:
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
 
 private slots:
-    void on_back_button_clicked();
+    void on_back_button_pressed();
+    void on_back_button_released();
     void on_close_button_clicked();
-    void on_home_button_clicked();
+    void on_home_button_pressed();
+    void on_home_button_released();
     void on_minimize_button_clicked();
     void on_more_button_clicked();
-    void on_power_button_clicked();
-    void on_recents_button_clicked();
+    void on_power_button_pressed();
+    void on_power_button_released();
+    void on_recents_button_pressed();
+    void on_recents_button_released();
     void on_rotate_CCW_button_clicked();
     void on_rotate_CW_button_clicked();
     void on_scrShot_button_clicked();
-    void on_volume_down_button_clicked();
-    void on_volume_up_button_clicked();
+    void on_volume_down_button_pressed();
+    void on_volume_down_button_released();
+    void on_volume_up_button_pressed();
+    void on_volume_up_button_released();
     void on_zoom_button_clicked();
 
     void slot_installCanceled();

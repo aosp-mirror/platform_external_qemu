@@ -407,10 +407,15 @@ void ToolWindow::raiseMainWindow()
     emulator_window->activateWindow();
 }
 
-void ToolWindow::on_back_button_clicked()
+void ToolWindow::on_back_button_pressed()
 {
-    handleUICommand(QtUICommand::BACK);
+    handleUICommand(QtUICommand::BACK, true);
     raiseMainWindow();
+}
+
+void ToolWindow::on_back_button_released()
+{
+    handleUICommand(QtUICommand::BACK, false);
 }
 
 void ToolWindow::on_close_button_clicked()
@@ -418,10 +423,15 @@ void ToolWindow::on_close_button_clicked()
     parentWidget()->close();
 }
 
-void ToolWindow::on_home_button_clicked()
+void ToolWindow::on_home_button_pressed()
 {
-    handleUICommand(QtUICommand::HOME);
+    handleUICommand(QtUICommand::HOME, true);
     raiseMainWindow();
+}
+
+void ToolWindow::on_home_button_released()
+{
+   handleUICommand(QtUICommand::HOME, false);
 }
 
 void ToolWindow::on_minimize_button_clicked()
@@ -433,26 +443,45 @@ void ToolWindow::on_minimize_button_clicked()
     emulator_window->showMinimized();
 }
 
-void ToolWindow::on_power_button_clicked()
-{
-    handleUICommand(QtUICommand::POWER);
+void ToolWindow::on_power_button_pressed() {
+    handleUICommand(QtUICommand::POWER, true);
     raiseMainWindow();
 }
-void ToolWindow::on_volume_up_button_clicked()
+
+void ToolWindow::on_power_button_released() {
+    handleUICommand(QtUICommand::POWER, false);
+}
+
+void ToolWindow::on_volume_up_button_pressed()
 {
-    handleUICommand(QtUICommand::VOLUME_UP);
+    handleUICommand(QtUICommand::VOLUME_UP, true);
     raiseMainWindow();
 }
-void ToolWindow::on_volume_down_button_clicked()
+void ToolWindow::on_volume_up_button_released()
 {
-    handleUICommand(QtUICommand::VOLUME_DOWN);
+    handleUICommand(QtUICommand::VOLUME_UP, false);
+}
+void ToolWindow::on_volume_down_button_pressed()
+{
+    handleUICommand(QtUICommand::VOLUME_DOWN, true);
     raiseMainWindow();
 }
-void ToolWindow::on_recents_button_clicked()
+void ToolWindow::on_volume_down_button_released()
 {
-    handleUICommand(QtUICommand::RECENTS);
+    handleUICommand(QtUICommand::VOLUME_DOWN, false);
+}
+
+void ToolWindow::on_recents_button_pressed()
+{
+    handleUICommand(QtUICommand::RECENTS, true);
     raiseMainWindow();
 }
+
+void ToolWindow::on_recents_button_released()
+{
+    handleUICommand(QtUICommand::RECENTS, false);
+}
+
 void ToolWindow::on_rotate_CW_button_clicked()
 {
     handleUICommand(QtUICommand::ROTATE_RIGHT, true);
