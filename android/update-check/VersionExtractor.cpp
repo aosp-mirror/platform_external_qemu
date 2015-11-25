@@ -139,7 +139,7 @@ Version VersionExtractor::extractVersion(const std::string& data) const {
 }
 
 Version VersionExtractor::getCurrentVersion() const {
-    static const Version currentVersion = Version(VERSION_STRING_SHORT);
+    static const Version currentVersion = Version(EMULATOR_VERSION_STRING_SHORT);
     return currentVersion;
 }
 
