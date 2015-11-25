@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "1b153384_df129c70",
+        "filename": "Makefile.top.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-25T23:27:12Z",
+      "side": 1,
+      "message": "I don\u0027t follow on the handling dependency properly part of the comment. Is this referring to the dependency between the generated symbol file and the final placement that all happens in install-symbol?\n\nIf so, then there is something missing there as there can be discrepancies between symbols and symbols_intermediate. Haven\u0027t figured out how to deal with that yet.",
+      "parentUuid": "fbbdbfca_76fe4e5b",
+      "revId": "135976a57cb5d5262d2c4ef3029e78f2c4c64c61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbbdbfca_b60f0645",
         "filename": "android/build/definitions.make",
         "patchSetId": 6
