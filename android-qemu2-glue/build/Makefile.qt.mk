@@ -51,10 +51,6 @@ LIBXML2_CFLAGS := -DLIBXML_STATIC
     ANDROID_QT_CFLAGS += $(LIBXML2_CFLAGS)
 
 
-# Definitions related to the emulator's UI implementation.
-# Note that there are two possible backends, based on the definitions
-# of EMULATOR_USE_SDL2 or EMULATOR_USE_QT.
-
 ANDROID_SKIN_LDLIBS :=
 ANDROID_SKIN_LDFLAGS :=
 ANDROID_SKIN_CFLAGS :=

@@ -72,12 +72,7 @@ LOCAL_WHOLE_STATIC_LIBRARIES += \
     $(call qemu2-if-target,arm64, libqemu2_common_aarch64) \
 
 LOCAL_STATIC_LIBRARIES += \
-    $(SDL2_STATIC_LIBRARIES) \
     $(ANDROID_SKIN_STATIC_LIBRARIES) \
-
-ifndef EMULATOR_USE_QT
-    LOCAL_STATIC_LIBRARIES += $(ANDROID_EMU_BASE_STATIC_LIBRARIES_QEMU2)
-endif
 
 LOCAL_LDFLAGS += \
     $(QEMU2_DEPS_LDFLAGS) \
@@ -86,7 +81,6 @@ LOCAL_LDFLAGS += \
 LOCAL_LDLIBS += \
     $(QEMU2_GLIB_LDLIBS) \
     $(QEMU2_PIXMAN_LDLIBS) \
-    $(SDL2_LDLIBS) \
     $(CXX_STD_LIB) \
     -lfdt \
     $(call qemu2-if-windows, -lvfw32) \

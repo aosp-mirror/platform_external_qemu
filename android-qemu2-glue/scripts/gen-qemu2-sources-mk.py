@@ -26,14 +26,20 @@ EXPECTED_HOSTS = set([
 
 QEMU_PREFIX = 'qemu-system-'
 IGNORED_OBJECTS = [
+    '../audio/sdlaudio.o',
     '../disas/arm-a64.o',
     '../disas/libvixl/a64/decoder-a64.o',
     '../disas/libvixl/a64/disasm-a64.o',
     '../disas/libvixl/a64/instructions-a64.o',
     '../disas/libvixl/utils.o',
     'gdbstub-xml.o',
+    'hw/misc/android_boot_properties.o',
+    'hw/misc/android_pipe_opengles.o',
     '../qmp-marshal.o',
     'trace/generated-helpers.o',
+    '../ui/sdl_zoom.o',
+    '../ui/sdl.o',
+    '../ui/sdl2.o',
     '/version.o',   # something from the Windows build
     ]
 
@@ -49,14 +55,6 @@ CC_OBJECTS = [
 # even if they could've been common (e.g. to fix some linking issues)
 FORCE_TARGET_OBJECTS = [
     '../vl.o'
-    ]
-
-# objects which should appear only if we're building a non-AndroidEmu version
-NON_QT_OBJECTS = [
-    '../ui/sdl.o',
-    '../ui/sdl2.o',
-    'hw/misc/android_boot_properties.o',
-    'hw/misc/android_pipe_opengles.o'
     ]
 
 def find_target_lists(build_path, hosts):
@@ -97,33 +95,13 @@ def find_link_map(build_path, host):
         dirs = []
     return result
 
-def split_nonqt(files):
-    def is_non_qt(file):
-       """Returns True if |file| is a non-Qt object."""
-       return any([file.endswith(x) for x in NON_QT_OBJECTS])
-
-    non_qt = set(filter(is_non_qt, files))
-    general = set(files) - non_qt
-    return (general, non_qt)
-
 def list_files(name, files):
-    (general, non_qt) = split_nonqt(files)
-
     print "%s := \\" % name
 
-    for f in sorted(source_list_from_objects(general)):
+    for f in sorted(source_list_from_objects(files)):
         print "    %s \\" % f
     print ""
 
-    if len(non_qt) > 0:
-        print "ifndef EMULATOR_USE_QT"
-        print
-        print "%s += \\" % name
-        for f in sorted(source_list_from_objects(non_qt)):
-            print "    %s \\" % f
-        print
-        print "endif  # !EMULATOR_USE_QT"
-        print
 
 def source_list_from_objects(objects):
     result = set()

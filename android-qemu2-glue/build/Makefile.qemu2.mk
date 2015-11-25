@@ -53,11 +53,6 @@ QEMU2_INCLUDES += \
     $(QEMU2_AUTO_GENERATED_DIR) \
     $(LIBEXT4_UTILS_INCLUDES) \
 
-ifndef EMULATOR_USE_SDL2
-include $(QEMU2_OLD_LOCAL_PATH)/distrib/libsdl2.mk
-endif
-QEMU2_SDL2_INCLUDES := $(SDL2_INCLUDES)/SDL2
-
 QEMU2_INCLUDES += $(QEMU2_GLIB_INCLUDES) $(QEMU2_PIXMAN_INCLUDES)
 
 QEMU2_CFLAGS := \
@@ -76,9 +71,7 @@ QEMU2_CFLAGS := \
 
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 
-ifdef EMULATOR_USE_QT
-    include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-qt.mk
-endif
+include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-qt.mk
 
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-sources.mk
 
@@ -93,10 +86,8 @@ LOCAL_CFLAGS += $(QEMU2_CFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(QEMU2_INCLUDES) \
-    $(QEMU2_SDL2_INCLUDES) \
     $(LOCAL_PATH)/slirp \
     $(LOCAL_PATH)/tcg \
-    $(SDL2_INCLUDES) \
     $(ANDROID_EMULIB_INCLUDES)
 
 LOCAL_SRC_FILES += \
@@ -191,19 +182,17 @@ LOCAL_SRC_FILES += \
 $(call gen-hw-config-defs)
 QEMU2_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES)
 
-ifdef EMULATOR_USE_QT
-    # everything needed to build Qt UI
-    LOCAL_CFLAGS += \
-        $(ANDROID_SKIN_CFLAGS)
+# everything needed to build Qt UI
+LOCAL_CFLAGS += \
+    $(ANDROID_SKIN_CFLAGS)
 
-    LOCAL_SRC_FILES += \
-        $(ANDROID_SKIN_SOURCES:%=../qemu/%) \
-        $(QEMU2_GLUE_SOURCES)
+LOCAL_SRC_FILES += \
+    $(ANDROID_SKIN_SOURCES:%=../qemu/%) \
+    $(QEMU2_GLUE_SOURCES)
 
-    LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES:%=../qemu/%)
-    LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES:%=../qemu/%)
-    LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES:%=../qemu/%)
-endif
+LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES:%=../qemu/%)
+LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES:%=../qemu/%)
+LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES:%=../qemu/%)
 
 $(call end-emulator-library)
 

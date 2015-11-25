@@ -6,7 +6,6 @@ QEMU2_COMMON_SOURCES := \
     audio/audio.c \
     audio/mixeng.c \
     audio/noaudio.c \
-    audio/sdlaudio.c \
     audio/wavaudio.c \
     audio/wavcapture.c \
     backends/hostmem-ram.c \
@@ -247,7 +246,6 @@ QEMU2_COMMON_SOURCES := \
     ui/input.c \
     ui/keymaps.c \
     ui/qemu-pixman.c \
-    ui/sdl_zoom.c \
     ui/vnc-enc-hextile.c \
     ui/vnc-enc-tight.c \
     ui/vnc-enc-zlib.c \
@@ -258,14 +256,6 @@ QEMU2_COMMON_SOURCES := \
     ui/x_keymap.c \
     vmstate.c \
     xbzrle.c \
-
-ifndef EMULATOR_USE_QT
-
-QEMU2_COMMON_SOURCES += \
-    ui/sdl.c \
-    ui/sdl2.c \
-
-endif  # !EMULATOR_USE_QT
 
 QEMU2_COMMON_SOURCES_linux-x86_64 := \
     aio-posix.c \
@@ -392,14 +382,6 @@ QEMU2_TARGET_SOURCES := \
     vl.c \
     xen-common-stub.c \
     xen-hvm-stub.c \
-
-ifndef EMULATOR_USE_QT
-
-QEMU2_TARGET_SOURCES += \
-    hw/misc/android_boot_properties.c \
-    hw/misc/android_pipe_opengles.c \
-
-endif  # !EMULATOR_USE_QT
 
 QEMU2_TARGET_aarch64_SOURCES := \
     disas/arm.c \
