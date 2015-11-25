@@ -22,6 +22,7 @@ ANDROID_BEGIN_HEADER
 // modify the library search path when needed.
 // Return true in case of success, false if there is no corresponding
 // Qt library directory.
-bool androidQtSetupEnv();
+// |bitness| - target program bittness, 32/64 or 0 for autodetection
+bool androidQtSetupEnv(int bitness);
 
 ANDROID_END_HEADER

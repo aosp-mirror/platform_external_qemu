@@ -75,11 +75,13 @@ TEST(EmuglBackendScanner, noBackends) {
 }
 
 TEST(EmuglBackendScanner, listBackends) {
-    TestTempDir myDir("emugl_backend_scanner");
+    TestSystem testSys("foo", System::kProgramBitness);
+    TestTempDir* myDir = testSys.getTempRoot();
 
     // Create lib directory.
-    String libDir(myDir.path());
-    libDir += "/";
+    String libDir(myDir->path());
+    libDir += "/foo/";
+    make_dir(libDir);
     libDir += System::kLibSubDir;
     make_dir(libDir);
 
@@ -104,14 +106,14 @@ TEST(EmuglBackendScanner, listBackends) {
     make_subdir(libDir, "gles_sixth");
 
     // Now check the scanner
-    StringVector names = EmuglBackendScanner::scanDir(myDir.path());
-    EXPECT_EQ(3U, names.size());
+    StringVector names = EmuglBackendScanner::scanDir("foo");
+    ASSERT_EQ(3U, names.size());
     EXPECT_STREQ("fifth", names[0].c_str());
     EXPECT_STREQ("second", names[1].c_str());
     EXPECT_STREQ("sixth", names[2].c_str());
 }
 
-TEST(EmuglBackendScanner, listBackendsWithHostBitness) {
+TEST(EmuglBackendScanner, listBackendsWithProgramBitness) {
     TestSystem testSys("foo", 32);
     TestTempDir* myDir = testSys.getTempRoot();
 
@@ -127,13 +129,13 @@ TEST(EmuglBackendScanner, listBackendsWithHostBitness) {
     myDir->makeSubDir("foo/lib64/gles_sixth");
 
     StringVector names = EmuglBackendScanner::scanDir("foo", 32);
-    EXPECT_EQ(3U, names.size());
+    ASSERT_EQ(3U, names.size());
     EXPECT_STREQ("first", names[0].c_str());
     EXPECT_STREQ("second", names[1].c_str());
     EXPECT_STREQ("third", names[2].c_str());
 
     names = EmuglBackendScanner::scanDir("foo", 64);
-    EXPECT_EQ(3U, names.size());
+    ASSERT_EQ(3U, names.size());
     EXPECT_STREQ("fifth", names[0].c_str());
     EXPECT_STREQ("fourth", names[1].c_str());
     EXPECT_STREQ("sixth", names[2].c_str());

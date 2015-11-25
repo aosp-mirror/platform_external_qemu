@@ -11,6 +11,7 @@
 
 #include "android/qt/qt_path.h"
 
+#include "android/base/String.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
@@ -29,7 +30,7 @@ TEST(androidQtGetLibraryDir, Qt32) {
 
     TestSystem testSys(basePath, 32);
 
-    EXPECT_STREQ(resultPath, androidQtGetLibraryDir().c_str());
+    EXPECT_STREQ(resultPath, androidQtGetLibraryDir(32).c_str());
 }
 
 TEST(androidQtGetLibraryDir, Qt64) {
@@ -43,7 +44,24 @@ TEST(androidQtGetLibraryDir, Qt64) {
 
     TestSystem testSys(basePath, 64);
 
-    EXPECT_STREQ(resultPath, androidQtGetLibraryDir().c_str());
+    EXPECT_STREQ(resultPath, androidQtGetLibraryDir(64).c_str());
+}
+
+
+TEST(androidQtGetLibraryDir, DetectBittness) {
+#if _WIN32
+    const char basePath[]   = "\\foo";
+    const String resultPath =
+            String("\\foo\\").append(System::kLibSubDir).append("\\qt\\lib");
+#else
+    const char basePath[]  = "/foo";
+    const String resultPath =
+            String("/foo/").append(System::kLibSubDir).append("/qt/lib");
+#endif
+
+    TestSystem testSys(basePath, System::kProgramBitness);
+
+    EXPECT_STREQ(resultPath.c_str(), androidQtGetLibraryDir(0).c_str());
 }
 
 TEST(androidQtGetPluginsDir, Qt32) {
@@ -57,7 +75,7 @@ TEST(androidQtGetPluginsDir, Qt32) {
 
     TestSystem testSys(basePath, 32);
 
-    EXPECT_STREQ(resultPath, androidQtGetPluginsDir().c_str());
+    EXPECT_STREQ(resultPath, androidQtGetPluginsDir(32).c_str());
 }
 
 TEST(androidQtGetPluginsDir, Qt64) {
@@ -71,5 +89,21 @@ TEST(androidQtGetPluginsDir, Qt64) {
 
     TestSystem testSys(basePath, 64);
 
-    EXPECT_STREQ(resultPath, androidQtGetPluginsDir().c_str());
+    EXPECT_STREQ(resultPath, androidQtGetPluginsDir(64).c_str());
+}
+
+TEST(androidQtGetPluginsDir, DetectBitness) {
+#if _WIN32
+    const char basePath[] = "\\foo";
+    const String resultPath =
+            String("\\foo\\").append(System::kLibSubDir).append("\\qt\\plugins");
+#else
+    const char basePath[]  = "/foo";
+    const String resultPath =
+            String("/foo/").append(System::kLibSubDir).append("/qt/plugins");
+#endif
+
+    TestSystem testSys(basePath, System::kProgramBitness);
+
+    EXPECT_STREQ(resultPath.c_str(), androidQtGetPluginsDir(0).c_str());
 }

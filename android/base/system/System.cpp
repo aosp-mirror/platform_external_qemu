@@ -35,6 +35,8 @@
 #import <Carbon/Carbon.h>
 #endif  // __APPLE__
 
+#include <array>
+
 #ifndef _WIN32
 #include <fcntl.h>
 #include <dirent.h>
@@ -42,6 +44,7 @@
 #include <sys/times.h>
 #include <sys/types.h>
 #endif
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -258,26 +261,20 @@ public:
     virtual int getHostBitness() const {
 #ifdef _WIN32
 
-#if 1 // 32-bit limitation for Windows
-        // We do not support 64-bit execution on Windows due to a
-        // limitation of 'e2fsprogs'.
-        // (See android/scripts/build-e2fsprogs.sh)
-        //
-        // While this limitation is in place, always indicate 32-bit
-        // operation for Windows.
-        return 32;
-#else // If we didn't have a 32-bit limitation for Windows...
-        char directory[900];
-
         // Retrieves the path of the WOW64 system directory, which doesn't
         // exist on 32-bit systems.
-        unsigned len = GetSystemWow64Directory(directory, sizeof(directory));
+        // NB: we don't really need the directory, we just want to see if
+        //     Windows has it - so let's not even try to pass a buffer that
+        //     is long enough; return value is the required buffer length.
+        std::array<wchar_t, 1> directory;
+        const unsigned len = GetSystemWow64DirectoryW(
+                           directory.data(),
+                           static_cast<unsigned>(directory.size()));
         if (len == 0) {
             return 32;
         } else {
             return 64;
         }
-#endif
 
 #else // !_WIN32
     /*
@@ -287,7 +284,7 @@ public:
         Here are comments from there:
 
         ## On Linux or Darwin, a 64-bit kernel (*) doesn't mean that the
-        ## user-landis always 32-bit, so use "file" to determine the bitness
+        ## user-land is always 32-bit, so use "file" to determine the bitness
         ## of the shell that invoked us. The -L option is used to de-reference
         ## symlinks.
         ##
@@ -602,6 +599,8 @@ const char* System::kLibSubDir = "lib";
 const char* System::kBinSubDir = "bin";
 #endif
 
+const char* System::kBin32SubDir = "bin";
+
 #ifdef _WIN32
 // static
 const char* System::kLibrarySearchListEnvVarName = "PATH";
@@ -767,7 +766,18 @@ String System::findBundledExecutable(const char* programName) {
 
     String executablePath = PathUtils::recompose(pathList);
     if (!system->pathIsFile(executablePath.c_str())) {
+#if defined(_WIN32) && defined(__x86_64)
+        // On Windows we don't have a x64 version e2fsprogs, so let's try
+        // 32-bit directory if 64-bit lookup failed
+        assert(pathList[1] == kBinSubDir);
+        pathList[1] = kBin32SubDir;
+        executablePath = PathUtils::recompose(pathList);
+        if (!system->pathIsFile(executablePath.c_str())) {
+            executablePath.clear();
+        }
+#else
         executablePath.clear();
+#endif
     }
 
     return executablePath;

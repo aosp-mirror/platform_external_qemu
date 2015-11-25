@@ -33,15 +33,15 @@ using android::base::StringVector;
 using android::base::System;
 
 EmuglBackendList::EmuglBackendList(const char* execDir,
-                                   int hostBitness) :
-        mDefaultName("auto"), mNames(), mHostBitness(0), mExecDir(execDir) {
+                                   int programBitness) :
+        mDefaultName("auto"), mNames(), mProgramBitness(0), mExecDir(execDir) {
     // Fix host bitness if needed.
-    if (!hostBitness) {
-        hostBitness = System::get()->getHostBitness();
+    if (!programBitness) {
+        programBitness = System::get()->getProgramBitness();
     }
-    mHostBitness = hostBitness;
+    mProgramBitness = programBitness;
 
-    mNames = EmuglBackendScanner::scanDir(execDir, hostBitness);
+    mNames = EmuglBackendScanner::scanDir(execDir, programBitness);
 }
 
 bool EmuglBackendList::contains(const char* name) const {
@@ -57,7 +57,7 @@ String EmuglBackendList::getLibDirPath(const char* name) {
     return android::base::StringFormat(
             "%s/%s/gles_%s",
             mExecDir.c_str(),
-            mHostBitness == 64 ? "lib64" : "lib",
+            mProgramBitness == 64 ? "lib64" : "lib",
             name);
 }
 
