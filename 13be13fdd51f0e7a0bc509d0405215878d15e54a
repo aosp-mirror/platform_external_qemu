@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5bd5eb28_566ad432",
+        "filename": "android/utils/assert.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-25T18:15:45Z",
+      "side": 1,
+      "message": "#ifdef __cplusplus\n   static_assert\n#else\n ....\n\n?",
+      "range": {
+        "startLine": 176,
+        "startChar": 0,
+        "endLine": 181,
+        "endChar": 37
+      },
+      "revId": "13be13fdd51f0e7a0bc509d0405215878d15e54a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
