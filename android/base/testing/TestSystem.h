@@ -30,8 +30,8 @@ public:
                int hostBitness,
                const char* homeDir = "/home",
                const char* appDataDir = "")
-        : mLauncherDir(launcherDir),
-          mProgramDir(launcherDir),
+        : mProgramDir(launcherDir),
+          mLauncherDir(launcherDir),
           mHomeDir(homeDir),
           mAppDataDir(appDataDir),
           mHostBitness(hostBitness),

@@ -37,7 +37,7 @@ StringVector EmuglBackendScanner::scanDir(const char* execDir,
         return names;
     }
     if (!hostBitness) {
-        hostBitness = System::kProgramBitness;
+        hostBitness = System::get()->getHostBitness();
     }
     const char* subdir = (hostBitness == 64) ? "lib64" : "lib";
     String subDir = StringFormat("%s/%s/", execDir, subdir);

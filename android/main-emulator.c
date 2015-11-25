@@ -496,14 +496,8 @@ getTargetEmulatorPath(const char* progDir,
 {
     char*  result;
     char* ranchu_result;
-#ifdef _WIN32
-    /* TODO: currently amd64-mingw32msvc-gcc doesn't work which prevents
-             generating 64-bit binaries for Windows */
-    bool search_for_64bit_emulator = false;
-#else
     bool search_for_64bit_emulator =
             !force_32bit && android_getHostBitness() == 64;
-#endif
 
     const char* emulatorSuffix;
 
@@ -570,5 +564,7 @@ static void updateLibrarySearchPath(bool is_64bit) {
                "Can not use bundled libraries. ",
                fullPath);
     }
+
+    D("Adding library search path: '%s'\n", fullPath);
     add_library_search_dir(fullPath);
 }
