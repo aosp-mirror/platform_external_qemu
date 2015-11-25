@@ -378,9 +378,7 @@ char* String::release() {
     char* result = nullptr;
     if (mStr == mStorage) {
         // Small string optimization being used, allocate a new heap block.
-        result = static_cast<char*>(malloc(mSize + 1U));
-        ::memcpy(result, mStr, mSize);
-        result[mSize] = '\0';
+        result = ::strdup(mStr);
     } else {
         // Just grab the heap block from the instance.
         result = mStr;
