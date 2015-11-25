@@ -19,5 +19,5 @@
 char* win32_cmdline_quote(const char* param) {
     android::base::String result =
             android::base::Win32Utils::quoteCommandLine(param);
-    return ASTRDUP(result.c_str());
+    return result.release();
 }

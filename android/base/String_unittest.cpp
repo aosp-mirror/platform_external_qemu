@@ -407,5 +407,28 @@ TEST(String, contains) {
     EXPECT_FALSE(str.contains(String("old!!")));
 }
 
+TEST(String, release) {
+    String str("Hello");  // First, with a small string.
+    const char* str_0 = str.c_str();
+    char* cstr = str.release();
+
+    EXPECT_NE(str_0, cstr);
+
+    EXPECT_TRUE(str.empty());
+    EXPECT_STREQ("", str.c_str());
+    EXPECT_STREQ("Hello", cstr);
+    free(cstr);
+
+    str.assign("This is a very long string");
+    str_0 = str.c_str();
+    cstr = str.release();
+
+    EXPECT_EQ(str_0, cstr);
+    EXPECT_TRUE(str.empty());
+    EXPECT_STREQ("", str.c_str());
+    EXPECT_STREQ("This is a very long string", cstr);
+    free(cstr);
+}
+
 }  // namespace base
 }  // namespace android

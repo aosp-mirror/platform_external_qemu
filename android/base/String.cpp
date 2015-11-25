@@ -374,5 +374,24 @@ void String::finalizeSlice(String* strings, size_t count) {
     }
 }
 
+char* String::release() {
+    char* result = nullptr;
+    if (mStr == mStorage) {
+        // Small string optimization being used, allocate a new heap block.
+        result = static_cast<char*>(malloc(mSize + 1U));
+        ::memcpy(result, mStr, mSize);
+        result[mSize] = '\0';
+    } else {
+        // Just grab the heap block from the instance.
+        result = mStr;
+    }
+    // Make the string empty again.
+    mStr = mStorage;
+    mSize = 0U;
+    mStorage[0] = '\0';
+
+    return result;
+}
+
 }  // namespace base
 }  // namespace android
