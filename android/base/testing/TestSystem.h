@@ -30,10 +30,11 @@ public:
                int hostBitness,
                const char* homeDir = "/home",
                const char* appDataDir = "")
-        : mLauncherDir(launcherDir),
-          mProgramDir(launcherDir),
+        : mProgramDir(launcherDir),
+          mLauncherDir(launcherDir),
           mHomeDir(homeDir),
           mAppDataDir(appDataDir),
+          mCurrentDir(homeDir),
           mHostBitness(hostBitness),
           mIsRemoteSession(false),
           mRemoteSessionType(),
@@ -82,6 +83,11 @@ public:
     virtual const String& getAppDataDirectory() const {
         return mAppDataDir;
     }
+
+    virtual String getCurrentDirectory() const { return mCurrentDir; }
+
+    // Set current directory during unit-testing.
+    void setCurrentDirectoryForTesting(const char* path) { mCurrentDir = path; }
 
     virtual int getHostBitness() const {
         return mHostBitness;
@@ -144,6 +150,18 @@ public:
 
     virtual bool pathIsDir(const char* path) const {
         return pathIsDirInternal(toTempRoot(path).c_str());
+    }
+
+    virtual bool pathCanRead(const char* path) const override {
+        return pathCanReadInternal(toTempRoot(path).c_str());
+    }
+
+    virtual bool pathCanWrite(const char* path) const override {
+        return pathCanWriteInternal(toTempRoot(path).c_str());
+    }
+
+    virtual bool pathCanExec(const char* path) const override {
+        return pathCanExecInternal(toTempRoot(path).c_str());
     }
 
     virtual StringVector scanDirEntries(const char* dirPath,
@@ -256,6 +274,7 @@ private:
     String mLauncherDir;
     String mHomeDir;
     String mAppDataDir;
+    String mCurrentDir;
     int mHostBitness;
     bool mIsRemoteSession;
     String mRemoteSessionType;

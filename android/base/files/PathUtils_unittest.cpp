@@ -18,6 +18,8 @@
 
 #define ARRAY_SIZE(x)  (sizeof(x)/sizeof(x[0]))
 
+#define DUP(x) x, x
+
 namespace android {
 namespace base {
 
@@ -73,6 +75,11 @@ TEST(PathUtils, isPathSeparator) {
                   PathUtils::isPathSeparator(ch))
                 << "Testing '" << ch << "'";
     }
+}
+
+TEST(PathUtils, getDirSeparator) {
+    EXPECT_EQ('/', PathUtils::getDirSeparator(kHostPosix));
+    EXPECT_EQ('\\', PathUtils::getDirSeparator(kHostWin32));
 }
 
 TEST(PathUtils, removeTrailingDirSeparator) {
@@ -180,6 +187,98 @@ TEST(PathUtils, isAbsolute) {
         EXPECT_EQ(kData[n].expected[kHostType],
                   PathUtils::isAbsolute(path))
                 << "Testing '" << (path ? path : "<NULL>") << "'";
+    }
+}
+
+TEST(PathUtils, split) {
+    static const struct {
+        const char* path;
+        struct {
+            bool result;
+            const char* dirname;
+            const char* basename;
+        } expected[kHostTypeCount];
+    } kData[] = {
+            {".", {{true, ".", "."}, {true, ".", "."}}},
+            {"/", {{false, nullptr, nullptr}, {false, nullptr, nullptr}}},
+            {"foo", {{true, ".", "foo"}, {true, ".", "foo"}}},
+            {"/foo", {{true, "/", "foo"}, {true, "/", "foo"}}},
+            {"foo/bar", {{true, "foo/", "bar"}, {true, "foo/", "bar"}}},
+            {"foo\\bar", {{true, ".", "foo\\bar"}, {true, "foo\\", "bar"}}},
+            {"foo/", {{false, nullptr, nullptr}, {false, nullptr, nullptr}}},
+            {"foo\\", {{true, ".", "foo\\"}, {false, nullptr, nullptr}}},
+            {"C:foo", {{true, ".", "C:foo"}, {true, "C:", "foo"}}},
+            {"C:/foo", {{true, "C:/", "foo"}, {true, "C:/", "foo"}}},
+    };
+    for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
+        String dirname, basename;
+
+        EXPECT_EQ(kData[n].expected[kHostPosix].result,
+                  PathUtils::split(kData[n].path, kHostPosix, &dirname,
+                                   &basename))
+                << "when testing posix [" << kData[n].path << "]";
+        if (kData[n].expected[kHostPosix].result) {
+            EXPECT_STREQ(kData[n].expected[kHostPosix].dirname, dirname.c_str())
+                    << "when testing posix [" << kData[n].path << "]";
+            EXPECT_STREQ(kData[n].expected[kHostPosix].basename,
+                         basename.c_str())
+                    << "when testing posix [" << kData[n].path << "]";
+        }
+
+        EXPECT_EQ(kData[n].expected[kHostWin32].result,
+                  PathUtils::split(kData[n].path, kHostWin32, &dirname,
+                                   &basename))
+                << "when testing win32 [" << kData[n].path << "]";
+        if (kData[n].expected[kHostWin32].result) {
+            EXPECT_STREQ(kData[n].expected[kHostWin32].dirname, dirname.c_str())
+                    << "when testing win32 [" << kData[n].path << "]";
+            EXPECT_STREQ(kData[n].expected[kHostWin32].basename,
+                         basename.c_str())
+                    << "when testing win32 [" << kData[n].path << "]";
+        }
+
+        EXPECT_EQ(kData[n].expected[kHostType].result,
+                  PathUtils::split(kData[n].path, &dirname, &basename))
+                << "when testing host [" << kData[n].path << "]";
+        if (kData[n].expected[kHostType].result) {
+            EXPECT_STREQ(kData[n].expected[kHostType].dirname, dirname.c_str())
+                    << "when testing host [" << kData[n].path << "]";
+            EXPECT_STREQ(kData[n].expected[kHostType].basename,
+                         basename.c_str())
+                    << "when testing host [" << kData[n].path << "]";
+        }
+    }
+}
+
+TEST(PathUtils, join) {
+    static const struct {
+        const char* path1;
+        const char* path2;
+        const char* expected[kHostTypeCount];
+    } kData[] = {{".", "foo", {"./foo", ".\\foo"}},
+                 {"foo", "/bar", {"/bar", "/bar"}},
+                 {"foo", "bar", {"foo/bar", "foo\\bar"}},
+                 {"foo/", "bar", {"foo/bar", "foo/bar"}},
+                 {"foo\\", "bar", {"foo\\/bar", "foo\\bar"}},
+                 {"C:", "foo", {"C:/foo", "C:foo"}},
+                 {"C:/", "foo", {"C:/foo", "C:/foo"}},
+                 {"C:\\", "foo", {"C:\\/foo", "C:\\foo"}}};
+    for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
+        String path =
+                PathUtils::join(kData[n].path1, kData[n].path2, kHostPosix);
+        EXPECT_STREQ(kData[n].expected[kHostPosix], path.c_str())
+                << "When testing posix [" << kData[n].path1 << ", "
+                << kData[n].path2 << "]";
+
+        path = PathUtils::join(kData[n].path1, kData[n].path2, kHostWin32);
+        EXPECT_STREQ(kData[n].expected[kHostWin32], path.c_str())
+                << "When testing win32 [" << kData[n].path1 << ", "
+                << kData[n].path2 << "]";
+
+        path = PathUtils::join(kData[n].path1, kData[n].path2);
+        EXPECT_STREQ(kData[n].expected[kHostType], path.c_str())
+                << "When testing host [" << kData[n].path1 << ", "
+                << kData[n].path2 << "]";
     }
 }
 

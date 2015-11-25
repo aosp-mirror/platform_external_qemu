@@ -111,6 +111,34 @@ public:
         return mProgramDir;
     }
 
+    virtual String getCurrentDirectory() const {
+#if defined(_WIN32)
+        int currentLen = GetCurrentDirectoryW(0, nullptr);
+        if (currentLen < 0) {
+            // Could not get size of working directory. Something is really
+            // fishy here, return an empty string.
+            return String();
+        }
+        wchar_t* currentDir =
+                static_cast<wchar_t*>(calloc(currentLen + 1, sizeof(wchar_t)));
+        if (!GetCurrentDirectoryW(currentLen + 1, currentDir)) {
+            // Again, some unexpected problem. Can't do much here.
+            // Make the string empty.
+            currentDir[0] = L'0';
+        }
+
+        String result = Win32UnicodeString::convertToUtf8(currentDir);
+        ::free(currentDir);
+        return result;
+#else   // !_WIN32
+        char currentDir[PATH_MAX];
+        if (!getcwd(currentDir, sizeof(currentDir))) {
+            return String();
+        }
+        return String(currentDir);
+#endif  // !_WIN32
+    }
+
     virtual const String& getLauncherDirectory() const {
         if (mLauncherDir.empty()) {
             String programDir = getProgramDirectory();
@@ -379,6 +407,18 @@ public:
 
     virtual bool pathIsDir(const char* path) const {
         return pathIsDirInternal(path);
+    }
+
+    virtual bool pathCanRead(const char* path) const override {
+        return pathCanReadInternal(path);
+    }
+
+    virtual bool pathCanWrite(const char* path) const override {
+        return pathCanWriteInternal(path);
+    }
+
+    virtual bool pathCanExec(const char* path) const override {
+        return pathCanExecInternal(path);
     }
 
     Times getProcessTimes() const {
@@ -669,6 +709,30 @@ bool System::pathIsDirInternal(const char* path) {
         return false;
     }
     return S_ISDIR(st.st_mode);
+}
+
+// static
+bool System::pathCanReadInternal(const char* path) {
+    if (!path) {
+        return false;
+    }
+    return HANDLE_EINTR(access(path, R_OK)) == 0;
+}
+
+// static
+bool System::pathCanWriteInternal(const char* path) {
+    if (!path) {
+        return false;
+    }
+    return HANDLE_EINTR(access(path, W_OK)) == 0;
+}
+
+// static
+bool System::pathCanExecInternal(const char* path) {
+    if (!path) {
+        return false;
+    }
+    return HANDLE_EINTR(access(path, X_OK)) == 0;
 }
 
 // static
