@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fbb05f0b_64319b2e",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-25T01:53:22Z",
+      "side": 1,
+      "message": "add other buttons too pls",
+      "range": {
+        "startLine": 437,
+        "startChar": 0,
+        "endLine": 437,
+        "endChar": 46
+      },
+      "revId": "b6c7d33ec322f95ba67a696cc11cf5604d1f6874",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
