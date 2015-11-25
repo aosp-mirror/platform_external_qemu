@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bbc4277e_2d8b8541",
+        "filename": "android/base/files/PathUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-25T00:13:21Z",
+      "side": 1,
+      "message": "assert?",
+      "range": {
+        "startLine": 38,
+        "startChar": 17,
+        "endLine": 38,
+        "endChar": 28
+      },
+      "revId": "679b3f7252d685ee5db23905122ce81d1c529d03",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
