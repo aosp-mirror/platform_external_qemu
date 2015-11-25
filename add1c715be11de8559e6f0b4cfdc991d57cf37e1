@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fbb05f0b_701a7659",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-25T00:07:21Z",
+      "side": 1,
+      "message": "I think you could just test if\n\n   hw-\u003ehw_lcd_width * hw-\u003ehw_lcd_height \u003e 768 * 1280\n\nif I understand correctly, the limitation is on the amount of memory, not the individual dimensions, so theoretically something like 760 * 1281 should be fine since it fits into the memory limits",
+      "range": {
+        "startLine": 173,
+        "startChar": 12,
+        "endLine": 173,
+        "endChar": 42
+      },
+      "revId": "add1c715be11de8559e6f0b4cfdc991d57cf37e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
