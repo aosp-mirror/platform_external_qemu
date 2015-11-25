@@ -45,7 +45,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     toolsUi(new Ui::ToolControls)
 {
     Q_INIT_RESOURCE(resources);
-
+    qApp->setAttribute(Qt::AA_UseHighDpiPixmaps);
     twInstance = this;
 
     // "Tool" type windows live in another layer on top of everything in OSX, which is undesirable
