@@ -408,6 +408,7 @@ void GeoDataLoaderThread::loadGeoDataFromFile(const QString& file_name, GpsFixAr
 
 void GeoDataLoaderThread::run() {
     if (mFileName.isEmpty() || mFixes == nullptr) {
+        emit(loadingFinished(mFileName, false, tr("No file to load")));
         return;
     }
 
