@@ -1268,6 +1268,10 @@ _camera_service_connect(void*          opaque,
     return client;
 }
 
+#ifdef _WIN32
+extern int windows_camera_thread_init();
+#endif
+
 void
 android_camera_service_init(void)
 { 
@@ -1275,6 +1279,11 @@ android_camera_service_init(void)
     static int _inited = 0;
 
     if (!_inited) {
+
+#ifdef _WIN32
+        // For Windows, initialize a separate camera thread.
+        windows_camera_thread_init();
+#endif
         _camera_service_init(&_camera_service_desc);
         QemudService*  serv = qemud_service_register( SERVICE_NAME, 0,
                 &_camera_service_desc,

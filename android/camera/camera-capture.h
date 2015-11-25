@@ -23,6 +23,32 @@
 
 #include "camera-common.h"
 
+/* NOTE: On Windows, we make certain assumptions about * how many threads
+ * are accessing * the camera capture API at a time:
+ *
+ * Namely, that only ONE camera thread is accessing the camera capture API
+ * at any time.
+ *
+ * More details:
+ *
+ * First, some background. The windows camera capture library (vfw32)
+ * cannot be operated on from multiple threads,
+ * or stranges freezes/crashes will result.
+ *
+ * Therefore, all vfw32 calls will go through a single thread,
+ * and the CameraDevice API on windows
+ * merely sets arguments and signals that thread.
+ *
+ * The state machine running on that thread
+ * then assumes that only one other thread is interacting
+ * with it at a time. This is because
+ * we assume the existence of only one camera client,
+ * which results in only serial access to the underlying
+ * camera API.
+ */
+
+/* Camera capture API follows */
+
 /* Initializes camera device descriptor, and connects to the camera device.
  * Param:
  *  name - On Linux contains name of the device to be used to capture video.
