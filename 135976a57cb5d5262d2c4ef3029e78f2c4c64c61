@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1b153384_212e3982",
+        "filename": "Makefile.top.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-25T02:59:22Z",
+      "side": 1,
+      "message": "Okay let me rework this CL.",
+      "parentUuid": "7b80ef13_27f91aeb",
+      "revId": "135976a57cb5d5262d2c4ef3029e78f2c4c64c61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbbdbfca_76fe4e5b",
         "filename": "Makefile.top.mk",
         "patchSetId": 6
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "bbc4277e_68b28b56",
+        "filename": "Makefile.top.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-25T02:59:22Z",
+      "side": 1,
+      "message": "got it.",
+      "parentUuid": "fbbdbfca_76fe4e5b",
+      "revId": "135976a57cb5d5262d2c4ef3029e78f2c4c64c61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbbdbfca_b60f0645",
         "filename": "android/build/definitions.make",
         "patchSetId": 6
@@ -47,6 +83,24 @@
       "writtenOn": "2015-11-24T13:25:51Z",
       "side": 1,
       "message": "The line above should use $$ not $:\n\n   $$(if $$(LOCAL_GENERATE_SYMBOLS), $$(eval SYMBOLS +\u003d $$(_SYMBOL)))",
+      "revId": "135976a57cb5d5262d2c4ef3029e78f2c4c64c61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb2a67bd_a8196e64",
+        "filename": "android/build/definitions.make",
+        "patchSetId": 6
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-25T02:59:22Z",
+      "side": 1,
+      "message": "will fix",
+      "parentUuid": "fbbdbfca_b60f0645",
       "revId": "135976a57cb5d5262d2c4ef3029e78f2c4c64c61",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
