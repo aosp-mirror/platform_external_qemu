@@ -46,6 +46,40 @@
       "revId": "7f8dbca3192361dfca7ad06cfb6d6fb11ca183ae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b80ef13_aa330f37",
+        "filename": "android-configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-25T09:11:46Z",
+      "side": 1,
+      "message": "nit: s/BUILDNUMBER/BUILD_NUMBER/",
+      "revId": "7f8dbca3192361dfca7ad06cfb6d6fb11ca183ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbb8a7d5_7c4f1568",
+        "filename": "android-configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-25T09:11:46Z",
+      "side": 1,
+      "message": "nit: /buildnumber/build-number/",
+      "revId": "7f8dbca3192361dfca7ad06cfb6d6fb11ca183ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
