@@ -71,18 +71,15 @@ include $(LOCAL_PATH)/Makefile.qemu-launcher.mk
 #       EMULATOR_PROGRAM_BITNESS.
 ifeq ($(HOST_BITS),$(EMULATOR_PROGRAM_BITNESS))
 $(call start-emulator-program, emulator)
+
 LOCAL_SRC_FILES := \
     android/cpu_accelerator.cpp \
     android/main-emulator.c \
+    android/qt/qt_path.cpp \
+    android/qt/qt_setup.cpp \
 
-ifdef EMULATOR_USE_QT
-    LOCAL_SRC_FILES += \
-        android/qt/qt_path.cpp \
-        android/qt/qt_setup.cpp \
-
-    # Needed to compile the call to androidQtSetupEnv() in main-emulator.c
-    LOCAL_CFLAGS += -DCONFIG_QT
-endif
+# Needed to compile the call to androidQtSetupEnv() in main-emulator.c
+LOCAL_CFLAGS += -DCONFIG_QT
 
 LOCAL_STATIC_LIBRARIES := emulator-common $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1)
 # Ensure this is always built, even if 32-bit binaries are disabled.

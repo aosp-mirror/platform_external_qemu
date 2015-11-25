@@ -21,6 +21,7 @@
 #include "android/hw-sensors.h"
 #include "android/opengles.h"
 #include "android/skin/keycode.h"
+#include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/winsys.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/debug.h"
@@ -29,9 +30,6 @@
 
 #include "android/telephony/modem_driver.h"
 
-#if CONFIG_QT
-#include "android/skin/qt/set-ui-emu-agent.h"
-#endif
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -262,9 +260,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
                           emulator->onion_alpha);
     }
 
-#if CONFIG_QT
     setUiEmuAgent(emulator->uiEmuAgent);
-#endif
 
     // Determine whether to use an EmuGL sub-window or not.
     if (!s_use_emugl_subwindow) {

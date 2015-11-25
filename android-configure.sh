@@ -238,7 +238,6 @@ OPTION_OUT_DIR=
 OPTION_HELP=no
 OPTION_STRIP=yes
 OPTION_MINGW=no
-OPTION_UI=
 OPTION_GLES=
 OPTION_SDK_REV=
 OPTION_SYMBOLS=no
@@ -308,15 +307,9 @@ for opt do
   ;;
   --no-symbols) OPTION_SYMBOLS=no
   ;;
-  --ui=sdl2) OPTION_UI=sdl2
-  ;;
-  --ui=qt) OPTION_UI=qt
-  ;;
   --gles=dgl) OPTION_GLES=dgl
   ;;
   --gles=angle) OPTION_GLES=angle
-  ;;
-  --ui=*) echo "Unknown --ui value, try one of: sdl2 qt"
   ;;
   --gles=*) echo "Unknown --gles value, try one of: dgl angle"
   ;;
@@ -345,8 +338,6 @@ EOF
     echo "  --symbols                   Generating Breakpad symbol files."
     echo "  --no-symbols                Do not generate Breakpad symbol files (default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
-    echo "  --ui=sdl2                   Use SDL2-based UI backend."
-    echo "  --ui=qt                     Use Qt-based UI backend (default)."
     echo "  --gles=dgl                  Build the OpenGLES to Desktop OpenGL Translator (default)"
     echo "  --gles=angle                Build the OpenGLES to ANGLE wrapper"
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
@@ -368,11 +359,6 @@ if [ "$OPTION_AOSP_PREBUILTS_DIR" ]; then
         exit 1
     fi
     AOSP_PREBUILTS_DIR=$OPTION_AOSP_PREBUILTS_DIR
-fi
-
-if [ -z "$OPTION_UI" ]; then
-    OPTION_UI=$UI_DEFAULT
-    log "Auto-config: --ui=$OPTION_UI"
 fi
 
 if [ -z "$OPTION_GLES" ]; then
@@ -547,11 +533,6 @@ probe_prebuilts_dir "Zlib" ZLIB_PREBUILTS_DIR qemu-android-deps
 probe_prebuilts_dir "Libpng" LIBPNG_PREBUILTS_DIR qemu-android-deps
 
 ###
-###  LibSDL2 probe
-###
-probe_prebuilts_dir "LibSDL2" SDL2_PREBUILTS_DIR qemu-android-deps
-
-###
 ###  Libxml2 probe
 ###
 probe_prebuilts_dir "Libxml2" LIBXML2_PREBUILTS_DIR common/libxml2
@@ -584,9 +565,7 @@ fi
 ###  Qt probe
 ###
 QT_PREBUILTS_DIR=
-if [ "$OPTION_UI" = "qt" ]; then
-    probe_prebuilts_dir "Qt" QT_PREBUILTS_DIR qt
-fi
+probe_prebuilts_dir "Qt" QT_PREBUILTS_DIR qt
 
 ###
 ###  e2fsprogs probe
@@ -711,15 +690,8 @@ echo "CONFIG_ESD        := $PROBE_ESD" >> $config_mk
 echo "CONFIG_ALSA       := $PROBE_ALSA" >> $config_mk
 echo "CONFIG_OSS        := $PROBE_OSS" >> $config_mk
 echo "CONFIG_PULSEAUDIO := $PROBE_PULSEAUDIO" >> $config_mk
-echo "SDL2_PREBUILTS_DIR := $SDL2_PREBUILTS_DIR" >> $config_mk
-if [ "$QT_PREBUILTS_DIR" ]; then
-    echo "QT_PREBUILTS_DIR  := $QT_PREBUILTS_DIR" >> $config_mk
-    echo "EMULATOR_USE_SDL2 := false" >> $config_mk
-    echo "EMULATOR_USE_QT   := true" >> $config_mk
-else
-    echo "EMULATOR_USE_SDL2 := true" >> $config_mk
-    echo "EMULATOR_USE_QT   := false" >> $config_mk
-fi
+echo "QT_PREBUILTS_DIR  := $QT_PREBUILTS_DIR" >> $config_mk
+
 if [ "$OPTION_GLES" = "angle" ] ; then
     echo "EMULATOR_USE_ANGLE := true" >> $config_mk
 else
@@ -792,14 +764,8 @@ echo "#define CONFIG_GDBSTUB  1" >> $config_h
 echo "#define CONFIG_SLIRP    1" >> $config_h
 echo "#define CONFIG_SKINS    1" >> $config_h
 echo "#define CONFIG_TRACE    1" >> $config_h
-
-if [ "$QT_PREBUILTS_DIR" ]; then
-    echo "#define CONFIG_QT     1" >> $config_h
-    echo "#undef CONFIG_SDL" >> $config_h
-else
-    echo "#undef CONFIG_QT" >> $config_mk
-    echo "#define CONFIG_SDL    1" >> $config_h
-fi
+echo "#define CONFIG_QT       1" >> $config_h
+echo "#undef CONFIG_SDL" >> $config_h
 
 case "$HOST_OS" in
     windows)

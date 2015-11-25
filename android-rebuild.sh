@@ -266,49 +266,45 @@ if [ ! -f "$CONFIG_MAKE" ]; then
 fi
 
 # Copy Qt shared libraries, if needed.
-EMULATOR_USE_QT=$(awk '$1 == "EMULATOR_USE_QT" { print $3; }' \
+QT_PREBUILTS_DIR=$(awk '$1 == "QT_PREBUILTS_DIR" { print $3; }' \
         $CONFIG_MAKE 2>/dev/null || true)
-if [ "$EMULATOR_USE_QT" = "true" ]; then
-    QT_PREBUILTS_DIR=$(awk '$1 == "QT_PREBUILTS_DIR" { print $3; }' \
-            $CONFIG_MAKE 2>/dev/null || true)
-    if [ ! -d "$QT_PREBUILTS_DIR" ]; then
-        panic "Missing Qt prebuilts directory: $QT_PREBUILTS_DIR"
-    fi
-    echo "Copying Qt prebuilt libraries from $QT_PREBUILTS_DIR"
-    for QT_ARCH in x86 x86_64; do
-        QT_SRCDIR=$QT_PREBUILTS_DIR/$TARGET_OS-$QT_ARCH
-        case $QT_ARCH in
-            x86) QT_DSTDIR=$OUT_DIR/lib/qt;;
-            x86_64) QT_DSTDIR=$OUT_DIR/lib64/qt;;
-            *) panic "Invalid Qt host architecture: $QT_ARCH";;
-        esac
-        run mkdir -p "$QT_DSTDIR" || panic "Could not create Qt library sub-directory!"
-        if [ ! -d "$QT_SRCDIR" ]; then
-            continue
-        fi
-        case $TARGET_OS in
-            windows) QT_DLL_FILTER="*.dll";;
-            darwin) QT_DLL_FILTER="*.dylib";;
-            *) QT_DLL_FILTER="*.so*";;
-        esac
-        QT_LIBS=$(cd "$QT_SRCDIR" && find . -name "$QT_DLL_FILTER" 2>/dev/null)
-        #echo "QT_SRCDIR [$QT_SRCDIR] QT_LIBS [$QT_LIBS]"
-        if [ -z "$QT_LIBS" ]; then
-            panic "Cannot find Qt prebuilt libraries!?"
-        fi
-        for QT_LIB in $QT_LIBS; do
-            QT_LIB=${QT_LIB#./}
-            QT_DST_LIB=$QT_LIB
-            if [ "$TARGET_OS" = "windows" ]; then
-                # NOTE: On Windows, the prebuilt libraries are placed under
-                # $PREBUILTS/qt/bin, not $PREBUILTS/qt/lib, ensure that they
-                # are always copied to $OUT_DIR/lib[64]/qt/lib/.
-                QT_DST_LIB=$(printf %s "$QT_DST_LIB" | sed -e 's|^bin/|lib/|g')
-            fi
-            copy_file "$QT_SRCDIR/$QT_LIB" "$QT_DSTDIR/$QT_DST_LIB"
-        done
-    done
+if [ ! -d "$QT_PREBUILTS_DIR" ]; then
+    panic "Missing Qt prebuilts directory: $QT_PREBUILTS_DIR"
 fi
+echo "Copying Qt prebuilt libraries from $QT_PREBUILTS_DIR"
+for QT_ARCH in x86 x86_64; do
+    QT_SRCDIR=$QT_PREBUILTS_DIR/$TARGET_OS-$QT_ARCH
+    case $QT_ARCH in
+        x86) QT_DSTDIR=$OUT_DIR/lib/qt;;
+        x86_64) QT_DSTDIR=$OUT_DIR/lib64/qt;;
+        *) panic "Invalid Qt host architecture: $QT_ARCH";;
+    esac
+    run mkdir -p "$QT_DSTDIR" || panic "Could not create Qt library sub-directory!"
+    if [ ! -d "$QT_SRCDIR" ]; then
+        continue
+    fi
+    case $TARGET_OS in
+        windows) QT_DLL_FILTER="*.dll";;
+        darwin) QT_DLL_FILTER="*.dylib";;
+        *) QT_DLL_FILTER="*.so*";;
+    esac
+    QT_LIBS=$(cd "$QT_SRCDIR" && find . -name "$QT_DLL_FILTER" 2>/dev/null)
+    #echo "QT_SRCDIR [$QT_SRCDIR] QT_LIBS [$QT_LIBS]"
+    if [ -z "$QT_LIBS" ]; then
+        panic "Cannot find Qt prebuilt libraries!?"
+    fi
+    for QT_LIB in $QT_LIBS; do
+        QT_LIB=${QT_LIB#./}
+        QT_DST_LIB=$QT_LIB
+        if [ "$TARGET_OS" = "windows" ]; then
+            # NOTE: On Windows, the prebuilt libraries are placed under
+            # $PREBUILTS/qt/bin, not $PREBUILTS/qt/lib, ensure that they
+            # are always copied to $OUT_DIR/lib[64]/qt/lib/.
+            QT_DST_LIB=$(printf %s "$QT_DST_LIB" | sed -e 's|^bin/|lib/|g')
+        fi
+        copy_file "$QT_SRCDIR/$QT_LIB" "$QT_DSTDIR/$QT_DST_LIB"
+    done
+done
 
 # Copy e2fsprogs binaries.
 E2FSPROGS_DIR=$PREBUILTS_DIR/common/e2fsprogs

@@ -46,9 +46,6 @@ gen-hw-config-defs = \
   $(eval LOCAL_GENERATED_SOURCES += $(QEMU_HW_CONFIG_DEFS_H))\
   $(eval LOCAL_C_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES))
 
-EMULATOR_USE_SDL2 := $(strip $(filter true,$(EMULATOR_USE_SDL2)))
-EMULATOR_USE_QT := $(strip $(filter true,$(EMULATOR_USE_QT)))
-
 ##############################################################################
 ##############################################################################
 ###
@@ -178,39 +175,13 @@ common_LOCAL_SRC_FILES += android/loadpng.c
 EMULATOR_LIBUI_INCLUDES += $(LIBJPEG_INCLUDES)
 EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libjpeg
 
-##############################################################################
-# SDL-related definitions
-#
-
-ifdef EMULATOR_USE_SDL2
-    include $(LOCAL_PATH)/distrib/libsdl2.mk
-
-    EMULATOR_LIBUI_CFLAGS += $(SDL2_CFLAGS)
-    EMULATOR_LIBUI_INCLUDES += $(SDL2_INCLUDES)
-    EMULATOR_LIBUI_LDLIBS += $(SDL2_LDLIBS)
-    EMULATOR_LIBUI_STATIC_LIBRARIES += $(SDL2_STATIC_LIBRARIES)
-
-    ifeq ($(HOST_OS),windows)
-        # Special exception for Windows: -lmingw32 must appear before libSDLmain
-        # on the link command-line, because it depends on _WinMain@16 which is
-        # exported by the latter.
-        EMULATOR_LIBUI_LDFLAGS += -lmingw32
-        EMULATOR_LIBUI_CFLAGS += -Dmain=SDL_main
-    else
-        # The following is needed by SDL_LoadObject
-        EMULATOR_LIBUI_LDLIBS += -ldl
-    endif
-endif  # EMULATOR_USE_SDL2
-
 ###########################################################################
 # Qt-related definitions
 #
-ifdef EMULATOR_USE_QT
-    EMULATOR_LIBUI_INCLUDES += $(QT_INCLUDES)
-    EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
-    EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
-    EMULATOR_LIBUI_CFLAGS += $(LIBXML2_CFLAGS)
-endif  # EMULATOR_USE_QT
+EMULATOR_LIBUI_INCLUDES += $(QT_INCLUDES)
+EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
+EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
+EMULATOR_LIBUI_CFLAGS += $(LIBXML2_CFLAGS)
 
 # the skin support sources
 #

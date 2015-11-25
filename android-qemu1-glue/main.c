@@ -166,7 +166,7 @@ static bool use_software_gpu_and_screen_too_large(AndroidHwConfig *hw) {
             hw->hw_lcd_width * hw->hw_lcd_height > 768 * 1280);
 }
 
-#if CONFIG_QT && defined(_WIN32)
+#if defined(_WIN32)
 // On Windows, link against qtmain.lib which provides a WinMain()
 // implementation, that later calls qMain().
 #define main qt_main
@@ -370,7 +370,6 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-#ifdef CONFIG_QT
     /* The Qt UI handles keyboard shortcuts on its own. Don't load any keyset. */
     SkinKeyset* keyset = skin_keyset_new_from_text("");
     if (!keyset) {
@@ -381,35 +380,7 @@ int main(int argc, char **argv) {
     if (!opts->keyset) {
         write_default_keyset();
     }
-#else
-    SkinKeyset* keyset = NULL;
-    if (opts->keyset) {
-        parse_keyset(opts->keyset, opts);
-        keyset = skin_keyset_get_default();
-        if (!keyset) {
-            fprintf(stderr,
-                    "emulator: WARNING: could not find keyset file named '%s',"
-                    " using defaults instead\n",
-                    opts->keyset);
-        }
-    }
-    if (!keyset) {
-        parse_keyset("default", opts);
-        keyset = skin_keyset_get_default();
-        if (!keyset) {
-            keyset = skin_keyset_new_from_text(
-                    skin_keyset_get_default_text());
-            if (!keyset) {
-                fprintf(stderr, "PANIC: default keyset file is corrupted !!\n" );
-                fprintf(stderr, "PANIC: please update the code in android/skin/keyset.c\n" );
-                exit(1);
-            }
-            skin_keyset_set_default(keyset);
-            if (!opts->keyset)
-                write_default_keyset();
-        }
-    }
-#endif
+
     if (opts->shared_net_id) {
         char*  end;
         long   shared_net_id = strtol(opts->shared_net_id, &end, 0);
@@ -1034,10 +1005,6 @@ int main(int argc, char **argv) {
     uiEmuAgent.settings = NULL;
 
     /* Setup SDL UI just before calling the code */
-#if defined(CONFIG_SDL)
-    init_sdl_ui(skinConfig, skinPath, opts, &uiEmuAgent);
-    enter_qemu_main_loop(n, args);
-#elif defined(CONFIG_QT)
 #ifdef __linux__
     sigset_t set;
     sigfillset(&set);
@@ -1046,6 +1013,6 @@ int main(int argc, char **argv) {
     init_sdl_ui(skinConfig, skinPath, opts, &uiEmuAgent);
     skin_winsys_spawn_thread(enter_qemu_main_loop, n, args);
     skin_winsys_enter_main_loop(argc, argv);
-#endif
+
     return 0;
 }
