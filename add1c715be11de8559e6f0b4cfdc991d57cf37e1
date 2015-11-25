@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5b1b2bb8_72fe3d5b",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1079424
+      },
+      "writtenOn": "2015-11-25T00:20:29Z",
+      "side": 1,
+      "message": "Acknowledged.",
+      "parentUuid": "3bed97ca_99467e34",
+      "range": {
+        "startLine": 165,
+        "startChar": 0,
+        "endLine": 165,
+        "endChar": 30
+      },
+      "revId": "add1c715be11de8559e6f0b4cfdc991d57cf37e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbb05f0b_701a7659",
         "filename": "android-qemu1-glue/main.c",
         "patchSetId": 1
@@ -60,6 +84,30 @@
       "side": 1,
       "message": "+1\nAlso, do we need to add the same kind of test to qemu2?",
       "parentUuid": "fbb05f0b_701a7659",
+      "range": {
+        "startLine": 173,
+        "startChar": 12,
+        "endLine": 173,
+        "endChar": 42
+      },
+      "revId": "add1c715be11de8559e6f0b4cfdc991d57cf37e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db271bf3_e74f153a",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1079424
+      },
+      "writtenOn": "2015-11-25T00:20:29Z",
+      "side": 1,
+      "message": "Done. I apparently forgot the usefulness of multiplication.\n\nI touched QEMU-2 this in the commit message.\n\n\"This is not an issue in QEMU-2, which can at least boot 1080 X 1920 when GPU is off.\"",
+      "parentUuid": "fbb05f0b_3014ee28",
       "range": {
         "startLine": 173,
         "startChar": 12,
