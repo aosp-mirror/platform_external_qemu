@@ -37,7 +37,9 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                     int x,
                                     int y,
                                     int width,
-                                    int height) {
+                                    int height,
+                                    SubWindowRepaintCallback repaint_callback,
+                                    void* repaint_callback_param) {
     NSWindow* win = (NSWindow *)p_window;
     if (!win) {
         return NULL;
