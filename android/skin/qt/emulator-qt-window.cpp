@@ -139,6 +139,13 @@ void EmulatorQtWindow::closeEvent(QCloseEvent *event)
         event->ignore();
     } else {
         tool_window->close();
+
+        // This object is owned directly by |window|.  Avoid circular
+        // destructor calls by explicitly unsetting the widget.  This
+        // must be done outside of the container to transfer ownership
+        // away from it, and it cannot be done from within the destructor.
+        mContainer.takeWidget();
+
         event->accept();
     }
 }
