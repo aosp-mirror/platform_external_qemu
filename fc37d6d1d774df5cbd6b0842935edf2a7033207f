@@ -22,6 +22,30 @@
       "revId": "fc37d6d1d774df5cbd6b0842935edf2a7033207f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbc4277e_22ff0f5a",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-26T00:19:23Z",
+      "side": 1,
+      "message": "Moved to a different place",
+      "parentUuid": "3b167790_67fb21a2",
+      "range": {
+        "startLine": 48,
+        "startChar": 4,
+        "endLine": 48,
+        "endChar": 47
+      },
+      "revId": "fc37d6d1d774df5cbd6b0842935edf2a7033207f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
