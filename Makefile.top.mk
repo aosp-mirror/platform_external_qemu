@@ -228,6 +228,7 @@ ifeq ($(HOST_OS),darwin)
       CoreMedia \
       CoreVideo \
       ForceFeedback \
+      IOKit \
       QTKit \
 
   QEMU_SYSTEM_LDLIBS += $(QEMU_SYSTEM_FRAMEWORKS:%=-Wl,-framework,%)
