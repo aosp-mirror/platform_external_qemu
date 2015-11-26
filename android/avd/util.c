@@ -76,7 +76,7 @@ path_getSdkRoot( char *pFromEnv )
         sdkPath = path_parent(temp, 3);
     }
 
-    free(parent);
+    free((char*)parent);
 
     if (sdkPath == NULL) {
         derror("can't find root of SDK directory");

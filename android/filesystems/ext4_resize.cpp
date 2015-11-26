@@ -98,7 +98,7 @@ int resizeExt4Partition(const char* partitionPath, int64_t newByteSize) {
                       Win32Utils::quoteCommandLine(partitionPath).c_str(),
                       size_in_MB);
     args[sizeof(args) - 1] = '\0';
-    if (copied < 0 || copied >= sizeof(args)) {
+    if (copied < 0 || copied >= static_cast<int>(sizeof(args))) {
         fprintf(stderr, "ERROR: failed to format resize2fs command\n");
         return -1;
     }
@@ -156,7 +156,7 @@ int resizeExt4Partition(const char* partitionPath, int64_t newByteSize) {
 #endif
     if (exitCode != 0) {
         fprintf(stderr, "ERROR: resizing partition failed with exit code %d\n",
-                exitCode);
+                (int)exitCode);
         return exitCode;
     }
     return 0;
