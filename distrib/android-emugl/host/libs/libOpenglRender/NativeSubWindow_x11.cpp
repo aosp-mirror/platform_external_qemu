@@ -37,7 +37,9 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                     int x,
                                     int y,
                                     int width,
-                                    int height) {
+                                    int height,
+                                    SubWindowRepaintCallback repaint_callback,
+                                    void* repaint_callback_param) {
    // The call to this function is protected by a lock
    // in FrameBuffer so it is safe to check and initialize s_display here
    if (!s_display) {
