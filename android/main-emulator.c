@@ -472,11 +472,14 @@ probeTargetEmulatorPath(const char* progDir,
  *   arm:
  *     32-bit: emulator(64)-arm
  *     64-bit: emulator(64)-arm64(NA) ->
-               emulator(64)-ranchu-arm64 -> qemu/<host>/qemu-system-aarch64
+ *             emulator(64)-ranchu-arm64 -> qemu/<host>/qemu-system-aarch64
  *   mips:
- *     32-bit: emulator(64)-mips
+ *     32-bit: (if '-ranchu')
+ *               emulator(64)-ranchu-mips -> qemu/<host>/qemu-system-mipsel
+ *             else
+ *               emulator(64)-mips
  *     64-bit: emulator(64)-mips64(NA) ->
-               emulator(64)-ranchu-mips64 -> qemu/<host>/qemu-system-mips64
+ *             emulator(64)-ranchu-mips64 -> qemu/<host>/qemu-system-mips64
  *   x86:
  *     32-bit: (if '-ranchu')
  *               emulator(64)-ranchu-x86 -> qemu/<host>/qemu-system-x86

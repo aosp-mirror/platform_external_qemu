@@ -53,6 +53,7 @@ include $(LOCAL_PATH)/Makefile.qemu-launcher.mk
 
 EMULATOR_TARGET_ARCH := mips
 include $(LOCAL_PATH)/Makefile.qemu1-target.mk
+include $(LOCAL_PATH)/Makefile.qemu-launcher.mk
 
 EMULATOR_TARGET_ARCH := mips64
 include $(LOCAL_PATH)/Makefile.qemu-launcher.mk
