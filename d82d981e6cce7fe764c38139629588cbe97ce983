@@ -22,6 +22,30 @@
       "revId": "d82d981e6cce7fe764c38139629588cbe97ce983",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b1b2bb8_9d282974",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-26T00:52:09Z",
+      "side": 1,
+      "message": "No, but added a tr() just in case",
+      "parentUuid": "bb2a67bd_cb9dbcd9",
+      "range": {
+        "startLine": 411,
+        "startChar": 39,
+        "endLine": 411,
+        "endChar": 64
+      },
+      "revId": "d82d981e6cce7fe764c38139629588cbe97ce983",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
