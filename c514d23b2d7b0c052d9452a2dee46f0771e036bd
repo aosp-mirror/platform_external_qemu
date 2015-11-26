@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5b1b2bb8_1d3b99c6",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-26T00:40:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b2123e5_6004a82e",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 17
+      },
+      "revId": "c514d23b2d7b0c052d9452a2dee46f0771e036bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5bd5eb28_fc89c19e",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_win32.cpp",
         "patchSetId": 1
