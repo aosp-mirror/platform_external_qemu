@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b2123e5_6004a82e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-26T00:19:59Z",
+      "side": 1,
+      "message": "static?",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 17
+      },
+      "revId": "c514d23b2d7b0c052d9452a2dee46f0771e036bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5bd5eb28_fc89c19e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-26T00:19:59Z",
+      "side": 1,
+      "message": "please check if it is nullptr before calling it (just in case)",
+      "range": {
+        "startLine": 20,
+        "startChar": 34,
+        "endLine": 20,
+        "endChar": 50
+      },
+      "revId": "c514d23b2d7b0c052d9452a2dee46f0771e036bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b167790_e2641f29",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-26T00:19:59Z",
+      "side": 1,
+      "message": "extra blank line",
+      "range": {
+        "startLine": 25,
+        "startChar": 1,
+        "endLine": 26,
+        "endChar": 1
+      },
+      "revId": "c514d23b2d7b0c052d9452a2dee46f0771e036bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbb05f0b_fa2d4085",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-26T00:19:59Z",
+      "side": 1,
+      "message": "there\u0027s a common way of doing this in Windows:\n create your own class (or struct) to hold all values\n allocate it dynamically and fill in the fields\n store the pointer into GWLP_USERDATA offset - this way you don\u0027t need to allocate any extra memory in window class",
+      "range": {
+        "startLine": 57,
+        "startChar": 26,
+        "endLine": 57,
+        "endChar": 27
+      },
+      "revId": "c514d23b2d7b0c052d9452a2dee46f0771e036bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbc4277e_82625b19",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-26T00:19:59Z",
+      "side": 1,
+      "message": "this is obsolete AFAIK",
+      "range": {
+        "startLine": 62,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 15
+      },
+      "revId": "c514d23b2d7b0c052d9452a2dee46f0771e036bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
