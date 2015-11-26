@@ -22,6 +22,30 @@
       "revId": "2bfaae8442a0f79f6095e50cae3b589d47dd8729",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbbdbfca_b927f791",
+        "filename": "android/base/String.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-26T09:47:41Z",
+      "side": 1,
+      "message": "oh my, you\u0027re right :)",
+      "parentUuid": "9bbbe3f1_ac48bbaf",
+      "range": {
+        "startLine": 381,
+        "startChar": 17,
+        "endLine": 383,
+        "endChar": 29
+      },
+      "revId": "2bfaae8442a0f79f6095e50cae3b589d47dd8729",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
