@@ -471,6 +471,11 @@ void FrameBuffer::setPostCallback(OnPostFn onPost, void* onPostContext)
     }
 }
 
+static void subWindowRepaint(void* param) {
+    auto fb = static_cast<FrameBuffer*>(param);
+    fb->repost();
+}
+
 bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                  int wx,
                                  int wy,
@@ -491,7 +496,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
     m_lock.lock();
     if (!m_subWin) {
         // create native subwindow for FB display output
-        m_subWin = createSubWindow(p_window, wx, wy, ww, wh);
+        m_subWin = createSubWindow(p_window, wx, wy, ww, wh, subWindowRepaint, this);
         if (m_subWin) {
             m_nativeWindow = p_window;
 
