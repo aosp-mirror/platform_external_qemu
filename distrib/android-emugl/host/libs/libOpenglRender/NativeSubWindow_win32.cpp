@@ -14,22 +14,36 @@
 * limitations under the License.
 */
 #include "NativeSubWindow.h"
-#include <stdio.h>
+
+LRESULT CALLBACK subWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if (uMsg == WM_PAINT) {
+        SubWindowRepaintCallback repaint_callback =
+            (SubWindowRepaintCallback)GetWindowLongPtr(hwnd, 0);
+        void* repaint_callback_param =
+            (void*)GetWindowLongPtr(hwnd, sizeof(SubWindowRepaintCallback));
+        repaint_callback(repaint_callback_param);
+        
+    } 
+    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
 
 EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
-                                    int x, int y,int width, int height){
+                                    int x, int y,int width, int height,
+                                    SubWindowRepaintCallback repaint_callback,
+                                    void* repaint_callback_param){
     static const char className[] = "subWin";
 
     WNDCLASS wc = {};
     if (!GetClassInfo(GetModuleHandle(NULL), className, &wc)) {
         wc.style =  CS_OWNDC | CS_HREDRAW | CS_VREDRAW;// redraw if size changes
-        wc.lpfnWndProc = &DefWindowProc;               // points to window procedure
-        wc.cbWndExtra = sizeof(void*);                 // save extra window memory, to store VasWindow instance
+        wc.lpfnWndProc = &subWindowProc;               // points to window procedure
+        wc.cbWndExtra = sizeof(LONG_PTR) +
+                        sizeof(SubWindowRepaintCallback) +
+                        sizeof(void*) ;                // save extra window class memory, to store repaint callback
         wc.lpszClassName = className;                  // name of window class
         RegisterClass(&wc);
     }
 
-    printf("creating window %d %d %d %d\n",x,y,width,height);
     EGLNativeWindowType ret = CreateWindowEx(
                         WS_EX_NOPARENTNOTIFY,  // do not bother our parent window
                         className,
@@ -40,7 +54,11 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                         NULL,
                         NULL,
                         NULL);
-
+    SetWindowLongPtr(ret, 0, (LONG_PTR)repaint_callback);
+    SetWindowLongPtr(
+            ret,
+            sizeof(SubWindowRepaintCallback),
+            (LONG_PTR)repaint_callback_param);
     ShowWindow(ret, SW_SHOW);
     return ret;
 }
