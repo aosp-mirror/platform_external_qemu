@@ -163,32 +163,6 @@ pipe_list_findp_channel(HwPipe **list, uint64_t channel)
     return pnode;
 }
 
-static HwPipe**
-pipe_list_findp_waked(HwPipe **list, HwPipe *pipe)
-{
-    HwPipe** pnode = list;
-    for (;;) {
-        HwPipe* node = *pnode;
-        if (node == NULL || node == pipe) {
-            break;
-        }
-        pnode = &node->next_waked;
-    }
-    return pnode;
-}
-
-
-static void pipe_list_remove_waked(HwPipe **list, HwPipe *pipe)
-{
-    HwPipe** lookup = pipe_list_findp_waked(list, pipe);
-    HwPipe*  node   = *lookup;
-
-    if (node != NULL) {
-        (*lookup) = node->next_waked;
-        node->next_waked = NULL;
-    }
-}
-
 static void pipe_free(HwPipe* pipe)
 {
     android_pipe_free(pipe->pipe);
@@ -887,7 +861,6 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
 static void qemu2_android_pipe_wake( void* hwpipe, unsigned flags )
 {
     HwPipe*  pipe = hwpipe;
-    HwPipe** lookup;
     PipeDevice*  dev = pipe->device;
 
     DD("%s: channel=0x%llx flags=%d", __FUNCTION__, (unsigned long long)pipe->channel, flags);
