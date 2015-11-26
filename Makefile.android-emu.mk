@@ -36,12 +36,6 @@ ANDROID_EMU_INTERNAL_QEMU2_CFLAGS := \
     -DANDROID_QEMU2_SPECIFIC \
     -DANDROID_QEMU2_INTEGRATED_BUILD \
 
-ifndef EMULATOR_USE_QT
-    # skin is only used in QT version of QEMU2 for now, so let's make sure
-    # it's not compiled into the non-QT one
-    ANDROID_EMU_INTERNAL_QEMU2_CFLAGS += -DNO_SKIN
-endif
-
 ANDROID_EMU_INTERNAL_INCLUDES := \
     $(OBJS_DIR)/build \
     $(ANDROID_EMU_INCLUDES) \
