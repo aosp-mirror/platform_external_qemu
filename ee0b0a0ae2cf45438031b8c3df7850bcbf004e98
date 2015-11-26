@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bbc4277e_a2343fd9",
+        "filename": "android/skin/image.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-26T00:47:00Z",
+      "side": 1,
+      "message": "it feels to me that the original idea was different - free it only if it was previously cloned. Now it\u0027s the opposite",
+      "range": {
+        "startLine": 623,
+        "startChar": 12,
+        "endLine": 625,
+        "endChar": 13
+      },
+      "revId": "ee0b0a0ae2cf45438031b8c3df7850bcbf004e98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
