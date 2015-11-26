@@ -178,6 +178,7 @@ ANDROID_EMU_SOURCES := \
     android/framebuffer.c \
     android/gps.c \
     android/gpu_frame.cpp \
+    android/help.c \
     android/hw-control.c \
     android/hw-events.c \
     android/hw-fingerprint.c \
@@ -220,7 +221,6 @@ ANDROID_EMU_DEPENDENT_SOURCES := \
     android/android-constants.c \
     android/cmdline-option.c \
     android/cpu_accelerator.cpp \
-    android/help.c \
     android/main-common.c \
     android/qemu-setup.c \
     android/avd/hw-config.c \

@@ -1364,7 +1364,6 @@ help_keyset(stralloc_t*  out)
     );
 }
 
-#ifdef CONFIG_NAND_LIMITS
 static void
 help_nand_limits(stralloc_t*  out)
 {
@@ -1379,9 +1378,10 @@ help_nand_limits(stralloc_t*  out)
     "  target signal. the read and/or write threshold'reads' are a number optionally\n"
     "  followed by a K, M or G suffix, corresponding to the number of bytes to be\n"
     "  read or written before the signal is sent.\n\n"
+
+    "  IMPORTANT: This feature does not work on Windows!\n\n"
     );
 }
-#endif /* CONFIG_NAND_LIMITS */
 
 static void
 help_bootchart(stralloc_t  *out)

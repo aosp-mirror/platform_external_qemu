@@ -18,9 +18,6 @@
 #define CFG_FLAG   OPT_FLAG
 #endif
 
-/* required to ensure that the CONFIG_XXX macros are properly defined */
-#include "android/config/config.h"
-
 /* Some options acts like flags, while others must be followed by a parameter
  * string. Nothing really new here.
  *
@@ -149,9 +146,7 @@ OPT_LIST(  prop, "<name>=<value>", "set system property on boot")
 
 OPT_PARAM( shared_net_id, "<number>", "join the shared network, using IP address 10.1.2.<number>")
 
-#ifdef CONFIG_NAND_LIMITS
 OPT_PARAM( nand_limits, "<nlimits>", "enforce NAND/Flash read/write thresholds" )
-#endif
 
 OPT_PARAM( gpu, "<mode>", "set hardware OpenGLES emulation mode" )
 
