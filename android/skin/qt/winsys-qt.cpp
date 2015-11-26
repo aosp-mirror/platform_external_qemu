@@ -291,6 +291,7 @@ extern void skin_winsys_start(bool, bool)
 {
     GlobalState* g = globalState();
     g->app = new QApplication(g->argc, g->argv);
+    g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
     EmulatorQtWindow::create();
 }
 
