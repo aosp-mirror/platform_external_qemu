@@ -47,14 +47,14 @@ bool KmlParserInternal::parseCoordinates(xmlNode * current, GpsFixArray * fixes)
         return false;
 
     // strtok modifies the string it's given, so we make a copy to operate on
-    char * coordinates = strdup((const char *) coordinates_node->xmlChildrenNode->content);
+    char* coordinates = strdup((const char *) coordinates_node->xmlChildrenNode->content);
 
-    char * saveptr;
     #ifdef _WIN32
     // in windows, each thread saves its own copy of the static required variables
-    char * split = strtok(coordinates, " \t\n\v\r\f");
+    char* split = strtok(coordinates, " \t\n\v\r\f");
     #else
-    char * split = strtok_r(coordinates, " \t\n\v\r\f", &saveptr);
+    char* saveptr;
+    char* split = strtok_r(coordinates, " \t\n\v\r\f", &saveptr);
     #endif
     while (split != NULL) {
 

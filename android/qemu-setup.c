@@ -40,6 +40,8 @@ int    android_base_port;
 /* ADB port */
 int    android_adb_port = 5037; // Default
 
+#ifndef ANDROID_QEMU2_SPECIFIC
+
 enum {
     REPORT_CONSOLE_SERVER = (1 << 0),
     REPORT_CONSOLE_MAX    = (1 << 1)
@@ -205,6 +207,8 @@ static int qemu_control_console_start(int port, const QAndroidBatteryAgent* batt
                                  netAgent);
 }
 
+#endif  // ANDROID_QEMU2_SPECIFIC
+
 /* this function is called from qemu_main() once all arguments have been parsed
  * it should be used to setup any Android-specific items in the emulation before the
  * main loop runs
@@ -219,10 +223,7 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
                              const QAndroidVmOperations* vmOperations,
                              const QAndroidNetAgent* netAgent)
 {
-    int   tries     = MAX_ANDROID_EMULATORS;
-    int   success   = 0;
-    int   adb_port = -1;
-    uint32_t  guest_ip;
+    uint32_t guest_ip;
 
         /* Set the port where the emulator expects adb to run on the host
          * machine */
@@ -251,6 +252,9 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
     }
 
 #ifndef ANDROID_QEMU2_SPECIFIC
+    int tries = MAX_ANDROID_EMULATORS;
+    int success   = 0;
+    int adb_port = -1;
     int base_port = 5554;
     int legacy_adb = avdInfo_getAdbdCommunicationMode(android_avdInfo) ? 0 : 1;
 
@@ -374,7 +378,7 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
 
         socket_close(s);
     }
-#endif
+#endif  // ANDROID_QEMU2_SPECIFIC
 
     telephonyAgent->initModem(android_base_port);
 

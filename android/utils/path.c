@@ -99,21 +99,6 @@ path_parent( const char*  path, int  levels )
     return result;
 }
 
-static char*
-substring_dup( const char*  start, const char*  end )
-{
-    int    len    = end - start;
-    char*  result = android_alloc(len+1);
-    memcpy(result, start, len);
-    result[len] = 0;
-    return result;
-}
-
-
-
-
-
-
 /** MISC FILE AND DIRECTORY HANDLING
  **/
 
