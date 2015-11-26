@@ -39,7 +39,8 @@ ANDROID_EMULIB_INCLUDES := $(LOCAL_PATH)/../qemu/
 QEMU2_GLIB_LDLIBS := \
     -lglib-2.0 \
     $(call qemu2-if-darwin, -liconv -lintl) \
-    $(call qemu2-if-linux, -lpthread -lrt)
+    $(call qemu2-if-linux, -lpthread -lrt) \
+    $(call qemu2-if-windows, -lole32) \
 
 QEMU2_PIXMAN_INCLUDES := $(QEMU2_DEPS_TOP_DIR)/include/pixman-1
 QEMU2_PIXMAN_LDLIBS := -lpixman-1
@@ -52,6 +53,7 @@ QEMU2_INCLUDES += \
     $(LOCAL_PATH)/include \
     $(QEMU2_AUTO_GENERATED_DIR) \
     $(LIBEXT4_UTILS_INCLUDES) \
+    $(ZLIB_INCLUDES) \
 
 QEMU2_INCLUDES += $(QEMU2_GLIB_INCLUDES) $(QEMU2_PIXMAN_INCLUDES)
 
