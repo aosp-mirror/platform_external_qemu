@@ -54,7 +54,8 @@ background_init(Background* back,
 {
     SkinRect  r;
 
-    back->image = skin_image_rotate( sback->image, loc->rotation );
+    SkinImage *clone = skin_image_clone( sback->image );
+    back->image = skin_image_rotate( clone, loc->rotation );
     skin_rect_rotate( &r, &sback->rect, loc->rotation );
     r.pos.x += loc->anchor.x;
     r.pos.y += loc->anchor.y;
