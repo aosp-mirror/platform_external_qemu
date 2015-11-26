@@ -232,12 +232,6 @@ private:
 #endif
         }
 
-        ~EmulatorWindowContainer() {
-            // This object is owned directly by |window|.  Avoid circular
-            // destructor calls by explicitly unsetting the widget.
-            takeWidget();
-        }
-
         bool event(QEvent *e)
         {
             // Ignore MetaCall and UpdateRequest events, and don't snap in zoom mode.
