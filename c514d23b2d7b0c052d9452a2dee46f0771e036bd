@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "3b167790_220d974c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-26T00:38:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5bd5eb28_fc89c19e",
+      "range": {
+        "startLine": 20,
+        "startChar": 34,
+        "endLine": 20,
+        "endChar": 50
+      },
+      "revId": "c514d23b2d7b0c052d9452a2dee46f0771e036bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3b167790_e2641f29",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_win32.cpp",
         "patchSetId": 1
@@ -59,6 +83,30 @@
       "writtenOn": "2015-11-26T00:19:59Z",
       "side": 1,
       "message": "extra blank line",
+      "range": {
+        "startLine": 25,
+        "startChar": 1,
+        "endLine": 26,
+        "endChar": 1
+      },
+      "revId": "c514d23b2d7b0c052d9452a2dee46f0771e036bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9bbbe3f1_47f21805",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-26T00:38:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3b167790_e2641f29",
       "range": {
         "startLine": 25,
         "startChar": 1,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "9b2123e5_409084fe",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-26T00:38:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fbb05f0b_fa2d4085",
+      "range": {
+        "startLine": 57,
+        "startChar": 26,
+        "endLine": 57,
+        "endChar": 27
+      },
+      "revId": "c514d23b2d7b0c052d9452a2dee46f0771e036bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bbc4277e_82625b19",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_win32.cpp",
         "patchSetId": 1
@@ -105,6 +177,30 @@
       "writtenOn": "2015-11-26T00:19:59Z",
       "side": 1,
       "message": "this is obsolete AFAIK",
+      "range": {
+        "startLine": 62,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 15
+      },
+      "revId": "c514d23b2d7b0c052d9452a2dee46f0771e036bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5bd5eb28_9ce64d67",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/NativeSubWindow_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-26T00:38:59Z",
+      "side": 1,
+      "message": "Removed in Patch set 2",
+      "parentUuid": "bbc4277e_82625b19",
       "range": {
         "startLine": 62,
         "startChar": 0,
