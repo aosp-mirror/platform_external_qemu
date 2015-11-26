@@ -1297,7 +1297,7 @@ extern "C" int main(int argc, char **argv) {
     // Now launch the main loop.
 #ifndef CONFIG_QT
     enter_qemu_main_loop(n, (char**)args);
-#else
+#else  // CONFIG_QT
 
 
     static UiEmuAgent uiEmuAgent;
@@ -1318,12 +1318,11 @@ extern "C" int main(int argc, char **argv) {
     sigset_t set;
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, NULL);
-#endif
+#endif  // !_WIN32
     init_sdl_ui(skinConfig, skinPath, opts, &uiEmuAgent);
     skin_winsys_spawn_thread(enter_qemu_main_loop, n, (char**)args);
     skin_winsys_enter_main_loop(argc, argv);
-
-#endif
-
+    aconfig_node_free(skinConfig);
+#endif  // CONFIG_QT
     return 0;
 }
