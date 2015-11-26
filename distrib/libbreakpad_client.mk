@@ -8,7 +8,3 @@ $(call define-emulator-prebuilt-library,\
 
 BREAKPAD_STATIC_LIBRARIES := emulator-libbreakpad_client
 BREAKPAD_INCLUDES := $(BREAKPAD_TOP_DIR)/include/breakpad
-BREAKPAD_LDLIBS :=
-ifeq ($(HOST_OS),windows)
-    BREAKPAD_LDLIBS += -lstdc++
-endif

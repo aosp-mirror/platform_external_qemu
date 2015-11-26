@@ -1,40 +1,86 @@
+# This header contains declarations related to AndroidEmu, the library
+# that contains generic code to support Android emulation, independent
+# from the rest of QEMU1 or QEMU2. For more details, see:
+#
+#    external/qemu/docs/ANDROID-EMULATION-LIBRARY.TXT
+#
+# There are actually several libraries declared here:
+#
+#    - android-emu-base:
+#      Corresponds to the android/base/ and android/utils/ directories
+#      which contain a low-level interface over the host platform.
+#      None of this code should know or depend on emulation specifics.
+#
+#    - android-emu:
+#      Corresponds to the rest of the AndroidEmu library. It depends on
+#      android-emu-base, of course, and any code that should be used by
+#      both the QEMU1 and QEMU2 emulator binaries should ideally placed
+#      here. Another benefit is that it comes with unit-tests, unlike the
+#      rest of the QEMU code bases.
+#
+#      NOTE: At the moment, this does not include the UI code implemented
+#            from android/skin/ sources.
+#
+#   - android-emu-qemu1 and android-emu-qemu2:
+#
+#     At the moment, a few AndroidEmu sources still depend on either the UI
+#     code, or some QEMU-specific configuration headers, and cannot be moved
+#     into android-emu yet. These sources are listed in
+#     ANDROID_EMU_DEPENDENT_SOURCES below.
+#
+#     This code is collected into android-emu-qemu1 and android-emu-qemu2
+#     which will be linked against the QEMU1 and QEMU2 binaries in the end.
+#
 ###############################################################################
 # public variables
 
-ANDROID_EMU_ROOT := $(SRC_PATH)/android
+ANDROID_EMU_OLD_LOCAL_PATH := $(LOCAL_PATH)
+
+LOCAL_PATH := $(call my-dir)
+
+ANDROID_EMU_ROOT := $(LOCAL_PATH)/android
 
 # all includes are like 'android/...', so we need to count on that
-ANDROID_EMU_INCLUDES := \
-    $(ANDROID_EMU_ROOT)/.. \
+ANDROID_EMU_INCLUDES := $(LOCAL_PATH)
 
+# The list of static libraries that anything that depends on android-emu
+# should depend on too.
+ANDROID_EMU_STATIC_LIBRARIES := \
+    android-emu \
+    android-emu-base \
+    $(LIBCURL_STATIC_LIBRARIES) \
+    $(LIBXML2_STATIC_LIBRARIES) \
+    $(BREAKPAD_STATIC_LIBRARIES) \
+    emulator-libext4_utils \
+    emulator-libsparse \
+    emulator-libselinux \
+
+ANDROID_EMU_LDLIBS :=
+
+ifneq (windows,$(HOST_OS))
+ANDROID_EMU_LDLIBS += -ldl
+endif
+
+# Static libraries related to AndroidEmu that need to be linked into QEMU1
 ANDROID_EMU_STATIC_LIBRARIES_QEMU1 := \
     android-emu-qemu1 \
-    android-emu \
-    android-emu-base \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
 
+# Static libraries related to AndroidEmu that need to be linked into QEMU1
 ANDROID_EMU_STATIC_LIBRARIES_QEMU2 := \
     android-emu-qemu2 \
-    android-emu \
-    android-emu-base \
-
-# a lightweight version, without the very qemu-specific stuff
-ANDROID_EMU_BASE_STATIC_LIBRARIES_QEMU1 := \
-    android-emu-qemu1 \
-    android-emu-base \
-
-ANDROID_EMU_BASE_STATIC_LIBRARIES_QEMU2 := \
-    android-emu-qemu2 \
-    android-emu-base \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
 
 ###############################################################################
 # internal variables to build the libraries
 
 ANDROID_EMU_INTERNAL_CFLAGS := \
-    $(EMULATOR_COMMON_CFLAGS) $(LIBXML2_CFLAGS) $(EMULATOR_VERSION_CFLAGS)
+    $(EMULATOR_COMMON_CFLAGS) \
+    $(LIBXML2_CFLAGS) \
+    $(EMULATOR_VERSION_CFLAGS)
 
 ANDROID_EMU_INTERNAL_QEMU2_CFLAGS := \
     -DANDROID_QEMU2_SPECIFIC \
-    -DANDROID_QEMU2_INTEGRATED_BUILD \
 
 ANDROID_EMU_INTERNAL_INCLUDES := \
     $(OBJS_DIR)/build \
@@ -72,15 +118,6 @@ ANDROID_EMU_BASE_SOURCES := \
     android/base/threads/ThreadStore.cpp \
     android/base/Uri.cpp \
     android/base/Version.cpp \
-    android/camera/camera-service.c \
-    android/camera/camera-format-converters.c \
-    android/filesystems/ext4_resize.cpp \
-    android/filesystems/ext4_utils.cpp \
-    android/filesystems/fstab_parser.cpp \
-    android/filesystems/internal/PartitionConfigBackend.cpp \
-    android/filesystems/partition_config.cpp \
-    android/filesystems/partition_types.cpp \
-    android/filesystems/ramdisk_extractor.cpp \
     android/utils/aconfig-file.c \
     android/utils/assert.c \
     android/utils/bufprint.c \
@@ -124,22 +161,6 @@ ANDROID_EMU_BASE_SOURCES := \
     android/utils/vector.c \
     android/utils/x86_cpuid.cpp \
 
-# Platform-specific camera capture
-ifeq ($(HOST_OS),linux)
-    ANDROID_EMU_BASE_SOURCES += \
-        android/camera/camera-capture-linux.c
-endif
-
-ifeq ($(HOST_OS),darwin)
-    ANDROID_EMU_BASE_SOURCES += \
-        android/camera/camera-capture-mac.m
-endif
-
-ifeq ($(HOST_OS),windows)
-    ANDROID_EMU_BASE_SOURCES += \
-        android/camera/camera-capture-windows.c
-endif
-
 ifeq ($(HOST_OS),windows)
     ANDROID_EMU_BASE_SOURCES += \
         android/base/synchronization/ConditionVariable_win32.cpp \
@@ -155,18 +176,31 @@ endif
 ANDROID_EMU_SOURCES := \
     android/adb-qemud.c \
     android/adb-server.c \
+    android/android-constants.c \
     android/async-console.c \
     android/async-socket.c \
     android/async-socket-connector.c \
     android/async-utils.c \
+    android/avd/hw-config.c \
+    android/avd/info.c \
+    android/avd/scanner.c \
+    android/avd/util.c \
     android/boot-properties.c \
+    android/kernel/kernel_utils.cpp \
+    android/camera/camera-service.c \
+    android/camera/camera-format-converters.c \
+    android/cmdline-option.c \
+    android/cpu_accelerator.cpp \
     android/console.c \
     android/curl-support.c \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
     android/emulation/android_pipe_zero.c \
     android/emulation/android_qemud.cpp \
+    android/emulation/bufprint_config_dirs.cpp \
+    android/emulation/ConfigDirs.cpp \
     android/emulation/control/LineConsumer.cpp \
+    android/emulation/CpuAccelerator.cpp \
     android/emulation/nand_limits.c \
     android/emulation/qemud/android_qemud_client.cpp \
     android/emulation/qemud/android_qemud_multiplexer.cpp \
@@ -175,7 +209,16 @@ ANDROID_EMU_SOURCES := \
     android/emulation/qemud/android_qemud_sink.cpp \
     android/emulation/serial_line.cpp \
     android/emulator-window.c \
+    android/filesystems/ext4_resize.cpp \
+    android/filesystems/ext4_utils.cpp \
+    android/filesystems/fstab_parser.cpp \
+    android/filesystems/internal/PartitionConfigBackend.cpp \
+    android/filesystems/partition_config.cpp \
+    android/filesystems/partition_types.cpp \
+    android/filesystems/ramdisk_extractor.cpp \
     android/framebuffer.c \
+    android/gps/GpxParser.cpp \
+    android/gps/KmlParser.cpp \
     android/gps.c \
     android/gpu_frame.cpp \
     android/help.c \
@@ -191,8 +234,11 @@ ANDROID_EMU_SOURCES := \
     android/metrics/metrics_reporter_ga.c \
     android/metrics/metrics_reporter_toolbar.c \
     android/metrics/StudioHelper.cpp \
-    android/opengles.c \
+    android/opengl/EmuglBackendList.cpp \
+    android/opengl/EmuglBackendScanner.cpp \
+    android/opengl/emugl_config.cpp \
     android/opengl/GpuFrameBridge.cpp \
+    android/opengles.c \
     android/proxy/proxy_common.c \
     android/proxy/proxy_http.c \
     android/proxy/proxy_http_connector.c \
@@ -217,36 +263,40 @@ ANDROID_EMU_SOURCES := \
     android/update-check/VersionExtractor.cpp \
     android/user-config.c \
 
-ANDROID_EMU_DEPENDENT_SOURCES := \
-    android/android-constants.c \
-    android/cmdline-option.c \
-    android/cpu_accelerator.cpp \
-    android/main-common.c \
-    android/qemu-setup.c \
-    android/avd/hw-config.c \
-    android/avd/info.c \
-    android/avd/scanner.c \
-    android/avd/util.c \
-    android/emulation/android_pipe.c \
-    android/emulation/bufprint_config_dirs.cpp \
-    android/emulation/ConfigDirs.cpp \
-    android/emulation/CpuAccelerator.cpp \
-    android/kernel/kernel_utils.cpp \
-    android/opengl/EmuglBackendList.cpp \
-    android/opengl/EmuglBackendScanner.cpp \
-    android/opengl/emugl_config.cpp \
+# Platform-specific camera capture
+ifeq ($(HOST_OS),linux)
+    ANDROID_EMU_SOURCES += \
+        android/camera/camera-capture-linux.c
+endif
 
-ifeq (windows,$(HOST_OS))
-ANDROID_EMU_DEPENDENT_SOURCES += \
-    android/windows_installer.cpp \
+ifeq ($(HOST_OS),darwin)
+    ANDROID_EMU_SOURCES += \
+        android/camera/camera-capture-mac.m
+endif
+
+ifeq ($(HOST_OS),windows)
+    ANDROID_EMU_SOURCES += \
+        android/camera/camera-capture-windows.c \
+        android/windows_installer.cpp \
 
 endif
 
+# The following source files cannot be moved to android-emu yet for the
+# following reasons:
+#
+#  main-common.c: Depends on UI layer code.
+#  qemu-setup.c: Depends on ANDROID_QEMU2_SPECIFIC
+#  android_pipe.c: Depends on ANDROID_QEMU2_SPECIFIC
+#
+# TODO: Move ui-dependent code to android/main-common-ui.c
+# TODO: Remove ANDROID_QEMU2_SPECIFIC code path differences.
+ANDROID_EMU_DEPENDENT_SOURCES := \
+    android/main-common.c \
+    android/qemu-setup.c \
+    android/emulation/android_pipe.c \
+
 ###############################################################################
 # now build it
-
-ANDROID_EMU_OLD_LOCAL_PATH := $(LOCAL_PATH)
-LOCAL_PATH := $(SRC_PATH)
 
 $(call start-emulator-library,android-emu-base)
     LOCAL_SRC_FILES := $(ANDROID_EMU_BASE_SOURCES)

@@ -118,9 +118,6 @@ common_LOCAL_SRC_FILES += \
 
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
-common_LOCAL_CFLAGS += $(LIBXML2_CFLAGS)
-common_LOCAL_CFLAGS += -I$(LIBEXT4_UTILS_INCLUDES)
-
 include $(LOCAL_PATH)/android/wear-agent/sources.mk
 
 ## one for 32-bit
@@ -131,7 +128,6 @@ LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
 LOCAL_C_INCLUDES += \
     $(LIBCURL_INCLUDES) \
     $(LIBXML2_INCLUDES) \
-    $(BREAKPAD_INCLUDES) \
     $(LIBJPEG_INCLUDES) \
 
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)

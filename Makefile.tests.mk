@@ -48,6 +48,10 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/filesystems/partition_types_unittest.cpp \
   android/filesystems/ramdisk_extractor_unittest.cpp \
   android/filesystems/testing/TestSupport.cpp \
+  android/gps/GpxParser_unittest.cpp \
+  android/gps/internal/GpxParserInternal_unittest.cpp \
+  android/gps/internal/KmlParserInternal_unittest.cpp \
+  android/gps/KmlParser_unittest.cpp \
   android/kernel/kernel_utils_unittest.cpp \
   android/metrics/metrics_reporter_unittest.cpp \
   android/metrics/metrics_reporter_ga_unittest.cpp \
@@ -99,24 +103,21 @@ EMULATOR_UNITTESTS_SOURCES += \
 endif
 
 $(call start-emulator-program, emulator$(HOST_SUFFIX)_unittests)
-LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include  $(LIBXML2_INCLUDES)
-LOCAL_LDLIBS += $(LIBCURL_LDLIBS)
+LOCAL_C_INCLUDES += \
+    $(EMULATOR_GTEST_INCLUDES) \
+    $(LIBXML2_INCLUDES) \
+
+LOCAL_LDLIBS += $(ANDROID_EMU_LDLIBS)
+
 LOCAL_SRC_FILES := $(EMULATOR_UNITTESTS_SOURCES)
-LOCAL_CFLAGS += -O0 -I$(LIBCURL_INCLUDES) $(EMULATOR_UNITTESTS_CFLAGS)
-LOCAL_LDFLAGS += $(EMULATOR_UNITTESTS_LDFLAGS)
+
+LOCAL_CFLAGS += -O0
+
 LOCAL_STATIC_LIBRARIES += \
     libandroid-wear-agent \
-    emulator-common \
-    emulator-libext4_utils \
-    emulator-libsparse \
-    emulator-libselinux \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
     emulator-libgtest \
     $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
-    $(LIBCURL_STATIC_LIBRARIES) \
-    $(LIBXML2_STATIC_LIBRARIES) \
-    emulator-libext4_utils \
-    emulator-libsparse \
-    emulator-libselinux \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/
@@ -134,30 +135,17 @@ ANDROID_SKIN_UNITTESTS := \
     android/skin/region_unittest.cpp \
 
 $(call start-emulator-program, android$(HOST_SUFFIX)_skin_unittests)
-LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include
+
+LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES)
+
 LOCAL_SRC_FILES := $(ANDROID_SKIN_UNITTESTS)
-LOCAL_CFLAGS += $(EMULATOR_UNITTESTS_CFLAGS)
-LOCAL_LDFLAGS += $(EMULATOR_UNITTESTS_LDFLAGS)
 
-LOCAL_SRC_FILES += \
-    android/gps/GpxParser_unittest.cpp \
-    android/gps/internal/GpxParserInternal_unittest.cpp \
-    android/gps/internal/KmlParserInternal_unittest.cpp \
-    android/gps/KmlParser_unittest.cpp \
-
-LOCAL_C_INCLUDES += $(LIBXML2_INCLUDES)
-
-LOCAL_CFLAGS += -O0 -I$(LIBCURL_INCLUDES)
+LOCAL_CFLAGS += -O0
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
-    emulator-common \
+    $(ANDROID_EMULATOR_STATIC_LIBRARIES) \
     emulator-libgtest \
     $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
-    $(LIBCURL_STATIC_LIBRARIES) \
-    $(LIBXML2_STATIC_LIBRARIES) \
-    emulator-libext4_utils \
-    emulator-libsparse \
-    emulator-libselinux \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/
