@@ -141,7 +141,7 @@ LOCAL_SRC_FILES := $(ANDROID_SKIN_UNITTESTS)
 
 LOCAL_CFLAGS += -O0
 LOCAL_STATIC_LIBRARIES += \
-    emulator-libui \
+    android-emu-ui \
     $(ANDROID_EMULATOR_STATIC_LIBRARIES) \
     emulator-libgtest \
     $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \

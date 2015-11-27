@@ -61,67 +61,6 @@ QEMU1_COMMON_INCLUDES := \
 ##############################################################################
 ##############################################################################
 ###
-###  emulator-libui: LIBRARY OF UI-RELATED FUNCTIONS
-###
-###  THESE ARE USED BY 'emulator-ui' AND THE STANDALONE PROGRAMS
-###
-
-EMULATOR_LIBUI_INCLUDES :=
-EMULATOR_LIBUI_LDLIBS :=
-EMULATOR_LIBUI_LDFLAGS :=
-
-EMULATOR_LIBUI_STATIC_LIBRARIES := \
-    emulator-libpng \
-    emulator-libjpeg \
-
-EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
-EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
-
-# the skin support sources
-#
-include $(LOCAL_PATH)/android/skin/sources.mk
-
-ifeq ($(HOST_OS),windows)
-# For capCreateCaptureWindow used in camera-capture-windows.c
-EMULATOR_LIBUI_LDLIBS += -lvfw32
-endif
-
-## one for 32-bit
-$(call start-emulator-library, emulator-libui)
-
-LOCAL_CFLAGS := \
-    $(EMULATOR_COMMON_CFLAGS) \
-    $(LIBXML2_CFLAGS) \
-    $(ANDROID_SKIN_CFLAGS) \
-
-# enable MMX code for our skin scaler
-ifeq ($(HOST_ARCH),x86)
-LOCAL_CFLAGS += -DUSE_MMX=1 -mmmx
-endif
-
-LOCAL_C_INCLUDES := \
-    $(LIBPNG_INCLUDES) \
-    $(LIBJPEG_INCLUDES) \
-    $(QT_INCLUDES) \
-
-LOCAL_SRC_FILES += \
-    android/loadpng.c \
-    android/gpu_frame.cpp \
-    android/emulator-window.c \
-    android/resource.c \
-    android/user-config.c \
-    $(ANDROID_SKIN_SOURCES) \
-
-LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
-LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
-LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES)
-
-$(call gen-hw-config-defs)
-$(call end-emulator-library)
-
-##############################################################################
-##############################################################################
-###
 ###  emulator-libqemu: TARGET-INDEPENDENT QEMU FUNCTIONS
 ###
 ###  THESE ARE USED BY EVERYTHING EXCEPT 'emulator-ui'

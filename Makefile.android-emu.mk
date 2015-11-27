@@ -21,6 +21,12 @@
 #      NOTE: At the moment, this does not include the UI code implemented
 #            from android/skin/ sources.
 #
+#   - android-emu-ui:
+#     Corresponds to the generic UI code, based on the Qt cross-platform
+#     library. At the moment, this depends on code that is only provided
+#     by the QEMU glue implementations, and isn't unit-testable on its
+#     own, which is why it's separated from android-emu.
+#
 #   - android-emu-qemu1 and android-emu-qemu2:
 #
 #     At the moment, a few AndroidEmu sources still depend on either the UI
@@ -48,12 +54,15 @@ ANDROID_EMU_INCLUDES := $(LOCAL_PATH)
 ANDROID_EMU_STATIC_LIBRARIES := \
     android-emu \
     android-emu-base \
+    emulator-libpng \
+    emulator-libjpeg \
     $(LIBCURL_STATIC_LIBRARIES) \
     $(LIBXML2_STATIC_LIBRARIES) \
     $(BREAKPAD_STATIC_LIBRARIES) \
     emulator-libext4_utils \
     emulator-libsparse \
     emulator-libselinux \
+    emulator-zlib \
 
 ANDROID_EMU_LDLIBS :=
 
@@ -339,6 +348,63 @@ $(call start-emulator-library,android-emu-qemu2)
 
     LOCAL_C_INCLUDES := $(ANDROID_EMU_INTERNAL_INCLUDES)
     $(call gen-hw-config-defs)
+$(call end-emulator-library)
+
+##############################################################################
+##############################################################################
+###
+###  android-emu-ui: UI specific part of AndroidEmu
+###
+###
+
+ANDROID_EMU_UI_INCLUDES :=
+ANDROID_EMU_UI_LDLIBS :=
+ANDROID_EMU_UI_LDFLAGS :=
+
+ANDROID_EMU_UI_STATIC_LIBRARIES :=
+
+ANDROID_EMU_UI_INCLUDES += $(QT_INCLUDES)
+ANDROID_EMU_UI_LDFLAGS += $(QT_LDFLAGS)
+ANDROID_EMU_UI_LDLIBS += $(QT_LDLIBS)
+
+# the skin support sources
+include $(LOCAL_PATH)/android/skin/sources.mk
+
+ifeq ($(HOST_OS),windows)
+# For capCreateCaptureWindow used in camera-capture-windows.c
+ANDROID_EMU_UI_LDLIBS += -lvfw32
+endif
+
+## one for 32-bit
+$(call start-emulator-library, android-emu-ui)
+
+LOCAL_CFLAGS := \
+    $(EMULATOR_COMMON_CFLAGS) \
+    $(LIBXML2_CFLAGS) \
+    $(ANDROID_SKIN_CFLAGS) \
+
+# enable MMX code for our skin scaler
+ifeq ($(HOST_ARCH),x86)
+LOCAL_CFLAGS += -DUSE_MMX=1 -mmmx
+endif
+
+LOCAL_C_INCLUDES := \
+    $(LIBPNG_INCLUDES) \
+    $(LIBJPEG_INCLUDES) \
+    $(QT_INCLUDES) \
+
+LOCAL_SRC_FILES += \
+    android/gpu_frame.cpp \
+    android/emulator-window.c \
+    android/resource.c \
+    android/user-config.c \
+    $(ANDROID_SKIN_SOURCES) \
+
+LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
+LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
+LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES)
+
+$(call gen-hw-config-defs)
 $(call end-emulator-library)
 
 LOCAL_PATH := $(ANDROID_EMU_OLD_LOCAL_PATH)

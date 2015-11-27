@@ -50,7 +50,7 @@ $(call start-emulator-library, emulator-target-$(EMULATOR_TARGET_CPU))
 LOCAL_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
     $(EMULATOR_TARGET_CFLAGS) \
-    $(EMULATOR_LIBUI_CFLAGS) \
+    $(ANDROID_EMU_UI_CFLAGS) \
     $(ZLIB_CFLAGS) \
 
 # These are required by the TCG engine.
@@ -237,10 +237,10 @@ $(call end-emulator-library)
 $(call start-emulator-program, emulator$(HOST_SUFFIX)-$(EMULATOR_TARGET_ARCH))
 
 LOCAL_STATIC_LIBRARIES += \
-    emulator-libui \
+    android-emu-ui \
     $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
     $(ANDROID_SKIN_STATIC_LIBRARIES) \
-    $(EMULATOR_LIBUI_STATIC_LIBRARIES) \
+    $(ANDROID_EMU_UI_STATIC_LIBRARIES) \
 
 LOCAL_WHOLE_STATIC_LIBRARIES := \
     emulator-libqemu \
@@ -249,11 +249,11 @@ LOCAL_WHOLE_STATIC_LIBRARIES := \
 LOCAL_LDLIBS := \
     $(EMULATOR_COMMON_LDLIBS) \
     $(EMULATOR_LIBQEMU_LDLIBS) \
-    $(EMULATOR_LIBUI_LDLIBS) \
+    $(ANDROID_EMU_UI_LDLIBS) \
     $(CXX_STD_LIB) \
 
 LOCAL_LDFLAGS := \
-    $(EMULATOR_LIBUI_LDFLAGS) \
+    $(ANDROID_EMU_UI_LDFLAGS) \
 
 LOCAL_GENERATE_SYMBOLS := true
 $(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)
