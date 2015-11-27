@@ -10,6 +10,9 @@ include $(LOCAL_PATH)/distrib/Qt5.mk
 include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
 include $(LOCAL_PATH)/distrib/libpng.mk
 
+MINI_GLIB_DIR := distrib/mini-glib
+include $(LOCAL_PATH)/$(MINI_GLIB_DIR)/sources.make
+
 ANDROID_SDK_TOOLS_REVISION := $(strip $(ANDROID_SDK_TOOLS_REVISION))
 ifdef ANDROID_SDK_TOOLS_REVISION
     EMULATOR_VERSION_CFLAGS := -DANDROID_SDK_TOOLS_REVISION=$(ANDROID_SDK_TOOLS_REVISION)
@@ -101,7 +104,7 @@ LOCAL_SRC_FILES := \
 # Needed to compile the call to androidQtSetupEnv() in main-emulator.c
 LOCAL_CFLAGS += -DCONFIG_QT
 
-LOCAL_STATIC_LIBRARIES := emulator-common $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1)
+LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1)
 # Ensure this is always built, even if 32-bit binaries are disabled.
 LOCAL_IGNORE_BITNESS := true
 

@@ -35,7 +35,6 @@ LOCAL_C_INCLUDES := $(OBJS_DIR)/build
 
 LOCAL_STATIC_LIBRARIES := \
     $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
-    emulator-common \
     emulator-libext4_utils \
     emulator-libsparse \
     emulator-libselinux \

@@ -49,7 +49,6 @@ EMULATOR_TARGET_CFLAGS := \
 $(call start-emulator-library, emulator-target-$(EMULATOR_TARGET_CPU))
 LOCAL_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
-    $(QEMU1_COMMON_CFLAGS) \
     $(EMULATOR_TARGET_CFLAGS) \
     $(EMULATOR_LIBUI_CFLAGS) \
     $(ZLIB_CFLAGS) \
@@ -65,8 +64,8 @@ LOCAL_CFLAGS += \
     -DHAS_AUDIO \
 
 LOCAL_C_INCLUDES += \
+    $(QEMU1_COMMON_INCLUDES) \
     $(EMULATOR_TARGET_INCLUDES) \
-    $(MINI_GLIB_INCLUDES) \
 
 LOCAL_SRC_FILES += \
     android-qemu1-glue/main.c \
@@ -239,7 +238,6 @@ $(call start-emulator-program, emulator$(HOST_SUFFIX)-$(EMULATOR_TARGET_ARCH))
 
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
-    emulator-common \
     $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
     $(ANDROID_SKIN_STATIC_LIBRARIES) \
     $(EMULATOR_LIBUI_STATIC_LIBRARIES) \
