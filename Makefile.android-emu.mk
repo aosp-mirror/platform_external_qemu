@@ -271,6 +271,9 @@ ANDROID_EMU_SOURCES := \
     android/update-check/VersionExtractor.cpp \
     android/user-config.c \
     android/utils/jpeg-compress.c \
+    android/wear-agent/android_wear_agent.cpp \
+    android/wear-agent/WearAgent.cpp \
+    android/wear-agent/PairUpWearPhone.cpp \
 
 # Platform-specific camera capture
 ifeq ($(HOST_OS),linux)
