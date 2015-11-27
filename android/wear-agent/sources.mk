@@ -8,7 +8,7 @@ LIBWEAR_AGENT_SOURCES := \
     android/wear-agent/WearAgent.cpp \
     android/wear-agent/PairUpWearPhone.cpp \
 
-LIBWEAR_AGENT_INCLUDES := $(LOCAL_PATH) $(LOCAL_PATH)/include
+LIBWEAR_AGENT_INCLUDES := $(LOCAL_PATH)
 
 $(call start-emulator-library, libandroid-wear-agent)
 LOCAL_SRC_FILES := $(LIBWEAR_AGENT_SOURCES)
@@ -22,7 +22,7 @@ WEAR_AGENT_SOURCES := \
     android/wear-agent/PairUpWearPhone.cpp \
     android/wear-agent/WearAgent.cpp \
 
-WEAR_AGENT_LIBS := emulator-common $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1)
+WEAR_AGENT_LIBS := $(ANDROID_EMU_STATIC_LIBRARIES)
 
 $(call start-emulator-program, wear-agent$(HOST_SUFFIX))
 LOCAL_SRC_FILES := $(WEAR_AGENT_SOURCES)

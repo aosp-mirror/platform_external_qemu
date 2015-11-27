@@ -216,7 +216,7 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "android/boot-properties.h"
 #include "android/hw-control.h"
 #include "android/core-init-utils.h"
-#include "android/audio-test.h"
+#include "android-qemu1-glue/audio-test.h"
 
 #include "android/snaphost-android.h"
 #include "android/version.h"

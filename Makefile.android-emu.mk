@@ -77,6 +77,7 @@ ANDROID_EMU_STATIC_LIBRARIES_QEMU2 := \
 ANDROID_EMU_INTERNAL_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
     $(LIBXML2_CFLAGS) \
+    $(LIBCURL_CFLAGS) \
     $(EMULATOR_VERSION_CFLAGS)
 
 ANDROID_EMU_INTERNAL_QEMU2_CFLAGS := \
@@ -85,6 +86,8 @@ ANDROID_EMU_INTERNAL_QEMU2_CFLAGS := \
 ANDROID_EMU_INTERNAL_INCLUDES := \
     $(OBJS_DIR)/build \
     $(ANDROID_EMU_INCLUDES) \
+    $(LIBPNG_INCLUDES) \
+    $(LIBJPEG_INCLUDES) \
     $(LIBCURL_INCLUDES) \
     $(LIBXML2_INCLUDES) \
     $(LIBEXT4_UTILS_INCLUDES) \
@@ -192,6 +195,7 @@ ANDROID_EMU_SOURCES := \
     android/cmdline-option.c \
     android/cpu_accelerator.cpp \
     android/console.c \
+    android/core-init-utils.c \
     android/curl-support.c \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
@@ -225,6 +229,8 @@ ANDROID_EMU_SOURCES := \
     android/hw-control.c \
     android/hw-events.c \
     android/hw-fingerprint.c \
+    android/hw-kmsg.c \
+    android/hw-lcd.c \
     android/hw-pipe-net.c \
     android/hw-qemud.cpp \
     android/hw-sensors.c \
@@ -234,6 +240,8 @@ ANDROID_EMU_SOURCES := \
     android/metrics/metrics_reporter_ga.c \
     android/metrics/metrics_reporter_toolbar.c \
     android/metrics/StudioHelper.cpp \
+    android/multitouch-screen.c \
+    android/multitouch-port.c \
     android/opengl/EmuglBackendList.cpp \
     android/opengl/EmuglBackendScanner.cpp \
     android/opengl/emugl_config.cpp \
@@ -262,6 +270,7 @@ ANDROID_EMU_SOURCES := \
     android/update-check/UpdateChecker.cpp \
     android/update-check/VersionExtractor.cpp \
     android/user-config.c \
+    android/utils/jpeg-compress.c \
 
 # Platform-specific camera capture
 ifeq ($(HOST_OS),linux)

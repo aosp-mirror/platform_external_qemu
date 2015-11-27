@@ -11,7 +11,6 @@
 */
 #include "android/skin/window.h"
 
-#include "android/config/config.h"
 #include "android/skin/charmap.h"
 #include "android/skin/event.h"
 #include "android/skin/image.h"

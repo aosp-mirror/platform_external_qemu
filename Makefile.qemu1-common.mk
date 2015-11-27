@@ -54,83 +54,40 @@ gen-hw-config-defs = \
 ###  THESE ARE POTENTIALLY USED BY ALL COMPONENTS
 ###
 
-common_LOCAL_CFLAGS =
-common_LOCAL_SRC_FILES =
-
-EMULATOR_COMMON_CFLAGS := -Werror=implicit-function-declaration
-
 # Needed by everything about the host
 # $(OBJS_DIR)/build contains config-host.h
 # $(LOCAL_PATH)/include contains common headers.
-EMULATOR_COMMON_CFLAGS += \
+QEMU1_COMMON_CFLAGS := \
     -I$(OBJS_DIR)/build \
     -I$(LOCAL_PATH)/include
 
 # Need to include "qapi-types.h" and other auto-generated files from
 # android-configure.sh
-EMULATOR_COMMON_CFLAGS += -I$(OBJS_DIR)/build/qemu1-qapi-auto-generated
-
-# Include the emulator version definition from Makefile.common.mk
-EMULATOR_COMMON_CFLAGS += $(EMULATOR_VERSION_CFLAGS)
-
-# Enable large-file support (i.e. make off_t a 64-bit value)
-ifeq ($(HOST_OS),linux)
-EMULATOR_COMMON_CFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
-endif
-
-ifeq (true,$(BUILD_DEBUG_EMULATOR))
-    EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=1
-else
-    EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=0
-endif
-
-###########################################################
-# Zlib sources
-#
-EMULATOR_COMMON_CFLAGS += -I$(ZLIB_INCLUDES)
+QEMU1_COMMON_CFLAGS += -I$(OBJS_DIR)/build/qemu1-qapi-auto-generated
 
 ###########################################################
 # GLib sources
 #
-GLIB_DIR := distrib/mini-glib
-include $(LOCAL_PATH)/$(GLIB_DIR)/sources.make
-EMULATOR_COMMON_CFLAGS += -I$(GLIB_INCLUDE_DIR)
-
-common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
-
-EMULATOR_COMMON_CFLAGS += $(LIBCURL_CFLAGS)
+MINI_GLIB_DIR := distrib/mini-glib
+include $(LOCAL_PATH)/$(MINI_GLIB_DIR)/sources.make
+QEMU1_COMMON_CFLAGS += -I$(MINI_GLIB_INCLUDE_DIR)
 
 ###########################################################
 # build the android-emu libraries
-include $(LOCAL_PATH)/Makefile.android-emu.mk
 
 ###########################################################
 # Android utility functions
 #
-common_LOCAL_SRC_FILES += \
-    android/audio-test.c \
-    android/core-init-utils.c \
-    android/hw-kmsg.c \
-    android/hw-lcd.c \
-    android/multitouch-screen.c \
-    android/multitouch-port.c \
-    android/utils/jpeg-compress.c \
-
-common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
-
-include $(LOCAL_PATH)/android/wear-agent/sources.mk
-
 ## one for 32-bit
 $(call start-emulator-library, emulator-common)
 
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
+LOCAL_CFLAGS += \
+    $(EMULATOR_COMMON_CFLAGS) \
+    $(QEMU1_COMMON_CFLAGS) \
 
-LOCAL_C_INCLUDES += \
-    $(LIBCURL_INCLUDES) \
-    $(LIBXML2_INCLUDES) \
-    $(LIBJPEG_INCLUDES) \
-
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+LOCAL_SRC_FILES += \
+    $(MINI_GLIB_SOURCES) \
+    android-qemu1-glue/audio-test.c \
 
 ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
     LOCAL_IGNORE_BITNESS := true
@@ -322,9 +279,11 @@ LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/slirp-android \
     $(intermediates) \
     $(LIBJPEG_INCLUDES) \
+    $(ZLIB_INCLUDES) \
 
 LOCAL_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
+    $(QEMU1_COMMON_CFLAGS) \
     -W \
     -Wall \
     $(GCC_W_NO_MISSING_FIELD_INITIALIZERS) \

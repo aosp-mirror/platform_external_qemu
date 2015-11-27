@@ -38,6 +38,26 @@ endef
 
 endif  # HOST_OS == windows
 
+EMULATOR_COMMON_CFLAGS := -Werror=implicit-function-declaration
+
+# Include the emulator version definition from Makefile.common.mk
+EMULATOR_COMMON_CFLAGS += $(EMULATOR_VERSION_CFLAGS)
+
+# Enable large-file support (i.e. make off_t a 64-bit value)
+ifeq ($(HOST_OS),linux)
+EMULATOR_COMMON_CFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
+endif
+
+ifeq (true,$(BUILD_DEBUG_EMULATOR))
+    EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=1
+else
+    EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=0
+endif
+
+
+include $(LOCAL_PATH)/Makefile.android-emu.mk
+include $(LOCAL_PATH)/android/wear-agent/sources.mk
+
 # We want to build all variants of the emulator binaries. This makes
 # it easier to catch target-specific regressions during emulator development.
 EMULATOR_TARGET_ARCH := arm
