@@ -16,6 +16,24 @@
       "revId": "b0b350035ea74e811875a70da5479c841a6d4c40",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1be45325_92273ca4",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 7
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-30T23:52:08Z",
+      "side": 1,
+      "message": "Fixed in recent patches.",
+      "parentUuid": "d67c5259_054ab4a8",
+      "revId": "b0b350035ea74e811875a70da5479c841a6d4c40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
