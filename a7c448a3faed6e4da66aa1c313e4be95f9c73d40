@@ -167,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "9bf043de_9071747c",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-30T18:57:59Z",
+      "side": 1,
+      "message": "That\u0027s fair enough - I had hoped to not have to go that in-depth with choosing which path, but I suppose it makes sense to.\n\nAs for preview vs. stable, my gut says to go with the latest *stable* version no matter what, but this of course is an over-simplification.",
+      "parentUuid": "db0f1bb0_2aafffe9",
+      "range": {
+        "startLine": 223,
+        "startChar": 33,
+        "endLine": 223,
+        "endChar": 37
+      },
+      "revId": "a7c448a3faed6e4da66aa1c313e4be95f9c73d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b153384_2ef3c85d",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 3
