@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5bda4b65_8ec5db61",
+        "filename": "android/hw-sensors.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-30T17:09:51Z",
+      "side": 1,
+      "message": "This is pretty undesirable in terms of the logical ordering of these values.",
+      "range": {
+        "startLine": 66,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 54
+      },
+      "revId": "1d535b3a9fae1e730823a5d644a71e3043d073e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbde9f59_4bdda52d",
+        "filename": "android/skin/rect.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-30T17:09:51Z",
+      "side": 1,
+      "message": "This is not a mathematical rotation of 90 degrees, but a rotation of 90 degrees clockwise. I would strongly prefer that we stick to standard mathematical convention.",
+      "range": {
+        "startLine": 28,
+        "startChar": 8,
+        "endLine": 29,
+        "endChar": 20
+      },
+      "revId": "1d535b3a9fae1e730823a5d644a71e3043d073e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb1267d6_a9c09d51",
+        "filename": "docs/ANDROID-SKIN-FILES.TXT",
+        "patchSetId": 4
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-30T17:09:51Z",
+      "side": 1,
+      "message": "Nit: trailing whitespace",
+      "revId": "1d535b3a9fae1e730823a5d644a71e3043d073e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
