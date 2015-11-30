@@ -34,7 +34,8 @@ host_common_SRC_FILES :=      \
      EglPbufferSurface.cpp    \
      EglThreadInfo.cpp        \
      EglDisplay.cpp           \
-     ClientAPIExts.cpp
+     ClientAPIExts.cpp	      \
+
 
 ### EGL host implementation ########################
 $(call emugl-begin-host-shared-library,lib$(BUILD_TARGET_SUFFIX)EGL_translator)

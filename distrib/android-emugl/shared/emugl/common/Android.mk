@@ -14,6 +14,8 @@ commonSources := \
         smart_ptr.cpp \
         sockets.cpp \
         thread_store.cpp \
+	android_twitter.cpp \
+
 
 host_commonSources := $(commonSources)
 
