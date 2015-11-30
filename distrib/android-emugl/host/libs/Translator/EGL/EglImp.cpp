@@ -60,7 +60,7 @@ void initGlobalInfo()
     emugl::Mutex::AutoLock mutex(s_eglLock);
     if (!g_eglInfo) {
         g_eglInfo = EglGlobalInfo::getInstance();
-    } 
+    }
 }
 
 static const EGLiface s_eglIface = {
@@ -815,6 +815,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSwapBuffers(EGLDisplay display, EGLSurface surf
     }
 
     dpy->nativeType()->swapBuffers(Srfc->native());
+
     return EGL_TRUE;
 }
 

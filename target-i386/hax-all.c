@@ -1038,7 +1038,13 @@ static int hax_set_msrs(CPUX86State *env)
     hax_msr_entry_set(&msrs[n++], MSR_IA32_SYSENTER_CS, env->sysenter_cs);
     hax_msr_entry_set(&msrs[n++], MSR_IA32_SYSENTER_ESP, env->sysenter_esp);
     hax_msr_entry_set(&msrs[n++], MSR_IA32_SYSENTER_EIP, env->sysenter_eip);
-    hax_msr_entry_set(&msrs[n++], MSR_IA32_TSC, env->tsc);
+    /* QEMU used to copy env->tsc to MSR_IA32_TSC, but copying the host's
+     * TSC could give us very similar clocks across guest and host, making
+     * it easy to timestamp events and benchmark latencies.
+     */
+    int64_t host_tsc = cpu_get_real_ticks();
+    hax_msr_entry_set(&msrs[n++], MSR_IA32_TSC, host_tsc);
+    //    hax_msr_entry_set(&msrs[n++], MSR_IA32_TSC, env->tsc);
 #ifdef TARGET_X86_64
     hax_msr_entry_set(&msrs[n++], MSR_EFER, env->efer);
     hax_msr_entry_set(&msrs[n++], MSR_STAR, env->star);
