@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7bf38fea_cfcbdd74",
+        "filename": "android/build/definitions.make",
+        "patchSetId": 8
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-30T16:57:55Z",
+      "side": 1,
+      "message": "I\u0027m just trying to understand it: why is the function name \u0027install-symlink\u0027 but it performs a copy?",
+      "range": {
+        "startLine": 300,
+        "startChar": 9,
+        "endLine": 300,
+        "endChar": 11
+      },
+      "revId": "a7524da581651448b02f39a9437a78d6dcfa8ce9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
