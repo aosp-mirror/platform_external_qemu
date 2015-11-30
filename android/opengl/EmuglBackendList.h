@@ -23,10 +23,10 @@ public:
     typedef android::base::StringVector StringVector;
 
     // Parse the content of |execDir|/<lib>/ for Emugl backends.
-    // |hostBitness| can be 0 (autodetect), 32 or 64, and determines
+    // |programBitness| can be 0 (autodetect), 32 or 64, and determines
     // the value of <lib> which will be 'lib' for 32-bit systems,
     // and 'lib64' for 64-bit ones.
-    EmuglBackendList(const char* execDir, int hostBitness);
+    EmuglBackendList(const char* execDir, int programBitness);
 
     // Return the name of the default Emugl backend.
     const String& defaultName() const { return mDefaultName; }
@@ -59,7 +59,7 @@ public:
 private:
     String mDefaultName;
     StringVector mNames;
-    int mHostBitness;
+    int mProgramBitness;
     String mExecDir;
 };
 
