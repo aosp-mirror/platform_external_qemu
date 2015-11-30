@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b0923b2_ee39fb24",
+        "filename": "android/camera/camera-capture-windows.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 979,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-30T23:14:41Z",
+      "side": 1,
+      "message": "should it be before or after the lock?\nI think it should go after - as there\u0027s a possible race otherwise:\n\nt1                    t2\ncheck                 \n                      check\nlock\nfill the cmd\nunlock and wait\n                      lock\n                      fill the cmd (overwriting previous)\n                      ...",
+      "range": {
+        "startLine": 979,
+        "startChar": 2,
+        "endLine": 979,
+        "endChar": 30
+      },
+      "revId": "fe8fbee92b9662fdfcb6ffb6a2c8d31085b998c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
