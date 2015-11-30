@@ -234,6 +234,30 @@
       "revId": "3346e8da871a8f1fab179651565df3497b0a24d4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bd59733_d02a6225",
+        "filename": "android/camera/camera-capture-windows.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 943,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-30T22:25:49Z",
+      "side": 1,
+      "message": "Can we have a comment on top of the file (and in the common header) about the assumption? Otherwise there will be someone who will call if from different threads (Qt\u0027s already got its own thread, main loop has its own; who knows about new code)\nand complain that it hangs\nAlso, it\u0027s good to at least add an assert on top of each camera_device_*() function to make sure there\u0027s no pending command",
+      "parentUuid": "3bd59733_b0223694",
+      "range": {
+        "startLine": 940,
+        "startChar": 0,
+        "endLine": 943,
+        "endChar": 3
+      },
+      "revId": "3346e8da871a8f1fab179651565df3497b0a24d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
