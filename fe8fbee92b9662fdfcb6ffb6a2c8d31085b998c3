@@ -22,6 +22,30 @@
       "revId": "fe8fbee92b9662fdfcb6ffb6a2c8d31085b998c3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7bf38fea_d575acd8",
+        "filename": "android/camera/camera-capture-windows.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 979,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-30T23:27:49Z",
+      "side": 1,
+      "message": "Thanks for catching this! It\u0027s after the lock now.",
+      "parentUuid": "9b0923b2_ee39fb24",
+      "range": {
+        "startLine": 979,
+        "startChar": 2,
+        "endLine": 979,
+        "endChar": 30
+      },
+      "revId": "fe8fbee92b9662fdfcb6ffb6a2c8d31085b998c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
