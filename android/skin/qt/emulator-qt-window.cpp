@@ -32,6 +32,7 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/emulation/android_twitter.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/globals.h"
 #include "android/skin/event.h"
@@ -788,6 +789,14 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type, SkinMouseButtonType 
     skin_event->u.mouse.y = pos.y();
     skin_event->u.mouse.xrel = 0;
     skin_event->u.mouse.yrel = 0;
+
+#define DEBUG_INPUT_LATENCY
+#ifdef DEBUG_INPUT_LATENCY
+    android_twitter_sms("Name: %-16s F1: %-16s F2: %-8ld F3: %-8ld",
+                        "host-touch-entry",
+                        (type == kEventMouseButtonDown || type ==  kEventMouseMotion) ? "down" : "up",
+                        (long) skin_event->u.mouse.x, (long) skin_event->u.mouse.y);
+#endif
 
     queueEvent(skin_event);
 }
