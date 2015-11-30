@@ -620,7 +620,7 @@ skin_image_unref( SkinImage**  pimage )
 
     if (image) {
         if (image != _no_image && --image->ref_count == 0) {
-            if (!(image->flags & SKIN_IMAGE_CLONE)) {
+            if ((image->flags & SKIN_IMAGE_CLONE) != 0) {
                 skin_image_free(image);
             }
         }
