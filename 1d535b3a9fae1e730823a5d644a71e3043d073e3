@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1bea93c4_c233e636",
+        "filename": "android/hw-sensors.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-11-30T17:59:37Z",
+      "side": 1,
+      "message": "Unfortunately, LANDSCAPE is by definition 270 degrees clockwise, and I think ordering by increasing degrees is more desirable. There\u0027s really no canonical order with the labels.\n\nDo you suggest we translate clockwise degrees to counterclockwise degrees as we read the skins? I think it would get confusing to have to deal with clockwise and counterclockwise degrees.",
+      "parentUuid": "5bda4b65_8ec5db61",
+      "range": {
+        "startLine": 66,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 54
+      },
+      "revId": "1d535b3a9fae1e730823a5d644a71e3043d073e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbde9f59_4bdda52d",
         "filename": "android/skin/rect.c",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-30T17:09:51Z",
       "side": 1,
       "message": "This is not a mathematical rotation of 90 degrees, but a rotation of 90 degrees clockwise. I would strongly prefer that we stick to standard mathematical convention.",
+      "range": {
+        "startLine": 28,
+        "startChar": 8,
+        "endLine": 29,
+        "endChar": 20
+      },
+      "revId": "1d535b3a9fae1e730823a5d644a71e3043d073e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dbcc7b7f_761d78a1",
+        "filename": "android/skin/rect.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-11-30T17:59:37Z",
+      "side": 1,
+      "message": "My opinion is that having a single direction of rotation is more important than following the mathematical convention. We just need to make it clear that we\u0027re using clockwise rotations *everywhere*. The alternative is to indicate whether a rotation is clockwise or counterclockwise every time we do a rotation.",
+      "parentUuid": "fbde9f59_4bdda52d",
       "range": {
         "startLine": 28,
         "startChar": 8,
