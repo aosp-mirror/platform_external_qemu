@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dbcc7b7f_16226c80",
+        "filename": "android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-11-30T21:23:15Z",
+      "side": 1,
+      "message": "Only difference is here. Rotate is destructive, but we need to keep the original SkinImage.",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 60
+      },
+      "revId": "ab5055f58b18e99645bb4ff337ea23ebd007b6a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
