@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "db0f1bb0_2aafffe9",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-11-30T18:39:12Z",
+      "side": 1,
+      "message": "Consider this possibility: you have versions 1.1, 1.12 and 1.3. Technically 1.3 should be before 1.12 (since 3 \u003c 12) but when sorted alphabetically I think 1.12 will come before 1.3.\n\nThe link you posted is pretty specific about the format of the names, so I think it would be safe to actually parse the filtered names, sort them (numerically) by version and pick the latest one.\n\nI am not sure what to do with preview SDKs- is it ok to initialize SDK path to a preview version if it happens to be the latest? If yes, then we don\u0027t need to do any additional checks, otherwise we need to ensure that we\u0027re initializing to the latest *stable* version and only fall back on preview if there are no stable versions available.",
+      "parentUuid": "9bf043de_70985038",
+      "range": {
+        "startLine": 223,
+        "startChar": 33,
+        "endLine": 223,
+        "endChar": 37
+      },
+      "revId": "a7c448a3faed6e4da66aa1c313e4be95f9c73d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b153384_2ef3c85d",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 3
