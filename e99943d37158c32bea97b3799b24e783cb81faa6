@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1be45325_721df04e",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 10
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-30T23:52:08Z",
+      "side": 1,
+      "message": "Fixed in recent patches.",
+      "parentUuid": "56278298_8c40ab3b",
+      "revId": "e99943d37158c32bea97b3799b24e783cb81faa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "368beea4_0398f258",
         "filename": "android/crashreport/CrashReporter.cpp",
         "patchSetId": 10
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-30T23:00:14Z",
       "side": 1,
       "message": "Thanks!!",
+      "revId": "e99943d37158c32bea97b3799b24e783cb81faa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbe987fc_375f6050",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-30T23:52:08Z",
+      "side": 1,
+      "message": "The most recent version is very similar to the android::base::System one.  The only difference is returning a PID for the child process. Please advise if I should roll this in or keep separate.",
+      "parentUuid": "368beea4_0398f258",
       "revId": "e99943d37158c32bea97b3799b24e783cb81faa6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -71,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "7bf38fea_3531982f",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-30T23:52:08Z",
+      "side": 1,
+      "message": "These have been fixed in recent patch",
+      "parentUuid": "56278298_cc4aa359",
+      "revId": "e99943d37158c32bea97b3799b24e783cb81faa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "368beea4_237deec4",
         "filename": "android/crashreport/CrashService.cpp",
         "patchSetId": 10
@@ -82,6 +136,24 @@
       "writtenOn": "2015-11-30T23:00:14Z",
       "side": 1,
       "message": "mmm, this formatting is a little weird. Did you run \u0027git clang-format\u0027 here?",
+      "revId": "e99943d37158c32bea97b3799b24e783cb81faa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b1763d8_7bdd9b2d",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-30T23:52:08Z",
+      "side": 1,
+      "message": "I did run clang-format.  I just tested again, clang-format puts that .c_str() on a new line for some reason.  Should I change manually?",
+      "parentUuid": "368beea4_237deec4",
       "revId": "e99943d37158c32bea97b3799b24e783cb81faa6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
