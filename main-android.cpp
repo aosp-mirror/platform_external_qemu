@@ -52,6 +52,7 @@ extern "C" {
 #define TARGET_X86
 #endif
 
+#include <algorithm>
 #include <assert.h>
 #include <limits.h>
 #include <stdio.h>
@@ -754,7 +755,7 @@ extern "C" int main(int argc, char **argv) {
     else
         opts->shell = 1;
 
-    if (opts->shell || opts->logcat) {
+    if (opts->shell || opts->logcat || opts->show_kernel) {
         args[n++] = "-serial";
         args[n++] = opts->shell_serial;
         shell_serial = serial++;
@@ -826,66 +827,6 @@ extern "C" int main(int argc, char **argv) {
             args[n++] = "-boot-property";
             args[n++] = pl->param;
         }
-    }
-
-    /* Setup the kernel init options
-     */
-    {
-        static char  params[1024];
-        char        *p = params, *end = p + sizeof(params);
-
-        /* Don't worry about having a leading space here, this is handled
-         * by the core later. */
-
-        p = bufprint(p, end, " androidboot.hardware=goldfish");
-#ifdef TARGET_I386
-        p = bufprint(p, end, " clocksource=pit");
-#endif
-
-        if (opts->shell || opts->logcat) {
-            p = bufprint(p, end, " androidboot.console=%s%d",
-                         androidHwConfig_getKernelSerialPrefix(android_hw),
-                         shell_serial );
-        }
-
-        if (!opts->no_jni) {
-            p = bufprint(p, end, " android.checkjni=1");
-        }
-
-        if (opts->no_boot_anim) {
-            p = bufprint( p, end, " android.bootanim=0" );
-        }
-
-        if (opts->logcat) {
-            char*  q = bufprint(p, end, " androidboot.logcat=%s", opts->logcat);
-
-            if (q < end) {
-                /* replace any space by a comma ! */
-                {
-                    int  nn;
-                    for (nn = 1; p[nn] != 0; nn++)
-                        if (p[nn] == ' ' || p[nn] == '\t')
-                            p[nn] = ',';
-                    p += nn;
-                }
-            }
-            p = q;
-        }
-
-        if (opts->bootchart) {
-            p = bufprint(p, end, " androidboot.bootchart=%s", opts->bootchart);
-        }
-
-        if (opts->selinux) {
-            p = bufprint(p, end, " androidboot.selinux=%s", opts->selinux);
-        }
-
-        if (p >= end) {
-            fprintf(stderr, "### ERROR: kernel parameters too long\n");
-            exit(1);
-        }
-
-        hw->kernel_parameters = strdup(params);
     }
 
     if (opts->ports) {
@@ -1119,6 +1060,53 @@ extern "C" int main(int argc, char **argv) {
 
     String kernelCommandLine = "qemu=1";
 
+    // Append these kernel parameters here to avoid having to modify QEMU code
+    if (hw->kernel_parameters && hw->kernel_parameters[0] != '\0') {
+        if (hw->kernel_parameters[0] != ' ') {
+            kernelCommandLine += " ";
+        }
+        kernelCommandLine += hw->kernel_parameters;
+        // Clear this value to prevent accidental usage elsewhere
+        hw->kernel_parameters[0] = '\0';
+    }
+
+#ifdef TARGET_I386
+    kernelCommandLine += " clocksource=pit";
+#endif
+
+    if (opts->shell || opts->logcat) {
+        const char* prefix = androidHwConfig_getKernelSerialPrefix(android_hw);
+        StringAppendFormat(&kernelCommandLine, " androidboot.console=%s%d",
+                           prefix, shell_serial);
+    }
+
+    if (!opts->no_jni) {
+        kernelCommandLine += " android.checkjni=1";
+    }
+
+    if (opts->no_boot_anim) {
+        kernelCommandLine += " android.bootanim=0";
+    }
+
+    if (opts->logcat) {
+        String logcat = StringFormat(" androidboot.logcat=%s", opts->logcat);
+        // Replace whitespace with comma starting at the second character
+        // since the first one in the format string above is a whitespace
+        std::replace(&logcat[1], &logcat[logcat.size()], ' ', ',');
+        std::replace(&logcat[1], &logcat[logcat.size()], '\t', ',');
+        kernelCommandLine += logcat;
+    }
+
+    if (opts->bootchart) {
+        kernelCommandLine += StringFormat(" androidboot.bootchart=%s",
+                                          opts->bootchart);
+    }
+
+    if (opts->selinux) {
+        kernelCommandLine += StringFormat(" androidboot.selinux=%s",
+                                          opts->selinux);
+    }
+
     if (opts->show_kernel) {
         kernelCommandLine += StringFormat(" console=%s0,38400",
                                           kTarget.ttyPrefix);
@@ -1161,9 +1149,6 @@ extern "C" int main(int argc, char **argv) {
         lcd_density = StringFormat("%d", hw->hw_lcd_density);
         args[n++] = lcd_density.c_str();
     }
-
-    args[n++] = "-serial";
-    args[n++] = "mon:stdio";
 
     // Kernel image
     args[n++] = "-kernel";

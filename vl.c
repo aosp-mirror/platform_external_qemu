@@ -4149,6 +4149,11 @@ int run_qemu_main(int argc, const char **argv)
         boot_property_add("dalvik.vm.heapsize",temp);
     }
 
+    /* From API 19 and above, the platform provides an explicit property for low memory devices. */
+    if (android_hw->hw_ramSize <= 512) {
+        boot_property_add("ro.config.low_ram", "true");
+    }
+
     /* Initialize presence of hardware nav button */
     boot_property_add("qemu.hw.mainkeys", android_hw->hw_mainKeys ? "1" : "0");
 
@@ -4168,13 +4173,13 @@ int run_qemu_main(int argc, const char **argv)
         }
     }
 
-#endif // USE_ANDROID_EMU
-
     if (lcd_density) {
         char temp[8];
         snprintf(temp, sizeof(temp), "%d", lcd_density);
         boot_property_add("qemu.sf.lcd_density", temp);
     }
+
+#endif // USE_ANDROID_EMU
 
 #endif // CONFIG_ANDROID
 
