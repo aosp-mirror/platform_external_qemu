@@ -37,7 +37,7 @@ EmuglBackendList::EmuglBackendList(const char* execDir,
         mDefaultName("auto"), mNames(), mHostBitness(0), mExecDir(execDir) {
     // Fix host bitness if needed.
     if (!hostBitness) {
-        hostBitness = System::get()->getHostBitness();
+        hostBitness = System::get()->getProgramBitness();
     }
     mHostBitness = hostBitness;
 

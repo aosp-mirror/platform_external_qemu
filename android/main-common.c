@@ -962,9 +962,10 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
         }
         hw->hw_ramSize = ramSize;
     }
-    bool is32bitWindowsHost = false;
-#ifdef _WIN32
-    is32bitWindowsHost = (32 == android_getHostBitness());
+#if defined(_WIN32) && !defined(_WIN64)
+    const bool is32bitWindowsHost = true;
+#else
+    const bool is32bitWindowsHost = false;
 #endif
     // For recent system versions, ensure a minimum of 1GB or memory, anything
     // lower is very painful during the boot process and after that.

@@ -29,7 +29,7 @@ TEST(androidQtGetLibraryDir, Qt32) {
 
     TestSystem testSys(basePath, 32);
 
-    EXPECT_STREQ(resultPath, androidQtGetLibraryDir().c_str());
+    EXPECT_STREQ(resultPath, androidQtGetLibraryDir(32).c_str());
 }
 
 TEST(androidQtGetLibraryDir, Qt64) {
@@ -43,7 +43,7 @@ TEST(androidQtGetLibraryDir, Qt64) {
 
     TestSystem testSys(basePath, 64);
 
-    EXPECT_STREQ(resultPath, androidQtGetLibraryDir().c_str());
+    EXPECT_STREQ(resultPath, androidQtGetLibraryDir(64).c_str());
 }
 
 TEST(androidQtGetPluginsDir, Qt32) {
@@ -57,7 +57,7 @@ TEST(androidQtGetPluginsDir, Qt32) {
 
     TestSystem testSys(basePath, 32);
 
-    EXPECT_STREQ(resultPath, androidQtGetPluginsDir().c_str());
+    EXPECT_STREQ(resultPath, androidQtGetPluginsDir(32).c_str());
 }
 
 TEST(androidQtGetPluginsDir, Qt64) {
@@ -71,5 +71,5 @@ TEST(androidQtGetPluginsDir, Qt64) {
 
     TestSystem testSys(basePath, 64);
 
-    EXPECT_STREQ(resultPath, androidQtGetPluginsDir().c_str());
+    EXPECT_STREQ(resultPath, androidQtGetPluginsDir(64).c_str());
 }

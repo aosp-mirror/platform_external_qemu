@@ -17,9 +17,11 @@
 // which holds Qt's shared libraries. This path is typically
 // added to the system library search path and passed to
 // QCoreApplication::setLibraryPaths().
-android::base::String androidQtGetLibraryDir();
+// |wantedBitness| is the bitness of the executable (32 or 64).
+android::base::String androidQtGetLibraryDir(int wantedBitness);
 
 // Return the path to the emulator's Qt plugins directory,
 // which holds Qt's plugins. It should be added to the
 // QT_QPA_PLATFORM_PLUGIN_PATH environment variable.
-android::base::String androidQtGetPluginsDir();
+// |wantedBitness| is the bitness of the executable (32 or 64).
+android::base::String androidQtGetPluginsDir(int wantedBitness);

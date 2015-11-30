@@ -70,7 +70,7 @@ extern void skin_winsys_enter_main_loop(int argc, char **argv)
     D("Starting QT main loop\n");
 
     // Make Qt look at the libraries within this installation
-    String qtPath = androidQtGetLibraryDir();
+    String qtPath = androidQtGetLibraryDir(System::get()->getProgramBitness());
     QStringList pathList(qtPath.c_str());
     QCoreApplication::setLibraryPaths(pathList);
     D("Qt lib path: %s\n", qtPath.c_str());

@@ -23,9 +23,9 @@
 
 using namespace android::base;
 
-bool androidQtSetupEnv() {
+bool androidQtSetupEnv(int wantedBitness) {
     // Add <progdir>/<lib>/qt/lib if it exists to the library search path.
-    String  qtLibSubDir = androidQtGetLibraryDir();
+    String  qtLibSubDir = androidQtGetLibraryDir(wantedBitness);
     System* system = System::get();
 
     if (!system->pathIsDir(qtLibSubDir.c_str())) {
@@ -38,7 +38,7 @@ bool androidQtSetupEnv() {
     //LOG(INFO) << "Library search list [" << (env ? env : "<empty>") << "]";
 
     // Set the platforms plugin path too.
-    String qtPluginsSubDir = androidQtGetPluginsDir();
+    String qtPluginsSubDir = androidQtGetPluginsDir(wantedBitness);
     system->envSet("QT_QPA_PLATFORM_PLUGIN_PATH", qtPluginsSubDir.c_str());
 
     return true;

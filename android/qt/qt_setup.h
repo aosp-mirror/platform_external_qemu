@@ -19,9 +19,10 @@ ANDROID_BEGIN_HEADER
 
 // Setup environment variables to run the Qt-based UI programs.
 // This function should be called from the top-level launcher and will
-// modify the library search path when needed.
+// modify the library search path when needed. |wantedBitness| is the desired
+// bitness of the executable to be launched (32 or 64).
 // Return true in case of success, false if there is no corresponding
 // Qt library directory.
-bool androidQtSetupEnv();
+bool androidQtSetupEnv(int wantedBitness);
 
 ANDROID_END_HEADER
