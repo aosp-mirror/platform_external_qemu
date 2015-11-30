@@ -27,6 +27,7 @@
 #include "monitor/monitor.h"
 #include "ui/console.h"
 #include "qapi/qmp/qjson.h"
+#include "android/emulation/android_twitter.h"
 
 #ifdef CONFIG_SKINNING
 QEMUPutMouseEntry *original_qemu_add_mouse_event_handler(QEMUPutMouseEvent *func,
@@ -182,6 +183,15 @@ void kbd_mouse_event(int dx, int dy, int dz, int buttons_state)
 
     mouse_event = entry->qemu_put_mouse_event;
     mouse_event_opaque = entry->qemu_put_mouse_event_opaque;
+
+#define DEBUG_INPUT_LATENCY
+#ifdef DEBUG_INPUT_LATENCY
+    char msg[128] = { 0 } ;
+    snprintf(msg, 128, "F1: %-8ld F2: %-8ld F3: %-16s",
+             (long) dx, (long) dy,
+             buttons_state == 0 ? "finger-up" : "finger-down");
+    android_tweet(0, msg);
+#endif
 
     if (mouse_event) {
 #ifndef CONFIG_SKINNING
