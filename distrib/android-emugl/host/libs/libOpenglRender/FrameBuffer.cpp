@@ -22,6 +22,8 @@
 #include "TimeUtils.h"
 #include "gles2_dec.h"
 
+#include "emugl/common/android_twitter.h"
+
 #include "OpenGLESDispatch/EGLDispatch.h"
 
 #include <stdio.h>
@@ -168,6 +170,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     if (s_theFrameBuffer != NULL) {
         return true;
     }
+    android_twitter_init();
 
     //
     // allocate space for the FrameBuffer object
@@ -1115,6 +1118,50 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
             m_statsNumFrames = 0;
         }
     }
+
+#define DEBUG_INPUT_LATENCY
+#ifdef DEBUG_INPUT_LATENCY
+    if (1) {
+        GLint readFormat;
+        GLint readType;
+
+        glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
+        glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
+
+        unsigned char pixel[4] = {0};
+        (*c).second.cb->readPixels(0, 0, 1, 1, (GLenum)readFormat,
+                                   (GLenum)readType, (void*)pixel);
+
+        int r = (int)pixel[0];
+        int g = (int)pixel[1];
+        int b = (int)pixel[2];
+        int a = (int)pixel[3];
+
+        int x = (((b >> 5) & 0x7) << 8) | r;
+        int y = (((b >> 2) & 0x7) << 8) | g;
+        int c = b & 0x3;
+        const char* action = "?";
+        switch (c) {
+            case 0:
+                action = "down";
+                break;
+            case 1:
+                action = "up";
+                break;
+            case 2:
+                action = "move";
+                break;
+            default:
+                action = "other";
+        }
+
+        fprintf(stdout,
+                "pixel: {%d, %d, %d, %d} --> location: {%d, %d}, action: %d\n",
+                r, g, b, a, x, y, c);
+        android_twitter_sms("Name: %-16s F1: %-16s F2: %-8ld F3: %-8ld",
+                            "host-gpu", action, x, y);
+    }
+#endif  // DEBUG_INPUT_LATENCY
 
     //
     // Send framebuffer (without FPS overlay) to callback
