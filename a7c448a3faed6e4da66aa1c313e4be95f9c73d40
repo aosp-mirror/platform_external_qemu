@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1be45325_0ce7b701",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-30T18:23:51Z",
+      "side": 1,
+      "message": "Indeed it does - I didn\u0027t use it because I thought we had a specific reason to use libxml2 before, but here it probably makes more sense to use Qt\u0027s library. I\u0027ll give that a try.",
+      "parentUuid": "bbc4277e_8d3a9173",
+      "range": {
+        "startLine": 34,
+        "startChar": 10,
+        "endLine": 34,
+        "endChar": 25
+      },
+      "revId": "a7c448a3faed6e4da66aa1c313e4be95f9c73d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bb2a67bd_95f80737",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-24T23:51:08Z",
       "side": 1,
       "message": "There\u0027s a lot of code shared between windows and linux versions...",
+      "range": {
+        "startLine": 190,
+        "startChar": 7,
+        "endLine": 190,
+        "endChar": 16
+      },
+      "revId": "a7c448a3faed6e4da66aa1c313e4be95f9c73d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7bf38fea_aff8996e",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-30T18:23:51Z",
+      "side": 1,
+      "message": "Linux and OSX, but yes, I\u0027ll try consolidating this is a bit. Sadly, the directory structures are *slightly* different on each platform.",
+      "parentUuid": "bb2a67bd_95f80737",
       "range": {
         "startLine": 190,
         "startChar": 7,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "9bf043de_70985038",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-30T18:23:51Z",
+      "side": 1,
+      "message": "I wasn\u0027t sure about the best way to find the latest version: see http://tools.android.com/tech-docs/configuration\n\nListing them alphabetically and picking the last one *should* always pick the latest full version of Android Studio, but this won\u0027t take into account Preview releases. Suggestions?",
+      "parentUuid": "fbb05f0b_d0c6ea1c",
+      "range": {
+        "startLine": 223,
+        "startChar": 33,
+        "endLine": 223,
+        "endChar": 37
+      },
+      "revId": "a7c448a3faed6e4da66aa1c313e4be95f9c73d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b153384_2ef3c85d",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 3
@@ -82,6 +154,30 @@
       "writtenOn": "2015-11-24T23:51:08Z",
       "side": 1,
       "message": "I think this parsing code could benefit from using the DOM model provided by QDOMDocument.",
+      "range": {
+        "startLine": 258,
+        "startChar": 12,
+        "endLine": 258,
+        "endChar": 16
+      },
+      "revId": "a7c448a3faed6e4da66aa1c313e4be95f9c73d40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b0923b2_a8df7bf9",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-30T18:23:51Z",
+      "side": 1,
+      "message": "Done! It\u0027s a bit easier to work through, but it\u0027s still not too pretty.",
+      "parentUuid": "1b153384_2ef3c85d",
       "range": {
         "startLine": 258,
         "startChar": 12,
