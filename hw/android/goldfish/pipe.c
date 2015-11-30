@@ -55,6 +55,12 @@
 /* Set to 1 to enable the 'throttle' pipe type, useful for debugging */
 #define DEBUG_THROTTLE_PIPE 1
 
+/*
+** Set to 1 to enable the 'twitter' pipe type, useful for performance
+** debugging through timestamped host/guest logs
+*/
+#define DEBUG_TWITTER_PIPE 1
+
 #define GOLDFISH_PIPE_SAVE_VERSION  4
 #define GOLDFISH_PIPE_SAVE_LEGACY_VERSION  3
 
@@ -686,5 +692,8 @@ void pipe_dev_init(bool newDeviceNaming)
 #endif
 #if DEBUG_THROTTLE_PIPE
     android_pipe_add_type_pingpong();
+#endif
+#if DEBUG_TWITTER_PIPE
+    android_pipe_add_type_twitter();
 #endif
 }
