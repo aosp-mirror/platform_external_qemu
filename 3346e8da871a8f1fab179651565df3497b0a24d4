@@ -258,6 +258,30 @@
       "revId": "3346e8da871a8f1fab179651565df3497b0a24d4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbde9f59_31d64874",
+        "filename": "android/camera/camera-capture-windows.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 943,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-30T23:10:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3bd59733_d02a6225",
+      "range": {
+        "startLine": 940,
+        "startChar": 0,
+        "endLine": 943,
+        "endChar": 3
+      },
+      "revId": "3346e8da871a8f1fab179651565df3497b0a24d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
