@@ -459,7 +459,13 @@ static int kvm_put_msrs(CPUX86State *env)
     kvm_msr_entry_set(&msrs[n++], MSR_IA32_SYSENTER_EIP, env->sysenter_eip);
     if (kvm_has_msr_star(env))
 	kvm_msr_entry_set(&msrs[n++], MSR_STAR, env->star);
-    kvm_msr_entry_set(&msrs[n++], MSR_IA32_TSC, env->tsc);
+    /* QEMU used to copy env->tsc to MSR_IA32_TSC, but copying the host's
+     * TSC could give us very similar clocks across guest and host, making
+     * it easy to timestamp events and benchmark latencies.
+     */
+    int64_t host_tsc = cpu_get_real_ticks();
+    kvm_msr_entry_set(&msrs[n++], MSR_IA32_TSC, host_tsc);
+    //    kvm_msr_entry_set(&msrs[n++], MSR_IA32_TSC, env->tsc);
 #ifdef TARGET_X86_64
     /* FIXME if lm capable */
     kvm_msr_entry_set(&msrs[n++], MSR_CSTAR, env->cstar);
