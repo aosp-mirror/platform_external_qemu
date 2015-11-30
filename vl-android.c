@@ -51,6 +51,7 @@
 #include "android/camera/camera-service.h"
 #include "android/curl-support.h"
 #include "android/emulation/bufprint_config_dirs.h"
+#include "android/emulation/android_twitter.h"
 #include "android/filesystems/partition_config.h"
 #include "android/globals.h"
 #include "android/gps.h"
@@ -1966,6 +1967,8 @@ int main(int argc, char **argv, char **envp)
     STRALLOC_DEFINE(kernel_params);
     STRALLOC_DEFINE(kernel_config);
     int    dns_count = 0;
+
+    android_twitter_init();
 
     // libcurl initialization is thread-unsafe, so let's call it first
     // to make sure no other thread could be doing the same
