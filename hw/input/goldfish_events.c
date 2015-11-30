@@ -17,6 +17,7 @@
 #include "hw/sysbus.h"
 #include "ui/input.h"
 #include "ui/console.h"
+#include "hw/input/android_keycodes.h"
 #include "hw/input/linux_keycodes.h"
 
 #include "hw/input/goldfish_events.h"
@@ -406,6 +407,8 @@ static const GoldfishEventCodeInfo ev_key_codes_table[] = {
     KEY_CODE(KEY_FOCUS, LINUX_KEY_FOCUS),
     KEY_CODE(KEY_PLUS, LINUX_KEY_PLUS),
     KEY_CODE(KEY_NOTIFICATION, LINUX_KEY_NOTIFICATION),
+
+    KEY_CODE(KEY_APPSWITCH, ANDROID_KEY_APPSWITCH),
 
     BTN_CODE(BTN_MISC),
     BTN_CODE(BTN_0),
@@ -1158,6 +1161,8 @@ static void gf_evdev_realize(DeviceState *dev, Error **errp)
     events_set_bit(s, EV_KEY, LINUX_KEY_SOFT2);
     events_set_bit(s, EV_KEY, LINUX_KEY_POWER);
     events_set_bit(s, EV_KEY, LINUX_KEY_SEARCH);
+
+    events_set_bit(s, EV_KEY, ANDROID_KEY_APPSWITCH);
 
     if (s->have_dpad) {
         events_set_bit(s, EV_KEY, LINUX_KEY_DOWN);
