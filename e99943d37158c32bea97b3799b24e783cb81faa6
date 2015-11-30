@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "56278298_8c40ab3b",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 10
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-30T23:00:14Z",
+      "side": 1,
+      "message": "nit: still some tabs here and below :) please address this.",
+      "revId": "e99943d37158c32bea97b3799b24e783cb81faa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "368beea4_0398f258",
+        "filename": "android/crashreport/CrashReporter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-30T23:00:14Z",
+      "side": 1,
+      "message": "Thanks!!",
+      "revId": "e99943d37158c32bea97b3799b24e783cb81faa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56278298_cc4aa359",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-30T23:00:14Z",
+      "side": 1,
+      "message": "nit: Use \u0027static const char kNameKey[]\u0027, it\u0027s better because it avoids exposing the variable to the linker, and avoids creating a global mutable pointer variable and a load-time relocation to make it point to a static array :)",
+      "revId": "e99943d37158c32bea97b3799b24e783cb81faa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "368beea4_237deec4",
+        "filename": "android/crashreport/CrashService.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-30T23:00:14Z",
+      "side": 1,
+      "message": "mmm, this formatting is a little weird. Did you run \u0027git clang-format\u0027 here?",
+      "revId": "e99943d37158c32bea97b3799b24e783cb81faa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
