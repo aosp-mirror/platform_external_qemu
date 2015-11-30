@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9b0923b2_2e31532f",
+        "filename": "android/crashreport/CrashSystem.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-30T23:52:08Z",
+      "side": 1,
+      "message": "fixed.",
+      "parentUuid": "5b032b91_86214ae2",
+      "revId": "8bedaefe9ad9472662814142548d2f608a976468",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bb37c76a_c12162e1",
         "filename": "android/crashreport/main-crash-service.cpp",
         "patchSetId": 24
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-30T23:00:14Z",
       "side": 1,
       "message": "We might consider writing the dump to disk in case of crash, and have the next emulator invokation scan the dump directory for new files to send. This would remove the Qt dependency from the crash service entirely and make things simpler.\n\nWhat do you think?",
+      "revId": "8bedaefe9ad9472662814142548d2f608a976468",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b1763d8_bbe493d0",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-30T23:52:08Z",
+      "side": 1,
+      "message": "This could work. The implementation right now does write the dump to disk, deleting it once upload/no confirm is complete.\n\nOne issue is that the dumps do not hold information regarding the version/build. To keep things consistent, we\u0027d need to either modify the breakpad dumps to store this info or just write an accompanying file to the dump that could be parsed (I was using the ini classes before to do this).\n\nThe check for previous crashes would then be part of the emulator-target binaries in both qemu and qemu-android.",
+      "parentUuid": "bb37c76a_c12162e1",
       "revId": "8bedaefe9ad9472662814142548d2f608a976468",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7bf38fea_159fb41e",
+        "filename": "android/scripts/upload-symbols.sh",
+        "patchSetId": 24
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-30T23:52:08Z",
+      "side": 1,
+      "message": "Let me try changing this to use the common.shi package and switch the arg parsing as well.",
+      "parentUuid": "7b0c6fc0_a76a0af3",
+      "revId": "8bedaefe9ad9472662814142548d2f608a976468",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "db347b68_627c16c8",
         "filename": "android/scripts/upload-symbols.sh",
         "patchSetId": 24
@@ -64,6 +118,24 @@
       "writtenOn": "2015-11-30T23:00:14Z",
       "side": 1,
       "message": "nit: Prefer:\n\n    \"$URL\" ||\n         (echo \"Curl failed for symbol file $1 with return code $?\" \u003e\u00262; exit 1)",
+      "revId": "8bedaefe9ad9472662814142548d2f608a976468",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb1267d6_ef5a1534",
+        "filename": "android/scripts/upload-symbols.sh",
+        "patchSetId": 24
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-30T23:52:08Z",
+      "side": 1,
+      "message": "Fixing.",
+      "parentUuid": "db347b68_627c16c8",
       "revId": "8bedaefe9ad9472662814142548d2f608a976468",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
