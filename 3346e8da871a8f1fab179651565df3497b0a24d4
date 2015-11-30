@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1be45325_cfc521b3",
+        "filename": "android/camera/camera-capture-windows.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-30T21:36:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b0923b2_6bb29d0f",
+      "range": {
+        "startLine": 254,
+        "startChar": 0,
+        "endLine": 254,
+        "endChar": 22
+      },
+      "revId": "3346e8da871a8f1fab179651565df3497b0a24d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5bda4b65_71097271",
         "filename": "android/camera/camera-capture-windows.c",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-30T20:21:04Z",
       "side": 1,
       "message": "I would really prefer to have a union of structs for each specific command here. Set of registers is too error-prone IMHO and it\u0027s hard to actually understand",
+      "range": {
+        "startLine": 780,
+        "startChar": 0,
+        "endLine": 789,
+        "endChar": 19
+      },
+      "revId": "3346e8da871a8f1fab179651565df3497b0a24d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1be45325_4fb25156",
+        "filename": "android/camera/camera-capture-windows.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 789,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-30T21:36:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5bda4b65_71097271",
       "range": {
         "startLine": 780,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "9bf043de_f3256a57",
+        "filename": "android/camera/camera-capture-windows.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 910,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-30T21:36:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "db0f1bb0_2d25d988",
+      "range": {
+        "startLine": 910,
+        "startChar": 1,
+        "endLine": 910,
+        "endChar": 33
+      },
+      "revId": "3346e8da871a8f1fab179651565df3497b0a24d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbde9f59_6bbf41ed",
         "filename": "android/camera/camera-capture-windows.c",
         "patchSetId": 7
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "db0f1bb0_30bbf090",
+        "filename": "android/camera/camera-capture-windows.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 915,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-30T21:36:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fbde9f59_6bbf41ed",
+      "range": {
+        "startLine": 915,
+        "startChar": 0,
+        "endLine": 915,
+        "endChar": 9
+      },
+      "revId": "3346e8da871a8f1fab179651565df3497b0a24d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b0923b2_8bc5d161",
         "filename": "android/camera/camera-capture-windows.c",
         "patchSetId": 7
@@ -105,6 +201,30 @@
       "writtenOn": "2015-11-30T20:21:04Z",
       "side": 1,
       "message": "do we guarantee anything regarding thread safety of the API?\ncurrent implementation may easily loose a command and deadlock if several camera_device_*() functions are called in parallel; this code\n\n  qemu_cond_signal(\u0026cts-\u003ecmd_available);\n  while (cts-\u003erdy \u003d\u003d 0) {\n    qemu_cond_wait(\u0026cts-\u003ecmd_ready, \u0026cts-\u003elock);\n  }\n\n... doesn\u0027t guarantee that the handler thread wakes up first, it\u0027s just the most probable outcome. it\u0027s possible that a separate thread calling camera_device_blah() wakes and captures the cts-\u003elock mutex\n\nThe only guaranteed implementations would be either queue of commands or some wait in the beginning of camera_device_*() until the previous existing command is processed",
+      "range": {
+        "startLine": 940,
+        "startChar": 0,
+        "endLine": 943,
+        "endChar": 3
+      },
+      "revId": "3346e8da871a8f1fab179651565df3497b0a24d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bd59733_b0223694",
+        "filename": "android/camera/camera-capture-windows.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 943,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-11-30T21:36:35Z",
+      "side": 1,
+      "message": "Yes, that\u0027s right. One of the assumptions made while creating this was that there is only one camera_device_* call in flight at a time, and therefore, at any time there are only two threads that potentially lock this mutex. \n\nThis seems to be a reasonable assumption because there is only one camera client, and all camera client commands wait until the underlying camera implementation is done with the latest command.",
+      "parentUuid": "9b0923b2_8bc5d161",
       "range": {
         "startLine": 940,
         "startChar": 0,
