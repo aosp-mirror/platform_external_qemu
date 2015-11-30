@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "fbde9f59_2b0db94b",
+        "filename": "android/hw-sensors.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-30T18:21:07Z",
+      "side": 1,
+      "message": "Can you point me towards that definition? I agree that increasing degrees is more desirable.\n\nThe most important thing is (as much as possible) consistency across our entire codebase AND the skin file format.",
+      "parentUuid": "1bea93c4_c233e636",
+      "range": {
+        "startLine": 66,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 54
+      },
+      "revId": "1d535b3a9fae1e730823a5d644a71e3043d073e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbde9f59_4bdda52d",
         "filename": "android/skin/rect.c",
         "patchSetId": 4
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "My opinion is that having a single direction of rotation is more important than following the mathematical convention. We just need to make it clear that we\u0027re using clockwise rotations *everywhere*. The alternative is to indicate whether a rotation is clockwise or counterclockwise every time we do a rotation.",
       "parentUuid": "fbde9f59_4bdda52d",
+      "range": {
+        "startLine": 28,
+        "startChar": 8,
+        "endLine": 29,
+        "endChar": 20
+      },
+      "revId": "1d535b3a9fae1e730823a5d644a71e3043d073e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db0f1bb0_0a143b28",
+        "filename": "android/skin/rect.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-11-30T18:21:07Z",
+      "side": 1,
+      "message": "Agreed, I would just prefer that the standard be counterclockwise instead of clockwise because math.",
+      "parentUuid": "dbcc7b7f_761d78a1",
       "range": {
         "startLine": 28,
         "startChar": 8,
