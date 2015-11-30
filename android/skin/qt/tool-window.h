@@ -53,7 +53,6 @@ class ToolWindow : public QFrame
 public:
     explicit ToolWindow(EmulatorQtWindow *emulatorWindow, QWidget *parent);
     void hide();
-    void mousePressEvent(QMouseEvent *event);
     void show();
     void dockMainWindow();
     void raiseMainWindow();
@@ -91,6 +90,9 @@ private:
                            const char *iconPath, QString tip,
                            EmulatorQtWindowSlot slot);
     void showOrRaiseExtendedWindow(ExtendedWindowPane pane);
+
+    virtual void closeEvent(QCloseEvent* ce) override;
+    virtual void mousePressEvent(QMouseEvent *event) override;
 
     QWidget *button_area;
     EmulatorQtWindow *emulator_window;
