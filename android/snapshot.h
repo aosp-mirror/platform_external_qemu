@@ -19,9 +19,9 @@
 #include "config/config.h"
 
 /* Prints a table with information on the snapshot stored in the file
- * 'snapstorage', then exit()s.
+ * 'snapstorage'.
  */
-void snapshot_print_and_exit( const char *snapstorage );
+void snapshot_print(const char *snapstorage);
 
 
 extern int android_snapshot_update_time;

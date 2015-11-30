@@ -327,9 +327,7 @@ snapshot_read_qcow_header( int fd, uint32_t *nb_snapshots, uint64_t *snapshots_o
 /* Prints a table with information on the snapshots in the qcow2-formatted file
  * 'snapstorage', then exit()s.
  */
-void
-snapshot_print_and_exit( const char *snapstorage )
-{
+void snapshot_print(const char *snapstorage) {
     /* open snapshot file */
     int fd = open(snapstorage, O_RDONLY);
     if (fd < 0) {
@@ -351,5 +349,4 @@ snapshot_print_and_exit( const char *snapstorage )
     }
 
     close(fd);
-    exit(0);
 }

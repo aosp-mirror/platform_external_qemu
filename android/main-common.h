@@ -29,14 +29,6 @@ ANDROID_BEGIN_HEADER
 // will free() the previous value of |*string| first.
 void reassign_string(char** string, const char* new_value);
 
-/** Emulator user configuration (e.g. last window position)
- **/
-
-void user_config_init( void );
-void user_config_done( void );
-
-void user_config_get_window_pos( int *window_x, int *window_y );
-
 unsigned convertBytesToMB( uint64_t  size );
 uint64_t convertMBToBytes( unsigned  megaBytes );
 
@@ -50,29 +42,12 @@ void write_default_keyset( void );
 extern const char*  skin_network_speed;
 extern const char*  skin_network_delay;
 
-/* Find the skin corresponding to our options, and return an AConfig pointer
- * and the base path to load skin data from
- */
-void parse_skin_files(const char*      skinDirPath,
-                      const char*      skinName,
-                      AndroidOptions*  opts,
-                      AndroidHwConfig* hwConfig,
-                      AConfig*        *skinConfig,
-                      char*           *skinPath);
-
 /* Returns the amount of pixels used by the default display. */
 int64_t  get_screen_pixels(AConfig*  skinConfig);
 
-void init_sdl_ui(AConfig*          skinConfig,
-                 const char*       skinPath,
-                 AndroidOptions*   opts,
-                 const UiEmuAgent* uiEmuAgent);
-
-/* Sanitize options. This deals with a few legacy options that are now
- * handled differently. Call before anything else that needs to read
- * the options list.
- */
-void sanitizeOptions( AndroidOptions* opts );
+int init_sdl_ui(AndroidOptions* opts,
+                AndroidHwConfig* hw,
+                const UiEmuAgent* uiEmuAgent);
 
 /* Creates and initializes AvdInfo instance for the given options.
  * Param:
@@ -84,14 +59,28 @@ void sanitizeOptions( AndroidOptions* opts );
  */
 struct AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild);
 
-/* Handle the command-line options that are common to both the classic and
- * and new emulator code bases. |opts| is the set of options, that may be
- * modified by the function, |hw| is the hardware configuration that will
- * be modified by the function, and |avd| is the AVD information data.
- */
-void handleCommonEmulatorOptions(AndroidOptions* opts,
-                                 AndroidHwConfig* hw,
-                                 AvdInfo* avd);
+// Parse command-line options specified by |*argc| and |*argv| and extract
+// useful information. On success, sets up the content of |opts| and |hwConfig|
+// and creates a new AvdInfo instance whose address is returned in |*avd|,
+// a new AConfig in |*skinConfig| na d a new skin path in |*skinPath|.
+//
+// The return value indicates failure or exit conditions in different
+// ways:
+//
+//     1 -> success, continue to launch the emulator.
+//     2 -> informational QEMU options detected, just pass the new values
+//          of |*argc| and |*argv| to the QEMU main function to let it
+//          display an informative text and exit.
+//     0 -> exit process immediately with status 0 (used to implement -help)
+//    -n -> for |n >= 1|, exit process immediately with status |-n|
+//
+// IMPORTANT: Even in case of failure, the caller is responsible for
+// freeing |*avd| if it is not null.
+int parseEmulatorCommandLineOptions(int* argc,
+                                    char*** argv,
+                                    AndroidOptions* opts,
+                                    AndroidHwConfig* hwConfig,
+                                    AvdInfo** avd);
 
 /* Populate the hwConfig fields corresponding to the kernel/disk images
  * used by the emulator. This will zero *hwConfig first.

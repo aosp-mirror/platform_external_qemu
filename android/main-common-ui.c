@@ -42,18 +42,17 @@
 /***  CONFIGURATION
  ***/
 
+/** Emulator user configuration (e.g. last window position)
+ **/
+
 static AUserConfig*  userConfig;
 
-void
-user_config_init( void )
-{
+static void user_config_init( void ) {
     userConfig = auserConfig_new( android_avdInfo );
 }
 
 /* only call this function on normal exits, so that ^C doesn't save the configuration */
-void
-user_config_done( void )
-{
+static void user_config_done( void ) {
     int  win_x, win_y;
 
     if (!userConfig) {
@@ -66,9 +65,7 @@ user_config_done( void )
     auserConfig_save(userConfig);
 }
 
-void
-user_config_get_window_pos( int *window_x, int *window_y )
-{
+static void user_config_get_window_pos( int *window_x, int *window_y ) {
     *window_x = *window_y = 10;
 
     if (userConfig)
@@ -176,10 +173,6 @@ write_default_keyset( void )
 /*****                                                             *****/
 /***********************************************************************/
 /***********************************************************************/
-
-const char*  skin_network_speed = NULL;
-const char*  skin_network_delay = NULL;
-
 
 static void android_ui_at_exit(void)
 {
@@ -404,14 +397,15 @@ static const struct {
     { NULL, NULL }
 };
 
-void
-parse_skin_files(const char*      skinDirPath,
-                 const char*      skinName,
-                 AndroidOptions*  opts,
-                 AndroidHwConfig* hwConfig,
-                 AConfig*        *skinConfig,
-                 char*           *skinPath)
-{
+/* Find the skin corresponding to our options, and return an AConfig pointer
+ * and the base path to load skin data from
+ */
+static void parse_skin_files(const char*      skinDirPath,
+                             const char*      skinName,
+                             AndroidOptions*  opts,
+                             AndroidHwConfig* hwConfig,
+                             AConfig*        *skinConfig,
+                             char*           *skinPath) {
     char      tmp[1024];
     AConfig*  root;
     const char* path = NULL;
@@ -586,18 +580,38 @@ DEFAULT_SKIN:
 }
 
 
-void
-init_sdl_ui(AConfig*          skinConfig,
-            const char*       skinPath,
-            AndroidOptions*   opts,
-            const UiEmuAgent* uiEmuAgent)
-{
+int init_sdl_ui(AndroidOptions* opts,
+                 AndroidHwConfig* hw,
+                 const UiEmuAgent* uiEmuAgent) {
     int  win_x, win_y;
 
     signal(SIGINT, SIG_DFL);
 #ifndef _WIN32
     signal(SIGQUIT, SIG_DFL);
 #endif
+
+    if (skin_charmap_setup(opts->charmap) < 0) {
+        return -1;
+    }
+
+    user_config_init();
+
+    AConfig* skinConfig = NULL;
+    char* skinPath = NULL;
+    parse_skin_files(opts->skindir, opts->skin, opts, hw,
+                     &skinConfig, &skinPath);
+
+    // The Qt UI handles keyboard shortcuts on its own. Don't load any keyset.
+    SkinKeyset* keyset = skin_keyset_new_from_text("");
+    if (!keyset) {
+        derror("Unable to create empty default keyset!!\n" );
+        aconfig_node_free(skinConfig);
+        return -1;
+    }
+    skin_keyset_set_default(keyset);
+    if (!opts->keyset) {
+        write_default_keyset();
+    }
 
     skin_winsys_start(opts->no_window, opts->raw_keys);
 
@@ -630,9 +644,9 @@ init_sdl_ui(AConfig*          skinConfig,
         if (icon_data) {
             skin_winsys_set_window_icon(icon_data, icon_size);
         } else {
-            fprintf(stderr,
-                    "### Error: could not find emulator icon resource: %s\n",
-                    kIconFile);
+            derror("could not find emulator icon resource: %s\n", kIconFile);
+            aconfig_node_free(skinConfig);
+            return -1;
         }
     }
     atexit(android_ui_at_exit);
@@ -664,4 +678,7 @@ init_sdl_ui(AConfig*          skinConfig,
         emulator_window_get()->onion_alpha    = alpha;
         emulator_window_get()->onion_rotation = rotate;
     }
+
+    aconfig_node_free(skinConfig);
+    return 0;
 }
