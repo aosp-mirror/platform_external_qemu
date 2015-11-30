@@ -34,6 +34,7 @@
 #include "android/crashreport/crash-handler.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/cpu_accelerator.h"
+#include "android/emulation/android_twitter.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulator-window.h"
 
@@ -997,6 +998,16 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type, SkinMouseButtonType 
     skin_event->u.mouse.xrel = pos.x() - mPrevMousePosition.x();
     skin_event->u.mouse.yrel = pos.y() - mPrevMousePosition.y();
     mPrevMousePosition = pos;
+
+#define DEBUG_INPUT_LATENCY
+#ifdef DEBUG_INPUT_LATENCY
+    android_twitter_sms(
+            "Name: %-16s F1: %-16s F2: %-8ld F3: %-8ld", "host-touch-entry",
+            (type == kEventMouseButtonDown
+                     ? "down"
+                     : (type == kEventMouseMotion ? "move" : "up")),
+            (long)skin_event->u.mouse.x, (long)skin_event->u.mouse.y);
+#endif
 
     queueEvent(skin_event);
 }

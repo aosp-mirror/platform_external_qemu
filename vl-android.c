@@ -52,6 +52,7 @@
 #include "android/console.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/bufprint_config_dirs.h"
+#include "android/emulation/android_twitter.h"
 #include "android/filesystems/partition_config.h"
 #include "android/globals.h"
 #include "android/gps.h"
@@ -1951,6 +1952,9 @@ int main(int argc, char **argv, char **envp)
     STRALLOC_DEFINE(kernel_params);
     STRALLOC_DEFINE(kernel_config);
     int    dns_count = 0;
+
+    // A simple device to log guest timestamped messages
+    android_twitter_init();
 
     /* Ensure Looper implementation for this thread is based on the QEMU
      * main loop. */
