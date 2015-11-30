@@ -61,8 +61,7 @@ char* path_get_absolute(const char* path) {
     for (const auto& item : pathItems) {
         currentItems.push_back(item);
     }
-    String result = PathUtils::recompose(currentItems).c_str();
-    return ASTRDUP(result.c_str());
+    return PathUtils::recompose(currentItems).release();
 }
 
 int path_split(const char* path, char** dirname, char** basename) {
@@ -71,10 +70,10 @@ int path_split(const char* path, char** dirname, char** basename) {
         return -1;
     }
     if (dirname) {
-        *dirname = ASTRDUP(dir.c_str());
+        *dirname = dir.release();
     }
     if (basename) {
-        *basename = ASTRDUP(file.c_str());
+        *basename = file.release();
     }
     return 0;
 }
@@ -84,7 +83,7 @@ char* path_dirname(const char* path) {
     if (!PathUtils::split(path, &dir, nullptr)) {
         return nullptr;
     }
-    return ASTRDUP(dir.c_str());
+    return dir.release();
 }
 
 char* path_basename(const char* path) {
@@ -92,5 +91,5 @@ char* path_basename(const char* path) {
     if (!PathUtils::split(path, nullptr, &file)) {
         return nullptr;
     }
-    return ASTRDUP(file.c_str());
+    return file.release();
 }

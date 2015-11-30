@@ -187,6 +187,13 @@ public:
         return contains(str.c_str(), str.size());
     }
 
+    // Release the ownership of the underlying char array of a String
+    // instance and clear it at the same time. The caller is responsible
+    // for calling free() on the returned pointer, and the string instance
+    // will be empty after the call. Useful when one needs to return the
+    // zero-terminated string to C functions.
+    char* release();
+
 protected:
     friend class StringVector;
 

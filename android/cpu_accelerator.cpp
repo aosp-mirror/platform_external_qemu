@@ -20,13 +20,12 @@
 
 #include "android/utils/system.h"
 
-extern "C" AndroidCpuAcceleration androidCpuAcceleration_getStatus(char** status_p) {
+extern "C" AndroidCpuAcceleration androidCpuAcceleration_getStatus(
+        char** status_p) {
     AndroidCpuAcceleration result = android::GetCurrentCpuAcceleratorStatusCode();
 
     if (status_p) {
-        android::base::String status =
-                android::GetCurrentCpuAcceleratorStatus();
-        *status_p = ASTRDUP(status.c_str());
+        *status_p = android::GetCurrentCpuAcceleratorStatus().release();
     }
 
     return result;
