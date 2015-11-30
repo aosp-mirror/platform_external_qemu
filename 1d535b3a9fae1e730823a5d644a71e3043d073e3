@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "5be08be0_d27814d5",
+        "filename": "android/hw-sensors.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-11-30T18:34:02Z",
+      "side": 1,
+      "message": "\u003e Can you point me towards that definition?\n\nI actually couldn\u0027t find a straightforward definition, but I have 2 good reasons to believe it\u0027s true.\n\n1) If you look at the skin config files (e.g., Nexus 5, Nexus 6, etc), the direction labeled  landscape is associated with the image that\u0027s 270 degrees clockwise (i.e., rotation 3).\n\n2) I have a screen rotation app on my Nexus 7 (because auto-rotate is broken, long story), and the orientation labeled \"landscape\" is 270 degrees clockwise, while the orientation labeled \"reverse landscape\" is 90 degrees clockwise. And I believe they\u0027re just using the default definitions here: http://developer.android.com/reference/android/R.attr.html#screenOrientation. Every screen orientation app I tested confirms my hypothesis. We could also just write our own dummy app using that attribute to be 100% confident, but I haven\u0027t bothered yet.",
+      "parentUuid": "fbde9f59_2b0db94b",
+      "range": {
+        "startLine": 66,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 54
+      },
+      "revId": "1d535b3a9fae1e730823a5d644a71e3043d073e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbde9f59_4bdda52d",
         "filename": "android/skin/rect.c",
         "patchSetId": 4
@@ -132,6 +156,30 @@
       "side": 1,
       "message": "Agreed, I would just prefer that the standard be counterclockwise instead of clockwise because math.",
       "parentUuid": "dbcc7b7f_761d78a1",
+      "range": {
+        "startLine": 28,
+        "startChar": 8,
+        "endLine": 29,
+        "endChar": 20
+      },
+      "revId": "1d535b3a9fae1e730823a5d644a71e3043d073e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dbc1db6d_60d86647",
+        "filename": "android/skin/rect.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-11-30T18:34:02Z",
+      "side": 1,
+      "message": "Well we can\u0027t change the skin files.",
+      "parentUuid": "db0f1bb0_0a143b28",
       "range": {
         "startLine": 28,
         "startChar": 8,
