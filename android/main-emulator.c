@@ -31,6 +31,7 @@
 #include "android/opengl/emugl_config.h"
 #include "android/qt/qt_setup.h"
 #include "android/utils/compiler.h"
+#include "android/utils/exec.h"
 #include "android/utils/host_bitness.h"
 #include "android/utils/panic.h"
 #include "android/utils/path.h"
@@ -71,19 +72,6 @@ static char* getTargetEmulatorPath(const char* progDir,
                                    bool* is_64bit);
 
 static void updateLibrarySearchPath(bool is_64bit);
-
-/* The execv() definition in older mingw is slightly bogus.
- * It takes a second argument of type 'const char* const*'
- * while POSIX mandates char** instead.
- *
- * To avoid compiler warnings, define the safe_execv macro
- * to perform an explicit cast with mingw.
- */
-#if defined(_WIN32) && !ANDROID_GCC_PREREQ(4,4)
-#  define safe_execv(_filepath,_argv)  execv((_filepath),(const char* const*)(_argv))
-#else
-#  define safe_execv(_filepath,_argv)  execv((_filepath),(_argv))
-#endif
 
 /* Main routine */
 int main(int argc, char** argv)
