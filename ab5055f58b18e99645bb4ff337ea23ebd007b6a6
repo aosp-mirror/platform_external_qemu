@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "fb25bf43_5309a470",
+        "filename": "android/skin/image.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-11-30T22:47:22Z",
+      "side": 1,
+      "message": "\u003e it seems like it\u0027s a hack someone put here to fix random crashes on exit - \"never delete originals as someone\u0027s still using those\"\n\nShame on that someone for not explaining with comments. :)",
+      "parentUuid": "9bf043de_96b28cbd",
+      "range": {
+        "startLine": 623,
+        "startChar": 17,
+        "endLine": 623,
+        "endChar": 51
+      },
+      "revId": "ab5055f58b18e99645bb4ff337ea23ebd007b6a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dbcc7b7f_16226c80",
         "filename": "android/skin/window.c",
         "patchSetId": 1
