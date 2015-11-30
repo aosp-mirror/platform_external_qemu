@@ -22,6 +22,30 @@
       "revId": "a7524da581651448b02f39a9437a78d6dcfa8ce9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1be45325_0f00c942",
+        "filename": "android/build/definitions.make",
+        "patchSetId": 8
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-11-30T20:03:36Z",
+      "side": 1,
+      "message": "I will rename to copy-symlink",
+      "parentUuid": "7bf38fea_cfcbdd74",
+      "range": {
+        "startLine": 300,
+        "startChar": 9,
+        "endLine": 300,
+        "endChar": 11
+      },
+      "revId": "a7524da581651448b02f39a9437a78d6dcfa8ce9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
