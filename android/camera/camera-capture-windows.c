@@ -859,7 +859,7 @@ typedef struct {
 static camera_thread_state_t* cts = NULL;
 
 // State machine controlling the Windows camera thread.
-static void camera_thread_fn() {
+static void* camera_thread_fn(void* dummy) {
   qemu_mutex_lock(&cts->lock);
 
   // Tell everyone the camera thread
@@ -927,6 +927,8 @@ static void camera_thread_fn() {
   }
 
   qemu_mutex_unlock(&cts->lock);
+
+  return NULL;
 }
 
 int windows_camera_thread_init() {
@@ -958,6 +960,8 @@ int windows_camera_thread_init() {
   }
 
   qemu_mutex_unlock(&cts->lock);
+
+  return 1;
 }
 
 
