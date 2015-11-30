@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5b032b91_86214ae2",
+        "filename": "android/crashreport/CrashSystem.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-30T23:00:14Z",
+      "side": 1,
+      "message": "const std::string\u0026 instead?",
+      "revId": "8bedaefe9ad9472662814142548d2f608a976468",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb37c76a_c12162e1",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-30T23:00:14Z",
+      "side": 1,
+      "message": "We might consider writing the dump to disk in case of crash, and have the next emulator invokation scan the dump directory for new files to send. This would remove the Qt dependency from the crash service entirely and make things simpler.\n\nWhat do you think?",
+      "revId": "8bedaefe9ad9472662814142548d2f608a976468",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b0c6fc0_a76a0af3",
+        "filename": "android/scripts/upload-symbols.sh",
+        "patchSetId": 24
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-30T23:00:14Z",
+      "side": 1,
+      "message": "Please sanitize the environment to avoid locale-based issues and unexpected failures, i.e.:\n\nset +e\nexport LANG\u003dC\nexport LC_ALL\u003dC",
+      "revId": "8bedaefe9ad9472662814142548d2f608a976468",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db347b68_627c16c8",
+        "filename": "android/scripts/upload-symbols.sh",
+        "patchSetId": 24
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-11-30T23:00:14Z",
+      "side": 1,
+      "message": "nit: Prefer:\n\n    \"$URL\" ||\n         (echo \"Curl failed for symbol file $1 with return code $?\" \u003e\u00262; exit 1)",
+      "revId": "8bedaefe9ad9472662814142548d2f608a976468",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
