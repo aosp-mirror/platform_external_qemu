@@ -52,6 +52,7 @@
 #include "android/crashreport/crash-handler.h"
 #include "android/curl-support.h"
 #include "android/emulation/bufprint_config_dirs.h"
+#include "android/emulation/android_twitter.h"
 #include "android/filesystems/partition_config.h"
 #include "android/globals.h"
 #include "android/gps.h"
@@ -1951,6 +1952,7 @@ int main(int argc, char **argv, char **envp)
     if (!crashhandler_init()) {
         VERBOSE_PRINT(init, "Crash handling not initialized\n");
     }
+    android_twitter_init();
 
     // libcurl initialization is thread-unsafe, so let's call it first
     // to make sure no other thread could be doing the same
