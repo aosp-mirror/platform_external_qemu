@@ -9,6 +9,7 @@ include $(LOCAL_PATH)/distrib/libbreakpad_client.mk
 include $(LOCAL_PATH)/distrib/Qt5.mk
 include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
 include $(LOCAL_PATH)/distrib/libpng.mk
+include $(LOCAL_PATH)/distrib/googletest/Android.mk
 
 MINI_GLIB_DIR := distrib/mini-glib
 include $(LOCAL_PATH)/$(MINI_GLIB_DIR)/sources.make
@@ -124,8 +125,6 @@ $(call local-link-static-c++lib)
 
 $(call end-emulator-program)
 endif  # HOST_BITS == EMULATOR_PROGRAM_BITNESS
-
-include $(LOCAL_PATH)/Makefile.tests.mk
 
 ##############################################################################
 ##############################################################################
