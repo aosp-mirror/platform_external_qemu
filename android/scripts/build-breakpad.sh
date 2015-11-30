@@ -165,17 +165,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         dump "$(builder_text) Building breakpad"
 
-        case $SYSTEM in
-            windows*)
-                build_breakpad_package --disable-processor
-                ;;
-            linux*)
-                build_breakpad_package
-                ;;
-            darwin*)
-                build_breakpad_package
-                ;;
-        esac
+        build_breakpad_package
 
         # Copy binaries necessary for the build itself as well as static
         # libraries.
@@ -183,7 +173,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         copy_directory_files \
                 "$(builder_install_prefix)" \
                 "$INSTALL_DIR/$SYSTEM" \
-                lib/libbreakpad_client.a
+                lib/libbreakpad_client.a \
+                lib/libbreakpad.a \
+                lib/libdisasm.a \
 
         copy_directory \
                 "$(builder_install_prefix)/include/breakpad" \
