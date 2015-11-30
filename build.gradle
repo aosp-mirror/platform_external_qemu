@@ -9,11 +9,13 @@ props.load(fprops.newDataInputStream())
 
 task buildDefaultEmulator(type: BuildEmulator) {
     revision = props."Pkg.Revision"
+    build_number = System.getenv("BUILD_NUMBER")
     output = new File(project.buildDir, "default")
 }
 
 task buildWindowsEmulator(type: BuildEmulator) {
     revision = props."Pkg.Revision"
+    build_number = System.getenv("BUILD_NUMBER")
     output = new File(project.buildDir, "windows")
     windows = true
 }
