@@ -1,4 +1,4 @@
-/* Copyright (C) 2010 The Android Open Source Project
+/* Copyright (C) 2010-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -29,7 +29,7 @@ void qemu_control_setEventDevice(void* opaque) {
 static void user_event_keycodes(int* kcodes, int count) {
     int nn;
     for (nn = 0; nn < count; nn++) {
-        kbd_put_keycode(kcodes[nn] & 0x1ff, (kcodes[nn] & 0x200) != 0);
+        kbd_put_keycode(kcodes[nn] & 0x3ff, (kcodes[nn] & 0x400) != 0);
     }
 }
 
@@ -38,13 +38,13 @@ static void user_event_key(unsigned code, bool down) {
         return;
     }
     if (VERBOSE_CHECK(keys))
-        printf(">> KEY [0x%03x,%s]\n", (code & 0x1ff), down ? "down" : " up ");
+        printf(">> KEY [0x%03x,%s]\n", (code & 0x3ff), down ? "down" : " up ");
 
     gf_event_send(0x01, code, down);
 }
 
 static void user_event_keycode(int code) {
-    kbd_put_keycode(code & 0x1ff, (code & 0x200) != 0);
+    kbd_put_keycode(code & 0x3ff, (code & 0x400) != 0);
 }
 
 static void user_event_generic(int type, int code, int value) {
