@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bb1267d6_6c3ab376",
+        "filename": "android/camera/camera-capture-windows.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 911,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-11-30T22:25:49Z",
+      "side": 1,
+      "message": "memset to zero?",
+      "range": {
+        "startLine": 911,
+        "startChar": 2,
+        "endLine": 911,
+        "endChar": 70
+      },
+      "revId": "940501765ff86ef0a6822e372ab47bbf1e061ef2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
