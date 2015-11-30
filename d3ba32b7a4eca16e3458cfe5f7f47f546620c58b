@@ -22,6 +22,30 @@
       "revId": "d3ba32b7a4eca16e3458cfe5f7f47f546620c58b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bdbd73a_438d1a18",
+        "filename": "android/skin/image.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-11-30T18:04:02Z",
+      "side": 1,
+      "message": "Yeah. Probably. But then I have no idea how to free the original 2 images.",
+      "parentUuid": "7bf38fea_8f2155e2",
+      "range": {
+        "startLine": 623,
+        "startChar": 15,
+        "endLine": 623,
+        "endChar": 57
+      },
+      "revId": "d3ba32b7a4eca16e3458cfe5f7f47f546620c58b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
