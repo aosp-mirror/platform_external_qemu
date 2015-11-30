@@ -180,8 +180,10 @@ ANDROID_EMU_SOURCES := \
     android/curl-support.c \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
+    android/emulation/android_pipe_twitter.cpp \
     android/emulation/android_pipe_zero.c \
     android/emulation/android_qemud.cpp \
+    android/emulation/android_twitter.cpp \
     android/emulation/control/LineConsumer.cpp \
     android/emulation/nand_limits.c \
     android/emulation/qemud/android_qemud_client.cpp \

@@ -34,6 +34,8 @@
 #include "EglOsApi.h"
 #include "ClientAPIExts.h"
 
+#include "android_twitter.h"
+
 #include <EGL/egl.h>
 
 #include <stdio.h>
@@ -60,7 +62,7 @@ void initGlobalInfo()
     emugl::Mutex::AutoLock mutex(s_eglLock);
     if (!g_eglInfo) {
         g_eglInfo = EglGlobalInfo::getInstance();
-    } 
+    }
 }
 
 static const EGLiface s_eglIface = {
@@ -77,6 +79,7 @@ static void initGLESx(GLESVersion version) {
         return;
     }
     iface->initGLESx();
+    android_twitter_init();
 }
 
 /*****************************************  supported extentions  ***********************************************************************/
@@ -815,6 +818,9 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSwapBuffers(EGLDisplay display, EGLSurface surf
     }
 
     dpy->nativeType()->swapBuffers(Srfc->native());
+
+    android_twitter_sms("Name: %-16s ", "host-gpu");
+
     return EGL_TRUE;
 }
 
