@@ -31,6 +31,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/android_twitter.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -699,7 +700,6 @@ void EmulatorQtWindow::doResize(const QSize &size)
     }
 }
 
-
 void EmulatorQtWindow::handleMouseEvent(SkinEventType type, QMouseEvent *event)
 {
     SkinEvent *skin_event = createSkinEvent(type);
@@ -708,6 +708,12 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type, QMouseEvent *event)
     skin_event->u.mouse.y = event->y();
     skin_event->u.mouse.xrel = 0;
     skin_event->u.mouse.yrel = 0;
+
+    QString tweet = QString("X: %1 Y: %2 m: %3").arg(
+        QString::number(skin_event->u.mouse.x),
+        QString::number(skin_event->u.mouse.y),
+        __FUNCTION__);
+    android_tweet(0, tweet.toStdString().c_str());
 
     queueEvent(skin_event);
 }
@@ -943,4 +949,3 @@ bool EmulatorQtWindow::mouseInside() {
            widget_cursor_coords.y() >= 0 &&
            widget_cursor_coords.y() < height();
 }
-
