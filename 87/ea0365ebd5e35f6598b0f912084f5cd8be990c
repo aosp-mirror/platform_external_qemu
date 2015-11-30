@@ -1,0 +1,7 @@
+Code-Review+2: Yurii Zubrytskyi <zyy@google.com>
+Verified+1: Chaoren Lin <chaorenl@google.com>
+Submitted-by: Chaoren Lin <chaorenl@google.com>
+Submitted-at: Mon, 30 Nov 2015 16:53:38 +0000
+Reviewed-on: https://android-review.googlesource.com/183573
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
