@@ -30,6 +30,7 @@ ExtendedWindow::ExtendedWindow(
     QFrame(nullptr),
     mEmulatorWindow(eW),
     mToolWindow(tW),
+    mGeoDataLoader(nullptr),
     mBatteryAgent       (agentPtr ? agentPtr->battery   : nullptr),
     mCellularAgent      (agentPtr ? agentPtr->cellular  : nullptr),
     mEmulatorWindowAgent(agentPtr ? agentPtr->window    : nullptr),
@@ -41,7 +42,9 @@ ExtendedWindow::ExtendedWindow(
     mUserEventsAgent    (agentPtr ? agentPtr->userEvents : nullptr),
     mLoc_mSecRemaining(-1),
     mLoc_nowPlaying(false),
+    mLoc_nowLoadingGeoData(false),
     mLoc_rowToSend(-1),
+    mCloseRequested(false),
     mQtUIShortcuts(shortcuts),
     mExtendedUi(new Ui::ExtendedControls)
 {
@@ -113,7 +116,18 @@ ExtendedWindow::~ExtendedWindow()
 
 void ExtendedWindow::closeEvent(QCloseEvent *ce)
 {
-    mToolWindow->extendedIsClosing();
+    if (mLoc_nowLoadingGeoData) {
+        mCloseRequested = true;
+        ce->ignore();
+    } else {
+        if (mGeoDataLoader) {
+            // This might cause lag when closing the extended window
+            // when loading a very large KML/GPX file.
+            mGeoDataLoader->wait();
+        }
+        mToolWindow->extendedIsClosing();
+        ce->accept();
+    }
 }
 
 // Tab buttons. Each raises its stacked pane to the top.

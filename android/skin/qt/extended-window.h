@@ -42,6 +42,7 @@
 
 class EmulatorQtWindow;
 class ToolWindow;
+class GeoDataLoaderThread;
 
 namespace Ui {
     class ExtendedControls;
@@ -66,11 +67,12 @@ public:
 private:
 
     ~ExtendedWindow();
-    void closeEvent(QCloseEvent *ce);
+    void closeEvent(QCloseEvent *ce) override;
 
-    EmulatorQtWindow   *mEmulatorWindow;
-    ToolWindow         *mToolWindow;
-    GpsFixArray         mGpsFixesArray;
+    EmulatorQtWindow    *mEmulatorWindow;
+    ToolWindow          *mToolWindow;
+    GeoDataLoaderThread *mGeoDataLoader;
+    GpsFixArray          mGpsFixesArray;
 
     class BatteryState {
     public:
@@ -142,8 +144,10 @@ private:
 
     int      mLoc_mSecRemaining;
     bool     mLoc_nowPlaying;
+    bool     mLoc_nowLoadingGeoData;
     int      mLoc_rowToSend;
     QTimer   mLoc_timer;
+    bool     mCloseRequested;
     QDoubleValidator mMagFieldValidator;
     QDoubleValidator mAltitudeValidator;
     std::map<ExtendedWindowPane, QPushButton*> mPaneButtonMap;
