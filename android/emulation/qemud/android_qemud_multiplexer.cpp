@@ -26,7 +26,7 @@ void qemud_multiplexer_serial_recv(void* opaque,
                                    uint8_t* msg,
                                    int msglen) {
     QemudMultiplexer* m = (QemudMultiplexer*) opaque;
-    android::base::AutoLock _lock(m->lock);
+    // Note: A lock is not needed here.
     QemudClient* c = m->clients;
 
     /* dispatch to an existing client if possible
