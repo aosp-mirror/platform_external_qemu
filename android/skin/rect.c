@@ -18,15 +18,15 @@ void skin_pos_rotate(SkinPos* dst, const SkinPos* src, SkinRotation rotation) {
     int  x = src->x;
     int  y = src->y;
 
-    switch ( rotation & 3 ) {
+    switch (rotation) {
     case SKIN_ROTATION_0:
         dst->x = x;
         dst->y = y;
         break;
 
     case SKIN_ROTATION_90:
-        dst->x = -y;
-        dst->y =  x;
+        dst->x =  y;
+        dst->y = -x;
         break;
 
     case SKIN_ROTATION_180:
@@ -34,9 +34,9 @@ void skin_pos_rotate(SkinPos* dst, const SkinPos* src, SkinRotation rotation) {
         dst->y = -y;
         break;
 
-    default:
-        dst->x =  y;
-        dst->y = -x;
+    case SKIN_ROTATION_270:
+        dst->x = -y;
+        dst->y =  x;
     }
 }
 

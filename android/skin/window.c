@@ -124,8 +124,8 @@ static int adisplay_init(ADisplay* disp,
             break;
 
         case SKIN_ROTATION_90:
-            disp->origin.x = disp->rect.pos.x;
-            disp->origin.y = disp->rect.pos.y + disp->rect.size.h;
+            disp->origin.x = disp->rect.pos.x + disp->rect.size.w;
+            disp->origin.y = disp->rect.pos.y;
             break;
 
         case SKIN_ROTATION_180:
@@ -133,9 +133,9 @@ static int adisplay_init(ADisplay* disp,
             disp->origin.y = disp->rect.pos.y + disp->rect.size.h;
             break;
 
-        default:
-            disp->origin.x = disp->rect.pos.x + disp->rect.size.w;
-            disp->origin.y = disp->rect.pos.y;
+        case SKIN_ROTATION_270:
+            disp->origin.x = disp->rect.pos.x;
+            disp->origin.y = disp->rect.pos.y + disp->rect.size.h;
             break;
     }
     skin_size_rotate( &disp->datasize, &sdisp->rect.size, sdisp->rotation );
@@ -202,8 +202,8 @@ static void adisplay_set_onion(ADisplay* disp,
             break;
 
         case SKIN_ROTATION_90:
-            orect->pos.x = rect->pos.x;
-            orect->pos.y = rect->pos.y + rect->size.h - onion_h;
+            orect->pos.x = rect->pos.x + rect->size.w - onion_w;
+            orect->pos.y = rect->pos.y;
             break;
 
         case SKIN_ROTATION_180:
@@ -211,9 +211,9 @@ static void adisplay_set_onion(ADisplay* disp,
             orect->pos.y = rect->pos.y + rect->size.h - onion_h;
             break;
 
-        default:
-            orect->pos.x = rect->pos.x + rect->size.w - onion_w;
-            orect->pos.y = rect->pos.y;
+        case SKIN_ROTATION_270:
+            orect->pos.x = rect->pos.x;
+            orect->pos.y = rect->pos.y + rect->size.h - onion_h;
     }
     orect->size.w = onion_w;
     orect->size.h = onion_h;
