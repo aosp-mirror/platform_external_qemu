@@ -137,6 +137,12 @@ void ToolWindow::hide()
     QFrame::hide();
 }
 
+void ToolWindow::closeEvent(QCloseEvent* ce) {
+    // make sure only parent processes the event - otherwise some
+    // siblings won't get it, e.g. main window
+    ce->ignore();
+}
+
 void ToolWindow::mousePressEvent(QMouseEvent *event)
 {
     raiseMainWindow();
