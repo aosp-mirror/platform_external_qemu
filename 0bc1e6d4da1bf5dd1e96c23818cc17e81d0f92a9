@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1bac5306_8c7527da",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureResize.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1078923
+      },
+      "writtenOn": "2015-12-01T19:41:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1be45325_b5c0e251",
+      "range": {
+        "startLine": 153,
+        "startChar": 24,
+        "endLine": 153,
+        "endChar": 28
+      },
+      "revId": "0bc1e6d4da1bf5dd1e96c23818cc17e81d0f92a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bb1267d6_0f41e9e7",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureResize.cpp",
         "patchSetId": 5
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "9bb8433f_5083cce8",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureResize.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1078923
+      },
+      "writtenOn": "2015-12-01T19:41:40Z",
+      "side": 1,
+      "message": "Done. I\u0027ve created a helper function that could be refactored out as a utility.",
+      "parentUuid": "bb1267d6_0f41e9e7",
+      "range": {
+        "startLine": 168,
+        "startChar": 24,
+        "endLine": 168,
+        "endChar": 28
+      },
+      "revId": "0bc1e6d4da1bf5dd1e96c23818cc17e81d0f92a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bbe987fc_f7c0b8a4",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureResize.cpp",
         "patchSetId": 5
@@ -59,6 +107,30 @@
       "writtenOn": "2015-12-01T00:32:53Z",
       "side": 1,
       "message": "use nullptr instead of 0 or NULL for null pointers",
+      "range": {
+        "startLine": 169,
+        "startChar": 62,
+        "endLine": 169,
+        "endChar": 63
+      },
+      "revId": "0bc1e6d4da1bf5dd1e96c23818cc17e81d0f92a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5ba24b12_0e100b67",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureResize.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1078923
+      },
+      "writtenOn": "2015-12-01T19:41:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bbe987fc_f7c0b8a4",
       "range": {
         "startLine": 169,
         "startChar": 62,
@@ -106,6 +178,30 @@
       "side": 1,
       "message": "Yes - use string streams\n\n#include \u003csstream\u003e\n...\nstd::ostringstream factorDefine;\n\nfactorDefine \u003c\u003c \"#define FACTOR \" \u003c\u003c factor \u003c\u003c \"\\n\";\nattachShaders(\u0026mFBWidth, factorDefine().str().c_str(), ...",
       "parentUuid": "9bf043de_d92727f5",
+      "range": {
+        "startLine": 293,
+        "startChar": 9,
+        "endLine": 293,
+        "endChar": 21
+      },
+      "revId": "0bc1e6d4da1bf5dd1e96c23818cc17e81d0f92a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fba69f26_2b37b926",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureResize.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1078923
+      },
+      "writtenOn": "2015-12-01T19:41:40Z",
+      "side": 1,
+      "message": "Done. Thanks.",
+      "parentUuid": "bbe987fc_77872880",
       "range": {
         "startLine": 293,
         "startChar": 9,
