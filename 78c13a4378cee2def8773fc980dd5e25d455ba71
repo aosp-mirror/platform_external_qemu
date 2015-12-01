@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7bf38fea_5531bce6",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1078923
+      },
+      "writtenOn": "2015-12-01T00:13:19Z",
+      "side": 1,
+      "message": "Disregarded as instructed.",
+      "parentUuid": "5b1b2bb8_060d0f4c",
+      "range": {
+        "startLine": 153,
+        "startChar": 4,
+        "endLine": 153,
+        "endChar": 17
+      },
+      "revId": "78c13a4378cee2def8773fc980dd5e25d455ba71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbb05f0b_aafacf9b",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureResize.cpp",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "bb1267d6_ef169528",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureResize.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1078923
+      },
+      "writtenOn": "2015-12-01T00:13:19Z",
+      "side": 1,
+      "message": "I\u0027ve checked and it works fine. Would appreciate someone else testing it as well, though.",
+      "parentUuid": "fbb05f0b_aafacf9b",
+      "range": {
+        "startLine": 28,
+        "startChar": 5,
+        "endLine": 28,
+        "endChar": 14
+      },
+      "revId": "78c13a4378cee2def8773fc980dd5e25d455ba71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bbc4277e_0271b0ec",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureResize.cpp",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2015-11-24T19:04:59Z",
       "side": 1,
       "message": "We have similar code for compiling the shaders both here and in TextureDraw. It would be very nice to have some sort of common procedure that compiles and links shader code and returns the error messages, and share that procedure between TextureResizer and TextureDraw",
+      "range": {
+        "startLine": 136,
+        "startChar": 3,
+        "endLine": 136,
+        "endChar": 10
+      },
+      "revId": "78c13a4378cee2def8773fc980dd5e25d455ba71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbe987fc_b75eb0f4",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureResize.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1078923
+      },
+      "writtenOn": "2015-12-01T00:13:19Z",
+      "side": 1,
+      "message": "True. I would rather keep a refactoring CL separate though.",
+      "parentUuid": "bbc4277e_0271b0ec",
       "range": {
         "startLine": 136,
         "startChar": 3,
