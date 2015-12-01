@@ -21,6 +21,7 @@
 #include "GLESv2Dispatch.h"
 #include "RenderThreadInfo.h"
 #include "TextureDraw.h"
+#include "TextureResize.h"
 
 #include <stdio.h>
 
@@ -189,6 +190,9 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                 (EGLClientBuffer)SafePointerFromUInt(cb->m_blitTex),
                 NULL);
     }
+
+    cb->m_resizer = new TextureResize(p_width, p_height);
+
     return cb;
 }
 
@@ -218,6 +222,8 @@ ColorBuffer::~ColorBuffer() {
 
     GLuint tex[2] = {m_tex, m_blitTex};
     s_gles2.glDeleteTextures(2, tex);
+
+    delete m_resizer;
 }
 
 void ColorBuffer::readPixels(int x,
@@ -350,7 +356,7 @@ bool ColorBuffer::bindToRenderbuffer() {
 
 bool ColorBuffer::post(float rotation, float dx, float dy) {
     // NOTE: Do not call m_helper->setupContext() here!
-    return m_helper->getTextureDraw()->draw(m_tex, rotation, dx, dy);
+    return m_helper->getTextureDraw()->draw(m_resizer->update(m_tex), rotation, dx, dy);
 }
 
 void ColorBuffer::readback(unsigned char* img) {
