@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9bf043de_f9ed4b76",
+        "filename": "android/emulation/qemud/android_qemud_multiplexer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-01T00:59:56Z",
+      "side": 1,
+      "message": "spaces",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 4
+      },
+      "revId": "ea4698aae472b1ee5979bfe7d2715e09be69c07a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
