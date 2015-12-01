@@ -25,9 +25,11 @@
 #include <QProcess>
 #include <QResizeEvent>
 #include <QRubberBand>
-#include <QSettings>
 #include <QScrollArea>
 #include <QScrollBar>
+#include <QSettings>
+#include <QStyle>
+#include <QStyleFactory>
 #include <QTimer>
 #include <QVariantAnimation>
 #include <QWidget>
@@ -222,14 +224,26 @@ private:
             // The following hints prevent the minimize/maximize/close buttons from appearing.
             setWindowFlags(Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::Window);
 
+#ifdef __APPLE__
             // Digging into the Qt source code reveals that if the above flags are set on OSX, the
             // created window will be given a style mask that removes the resize handles from the
             // window. The hint below is the specific customization flag that ensures the window
             // will have resize handles. So, we add the button for now, then immediately disable
             // it when the window is first shown.
-#ifdef __APPLE__
             setWindowFlags(this->windowFlags() | Qt::WindowMaximizeButtonHint);
-#endif
+
+            // On OS X the native scrollbars disappear when not in use which
+            // makes the zoomed-in emulator window look unscrollable. Also, due
+            // to the semi-transparent nature of the scrollbar, it will
+            // interfere with the main GL window, causing all kinds of ugly
+            // effects.
+            QStyle *style = QStyleFactory::create("Fusion");
+            if (style) {
+                this->verticalScrollBar()->setStyle(style);
+                this->horizontalScrollBar()->setStyle(style);
+                QObject::connect(this, &QObject::destroyed, [style]{ delete style; });
+            }
+#endif  // __APPLE__
         }
 
         ~EmulatorWindowContainer() {
