@@ -14,6 +14,8 @@
  * GNU General Public License for more details.
  */
 
+#include "android/globals.h"  /* for android_hw */
+
 #include "hw/sysbus.h"
 #include "ui/input.h"
 #include "ui/console.h"
@@ -914,21 +916,19 @@ static const int dpad_map[Q_KEY_CODE_MAX] = {
 static void gf_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
                                      InputEvent *evt)
 {
-    /* Handle a key event. Minimal implementation which just handles
-     * the required hardware buttons and the dpad.
-     * This should be extended to also honour have_keyboard, and
-     * possibly also the control keys which affect the emulator itself.
-     */
 
     GoldfishEvDevState *s = GOLDFISHEVDEV(dev);
-    int qcode;
     int lkey = 0;
     int mod;
 
     assert(evt->kind == INPUT_EVENT_KIND_KEY);
 
-    qcode = qemu_input_key_value_to_qcode(evt->key->key);
+    KeyValue* kv = evt->key->key;
 
+    int qcode = kv->qcode;
+    
+    enqueue_event(s, EV_KEY, qcode, evt->key->down);
+    
     /* Keep our modifier state up to date */
     switch (qcode) {
     case Q_KEY_CODE_SHIFT:
@@ -1184,7 +1184,7 @@ static void gf_evdev_realize(DeviceState *dev, Error **errp)
         events_set_bit(s, EV_KEY, LINUX_KEY_CAMERA);
     }
 
-    if (s->have_keyboard) {
+    if (android_hw->hw_keyboard) {
         /* since we want to implement Unicode reverse-mapping
          * allow any kind of key, even those not available on
          * the skin.
