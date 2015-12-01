@@ -146,6 +146,10 @@ sdk {
             into 'lib'
             builtBy buildWindowsEmulator
         }
+        item("$buildWindowsEmulator.output/lib64") {
+            into 'lib64'
+            builtBy buildWindowsEmulator
+        }
         item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/bios.bin") {
             into 'lib/pc-bios'
         }
