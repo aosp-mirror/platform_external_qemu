@@ -1613,6 +1613,7 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
 
     // Reset viewport parameters
     window->zoom = 1.0;
+    window->scroll_h = 0;
     window->framebuffer.w = 0;
     window->framebuffer.h = 0;
 
