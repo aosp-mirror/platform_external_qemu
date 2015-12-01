@@ -19,6 +19,7 @@
 #include "android/base/StringFormat.h"
 
 #include "android/help.h"
+#include "android/utils/exec.h"
 #include "android/utils/stralloc.h"
 #include "android/version.h"
 
@@ -65,19 +66,6 @@ static const char kQemuArch[] =
     #error "No target architecture macro. Bad makefile?"
 #endif
         ;
-
-/* The execv() definition in older mingw is slightly bogus.
- * It takes a second argument of type 'const char* const*'
- * while POSIX mandates char** instead.
- *
- * To avoid compiler warnings, define the safe_execv macro
- * to perform an explicit cast with mingw.
- */
-#if defined(_WIN32) && !ANDROID_GCC_PREREQ(4,4)
-#  define safe_execv(_filepath,_argv)  execv((_filepath),(const char* const*)(_argv))
-#else
-#  define safe_execv(_filepath,_argv)  execv((_filepath),(_argv))
-#endif
 
 static void emulator_help() {
     STRALLOC_DEFINE(out);

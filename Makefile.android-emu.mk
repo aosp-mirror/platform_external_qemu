@@ -90,6 +90,7 @@ ANDROID_EMU_BASE_SOURCES := \
     android/utils/dll.c \
     android/utils/dirscanner.cpp \
     android/utils/eintr_wrapper.c \
+    android/utils/exec.cpp \
     android/utils/filelock.c \
     android/utils/file_data.c \
     android/utils/format.cpp \
