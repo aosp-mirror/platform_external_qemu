@@ -205,6 +205,10 @@ skin_image_desc_equal(const SkinImageDesc* a,
 /********************************************************************************/
 /********************************************************************************/
 
+enum {
+    SKIN_IMAGE_CLONE = (1 << 0)   /* this image is a clone */
+};
+
 struct SkinImage {
     unsigned         hash;
     SkinImage*       link;
@@ -212,6 +216,7 @@ struct SkinImage {
     SkinImage*       next;
     SkinImage*       prev;
     SkinSurface*     surface;
+    unsigned         flags;
     unsigned         w, h;
     void*            pixels;  /* 32-bit ARGB */
     SkinImageDesc    desc;
@@ -226,6 +231,7 @@ static const SkinImage _no_image[1] = {
         .next = NULL,
         .prev = NULL,
         .surface = NULL,
+        .flags = 0,
         .w = 0,
         .h = 0,
         .pixels = NULL,
@@ -614,7 +620,9 @@ skin_image_unref( SkinImage**  pimage )
 
     if (image) {
         if (image != _no_image && --image->ref_count == 0) {
-            skin_image_free(image);
+            if ((image->flags & SKIN_IMAGE_CLONE) != 0) {
+                skin_image_free(image);
+            }
         }
         *pimage = NULL;
     }
@@ -652,6 +660,7 @@ skin_image_clone( SkinImage*  source )
 
     image->desc  = source->desc;
     image->hash  = source->hash;
+    image->flags = SKIN_IMAGE_CLONE;
     image->w     = source->w;
     image->h     = source->h;
     image->pixels = rotate_image( source->pixels, source->w, source->h,
@@ -695,6 +704,8 @@ skin_image_clone_full( SkinImage*    source,
     desc.blend    = blend;
 
     clone = skin_image_create( &desc, 0 );
+    if (clone != SKIN_IMAGE_NONE)
+        clone->flags |= SKIN_IMAGE_CLONE;
 
     return clone;
 }

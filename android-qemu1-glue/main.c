@@ -1009,10 +1009,10 @@ int main(int argc, char **argv) {
     sigset_t set;
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, NULL);
-#endif  // __linux__
+#endif
     init_sdl_ui(skinConfig, skinPath, opts, &uiEmuAgent);
     skin_winsys_spawn_thread(enter_qemu_main_loop, n, args);
     skin_winsys_enter_main_loop(argc, argv);
-    aconfig_node_free(skinConfig);
+
     return 0;
 }
