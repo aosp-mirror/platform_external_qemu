@@ -35,6 +35,7 @@ host_common_SRC_FILES := \
     render_api.cpp \
     RenderWindow.cpp \
     TextureDraw.cpp \
+    TextureResize.cpp \
     WindowSurface.cpp \
 
 host_common_CFLAGS :=
