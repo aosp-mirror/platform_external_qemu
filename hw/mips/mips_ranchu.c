@@ -78,39 +78,40 @@ typedef struct DevMapEntry {
     const char* qemu_name;
     const char* dt_name;
     const char* dt_compatible;
+    int dt_num_compatible;
 } DevMapEntry;
 
 static DevMapEntry devmap[] = {
     [RANCHU_GOLDFISH_PIC] =       { GOLDFISH_IO_SPACE, 0x1000, 0,
-        NULL, "goldfish_pic", "generic,goldfish-pic" },
+        NULL, "goldfish_pic", "generic,goldfish-pic", 1 },
     /* ttyGF0 base address remains hardcoded in the kernel.
      * Early printing (prom_putchar()) relies on finding device
      * mapped on this address. DT can not be used at that early stage
      * for acquiring the base address of the device in the kernel.
      */
     [RANCHU_GOLDFISH_TTY] =       { GOLDFISH_IO_SPACE + 0x02000, 0x1000, 2,
-        "goldfish_tty", "goldfish_tty", "generic,goldfish-tty" },
+        "goldfish_tty", "goldfish_tty", "generic,goldfish-tty", 1 },
     /* repeats for a total of MAX_GF_TTYS */
     [RANCHU_GOLDFISH_TIMER] =     { GOLDFISH_IO_SPACE + 0x05000, 0x1000, 5,
-        "goldfish_timer", "goldfish_timer", "generic,goldfish-timer" },
+        "goldfish_timer", "goldfish_timer", "generic,goldfish-timer", 1 },
     [RANCHU_GOLDFISH_RTC] =       { GOLDFISH_IO_SPACE + 0x06000, 0x1000, 6,
-        "goldfish_rtc", "goldfish_rtc", "generic,goldfish-rtc" },
+        "goldfish_rtc", "goldfish_rtc", "generic,goldfish-rtc", 1 },
     [RANCHU_GOLDFISH_BATTERY] =   { GOLDFISH_IO_SPACE + 0x07000, 0x1000, 7,
-        "goldfish_battery", "goldfish_battery", "generic,goldfish-battery" },
+        "goldfish_battery", "goldfish_battery", "generic,goldfish-battery", 1 },
     [RANCHU_GOLDFISH_FB] =        { GOLDFISH_IO_SPACE + 0x08000, 0x0100, 8,
-        "goldfish_fb", "goldfish_fb", "generic,goldfish-fb" },
+        "goldfish_fb", "goldfish_fb", "generic,goldfish-fb", 1 },
     [RANCHU_GOLDFISH_EVDEV] =     { GOLDFISH_IO_SPACE + 0x09000, 0x1000, 9,
         "goldfish-events", "goldfish_events", "generic,goldfish-events-keypad" },
     [RANCHU_GOLDFISH_PIPE] = { GOLDFISH_IO_SPACE + 0x0A000, 0x2000, 10,
-        "goldfish_pipe", "goldfish_pipe", "generic,android-pipe" },
+        "goldfish_pipe", "android_pipe", "google,android-pipe\0generic,android-pipe", 2 },
     [RANCHU_GOLDFISH_AUDIO] =     { GOLDFISH_IO_SPACE + 0x0C000, 0x0100, 11,
         "goldfish_audio", "goldfish_audio", "generic,goldfish-audio" },
     [RANCHU_GOLDFISH_SYNC] =     { GOLDFISH_IO_SPACE + 0x0D000, 0x0100, 11,
         "goldfish_sync", "goldfish_sync", "generic,goldfish-audio" },
     [RANCHU_GOLDFISH_RESET] =     { GOLDFISH_IO_SPACE + 0x0D000, 0x0100, 12,
-        "goldfish_reset", "goldfish_reset", "generic,goldfish-reset" },
+        "goldfish_reset", "goldfish_reset", "generic,goldfish-reset", 1 },
     [RANCHU_MMIO] =         { GOLDFISH_IO_SPACE + 0x10000, 0x0200, 16,
-        "virtio-mmio", "virtio_mmio", "virtio,mmio" },
+        "virtio-mmio", "virtio_mmio", "virtio,mmio", 1 },
     /* ...repeating for a total of VIRTIO_TRANSPORTS, each of that size */
 };
 
@@ -333,16 +334,18 @@ static const MemoryRegionOps goldfish_reset_io_ops = {
 static void create_device(void* fdt, DevMapEntry* dev, qemu_irq* pic,
                           int num_devices, int is_virtio)
 {
-    int i;
+    int i, j, dt_compat_sz = 0;
 
     for (i = 0; i < num_devices; i++) {
         hwaddr base = dev->base + i * dev->size;
 
         char* nodename = g_strdup_printf("/%s@%" PRIx64, dev->dt_name, base);
         qemu_fdt_add_subnode(fdt, nodename);
+        for (j = 0; j < dev->dt_num_compatible; j++) {
+            dt_compat_sz += strlen(dev->dt_compatible + dt_compat_sz) + 1;
+        }
         qemu_fdt_setprop(fdt, nodename, "compatible",
-                         dev->dt_compatible,
-                         strlen(dev->dt_compatible) + 1);
+                         dev->dt_compatible, dt_compat_sz);
         qemu_fdt_setprop_sized_cells(fdt, nodename, "reg", 1, base, 2, dev->size);
 
         if (pic == NULL) {
