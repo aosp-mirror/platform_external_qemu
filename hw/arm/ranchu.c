@@ -497,7 +497,8 @@ static void ranchu_init(MachineState *machine)
     create_simple_device(vbi, pic, RANCHU_GF_EVDEV, "goldfish-events",
                          "generic,goldfish-events-keypad", 1, 0, 0);
     create_simple_device(vbi, pic, RANCHU_ANDROID_PIPE, "android_pipe",
-                         "generic,android-pipe", 1, 0, 0);
+                         "google,android-pipe\0generic,android-pipe",
+                         2, 0, 0);
 
     /* Create mmio transports, so the user can create virtio backends
      * (which will be automatically plugged in to the transports). If
