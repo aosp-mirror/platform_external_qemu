@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "3bd59733_76dba645",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-01T01:42:10Z",
+      "side": 1,
+      "message": "I had planned for the crash to be uploaded immediately as it would also allow for the possibility of a user feedback box in the gui.\n\nBy moving it to a \"detect if last crash\" mode, it would also have to deal with batch crash confirmation and uploads. I\u0027m also not clear how well this would work for multiple instances of the emulator crashing and restarting simultaneously.\n\nI can get around this by execv\u0027ing the crash-service into an emulator instance with -process-crash\u003d\u003cdumpfile\u003e and move the gui and upload into emulator-target.",
+      "parentUuid": "9b1763d8_bbe493d0",
+      "revId": "8bedaefe9ad9472662814142548d2f608a976468",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7b0c6fc0_a76a0af3",
         "filename": "android/scripts/upload-symbols.sh",
         "patchSetId": 24
