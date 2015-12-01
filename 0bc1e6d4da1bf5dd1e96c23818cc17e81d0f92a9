@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9bf043de_d92727f5",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/TextureResize.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1078923
+      },
+      "writtenOn": "2015-12-01T00:13:19Z",
+      "side": 1,
+      "message": "Is there a better way to do this?",
+      "range": {
+        "startLine": 293,
+        "startChar": 9,
+        "endLine": 293,
+        "endChar": 21
+      },
+      "revId": "0bc1e6d4da1bf5dd1e96c23818cc17e81d0f92a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
