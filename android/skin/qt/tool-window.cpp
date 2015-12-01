@@ -481,14 +481,9 @@ void ToolWindow::on_recents_button_released()
     handleUICommand(QtUICommand::RECENTS, false);
 }
 
-void ToolWindow::on_rotate_CW_button_clicked()
+void ToolWindow::on_rotate_button_clicked()
 {
     handleUICommand(QtUICommand::ROTATE_RIGHT, true);
-    raiseMainWindow();
-}
-void ToolWindow::on_rotate_CCW_button_clicked()
-{
-    handleUICommand(QtUICommand::ROTATE_LEFT, true);
     raiseMainWindow();
 }
 void ToolWindow::on_scrShot_button_clicked()
