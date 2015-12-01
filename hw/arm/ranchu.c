@@ -528,7 +528,8 @@ static void ranchu_init(MachineState *machine)
     create_simple_device(vbi, pic, RANCHU_GOLDFISH_EVDEV, "goldfish-events",
                          "generic,goldfish-events-keypad", 1, 0, 0);
     create_simple_device(vbi, pic, RANCHU_GOLDFISH_PIPE, "goldfish_pipe",
-                         "generic,android-pipe", 1, 0, 0);
+                         "google,android-pipe\0generic,android-pipe",
+                         2, 0, 0);
     create_simple_device(vbi, pic, RANCHU_GOLDFISH_SYNC, "goldfish-sync",
                          "generic,goldfish-sync", 1, 0, 0);
 
