@@ -342,19 +342,6 @@ of them:
     the set of options supported by the 'emulator' program and the classic
     emulators.
 
-  - CPU-specific intermediate "ranchu" launchers, which translate the
-    command-line options supported by the Android emulator, into something
-    compatible with the QEMU options expected by the QEMU-based emulation
-    engines. For example, on Linux:
-
-        $EXEC_DIR/emulator64-ranchu-arm64
-
-    Is a 64-bit host program that will launch:
-
-        $EXEC_DIR/qemu/linux-x86_64/qemu-system-aarch64
-
-    with the right set of options.
-
   - GPU Emulation libraries, which implement guest EGL/GLES to desktop GL
     translation. This is the default GPU emulation mode also known as 'host'
     mode. The files are:
