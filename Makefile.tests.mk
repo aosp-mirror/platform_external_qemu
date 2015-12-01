@@ -33,6 +33,7 @@ EMULATOR_UNITTESTS_SOURCES := \
   android/base/synchronization/Lock_unittest.cpp \
   android/base/synchronization/MessageChannel_unittest.cpp \
   android/base/system/System_unittest.cpp \
+  android/base/threads/FunctorThread_unittest.cpp \
   android/base/threads/Thread_unittest.cpp \
   android/base/threads/ThreadStore_unittest.cpp \
   android/base/Uri_unittest.cpp \
