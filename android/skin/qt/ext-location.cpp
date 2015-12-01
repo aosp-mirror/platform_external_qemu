@@ -45,11 +45,11 @@ void ExtendedWindow::initLocation()
             settings.value(Ui::Settings::LOCATION_PLAYBACK_SPEED, 0).toInt());
     QString location_data_file =
         settings.value(Ui::Settings::LOCATION_PLAYBACK_FILE, "").toString();
-    auto geo_data_loader = GeoDataLoaderThread::newInstance(
+    mGeoDataLoader = GeoDataLoaderThread::newInstance(
             this,
             SLOT(loc_geoDataLoadingStarted()),
             SLOT(loc_startupGeoDataLoadingFinished(QString, bool, QString)));
-    geo_data_loader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
+    mGeoDataLoader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
 }
 
 void ExtendedWindow::loc_geoDataLoadingStarted() {
@@ -62,20 +62,37 @@ void ExtendedWindow::loc_geoDataLoadingStarted() {
 }
 
 void ExtendedWindow::loc_startupGeoDataLoadingFinished(QString, bool ok, QString) {
+    mGeoDataLoader = nullptr;
     // on startup, we silently ignore the previously remebered geo data file being
     // missing or malformed.
     if (ok) {
         loc_populateTable(&mGpsFixesArray);
+
+        // loc_populateTable can take a while if the amount of data is large,
+        // but it still processes UI events.
+        // If the user requests the window to be closed while that function is
+        // running, mCloseRequested will be set to true and the function will exit.
+        if (mCloseRequested) {
+            close();
+            return;
+        }
     }
     setButtonEnabled(mExtendedUi->loc_GpxKmlButton, mSettingsState.mTheme, true);
     setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, true);
 }
 
 void ExtendedWindow::loc_geoDataLoadingFinished(QString file_name, bool ok, QString error) {
+    mGeoDataLoader = nullptr;
     if (ok) {
         QSettings settings;
         settings.setValue(Ui::Settings::LOCATION_PLAYBACK_FILE, file_name);
         loc_populateTable(&mGpsFixesArray);
+
+        // See comment near the previous call to loc_populateTable.
+        if (mCloseRequested) {
+            close();
+            return;
+        }
     } else {
         mToolWindow->showErrorDialog(
                 error,
@@ -278,10 +295,10 @@ void ExtendedWindow::on_loc_GpxKmlButton_clicked()
     // Asynchronously parse the file with geo data.
     // If the file is big enough, parsing it synchronously will cause a noticeable
     // hiccup in the UI.
-    auto loader_thread = GeoDataLoaderThread::newInstance(this,
+    mGeoDataLoader = GeoDataLoaderThread::newInstance(this,
                                                           SLOT(loc_geoDataLoadingStarted()),
                                                           SLOT(loc_geoDataLoadingFinished(QString, bool, QString)));
-    loader_thread->loadGeoDataFromFile(fileName, &mGpsFixesArray);
+    mGeoDataLoader->loadGeoDataFromFile(fileName, &mGpsFixesArray);
 }
 
 void ExtendedWindow::loc_populateTable(GpsFixArray *fixes)
@@ -294,7 +311,8 @@ void ExtendedWindow::loc_populateTable(GpsFixArray *fixes)
     time_t previousTime = fixes->at(0).time;
     mExtendedUi->loc_pathTable->setRowCount(fixes->size());
     mExtendedUi->loc_pathTable->blockSignals(true);
-    for (unsigned i = 0; i < fixes->size(); i++) {
+    mLoc_nowLoadingGeoData = true;
+    for (unsigned i = 0; !mCloseRequested && i < fixes->size(); i++) {
         GpsFix &fix = fixes->at(i);
         time_t delay = fix.time - previousTime; // In seconds
 
@@ -319,6 +337,7 @@ void ExtendedWindow::loc_populateTable(GpsFixArray *fixes)
         }
         previousTime = fix.time;
     }
+    mLoc_nowLoadingGeoData = false;
     mExtendedUi->loc_pathTable->blockSignals(false);
     setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, true);
 }
