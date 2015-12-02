@@ -44,11 +44,13 @@
  */
 
 #include "android/camera/camera-capture.h"
+
+#include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/MessageChannel.h"
+#include "android/base/threads/Thread.h"
 #include "android/camera/camera-format-converters.h"
 
-extern "C" {
-#include "qemu/thread.h"
-}  // extern "C"
+using Thread = android::base::Thread;
 
 #include <stdio.h>
 #include <vfw.h>
@@ -778,7 +780,7 @@ static const CameraFrameDim _emulate_dims[] =
     return found;
 }
 
-
+// Camera thread state
 
 typedef enum {
   CAMERA_CMD_NOP,
@@ -790,347 +792,218 @@ typedef enum {
   CAMERA_CMD_ENUMERATE_DEVICES
 } camera_cmd_t;
 
-// Camera thread state
+// Structure used to model a command sent from the main thread to
+// the camera thread. The process() method handles the command and
+// returns a result as an intptr_t, since the result of CAMERA_CMD_OPEN
+// is a pointer to a CameraDevice* instance.
+struct CameraCommand {
+    camera_cmd_t cmd;
+    union {
+        // CAMERA_CMD_OPEN
+        // NOTE: The result is a CameraDevice* cast as an intptr_t
+        struct {
+            const char* name;
+            int channel;
+        } open;
 
-// Structs holding arguments for each command
+        // CAMERA_CMD_START_CAPTURING
+        struct {
+            CameraDevice* device;
+            uint32_t pixel_format;
+            int frame_width;
+            int frame_height;
+        } start;
 
-typedef struct {
-  CameraDevice* device;
-  const char* name;
-  int channel;
-} open_cmd_args_t;
+        // CAMERA_CMD_STOP_CAPTURING
+        struct {
+            CameraDevice* device;
+        } stop;
 
-typedef struct {
-  CameraDevice* device;
-  uint32_t pixel_format;
-  int frame_width; int frame_height;
-  int ret;
-} start_cmd_args_t;
+        // CAMERA_CMD_READ_FRAME
+        struct {
+            CameraDevice* device;
+            ClientFrameBuffer* framebuffers;
+            int fbs_num;
+            float r_scale;
+            float g_scale;
+            float b_scale;
+            float exp_comp;
+        } read_frame;
 
-typedef struct {
-  CameraDevice* device;
-  int ret;
-} stop_cmd_args_t;
+        // CAMERA_CMD_CLOSE
+        struct {
+            CameraDevice* device;
+        } close;
 
-typedef struct {
-  CameraDevice* device;
-  ClientFrameBuffer* framebuffers;
-  int fbs_num;
-  float r_scale; float g_scale; float b_scale;
-  float exp_comp;
-  int ret;
-} read_frame_cmd_args_t;
+        // CAMERA_CMD_ENUMERATE_DEVICES
+        struct {
+            CameraInfo* info;
+            int max;
+        } enumerate;
+    };
 
-typedef struct {
-  CameraDevice* device;
-} close_cmd_args_t;
+    // Process a command (i.e. execute it). Must be called in the camera
+    // thread context.
+    intptr_t process() const {
+        const CameraCommand& cmd = *this;
+        intptr_t result = 0;
 
-typedef struct {
-  CameraInfo* info;
-  int max;
-  int ret;
-} enumerate_cmd_args_t;
+        // Execute the command
+        switch (cmd.cmd) {
+            case CAMERA_CMD_NOP:
+                break;
 
-typedef union {
-  open_cmd_args_t open_cmd_args;
-  start_cmd_args_t start_cmd_args;
-  stop_cmd_args_t stop_cmd_args;
-  read_frame_cmd_args_t read_frame_cmd_args;
-  close_cmd_args_t close_cmd_args;
-  enumerate_cmd_args_t enumerate_cmd_args;
-} camera_cmd_args_t;
+            case CAMERA_CMD_OPEN:
+                result = reinterpret_cast<intptr_t>(cmd_camera_device_open(
+                        cmd.open.name, cmd.open.channel));
+                break;
 
-typedef struct {
-  // Currently executing command
-  camera_cmd_t cmd;
-  // Arguments to command
-  camera_cmd_args_t args;
+            case CAMERA_CMD_START_CAPTURING:
+                result = cmd_camera_device_start_capturing(
+                        cmd.start.device, cmd.start.pixel_format,
+                        cmd.start.frame_width, cmd.start.frame_height);
+                break;
 
-  BOOL exists;
-  BOOL avail;
-  BOOL rdy;
+            case CAMERA_CMD_STOP_CAPTURING:
+                result = cmd_camera_device_stop_capturing(cmd.stop.device);
+                break;
 
-  QemuMutex lock;
-  QemuCond cts_exists;
-  QemuCond cmd_available;
-  QemuCond cmd_ready;
-  QemuThread thread;
+            case CAMERA_CMD_READ_FRAME:
+                result = cmd_camera_device_read_frame(
+                        cmd.read_frame.device, cmd.read_frame.framebuffers,
+                        cmd.read_frame.fbs_num, cmd.read_frame.r_scale,
+                        cmd.read_frame.g_scale, cmd.read_frame.b_scale,
+                        cmd.read_frame.exp_comp);
+                break;
 
-} camera_thread_state_t;
+            case CAMERA_CMD_CLOSE:
+                cmd_camera_device_close(cmd.close.device);
+                break;
 
-static camera_thread_state_t* cts = NULL;
+            case CAMERA_CMD_ENUMERATE_DEVICES:
+                result = cmd_enumerate_camera_devices(cmd.enumerate.info,
+                                                      cmd.enumerate.max);
+                break;
+        }
+        return result;
+    }
+};
 
-// State machine controlling the Windows camera thread.
-static void* camera_thread_fn(void* dummy) {
-  qemu_mutex_lock(&cts->lock);
-
-  // Tell everyone the camera thread
-  // has the lock.
-  // Coordination with other threads can then proceed.
-  if(cts->exists == 0) {
-    cts->exists = 1;
-    qemu_cond_signal(&cts->cts_exists);
-  }
-
-  while(1) {
-
-    // Wait until another thread sets cts's registers
-    // and sets cts->avail to 1 (command is available for execution)
-    while(cts->avail == 0) {
-      qemu_cond_wait(&cts->cmd_available, &cts->lock);
+// The camera thead instance.
+class CameraThread : public android::base::Thread {
+public:
+    // Constructor, called from the main thread.
+    CameraThread() : mInput(), mOutput() {
+        this->start();
     }
 
-    // Execute the command
-    switch(cts->cmd) {
-      case CAMERA_CMD_NOP:
-        break;
-      case CAMERA_CMD_OPEN:
-        cts->args.open_cmd_args.device =
-            cmd_camera_device_open(cts->args.open_cmd_args.name,
-                                   cts->args.open_cmd_args.channel);
-        break;
-      case CAMERA_CMD_START_CAPTURING:
-        cts->args.start_cmd_args.ret =
-            cmd_camera_device_start_capturing(cts->args.start_cmd_args.device,
-                                              cts->args.start_cmd_args.pixel_format,
-                                              cts->args.start_cmd_args.frame_width,
-                                              cts->args.start_cmd_args.frame_height);
-        break;
-      case CAMERA_CMD_STOP_CAPTURING:
-        cts->args.stop_cmd_args.ret =
-            cmd_camera_device_stop_capturing(cts->args.stop_cmd_args.device);
-        break;
-      case CAMERA_CMD_READ_FRAME:
-        cts->args.read_frame_cmd_args.ret =
-            cmd_camera_device_read_frame(cts->args.read_frame_cmd_args.device,
-                                         cts->args.read_frame_cmd_args.framebuffers,
-                                         cts->args.read_frame_cmd_args.fbs_num,
-                                         cts->args.read_frame_cmd_args.r_scale,
-                                         cts->args.read_frame_cmd_args.g_scale,
-                                         cts->args.read_frame_cmd_args.b_scale,
-                                         cts->args.read_frame_cmd_args.exp_comp);
-        break;
-      case CAMERA_CMD_CLOSE:
-        cmd_camera_device_close(cts->args.close_cmd_args.device);
-        break;
-      case CAMERA_CMD_ENUMERATE_DEVICES:
-        cts->args.enumerate_cmd_args.ret =
-            cmd_enumerate_camera_devices(cts->args.enumerate_cmd_args.info,
-                                         cts->args.enumerate_cmd_args.max);
-        break;
-      default:
-        break;
+    // Main thread function, runs in the camera thread context.
+    virtual intptr_t main() override {
+        bool running = true;
+        while (running) {
+            CameraCommand cmd;
+            mInput.receive(&cmd);
+            intptr_t result = cmd.process();
+            mOutput.send(result);
+
+            // TODO: Stop the thread at some point?
+        }
+        return 0;
     }
 
-    // Unset available, set ready to 1 (command has executed),
-    // and tell this to other threads
-    cts->avail = 0; cts->rdy = 1;
-    qemu_cond_signal(&cts->cmd_ready);
-  }
+    // Call from the main thread to send a command and wait for its result.
+    intptr_t sendCommandAndGetResult(const CameraCommand& cmd) {
+        mInput.send(cmd);
+        intptr_t result = 0;
+        mOutput.receive(&result);
+        return result;
+    }
 
-  qemu_mutex_unlock(&cts->lock);
+private:
+    // message channel used to send commands from the main thread
+    // to the camera thread.
+    android::base::MessageChannel<CameraCommand, 4U> mInput;
 
-  return NULL;
-}
+    // message channel used to send results from the camera
+    // thread to the main one.
+    android::base::MessageChannel<intptr_t, 4U> mOutput;
+};
+
+static android::base::LazyInstance<CameraThread> sCameraThread =
+        LAZY_INSTANCE_INIT;
 
 extern "C" int windows_camera_thread_init() {
-  if (cts) return 0;
-
-  cts = (camera_thread_state_t*)malloc(sizeof(camera_thread_state_t));
-  memset(cts, 0, sizeof(camera_thread_state_t));
-
-  cts->cmd = CAMERA_CMD_NOP;
-
-  qemu_mutex_init(&cts->lock);
-
-  // Condition variables and state
-  // for synchronizing Windows camera thread
-  // with rest of system:
-  cts->exists = 0; // CTS loop exists and has the lock (need this initial condition before anything else)
-  cts->avail = 0; // A command is ready to execute (all registers set)
-  cts->rdy = 0; // Command has executed and control can return to calling thread
-  qemu_cond_init(&cts->cts_exists);
-  qemu_cond_init(&cts->cmd_available);
-  qemu_cond_init(&cts->cmd_ready);
-
-  qemu_thread_create(&cts->thread, "windows_camera", camera_thread_fn, 0, QEMU_THREAD_DETACHED);
-
-  qemu_mutex_lock(&cts->lock);
-
-  while(cts->exists == 0) {
-    qemu_cond_wait(&cts->cts_exists, &cts->lock);
-  }
-
-  qemu_mutex_unlock(&cts->lock);
-
-  return 1;
+    // Force thread creation and start.
+    (void)sCameraThread.ptr();
+    return 0;
 }
-
 
 /*******************************************************************************
  *                     CameraDevice API
  ******************************************************************************/
 
-void check_no_simultaneous_access(const char* func_name) {
-  if (cts->avail != 0) {
-    fprintf(stderr, "%s: Cannot access camera capture API simultaneously from two threads!\n", func_name);
-    E("%s: Cannot access camera capture API simultaneously from two threads!",
-      func_name);
-    exit(1);
-  }
-}
-
 CameraDevice* camera_device_open(const char* name, int channel) {
-  qemu_mutex_lock(&cts->lock);
-  check_no_simultaneous_access(__FUNCTION__);
+    CameraCommand cmd = {};
+    cmd.cmd = CAMERA_CMD_OPEN;
+    cmd.open.name = name;
+    cmd.open.channel = channel;
 
-  cts->cmd = CAMERA_CMD_OPEN;
-  cts->args.open_cmd_args.name = name;
-  cts->args.open_cmd_args.channel = channel;
-
-  cts->avail = 1; cts->rdy = 0;
-
-  qemu_cond_signal(&cts->cmd_available);
-  while (cts->rdy == 0) {
-    qemu_cond_wait(&cts->cmd_ready, &cts->lock);
-  }
-
-  CameraDevice* ret = cts->args.open_cmd_args.device;
-
-  qemu_mutex_unlock(&cts->lock);
-  return ret;
+    return reinterpret_cast<CameraDevice*>(
+            sCameraThread->sendCommandAndGetResult(cmd));
 }
 
+int camera_device_start_capturing(CameraDevice* cd,
+                                  uint32_t pixel_format,
+                                  int frame_width,
+                                  int frame_height) {
+    CameraCommand cmd = {};
+    cmd.cmd = CAMERA_CMD_START_CAPTURING;
+    cmd.start.device = cd;
+    cmd.start.pixel_format = pixel_format;
+    cmd.start.frame_width = frame_width;
+    cmd.start.frame_height = frame_height;
 
-int
-camera_device_start_capturing(CameraDevice* cd,
-                              uint32_t pixel_format,
-                              int frame_width,
-                              int frame_height)
-{
-  qemu_mutex_lock(&cts->lock);
-  check_no_simultaneous_access(__FUNCTION__);
-
-  cts->cmd = CAMERA_CMD_START_CAPTURING;
-  cts->args.start_cmd_args.device = cd;
-  cts->args.start_cmd_args.pixel_format = pixel_format;
-  cts->args.start_cmd_args.frame_width = frame_width;
-  cts->args.start_cmd_args.frame_height = frame_height;
-
-  cts->avail = 1; cts->rdy = 0;
-
-  qemu_cond_signal(&cts->cmd_available);
-  while (cts->rdy == 0) {
-    qemu_cond_wait(&cts->cmd_ready, &cts->lock);
-  }
-
-  int ret = cts->args.start_cmd_args.ret;
-
-  qemu_mutex_unlock(&cts->lock);
-
-  return ret;
+    return static_cast<int>(sCameraThread->sendCommandAndGetResult(cmd));
 }
 
-
-int
-camera_device_stop_capturing(CameraDevice* cd)
-{
-  qemu_mutex_lock(&cts->lock);
-  check_no_simultaneous_access(__FUNCTION__);
-
-  cts->cmd = CAMERA_CMD_STOP_CAPTURING;
-  cts->args.stop_cmd_args.device = cd;
-
-  cts->avail = 1; cts->rdy = 0;
-
-  qemu_cond_signal(&cts->cmd_available);
-  while (cts->rdy == 0) {
-    qemu_cond_wait(&cts->cmd_ready, &cts->lock);
-  }
-
-  int ret = cts->args.stop_cmd_args.ret;
-
-  qemu_mutex_unlock(&cts->lock);
-
-  return ret;
+int camera_device_stop_capturing(CameraDevice* cd) {
+    CameraCommand cmd = {};
+    cmd.cmd = CAMERA_CMD_STOP_CAPTURING;
+    cmd.stop.device = cd;
+    return static_cast<int>(sCameraThread->sendCommandAndGetResult(cmd));
 }
 
-
-int
-camera_device_read_frame(CameraDevice* cd,
+int camera_device_read_frame(CameraDevice* cd,
                              ClientFrameBuffer* framebuffers,
                              int fbs_num,
                              float r_scale,
                              float g_scale,
                              float b_scale,
-                             float exp_comp)
-{
-  qemu_mutex_lock(&cts->lock);
-  check_no_simultaneous_access(__FUNCTION__);
+                             float exp_comp) {
+    CameraCommand cmd = {};
+    cmd.cmd = CAMERA_CMD_READ_FRAME;
+    cmd.read_frame.device = cd;
+    cmd.read_frame.framebuffers = framebuffers;
+    cmd.read_frame.fbs_num = fbs_num;
+    cmd.read_frame.r_scale = r_scale;
+    cmd.read_frame.g_scale = g_scale;
+    cmd.read_frame.b_scale = b_scale;
+    cmd.read_frame.exp_comp = exp_comp;
 
-  cts->cmd = CAMERA_CMD_READ_FRAME;
-  cts->args.read_frame_cmd_args.device = cd;
-  cts->args.read_frame_cmd_args.framebuffers = framebuffers;
-  cts->args.read_frame_cmd_args.fbs_num = fbs_num;
-  cts->args.read_frame_cmd_args.r_scale = r_scale;
-  cts->args.read_frame_cmd_args.g_scale = g_scale;
-  cts->args.read_frame_cmd_args.b_scale = b_scale;
-  cts->args.read_frame_cmd_args.exp_comp = exp_comp;
-
-  cts->avail = 1; cts->rdy = 0;
-
-  qemu_cond_signal(&cts->cmd_available);
-
-  while (cts->rdy == 0) {
-    qemu_cond_wait(&cts->cmd_ready, &cts->lock);
-  }
-
-  int ret = cts->args.read_frame_cmd_args.ret;
-
-  qemu_mutex_unlock(&cts->lock);
-
-  return ret;
+    return static_cast<int>(sCameraThread->sendCommandAndGetResult(cmd));
 }
 
-void
-camera_device_close(CameraDevice* d) {
-  qemu_mutex_lock(&cts->lock);
-  check_no_simultaneous_access(__FUNCTION__);
-
-  cts->cmd = CAMERA_CMD_CLOSE;
-  cts->args.close_cmd_args.device = d;
-
-  cts->avail = 1; cts->rdy = 0;
-
-  qemu_cond_signal(&cts->cmd_available);
-  while (cts->rdy == 0) {
-    qemu_cond_wait(&cts->cmd_ready, &cts->lock);
-  }
-
-  qemu_mutex_unlock(&cts->lock);
-
-  return;
+void camera_device_close(CameraDevice* cd) {
+    CameraCommand cmd = {};
+    cmd.cmd = CAMERA_CMD_CLOSE;
+    cmd.close.device = cd;
+    (void)sCameraThread->sendCommandAndGetResult(cmd);
 }
 
-int
-enumerate_camera_devices(CameraInfo* cis, int max) {
-  qemu_mutex_lock(&cts->lock);
-  check_no_simultaneous_access(__FUNCTION__);
-
-  cts->cmd = CAMERA_CMD_ENUMERATE_DEVICES;
-  cts->args.enumerate_cmd_args.info = cis;
-  cts->args.enumerate_cmd_args.max = max;
-
-  cts->avail = 1; cts->rdy = 0;
-
-  qemu_cond_signal(&cts->cmd_available);
-  while (cts->rdy == 0) {
-    qemu_cond_wait(&cts->cmd_ready, &cts->lock);
-  }
-
-  int ret = cts->args.enumerate_cmd_args.ret;
-
-  qemu_mutex_unlock(&cts->lock);
-
-  return ret;
+int enumerate_camera_devices(CameraInfo* cis, int max) {
+    CameraCommand cmd = {};
+    cmd.cmd = CAMERA_CMD_ENUMERATE_DEVICES;
+    cmd.enumerate.info = cis;
+    cmd.enumerate.max = max;
+    return static_cast<int>(sCameraThread->sendCommandAndGetResult(cmd));
 }
