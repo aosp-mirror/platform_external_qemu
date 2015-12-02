@@ -179,6 +179,7 @@ private slots:
 
     void slot_animationFinished();
     void slot_animationValueChanged(const QVariant &value);
+    void slot_startupTick();
 
     /*
      Here are conventional slots that perform interesting high-level functions in the emulator. These can be hooked up to signals
@@ -195,6 +196,14 @@ public slots:
 
     void slot_screenChanged(QScreen* screen);
 private:
+
+    // When the main window appears, close the "Starting..."
+    // pop-up, if it was displayed.
+    void showEvent(QShowEvent* event) {
+        mStartupTimer.stop();
+        mStartupDialog.close();
+    }
+
     bool mouseInside();
     void doResize(const QSize &size);
 
@@ -206,6 +215,9 @@ private:
 
 
     void             *batteryState;
+
+    QTimer          mStartupTimer;
+    QProgressDialog mStartupDialog;
 
     SkinSurface *backing_surface;
     QQueue<SkinEvent*> event_queue;
