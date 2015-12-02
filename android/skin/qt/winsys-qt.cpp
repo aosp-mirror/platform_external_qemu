@@ -96,8 +96,8 @@ extern void skin_winsys_enter_main_loop(int argc, char **argv)
     g->argc = argc;
     g->argv = argv;
     g->app->exec();
+    g->app->quit();
     D("Finished QT main loop\n");
-    delete g->app;
 }
 
 extern void skin_winsys_get_monitor_rect(SkinRect *rect)
