@@ -41,7 +41,6 @@
 
 /* Required by android/utils/debug.h */
 int android_verbose;
-bool ranchu = false;
 
 #define DEBUG 1
 
@@ -65,13 +64,54 @@ bool ranchu = false;
 #define GLES_EMULATION_LIB64  "lib64OpenglRender" DLL_EXTENSION
 
 /* Forward declarations */
-static char* getTargetEmulatorPath(const char* progDir,
-                                   bool tryCurrentPath,
-                                   const char* avdArch,
-                                   const int force_32bit,
-                                   bool* is_64bit);
+static char* getClassicEmulatorPath(const char* progDir,
+                                    bool tryCurrentPath,
+                                    const char* avdArch,
+                                    int* wantedBitness);
 
-static void updateLibrarySearchPath(bool is_64bit);
+static char* getQemuExecutablePath(const char* programPath,
+                                   const char* avdArch,
+                                   int wantedBitness);
+
+static void updateLibrarySearchPath(int wantedBitness);
+
+#ifdef _WIN32
+static const char kExeExtension[] = ".exe";
+#else
+static const char kExeExtension[] = "";
+#endif
+
+#define ARRAY_SIZE(x)  (sizeof(x)/sizeof(x[0]))
+
+// Return true if string |str| is in |list|, which is an array of string
+// pointers of |listSize| elements.
+static bool isStringInList(const char* str,
+                           const char* const* list,
+                           size_t listSize) {
+    size_t n = 0;
+    for (n = 0; n < listSize; ++n) {
+        if (!strcmp(str, list[n])) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Return true if the CPU architecture |avdArch| is supported by QEMU1,
+// i.e. the 'goldfish' virtual board.
+static bool isCpuArchSupportedByGoldfish(const char* avdArch) {
+    static const char* const kSupported[] = {"arm", "mips", "x86", "x86_64"};
+    return isStringInList(avdArch, kSupported, ARRAY_SIZE(kSupported));
+}
+
+
+// Return true if the CPU architecture |avdArch| is supported by QEMU2,
+// i.e. the 'ranchu' virtual board.
+static bool isCpuArchSupportedByRanchu(const char* avdArch) {
+    static const char* const kSupported[] =
+            {"arm64", "mips64", "x86", "x86_64"};
+    return isStringInList(avdArch, kSupported, ARRAY_SIZE(kSupported));
+}
 
 /* Main routine */
 int main(int argc, char** argv)
@@ -80,8 +120,9 @@ int main(int argc, char** argv)
     char*       avdArch = NULL;
     const char* gpu = NULL;
     char*       emulatorPath;
-    int         force_32bit = 0;
-    bool        no_window = false;
+    bool force_32bit = false;
+    bool no_window = false;
+    bool ranchu = false;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -139,7 +180,7 @@ int main(int argc, char** argv)
         }
 
         if (!strcmp(opt,"-force-32bit")) {
-            force_32bit = 1;
+            force_32bit = true;
             continue;
         }
 
@@ -180,13 +221,16 @@ int main(int argc, char** argv)
         if (val && (!strcmp(val, "true") || !strcmp(val, "1"))) {
             if (!force_32bit) {
                 D("Auto-config: -force-32bit (%s=%s)\n", kEnvVar, val);
-                force_32bit = 1;
+                force_32bit = true;
             }
         }
     }
 
+    int hostBitness = android_getHostBitness();
+    int wantedBitness = hostBitness;
+
 #if defined(__linux__)
-    if (!force_32bit && android_getHostBitness() == 32) {
+    if (!force_32bit && hostBitness == 32) {
         fprintf(stderr,
 "ERROR: 32-bit Linux Android emulator binaries are DEPRECATED, to use them\n"
 "       you will have to do at least one of the following:\n"
@@ -201,10 +245,11 @@ int main(int argc, char** argv)
         );
         exit(1);
     }
-#elif defined(_WIN32)
-    // Windows version of Qemu1 works only in x86 mode
-    force_32bit = !ranchu;
-#endif
+#endif  // __linux__
+
+    if (force_32bit) {
+        wantedBitness = 32;
+    }
 
     /* If there is an AVD name, we're going to extract its target architecture
      * by looking at its config.ini
@@ -242,14 +287,39 @@ int main(int argc, char** argv)
     bool tryCurrentPath = !strchr(argv[0], '/');
 #endif
 
-    /* Find the architecture-specific program in the same directory */
-    bool is_64bit = false;
-    emulatorPath = getTargetEmulatorPath(progDir,
-                                         tryCurrentPath,
-                                         avdArch,
-                                         force_32bit,
-                                         &is_64bit);
-    D("Found target-specific emulator binary: %s\n", emulatorPath);
+    // Launch the classic emulator by default, unless the AVD's CPU
+    // architecture is not supported by the 'goldfish' board, or the
+    // -ranchu flag was used on the command-line.
+    //
+    // More complex logic might be introduced in the future (e.g. select
+    // the board based on the architecture and API level).
+    if (!ranchu && !isCpuArchSupportedByGoldfish(avdArch)) {
+        ranchu = true;
+        D("Auto-config: -ranchu  (%s only supported by ranchu board)\n",
+          avdArch);
+    } else if (ranchu && !isCpuArchSupportedByRanchu(avdArch)) {
+        APANIC("CPU Architecture '%s' is not supported by the 'ranchu' virtual board",
+               avdArch);
+    }
+
+#ifdef _WIN32
+    // Windows version of Qemu1 works only in x86 mode
+    if (!ranchu) {
+        wantedBitness = 32;
+    }
+#endif
+
+    if (ranchu) {
+        emulatorPath = getQemuExecutablePath(progDir,
+                                             avdArch,
+                                             wantedBitness);
+    } else {
+        emulatorPath = getClassicEmulatorPath(progDir,
+                                              tryCurrentPath,
+                                              avdArch,
+                                              &wantedBitness);
+    }
+    D("Found target-specific %d-bit emulator binary: %s\n", wantedBitness, emulatorPath);
 
     /* Replace it in our command-line */
     argv[0] = emulatorPath;
@@ -257,7 +327,7 @@ int main(int argc, char** argv)
     /* Setup library paths so that bundled standard shared libraries are picked
      * up by the re-exec'ed emulator
      */
-    updateLibrarySearchPath(is_64bit);
+    updateLibrarySearchPath(wantedBitness);
 
     /* We need to find the location of the GLES emulation shared libraries
      * and modify either LD_LIBRARY_PATH or PATH accordingly
@@ -271,9 +341,8 @@ int main(int argc, char** argv)
     }
 
     EmuglConfig config;
-    int bitness = is_64bit ? 64 : 32;
     if (!emuglConfig_init(
-                &config, gpuEnabled, gpuMode, gpu, bitness, no_window)) {
+                &config, gpuEnabled, gpuMode, gpu, wantedBitness, no_window)) {
         fprintf(stderr, "ERROR: %s\n", config.status);
         exit(1);
     }
@@ -282,7 +351,7 @@ int main(int argc, char** argv)
     emuglConfig_setupEnv(&config);
 
     /* Add <lib>/qt/ to the library search path. */
-    androidQtSetupEnv(bitness);
+    androidQtSetupEnv(wantedBitness);
 
 #ifdef _WIN32
     // Take care of quoting all parameters before sending them to execv().
@@ -332,17 +401,11 @@ static char* bufprint_emulatorName(char* p,
                                    char* end,
                                    const char* progDir,
                                    const char* prefix,
-                                   const char* variant,
-                                   const char* archSuffix,
-                                   const char* exeExtension) {
+                                   const char* archSuffix) {
     if (progDir) {
         p = bufprint(p, end, "%s/", progDir);
     }
-    p = bufprint(p, end, "%s", prefix);
-    if (variant) {
-        p = bufprint(p, end, "%s-", variant);
-    }
-    p = bufprint(p, end, "%s%s", archSuffix, exeExtension);
+    p = bufprint(p, end, "%s%s%s", prefix, archSuffix, kExeExtension);
     return p;
 }
 
@@ -351,48 +414,34 @@ static char* bufprint_emulatorName(char* p,
  *
  * |progDir| is an optional program directory. If NULL, the executable
  * will be searched in the current directory.
- * |variant| is an optional variant. If not NULL, then a name like
- * 'emulator-<variant>-<archSuffix>' will be searched, instead of
- * 'emulator-<archSuffix>'.
  * |archSuffix| is an architecture-specific suffix, like "arm", or 'x86"
- * If |search_for_64bit_emulator| is true, lookup for 64-bit emulator first,
- * then the 32-bit version.
- * If |try_current_path|, try to look into the current path if no
+ * |wantedBitness| points to an integer describing the wanted bitness of
+ * the program. The function might modify it, in the case where it is 64
+ * but only 32-bit versions of the executables are found (in this case,
+ * |*wantedBitness| is set to 32).
+ * If |try_current_path| is true, try to look into the current path if no
  * executable was found under |progDir|.
  * On success, returns the path of the executable (string must be freed by
- * the caller) and sets |*is_64bit| to indicate whether the binary is a
- * 64-bit executable. On failure, return NULL.
+ * the caller). On failure, return NULL.
  */
-static char*
-probeTargetEmulatorPath(const char* progDir,
-                        const char* variant,
-                        const char* archSuffix,
-                        bool search_for_64bit_emulator,
-                        bool try_current_path,
-                        bool* is_64bit)
-{
+static char* probeTargetEmulatorPath(const char* progDir,
+                                     const char* archSuffix,
+                                     int* wantedBitness,
+                                     bool try_current_path) {
     char path[PATH_MAX], *pathEnd = path + sizeof(path), *p;
 
     static const char kEmulatorPrefix[] = "emulator-";
     static const char kEmulator64Prefix[] = "emulator64-";
-#ifdef _WIN32
-    const char kExeExtension[] = ".exe";
-#else
-    const char kExeExtension[] = "";
-#endif
 
     // First search for the 64-bit emulator binary.
-    if (search_for_64bit_emulator) {
+    if (*wantedBitness == 64) {
         p = bufprint_emulatorName(path,
                                   pathEnd,
                                   progDir,
                                   kEmulator64Prefix,
-                                  variant,
-                                  archSuffix,
-                                  kExeExtension);
+                                  archSuffix);
         D("Probing program: %s\n", path);
         if (p < pathEnd && path_exists(path)) {
-            *is_64bit = true;
             return strdup(path);
         }
     }
@@ -402,12 +451,10 @@ probeTargetEmulatorPath(const char* progDir,
                                 pathEnd,
                                 progDir,
                                 kEmulatorPrefix,
-                                variant,
-                                archSuffix,
-                                kExeExtension);
+                                archSuffix);
     D("Probing program: %s\n", path);
     if (p < pathEnd && path_exists(path)) {
-        *is_64bit = false;
+        *wantedBitness = 32;
         return strdup(path);
     }
 
@@ -415,19 +462,16 @@ probeTargetEmulatorPath(const char* progDir,
     if (try_current_path) {
         char* result;
 
-        if (search_for_64bit_emulator) {
+        if (*wantedBitness == 64) {
             p = bufprint_emulatorName(path,
                                       pathEnd,
                                       NULL,
                                       kEmulator64Prefix,
-                                      variant,
-                                      archSuffix,
-                                      kExeExtension);
+                                      archSuffix);
             if (p < pathEnd) {
                 D("Probing path for: %s\n", path);
                 result = path_search_exec(path);
                 if (result) {
-                    *is_64bit = true;
                     return result;
                 }
             }
@@ -437,14 +481,12 @@ probeTargetEmulatorPath(const char* progDir,
                                     pathEnd,
                                     NULL,
                                     kEmulatorPrefix,
-                                    variant,
-                                    archSuffix,
-                                    kExeExtension);
+                                    archSuffix);
         if (p < pathEnd) {
             D("Probing path for: %s\n", path);
             result = path_search_exec(path);
             if (result) {
-                *is_64bit = false;
+                *wantedBitness = 32;
                 return result;
             }
         }
@@ -453,93 +495,94 @@ probeTargetEmulatorPath(const char* progDir,
     return NULL;
 }
 
-/*
- * emulator engine selection process is
- * emulator ->
- *   arm:
- *     32-bit: emulator(64)-arm
- *     64-bit: emulator(64)-arm64(NA) ->
- *             emulator(64)-ranchu-arm64 -> qemu/<host>/qemu-system-aarch64
- *   mips:
- *     32-bit: (if '-ranchu')
- *               emulator(64)-ranchu-mips -> qemu/<host>/qemu-system-mipsel
- *             else
- *               emulator(64)-mips
- *     64-bit: emulator(64)-mips64(NA) ->
- *             emulator(64)-ranchu-mips64 -> qemu/<host>/qemu-system-mips64
- *   x86:
- *     32-bit: (if '-ranchu')
- *               emulator(64)-ranchu-x86 -> qemu/<host>/qemu-system-x86
- *             else
- *               emulator(64)-x86
- *     64-bit: (if '-ranchu')
- *               emulator(64)-ranchu-x86_64 -> qemu/<host>/qemu-system-x86_64
- *             else
- *               emulator(64)-x86
- */
-static char*
-getTargetEmulatorPath(const char* progDir,
-                      bool tryCurrentPath,
-                      const char* avdArch,
-                      const int force_32bit,
-                      bool* is_64bit)
-{
-    char*  result;
-    char* ranchu_result;
-    bool search_for_64bit_emulator =
-            !force_32bit && android_getHostBitness() == 64;
-    const char* emulatorSuffix;
-
+// Find the path to the classic emulator binary that supports CPU architecture
+// |avdArch|. |progDir| is the program's directory. If |tryCurrentPath|, then
+static char* getClassicEmulatorPath(const char* progDir,
+                                    bool tryCurrentPath,
+                                    const char* avdArch,
+                                    int* wantedBitness) {
     /* Try look for classic emulator first */
-    emulatorSuffix = emulator_getBackendSuffix(avdArch);
+    const char* emulatorSuffix = emulator_getBackendSuffix(avdArch);
     if (!emulatorSuffix) {
         APANIC("This emulator cannot emulate %s CPUs!\n", avdArch);
     }
     D("Looking for emulator-%s to emulate '%s' CPU\n", emulatorSuffix,
       avdArch);
 
-    result = probeTargetEmulatorPath(progDir,
-                                     NULL,
-                                     emulatorSuffix,
-                                     search_for_64bit_emulator,
-                                     tryCurrentPath,
-                                     is_64bit);
-    if (result && !ranchu) {
-        /* found and not ranchu */
-        D("return result: %s\n", result);
-        return result;
-    } else {
-        /* no classic emulator or prefer ranchu */
-        D("Looking for ranchu emulator backend for %s CPU\n", avdArch);
-        ranchu_result = probeTargetEmulatorPath(progDir,
-                                                "ranchu",
-                                                avdArch,
-                                                search_for_64bit_emulator,
-                                                tryCurrentPath,
-                                                is_64bit);
-        if (ranchu_result) {
-            D("return ranchu: %s\n", ranchu_result);
-            return ranchu_result;
-        } else {
-            if (result) {
-                /* ranchu not found, fallback to classic
-                   should NOT happen in current scenario
-                   just go ahead still and leave a message
-                */
-                fprintf(stderr, "ERROR: requested 'ranchu' not available\n"
-                        "classic backend is used\n");
-                return result;
-            }
+    char* result = probeTargetEmulatorPath(progDir,
+                                           emulatorSuffix,
+                                           wantedBitness,
+                                           tryCurrentPath);
+    if (!result) {
+        APANIC("Missing emulator engine program for '%s' CPU.\n", avdArch);
+    }
+    D("return result: %s\n", result);
+    return result;
+}
+
+// Convert an emulator-specific CPU architecture name |avdArch| into the
+// corresponding QEMU one. Return NULL if unknown.
+static const char* getQemuArch(const char* avdArch) {
+    static const struct {
+        const char* arch;
+        const char* qemuArch;
+    } kQemuArchs[] = {
+        {"arm", "armel"},
+        {"arm64", "aarch64"},
+        {"mips", "mipsel"},
+        {"mips64", "mips64el"},
+        {"x86","i386"},
+        {"x86_64","x86_64"},
+    };
+    size_t n;
+    for (n = 0; n < ARRAY_SIZE(kQemuArchs); ++n) {
+        if (!strcmp(avdArch, kQemuArchs[n].arch)) {
+            return kQemuArchs[n].qemuArch;
         }
     }
-
-    /* Otherwise, the program is missing */
-    APANIC("Missing emulator engine program for '%s' CPUS.\n", avdArch);
     return NULL;
 }
 
-static void updateLibrarySearchPath(bool is_64bit) {
-    const char* libSubDir = is_64bit ? "lib64" : "lib";
+// Return the path of the QEMU executable. |progDir| is the directory
+// containing the current program. |avdArch| is the CPU architecture name.
+// of the current program (i.e. the 'emulator' launcher).
+// Return NULL in case of error.
+static char* getQemuExecutablePath(const char* progDir,
+                                   const char* avdArch,
+                                   int wantedBitness) {
+// The host operating system name.
+#ifdef __linux__
+    static const char kHostOs[] = "linux";
+#elif defined(__APPLE__)
+    static const char kHostOs[] = "darwin";
+#elif defined(_WIN32)
+    static const char kHostOs[] = "windows";
+#endif
+    const char* hostArch = (wantedBitness == 64) ? "x86_64" : "x86";
+    const char* qemuArch = getQemuArch(avdArch);
+    if (!qemuArch) {
+        APANIC("QEMU2 emulator does not support %s CPU architecture", avdArch);
+    }
+
+    char fullPath[PATH_MAX];
+    char* fullPathEnd = fullPath + sizeof(fullPath);
+    char* tail = bufprint(fullPath,
+                          fullPathEnd,
+                          "%s/qemu/%s-%s/qemu-system-%s%s",
+                          progDir,
+                          kHostOs,
+                          hostArch,
+                          qemuArch,
+                          kExeExtension);
+    if (tail >= fullPathEnd) {
+        APANIC("QEMU executable path too long (clipped) [%s]. "
+               "Can not use QEMU2 emulator. ", fullPath);
+    }
+    return strdup(fullPath);
+}
+
+static void updateLibrarySearchPath(int wantedBitness) {
+    const char* libSubDir = (wantedBitness == 64) ? "lib64" : "lib";
     char fullPath[PATH_MAX];
     char* tail = fullPath;
 
