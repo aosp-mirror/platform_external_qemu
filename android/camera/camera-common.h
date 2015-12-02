@@ -21,6 +21,7 @@
  * camera emulation.
  */
 
+#include "android/utils/compiler.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
@@ -40,6 +41,8 @@
 #ifdef _WIN32
 #include <winsock2.h>
 #endif
+
+ANDROID_BEGIN_HEADER
 
 /*
  * These are missing in the current linux/videodev2.h
@@ -147,6 +150,7 @@ typedef struct CameraInfo {
     int                 in_use;
 } CameraInfo;
 
+#if 0
 /* Allocates CameraInfo instance. */
 static __inline__ CameraInfo* _camera_info_alloc(void)
 {
@@ -154,6 +158,7 @@ static __inline__ CameraInfo* _camera_info_alloc(void)
     ANEW0(ci);
     return ci;
 }
+#endif
 
 /* Frees all resources allocated for CameraInfo instance (including the
  * instance itself).
@@ -207,3 +212,5 @@ _camera_sleep(int millisec)
         t.tv_usec = (wake_at - stamp) - (uint64_t)t.tv_sec * 1000000;
     } while (select(0, NULL, NULL, NULL, &t) < 0 && errno == EINTR);
 }
+
+ANDROID_END_HEADER

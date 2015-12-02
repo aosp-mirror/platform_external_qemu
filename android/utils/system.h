@@ -47,8 +47,13 @@ void   android_free( void*  block );
 /* convenience macros */
 
 #define  AZERO(p)             memset((char*)(p),0,sizeof(*(p)))
+#ifdef __cplusplus
+#define  ANEW(p)              (p = reinterpret_cast<__typeof__(*p)>(android_alloc(sizeof(*p))))
+#define  ANEW0(p)             (p = reinterpret_cast<__typeof__(*p)>(android_alloc(sizeof(*p))))
+#else  // !__cplusplus
 #define  ANEW(p)              (p = android_alloc(sizeof(*p)))
 #define  ANEW0(p)             (p = android_alloc0(sizeof(*p)))
+#endif  // !__cplusplus
 #define  AFREE(p)             android_free(p)
 
 #define  AMEM_ZERO(dst,size)      memset((char*)(dst), 0, (size_t)(size))

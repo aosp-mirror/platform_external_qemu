@@ -144,7 +144,7 @@ endif
 
 ifeq ($(HOST_OS),windows)
     ANDROID_EMU_BASE_SOURCES += \
-        android/camera/camera-capture-windows.c
+        android/camera/camera-capture-windows.cpp
 endif
 
 ifeq ($(HOST_OS),windows)

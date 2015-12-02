@@ -46,7 +46,9 @@
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
 
+extern "C" {
 #include "qemu/thread.h"
+}  // extern "C"
 
 #include <stdio.h>
 #include <vfw.h>
@@ -931,7 +933,7 @@ static void* camera_thread_fn(void* dummy) {
   return NULL;
 }
 
-int windows_camera_thread_init() {
+extern "C" int windows_camera_thread_init() {
   if (cts) return 0;
 
   cts = (camera_thread_state_t*)malloc(sizeof(camera_thread_state_t));
@@ -968,7 +970,6 @@ int windows_camera_thread_init() {
 /*******************************************************************************
  *                     CameraDevice API
  ******************************************************************************/
-
 
 void check_no_simultaneous_access(const char* func_name) {
   if (cts->avail != 0) {
@@ -1133,4 +1134,3 @@ enumerate_camera_devices(CameraInfo* cis, int max) {
 
   return ret;
 }
-
