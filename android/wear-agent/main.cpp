@@ -54,6 +54,8 @@ int main(int argc, char** argv)
         android::wear::WearAgent agent(mainLooper, adbHostPort);
         SocketDrainer socketDrainer(mainLooper);
 
+        agent.waitUnitConnected(secondsToRun ? secondsToRun * 1000 : unsigned(-1));
+
         mainLooper->run();
 
         if (secondsToRun > 0) {

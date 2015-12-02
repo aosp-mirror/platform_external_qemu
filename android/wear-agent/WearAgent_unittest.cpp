@@ -48,12 +48,12 @@ TEST(WearAgent, SimpleTest) {
     int milSecondsToRun = 1;
     Looper* mainLooper = Looper::create();
     {
+        android::wear::WearAgent agent(mainLooper, adbHostPort);
+        SocketDrainer drainer(mainLooper);
+
         Looper::Timer* timer = mainLooper->createTimer(on_time_up, mainLooper);
         const Looper::Duration dl = milSecondsToRun;
         timer->startRelative(dl);
-
-        android::wear::WearAgent agent(mainLooper, adbHostPort);
-        SocketDrainer drainer(mainLooper);
 
         mainLooper->run();
         delete timer;
@@ -76,14 +76,17 @@ static bool testTrackDevicesQuery(int socketFd, ScopedSocket* agentSocket) {
 static void runWearAgent(int adbHostPort, int milSecondsToRun) {
     Looper* mainLooper = Looper::create();
     {
+        android::wear::WearAgent agent(mainLooper, adbHostPort);
+        SocketDrainer drainer(mainLooper);
+
+        ASSERT_TRUE(agent.waitUnitConnected(milSecondsToRun));
+
         Looper::Timer* timer = NULL;
         if (milSecondsToRun > 0) {
             timer = mainLooper->createTimer(on_time_up, mainLooper);
             const Looper::Duration dl = milSecondsToRun;
             timer->startRelative(dl);
         }
-        android::wear::WearAgent agent(mainLooper, adbHostPort);
-        SocketDrainer drainer(mainLooper);
 
         mainLooper->run();
 
