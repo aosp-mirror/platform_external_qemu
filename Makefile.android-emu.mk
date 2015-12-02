@@ -40,6 +40,7 @@ ANDROID_EMU_INTERNAL_INCLUDES := \
     $(OBJS_DIR)/build \
     $(ANDROID_EMU_INCLUDES) \
     $(LIBCURL_INCLUDES) \
+    $(LIBJPEG_INCLUDES) \
     $(LIBXML2_INCLUDES) \
     $(LIBEXT4_UTILS_INCLUDES) \
 
@@ -81,6 +82,8 @@ ANDROID_EMU_BASE_SOURCES := \
     android/filesystems/partition_config.cpp \
     android/filesystems/partition_types.cpp \
     android/filesystems/ramdisk_extractor.cpp \
+    android/multitouch-port.c \
+    android/multitouch-screen.c \
     android/utils/aconfig-file.c \
     android/utils/assert.c \
     android/utils/bufprint.c \
@@ -100,6 +103,7 @@ ANDROID_EMU_BASE_SOURCES := \
     android/utils/ini.cpp \
     android/utils/intmap.c \
     android/utils/ipaddr.cpp \
+    android/utils/jpeg-compress.c \
     android/utils/lineinput.c \
     android/utils/looper.cpp \
     android/utils/mapfile.c \
