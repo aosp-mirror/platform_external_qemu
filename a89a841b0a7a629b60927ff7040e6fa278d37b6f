@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5b1deb19_458654cc",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-02T23:57:16Z",
+      "side": 1,
+      "message": "connected() only reads a single pointer. on x86 pointer-sized read is atomic",
+      "parentUuid": "db339bd5_4ae05319",
+      "revId": "a89a841b0a7a629b60927ff7040e6fa278d37b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a0f23453_a0627ae7",
         "filename": "android/wear-agent/WearAgent.cpp",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-12-02T20:41:50Z",
       "side": 1,
       "message": "ow, that\u0027s dangerous. Loopers and their data structures are single-thread entities, i.e. they are not designed from being invoked from different threads. This call is modifying another thread\u0027s looper, which is a potential data race / random crash source. You really need better synchronization here.\n\nI looks like what you need is a socketpair() that allows you to send one byte from this thread, and have a fdWatch() on the main thread that triggers a callback when it receives it. We don\u0027t have a helper class to do this in android/base/, it might be useful to add one.\n\nSee socket_pair() in android/utils/sockets.c if that can help. Another alternative is to add a Looper::Event class to android/base/Looper.h but that requires more work.",
+      "revId": "a89a841b0a7a629b60927ff7040e6fa278d37b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9bb8433f_8544d0f9",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-02T23:57:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a0f23453_a0627ae7",
       "revId": "a89a841b0a7a629b60927ff7040e6fa278d37b6f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "5ba24b12_b8af76bc",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-02T23:57:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "db339bd5_aaaf0fbc",
+      "revId": "a89a841b0a7a629b60927ff7040e6fa278d37b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b21b386_6441cae7",
         "filename": "android/wear-agent/WearAgent.cpp",
         "patchSetId": 2
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "fba69f26_a5f8f2e7",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-02T23:57:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1b21b386_6441cae7",
+      "revId": "a89a841b0a7a629b60927ff7040e6fa278d37b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e0e8ac67_021eca4b",
         "filename": "android/wear-agent/WearAgent.h",
         "patchSetId": 2
@@ -81,6 +153,24 @@
       "writtenOn": "2015-12-02T20:41:50Z",
       "side": 1,
       "message": "Did you mean waitUntilConnected() here ?",
+      "revId": "a89a841b0a7a629b60927ff7040e6fa278d37b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b18372c_4f3031c5",
+        "filename": "android/wear-agent/WearAgent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-02T23:57:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e0e8ac67_021eca4b",
       "revId": "a89a841b0a7a629b60927ff7040e6fa278d37b6f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
