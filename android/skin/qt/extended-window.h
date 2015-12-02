@@ -96,6 +96,7 @@ private:
     public:
         SettingsTheme mTheme;
         QString       mSavePath;
+        QString       mSdkPath;
 
         SettingsState() :
             mTheme(SETTINGS_THEME_LIGHT)
@@ -239,10 +240,12 @@ private slots:
     void locationPlaybackStop();
 
     // Settings
-    void on_set_folderButton_clicked();
-    void on_set_themeBox_currentIndexChanged(int index);
-    void on_set_saveLocBox_textEdited(const QString&);
     void on_set_allowKeyboardGrab_toggled(bool);
+    void on_set_saveLocBox_textEdited(const QString&);
+    void on_set_saveLocFolderButton_clicked();
+    void on_set_sdkPathBox_textEdited(const QString&);
+    void on_set_sdkPathButton_clicked();
+    void on_set_themeBox_currentIndexChanged(int index);
 
     // Help
     void on_help_docs_clicked();

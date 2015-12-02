@@ -24,9 +24,11 @@ namespace Ui {
         //       associated with "ext-settings", not because
         //       we're in "namespace Settings".
 
-        const QString SAVE_PATH("set/savePath");
-        const QString UI_THEME("set/theme");
         const QString ALLOW_KEYBOARD_GRAB("set/allow_keyboard_grab");
+        const QString SAVE_PATH("set/savePath");
+        const QString SDK_PATH("set/sdkPath");
+        const QString UI_THEME("set/theme");
+
         const QString LOCATION_LATITUDE("loc/latitude");
         const QString LOCATION_LONGITUDE("loc/longitude");
         const QString LOCATION_ALTITUDE("loc/altitude");
