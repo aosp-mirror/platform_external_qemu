@@ -4581,10 +4581,6 @@ int run_qemu_main(int argc, const char **argv)
 
     set_numa_nodes();
 
-    if (qemu_opts_foreach(qemu_find_opts("mon"), mon_init_func, NULL, 1) != 0) {
-        exit(1);
-    }
-
     if (foreach_device_config(DEV_SERIAL, serial_parse) < 0)
         exit(1);
     if (foreach_device_config(DEV_PARALLEL, parallel_parse) < 0)
@@ -4737,6 +4733,10 @@ int run_qemu_main(int argc, const char **argv)
     extern void android_emulator_set_base_port(int);
     android_emulator_set_base_port(android_base_port);
 #endif
+
+    if (qemu_opts_foreach(qemu_find_opts("mon"), mon_init_func, NULL, 1) != 0) {
+        exit(1);
+    }
 
     /* TODO: once all bus devices are qdevified, this should be done
      * when bus is created by qdev.c */

@@ -18,7 +18,14 @@
 
 #ifndef ANDROID_CONSOLE_H
 #define ANDROID_CONSOLE_H
-
+#ifdef USE_ANDROID_EMU
+#include "android/emulation/control/battery_agent.h"
+#include "android/emulation/control/finger_agent.h"
+#include "android/emulation/control/location_agent.h"
+#include "android/emulation/control/net_agent.h"
+#include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/vm_operations.h"
+#endif
 #include "qemu-common.h"
 
 void android_console_kill(Monitor *mon, const QDict *qdict);
@@ -53,6 +60,22 @@ void android_console_avd_snapshot_load(Monitor *mon, const QDict *qdict);
 void android_console_avd_snapshot_del(Monitor *mon, const QDict *qdict);
 void android_console_avd(Monitor *mon, const QDict *qdict);
 
+void android_console_finger_touch(Monitor *mon, const QDict *qdict);
+void android_console_finger_remove(Monitor *mon, const QDict *qdict);
+void android_console_finger(Monitor *mon, const QDict *qdict);
+
+void android_console_geo_nmea(Monitor *mon, const QDict *qdict);
+void android_console_geo_fix(Monitor *mon, const QDict *qdict);
+void android_console_geo(Monitor *mon, const QDict *qdict);
+
 void android_monitor_print_error(Monitor *mon, const char *fmt, ...);
 
+#ifdef USE_ANDROID_EMU
+void qemu2_android_console_setup( const QAndroidBatteryAgent* battery_agent,
+        const QAndroidFingerAgent* finger_agent,
+        const QAndroidLocationAgent* location_agent,
+        const QAndroidUserEventAgent* user_event_agent,
+        const QAndroidVmOperations* vm_operations,
+        const QAndroidNetAgent* net_agent);
+#endif
 #endif
