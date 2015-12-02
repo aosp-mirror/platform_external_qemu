@@ -128,6 +128,9 @@ public:
     // Return an empty string if the file doesn't exist.
     static String findBundledExecutable(const char* programName);
 
+    // Sleep for |n| milliseconds
+    static void sleepMs(unsigned n);
+
     // Retrieve the value of a given environment variable.
     // Equivalent to getenv() but returns a String instance.
     // If the variable is not defined, return an empty string.
