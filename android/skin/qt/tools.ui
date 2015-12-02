@@ -129,7 +129,7 @@ color: #f0f0f0</string>
     </rect>
    </property>
    <property name="toolTip">
-    <string>Rotate left</string>
+    <string>Rotate</string>
    </property>
    <property name="text">
     <string notr="true"/>
