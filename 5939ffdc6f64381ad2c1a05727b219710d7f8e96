@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bbb18759_262d2c69",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-02T23:57:01Z",
+      "side": 0,
+      "message": "This wasn\u0027t necessary because it already returned from the main loop.",
+      "range": {
+        "startLine": 99,
+        "startChar": 4,
+        "endLine": 99,
+        "endChar": 19
+      },
+      "revId": "5939ffdc6f64381ad2c1a05727b219710d7f8e96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
