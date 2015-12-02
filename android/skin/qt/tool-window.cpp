@@ -58,6 +58,17 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
 #endif
     setWindowFlags(flag | Qt::FramelessWindowHint);
     toolsUi->setupUi(this);
+
+    // Start a timer. If the main window doesn't
+    // appear before the timer expires, show a
+    // pop-up to let the user know we're still
+    // working.
+    QObject::connect(&mStartupTimer, &QTimer::timeout,
+                     this, &ToolWindow::slot_startupTick);
+    mStartupTimer.setSingleShot(true);
+    mStartupTimer.setInterval(500); // Half a second
+    mStartupTimer.start();
+
     // Make this more narrow than QtDesigner likes
     this->resize(60, this->height());
 
@@ -127,6 +138,17 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     mShortcutKeyStore.add(
             QKeySequence(Qt::Key_Alt | Qt::AltModifier | Qt::ControlModifier),
             QtUICommand::UNGRAB_KEYBOARD);
+}
+
+void ToolWindow::slot_startupTick() {
+    // It's be a while since we were launched, and the main
+    // window still hasn't appeared.
+    // Show a pop-up that lets the user know we are working.
+    mStartupDialog.setWindowTitle(tr("Android Emulator"));
+    mStartupDialog.setLabelText(tr("Starting..."));
+    mStartupDialog.setRange(0, 0); // Don't show % complete
+    mStartupDialog.setCancelButton(0);   // No "cancel" button
+    mStartupDialog.show();
 }
 
 void ToolWindow::hide()

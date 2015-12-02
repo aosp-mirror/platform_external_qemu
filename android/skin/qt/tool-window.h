@@ -29,6 +29,7 @@
 #include <QPair>
 #include <QProcess>
 #include <QProgressDialog>
+#include <QTimer>
 #include <QToolButton>
 #include <QUrl>
 #include <QWidget>
@@ -79,6 +80,13 @@ signals:
 private:
     void handleUICommand(QtUICommand cmd, bool down);
 
+    // When the main window appears, close the "Starting..."
+    // pop-up, if it was displayed.
+    void showEvent(QShowEvent* event) {
+        mStartupTimer.stop();
+        mStartupDialog.close();
+    }
+
     // Helper method, calls handleUICommand with
     // down equal to true and down equal to false.
     void handleUICommand(QtUICommand cmd) {
@@ -102,6 +110,8 @@ private:
     Ui::ToolControls *toolsUi;
     QProcess mInstallProcess;
     QProcess mPushProcess;
+    QTimer   mStartupTimer;
+    QProgressDialog mStartupDialog;
     QProgressDialog mPushDialog;
     QProgressDialog mInstallDialog;
     QQueue<QUrl> mFilesToPush;
@@ -130,6 +140,7 @@ private slots:
     void slot_installCanceled();
     void slot_installFinished(int exitStatus);
 
+    void slot_startupTick();
     void slot_pushCanceled();
     void slot_pushFinished(int exitStatus);
 };
