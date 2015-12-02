@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 The Android Open Source Project
+/* Copyright (C) 2011-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -480,6 +480,28 @@ AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild)
     return ret;
 }
 
+/*
+ * handleCommonEmulatorOptions
+ *
+ * sets values in |hw| based on options set in |opts|
+ *
+ * Some values that may be set:
+ *
+ * kernel_path
+ * hw_cpu_model
+ * kernel_newDeviceNaming
+ * kernel_supportsYaffs2
+ * disk_ramdisk_path
+ * disk_systemPartition_path
+ * disk_systemPartition_initPath
+ * disk_dataPartition_size
+ * disk_cachePartition
+ * disk_cachePartition_path
+ * disk_cachePartition_size
+ * hw_sdCard
+ * hw_sdCard_path
+ * hw_ramSize
+ */
 void handleCommonEmulatorOptions(AndroidOptions* opts,
                                  AndroidHwConfig* hw,
                                  AvdInfo* avd) {
