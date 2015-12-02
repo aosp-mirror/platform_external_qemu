@@ -483,6 +483,10 @@ void ToolWindow::on_recents_button_released()
 
 void ToolWindow::on_rotate_button_clicked()
 {
+    // TODO: remove this after we preserve zoom after rotate
+    if (emulator_window->isInZoomMode())
+        toolsUi->zoom_button->click();
+
     handleUICommand(QtUICommand::ROTATE_RIGHT, true);
     raiseMainWindow();
 }
