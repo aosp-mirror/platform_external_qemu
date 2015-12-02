@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dbae3bf9_e677a61c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-02T21:55:19Z",
+      "side": 1,
+      "message": "nit: typo",
+      "range": {
+        "startLine": 9,
+        "startChar": 40,
+        "endLine": 9,
+        "endChar": 44
+      },
+      "revId": "421c4e6d1c73dd95c9cdfb5996dce765a53f9407",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
