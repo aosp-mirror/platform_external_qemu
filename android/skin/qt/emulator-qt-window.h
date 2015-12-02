@@ -206,11 +206,12 @@ private:
 
     bool mouseInside();
     void doResize(const QSize &size);
+    SkinMouseButtonType getSkinMouseButton(QMouseEvent *event) const;
 
     SkinEvent *createSkinEvent(SkinEventType type);
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void handleKeyEvent(SkinEventType type, QKeyEvent *event);
-    void handleMouseEvent(SkinEventType type, QMouseEvent *event);
+    void handleMouseEvent(SkinEventType type, SkinMouseButtonType button, const QPoint &pos);
     QString getTmpImagePath();
 
 
@@ -413,7 +414,10 @@ private:
               mContainer(container),
               mRubberBand(QRubberBand::Rectangle, this),
               mCursor(":/cursor/zoom_cursor"),
-              mIsFlash(false)
+              mMultitouchCenter(-1,-1),
+              mPrimaryTouchPoint(-1,-1),
+              mReleaseOnClose(false),
+              mMode(OverlayMode::Hidden)
         {
             setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
             setAttribute(Qt::WA_TranslucentBackground);
@@ -432,8 +436,15 @@ private:
         void hide()
         {
             QFrame::hide();
+            mMode = OverlayMode::Hidden;
             mContainer->setFocus();
             mContainer->activateWindow();
+
+            if (mReleaseOnClose) {
+                mEmulatorWindow->handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, mPrimaryTouchPoint);
+                mEmulatorWindow->handleMouseEvent(kEventMouseButtonUp, kMouseButtonSecondaryTouch, getSecondaryTouchPoint());
+                mReleaseOnClose = false;
+            }
         }
 
         void hideEvent(QHideEvent *event)
@@ -448,64 +459,98 @@ private:
 
         void keyReleaseEvent(QKeyEvent *event)
         {
-            if (event->key() == Qt::Key_Control) {
+            if (event->key() == Qt::Key_Control && mMode == OverlayMode::Zoom) {
+                this->hide();
+            } else if (event->key() == Qt::Key_Alt && mMode == OverlayMode::Multitouch) {
                 this->hide();
             }
         }
 
         void mouseMoveEvent(QMouseEvent *event)
         {
-            if (mIsFlash) return;
+            if (mMode == OverlayMode::Zoom) {
+                mRubberBand.setGeometry(QRect(mRubberbandOrigin, event->pos()).normalized()
+                                            .intersected(QRect(0, 0, width(), height())));
+            } else if (mMode == OverlayMode::Multitouch) {
+                if (event->buttons() & Qt::LeftButton) {
+                    mPrimaryTouchPoint = event->pos();
+                    update();
 
-            mRubberBand.setGeometry(QRect(mOrigin, event->pos()).normalized()
-                                        .intersected(QRect(0, 0, this->width(), this->height())));
+                    mEmulatorWindow->handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mPrimaryTouchPoint);
+                    mEmulatorWindow->handleMouseEvent(kEventMouseMotion, kMouseButtonSecondaryTouch, getSecondaryTouchPoint());
+                } else if (event->buttons() & Qt::RightButton) {
+                    mMultitouchCenter = event->pos();
+                    update();
+                }
+            }
         }
 
         void mousePressEvent(QMouseEvent *event)
         {
-            if (mIsFlash) return;
+            if (mMode == OverlayMode::Zoom) {
+                mRubberbandOrigin = event->pos();
+                mRubberBand.setGeometry(QRect(mRubberbandOrigin, QSize()));
+                mRubberBand.show();
+            } else if (mMode == OverlayMode::Multitouch) {
+                if (event->button() == Qt::LeftButton) {
+                    mPrimaryTouchPoint = event->pos();
+                    mReleaseOnClose = true;
+                    update();
 
-            mOrigin = event->pos();
-            mRubberBand.setGeometry(QRect(mOrigin, QSize()));
-            mRubberBand.show();
+                    mEmulatorWindow->handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft, mPrimaryTouchPoint);
+                    mEmulatorWindow->handleMouseEvent(kEventMouseButtonDown, kMouseButtonSecondaryTouch, getSecondaryTouchPoint());
+                } else if (event->button() == Qt::RightButton) {
+                    mMultitouchCenter = event->pos();
+                    update();
+                }
+            }
         }
 
         void mouseReleaseEvent(QMouseEvent *event)
         {
-            if (mIsFlash) return;
+            if (mMode == OverlayMode::Zoom) {
+                QRect geom = mRubberBand.geometry();
+                QPoint localPoint = mEmulatorWindow->mapFromGlobal(this->mapToGlobal(geom.center()));
 
-            QRect geom = mRubberBand.geometry();
-            QPoint localPoint = mEmulatorWindow->mapFromGlobal(this->mapToGlobal(geom.center()));
+                // Assume that very, very small dragged rectangles were actually just clicks that
+                // slipped a bit
+                int areaSq = geom.width() * geom.width() + geom.height() * geom.height();
 
-            // Assume that very, very small dragged rectangles were actually just clicks that
-            // slipped a bit
-            int areaSq = geom.width() * geom.width() + geom.height() * geom.height();
+                // Left click zooms in
+                if (event->button() == Qt::LeftButton) {
 
-            // Left click zooms in
-            if (event->button() == Qt::LeftButton) {
+                    // Click events (with no drag) keep the mouse focused on the same pixel
+                    if (areaSq < 20) {
+                        mEmulatorWindow->zoomIn(localPoint, mContainer->mapFromGlobal(QCursor::pos()));
 
-                // Click events (with no drag) keep the mouse focused on the same pixel
-                if (areaSq < 20) {
-                    mEmulatorWindow->zoomIn(localPoint, mContainer->mapFromGlobal(QCursor::pos()));
+                    // Dragged rectangles will center said rectangle and zoom in as much as possible
+                    } else {
+                        mEmulatorWindow->zoomTo(localPoint, geom.size());
+                    }
 
-                // Dragged rectangles will center said rectangle and zoom in as much as possible
-                } else {
-                    mEmulatorWindow->zoomTo(localPoint, geom.size());
+                // Right click zooms out
+                } else if (event->button() == Qt::RightButton) {
+
+                    // Click events (with no drag) keep the mouse focused on the same pixel
+                    if (areaSq < 20) {
+                        mEmulatorWindow->zoomOut(localPoint, mContainer->mapFromGlobal(QCursor::pos()));
+
+                    // Dragged rectangles will reset zoom to 1
+                    } else {
+                        mEmulatorWindow->zoomReset();
+                    }
                 }
+                mRubberBand.hide();
+            } else if (mMode == OverlayMode::Multitouch) {
+                if (event->button() == Qt::LeftButton) {
+                    mPrimaryTouchPoint = event->pos();
+                    mReleaseOnClose = false;
+                    mEmulatorWindow->handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, mPrimaryTouchPoint);
+                    mEmulatorWindow->handleMouseEvent(kEventMouseButtonUp, kMouseButtonSecondaryTouch, getSecondaryTouchPoint());
 
-            // Right click zooms out
-            } else if (event->button() == Qt::RightButton) {
-
-                // Click events (with no drag) keep the mouse focused on the same pixel
-                if (areaSq < 20) {
-                    mEmulatorWindow->zoomOut(localPoint, mContainer->mapFromGlobal(QCursor::pos()));
-
-                // Dragged rectangles will reset zoom to 1
-                } else {
-                    mEmulatorWindow->zoomReset();
+                    update();
                 }
             }
-            mRubberBand.hide();
         }
 
         void paintEvent(QPaintEvent *e)
@@ -519,25 +564,44 @@ private:
 
             // On OSX, this threshold is 12, so make alpha 13.
             // On Windows, this threshold is 0, so make alpha 1.
-            // On Linux, this threshold is 0, so we don't even need to draw if alpha = 0.
+            // On Linux, this threshold is 0.
 #if __APPLE__
             if (alpha < 13) alpha = 13;
 #elif _WIN32
             if (alpha < 1) alpha = 1;
-#elif __linux__
-            if (alpha == 0) return;
 #endif
 
 
             QPainter painter(this);
             QRect bg(QPoint(0, 0), this->size());
             painter.fillRect(bg, QColor(255,255,255,alpha));
+
+            if (mMode == OverlayMode::Multitouch) {
+                painter.setOpacity(.6);
+                painter.setBrush(mRubberBand.palette().highlight());
+                painter.setPen(QPen(painter.brush(), 2));
+                painter.drawEllipse(mMultitouchCenter, 10, 10);
+
+                if (mReleaseOnClose) {
+                    painter.drawEllipse(getSecondaryTouchPoint(), 20, 20);
+                    painter.drawEllipse(mPrimaryTouchPoint, 20, 20);
+                }
+            }
+        }
+
+        void resizeEvent(QResizeEvent *event)
+        {
+            mMultitouchCenter = QPoint(width() / 2, height() / 2);
         }
 
         void showEvent(QShowEvent *event)
         {
             this->setFocus();
             this->activateWindow();
+
+            if (mMode == OverlayMode::Multitouch) {
+                mPrimaryTouchPoint = mMultitouchCenter;
+            }
         }
 
         void setFlashValue(double val)
@@ -547,27 +611,62 @@ private:
 
         void showAsFlash()
         {
-            mIsFlash = true;
+            if (mMode != OverlayMode::Hidden) return;
+
+            mMode = OverlayMode::Flash;
             setCursor(Qt::ArrowCursor);
             show();
         }
 
+        void showForMultitouch()
+        {
+            if (mMode != OverlayMode::Hidden) return;
+
+            // Show and render the frame once before the mode is changed.
+            // This ensures that the first frame of the overlay that is rendered *does not* show
+            // the center point, as this has adverse effects on OSX (it seems to corrupt the alpha
+            // portion of the color buffer, leaving the original location of the point with a
+            // different alpha, resulting in a shadow).
+            show();
+            update();
+
+            mMode = OverlayMode::Multitouch;
+            setCursor(Qt::ArrowCursor);
+        }
+
         void showForZoom()
         {
-            mIsFlash = false;
+            if (mMode != OverlayMode::Hidden) return;
+
+            mMode = OverlayMode::Zoom;
             setCursor(QCursor(mCursor));
             show();
         }
 
     private:
+        QPoint getSecondaryTouchPoint() const
+        {
+            return mPrimaryTouchPoint + 2 * (mMultitouchCenter - mPrimaryTouchPoint);
+        }
+
         EmulatorQtWindow *mEmulatorWindow;
         EmulatorWindowContainer *mContainer;
         QRubberBand mRubberBand;
-        QPoint mOrigin;
+        QPoint mRubberbandOrigin;
         QPixmap mCursor;
 
+        QPoint mMultitouchCenter;
+        QPoint mPrimaryTouchPoint;
+        bool mReleaseOnClose;
+
         double mFlashValue;
-        bool mIsFlash;
+
+        enum class OverlayMode {
+            Hidden,
+            Flash,
+            Multitouch,
+            Zoom,
+        } mMode;
     };
 
     EmulatorWindowContainer mContainer;
