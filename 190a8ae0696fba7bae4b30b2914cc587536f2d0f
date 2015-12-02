@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bbb18759_b77030ea",
+        "filename": "android/skin/qt/tools.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-02T00:06:30Z",
+      "side": 1,
+      "message": "Wow, there\u0027s no way to make this automatic? Seems like a pain in the ass to recalculate every time we insert/remove a button.",
+      "range": {
+        "startLine": 158,
+        "startChar": 8,
+        "endLine": 158,
+        "endChar": 11
+      },
+      "revId": "190a8ae0696fba7bae4b30b2914cc587536f2d0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
