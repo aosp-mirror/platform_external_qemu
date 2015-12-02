@@ -47,8 +47,13 @@ void ExtendedWindow::completeSettingsInitialization()
         setElidedText(mExtendedUi->set_saveLocBox, mSettingsState.mSavePath);
     }
 
-    // Dark/Light theme
+    // SDK folder
     QSettings settings;
+    QString sdkPath = settings.value(Ui::Settings::SDK_PATH, "").toString();
+    sdkPath = QDir::toNativeSeparators(sdkPath);
+    mExtendedUi->set_sdkPathBox->setText(sdkPath);
+
+    // Dark/Light theme
     SettingsTheme theme = (SettingsTheme)settings.
                              value(Ui::Settings::UI_THEME, 0).toInt();
     if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
@@ -123,7 +128,7 @@ void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
     adjustTabs(PANE_IDX_SETTINGS);
 }
 
-void ExtendedWindow::on_set_folderButton_clicked()
+void ExtendedWindow::on_set_saveLocFolderButton_clicked()
 {
     QString dirName = QFileDialog::getExistingDirectory(
                                       this,
@@ -151,6 +156,54 @@ void ExtendedWindow::on_set_folderButton_clicked()
     settings.setValue(Ui::Settings::SAVE_PATH, dirName);
 
     setElidedText(mExtendedUi->set_saveLocBox, dirName);
+}
+
+void ExtendedWindow::on_set_sdkFolderButton_clicked()
+{
+    QSettings settings;
+    QString dirName = settings.value(Ui::Settings::SDK_PATH, "").toString();
+
+    // Repeat this dialog until the user is successful or cancels
+    while(1) {
+        dirName = QFileDialog::getExistingDirectory(
+                                  this,
+                                  tr("Android SDK location"),
+                                  dirName,
+                                  QFileDialog::ShowDirsOnly);
+
+        if ( dirName.isEmpty() ) return; // Operation was canceled
+
+        // We got a path. If it does not have an SDK, don't allow it.
+        // (We simply test for the existence of "platforms/"; see
+        // validateSdkPath() in //tools/adt/idea/android/src/com/
+        // android/tools/idea/sdk/SdkPaths.java)
+        QString platformsName = dirName + "/platforms";
+        QFileInfo platformsInfo(platformsName);
+        if ( platformsInfo.exists() && platformsInfo.isDir() ) {
+            // The /platforms sub-directory exists in the
+            // chosen location. Accept this path.
+            break;
+        }
+        // The path is not good. Force the user to cancel or try again.
+        QString errStr = tr("This path does not point to an SDK installation<br><br>")
+                         + QDir::toNativeSeparators(dirName);
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Select Android SDK path"));
+        msgBox.setText(errStr);
+        msgBox.setInformativeText(tr("Do you want try again or cancel?"));
+        msgBox.setStandardButtons(QMessageBox::Retry | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Cancel);
+        int selection = msgBox.exec();
+        if (selection == QMessageBox::Cancel) return;
+
+        // Try again with their choice (dirName) as the starting point
+    } // end while (1);
+
+    // Save this selection
+    settings.setValue(Ui::Settings::SDK_PATH, dirName);
+
+    dirName = QDir::toNativeSeparators(dirName);
+    mExtendedUi->set_sdkPathBox->setText(dirName);
 }
 
 // static member function
