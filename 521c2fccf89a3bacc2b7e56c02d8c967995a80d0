@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bb37c76a_41555244",
+        "filename": "android/build/definitions.make",
+        "patchSetId": 9
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T17:34:16Z",
+      "side": 1,
+      "message": "nit: would rather put this outside of the define, and in the caller instead.",
+      "revId": "521c2fccf89a3bacc2b7e56c02d8c967995a80d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
