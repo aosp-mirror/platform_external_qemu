@@ -31,6 +31,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/globals.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -202,7 +203,9 @@ void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
 
 void EmulatorQtWindow::mouseMoveEvent(QMouseEvent *event)
 {
-    handleMouseEvent(kEventMouseMotion, event);
+    handleMouseEvent(kEventMouseMotion,
+                     event->button() == Qt::RightButton ? kMouseButtonRight : kMouseButtonLeft,
+                     event->pos());
 }
 
 void EmulatorQtWindow::mousePressEvent(QMouseEvent *event)
@@ -211,12 +214,16 @@ void EmulatorQtWindow::mousePressEvent(QMouseEvent *event)
     if (settings.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool()) {
         mGrabKeyboardInput = true;
     }
-    handleMouseEvent(kEventMouseButtonDown, event);
+    handleMouseEvent(kEventMouseButtonDown,
+                     event->button() == Qt::RightButton ? kMouseButtonRight : kMouseButtonLeft,
+                     event->pos());
 }
 
 void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent *event)
 {
-    handleMouseEvent(kEventMouseButtonUp, event);
+    handleMouseEvent(kEventMouseButtonUp,
+                     event->button() == Qt::RightButton ? kMouseButtonRight : kMouseButtonLeft,
+                     event->pos());
 }
 
 void EmulatorQtWindow::paintEvent(QPaintEvent *)
@@ -700,12 +707,12 @@ void EmulatorQtWindow::doResize(const QSize &size)
 }
 
 
-void EmulatorQtWindow::handleMouseEvent(SkinEventType type, QMouseEvent *event)
+void EmulatorQtWindow::handleMouseEvent(SkinEventType type, SkinMouseButtonType button, const QPoint &pos)
 {
     SkinEvent *skin_event = createSkinEvent(type);
-    skin_event->u.mouse.button = event->button() == Qt::RightButton ? kMouseButtonRight : kMouseButtonLeft;
-    skin_event->u.mouse.x = event->x();
-    skin_event->u.mouse.y = event->y();
+    skin_event->u.mouse.button = button;
+    skin_event->u.mouse.x = pos.x();
+    skin_event->u.mouse.y = pos.y();
     skin_event->u.mouse.xrel = 0;
     skin_event->u.mouse.yrel = 0;
 
@@ -746,6 +753,19 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
             } else if (type == kEventKeyUp) {
                 mOverlay.hide();
             }
+        }
+    }
+    if (!grab && event->key() == Qt::Key_Alt) {
+        if (type == kEventKeyDown) {
+            if (androidHwConfig_isScreenMultiTouch(android_hw)) {
+                mOverlay.showForMultitouch();
+            } else {
+                tool_window->showErrorDialog(tr("Your virtual device is not configured for "
+                                                "multi-touch input."),
+                                             tr("Multi-touch"));
+            }
+        } else if (type == kEventKeyUp) {
+            mOverlay.hide();
         }
     }
     if (grab ||
