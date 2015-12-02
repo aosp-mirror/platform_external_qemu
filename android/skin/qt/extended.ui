@@ -2091,7 +2091,7 @@ font-family: &quot;Roboto&quot;</string>
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="QPushButton" name="set_folderButton">
+    <widget class="QPushButton" name="set_saveLocFolderButton">
      <property name="geometry">
       <rect>
        <x>572</x>
@@ -2190,31 +2190,6 @@ font-family: &quot;Roboto&quot;</string>
       <string>Toggle</string>
      </property>
     </widget>
-    <widget class="QCheckBox" name="set_useStudioPathBox">
-     <property name="geometry">
-      <rect>
-       <x>324</x>
-       <y>92</y>
-       <width>211</width>
-       <height>24</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Use Android Studio path</string>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>24</width>
-       <height>24</height>
-      </size>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Toggle</string>
-     </property>
-    </widget>
     <widget class="QLineEdit" name="set_sdkPathBox">
      <property name="enabled">
       <bool>true</bool>
@@ -2222,7 +2197,7 @@ font-family: &quot;Roboto&quot;</string>
      <property name="geometry">
       <rect>
        <x>324</x>
-       <y>112</y>
+       <y>92</y>
        <width>240</width>
        <height>31</height>
       </rect>
@@ -2237,11 +2212,11 @@ font-family: &quot;Roboto&quot;</string>
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="QPushButton" name="set_sdkFolderButton">
+    <widget class="QPushButton" name="set_sdkPathButton">
      <property name="geometry">
       <rect>
        <x>572</x>
-       <y>112</y>
+       <y>92</y>
        <width>32</width>
        <height>32</height>
       </rect>
@@ -2266,17 +2241,6 @@ font-family: &quot;Roboto&quot;</string>
       <string notr="true">folder</string>
      </property>
     </widget>
-    <zorder>themeTitle</zorder>
-    <zorder>set_themeBox</zorder>
-    <zorder>saveLocationTitle</zorder>
-    <zorder>set_saveLocBox</zorder>
-    <zorder>set_folderButton</zorder>
-    <zorder>themeTitle_2</zorder>
-    <zorder>themeTitle_4</zorder>
-    <zorder>set_allowKeyboardGrab</zorder>
-    <zorder>set_sdkPathBox</zorder>
-    <zorder>set_sdkFolderButton</zorder>
-    <zorder>set_useStudioPathBox</zorder>
    </widget>
    <widget class="QWidget" name="helpPage">
     <widget class="QTabWidget" name="help_tabs">
@@ -3447,7 +3411,7 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>help_fileBug</tabstop>
   <tabstop>help_sendFeedback</tabstop>
   <tabstop>set_saveLocBox</tabstop>
-  <tabstop>set_folderButton</tabstop>
+  <tabstop>set_saveLocFolderButton</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>
