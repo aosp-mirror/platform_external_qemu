@@ -62,7 +62,7 @@ public:
     explicit ScopedPtr(T* ptr) : mPtr(ptr) {}
 
     // Destructor will call reset() automatically.
-    ~ScopedPtr() { reset(nullptr); }
+    ~ScopedPtr() { reset(); }
 
     // Release the pointer object from the instance and return it.
     // Caller should assume ownership of the object.
@@ -73,7 +73,7 @@ public:
     }
 
     // Reset the managed object to a new value.
-    void reset(T* ptr) {
+    void reset(T* ptr = nullptr) {
         static_cast<Deleter&>(*this)(mPtr);
         mPtr = ptr;
     }

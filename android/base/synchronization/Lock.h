@@ -23,6 +23,8 @@
 #  include <pthread.h>
 #endif
 
+#include <assert.h>
+
 namespace android {
 namespace base {
 
@@ -78,17 +80,28 @@ private:
 
 // Helper class to lock / unlock a mutex automatically on scope
 // entry and exit.
+// NB: not thread-safe (as opposed to the Lock class)
 class AutoLock {
 public:
     AutoLock(Lock& lock) : mLock(lock) {
         mLock.lock();
     }
 
-    ~AutoLock() {
+    void unlock() {
+        assert(mLocked);
         mLock.unlock();
+        mLocked = false;
     }
+
+    ~AutoLock() {
+        if (mLocked) {
+            mLock.unlock();
+        }
+    }
+
 private:
     Lock& mLock;
+    bool mLocked = true;
     DISALLOW_COPY_AND_ASSIGN(AutoLock);
 };
 
