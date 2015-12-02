@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
+/* Copyright (C) 2007-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -48,6 +48,7 @@ void goldfish_fb_init(int id);
 void goldfish_audio_init(uint32_t base, int id, const char* input_source);
 void goldfish_battery_init(int has_battery);
 void goldfish_battery_set_prop(int ac, int property, int value);
+int  goldfish_battery_read_prop(int property);
 void goldfish_mmc_init(uint32_t base, int id, BlockDriverState* bs);
 
 // Query functions:

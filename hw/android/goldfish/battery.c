@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 The Android Open Source Project
+/* Copyright (C) 2007-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -190,6 +190,37 @@ void goldfish_battery_init(int has_battery)
                     goldfish_battery_save,
                     goldfish_battery_load,
                     s);
+}
+
+int goldfish_battery_read_prop(int property)
+{
+    int retVal = 0;
+
+    if (!battery_state || !battery_state->hw_has_battery) {
+        return 0;
+    }
+
+    switch (property) {
+        case POWER_SUPPLY_PROP_ONLINE:
+            retVal = battery_state->ac_online;
+            break;
+        case POWER_SUPPLY_PROP_STATUS:
+            retVal = battery_state->status;
+            break;
+        case POWER_SUPPLY_PROP_HEALTH:
+            retVal = battery_state->health;
+            break;
+        case POWER_SUPPLY_PROP_PRESENT:
+            retVal = battery_state->present;
+            break;
+        case POWER_SUPPLY_PROP_CAPACITY:
+            retVal = battery_state->capacity;
+            break;
+        default:
+            retVal = 0;
+            break;
+    }
+    return retVal;
 }
 
 void goldfish_battery_set_prop(int ac, int property, int value)

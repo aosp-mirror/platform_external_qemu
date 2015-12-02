@@ -52,23 +52,44 @@ typedef struct QAndroidBatteryAgent {
     // Sets whether the battery is present or not
     void (*setIsBatteryPresent)(bool isPresent);
 
+    // Returns whether the battery is present or not
+    bool (*present)();
+
     // Sets whether the battery is charging or not
     void (*setIsCharging)(bool isCharging);
 
+    // Returns whether the battery is charging or not
+    bool (*charging)();
+
     // Set what type of charger is being used
     void (*setCharger)(enum BatteryCharger charger);
+
+    // Returns what type of charger is being used
+    enum BatteryCharger (*charger)();
 
     // Sets the current charge level
     // Input: |percentFull| integer percentage, 0 .. 100
     void (*setChargeLevel)(int percentFull);
 
+    // Returns the current charge level as a
+    // percentage, 0 .. 100
+    int (*chargeLevel)();
+
     // Sets the battery health
     // Input: |health| one of the BatteryHealth enum values, above
     void (*setHealth)(enum BatteryHealth health);
 
+    // Returns the battery health as one of the BatteryHealth
+    // enum values, above
+    enum BatteryHealth (*health)();
+
     // Sets the battery status
     // Input: |status| one of the BatteryStatus enum values, above
     void (*setStatus)(enum BatteryStatus status);
+
+    // Returns the battery status as one of the BatteryStatus
+    // enum values, above
+    enum BatteryStatus (*status)();
 
     // Query the battery state
     void (*batteryDisplay)(void* opaque, LineConsumerCallback outputCallback);
