@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5ba24b12_833e8cb4",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 28
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-02T20:17:06Z",
+      "side": 1,
+      "message": "Moving",
+      "parentUuid": "fb1bff58_4317662f",
+      "revId": "4848cd998ca3ea6e488e4067f12c8433f0c0dceb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fb1bff58_6314622a",
         "filename": "Makefile.common.mk",
         "patchSetId": 28
@@ -30,6 +48,24 @@
       "writtenOn": "2015-12-02T18:26:46Z",
       "side": 1,
       "message": "nit: Prefer multi-line assignment for clarity, as in:\n\n  LOCAL_LDLIBS +\u003d \\\n      $(EMULATOR_LIBUI_LDLIBS) \\\n      $(LIBCURL_LDLIBS) \\\n      $(BREAKPAD_CLIENT_LDLIBS) \\\n      $(BREAKPAD_LDLIBS) \\\n      $(CXX_STD_LIB) \\",
+      "revId": "4848cd998ca3ea6e488e4067f12c8433f0c0dceb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dbae3bf9_06c74a1a",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 28
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-02T20:17:06Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "fb1bff58_6314622a",
       "revId": "4848cd998ca3ea6e488e4067f12c8433f0c0dceb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "3b18372c_e9bf7d1b",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 28
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-02T20:17:06Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "9b2da379_28316be8",
+      "revId": "4848cd998ca3ea6e488e4067f12c8433f0c0dceb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bb36e7c5_296c0ddc",
         "filename": "Makefile.common.mk",
         "patchSetId": 28
@@ -64,6 +118,24 @@
       "writtenOn": "2015-12-02T18:26:46Z",
       "side": 1,
       "message": "the trailing \\ here is correct but should be followed by an empty line, otherwise the LOCAL_CFLAGS below is added to LOCAL_C_INCLUDES instead of updating the LOCAL_CFLAGS variable!",
+      "revId": "4848cd998ca3ea6e488e4067f12c8433f0c0dceb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dbae3bf9_e6cb2622",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 28
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-02T20:17:06Z",
+      "side": 1,
+      "message": "Fixed.",
+      "parentUuid": "bb36e7c5_296c0ddc",
       "revId": "4848cd998ca3ea6e488e4067f12c8433f0c0dceb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "dbae3bf9_466f92d2",
+        "filename": "Makefile.tests.mk",
+        "patchSetId": 28
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-02T20:17:06Z",
+      "side": 1,
+      "message": "Fixed and moved to new makefile.",
+      "parentUuid": "e0e8ac67_2252ee0f",
+      "revId": "4848cd998ca3ea6e488e4067f12c8433f0c0dceb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b21b386_44d68e74",
         "filename": "Makefile.tests.mk",
         "patchSetId": 28
@@ -98,6 +188,24 @@
       "writtenOn": "2015-12-02T18:26:46Z",
       "side": 1,
       "message": "nit: style. It\u0027s easier to use 4-space indentation in Makefiles.",
+      "revId": "4848cd998ca3ea6e488e4067f12c8433f0c0dceb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb113f0a_cd3f2db7",
+        "filename": "Makefile.tests.mk",
+        "patchSetId": 28
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-02T20:17:06Z",
+      "side": 1,
+      "message": "fixed",
+      "parentUuid": "1b21b386_44d68e74",
       "revId": "4848cd998ca3ea6e488e4067f12c8433f0c0dceb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
