@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "80f5303f_3fbe87d2",
+        "filename": "android/base/threads/FunctorThread.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T08:27:48Z",
+      "side": 1,
+      "message": "nit: same here.",
+      "revId": "6774edb889298c059b8c683a9a7a3cf5238e272e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0f23453_e0ad22ad",
+        "filename": "android/base/threads/FunctorThread.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T08:27:48Z",
+      "side": 1,
+      "message": "nit: add comments to closing braces, as in:\n\n  }  // namespace base\n  }  // namespace android",
+      "revId": "6774edb889298c059b8c683a9a7a3cf5238e272e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb421f2f_0bb2dd0d",
+        "filename": "android/base/threads/FunctorThread.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T08:27:48Z",
+      "side": 1,
+      "message": "nit: { should be at the end of the line above. Maybe use git clang-format ?",
+      "revId": "6774edb889298c059b8c683a9a7a3cf5238e272e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
