@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "db339bd5_4ae05319",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T20:41:50Z",
+      "side": 1,
+      "message": "it looks like you are calling connected() from multiple threads, and the function reads a member field (mFdWatch) without any locking or memory barriers. I smell a race condition here.",
+      "revId": "a89a841b0a7a629b60927ff7040e6fa278d37b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0f23453_a0627ae7",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T20:41:50Z",
+      "side": 1,
+      "message": "ow, that\u0027s dangerous. Loopers and their data structures are single-thread entities, i.e. they are not designed from being invoked from different threads. This call is modifying another thread\u0027s looper, which is a potential data race / random crash source. You really need better synchronization here.\n\nI looks like what you need is a socketpair() that allows you to send one byte from this thread, and have a fdWatch() on the main thread that triggers a callback when it receives it. We don\u0027t have a helper class to do this in android/base/, it might be useful to add one.\n\nSee socket_pair() in android/utils/sockets.c if that can help. Another alternative is to add a Looper::Event class to android/base/Looper.h but that requires more work.",
+      "revId": "a89a841b0a7a629b60927ff7040e6fa278d37b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db339bd5_aaaf0fbc",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T20:41:50Z",
+      "side": 1,
+      "message": "hint: use auto to reduce typing in this case, e.g.:\n\n  auto agent \u003d static_cast\u003cWearAgentImpl*\u003e(opaque);\n\nNote that the type is still explicit to the reader here.",
+      "revId": "a89a841b0a7a629b60927ff7040e6fa278d37b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b21b386_6441cae7",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T20:41:50Z",
+      "side": 1,
+      "message": "same here.",
+      "revId": "a89a841b0a7a629b60927ff7040e6fa278d37b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e0e8ac67_021eca4b",
+        "filename": "android/wear-agent/WearAgent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T20:41:50Z",
+      "side": 1,
+      "message": "Did you mean waitUntilConnected() here ?",
+      "revId": "a89a841b0a7a629b60927ff7040e6fa278d37b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
