@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e0e8ac67_22ac2eb1",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T08:25:00Z",
+      "side": 1,
+      "message": "do you really want this to apply to TestSystem() as well? otherwise a virtual abstract method would be better.",
+      "revId": "6c1c4051a438909dd8838c09bac573a461fd0a0b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
