@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fb421f2f_ebfcb12a",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 31
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T21:48:22Z",
+      "side": 1,
+      "message": "ah, please fix the order of all the android/... headers now.\n\nAlso, include third-party libraries (e.g. Qt), then the C++ stdlib, then the C system headers. But that\u0027s just a nit.",
+      "revId": "1a2d6ab8ec3f2c58b03c89fb852d9f3dc14656f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
