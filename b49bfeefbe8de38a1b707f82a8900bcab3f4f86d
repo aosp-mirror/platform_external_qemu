@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9bb8433f_0a6d8f9b",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-02T21:59:07Z",
+      "side": 1,
+      "message": "Set it similar to the screenshot save path.\nThe issue you messaged me about should be fixed by https://android-review.googlesource.com/#/c/184726/",
+      "range": {
+        "startLine": 54,
+        "startChar": 17,
+        "endLine": 54,
+        "endChar": 31
+      },
+      "revId": "b49bfeefbe8de38a1b707f82a8900bcab3f4f86d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b1deb19_aa8e17a3",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-02T21:59:07Z",
+      "side": 1,
+      "message": "Let\u0027s rewrite the loop like this:\n\n\ndo {\n//...\n} while (\n (platformsInfo.exists() \u0026\u0026 platformsInfo.isDir()) ||\n  QMessageBox::question(this,\n                        tr(\"Select Android SDK path\"),\n                        tr(\"Do you want to try again or cancel?\"),\n                        QMessageBox::Retry | QMessageBox::Cancel) \u003d\u003d QMessageBox::Retry);\n\nI think giving a clear exit condition is better than while(1)...",
+      "range": {
+        "startLine": 167,
+        "startChar": 4,
+        "endLine": 167,
+        "endChar": 9
+      },
+      "revId": "b49bfeefbe8de38a1b707f82a8900bcab3f4f86d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
