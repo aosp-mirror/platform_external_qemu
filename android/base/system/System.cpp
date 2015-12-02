@@ -783,5 +783,13 @@ String System::findBundledExecutable(const char* programName) {
     return executablePath;
 }
 
+void System::sleepMs(unsigned n) {
+#ifdef _WIN32
+    ::Sleep(n);
+#else
+    usleep(n * 1000);
+#endif
+}
+
 }  // namespace base
 }  // namespace android
