@@ -30,7 +30,9 @@ static void setElidedText(QLineEdit* line_edit, const QString& text) {
 }
 
 void ExtendedWindow::initSettings()
-{ }
+{
+    mExtendedUi->set_saveLocBox->installEventFilter(this);
+}
 
 void ExtendedWindow::completeSettingsInitialization()
 {
