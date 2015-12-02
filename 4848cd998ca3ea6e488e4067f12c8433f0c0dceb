@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fb1bff58_4317662f",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 28
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T18:26:46Z",
+      "side": 1,
+      "message": "since this is pretty non-trivial, I recommend creating Makefile.crash-service.mk and put both the definitions of the crash service and its test programs there (I\u0027m preparing a future patch to get rid of Makefile.tests.mk for the record). This will be slightly cleaner imho.",
+      "revId": "4848cd998ca3ea6e488e4067f12c8433f0c0dceb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb1bff58_6314622a",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 28
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T18:26:46Z",
+      "side": 1,
+      "message": "nit: Prefer multi-line assignment for clarity, as in:\n\n  LOCAL_LDLIBS +\u003d \\\n      $(EMULATOR_LIBUI_LDLIBS) \\\n      $(LIBCURL_LDLIBS) \\\n      $(BREAKPAD_CLIENT_LDLIBS) \\\n      $(BREAKPAD_LDLIBS) \\\n      $(CXX_STD_LIB) \\",
+      "revId": "4848cd998ca3ea6e488e4067f12c8433f0c0dceb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b2da379_28316be8",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 28
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T18:26:46Z",
+      "side": 1,
+      "message": "same here.",
+      "revId": "4848cd998ca3ea6e488e4067f12c8433f0c0dceb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb36e7c5_296c0ddc",
+        "filename": "Makefile.common.mk",
+        "patchSetId": 28
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T18:26:46Z",
+      "side": 1,
+      "message": "the trailing \\ here is correct but should be followed by an empty line, otherwise the LOCAL_CFLAGS below is added to LOCAL_C_INCLUDES instead of updating the LOCAL_CFLAGS variable!",
+      "revId": "4848cd998ca3ea6e488e4067f12c8433f0c0dceb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e0e8ac67_2252ee0f",
+        "filename": "Makefile.tests.mk",
+        "patchSetId": 28
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T18:26:46Z",
+      "side": 1,
+      "message": "please use multi-line assignment as in:\n\n  LOCAL_C_INCLUDES +\u003d \\\n      $(LOCAL_PATH)/include \\\n      $(BREAKPAD_INCLUDES) \\\n      $(EMULATOR_GTEST_INCLUDES) \\",
+      "revId": "4848cd998ca3ea6e488e4067f12c8433f0c0dceb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b21b386_44d68e74",
+        "filename": "Makefile.tests.mk",
+        "patchSetId": 28
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T18:26:46Z",
+      "side": 1,
+      "message": "nit: style. It\u0027s easier to use 4-space indentation in Makefiles.",
+      "revId": "4848cd998ca3ea6e488e4067f12c8433f0c0dceb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
