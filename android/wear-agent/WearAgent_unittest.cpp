@@ -35,9 +35,12 @@ namespace wear {
 using namespace ::android::base;
 using namespace ::android::wear::testing;
 
+static volatile bool stopped = false;
+
 static void on_time_up (void* opaque, Looper::Timer* timer) {
     Looper* looper = static_cast<Looper*>(opaque);
     looper->forceQuit();
+    stopped = true;
 }
 
 // Simple test to run agent for 1 mil second and exit without crash
@@ -48,14 +51,18 @@ TEST(WearAgent, SimpleTest) {
     int milSecondsToRun = 1;
     Looper* mainLooper = Looper::create();
     {
-        Looper::Timer* timer = mainLooper->createTimer(on_time_up, mainLooper);
-        const Looper::Duration dl = milSecondsToRun;
-        timer->startRelative(dl);
+        stopped = false;
 
         android::wear::WearAgent agent(mainLooper, adbHostPort);
         SocketDrainer drainer(mainLooper);
 
-        mainLooper->run();
+        Looper::Timer* timer = mainLooper->createTimer(on_time_up, mainLooper);
+        const Looper::Duration dl = milSecondsToRun;
+        timer->startRelative(dl);
+
+        while (!stopped) {
+            mainLooper->run();
+        }
         delete timer;
     }
     delete mainLooper;
@@ -76,21 +83,27 @@ static bool testTrackDevicesQuery(int socketFd, ScopedSocket* agentSocket) {
 static void runWearAgent(int adbHostPort, int milSecondsToRun) {
     Looper* mainLooper = Looper::create();
     {
+        stopped = false;
+
+        android::wear::WearAgent agent(mainLooper, adbHostPort);
+        SocketDrainer drainer(mainLooper);
+
         Looper::Timer* timer = NULL;
         if (milSecondsToRun > 0) {
             timer = mainLooper->createTimer(on_time_up, mainLooper);
             const Looper::Duration dl = milSecondsToRun;
             timer->startRelative(dl);
         }
-        android::wear::WearAgent agent(mainLooper, adbHostPort);
-        SocketDrainer drainer(mainLooper);
 
-        mainLooper->run();
+        while (!stopped) {
+            mainLooper->run();
+        }
 
         if (milSecondsToRun > 0) {
             delete timer;
         }
     }
+
     DPRINT("wear agent exits\n");
     fflush(stdout);
     delete mainLooper;
@@ -115,7 +128,7 @@ static bool testWearAgent(bool usbPhone) {
     } else {
         if (childpid < 0) {
             DPRINT("Cannot fork!\n");
-            return -1;
+            return false;
         }
     }
     ScopedSocket agentSocketTracking;

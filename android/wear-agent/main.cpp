@@ -23,10 +23,13 @@ using namespace android::base;
 
 void print_help(const char* progname);
 
+static volatile bool stopped = false;
+
 static void _on_time_up (void* opaque, Looper::Timer* timer) {
     Looper* looper = static_cast<Looper*>(opaque);
     printf("stop the wear agent now !\n");
     looper->forceQuit();
+    stopped = true;
 }
 
 bool parse_arguments(int argc, char** argv, int& adbHostPort, int& secondsToRun);
@@ -45,6 +48,7 @@ int main(int argc, char** argv)
     // Enclose in a block so that agent can cleanup before
     // looper is freed, otherwise agent cannot cleanup properly
     {
+        stopped = false;
         Looper::Timer* timer = NULL;
         if (secondsToRun > 0) {
             timer = mainLooper->createTimer(_on_time_up, mainLooper);
@@ -54,7 +58,9 @@ int main(int argc, char** argv)
         android::wear::WearAgent agent(mainLooper, adbHostPort);
         SocketDrainer socketDrainer(mainLooper);
 
-        mainLooper->run();
+        while (!stopped) {
+            mainLooper->run();
+        }
 
         if (secondsToRun > 0) {
             delete timer;
