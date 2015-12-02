@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2013 The Android Open Source Project
+/* Copyright (C) 2007-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -73,6 +73,7 @@ extern void goldfish_battery_display(Monitor *mon);
 typedef void (*BatteryLineCallback)(void* opaque, const char* line, int len);
 extern void goldfish_battery_display_cb(void* opaque,
                                         BatteryLineCallback callback);
+int  goldfish_battery_read_prop(int property);
 void goldfish_battery_set_prop(int ac, int property, int value);
 
 #endif /* _HW_GOLDFISH_BATTERY_H */
