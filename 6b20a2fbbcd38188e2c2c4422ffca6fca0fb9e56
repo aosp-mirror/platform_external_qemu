@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fb421f2f_eb4e716a",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 11
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T17:34:16Z",
+      "side": 1,
+      "message": "I would like to get the \u0027android-configure.sh \u0026\u0026 make\u0027 flow continue to work. Is is possible to put this copying and generation step inside of android-configure.sh instead to make it so?",
+      "revId": "6b20a2fbbcd38188e2c2c4422ffca6fca0fb9e56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e0e8ac67_424df271",
+        "filename": "android/build/definitions.make",
+        "patchSetId": 11
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-02T17:34:16Z",
+      "side": 1,
+      "message": "still inside install-symbol?",
+      "revId": "6b20a2fbbcd38188e2c2c4422ffca6fca0fb9e56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
