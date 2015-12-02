@@ -56,6 +56,10 @@ public:
     // its looper. NOTE: This must happen _before_ the looper is destroyed.
     ~WearAgent();
 
+    // Wait for up to |timeoutMs| until agent connects the adb service
+    // returns true if connected
+    bool waitUnitConnected(unsigned timeoutMs);
+
 private:
     DISALLOW_COPY_AND_ASSIGN(WearAgent);
 
