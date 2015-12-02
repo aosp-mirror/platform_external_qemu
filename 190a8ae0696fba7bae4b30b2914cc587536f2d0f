@@ -22,6 +22,30 @@
       "revId": "190a8ae0696fba7bae4b30b2914cc587536f2d0f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9bb8433f_336d724a",
+        "filename": "android/skin/qt/tools.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-02T00:19:39Z",
+      "side": 1,
+      "message": "It\u0027s not really recalculating, just dragging the button in qt designer until it looks right. But, to answer your question, there is a way to do it, we should use layout containers provided by Qt (QHBoxLayout etc.). Consider this an item for future refactoring :)",
+      "parentUuid": "bbb18759_b77030ea",
+      "range": {
+        "startLine": 158,
+        "startChar": 8,
+        "endLine": 158,
+        "endChar": 11
+      },
+      "revId": "190a8ae0696fba7bae4b30b2914cc587536f2d0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
