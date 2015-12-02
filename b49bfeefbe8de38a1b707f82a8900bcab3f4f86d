@@ -45,6 +45,53 @@
       "revId": "b49bfeefbe8de38a1b707f82a8900bcab3f4f86d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9bb8433f_ea02cb97",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-02T22:03:52Z",
+      "side": 1,
+      "message": "I agree with a do/while, but perhaps a slightly more readable exit condition?",
+      "parentUuid": "5b1deb19_aa8e17a3",
+      "range": {
+        "startLine": 167,
+        "startChar": 4,
+        "endLine": 167,
+        "endChar": 9
+      },
+      "revId": "b49bfeefbe8de38a1b707f82a8900bcab3f4f86d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9bb8433f_aaf8c3e7",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-02T22:03:52Z",
+      "side": 1,
+      "message": "Re-name this function to \"initAndroidSdkRoot\", and make it private? That, or change this function to return whatever is in the QSettings/text box, and move the code currently there into this location.",
+      "range": {
+        "startLine": 91,
+        "startChar": 18,
+        "endLine": 91,
+        "endChar": 35
+      },
+      "revId": "b49bfeefbe8de38a1b707f82a8900bcab3f4f86d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
