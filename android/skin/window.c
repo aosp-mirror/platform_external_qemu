@@ -988,6 +988,7 @@ struct SkinWindow {
     Layout        layout;
     SkinPos       pos;
     FingerState   finger;
+    FingerState   secondary_finger;
     ButtonState   button;
     BallState     ball;
     char          enabled;
@@ -1029,11 +1030,10 @@ add_finger_event(SkinWindow* window,
 
 static void
 skin_window_find_finger( SkinWindow*  window,
+                         FingerState* finger,
                          int          x,
                          int          y )
 {
-    FingerState*  finger = &window->finger;
-
     /* find the display that contains this movement */
     finger->display = NULL;
     finger->inside  = 0;
@@ -1056,10 +1056,10 @@ skin_window_find_finger( SkinWindow*  window,
 
 static void
 skin_window_move_mouse( SkinWindow*  window,
+                        FingerState* finger,
                         int          x,
                         int          y )
 {
-    FingerState*  finger = &window->finger;
     ButtonState*  button = &window->button;
 
     if (finger->tracking) {
@@ -1637,6 +1637,7 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
     skin_window_resize(window, 1);
 
     finger_state_reset( &window->finger );
+    finger_state_reset( &window->secondary_finger );
     button_state_reset( &window->button );
     ball_state_reset( &window->ball, window );
 
@@ -1846,6 +1847,19 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
     Button*  button;
     int      mx, my;
 
+    FingerState*    finger;
+
+    // The "button state" contains two flags: the lowest order bit indicates whether or not this is
+    // a press (1) or release (0) event, and the second bit indicates if this is the primary (0) or
+    // secondary (1) finger.
+    unsigned        button_state = (ev->type == kEventMouseButtonUp ? 0 : 1);
+    if (ev->u.mouse.button == kMouseButtonLeft) {
+        finger = &window->finger;
+    } else {
+        finger = &window->secondary_finger;
+        button_state += 2;
+    }
+
     if (!window->surface)
         return;
 
@@ -1859,19 +1873,19 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         mx = ev->u.mouse.x;
         my = ev->u.mouse.y;
         skin_window_map_to_scale( window, &mx, &my );
-        skin_window_move_mouse( window, mx, my );
-        skin_window_find_finger( window, mx, my );
+        skin_window_move_mouse( window, finger, mx, my );
+        skin_window_find_finger( window, finger, mx, my );
 #if 0
         printf("down: x=%d y=%d fx=%d fy=%d fis=%d\n",
                ev->u.mouse.x, ev->u.mouse.y, window->finger.pos.x,
                window->finger.pos.y, window->finger.inside);
 #endif
-        if (window->finger.inside) {
-            window->finger.tracking = 1;
+        if (finger->inside) {
+            finger->tracking = 1;
             add_finger_event(window,
-                             window->finger.pos.x,
-                             window->finger.pos.y,
-                             1);
+                             finger->pos.x,
+                             finger->pos.y,
+                             button_state);
         } else {
             window->button.pressed = NULL;
             button = window->button.hover;
@@ -1904,16 +1918,16 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
             }
             window->button.pressed = NULL;
             window->button.hover   = NULL;
-            skin_window_move_mouse( window, mx, my );
+            skin_window_move_mouse( window, finger, mx, my );
         }
-        else if (window->finger.tracking)
+        else if (finger->tracking || ev->u.mouse.button == kMouseButtonSecondaryTouch )
         {
-            skin_window_move_mouse( window, mx, my );
-            window->finger.tracking = 0;
+            skin_window_move_mouse( window, finger, mx, my );
+            finger->tracking = 0;
             add_finger_event(window,
-                             window->finger.pos.x,
-                             window->finger.pos.y,
-                             0);
+                             finger->pos.x,
+                             finger->pos.y,
+                             button_state);
         }
         break;
 
@@ -1929,12 +1943,12 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         skin_window_map_to_scale( window, &mx, &my );
         if ( !window->button.pressed )
         {
-            skin_window_move_mouse( window, mx, my );
-            if ( window->finger.tracking ) {
+            skin_window_move_mouse( window, finger, mx, my );
+            if ( finger->tracking ) {
                 add_finger_event(window,
-                                 window->finger.pos.x,
-                                 window->finger.pos.y,
-                                 1);
+                                 finger->pos.x,
+                                 finger->pos.y,
+                                 button_state);
             }
         }
         break;
