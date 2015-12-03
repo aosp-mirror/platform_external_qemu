@@ -74,8 +74,9 @@ public:
 
     // Reset the managed object to a new value.
     void reset(T* ptr = nullptr) {
-        static_cast<Deleter&>(*this)(mPtr);
+        const auto oldPtr = mPtr;
         mPtr = ptr;
+        static_cast<Deleter&>(*this)(oldPtr);
     }
 
     // Check if pointer is not null

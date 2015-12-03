@@ -89,6 +89,11 @@ public:
     // NOTE: |exitStatus| can be NULL.
     bool tryWait(intptr_t *exitStatus);
 
+    // Mask all signals for the current thread
+    // This is needed for the qemu guest to run properly
+    // NB: noop for Win32
+    static void maskAllSignals();
+
 private:
 #ifdef _WIN32
     static DWORD WINAPI thread_main(void* arg);
