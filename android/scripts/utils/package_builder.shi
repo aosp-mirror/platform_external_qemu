@@ -179,7 +179,7 @@ package_builder_process_options () {
     if [ "$OPT_SSH_WRAPPER" ]; then
         ANDROID_EMULATOR_SSH_WRAPPER=$OPT_SSH_WRAPPER
     elif [ "$ANDROID_EMULATOR_SSH_WRAPPER" ]; then
-        log "Auto-config: --ssh-wrapper=$ANDROID_EMULATOR_SSH_WRAPPER  [ANDROID_EMAULTOR_SSH_WRAPPER]"
+        log "Auto-config: --ssh-wrapper=$ANDROID_EMULATOR_SSH_WRAPPER  [ANDROID_EMULATOR_SSH_WRAPPER]"
     fi
 
     # Special handling for Darwin target systems.
@@ -297,6 +297,14 @@ builder_prepare_remote_darwin_build () {
             "$PKG_DIR"/aosp/$TOOLCHAIN_SUBDIR
     copy_directory "$(program_directory)" "$PKG_DIR/scripts"
     copy_directory "$(program_directory)"/../dependencies "$PKG_DIR"/dependencies
+
+    local BREAKPAD_SUBDIR
+    for DARWIN_SYSTEM in $DARWIN_SYSTEMS; do
+        BREAKPAD_SUBDIR=$(aosp_prebuilt_breakpad_subdir_for $DARWIN_SYSTEM)
+        run mkdir -p "$PKG_DIR/aosp/$BREAKPAD_SUBDIR"
+        copy_directory "$AOSP_DIR"/$BREAKPAD_SUBDIR \
+            "$PKG_DIR"/aosp/$BREAKPAD_SUBDIR
+    done
 
     DARWIN_BUILD_FLAGS="--verbosity=$(get_verbosity)"
 

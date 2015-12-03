@@ -92,8 +92,15 @@ aosp_prebuilt_toolchain_subdir_for () {
     esac
 }
 
+# Return the subdirectory that contains the breakpad prebuilts to be
+# used for a given host system.
+# $1: System name (e.g. 'linux-x86' or 'linux-x86_64')
+aosp_prebuilt_breakpad_subdir_for () {
+    printf "prebuilts/android-emulator-build/common/breakpad/$1"
+}
+
 # Return the AOSP subdirectory corresponding to the toolchain's sysroot.
-# $1: System name (e.g. 'linux' or 'linux-x86_64')
+# $1: System name (e.g. 'linux-x86' or 'linux-x86_64')
 aosp_prebuilt_toolchain_sysroot_subdir_for () {
     local PREBUILT_DIR
     PREBUILT_DIR="$(aosp_prebuilt_toolchain_subdir_for "$1")"
