@@ -16,6 +16,7 @@
 
 #include "android/base/threads/ThreadStore.h"
 
+#include <signal.h>
 #include <stdio.h>
 
 namespace android {
@@ -120,6 +121,13 @@ void* Thread::thread_main(void *arg) {
     ::android::base::ThreadStoreBase::OnThreadExit();
 
     return (void*)ret;
+}
+
+// static
+void Thread::maskAllSignals() {
+    sigset_t set;
+    sigfillset(&set);
+    pthread_sigmask(SIG_SETMASK, &set, nullptr);
 }
 
 }  // namespace base

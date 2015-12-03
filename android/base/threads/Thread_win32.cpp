@@ -129,5 +129,10 @@ DWORD WINAPI Thread::thread_main(void *arg) {
     return static_cast<DWORD>(ret);
 }
 
+// static
+void Thread::maskAllSignals() {
+    // no such thing as signal in Windows
+}
+
 }  // namespace base
 }  // namespace android
