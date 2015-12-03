@@ -16,6 +16,24 @@
       "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "000140f3_7ba77f81",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 468,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-03T22:58:59Z",
+      "side": 1,
+      "message": "Good find, should be \"buttons() \u0026\" for both. I believe its because MouseMove events aren\u0027t technically attached to a single button, so instead you need to enumerate which buttons are being used.",
+      "parentUuid": "2006440b_5ca27dc0",
+      "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
