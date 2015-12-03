@@ -71,6 +71,16 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         mMouseInside(false),
         mMainLoopThread(nullptr)
 {
+    // Start a timer. If the main window doesn't
+    // appear before the timer expires, show a
+    // pop-up to let the user know we're still
+    // working.
+    QObject::connect(&mStartupTimer, &QTimer::timeout,
+                     this, &EmulatorQtWindow::slot_startupTick);
+    mStartupTimer.setSingleShot(true);
+    mStartupTimer.setInterval(500); // Half a second
+    mStartupTimer.start();
+
     backing_surface = NULL;
     batteryState    = NULL;
 
@@ -130,6 +140,17 @@ EmulatorQtWindow::~EmulatorQtWindow()
 {
     delete tool_window;
     delete mMainLoopThread;
+}
+
+void EmulatorQtWindow::slot_startupTick() {
+    // It's been a while since we were launched, and the main
+    // window still hasn't appeared.
+    // Show a pop-up that lets the user know we are working.
+    mStartupDialog.setWindowTitle(tr("Android Emulator"));
+    mStartupDialog.setLabelText(tr("Starting..."));
+    mStartupDialog.setRange(0, 0); // Don't show % complete
+    mStartupDialog.setCancelButton(0);   // No "cancel" button
+    mStartupDialog.show();
 }
 
 void EmulatorQtWindow::closeEvent(QCloseEvent *event)
@@ -734,7 +755,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
     }
 
     QSettings settings;
-    bool grab = 
+    bool grab =
         mGrabKeyboardInput &&
         settings.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool() &&
         mouseInside();
@@ -943,4 +964,3 @@ bool EmulatorQtWindow::mouseInside() {
            widget_cursor_coords.y() >= 0 &&
            widget_cursor_coords.y() < height();
 }
-
