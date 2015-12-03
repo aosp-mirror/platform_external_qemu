@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "201f2457_54f24c56",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-03T17:59:54Z",
+      "side": 1,
+      "message": "Does this work on Windows, since it has different separators? It might be better to create a QDir and either list its contents and check for platforms or try to cd into platforms.",
+      "range": {
+        "startLine": 185,
+        "startChar": 8,
+        "endLine": 185,
+        "endChar": 55
+      },
+      "revId": "8996cf162ae8566c6cf7343e6dd9cad759158ee3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
