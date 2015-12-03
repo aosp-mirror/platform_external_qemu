@@ -116,7 +116,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
         "Ctrl+P     POWER\n"
         "Ctrl+M     MENU\n"
         "Ctrl+H     HOME\n"
-        "Ctrl+R     RECENTS\n"
+        "Ctrl+O     OVERVIEW\n"
         "Ctrl+Backspace BACK\n";
 
     QTextStream stream(&default_shortcuts);
@@ -360,7 +360,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
     case QtUICommand::BACK:
         uiEmuAgent->userEvents->sendKey(kKeyCodeBack, down);
         break;
-    case QtUICommand::RECENTS:
+    case QtUICommand::OVERVIEW:
         uiEmuAgent->userEvents->sendKey(kKeyCodeAppSwitch, down);
         break;
     case QtUICommand::ROTATE_RIGHT:
@@ -479,16 +479,16 @@ void ToolWindow::on_volume_down_button_released()
     handleUICommand(QtUICommand::VOLUME_DOWN, false);
 }
 
-void ToolWindow::on_recents_button_pressed()
+void ToolWindow::on_overview_button_pressed()
 {
     emulator_window->raise();
-    handleUICommand(QtUICommand::RECENTS, true);
+    handleUICommand(QtUICommand::OVERVIEW, true);
 }
 
-void ToolWindow::on_recents_button_released()
+void ToolWindow::on_overview_button_released()
 {
     emulator_window->activateWindow();
-    handleUICommand(QtUICommand::RECENTS, false);
+    handleUICommand(QtUICommand::OVERVIEW, false);
 }
 
 void ToolWindow::on_rotate_button_clicked()

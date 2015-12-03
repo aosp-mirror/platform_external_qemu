@@ -30,7 +30,7 @@ enum class QtUICommand {
     MENU,
     HOME,
     BACK,
-    RECENTS,
+    OVERVIEW,
     ROTATE_RIGHT,
     ROTATE_LEFT,
     UNGRAB_KEYBOARD
@@ -54,7 +54,7 @@ static const std::pair<QString, QtUICommand> NameToQtUICmd[] = {
     NAME_TO_CMD(MENU),
     NAME_TO_CMD(HOME),
     NAME_TO_CMD(BACK),
-    NAME_TO_CMD(RECENTS),
+    NAME_TO_CMD(OVERVIEW),
     NAME_TO_CMD(UNGRAB_KEYBOARD)
 };
 #undef NAME_TO_CMD
@@ -77,7 +77,7 @@ static const  std::pair<QtUICommand, QString> QtUICmdToDesc[] = {
     CMD_TO_DESC(HOME, "Home"),
     CMD_TO_DESC(BACK, "Back"),
     CMD_TO_DESC(MENU, "Menu"),
-    CMD_TO_DESC(RECENTS, "Recents"),
+    CMD_TO_DESC(OVERVIEW, "Overview"),
     CMD_TO_DESC(UNGRAB_KEYBOARD, "Stop grabbing keyboard input")
 };
 #undef CMD_TO_DESC
