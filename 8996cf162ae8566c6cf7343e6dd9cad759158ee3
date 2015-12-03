@@ -22,6 +22,30 @@
       "revId": "8996cf162ae8566c6cf7343e6dd9cad759158ee3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "60259c9f_f6c16004",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-03T18:08:10Z",
+      "side": 1,
+      "message": "Yes, I tested on Windows.\nThe path is displayed with backslashes; the screenshot\nfunction still works.",
+      "parentUuid": "201f2457_54f24c56",
+      "range": {
+        "startLine": 185,
+        "startChar": 8,
+        "endLine": 185,
+        "endChar": 55
+      },
+      "revId": "8996cf162ae8566c6cf7343e6dd9cad759158ee3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
