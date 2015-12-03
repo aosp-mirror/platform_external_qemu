@@ -389,10 +389,14 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
 bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
     QKeySequence event_key_sequence(event->key() + event->modifiers());
     bool down = event->type() == QEvent::KeyPress;
-    return mShortcutKeyStore.handle(event_key_sequence,
+    bool h = mShortcutKeyStore.handle(event_key_sequence,
                                     [this, down](QtUICommand cmd) {
-                                        handleUICommand(cmd, down);
+                                        if (down) {
+                                            handleUICommand(cmd, true);
+                                            handleUICommand(cmd, false);
+                                        }
                                     });
+    return h;
 }
 
 void ToolWindow::dockMainWindow()
