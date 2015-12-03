@@ -86,6 +86,10 @@ public:
             CFStringGetCString(value, s, PATH_MAX - 1, kCFStringEncodingUTF8);
             char* x = ::strrchr(s, '/');
             if (x) {
+                // skip all slashes - there might be more than one
+                while (x > s && x[-1] == '/') {
+                    --x;
+                }
                 *x = '\0';
                 mProgramDir.assign(s);
             } else {
