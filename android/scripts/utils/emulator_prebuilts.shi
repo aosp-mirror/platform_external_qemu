@@ -39,3 +39,4 @@ prebuilts_dir_parse_option () {
         log "Auto-config: --prebuilts-dir=$PREBUILTS_DIR  [default]"
     fi
 }
+

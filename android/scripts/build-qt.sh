@@ -291,6 +291,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         var_append EXTRA_CONFIGURE_FLAGS \
                 -opensource \
                 -confirm-license \
+                -force-debug-info \
                 -release \
                 -no-c++11 \
                 -no-rpath \
@@ -412,6 +413,18 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 bin/moc \
                 bin/rcc \
                 bin/uic \
+                $QT_SHARED_LIBS
+
+        # Build the symbol files
+        build_symbols \
+                "$(builder_install_prefix)" \
+                "$INSTALL_DIR/$SYSTEM" \
+                "$SYSTEM" \
+                $QT_SHARED_LIBS
+
+        # Strip the libs
+        strip_libs \
+                "$INSTALL_DIR/$SYSTEM" \
                 $QT_SHARED_LIBS
 
         case $SYSTEM in
