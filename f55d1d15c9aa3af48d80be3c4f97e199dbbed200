@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2006440b_5ca27dc0",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 468,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-03T16:09:09Z",
+      "side": 1,
+      "message": "Why \"button \u003d\u003d\" here (and below), vs. \"buttonS \u0026\" in the first test?",
+      "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
