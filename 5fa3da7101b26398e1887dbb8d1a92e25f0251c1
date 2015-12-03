@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "bbb18759_7a66a8fd",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-03T02:05:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1bac5306_266c0adc",
+      "range": {
+        "startLine": 291,
+        "startChar": 0,
+        "endLine": 291,
+        "endChar": 19
+      },
+      "revId": "5fa3da7101b26398e1887dbb8d1a92e25f0251c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fb113f0a_5f373e25",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-12-03T01:51:00Z",
       "side": 1,
       "message": "can we instead have a timer to generate the \u0027up\u0027 event? I mean, now one can\u0027t generate a long press anymore",
+      "range": {
+        "startLine": 395,
+        "startChar": 0,
+        "endLine": 399,
+        "endChar": 41
+      },
+      "revId": "5fa3da7101b26398e1887dbb8d1a92e25f0251c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb113f0a_dfd50ede",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-03T02:05:10Z",
+      "side": 1,
+      "message": "We can still do it with the graphical buttons.  I don\u0027t think timer is a good idea. We need to think of a better solution that allows a real long press with a keyboard shortcut but it would require more extensive changes",
+      "parentUuid": "fb113f0a_5f373e25",
       "range": {
         "startLine": 395,
         "startChar": 0,
