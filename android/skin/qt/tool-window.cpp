@@ -408,12 +408,13 @@ void ToolWindow::raiseMainWindow()
 
 void ToolWindow::on_back_button_pressed()
 {
+    emulator_window->raise();
     handleUICommand(QtUICommand::BACK, true);
-    raiseMainWindow();
 }
 
 void ToolWindow::on_back_button_released()
 {
+    emulator_window->activateWindow();
     handleUICommand(QtUICommand::BACK, false);
 }
 
@@ -424,12 +425,13 @@ void ToolWindow::on_close_button_clicked()
 
 void ToolWindow::on_home_button_pressed()
 {
+    emulator_window->raise();
     handleUICommand(QtUICommand::HOME, true);
-    raiseMainWindow();
 }
 
 void ToolWindow::on_home_button_released()
 {
+   emulator_window->activateWindow();
    handleUICommand(QtUICommand::HOME, false);
 }
 
@@ -443,41 +445,45 @@ void ToolWindow::on_minimize_button_clicked()
 }
 
 void ToolWindow::on_power_button_pressed() {
+    emulator_window->raise();
     handleUICommand(QtUICommand::POWER, true);
-    raiseMainWindow();
 }
 
 void ToolWindow::on_power_button_released() {
+    emulator_window->activateWindow();
     handleUICommand(QtUICommand::POWER, false);
 }
 
 void ToolWindow::on_volume_up_button_pressed()
 {
+    emulator_window->raise();
     handleUICommand(QtUICommand::VOLUME_UP, true);
-    raiseMainWindow();
 }
 void ToolWindow::on_volume_up_button_released()
 {
+    emulator_window->activateWindow();
     handleUICommand(QtUICommand::VOLUME_UP, false);
 }
 void ToolWindow::on_volume_down_button_pressed()
 {
+    emulator_window->raise();
     handleUICommand(QtUICommand::VOLUME_DOWN, true);
-    raiseMainWindow();
 }
 void ToolWindow::on_volume_down_button_released()
 {
+    emulator_window->activateWindow();
     handleUICommand(QtUICommand::VOLUME_DOWN, false);
 }
 
 void ToolWindow::on_recents_button_pressed()
 {
+    emulator_window->raise();
     handleUICommand(QtUICommand::RECENTS, true);
-    raiseMainWindow();
 }
 
 void ToolWindow::on_recents_button_released()
 {
+    emulator_window->activateWindow();
     handleUICommand(QtUICommand::RECENTS, false);
 }
 
@@ -488,17 +494,14 @@ void ToolWindow::on_rotate_button_clicked()
         toolsUi->zoom_button->click();
 
     handleUICommand(QtUICommand::ROTATE_RIGHT, true);
-    raiseMainWindow();
 }
 void ToolWindow::on_scrShot_button_clicked()
 {
     handleUICommand(QtUICommand::TAKE_SCREENSHOT, true);
-    raiseMainWindow();
 }
 void ToolWindow::on_zoom_button_clicked()
 {
     handleUICommand(QtUICommand::ENTER_ZOOM, true);
-    raiseMainWindow();
 }
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
