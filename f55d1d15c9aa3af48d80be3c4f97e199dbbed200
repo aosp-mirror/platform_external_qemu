@@ -2,6 +2,75 @@
   "comments": [
     {
       "key": {
+        "uuid": "20a2c463_e283c272",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-03T23:04:35Z",
+      "side": 1,
+      "message": "helper function?",
+      "range": {
+        "startLine": 207,
+        "startChar": 21,
+        "endLine": 207,
+        "endChar": 94
+      },
+      "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e06d0cee_80ac3a65",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 763,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-03T23:04:35Z",
+      "side": 1,
+      "message": "we need to stop displaying modal popups. Status bar/tooltips for the rescue! (I\u0027ll file a bug)",
+      "range": {
+        "startLine": 763,
+        "startChar": 29,
+        "endLine": 763,
+        "endChar": 44
+      },
+      "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1bac5306_e64a0237",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 395,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-03T23:04:35Z",
+      "side": 1,
+      "message": "this class is large enough to be moved to a separate file IMO",
+      "range": {
+        "startLine": 395,
+        "startChar": 10,
+        "endLine": 395,
+        "endChar": 35
+      },
+      "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2006440b_5ca27dc0",
         "filename": "android/skin/qt/emulator-qt-window.h",
         "patchSetId": 4
@@ -31,6 +100,75 @@
       "side": 1,
       "message": "Good find, should be \"buttons() \u0026\" for both. I believe its because MouseMove events aren\u0027t technically attached to a single button, so instead you need to enumerate which buttons are being used.",
       "parentUuid": "2006440b_5ca27dc0",
+      "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9bb8433f_5aeac29b",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-03T23:04:35Z",
+      "side": 1,
+      "message": "const ?",
+      "range": {
+        "startLine": 623,
+        "startChar": 38,
+        "endLine": 623,
+        "endChar": 39
+      },
+      "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5ba24b12_ae272cf5",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 645,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-03T23:04:35Z",
+      "side": 1,
+      "message": "can we have a C++ class enum OverlayMode with non-caps values?\nit looks pretty much the same, e.g. OverlayMode::Flash, but also won\u0027t clash with macros",
+      "range": {
+        "startLine": 640,
+        "startChar": 0,
+        "endLine": 645,
+        "endChar": 16
+      },
+      "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c08728d0_e732f6c9",
+        "filename": "android/skin/window.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1877,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-03T23:04:35Z",
+      "side": 1,
+      "message": "what are these magic numbers?",
+      "range": {
+        "startLine": 1877,
+        "startChar": 78,
+        "endLine": 1877,
+        "endChar": 86
+      },
       "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
