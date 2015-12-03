@@ -995,6 +995,150 @@ void android_console_finger_remove(Monitor* mon, const QDict* qdict) {
 }
 #endif
 
+enum { CMD_SMS = 0, CMD_SMS_SEND = 1, CMD_SMS_PDU = 2 };
+
+static const char* sms_help[] = {
+        /* CMD_SMS */
+        "SMS related commands, allows you to simulate an inbound SMS\n"
+        "\n"
+        "available sub-commands:\n"
+        "   sms send               send inbound SMS text message\n"
+        "   sms pdu                send inbound SMS text message\n",
+        /* CMD_SMS_SEND */
+        "send inbound SMS text message\n"
+        "'sms send <phonenumber> <message>' allows you to simulate a new "
+        "inbound sms message\n",
+        /* CMD_SMS_PDU */
+        "send inbound SMS PDU\n"
+        "'sms pdu <hexstring>' allows you to simulate a new inbound sms PDU\n"
+        "(used internally when one emulator sends SMS messages to another "
+        "instance).\n"
+        "you probably don't want to play with this at all\n"};
+
+void android_console_sms(Monitor* mon, const QDict* qdict) {
+    /* This only gets called for bad subcommands and help requests */
+    const char* helptext = qdict_get_try_str(qdict, "helptext");
+
+    /* Default to the first entry which is the parent help message */
+    int cmd = CMD_SMS;
+
+    if (helptext) {
+        if (strstr(helptext, "send")) {
+            cmd = CMD_SMS_SEND;
+        } else if (strstr(helptext, "pdu")) {
+            cmd = CMD_SMS_PDU;
+        }
+    }
+
+    /* If this is not a help request then we are here with a bad sub-command */
+    monitor_printf(mon,
+                   "%s\n%s\n",
+                   sms_help[cmd],
+                   helptext ? "OK" : "KO: missing sub-command");
+}
+
+#ifdef USE_ANDROID_EMU
+void android_console_sms_send(Monitor* mon, const QDict* qdict) {
+    char* args = (char*)qdict_get_try_str(qdict, "arg");
+    char* p;
+    int textlen;
+    SmsAddressRec sender;
+    SmsPDU* pdus;
+    int nn;
+
+    /* check that we have a phone number made of digits */
+    if (!args) {
+        monitor_printf(mon,
+                       "KO: missing argument, try 'sms send <phonenumber> "
+                       "<text message>'\r\n");
+        return;
+    }
+    p = strchr(args, ' ');
+    if (!p) {
+        monitor_printf(mon,
+                       "KO: missing argument, try 'sms send <phonenumber> "
+                       "<text message>'\r\n");
+        return;
+    }
+
+    if (sms_address_from_str(&sender, args, p - args) < 0) {
+        monitor_printf(mon,
+                       "KO: bad phone number format, must be [+](0-9)*\r\n");
+        return;
+    }
+
+    /* un-escape message text into proper utf-8 (conversion happens in-site) */
+    p += 1;
+    textlen = strlen(p);
+    textlen = sms_utf8_from_message_str(p, textlen, (unsigned char*)p, textlen);
+    if (textlen < 0) {
+        monitor_printf(
+                mon,
+                "message must be utf8 and can use the following escapes:\r\n"
+                "    \\n      for a newline\r\n"
+                "    \\xNN    where NN are two hexadecimal numbers\r\n"
+                "    \\uNNNN  where NNNN are four hexadecimal numbers\r\n"
+                "    \\\\     to send a '\\' character\r\n\r\n"
+                "    anything else is an error\r\n"
+                "KO: badly formatted text\r\n");
+        return;
+    }
+
+    if (!android_modem) {
+        monitor_printf(mon, "KO: modem emulation not running\r\n");
+        return;
+    }
+
+    /* create a list of SMS PDUs, then send them */
+    pdus = smspdu_create_deliver_utf8((cbytes_t)p, textlen, &sender, NULL);
+    if (pdus == NULL) {
+        monitor_printf(mon,
+                       "KO: internal error when creating SMS-DELIVER PDUs\n");
+        return;
+    }
+
+    for (nn = 0; pdus[nn] != NULL; nn++)
+        amodem_receive_sms(android_modem, pdus[nn]);
+
+    smspdu_free_list(pdus);
+    monitor_printf(mon, "OK\n");
+}
+
+void android_console_sms_pdu(Monitor* mon, const QDict* qdict) {
+    SmsPDU pdu;
+    char* args = (char*)qdict_get_try_str(qdict, "arg");
+
+    /* check that we have a phone number made of digits */
+    if (!args) {
+        monitor_printf(
+                mon, "KO: missing argument, try 'sms sendpdu <hexstring>'\r\n");
+        return;
+    }
+
+    if (!android_modem) {
+        monitor_printf(mon, "KO: modem emulation not running\r\n");
+        return;
+    }
+
+    pdu = smspdu_create_from_hex(args, strlen(args));
+    if (pdu == NULL) {
+        monitor_printf(mon, "KO: badly formatted <hexstring>\r\n");
+        return;
+    }
+
+    amodem_receive_sms(android_modem, pdu);
+    smspdu_free(pdu);
+    monitor_printf(mon, "OK\n");
+}
+#else
+void android_console_sms_send(Monitor* mon, const QDict* qdict) {
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+void android_console_sms_pdu(Monitor* mon, const QDict* qdict) {
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+#endif
+
 enum { CMD_GEO = 0, CMD_GEO_NMEA = 1, CMD_GEO_FIX = 2 };
 
 static const char* geo_help[] = {

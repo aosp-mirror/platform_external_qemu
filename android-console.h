@@ -25,6 +25,7 @@
 #include "android/emulation/control/net_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/telephony/modem_driver.h"
 #endif
 #include "qemu-common.h"
 
@@ -67,6 +68,10 @@ void android_console_finger(Monitor *mon, const QDict *qdict);
 void android_console_geo_nmea(Monitor *mon, const QDict *qdict);
 void android_console_geo_fix(Monitor *mon, const QDict *qdict);
 void android_console_geo(Monitor *mon, const QDict *qdict);
+
+void android_console_sms_send(Monitor *mon, const QDict *qdict);
+void android_console_sms_pdu(Monitor *mon, const QDict *qdict);
+void android_console_sms(Monitor *mon, const QDict *qdict);
 
 void android_monitor_print_error(Monitor *mon, const char *fmt, ...);
 

@@ -226,6 +226,29 @@ static mon_cmd_t android_geo_cmds[] = {
     { NULL, NULL, },
 };
 
+static mon_cmd_t android_sms_cmds[] = {
+    {
+        .name = "send",
+        .args_type = "arg:S?",
+        .params = "",
+        .help = "send inbound SMS text message\n"
+            "'sms send <phonenumber> <message>' allows you to simulate a new inbound sms message\n",
+        .mhandler.cmd = android_console_sms_send,
+    },
+    {
+        .name = "pdu",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "send inbound SMS PDU\n"
+            "'sms pdu <hexstring>' allows you to simulate a new inbound sms PDU\n"
+             "(used internally when one emulator sends SMS messages to another instance).\n"
+             "you probably don't want to play with this at all\n"
+             "\n",
+        .mhandler.cmd = android_console_sms_pdu,
+    },
+    { NULL, NULL, },
+};
+
 static mon_cmd_t android_cmds[] = {
     {
         .name = "help|h|?",
@@ -290,6 +313,13 @@ static mon_cmd_t android_cmds[] = {
         .help = "Geo-location commands",
         .mhandler.cmd = android_console_geo,
         .sub_cmds.static_table = android_geo_cmds,
+    },
+    {   .name = "sms",
+        .args_type = "item:s?",
+        .params = "",
+        .help = "SMS related commands",
+        .mhandler.cmd = android_console_sms,
+        .sub_cmds.static_table = android_sms_cmds,
     },
     { NULL, NULL, },
 };
