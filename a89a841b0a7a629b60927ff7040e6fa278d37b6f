@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "40209891_55c92c7e",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2015-12-03T16:47:52Z",
+      "side": 1,
+      "message": "on a second thought, why don\u0027t we just start a thread and let it manage\nthe all the wear-agent related stuff and stay off the main loop?\n\nor just start the \"wear-agent\" binary if it not started. since the wear-agent does not involve emulation at all: it simply talks to \nadb server and that is all it does.",
+      "parentUuid": "9b2da379_c86c4fa2",
+      "revId": "a89a841b0a7a629b60927ff7040e6fa278d37b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a0f23453_a0627ae7",
         "filename": "android/wear-agent/WearAgent.cpp",
         "patchSetId": 2
