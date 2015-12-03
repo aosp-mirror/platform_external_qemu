@@ -146,8 +146,8 @@ void EmulatorQtWindow::slot_startupTick() {
     // It's been a while since we were launched, and the main
     // window still hasn't appeared.
     // Show a pop-up that lets the user know we are working.
-    mStartupDialog.setWindowTitle(tr("Android Emulator"));
-    mStartupDialog.setLabelText(tr("Starting..."));
+    mStartupDialog.setWindowFlags(Qt::CustomizeWindowHint); // No title
+    mStartupDialog.setLabelText(tr("Android Emulator is starting..."));
     mStartupDialog.setRange(0, 0); // Don't show % complete
     mStartupDialog.setCancelButton(0);   // No "cancel" button
     mStartupDialog.show();
