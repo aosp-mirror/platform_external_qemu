@@ -237,7 +237,6 @@ OPTION_AOSP_PREBUILTS_DIR=
 OPTION_OUT_DIR=
 OPTION_HELP=no
 OPTION_STRIP=yes
-OPTION_CRASHUPLOAD=
 OPTION_MINGW=no
 OPTION_GLES=
 OPTION_SDK_REV=
@@ -295,10 +294,6 @@ for opt do
   ;;
   --no-strip) OPTION_STRIP=no
   ;;
-  --crash-staging) OPTION_CRASHUPLOAD=staging
-  ;;
-  --crash-prod) OPTION_CRASHUPLOAD=prod
-  ;;
   --out-dir=*) OPTION_OUT_DIR=$optarg
   ;;
   --aosp-prebuilts-dir=*) OPTION_AOSP_PREBUILTS_DIR=$optarg
@@ -346,7 +341,6 @@ EOF
     echo "  --strip                     Strip emulator executables (default)."
     echo "  --symbols                   Generating Breakpad symbol files."
     echo "  --no-symbols                Do not generate Breakpad symbol files (default)."
-    echo "  --crash-[staging,prod]      Send crashes to specific server (no crash reporting by default)."
     echo "  --debug                     Enable debug (-O0 -g) build"
     echo "  --gles=dgl                  Build the OpenGLES to Desktop OpenGL Translator (default)"
     echo "  --gles=angle                Build the OpenGLES to ANGLE wrapper"
@@ -723,13 +717,6 @@ if [ "$OPTION_STRIP" = "yes" ]; then
 fi
 if [ "$OPTION_SYMBOLS" = "yes" ]; then
     echo "EMULATOR_GENERATE_SYMBOLS := true" >> $config_mk
-fi
-if [ "$OPTION_CRASHUPLOAD" = "prod" ]; then
-    echo "EMULATOR_CRASHUPLOAD := PROD" >> $config_mk
-elif [ "$OPTION_CRASHUPLOAD" = "staging" ]; then
-    echo "EMULATOR_CRASHUPLOAD := STAGING" >> $config_mk
-else
-    echo "EMULATOR_CRASHUPLOAD := NONE" >> $config_mk
 fi
 
 if [ "$ANDROID_SDK_TOOLS_REVISION" ] ; then
