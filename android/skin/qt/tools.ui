@@ -193,7 +193,7 @@ color: #f0f0f0</string>
     </rect>
    </property>
    <property name="toolTip">
-    <string>Full screen</string>
+    <string>Zoom</string>
    </property>
    <property name="text">
     <string notr="true"/>
@@ -314,7 +314,7 @@ color: #f0f0f0</string>
     <string notr="true">home</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="recents_button">
+  <widget class="QPushButton" name="overview_button">
    <property name="geometry">
     <rect>
      <x>12</x>
@@ -324,14 +324,14 @@ color: #f0f0f0</string>
     </rect>
    </property>
    <property name="toolTip">
-    <string>Recents</string>
+    <string>Overview</string>
    </property>
    <property name="text">
     <string notr="true"/>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/light/recents</normaloff>:/light/recents</iconset>
+     <normaloff>:/light/overview</normaloff>:/light/overview</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -343,7 +343,7 @@ color: #f0f0f0</string>
     <bool>true</bool>
    </property>
    <property name="themeIconName" stdset="0">
-    <string notr="true">recents</string>
+    <string notr="true">overview</string>
    </property>
   </widget>
   <widget class="QPushButton" name="close_button">
@@ -420,7 +420,7 @@ color: #f0f0f0</string>
   <tabstop>zoom_button</tabstop>
   <tabstop>back_button</tabstop>
   <tabstop>home_button</tabstop>
-  <tabstop>recents_button</tabstop>
+  <tabstop>overview_button</tabstop>
   <tabstop>more_button</tabstop>
  </tabstops>
  <resources>
