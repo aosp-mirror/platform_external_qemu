@@ -26,6 +26,40 @@
 #include "sysemu/sysemu.h"
 #include "hmp.h"
 
+#ifdef USE_ANDROID_EMU
+typedef struct AndroidConsoleRec_
+{
+    // Interfaces to call into QEMU specific code.
+    QAndroidBatteryAgent battery_agent;
+    QAndroidFingerAgent finger_agent;
+    QAndroidLocationAgent location_agent;
+    QAndroidUserEventAgent user_event_agent;
+    QAndroidVmOperations vm_operations;
+    QAndroidNetAgent net_agent;
+} AndroidConsoleRec;
+
+static AndroidConsoleRec _g_global;
+
+void qemu2_android_console_setup( const QAndroidBatteryAgent* battery_agent,
+        const QAndroidFingerAgent* finger_agent,
+        const QAndroidLocationAgent* location_agent,
+        const QAndroidUserEventAgent* user_event_agent,
+        const QAndroidVmOperations* vm_operations,
+        const QAndroidNetAgent* net_agent)
+{
+    AndroidConsoleRec *global = & _g_global;
+    memset( global, 0, sizeof(*global));
+    // Copy the QEMU specific interfaces passed in to make lifetime management
+    // simpler.
+    global->battery_agent = *battery_agent;
+    global->finger_agent = *finger_agent;
+    global->location_agent = *location_agent;
+    global->user_event_agent = *user_event_agent;
+    global->vm_operations = *vm_operations;
+    global->net_agent = *net_agent;
+}
+#endif
+
 typedef struct {
     int is_udp;
     int host_port;
@@ -891,3 +925,222 @@ void android_console_avd(Monitor *mon, const QDict *qdict)
     monitor_printf(mon, "%s\n%s\n", avd_help[cmd],
                    helptext ? "OK" : "KO: missing sub-command");
 }
+
+enum {
+    CMD_FINGER = 0,
+    CMD_FINGER_TOUCH = 1,
+    CMD_FINGER_REMOVE = 2
+};
+
+static const char *finger_help[] = {
+    /* CMD_FINGER */
+    "manage emulator fingerprint,"
+            "allows you to touch the emulator fingerprint sensor\n"
+    "\n"
+    "available sub-commands:\n"
+    "   finger touch           touch fingerprint sensor with <fingerid>\n"
+    "   finger remove          remove finger from the fingerprint sensor\n",
+    /* CMD_FINGER_TOUCH */
+    "touch fingerprint sensor with <fingerid>",
+    /* CMD_FINGER_REMOVE */
+    "remove finger from the fingerprint sensor"
+};
+
+void android_console_finger(Monitor *mon, const QDict *qdict)
+{
+    /* This only gets called for bad subcommands and help requests */
+    const char *helptext = qdict_get_try_str(qdict, "helptext");
+
+    /* Default to the first entry which is the parent help message */
+    int cmd = CMD_FINGER;
+
+    if (helptext) {
+        if (strstr(helptext, "touch")) {
+            cmd = CMD_FINGER_TOUCH;
+        } else if (strstr(helptext, "remove")) {
+            cmd = CMD_FINGER_REMOVE;
+        }
+    }
+
+    /* If this is not a help request then we are here with a bad sub-command */
+    monitor_printf(mon, "%s\n%s\n", finger_help[cmd],
+                   helptext ? "OK" : "KO: missing sub-command");
+}
+
+#ifdef USE_ANDROID_EMU
+void android_console_finger_touch(Monitor *mon, const QDict *qdict)
+{
+    const char *arg = qdict_get_try_str(qdict, "arg");
+
+    if (!arg) {
+        monitor_printf(mon,
+                       "KO: argument missing, try 'finger touch <id>'\n");
+    } else {
+        char *endptr;
+        int fingerid = strtol(arg, &endptr, 0);
+        if (endptr != arg) {
+            _g_global.finger_agent.setTouch(true, fingerid);
+            monitor_printf(mon, "OK\n");
+        } else {
+            monitor_printf(mon, "KO: invalid fingerid\n");
+        }
+    }
+}
+
+void android_console_finger_remove(Monitor *mon, const QDict *qdict)
+{
+    _g_global.finger_agent.setTouch(false, -1);
+    monitor_printf(mon, "OK\n");
+}
+#else /* not USE_ANDROID_EMU */
+void android_console_finger_touch(Monitor *mon, const QDict *qdict)
+{
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+void android_console_finger_remove(Monitor *mon, const QDict *qdict)
+{
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+#endif
+
+enum {
+    CMD_GEO = 0,
+    CMD_GEO_NMEA = 1,
+    CMD_GEO_FIX = 2
+};
+
+static const char *geo_help[] = {
+    /* CMD_GEO */
+    "Geo-location commands,"
+            "allows you to change Geo-related settings, or to send GPS NMEA sentences\n"
+    "\n"
+    "available sub-commands:\n"
+    "   geo nmea               send a GPS NMEA sentence\n"
+    "   geo fix                send a simple GPS fix\n",
+    /* CMD_GEO_NMEA */
+    "send a GPS NMEA sentence\n"
+            "'geo nema <sentence>' sends an NMEA 0183 sentence to the emulated device, as\n"
+            "if it came from an emulated GPS modem. <sentence> must begin with '$GP'. Only\n"
+            "'$GPGGA' and '$GPRCM' sentences are supported at the moment.",
+    /* CMD_GEO_FIX */
+    "send a simple GPS fix\n"
+            "'geo fix <longitude> <latitude> [<altitude> [<satellites>]]'\n"
+            "allows you to send a simple GPS fix to the emulated system.\n"
+            "The parameters are:\n\n"
+            "   <longitude>   longitude, in decimal degrees\n"
+            "   <latitude>    latitude, in decimal degrees\n"
+            "   <altitude>    optional altitude in meters\n"
+            "   <satellites>  number of satellites being tracked (1-12)"
+};
+
+void android_console_geo(Monitor *mon, const QDict *qdict)
+{
+    /* This only gets called for bad subcommands and help requests */
+    const char *helptext = qdict_get_try_str(qdict, "helptext");
+
+    /* Default to the first entry which is the parent help message */
+    int cmd = CMD_GEO;
+
+    if (helptext) {
+        if (strstr(helptext, "nmea")) {
+            cmd = CMD_GEO_NMEA;
+        } else if (strstr(helptext, "fix")) {
+            cmd = CMD_GEO_FIX;
+        }
+    }
+
+    /* If this is not a help request then we are here with a bad sub-command */
+    monitor_printf(mon, "%s\n%s\n", geo_help[cmd],
+                   helptext ? "OK" : "KO: missing sub-command");
+}
+
+#ifdef USE_ANDROID_EMU
+void android_console_geo_nmea(Monitor *mon, const QDict *qdict)
+{
+    const char *arg = qdict_get_try_str(qdict, "arg");
+
+    if (!arg) {
+        monitor_printf(mon, "KO: argument missing, try 'geo nmea <mesg>'\n");
+    } else if (_g_global.location_agent.gpsIsSupported()){
+        _g_global.location_agent.gpsSendNmea(arg);
+        monitor_printf(mon, "OK\n");
+    } else {
+        monitor_printf(mon, "KO: no GPS emulation in this virtual device\n");
+    }
+}
+
+void android_console_geo_fix(Monitor *mon, const QDict *qdict)
+{
+    /* GEO_SAT2 provides bug backwards compatibility. */
+    enum { GEO_LONG = 0, GEO_LAT, GEO_ALT, GEO_SAT, GEO_SAT2, NUM_GEO_PARAMS };
+    const char* arg = qdict_get_try_str(qdict, "arg");
+    char*   p = (char*)arg;
+    int     top_param = -1;
+    double  altitude;
+    double  params[ NUM_GEO_PARAMS ];
+    int     n_satellites = 1;
+
+    struct  timeval tVal;
+
+    if (!p)
+        p = "";
+
+    /* tokenize */
+    while (*p) {
+        char*   end;
+        double  val = strtod( p, &end );
+
+        if (end == p) {
+            monitor_printf(mon, "KO: argument '%s' is not a number\n", p );
+            return;
+        }
+
+        params[++top_param] = val;
+        if (top_param + 1 == NUM_GEO_PARAMS)
+            break;
+
+        p = end;
+        while (*p && (p[0] == ' ' || p[0] == '\t'))
+            p += 1;
+    }
+
+    /* sanity check */
+    if (top_param < GEO_LAT) {
+        monitor_printf(mon, "KO: not enough arguments: see 'help geo fix' for details\n" );
+        return;
+    }
+
+    /* check number of satellites, must be integer between 1 and 12 */
+    if (top_param >= GEO_SAT) {
+        int sat_index = (top_param >= GEO_SAT2) ? GEO_SAT2 : GEO_SAT;
+        n_satellites = (int) params[sat_index];
+        if (n_satellites != params[sat_index]
+            || n_satellites < 1 || n_satellites > 12) {
+            monitor_printf(mon, "KO: invalid number of satellites. Must be an integer "
+                    "between 1 and 12\n");
+            return;
+        }
+    }
+
+    altitude = 0.0;
+    if (top_param < GEO_ALT) {
+        altitude = params[GEO_ALT];
+    }
+
+    memset(&tVal, 0, sizeof(tVal));
+    gettimeofday(&tVal, NULL);
+
+    _g_global.location_agent.gpsCmd(params[GEO_LAT], params[GEO_LONG],
+                                           altitude, n_satellites, &tVal);
+    monitor_printf(mon, "OK\n");
+}
+#else /* not USE_ANDROID_EMU */
+void android_console_geo_nmea(Monitor *mon, const QDict *qdict)
+{
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+void android_console_geo_fix(Monitor *mon, const QDict *qdict)
+{
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+#endif

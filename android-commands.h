@@ -179,6 +179,53 @@ static mon_cmd_t android_avd_cmds[] = {
     { NULL, NULL, },
 };
 
+static mon_cmd_t android_finger_cmds[] = {
+    {
+        .name = "touch",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "touch fingerprint sensor with <fingerid>",
+        .mhandler.cmd = android_console_finger_touch,
+    },
+    {
+        .name = "remove",
+        .args_type = "",
+        .params = "",
+        .help = "remove finger from the fingerprint sensor",
+        .mhandler.cmd = android_console_finger_remove,
+    },
+    { NULL, NULL, },
+};
+
+static mon_cmd_t android_geo_cmds[] = {
+    {
+        .name = "nmea",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "send a GPS NMEA sentence\n"
+            "'geo nema <sentence>' sends an NMEA 0183 sentence to the emulated device, as\n"
+            "if it came from an emulated GPS modem. <sentence> must begin with '$GP'. Only\n"
+            "'$GPGGA' and '$GPRCM' sentences are supported at the moment.\n",
+        .mhandler.cmd = android_console_geo_nmea,
+    },
+    {
+        .name = "fix",
+        .args_type = "arg:S?",
+        .params = "",
+        .help = "send a simple GPS fix\n"
+            "'geo fix <longitude> <latitude> [<altitude> [<satellites>]]'\n"
+            " allows you to send a simple GPS fix to the emulated system.\n"
+            " The parameters are:\n\n"
+            "  <longitude>   longitude, in decimal degrees\n"
+            "  <latitude>    latitude, in decimal degrees\n"
+            "  <altitude>    optional altitude in meters\n"
+            "  <satellites>  number of satellites being tracked (1-12)\n"
+            "\n",
+        .mhandler.cmd = android_console_geo_fix,
+    },
+    { NULL, NULL, },
+};
+
 static mon_cmd_t android_cmds[] = {
     {
         .name = "help|h|?",
@@ -229,6 +276,20 @@ static mon_cmd_t android_cmds[] = {
         .help = "control virtual device execution",
         .mhandler.cmd = android_console_avd,
         .sub_cmds.static_table = android_avd_cmds,
+    },
+    {   .name = "finger",
+        .args_type = "item:s?",
+        .params = "",
+        .help = "manage emulator fingerprint",
+        .mhandler.cmd = android_console_finger,
+        .sub_cmds.static_table = android_finger_cmds,
+    },
+    {   .name = "geo",
+        .args_type = "item:s?",
+        .params = "",
+        .help = "Geo-location commands",
+        .mhandler.cmd = android_console_geo,
+        .sub_cmds.static_table = android_geo_cmds,
     },
     { NULL, NULL, },
 };

@@ -17,6 +17,13 @@
 #include "android/android.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 
+extern "C" void qemu2_android_console_setup( const QAndroidBatteryAgent* battery_agent,
+        const QAndroidFingerAgent* finger_agent,
+        const QAndroidLocationAgent* location_agent,
+        const QAndroidUserEventAgent* user_event_agent,
+        const QAndroidVmOperations* vm_operations,
+        const QAndroidNetAgent* net_agent);
+
 void qemu_android_emulation_setup() {
     android_emulation_setup(
             gQAndroidBatteryAgent,
@@ -29,4 +36,11 @@ void qemu_android_emulation_setup() {
             gQAndroidVmOperations,
             gQAndroidNetAgent
     );
+    qemu2_android_console_setup(
+            gQAndroidBatteryAgent,
+            gQAndroidFingerAgent,
+            gQAndroidLocationAgent,
+            gQAndroidUserEventAgent,
+            gQAndroidVmOperations,
+            gQAndroidNetAgent);
 }
