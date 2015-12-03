@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "40f7b847_1dacf3b0",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-03T17:44:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9bb8433f_0a6d8f9b",
+      "range": {
+        "startLine": 54,
+        "startChar": 17,
+        "endLine": 54,
+        "endChar": 31
+      },
+      "revId": "b49bfeefbe8de38a1b707f82a8900bcab3f4f86d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b1deb19_aa8e17a3",
         "filename": "android/skin/qt/ext-settings.cpp",
         "patchSetId": 1
@@ -72,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "800e1027_37a7d8d0",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-03T17:44:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9bb8433f_ea02cb97",
+      "range": {
+        "startLine": 167,
+        "startChar": 4,
+        "endLine": 167,
+        "endChar": 9
+      },
+      "revId": "b49bfeefbe8de38a1b707f82a8900bcab3f4f86d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9bb8433f_aaf8c3e7",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 1
@@ -83,6 +131,30 @@
       "writtenOn": "2015-12-02T22:03:52Z",
       "side": 1,
       "message": "Re-name this function to \"initAndroidSdkRoot\", and make it private? That, or change this function to return whatever is in the QSettings/text box, and move the code currently there into this location.",
+      "range": {
+        "startLine": 91,
+        "startChar": 18,
+        "endLine": 91,
+        "endChar": 35
+      },
+      "revId": "b49bfeefbe8de38a1b707f82a8900bcab3f4f86d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "800e1027_d7309c2a",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-03T17:44:18Z",
+      "side": 1,
+      "message": "Renamed to \u0027findAndroidSdkRoot()\u0027",
+      "parentUuid": "9bb8433f_aaf8c3e7",
       "range": {
         "startLine": 91,
         "startChar": 18,
