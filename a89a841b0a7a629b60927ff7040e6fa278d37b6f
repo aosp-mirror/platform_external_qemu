@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "9b2da379_c86c4fa2",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-03T09:57:03Z",
+      "side": 1,
+      "message": "even if the read is atomic, you need memory barriers to ensure proper ordering, because you are going to use other members of the same object after. This thing is always tricky!.\n\nActually, it might be that on Intel CPUs, the memory order semantics guarantee that this specific code path always work, but this is not portable in general, and anything subtle like this should be tagged with a big comment explaining why it\u0027s ok to use in this specific context.",
+      "parentUuid": "5b1deb19_458654cc",
+      "revId": "a89a841b0a7a629b60927ff7040e6fa278d37b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a0f23453_a0627ae7",
         "filename": "android/wear-agent/WearAgent.cpp",
         "patchSetId": 2
