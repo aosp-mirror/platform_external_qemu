@@ -20,6 +20,7 @@
 #include <QGraphicsScene>
 #include <QIcon>
 #include <QInputDialog>
+#include <QLabel>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPixmap>
@@ -146,8 +147,24 @@ void EmulatorQtWindow::slot_startupTick() {
     // It's been a while since we were launched, and the main
     // window still hasn't appeared.
     // Show a pop-up that lets the user know we are working.
+
     mStartupDialog.setWindowTitle(tr("Android Emulator"));
-    mStartupDialog.setLabelText(tr("Starting..."));
+    // Hide close/minimize/maximize buttons
+    mStartupDialog.setWindowFlags(Qt::Dialog |
+                                  Qt::CustomizeWindowHint |
+                                  Qt::WindowTitleHint);
+    mStartupDialog.setWindowIcon(QIcon()); // Hide window icon
+
+    // Emulator logo
+    QLabel *label = new QLabel();
+    label->setAlignment(Qt::AlignCenter);
+    QSize size;
+    size.setWidth(mStartupDialog.size().width() / 2);
+    size.setHeight(size.width());
+    QPixmap pixmap = windowIcon().pixmap(size);
+    label->setPixmap(pixmap);
+    mStartupDialog.setLabel(label);
+
     mStartupDialog.setRange(0, 0); // Don't show % complete
     mStartupDialog.setCancelButton(0);   // No "cancel" button
     mStartupDialog.show();
