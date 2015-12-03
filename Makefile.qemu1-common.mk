@@ -95,6 +95,11 @@ common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
 
 EMULATOR_COMMON_CFLAGS += $(LIBCURL_CFLAGS)
 
+EMULATOR_CRASHUPLOAD := $(strip $(EMULATOR_CRASHUPLOAD))
+ifdef EMULATOR_CRASHUPLOAD
+    EMULATOR_COMMON_CFLAGS += -DCRASHUPLOAD=$(EMULATOR_CRASHUPLOAD)
+endif
+
 ###########################################################
 # build the android-emu libraries
 include $(LOCAL_PATH)/Makefile.android-emu.mk
@@ -126,7 +131,7 @@ LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
 LOCAL_C_INCLUDES += \
     $(LIBCURL_INCLUDES) \
     $(LIBXML2_INCLUDES) \
-    $(BREAKPAD_INCLUDES) \
+    $(BREAKPAD_CLIENT_INCLUDES) \
     $(LIBJPEG_INCLUDES) \
 
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)

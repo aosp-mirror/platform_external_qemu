@@ -5,7 +5,7 @@ include $(LOCAL_PATH)/distrib/libxml2.mk
 include $(LOCAL_PATH)/distrib/libsparse/sources.mk
 include $(LOCAL_PATH)/distrib/libselinux/sources.mk
 include $(LOCAL_PATH)/distrib/ext4_utils/sources.mk
-include $(LOCAL_PATH)/distrib/libbreakpad_client.mk
+include $(LOCAL_PATH)/distrib/libbreakpad.mk
 include $(LOCAL_PATH)/distrib/Qt5.mk
 include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
 include $(LOCAL_PATH)/distrib/libpng.mk
@@ -78,6 +78,7 @@ LOCAL_SRC_FILES := \
 LOCAL_CFLAGS += -DCONFIG_QT
 
 LOCAL_STATIC_LIBRARIES := emulator-common $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1)
+
 # Ensure this is always built, even if 32-bit binaries are disabled.
 LOCAL_IGNORE_BITNESS := true
 
@@ -97,6 +98,8 @@ $(call local-link-static-c++lib)
 
 $(call end-emulator-program)
 endif  # HOST_BITS == EMULATOR_PROGRAM_BITNESS
+
+include $(LOCAL_PATH)/Makefile.crash-service.mk
 
 include $(LOCAL_PATH)/Makefile.tests.mk
 
