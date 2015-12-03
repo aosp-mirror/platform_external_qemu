@@ -326,6 +326,21 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                     "$INSTALL_DIR/$SYSTEM/lib/$LIB"
         done
 
+        for LIB in $MESA_LIBS; do
+            # Build the symbol files
+            build_symbols \
+                "$(builder_install_prefix)" \
+                "$INSTALL_DIR/$SYSTEM" \
+                "$SYSTEM" \
+                "lib/$LIB"
+
+            # Strip the lib
+            strip_libs \
+                "$INSTALL_DIR/$SYSTEM" \
+                "lib/$LIB"
+        done
+
+
     ) || panic "[$SYSTEM] Could not build mesa!"
 
 done
