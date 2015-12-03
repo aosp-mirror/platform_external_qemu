@@ -1753,12 +1753,15 @@ GL_APICALL void  GL_APIENTRY glReadPixels(GLint x, GLint y, GLsizei width, GLsiz
 
 
 GL_APICALL void  GL_APIENTRY glReleaseShaderCompiler(void){
+// this function doesn't work on Mac OS with MacOSX10.9sdk
+#ifndef __APPLE__
     GET_CTX();
 
     if(ctx->dispatcher().glReleaseShaderCompiler != NULL)
     {
         ctx->dispatcher().glReleaseShaderCompiler();
     }
+#endif // !__APPLE__
 }
 
 GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width, GLsizei height){
