@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "204d6487_aabb6b8c",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1764,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-04T00:21:19Z",
+      "side": 1,
+      "message": "nit:\n#endif  // __APPLE__",
+      "range": {
+        "startLine": 1764,
+        "startChar": 1,
+        "endLine": 1764,
+        "endChar": 6
+      },
+      "revId": "e420724ffcd6539f1ab5590d7707652e188ded4b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
