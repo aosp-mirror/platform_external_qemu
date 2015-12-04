@@ -97,7 +97,7 @@ process_symbol () {
         --form codeIdentifier="$CODE_IDENTIFIER" \
         --form debugFile="$DEBUG_FILE" \
         --form debugIdentifier="$DEBUG_IDENTIFIER" \
-        --form symbolFile="@\"$SYMBOL_FILE\"" \
+        --form symbolFile="@$SYMBOL_FILE" \
         "$URL" ||
             panic "Curl failed with return code $?"
 }
