@@ -90,4 +90,6 @@ LOCAL_LDLIBS += \
 
 LOCAL_INSTALL_DIR := qemu/$(HOST_OS)-$(HOST_ARCH)
 
+LOCAL_GENERATE_SYMBOLS := true
+
 $(call end-emulator-program)
