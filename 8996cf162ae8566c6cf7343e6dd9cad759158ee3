@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "00486077_b2a4fe76",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-04T19:59:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c08728d0_847f68f6",
+      "range": {
+        "startLine": 201,
+        "startChar": 50,
+        "endLine": 201,
+        "endChar": 56
+      },
+      "revId": "8996cf162ae8566c6cf7343e6dd9cad759158ee3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "00486077_863d4cba",
         "filename": "android/skin/qt/ext-settings.cpp",
         "patchSetId": 2
@@ -95,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "20a9e45f_8a568f4f",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-04T19:59:33Z",
+      "side": 1,
+      "message": "Done, but slightly differently. See if you like it.",
+      "parentUuid": "00486077_863d4cba",
+      "range": {
+        "startLine": 206,
+        "startChar": 4,
+        "endLine": 210,
+        "endChar": 38
+      },
+      "revId": "8996cf162ae8566c6cf7343e6dd9cad759158ee3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e06d0cee_fd5603d9",
         "filename": "android/skin/qt/ext-settings.cpp",
         "patchSetId": 2
@@ -106,6 +154,30 @@
       "writtenOn": "2015-12-03T22:05:53Z",
       "side": 1,
       "message": "I realized eventFilter will only be called for objects for which it has been installed. So it makes no sense to check which object it is, it will always be either one box or the other. In both cases the behavior is equivalentm but the text is different. So I suggest doing this instead:\n\nbool is_save_loc \u003d object \u003d\u003d mExtendedUi-\u003eset_saveLocBox,\n     is_sdk_path \u003d object \u003d\u003d mExtendedUi-\u003eset_sdkPathBox;\nassert(is_save_loc || is_sdk_path);\nQLineEdit* line_edit \u003d (is_save_loc?mExtendedUi-\u003eset_saveLocBox:mExtendedUi-\u003eset_sdkPathBox);\nQString text \u003d is_save_loc?mSettingsState.mSavePath:mSettingsState.mSdkPath;\nif(event-\u003etype() \u003d\u003d QEvent::FocusIn) {\nline_edit-\u003esetText(text);\n} else if (event-\u003etype() \u003d\u003d QEvent::FocusOut) {\nsetElidedText(line_edit, text);\n}",
+      "range": {
+        "startLine": 273,
+        "startChar": 4,
+        "endLine": 273,
+        "endChar": 46
+      },
+      "revId": "8996cf162ae8566c6cf7343e6dd9cad759158ee3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "20a9e45f_ca4c87c7",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-04T19:59:33Z",
+      "side": 1,
+      "message": "I don\u0027t especially like the duplication of code here, but\nI think it\u0027s more clear the way it is.\n(But if you feel strongly...)",
+      "parentUuid": "e06d0cee_fd5603d9",
       "range": {
         "startLine": 273,
         "startChar": 4,
