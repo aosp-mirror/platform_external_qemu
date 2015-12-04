@@ -36,6 +36,7 @@ static std::string getTestCrasher() {
 #ifdef _WIN32
     path += ".exe";
 #endif
+    EXPECT_TRUE(System::get()->pathIsFile(path.c_str()));
     return path;
 }
 
