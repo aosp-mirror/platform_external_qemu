@@ -24,6 +24,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPixmap>
+#include <QProgressBar>
 #include <QPushButton>
 #include <QScreen>
 #include <QSemaphore>
@@ -165,6 +166,11 @@ void EmulatorQtWindow::slot_startupTick() {
     QPixmap pixmap = windowIcon().pixmap(size);
     label->setPixmap(pixmap);
     mStartupDialog.setLabel(label);
+
+    // The default progress bar on Windows isn't centered for some reason
+    QProgressBar *bar =  new QProgressBar();
+    bar->setAlignment(Qt::AlignHCenter);
+    mStartupDialog.setBar(bar);
 
     mStartupDialog.setRange(0, 0); // Don't show % complete
     mStartupDialog.setCancelButton(0);   // No "cancel" button
