@@ -16,6 +16,24 @@
       "revId": "9335b08111cb0be6e07ec4821b728bbf244ec219",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "009dc025_8f01c520",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 664,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-04T18:34:56Z",
+      "side": 1,
+      "message": "I actually didn\u0027t know there was such thing as \"enum class.\" You learn something new everyday! Changed.",
+      "parentUuid": "e0842cce_b6a42077",
+      "revId": "9335b08111cb0be6e07ec4821b728bbf244ec219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
