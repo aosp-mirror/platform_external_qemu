@@ -14,6 +14,13 @@
  * GNU General Public License for more details.
  */
 
+#if defined(USE_ANDROID_EMU)
+#include "android/globals.h"  /* for android_hw */
+#include "android-qemu2-glue/qemu-control-impl.h"
+#endif
+
+#include "android/multitouch-screen.h"
+
 #include "hw/sysbus.h"
 #include "ui/input.h"
 #include "ui/console.h"
@@ -21,16 +28,6 @@
 #include "hw/input/linux_keycodes.h"
 
 #include "hw/input/goldfish_events.h"
-
-#if defined(USE_ANDROID_EMU)
-#include "android/globals.h"  /* for android_hw */
-#include "android-qemu2-glue/qemu-control-impl.h"
-#endif
-
-/* Multitouch specific code is defined out via EVDEV_MULTITOUCH currently,
- * because upstream has no multitouch related APIs.
- */
-/* #define EVDEV_MULTITOUCH */
 
 #define MAX_EVENTS (256 * 4)
 
@@ -801,14 +798,12 @@ static void gf_evdev_put_mouse(void *opaque,
      * have the "dz == 0 for touchscreen, == 1 for trackball"
      * distinction.
      */
-#ifdef EVDEV_MULTITOUCH
     if (s->have_multitouch) {
         /* Convert mouse event into multi-touch event */
-        multitouch_update_pointer(MTES_MOUSE, 0, dx, dy,
-                                  (buttons_state & 1) ? 0x81 : 0);
+        multitouch_update_pointer(MTES_DEVICE, (buttons_state & 2) ? 1 : 0, dx, dy,
+                                      (buttons_state & 1) ? 0x81 : 0);
         return;
     }
-#endif
     if (s->have_touch) {
         enqueue_event(s, EV_ABS, ABS_X, dx);
         enqueue_event(s, EV_ABS, ABS_Y, dy);
@@ -1106,10 +1101,26 @@ static void gf_evdev_init(Object *obj)
 
     qemu_input_handler_register(dev, &gf_evdev_key_input_handler);
     qemu_add_mouse_event_handler(gf_evdev_put_mouse, s, 1, "goldfish-events");
+
+#if defined(USE_ANDROID_EMU)
+    s->have_dpad = android_hw->hw_dPad;
+    s->have_trackball = android_hw->hw_trackBall;
+
+    s->have_camera = strcmp(android_hw->hw_camera_back, "none") ||
+                     strcmp(android_hw->hw_camera_front, "none");
+
+    s->have_keyboard = android_hw->hw_keyboard;
+    s->have_keyboard_lid = android_hw->hw_keyboard_lid;
+
+    s->have_touch = androidHwConfig_isScreenTouch(android_hw);
+    s->have_multitouch = androidHwConfig_isScreenMultiTouch(android_hw);
+#endif
+
 }
 
 static void gf_evdev_realize(DeviceState *dev, Error **errp)
 {
+
     GoldfishEvDevState *s = GOLDFISHEVDEV(dev);
 
     /* Initialize the device ID so the event dev can be looked up duringi
@@ -1124,10 +1135,6 @@ static void gf_evdev_realize(DeviceState *dev, Error **errp)
 
     /* XXX PMM properties ? */
     s->name = "qwerty2";
-
-    if (s->have_multitouch) {
-        s->have_touch = true;
-    }
 
     /* configure EV_KEY array
      *
@@ -1183,11 +1190,7 @@ static void gf_evdev_realize(DeviceState *dev, Error **errp)
         events_set_bit(s, EV_KEY, LINUX_KEY_CAMERA);
     }
 
-#if defined(USE_ANDROID_EMU)
-    if (android_hw->hw_keyboard) {
-#else
-    {
-#endif
+    if (s->have_keyboard) {
         /* since we want to implement Unicode reverse-mapping
          * allow any kind of key, even those not available on
          * the skin.
@@ -1228,7 +1231,7 @@ static void gf_evdev_realize(DeviceState *dev, Error **errp)
      *
      * EV_ABS events are sent when the touchscreen is pressed
      */
-    if (s->have_touch) {
+    if (s->have_touch || s->have_multitouch) {
         ABSEntry *abs_values;
 
         events_set_bit(s, EV_SYN, EV_ABS);
@@ -1256,7 +1259,6 @@ static void gf_evdev_realize(DeviceState *dev, Error **errp)
         abs_values[ABS_Y].max = 0x7fff;
         abs_values[ABS_Z].max = 1;
 
-#ifdef EVDEV_MULTITOUCH
         if (s->have_multitouch) {
             /*
              * Setup multitouch.
@@ -1277,7 +1279,6 @@ static void gf_evdev_realize(DeviceState *dev, Error **errp)
             abs_values[ABS_MT_TOUCH_MAJOR].max = 0x7fffffff;
             abs_values[ABS_MT_PRESSURE].max = 0x100;
         }
-#endif
     }
 
     /* configure EV_SW array
@@ -1319,9 +1320,9 @@ static Property gf_evdev_props[] = {
     DEFINE_PROP_BOOL("have-lidswitch", GoldfishEvDevState,
                      have_keyboard_lid, false),
     DEFINE_PROP_BOOL("have-touch", GoldfishEvDevState,
-                     have_touch, true),
+                     have_touch, false),
     DEFINE_PROP_BOOL("have-multitouch", GoldfishEvDevState,
-                     have_multitouch, false),
+                     have_multitouch, true),
     DEFINE_PROP_END_OF_LIST()
 };
 

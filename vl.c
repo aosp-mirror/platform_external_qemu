@@ -124,6 +124,7 @@
 #include "android/utils/tempfile.h"
 #include "android/skin/winsys.h"
 #include "android/main-common.h"
+#include "android/multitouch-port.h"
 #include "android/opengl/emugl_config.h"
 #include "android/ui-emu-agent.h"
 #include "android/globals.h"
@@ -4106,6 +4107,11 @@ int run_qemu_main(int argc, const char **argv)
 
     /* Initialize camera */
     android_camera_service_init();
+
+    /* Initialize multi-touch emulation. */
+    if (androidHwConfig_isScreenMultiTouch(android_hw)) {
+        mts_port_create(NULL, gQAndroidUserEventAgent, gQAndroidDisplayAgent);
+    }
 
     /* qemu.gles will be read by the OpenGL ES emulation libraries.
      * If set to 0, the software GL ES renderer will be used as a fallback.
