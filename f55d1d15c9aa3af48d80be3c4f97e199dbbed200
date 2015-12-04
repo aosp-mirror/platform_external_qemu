@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "009dc025_ded4613c",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-04T17:30:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "20a2c463_e283c272",
+      "range": {
+        "startLine": 207,
+        "startChar": 21,
+        "endLine": 207,
+        "endChar": 94
+      },
+      "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e06d0cee_80ac3a65",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 4
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "20a2c463_85c9a881",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 763,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-04T17:30:34Z",
+      "side": 1,
+      "message": "Thankfully, every error dialog we show should go through this method, so all we need to do is rename it and change it\u0027s implementation - no tracking down other error dialogs!",
+      "parentUuid": "e06d0cee_80ac3a65",
+      "range": {
+        "startLine": 763,
+        "startChar": 29,
+        "endLine": 763,
+        "endChar": 44
+      },
+      "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1bac5306_e64a0237",
         "filename": "android/skin/qt/emulator-qt-window.h",
         "patchSetId": 4
@@ -59,6 +107,30 @@
       "writtenOn": "2015-12-03T23:04:35Z",
       "side": 1,
       "message": "this class is large enough to be moved to a separate file IMO",
+      "range": {
+        "startLine": 395,
+        "startChar": 10,
+        "endLine": 395,
+        "endChar": 35
+      },
+      "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "404ed883_8bb791f7",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 395,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-04T17:30:34Z",
+      "side": 1,
+      "message": "I wholeheartedly agree - this overlay was initially a hack for doing marching ants zoom, so I wasn\u0027t sure what else it would be used for. I\u0027ll move it outside in a future refactor.",
+      "parentUuid": "1bac5306_e64a0237",
       "range": {
         "startLine": 395,
         "startChar": 10,
@@ -129,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "8091b00f_65ed8278",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-04T17:30:34Z",
+      "side": 1,
+      "message": "I\u0027m usually a stickler for const correctness, but a lot of our code doesn\u0027t seem to do it. Regardless, done.",
+      "parentUuid": "9bb8433f_5aeac29b",
+      "range": {
+        "startLine": 623,
+        "startChar": 38,
+        "endLine": 623,
+        "endChar": 39
+      },
+      "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5ba24b12_ae272cf5",
         "filename": "android/skin/qt/emulator-qt-window.h",
         "patchSetId": 4
@@ -152,6 +248,30 @@
     },
     {
       "key": {
+        "uuid": "404ed883_cbd46913",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 645,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-04T17:30:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5ba24b12_ae272cf5",
+      "range": {
+        "startLine": 640,
+        "startChar": 0,
+        "endLine": 645,
+        "endChar": 16
+      },
+      "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c08728d0_e732f6c9",
         "filename": "android/skin/window.c",
         "patchSetId": 4
@@ -163,6 +283,30 @@
       "writtenOn": "2015-12-03T23:04:35Z",
       "side": 1,
       "message": "what are these magic numbers?",
+      "range": {
+        "startLine": 1877,
+        "startChar": 78,
+        "endLine": 1877,
+        "endChar": 86
+      },
+      "revId": "f55d1d15c9aa3af48d80be3c4f97e199dbbed200",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "40933818_63c1f67e",
+        "filename": "android/skin/window.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1877,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-04T17:30:34Z",
+      "side": 1,
+      "message": "If you check out add_finger_event(), you\u0027ll see that the last number is just some arbitrary \"state\" number. Previously, it was simply being used to indicate a \"touch down\" (state \u003d 1) or \"touch up\" (state \u003d 0).\n\nI\u0027m just taking advantage of the extra bits to indicate which finger (1st or 2nd) is being used. I\u0027ve updated this function to make that more obvious and added a comment.",
+      "parentUuid": "c08728d0_e732f6c9",
       "range": {
         "startLine": 1877,
         "startChar": 78,
