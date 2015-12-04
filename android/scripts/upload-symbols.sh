@@ -82,14 +82,15 @@ process_symbol () {
     LINE=$(sed -n -e 1p "$SYMBOL_FILE")
     read MODULE OS ARCH DEBUG_IDENTIFIER DEBUG_FILE <<<"$LINE"
     if [ "$MODULE" != MODULE ]; then
-        echo "Corrupt symbol file $SYMBOL_FILE" >&2
-        exit 1
+        panic "Corrupt symbol file $SYMBOL_FILE"
     fi
 
     CODE_FILE=$DEBUG_FILE
     CODE_IDENTIFIER=$DEBUG_IDENTIFIER
 
-    run curl \
+    curl \
+        --verbose \
+        --show-error \
         --dump-header /dev/null \
         --form product="$PRODUCT" \
         --form codeFile="$CODE_FILE" \
