@@ -40,6 +40,7 @@ typedef enum {
 
 typedef enum {
     kMouseButtonLeft = 1,
+    kMouseButtonSecondaryTouch,
     kMouseButtonRight,
     kMouseButtonCenter,
     kMouseButtonScrollUp,

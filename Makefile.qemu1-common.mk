@@ -112,9 +112,6 @@ common_LOCAL_SRC_FILES += \
     android/core-init-utils.c \
     android/hw-kmsg.c \
     android/hw-lcd.c \
-    android/multitouch-screen.c \
-    android/multitouch-port.c \
-    android/utils/jpeg-compress.c \
 
 common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
 
@@ -132,7 +129,6 @@ LOCAL_C_INCLUDES += \
     $(LIBCURL_INCLUDES) \
     $(LIBXML2_INCLUDES) \
     $(BREAKPAD_CLIENT_INCLUDES) \
-    $(LIBJPEG_INCLUDES) \
 
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 

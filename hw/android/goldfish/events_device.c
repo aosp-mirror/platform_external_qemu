@@ -278,7 +278,7 @@ static void events_put_mouse(void *opaque, int dx, int dy, int dz, int buttons_s
     if (dz == 0) {
         if (androidHwConfig_isScreenMultiTouch(android_hw)) {
             /* Convert mouse event into multi-touch event */
-            multitouch_update_pointer(MTES_MOUSE, 0, dx, dy,
+            multitouch_update_pointer(MTES_DEVICE, (buttons_state & 2) ? 1 : 0, dx, dy,
                                       (buttons_state & 1) ? 0x81 : 0);
         } else if (androidHwConfig_isScreenTouch(android_hw)) {
             enqueue_event(s, EV_ABS, ABS_X, dx);
