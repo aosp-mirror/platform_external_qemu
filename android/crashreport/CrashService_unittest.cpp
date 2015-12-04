@@ -84,10 +84,12 @@ TEST(CrashService, startAttachWaitNoCrash) {
     std::unique_ptr<CrashService> crash(
             CrashService::makeCrashService("foo", "bar"));
     CrashSystem::CrashPipe crashpipe = CrashSystem::get()->getCrashPipe();
+    EXPECT_TRUE(crashpipe.isValid());
     crash->startCrashServer(crashpipe.mServer);
     StringVector cmdline = getTestCrasherCmdLine(crashpipe.mClient);
     cmdline.append(StringView("-nocrash"));
     int pid = CrashSystem::spawnService(cmdline);
+    EXPECT_GT(pid, 0);
     int64_t waitduration = crash->waitForDumpFile(pid, 10000);
     EXPECT_EQ(waitduration, -1);
 }
@@ -111,10 +113,12 @@ TEST(CrashService, startAttachWaitCrash) {
     std::unique_ptr<CrashService> crash(
             CrashService::makeCrashService("foo", "bar"));
     CrashSystem::CrashPipe crashpipe = CrashSystem::get()->getCrashPipe();
+    EXPECT_TRUE(crashpipe.isValid());
     crash->startCrashServer(crashpipe.mServer);
     StringVector cmdline = getTestCrasherCmdLine(crashpipe.mClient);
 
     int pid = CrashSystem::spawnService(cmdline);
+    EXPECT_GT(pid, 0);
     int64_t waitduration = crash->waitForDumpFile(pid, 500);
     EXPECT_NE(waitduration, -1);
     EXPECT_TRUE(CrashSystem::isDump(crash->getDumpFile()));
@@ -130,10 +134,12 @@ TEST(CrashService, startWaitNoAttach) {
     std::unique_ptr<CrashService> crash(
             CrashService::makeCrashService("foo", "bar"));
     CrashSystem::CrashPipe crashpipe = CrashSystem::get()->getCrashPipe();
+    EXPECT_TRUE(crashpipe.isValid());
     crash->startCrashServer(crashpipe.mServer);
     StringVector cmdline = getTestCrasherCmdLine(crashpipe.mClient);
     cmdline.append(StringView("-noattach"));
     int pid = CrashSystem::spawnService(cmdline);
+    EXPECT_GT(pid, 0);
     int64_t waitduration = crash->waitForDumpFile(pid, 1);
     EXPECT_EQ(waitduration, -1);
 }
@@ -144,11 +150,13 @@ TEST(CrashService, startAttachWaitTimeout) {
     std::unique_ptr<CrashService> crash(
             CrashService::makeCrashService("foo", "bar"));
     CrashSystem::CrashPipe crashpipe = CrashSystem::get()->getCrashPipe();
+    EXPECT_TRUE(crashpipe.isValid());
     crash->startCrashServer(crashpipe.mServer);
     StringVector cmdline = getTestCrasherCmdLine(crashpipe.mClient);
     cmdline.append(StringView("-delay_ms"));
     cmdline.append(StringView("100"));
     int pid = CrashSystem::spawnService(cmdline);
+    EXPECT_GT(pid, 0);
     int64_t waitduration = crash->waitForDumpFile(pid, 1);
     EXPECT_EQ(waitduration, -1);
     waitduration = crash->waitForDumpFile(pid, 200);
