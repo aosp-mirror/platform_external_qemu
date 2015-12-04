@@ -89,7 +89,6 @@ process_symbol () {
     CODE_IDENTIFIER=$DEBUG_IDENTIFIER
 
     curl \
-        --verbose \
         --show-error \
         --dump-header /dev/null \
         --form product="$PRODUCT" \
