@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e0842cce_b6a42077",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 664,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-04T18:27:55Z",
+      "side": 1,
+      "message": "why not enum class? our style prefers it over the obsolete C enums",
+      "revId": "9335b08111cb0be6e07ec4821b728bbf244ec219",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
