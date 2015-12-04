@@ -249,6 +249,26 @@ static mon_cmd_t android_sms_cmds[] = {
     { NULL, NULL, },
 };
 
+static mon_cmd_t android_cdma_cmds[] = {
+    {
+        .name = "ssource",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "set the current CDMA subscription source\n"
+            "'cdma ssource <ssource>' allows you to specify where to read the subscription from\n",
+        .mhandler.cmd = android_console_cdma_ssource,
+    },
+    {
+        .name = "prl_version",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "dump the current PRL version\n"
+        "'cdma prl_version <version>' allows you to dump the current PRL version\n",
+        .mhandler.cmd = android_console_cdma_prl_version,
+    },
+    { NULL, NULL, },
+};
+
 static mon_cmd_t android_cmds[] = {
     {
         .name = "help|h|?",
@@ -320,6 +340,13 @@ static mon_cmd_t android_cmds[] = {
         .help = "SMS related commands",
         .mhandler.cmd = android_console_sms,
         .sub_cmds.static_table = android_sms_cmds,
+    },
+    {   .name = "cdma",
+        .args_type = "item:s?",
+        .params = "",
+        .help = "CDMA related commands",
+        .mhandler.cmd = android_console_cdma,
+        .sub_cmds.static_table = android_cdma_cmds,
     },
     { NULL, NULL, },
 };

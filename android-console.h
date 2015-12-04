@@ -73,6 +73,10 @@ void android_console_sms_send(Monitor *mon, const QDict *qdict);
 void android_console_sms_pdu(Monitor *mon, const QDict *qdict);
 void android_console_sms(Monitor *mon, const QDict *qdict);
 
+void android_console_cdma_ssource(Monitor *mon, const QDict *qdict);
+void android_console_cdma_prl_version(Monitor *mon, const QDict *qdict);
+void android_console_cdma(Monitor *mon, const QDict *qdict);
+
 void android_monitor_print_error(Monitor *mon, const char *fmt, ...);
 
 #ifdef USE_ANDROID_EMU

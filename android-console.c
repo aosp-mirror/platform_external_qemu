@@ -1139,6 +1139,114 @@ void android_console_sms_pdu(Monitor* mon, const QDict* qdict) {
 }
 #endif
 
+enum { CMD_CDMA = 0, CMD_CDMA_SSOURCE = 1, CMD_CDMA_PRL_VERSION = 2 };
+
+static const char* cdma_help[] = {
+        /* CMD_CDMA */
+        "CDMA related commands, allows you to change CDMA-related settings\n"
+        "\n"
+        "available sub-commands:\n"
+        "   cdma ssource           set the current CDMA subscription source\n"
+        "   cdma prl_version       dump the current PRL version\n",
+        /* CMD_CDMA_SSOURCE */
+        "set the current CDMA subscription source\n"
+        "'cdma ssource <ssource>' allows you to specify where to read the "
+        "subscription from\n",
+        /* CMD_CDMA_PRL_VERSION */
+        "dump the current PRL version\n"
+        "'cdma prl_version <version>' allows you to dump the current PRL "
+        "version\n"};
+
+void android_console_cdma(Monitor* mon, const QDict* qdict) {
+    /* This only gets called for bad subcommands and help requests */
+    const char* helptext = qdict_get_try_str(qdict, "helptext");
+
+    /* Default to the first entry which is the parent help message */
+    int cmd = CMD_CDMA;
+
+    if (helptext) {
+        if (strstr(helptext, "ssource")) {
+            cmd = CMD_CDMA_SSOURCE;
+        } else if (strstr(helptext, "prl_version")) {
+            cmd = CMD_CDMA_PRL_VERSION;
+        }
+    }
+
+    /* If this is not a help request then we are here with a bad sub-command */
+    monitor_printf(mon,
+                   "%s\n%s\n",
+                   cdma_help[cmd],
+                   helptext ? "OK" : "KO: missing sub-command");
+}
+
+static const struct {
+    const char* name;
+    const char* display;
+    ACdmaSubscriptionSource source;
+} _cdma_subscription_sources[] = {
+          {"nv",
+           "Read subscription from non-volatile RAM",
+           A_SUBSCRIPTION_NVRAM},
+          {"ruim", "Read subscription from RUIM", A_SUBSCRIPTION_RUIM},
+};
+
+#ifdef USE_ANDROID_EMU
+void android_console_cdma_ssource(Monitor* mon, const QDict* qdict) {
+    char* args = (char*)qdict_get_try_str(qdict, "arg");
+    int nn;
+    if (!args) {
+        monitor_printf(mon,
+                       "KO: missing argument, try 'cdma ssource <source>'\n");
+        return;
+    }
+
+    for (nn = 0; nn < sizeof(_cdma_subscription_sources) /
+                                 sizeof(_cdma_subscription_sources[0]);
+         nn++) {
+        const char* name = _cdma_subscription_sources[nn].name;
+        ACdmaSubscriptionSource ssource = _cdma_subscription_sources[nn].source;
+
+        if (!name)
+            break;
+
+        if (!strcasecmp(args, name)) {
+            amodem_set_cdma_subscription_source(android_modem, ssource);
+            monitor_printf(mon, "OK\n");
+            return;
+        }
+    }
+    monitor_printf(mon, "KO: Don't know source %s\n", args);
+}
+
+void android_console_cdma_prl_version(Monitor* mon, const QDict* qdict) {
+    char* args = (char*)qdict_get_try_str(qdict, "arg");
+    int version = 0;
+    char* endptr;
+
+    if (!args) {
+        monitor_printf(
+                mon,
+                "KO: missing argument, try 'cdma prl_version <version>'\r\n");
+        return;
+    }
+
+    version = strtol(args, &endptr, 0);
+    if (endptr != args) {
+        amodem_set_cdma_prl_version(android_modem, version);
+    }
+    monitor_printf(mon, "OK\n");
+}
+#else
+void android_console_cdma_ssource(Monitor* mon, const QDict* qdict) {
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+
+void android_console_cdma_prl_version(Monitor* mon, const QDict* qdict) {
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+
+#endif
+
 enum { CMD_GEO = 0, CMD_GEO_NMEA = 1, CMD_GEO_FIX = 2 };
 
 static const char* geo_help[] = {
