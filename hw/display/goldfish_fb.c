@@ -17,19 +17,53 @@
 #include "trace.h"
 #include "hw/display/goldfish_fb.h"
 
-#define BITS 8
+#ifdef USE_ANDROID_EMU
+extern int android_display_bpp;
+#endif
+
+#define DEST_BITS 8
+#define SOURCE_BITS 16
 #include "goldfish_fb_template.h"
-#define BITS 15
+#define DEST_BITS 15
+#define SOURCE_BITS 16
 #include "goldfish_fb_template.h"
-#define BITS 16
+#define DEST_BITS 16
+#define SOURCE_BITS 16
 #include "goldfish_fb_template.h"
-#define BITS 24
+#define DEST_BITS 24
+#define SOURCE_BITS 16
 #include "goldfish_fb_template.h"
-#define BITS 32
+#define DEST_BITS 32
+#define SOURCE_BITS 16
+#include "goldfish_fb_template.h"
+#define DEST_BITS 8
+#define SOURCE_BITS 32
+#include "goldfish_fb_template.h"
+#define DEST_BITS 15
+#define SOURCE_BITS 32
+#include "goldfish_fb_template.h"
+#define DEST_BITS 16
+#define SOURCE_BITS 32
+#include "goldfish_fb_template.h"
+#define DEST_BITS 24
+#define SOURCE_BITS 32
+#include "goldfish_fb_template.h"
+#define DEST_BITS 32
+#define SOURCE_BITS 32
 #include "goldfish_fb_template.h"
 
 #define TYPE_GOLDFISH_FB "goldfish_fb"
 #define GOLDFISH_FB(obj) OBJECT_CHECK(struct goldfish_fb_state, (obj), TYPE_GOLDFISH_FB)
+/* These values *must* match the platform definitions found under
+ * <system/graphics.h>
+ */
+enum {
+    HAL_PIXEL_FORMAT_RGBA_8888          = 1,
+    HAL_PIXEL_FORMAT_RGBX_8888          = 2,
+    HAL_PIXEL_FORMAT_RGB_888            = 3,
+    HAL_PIXEL_FORMAT_RGB_565            = 4,
+    HAL_PIXEL_FORMAT_BGRA_8888          = 5,
+};
 
 enum {
     FB_GET_WIDTH        = 0x00,
@@ -41,6 +75,7 @@ enum {
     FB_SET_BLANK        = 0x18,
     FB_GET_PHYS_WIDTH   = 0x1c,
     FB_GET_PHYS_HEIGHT  = 0x20,
+    FB_GET_FORMAT       = 0x24,
 
     FB_INT_VSYNC             = 1U << 0,
     FB_INT_BASE_UPDATE_DONE  = 1U << 1
@@ -62,6 +97,7 @@ struct goldfish_fb_state {
     uint32_t int_enable;
     int      rotation;   /* 0, 1, 2 or 3 */
     int      dpi;
+    int      format;
 };
 
 #define  GOLDFISH_FB_SAVE_VERSION  3
@@ -101,6 +137,7 @@ static void goldfish_fb_save(QEMUFile*  f, void*  opaque)
     qemu_put_be32(f, s->int_enable);
     qemu_put_be32(f, s->rotation);
     qemu_put_be32(f, s->dpi);
+    qemu_put_be32(f, s->format);
 }
 
 static int  goldfish_fb_load(QEMUFile*  f, void*  opaque, int  version_id)
@@ -138,6 +175,7 @@ static int  goldfish_fb_load(QEMUFile*  f, void*  opaque, int  version_id)
     s->int_enable   = qemu_get_be32(f);
     s->rotation     = qemu_get_be32(f);
     s->dpi          = qemu_get_be32(f);
+    s->format       = qemu_get_be32(f);
 
     /* force a refresh */
     s->need_update = 1;
@@ -261,33 +299,44 @@ static void goldfish_fb_update_display(void *opaque)
             g_assert_not_reached();
         }
 
-        switch (surface_bits_per_pixel(ds)) {
-        case 0:
-            return;
-        case 8:
-            fn = draw_line_8;
+        int source_bytes_per_pixel = 2;
+
+        switch (s->format) { /* source format */
+        case HAL_PIXEL_FORMAT_RGB_565:
+            source_bytes_per_pixel = 2;
+            switch (surface_bits_per_pixel(ds)) { /* dest format */
+            case 8:  fn = draw_line_16_8;  break;
+            case 15: fn = draw_line_16_15; break;
+            case 16: fn = draw_line_16_16; break;
+            case 24: fn = draw_line_16_24; break;
+            case 32: fn = draw_line_16_32; break;
+            default:
+                hw_error("goldfish_fb: bad dest color depth\n");
+                return;
+            }
             break;
-        case 15:
-            fn = draw_line_15;
-            break;
-        case 16:
-            fn = draw_line_16;
-            break;
-        case 24:
-            fn = draw_line_24;
-            break;
-        case 32:
-            fn = draw_line_32;
+        case HAL_PIXEL_FORMAT_RGBX_8888:
+            source_bytes_per_pixel = 4;
+            switch (surface_bits_per_pixel(ds)) { /* dest format */
+            case 8:  fn = draw_line_32_8;  break;
+            case 15: fn = draw_line_32_15; break;
+            case 16: fn = draw_line_32_16; break;
+            case 24: fn = draw_line_32_24; break;
+            case 32: fn = draw_line_32_32; break;
+            default:
+                hw_error("goldfish_fb: bad dest color depth\n");
+                return;
+            }
             break;
         default:
-            hw_error("goldfish_fb: bad color depth\n");
+            hw_error("goldfish_fb: bad source color format\n");
             return;
         }
 
         ymin = 0;
         framebuffer_update_display(ds, address_space, s->fb_base,
                                    src_width, src_height,
-                                   src_width * 2,
+                                   src_width * source_bytes_per_pixel,
                                    dest_row_pitch, dest_col_pitch,
                                    full_update,
                                    fn, ds, &ymin, &ymax);
@@ -321,6 +370,10 @@ static uint64_t goldfish_fb_read(void *opaque, hwaddr offset, unsigned size)
     struct goldfish_fb_state *s = opaque;
     DisplaySurface *ds = qemu_console_surface(s->con);
 
+#ifndef USE_ANDROID_EMU
+    int android_display_bpp = surface_bits_per_pixel(ds);
+#endif
+
     switch(offset) {
         case FB_GET_WIDTH:
             ret = surface_width(ds);
@@ -344,6 +397,24 @@ static uint64_t goldfish_fb_read(void *opaque, hwaddr offset, unsigned size)
 
         case FB_GET_PHYS_HEIGHT:
             ret = pixels_to_mm( surface_height(ds), s->dpi );
+            break;
+
+        case FB_GET_FORMAT:
+            /* A kernel making this query supports high color and true color */
+            switch (android_display_bpp) {   /* hw.lcd.depth */
+            case 32:
+            case 24:
+               ret = HAL_PIXEL_FORMAT_RGBX_8888;
+               break;
+            case 16:
+               ret = HAL_PIXEL_FORMAT_RGB_565;
+               break;
+            default:
+               error_report("goldfish_fb_read: Bad android_display_bpp %d",
+                       android_display_bpp);
+               break;
+            }
+            s->format = ret;
             break;
 
         default:
@@ -417,7 +488,9 @@ static int goldfish_fb_init(SysBusDevice *sbdev)
 
     s->con = graphic_console_init(dev, 0, &goldfish_fb_ops, s);
 
-    s->dpi = 165;  /* XXX: Find better way to get actual value ! */
+    s->dpi = 165;  /* TODO: Find better way to get actual value ! */
+
+    s->format = HAL_PIXEL_FORMAT_RGB_565;
 
     memory_region_init_io(&s->iomem, OBJECT(s), &goldfish_fb_iomem_ops, s,
             "goldfish_fb", 0x100);
