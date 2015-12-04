@@ -185,9 +185,9 @@ int CrashSystem::spawnService(
     }
 
     // In the child process.
-    int fd = open("/dev/null", O_WRONLY);
-    dup2(fd, 1);
-    dup2(fd, 2);
+    //int fd = open("/dev/null", O_WRONLY);
+    //dup2(fd, 1);
+    //dup2(fd, 2);
 
     execvp(commandLine[0].c_str(), params);
     // Should not happen.
