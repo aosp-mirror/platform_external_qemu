@@ -160,7 +160,7 @@ AndroidCpuAcceleration ProbeKVM(String* status) {
 
 #if HAVE_HAX
 
-#define HAXM_INSTALLER_VERSION_MINIMUM 0x01001005
+#define HAXM_INSTALLER_VERSION_MINIMUM 0x06000001
 
 std::string cpuAcceleratorFormatVersion(int32_t version) {
     if (version < 0) {
