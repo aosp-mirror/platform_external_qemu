@@ -22,6 +22,63 @@ ifdef ANDROID_SDK_TOOLS_BUILD_NUMBER
     EMULATOR_VERSION_CFLAGS += -DANDROID_SDK_TOOLS_BUILD_NUMBER=$(ANDROID_SDK_TOOLS_BUILD_NUMBER)
 endif
 
+EMULATOR_COMMON_CFLAGS := -Werror=implicit-function-declaration
+
+# Include the emulator version definition from Makefile.common.mk
+EMULATOR_COMMON_CFLAGS += $(EMULATOR_VERSION_CFLAGS)
+
+ifeq (true,$(BUILD_DEBUG_EMULATOR))
+    EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=1
+else
+    EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=0
+endif
+
+EMULATOR_CRASHUPLOAD := $(strip $(EMULATOR_CRASHUPLOAD))
+ifdef EMULATOR_CRASHUPLOAD
+    EMULATOR_COMMON_CFLAGS += -DCRASHUPLOAD=$(EMULATOR_CRASHUPLOAD)
+endif
+
+# Required to access config-host.h
+EMULATOR_COMMON_INCLUDES := \
+    $(OBJS_DIR)/build
+
+##############################################################################
+##############################################################################
+###
+###  gen-hw-config-defs: Generate hardware configuration definitions header
+###
+###  The 'gen-hw-config.py' script is used to generate the hw-config-defs.h
+###  header from the an .ini file like android/avd/hardware-properties.ini
+###
+###  Due to the way the Android build system works, we need to regenerate
+###  it for each module (the output will go into a module-specific directory).
+###
+###  This defines a function that can be used inside a module definition
+###
+###  $(call gen-hw-config-defs)
+###
+
+# First, define a rule to generate a dummy "emulator_hw_config_defs" module
+# which purpose is simply to host the generated header in its output directory.
+intermediates := $(call intermediates-dir-for,$(HOST_BITS),emulator_hw_config_defs)
+
+QEMU_HARDWARE_PROPERTIES_INI := $(LOCAL_PATH)/android/avd/hardware-properties.ini
+QEMU_HW_CONFIG_DEFS_H := $(intermediates)/android/avd/hw-config-defs.h
+$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_PATH := $(LOCAL_PATH)
+$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/android/tools/gen-hw-config.py $< $@
+$(QEMU_HW_CONFIG_DEFS_H): $(QEMU_HARDWARE_PROPERTIES_INI) $(LOCAL_PATH)/android/tools/gen-hw-config.py
+	$(hide) rm -f $@
+	$(transform-generated-source)
+
+QEMU_HW_CONFIG_DEFS_INCLUDES := $(intermediates)
+
+# Second, define a function that needs to be called inside each module that contains
+# a source file that includes the generated header file.
+gen-hw-config-defs = \
+  $(eval LOCAL_GENERATED_SOURCES += $(QEMU_HW_CONFIG_DEFS_H))\
+  $(eval LOCAL_C_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES))
+
+include $(LOCAL_PATH)/Makefile.android-emu.mk
 include $(LOCAL_PATH)/Makefile.qemu1-common.mk
 
 ifeq ($(HOST_OS),windows)
