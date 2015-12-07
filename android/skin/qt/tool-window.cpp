@@ -272,6 +272,29 @@ void ToolWindow::runAdbInstall(const QString &path)
     mInstallProcess.waitForStarted();
 }
 
+
+void ToolWindow::runAdbShellStop()
+{
+    if (mShellStopProcess.state() != QProcess::NotRunning) {
+        return;
+    }
+    QStringList args;
+    QString command = getAdbFullPath(&args);
+    if (command.isNull()) {
+        return;
+    }
+
+    args << "shell";
+    args << "stop";
+    //args << "pm list packages";
+
+    // Keep track of this process
+    fprintf(stderr, "running stop command...\n");
+    mShellStopProcess.start(command, args);
+    mShellStopProcess.waitForStarted();
+    fprintf(stderr, "done wait running stop command...\n");
+}
+
 void ToolWindow::runAdbPush(const QList<QUrl> &urls)
 {
     // Queue up the next set of files
@@ -424,6 +447,7 @@ void ToolWindow::on_back_button_released()
 
 void ToolWindow::on_close_button_clicked()
 {
+    runAdbShellStop();
     parentWidget()->close();
 }
 
