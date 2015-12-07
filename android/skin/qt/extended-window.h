@@ -297,3 +297,13 @@ private:
     QString mFileName;
     GpsFixArray* mFixes;
 };
+
+class LatestVersionLoadTask : public QObject {
+    Q_OBJECT
+
+public slots:
+    void run();
+
+signals:
+    void finished(QString version);
+};
