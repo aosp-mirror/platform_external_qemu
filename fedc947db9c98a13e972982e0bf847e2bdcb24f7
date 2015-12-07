@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "60e03ce1_844e4a4d",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-07T22:21:13Z",
+      "side": 1,
+      "message": "I think the idea is to set \u0027opts-\u003eranchu \u003d 0\u0027 after android_parse_options(), this way we ignore whatever was passed on the command-line initially",
+      "revId": "fedc947db9c98a13e972982e0bf847e2bdcb24f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
