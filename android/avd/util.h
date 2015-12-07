@@ -43,6 +43,12 @@ char* path_getRootIniPath( const char*  avdName );
  */
 char* path_getAvdTargetArch( const char* avdName );
 
+/* Return the path to an AVD's system images directory, relative to a given
+ * root SDK path. Caller must free() the result.
+ */
+char* path_getAvdSystemPath(const char* avdName,
+                            const char* sdkRootPath);
+
 /* Return the value of hw.gpu.mode for a given AVD.
  * Caller must free() returned string.
  *
