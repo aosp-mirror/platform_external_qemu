@@ -54,8 +54,14 @@ public:
     // Initialize from a zero-terminated wchar_t array.
     explicit Win32UnicodeString(const wchar_t* str);
 
+    // Copy-constructor.
+    Win32UnicodeString(const Win32UnicodeString& other);
+
     // Destructor.
     ~Win32UnicodeString();
+
+    // Assignment operator.
+    Win32UnicodeString& operator=(const Win32UnicodeString& other);
 
     // Return pointer to first wchar_t in the string.
     const wchar_t* c_str() const { return mStr ? mStr : L""; }
@@ -71,6 +77,9 @@ public:
 
     // Convert to a String instance holding the corresponding UTF-8 text.
     String toString() const;
+
+    // Return n-th character from string.
+    wchar_t operator[](size_t index) const { return mStr[index]; }
 
     // Reset content from UTF-8 text at |str| or |len| bytes.
     void reset(const char* str, size_t len);
@@ -94,8 +103,6 @@ public:
     static String convertToUtf8(const wchar_t* str, size_t len);
 
 private:
-    DISALLOW_COPY_AND_ASSIGN(Win32UnicodeString);
-
     wchar_t* mStr;
     size_t mSize;
 };

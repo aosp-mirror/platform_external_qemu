@@ -665,8 +665,8 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName) {
     char* systemImagePath = path_getAvdSystemPath(avdName, sdkRootPath);
     char* kernel_file = NULL;
     asprintf(&kernel_file, "%s/%s", systemImagePath, "kernel-ranchu");
-    D("Probing for %s\n", kernel_file);
     result = path_exists(kernel_file);
+    D("Probing for %s: file %s\n", kernel_file, result ? "exists" : "missing");
 
     AFREE(kernel_file);
     AFREE(systemImagePath);
