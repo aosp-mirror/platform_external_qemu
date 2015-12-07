@@ -810,8 +810,21 @@ help_ranchu(stralloc_t* out)
 {
     PRINTF(
         "  Use the new emulator engine as the preferred backend\n"
+        "  This option is deprecated, the 'emulator' launcher will\n"
+        "  auto-detect the best value by default.\n"
     );
 }
+
+static void
+help_no_ranchu(stralloc_t* out)
+{
+    PRINTF(
+        "  Use the classic emulator engine as the preferred backend\n"
+        "  This option is deprecated, the 'emulator' launcher will\n"
+        "  auto-detect the best value by default.\n"
+    );
+}
+
 
 static void
 help_skindir(stralloc_t*  out)
