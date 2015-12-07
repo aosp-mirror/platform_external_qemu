@@ -44,11 +44,23 @@ Win32UnicodeString::Win32UnicodeString(const wchar_t* str)
     size_t len = str ? wcslen(str) : 0u;
     resize(len);
     ::memcpy(mStr, str, len * sizeof(wchar_t));
-    mSize = len;
+}
+
+Win32UnicodeString::Win32UnicodeString(const Win32UnicodeString& other)
+    : mStr(nullptr), mSize(0u) {
+    resize(other.mSize);
+    ::memcpy(mStr, other.mStr, other.mSize * sizeof(wchar_t));
 }
 
 Win32UnicodeString::~Win32UnicodeString() {
     delete[] mStr;
+}
+
+Win32UnicodeString& Win32UnicodeString::operator=(
+        const Win32UnicodeString& other) {
+    resize(other.mSize);
+    ::memcpy(mStr, other.mStr, other.mSize * sizeof(wchar_t));
+    return *this;
 }
 
 wchar_t* Win32UnicodeString::data() {
