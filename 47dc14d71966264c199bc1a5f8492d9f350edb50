@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a0af948e_f81ed137",
+        "filename": "android/help.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 823,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-07T18:25:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a0af948e_58525d19",
+      "revId": "47dc14d71966264c199bc1a5f8492d9f350edb50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "60e03ce1_7e52b110",
         "filename": "android/main-emulator.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-12-07T18:07:29Z",
       "side": 1,
       "message": "this is not needed: let\u0027s leave it autodetect and instead (that\u0027s how I understand Vince\u0027s email",
+      "revId": "47dc14d71966264c199bc1a5f8492d9f350edb50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80d9b040_1f436349",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-07T18:25:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "60e03ce1_7e52b110",
       "revId": "47dc14d71966264c199bc1a5f8492d9f350edb50",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
