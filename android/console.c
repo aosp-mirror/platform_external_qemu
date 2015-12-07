@@ -1082,7 +1082,8 @@ do_cdma_ssource( ControlClient  client, char*  args )
         return -1;
     }
 
-    for (nn = 0; ; nn++) {
+    for (nn = 0; nn < sizeof(_cdma_subscription_sources) / sizeof(_cdma_subscription_sources[0]);
+            nn++) {
         const char*         name    = _cdma_subscription_sources[nn].name;
         ACdmaSubscriptionSource ssource = _cdma_subscription_sources[nn].source;
 
