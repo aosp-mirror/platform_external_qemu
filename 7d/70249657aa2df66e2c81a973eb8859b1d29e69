@@ -1,0 +1,10 @@
+Code-Review+2: Bo Hu <bohu@google.com>
+Code-Review+2: Grigory Dzhavadyan <grigoryj@google.com>
+Code-Review+1: Yurii Zubrytskyi <zyy@google.com>
+Verified+1: Yurii Zubrytskyi <zyy@google.com>
+Verified+1: Bo Hu <bohu@google.com>
+Submitted-by: Yurii Zubrytskyi <zyy@google.com>
+Submitted-at: Mon, 07 Dec 2015 18:11:10 +0000
+Reviewed-on: https://android-review.googlesource.com/185356
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
