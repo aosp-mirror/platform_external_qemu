@@ -30,7 +30,7 @@
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/tool-window.h"
-
+#include "android/utils/system.h"
 #include "ui_tools.h"
 
 using namespace android::base;
@@ -272,6 +272,35 @@ void ToolWindow::runAdbInstall(const QString &path)
     mInstallProcess.waitForStarted();
 }
 
+
+void ToolWindow::runAdbShellStop()
+{
+    if (mShellStopProcess.state() != QProcess::NotRunning) {
+        return;
+    }
+    QStringList args;
+    QString command = getAdbFullPath(&args);
+    if (command.isNull()) {
+        return;
+    }
+
+    args << "shell";
+    args << "stop";
+    //args << "pm list packages";
+
+    // Keep track of this process
+    fprintf(stderr, "running stop command...\n");
+    mShellStopProcess.start(command, args);
+    mShellStopProcess.waitForStarted();
+    //mShellStopProcess.waitForFinished();
+    ::sleep_ms(1e4);
+    QString output = QString(mShellStopProcess.readAllStandardOutput());
+    fprintf(stderr, "%s\n", output.toStdString().c_str());
+    QString error = QString(mShellStopProcess.readAllStandardError());
+    fprintf(stderr, "%s\n", error.toStdString().c_str());
+    fprintf(stderr, "done wait running stop command...\n");
+}
+
 void ToolWindow::runAdbPush(const QList<QUrl> &urls)
 {
     // Queue up the next set of files
@@ -424,11 +453,13 @@ void ToolWindow::on_back_button_released()
 
 void ToolWindow::on_close_button_clicked()
 {
+    //runAdbShellStop();
     parentWidget()->close();
 }
 
 void ToolWindow::on_home_button_pressed()
 {
+    runAdbShellStop();
     emulator_window->raise();
     handleUICommand(QtUICommand::HOME, true);
 }
