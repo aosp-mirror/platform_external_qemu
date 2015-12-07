@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "80d9b040_7f48efb1",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1085,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-07T17:11:45Z",
+      "side": 0,
+      "message": "wow, we were lucky to have it working before",
+      "range": {
+        "startLine": 1085,
+        "startChar": 16,
+        "endLine": 1085,
+        "endChar": 17
+      },
+      "revId": "e46337b07ed28def3ffaf57ec6b0d9166d5b6c78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
