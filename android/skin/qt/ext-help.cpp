@@ -28,16 +28,27 @@ const QString FILE_BUG_URL =
 const QString SEND_FEEDBACK_URL =
     "https://code.google.com/p/android/issues/entry?template=Emulator%20Feature%20Request";
 
+void LatestVersionLoadTask::run() {
+    // Get latest version that is available online
+    char configPath[PATH_MAX];
+    bufprint_config_path(configPath, configPath + sizeof(configPath));
+    android::update_check::UpdateChecker upCheck(configPath);
+    const auto latestVersion = upCheck.getLatestVersion();
+    const auto latestVerStr = latestVersion.isValid()
+            ? QString(latestVersion.toString().c_str()) : tr("Unavailable");
+    emit finished(latestVerStr);
+}
+
 void ExtendedWindow::initHelp()
 {
     // Get the version of this code
     android::update_check::VersionExtractor vEx;
 
     android::base::Version curVersion = vEx.getCurrentVersion();
-    android::base::String  verStr =
-            curVersion.isValid() ? curVersion.toString() : "Unknown";
+    auto verStr = curVersion.isValid()
+            ? QString(curVersion.toString().c_str()) : "Unknown";
 
-    mExtendedUi->help_versionBox->setPlainText(verStr.c_str());
+    mExtendedUi->help_versionBox->setPlainText(verStr);
 
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
     mExtendedUi->help_androidVersionBox->setPlainText(apiVersionString(apiLevel));
@@ -45,12 +56,18 @@ void ExtendedWindow::initHelp()
     // Show the ADB port number
     mExtendedUi->help_adbPortBox->setPlainText( QString::number(android_adb_port) );
 
-    // Get latest version that is available on line
-
-    char configPath[PATH_MAX];
-    bufprint_config_path(configPath, configPath + sizeof(configPath));
-    android::update_check::UpdateChecker upCheck(configPath);
-
+    // launch the latest version loader in a separate thread
+    auto latestVersionThread = new QThread();
+    auto latestVersionTask = new LatestVersionLoadTask();
+    latestVersionTask->moveToThread(latestVersionThread);
+    connect(latestVersionThread, SIGNAL(started()), latestVersionTask, SLOT(run()));
+    connect(latestVersionTask, SIGNAL(finished(QString)),
+            mExtendedUi->help_latestVersionBox, SLOT(setPlainText(QString)));
+    connect(latestVersionTask, SIGNAL(finished(QString)), latestVersionThread, SLOT(quit()));
+    connect(latestVersionThread, SIGNAL(finished()), latestVersionTask, SLOT(deleteLater()));
+    connect(latestVersionThread, SIGNAL(finished()), latestVersionThread, SLOT(deleteLater()));
+    mExtendedUi->help_latestVersionBox->setPlainText(tr("Loading..."));
+    latestVersionThread->start();
 }
 
 void ExtendedWindow::on_help_docs_clicked() {
