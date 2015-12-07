@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "60c91c79_b968dbcc",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-07T20:36:06Z",
+      "side": 1,
+      "message": "well, I really want to error out if someone uses \"-engine qemu2\" with an ARM system image, or \"-engine classic\" with an ARM64 one.\n\nIf we can find a kerne-ranchu for MIPS or ARM, we better have a QEMU2 binary to support this (we do for MIPS I believe, not ARM).",
+      "parentUuid": "40db3839_a08414c5",
+      "revId": "1a56eccc598c174ef9aaa7a55de6094f26bc5ee3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e0b50cdb_9d9a272e",
         "filename": "android/main-emulator.c",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "80b290f4_9a6b09c9",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 658,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-07T20:36:06Z",
+      "side": 1,
+      "message": "Good idea, will do.",
+      "parentUuid": "e0b50cdb_9d9a272e",
+      "revId": "1a56eccc598c174ef9aaa7a55de6094f26bc5ee3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "80d9b040_c2976404",
         "filename": "android/main-emulator.c",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2015-12-07T20:31:22Z",
       "side": 1,
       "message": "except arm64 \u0026 mips64.  Their kernel-qemu is always a ranchu kernel",
+      "revId": "1a56eccc598c174ef9aaa7a55de6094f26bc5ee3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0af948e_5b4df771",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 662,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-07T20:36:06Z",
+      "side": 1,
+      "message": "This is actually handled by the previous checks for cpuArchSupportsRanchu() and cpuArchSupportsGoldfish(), this function should only be called when the CPU architecture is supported by both engines.",
+      "parentUuid": "80d9b040_c2976404",
       "revId": "1a56eccc598c174ef9aaa7a55de6094f26bc5ee3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
