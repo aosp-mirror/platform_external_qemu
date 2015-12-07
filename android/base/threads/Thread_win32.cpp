@@ -39,10 +39,11 @@ private:
 
 }  // namespace
 
-Thread::Thread() :
+Thread::Thread(ThreadFlags flags) :
     mThread(INVALID_HANDLE_VALUE),
     mThreadId(0),
     mExitStatus(0),
+    mFlags(flags),
     mIsRunning(false) {
     InitializeCriticalSection(&mLock);
 }
@@ -111,6 +112,8 @@ DWORD WINAPI Thread::thread_main(void *arg) {
     intptr_t ret;
 
     {
+        // no need to call maskAllSignals() here: we know
+        // that on Windows it's a noop
         Thread* self = reinterpret_cast<Thread*>(arg);
         ret = self->main();
 
