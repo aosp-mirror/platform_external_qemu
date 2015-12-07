@@ -122,7 +122,14 @@ int main(int argc, char** argv)
     char*       emulatorPath;
     bool force_32bit = false;
     bool no_window = false;
-    bool ranchu = false;
+
+    enum RanchuState {
+        RANCHU_AUTODETECT = 0,
+        RANCHU_ON,
+        RANCHU_OFF,
+    };
+
+    enum RanchuState ranchu = RANCHU_AUTODETECT;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -175,7 +182,12 @@ int main(int argc, char** argv)
         }
 
         if (!strcmp(opt,"-ranchu")) {
-            ranchu = true;
+            // Nothing: the option is deprecated and defaults to auto-detect.
+            continue;
+        }
+
+        if (!strcmp(opt, "-no-ranchu")) {
+            ranchu = RANCHU_OFF;
             continue;
         }
 
@@ -287,29 +299,41 @@ int main(int argc, char** argv)
     bool tryCurrentPath = !strchr(argv[0], '/');
 #endif
 
-    // Launch the classic emulator by default, unless the AVD's CPU
-    // architecture is not supported by the 'goldfish' board, or the
-    // -ranchu flag was used on the command-line.
+    // Launch the QEMU2 emulator by default, unless the AVD's CPU
+    // architecture is not supported by the 'ranchu' board, or the
+    // -no-ranchu flag was used on the command-line.
     //
     // More complex logic might be introduced in the future (e.g. select
     // the board based on the architecture and API level).
-    if (!ranchu && !isCpuArchSupportedByGoldfish(avdArch)) {
-        ranchu = true;
-        D("Auto-config: -ranchu  (%s only supported by ranchu board)\n",
-          avdArch);
-    } else if (ranchu && !isCpuArchSupportedByRanchu(avdArch)) {
-        APANIC("CPU Architecture '%s' is not supported by the 'ranchu' virtual board",
+    if (ranchu == RANCHU_AUTODETECT) {
+        bool cpuHasRanchu = isCpuArchSupportedByRanchu(avdArch);
+
+        if (cpuHasRanchu) {
+            ranchu = RANCHU_ON;
+            D("Auto-config: -ranchu (%s defaults to QEMU2 emulator)\n", avdArch);
+        } else {
+            ranchu = RANCHU_OFF;
+            D("Auto-config: -no-ranchu (%s not supported by QEMU2 emulator)\n", avdArch);
+        }
+    }
+
+    if (ranchu == RANCHU_OFF && !isCpuArchSupportedByGoldfish(avdArch)) {
+        APANIC("CPU Architecture '%s' is not supported by the classic emulator",
+               avdArch);
+    }
+    if (ranchu == RANCHU_ON && !isCpuArchSupportedByRanchu(avdArch)) {
+        APANIC("CPU Architecture '%s' is not supported by the QEMU2 emulator",
                avdArch);
     }
 
 #ifdef _WIN32
     // Windows version of Qemu1 works only in x86 mode
-    if (!ranchu) {
+    if (ranchu == RANCHU_OFF) {
         wantedBitness = 32;
     }
 #endif
 
-    if (ranchu) {
+    if (ranchu == RANCHU_ON) {
         emulatorPath = getQemuExecutablePath(progDir,
                                              avdArch,
                                              wantedBitness);

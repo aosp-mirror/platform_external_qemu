@@ -809,9 +809,20 @@ static void
 help_ranchu(stralloc_t* out)
 {
     PRINTF(
-        "  Use the new emulator engine as the preferred backend\n"
+        "  DEPRECATED: Previously used to use the new emulator engine as the\n"
+        "  preferred backend. Now this option is simply ignored and the 'emulator'\n"
+        "  launcher will auto-detect the engine, favoring QEMU2 over the classic one\n"
     );
 }
+
+static void
+help_no_ranchu(stralloc_t* out)
+{
+    PRINTF(
+        "  Use the classic emulator engine as the preferred backend\n"
+    );
+}
+
 
 static void
 help_skindir(stralloc_t*  out)
