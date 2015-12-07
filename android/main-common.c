@@ -607,6 +607,20 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
         exit(2);
     }
 
+    // make sure we're using the proper engine (qemu1/qemu2) for the kernel
+    if (opts->ranchu && kernelVersion < KERNEL_VERSION_3_10_0) {
+        derror("New emulator backend requires minimum kernel version 3.10+ (currently got lower)\n"
+               "Please make sure you've got updated system images and do not force the specific "
+               "kernel image together with the engine version",
+               versionString);
+        exit(2);
+    } else if (!opts->ranchu && kernelVersion >= KERNEL_VERSION_3_10_0) {
+        derror("Kernel version 3.10 and higher requires the new emulation engine\n"
+               "Please do not force the specific kernel image together with the engine version",
+               versionString);
+        exit(2);
+    }
+
     // Auto-detect kernel device naming scheme if needed.
     if (androidHwConfig_getKernelDeviceNaming(hw) < 0) {
         const char* newDeviceNaming = "no";

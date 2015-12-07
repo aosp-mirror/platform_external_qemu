@@ -191,10 +191,10 @@ int main(int argc, char **argv) {
     char*             skinPath;
     int               inAndroidBuild;
 
-    AndroidOptions  opts[1];
+    AndroidOptions  opts[1] = {};
+
     /* net.shared_net_ip boot property value. */
-    char boot_prop_ip[64];
-    boot_prop_ip[0] = '\0';
+    char boot_prop_ip[64] = {};
 
     args[0] = argv[0];
 
