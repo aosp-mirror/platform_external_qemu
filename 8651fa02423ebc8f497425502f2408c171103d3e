@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "40db3839_e388e608",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-07T22:24:25Z",
+      "side": 1,
+      "message": "exactly ! :-)",
+      "revId": "8651fa02423ebc8f497425502f2408c171103d3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
