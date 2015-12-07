@@ -113,6 +113,8 @@ static bool isCpuArchSupportedByRanchu(const char* avdArch) {
     return isStringInList(avdArch, kSupported, ARRAY_SIZE(kSupported));
 }
 
+static bool checkAvdSystemDirForKernelRanchu(const char* avdName);
+
 /* Main routine */
 int main(int argc, char** argv)
 {
@@ -120,9 +122,9 @@ int main(int argc, char** argv)
     char*       avdArch = NULL;
     const char* gpu = NULL;
     char*       emulatorPath;
+    const char* engine = NULL;
     bool force_32bit = false;
     bool no_window = false;
-    bool ranchu = false;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -172,10 +174,17 @@ int main(int argc, char** argv)
         if (!strcmp(opt,"-gpu") && nn + 1 < argc) {
             gpu = argv[nn + 1];
             nn++;
+            continue;
         }
 
         if (!strcmp(opt,"-ranchu")) {
-            ranchu = true;
+            // Nothing: the option is deprecated and defaults to auto-detect.
+            continue;
+        }
+
+        if (!strcmp(opt, "-engine") && nn + 1 < argc) {
+            engine = argv[nn + 1];
+            nn++;
             continue;
         }
 
@@ -287,29 +296,73 @@ int main(int argc, char** argv)
     bool tryCurrentPath = !strchr(argv[0], '/');
 #endif
 
-    // Launch the classic emulator by default, unless the AVD's CPU
-    // architecture is not supported by the 'goldfish' board, or the
-    // -ranchu flag was used on the command-line.
-    //
-    // More complex logic might be introduced in the future (e.g. select
-    // the board based on the architecture and API level).
-    if (!ranchu && !isCpuArchSupportedByGoldfish(avdArch)) {
-        ranchu = true;
-        D("Auto-config: -ranchu  (%s only supported by ranchu board)\n",
-          avdArch);
-    } else if (ranchu && !isCpuArchSupportedByRanchu(avdArch)) {
-        APANIC("CPU Architecture '%s' is not supported by the 'ranchu' virtual board",
+    enum RanchuState {
+        RANCHU_AUTODETECT,
+        RANCHU_ON,
+        RANCHU_OFF,
+    } ranchu = RANCHU_AUTODETECT;
+
+    if (engine) {
+        if (!strcmp(engine, "auto")) {
+            ranchu = RANCHU_AUTODETECT;
+        } else if (!strcmp(engine, "classic")) {
+            ranchu = RANCHU_OFF;
+        } else if (!strcmp(engine, "qemu2")) {
+            ranchu = RANCHU_ON;
+        } else {
+            APANIC("Invalid -engine value '%s', please use one of: auto, classic, qemu2",
+                   engine);
+        }
+    }
+
+    if (ranchu == RANCHU_AUTODETECT) {
+        // Auto-detect which emulation engine to launch.
+        bool cpuHasRanchu = isCpuArchSupportedByRanchu(avdArch);
+        bool cpuHasGoldfish = isCpuArchSupportedByGoldfish(avdArch);
+
+        if (cpuHasRanchu) {
+            if (cpuHasGoldfish) {
+                // Need to auto-detect the default engine.
+                // TODO: Deal with -kernel <file>, -systemdir <dir> and platform
+                // builds appropriately. For now this only works reliably for
+                // regular SDK AVD configurations.
+                if (checkAvdSystemDirForKernelRanchu(avdName)) {
+                    D("Auto-config: -engine qemu2 (based on configuration)\n");
+                    ranchu = RANCHU_ON;
+                } else {
+                    D("Auto-config: -engine classic (based on configuration)\n");
+                    ranchu = RANCHU_OFF;
+                }
+            } else {
+                D("Auto-config: -engine qemu2 (%s default)\n", avdArch);
+                ranchu = RANCHU_ON;
+            }
+        } else if (cpuHasGoldfish) {
+            D("Auto-config: -engine classic (%s default)\n", avdArch);
+            ranchu = RANCHU_OFF;
+        } else {
+            APANIC("CPU architecture '%s' is not supported\n", avdArch);
+        }
+    }
+
+    // Sanity checks.
+    if (ranchu == RANCHU_OFF && !isCpuArchSupportedByGoldfish(avdArch)) {
+        APANIC("CPU Architecture '%s' is not supported by the classic emulator",
+               avdArch);
+    }
+    if (ranchu == RANCHU_ON && !isCpuArchSupportedByRanchu(avdArch)) {
+        APANIC("CPU Architecture '%s' is not supported by the QEMU2 emulator",
                avdArch);
     }
 
 #ifdef _WIN32
     // Windows version of Qemu1 works only in x86 mode
-    if (!ranchu) {
+    if (ranchu == RANCHU_OFF) {
         wantedBitness = 32;
     }
 #endif
 
-    if (ranchu) {
+    if (ranchu == RANCHU_ON) {
         emulatorPath = getQemuExecutablePath(progDir,
                                              avdArch,
                                              wantedBitness);
@@ -599,4 +652,24 @@ static void updateLibrarySearchPath(int wantedBitness) {
 
     D("Adding library search path: '%s'\n", fullPath);
     add_library_search_dir(fullPath);
+}
+
+// Verify and AVD's system image directory to see if it supports ranchu.
+static bool checkAvdSystemDirForKernelRanchu(const char* avdName) {
+    bool result = false;
+
+    // For now, just check that a kernel-ranchu file exists. All official
+    // system images should have that if they support ranchu.
+    char fromEnv = 0;
+    char* sdkRootPath = path_getSdkRoot(&fromEnv);
+    char* systemImagePath = path_getAvdSystemPath(avdName, sdkRootPath);
+    char* kernel_file = NULL;
+    asprintf(&kernel_file, "%s/%s", systemImagePath, "kernel-ranchu");
+    D("Probing for %s\n", kernel_file);
+    result = path_exists(kernel_file);
+
+    AFREE(kernel_file);
+    AFREE(systemImagePath);
+    AFREE(sdkRootPath);
+    return result;
 }
