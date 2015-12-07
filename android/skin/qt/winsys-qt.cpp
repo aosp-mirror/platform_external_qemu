@@ -98,12 +98,8 @@ extern void skin_winsys_enter_main_loop(int argc, char **argv)
     g->app->exec();
     D("Finished QT main loop\n");
 
-#if !defined(__APPLE__)
-    // TODO: remove this
-    // Deleting the app inexplicably causes a crash on OS X, but *not* deleting
-    // it causes a crash on Linux. Evil hack until we figure out why.
-    delete g->app;
-#endif  // __APPLE__
+    // There are some atexit cleanups that need to happen before this
+    atexit([] { delete qApp; });
 }
 
 extern void skin_winsys_get_monitor_rect(SkinRect *rect)
