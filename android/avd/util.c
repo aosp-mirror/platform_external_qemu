@@ -340,6 +340,33 @@ path_getAvdTargetArch( const char* avdName )
 }
 
 char*
+path_getAvdSystemPath(const char* avdName,
+                      const char* sdkRoot) {
+    char* result = NULL;
+    char* avdPath = _getAvdContentPath(avdName);
+    int nn;
+    for (nn = 0; nn < MAX_SEARCH_PATHS; ++nn) {
+        char searchKey[32];
+        snprintf(searchKey, sizeof(searchKey), "%s%d", SEARCH_PREFIX, nn + 1);
+        char* searchPath = _getAvdConfigValue(avdPath, searchKey, NULL);
+        if (!searchPath) {
+            continue;
+        }
+
+        char temp[PATH_MAX], *p = temp, *end= p+sizeof temp;
+        p = bufprint(temp, end, "%s/%s", sdkRoot, searchPath);
+        D(" Looking for %s\n", temp);
+        if (p >= end || !path_is_dir(temp)) {
+            continue;
+        }
+        result = ASTRDUP(temp);
+        break;
+    }
+    AFREE(avdPath);
+    return result;
+}
+
+char*
 path_getAvdGpuMode(const char* avdName)
 {
     char* avdPath = _getAvdContentPath(avdName);

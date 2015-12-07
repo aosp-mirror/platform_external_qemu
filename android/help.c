@@ -809,9 +809,27 @@ static void
 help_ranchu(stralloc_t* out)
 {
     PRINTF(
-        "  Use the new emulator engine as the preferred backend\n"
+        "  DEPRECATED: Previously used to use the new emulator engine as the\n"
+        "  preferred backend. Now this option is simply ignored and the 'emulator'\n"
+        "  launcher will auto-detect the engine, favoring QEMU2 over the classic one\n"
     );
 }
+
+static void
+help_engine(stralloc_t* out)
+{
+    PRINTF(
+        "  Select the emulation engine to use. Valid values are\n\n"
+        "      auto    -> perform auto-detection (default)\n"
+        "      classic -> use the classic emulator engine\n"
+        "      qemu2   -> use the newer emulator engine\n\n"
+
+        "  Auto-detection should provide the value that provides the best\n"
+        "  performance when emulating a given AVD. Only use this option\n"
+        "  for debugging / comparison purposes.\n\n"
+    );
+}
+
 
 static void
 help_skindir(stralloc_t*  out)

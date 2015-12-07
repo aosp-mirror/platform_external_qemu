@@ -98,6 +98,7 @@ CFG_PARAM( memory, "<size>", "physical RAM size in MBs" )
 OPT_PARAM( accel, "<mode>", "Configure emulation acceleration" )
 OPT_FLAG ( no_accel, "Same as '-accel off'" )
 OPT_FLAG ( ranchu, "Use new emulator backend instead of the classic one" )
+OPT_PARAM( engine, "<engine>", "Select engine. auto|classic|qemu2" )
 
 OPT_PARAM( netspeed, "<speed>", "maximum network download/upload speeds" )
 OPT_PARAM( netdelay, "<delay>", "network latency emulation" )
