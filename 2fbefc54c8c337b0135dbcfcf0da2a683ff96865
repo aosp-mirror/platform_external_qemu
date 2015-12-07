@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "20eac4c4_425196b3",
+        "filename": "android/base/system/System_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-07T23:13:08Z",
+      "side": 1,
+      "message": "aren\u0027t these the same?",
+      "range": {
+        "startLine": 185,
+        "startChar": 0,
+        "endLine": 187,
+        "endChar": 40
+      },
+      "revId": "2fbefc54c8c337b0135dbcfcf0da2a683ff96865",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e0b50cdb_2072ceee",
+        "filename": "android/base/system/System_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-07T23:13:08Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 193,
+        "startChar": 0,
+        "endLine": 195,
+        "endChar": 39
+      },
+      "revId": "2fbefc54c8c337b0135dbcfcf0da2a683ff96865",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
