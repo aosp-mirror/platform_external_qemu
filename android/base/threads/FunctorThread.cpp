@@ -19,8 +19,9 @@
 namespace android {
 namespace base {
 
-FunctorThread::FunctorThread(const Functor& func)
-    : mThreadFunc(func) {
+FunctorThread::FunctorThread(const Functor& func, ThreadFlags flags)
+    : Thread(flags)
+    , mThreadFunc(func) {
     assert(mThreadFunc);
 }
 

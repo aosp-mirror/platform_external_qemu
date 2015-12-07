@@ -71,6 +71,7 @@ ANDROID_EMU_BASE_SOURCES := \
     android/base/Log.cpp \
     android/base/memory/LazyInstance.cpp \
     android/base/system/System.cpp \
+    android/base/threads/Async.cpp \
     android/base/threads/FunctorThread.cpp \
     android/base/threads/ThreadStore.cpp \
     android/base/Uri.cpp \

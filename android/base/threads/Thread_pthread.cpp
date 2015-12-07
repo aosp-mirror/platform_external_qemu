@@ -42,9 +42,10 @@ private:
 
 }  // namespace
 
-Thread::Thread() :
+Thread::Thread(ThreadFlags flags) :
     mThread((pthread_t)NULL),
     mExitStatus(0),
+    mFlags(flags),
     mIsRunning(false) {
     pthread_mutex_init(&mLock, NULL);
 }
@@ -107,6 +108,10 @@ void* Thread::thread_main(void *arg) {
 
     {
         Thread* self = reinterpret_cast<Thread*>(arg);
+        if ((self->mFlags & ThreadFlags::MaskSignals) != ThreadFlags::None) {
+            Thread::maskAllSignals();
+        }
+
         ret = self->main();
 
         pthread_mutex_lock(&self->mLock);
