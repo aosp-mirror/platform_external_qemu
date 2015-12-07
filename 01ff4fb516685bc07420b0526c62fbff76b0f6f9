@@ -16,6 +16,24 @@
       "revId": "01ff4fb516685bc07420b0526c62fbff76b0f6f9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "20eac4c4_7f346b87",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-07T20:32:45Z",
+      "side": 1,
+      "message": "the implementation of this function is correct. I\u0027ve added another function that checks the kernel value if both the goldfish and ranchu booleans are true, this is the only case where we should try to auto-detect stuff.",
+      "parentUuid": "40db3839_bd2fdf63",
+      "revId": "01ff4fb516685bc07420b0526c62fbff76b0f6f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
