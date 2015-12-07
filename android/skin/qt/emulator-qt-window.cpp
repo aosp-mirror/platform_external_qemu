@@ -181,12 +181,18 @@ void EmulatorQtWindow::slot_startupTick() {
 void EmulatorQtWindow::closeEvent(QCloseEvent *event)
 {
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
-        queueEvent(createSkinEvent(kEventQuit));
+        // run "adb shell stop" and call queueQuitEvent afterwards
+        tool_window->runAdbShellStopAndQuit();
         event->ignore();
     } else {
         tool_window->close();
         event->accept();
     }
+}
+
+void EmulatorQtWindow::queueQuitEvent()
+{
+    queueEvent(createSkinEvent(kEventQuit));
 }
 
 void EmulatorQtWindow::dragEnterEvent(QDragEnterEvent *event)
