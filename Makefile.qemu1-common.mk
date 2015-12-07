@@ -13,96 +13,34 @@
 ##############################################################################
 ##############################################################################
 ###
-###  gen-hw-config-defs: Generate hardware configuration definitions header
-###
-###  The 'gen-hw-config.py' script is used to generate the hw-config-defs.h
-###  header from the an .ini file like android/avd/hardware-properties.ini
-###
-###  Due to the way the Android build system works, we need to regenerate
-###  it for each module (the output will go into a module-specific directory).
-###
-###  This defines a function that can be used inside a module definition
-###
-###  $(call gen-hw-config-defs)
-###
-
-# First, define a rule to generate a dummy "emulator_hw_config_defs" module
-# which purpose is simply to host the generated header in its output directory.
-intermediates := $(call intermediates-dir-for,$(HOST_BITS),emulator_hw_config_defs)
-
-QEMU_HARDWARE_PROPERTIES_INI := $(LOCAL_PATH)/android/avd/hardware-properties.ini
-QEMU_HW_CONFIG_DEFS_H := $(intermediates)/android/avd/hw-config-defs.h
-$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_PATH := $(LOCAL_PATH)
-$(QEMU_HW_CONFIG_DEFS_H): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/android/tools/gen-hw-config.py $< $@
-$(QEMU_HW_CONFIG_DEFS_H): $(QEMU_HARDWARE_PROPERTIES_INI) $(LOCAL_PATH)/android/tools/gen-hw-config.py
-	$(hide) rm -f $@
-	$(transform-generated-source)
-
-QEMU_HW_CONFIG_DEFS_INCLUDES := $(intermediates)
-
-# Second, define a function that needs to be called inside each module that contains
-# a source file that includes the generated header file.
-gen-hw-config-defs = \
-  $(eval LOCAL_GENERATED_SOURCES += $(QEMU_HW_CONFIG_DEFS_H))\
-  $(eval LOCAL_C_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES))
-
-##############################################################################
-##############################################################################
-###
 ###  emulator-common: LIBRARY OF COMMON FUNCTIONS
 ###
 ###  THESE ARE POTENTIALLY USED BY ALL COMPONENTS
 ###
 
-common_LOCAL_CFLAGS =
-common_LOCAL_SRC_FILES =
+QEMU1_COMMON_CFLAGS := \
+    $(EMULATOR_COMMON_CFLAGS) \
 
-EMULATOR_COMMON_CFLAGS := -Werror=implicit-function-declaration
-
-# Needed by everything about the host
-# $(OBJS_DIR)/build contains config-host.h
-# $(LOCAL_PATH)/include contains common headers.
-EMULATOR_COMMON_CFLAGS += \
-    -I$(OBJS_DIR)/build \
-    -I$(LOCAL_PATH)/include
+QEMU1_COMMON_INCLUDES := \
+    $(EMULATOR_COMMON_INCLUDES) \
+    $(LOCAL_PATH)/include
 
 # Need to include "qapi-types.h" and other auto-generated files from
 # android-configure.sh
-EMULATOR_COMMON_CFLAGS += -I$(OBJS_DIR)/build/qemu1-qapi-auto-generated
+QEMU1_COMMON_INCLUDES += $(OBJS_DIR)/build/qemu1-qapi-auto-generated
 
-# Include the emulator version definition from Makefile.common.mk
-EMULATOR_COMMON_CFLAGS += $(EMULATOR_VERSION_CFLAGS)
-
-ifeq (true,$(BUILD_DEBUG_EMULATOR))
-    EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=1
-else
-    EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=0
-endif
-
-###########################################################
 # Zlib sources
-#
-EMULATOR_COMMON_CFLAGS += -I$(ZLIB_INCLUDES)
+QEMU1_COMMON_INCLUDES += $(ZLIB_INCLUDES)
 
-###########################################################
 # GLib sources
-#
 GLIB_DIR := distrib/mini-glib
 include $(LOCAL_PATH)/$(GLIB_DIR)/sources.make
-EMULATOR_COMMON_CFLAGS += -I$(GLIB_INCLUDE_DIR)
+QEMU1_COMMON_INCLUDES += $(GLIB_INCLUDE_DIR)
 
 common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
 
-EMULATOR_COMMON_CFLAGS += $(LIBCURL_CFLAGS)
+QEMU1_COMMON_CFLAGS += $(LIBCURL_CFLAGS)
 
-EMULATOR_CRASHUPLOAD := $(strip $(EMULATOR_CRASHUPLOAD))
-ifdef EMULATOR_CRASHUPLOAD
-    EMULATOR_COMMON_CFLAGS += -DCRASHUPLOAD=$(EMULATOR_CRASHUPLOAD)
-endif
-
-###########################################################
-# build the android-emu libraries
-include $(LOCAL_PATH)/Makefile.android-emu.mk
 
 ###########################################################
 # Android utility functions
@@ -113,7 +51,7 @@ common_LOCAL_SRC_FILES += \
     android/hw-kmsg.c \
     android/hw-lcd.c \
 
-common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
+common_LOCAL_CFLAGS += $(QEMU1_COMMON_CFLAGS)
 
 common_LOCAL_CFLAGS += $(LIBXML2_CFLAGS)
 common_LOCAL_CFLAGS += -I$(LIBEXT4_UTILS_INCLUDES)
@@ -126,6 +64,7 @@ $(call start-emulator-library, emulator-common)
 LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
 
 LOCAL_C_INCLUDES += \
+    $(QEMU1_COMMON_INCLUDES) \
     $(LIBCURL_INCLUDES) \
     $(LIBXML2_INCLUDES) \
     $(BREAKPAD_CLIENT_INCLUDES) \
@@ -205,8 +144,15 @@ endif
 
 ## one for 32-bit
 $(call start-emulator-library, emulator-libui)
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS) $(ANDROID_SKIN_CFLAGS)
-LOCAL_C_INCLUDES := $(EMULATOR_LIBUI_INCLUDES)
+LOCAL_CFLAGS += \
+    $(EMULATOR_COMMON_CFLAGS) \
+    $(ANDROID_SKIN_CFLAGS) \
+    $(LIBXML2_CFLAGS) \
+
+LOCAL_C_INCLUDES := \
+    $(EMULATOR_COMMON_INCLUDES) \
+    $(EMULATOR_LIBUI_INCLUDES) \
+
 LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
@@ -319,12 +265,13 @@ $(QEMU_GDBSTUB_XML_C): $(QEMU_TARGET_XML_SOURCES) $(LOCAL_PATH)/feature_to_c.sh
 LOCAL_GENERATED_SOURCES += $(QEMU_GDBSTUB_XML_C)
 
 LOCAL_C_INCLUDES += \
+    $(QEMU1_COMMON_INCLUDES) \
     $(LOCAL_PATH)/slirp-android \
     $(intermediates) \
     $(LIBJPEG_INCLUDES) \
 
 LOCAL_CFLAGS := \
-    $(EMULATOR_COMMON_CFLAGS) \
+    $(QEMU1_COMMON_CFLAGS) \
     -W \
     -Wall \
     $(GCC_W_NO_MISSING_FIELD_INITIALIZERS) \

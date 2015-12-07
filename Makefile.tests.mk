@@ -104,9 +104,8 @@ endif
 $(call start-emulator-program, emulator$(HOST_SUFFIX)_unittests)
 LOCAL_C_INCLUDES += \
     $(EMULATOR_GTEST_INCLUDES) \
-    $(LOCAL_PATH)/include \
+    $(EMULATOR_COMMON_INCLUDES) \
     $(LIBCURL_INCLUDES) \
-    $(LIBXML2_INCLUDES) \
     $(BREAKPAD_INCLUDES) \
 
 LOCAL_LDLIBS += \
@@ -151,7 +150,10 @@ ANDROID_SKIN_UNITTESTS := \
     android/skin/region_unittest.cpp \
 
 $(call start-emulator-program, android$(HOST_SUFFIX)_skin_unittests)
-LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES) $(LOCAL_PATH)/include
+LOCAL_C_INCLUDES += \
+    $(ANDROID_EMU_INCLUDES) \
+    $(EMULATOR_GTEST_INCLUDES) \
+
 LOCAL_SRC_FILES := $(ANDROID_SKIN_UNITTESTS)
 LOCAL_CFLAGS += $(EMULATOR_UNITTESTS_CFLAGS)
 LOCAL_LDFLAGS += $(EMULATOR_UNITTESTS_LDFLAGS)
