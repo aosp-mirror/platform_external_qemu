@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "60c91c79_798003b1",
+        "filename": "android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 611,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-07T20:30:33Z",
+      "side": 1,
+      "message": "the option is deprecated now, so its value will be of no use.\nI recommend adding a parameter to this function to indicate whether it\u0027s called from the QEMU1 or QEMU2 glue instead, it will be simpler.",
+      "revId": "ca4b28b181258a36f14611db067f3197402331b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
