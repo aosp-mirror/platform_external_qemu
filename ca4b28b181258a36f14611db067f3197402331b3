@@ -34,6 +34,24 @@
       "revId": "ca4b28b181258a36f14611db067f3197402331b3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c0b808d7_7f346787",
+        "filename": "android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 611,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-07T22:13:00Z",
+      "side": 1,
+      "message": "ok, but if -ranchu is used with a QEMU1-backed AVD, you\u0027re going to make the wrong check. I suggest setting opts-\u003eranchu \u003d 0 in the QEMU1 glue that calls this function then, that should be enough!!",
+      "parentUuid": "a0af948e_bb5c53cb",
+      "revId": "ca4b28b181258a36f14611db067f3197402331b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
