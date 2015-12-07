@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "40db3839_bd2fdf63",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2015-12-07T18:41:42Z",
+      "side": 1,
+      "message": "isCpuArchSupportedByRanchu just checks a list of arch names.  I think we should be checking for the \"kernel-ranchu\" file next to the \"kernel-qemu\" file.",
+      "revId": "01ff4fb516685bc07420b0526c62fbff76b0f6f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
