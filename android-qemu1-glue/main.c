@@ -191,16 +191,19 @@ int main(int argc, char **argv) {
     char*             skinPath;
     int               inAndroidBuild;
 
-    AndroidOptions  opts[1];
+    AndroidOptions  opts[1] = {};
+
     /* net.shared_net_ip boot property value. */
-    char boot_prop_ip[64];
-    boot_prop_ip[0] = '\0';
+    char boot_prop_ip[64] = {};
 
     args[0] = argv[0];
 
     if ( android_parse_options( &argc, &argv, opts ) < 0 ) {
         exit(1);
     }
+
+    // we know it's qemu1, and don't care what user wanted to trick us into
+    opts->ranchu = 0;
 
 #ifdef _WIN32
     socket_init();
