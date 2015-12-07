@@ -803,19 +803,20 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
             }
         }
     }
-    if (!grab && event->key() == Qt::Key_Alt) {
-        if (type == kEventKeyDown) {
-            if (androidHwConfig_isScreenMultiTouch(android_hw)) {
-                mOverlay.showForMultitouch();
-            } else {
-                tool_window->showErrorDialog(tr("Your virtual device is not configured for "
-                                                "multi-touch input."),
-                                             tr("Multi-touch"));
-            }
-        } else if (type == kEventKeyUp) {
-            mOverlay.hide();
-        }
-    }
+    // TODO(birenbaum): re-enable multi-touch UI when it works in QEMU2.
+    //if (!grab && event->key() == Qt::Key_Alt) {
+    //    if (type == kEventKeyDown) {
+    //        if (androidHwConfig_isScreenMultiTouch(android_hw)) {
+    //            mOverlay.showForMultitouch();
+    //        } else {
+    //            tool_window->showErrorDialog(tr("Your virtual device is not configured for "
+    //                                            "multi-touch input."),
+    //                                         tr("Multi-touch"));
+    //        }
+    //    } else if (type == kEventKeyUp) {
+    //        mOverlay.hide();
+    //    }
+    //}
     if (grab ||
          !tool_window->handleQtKeyEvent(event)) {
         forwardKeyEventToEmulator(type, event);
