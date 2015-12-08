@@ -254,17 +254,20 @@ static void coreaudio_voice_fini (coreaudioVoice *core)
     OSStatus status;
     int err;
 
-    if (!conf.isAtexit) {
-        /* stop playback */
-        coreaudio_voice_ctl(core, VOICE_DISABLE);
+    pthread_mutex_lock(&core->mutex);
 
-        /* remove callback */
-        status = AudioDeviceRemoveIOProc(core->deviceID, core->ioproc);
-        if (status != kAudioHardwareNoError) {
-            coreaudio_logerr (status, "Could not remove IOProc\n");
-        }
+    /* stop playback */
+    coreaudio_voice_ctl(core, VOICE_DISABLE);
+
+    /* remove callback */
+    status = AudioDeviceRemoveIOProc(core->deviceID, core->ioproc);
+    if (status != kAudioHardwareNoError) {
+        coreaudio_logerr (status, "Could not remove IOProc\n");
     }
+
     core->deviceID = kAudioDeviceUnknown;
+
+    pthread_mutex_unlock(&core->mutex);
 
     /* destroy mutex */
     err = pthread_mutex_destroy(&core->mutex);
