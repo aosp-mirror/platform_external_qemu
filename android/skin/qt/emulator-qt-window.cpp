@@ -155,7 +155,8 @@ void EmulatorQtWindow::slot_startupTick() {
     mStartupDialog.setWindowFlags(Qt::Dialog |
                                   Qt::CustomizeWindowHint |
                                   Qt::WindowTitleHint);
-    mStartupDialog.setWindowIcon(QIcon()); // Hide window icon
+    // Make sure the icon is the same as in the main window
+    mStartupDialog.setWindowIcon(QApplication::windowIcon());
 
     // Emulator logo
     QLabel *label = new QLabel();
