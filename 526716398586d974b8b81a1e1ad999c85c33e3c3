@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8041b0d9_5f4d2bbf",
+        "filename": "android/base/threads/Async.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-08T18:55:57Z",
+      "side": 1,
+      "message": "nit: Please add a copyright disclaimer here.",
+      "revId": "526716398586d974b8b81a1e1ad999c85c33e3c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a03eb447_80e036ec",
+        "filename": "android/base/threads/Async.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-08T18:55:57Z",
+      "side": 1,
+      "message": "nit: use camelCase() for function names, so name this android::base::async(), not Async().",
+      "revId": "526716398586d974b8b81a1e1ad999c85c33e3c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
