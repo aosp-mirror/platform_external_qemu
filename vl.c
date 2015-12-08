@@ -113,6 +113,7 @@
 #include "android/metrics/metrics_reporter.h"
 #include "android/metrics/studio-helper.h"
 #include "android/update-check/update_check.h"
+#include "android/utils/async.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
@@ -2877,7 +2878,7 @@ static void android_init_metrics()
     androidMetrics_write(&metrics);
     androidMetrics_fini(&metrics);
 
-    androidMetrics_tryReportAll();
+    async(androidMetrics_tryReportAll);
 
     metrics_looper = looper_getForThread();
     if (!metrics_looper) {
