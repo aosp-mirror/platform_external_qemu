@@ -98,31 +98,11 @@ protected:
 
     void asyncWorker();
 
-    // Helper class to run the worker in a new thread
-    class CheckerThread : public android::base::Thread {
-    public:
-        CheckerThread(UpdateChecker* checker) : mChecker(checker) {}
-
-        virtual intptr_t main() {
-            mChecker->asyncWorker();
-            return 0;
-        }
-
-        virtual void onExit() {
-            // The checker has been abandoned on this thread. So just kill it...
-            delete mChecker;
-        }
-
-    private:
-        UpdateChecker* mChecker;
-    };
-
 private:
-    CheckerThread mThread;
-    std::auto_ptr<IVersionExtractor> mVersionExtractor;
-    std::auto_ptr<IDataLoader> mDataLoader;
-    std::auto_ptr<ITimeStorage> mTimeStorage;
-    std::auto_ptr<INewerVersionReporter> mReporter;
+    std::unique_ptr<IVersionExtractor> mVersionExtractor;
+    std::unique_ptr<IDataLoader> mDataLoader;
+    std::unique_ptr<ITimeStorage> mTimeStorage;
+    std::unique_ptr<INewerVersionReporter> mReporter;
 };
 
 }  // namespace update_check
