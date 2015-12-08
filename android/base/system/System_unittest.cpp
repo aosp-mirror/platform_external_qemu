@@ -178,6 +178,24 @@ TEST(System, envGetAndSet) {
     EXPECT_STREQ("", sys->envGet(kVarName).c_str());
 }
 
+TEST(System, pathIsDir) {
+    TestSystem sys("/bin", 32);
+
+    EXPECT_FALSE(sys.pathIsDir("foo"));
+    EXPECT_FALSE(sys.pathIsDir("foo/"));
+#ifdef _WIN32
+    EXPECT_FALSE(sys.pathIsDir("foo\\"));
+#endif
+
+    sys.getTempRoot()->makeSubDir("foo");
+
+    EXPECT_TRUE(sys.pathIsDir("foo"));
+    EXPECT_TRUE(sys.pathIsDir("foo/"));
+#ifdef _WIN32
+    EXPECT_TRUE(sys.pathIsDir("foo\\"));
+#endif
+}
+
 TEST(System, pathOperations) {
     System* sys = System::get();
     TestTempDir tempDir("path_opts");

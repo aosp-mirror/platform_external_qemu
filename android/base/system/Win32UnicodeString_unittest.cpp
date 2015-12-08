@@ -58,6 +58,15 @@ TEST(Win32UnicodeString, Constructors) {
         Win32UnicodeString str4(kData[n].utf16);
         EXPECT_EQ(utf16Len, str4.size());
         EXPECT_STREQ(kData[n].utf16, str4.c_str());
+
+        Win32UnicodeString str5 = str4;
+        EXPECT_EQ(utf16Len, str5.size());
+        EXPECT_STREQ(kData[n].utf16, str5.c_str());
+
+        Win32UnicodeString str6("foo");
+        str6 = str5;
+        EXPECT_EQ(utf16Len, str6.size());
+        EXPECT_STREQ(kData[n].utf16, str6.c_str());
     }
 }
 

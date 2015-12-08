@@ -355,10 +355,11 @@ path_getAvdSystemPath(const char* avdName,
 
         char temp[PATH_MAX], *p = temp, *end= p+sizeof temp;
         p = bufprint(temp, end, "%s/%s", sdkRoot, searchPath);
-        D(" Looking for %s\n", temp);
         if (p >= end || !path_is_dir(temp)) {
+            D(" Not a directory: %s\n", temp);
             continue;
         }
+        D(" Found directory: %s\n", temp);
         result = ASTRDUP(temp);
         break;
     }

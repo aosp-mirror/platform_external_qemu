@@ -580,6 +580,46 @@ private:
 LazyInstance<HostSystem> sHostSystem = LAZY_INSTANCE_INIT;
 System* sSystemForTesting = NULL;
 
+#ifdef _WIN32
+// Return |path| as a Unicode string, while discarding trailing separators.
+Win32UnicodeString win32Path(const char* path) {
+    Win32UnicodeString wpath(path, ::strlen(path));
+    // Get rid of trailing directory separators, Windows doesn't like them.
+    size_t size = wpath.size();
+    while (size > 0U &&
+           (wpath[size - 1U] == L'\\' || wpath[size - 1U] == L'/')) {
+        size--;
+    }
+    if (size < wpath.size()) {
+        wpath.resize(size);
+    }
+    return wpath;
+}
+
+using PathStat = struct _stat;
+
+#else  // _WIN32
+
+using PathStat = struct stat;
+
+#endif  // _WIN32
+
+int pathStat(const char* path, PathStat* st) {
+#ifdef _WIN32
+    return _wstat(win32Path(path).c_str(), st);
+#else   // !_WIN32
+    return HANDLE_EINTR(stat(path, st));
+#endif  // !_WIN32
+}
+
+int pathAccess(const char* path, int mode) {
+#ifdef _WIN32
+    return _waccess(win32Path(path).c_str(), mode);
+#else   // !_WIN32
+    return HANDLE_EINTR(access(path, mode));
+#endif  // !_WIN32
+}
+
 }  // namespace
 
 // static
@@ -670,11 +710,7 @@ bool System::pathExistsInternal(const char* path) {
     if (!path) {
         return false;
     }
-#ifdef _WIN32
-    int ret = _waccess(Win32UnicodeString(path).c_str(), F_OK);
-#else
-    int ret = HANDLE_EINTR(access(path, F_OK));
-#endif
+    int ret = pathAccess(path, F_OK);
     return (ret == 0) || (errno != ENOENT);
 }
 
@@ -683,13 +719,8 @@ bool System::pathIsFileInternal(const char* path) {
     if (!path) {
         return false;
     }
-#ifdef _WIN32
-    struct _stat st;
-    int ret = _wstat(Win32UnicodeString(path).c_str(), &st);
-#else
-    struct stat st;
-    int ret = HANDLE_EINTR(stat(path, &st));
-#endif
+    PathStat st;
+    int ret = pathStat(path, &st);
     if (ret < 0) {
         return false;
     }
@@ -701,13 +732,8 @@ bool System::pathIsDirInternal(const char* path) {
     if (!path) {
         return false;
     }
-#ifdef _WIN32
-    struct _stat st;
-    int ret = _wstat(Win32UnicodeString(path).c_str(), &st);
-#else
-    struct stat st;
-    int ret = HANDLE_EINTR(stat(path, &st));
-#endif
+    PathStat st;
+    int ret = pathStat(path, &st);
     if (ret < 0) {
         return false;
     }
@@ -719,7 +745,7 @@ bool System::pathCanReadInternal(const char* path) {
     if (!path) {
         return false;
     }
-    return HANDLE_EINTR(access(path, R_OK)) == 0;
+    return pathAccess(path, R_OK) == 0;
 }
 
 // static
@@ -727,7 +753,7 @@ bool System::pathCanWriteInternal(const char* path) {
     if (!path) {
         return false;
     }
-    return HANDLE_EINTR(access(path, W_OK)) == 0;
+    return pathAccess(path, W_OK) == 0;
 }
 
 // static
@@ -735,7 +761,7 @@ bool System::pathCanExecInternal(const char* path) {
     if (!path) {
         return false;
     }
-    return HANDLE_EINTR(access(path, X_OK)) == 0;
+    return pathAccess(path, X_OK) == 0;
 }
 
 // static
