@@ -216,8 +216,10 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "android/hw-lcd.h"
 #include "android/boot-properties.h"
 #include "android/hw-control.h"
+#include "android/audio-test.h"
 #include "android/core-init-utils.h"
 #include "android/audio-test.h"
+#include "android/utils/async.h"
 
 #include "android/snaphost-android.h"
 #include "android/version.h"
@@ -1907,7 +1909,7 @@ static void android_init_metrics(int opengl_alive)
     androidMetrics_write(&metrics);
     androidMetrics_fini(&metrics);
 
-    androidMetrics_tryReportAll();
+    async(androidMetrics_tryReportAll);
 
     metrics_looper = looper_getForThread();
     if (!metrics_looper) {
