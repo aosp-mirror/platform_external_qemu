@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/base/Compiler.h"
+#include "android/base/threads/Types.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -60,7 +61,7 @@ class Thread {
 
 public:
     // Public constructor.
-    Thread();
+    Thread(ThreadFlags flags = ThreadFlags::MaskSignals);
 
     // Virtual destructor.
     virtual ~Thread();
@@ -108,6 +109,7 @@ private:
     pthread_mutex_t mLock;
 #endif
     intptr_t mExitStatus;
+    ThreadFlags mFlags;
     bool mIsRunning;
 };
 
