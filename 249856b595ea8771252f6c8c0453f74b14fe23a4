@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "80d9b040_e80a87fe",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 806,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-08T00:02:35Z",
+      "side": 1,
+      "message": "why re-enableD\n?",
+      "range": {
+        "startLine": 806,
+        "startChar": 33,
+        "endLine": 806,
+        "endChar": 34
+      },
+      "revId": "249856b595ea8771252f6c8c0453f74b14fe23a4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "20eac4c4_a59a642d",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 819,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-08T00:02:35Z",
+      "side": 1,
+      "message": "could you please use only // comments?",
+      "range": {
+        "startLine": 807,
+        "startChar": 0,
+        "endLine": 819,
+        "endChar": 8
+      },
+      "revId": "249856b595ea8771252f6c8c0453f74b14fe23a4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
