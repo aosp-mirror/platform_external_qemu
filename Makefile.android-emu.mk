@@ -89,6 +89,7 @@ ANDROID_EMU_BASE_SOURCES := \
     android/multitouch-screen.c \
     android/utils/aconfig-file.c \
     android/utils/assert.c \
+    android/utils/async.cpp \
     android/utils/bufprint.c \
     android/utils/bufprint_system.cpp \
     android/utils/cbuffer.c \
