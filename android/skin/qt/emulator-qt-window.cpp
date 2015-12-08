@@ -755,6 +755,8 @@ SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(QMouseEvent *event) con
     return (event->button() == Qt::RightButton) ? kMouseButtonRight : kMouseButtonLeft;
 }
 
+#include <iostream>
+
 void EmulatorQtWindow::handleMouseEvent(SkinEventType type, SkinMouseButtonType button, const QPoint &pos)
 {
     SkinEvent *skin_event = createSkinEvent(type);
@@ -764,6 +766,7 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type, SkinMouseButtonType 
     skin_event->u.mouse.xrel = 0;
     skin_event->u.mouse.yrel = 0;
 
+    std::cout << "Mouse down event!" << std::endl;
     queueEvent(skin_event);
 }
 
@@ -803,7 +806,9 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
             }
         }
     }
-    if (!grab && event->key() == Qt::Key_Alt) {
+    if (!grab &&
+         event->key() == Qt::Key_Alt &&
+         event->modifiers() == Qt::AltModifier) {
         if (type == kEventKeyDown) {
             if (androidHwConfig_isScreenMultiTouch(android_hw)) {
                 mOverlay.showForMultitouch();
