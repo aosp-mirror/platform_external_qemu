@@ -615,10 +615,13 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
                versionString);
         exit(2);
     } else if (!opts->ranchu && kernelVersion >= KERNEL_VERSION_3_10_0) {
-        derror("Kernel version 3.10 and higher requires the new emulation engine\n"
-               "Please do not force the specific kernel image together with the engine version",
-               versionString);
-        exit(2);
+        char* kernel_file = path_basename(hw->kernel_path);
+        if (kernel_file && !strcmp(kernel_file, "kernel-ranchu")) {
+            derror("This kernel requires the new emulation engine\n"
+                   "Please do not force the specific kernel image together with the engine version",
+                versionString);
+            exit(2);
+        }
     }
 
     // Auto-detect kernel device naming scheme if needed.
