@@ -803,7 +803,9 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
             }
         }
     }
-    if (!grab && event->key() == Qt::Key_Alt) {
+    if (!grab &&
+         event->key() == Qt::Key_Alt &&
+         event->modifiers() == Qt::AltModifier) {
         if (type == kEventKeyDown) {
             if (androidHwConfig_isScreenMultiTouch(android_hw)) {
                 mOverlay.showForMultitouch();
