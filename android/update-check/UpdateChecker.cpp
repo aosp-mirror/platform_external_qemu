@@ -13,6 +13,7 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
+#include "android/base/threads/Async.h"
 #include "android/curl-support.h"
 #include "android/update-check/update_check.h"
 #include "android/update-check/VersionExtractor.h"
@@ -45,8 +46,8 @@ using android::base::Version;
 using android::update_check::UpdateChecker;
 
 void android_checkForUpdates(const char* homePath) {
-    std::auto_ptr<UpdateChecker> checker(new (std::nothrow)
-                                                 UpdateChecker(homePath));
+    std::unique_ptr<UpdateChecker> checker(new (std::nothrow)
+                                               UpdateChecker(homePath));
 
     if (checker->init() && checker->needsCheck() && checker->runAsyncCheck()) {
         // checker will delete itself after the check in the worker thread
@@ -150,8 +151,7 @@ public:
 };
 
 UpdateChecker::UpdateChecker(const char* configPath)
-    : mThread(this),
-      mVersionExtractor(new VersionExtractor()),
+    : mVersionExtractor(new VersionExtractor()),
       mDataLoader(new DataLoader()),
       mTimeStorage(new TimeStorage(configPath)),
       mReporter(new NewerVersionReporter()) {}
@@ -160,8 +160,7 @@ UpdateChecker::UpdateChecker(IVersionExtractor* extractor,
                              IDataLoader* loader,
                              ITimeStorage* storage,
                              INewerVersionReporter* reporter)
-    : mThread(this),
-      mVersionExtractor(extractor),
+    : mVersionExtractor(extractor),
       mDataLoader(loader),
       mTimeStorage(storage),
       mReporter(reporter) {}
@@ -181,7 +180,7 @@ bool UpdateChecker::needsCheck() const {
 }
 
 bool UpdateChecker::runAsyncCheck() {
-    return mThread.start();
+    return android::base::async([this] { asyncWorker(); delete this; return 0; });
 }
 
 time_t UpdateChecker::clearHMS(time_t t) {
