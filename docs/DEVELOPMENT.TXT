@@ -36,38 +36,25 @@ Replace 'emu-master-dev' with another branch name if necessary.
 II. Building the binaries:
 --------------------------
 
-II.1) Build the dependencies:
-- - - - - - - - - - - - - - -
+II.1) Prebuilt binaries:
+- - - - - - - - - - - -
 
-This step will build various binary libraries that are later used by the
-Android emulator programs.
-
-Since these libraries are large, take a long time to build, and hardly change
-over time, they are stored in a directory outside of the regular build tree
-(to make regular builds faster), which is by default:
-
-    /tmp/$USER-emulator-prebuilts/
-
-You can select a different location by setting ANDROID_EMULATOR_PREBUILTS_DIR
-in your environment.
-
-To build them, do:
-
-   cd studio-dev/external/qemu
-   android/scripts/build-mesa.sh
-   android/scripts/build-qemu-android.sh
-
-For your information, the Mesa library is used to implement software-based
-GLES emulation, and 'qemu-android' is the new emulator code based on a more
-recent upstream QEMU (more on this later).
+Building the emulator now depends on many prebuilt libraries that are stored
+under $TOP/prebuilts/android-emulator-build/. Normally, you don't need to
+care about them, but read the section below named "Rebuilding prebuilts"
+for more information, or if you need to add a new dependency.
 
 II.2) Build the emulator binaries:
 - - - - - - - - - - - - - - - - - -
 
 After building all the dependencies, do:
 
-  cd studio-dev/external/qemu
+  cd $TOP/external/qemu
   ./android-rebuild.sh
+
+Note that android-rebuild.sh will build all sources, but also run a small
+series of unit-tests to check that everything works as expected. In case
+of problem, use the --verbose flag to see what's failing.
 
 Final binaries will be located under the 'objs' directory. You can select
 a different location with --out-dir=<path>.
@@ -79,6 +66,13 @@ On Linux, it is possible to build Windows binaries by using the --mingw option
 as in:
 
   ./android-rebuild.sh --mingw
+
+If you have Wine installed, android-rebuild.sh will detect it and run the
+unit-tests with it.
+
+IMPORTANT: Unfortunately, it's not possible to run the Windows emulator
+           binaries under Wine anymore. This seems related to OpenGL API
+           emulation issues in Wine.
 
 android-rebuild.sh also supports other interesting options (e.g. --debug to
 generate debug versions of the binaries). For all details, use:
@@ -93,7 +87,7 @@ II.3) Packaging binary releases:
 
 You can create redistributable tarballs by using:
 
-  cd studio/dev/external/qemu
+  cd $TOP/external/qemu
   android/scripts/package-release.sh
 
 This will create /tmp/android-emulator-<date>-<system>.tar.bz2 containing
@@ -188,7 +182,7 @@ where <cpu> can be one of 'arm', 'x86', 'mips', 'x86_64', 'arm64' or 'mips64'.
 
 To boot the generated system image:
 
-   cd studio-dev/external/qemu
+   cd $TOP/external/qemu
    ./android-rebuild.sh
    export ANDROID_BUILD_TOP=/path/to/aosp
    objs/emulator <your-options>
@@ -204,7 +198,7 @@ The 'classic' emulator programs are used to run legacy Android SDK system
 images (from Cupcake to Lollipop) and are based on a very ancient version of
 QEMU that has been drastically patched and altered.
 
-Its sources lie under studio-dev/external/qemu/, with the following
+Its sources lie under $TOP/external/qemu/, with the following
 important sub-directories:
 
   android/
@@ -256,7 +250,7 @@ The 'new' emulator programs are used to run more version Android system images
 of upstream QEMU (2.2.0 at this time), which has been slightly modified with
 Android-specific changes.
 
-The sources are under studio-dev/external/qemu-android/
+The sources are under $TOP/external/qemu-android/
 
 Note that these sources will be periodically rebased on top of upstream QEMU
 changes / releases. It is our goal to ultimately send patches upstream to
@@ -307,10 +301,10 @@ of them:
     properly loaded when needed (which typically involves modifying
     LD_LIBRARY_PATH on Posix systems, and PATH on Windows).
 
-  - CPU-specific "classic" emulation engines, which are independent programs
-    that can emulate a single virtual CPU. 32-bit and 64-bit versions are
-    typically available, and are called by 'emulator' based on AVD
-    configuration, for example:
+  - CPU-specific "classic" (a.k.a QEMU1) emulation engines, which are
+    independent program that can emulate a single virtual CPU. 32-bit
+    and 64-bit versions are typically available, and are called by
+    'emulator' based on AVD configuration, for example:
 
         $EXEC_DIR/emulator-arm   ->
                 32-bit host program to emulate 32-bit ARM CPUs.
@@ -326,7 +320,7 @@ of them:
     sources under external/qemu, and can be used to emulate old Android
     system images (e.g. anything before the L release).
 
-  - CPU-specific "newer" QEMU emulation engines, based on a newer version
+  - CPU-specific "newer" QEMU2 emulation engines, based on a newer version
     of QEMU (2.2.0), located under:
 
         $EXEC_DIR/qemu/$HOST_SYSTEM/qemu-system-$ARCH
@@ -335,12 +329,11 @@ of them:
     is a virtual cpu name, following QEMU convention (e.g. 'aarch64' for
     64-bit ARM CPUs).
 
-    They are built from the sources under external/qemu-android/
+    They are built by android-rebuild.sh from the sources under
+    external/qemu-android/
 
     Note that these are slightly-modified QEMU programs, and thus accept
-    only QEMU-specific command-line options, which are very different from
-    the set of options supported by the 'emulator' program and the classic
-    emulators.
+    emulator-specific command-line options, not the original QEMU ones.
 
   - GPU Emulation libraries, which implement guest EGL/GLES to desktop GL
     translation. This is the default GPU emulation mode also known as 'host'
@@ -378,8 +371,107 @@ of them:
     For more details, see docs/GPU-EMULATION.TXT
 
 
-VI. Other related sources:
---------------------------
+VI. Rebuilding prebuilt binaries:
+---------------------------------
+
+The emulator prebuilt binaries are stored in git repositories under:
+
+  $TOP/prebuilts/android-emulator-build/
+
+This section explains how to update them, if necessary. For example, to
+add a new prebuilt library when adding a new emulator feature.
+
+All the binaries are built from various scripts available under
+$STOP/external/qemu/android/scripts/, the most important files here
+are the following:
+
+   external/android/dependencies/PACKAGES.TXT
+       A list of source tarball and patch archives, with their original
+       download URL, expected SHA1SUM, and other information. Note that
+       the same directory contains patch tarballs for misc sources.
+
+   external/android/scripts/download-sources.sh:
+       A script used to parse PACKAGES.TXT and download or check all
+       packages into the following directory:
+
+          $TOP/prebuilts/android-emulator-build/archive/
+
+       If one wants to add a new prebuilt library, start by updated
+       PACKAGES.TXT, then run download-sources.sh to update the
+       .../archive/ content.
+
+       IMPORTANT: download-sources.sh copies the PACKAGES.TXT and associated
+                  patch files into .../archive/, which is the location used
+                  by all the build-<name>.sh scripts described below.
+
+                  In other words: IF YOU UPDATE PACKAGES.TXT, ALWAYS RUN
+                  download-sources.sh BEFORE RUNNING ONE OF THE BUILD
+                  SCRIPTS BELOW.
+
+    external/android/scripts/build-<name>.sh:
+       A script used to rebuild a given set of prebuilt binaries.
+       Note that by default, when invoked on Linux, this builds Linux
+       and Windows binaries at the same time. It is also possible to
+       build for all supported host platforms with the --darwin-ssh=<hostname>
+       option, that will direct the script to perform a remote build on
+       a Darwin machine through ssh.
+
+       The corresponding binaries are then stored under one of:
+
+           $TOP/prebuilts/android-emulator-build/<name>/<system>/
+           $TOP/prebuilts/android-emulator-build/common/<name>/<system>/
+
+       Where <name> is the prebuilt name, and <system> is a host system tag
+       like windows-x86 or linux-x86_64.
+
+    external/android/scripts/build-qt.sh:
+       As a special exception, this script works like the other build-<name>.sh
+       scripts, except that the Qt source tarball are not listed in
+       PACKAGES.TXT, nor is a copy stored under .../archive/.
+
+       The reason for this is simply that the archive file is too large
+       (several hundreds MBs). As such, one should call this script with
+       the --download option on the first time. This will grab the tarball
+       from official Qt servers and put it under .../archive/ where it
+       will *not* be put under git.
+
+    external/android/scripts/build-qemu-android.sh:
+       This is another special exception because this script does not build
+       something that is put on git repositories. The purpose of this script
+       is to rebuild the QEMU2 binaries from sources under
+       $TOP/external/qemu-android, using the original QEMU2 configure/build
+       system (unlike android-rebuild.sh, which uses the emulator build
+       system to compile them). The main difference is that said binaries
+       cannot use the AndroidEmu library (see the documentation for it in
+       docs/ANDROID-EMULATION-LIBRARY.TXT).
+
+       The reason to use this script is to ease the task of tracking
+       upstream QEMU changes, and rebasing our own modifications on top
+       of it (mainly because the Android-specific features added on top
+       of it are way too large to be accepted by upstream).
+
+       In particular, build-qemu-android.sh generates LINK-<system>.TXT
+       files describing all the object files used during a link of the
+       final QEMU2 binaries. These files are later processed by a helper
+       script located under:
+
+          external/qemu-android/android-qemu2-glue/ \
+                  scripts/gen-qemu2-sources-mk.sh
+
+       to generate the correspond Android .mk rules used with
+       android-rebuild.sh, i.e.:
+
+          external/qemu-android/android-qemu2-glue/ \
+                  build/Makefile.qemu2-sources.mk
+
+       The new QEMU2 binaries are copied into:
+
+          $TOP/prebuilts/android-emulator-build/qemu-android/
+
+       Note that this directory is *not* backed by a git repository.
+
+VII. Other related sources:
+---------------------------
 
 A full SDK depends on other notable sources from different locations:
 
