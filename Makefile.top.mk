@@ -142,7 +142,6 @@ MY_CFLAGS += -D_GNU_SOURCE=1
 #
 start-emulator-library = \
     $(eval include $(CLEAR_VARS)) \
-    $(eval LOCAL_NO_DEFAULT_COMPILER_FLAGS := true) \
     $(eval LOCAL_MODULE := $1) \
     $(eval LOCAL_MODULE_CLASS := STATIC_LIBRARIES) \
     $(eval LOCAL_BUILD_FILE := $(BUILD_HOST_STATIC_LIBRARY))
