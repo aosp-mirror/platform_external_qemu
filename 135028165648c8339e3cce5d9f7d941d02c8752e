@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "80d9b040_c8806369",
+        "filename": "android/scripts/utils/aosp_dir.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "I believe these should be exact, i.e linux-x86_64 or linux-x86, but not \u0027linux\u0027",
+      "revId": "135028165648c8339e3cce5d9f7d941d02c8752e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80b290f4_dd0bbba9",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "same here.",
+      "revId": "135028165648c8339e3cce5d9f7d941d02c8752e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c0b808d7_cdadc9ad",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "+\u003d is a bash-ism, please replace with:\n\n  SYMTOOL\u003d${SYMTOOL}_dwarf",
+      "revId": "135028165648c8339e3cce5d9f7d941d02c8752e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0af948e_c17bd8cc",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 524,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "fyi, there is no need for quotes in direct assignment per Posix, i.e.:\n\n  FOO\u003d$BAR\n\nwill always do the correct thing, even if $BAR contains space. On the other hand, with:\n\n  local FOO\u003d$BAR\n\nThe result depends on the shell. Some of them consider \u0027local\u0027 to be a command, and the you would need to quote \"$BAR\" to make it work properly. Crazy, I know.",
+      "revId": "135028165648c8339e3cce5d9f7d941d02c8752e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c0b808d7_2def25e3",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 588,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "\u003d\u003d is a Bash-ism, use \u003d instead.",
+      "revId": "135028165648c8339e3cce5d9f7d941d02c8752e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "60c91c79_7f154386",
+        "filename": "android/scripts/utils/emulator_prebuilts.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "please remove this?",
+      "revId": "135028165648c8339e3cce5d9f7d941d02c8752e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
