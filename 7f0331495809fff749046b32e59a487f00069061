@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "05487277_a3f15a8e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 961,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T17:21:18Z",
+      "side": 1,
+      "message": "no, no need to reformat everything, just use the more convenient forms for new code :) that\u0027s just a nit by the way, so feel free to submit as is",
+      "parentUuid": "a58ec6ed_00d6e61a",
+      "revId": "7f0331495809fff749046b32e59a487f00069061",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c562daed_497881cc",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 4
@@ -101,6 +119,24 @@
       "side": 1,
       "message": "HandleType can be smaller than the EGLImageKHR type (which is an opaque void pointer), which makes the reinterpret_cast implementation dependent (and if I recall correctly I got a compilation error).",
       "parentUuid": "6553ee27_c67a22c9",
+      "revId": "7f0331495809fff749046b32e59a487f00069061",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "253496db_cc0daf50",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 973,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T17:21:18Z",
+      "side": 1,
+      "message": "ok, thanks for the clarification :)",
+      "parentUuid": "45250aa8_6d7355f4",
       "revId": "7f0331495809fff749046b32e59a487f00069061",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
