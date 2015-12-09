@@ -238,7 +238,6 @@ $(call start-emulator-program, emulator$(HOST_SUFFIX)-$(EMULATOR_TARGET_ARCH))
 
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
-    libandroid-wear-agent \
     emulator-common \
     $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
     $(ANDROID_SKIN_STATIC_LIBRARIES) \
