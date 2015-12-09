@@ -3388,6 +3388,30 @@ Dump json-encoded vmstate information for current machine type to file
 in @var{file}
 ETEXI
 
+DEF("netspeed", HAS_ARG, QEMU_OPTION_netspeed,
+    "-netspeed <speed> maximum network download/upload speeds\n", QEMU_ARCH_ALL)
+STEXI
+@item -netspeed @var{speed}
+@findex -netspeed
+Set a maximum network transfer speed, either as a network type or in kbit/s
+ETEXI
+
+DEF("netdelay", HAS_ARG, QEMU_OPTION_netdelay,
+    "-netdelay <delay> network latency emulation\n", QEMU_ARCH_ALL)
+STEXI
+@item -netdelay @var{delay}
+@findex -netdelay
+Set the network delay, either based on a network type or in milliseconds
+ETEXI
+
+DEF("netfast", 0, QEMU_OPTION_netfast,
+    "-netfast disable network shaping\n", QEMU_ARCH_ALL)
+STEXI
+@item -netfast
+@findex -netfast
+Disable network shaping to make network as fast as possible
+ETEXI
+
 DEF("lcd-density", HAS_ARG, QEMU_OPTION_lcd_density,
     "-lcd-density density\n"
     "                select lcd display density value (default is 160)\n", QEMU_ARCH_ALL)

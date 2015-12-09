@@ -230,6 +230,10 @@ int no_shutdown = 0;
 int cursor_hide = 1;
 int graphic_rotate = 0;
 #ifdef CONFIG_ANDROID
+/* -netspeed option value. */
+char* android_op_netspeed = NULL;
+char* android_op_netdelay = NULL;
+int android_op_netfast = 0;
 int lcd_density = LCD_DENSITY_MDPI;
 #ifdef USE_ANDROID_EMU
 static const char* android_hw_file = NULL;
@@ -4010,6 +4014,15 @@ int run_qemu_main(int argc, const char **argv)
                 }
                 break;
 #ifdef CONFIG_ANDROID
+            case QEMU_OPTION_netspeed:
+                android_op_netspeed = (char*)optarg;
+                break;
+            case QEMU_OPTION_netdelay:
+                android_op_netdelay = (char*)optarg;
+                break;
+            case QEMU_OPTION_netfast:
+                android_op_netfast = 1;
+                break;
             case QEMU_OPTION_lcd_density:
                 lcd_density = strtol(optarg, (char **) &optarg, 10);
                 switch (lcd_density) {
@@ -4180,6 +4193,25 @@ int run_qemu_main(int argc, const char **argv)
         boot_property_add("qemu.sf.lcd_density", temp);
     }
 
+    /* Initialize net speed and delays stuff. */
+    if (android_parse_network_speed(android_op_netspeed) < 0) {
+        fprintf(stderr, "invalid -netspeed parameter '%s'",
+                android_op_netspeed);
+        exit(1);
+    }
+
+    if (android_parse_network_latency(android_op_netdelay) < 0) {
+        fprintf(stderr, "invalid -netdelay parameter '%s'",
+                android_op_netdelay);
+        exit(1);
+    }
+
+    if (android_op_netfast) {
+        qemu_net_download_speed = 0;
+        qemu_net_upload_speed = 0;
+        qemu_net_min_latency = 0;
+        qemu_net_max_latency = 0;
+    }
 #endif // USE_ANDROID_EMU
 
 #endif // CONFIG_ANDROID

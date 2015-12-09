@@ -14,6 +14,10 @@
 #include "android/telephony/modem_driver.h"
 #include "android/shaper.h"
 
+extern "C" {
+#include "net/net.h"
+}
+
 double   qemu_net_upload_speed   = 0.;
 double   qemu_net_download_speed = 0.;
 int      qemu_net_min_latency = 0;
@@ -25,6 +29,7 @@ NetDelay   slirp_delay_in;
 
 #if defined(CONFIG_SLIRP)
 static void* s_slirp_state = nullptr;
+static void* s_net_client_state = nullptr;
 static Slirp* s_slirp = nullptr;
 
 static void
@@ -42,13 +47,16 @@ slirp_shaper_in_cb(void* data, size_t size, void* opaque)
 static void
 slirp_shaper_out_cb(void* data, size_t size, void* opaque)
 {
-    slirp_output(s_slirp_state, static_cast<const uint8_t*>(data), size);
+    qemu_send_packet(static_cast<NetClientState*>(s_net_client_state),
+                     static_cast<const uint8_t*>(data),
+                     size);
 }
 
 void
-slirp_init_shapers(void* slirp_state, Slirp* slirp)
+slirp_init_shapers(void* slirp_state, void* net_client_state, Slirp* slirp)
 {
     s_slirp_state = slirp_state;
+    s_net_client_state = net_client_state;
     s_slirp = slirp;
     slirp_delay_in = netdelay_create(slirp_delay_in_cb);
     slirp_shaper_in = netshaper_create(1, slirp_shaper_in_cb);

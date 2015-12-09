@@ -637,12 +637,11 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = opts->timezone;
     }
 
-    if (0 && opts->netspeed) {
+    if (opts->netspeed) {
         args[n++] = "-netspeed";
         args[n++] = opts->netspeed;
-        fprintf(stderr, "%s netspeed\n", __func__);
     }
-    if (0 && opts->netdelay) {
+    if (opts->netdelay) {
         args[n++] = "-netdelay";
         args[n++] = opts->netdelay;
     }

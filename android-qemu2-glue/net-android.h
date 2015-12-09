@@ -19,7 +19,9 @@ ANDROID_BEGIN_HEADER
 #if defined(CONFIG_SLIRP)
 #include "libslirp.h"
 
-void slirp_init_shapers(void* slirp_state, Slirp *slirp);
+void slirp_init_shapers(void* slirp_state,
+                        void* net_client_state,
+                        Slirp *slirp);
 #endif  // CONFIG_SLIRP
 
 ANDROID_END_HEADER
