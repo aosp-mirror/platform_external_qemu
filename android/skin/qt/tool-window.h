@@ -63,7 +63,6 @@ public:
 
     void showErrorDialog(const QString &message, const QString &title);
 
-    QString getAndroidSdkRoot();
     QString getAdbFullPath(QStringList *args);
     QString getScreenshotSaveDirectory();
     QString getScreenshotSaveFile();
@@ -79,6 +78,9 @@ signals:
 
 private:
     void handleUICommand(QtUICommand cmd, bool down);
+
+    // Use this function only if SDK_PATH is not available in QSettings
+    QString findAndroidSdkRoot();
 
     // Helper method, calls handleUICommand with
     // down equal to true and down equal to false.

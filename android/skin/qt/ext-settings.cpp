@@ -32,6 +32,7 @@ static void setElidedText(QLineEdit* line_edit, const QString& text) {
 void ExtendedWindow::initSettings()
 {
     mExtendedUi->set_saveLocBox->installEventFilter(this);
+    mExtendedUi->set_sdkPathBox->installEventFilter(this);
 }
 
 void ExtendedWindow::completeSettingsInitialization()
@@ -49,8 +50,14 @@ void ExtendedWindow::completeSettingsInitialization()
         setElidedText(mExtendedUi->set_saveLocBox, mSettingsState.mSavePath);
     }
 
-    // Dark/Light theme
+    // SDK path
     QSettings settings;
+    QString sdkPath = settings.value(Ui::Settings::SDK_PATH, "").toString();
+    sdkPath = QDir::toNativeSeparators(sdkPath);
+    setElidedText(mExtendedUi->set_sdkPathBox, sdkPath);
+    mSettingsState.mSdkPath = sdkPath;
+
+    // Dark/Light theme
     SettingsTheme theme = (SettingsTheme)settings.
                              value(Ui::Settings::UI_THEME, 0).toInt();
     if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
@@ -125,7 +132,7 @@ void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
     adjustTabs(PANE_IDX_SETTINGS);
 }
 
-void ExtendedWindow::on_set_folderButton_clicked()
+void ExtendedWindow::on_set_saveLocFolderButton_clicked()
 {
     QString dirName = QFileDialog::getExistingDirectory(
                                       this,
@@ -153,6 +160,54 @@ void ExtendedWindow::on_set_folderButton_clicked()
     settings.setValue(Ui::Settings::SAVE_PATH, dirName);
 
     setElidedText(mExtendedUi->set_saveLocBox, dirName);
+}
+
+void ExtendedWindow::on_set_sdkPathButton_clicked()
+{
+    QSettings settings;
+    QString dirName = settings.value(Ui::Settings::SDK_PATH, "").toString();
+
+    // Repeat this dialog until the user is successful or cancels
+    bool pathIsGood = false;
+    do {
+        dirName = QFileDialog::getExistingDirectory(
+                                  this,
+                                  tr("Android SDK location"),
+                                  dirName,
+                                  QFileDialog::ShowDirsOnly);
+
+        if ( dirName.isEmpty() ) break; // Operation was canceled
+
+        // We got a path. If it does not have an SDK, don't allow it.
+        // (We simply test for the existence of "platforms/"; see
+        // validateSdkPath() in //tools/adt/idea/android/src/com/
+        // android/tools/idea/sdk/SdkPaths.java)
+        QString platformsName = dirName + "/platforms";
+        QFileInfo platformsInfo(platformsName);
+        pathIsGood = platformsInfo.exists() && platformsInfo.isDir();
+
+        if (pathIsGood) {
+            // Save this selection
+            settings.setValue(Ui::Settings::SDK_PATH, dirName);
+
+            dirName = QDir::toNativeSeparators(dirName);
+            setElidedText(mExtendedUi->set_sdkPathBox, dirName);
+            mSettingsState.mSdkPath = dirName;
+        } else {
+            // The path is not good. Force the user to cancel or try again.
+            QString errStr = tr("This path does not point to "
+                                "an SDK installation<br><br>")
+                             + QDir::toNativeSeparators(dirName);
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Select Android SDK path"));
+            msgBox.setText(errStr);
+            msgBox.setInformativeText(tr("Do you want try again or cancel?"));
+            msgBox.setStandardButtons(QMessageBox::Retry | QMessageBox::Cancel);
+            msgBox.setDefaultButton(QMessageBox::Cancel);
+            int selection = msgBox.exec();
+            if (selection == QMessageBox::Cancel) break;
+        }
+    } while ( !pathIsGood );
 }
 
 // static member function
@@ -209,11 +264,24 @@ void ExtendedWindow::on_set_saveLocBox_textEdited(const QString&) {
     mExtendedUi->set_saveLocBox->setText(mSettingsState.mSavePath);
 }
 
+void ExtendedWindow::on_set_sdkPathBox_textEdited(const QString&) {
+    mExtendedUi->set_sdkPathBox->setText(mSettingsState.mSdkPath);
+}
+
 bool ExtendedWindow::eventFilter(QObject* object, QEvent* event) {
-    if (event->type() == QEvent::FocusIn && object == mExtendedUi->set_saveLocBox) {
-        mExtendedUi->set_saveLocBox->setText(mSettingsState.mSavePath);
-    } else if (event->type() == QEvent::FocusOut && object == mExtendedUi->set_saveLocBox) {
-        setElidedText(mExtendedUi->set_saveLocBox, mSettingsState.mSavePath);
+
+    if (object == mExtendedUi->set_saveLocBox) {
+        if (event->type() == QEvent::FocusIn) {
+            mExtendedUi->set_saveLocBox->setText(mSettingsState.mSavePath);
+        } else if (event->type() == QEvent::FocusOut) {
+            setElidedText(mExtendedUi->set_saveLocBox, mSettingsState.mSavePath);
+        }
+    } else if (object == mExtendedUi->set_sdkPathBox) {
+        if (event->type() == QEvent::FocusIn) {
+            mExtendedUi->set_sdkPathBox->setText(mSettingsState.mSdkPath);
+        } else if (event->type() == QEvent::FocusOut) {
+            setElidedText(mExtendedUi->set_sdkPathBox, mSettingsState.mSdkPath);
+        }
     }
     return false;
 }
