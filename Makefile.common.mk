@@ -9,6 +9,7 @@ include $(LOCAL_PATH)/distrib/libbreakpad.mk
 include $(LOCAL_PATH)/distrib/Qt5.mk
 include $(LOCAL_PATH)/distrib/jpeg-6b/libjpeg.mk
 include $(LOCAL_PATH)/distrib/libpng.mk
+include $(LOCAL_PATH)/distrib/googletest/Android.mk
 
 EMULATOR_VERSION_CFLAGS :=
 

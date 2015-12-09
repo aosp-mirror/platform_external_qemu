@@ -11,22 +11,16 @@
 $(call start-emulator-program, emulator$(HOST_SUFFIX)-crash-service)
 LOCAL_SRC_FILES := \
     android/crashreport/main-crash-service.cpp \
-    android/crashreport/CrashSystem.cpp \
     android/crashreport/CrashService_common.cpp \
     android/crashreport/CrashService_$(HOST_OS).cpp \
     android/crashreport/ui/ConfirmDialog.cpp \
-    android/curl-support.c \
-    android/emulation/ConfigDirs.cpp \
     android/resource.c \
     android/skin/resource.c \
 
 LOCAL_STATIC_LIBRARIES := \
-    android-emu-base \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
     emulator-libui \
-    emulator-common \
     $(EMULATOR_LIBUI_STATIC_LIBRARIES) \
-    $(LIBCURL_STATIC_LIBRARIES) \
-    $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
     $(BREAKPAD_STATIC_LIBRARIES) \
 
 LOCAL_QT_MOC_SRC_FILES := \
@@ -41,8 +35,7 @@ endif
 
 LOCAL_LDLIBS := \
     $(EMULATOR_LIBUI_LDLIBS) \
-    $(LIBCURL_LDLIBS) \
-    $(BREAKPAD_CLIENT_LDLIBS) \
+    $(ANDROID_EMU_LDLIBS) \
     $(BREAKPAD_LDLIBS) \
     $(CXX_STD_LIB) \
 
@@ -58,6 +51,7 @@ LOCAL_CFLAGS += \
 endif
 
 LOCAL_C_INCLUDES += \
+    $(ANDROID_EMU_INCLUDES) \
     $(EMULATOR_LIBUI_INCLUDES) \
     $(LIBCURL_INCLUDES) \
     $(BREAKPAD_INCLUDES) \
@@ -80,21 +74,29 @@ $(call end-emulator-program)
 #
 
 $(call start-emulator-program, emulator$(HOST_SUFFIX)_test_crasher)
+
 LOCAL_C_INCLUDES += \
+    $(ANDROID_EMU_INCLUDES) \
     $(EMULATOR_GTEST_INCLUDES) \
-    $(LOCAL_PATH)/include \
+    $(LIBCURL_INCLUDES) \
     $(BREAKPAD_INCLUDES) \
 
-LOCAL_CFLAGS += -O0
+LOCAL_CFLAGS += -O0 $(LIBCURL_CFLAGS)
 
 LOCAL_SRC_FILES += \
+    android/crashreport/CrashService_common.cpp \
+    android/crashreport/CrashService_$(HOST_OS).cpp \
+    android/crashreport/CrashService_unittest.cpp \
+    android/crashreport/CrashSystem_unittest.cpp \
     android/crashreport/testing/main-test-crasher.cpp \
-    android/emulation/ConfigDirs.cpp \
 
 LOCAL_STATIC_LIBRARIES += \
-    emulator-common \
-    $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
-    $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
+    $(BREAKPAD_STATIC_LIBRARIES) \
+    emulator-libgtest \
+
+LOCAL_LDLIBS += \
+    $(ANDROID_EMU_LDLIBS) \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/
