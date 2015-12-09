@@ -135,8 +135,12 @@ signals:
 
 public:
     bool isInZoomMode();
+    void panHorizontal(bool left);
+    void panVertical(bool up);
     void recenterFocusPoint();
     void saveZoomPoints(const QPoint &focus, const QPoint &viewportFocus);
+    void scaleDown();
+    void scaleUp();
     void screenshot();
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateScrollBarChanged(int x, int y);
@@ -145,7 +149,9 @@ public:
     void simulateWindowMoved(const QPoint &pos);
     void simulateZoomedWindowResized(const QSize &size);
     void toggleZoomMode();
+    void zoomIn();
     void zoomIn(const QPoint &focus, const QPoint &viewportFocus);
+    void zoomOut();
     void zoomOut(const QPoint &focus, const QPoint &viewportFocus);
     void zoomReset();
     void zoomTo(const QPoint &focus, const QSize &rectSize);
