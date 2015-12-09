@@ -645,6 +645,9 @@ case $HOST_OS in
         ;;
 esac
 
+# Prebuilts
+PREBUILT_SYMBOLS=
+
 # Copy a single file
 # $1: Source file path.
 # $2: Destination file path (not a directory!)
@@ -691,8 +694,17 @@ install_prebuilt_dll () {
     local SRC_FILE="$2"
     local DST_FILE="$3"
     local SRC_PATH="$PKG_SRC/$SRC_FILE"
+    local SRC_SYMBOL_PATH="$PKG_SRC/symbols/$SRC_FILE.sym"
 
     copy_file "$SRC_PATH" "$OUT_DIR/$DST_FILE"
+
+    # Symbol file does not exist for symlinks
+    if [ ! -L $SRC_PATH ]; then
+        if [ ! -f $SRC_SYMBOL_PATH ]; then
+            panic "Couldn't find symbol for $SRC_PATH : $SRC_SYMBOL_PATH"
+        fi
+        PREBUILT_SYMBOLS="$PREBUILT_SYMBOLS $SRC_SYMBOL_PATH"
+    fi
 }
 ###
 ###  Mesa probe
@@ -930,6 +942,12 @@ if [ "$OPTION_STRIP" = "yes" ]; then
 fi
 if [ "$OPTION_SYMBOLS" = "yes" ]; then
     echo "EMULATOR_GENERATE_SYMBOLS := true" >> $config_mk
+    echo "EMULATOR_PREBUILT_SYMBOLS := \\" >> $config_mk
+    for PREBUILT_SYMBOL in $PREBUILT_SYMBOLS;
+    do
+        echo "    $PREBUILT_SYMBOL \\" >> $config_mk
+    done
+    echo "" >> $config_mk
 fi
 if [ "$OPTION_CRASHUPLOAD" = "prod" ]; then
     echo "EMULATOR_CRASHUPLOAD := PROD" >> $config_mk
