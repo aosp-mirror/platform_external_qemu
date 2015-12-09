@@ -64,11 +64,8 @@ String EmuglBackendList::getLibDirPath(const char* name) {
 bool EmuglBackendList::getBackendLibPath(const char* name,
                                          Library library,
                                          String* libPath) {
-#ifdef _WIN32
-    static const char kLibPrefix[] = "";
-#else
     static const char kLibPrefix[] = "lib";
-#endif
+
 #ifdef _WIN32
     static const char kLibSuffix[] = ".dll";
 #elif defined(__APPLE__)
