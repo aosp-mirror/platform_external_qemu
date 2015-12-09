@@ -70,6 +70,7 @@ public:
 
     void runAdbInstall(const QString &path);
     void runAdbPush(const QList<QUrl> &urls);
+    void runAdbShellStopAndQuit();
 
     bool handleQtKeyEvent(QKeyEvent* event);
 
@@ -102,6 +103,7 @@ private:
     Ui::ToolControls *toolsUi;
     QProcess mInstallProcess;
     QProcess mPushProcess;
+    QProcess mShellStopProcess;
     QProgressDialog mPushDialog;
     QProgressDialog mInstallDialog;
     QQueue<QUrl> mFilesToPush;
@@ -129,6 +131,8 @@ private slots:
 
     void slot_installCanceled();
     void slot_installFinished(int exitStatus);
+
+    void slot_shellStopFinished(int exitStatus);
 
     void slot_pushCanceled();
     void slot_pushFinished(int exitStatus);

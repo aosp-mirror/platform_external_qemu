@@ -30,7 +30,6 @@
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/tool-window.h"
-
 #include "ui_tools.h"
 
 using namespace android::base;
@@ -81,6 +80,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     mPushDialog.close();
     QObject::connect(&mPushDialog, SIGNAL(canceled()), this, SLOT(slot_pushCanceled()));
     QObject::connect(&mPushProcess, SIGNAL(finished(int)), this, SLOT(slot_pushFinished(int)));
+
+    QObject::connect(&mShellStopProcess, SIGNAL(finished(int)), this, SLOT(slot_shellStopFinished(int)));
 
     // Get the latest user selections from the
     // user-config code.
@@ -270,6 +271,26 @@ void ToolWindow::runAdbInstall(const QString &path)
     // Keep track of this process
     mInstallProcess.start(command, args);
     mInstallProcess.waitForStarted();
+}
+
+
+void ToolWindow::runAdbShellStopAndQuit()
+{
+    if (mShellStopProcess.state() != QProcess::NotRunning) {
+        return;
+    }
+    QStringList args;
+    QString command = getAdbFullPath(&args);
+    if (command.isNull()) {
+        emulator_window->queueQuitEvent();
+        return;
+    }
+
+    args << "shell";
+    args << "stop";
+
+    mShellStopProcess.start(command, args);
+    mShellStopProcess.waitForStarted();
 }
 
 void ToolWindow::runAdbPush(const QList<QUrl> &urls)
@@ -559,6 +580,11 @@ void ToolWindow::slot_installFinished(int exitStatus)
         QString msg = tr("The APK failed to install. Error code: ") + match.captured(1);
         showErrorDialog(msg, tr("APK Installer"));
     }
+}
+
+void ToolWindow::slot_shellStopFinished(int exitStatus)
+{
+    emulator_window->queueQuitEvent();
 }
 
 void ToolWindow::slot_pushCanceled()
