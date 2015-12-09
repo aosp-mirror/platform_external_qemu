@@ -413,9 +413,10 @@ _avdInfo_getSdkRoot( AvdInfo*  i )
 {
 
     i->sdkRootPath = path_getSdkRoot(&i->sdkRootPathFromEnv);
-    if (i->sdkRootPath == NULL)
+    if (i->sdkRootPath == NULL) {
+        derror("can't find SDK installation directory");
         return -1;
-
+    }
     return 0;
 }
 
