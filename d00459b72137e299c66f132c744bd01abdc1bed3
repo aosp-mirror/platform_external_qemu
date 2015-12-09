@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "605f5ccc_6ce64fd9",
+        "filename": "android/camera/camera-common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-09T03:32:07Z",
+      "side": 1,
+      "message": "really? why is it staying then?",
+      "range": {
+        "startLine": 153,
+        "startChar": 0,
+        "endLine": 161,
+        "endChar": 6
+      },
+      "revId": "d00459b72137e299c66f132c744bd01abdc1bed3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
