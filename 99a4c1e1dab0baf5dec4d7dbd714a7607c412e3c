@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "253496db_ef9bbde0",
+        "filename": "android/avd/util.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T21:23:39Z",
+      "side": 1,
+      "message": "nit: s/nonesence/nonsense/",
+      "revId": "99a4c1e1dab0baf5dec4d7dbd714a7607c412e3c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "855c6237_4a5e3327",
+        "filename": "android/avd/util.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T21:23:39Z",
+      "side": 1,
+      "message": "oh, that\u0027s a nice way to wreck the emulator by setting an arbitrary environment variable, maybe panic with a human friendly message instead?",
+      "revId": "99a4c1e1dab0baf5dec4d7dbd714a7607c412e3c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
