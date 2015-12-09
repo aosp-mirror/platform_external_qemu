@@ -290,7 +290,9 @@ void ToolWindow::runAdbShellStopAndQuit()
     args << "stop";
 
     mShellStopProcess.start(command, args);
-    mShellStopProcess.waitForStarted();
+    if(!mShellStopProcess.waitForStarted()) {
+        emulator_window->queueQuitEvent();
+    };
 }
 
 void ToolWindow::runAdbPush(const QList<QUrl> &urls)
