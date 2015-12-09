@@ -1,0 +1,242 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a5596647_28f8aba2",
+        "filename": "android/scripts/utils/aosp_dir.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "nit: it\u0027s always a full system name, not \u0027linux\u0027 but \u0027linux-x86_64\u0027",
+      "revId": "904e86e3ba404ed13c53d0618dfe638a4c8bcfad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c562daed_c9d5910f",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "nit: this is a full system name, i.e. \u0027linux-x86_64\u0027 but not \u0027linux\u0027",
+      "revId": "904e86e3ba404ed13c53d0618dfe638a4c8bcfad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "454eea83_65eec6e6",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 520,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "\u003d\u003d is a bashism, please replace with \u003d",
+      "revId": "904e86e3ba404ed13c53d0618dfe638a4c8bcfad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "254d7687_84e8a6d1",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "+\u003d is a bashism, please replace with:\n\n   SYMTOOL\u003d${SYMTOOL}_dwarf",
+      "revId": "904e86e3ba404ed13c53d0618dfe638a4c8bcfad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e55fde25_0afddb92",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 524,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "fyi, direct assignments do not need quoting per Posix, i.e. the line:\n\n   FOO\u003d$BAR\n\nwill always work correctly, even if $BAR contains spaces. On the other hand this is not the case for:\n\n   local FOO\u003d$BAR\n\nthere, the behaviour depends on the shell. Some of them consider \u0027local\u0027 to be a command, and thus this will not work as expected. For others, like bash, \u0027local\u0027 is a keyword and this is still considered a direct assignment. When in doubt, always quote with \u0027local\u0027, but not with direct assignments.\n\nJust mentioning it, the above line is ok.",
+      "revId": "904e86e3ba404ed13c53d0618dfe638a4c8bcfad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05487277_c3de9629",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 532,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "Always use %s when using printf to dump a simple variable, otherwise a % in the input could change the meaning, e.g. replace with:\n\n    printf %s \"$SYMTOOL_PATH\"",
+      "revId": "904e86e3ba404ed13c53d0618dfe638a4c8bcfad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "253496db_4c265ffe",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 536,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "the term \"target root directory\" is ambiguous, just call it \"destination directory\", that should be enough and will not lead to confusion.\n\nSimilarly, document $3 as \"host system name\" instead.",
+      "revId": "904e86e3ba404ed13c53d0618dfe638a4c8bcfad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c562daed_09fde992",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 556,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "nit: needs quoting here.",
+      "revId": "904e86e3ba404ed13c53d0618dfe638a4c8bcfad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "855c6237_67eed2e6",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "nit: probably change the first $SYMTOOL to something else :)",
+      "revId": "904e86e3ba404ed13c53d0618dfe638a4c8bcfad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5596647_e8e173f1",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 568,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "maybe add a panic message in case of failure to provide a human-readable error message when this fails, otherwise the situation might be hard to understand / debug.",
+      "revId": "904e86e3ba404ed13c53d0618dfe638a4c8bcfad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "65984e34_3ec46965",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 588,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "\u003d\u003d is a bash-ism, please replace with \u003d",
+      "revId": "904e86e3ba404ed13c53d0618dfe638a4c8bcfad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c562daed_c907d15f",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 589,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "try to use \"run \u003ccommand\u003e\" whenever possible, to help understand what\u0027s going on with --verbose, the only case where you should not be doing this is when you redirect the outputs or inputs of \u003ccommand\u003e.",
+      "revId": "904e86e3ba404ed13c53d0618dfe638a4c8bcfad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e55fde25_2a11bf9c",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "same here.",
+      "revId": "904e86e3ba404ed13c53d0618dfe638a4c8bcfad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "253496db_8c01e74b",
+        "filename": "android/scripts/utils/emulator_prebuilts.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 1,
+      "message": "nit: un-necessary",
+      "revId": "904e86e3ba404ed13c53d0618dfe638a4c8bcfad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

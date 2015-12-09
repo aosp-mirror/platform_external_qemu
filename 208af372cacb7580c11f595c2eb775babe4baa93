@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "253496db_ac04a35b",
+        "filename": "android/scripts/utils/package_builder.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:20:24Z",
+      "side": 0,
+      "message": "I like this line, please keep it here :)",
+      "revId": "208af372cacb7580c11f595c2eb775babe4baa93",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
