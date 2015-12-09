@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "05487277_06fddc92",
+        "filename": "android/scripts/utils/aosp_dir.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-09T20:20:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "80d9b040_c8806369",
+      "revId": "135028165648c8339e3cce5d9f7d941d02c8752e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "80b290f4_dd0bbba9",
         "filename": "android/scripts/utils/common.shi",
         "patchSetId": 1
@@ -98,6 +116,24 @@
       "writtenOn": "2015-12-09T16:20:24Z",
       "side": 1,
       "message": "please remove this?",
+      "revId": "135028165648c8339e3cce5d9f7d941d02c8752e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05487277_e6e1a0f1",
+        "filename": "android/scripts/utils/emulator_prebuilts.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-09T20:20:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "60c91c79_7f154386",
       "revId": "135028165648c8339e3cce5d9f7d941d02c8752e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
