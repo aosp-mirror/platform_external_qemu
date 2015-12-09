@@ -16,6 +16,24 @@
       "revId": "0ec81e42e7f7a7e1f682dce94f9ba60517c6bd74",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "253496db_b204f85b",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 3
+      },
+      "lineNbr": 567,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-09T22:10:30Z",
+      "side": 1,
+      "message": "fixed",
+      "parentUuid": "253496db_d2ac24b1",
+      "revId": "0ec81e42e7f7a7e1f682dce94f9ba60517c6bd74",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
