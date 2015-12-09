@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a58ec6ed_00d6e61a",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 961,
+      "author": {
+        "id": 1084468
+      },
+      "writtenOn": "2015-12-09T17:10:34Z",
+      "side": 1,
+      "message": "I just copy-pasted this from line 880. Should I change this and the other code, or just this, or just leave it?",
+      "parentUuid": "65984e34_7e3d110c",
+      "revId": "7f0331495809fff749046b32e59a487f00069061",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c562daed_497881cc",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "e5843ece_42ab9299",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 967,
+      "author": {
+        "id": 1084468
+      },
+      "writtenOn": "2015-12-09T17:10:34Z",
+      "side": 1,
+      "message": "Also part of the copy-paste.",
+      "parentUuid": "c562daed_497881cc",
+      "revId": "7f0331495809fff749046b32e59a487f00069061",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6553ee27_c67a22c9",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2015-12-09T16:51:15Z",
       "side": 1,
       "message": "why not reinterpret_cast\u003cHandleType\u003e(image) instead?",
+      "revId": "7f0331495809fff749046b32e59a487f00069061",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "45250aa8_6d7355f4",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 973,
+      "author": {
+        "id": 1084468
+      },
+      "writtenOn": "2015-12-09T17:10:34Z",
+      "side": 1,
+      "message": "HandleType can be smaller than the EGLImageKHR type (which is an opaque void pointer), which makes the reinterpret_cast implementation dependent (and if I recall correctly I got a compilation error).",
+      "parentUuid": "6553ee27_c67a22c9",
       "revId": "7f0331495809fff749046b32e59a487f00069061",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
