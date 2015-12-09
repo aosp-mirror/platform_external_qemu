@@ -41,9 +41,6 @@ endif
 include $(CONFIG_MAKE)
 include $(BUILD_SYSTEM)/definitions.make
 
-VPATH := $(OBJS_DIR)
-VPATH += :$(SRC_PATH)/android/config
-
 .PHONY: all libraries executables clean clean-config clean-objs-dir \
         clean-executables clean-libraries
 
