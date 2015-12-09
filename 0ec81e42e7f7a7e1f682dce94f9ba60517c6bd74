@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "253496db_d2ac24b1",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 3
+      },
+      "lineNbr": 567,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T21:54:21Z",
+      "side": 1,
+      "message": "code is good, but fyi, you don\u0027t need a trailing \\ if the line ends with || :)",
+      "revId": "0ec81e42e7f7a7e1f682dce94f9ba60517c6bd74",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
