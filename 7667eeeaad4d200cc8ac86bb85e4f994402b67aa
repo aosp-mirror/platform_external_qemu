@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05487277_c981156d",
+        "filename": "android-configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 821,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T23:11:45Z",
+      "side": 1,
+      "message": "technically, this need quoting in case $E2FS_SRCDIR contains spaces.",
+      "revId": "7667eeeaad4d200cc8ac86bb85e4f994402b67aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
