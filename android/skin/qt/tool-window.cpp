@@ -110,6 +110,21 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
         "Ctrl+Shift+S SHOW_PANE_SETTINGS\n"
         "Ctrl+S     TAKE_SCREENSHOT\n"
         "Ctrl+Z     ENTER_ZOOM\n"
+#ifdef __APPLE__
+        "Ctrl+Num+Up        ZOOM_IN\n"
+        "Ctrl+Num+Down      ZOOM_OUT\n"
+        "Ctrl+Alt+Num+Up    PAN_UP\n"
+        "Ctrl+Alt+Num+Down  PAN_DOWN\n"
+        "Ctrl+Alt+Num+Left  PAN_LEFT\n"
+        "Ctrl+Alt+Num+Right PAN_RIGHT\n"
+#else
+        "Ctrl+Up    ZOOM_IN\n"
+        "Ctrl+Down  ZOOM_OUT\n"
+        "Ctrl+Shift+Up    PAN_UP\n"
+        "Ctrl+Shift+Down  PAN_DOWN\n"
+        "Ctrl+Shift+Left  PAN_LEFT\n"
+        "Ctrl+Shift+Right PAN_RIGHT\n"
+#endif
         "Ctrl+G     GRAB_KEYBOARD\n"
         "Ctrl+=     VOLUME_UP\n"
         "Ctrl+-     VOLUME_DOWN\n"
@@ -335,6 +350,44 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         if (down) {
             emulator_window->toggleZoomMode();
             toolsUi->zoom_button->setDown(emulator_window->isInZoomMode());
+        }
+        break;
+    case QtUICommand::ZOOM_IN:
+        if (down) {
+            if (emulator_window->isInZoomMode()) {
+                emulator_window->zoomIn();
+            } else {
+                emulator_window->scaleUp();
+            }
+        }
+        break;
+    case QtUICommand::ZOOM_OUT:
+        if (down) {
+            if (emulator_window->isInZoomMode()) {
+                emulator_window->zoomOut();
+            } else {
+                emulator_window->scaleDown();
+            }
+        }
+        break;
+    case QtUICommand::PAN_UP:
+        if (down) {
+            emulator_window->panVertical(true);
+        }
+        break;
+    case QtUICommand::PAN_DOWN:
+        if (down) {
+            emulator_window->panVertical(false);
+        }
+        break;
+    case QtUICommand::PAN_LEFT:
+        if (down) {
+            emulator_window->panHorizontal(true);
+        }
+        break;
+    case QtUICommand::PAN_RIGHT:
+        if (down) {
+            emulator_window->panHorizontal(false);
         }
         break;
     case QtUICommand::GRAB_KEYBOARD:
