@@ -36,7 +36,7 @@ LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/tcg \
     $(LOCAL_PATH)/tcg/i386 \
     $(LOCAL_PATH)/target-$(QEMU2_TARGET_TARGET) \
-    $(ANDROID_EMULIB_INCLUDES)
+    $(ANDROID_EMU_INCLUDES)
 
 LOCAL_CFLAGS += -DNEED_CPU_H
 
@@ -66,14 +66,11 @@ LOCAL_PREBUILTS_OBJ_FILES += \
 
 LOCAL_WHOLE_STATIC_LIBRARIES += \
     libqemu2_common \
-    emulator-libext4_utils \
-    emulator-libsparse \
-    emulator-libselinux \
     $(call qemu2-if-target,arm64, libqemu2_common_aarch64) \
 
 LOCAL_STATIC_LIBRARIES += \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
     $(ANDROID_SKIN_STATIC_LIBRARIES) \
-    $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
 
 LOCAL_LDFLAGS += \
     $(QEMU2_DEPS_LDFLAGS) \
@@ -86,6 +83,7 @@ LOCAL_LDLIBS += \
     -lfdt \
     $(call qemu2-if-windows, -lvfw32) \
     $(call qemu2-if-linux, -lpulse) \
+    $(ANDROID_EMU_LDLIBS) \
     $(ANDROID_SKIN_LDLIBS) \
 
 LOCAL_INSTALL_DIR := qemu/$(HOST_OS)-$(HOST_ARCH)
