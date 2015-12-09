@@ -23,6 +23,10 @@
 
 #include "camera-common.h"
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /* NOTE: On Windows, we make certain assumptions about * how many threads
  * are accessing * the camera capture API at a time:
  *
@@ -141,3 +145,5 @@ extern void camera_device_close(CameraDevice* cd);
  *  Number of entries added to the 'cis' array on success, or < 0 on failure.
  */
 extern int enumerate_camera_devices(CameraInfo* cis, int max);
+
+ANDROID_END_HEADER

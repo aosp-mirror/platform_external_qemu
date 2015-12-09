@@ -26,6 +26,10 @@
 
 #include "camera-common.h"
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /* Checks if conversion between two pixel formats is available.
  * Param:
  *  from - Pixel format to convert from.
@@ -68,3 +72,5 @@ extern int convert_frame(const void* frame,
                          float g_scale,
                          float b_scale,
                          float exp_comp);
+
+ANDROID_END_HEADER
