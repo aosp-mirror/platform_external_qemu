@@ -75,6 +75,10 @@ static char* getQemuExecutablePath(const char* programPath,
 
 static void updateLibrarySearchPath(int wantedBitness);
 
+static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
+                                             const char* avdArch,
+                                             const char* androidOut);
+
 #ifdef _WIN32
 static const char kExeExtension[] = ".exe";
 #else
@@ -112,8 +116,6 @@ static bool isCpuArchSupportedByRanchu(const char* avdArch) {
             {"arm64", "mips64", "x86", "x86_64"};
     return isStringInList(avdArch, kSupported, ARRAY_SIZE(kSupported));
 }
-
-static bool checkAvdSystemDirForKernelRanchu(const char* avdName);
 
 /* Main routine */
 int main(int argc, char** argv)
@@ -260,6 +262,10 @@ int main(int argc, char** argv)
         wantedBitness = 32;
     }
 
+    // When running in a platform build environment, point to the output
+    // directory where image partition files are located.
+    const char* androidOut = NULL;
+
     /* If there is an AVD name, we're going to extract its target architecture
      * by looking at its config.ini
      */
@@ -269,7 +275,7 @@ int main(int argc, char** argv)
         D("Found AVD target architecture: %s\n", avdArch);
     } else {
         /* Otherwise, using the ANDROID_PRODUCT_OUT directory */
-        const char* androidOut = getenv("ANDROID_PRODUCT_OUT");
+        androidOut = getenv("ANDROID_PRODUCT_OUT");
 
         if (androidOut != NULL) {
             D("Found ANDROID_PRODUCT_OUT: %s\n", androidOut);
@@ -326,7 +332,8 @@ int main(int argc, char** argv)
                 // TODO: Deal with -kernel <file>, -systemdir <dir> and platform
                 // builds appropriately. For now this only works reliably for
                 // regular SDK AVD configurations.
-                if (checkAvdSystemDirForKernelRanchu(avdName)) {
+                if (checkAvdSystemDirForKernelRanchu(avdName, avdArch,
+                                                     androidOut)) {
                     D("Auto-config: -engine qemu2 (based on configuration)\n");
                     ranchu = RANCHU_ON;
                 } else {
@@ -655,21 +662,42 @@ static void updateLibrarySearchPath(int wantedBitness) {
 }
 
 // Verify and AVD's system image directory to see if it supports ranchu.
-static bool checkAvdSystemDirForKernelRanchu(const char* avdName) {
+static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
+                                             const char* avdArch,
+                                             const char* androidOut) {
     bool result = false;
+    char* kernel_file = NULL;
 
     // For now, just check that a kernel-ranchu file exists. All official
     // system images should have that if they support ranchu.
-    char fromEnv = 0;
-    char* sdkRootPath = path_getSdkRoot(&fromEnv);
-    char* systemImagePath = path_getAvdSystemPath(avdName, sdkRootPath);
-    char* kernel_file = NULL;
-    asprintf(&kernel_file, "%s/%s", systemImagePath, "kernel-ranchu");
+    if (androidOut) {
+        // This is running inside an Android platform build.
+        const char* androidBuildTop = getenv("ANDROID_BUILD_TOP");
+        if (!androidBuildTop || !androidBuildTop[0]) {
+            D("Cannot find Android build top directory, assume no ranchu "
+              "support!\n");
+            return false;
+        }
+        D("Found ANDROID_BUILD_TOP: %s\n", androidBuildTop);
+        if (!path_exists(androidBuildTop)) {
+            D("Invalid Android build top: %s\n", androidBuildTop);
+            return false;
+        }
+        asprintf(&kernel_file, "%s/prebuilts/qemu-kernel/%s/%s",
+                 androidBuildTop, avdArch, "kernel-ranchu");
+    } else {
+        // This is a regular SDK AVD launch.
+        char fromEnv = 0;
+        char* sdkRootPath = path_getSdkRoot(&fromEnv);
+        char* systemImagePath = path_getAvdSystemPath(avdName, sdkRootPath);
+        asprintf(&kernel_file, "%s/%s", systemImagePath, "kernel-ranchu");
+
+        AFREE(systemImagePath);
+        AFREE(sdkRootPath);
+    }
     result = path_exists(kernel_file);
     D("Probing for %s: file %s\n", kernel_file, result ? "exists" : "missing");
 
     AFREE(kernel_file);
-    AFREE(systemImagePath);
-    AFREE(sdkRootPath);
     return result;
 }
