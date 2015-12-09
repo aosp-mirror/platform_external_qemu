@@ -215,6 +215,42 @@ if [ ! -d "$OUT_DIR"/qemu ]; then
     fi
 fi
 
+if [ -d "$PREBUILTS_DIR/common/swiftshader" ]; then
+    SWIFTSHADER_HOST=$HOST_SYSTEM
+    if [ "$MINGW" ]; then
+        SWIFTSHADER_HOST=windows
+    fi
+    case $SWIFTSHADER_HOST in
+        windows)
+            SWIFTSHADER_SUFFIX=.dll
+            ;;
+        linux)
+            SWIFTSHADER_SUFFIX=.so
+            ;;
+        *)
+            SWIFTSHADER_LIBS=
+    esac
+    for LIBNAME in EGL_translator GLES_CM_translator GLES_V2_translator; do
+        for SWIFTSHADER_ARCH in x86 x86_64; do
+            if [ "$SWIFTSHADER_ARCH" = "x86" ]; then
+                SWIFTSHADER_PREFIX=lib
+                SWIFTSHADER_LIBDIR=lib
+            else
+                SWIFTSHADER_PREFIX=lib64
+                SWIFTSHADER_LIBDIR=lib64
+            fi
+            FINAL_LIBNAME="$SWIFTSHADER_PREFIX$LIBNAME$SWIFTSHADER_SUFFIX"
+            SWIFTSHADER_LIBRARY=$(ls "$PREBUILTS_DIR/common/swiftshader/$SWIFTSHADER_HOST-$SWIFTSHADER_ARCH/lib/$FINAL_LIBNAME" 2>/dev/null || true)
+            if [ "$SWIFTSHADER_LIBRARY" ]; then
+                SWIFTSHADER_DSTDIR="$OUT_DIR/$SWIFTSHADER_LIBDIR/gles_swiftshader"
+                SWIFTSHADER_DSTLIB="$FINAL_LIBNAME"
+                echo "Copying $SWIFTSHADER_HOST-$SWIFTSHADER_ARCH $FINAL_LIBNAME library to $SWIFTSHADER_DSTDIR"
+                copy_file "$SWIFTSHADER_LIBRARY" "$SWIFTSHADER_DSTDIR/$SWIFTSHADER_DSTLIB"
+            fi
+        done
+    done
+fi
+
 if [ -d "$PREBUILTS_DIR/mesa" ]; then
     MESA_HOST=$HOST_SYSTEM
     if [ "$MINGW" ]; then
@@ -561,3 +597,4 @@ else
 fi
 
 echo "Done. !!"
+
