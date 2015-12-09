@@ -22,6 +22,30 @@
       "revId": "30a9539694666f3d4e576a23dc4a46f3cf51e98a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c0e3a848_6a51abde",
+        "filename": "android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 893,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T03:40:29Z",
+      "side": 1,
+      "message": "I submitted before seeing your comment, but you\u0027re right, I\u0027ll fix it in a future patch.",
+      "parentUuid": "405a58de_48281f65",
+      "range": {
+        "startLine": 893,
+        "startChar": 6,
+        "endLine": 893,
+        "endChar": 18
+      },
+      "revId": "30a9539694666f3d4e576a23dc4a46f3cf51e98a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
