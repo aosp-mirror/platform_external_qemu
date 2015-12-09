@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "00f940fe_be793515",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 11
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-09T03:01:56Z",
+      "side": 1,
+      "message": "I have changed this in CL 186080, please take a look.",
+      "parentUuid": "fb421f2f_eb4e716a",
+      "revId": "6b20a2fbbcd38188e2c2c4422ffca6fca0fb9e56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e0e8ac67_424df271",
         "filename": "android/build/definitions.make",
         "patchSetId": 11
@@ -30,6 +48,24 @@
       "writtenOn": "2015-12-02T17:34:16Z",
       "side": 1,
       "message": "still inside install-symbol?",
+      "revId": "6b20a2fbbcd38188e2c2c4422ffca6fca0fb9e56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00f940fe_9e7ef9f8",
+        "filename": "android/build/definitions.make",
+        "patchSetId": 11
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-09T03:01:56Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "e0e8ac67_424df271",
       "revId": "6b20a2fbbcd38188e2c2c4422ffca6fca0fb9e56",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
