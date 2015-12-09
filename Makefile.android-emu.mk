@@ -188,6 +188,11 @@ LOCAL_C_INCLUDES := $(_ANDROID_EMU_INTERNAL_INCLUDES)
 LOCAL_SRC_FILES := \
     android/adb-qemud.c \
     android/adb-server.c \
+    android/android-constants.c \
+    android/avd/hw-config.c \
+    android/avd/info.c \
+    android/avd/scanner.c \
+    android/avd/util.c \
     android/async-console.c \
     android/async-socket.c \
     android/async-socket-connector.c \
@@ -195,7 +200,9 @@ LOCAL_SRC_FILES := \
     android/boot-properties.c \
     android/camera/camera-service.c \
     android/camera/camera-format-converters.c \
+    android/cmdline-option.c \
     android/console.c \
+    android/cpu_accelerator.cpp \
     android/crashreport/CrashSystem.cpp \
     android/crashreport/CrashReporter_common.cpp \
     android/crashreport/CrashReporter_$(HOST_OS).cpp \
@@ -204,7 +211,10 @@ LOCAL_SRC_FILES := \
     android/emulation/android_pipe_throttle.c \
     android/emulation/android_pipe_zero.c \
     android/emulation/android_qemud.cpp \
+    android/emulation/bufprint_config_dirs.cpp \
+    android/emulation/ConfigDirs.cpp \
     android/emulation/control/LineConsumer.cpp \
+    android/emulation/CpuAccelerator.cpp \
     android/emulation/nand_limits.c \
     android/emulation/qemud/android_qemud_client.cpp \
     android/emulation/qemud/android_qemud_multiplexer.cpp \
@@ -223,12 +233,14 @@ LOCAL_SRC_FILES := \
     android/framebuffer.c \
     android/gps.c \
     android/gpu_frame.cpp \
+    android/help.c \
     android/hw-control.c \
     android/hw-events.c \
     android/hw-fingerprint.c \
     android/hw-pipe-net.c \
     android/hw-qemud.cpp \
     android/hw-sensors.c \
+    android/kernel/kernel_utils.cpp \
     android/loadpng.c \
     android/main-common-ui.c \
     android/metrics/metrics_reporter.cpp \
@@ -237,8 +249,11 @@ LOCAL_SRC_FILES := \
     android/metrics/StudioHelper.cpp \
     android/multitouch-port.c \
     android/multitouch-screen.c \
-    android/opengles.c \
+    android/opengl/EmuglBackendList.cpp \
+    android/opengl/EmuglBackendScanner.cpp \
+    android/opengl/emugl_config.cpp \
     android/opengl/GpuFrameBridge.cpp \
+    android/opengles.c \
     android/proxy/proxy_common.c \
     android/proxy/proxy_http.c \
     android/proxy/proxy_http_connector.c \
@@ -283,7 +298,9 @@ endif
 
 ifeq ($(HOST_OS),windows)
     LOCAL_SRC_FILES += \
-        android/camera/camera-capture-windows.cpp
+        android/camera/camera-capture-windows.cpp \
+        android/windows_installer.cpp \
+
 endif
 
 $(call gen-hw-config-defs)
@@ -311,32 +328,13 @@ ANDROID_EMU_STATIC_LIBRARIES := \
 #  static libraries. The plan is to remove these completely in the future.
 #
 
-# TODO(digit): Most of these sources can be moved into android-emu already.
+# TODO(digit): main-common.c: Move non-UI dependent code to main-common-ui.c
+# TODO(digit): Remove ANDROID_QEMU2_SPECIFIC from qemu-setup.c and
+#              android_pipe.c
 _ANDROID_EMU_DEPENDENT_SOURCES := \
-    android/android-constants.c \
-    android/cmdline-option.c \
-    android/cpu_accelerator.cpp \
-    android/help.c \
     android/main-common.c \
     android/qemu-setup.c \
-    android/avd/hw-config.c \
-    android/avd/info.c \
-    android/avd/scanner.c \
-    android/avd/util.c \
     android/emulation/android_pipe.c \
-    android/emulation/bufprint_config_dirs.cpp \
-    android/emulation/ConfigDirs.cpp \
-    android/emulation/CpuAccelerator.cpp \
-    android/kernel/kernel_utils.cpp \
-    android/opengl/EmuglBackendList.cpp \
-    android/opengl/EmuglBackendScanner.cpp \
-    android/opengl/emugl_config.cpp \
-
-ifeq (windows,$(HOST_OS))
-_ANDROID_EMU_DEPENDENT_SOURCES += \
-    android/windows_installer.cpp \
-
-endif
 
 $(call start-emulator-library,android-emu-qemu1)
 LOCAL_CFLAGS := $(_ANDROID_EMU_INTERNAL_CFLAGS)
