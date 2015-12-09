@@ -38,7 +38,6 @@ MY_CXX := $(HOST_CXX)
 MY_LD  := $(HOST_LD)
 MY_AR  := $(HOST_AR)
 MY_WINDRES := $(HOST_WINDRES)
-MY_DUMPSYMS  := $(HOST_DUMPSYMS)
 
 MY_CFLAGS := -g -falign-functions=0
 ifeq ($(BUILD_DEBUG_EMULATOR),true)
@@ -173,7 +172,7 @@ $(call local-host-define,CC)
 $(call local-host-define,CXX)
 $(call local-host-define,AR)
 $(call local-host-define,LD)
-$(call local-host-define,SYMTOOL)
+$(call local-host-define,DUMPSYMS)
 
 LOCAL_CFLAGS := \
     $$(call local-host-tool,CFLAGS$$(HOST_BITS)) \
@@ -273,4 +272,11 @@ HOST_SUFFIX := 64
 include $(LOCAL_PATH)/Makefile.common.mk
 endif
 
+##
+##   PREBUILT_DLL_SYMBOLS
+##
+ifeq (true,$(EMULATOR_GENERATE_SYMBOLS))
+$(foreach prebuilt_symbol,$(EMULATOR_PREBUILT_SYMBOLS),$(eval $(call install-symbol,\
+    $(prebuilt_symbol))))
+endif
 ## VOILA!!
