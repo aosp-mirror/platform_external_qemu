@@ -203,7 +203,7 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
 
     switch (type) {
         case IMAGE_TYPE_SYSTEM:
-            driveParam += StringFormat("index=%d,id=system,file=%s",
+            driveParam += StringFormat("index=%d,id=system,read-only,file=%s",
                                       idx++,
                                       hw->disk_systemPartition_initPath);
             deviceParam = StringFormat("%s,drive=system",
