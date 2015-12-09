@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "65984e34_7e3d110c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 961,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:51:15Z",
+      "side": 1,
+      "message": "nit: extra spaces around parameter. Alternatively, since we now allow C++11:\n\n    auto r \u003d m_contexts.find(context);",
+      "revId": "7f0331495809fff749046b32e59a487f00069061",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c562daed_497881cc",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 967,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:51:15Z",
+      "side": 1,
+      "message": "nit: why not r-\u003esecond ?",
+      "revId": "7f0331495809fff749046b32e59a487f00069061",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6553ee27_c67a22c9",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 973,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:51:15Z",
+      "side": 1,
+      "message": "why not reinterpret_cast\u003cHandleType\u003e(image) instead?",
+      "revId": "7f0331495809fff749046b32e59a487f00069061",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "454eea83_a555de46",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:51:15Z",
+      "side": 1,
+      "message": "Please document properly what these methods do.",
+      "revId": "7f0331495809fff749046b32e59a487f00069061",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
