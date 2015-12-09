@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "20fe44e6_bf7013bf",
+        "filename": "android/camera/camera-capture-windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T01:10:39Z",
+      "side": 1,
+      "message": "these two lines above are no longer needed, will update the patch.",
+      "revId": "8fa60f81d8cf817c6558a9082c1bb88202c911af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0054e0af_263e38b5",
+        "filename": "android/camera/camera-capture-windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 906,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T01:10:39Z",
+      "side": 1,
+      "message": "obsolete comment, since there is no |channel| parameter anymore.",
+      "revId": "8fa60f81d8cf817c6558a9082c1bb88202c911af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
