@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "855c6237_07fdd692",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 687,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:30:11Z",
+      "side": 1,
+      "message": "nit: numbering :) and specify that $2 is related to $1.\n\nAlso I\u0027m not sure you need this function. I\u0027d rather see the $OUT_DIR appear explicitly where this is called instead.",
+      "revId": "3af2716072838574c9b7b10cba21d85ff44219dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05487277_6317e294",
+        "filename": "android-configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 794,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-09T16:30:11Z",
+      "side": 1,
+      "message": "nit: use \u0027copy_file\u0027 here instead of the 4 lines above?",
+      "revId": "3af2716072838574c9b7b10cba21d85ff44219dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
