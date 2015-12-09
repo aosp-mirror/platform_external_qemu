@@ -80,7 +80,6 @@ HOST_OS=$BUILD_OS
 HOST_ARCH=$BUILD_ARCH
 HOST_TAG=$HOST_OS-$HOST_ARCH
 
-
 #### Toolchain support
 ####
 
@@ -490,7 +489,7 @@ if [ "$PCBIOS_PROBE" = "yes" ]; then
     if [ ! -d "$PCBIOS_DIR" ]; then
         log "PC Bios    : Could not find prebuilts directory."
     else
-        mkdir -p $OUT_DIR/lib/pc-bios
+        mkdir -p $OUT_DIR/lib/pc-bios || panic "Could not create dir $OUT_DIR/lib/pc-bios"
         for BIOS_FILE in bios.bin vgabios-cirrus.bin bios-256k.bin efi-virtio.rom kvmvapic.bin linuxboot.bin; do
             log "PC Bios    : Copying $BIOS_FILE"
             cp -f $PCBIOS_DIR/$BIOS_FILE $OUT_DIR/lib/pc-bios/$BIOS_FILE ||
@@ -563,7 +562,6 @@ cp -f "$CACERTS_FILE" "$OUT_DIR/lib/"
 ###  Breakpad probe
 ###
 probe_prebuilts_dir "Breakpad" BREAKPAD_PREBUILTS_DIR common/breakpad
-BREAKPAD_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/breakpad
 if [ "$OPTION_MINGW" = "yes" ] ; then
     DUMPSYMS=$BREAKPAD_PREBUILTS_DIR/$BUILD_TAG/bin/dump_syms_dwarf
 else
@@ -647,6 +645,250 @@ case $HOST_OS in
         ;;
 esac
 
+# Copy a single file
+# $1: Source file path.
+# $2: Destination file path (not a directory!)
+copy_file () {
+    local SRC_FILE="$1"
+    local DST_FILE="$2"
+
+    log2 "Copying $SRC_FILE -> $DST_FILE"
+
+    case $DST_FILE in
+        */)
+            if [ ! -d "$DST_FILE" ]; then
+                mkdir -p "${DST_FILE%%/}" ||
+                        panic "Cannot create destination directory: $DST_FILE"
+            fi
+            DST_FILE=${DST_FILE%%/}
+            ;;
+        *)
+            if [ -d "$DST_FILE" ]; then
+                DST_FILE=${DST_FILE}/
+            else
+                local DST_DIR="$(dirname "$DST_FILE")"
+                if [ ! -d "$DST_DIR" ]; then
+                    mkdir -p "$(dirname "$DST_FILE")" ||
+                            panic "Could not create destination directory: $DST_DIR"
+                fi
+            fi
+            ;;
+    esac
+    cp -a $SRC_FILE $DST_FILE ||
+            panic "Could not copy $SRC_FILE into $DST_FILE !?"
+}
+
+
+# Copy a prebuilt file
+# $1: PKG root directory
+# $2: Source file path relative to PKG root directory
+# $3: Destination file path (not a directory!) relative to OUT_DIR
+install_prebuilt_dll () {
+    local PKG_SRC="$1"
+    local SRC_FILE="$2"
+    local DST_FILE="$3"
+    local SRC_PATH="$PKG_SRC/$SRC_FILE"
+
+    copy_file "$SRC_PATH" "$OUT_DIR/$DST_FILE"
+}
+
+###
+### Copy Swiftshader if available
+###
+SWIFTSHADER_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/swiftshader
+if [ -d $SWIFTSHADER_PREBUILTS_DIR ]; then
+    log "Copying Swiftshader prebuilt libraries from $SWIFTSHADER_PREBUILTS_DIR"
+    SWIFTSHADER_PREFIX=lib
+    SWIFTSHADER_HOST=$HOST_OS
+    case $SWIFTSHADER_HOST in
+        windows)
+            SWIFTSHADER_SUFFIX=.dll
+            ;;
+        linux)
+            SWIFTSHADER_SUFFIX=.so
+            ;;
+        *)
+    esac
+    for LIBNAME in EGL GLES_CM GLESv2; do
+        for SWIFTSHADER_ARCH in x86 x86_64; do
+            if [ "$SWIFTSHADER_ARCH" = "x86" ]; then
+                SWIFTSHADER_LIBDIR=lib
+            else
+                SWIFTSHADER_LIBDIR=lib64
+            fi
+            FINAL_LIBNAME="$SWIFTSHADER_PREFIX$LIBNAME$SWIFTSHADER_SUFFIX"
+            SWIFTSHADER_LIBRARY=$(ls "$SWIFTSHADER_PREBUILTS_DIR/$SWIFTSHADER_HOST-$SWIFTSHADER_ARCH/lib/$FINAL_LIBNAME" 2>/dev/null || true)
+            if [ "$SWIFTSHADER_LIBRARY" ]; then
+                SWIFTSHADER_DSTDIR="$OUT_DIR/$SWIFTSHADER_LIBDIR/gles_swiftshader"
+                SWIFTSHADER_DSTLIB="$FINAL_LIBNAME"
+                copy_file "$SWIFTSHADER_LIBRARY" "$SWIFTSHADER_DSTDIR/$SWIFTSHADER_DSTLIB"
+            fi
+        done
+    done
+fi
+
+
+###
+###  Copy Mesa if available
+###
+MESA_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/mesa
+if [ -d $MESA_PREBUILTS_DIR ]; then
+    log "Copying Mesa prebuilt libraries from $MESA_PREBUILTS_DIR"
+    case $HOST_OS in
+        windows)
+            MESA_LIBNAME=opengl32.dll
+            ;;
+        linux)
+            MESA_LIBNAME=libGL.so
+            ;;
+        *)
+            MESA_LIBNAME=
+    esac
+    for LIBNAME in $MESA_LIBNAME; do
+        for MESA_ARCH in x86 x86_64; do
+            if [ "$MESA_ARCH" = "x86" ]; then
+                MESA_LIBDIR=lib
+            else
+                MESA_LIBDIR=lib64
+            fi
+            MESA_SRCDIR=$MESA_PREBUILTS_DIR/$HOST_OS-$MESA_ARCH
+            MESA_DSTDIR="$MESA_LIBDIR/gles_mesa"
+            MESA_DSTLIB="$LIBNAME"
+            if [ "$LIBNAME" = "opengl32.dll" ]; then
+                MESA_DSTLIB="mesa_opengl32.dll"
+            fi
+            install_prebuilt_dll "$MESA_SRCDIR" "lib/$LIBNAME" "$MESA_DSTDIR/$MESA_DSTLIB"
+            if [ "$HOST_OS" = "linux" -a "$LIBNAME" = "libGL.so" ]; then
+                # Special handling for Linux, this is needed because SDL
+                # will actually try to load libGL.so.1 before GPU emulation
+                # is initialized. This is actually a link to the system's
+                # libGL.so, and will thus prevent the Mesa version from
+                # loading. By creating the symlink, Mesa will also be used
+                # by SDL.
+                ln -sf libGL.so "$OUT_DIR/$MESA_DSTDIR/libGL.so.1"
+            fi
+        done
+    done
+fi
+
+# Copy Qt shared libraries, if needed.
+log "Copying Qt prebuilt libraries from $QT_PREBUILTS_DIR"
+for QT_ARCH in x86 x86_64; do
+    QT_SRCDIR=$QT_PREBUILTS_DIR/$HOST_OS-$QT_ARCH
+    case $QT_ARCH in
+        x86) QT_DSTDIR=lib/qt;;
+        x86_64) QT_DSTDIR=lib64/qt;;
+        *) panic "Invalid Qt host architecture: $QT_ARCH";;
+    esac
+    mkdir -p "$QT_DSTDIR" || panic "Could not create Qt library sub-directory!"
+    if [ ! -d "$QT_SRCDIR" ]; then
+        continue
+    fi
+    case $HOST_OS in
+        windows) QT_DLL_FILTER="*.dll";;
+        darwin) QT_DLL_FILTER="*.dylib";;
+        *) QT_DLL_FILTER="*.so*";;
+    esac
+    QT_LIBS=$(cd "$QT_SRCDIR" && find . -name "$QT_DLL_FILTER" ! -name "*.sym" 2>/dev/null)
+    if [ -z "$QT_LIBS" ]; then
+        panic "Cannot find Qt prebuilt libraries!?"
+    fi
+    for QT_LIB in $QT_LIBS; do
+        QT_LIB=${QT_LIB#./}
+        QT_DST_LIB=$QT_LIB
+        if [ "$HOST_OS" = "windows" ]; then
+            # NOTE: On Windows, the prebuilt libraries are placed under
+            # $PREBUILTS/qt/bin, not $PREBUILTS/qt/lib, ensure that they
+            # are always copied to $OUT_DIR/lib[64]/qt/lib/.
+            QT_DST_LIB=$(printf %s "$QT_DST_LIB" | sed -e 's|^bin/|lib/|g')
+        fi
+        install_prebuilt_dll "$QT_SRCDIR" "$QT_LIB" "$QT_DSTDIR/$QT_DST_LIB"
+    done
+done
+
+# Copy e2fsprogs binaries.
+log "Copying e2fsprogs binaries."
+for E2FS_ARCH in x86 x86_64; do
+    # NOTE: in windows only 32-bit binaries are available, so we'll copy the
+    # 32-bit executables to the bin64/ directory to cover all our bases
+    case $HOST_OS in
+        windows) E2FS_SRCDIR=$E2FSPROGS_PREBUILTS_DIR/$HOST_OS-x86;;
+        *) E2FS_SRCDIR=$E2FSPROGS_PREBUILTS_DIR/$HOST_OS-$E2FS_ARCH;;
+    esac
+
+    if [ ! -d "$E2FS_SRCDIR" ]; then
+        continue
+    fi
+
+    case $E2FS_ARCH in
+        x86) E2FS_DSTDIR=$OUT_DIR/bin;;
+        x86_64) E2FS_DSTDIR=$OUT_DIR/bin64;;
+        *) panic "Invalid e2fsprogs host architecture: $E2FS_ARCH"
+    esac
+    copy_file "$E2FS_SRCDIR/sbin/*" "$E2FS_DSTDIR/"
+done
+
+# Copy the requested library from the toolchain sysroot.
+# This function
+#   - resolves symlinks to find the actual library
+#   - copies the actual library with the resolved name.
+#   - copies all the symlinks found in $SRCDIR to that library as well.
+# This way, linking against generic/specific version works on systems that
+# do/don't understand symlinks.
+#   $1: Destination directory.
+#   $2: Source directory.
+#   $3: Name of the library (without the .so suffix).
+copy_toolchain_lib () {
+    local DESTDIR SRCDIR NAME
+    local FROM REALNAME
+    local SYMLINK SYMNAME
+    DESTDIR="$1"
+    SRCDIR="$2"
+    NAME="$3.so"
+
+    mkdir -p "${DESTDIR}" || panic "Failed to created ${DESTDIR}"
+
+    FROM="$(readlink -qnm "${SRCDIR}/${NAME}")" ||
+            panic "Coulnd't resolve ${SRCDIR}/${NAME}"
+    REALNAME="$(basename "${FROM}")"
+
+    cp -f "${FROM}" "${DESTDIR}/${REALNAME}" ||
+            panic "Cound't copy ${FROM} --> ${DESTDIR}/${REALNAME}"
+
+    # Now re-create all the symlinks as relative path symlinks.
+    for SYMLINK in "${SRCDIR}/${NAME}".*; do
+        if [ "${SYMLINK}" = "${FROM}" -o "$(readlink -qnm "${SYMLINK}")" != "${FROM}" ]; then
+            continue
+        fi
+        SYMNAME="$(basename "${SYMLINK}")"
+        if [ ! -e "${DESTDIR}/${SYMNAME}" -o "$(readlink -qnm "${DESTDIR}/${SYMNAME}")" != "${DESTDIR}/${REALNAME}" ]; then
+            rm -f "${DESTDIR}/${SYMNAME}"
+            ln -s "${REALNAME}" "${DESTDIR}/${SYMNAME}" || \
+                    panic "Failed to create symlink ${DESTDIR}/${SYMNAME} --> ${REALNAME}"
+        fi
+    done
+}
+
+if [ -n "${TOOLCHAIN_SYSROOT}" ]; then
+    # We currently only bundle libraries for linux
+    # - mingw: Statically links all libraries (b.android.com/191369)
+    # - darwin: We use the development machine's installed SDK. No point
+    #       bundling, since we don't have a uniform libraries to begin with.
+    case $HOST_OS in
+        linux*)
+            log "Copying toolchain libraries to bundle with the program"
+            for BUNDLED_LIB in libstdc++; do
+                log "  Bundling ${BUNDLED_LIB}"
+                copy_toolchain_lib "${OUT_DIR}/lib" "${TOOLCHAIN_SYSROOT}/lib32" "${BUNDLED_LIB}"
+                copy_toolchain_lib "${OUT_DIR}/lib64" "${TOOLCHAIN_SYSROOT}/lib64" "${BUNDLED_LIB}"
+            done
+        ;;
+        *) log "Not copying toolchain libraries for ${HOST_OS}";;
+    esac
+fi
+
+
+
 # Re-create the configuration file
 config_mk=$OUT_DIR/build/config.make
 config_dir=$(dirname $config_mk)
@@ -689,7 +931,6 @@ echo "BUILD_LD          := $BUILD_LD" >> $config_mk
 echo "BUILD_OBJCOPY     := $BUILD_OBJCOPY" >> $config_mk
 echo "BUILD_CFLAGS      := $BUILD_CFLAGS" >> $config_mk
 echo "BUILD_LDFLAGS     := $BUILD_LDFLAGS" >> $config_mk
-echo "BUILD_DUMPSYMS    := $DUMPSYMS" >> $config_mk
 echo "BUILD_STATIC_FLAGS := $BUILD_STATIC_FLAGS" >> $config_mk
 
 PWD=`pwd`
