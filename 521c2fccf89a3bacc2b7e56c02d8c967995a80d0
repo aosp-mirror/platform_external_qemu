@@ -16,6 +16,24 @@
       "revId": "521c2fccf89a3bacc2b7e56c02d8c967995a80d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e0e0ac3e_250fd8b9",
+        "filename": "android/build/definitions.make",
+        "patchSetId": 9
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-09T03:01:56Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "bb37c76a_41555244",
+      "revId": "521c2fccf89a3bacc2b7e56c02d8c967995a80d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
