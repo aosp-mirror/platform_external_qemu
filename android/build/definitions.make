@@ -274,6 +274,48 @@ else  # EMULATOR_STRIP_BINARIES != true
 endif # EMULATOR_STRIP_BINARIES != true
 endef
 
+# Install an existing symbol file into the symbols directory
+#
+define install-symbol
+_INTERMEDIATE_SYMBOL := $(1)
+ifeq (,$$(wildcard $$(_INTERMEDIATE_SYMBOL)))
+$$(error Can not call install-symbol with missing file $$(_INTERMEDIATE_SYMBOL))
+endif
+$$(eval _SYMB_HEADER := $$(shell head -n1 $$(_INTERMEDIATE_SYMBOL)))
+$$(eval _SYMB_CODE := $$(word 4,$$(_SYMB_HEADER)))
+$$(eval _SYMB_NAME := $$(word 5,$$(_SYMB_HEADER)))
+$$(eval _SYMB_DEST := $(SYMBOLS_DIR)/$$(_SYMB_NAME)/$$(_SYMB_CODE))
+SYMBOLS += $$(_SYMB_DEST)
+$$(_SYMB_DEST): PRIVATE_INTERMEDIATE_SYMBOL := $$(_INTERMEDIATE_SYMBOL)
+$$(_SYMB_DEST): PRIVATE_SYMBOL_DEST := $$(_SYMB_DEST)
+$$(_SYMB_DEST): $$(_INTERMEDIATE_SYMBOL)
+	@echo "Install Symbol: $$(PRIVATE_SYMBOL_DEST)"
+	@mkdir -p $$(PRIVATE_SYMBOL_DEST)
+	$(hide) cp $$(PRIVATE_INTERMEDIATE_SYMBOL) $$(PRIVATE_SYMBOL_DEST)
+endef
+
+# Builds, then installs a symbol from a module target
+#
+define build-install-symbol
+_MODULE := $(1)
+_INTERMEDIATE_SYMBOL := $$(_MODULE).sym
+INTERMEDIATE_SYMBOLS += $$(_INTERMEDIATE_SYMBOL)
+$$(_INTERMEDIATE_SYMBOL): PRIVATE_DUMPSYMS := $$(HOST_DUMPSYMS)
+$$(_INTERMEDIATE_SYMBOL): PRIVATE_MODULE  := $$(_MODULE)
+$$(_INTERMEDIATE_SYMBOL): PRIVATE_INTERMEDIATE_SYMBOL := $$(_INTERMEDIATE_SYMBOL)
+$$(_INTERMEDIATE_SYMBOL): $$(_MODULE)
+	@echo "Build Symbol: $$(PRIVATE_INTERMEDIATE_SYMBOL)"
+	@mkdir -p $$(dir $$(PRIVATE_INTERMEDIATE_SYMBOL))
+	$(hide) $$(PRIVATE_DUMPSYMS) $$(PRIVATE_MODULE) > $$(PRIVATE_INTERMEDIATE_SYMBOL)
+	@SYMB_CODE=`head -n1 $$(PRIVATE_INTERMEDIATE_SYMBOL) | cut -d" " -f4` && \
+	SYMB_NAME=`head -n1 $$(PRIVATE_INTERMEDIATE_SYMBOL) | cut -d" " -f5` && \
+	SYMB_DEST=$(SYMBOLS_DIR)/$$$$SYMB_NAME/$$$$SYMB_CODE && \
+	mkdir -p $$$$SYMB_DEST && \
+	echo "Install Symbol: $$$$SYMB_DEST\$$(notdir $$(PRIVATE_INTERMEDIATE_SYMBOL))" && \
+	cp $$(PRIVATE_INTERMEDIATE_SYMBOL) $$$$SYMB_DEST
+endef
+
+
 install-executable = $(eval $(call install-stripped-binary,$1,$2,--strip-all))
 install-shared-library = $(eval $(call install-stripped-binary,$1,$2,--strip-unneeded))
 
