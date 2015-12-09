@@ -28,6 +28,7 @@ void ExtendedWindow::initVirtualSensors()
     mExtendedUi->humiditySensorValueWidget->setRange(0, 100);
     mExtendedUi->humiditySensorValueWidget->setValue(50);
     mExtendedUi->proximitySensorValueWidget->setRange(0, 10);
+    mExtendedUi->proximitySensorValueWidget->setValue(10);
     mExtendedUi->magNorthWidget->setValidator(&mMagFieldValidator);
     mExtendedUi->magNorthWidget->setTextMargins(0, 0, 0, 4);
     mExtendedUi->magEastWidget->setValidator(&mMagFieldValidator);
