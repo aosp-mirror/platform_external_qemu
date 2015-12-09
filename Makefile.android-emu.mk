@@ -261,6 +261,7 @@ LOCAL_SRC_FILES := \
     android/proxy/proxy_http_rewriter.c \
     android/qemu-tcpdump.c \
     android/qt/qt_path.cpp \
+    android/qt/qt_setup.cpp \
     android/resource.c \
     android/sdk-controller-socket.c \
     android/sensors-port.c \
@@ -309,6 +310,19 @@ $(call end-emulator-library)
 ANDROID_EMU_STATIC_LIBRARIES := \
     android-emu \
     android-emu-base \
+    $(LIBCURL_STATIC_LIBRARIES) \
+    $(LIBXML2_STATIC_LIBRARIES) \
+    $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
+    emulator-libext4_utils \
+    emulator-libsparse \
+    emulator-libselinux \
+    emulator-libjpeg \
+    emulator-libpng \
+    emulator-zlib \
+
+ANDROID_EMU_LDLIBS := \
+    $(LIBCURL_LDLIBS) \
+    $(BREAKPAD_CLIENT_LDLIBS) \
 
 # TODO(digit): Move AndroidEmu unit tests declarations here.
 

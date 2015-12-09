@@ -104,12 +104,12 @@ endif
 $(call start-emulator-program, emulator$(HOST_SUFFIX)_unittests)
 LOCAL_C_INCLUDES += \
     $(EMULATOR_GTEST_INCLUDES) \
-    $(EMULATOR_COMMON_INCLUDES) \
+    $(ANDROID_EMU_INCLUDES) \
     $(LIBCURL_INCLUDES) \
     $(BREAKPAD_INCLUDES) \
 
 LOCAL_LDLIBS += \
-    $(LIBCURL_LDLIBS) \
+    $(ANDROID_EMU_LDLIBS) \
 
 LOCAL_SRC_FILES := \
     $(EMULATOR_UNITTESTS_SOURCES) \
@@ -119,20 +119,9 @@ LOCAL_SRC_FILES := \
 LOCAL_CFLAGS += -O0 $(LIBCURL_CFLAGS) $(EMULATOR_UNITTESTS_CFLAGS)
 LOCAL_LDFLAGS += $(EMULATOR_UNITTESTS_LDFLAGS)
 LOCAL_STATIC_LIBRARIES += \
-    libandroid-wear-agent \
-    emulator-common \
-    emulator-libext4_utils \
-    emulator-libsparse \
-    emulator-libselinux \
     emulator-libgtest \
-    $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
-    $(LIBCURL_STATIC_LIBRARIES) \
-    $(LIBXML2_STATIC_LIBRARIES) \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
     $(BREAKPAD_STATIC_LIBRARIES) \
-    $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
-    emulator-libext4_utils \
-    emulator-libsparse \
-    emulator-libselinux \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/
@@ -155,8 +144,6 @@ LOCAL_C_INCLUDES += \
     $(EMULATOR_GTEST_INCLUDES) \
 
 LOCAL_SRC_FILES := $(ANDROID_SKIN_UNITTESTS)
-LOCAL_CFLAGS += $(EMULATOR_UNITTESTS_CFLAGS)
-LOCAL_LDFLAGS += $(EMULATOR_UNITTESTS_LDFLAGS)
 
 LOCAL_SRC_FILES += \
     android/gps/GpxParser_unittest.cpp \
@@ -164,19 +151,14 @@ LOCAL_SRC_FILES += \
     android/gps/internal/KmlParserInternal_unittest.cpp \
     android/gps/KmlParser_unittest.cpp \
 
-LOCAL_C_INCLUDES += $(LIBXML2_INCLUDES)
+LOCAL_C_INCLUDES += \
+    $(LIBXML2_INCLUDES) \
 
-LOCAL_CFLAGS += -O0 -I$(LIBCURL_INCLUDES)
+LOCAL_CFLAGS += -O0
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
-    emulator-common \
     emulator-libgtest \
-    $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
-    $(LIBCURL_STATIC_LIBRARIES) \
-    $(LIBXML2_STATIC_LIBRARIES) \
-    emulator-libext4_utils \
-    emulator-libsparse \
-    emulator-libselinux \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/
