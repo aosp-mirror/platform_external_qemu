@@ -30,7 +30,6 @@
 BUILD_SYSTEM := android/build
 OBJS_DIR     := objs
 SYMBOLS_DIR  := $(OBJS_DIR)/build/symbols
-LIBS_DIR     := $(OBJS_DIR)/libs
 CONFIG_MAKE  := $(OBJS_DIR)/build/config.make
 CONFIG_HOST_H := $(OBJS_DIR)/build/config-host.h
 

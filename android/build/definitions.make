@@ -240,20 +240,6 @@ $$(DST): $$(SRC)
 install: $$(DST)
 endef
 
-# for now, we only use prebuilt SDL libraries, so copy them
-define copy-prebuilt-lib
-_SRC := $(1)
-_SRC1 := $$(notdir $$(_SRC))
-_DST := $$(LIBS_DIR)/$$(_SRC1)
-LIBRARIES += $$(_DST)
-$$(_DST): PRIVATE_DST := $$(_DST)
-$$(_DST): PRIVATE_SRC := $$(_SRC)
-$$(_DST): $$(_SRC)
-	@mkdir -p $$(dir $$(PRIVATE_DST))
-	@echo "Prebuilt: $$(PRIVATE_DST)"
-	$(hide) cp -f $$(PRIVATE_SRC) $$(PRIVATE_DST)
-endef
-
 define  create-dir
 $(1):
 	mkdir -p $(1)
