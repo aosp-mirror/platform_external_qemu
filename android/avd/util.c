@@ -21,6 +21,7 @@
 #include "android/utils/property_file.h"
 #include "android/utils/system.h"
 
+#include <assert.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -50,9 +51,25 @@ path_getSdkRoot( char *pFromEnv )
     env = getenv(SDK_ROOT_ENV);
     if (env != NULL && env[0] != 0) {
         if (path_exists(env)) {
-            D("found " SDK_ROOT_ENV ": %s", env);
+            D("found " SDK_ROOT_ENV ": '%s'", env);
             *pFromEnv = 1;
-            return ASTRDUP(env);
+#ifdef _WIN32
+            // make sure we unquote the path if it's quoted: appending
+            // to quoted paths creates nonesence, e.g. "C:\foo"\bar
+            if (env[0] != '\"') {
+                return strdup(env);
+            }
+
+            char* const res = strdup(env + 1);
+            const int len = strlen(res);
+            assert(res[len - 1] == '\"');
+            res[len - 1] = 0;
+            D(" unquoted " SDK_ROOT_ENV ": '%s'", res);
+
+            return res;
+#else
+            return strdup(env);
+#endif
         }
         D(SDK_ROOT_ENV " points to unknown directory: %s", env);
     }
