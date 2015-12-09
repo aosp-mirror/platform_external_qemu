@@ -14,6 +14,8 @@
 
 #include "android/utils/compiler.h"
 
+#include <stdint.h>
+
 ANDROID_BEGIN_HEADER
 
 /*

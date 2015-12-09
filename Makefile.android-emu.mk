@@ -240,6 +240,7 @@ LOCAL_SRC_FILES := \
     android/hw-pipe-net.c \
     android/hw-qemud.cpp \
     android/hw-sensors.c \
+    android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
     android/loadpng.c \
     android/main-common-ui.c \
@@ -274,16 +275,10 @@ LOCAL_SRC_FILES := \
     android/telephony/sim_card.c \
     android/telephony/sms.c \
     android/telephony/sysdeps.c \
+    android/uncompress.cpp \
     android/update-check/UpdateChecker.cpp \
     android/update-check/VersionExtractor.cpp \
     android/user-config.c \
-    android/utils/jpeg-compress.c \
-    android/utils/uncompress.cpp \
-
-# TODO(digit): Move jpeg-compress.c and uncompress.cpp out of android/utils/
-#              since this directory is supposed to only contain
-#              android-emu-base sources, which should not depend on
-#              third-party libraries.
 
 # Platform-specific camera capture
 ifeq ($(HOST_OS),linux)

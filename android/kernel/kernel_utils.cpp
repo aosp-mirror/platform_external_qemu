@@ -13,10 +13,10 @@
 #include "android/base/Log.h"
 #include "android/kernel/kernel_utils.h"
 #include "android/kernel/kernel_utils_testing.h"
+#include "android/uncompress.h"
 #include "android/utils/file_data.h"
 #include "android/utils/path.h"
 #include "android/utils/string.h"
-#include "android/utils/uncompress.h"
 
 #include <stdint.h>
 #include <stdio.h>

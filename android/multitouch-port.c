@@ -18,12 +18,12 @@
 
 #include "android/globals.h"  /* for android_hw */
 #include "android/hw-events.h"
+#include "android/jpeg-compress.h"
 #include "android/multitouch-screen.h"
 #include "android/opengles.h"
 #include "android/sdk-controller-socket.h"
 #include "android/skin/charmap.h"
 #include "android/utils/debug.h"
-#include "android/utils/jpeg-compress.h"
 #include "android/utils/misc.h"
 #include "android/utils/panic.h"
 
