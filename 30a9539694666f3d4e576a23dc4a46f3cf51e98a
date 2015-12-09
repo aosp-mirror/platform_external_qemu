@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "405a58de_48281f65",
+        "filename": "android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 893,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-09T03:27:01Z",
+      "side": 1,
+      "message": "unnamed namespace? Otherwise it may clash with some other class of the same name (and it\u0027s hard to predict as there\u0027s no \u0027CameraThread.*\u0027 files",
+      "range": {
+        "startLine": 893,
+        "startChar": 6,
+        "endLine": 893,
+        "endChar": 18
+      },
+      "revId": "30a9539694666f3d4e576a23dc4a46f3cf51e98a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
