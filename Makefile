@@ -29,15 +29,17 @@
 
 BUILD_SYSTEM := android/build
 OBJS_DIR     := objs
-SYMBOLS_DIR  := $(OBJS_DIR)/build/symbols
 CONFIG_MAKE  := $(OBJS_DIR)/build/config.make
 CONFIG_HOST_H := $(OBJS_DIR)/build/config-host.h
+SYMBOLS_DIR  := $(OBJS_DIR)/build/symbols
+SYMBOLS_INTERMEDIATE_DIR := $(OBJS_DIR)/build/symbols_intermediate
 
 ifeq ($(wildcard $(CONFIG_MAKE)),)
     $(error "The configuration file '$(CONFIG_MAKE)' doesn't exist, please run the 'android-configure.sh' script")
 endif
 
 include $(CONFIG_MAKE)
+
 include $(BUILD_SYSTEM)/definitions.make
 
 .PHONY: all libraries executables clean clean-config clean-objs-dir \
@@ -53,8 +55,9 @@ DEPENDENCY_DIRS :=
 
 all: libraries executables symbols
 EXECUTABLES :=
-SYMBOLS :=
+SYMBOLS     :=
 LIBRARIES   :=
+INTERMEDIATE_SYMBOLS :=
 
 clean: clean-intermediates
 
@@ -65,10 +68,10 @@ include Makefile.top.mk
 
 libraries: $(LIBRARIES)
 executables: $(EXECUTABLES)
-symbols: $(SYMBOLS)
+symbols: $(INTERMEDIATE_SYMBOLS) $(SYMBOLS)
 
 clean-intermediates:
-	rm -rf $(OBJS_DIR)/intermediates $(EXECUTABLES) $(LIBRARIES) $(SYMBOLS) $(SYMBOLS_DIR)
+	rm -rf $(OBJS_DIR)/intermediates $(EXECUTABLES) $(LIBRARIES) $(SYMBOLS) $(SYMBOLS_DIR) $(SYMBOLS_INTERMEDIATE_DIR)
 
 clean-config:
 	rm -f $(CONFIG_MAKE) $(CONFIG_HOST_H)
