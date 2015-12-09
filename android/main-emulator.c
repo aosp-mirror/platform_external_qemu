@@ -113,7 +113,7 @@ static bool isCpuArchSupportedByGoldfish(const char* avdArch) {
 // i.e. the 'ranchu' virtual board.
 static bool isCpuArchSupportedByRanchu(const char* avdArch) {
     static const char* const kSupported[] =
-            {"arm64", "mips64", "x86", "x86_64"};
+            {"arm64", "mips", "mips64", "x86", "x86_64"};
     return isStringInList(avdArch, kSupported, ARRAY_SIZE(kSupported));
 }
 
