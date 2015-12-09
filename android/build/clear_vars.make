@@ -15,7 +15,6 @@
 
 # called multiple times to clear variables used to define a given 'module'
 #
-LOCAL_NO_DEFAULT_COMPILER_FLAGS:=
 LOCAL_CC :=
 LOCAL_CXX :=
 LOCAL_C_INCLUDES :=
