@@ -10,11 +10,12 @@
 ** GNU General Public License for more details.
 */
 
-#include <stdint.h>
+#include "android/jpeg-compress.h"
+
+#include "android/utils/panic.h"
+
 #include "jinclude.h"
 #include "jpeglib.h"
-#include "jpeg-compress.h"
-#include "panic.h"
 
 /* Implements JPEG destination manager's init_destination routine. */
 static void _on_init_destination(j_compress_ptr cinfo);

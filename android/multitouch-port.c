@@ -23,7 +23,7 @@
 #include "android/sdk-controller-socket.h"
 #include "android/skin/charmap.h"
 #include "android/utils/debug.h"
-#include "android/utils/jpeg-compress.h"
+#include "android/jpeg-compress.h"
 #include "android/utils/misc.h"
 #include "android/utils/panic.h"
 

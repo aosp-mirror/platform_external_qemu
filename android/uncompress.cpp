@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/utils/uncompress.h"
+#include "android/uncompress.h"
 #include "zlib.h"
 
 bool uncompress_gzipStream(uint8_t* dst, size_t* dstLen, const uint8_t* src,

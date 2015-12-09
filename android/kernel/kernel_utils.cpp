@@ -16,7 +16,7 @@
 #include "android/utils/file_data.h"
 #include "android/utils/path.h"
 #include "android/utils/string.h"
-#include "android/utils/uncompress.h"
+#include "android/uncompress.h"
 
 #include <stdint.h>
 #include <stdio.h>
