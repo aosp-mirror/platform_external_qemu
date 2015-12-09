@@ -269,6 +269,95 @@ static mon_cmd_t android_cdma_cmds[] = {
     { NULL, NULL, },
 };
 
+static mon_cmd_t android_gsm_cmds[] = {
+    {
+        .name = "list",
+        .args_type = "",
+        .params = "",
+        .help = "list current phone calls\n"
+            "'gsm list' lists all inbound and outbound calls and their state\n",
+        .mhandler.cmd = android_console_gsm_list,
+    },
+    {
+        .name = "call",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "create inbound phone call\n"
+            "'gsm call <phonenumber>' allows you to simulate a new inbound call\n",
+        .mhandler.cmd = android_console_gsm_call,
+    },
+    {
+        .name = "busy",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "close waiting outbound call as busy\n"
+            "'gsm busy <phonenumber>' closes an outbound call, reporting\n"
+    "the remote phone as busy. only possible if the call is 'waiting'.\n",
+        .mhandler.cmd = android_console_gsm_busy,
+    },
+    {
+        .name = "hold",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "change the state of an outbound call to 'held'\n"
+            "'gsm hold <remoteNumber>' change the state of a call to 'held'. this is only possible\n"
+    "if the call in the 'waiting' or 'active' state\n",
+        .mhandler.cmd = android_console_gsm_hold,
+    },
+    {
+        .name = "accept",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "change the state of an outbound call to 'active'\n"
+            "'gsm accept <remoteNumber>' change the state of a call to 'active'. this is only possible\n"
+    "if the call is in the 'waiting' or 'held' state\n",
+        .mhandler.cmd = android_console_gsm_accept,
+    },
+    {
+        .name = "cancel",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "disconnect an inbound or outbound phone call\n"
+            "'gsm cancel <phonenumber>' allows you to simulate the end of an inbound or outbound call\n",
+        .mhandler.cmd = android_console_gsm_cancel,
+    },
+    {
+        .name = "data",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "modify data connection state"
+            "'gsm data <state>' allows you to modify the data connection state\n",
+        .mhandler.cmd = android_console_gsm_data,
+    },
+    {
+        .name = "voice",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "modify voice connection state"
+            "'gsm voice <state>' allows you to modify the voice connection state\n",
+        .mhandler.cmd = android_console_gsm_voice,
+    },
+    {
+        .name = "status",
+        .args_type = "",
+        .params = "",
+        .help = "display GSM status"
+            "'gsm status' displays the current state of the GSM emulation\n",
+        .mhandler.cmd = android_console_gsm_status,
+    },
+    {
+        .name = "signal",
+        .args_type = "arg:S?",
+        .params = "",
+        .help = "sets the rssi and ber"
+            "signal <rssi> [<ber>]' changes the reported strength and error rate on next (15s) update.\n"
+    "rssi range is 0..31 and 99 for unknown\n"
+    "ber range is 0..7 percent and 99 for unknown\n",
+        .mhandler.cmd = android_console_gsm_signal,
+    },
+    { NULL, NULL, },
+};
+
 static mon_cmd_t android_cmds[] = {
     {
         .name = "help|h|?",
@@ -347,6 +436,13 @@ static mon_cmd_t android_cmds[] = {
         .help = "CDMA related commands",
         .mhandler.cmd = android_console_cdma,
         .sub_cmds.static_table = android_cdma_cmds,
+    },
+        {   .name = "gsm",
+        .args_type = "item:s?",
+        .params = "",
+        .help = "GSM related commands",
+        .mhandler.cmd = android_console_gsm,
+        .sub_cmds.static_table = android_gsm_cmds,
     },
     { NULL, NULL, },
 };

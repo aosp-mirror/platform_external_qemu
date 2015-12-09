@@ -1247,6 +1247,480 @@ void android_console_cdma_prl_version(Monitor* mon, const QDict* qdict) {
 
 #endif
 
+enum {
+    CMD_GSM = 0,
+    CMD_GSM_LIST = 1,
+    CMD_GSM_CALL = 2,
+    CMD_GSM_BUSY = 3,
+    CMD_GSM_HOLD = 4,
+    CMD_GSM_ACCEPT = 5,
+    CMD_GSM_CANCEL = 6,
+    CMD_GSM_DATA = 7,
+    CMD_GSM_VOICE = 8,
+    CMD_GSM_STATUS = 9,
+    CMD_GSM_SIGNAL = 10
+};
+
+static const char* gsm_help[] = {
+        /* CMD_GSM */
+        "GSM related commands,"
+        "allows you to change GSM-related settings, or to make new inbound "
+        "phone call\n"
+        "\n"
+        "available sub-commands:\n"
+        "   gsm list               list current phone calls\n"
+        "   gsm call               create inbound phone call\n"
+        "   gsm busy               close waiting outbound call as busy\n"
+        "   gsm hold               change the state of an outbound call to "
+        "'held'\n"
+        "   gsm accept             change the state of an outbound call to "
+        "'active'\n"
+        "   gsm cancel             disconnect an inbound or outbound phone "
+        "call\n"
+        "   gsm data               modify data connection state\n"
+        "   gsm voice              modify voice connection state\n"
+        "   gsm status             display GSM state\n"
+        "   gsm signal             sets the rssi and ber\n",
+        /* CMD_GSM_LIST */
+        "list current phone calls\n"
+        "'gsm list' lists all inbound and outbound calls and their state\n",
+        /* CMD_GSM_CALL */
+        "create inbound phone call\n"
+        "'gsm call <phonenumber>' allows you to simulate a new inbound call\n",
+        /* CMD_GSM_BUSY */
+        "close waiting outbound call as busy\n"
+        "'gsm busy <phonenumber>' closes an outbound call, reporting\n"
+        "the remote phone as busy. only possible if the call is 'waiting'.\n",
+        /* CMD_GSM_HOLD */
+        "change the state of an outbound call to 'held'\n"
+        "'gsm hold <remoteNumber>' change the state of a call to 'held'. this "
+        "is only possible\n"
+        "if the call in the 'waiting' or 'active' state\n",
+        /* CMD_GSM_ACCEPT */
+        "change the state of an outbound call to 'active'\n"
+        "'gsm accept <remoteNumber>' change the state of a call to 'active'. "
+        "this is only possible\n"
+        "if the call is in the 'waiting' or 'held' state\n",
+        /* CMD_GSM_CANCEL */
+        "disconnect an inbound or outbound phone call\n"
+        "'gsm cancel <phonenumber>' allows you to simulate the end of an "
+        "inbound or outbound call\n",
+        /* CMD_GSM_DATA */
+        "modify data connection state\n"
+        "'gsm data <state>' allows you to modify the data connection state\n",
+        /* CMD_GSM_VOICE */
+        "modify voice connection state\n"
+        "'gsm voice <state>' allows you to modify the voice connection state\n",
+        /* CMD_GSM_STATUS */
+        "display GSM state\n"
+        "'gsm status' displays the current state of the GSM emulation\n",
+        /* CMD_GSM_SIGNAL */
+        "sets the rssi and ber\n"
+        "'gsm signal <rssi> [<ber>]' changes the reported strength and error "
+        "rate on next (15s) update.\n"
+        "rssi range is 0..31 and 99 for unknown\n"
+        "ber range is 0..7 percent and 99 for unknown\n",
+};
+
+void android_console_gsm(Monitor* mon, const QDict* qdict) {
+    /* This only gets called for bad subcommands and help requests */
+    const char* helptext = qdict_get_try_str(qdict, "helptext");
+
+    /* Default to the first entry which is the parent help message */
+    int cmd = CMD_GSM;
+
+    if (helptext) {
+        if (strstr(helptext, "list")) {
+            cmd = CMD_GSM_LIST;
+        } else if (strstr(helptext, "call")) {
+            cmd = CMD_GSM_CALL;
+        } else if (strstr(helptext, "busy")) {
+            cmd = CMD_GSM_BUSY;
+        } else if (strstr(helptext, "hold")) {
+            cmd = CMD_GSM_HOLD;
+        } else if (strstr(helptext, "accept")) {
+            cmd = CMD_GSM_ACCEPT;
+        } else if (strstr(helptext, "cancel")) {
+            cmd = CMD_GSM_CANCEL;
+        } else if (strstr(helptext, "data")) {
+            cmd = CMD_GSM_DATA;
+        } else if (strstr(helptext, "voice")) {
+            cmd = CMD_GSM_VOICE;
+        } else if (strstr(helptext, "status")) {
+            cmd = CMD_GSM_STATUS;
+        } else if (strstr(helptext, "signal")) {
+            cmd = CMD_GSM_SIGNAL;
+        }
+    }
+
+    /* If this is not a help request then we are here with a bad sub-command */
+    monitor_printf(mon,
+                   "%s\n%s\n",
+                   gsm_help[cmd],
+                   helptext ? "OK" : "KO: missing sub-command");
+}
+
+#ifdef USE_ANDROID_EMU
+static const struct {
+    const char* name;
+    const char* display;
+    ARegistrationState state;
+} _gsm_states[] = {
+          {"unregistered", "no network available", A_REGISTRATION_UNREGISTERED},
+          {"home", "on local network, non-roaming", A_REGISTRATION_HOME},
+          {"roaming", "on roaming network", A_REGISTRATION_ROAMING},
+          {"searching", "searching networks", A_REGISTRATION_SEARCHING},
+          {"denied", "emergency calls only", A_REGISTRATION_DENIED},
+          {"off", "same as 'unregistered'", A_REGISTRATION_UNREGISTERED},
+          {"on", "same as 'home'", A_REGISTRATION_HOME},
+          {NULL, NULL, A_REGISTRATION_UNREGISTERED}};
+
+static const char* gsm_state_to_string(ARegistrationState state) {
+    int nn;
+    for (nn = 0; _gsm_states[nn].name != NULL; nn++) {
+        if (state == _gsm_states[nn].state)
+            return _gsm_states[nn].name;
+    }
+    return "<unknown>";
+}
+
+static const char* call_state_to_string(ACallState state) {
+    switch (state) {
+        case A_CALL_ACTIVE:
+            return "active";
+        case A_CALL_HELD:
+            return "held";
+        case A_CALL_ALERTING:
+            return "ringing";
+        case A_CALL_WAITING:
+            return "waiting";
+        case A_CALL_INCOMING:
+            return "incoming";
+        default:
+            return "unknown";
+    }
+}
+
+void android_console_gsm_list(Monitor* mon, const QDict* qdict) {
+    /* check that we have a phone number made of digits */
+    int count = amodem_get_call_count(android_modem);
+    int nn;
+    for (nn = 0; nn < count; nn++) {
+        ACall call = amodem_get_call(android_modem, nn);
+        const char* dir;
+
+        if (call == NULL)
+            continue;
+
+        if (call->dir == A_CALL_OUTBOUND)
+            dir = "outbound to ";
+        else
+            dir = "inbound from";
+
+        monitor_printf(mon,
+                       "%s %-10s : %s\r\n",
+                       dir,
+                       call->number,
+                       call_state_to_string(call->state));
+    }
+    monitor_printf(mon, "OK\n");
+}
+
+static int gsm_check_number(char* args) {
+    int nn;
+
+    for (nn = 0; args[nn] != 0; nn++) {
+        int c = args[nn];
+        if (!isdigit(c) && c != '+' && c != '#') {
+            return -1;
+        }
+    }
+    if (nn == 0)
+        return -1;
+
+    return 0;
+}
+
+void android_console_gsm_call(Monitor* mon, const QDict* qdict) {
+    char* args = (char*)qdict_get_try_str(qdict, "arg");
+    /* check that we have a phone number made of digits */
+    if (!args) {
+        monitor_printf(
+                mon, "KO: missing argument, try 'gsm call <phonenumber>'\r\n");
+        return;
+    }
+
+    if (gsm_check_number(args)) {
+        monitor_printf(
+                mon,
+                "KO: bad phone number format, use digits, # and + only\r\n");
+        return;
+    }
+
+    if (!android_modem) {
+        monitor_printf(mon, "KO: modem emulation not running\r\n");
+        return;
+    }
+    amodem_add_inbound_call(android_modem, args);
+    monitor_printf(mon, "OK\n");
+}
+
+void android_console_gsm_busy(Monitor* mon, const QDict* qdict) {
+    ACall call;
+
+    char* args = (char*)qdict_get_try_str(qdict, "arg");
+    if (!args) {
+        monitor_printf(
+                mon, "KO: missing argument, try 'gsm busy <phonenumber>'\r\n");
+        return;
+    }
+    call = amodem_find_call_by_number(android_modem, args);
+    if (call == NULL || call->dir != A_CALL_OUTBOUND) {
+        monitor_printf(
+                mon,
+                "KO: no current outbound call to number '%s' (call %p)\r\n",
+                args,
+                call);
+        return;
+    }
+    if (amodem_disconnect_call(android_modem, args) < 0) {
+        monitor_printf(mon, "KO: could not cancel this number\r\n");
+        return;
+    }
+    monitor_printf(mon, "OK\n");
+}
+
+void android_console_gsm_hold(Monitor* mon, const QDict* qdict) {
+    ACall call;
+
+    char* args = (char*)qdict_get_try_str(qdict, "arg");
+    if (!args) {
+        monitor_printf(
+                mon,
+                "KO: missing argument, try 'gsm out hold <phonenumber>'\r\n");
+        return;
+    }
+    call = amodem_find_call_by_number(android_modem, args);
+    if (call == NULL) {
+        monitor_printf(
+                mon, "KO: no current call to/from number '%s'\r\n", args);
+        return;
+    }
+    if (amodem_update_call(android_modem, args, A_CALL_HELD) < 0) {
+        monitor_printf(mon, "KO: could put this call on hold\r\n");
+        return;
+    }
+    monitor_printf(mon, "OK\n");
+}
+
+void android_console_gsm_accept(Monitor* mon, const QDict* qdict) {
+    ACall call;
+
+    char* args = (char*)qdict_get_try_str(qdict, "arg");
+    if (!args) {
+        monitor_printf(
+                mon,
+                "KO: missing argument, try 'gsm accept <phonenumber>'\r\n");
+        return;
+    }
+    call = amodem_find_call_by_number(android_modem, args);
+    if (call == NULL) {
+        monitor_printf(
+                mon, "KO: no current call to/from number '%s'\r\n", args);
+        return;
+    }
+    if (amodem_update_call(android_modem, args, A_CALL_ACTIVE) < 0) {
+        monitor_printf(mon, "KO: could not activate this call\r\n");
+        return;
+    }
+    monitor_printf(mon, "OK\n");
+}
+
+void android_console_gsm_cancel(Monitor* mon, const QDict* qdict) {
+    char* args = (char*)qdict_get_try_str(qdict, "arg");
+    if (!args) {
+        monitor_printf(
+                mon, "KO: missing argument, try 'gsm call <phonenumber>'\r\n");
+        return;
+    }
+    if (gsm_check_number(args)) {
+        monitor_printf(
+                mon,
+                "KO: bad phone number format, use digits, # and + only\r\n");
+        return;
+    }
+    if (!android_modem) {
+        monitor_printf(mon, "KO: modem emulation not running\r\n");
+        return;
+    }
+    if (amodem_disconnect_call(android_modem, args) < 0) {
+        monitor_printf(mon, "KO: could not cancel this number\r\n");
+        return;
+    }
+    monitor_printf(mon, "OK\n");
+}
+
+void android_console_gsm_data(Monitor* mon, const QDict* qdict) {
+    int nn;
+    monitor_printf(mon,
+                   "the 'gsm data <state>' allows you to change the state of "
+                   "your GPRS connection\r\n"
+                   "valid values for <state> are the following:\r\n\r\n");
+    for (nn = 0;; nn++) {
+        const char* name = _gsm_states[nn].name;
+        const char* display = _gsm_states[nn].display;
+
+        if (!name)
+            break;
+
+        monitor_printf(mon, "  %-15s %s\r\n", name, display);
+    }
+    monitor_printf(mon, "\r\n");
+    monitor_printf(mon, "OK\n");
+}
+
+void android_console_gsm_voice(Monitor* mon, const QDict* qdict) {
+    int nn;
+    monitor_printf(mon,
+                   "the 'gsm voice <state>' allows you to change the state of "
+                   "your GPRS connection\r\n"
+                   "valid values for <state> are the following:\r\n\r\n");
+    for (nn = 0;; nn++) {
+        const char* name = _gsm_states[nn].name;
+        const char* display = _gsm_states[nn].display;
+
+        if (!name)
+            break;
+
+        monitor_printf(mon, "  %-15s %s\r\n", name, display);
+    }
+    monitor_printf(mon, "\r\n");
+    monitor_printf(mon, "OK\n");
+}
+
+void android_console_gsm_status(Monitor* mon, const QDict* qdict) {
+    char* args = (char*)qdict_get_try_str(qdict, "arg");
+    if (args) {
+        monitor_printf(mon, "KO: no argument required\r\n");
+        return;
+    }
+    if (!android_modem) {
+        monitor_printf(mon, "KO: modem emulation not running\r\n");
+        return;
+    }
+    monitor_printf(
+            mon,
+            "gsm voice state: %s\r\n",
+            gsm_state_to_string(amodem_get_voice_registration(android_modem)));
+    monitor_printf(
+            mon,
+            "gsm data state:  %s\r\n",
+            gsm_state_to_string(amodem_get_data_registration(android_modem)));
+    monitor_printf(mon, "OK\n");
+}
+
+void android_console_gsm_signal(Monitor* mon, const QDict* qdict) {
+    char* args = (char*)qdict_get_try_str(qdict, "arg");
+    enum { SIGNAL_RSSI = 0, SIGNAL_BER, NUM_SIGNAL_PARAMS };
+    char* p = args;
+    int top_param = -1;
+    int params[NUM_SIGNAL_PARAMS];
+
+    static int last_ber = 99;
+
+    if (!p)
+        p = "";
+
+    /* tokenize */
+    while (*p) {
+        char* end;
+        int val = strtol(p, &end, 10);
+
+        if (end == p) {
+            monitor_printf(mon, "KO: argument '%s' is not a number\n", p);
+            return;
+        }
+
+        params[++top_param] = val;
+        if (top_param + 1 == NUM_SIGNAL_PARAMS)
+            break;
+
+        p = end;
+        while (*p && (p[0] == ' ' || p[0] == '\t'))
+            p += 1;
+    }
+
+    /* sanity check */
+    if (top_param < SIGNAL_RSSI) {
+        monitor_printf(mon,
+                       "KO: not enough arguments: see 'help gsm signal' for "
+                       "details\r\n");
+        return;
+    }
+
+    int rssi = params[SIGNAL_RSSI];
+    if ((rssi < 0 || rssi > 31) && rssi != 99) {
+        monitor_printf(mon, "KO: invalid RSSI - must be 0..31 or 99\r\n");
+        return;
+    }
+
+    /* check ber is 0..7 or 99 */
+    if (top_param >= SIGNAL_BER) {
+        int ber = params[SIGNAL_BER];
+        if ((ber < 0 || ber > 7) && ber != 99) {
+            monitor_printf(mon, "KO: invalid BER - must be 0..7 or 99\r\n");
+            return;
+        }
+        last_ber = ber;
+    }
+
+    amodem_set_signal_strength(android_modem, rssi, last_ber);
+
+    monitor_printf(mon, "OK\n");
+}
+
+#else
+void android_console_gsm_list(Monitor* mon, const QDict* qdict) {
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+
+void android_console_gsm_call(Monitor* mon, const QDict* qdict) {
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+
+void android_console_gsm_busy(Monitor* mon, const QDict* qdict) {
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+
+void android_console_gsm_hold(Monitor* mon, const QDict* qdict) {
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+
+void android_console_gsm_accept(Monitor* mon, const QDict* qdict) {
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+
+void android_console_gsm_cancel(Monitor* mon, const QDict* qdict) {
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+
+void android_console_gsm_data(Monitor* mon, const QDict* qdict) {
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+
+void android_console_gsm_voice(Monitor* mon, const QDict* qdict) {
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+
+void android_console_gsm_status(Monitor* mon, const QDict* qdict) {
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+
+void android_console_gsm_signal(Monitor* mon, const QDict* qdict) {
+    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
+}
+#endif
+
 enum { CMD_GEO = 0, CMD_GEO_NMEA = 1, CMD_GEO_FIX = 2 };
 
 static const char* geo_help[] = {

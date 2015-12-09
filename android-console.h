@@ -77,6 +77,18 @@ void android_console_cdma_ssource(Monitor *mon, const QDict *qdict);
 void android_console_cdma_prl_version(Monitor *mon, const QDict *qdict);
 void android_console_cdma(Monitor *mon, const QDict *qdict);
 
+void android_console_gsm_list(Monitor *mon, const QDict *qdict);
+void android_console_gsm_call(Monitor *mon, const QDict *qdict);
+void android_console_gsm_busy(Monitor *mon, const QDict *qdict);
+void android_console_gsm_hold(Monitor *mon, const QDict *qdict);
+void android_console_gsm_accept(Monitor *mon, const QDict *qdict);
+void android_console_gsm_cancel(Monitor *mon, const QDict *qdict);
+void android_console_gsm_data(Monitor *mon, const QDict *qdict);
+void android_console_gsm_voice(Monitor *mon, const QDict *qdict);
+void android_console_gsm_status(Monitor *mon, const QDict *qdict);
+void android_console_gsm_signal(Monitor *mon, const QDict *qdict);
+void android_console_gsm(Monitor *mon, const QDict *qdict);
+
 void android_monitor_print_error(Monitor *mon, const char *fmt, ...);
 
 #ifdef USE_ANDROID_EMU
