@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "80ed303a_62655860",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-09T07:21:15Z",
+      "side": 1,
+      "message": "can you add a comment explaining that this will result in queueQuitEvent() call after the command finishes? otherwise it\u0027s not very obvious",
+      "range": {
+        "startLine": 184,
+        "startChar": 8,
+        "endLine": 184,
+        "endChar": 39
+      },
+      "revId": "255df9b9e245c89f7f7bd742e4b04ce355d34fbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e0e0ac3e_8857db4b",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-09T07:21:15Z",
+      "side": 1,
+      "message": "nit: alignment",
+      "range": {
+        "startLine": 194,
+        "startChar": 0,
+        "endLine": 194,
+        "endChar": 8
+      },
+      "revId": "255df9b9e245c89f7f7bd742e4b04ce355d34fbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
