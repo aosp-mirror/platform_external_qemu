@@ -21,6 +21,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/base/threads/Async.h"
 #include "android/globals.h"
 #include "android/main-common.h"
 #include "android/skin/event.h"
@@ -35,6 +36,12 @@
 using namespace android::base;
 
 static ToolWindow *twInstance = NULL;
+
+extern "C" void setUiEmuAgent(const UiEmuAgent *agentPtr) {
+    if (twInstance) {
+        twInstance->setToolEmuAgent(agentPtr);
+    }
+}
 
 ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     QFrame(parent),
@@ -80,8 +87,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     mPushDialog.close();
     QObject::connect(&mPushDialog, SIGNAL(canceled()), this, SLOT(slot_pushCanceled()));
     QObject::connect(&mPushProcess, SIGNAL(finished(int)), this, SLOT(slot_pushFinished(int)));
-
-    QObject::connect(&mShellStopProcess, SIGNAL(finished(int)), this, SLOT(slot_shellStopFinished(int)));
 
     // Get the latest user selections from the
     // user-config code.
@@ -300,23 +305,39 @@ void ToolWindow::runAdbInstall(const QString &path)
 
 void ToolWindow::runAdbShellStopAndQuit()
 {
-    if (mShellStopProcess.state() != QProcess::NotRunning) {
+    // we need to run it only once, so don't ever reset this
+    if (mStartedAdbStopProcess) {
         return;
     }
+
+    if (async([this] { return this->adbShellStopRunner(); })) {
+        mStartedAdbStopProcess = true;
+    } else {
+        emulator_window->queueQuitEvent();
+    }
+}
+
+int ToolWindow::adbShellStopRunner() {
     QStringList args;
-    QString command = getAdbFullPath(&args);
+    const auto command = getAdbFullPath(&args);
     if (command.isNull()) {
         emulator_window->queueQuitEvent();
-        return;
+        return 1;
     }
 
-    args << "shell";
-    args << "stop";
+    // convert the command + arguments to the format needed in System class call
+    StringVector fullArgs;
+    fullArgs.push_back(command.toUtf8().constData());
+    for (const auto& arg : args) {
+        fullArgs.push_back(arg.toUtf8().constData());
+    }
+    fullArgs.push_back("shell");
+    fullArgs.push_back("stop");
 
-    mShellStopProcess.start(command, args);
-    if(!mShellStopProcess.waitForStarted()) {
-        emulator_window->queueQuitEvent();
-    };
+    System::get()->runSilentCommand(fullArgs, true);
+
+    emulator_window->queueQuitEvent();
+    return 0;
 }
 
 void ToolWindow::runAdbPush(const QList<QUrl> &urls)
@@ -646,11 +667,6 @@ void ToolWindow::slot_installFinished(int exitStatus)
     }
 }
 
-void ToolWindow::slot_shellStopFinished(int exitStatus)
-{
-    emulator_window->queueQuitEvent();
-}
-
 void ToolWindow::slot_pushCanceled()
 {
     if (mPushProcess.state() != QProcess::NotRunning) {
@@ -685,11 +701,5 @@ void ToolWindow::slot_pushFinished(int exitStatus)
         // Keep track of this process
         mPushProcess.start(command, args);
         mPushProcess.waitForStarted();
-    }
-}
-
-extern "C" void setUiEmuAgent(const UiEmuAgent *agentPtr) {
-    if (twInstance) {
-        twInstance->setToolEmuAgent(agentPtr);
     }
 }
