@@ -43,6 +43,7 @@
 #include <pwd.h>
 #include <sys/times.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #endif
 #include <assert.h>
 #include <stdlib.h>
@@ -459,7 +460,7 @@ public:
         return time(NULL);
     }
 
-    bool runSilentCommand(const StringVector& commandLine) {
+    bool runSilentCommand(const StringVector& commandLine, bool wait) {
         // Sanity check.
         if (commandLine.empty()) {
             return false;
@@ -496,7 +497,7 @@ public:
                             NULL,  /* process handle is not inheritable */
                             NULL,  /* thread handle is not inheritable */
                             FALSE, /* no, don't inherit any handles */
-                            DETACHED_PROCESS, /* the new process doesn't
+                            CREATE_NO_WINDOW, /* the new process doesn't
                                                  have a console */
                             NULL,     /* use parent's environment block */
                             NULL,     /* use parent's starting directory */
@@ -505,8 +506,13 @@ public:
             return false;
         }
 
-        CloseHandle(pinfo.hProcess);
         CloseHandle(pinfo.hThread);
+
+        if (wait) {
+            ::WaitForSingleObject(pinfo.hProcess, INFINITE);
+        }
+
+        CloseHandle(pinfo.hProcess);
 
         return true;
 #else  // !_WIN32
@@ -520,8 +526,12 @@ public:
             return false;
         }
         if (pid != 0) {
-            // Parent process returns immediately.
+            // Parent process returns.
             delete [] params;
+            if (wait) {
+                int status;
+                HANDLE_EINTR(waitpid(pid, &status, 0));
+            }
             return true;
         }
 
