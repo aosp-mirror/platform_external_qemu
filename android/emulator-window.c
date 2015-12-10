@@ -238,7 +238,6 @@ emulator_window_setup( EmulatorWindow*  emulator )
         s_use_emugl_subwindow = 0;
     }
 
-
     if (s_use_emugl_subwindow) {
         VERBOSE_PRINT(gles, "Using EmuGL sub-window for GPU display");
     } else {

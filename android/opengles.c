@@ -155,6 +155,9 @@ android_initOpenglesEmulation(void)
     if (env && env[0] != '\0' && env[0] != '0') {
         rendererUsesSubWindow = false;
     }
+    if (!android_hw->hw_gpu_enabled || !strcmp(android_hw->hw_gpu_mode, "guest")) {
+        rendererUsesSubWindow = 0;
+    }
 
     if (android_gles_fast_pipes) {
 #ifdef _WIN32
