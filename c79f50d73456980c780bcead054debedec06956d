@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "65984e34_67c0207d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-10T02:00:48Z",
+      "side": 1,
+      "message": "this doesn\u0027t make much sense to me !? Can you clarify?",
+      "revId": "c79f50d73456980c780bcead054debedec06956d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6553ee27_55f376ca",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-10T02:00:48Z",
+      "side": 1,
+      "message": "Also, context is missing about these patches, either provide links to the corresponding gerrit issue, or don\u0027t bother and find a better explanation.",
+      "revId": "c79f50d73456980c780bcead054debedec06956d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
