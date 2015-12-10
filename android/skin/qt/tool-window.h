@@ -77,6 +77,7 @@ signals:
     void skinUIEvent(SkinEvent* event);
 
 private:
+    int adbShellStopRunner();
     void handleUICommand(QtUICommand cmd, bool down);
 
     // Use this function only if SDK_PATH is not available in QSettings
@@ -105,7 +106,7 @@ private:
     Ui::ToolControls *toolsUi;
     QProcess mInstallProcess;
     QProcess mPushProcess;
-    QProcess mShellStopProcess;
+    bool mStartedAdbStopProcess = false;
     QProgressDialog mPushDialog;
     QProgressDialog mInstallDialog;
     QQueue<QUrl> mFilesToPush;
@@ -133,8 +134,6 @@ private slots:
 
     void slot_installCanceled();
     void slot_installFinished(int exitStatus);
-
-    void slot_shellStopFinished(int exitStatus);
 
     void slot_pushCanceled();
     void slot_pushFinished(int exitStatus);
