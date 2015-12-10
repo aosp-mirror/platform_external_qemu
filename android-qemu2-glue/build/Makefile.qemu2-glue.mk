@@ -8,7 +8,6 @@ LOCAL_C_INCLUDES += \
     $(QEMU2_INCLUDES) \
     $(LOCAL_PATH)/slirp \
     $(LOCAL_PATH)/tcg \
-    $(ANDROID_EMU_INCLUDES)
 
 LOCAL_SRC_FILES := \
     android_qemud.cpp \

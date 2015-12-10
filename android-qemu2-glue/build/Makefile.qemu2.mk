@@ -33,9 +33,6 @@ QEMU2_DEPS_LDFLAGS := -L$(QEMU2_DEPS_TOP_DIR)/lib
 QEMU2_GLIB_INCLUDES := $(QEMU2_DEPS_TOP_DIR)/include/glib-2.0 \
                        $(QEMU2_DEPS_TOP_DIR)/lib/glib-2.0/include
 
-# make sure we set up the AndroidEmu include path
-ANDROID_EMULIB_INCLUDES := $(LOCAL_PATH)/../qemu/
-
 QEMU2_GLIB_LDLIBS := \
     -lglib-2.0 \
     $(call qemu2-if-darwin, -liconv -lintl) \
@@ -47,17 +44,18 @@ QEMU2_PIXMAN_LDLIBS := -lpixman-1
 
 # Ensure config-host.h can be found properly.
 QEMU2_INCLUDES := $(LOCAL_PATH)/android-qemu2-glue/config/$(HOST_OS)-$(HOST_ARCH)
+
 # Ensure QEMU2 headers are found.
 QEMU2_INCLUDES += \
     $(LOCAL_PATH) \
     $(LOCAL_PATH)/include \
     $(QEMU2_AUTO_GENERATED_DIR) \
-    $(LIBEXT4_UTILS_INCLUDES) \
-    $(ZLIB_INCLUDES) \
+    $(ANDROID_EMU_INCLUDES) \
 
 QEMU2_INCLUDES += $(QEMU2_GLIB_INCLUDES) $(QEMU2_PIXMAN_INCLUDES)
 
 QEMU2_CFLAGS := \
+    $(EMULATOR_COMMON_CFLAGS) \
     $(call qemu2-if-windows,\
         -DWIN32_LEAN_AND_MEAN \
         -D__USE_MINGW_ANSI_STDIO=1 \
@@ -65,7 +63,6 @@ QEMU2_CFLAGS := \
     -fno-strict-aliasing \
     -fno-common \
     $(LIBCURL_CFLAGS) \
-    $(EMULATOR_VERSION_CFLAGS) \
     -D_GNU_SOURCE \
     -D_FILE_OFFSET_BITS=64 \
     -DCONFIG_ANDROID \
@@ -90,7 +87,7 @@ LOCAL_C_INCLUDES += \
     $(QEMU2_INCLUDES) \
     $(LOCAL_PATH)/slirp \
     $(LOCAL_PATH)/tcg \
-    $(ANDROID_EMULIB_INCLUDES)
+    $(ZLIB_INCLUDES) \
 
 LOCAL_SRC_FILES += \
     $(QEMU2_COMMON_SOURCES) \
