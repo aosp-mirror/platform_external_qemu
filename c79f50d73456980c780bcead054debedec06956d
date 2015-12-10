@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6553ee27_35111a9d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2015-12-10T02:14:58Z",
+      "side": 1,
+      "message": "From my understanding, the expected behavior of \"-gpu on\" is to create a sub-window on the host side, translate the GL commands and render to the sub-window. \"-gpu off\" will let the guest do software rendering and copy the framebuffer to the host. \"-gpu mesa\" shall behave the same as \"-gpu on\" except for the translator. But mesa does not create sub-window and instead sets up the gpu_frame_set_post_callback.",
+      "parentUuid": "65984e34_67c0207d",
+      "revId": "c79f50d73456980c780bcead054debedec06956d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6553ee27_55f376ca",
         "filename": "/COMMIT_MSG",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-12-10T02:00:48Z",
       "side": 1,
       "message": "Also, context is missing about these patches, either provide links to the corresponding gerrit issue, or don\u0027t bother and find a better explanation.",
+      "revId": "c79f50d73456980c780bcead054debedec06956d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "254d7687_58472d55",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2015-12-10T02:14:58Z",
+      "side": 1,
+      "message": "sorry, will remove this",
+      "parentUuid": "6553ee27_55f376ca",
       "revId": "c79f50d73456980c780bcead054debedec06956d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
