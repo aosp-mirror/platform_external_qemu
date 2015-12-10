@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "855c6237_adb02949",
+        "filename": "android/kernel/kernel_utils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-10T00:05:26Z",
+      "side": 1,
+      "message": "need order fix!",
+      "revId": "3b8bd7effaa8914fd1d88e71a3ac4d2980a1cd7f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6553ee27_0f516d0b",
+        "filename": "android/multitouch-port.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-10T00:05:26Z",
+      "side": 1,
+      "message": "need order fix too!",
+      "revId": "3b8bd7effaa8914fd1d88e71a3ac4d2980a1cd7f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
