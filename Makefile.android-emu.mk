@@ -232,6 +232,8 @@ LOCAL_SRC_FILES := \
     android/filesystems/partition_types.cpp \
     android/filesystems/ramdisk_extractor.cpp \
     android/framebuffer.c \
+    android/gps/GpxParser.cpp \
+    android/gps/KmlParser.cpp \
     android/gps.c \
     android/gpu_frame.cpp \
     android/help.c \
@@ -338,6 +340,7 @@ $(call start-emulator-program, android_emu$(HOST_SUFFIX)_unittests)
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
     $(EMULATOR_GTEST_INCLUDES) \
+    $(LIBXML2_INCLUDES) \
 
 LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
@@ -390,6 +393,10 @@ LOCAL_SRC_FILES := \
   android/filesystems/partition_types_unittest.cpp \
   android/filesystems/ramdisk_extractor_unittest.cpp \
   android/filesystems/testing/TestSupport.cpp \
+  android/gps/GpxParser_unittest.cpp \
+  android/gps/internal/GpxParserInternal_unittest.cpp \
+  android/gps/internal/KmlParserInternal_unittest.cpp \
+  android/gps/KmlParser_unittest.cpp \
   android/kernel/kernel_utils_unittest.cpp \
   android/metrics/metrics_reporter_unittest.cpp \
   android/metrics/metrics_reporter_ga_unittest.cpp \
