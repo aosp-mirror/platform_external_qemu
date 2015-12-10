@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "65984e34_12d63c1b",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 533,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-10T02:43:54Z",
+      "side": 1,
+      "message": "HANDLE_EINTR() ?",
+      "revId": "fdaccc58e01778d4d3ca1a3f6a9522fb190b7eea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
