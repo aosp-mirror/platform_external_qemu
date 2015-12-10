@@ -645,6 +645,9 @@ case $HOST_OS in
         ;;
 esac
 
+# Prebuilts
+PREBUILT_SYMBOLS=
+
 # Copy a single file
 # $1: Source file path.
 # $2: Destination file path (not a directory!)
@@ -681,15 +684,25 @@ copy_file () {
 
 # Copy a prebuilt file
 # $1: PKG root directory
-# $2: Source file path relative to PKG root directory
+# $2: Source file path relative to PKG SRC directory
 # $3: Destination file path (not a directory!) relative to OUT_DIR
 install_prebuilt_dll () {
     local PKG_SRC="$1"
     local SRC_FILE="$2"
     local DST_FILE="$3"
     local SRC_PATH="$PKG_SRC/$SRC_FILE"
+    local SRC_SYMBOL_PATH="$PKG_SRC/symbols/$SRC_FILE.sym"
 
-    copy_file "$SRC_PATH" "$OUT_DIR/$DST_FILE"
+    copy_file "$SRC_PATH" "$DST_FILE"
+
+    # Symbol file does not exist for symlinks
+    if [ ! -L $SRC_PATH ]; then
+        if [ ! -f $SRC_SYMBOL_PATH ]; then
+            log "WARNING Couldn't find symbol for $SRC_PATH : $SRC_SYMBOL_PATH"
+        else
+            PREBUILT_SYMBOLS="$PREBUILT_SYMBOLS $SRC_SYMBOL_PATH"
+        fi
+    fi
 }
 
 ###
@@ -716,12 +729,15 @@ if [ -d $SWIFTSHADER_PREBUILTS_DIR ]; then
             else
                 SWIFTSHADER_LIBDIR=lib64
             fi
-            FINAL_LIBNAME="$SWIFTSHADER_PREFIX$LIBNAME$SWIFTSHADER_SUFFIX"
-            SWIFTSHADER_LIBRARY=$(ls "$SWIFTSHADER_PREBUILTS_DIR/$SWIFTSHADER_HOST-$SWIFTSHADER_ARCH/lib/$FINAL_LIBNAME" 2>/dev/null || true)
-            if [ "$SWIFTSHADER_LIBRARY" ]; then
-                SWIFTSHADER_DSTDIR="$OUT_DIR/$SWIFTSHADER_LIBDIR/gles_swiftshader"
-                SWIFTSHADER_DSTLIB="$FINAL_LIBNAME"
-                copy_file "$SWIFTSHADER_LIBRARY" "$SWIFTSHADER_DSTDIR/$SWIFTSHADER_DSTLIB"
+            SWIFTSHADER_LIBNAME=$SWIFTSHADER_PREFIX$LIBNAME$SWIFTSHADER_SUFFIX
+            SWIFTSHADER_SRCDIR=$SWIFTSHADER_PREBUILTS_DIR/$SWIFTSHADER_HOST-$SWIFTSHADER_ARCH
+
+            SWIFTSHADER_DSTDIR="$OUT_DIR/$SWIFTSHADER_LIBDIR/gles_swiftshader"
+            SWIFTSHADER_DSTLIB="$FINAL_LIBNAME"
+            if [ -f "$SWIFTSHADER_SRCDIR/lib/$SWIFTSHADER_LIBNAME" ]; then
+                install_prebuilt_dll "$SWIFTSHADER_SRCDIR" \
+                                 "lib/$SWIFTSHADER_LIBNAME" \
+                                 "$SWIFTSHADER_DSTDIR/$SWIFTSHADER_DSTLIB"
             fi
         done
     done
@@ -752,7 +768,7 @@ if [ -d $MESA_PREBUILTS_DIR ]; then
                 MESA_LIBDIR=lib64
             fi
             MESA_SRCDIR=$MESA_PREBUILTS_DIR/$HOST_OS-$MESA_ARCH
-            MESA_DSTDIR="$MESA_LIBDIR/gles_mesa"
+            MESA_DSTDIR="$OUT_DIR/$MESA_LIBDIR/gles_mesa"
             MESA_DSTLIB="$LIBNAME"
             if [ "$LIBNAME" = "opengl32.dll" ]; then
                 MESA_DSTLIB="mesa_opengl32.dll"
@@ -765,7 +781,7 @@ if [ -d $MESA_PREBUILTS_DIR ]; then
                 # libGL.so, and will thus prevent the Mesa version from
                 # loading. By creating the symlink, Mesa will also be used
                 # by SDL.
-                ln -sf libGL.so "$OUT_DIR/$MESA_DSTDIR/libGL.so.1"
+                ln -sf libGL.so "$MESA_DSTDIR/libGL.so.1"
             fi
         done
     done
@@ -776,8 +792,8 @@ log "Copying Qt prebuilt libraries from $QT_PREBUILTS_DIR"
 for QT_ARCH in x86 x86_64; do
     QT_SRCDIR=$QT_PREBUILTS_DIR/$HOST_OS-$QT_ARCH
     case $QT_ARCH in
-        x86) QT_DSTDIR=lib/qt;;
-        x86_64) QT_DSTDIR=lib64/qt;;
+        x86) QT_DSTDIR=$OUT_DIR/lib/qt;;
+        x86_64) QT_DSTDIR=$OUT_DIR/lib64/qt;;
         *) panic "Invalid Qt host architecture: $QT_ARCH";;
     esac
     mkdir -p "$QT_DSTDIR" || panic "Could not create Qt library sub-directory!"
@@ -964,6 +980,12 @@ if [ "$OPTION_STRIP" = "yes" ]; then
 fi
 if [ "$OPTION_SYMBOLS" = "yes" ]; then
     echo "EMULATOR_GENERATE_SYMBOLS := true" >> $config_mk
+    echo "EMULATOR_PREBUILT_SYMBOLS := \\" >> $config_mk
+    for PREBUILT_SYMBOL in $PREBUILT_SYMBOLS;
+    do
+        echo "    $PREBUILT_SYMBOL \\" >> $config_mk
+    done
+    echo "" >> $config_mk
 fi
 if [ "$OPTION_CRASHUPLOAD" = "prod" ]; then
     echo "EMULATOR_CRASHUPLOAD := PROD" >> $config_mk
