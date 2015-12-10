@@ -9,8 +9,11 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "audio/audio.h"
+
+#include "android-qemu1-glue/audio-test.h"
+
 #include "android/utils/debug.h"
+#include "audio/audio.h"
 
 /* This source file contains a small test audio virtual device that
  * can be used to check that the emulator properly plays sound on

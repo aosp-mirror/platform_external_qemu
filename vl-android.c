@@ -213,16 +213,15 @@ int qemu_main(int argc, char **argv, char **envp);
 #include "android/kvm.h"
 #endif
 #include "sysemu/balloon.h"
-#include "android/hw-lcd.h"
-#include "android/boot-properties.h"
-#include "android/hw-control.h"
-#include "android/audio-test.h"
-#include "android/core-init-utils.h"
-#include "android/audio-test.h"
-#include "android/utils/async.h"
 
+#include "android/boot-properties.h"
+#include "android/core-init-utils.h"
+#include "android/hw-control.h"
+#include "android/hw-lcd.h"
 #include "android/snaphost-android.h"
+#include "android/utils/async.h"
 #include "android/version.h"
+#include "android-qemu1-glue/audio-test.h"
 
 /* in android/qemulator.c */
 extern void  android_emulator_set_base_port(int  port);
