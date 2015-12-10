@@ -37,7 +37,7 @@
 #include "slirp/libslirp.h"
 #include "sysemu/char.h"
 
-#if defined(USE_ANDROID_EMU)
+#if defined(CONFIG_ANDROID) && defined(USE_ANDROID_EMU)
 #include "android/shaper.h"
 #include "android-qemu2-glue/net-android.h"
 #endif
@@ -106,7 +106,7 @@ static inline void slirp_smb_cleanup(SlirpState *s) { }
 
 void slirp_output(void *opaque, const uint8_t *pkt, int pkt_len)
 {
-#ifdef CONFIG_ANDROID
+#if defined(CONFIG_ANDROID) && defined(USE_ANDROID_EMU)
     netshaper_send(slirp_shaper_out, (void*)pkt, pkt_len);
 #else
     SlirpState *s = opaque;
@@ -117,7 +117,7 @@ void slirp_output(void *opaque, const uint8_t *pkt, int pkt_len)
 
 static ssize_t net_slirp_receive(NetClientState *nc, const uint8_t *buf, size_t size)
 {
-#ifdef CONFIG_ANDROID
+#if defined(CONFIG_ANDROID) && defined(USE_ANDROID_EMU)
     netshaper_send(slirp_shaper_in, (char*)buf, size);
 #else
     SlirpState *s = DO_UPCAST(SlirpState, nc, nc);
@@ -280,7 +280,7 @@ static int net_slirp_init(NetClientState *peer, const char *model,
     }
 #endif
 
-#if defined(USE_ANDROID_EMU)
+#if defined(CONFIG_ANDROID) && defined(USE_ANDROID_EMU)
     slirp_init_shapers(s, &s->nc, s->slirp);
 #endif
 

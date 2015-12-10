@@ -47,7 +47,7 @@ void do_info_usernet(Monitor *mon, const QDict *qdict);
  */
 Slirp *net_slirp_lookup(const char *vlan, const char *stack, Error **errp);
 
-int net_slirp_is_inited();
+int net_slirp_is_inited(void);
 
 #endif
 

@@ -209,22 +209,22 @@ void android_pipe_free(void* pipe_) {
     free(pipe);
 }
 
-unsigned android_pipe_poll(void* pipe_) {
+static unsigned android_pipe_poll(void* pipe_) {
     PipeInternal* pipe = pipe_;
     return pipe->funcs->poll(pipe->opaque);
 }
 
-int android_pipe_recv(void* pipe_, AndroidPipeBuffer* buffers, int numBuffers) {
+static int android_pipe_recv(void* pipe_, AndroidPipeBuffer* buffers, int numBuffers) {
     PipeInternal* pipe = pipe_;
     return pipe->funcs->recvBuffers(pipe->opaque, buffers, numBuffers);
 }
 
-int android_pipe_send(void* pipe_, const AndroidPipeBuffer* buffers, int numBuffers) {
+static int android_pipe_send(void* pipe_, const AndroidPipeBuffer* buffers, int numBuffers) {
     PipeInternal* pipe = pipe_;
     return pipe->funcs->sendBuffers(pipe->opaque, buffers, numBuffers);
 }
 
-void android_pipe_wake_on(void* pipe_, unsigned wakes) {
+static void android_pipe_wake_on(void* pipe_, unsigned wakes) {
     PipeInternal* pipe = pipe_;
     pipe->funcs->wakeOn(pipe->opaque, wakes);
 }

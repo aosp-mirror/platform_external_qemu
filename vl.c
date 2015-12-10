@@ -155,15 +155,7 @@ int android_display_bpp    = 32;
 static Looper* metrics_looper = NULL;
 /////////////////////////////////////////////////////////////
 
-#else  /* !USE_ANDROID_EMU */
-
-#include "hw/misc/android_boot_properties.h"
-
-static void boot_property_add(const char* name, const char* value) {
-    android_boot_property_add(name, value);
-}
-
-#endif  /* !USE_ANDROID_EMU */
+#endif  /* USE_ANDROID_EMU */
 
 #define  LCD_DENSITY_LDPI      120
 #define  LCD_DENSITY_MDPI      160

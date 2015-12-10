@@ -14,8 +14,6 @@
  * GNU General Public License for more details.
  */
 
-#include "android/globals.h"  /* for android_hw */
-
 #include "hw/sysbus.h"
 #include "ui/input.h"
 #include "ui/console.h"
@@ -25,6 +23,7 @@
 #include "hw/input/goldfish_events.h"
 
 #if defined(USE_ANDROID_EMU)
+#include "android/globals.h"  /* for android_hw */
 #include "android-qemu2-glue/qemu-control-impl.h"
 #endif
 
@@ -1184,7 +1183,11 @@ static void gf_evdev_realize(DeviceState *dev, Error **errp)
         events_set_bit(s, EV_KEY, LINUX_KEY_CAMERA);
     }
 
+#if defined(USE_ANDROID_EMU)
     if (android_hw->hw_keyboard) {
+#else
+    {
+#endif
         /* since we want to implement Unicode reverse-mapping
          * allow any kind of key, even those not available on
          * the skin.

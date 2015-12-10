@@ -16,7 +16,7 @@
  */
 
 #include "android-console.h"
-#include "android/globals.h"
+
 #include "monitor/monitor.h"
 #include "qemu/sockets.h"
 #include "net/slirp.h"
@@ -28,6 +28,9 @@
 #include "hmp.h"
 
 #ifdef USE_ANDROID_EMU
+
+#include "android/globals.h"
+
 typedef struct AndroidConsoleRec_ {
     // Interfaces to call into QEMU specific code.
     QAndroidBatteryAgent battery_agent;
@@ -857,7 +860,11 @@ void android_console_avd_status(Monitor* mon, const QDict* qdict) {
 }
 
 void android_console_avd_name(Monitor* mon, const QDict* qdict) {
+#ifdef USE_ANDROID_EMU
     monitor_printf(mon, "%s\n", android_hw->avd_name);
+#else
+    monitor_printf(mon, "%s\n", "android");
+#endif
     monitor_printf(mon, "OK\n");
 }
 
@@ -1181,6 +1188,7 @@ void android_console_cdma(Monitor* mon, const QDict* qdict) {
                    helptext ? "OK" : "KO: missing sub-command");
 }
 
+#ifdef USE_ANDROID_EMU
 static const struct {
     const char* name;
     const char* display;
@@ -1192,7 +1200,6 @@ static const struct {
           {"ruim", "Read subscription from RUIM", A_SUBSCRIPTION_RUIM},
 };
 
-#ifdef USE_ANDROID_EMU
 void android_console_cdma_ssource(Monitor* mon, const QDict* qdict) {
     char* args = (char*)qdict_get_try_str(qdict, "arg");
     int nn;
