@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "65984e34_076cbc4d",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2015-12-10T02:23:47Z",
+      "side": 1,
+      "message": "Would you explain more about this? I thought mesa should behave the same as gpu on at high level, no?",
+      "parentUuid": "254d7687_b83f41b0",
+      "revId": "a076382c93814c003c704003d2ae3298997ff6a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "454eea83_2e942b24",
         "filename": "android/opengles.c",
         "patchSetId": 5
