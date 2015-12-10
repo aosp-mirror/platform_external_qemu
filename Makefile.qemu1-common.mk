@@ -43,30 +43,10 @@ QEMU1_COMMON_INCLUDES += $(MINIGLIB_INCLUDES)
 ###  THESE ARE USED BY 'emulator-ui' AND THE STANDALONE PROGRAMS
 ###
 
-common_LOCAL_CFLAGS =
-common_LOCAL_SRC_FILES =
-common_LOCAL_QT_MOC_SRC_FILES =
-common_LOCAL_QT_RESOURCES =
-common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
-
-EMULATOR_LIBUI_CFLAGS :=
 EMULATOR_LIBUI_INCLUDES :=
 EMULATOR_LIBUI_LDLIBS :=
 EMULATOR_LIBUI_LDFLAGS :=
 EMULATOR_LIBUI_STATIC_LIBRARIES :=
-
-###########################################################
-# Libpng configuration
-#
-EMULATOR_LIBUI_INCLUDES += $(LIBPNG_INCLUDES)
-EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libpng
-common_LOCAL_SRC_FILES += android/loadpng.c
-
-###########################################################
-# Libjpeg configuration
-#
-EMULATOR_LIBUI_INCLUDES += $(LIBJPEG_INCLUDES)
-EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libjpeg
 
 ###########################################################################
 # Qt-related definitions
@@ -74,34 +54,13 @@ EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libjpeg
 EMULATOR_LIBUI_INCLUDES += $(QT_INCLUDES)
 EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
 EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
-EMULATOR_LIBUI_CFLAGS += $(LIBXML2_CFLAGS)
 
 # the skin support sources
 #
 include $(LOCAL_PATH)/android/skin/sources.mk
-common_LOCAL_SRC_FILES += $(ANDROID_SKIN_SOURCES)
 
-common_LOCAL_SRC_FILES += \
-    android/gpu_frame.cpp \
-    android/emulator-window.c \
-    android/resource.c \
-    android/user-config.c \
-
-# enable MMX code for our skin scaler
-ifeq ($(HOST_ARCH),x86)
-common_LOCAL_CFLAGS += -DUSE_MMX=1 -mmmx
-endif
-
-common_LOCAL_CFLAGS += $(EMULATOR_LIBUI_CFLAGS)
-
-
-ifeq ($(HOST_OS),windows)
-# For capCreateCaptureWindow used in camera-capture-windows.c
-EMULATOR_LIBUI_LDLIBS += -lvfw32
-endif
-
-## one for 32-bit
 $(call start-emulator-library, emulator-libui)
+
 LOCAL_CFLAGS += \
     $(EMULATOR_COMMON_CFLAGS) \
     $(ANDROID_SKIN_CFLAGS) \
@@ -111,7 +70,13 @@ LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_LIBUI_INCLUDES) \
 
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
+LOCAL_SRC_FILES += \
+    $(ANDROID_SKIN_SOURCES) \
+    android/gpu_frame.cpp \
+    android/emulator-window.c \
+    android/resource.c \
+    android/user-config.c \
+
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
 LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES)

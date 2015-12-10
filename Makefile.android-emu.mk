@@ -329,6 +329,11 @@ ANDROID_EMU_LDLIBS := \
     $(LIBCURL_LDLIBS) \
     $(BREAKPAD_CLIENT_LDLIBS) \
 
+ifeq ($(HOST_OS),windows)
+# For capCreateCaptureWindow used in camera-capture-windows.cpp
+ANDROID_EMU_LDLIBS += -lvfw32
+endif
+
 ###############################################################################
 #
 #  android-emu unit tests
