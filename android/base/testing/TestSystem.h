@@ -232,7 +232,7 @@ public:
         mSilentShellOpaque = shellOpaque;
     }
 
-    virtual bool runSilentCommand(const StringVector& commandLine) {
+    virtual bool runSilentCommand(const StringVector& commandLine, bool wait = false) {
         if (!commandLine.size()) {
             return false;
         }
