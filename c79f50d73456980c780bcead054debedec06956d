@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "a567a60d_21f8d4a2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-10T02:23:43Z",
+      "side": 1,
+      "message": "the sub-window is only useful when using host GPU drivers (-gpu on), because it will have its own desktop GL context and will be displayed on top of the UI window.\n\nFor \"-gpu guest\" and \"-gpu off\", we should display the framebuffer and not setup the GPU emulation libraries at all.\n\nFor \"-gpu mesa\", we should setup the GPU emulation library, but not create a sub-window. Instead, each frame is grabbed individually through glReadPixels() then displayed in the UI window directly (Mesa doesn\u0027t support native sub-windows, and it\u0027s faster anyway).\n\nFinally, there is now also \"-gpu swiftshader\" that should work exactly like \"-gpu mesa\" from this point of view.\n\nI\u0027m actually surprised you had to setup use_subwindow to 1 for mesa, it should be the other way !?!",
+      "parentUuid": "6553ee27_35111a9d",
+      "revId": "c79f50d73456980c780bcead054debedec06956d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6553ee27_55f376ca",
         "filename": "/COMMIT_MSG",
         "patchSetId": 4
