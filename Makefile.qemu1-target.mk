@@ -47,7 +47,6 @@ $(call start-emulator-library, emulator-target-$(EMULATOR_TARGET_CPU))
 LOCAL_CFLAGS := \
     $(QEMU1_COMMON_CFLAGS) \
     $(EMULATOR_TARGET_CFLAGS) \
-    $(EMULATOR_LIBUI_CFLAGS) \
 
 # These are required by the TCG engine.
 LOCAL_CFLAGS += \
