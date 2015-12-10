@@ -43,11 +43,6 @@ static EmulatorWindow   qemulator[1];
 // Our very own stash of a pointer to a device that handles user events.
 const QAndroidUserEventAgent* user_event_agent;
 
-// Set to 1 to use an EmuGL sub-window to display GpU content, or 0 to use
-// the frame post callback to retrieve every frame from the GPU, which will
-// be slower, except for software-based renderers.
-static bool s_use_emugl_subwindow = 1;
-
 static void emulator_window_refresh(EmulatorWindow* emulator);
 extern void qemu_system_shutdown_request(void);
 
@@ -126,7 +121,7 @@ static void emulator_window_keyboard_event(void* opaque, SkinKeyCode keycode, in
 
 static int emulator_window_opengles_show_window(
     void* window, int x, int y, int vw, int vh, int w, int h, float dpr, float rotation) {
-    if (s_use_emugl_subwindow) {
+    if (android_renderer_uses_subwindow) {
         return android_showOpenglesWindow(window, x, y, vw, vh, w, h, dpr, rotation);
     } else {
         return 0;
@@ -134,7 +129,7 @@ static int emulator_window_opengles_show_window(
 }
 
 static int emulator_window_opengles_hide_window(void) {
-    if (s_use_emugl_subwindow) {
+    if (android_renderer_uses_subwindow) {
         return android_hideOpenglesWindow();
     } else {
         return 0;
@@ -142,19 +137,19 @@ static int emulator_window_opengles_hide_window(void) {
 }
 
 static void emulator_window_opengles_move_window(int x, int y, int width, int height) {
-    if (s_use_emugl_subwindow) {
+    if (android_renderer_uses_subwindow) {
         android_moveOpenglesWindow(x, y, width, height);
     }
 }
 
 static void emulator_window_opengles_set_translation(float dx, float dy) {
-    if (s_use_emugl_subwindow) {
+    if (android_renderer_uses_subwindow) {
         android_setOpenglesTranslation(dx, dy);
     }
 }
 
 static void emulator_window_opengles_redraw_window(void) {
-    if (s_use_emugl_subwindow) {
+    if (android_renderer_uses_subwindow) {
         android_redrawOpenglesWindow();
     }
 }
@@ -232,14 +227,16 @@ emulator_window_setup( EmulatorWindow*  emulator )
 
     // Determine whether to use an EmuGL sub-window or not.
     const char* env = getenv("ANDROID_GL_SOFTWARE_RENDERER");
-    s_use_emugl_subwindow = !env || !env[0] || env[0] == '0';
+    android_renderer_uses_subwindow = !env || !env[0] || env[0] == '0';
     // for gpu off or gpu guest, we don't use the subwindow
     if (!android_hw->hw_gpu_enabled || !strcmp(android_hw->hw_gpu_mode, "guest")) {
-        s_use_emugl_subwindow = 0;
+        android_renderer_uses_subwindow = 0;
+    }
+    if (!strcmp(android_hw->hw_gpu_mode, "mesa")) {
+        android_renderer_uses_subwindow = 1;
     }
 
-
-    if (s_use_emugl_subwindow) {
+    if (android_renderer_uses_subwindow) {
         VERBOSE_PRINT(gles, "Using EmuGL sub-window for GPU display");
     } else {
         VERBOSE_PRINT(gles, "Using glReadPixels() for GPU display");
@@ -263,7 +260,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
     setUiEmuAgent(emulator->uiEmuAgent);
 
     // Determine whether to use an EmuGL sub-window or not.
-    if (!s_use_emugl_subwindow) {
+    if (!android_renderer_uses_subwindow) {
         gpu_frame_set_post_callback(looper_getForThread(),
                                     emulator,
                                     _emulator_window_on_gpu_frame);
@@ -285,7 +282,7 @@ emulator_window_fb_update( void*   _emulator, int  x, int  y, int  w, int  h )
         emulator_window_setup(emulator);
     }
 
-    if (!s_use_emugl_subwindow) {
+    if (!android_renderer_uses_subwindow) {
         skin_ui_update_display(emulator->ui, x, y, w, h);
     }
 }

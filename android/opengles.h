@@ -24,6 +24,12 @@ ANDROID_BEGIN_HEADER
  */
 int android_initOpenglesEmulation(void);
 
+/* Set to 1 to use an EmuGL sub-window to display GPU content (-gpu on and -gpu
+ * mesa), or 0 to use the frame post callback to retrieve every frame from the
+ * GPU, which will be slower, except for software-based renderers.
+ */
+extern int android_renderer_uses_subwindow;
+
 /* Tries to start the renderer process. Returns 0 on success, -1 on error.
  * At the moment, this must be done before the VM starts. The onPost callback
  * may be NULL.

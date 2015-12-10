@@ -14,7 +14,8 @@
 #include "android/opengles.h"
 #include <assert.h>
 
-/* Declared in "android/globals.h" */
+/* Declared in "android/opengles.h" */
+int  android_renderer_uses_subwindow = 1;
 int  android_gles_fast_pipes = 1;
 
 #include "android/globals.h"
@@ -116,7 +117,6 @@ RENDERER_FUNCTIONS_LIST
 extern int android_init_opengles_pipes(void);
 
 static ADynamicLibrary*  rendererLib;
-static bool              rendererUsesSubWindow;
 static int               rendererStarted;
 static char              rendererAddress[256];
 
@@ -150,10 +150,16 @@ android_initOpenglesEmulation(void)
         goto BAD_EXIT;
     }
 
-    rendererUsesSubWindow = true;
+    android_renderer_uses_subwindow = true;
     const char* env = getenv("ANDROID_GL_SOFTWARE_RENDERER");
     if (env && env[0] != '\0' && env[0] != '0') {
-        rendererUsesSubWindow = false;
+        android_renderer_uses_subwindow = false;
+    }
+    if (!android_hw->hw_gpu_enabled || !strcmp(android_hw->hw_gpu_mode, "guest")) {
+        android_renderer_uses_subwindow = 0;
+    }
+    if (!strcmp(android_hw->hw_gpu_mode, "mesa")) {
+        android_renderer_uses_subwindow = 1;
     }
 
     if (android_gles_fast_pipes) {
@@ -189,7 +195,7 @@ android_startOpenglesRenderer(int width, int height)
 
     if (!initOpenGLRenderer(width,
                             height,
-                            rendererUsesSubWindow,
+                            android_renderer_uses_subwindow,
                             rendererAddress,
                             sizeof(rendererAddress))) {
         D("Can't start OpenGLES renderer?");
