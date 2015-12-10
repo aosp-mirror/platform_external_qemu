@@ -46,7 +46,6 @@ QEMU1_COMMON_CFLAGS += $(LIBCURL_CFLAGS)
 # Android utility functions
 #
 common_LOCAL_SRC_FILES += \
-    android/audio-test.c \
     android/core-init-utils.c \
     android/hw-kmsg.c \
     android/hw-lcd.c \
@@ -294,6 +293,7 @@ LOCAL_SRC_FILES += \
     $(AUDIO_SOURCES) \
     aio-android.c \
     android-qemu1-glue/android_qemud.cpp \
+    android-qemu1-glue/audio-test.c \
     android-qemu1-glue/base/async/Looper.cpp \
     android-qemu1-glue/base/files/QemuFileStream.cpp \
     android-qemu1-glue/display.c \
