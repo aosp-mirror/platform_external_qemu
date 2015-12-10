@@ -33,48 +33,7 @@ QEMU1_COMMON_INCLUDES += $(OBJS_DIR)/build/qemu1-qapi-auto-generated
 QEMU1_COMMON_INCLUDES += $(ZLIB_INCLUDES)
 
 # GLib sources
-GLIB_DIR := distrib/mini-glib
-include $(LOCAL_PATH)/$(GLIB_DIR)/sources.make
-QEMU1_COMMON_INCLUDES += $(GLIB_INCLUDE_DIR)
-
-common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
-
-QEMU1_COMMON_CFLAGS += $(LIBCURL_CFLAGS)
-
-
-###########################################################
-# Android utility functions
-#
-common_LOCAL_SRC_FILES += \
-    android/core-init-utils.c \
-    android/hw-kmsg.c \
-    android/hw-lcd.c \
-
-common_LOCAL_CFLAGS += $(QEMU1_COMMON_CFLAGS)
-
-common_LOCAL_CFLAGS += $(LIBXML2_CFLAGS)
-common_LOCAL_CFLAGS += -I$(LIBEXT4_UTILS_INCLUDES)
-
-include $(LOCAL_PATH)/android/wear-agent/sources.mk
-
-## one for 32-bit
-$(call start-emulator-library, emulator-common)
-
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
-
-LOCAL_C_INCLUDES += \
-    $(QEMU1_COMMON_INCLUDES) \
-    $(LIBCURL_INCLUDES) \
-    $(LIBXML2_INCLUDES) \
-    $(BREAKPAD_CLIENT_INCLUDES) \
-
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-
-ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
-    LOCAL_IGNORE_BITNESS := true
-endif
-$(call gen-hw-config-defs)
-$(call end-emulator-library)
+QEMU1_COMMON_INCLUDES += $(MINIGLIB_INCLUDES)
 
 ##############################################################################
 ##############################################################################
@@ -376,6 +335,7 @@ LOCAL_SRC_FILES += \
     util/qemu-sockets-android.c \
     util/unicode.c \
     util/yield-android.c \
+    $(MINIGLIB_SOURCES) \
 
 ifeq ($(HOST_ARCH),x86)
     LOCAL_SRC_FILES += disas/i386.c
