@@ -342,6 +342,26 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
     return 0;
 }
 
+static uint32_t rcCreateClientImage(uint32_t context, EGLenum target, GLuint buffer)
+{
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return 0;
+    }
+
+    return fb->createClientImage(context, target, buffer);
+}
+
+static int rcDestroyClientImage(uint32_t image)
+{
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return 0;
+    }
+
+    return fb->destroyClientImage(image);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -370,4 +390,6 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcReadColorBuffer = rcReadColorBuffer;
     dec->rcUpdateColorBuffer = rcUpdateColorBuffer;
     dec->rcOpenColorBuffer2 = rcOpenColorBuffer2;
+    dec->rcCreateClientImage = rcCreateClientImage;
+    dec->rcDestroyClientImage = rcDestroyClientImage;
 }
