@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "454eea83_2b9c1d8b",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1054,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-10T01:30:25Z",
+      "side": 1,
+      "message": "Is it not necessary to prevent these from going too far?",
+      "revId": "6d858bff75df078cfab3527777bdded57f4d42e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
