@@ -752,8 +752,21 @@ void EmulatorQtWindow::doResize(const QSize &size)
         QSize newSize(backing_surface->original_w, backing_surface->original_h);
         newSize.scale(size, Qt::KeepAspectRatio);
 
-        double newScale = (double) newSize.width() / (double) backing_surface->original_w;
-        simulateSetScale(newScale);
+        QRect screenDimensions;
+        slot_getScreenDimensions(&screenDimensions);
+
+        // Make sure the new size is always a little bit smaller than the screen to prevent
+        // keyboard shortcut scaling from making a window too large for the screen, which can
+        // result in the showing of the scroll bars.
+        if (newSize.width() > .95 * screenDimensions.width() ||
+            newSize.height() > .95 * screenDimensions.height()) {
+            return;
+        }
+
+        double widthScale = (double) newSize.width() / (double) backing_surface->original_w;
+        double heightScale = (double) newSize.height() / (double) backing_surface->original_h;
+
+        simulateSetScale(MIN(widthScale, heightScale));
     }
 }
 
@@ -967,6 +980,21 @@ void EmulatorQtWindow::saveZoomPoints(const QPoint &focus, const QPoint &viewpor
     mViewportFocus = viewportFocus;
 }
 
+void EmulatorQtWindow::scaleDown()
+{
+    doResize(mContainer.size() / 1.1);
+}
+
+void EmulatorQtWindow::scaleUp()
+{
+    doResize(mContainer.size() * 1.1);
+}
+
+void EmulatorQtWindow::zoomIn()
+{
+    zoomIn(QPoint(width() / 2, height() / 2), QPoint(mContainer.width() / 2, mContainer.height() / 2));
+}
+
 void EmulatorQtWindow::zoomIn(const QPoint &focus, const QPoint &viewportFocus)
 {
     saveZoomPoints(focus, viewportFocus);
@@ -980,6 +1008,11 @@ void EmulatorQtWindow::zoomIn(const QPoint &focus, const QPoint &viewportFocus)
     if (scale < 2) {
         simulateSetZoom(MIN(mZoomFactor + .25, maxZoom));
     }
+}
+
+void EmulatorQtWindow::zoomOut()
+{
+    zoomOut(QPoint(width() / 2, height() / 2), QPoint(mContainer.width() / 2, mContainer.height() / 2));
 }
 
 void EmulatorQtWindow::zoomOut(const QPoint &focus, const QPoint &viewportFocus)
@@ -1012,6 +1045,26 @@ void EmulatorQtWindow::zoomTo(const QPoint &focus, const QSize &rectSize)
     double idealHeightZoom = mZoomFactor * (double) mContainer.height() / (double) (rectSize.height() + 20);
 
     simulateSetZoom(MIN(MIN(idealWidthZoom, idealHeightZoom), maxZoom));
+}
+
+void EmulatorQtWindow::panHorizontal(bool left)
+{
+    QScrollBar *bar = mContainer.horizontalScrollBar();
+    if (left) {
+        bar->setValue(bar->value() - bar->singleStep());
+    } else {
+        bar->setValue(bar->value() + bar->singleStep());
+    }
+}
+
+void EmulatorQtWindow::panVertical(bool up)
+{
+    QScrollBar *bar = mContainer.verticalScrollBar();
+    if (up) {
+        bar->setValue(bar->value() - bar->singleStep());
+    } else {
+        bar->setValue(bar->value() + bar->singleStep());
+    }
 }
 
 bool EmulatorQtWindow::mouseInside() {
