@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a567a60d_61c56c64",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-10T02:19:50Z",
+      "side": 1,
+      "message": "thanks for the update. Unfortunately, \"mixing the pipe with some -gpu off stuff\" is still rather cryptic. Can you replace it with something more simple?",
+      "revId": "a076382c93814c003c704003d2ae3298997ff6a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "254d7687_b83f41b0",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-10T02:19:50Z",
+      "side": 1,
+      "message": "actually I\u0027m pretty sure you don\u0027t want to use a subwindow when using mesa, so this should be 0, no?",
+      "revId": "a076382c93814c003c704003d2ae3298997ff6a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "454eea83_2e942b24",
+        "filename": "android/opengles.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-10T02:19:50Z",
+      "side": 1,
+      "message": "please try to use true/false for consistency.",
+      "revId": "a076382c93814c003c704003d2ae3298997ff6a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a567a60d_a1d2a423",
+        "filename": "android/opengles.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-10T02:19:50Z",
+      "side": 1,
+      "message": "same here??",
+      "revId": "a076382c93814c003c704003d2ae3298997ff6a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
