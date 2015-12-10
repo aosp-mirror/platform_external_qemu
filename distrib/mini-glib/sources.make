@@ -1,12 +1,14 @@
 # Included from top-level Makefile.common
 
-GLIB_INCLUDE_DIR := $(LOCAL_PATH)/$(GLIB_DIR)/include
+MINIGLIB_DIR := $(call my-dir)
 
-GLIB_SOURCES := \
-    $(GLIB_DIR)/src/glib-mini.c \
+MINIGLIB_INCLUDES := $(MINIGLIB_DIR)/include
+
+MINIGLIB_SOURCES := \
+    $(MINIGLIB_DIR)/src/glib-mini.c \
 
 ifeq ($(HOST_OS),windows)
-GLIB_SOURCES += \
-    $(GLIB_DIR)/src/glib-mini-win32.c \
+MINIGLIB_SOURCES += \
+    $(MINIGLIB_DIR)/src/glib-mini-win32.c \
 
 endif

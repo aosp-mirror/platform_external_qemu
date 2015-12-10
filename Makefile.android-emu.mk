@@ -202,6 +202,7 @@ LOCAL_SRC_FILES := \
     android/camera/camera-format-converters.c \
     android/cmdline-option.c \
     android/console.c \
+    android/core-init-utils.c \
     android/cpu_accelerator.cpp \
     android/crashreport/CrashSystem.cpp \
     android/crashreport/CrashReporter_common.cpp \
@@ -237,6 +238,8 @@ LOCAL_SRC_FILES := \
     android/hw-control.c \
     android/hw-events.c \
     android/hw-fingerprint.c \
+    android/hw-kmsg.c \
+    android/hw-lcd.c \
     android/hw-pipe-net.c \
     android/hw-qemud.cpp \
     android/hw-sensors.c \
