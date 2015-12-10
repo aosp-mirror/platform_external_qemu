@@ -220,6 +220,7 @@ if [ -d "$PREBUILTS_DIR/common/swiftshader" ]; then
     if [ "$MINGW" ]; then
         SWIFTSHADER_HOST=windows
     fi
+    SWIFTSHADER_PREFIX=lib
     case $SWIFTSHADER_HOST in
         windows)
             SWIFTSHADER_SUFFIX=.dll
@@ -228,15 +229,12 @@ if [ -d "$PREBUILTS_DIR/common/swiftshader" ]; then
             SWIFTSHADER_SUFFIX=.so
             ;;
         *)
-            SWIFTSHADER_LIBS=
     esac
-    for LIBNAME in EGL_translator GLES_CM_translator GLES_V2_translator; do
+    for LIBNAME in EGL GLES_CM GLESv2; do
         for SWIFTSHADER_ARCH in x86 x86_64; do
             if [ "$SWIFTSHADER_ARCH" = "x86" ]; then
-                SWIFTSHADER_PREFIX=lib
                 SWIFTSHADER_LIBDIR=lib
             else
-                SWIFTSHADER_PREFIX=lib64
                 SWIFTSHADER_LIBDIR=lib64
             fi
             FINAL_LIBNAME="$SWIFTSHADER_PREFIX$LIBNAME$SWIFTSHADER_SUFFIX"
