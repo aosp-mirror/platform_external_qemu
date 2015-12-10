@@ -25,7 +25,7 @@ $(call start-emulator-program,qemu-system-$(QEMU2_TARGET_CPU))
 
 LOCAL_CFLAGS += \
     $(QEMU2_CFLAGS) \
-    $(ANDROID_SKIN_CFLAGS)
+    $(EMULATOR_LIBUI_CFLAGS)
 
 LOCAL_C_INCLUDES += \
     $(QEMU2_INCLUDES) \
@@ -36,7 +36,9 @@ LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/tcg \
     $(LOCAL_PATH)/tcg/i386 \
     $(LOCAL_PATH)/target-$(QEMU2_TARGET_TARGET) \
-    $(ANDROID_EMU_INCLUDES)
+    $(ANDROID_EMU_INCLUDES) \
+    $(LIBCURL_INCLUDES) \
+    $(EMULATOR_LIBUI_INCLUDES) \
 
 LOCAL_CFLAGS += -DNEED_CPU_H
 
@@ -66,15 +68,17 @@ LOCAL_PREBUILTS_OBJ_FILES += \
 
 LOCAL_WHOLE_STATIC_LIBRARIES += \
     libqemu2_common \
+    libqemu2_glue \
     $(call qemu2-if-target,arm64, libqemu2_common_aarch64) \
 
 LOCAL_STATIC_LIBRARIES += \
-    $(ANDROID_EMU_STATIC_LIBRARIES) \
-    $(ANDROID_SKIN_STATIC_LIBRARIES) \
+    emulator-libui \
+    $(EMULATOR_LIBUI_STATIC_LIBRARIES) \
+    $(ANDROID_EMU_STATIC_LIBRARIES_QEMU2) \
 
 LOCAL_LDFLAGS += \
     $(QEMU2_DEPS_LDFLAGS) \
-    $(ANDROID_SKIN_LDFLAGS)
+    $(EMULATOR_LIBUI_LDFLAGS)
 
 LOCAL_LDLIBS += \
     $(QEMU2_GLIB_LDLIBS) \
@@ -84,7 +88,7 @@ LOCAL_LDLIBS += \
     $(call qemu2-if-windows, -lvfw32) \
     $(call qemu2-if-linux, -lpulse) \
     $(ANDROID_EMU_LDLIBS) \
-    $(ANDROID_SKIN_LDLIBS) \
+    $(EMULATOR_LIBUI_LDLIBS) \
 
 LOCAL_INSTALL_DIR := qemu/$(HOST_OS)-$(HOST_ARCH)
 
