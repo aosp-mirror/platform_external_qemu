@@ -338,7 +338,7 @@ static void enter_qemu_main_loop(int argc, char **argv) {
     D("Done with QEMU main loop");
 }
 
-#if defined(CONFIG_QT) && defined(_WIN32)
+#if defined(_WIN32)
 // On Windows, link against qtmain.lib which provides a WinMain()
 // implementation, that later calls qMain().
 #define main qt_main
@@ -474,7 +474,6 @@ extern "C" int main(int argc, char **argv) {
 
     sanitizeOptions(opts);
 
-#ifdef CONFIG_QT
     /* Initialization of UI started with -attach-core should work differently
      * than initialization of UI that starts the core. In particular....
      */
@@ -484,13 +483,11 @@ extern "C" int main(int argc, char **argv) {
     if (skin_charmap_setup(opts->charmap)) {
         exit(1);
     }
-#endif
 
     /* Parses options and builds an appropriate AVD. */
     int inAndroidBuild = 0;
     AvdInfo* avd = android_avdInfo = createAVD(opts, &inAndroidBuild);
 
-#ifdef CONFIG_QT
     /* get the skin from the virtual device configuration */
     if (opts->skindir != NULL) {
         if (opts->skin == NULL) {
@@ -520,7 +517,6 @@ extern "C" int main(int argc, char **argv) {
     if (opts->dynamic_skin == 0) {
         opts->dynamic_skin = avdInfo_shouldUseDynamicSkin(avd);
     }
-#endif
 
     // Read hardware configuration, apply overrides from options.
     AndroidHwConfig* hw = android_hw;
@@ -529,7 +525,6 @@ extern "C" int main(int argc, char **argv) {
         exit(1);
     }
 
-#ifdef CONFIG_QT
     SkinKeyset* keyset = NULL;
     if (opts->keyset) {
         parse_keyset(opts->keyset, opts);
@@ -557,7 +552,6 @@ extern "C" int main(int argc, char **argv) {
                 write_default_keyset();
         }
     }
-#endif
 
     char boot_prop_ip[128] = {};
     if (opts->shared_net_id) {
@@ -571,7 +565,6 @@ extern "C" int main(int argc, char **argv) {
                  "net.shared_net_ip=10.1.2.%ld", shared_net_id);
     }
 
-#ifdef CONFIG_QT
     AConfig* skinConfig;
     char* skinPath;
     user_config_init();
@@ -590,7 +583,6 @@ extern "C" int main(int argc, char **argv) {
             opts->netdelay = (char*)skin_network_delay;
         }
     }
-#endif
 
     if (opts->code_profile) {
         char*   profilePath = avdInfo_getCodeProfilePath(avd, opts->code_profile);
@@ -854,7 +846,6 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = opts->http_proxy;
     }
 
-#ifdef CONFIG_QT
     if (!opts->charmap) {
         /* Try to find a valid charmap name */
         char* charmap = avdInfo_getCharmapFile(avd, hw->hw_keyboard_charmap);
@@ -879,7 +870,6 @@ extern "C" int main(int argc, char **argv) {
                                  sizeof(charmap_name));
         reassign_string(&hw->hw_keyboard_charmap, charmap_name);
     }
-#endif
 
     {
         EmuglConfig emuglConfig;
@@ -1284,12 +1274,6 @@ extern "C" int main(int argc, char **argv) {
         printf("\n");
     }
 
-    // Now launch the main loop.
-#ifndef CONFIG_QT
-    enter_qemu_main_loop(n, (char**)args);
-#else  // CONFIG_QT
-
-
     static UiEmuAgent uiEmuAgent;
     uiEmuAgent.battery = gQAndroidBatteryAgent;
     uiEmuAgent.cellular = gQAndroidCellularAgent;
@@ -1313,6 +1297,6 @@ extern "C" int main(int argc, char **argv) {
     skin_winsys_spawn_thread(enter_qemu_main_loop, n, (char**)args);
     skin_winsys_enter_main_loop(argc, argv);
     aconfig_node_free(skinConfig);
-#endif  // CONFIG_QT
+
     return 0;
 }

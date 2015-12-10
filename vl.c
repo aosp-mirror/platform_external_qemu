@@ -2107,12 +2107,8 @@ static DisplayType select_display(const char *p)
     DisplayType display = DT_DEFAULT;
 
     if (strstart(p, "sdl", &opts)) {
-#if defined(CONFIG_SDL) || defined(CONFIG_QT)
-#ifdef CONFIG_QT
-        display = DT_QT;
-#else
+#if defined(CONFIG_SDL) || defined(USE_ANDROID_EMU)
         display = DT_SDL;
-#endif
         while (*opts) {
             const char *nextopt;
 
@@ -3666,9 +3662,7 @@ int run_qemu_main(int argc, const char **argv)
                 no_quit = 1;
                 break;
             case QEMU_OPTION_sdl:
-#ifdef CONFIG_QT
-                display_type = DT_QT;
-#elif defined(CONFIG_SDL)
+#if defined(CONFIG_SDL) || defined(USE_ANDROID_EMU)
                 display_type = DT_SDL;
 #else
                 fprintf(stderr, "SDL support is disabled\n");
@@ -4413,12 +4407,8 @@ int run_qemu_main(int argc, const char **argv)
     if (display_type == DT_DEFAULT && !display_remote) {
 #if defined(CONFIG_GTK)
         display_type = DT_GTK;
-#elif defined(CONFIG_SDL) || defined(CONFIG_COCOA) || defined(CONFIG_QT)
-#ifdef CONFIG_QT
-        display_type = DT_QT;
-#else
+#elif defined(CONFIG_SDL) || defined(CONFIG_COCOA) || defined(USE_ANDROID_EMU)
         display_type = DT_SDL;
-#endif
 #elif defined(CONFIG_VNC)
         vnc_display = "localhost:0,to=99";
         show_vnc_port = 1;
@@ -4700,10 +4690,7 @@ int run_qemu_main(int argc, const char **argv)
         curses_display_init(ds, full_screen);
         break;
 #endif
-#if defined(CONFIG_SDL) || defined(CONFIG_QT)
-#if defined(CONFIG_QT)
-    case DT_QT:
-#endif
+#if defined(CONFIG_SDL) || defined(USE_ANDROID_EMU)
     case DT_SDL:
         sdl_display_init(ds, full_screen, no_frame);
         break;

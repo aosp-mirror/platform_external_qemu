@@ -811,12 +811,12 @@ static const MemoryRegionOps android_pipe_iomem_ops = {
 static void qemu2_android_pipe_wake(void* hwpipe, unsigned flags);
 static void qemu2_android_pipe_close(void* hwpipe);
 
-#ifdef CONFIG_QT
+#if defined(USE_ANDROID_EMU)
 static const AndroidPipeHwFuncs qemu2_android_pipe_hw_funcs = {
     .closeFromHost = qemu2_android_pipe_close,
     .signalWake = qemu2_android_pipe_wake,
 };
-#else
+#else  // !USE_ANDROID_EMU
 void android_pipe_close(void* hwpipe) {
     qemu2_android_pipe_close(hwpipe);
 }
@@ -824,7 +824,7 @@ void android_pipe_close(void* hwpipe) {
 void android_pipe_wake(void* hwpipe, unsigned flags) {
     qemu2_android_pipe_wake(hwpipe, flags);
 }
-#endif
+#endif  // !USE_ANDROID_EMU
 
 static void android_pipe_realize(DeviceState *dev, Error **errp)
 {
@@ -844,7 +844,7 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
     android_throttle_init();
     android_net_pipes_init();
 
-#ifdef CONFIG_QT
+#ifdef USE_ANDROID_EMU
     android_pipe_set_hw_funcs(&qemu2_android_pipe_hw_funcs);
 #else
     android_sensors_init();
