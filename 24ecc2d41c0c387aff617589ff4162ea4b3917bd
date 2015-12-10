@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "652a0e7c_ae87f7f6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1084468
+      },
+      "writtenOn": "2015-12-10T02:47:34Z",
+      "side": 1,
+      "message": "GLESv2. I noticed that the code itself is correct though.",
+      "range": {
+        "startLine": 24,
+        "startChar": 16,
+        "endLine": 24,
+        "endChar": 23
+      },
+      "revId": "24ecc2d41c0c387aff617589ff4162ea4b3917bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
