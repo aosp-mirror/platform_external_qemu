@@ -14,8 +14,6 @@ ANDROID_SKIN_CFLAGS += -I$(LIBXML2_INCLUDES)
 ANDROID_SKIN_STATIC_LIBRARIES += $(LIBXML2_STATIC_LIBRARIES)
 
 ANDROID_SKIN_SOURCES += \
-    android/gps/GpxParser.cpp \
-    android/gps/KmlParser.cpp \
     android/skin/qt/angle-input-widget.cpp \
     android/skin/qt/editable-slider-widget.cpp \
     android/skin/qt/emulator-qt-window.cpp \

@@ -14,12 +14,6 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SRC_FILES := $(ANDROID_SKIN_UNITTESTS)
 
-LOCAL_SRC_FILES += \
-    android/gps/GpxParser_unittest.cpp \
-    android/gps/internal/GpxParserInternal_unittest.cpp \
-    android/gps/internal/KmlParserInternal_unittest.cpp \
-    android/gps/KmlParser_unittest.cpp \
-
 LOCAL_C_INCLUDES += \
     $(LIBXML2_INCLUDES) \
 
