@@ -187,10 +187,13 @@ public:
     // Run a shell command silently. This doesn't try to wait for it to
     // complete and will return as soon as possible. |commandLine| is a list
     // of parameters, where |commandLine[0]| is the full path to the
-    // executable. Return true on success, false on failure (i.e. if the
+    // executable. If |wait| is true it returns only after the process
+    // exited.
+    // Return true on success, false on failure (i.e. if the
     // executable could not be found, not whether the command itself
     // succeeded).
-    virtual bool runSilentCommand(const StringVector& commandLine) = 0;
+    virtual bool runSilentCommand(const StringVector& commandLine,
+                                  bool wait = false) = 0;
 
     // Return the path of a temporary directory appropriate for the system.
     virtual String getTempDir() const = 0;
