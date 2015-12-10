@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "6553ee27_15205edc",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2015-12-10T02:25:40Z",
+      "side": 1,
+      "message": "Thanks for your comments, I will further look into this issue.",
+      "parentUuid": "a567a60d_21f8d4a2",
+      "revId": "c79f50d73456980c780bcead054debedec06956d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6553ee27_55f376ca",
         "filename": "/COMMIT_MSG",
         "patchSetId": 4
