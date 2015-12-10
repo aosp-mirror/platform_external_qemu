@@ -510,3 +510,90 @@ timestamp_clear () {
 find_program () {
     which "$1" 2>/dev/null || true
 }
+
+
+# Return the dump_syms tool path for a given host system.
+# $1: System name (e.g. 'linux-x86' or 'linux-x86_64')
+aosp_prebuilt_breakpad_dump_syms_for () {
+    local SYMTOOL="dump_syms"
+    local HOST="$1"
+    if [ "$(get_build_os)" = "linux" ]; then
+        case ${HOST} in
+            *windows*)
+            SYMTOOL=${SYMTOOL}_dwarf
+            HOST=$(get_build_os)-$(get_build_arch)
+            ;;
+        esac
+    fi
+    local SYMTOOL_PATH="$AOSP_DIR/$(aosp_prebuilt_breakpad_subdir_for $HOST)/bin/${SYMTOOL}"
+    if [ ! -f "${SYMTOOL_PATH}" ]; then
+        panic "Breakpad prebuilt ${SYMTOOL} could not be found at ${SYMTOOL_PATH}"
+    fi
+    printf %s "${SYMTOOL_PATH}"
+}
+
+# Build breakpad symbols from unstripped binaries
+# Builds a symbols directory at the destination root dir and populates it with
+# *.sym extension symbol files mirroring the binary file paths
+#
+# Expects Breakpad prebuilt to be built, panics otherwise.
+# $1: Src root directory
+# $2: Target root directory
+# $3: Host target
+# $4+: List of binary paths relative to Src root
+build_symbols () {
+    local SRC_ROOT="$1"
+    local DEST_ROOT="$2"
+    local HOST="$3"
+    shift
+    shift
+    shift
+    local BINARY_FILES="$@"
+    local SYMBOL_DIR="$DEST_ROOT"/symbols
+    local BINARY_FULLNAME=
+    local BINARY_DIR=
+    local SYMTOOL="$(aosp_prebuilt_breakpad_dump_syms_for $HOST)"
+    if [ ! -f "$SYMTOOL" ]; then
+        panic "Breakpad prebuilt symbol dumper could not be found at $SYMTOOL"
+    fi
+    run mkdir -p "$SYMBOL_DIR"
+    for BINARY in $BINARY_FILES; do
+        if [ -L "$SRC_ROOT"/$BINARY ]; then
+            continue
+        fi
+        BINARY_FULLNAME="$(basename "$BINARY")"
+        BINARY_DIR="$(dirname "$BINARY")"
+        run mkdir -p $SYMBOL_DIR/$BINARY_DIR
+        $SYMTOOL $SRC_ROOT/$BINARY > $SYMBOL_DIR/$BINARY.sym ||
+            panic "Failed to create symbol file for $SRC_ROOT/$BINARY"
+    done
+}
+
+# Strips a library in place
+# Expects TOOLCHAIN_WRAPPER_DIR to be valid (set by builder_prepare_for_host*)
+# Panics if not found
+# $1: Target root directory
+# $2+: List of lib paths relative to $1
+strip_libs () {
+    local DEST_ROOT="$1"
+    shift
+    local LIBS="$@"
+    if [ -z $TOOLCHAIN_WRAPPER_DIR ]; then
+        panic "TOOLCHAIN_WRAPPER_DIR not set, was builder_prepare_for_host called?"
+    fi
+    if [ ! -d $TOOLCHAIN_WRAPPER_DIR ]; then
+        panic "TOOLCHAIN_WRAPPER_DIR is not a directory"
+    fi
+    for LIB in $LIBS; do
+        if [ "$(get_build_os)" = "darwin" ]; then
+            run strip -S $DEST_ROOT/$LIB || panic "Could not strip $DEST_ROOT"
+        else
+            local OBJCOPY="$TOOLCHAIN_WRAPPER_DIR"/$(builder_gnu_config_host_prefix)objcopy
+            if [ ! -f "$OBJCOPY" ]; then
+                panic "Could not find objcopy at $OBJCOPY"
+            fi
+            run "$OBJCOPY" --strip-unneeded $DEST_ROOT/$LIB || \
+                panic "Could not strip $DEST_ROOT/$LIB"
+        fi
+    done
+}
