@@ -1,55 +1,62 @@
+# Declarations related to the AndroidEmu library, which group Android-specific
+# emulation features that are used by both QEMU1 and QEMU2 engines.
+#
+# This file defines the following important modules:
+#
+#  - android-emu-base
+#  - android-emu
+#  - android-emu-qemu1
+#  - android-emu-qemu2
+#
+# See below for their documentation. Moreoever, it defines the following
+# variables that can be used outside of this script:
+#
+#   ANDROID_EMU_INCLUDES
+#       List of include paths to be used by any module that depends on
+#       AndroidEmu
+#
+#   ANDROID_EMU_STATIC_LIBRARIES
+#       List of static libraries to be used by any executable that depends on
+#       AndroidEmu.
+#
+#   ANDROID_EMU_STATIC_LIBRARIES_QEMU1
+#       List of static libraries to be used by any QEMU1 executable. Includes
+#       the items of ANDROID_EMU_STATIC_LIBRARIES.
+#
+#   ANDROID_EMU_STATIC_LIBRARIES_QEMU2
+#       Same, but for QEMU2 executables.
+#
+#
+#  IMPORTANT: For now, this does not include any declaration related to the UI!
+
 ###############################################################################
 # public variables
 
-ANDROID_EMU_ROOT := $(SRC_PATH)/android
+_ANDROID_EMU_OLD_LOCAL_PATH := $(LOCAL_PATH)
+
+_ANDROID_EMU_ROOT := $(call my-dir)
 
 # all includes are like 'android/...', so we need to count on that
-ANDROID_EMU_INCLUDES := \
-    $(ANDROID_EMU_ROOT)/.. \
-
-ANDROID_EMU_STATIC_LIBRARIES_QEMU1 := \
-    android-emu-qemu1 \
-    android-emu \
-    android-emu-base \
-
-ANDROID_EMU_STATIC_LIBRARIES_QEMU2 := \
-    android-emu-qemu2 \
-    android-emu \
-    android-emu-base \
-
-# a lightweight version, without the very qemu-specific stuff
-ANDROID_EMU_BASE_STATIC_LIBRARIES_QEMU1 := \
-    android-emu-qemu1 \
-    android-emu-base \
-
-ANDROID_EMU_BASE_STATIC_LIBRARIES_QEMU2 := \
-    android-emu-qemu2 \
-    android-emu-base \
+ANDROID_EMU_INCLUDES := $(_ANDROID_EMU_ROOT)
 
 ###############################################################################
-# internal variables to build the libraries
+#
+#  android-emu-base
+#
+#  This is a static library containing all the low-level system interfaces
+#  provided by android/base/ and android/utils/. It should only depend on
+#  system headers and libraries, and nothing else (including the C++ STL).
+#
 
-ANDROID_EMU_INTERNAL_CFLAGS := \
-    $(EMULATOR_COMMON_CFLAGS) \
-    $(LIBCURL_CFLAGS) \
-    $(LIBXML2_CFLAGS) \
+$(call start-emulator-library,android-emu-base)
 
-ANDROID_EMU_INTERNAL_QEMU2_CFLAGS := \
-    -DANDROID_QEMU2_SPECIFIC \
-    -DANDROID_QEMU2_INTEGRATED_BUILD \
+LOCAL_CFLAGS := $(EMULATOR_COMMON_CFLAGS)
 
-ANDROID_EMU_INTERNAL_INCLUDES := \
-    $(OBJS_DIR)/build \
+LOCAL_C_INCLUDES := \
+    $(EMULATOR_COMMON_INCLUDES) \
     $(ANDROID_EMU_INCLUDES) \
-    $(BREAKPAD_CLIENT_INCLUDES) \
-    $(LIBCURL_INCLUDES) \
-    $(LIBJPEG_INCLUDES) \
-    $(LIBXML2_INCLUDES) \
-    $(LIBEXT4_UTILS_INCLUDES) \
-    $(LIBPNG_INCLUDES) \
-    $(ZLIB_INCLUDES) \
 
-ANDROID_EMU_BASE_SOURCES := \
+LOCAL_SRC_FILES := \
     android/base/async/AsyncReader.cpp \
     android/base/async/AsyncWriter.cpp \
     android/base/async/Looper.cpp \
@@ -80,17 +87,6 @@ ANDROID_EMU_BASE_SOURCES := \
     android/base/threads/ThreadStore.cpp \
     android/base/Uri.cpp \
     android/base/Version.cpp \
-    android/camera/camera-service.c \
-    android/camera/camera-format-converters.c \
-    android/filesystems/ext4_resize.cpp \
-    android/filesystems/ext4_utils.cpp \
-    android/filesystems/fstab_parser.cpp \
-    android/filesystems/internal/PartitionConfigBackend.cpp \
-    android/filesystems/partition_config.cpp \
-    android/filesystems/partition_types.cpp \
-    android/filesystems/ramdisk_extractor.cpp \
-    android/multitouch-port.c \
-    android/multitouch-screen.c \
     android/utils/aconfig-file.c \
     android/utils/assert.c \
     android/utils/async.cpp \
@@ -111,7 +107,6 @@ ANDROID_EMU_BASE_SOURCES := \
     android/utils/ini.cpp \
     android/utils/intmap.c \
     android/utils/ipaddr.cpp \
-    android/utils/jpeg-compress.c \
     android/utils/lineinput.c \
     android/utils/looper.cpp \
     android/utils/mapfile.c \
@@ -131,49 +126,83 @@ ANDROID_EMU_BASE_SOURCES := \
     android/utils/system_wrapper.cpp \
     android/utils/tempfile.c \
     android/utils/timezone.c \
-    android/utils/uncompress.cpp \
     android/utils/uri.cpp \
     android/utils/utf8_utils.cpp \
     android/utils/vector.c \
     android/utils/x86_cpuid.cpp \
 
-# Platform-specific camera capture
-ifeq ($(HOST_OS),linux)
-    ANDROID_EMU_BASE_SOURCES += \
-        android/camera/camera-capture-linux.c
-endif
-
-ifeq ($(HOST_OS),darwin)
-    ANDROID_EMU_BASE_SOURCES += \
-        android/camera/camera-capture-mac.m
-endif
-
 ifeq ($(HOST_OS),windows)
-    ANDROID_EMU_BASE_SOURCES += \
-        android/camera/camera-capture-windows.cpp
-endif
+LOCAL_SRC_FILES += \
+    android/base/synchronization/ConditionVariable_win32.cpp \
+    android/base/threads/Thread_win32.cpp \
+    android/base/system/Win32Utils.cpp \
+    android/base/system/Win32UnicodeString.cpp \
+    android/utils/win32_cmdline_quote.cpp \
 
-ifeq ($(HOST_OS),windows)
-    ANDROID_EMU_BASE_SOURCES += \
-        android/base/synchronization/ConditionVariable_win32.cpp \
-        android/base/threads/Thread_win32.cpp \
-        android/base/system/Win32Utils.cpp \
-        android/base/system/Win32UnicodeString.cpp \
-        android/utils/win32_cmdline_quote.cpp
 else
-    ANDROID_EMU_BASE_SOURCES += \
-        android/base/threads/Thread_pthread.cpp
+LOCAL_SRC_FILES += \
+    android/base/threads/Thread_pthread.cpp \
+
 endif
 
-ANDROID_EMU_SOURCES := \
+$(call end-emulator-library)
+
+###############################################################################
+#
+#  android-emu
+#
+#  This is a static library containing all the Android emulation features
+#  shared with both the QEMU1 and QEMU2 engines. It should only depend on
+#  android-emu-base, a few third-party prebuilt libraries (e.g. libxml2) and
+#  system headers and libraries.
+#
+#  NOTE: This does not include UI code, and comes with its own set of unit
+#        tests.
+#
+
+# Common CFLAGS for android-emu related sources.
+_ANDROID_EMU_INTERNAL_CFLAGS := \
+    $(EMULATOR_COMMON_CFLAGS) \
+    $(LIBCURL_CFLAGS) \
+    $(LIBXML2_CFLAGS) \
+
+# Common INCLUDES for android-emu related sources.
+_ANDROID_EMU_INTERNAL_INCLUDES := \
+    $(EMULATOR_COMMON_INCLUDES) \
+    $(ANDROID_EMU_INCLUDES) \
+    $(BREAKPAD_CLIENT_INCLUDES) \
+    $(LIBCURL_INCLUDES) \
+    $(LIBJPEG_INCLUDES) \
+    $(LIBXML2_INCLUDES) \
+    $(LIBEXT4_UTILS_INCLUDES) \
+    $(LIBPNG_INCLUDES) \
+    $(ZLIB_INCLUDES) \
+
+
+$(call start-emulator-library,android-emu)
+
+LOCAL_CFLAGS := $(_ANDROID_EMU_INTERNAL_CFLAGS)
+
+LOCAL_C_INCLUDES := $(_ANDROID_EMU_INTERNAL_INCLUDES)
+
+LOCAL_SRC_FILES := \
     android/adb-qemud.c \
     android/adb-server.c \
+    android/android-constants.c \
+    android/avd/hw-config.c \
+    android/avd/info.c \
+    android/avd/scanner.c \
+    android/avd/util.c \
     android/async-console.c \
     android/async-socket.c \
     android/async-socket-connector.c \
     android/async-utils.c \
     android/boot-properties.c \
+    android/camera/camera-service.c \
+    android/camera/camera-format-converters.c \
+    android/cmdline-option.c \
     android/console.c \
+    android/cpu_accelerator.cpp \
     android/crashreport/CrashSystem.cpp \
     android/crashreport/CrashReporter_common.cpp \
     android/crashreport/CrashReporter_$(HOST_OS).cpp \
@@ -182,7 +211,10 @@ ANDROID_EMU_SOURCES := \
     android/emulation/android_pipe_throttle.c \
     android/emulation/android_pipe_zero.c \
     android/emulation/android_qemud.cpp \
+    android/emulation/bufprint_config_dirs.cpp \
+    android/emulation/ConfigDirs.cpp \
     android/emulation/control/LineConsumer.cpp \
+    android/emulation/CpuAccelerator.cpp \
     android/emulation/nand_limits.c \
     android/emulation/qemud/android_qemud_client.cpp \
     android/emulation/qemud/android_qemud_multiplexer.cpp \
@@ -191,29 +223,45 @@ ANDROID_EMU_SOURCES := \
     android/emulation/qemud/android_qemud_sink.cpp \
     android/emulation/serial_line.cpp \
     android/emulator-window.c \
+    android/filesystems/ext4_resize.cpp \
+    android/filesystems/ext4_utils.cpp \
+    android/filesystems/fstab_parser.cpp \
+    android/filesystems/internal/PartitionConfigBackend.cpp \
+    android/filesystems/partition_config.cpp \
+    android/filesystems/partition_types.cpp \
+    android/filesystems/ramdisk_extractor.cpp \
     android/framebuffer.c \
     android/gps.c \
     android/gpu_frame.cpp \
+    android/help.c \
     android/hw-control.c \
     android/hw-events.c \
     android/hw-fingerprint.c \
     android/hw-pipe-net.c \
     android/hw-qemud.cpp \
     android/hw-sensors.c \
+    android/jpeg-compress.c \
+    android/kernel/kernel_utils.cpp \
     android/loadpng.c \
     android/main-common-ui.c \
     android/metrics/metrics_reporter.cpp \
     android/metrics/metrics_reporter_ga.cpp \
     android/metrics/metrics_reporter_toolbar.cpp \
     android/metrics/StudioHelper.cpp \
-    android/opengles.c \
+    android/multitouch-port.c \
+    android/multitouch-screen.c \
+    android/opengl/EmuglBackendList.cpp \
+    android/opengl/EmuglBackendScanner.cpp \
+    android/opengl/emugl_config.cpp \
     android/opengl/GpuFrameBridge.cpp \
+    android/opengles.c \
     android/proxy/proxy_common.c \
     android/proxy/proxy_http.c \
     android/proxy/proxy_http_connector.c \
     android/proxy/proxy_http_rewriter.c \
     android/qemu-tcpdump.c \
     android/qt/qt_path.cpp \
+    android/qt/qt_setup.cpp \
     android/resource.c \
     android/sdk-controller-socket.c \
     android/sensors-port.c \
@@ -228,73 +276,224 @@ ANDROID_EMU_SOURCES := \
     android/telephony/sim_card.c \
     android/telephony/sms.c \
     android/telephony/sysdeps.c \
+    android/uncompress.cpp \
     android/update-check/UpdateChecker.cpp \
     android/update-check/VersionExtractor.cpp \
     android/user-config.c \
+    android/wear-agent/android_wear_agent.cpp \
+    android/wear-agent/WearAgent.cpp \
+    android/wear-agent/PairUpWearPhone.cpp \
 
-ANDROID_EMU_DEPENDENT_SOURCES := \
-    android/android-constants.c \
-    android/cmdline-option.c \
-    android/cpu_accelerator.cpp \
-    android/help.c \
-    android/main-common.c \
-    android/qemu-setup.c \
-    android/avd/hw-config.c \
-    android/avd/info.c \
-    android/avd/scanner.c \
-    android/avd/util.c \
-    android/emulation/android_pipe.c \
-    android/emulation/bufprint_config_dirs.cpp \
-    android/emulation/ConfigDirs.cpp \
-    android/emulation/CpuAccelerator.cpp \
-    android/kernel/kernel_utils.cpp \
-    android/opengl/EmuglBackendList.cpp \
-    android/opengl/EmuglBackendScanner.cpp \
-    android/opengl/emugl_config.cpp \
+# Platform-specific camera capture
+ifeq ($(HOST_OS),linux)
+    LOCAL_SRC_FILES += \
+        android/camera/camera-capture-linux.c
+endif
 
-ifeq (windows,$(HOST_OS))
-ANDROID_EMU_DEPENDENT_SOURCES += \
-    android/windows_installer.cpp \
+ifeq ($(HOST_OS),darwin)
+    LOCAL_SRC_FILES += \
+        android/camera/camera-capture-mac.m
+endif
+
+ifeq ($(HOST_OS),windows)
+    LOCAL_SRC_FILES += \
+        android/camera/camera-capture-windows.cpp \
+        android/windows_installer.cpp \
 
 endif
 
+$(call gen-hw-config-defs)
+$(call end-emulator-library)
+
+# List of static libraries that anything that depends on android-emu
+# should use.
+ANDROID_EMU_STATIC_LIBRARIES := \
+    android-emu \
+    android-emu-base \
+    $(LIBCURL_STATIC_LIBRARIES) \
+    $(LIBXML2_STATIC_LIBRARIES) \
+    $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
+    emulator-libext4_utils \
+    emulator-libsparse \
+    emulator-libselinux \
+    emulator-libjpeg \
+    emulator-libpng \
+    emulator-zlib \
+
+ANDROID_EMU_LDLIBS := \
+    $(LIBCURL_LDLIBS) \
+    $(BREAKPAD_CLIENT_LDLIBS) \
+
 ###############################################################################
-# now build it
+#
+#  android-emu unit tests
+#
+#
 
-ANDROID_EMU_OLD_LOCAL_PATH := $(LOCAL_PATH)
-LOCAL_PATH := $(SRC_PATH)
+$(call start-emulator-program, android_emu$(HOST_SUFFIX)_unittests)
 
-$(call start-emulator-library,android-emu-base)
-    LOCAL_SRC_FILES := $(ANDROID_EMU_BASE_SOURCES)
-    LOCAL_CFLAGS := $(ANDROID_EMU_INTERNAL_CFLAGS)
-    LOCAL_C_INCLUDES := $(ANDROID_EMU_INTERNAL_INCLUDES)
-    $(call gen-hw-config-defs)
-$(call end-emulator-library)
+LOCAL_C_INCLUDES += \
+    $(ANDROID_EMU_INCLUDES) \
+    $(EMULATOR_GTEST_INCLUDES) \
 
-$(call start-emulator-library,android-emu)
-    LOCAL_SRC_FILES := $(ANDROID_EMU_SOURCES)
-    LOCAL_CFLAGS := $(ANDROID_EMU_INTERNAL_CFLAGS)
-    LOCAL_C_INCLUDES := $(ANDROID_EMU_INTERNAL_INCLUDES)
-    $(call gen-hw-config-defs)
-$(call end-emulator-library)
+LOCAL_LDLIBS += \
+    $(ANDROID_EMU_LDLIBS) \
+
+LOCAL_SRC_FILES := \
+  android/avd/util_unittest.cpp \
+  android/base/containers/HashUtils_unittest.cpp \
+  android/base/containers/PodVector_unittest.cpp \
+  android/base/containers/PointerSet_unittest.cpp \
+  android/base/containers/ScopedPointerSet_unittest.cpp \
+  android/base/containers/StringVector_unittest.cpp \
+  android/base/containers/TailQueueList_unittest.cpp \
+  android/base/EintrWrapper_unittest.cpp \
+  android/base/files/IniFile_unittest.cpp \
+  android/base/files/PathUtils_unittest.cpp \
+  android/base/files/ScopedFd_unittest.cpp \
+  android/base/files/ScopedStdioFile_unittest.cpp \
+  android/base/files/Stream_unittest.cpp \
+  android/base/Log_unittest.cpp \
+  android/base/memory/LazyInstance_unittest.cpp \
+  android/base/memory/MallocUsableSize_unittest.cpp \
+  android/base/memory/ScopedPtr_unittest.cpp \
+  android/base/memory/QSort_unittest.cpp \
+  android/base/misc/HttpUtils_unittest.cpp \
+  android/base/misc/StringUtils_unittest.cpp \
+  android/base/misc/Utf8Utils_unittest.cpp \
+  android/base/sockets/ScopedSocket_unittest.cpp \
+  android/base/sockets/SocketDrainer_unittest.cpp \
+  android/base/sockets/SocketWaiter_unittest.cpp \
+  android/base/String_unittest.cpp \
+  android/base/StringFormat_unittest.cpp \
+  android/base/StringView_unittest.cpp \
+  android/base/synchronization/ConditionVariable_unittest.cpp \
+  android/base/synchronization/Lock_unittest.cpp \
+  android/base/synchronization/MessageChannel_unittest.cpp \
+  android/base/system/System_unittest.cpp \
+  android/base/threads/FunctorThread_unittest.cpp \
+  android/base/threads/Thread_unittest.cpp \
+  android/base/threads/ThreadStore_unittest.cpp \
+  android/base/Uri_unittest.cpp \
+  android/base/Version_unittest.cpp \
+  android/emulation/bufprint_config_dirs_unittest.cpp \
+  android/emulation/ConfigDirs_unittest.cpp \
+  android/emulation/control/LineConsumer_unittest.cpp \
+  android/emulation/CpuAccelerator_unittest.cpp \
+  android/emulation/serial_line_unittest.cpp \
+  android/filesystems/ext4_utils_unittest.cpp \
+  android/filesystems/fstab_parser_unittest.cpp \
+  android/filesystems/partition_config_unittest.cpp \
+  android/filesystems/partition_types_unittest.cpp \
+  android/filesystems/ramdisk_extractor_unittest.cpp \
+  android/filesystems/testing/TestSupport.cpp \
+  android/kernel/kernel_utils_unittest.cpp \
+  android/metrics/metrics_reporter_unittest.cpp \
+  android/metrics/metrics_reporter_ga_unittest.cpp \
+  android/metrics/metrics_reporter_toolbar_unittest.cpp \
+  android/metrics/StudioHelper_unittest.cpp \
+  android/opengl/EmuglBackendList_unittest.cpp \
+  android/opengl/EmuglBackendScanner_unittest.cpp \
+  android/opengl/emugl_config_unittest.cpp \
+  android/opengl/GpuFrameBridge_unittest.cpp \
+  android/qt/qt_path_unittest.cpp \
+  android/qt/qt_setup_unittest.cpp \
+  android/telephony/gsm_unittest.cpp \
+  android/telephony/sms_unittest.cpp \
+  android/update-check/UpdateChecker_unittest.cpp \
+  android/update-check/VersionExtractor_unittest.cpp \
+  android/utils/aconfig-file_unittest.cpp \
+  android/utils/bufprint_unittest.cpp \
+  android/utils/dirscanner_unittest.cpp \
+  android/utils/eintr_wrapper_unittest.cpp \
+  android/utils/file_data_unittest.cpp \
+  android/utils/format_unittest.cpp \
+  android/utils/host_bitness_unittest.cpp \
+  android/utils/path_unittest.cpp \
+  android/utils/property_file_unittest.cpp \
+  android/utils/string_unittest.cpp \
+  android/utils/x86_cpuid_unittest.cpp \
+  android/wear-agent/PairUpWearPhone_unittest.cpp \
+  android/wear-agent/testing/WearAgentTestUtils.cpp \
+  android/wear-agent/WearAgent_unittest.cpp \
+
+ifeq (windows,$(HOST_OS))
+LOCAL_SRC_FILES += \
+  android/base/files/ScopedHandle_unittest.cpp \
+  android/base/files/ScopedRegKey_unittest.cpp \
+  android/base/system/Win32UnicodeString_unittest.cpp \
+  android/base/system/Win32Utils_unittest.cpp \
+  android/utils/win32_cmdline_quote_unittest.cpp \
+  android/windows_installer_unittest.cpp \
+
+else
+LOCAL_SRC_FILES += \
+  android/emulation/nand_limits_unittest.cpp \
+
+endif
+
+LOCAL_CFLAGS += -O0
+
+LOCAL_STATIC_LIBRARIES += \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
+    emulator-libgtest \
+
+# Link against static libstdc++ on Linux and Windows since the unit-tests
+# cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/
+$(call local-link-static-c++lib)
+
+$(call end-emulator-program)
+
+###############################################################################
+#
+#  android-emu-qemu1 and android-emu-qemu2
+#
+#  Some of the sources under android/ are logically part of AndroidEmu
+#  but cannot be part of android-emu yet due to the following reasons:
+#
+#  - They compile differently based on the ANDROID_QEMU2_SPECIFIC macro.
+#  - They depend on Android UI code that is not part of android-emu.
+#
+#  These sources are grouped into the android-emu-qemu1 and android-emu-qemu2
+#  static libraries. The plan is to remove these completely in the future.
+#
+
+# TODO(digit): main-common.c: Move non-UI dependent code to main-common-ui.c
+# TODO(digit): Remove ANDROID_QEMU2_SPECIFIC from qemu-setup.c and
+#              android_pipe.c
+_ANDROID_EMU_DEPENDENT_SOURCES := \
+    android/main-common.c \
+    android/qemu-setup.c \
+    android/emulation/android_pipe.c \
 
 $(call start-emulator-library,android-emu-qemu1)
-    LOCAL_SRC_FILES := $(ANDROID_EMU_DEPENDENT_SOURCES)
-    LOCAL_CFLAGS := $(ANDROID_EMU_INTERNAL_CFLAGS)
-    LOCAL_C_INCLUDES := $(ANDROID_EMU_INTERNAL_INCLUDES)
-    $(call gen-hw-config-defs)
+LOCAL_CFLAGS := $(_ANDROID_EMU_INTERNAL_CFLAGS)
+LOCAL_C_INCLUDES := $(_ANDROID_EMU_INTERNAL_INCLUDES)
+LOCAL_SRC_FILES := $(_ANDROID_EMU_DEPENDENT_SOURCES)
+$(call gen-hw-config-defs)
 $(call end-emulator-library)
 
 $(call start-emulator-library,android-emu-qemu2)
-    LOCAL_SRC_FILES := $(ANDROID_EMU_DEPENDENT_SOURCES)
-    LOCAL_CFLAGS := \
-        $(ANDROID_EMU_INTERNAL_CFLAGS) \
-        $(ANDROID_EMU_INTERNAL_QEMU2_CFLAGS)
-
-    LOCAL_C_INCLUDES := $(ANDROID_EMU_INTERNAL_INCLUDES)
-    $(call gen-hw-config-defs)
+LOCAL_CFLAGS := $(_ANDROID_EMU_INTERNAL_CFLAGS)
+LOCAL_CFLAGS += -DANDROID_QEMU2_SPECIFIC
+LOCAL_C_INCLUDES := $(_ANDROID_EMU_INTERNAL_INCLUDES)
+LOCAL_SRC_FILES := $(_ANDROID_EMU_DEPENDENT_SOURCES)
+$(call gen-hw-config-defs)
 $(call end-emulator-library)
 
-LOCAL_PATH := $(ANDROID_EMU_OLD_LOCAL_PATH)
+# List of static libraries that anything that depends on android-emu-qemu1
+# should use.
+ANDROID_EMU_STATIC_LIBRARIES_QEMU1 := \
+    android-emu-qemu1 \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
 
-# all done
+# List of static libraries that anything that depends on android-emu-qemu2
+# should use.
+ANDROID_EMU_STATIC_LIBRARIES_QEMU2 := \
+    android-emu-qemu2 \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
+
+
+# Done
+
+LOCAL_PATH := $(_ANDROID_EMU_OLD_LOCAL_PATH)

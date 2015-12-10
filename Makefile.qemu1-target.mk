@@ -37,8 +37,6 @@ EMULATOR_TARGET_INCLUDES := \
     $(LOCAL_PATH)/tcg/$(TCG_TARGET) \
     $(LOCAL_PATH)/slirp-android \
     $(LIBCURL_INCLUDES) \
-    $(LIBXML2_INCLUDES) \
-    $(BREAKPAD_INCLUDES) \
 
 EMULATOR_TARGET_CFLAGS := \
     -DNEED_CPU_H \
@@ -50,7 +48,6 @@ LOCAL_CFLAGS := \
     $(QEMU1_COMMON_CFLAGS) \
     $(EMULATOR_TARGET_CFLAGS) \
     $(EMULATOR_LIBUI_CFLAGS) \
-    $(ZLIB_CFLAGS) \
 
 # These are required by the TCG engine.
 LOCAL_CFLAGS += \
@@ -65,7 +62,6 @@ LOCAL_CFLAGS += \
 LOCAL_C_INCLUDES += \
     $(QEMU1_COMMON_INCLUDES) \
     $(EMULATOR_TARGET_INCLUDES) \
-    $(GLIB_INCLUDE_DIR) \
 
 LOCAL_SRC_FILES += \
     android-qemu1-glue/main.c \
@@ -238,26 +234,19 @@ $(call start-emulator-program, emulator$(HOST_SUFFIX)-$(EMULATOR_TARGET_ARCH))
 
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
-    libandroid-wear-agent \
     emulator-common \
     $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
     $(ANDROID_SKIN_STATIC_LIBRARIES) \
-    $(LIBCURL_STATIC_LIBRARIES) \
     $(EMULATOR_LIBUI_STATIC_LIBRARIES) \
-    $(LIBXML2_STATIC_LIBRARIES) \
-    $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
-    emulator-libext4_utils \
-    emulator-libsparse \
-    emulator-libselinux \
 
 LOCAL_WHOLE_STATIC_LIBRARIES := \
     emulator-libqemu \
     emulator-target-$(EMULATOR_TARGET_CPU) \
 
 LOCAL_LDLIBS := \
+    $(ANDROID_EMU_LDLIBS) \
     $(EMULATOR_LIBQEMU_LDLIBS) \
     $(EMULATOR_LIBUI_LDLIBS) \
-    $(BREAKPAD_CLIENT_LDLIBS) \
     $(CXX_STD_LIB) \
 
 LOCAL_LDFLAGS := \
