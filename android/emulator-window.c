@@ -237,7 +237,9 @@ emulator_window_setup( EmulatorWindow*  emulator )
     if (!android_hw->hw_gpu_enabled || !strcmp(android_hw->hw_gpu_mode, "guest")) {
         s_use_emugl_subwindow = 0;
     }
-
+    if (!strcmp(android_hw->hw_gpu_mode, "mesa")) {
+        s_use_emugl_subwindow = 1;
+    }
 
     if (s_use_emugl_subwindow) {
         VERBOSE_PRINT(gles, "Using EmuGL sub-window for GPU display");
