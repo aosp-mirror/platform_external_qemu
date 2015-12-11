@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e5cc3e7f_42f352ca",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-11T21:19:51Z",
+      "side": 1,
+      "message": "nit: please format the code: no space before \u0027(\u0027, add spaces around \u0027+\u003d\u0027",
+      "range": {
+        "startLine": 181,
+        "startChar": 2,
+        "endLine": 182,
+        "endChar": 27
+      },
+      "revId": "117815122584de0d7efbd87b7ee6b0f28318fcdd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6553ee27_9c423244",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-11T21:19:51Z",
+      "side": 1,
+      "message": "does it mean we use the same file for all processes? Windows won\u0027t allow to open same file in parallel",
+      "range": {
+        "startLine": 182,
+        "startChar": 27,
+        "endLine": 183,
+        "endChar": 49
+      },
+      "revId": "117815122584de0d7efbd87b7ee6b0f28318fcdd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e5cc3e7f_22172e95",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-11T21:19:51Z",
+      "side": 1,
+      "message": "please update the message",
+      "range": {
+        "startLine": 185,
+        "startChar": 25,
+        "endLine": 185,
+        "endChar": 32
+      },
+      "revId": "117815122584de0d7efbd87b7ee6b0f28318fcdd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
