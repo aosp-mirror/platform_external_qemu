@@ -30,14 +30,15 @@
 #include "android/cpu_accelerator.h"
 #include "android/opengl/emugl_config.h"
 #include "android/qt/qt_setup.h"
+#include "android/utils/adb_start_server.h"
 #include "android/utils/compiler.h"
 #include "android/utils/exec.h"
 #include "android/utils/host_bitness.h"
 #include "android/utils/panic.h"
 #include "android/utils/path.h"
+#include "android/utils/sockets.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/win32_cmdline_quote.h"
-
 
 /* Required by android/utils/debug.h */
 int android_verbose;
@@ -78,7 +79,6 @@ static void updateLibrarySearchPath(int wantedBitness);
 static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                                              const char* avdArch,
                                              const char* androidOut);
-
 #ifdef _WIN32
 static const char kExeExtension[] = ".exe";
 #else
@@ -380,6 +380,9 @@ int main(int argc, char** argv)
                                               &wantedBitness);
     }
     D("Found target-specific %d-bit emulator binary: %s\n", wantedBitness, emulatorPath);
+
+    /* start adb server on the host -- before haxm kicks in*/
+    check_and_start_adb_server(); 
 
     /* Replace it in our command-line */
     argv[0] = emulatorPath;
@@ -701,3 +704,4 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
     AFREE(kernel_file);
     return result;
 }
+

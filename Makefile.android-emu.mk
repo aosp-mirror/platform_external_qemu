@@ -94,6 +94,7 @@ ANDROID_EMU_BASE_SOURCES := \
     android/utils/aconfig-file.c \
     android/utils/assert.c \
     android/utils/async.cpp \
+    android/utils/adb_start_server.cpp \
     android/utils/bufprint.c \
     android/utils/bufprint_system.cpp \
     android/utils/cbuffer.c \
