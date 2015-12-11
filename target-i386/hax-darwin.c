@@ -22,10 +22,11 @@
 hax_fd hax_mod_open(void)
 {
     int fd = open("/dev/HAX", O_RDWR);
-
     if (fd == -1) {
         fprintf(stderr, "Failed to open the hax module\n");
     }
+
+    fcntl(fd, F_SETFD, FD_CLOEXEC);
 
     return fd;
 }
@@ -175,6 +176,8 @@ hax_fd hax_host_open_vm(struct hax_state * hax, int vm_id)
     fd = open(vm_name, O_RDWR);
     qemu_vfree(vm_name);
 
+    fcntl(fd, F_SETFD, FD_CLOEXEC);
+
     return fd;
 }
 
@@ -223,6 +226,7 @@ hax_fd hax_host_open_vcpu(int vmid, int vcpuid)
     qemu_vfree(devfs_path);
     if (fd < 0)
         fprintf(stderr, "Failed to open the vcpu devfs\n");
+    fcntl(fd, F_SETFD, FD_CLOEXEC);
     return fd;
 }
 
