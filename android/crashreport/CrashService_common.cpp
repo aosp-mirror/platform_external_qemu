@@ -178,7 +178,9 @@ std::string CrashService::getCrashDetails() const {
     }
 
     // Capture printf's from PrintProcessState to file
-    FILE* fp = tmpfile();
+    std::string detailsFile (mDumpFile);
+    detailsFile+="details";
+    FILE* fp = fopen (detailsFile.c_str(), "w+");
     if (!fp) {
         E("Couldn't open tmpfile for writing crash details\n");
         return details;
@@ -192,6 +194,7 @@ std::string CrashService::getCrashDetails() const {
     fread(&details[0], 1, details.size(), fp);
 
     fclose(fp);
+    remove(detailsFile.c_str());
 
     return details;
 }
