@@ -114,7 +114,7 @@ public:
             CloseHandle(mClientProcess);
         }
         mClientProcess = OpenProcess(SYNCHRONIZE, FALSE, clientpid);
-        return mClientProcess == nullptr;
+        return mClientProcess != nullptr;
     }
 
     bool isClientAlive() override {
