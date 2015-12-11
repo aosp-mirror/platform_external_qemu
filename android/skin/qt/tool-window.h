@@ -70,6 +70,7 @@ public:
     void runAdbInstall(const QString &path);
     void runAdbPush(const QList<QUrl> &urls);
     void runAdbShellStopAndQuit();
+    bool checkAdbServerAndError();
 
     bool handleQtKeyEvent(QKeyEvent* event);
 
@@ -130,7 +131,6 @@ private slots:
     void on_volume_up_button_pressed();
     void on_volume_up_button_released();
     void on_zoom_button_clicked();
-
     void slot_installCanceled();
     void slot_installFinished(int exitStatus);
 

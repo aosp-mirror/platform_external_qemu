@@ -373,7 +373,7 @@ int   socket_send  ( int  fd, const void*  buf, int  buflen );
 int   socket_send_oob( int  fd, const void*  buf, int  buflen );
 int   socket_sendto( int  fd, const void*  buf, int  buflen, const SockAddress*  to );
 
-int   socket_connect( int  fd, const SockAddress*  address );
+int   socket_connect( int  fd, const SockAddress*  address);
 int   socket_bind( int  fd, const SockAddress*  address );
 int   socket_get_address( int  fd, SockAddress*  address );
 int   socket_get_peer_address( int  fd, SockAddress*  address );
@@ -396,7 +396,8 @@ int  socket_pair(int  *fd1, int *fd2);
 int  socket_loopback_server( int  port, SocketType  type );
 
 /* connect to a port on the host's loopback interface */
-int  socket_loopback_client( int  port, SocketType  type );
+int  socket_loopback_client( int  port, SocketType  type);
+int  socket_loopback_client_timeout( int  port, SocketType  type, int timeoutMs);
 
 /* create a server socket listening to a Unix domain path */
 #if HAVE_UNIX_SOCKETS
