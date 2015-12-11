@@ -31,7 +31,7 @@ void ExtendedWindow::initKbdShorts() {
     if (mQtUIShortcuts) {
         for (const auto& key_sequence_and_command : *mQtUIShortcuts) {
             addShortcutsTableRow(table_widget,
-                                 key_sequence_and_command.first.toString(),
+                                 key_sequence_and_command.first.toString(QKeySequence::NativeText),
                                  getQtUICommandDescription(key_sequence_and_command.second));
         }
     }
