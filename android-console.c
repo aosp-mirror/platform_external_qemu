@@ -16,6 +16,7 @@
  */
 
 #include "android-console.h"
+#include "android/globals.h"
 #include "monitor/monitor.h"
 #include "qemu/sockets.h"
 #include "net/slirp.h"
@@ -856,7 +857,8 @@ void android_console_avd_status(Monitor* mon, const QDict* qdict) {
 }
 
 void android_console_avd_name(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: 'avd name' is currently unsupported\n");
+    monitor_printf(mon, "%s\n", android_hw->avd_name);
+    monitor_printf(mon, "OK\n");
 }
 
 void android_console_avd_snapshot(Monitor* mon, const QDict* qdict) {

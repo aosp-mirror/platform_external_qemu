@@ -5378,6 +5378,9 @@ static void monitor_event(void *opaque, int event)
         }
         mon->reset_seen = 1;
         mon_refcount++;
+#ifdef CONFIG_ANDROID
+        monitor_printf(mon, "OK\n");
+#endif
         break;
 
     case CHR_EVENT_CLOSED:
