@@ -618,11 +618,17 @@ private:
 
         void showAsFlash()
         {
-            if (mMode != OverlayMode::Hidden) return;
+            if (mMode == OverlayMode::Hidden) {
+                mMode = OverlayMode::Flash;
+                show();
+            }
+        }
 
-            mMode = OverlayMode::Flash;
-            setCursor(Qt::ArrowCursor);
-            show();
+        void hideForFlash()
+        {
+            if (mMode == OverlayMode::Flash) {
+                hide();
+            }
         }
 
         void showForMultitouch()

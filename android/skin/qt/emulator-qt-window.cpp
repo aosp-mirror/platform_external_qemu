@@ -567,7 +567,7 @@ void EmulatorQtWindow::slot_scrollRangeChanged(int min, int max)
 
 void EmulatorQtWindow::slot_animationFinished()
 {
-    mOverlay.hide();
+    mOverlay.hideForFlash();
 }
 
 void EmulatorQtWindow::slot_animationValueChanged(const QVariant &value)
@@ -821,9 +821,9 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
     if (!grab && mInZoomMode) {
         if (event->key() == Qt::Key_Control) {
             if (type == kEventKeyDown) {
-                mOverlay.showForZoom();
-            } else if (type == kEventKeyUp) {
                 mOverlay.hide();
+            } else if (type == kEventKeyUp) {
+                mOverlay.showForZoom();
             }
         }
     }
@@ -961,6 +961,8 @@ void EmulatorQtWindow::toggleZoomMode()
         mContainer.setCursor(QCursor(Qt::ArrowCursor));
         doResize(mContainer.size());
         mOverlay.hide();
+    } else {
+        mOverlay.showForZoom();
     }
 }
 
