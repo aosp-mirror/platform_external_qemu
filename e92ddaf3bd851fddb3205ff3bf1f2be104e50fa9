@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "25157684_2415b21b",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-11T22:13:01Z",
+      "side": 1,
+      "message": "Nit: Crtl+Shift+H instead of Shift+Ctrl+H for consistencies sake?",
+      "revId": "e92ddaf3bd851fddb3205ff3bf1f2be104e50fa9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
