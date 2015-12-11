@@ -30,6 +30,7 @@
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/utils/adb_start_server.h"
 #include "ui_tools.h"
 
 using namespace android::base;
@@ -267,6 +268,16 @@ QString ToolWindow::getScreenshotSaveFile()
     return QDir::toNativeSeparators(QDir(dirName).filePath(fileName));
 }
 
+bool ToolWindow::checkAdbServerAndError()
+{
+    if (!is_adb_server_alive()) {
+        showErrorDialog(tr("adb server is not running on the host; start it and try again."),
+                        tr("Adb"));
+        return false;
+    }
+    return true;
+}
+
 void ToolWindow::runAdbInstall(const QString &path)
 {
     if (mInstallProcess.state() != QProcess::NotRunning) {
@@ -279,6 +290,9 @@ void ToolWindow::runAdbInstall(const QString &path)
     // Default the -r flag to replace the current version
     // TODO: is replace the desired default behavior?
     // TODO: enable other flags? -lrstdg available
+
+    if (!checkAdbServerAndError()) return;
+
     QStringList args;
     QString command = getAdbFullPath(&args);
     if (command.isNull()) {
@@ -305,7 +319,7 @@ void ToolWindow::runAdbShellStopAndQuit()
     }
     QStringList args;
     QString command = getAdbFullPath(&args);
-    if (command.isNull()) {
+    if (command.isNull() || !is_adb_server_alive()) {
         emulator_window->queueQuitEvent();
         return;
     }
@@ -678,6 +692,7 @@ void ToolWindow::slot_pushFinished(int exitStatus)
         if (command.isNull()) {
             return;
         }
+        if (!checkAdbServerAndError()) return;
         args << "push";
         args << mFilesToPush.dequeue().toLocalFile();
         args << REMOTE_DOWNLOADS_DIR;

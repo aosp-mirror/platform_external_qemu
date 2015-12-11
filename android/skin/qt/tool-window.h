@@ -130,7 +130,7 @@ private slots:
     void on_volume_up_button_pressed();
     void on_volume_up_button_released();
     void on_zoom_button_clicked();
-
+    bool checkAdbServerAndError();
     void slot_installCanceled();
     void slot_installFinished(int exitStatus);
 
