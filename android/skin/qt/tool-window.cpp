@@ -139,7 +139,11 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
         "Ctrl+-     VOLUME_DOWN\n"
         "Ctrl+P     POWER\n"
         "Ctrl+M     MENU\n"
+#ifndef __APPLE__
         "Ctrl+H     HOME\n"
+#else
+        "Ctrl+Shift+H  HOME\n"
+#endif
         "Ctrl+O     OVERVIEW\n"
         "Ctrl+Backspace BACK\n";
 
