@@ -31,6 +31,7 @@ hax_fd hax_mod_open(void)
         return -errno;
     }
 
+    fcntl(fd, F_SETFD, FD_CLOEXEC);
     return fd;
 }
 
@@ -179,6 +180,7 @@ hax_fd hax_host_open_vm(struct hax_state *hax, int vm_id)
 
     fd = open(vm_name, O_RDWR);
     g_free(vm_name);
+    fcntl(fd, F_SETFD, FD_CLOEXEC);
 
     return fd;
 }
@@ -232,6 +234,7 @@ hax_fd hax_host_open_vcpu(int vmid, int vcpuid)
     g_free(devfs_path);
     if (fd < 0)
         dprint("Failed to open the vcpu devfs\n");
+    fcntl(fd, F_SETFD, FD_CLOEXEC);
     return fd;
 }
 
