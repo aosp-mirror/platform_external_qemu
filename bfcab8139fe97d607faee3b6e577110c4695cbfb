@@ -121,6 +121,29 @@
     },
     {
       "key": {
+        "uuid": "a5596647_2ffc2a5e",
+        "filename": "android/utils/adb_start_server.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-11T17:07:24Z",
+      "side": 1,
+      "message": "this thing is just _horrible_ on Windows, please avoid at any costs",
+      "range": {
+        "startLine": 58,
+        "startChar": 4,
+        "endLine": 58,
+        "endChar": 17
+      },
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4520aa91_18cf69ab",
         "filename": "android/utils/adb_start_server.cpp",
         "patchSetId": 6
@@ -132,6 +155,47 @@
       "writtenOn": "2015-12-11T13:39:30Z",
       "side": 1,
       "message": "do you have more information about the failure?",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e55fde25_4a750814",
+        "filename": "android/utils/adb_start_server.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-11T17:07:24Z",
+      "side": 1,
+      "message": "+1. Something strange\u0027s going on with the MacOS\nCan you give more information about your machine config?",
+      "parentUuid": "4520aa91_18cf69ab",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "454eea83_ae52565a",
+        "filename": "android/utils/adb_start_server.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-11T17:07:24Z",
+      "side": 1,
+      "message": "please don\u0027t specify constant values in their names, It actually makes constants meaningless:\n\nint i \u003d 0 is the same as int i \u003d zero\nI doubt someone would change value of zero to be 1 if you need to change the initializers. On the other hand, int i \u003d startIndex is much better - you can easily update it to be 0, 1 or 100 without breaking the common sense",
+      "range": {
+        "startLine": 65,
+        "startChar": 8,
+        "endLine": 65,
+        "endChar": 14
+      },
       "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
