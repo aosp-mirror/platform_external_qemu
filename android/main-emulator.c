@@ -264,6 +264,17 @@ int main(int argc, char** argv)
         wantedBitness = 32;
     }
 
+#if defined(__APPLE__)
+    // Not sure when the android_getHostBitness will break again
+    // but we are not shiping 32bit for OSX long time ago.
+    // https://code.google.com/p/android/issues/detail?id=196779
+    if (force_32bit) {
+        fprintf(stderr,
+"WARNING: 32-bit OSX Android emulator binaries are not supported, use 64bit.\n");
+    }
+    wantedBitness = 64;
+#endif
+
     // When running in a platform build environment, point to the output
     // directory where image partition files are located.
     const char* androidOut = NULL;
