@@ -94,6 +94,7 @@ ExtendedWindow::ExtendedWindow(
 }
 
 void ExtendedWindow::showPane(ExtendedWindowPane pane) {
+    show();
     adjustTabs(pane);
 }
 
