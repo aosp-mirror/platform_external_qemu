@@ -145,14 +145,23 @@ int main(int argc, char** argv) {
 
     InitQt(argc, argv);
 
-    if (!displayConfirmDialog(crashservice->getCrashDetails())) {
+    const std::string crashDetails (crashservice->getCrashDetails());
+
+    if (crashDetails.empty()) {
+        E("Crash details could not be processed, skipping upload\n");
         return 1;
     }
+
+    if (!displayConfirmDialog(crashDetails)) {
+        return 1;
+    }
+
     if (!crashservice->uploadCrash(
                 ::android::crashreport::CrashSystem::get()->getCrashURL())) {
         E("Crash Report could not be uploaded\n");
         return 1;
     }
+
     D("Crash Report %s submitted\n", crashservice->getReportId().c_str());
     return 0;
 }
