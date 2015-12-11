@@ -212,12 +212,9 @@ const std::string& CrashSystem::getCrashServicePath() {
                 ::android::base::System::get()->getLauncherDirectory().c_str());
         mCrashServicePath += System::kDirSeparator;
         mCrashServicePath += "emulator";
-#ifndef _WIN32
-        // On Win32, only 32 bit binaries shipped.
         if (::android::base::System::get()->getHostBitness() == 64) {
             mCrashServicePath += "64";
         }
-#endif
         mCrashServicePath += "-crash-service";
 #ifdef _WIN32
         mCrashServicePath += ".exe";
