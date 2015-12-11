@@ -10,14 +10,6 @@
 # of these components.
 #
 
-##############################################################################
-##############################################################################
-###
-###  emulator-common: LIBRARY OF COMMON FUNCTIONS
-###
-###  THESE ARE POTENTIALLY USED BY ALL COMPONENTS
-###
-
 QEMU1_COMMON_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
 
@@ -34,54 +26,6 @@ QEMU1_COMMON_INCLUDES += $(ZLIB_INCLUDES)
 
 # GLib sources
 QEMU1_COMMON_INCLUDES += $(MINIGLIB_INCLUDES)
-
-##############################################################################
-##############################################################################
-###
-###  emulator-libui: LIBRARY OF UI-RELATED FUNCTIONS
-###
-###  THESE ARE USED BY 'emulator-ui' AND THE STANDALONE PROGRAMS
-###
-
-EMULATOR_LIBUI_INCLUDES :=
-EMULATOR_LIBUI_LDLIBS :=
-EMULATOR_LIBUI_LDFLAGS :=
-EMULATOR_LIBUI_STATIC_LIBRARIES :=
-
-###########################################################################
-# Qt-related definitions
-#
-EMULATOR_LIBUI_INCLUDES += $(QT_INCLUDES)
-EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
-EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
-
-# the skin support sources
-#
-include $(LOCAL_PATH)/android/skin/sources.mk
-
-$(call start-emulator-library, emulator-libui)
-
-LOCAL_CFLAGS += \
-    $(EMULATOR_COMMON_CFLAGS) \
-    $(ANDROID_SKIN_CFLAGS) \
-    $(LIBXML2_CFLAGS) \
-
-LOCAL_C_INCLUDES := \
-    $(EMULATOR_COMMON_INCLUDES) \
-    $(EMULATOR_LIBUI_INCLUDES) \
-
-LOCAL_SRC_FILES += \
-    $(ANDROID_SKIN_SOURCES) \
-    android/gpu_frame.cpp \
-    android/emulator-window.c \
-    android/resource.c \
-    android/user-config.c \
-
-LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
-LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
-LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES)
-$(call gen-hw-config-defs)
-$(call end-emulator-library)
 
 ##############################################################################
 ##############################################################################

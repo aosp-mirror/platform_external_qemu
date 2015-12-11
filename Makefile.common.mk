@@ -157,8 +157,6 @@ endif  # HOST_BITS == EMULATOR_PROGRAM_BITNESS
 
 include $(LOCAL_PATH)/Makefile.crash-service.mk
 
-include $(LOCAL_PATH)/Makefile.tests.mk
-
 ##############################################################################
 ##############################################################################
 ###

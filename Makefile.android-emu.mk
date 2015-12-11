@@ -508,6 +508,79 @@ ANDROID_EMU_STATIC_LIBRARIES_QEMU2 := \
     android-emu-qemu2 \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
 
+##############################################################################
+#
+#  emulator-libui
+#
+#  This is the library that implements the emulator's UI on top of
+#  android-emu. Note that it depends on interfaces that must be implemented
+#  by the engine-specific glue code. As such, the code cannot be unit-tested
+#  for now.
+#
+EMULATOR_LIBUI_INCLUDES :=
+EMULATOR_LIBUI_LDLIBS :=
+EMULATOR_LIBUI_LDFLAGS :=
+EMULATOR_LIBUI_STATIC_LIBRARIES :=
+
+EMULATOR_LIBUI_INCLUDES += $(QT_INCLUDES)
+EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
+EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
+
+# The skin support sources
+include $(LOCAL_PATH)/android/skin/sources.mk
+
+$(call start-emulator-library, emulator-libui)
+
+LOCAL_CFLAGS += \
+    $(EMULATOR_COMMON_CFLAGS) \
+    $(ANDROID_SKIN_CFLAGS) \
+    $(LIBXML2_CFLAGS) \
+
+LOCAL_C_INCLUDES := \
+    $(EMULATOR_COMMON_INCLUDES) \
+    $(EMULATOR_LIBUI_INCLUDES) \
+
+LOCAL_SRC_FILES += \
+    $(ANDROID_SKIN_SOURCES) \
+    android/gpu_frame.cpp \
+    android/emulator-window.c \
+    android/resource.c \
+    android/user-config.c \
+
+LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
+LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
+LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES)
+$(call gen-hw-config-defs)
+$(call end-emulator-library)
+
+# emulator-libui unit tests
+
+$(call start-emulator-program, emulator$(HOST_SUFFIX)_libui_unittests)
+
+LOCAL_C_INCLUDES += \
+    $(ANDROID_EMU_INCLUDES) \
+    $(EMULATOR_GTEST_INCLUDES) \
+
+LOCAL_SRC_FILES := \
+    android/skin/keycode_unittest.cpp \
+    android/skin/keycode-buffer_unittest.cpp \
+    android/skin/rect_unittest.cpp \
+    android/skin/region_unittest.cpp \
+
+LOCAL_C_INCLUDES += \
+    $(LIBXML2_INCLUDES) \
+
+LOCAL_CFLAGS += -O0
+LOCAL_STATIC_LIBRARIES += \
+    emulator-libui \
+    emulator-libgtest \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
+
+# Link against static libstdc++ on Linux and Windows since the unit-tests
+# cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/
+$(call local-link-static-c++lib)
+
+$(call end-emulator-program)
 
 # Done
 
