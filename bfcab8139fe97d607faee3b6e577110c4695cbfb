@@ -1,0 +1,293 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2506560b_7fa64b87",
+        "filename": "android/main-emulator.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "whitespace.",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4520aa91_38ca259b",
+        "filename": "android/utils/adb_start_server.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "nit: Please add a few empty lines here and after the using namespace ...",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "45c18a18_cd34a921",
+        "filename": "android/utils/adb_start_server.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "nit: extra spaces in parens. Use \u0027git clang-format\u0027 :)\n\n(Yes a lot of old code uses this style, but we prefer the new one now :-))",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "251f3657_d781be6c",
+        "filename": "android/utils/adb_start_server.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "nit: Since it\u0027s a port number, you probably want to check that |port \u003e 0 \u0026\u0026 port \u003c 65536|. To be more correct, read a long integer first, and compare it to these values, then cast it to an int.",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2506560b_3ff7a37f",
+        "filename": "android/utils/adb_start_server.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "prefer derror() to report errors, this will make it easier to filter them (e.g. from Studio or something else) in the future.",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0576b2c5_33702873",
+        "filename": "android/utils/adb_start_server.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "since this is a C++ file, for internal functions, prefer the C++ naming conventions for functions, i.e. smallCamelCase()",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0576b2c5_53712479",
+        "filename": "android/utils/adb_start_server.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "why does this work, instead of push_back(String(\"-P\")) ?",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4520aa91_18cf69ab",
+        "filename": "android/utils/adb_start_server.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "do you have more information about the failure?",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4520aa91_d8d0d147",
+        "filename": "android/utils/adb_start_server.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5f24653_a35164e1",
+        "filename": "android/utils/adb_start_server.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "Please don\u0027t put this under android/utils/, this directory should only contain headers/sources for basic utilities, i.e. related to interfacing with the platform / host system.\n\nYou could place that under android/emulation/ instead.",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e5d27ee6_72479855",
+        "filename": "android/utils/adb_start_server.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "I would recommend using prefixed-named like:\n\n  android_adb_is_server_alive();\n  android_adb_check_and_start_server();\n\nnit: Use (void) instead of () for the declaration of C functions that don\u0027t take a parameter. Otherwise a call with an int parameter will be accepted by the compiler due to legacy C compilation rules :-/\n\nnit: prefer returning bool instead of int to indicate success (requires #include \u003cstdbool.h\u003e)",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "65c68e32_0ede2bfd",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1017,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "make this static?",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0576b2c5_f381506c",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1033,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "I suggest avoiding re-implementing this here. Use an IOLooper instead (see android/utils/iolooper.h)",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "65c68e32_2ee3e7cb",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1093,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "bug: That\u0027s actually incorrect, a timeout of zero is not what you want here, it will return immediately if the connection doesn\u0027t happen immediately, which is possible, even on localhost!!\n\nWorse, this function can be used from a non-blocking socket (where the caller expects to handle the failures / wait itself). This call will reset it to blocking on return!\n\nYou might want to use negative timeout values, or INT_MAX instead to indicate waiting / blocking for the connect, and treat that differently in connect_with_timeout() !!",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5701ac6_f9d05747",
+        "filename": "android/utils/sockets.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "nit: probably not necessary :)",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "65c68e32_6ed9ef13",
+        "filename": "android/utils/sockets.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "same here.",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5f24653_8388a09c",
+        "filename": "android/utils/sockets.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:39:30Z",
+      "side": 1,
+      "message": "needs a comment explaining what it does.",
+      "revId": "bfcab8139fe97d607faee3b6e577110c4695cbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
