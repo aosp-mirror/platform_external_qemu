@@ -16,6 +16,24 @@
       "revId": "e363961a989fdb5cdf3c1a173cc0324727dfd23b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25157684_c7b660fc",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-11T23:13:11Z",
+      "side": 1,
+      "message": "It\u0027s a bug I didn\u0027t catch because I was testing on OSX... Thanks for noticing!",
+      "parentUuid": "85d9c240_bf827726",
+      "revId": "e363961a989fdb5cdf3c1a173cc0324727dfd23b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
