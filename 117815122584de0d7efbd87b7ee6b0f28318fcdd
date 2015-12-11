@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e5cc3e7f_e204665d",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-11T22:39:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e5cc3e7f_42f352ca",
+      "range": {
+        "startLine": 181,
+        "startChar": 2,
+        "endLine": 182,
+        "endChar": 27
+      },
+      "revId": "117815122584de0d7efbd87b7ee6b0f28318fcdd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6553ee27_9c423244",
         "filename": "android/crashreport/CrashService_common.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "e5cc3e7f_22380e1d",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-11T22:39:23Z",
+      "side": 1,
+      "message": "No, each process that crashes will create a unique crash dump file.  I am appending to that unique crash dump file name.",
+      "parentUuid": "6553ee27_9c423244",
+      "range": {
+        "startLine": 182,
+        "startChar": 27,
+        "endLine": 183,
+        "endChar": 49
+      },
+      "revId": "117815122584de0d7efbd87b7ee6b0f28318fcdd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e5cc3e7f_22172e95",
         "filename": "android/crashreport/CrashService_common.cpp",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2015-12-11T21:19:51Z",
       "side": 1,
       "message": "please update the message",
+      "range": {
+        "startLine": 185,
+        "startChar": 25,
+        "endLine": 185,
+        "endChar": 32
+      },
+      "revId": "117815122584de0d7efbd87b7ee6b0f28318fcdd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "85d9c240_5fa6cbd4",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-11T22:39:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e5cc3e7f_22172e95",
       "range": {
         "startLine": 185,
         "startChar": 25,
