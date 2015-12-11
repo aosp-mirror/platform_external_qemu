@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a5f24653_039c90d8",
+        "filename": "android/crashreport/CrashSystem.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-11T13:41:14Z",
+      "side": 1,
+      "message": "why is this true? We should also ship 64-bit binaries on Windows, we need them for QEMU2",
+      "revId": "978fafdaf1d74c98051e2df0a6f5185100d3e59e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
