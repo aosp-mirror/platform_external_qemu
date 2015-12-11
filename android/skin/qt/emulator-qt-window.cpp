@@ -581,10 +581,9 @@ void EmulatorQtWindow::screenshot()
 
     QStringList args;
     QString command = tool_window->getAdbFullPath(&args);
-    if (command.isNull()) {
+    if (command.isNull() || !tool_window->checkAdbServerAndError()) {
         return;
     }
-
     // Add the arguments
     args << "shell";                // Running a shell command
     args << "screencap";            // Take a screen capture
@@ -614,7 +613,7 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
         // Pull the image from its remote location to the desired location
         QStringList args;
         QString command = tool_window->getAdbFullPath(&args);
-        if (command.isNull()) {
+        if (command.isNull() || !tool_window->checkAdbServerAndError()) {
             return;
         }
 
