@@ -1014,18 +1014,69 @@ socket_recvfrom(int  fd, void*  buf, int  len, SockAddress*  from)
     return ret;
 }
 
+int connect_with_timeout(int socket, const struct sockaddr* address, socklen_t address_len, int timeoutMs)
+{
+    int res;
+    socklen_t lon;
+    fd_set myset;
+    int valopt;
+    struct timeval tv;
+    socket_set_nonblock(socket);
+    res = connect(socket, address, address_len);
+    if (res < 0) {
+        if (errno == EINPROGRESS) {
+            do {
+                tv.tv_sec = 0;
+                tv.tv_usec = timeoutMs * 1000;
+                FD_ZERO(&myset);
+                FD_SET(socket, &myset);
+                res = select(socket+1, NULL, &myset, NULL, &tv);
+                if (res < 0 && errno != EINTR) {
+                    D("Error connecting %d - %s\n", errno, strerror(errno));
+                    return -1;
+                } else if (res > 0) {
+                    lon = sizeof(int);
+                    if (getsockopt(socket, SOL_SOCKET, SO_ERROR, (void*)(&valopt), &lon) < 0) {
+                        D("Error in getsockopt() %d - %s\n", errno, strerror(errno));
+                        return -1;
+                    }
+                    if (valopt) {
+                        D("Error in delayed connection() %d - %s\n", valopt, strerror(valopt));
+                            return -1;
+                    }
+                    break;
+                } else {
+                    D("Timeout in select() - Cancelling!\n");
+                    break;
+                }
+            } while (1);
+        } else {
+            D("Error connecting %d - %s\n", errno, strerror(errno));
+            return -1;
+        }
+    }
+    // set block again
+    socket_set_nonblock(socket);
+    return 0;
+}
+
 int
-socket_connect_no_sigalrm(int socket, const struct sockaddr *address, socklen_t address_len)
+socket_connect_no_sigalrm(int socket, const struct sockaddr *address, socklen_t address_len,
+        int timeoutMs)
 {
     int ret;
     BEGIN_NOSIGALRM
-    ret = connect(socket, address, address_len);
+    if (timeoutMs <= 0) {
+        ret = connect(socket, address, address_len);
+    } else {
+        ret = connect_with_timeout(socket, address, address_len, timeoutMs);
+    }
     END_NOSIGALRM
     return ret;
 }
 
-int
-socket_connect( int  fd, const SockAddress*  address )
+static int
+socket_connect_timeout( int  fd, const SockAddress*  address, int timeoutMs)
 {
     sockaddr_storage  addr;
     socklen_t         addrlen;
@@ -1033,7 +1084,13 @@ socket_connect( int  fd, const SockAddress*  address )
     if (sock_address_to_bsd(address, &addr, &addrlen) < 0)
         return -1;
 
-    SOCKET_CALL(socket_connect_no_sigalrm(fd,addr.sa,addrlen));
+    SOCKET_CALL(socket_connect_no_sigalrm(fd,addr.sa, addrlen, timeoutMs));
+}
+
+int
+socket_connect( int  fd, const SockAddress*  address)
+{
+    return socket_connect_timeout(fd, address, 0);
 }
 
 int
@@ -1279,9 +1336,9 @@ FAIL:
 
 
 static int
-socket_connect_client( int  s, const SockAddress*  to )
+socket_connect_client( int  s, const SockAddress*  to, int timeoutMs)
 {
-    if (socket_connect(s, to) < 0) {
+    if (socket_connect_timeout(s, to, timeoutMs) < 0) {
         D( "could not connect client socket to %s: %s\n",
            sock_address_to_string(to), errno_str );
         socket_close(s);
@@ -1309,14 +1366,14 @@ socket_in_server( int  address, int  port, SocketType  type )
 
 
 static int
-socket_in_client( SockAddress*  to, SocketType  type )
+socket_in_client( SockAddress*  to, SocketType  type, int timeoutMs)
 {
     int  s;
 
     s = socket_create_inet( type );
     if (s < 0) return -1;
 
-    return socket_connect_client( s, to );
+    return socket_connect_client( s, to, timeoutMs);
 }
 
 
@@ -1327,14 +1384,19 @@ socket_loopback_server( int  port, SocketType  type )
 }
 
 int
-socket_loopback_client( int  port, SocketType  type )
+socket_loopback_client_timeout( int  port, SocketType  type, int timeoutMs)
 {
     SockAddress  addr;
 
     sock_address_init_inet( &addr, SOCK_ADDRESS_INET_LOOPBACK, port );
-    return socket_in_client( &addr, type );
+    return socket_in_client( &addr, type, timeoutMs);
 }
 
+int
+socket_loopback_client( int  port, SocketType  type)
+{
+    return socket_loopback_client_timeout( port, type, 0);
+}
 
 int
 socket_network_client( const char*  host, int  port, SocketType  type )
@@ -1344,7 +1406,7 @@ socket_network_client( const char*  host, int  port, SocketType  type )
     if (sock_address_init_resolve( &addr, host, port, 0) < 0)
         return -1;
 
-    return socket_in_client( &addr, type );
+    return socket_in_client( &addr, type, 0);
 }
 
 
@@ -1406,7 +1468,7 @@ socket_unix_client( const char*  name, SocketType  type )
 
     sock_address_init_unix( &addr, name );
 
-    ret =  socket_connect_client( s, &addr );
+    ret =  socket_connect_client( s, &addr, 0);
 
     sock_address_done( &addr );
     return ret;
