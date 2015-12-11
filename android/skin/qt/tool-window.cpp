@@ -117,6 +117,11 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
         "Ctrl+Alt+V SHOW_PANE_VIRTSENSORS\n"
         "Ctrl+Alt+D SHOW_PANE_DPAD\n"
         "Ctrl+Alt+S SHOW_PANE_SETTINGS\n"
+#ifdef __APPLE__
+        "Ctrl+/     SHOW_PANE_HELP\n"
+#else
+        "F1         SHOW_PANE_HELP\n"
+#endif
         "Ctrl+S     TAKE_SCREENSHOT\n"
         "Ctrl+Z     ENTER_ZOOM\n"
 #ifdef __APPLE__
@@ -377,6 +382,10 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
             showOrRaiseExtendedWindow(PANE_IDX_SETTINGS);
         }
         break;
+    case QtUICommand::SHOW_PANE_HELP:
+        if (down) {
+            showOrRaiseExtendedWindow(PANE_IDX_HELP);
+        }
     case QtUICommand::TAKE_SCREENSHOT:
         if (down) {
             emulator_window->screenshot();
@@ -609,9 +618,9 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
 
     extendedWindow = new ExtendedWindow(emulator_window, this, uiEmuAgent, &mShortcutKeyStore);
     extendedWindow->show();
-    extendedWindow->showPane(pane);
     // completeInitialization() must be called AFTER show()
     extendedWindow->completeInitialization();
+    extendedWindow->showPane(pane);
     extendedWindow->raise();
 }
 
