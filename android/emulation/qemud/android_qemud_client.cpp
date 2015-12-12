@@ -18,6 +18,7 @@
 
 #include <errno.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 
 QemudClient* qemud_client_new(QemudService* service,
