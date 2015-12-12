@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e59a7e77_12ee0ce5",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-12T23:13:43Z",
+      "side": 0,
+      "message": "seriously?, oh god! Thanks for this fix",
+      "revId": "123edb6ce39fff91d949159464a1c2b6d2eea3a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
