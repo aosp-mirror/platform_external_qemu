@@ -17,6 +17,7 @@
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
+#include "android/aeb.h"
 #include "android/proxy/proxy_http.h"
 #include "android/utils/debug.h"
 #include "android/utils/ipaddr.h"
@@ -472,4 +473,6 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
 
     /* initilize fingperprint here */
     android_hw_fingerprint_init();
+
+    android_aeb_init();
 }
