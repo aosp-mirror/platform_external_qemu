@@ -143,6 +143,9 @@ sdk {
             builtBy buildWindowsEmulator
         }
 
+        item("$buildWindowsEmulator.output/emulator64-crash-service.exe") {
+            builtBy buildWindowsEmulator
+        }
 
 /*
 XAV(2014-06-17): DISABLE win64 exe until it's ready
@@ -158,9 +161,6 @@ XAV(2014-06-17): DISABLE win64 exe until it's ready
             builtBy buildWindowsEmulator
         }
 
-        item("$buildWindowsEmulator.output/emulator64-crash-service.exe") {
-            builtBy buildWindowsEmulator
-        }
 */
     }
 }

@@ -212,7 +212,7 @@ const std::string& CrashSystem::getCrashServicePath() {
                 ::android::base::System::get()->getLauncherDirectory().c_str());
         mCrashServicePath += System::kDirSeparator;
         mCrashServicePath += "emulator";
-        if (::android::base::System::get()->getHostBitness() == 64) {
+        if (::android::base::System::kProgramBitness == 64) {
             mCrashServicePath += "64";
         }
         mCrashServicePath += "-crash-service";
