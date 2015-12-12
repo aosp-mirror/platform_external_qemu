@@ -248,7 +248,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 # official OpenGL shared library name.
                 MESA_TARGET="libgl-gdi"
                 OSMESA_TARGET="libgl-osmesa"
-                MESA_LIBS="opengl32.dll osmesa.dll"
+                MESA_LIBS="opengl32.dll"
                 BUILD_OSMESA=true
                 ;;
 
@@ -258,7 +258,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 # This generates a libGL.so.
                 MESA_TARGET="libgl-xlib"
                 OSMESA_TARGET="libgl-osmesa"
-                MESA_LIBS="libGL.so libosmesa.so"
+                MESA_LIBS="libGL.so"
                 BUILD_OSMESA=true
                 ;;
 
