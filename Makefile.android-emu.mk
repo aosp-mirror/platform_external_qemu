@@ -234,6 +234,7 @@ LOCAL_SRC_FILES := \
     android/gps/KmlParser.cpp \
     android/gps.c \
     android/gpu_frame.cpp \
+    android/android_emulator_bridge.c \
     android/help.c \
     android/hw-control.c \
     android/hw-events.c \
