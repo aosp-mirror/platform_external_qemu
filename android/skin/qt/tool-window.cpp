@@ -499,7 +499,7 @@ bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
 
 void ToolWindow::dockMainWindow()
 {
-    move(parentWidget()->geometry().right() + 10, parentWidget()->geometry().top() + 10);
+    move(parentWidget()->geometry().right() + 10, parentWidget()->geometry().top());
 }
 
 void ToolWindow::raiseMainWindow()

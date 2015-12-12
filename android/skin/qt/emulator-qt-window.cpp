@@ -409,8 +409,13 @@ void EmulatorQtWindow::slot_getWindowId(WId *out_id, QSemaphore *semaphore)
 
 void EmulatorQtWindow::slot_getWindowPos(int *xx, int *yy, QSemaphore *semaphore)
 {
-    *xx = mContainer.x();
-    *yy = mContainer.y();
+    // Note that mContainer.x() == mContainer.frameGeometry().x(), which
+    // is NOT what we want.
+
+    QRect geom = mContainer.geometry();
+
+    *xx = geom.x();
+    *yy = geom.y();
     if (semaphore != NULL) semaphore->release();
 }
 
@@ -529,7 +534,6 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, 
         // If this was the result of a zoom, don't change the overall window size, and adjust the
         // scroll bars to reflect the desired focus point.
         if (mNextIsZoom) {
-            mContainer.move(rect->topLeft());
             recenterFocusPoint();
         } else {
             mContainer.setGeometry(*rect);
@@ -900,8 +904,6 @@ void EmulatorQtWindow::simulateSetZoom(double zoom)
 
     mNextIsZoom = true;
     mZoomFactor = zoom;
-
-    simulateWindowMoved(mContainer.pos());
 
     QSize viewport = mContainer.viewportSize();
 
