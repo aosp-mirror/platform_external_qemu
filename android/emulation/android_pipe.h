@@ -276,4 +276,10 @@ extern void android_pipe_wake_on(void* pipe_, unsigned wakes);
 // Useful at the start and end of a unit-test.
 extern void android_pipe_reset_services(void);
 
+// Experimental: map memory visible to both guest and host
+// |len| specifies how big.
+// The guest and host can read/write to the
+// buffer at the same time.
+extern void* android_pipe_map_guest_buffer(uint64_t len);
+
 ANDROID_END_HEADER
