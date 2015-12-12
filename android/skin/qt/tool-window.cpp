@@ -706,3 +706,14 @@ extern "C" void setUiEmuAgent(const UiEmuAgent *agentPtr) {
         twInstance->setToolEmuAgent(agentPtr);
     }
 }
+
+void ToolWindow::paintEvent(QPaintEvent*) {
+    QPainter p;
+    QPen pen(Qt::SolidLine);
+    pen.setColor(Qt::black);
+    pen.setWidth(1);
+    p.begin(this);
+    p.setPen(pen);
+    p.drawRect(rect());
+    p.end();
+}

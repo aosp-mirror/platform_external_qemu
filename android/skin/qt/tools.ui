@@ -18,10 +18,10 @@
 color: #f0f0f0</string>
   </property>
   <property name="frameShape">
-   <enum>QFrame::Panel</enum>
+   <enum>QFrame::NoFrame</enum>
   </property>
   <property name="frameShadow">
-   <enum>QFrame::Raised</enum>
+   <enum>QFrame::Plain</enum>
   </property>
   <widget class="QPushButton" name="power_button">
    <property name="geometry">
