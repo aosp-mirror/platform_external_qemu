@@ -2659,6 +2659,130 @@ static const CommandDefRec fingerprint_commands[] =
       NULL, do_fingerprint_remove, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
+/*****                         A     E     B   C O M M A N D S                         ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+static int
+do_aeb_push( ControlClient client, char* host_path)
+{
+    if (host_path && !strstr(host_path, " ")) {
+        client->global->aeb_agent->push(host_path);
+        return 0;
+    }
+    control_write(client,
+                  "KO: invalid arguments, "
+                  "try 'aeb push <path-on-host>'\r\n");
+    return -1;
+}
+
+static int
+do_aeb_install( ControlClient client, char* host_path)
+{
+    if (host_path && !strstr(host_path, " ")) {
+        client->global->aeb_agent->install(host_path);
+        return 0;
+    }
+    control_write(client,
+                  "KO: invalid arguments, "
+                  "try 'aeb install <path-of-apk-on-host>'\r\n");
+    return -1;
+}
+
+#define AEB_MAX_DEVICE_PATH_SIZE 2048
+
+static int
+do_aeb_pull( ControlClient client, char* args)
+{
+    char* host_start_pos = NULL;
+    char device_path_buf[AEB_MAX_DEVICE_PATH_SIZE] = {};
+
+    if (args) {
+        host_start_pos = strstr(args, " ");
+        if (host_start_pos && !strstr(host_start_pos + 1, " ")) {
+            if (host_start_pos - args > AEB_MAX_DEVICE_PATH_SIZE - 1) {
+                control_write(client, "KO: AEB pull: device path too log\r\n");
+                return -1;
+            }
+            memcpy(device_path_buf, args, host_start_pos - args);
+            host_start_pos += 1;
+            client->global->aeb_agent->pull(device_path_buf, host_start_pos);
+            return 0;
+        }
+    }
+
+    control_write(client,
+                  "KO: invalid arguments, "
+                  "try 'aeb pull <path-on-device> <path-on-host>'\r\n");
+    return -1;
+}
+
+static int
+do_aeb_screencap( ControlClient client, char* host_path)
+{
+    if (host_path && !strstr(host_path, " ")) {
+        client->global->aeb_agent->screencap(host_path);
+        return 0;
+    }
+
+    control_write(client,
+                  "KO: invalid arguments, "
+                  "try 'aeb screencap <screenshot-save-path>\r\n");
+    return -1;
+}
+
+static int
+do_aeb_speedtest( ControlClient client, char* unused)
+{
+    (void)unused;
+
+    client->global->aeb_agent->speedtest();
+
+    return 0;
+}
+
+static int
+do_aeb_shutdown( ControlClient client, char* unused)
+{
+    (void)unused;
+
+    client->global->aeb_agent->shutdown();
+
+    return 0;
+}
+
+static const CommandDefRec  aeb_commands[] =
+{
+    { "push", "push a file",
+    "use AEB to push a file to the device\r\n",
+    NULL, do_aeb_push, NULL },
+
+    { "install", "install APK",
+    "use AEB to install APK\r\n",
+    NULL, do_aeb_install, NULL },
+
+    { "pull", "pull a file",
+    "use AEB to pull a file from the device\r\n",
+    NULL, do_aeb_pull, NULL },
+
+    { "screencap", "take a screenshot",
+    "use AEB to take a screenshot of the device\r\n",
+    NULL, do_aeb_screencap, NULL },
+
+    { "speedtest", "do a latency test",
+    "test latency of AEB\r\n",
+    NULL, do_aeb_speedtest, NULL },
+
+    { "shutdown", "shutdown the device",
+    "use AEB to shut down the device\r\n",
+    NULL, do_aeb_shutdown, NULL },
+
+    { NULL, NULL, NULL, NULL, NULL, NULL }
+};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -2802,6 +2926,10 @@ static const CommandDefRec   main_commands[] =
 
     { "debug", "control the emulator debug output tags",
       NULL, NULL, do_debug },
+
+    { "aeb", "Android Emulator Bridge",
+      "control the AEB\r\n", NULL,
+      NULL, aeb_commands},
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };

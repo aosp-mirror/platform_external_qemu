@@ -51,6 +51,7 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(adbserver,    "ADB server") \
     _VERBOSE_TAG(adbclient,    "ADB QEMU client") \
     _VERBOSE_TAG(adb,          "ADB debugger") \
+    _VERBOSE_TAG(aeb,          "Android Emulator Bridge") \
     _VERBOSE_TAG(asconnector,  "Asynchronous socket connector") \
     _VERBOSE_TAG(asyncsocket,  "Asynchronous socket") \
     _VERBOSE_TAG(sdkctlsocket, "Socket tethering to SdkControl server") \
