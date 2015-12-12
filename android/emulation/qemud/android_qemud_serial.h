@@ -36,7 +36,7 @@ ANDROID_BEGIN_HEADER
 /* max serial MTU. Don't change this without modifying
  * development/emulator/qemud/qemud.c as well.
  */
-#define  MAX_SERIAL_PAYLOAD        4000
+#define  MAX_SERIAL_PAYLOAD        1048576
 
 #if SUPPORT_LEGACY_QEMUD
 typedef enum {
