@@ -55,10 +55,10 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
 #else
     Qt::WindowFlags flag = Qt::Tool;
 #endif
-    setWindowFlags(flag | Qt::FramelessWindowHint);
+    setWindowFlags(flag | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::Drawer);
     toolsUi->setupUi(this);
     // Make this more narrow than QtDesigner likes
-    this->resize(60, this->height());
+    //this->resize(60, this->height());
 
     // Initialize some values in the QCoreApplication so we can easily
     // and consistently access QSettings to save and restore user settings
@@ -705,4 +705,21 @@ extern "C" void setUiEmuAgent(const UiEmuAgent *agentPtr) {
     if (twInstance) {
         twInstance->setToolEmuAgent(agentPtr);
     }
+}
+
+void ToolWindow::paintEvent(QPaintEvent*) {
+    QPainter p;
+    QPen pen(Qt::SolidLine);
+    pen.setColor(Qt::black);
+    pen.setWidth(1);
+    p.begin(this);
+    p.setPen(pen);
+#ifdef __APPLE__
+    // On OS X, the system seems to be making the window 1px wider/higher
+    // than it needs to be for some reason.
+    p.drawRect(contentsRect());
+#else
+    p.drawRect(QRect(0, 0, width() - 1, height() - 1));
+#endif
+    p.end();
 }
