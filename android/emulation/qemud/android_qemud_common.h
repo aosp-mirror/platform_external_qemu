@@ -15,7 +15,7 @@
 #include "android/utils/misc.h"
 
 /* length of the framed header */
-#define  FRAME_HEADER_SIZE  4
+#define  FRAME_HEADER_SIZE  8
 
 #define  D(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)
 #define  D_ACTIVE  VERBOSE_CHECK(qemud)

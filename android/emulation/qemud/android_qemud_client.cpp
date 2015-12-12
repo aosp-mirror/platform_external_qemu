@@ -18,6 +18,7 @@
 
 #include <errno.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 
 QemudClient* qemud_client_new(QemudService* service,
@@ -202,7 +203,7 @@ void qemud_client_recv(void* opaque, uint8_t* msg, int msglen) {
             if (!qemud_sink_fill(c->header, (const uint8_t**) &msg, &msglen))
                 break;
 
-            frame_size = hex2int(c->header0, 4);
+            frame_size = hex2int(c->header0, FRAME_HEADER_SIZE);
             if (frame_size == 0) {
                 D("%s: ignoring empty frame", __FUNCTION__);
                 continue;
