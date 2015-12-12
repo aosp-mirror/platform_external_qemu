@@ -179,4 +179,10 @@ typedef struct AndroidPipeHwFuncs {
 extern const AndroidPipeHwFuncs* android_pipe_set_hw_funcs(
         const AndroidPipeHwFuncs* hw_funcs);
 
+// Experimental: map memory visible to both guest and host
+// |len| specifies how big.
+// The guest and host can read/write to the
+// buffer at the same time.
+extern void* android_pipe_map_guest_buffer(uint64_t len);
+
 ANDROID_END_HEADER

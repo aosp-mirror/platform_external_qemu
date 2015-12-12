@@ -2659,6 +2659,32 @@ static const CommandDefRec fingerprint_commands[] =
       NULL, do_fingerprint_remove, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
+/*****                         A     E     B   C O M M A N D S                         ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+static int
+do_aeb_push( ControlClient client, char* args)
+{
+    if (args) {
+        client->global->aeb_agent->push(args);
+        return 0;
+    }
+    return -1;
+}
+
+static const CommandDefRec  aeb_commands[] =
+{
+    { "push", "push a file",
+    "use AEB to push a file\r\n",
+    NULL, do_aeb_push, NULL },
+
+    { NULL, NULL, NULL, NULL, NULL, NULL }
+};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -2802,6 +2828,10 @@ static const CommandDefRec   main_commands[] =
 
     { "debug", "control the emulator debug output tags",
       NULL, NULL, do_debug },
+
+    { "aeb", "Android Emulator Bridge",
+      "control the AEB\r\n", NULL,
+      NULL, aeb_commands},
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };

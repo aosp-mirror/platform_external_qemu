@@ -14,6 +14,7 @@
 #include "android/constants.h"
 #include "android/adb-server.h"
 #include "android/android.h"
+#include "android/android_emulator_bridge.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/emulation/android_pipe_pingpong.h"
@@ -468,8 +469,10 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
     /* initialize sensors, this must be done here due to timer issues */
     android_hw_sensors_init();
 
-    /* initilize fingperprint here */
+    /* initialize fingerprint here */
     android_hw_fingerprint_init();
 
+    /* initialize Android Emulator Bridge */
+    android_emulator_bridge_init();
     return true;
 }
