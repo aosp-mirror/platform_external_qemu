@@ -233,6 +233,7 @@ LOCAL_SRC_FILES := \
     android/framebuffer.c \
     android/gps.c \
     android/gpu_frame.cpp \
+    android/aeb.c \
     android/help.c \
     android/hw-control.c \
     android/hw-events.c \
