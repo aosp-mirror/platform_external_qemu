@@ -186,6 +186,7 @@ LOCAL_SRC_FILES := \
     android/adb-qemud.c \
     android/adb-server.c \
     android/android-constants.c \
+    android/android_emulator_bridge.c \
     android/avd/hw-config.c \
     android/avd/info.c \
     android/avd/scanner.c \
