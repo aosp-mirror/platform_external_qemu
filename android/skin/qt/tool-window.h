@@ -31,7 +31,7 @@
 #include <QProgressDialog>
 #include <QToolButton>
 #include <QUrl>
-#include <QWidget>
+#include <QFrame>
 #include <QQueue>
 
 #define REMOTE_DOWNLOADS_DIR "/sdcard/Download"
@@ -77,6 +77,8 @@ signals:
     void skinUIEvent(SkinEvent* event);
 
 private:
+    void paintEvent(QPaintEvent*) override;
+
     void handleUICommand(QtUICommand cmd, bool down);
 
     // Use this function only if SDK_PATH is not available in QSettings
