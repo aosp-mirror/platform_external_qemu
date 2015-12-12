@@ -19,7 +19,6 @@
 #include <errno.h>
 #include <stdlib.h>
 
-
 QemudClient* qemud_client_new(QemudService* service,
                               int channelId,
                               const char* client_param,
@@ -29,29 +28,25 @@ QemudClient* qemud_client_new(QemudService* service,
                               QemudClientSave clie_save,
                               QemudClientLoad clie_load) {
     QemudMultiplexer* m = qemud_multiplexer;
-    QemudClient* c = qemud_client_alloc(channelId,
-                                        client_param,
-                                        clie_opaque,
-                                        clie_recv,
-                                        clie_close,
-                                        clie_save,
-                                        clie_load,
-                                        m->serial,
-                                        &m->clients);
+    QemudClient* c = qemud_client_alloc(channelId, client_param, clie_opaque,
+                                        clie_recv, clie_close, clie_save,
+                                        clie_load, m->serial, &m->clients);
 
     qemud_service_add_client(service, c);
     return c;
 }
 
-void _qemud_pipe_cache_buffer(QemudClient* client, const uint8_t* msg, int msglen) {
+void _qemud_pipe_cache_buffer(QemudClient* client,
+                              const uint8_t* msg,
+                              int msglen) {
     QemudPipeMessage* buf;
     QemudPipeMessage** ins_at = &client->ProtocolSelector.Pipe.messages;
 
     /* Allocate descriptor big enough to contain message as well. */
-    buf = (QemudPipeMessage*) malloc(msglen + sizeof(QemudPipeMessage));
+    buf = (QemudPipeMessage*)malloc(msglen + sizeof(QemudPipeMessage));
     if (buf != NULL) {
         /* Message starts right after the descriptor. */
-        buf->message = (uint8_t*) buf + sizeof(QemudPipeMessage);
+        buf->message = (uint8_t*)buf + sizeof(QemudPipeMessage);
         buf->size = msglen;
         memcpy(buf->message, msg, msglen);
         buf->offset = 0;
@@ -74,8 +69,8 @@ void _qemud_pipe_send(QemudClient* client, const uint8_t* msg, int msglen) {
     if (msglen <= 0)
         return;
 
-    D("%s: len=%3d '%s'",
-      __FUNCTION__, msglen, quote_bytes((const char*) msg, msglen));
+    D("%s: len=%3d '%s'", __FUNCTION__, msglen,
+      quote_bytes((const char*)msg, msglen));
 
     if (framing) {
         len += FRAME_HEADER_SIZE;
@@ -169,22 +164,20 @@ void qemud_client_recv(void* opaque, uint8_t* msg, int msglen) {
         return;
     }
 
-    /* framing */
+/* framing */
 
 #if 1
     /* special case, in 99% of cases, everything is in
      * the incoming message, and we can do all we need
      * directly without dynamic allocation.
      */
-    if (msglen > FRAME_HEADER_SIZE &&
-        c->need_header == 1 &&
+    if (msglen > FRAME_HEADER_SIZE && c->need_header == 1 &&
         qemud_sink_needed(c->header) == 0) {
         int len = hex2int(msg, FRAME_HEADER_SIZE);
 
         if (len >= 0 && msglen == len + FRAME_HEADER_SIZE) {
             if (c->clie_recv)
-                c->clie_recv(c->clie_opaque,
-                             msg + FRAME_HEADER_SIZE,
+                c->clie_recv(c->clie_opaque, msg + FRAME_HEADER_SIZE,
                              msglen - FRAME_HEADER_SIZE, c);
             return;
         }
@@ -199,7 +192,7 @@ void qemud_client_recv(void* opaque, uint8_t* msg, int msglen) {
             int frame_size;
             uint8_t* data;
 
-            if (!qemud_sink_fill(c->header, (const uint8_t**) &msg, &msglen))
+            if (!qemud_sink_fill(c->header, (const uint8_t**)&msg, &msglen))
                 break;
 
             frame_size = hex2int(c->header0, 4);
@@ -208,8 +201,8 @@ void qemud_client_recv(void* opaque, uint8_t* msg, int msglen) {
                 continue;
             }
             if (frame_size < 0) {
-                D("%s: ignoring corrupted frame header '.*s'",
-                  __FUNCTION__, FRAME_HEADER_SIZE, c->header0);
+                D("%s: ignoring corrupted frame header '.*s'", __FUNCTION__,
+                  FRAME_HEADER_SIZE, c->header0);
                 continue;
             }
 
@@ -222,7 +215,7 @@ void qemud_client_recv(void* opaque, uint8_t* msg, int msglen) {
         }
 
         /* read the payload */
-        if (!qemud_sink_fill(c->payload, (const uint8_t**) &msg, &msglen))
+        if (!qemud_sink_fill(c->payload, (const uint8_t**)&msg, &msglen))
             break;
 
         c->payload->buff[c->payload->size] = 0;
@@ -271,7 +264,7 @@ void _qemud_client_free(QemudClient* c) {
 void qemud_client_disconnect(void* opaque, int guest_close) {
     QemudClient* c = static_cast<QemudClient*>(opaque);
 
-    if (c->closing) {  /* recursive call, exit immediately */
+    if (c->closing) { /* recursive call, exit immediately */
         return;
     }
 
@@ -281,11 +274,12 @@ void qemud_client_disconnect(void* opaque, int guest_close) {
          * don't actually close the client here, but notify the guest about the
          * client being disconnected. Then we will do the real client close when
          * the guest explicitly closes the pipe, in which case this routine will
-         * be called from the _qemudPipe_closeFromGuest callback with guest_close
+         * be called from the _qemudPipe_closeFromGuest callback with
+         * guest_close
          * set to 1. */
-        char tmp[128], * p = tmp, * end = p + sizeof(tmp);
+        char tmp[128], *p = tmp, *end = p + sizeof(tmp);
         p = bufprint(tmp, end, "disconnect:00");
-        _qemud_pipe_send(c, (uint8_t*) tmp, p - tmp);
+        _qemud_pipe_send(c, (uint8_t*)tmp, p - tmp);
         return;
     }
 
@@ -295,16 +289,18 @@ void qemud_client_disconnect(void* opaque, int guest_close) {
     qemud_client_remove(c);
 
     if (qemud_is_pipe_client(c)) {
-        /* We must NULL the client reference in the QemuPipe for this connection,
+        /* We must NULL the client reference in the QemuPipe for this
+         * connection,
          * so if a sudden receive request comes after client has been closed, we
          * don't blow up. */
         c->ProtocolSelector.Pipe.qemud_pipe->client = NULL;
     } else if (c->ProtocolSelector.Serial.channel > 0) {
         /* send a disconnect command to the daemon */
-        char tmp[128], * p = tmp, * end = p + sizeof(tmp);
+        char tmp[128], *p = tmp, *end = p + sizeof(tmp);
         p = bufprint(tmp, end, "disconnect:%02x",
                      c->ProtocolSelector.Serial.channel);
-        qemud_serial_send(c->ProtocolSelector.Serial.serial, 0, 0, (uint8_t*) tmp, p - tmp);
+        qemud_serial_send(c->ProtocolSelector.Serial.serial, 0, 0,
+                          (uint8_t*)tmp, p - tmp);
     }
 
     /* call the client close callback */
@@ -409,8 +405,8 @@ int qemud_serial_client_load(Stream* f,
     /* get current service instance */
     QemudService* sv = qemud_service_find(current_services, service_name);
     if (sv == NULL) {
-        D("%s: load failed: unknown service \"%s\"\n",
-          __FUNCTION__, service_name);
+        D("%s: load failed: unknown service \"%s\"\n", __FUNCTION__,
+          service_name);
         return -EIO;
     }
 
@@ -429,24 +425,26 @@ int qemud_serial_client_load(Stream* f,
 
     /* load client-specific state */
     int ret;
-    if (c->clie_load) if ((ret = c->clie_load(f, c, c->clie_opaque)))
-        return ret;  /* load failure */
+    if (c->clie_load)
+        if ((ret = c->clie_load(f, c, c->clie_opaque)))
+            return ret; /* load failure */
 
     /* load framing configuration */
     c->framing = stream_get_be32(f);
     if (c->framing) {
-
         /* header buffer */
         c->need_header = stream_get_be32(f);
         int header_size = stream_get_be32(f);
         if (header_size > FRAME_HEADER_SIZE) {
-            D("%s: load failed: payload buffer requires %d bytes, %d available\n",
+            D("%s: load failed: payload buffer requires %d bytes, %d "
+              "available\n",
               __FUNCTION__, header_size, FRAME_HEADER_SIZE);
             return -EIO;
         }
         int ret;
         if ((ret = stream_read(f, c->header0, header_size)) != header_size) {
-            D("%s: frame header buffer load failed: expected %d bytes, got %d\n",
+            D("%s: frame header buffer load failed: expected %d bytes, got "
+              "%d\n",
               __FUNCTION__, header_size, ret);
             return -EIO;
         }
@@ -461,11 +459,12 @@ int qemud_serial_client_load(Stream* f,
         }
 
         /* +1 for terminating zero */
-        c->payload->buff = static_cast<uint8_t*>(
-                _android_array_alloc(sizeof(*c->payload->buff), c->payload->size + 1));
+        c->payload->buff = static_cast<uint8_t*>(_android_array_alloc(
+                sizeof(*c->payload->buff), c->payload->size + 1));
         if ((ret = stream_read(f, c->payload->buff, c->payload->size)) !=
             c->payload->size) {
-            D("%s: frame payload buffer load failed: expected %d bytes, got %d\n",
+            D("%s: frame payload buffer load failed: expected %d bytes, got "
+              "%d\n",
               __FUNCTION__, c->payload->size, ret);
             AFREE(c->payload->buff);
             return -EIO;
