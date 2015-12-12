@@ -62,10 +62,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
 #else
     Qt::WindowFlags flag = Qt::Tool;
 #endif
-    setWindowFlags(flag | Qt::FramelessWindowHint);
+    setWindowFlags(flag | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::Drawer);
     toolsUi->setupUi(this);
-    // Make this more narrow than QtDesigner likes
-    this->resize(60, this->height());
 
     // Initialize some values in the QCoreApplication so we can easily
     // and consistently access QSettings to save and restore user settings
@@ -729,4 +727,29 @@ void ToolWindow::slot_pushFinished(int exitStatus)
         mPushProcess.start(command, args);
         mPushProcess.waitForStarted();
     }
+}
+
+void ToolWindow::paintEvent(QPaintEvent*) {
+    QPainter p;
+    QPen pen(Qt::SolidLine);
+    pen.setColor(Qt::black);
+    pen.setWidth(1);
+    p.begin(this);
+    p.setPen(pen);
+    double dpr = 1.0;
+    int primary_screen_idx = qApp->desktop()->screenNumber(this);
+    QScreen* primary_screen = QApplication::screens().at(primary_screen_idx);
+    if (primary_screen) {
+        dpr = primary_screen->devicePixelRatio();
+    }
+    if (dpr > 1.0) {
+        // Normally you'd draw the border with a (0, 0 - w-1, h-1) rectangle.
+        // However, there's some weirdness going on with high-density displays
+        // that makes a single-pixel "slack" appear at the left and bottom
+        // of the border. This basically adds 1 to compensate for it.
+        p.drawRect(contentsRect());
+    } else {
+        p.drawRect(QRect(0, 0, width() - 1, height() - 1));
+    }
+    p.end();
 }
