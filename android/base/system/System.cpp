@@ -516,10 +516,11 @@ public:
 
         return true;
 #else  // !_WIN32
-        char** params = new char*[commandLine.size()];
+        char** const params = new char*[commandLine.size() + 1];
         for (size_t n = 0; n < commandLine.size(); ++n) {
             params[n] = (char*)commandLine[n].c_str();
         }
+        params[commandLine.size()] = nullptr;
 
         int pid = fork();
         if (pid < 0) {
@@ -539,9 +540,13 @@ public:
         int fd = open("/dev/null", O_WRONLY);
         dup2(fd, 1);
         dup2(fd, 2);
-        execvp(commandLine[0].c_str(), params);
-        // Should not happen.
-        exit(1);
+        if (execvp(commandLine[0].c_str(), params) == -1) {
+            // no sense in trying to print anything - we've just passed
+            // '/dev/null' as stdout and stderr
+            exit(1);
+        }
+        // Should not happen, but let's keep the compiler happy
+        exit(2);
 #endif  // !_WIN32
     }
 
