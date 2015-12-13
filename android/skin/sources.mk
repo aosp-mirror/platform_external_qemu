@@ -23,4 +23,7 @@ ANDROID_SKIN_SOURCES := \
     android/skin/scaler.c \
     android/skin/ui.c \
 
+# enable MMX code for our skin scaler
+ANDROID_SKIN_CFLAGS += -DUSE_MMX=1 -mmmx
+
 include $(LOCAL_PATH)/android/skin/qt/sources.mk

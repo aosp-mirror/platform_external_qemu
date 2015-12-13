@@ -47,7 +47,6 @@ $(call start-emulator-library, emulator-target-$(EMULATOR_TARGET_CPU))
 LOCAL_CFLAGS := \
     $(QEMU1_COMMON_CFLAGS) \
     $(EMULATOR_TARGET_CFLAGS) \
-    $(EMULATOR_LIBUI_CFLAGS) \
 
 # These are required by the TCG engine.
 LOCAL_CFLAGS += \
@@ -234,7 +233,6 @@ $(call start-emulator-program, emulator$(HOST_SUFFIX)-$(EMULATOR_TARGET_ARCH))
 
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
-    emulator-common \
     $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1) \
     $(ANDROID_SKIN_STATIC_LIBRARIES) \
     $(EMULATOR_LIBUI_STATIC_LIBRARIES) \

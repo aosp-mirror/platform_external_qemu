@@ -10,14 +10,6 @@
 # of these components.
 #
 
-##############################################################################
-##############################################################################
-###
-###  emulator-common: LIBRARY OF COMMON FUNCTIONS
-###
-###  THESE ARE POTENTIALLY USED BY ALL COMPONENTS
-###
-
 QEMU1_COMMON_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
 
@@ -33,132 +25,7 @@ QEMU1_COMMON_INCLUDES += $(OBJS_DIR)/build/qemu1-qapi-auto-generated
 QEMU1_COMMON_INCLUDES += $(ZLIB_INCLUDES)
 
 # GLib sources
-GLIB_DIR := distrib/mini-glib
-include $(LOCAL_PATH)/$(GLIB_DIR)/sources.make
-QEMU1_COMMON_INCLUDES += $(GLIB_INCLUDE_DIR)
-
-common_LOCAL_SRC_FILES += $(GLIB_SOURCES)
-
-QEMU1_COMMON_CFLAGS += $(LIBCURL_CFLAGS)
-
-
-###########################################################
-# Android utility functions
-#
-common_LOCAL_SRC_FILES += \
-    android/audio-test.c \
-    android/core-init-utils.c \
-    android/hw-kmsg.c \
-    android/hw-lcd.c \
-
-common_LOCAL_CFLAGS += $(QEMU1_COMMON_CFLAGS)
-
-common_LOCAL_CFLAGS += $(LIBXML2_CFLAGS)
-common_LOCAL_CFLAGS += -I$(LIBEXT4_UTILS_INCLUDES)
-
-include $(LOCAL_PATH)/android/wear-agent/sources.mk
-
-## one for 32-bit
-$(call start-emulator-library, emulator-common)
-
-LOCAL_CFLAGS += $(common_LOCAL_CFLAGS)
-
-LOCAL_C_INCLUDES += \
-    $(QEMU1_COMMON_INCLUDES) \
-    $(LIBCURL_INCLUDES) \
-    $(LIBXML2_INCLUDES) \
-    $(BREAKPAD_CLIENT_INCLUDES) \
-
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-
-ifeq (32,$(EMULATOR_PROGRAM_BITNESS))
-    LOCAL_IGNORE_BITNESS := true
-endif
-$(call gen-hw-config-defs)
-$(call end-emulator-library)
-
-##############################################################################
-##############################################################################
-###
-###  emulator-libui: LIBRARY OF UI-RELATED FUNCTIONS
-###
-###  THESE ARE USED BY 'emulator-ui' AND THE STANDALONE PROGRAMS
-###
-
-common_LOCAL_CFLAGS =
-common_LOCAL_SRC_FILES =
-common_LOCAL_QT_MOC_SRC_FILES =
-common_LOCAL_QT_RESOURCES =
-common_LOCAL_CFLAGS += $(EMULATOR_COMMON_CFLAGS)
-
-EMULATOR_LIBUI_CFLAGS :=
-EMULATOR_LIBUI_INCLUDES :=
-EMULATOR_LIBUI_LDLIBS :=
-EMULATOR_LIBUI_LDFLAGS :=
-EMULATOR_LIBUI_STATIC_LIBRARIES :=
-
-###########################################################
-# Libpng configuration
-#
-EMULATOR_LIBUI_INCLUDES += $(LIBPNG_INCLUDES)
-EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libpng
-common_LOCAL_SRC_FILES += android/loadpng.c
-
-###########################################################
-# Libjpeg configuration
-#
-EMULATOR_LIBUI_INCLUDES += $(LIBJPEG_INCLUDES)
-EMULATOR_LIBUI_STATIC_LIBRARIES += emulator-libjpeg
-
-###########################################################################
-# Qt-related definitions
-#
-EMULATOR_LIBUI_INCLUDES += $(QT_INCLUDES)
-EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
-EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
-EMULATOR_LIBUI_CFLAGS += $(LIBXML2_CFLAGS)
-
-# the skin support sources
-#
-include $(LOCAL_PATH)/android/skin/sources.mk
-common_LOCAL_SRC_FILES += $(ANDROID_SKIN_SOURCES)
-
-common_LOCAL_SRC_FILES += \
-    android/gpu_frame.cpp \
-    android/emulator-window.c \
-    android/resource.c \
-    android/user-config.c \
-
-# enable MMX code for our skin scaler
-ifeq ($(HOST_ARCH),x86)
-common_LOCAL_CFLAGS += -DUSE_MMX=1 -mmmx
-endif
-
-common_LOCAL_CFLAGS += $(EMULATOR_LIBUI_CFLAGS)
-
-
-ifeq ($(HOST_OS),windows)
-# For capCreateCaptureWindow used in camera-capture-windows.c
-EMULATOR_LIBUI_LDLIBS += -lvfw32
-endif
-
-## one for 32-bit
-$(call start-emulator-library, emulator-libui)
-LOCAL_CFLAGS += \
-    $(EMULATOR_COMMON_CFLAGS) \
-    $(ANDROID_SKIN_CFLAGS) \
-    $(LIBXML2_CFLAGS) \
-
-LOCAL_C_INCLUDES := \
-    $(EMULATOR_COMMON_INCLUDES) \
-    $(EMULATOR_LIBUI_INCLUDES) \
-
-LOCAL_SRC_FILES += $(common_LOCAL_SRC_FILES)
-LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
-LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
-LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES)
-$(call gen-hw-config-defs)
-$(call end-emulator-library)
+QEMU1_COMMON_INCLUDES += $(MINIGLIB_INCLUDES)
 
 ##############################################################################
 ##############################################################################
@@ -294,6 +161,7 @@ LOCAL_SRC_FILES += \
     $(AUDIO_SOURCES) \
     aio-android.c \
     android-qemu1-glue/android_qemud.cpp \
+    android-qemu1-glue/audio-test.c \
     android-qemu1-glue/base/async/Looper.cpp \
     android-qemu1-glue/base/files/QemuFileStream.cpp \
     android-qemu1-glue/display.c \
@@ -376,6 +244,7 @@ LOCAL_SRC_FILES += \
     util/qemu-sockets-android.c \
     util/unicode.c \
     util/yield-android.c \
+    $(MINIGLIB_SOURCES) \
 
 ifeq ($(HOST_ARCH),x86)
     LOCAL_SRC_FILES += disas/i386.c

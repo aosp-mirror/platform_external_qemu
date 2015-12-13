@@ -202,6 +202,7 @@ LOCAL_SRC_FILES := \
     android/camera/camera-format-converters.c \
     android/cmdline-option.c \
     android/console.c \
+    android/core-init-utils.c \
     android/cpu_accelerator.cpp \
     android/crashreport/CrashSystem.cpp \
     android/crashreport/CrashReporter_common.cpp \
@@ -231,12 +232,16 @@ LOCAL_SRC_FILES := \
     android/filesystems/partition_types.cpp \
     android/filesystems/ramdisk_extractor.cpp \
     android/framebuffer.c \
+    android/gps/GpxParser.cpp \
+    android/gps/KmlParser.cpp \
     android/gps.c \
     android/gpu_frame.cpp \
     android/help.c \
     android/hw-control.c \
     android/hw-events.c \
     android/hw-fingerprint.c \
+    android/hw-kmsg.c \
+    android/hw-lcd.c \
     android/hw-pipe-net.c \
     android/hw-qemud.cpp \
     android/hw-sensors.c \
@@ -324,6 +329,11 @@ ANDROID_EMU_LDLIBS := \
     $(LIBCURL_LDLIBS) \
     $(BREAKPAD_CLIENT_LDLIBS) \
 
+ifeq ($(HOST_OS),windows)
+# For capCreateCaptureWindow used in camera-capture-windows.cpp
+ANDROID_EMU_LDLIBS += -lvfw32
+endif
+
 ###############################################################################
 #
 #  android-emu unit tests
@@ -335,6 +345,7 @@ $(call start-emulator-program, android_emu$(HOST_SUFFIX)_unittests)
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
     $(EMULATOR_GTEST_INCLUDES) \
+    $(LIBXML2_INCLUDES) \
 
 LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
@@ -387,6 +398,10 @@ LOCAL_SRC_FILES := \
   android/filesystems/partition_types_unittest.cpp \
   android/filesystems/ramdisk_extractor_unittest.cpp \
   android/filesystems/testing/TestSupport.cpp \
+  android/gps/GpxParser_unittest.cpp \
+  android/gps/internal/GpxParserInternal_unittest.cpp \
+  android/gps/internal/KmlParserInternal_unittest.cpp \
+  android/gps/KmlParser_unittest.cpp \
   android/kernel/kernel_utils_unittest.cpp \
   android/metrics/metrics_reporter_unittest.cpp \
   android/metrics/metrics_reporter_ga_unittest.cpp \
@@ -493,6 +508,79 @@ ANDROID_EMU_STATIC_LIBRARIES_QEMU2 := \
     android-emu-qemu2 \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
 
+##############################################################################
+#
+#  emulator-libui
+#
+#  This is the library that implements the emulator's UI on top of
+#  android-emu. Note that it depends on interfaces that must be implemented
+#  by the engine-specific glue code. As such, the code cannot be unit-tested
+#  for now.
+#
+EMULATOR_LIBUI_INCLUDES :=
+EMULATOR_LIBUI_LDLIBS :=
+EMULATOR_LIBUI_LDFLAGS :=
+EMULATOR_LIBUI_STATIC_LIBRARIES :=
+
+EMULATOR_LIBUI_INCLUDES += $(QT_INCLUDES)
+EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
+EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
+
+# The skin support sources
+include $(LOCAL_PATH)/android/skin/sources.mk
+
+$(call start-emulator-library, emulator-libui)
+
+LOCAL_CFLAGS += \
+    $(EMULATOR_COMMON_CFLAGS) \
+    $(ANDROID_SKIN_CFLAGS) \
+    $(LIBXML2_CFLAGS) \
+
+LOCAL_C_INCLUDES := \
+    $(EMULATOR_COMMON_INCLUDES) \
+    $(EMULATOR_LIBUI_INCLUDES) \
+
+LOCAL_SRC_FILES += \
+    $(ANDROID_SKIN_SOURCES) \
+    android/gpu_frame.cpp \
+    android/emulator-window.c \
+    android/resource.c \
+    android/user-config.c \
+
+LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
+LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
+LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES)
+$(call gen-hw-config-defs)
+$(call end-emulator-library)
+
+# emulator-libui unit tests
+
+$(call start-emulator-program, emulator$(HOST_SUFFIX)_libui_unittests)
+
+LOCAL_C_INCLUDES += \
+    $(ANDROID_EMU_INCLUDES) \
+    $(EMULATOR_GTEST_INCLUDES) \
+
+LOCAL_SRC_FILES := \
+    android/skin/keycode_unittest.cpp \
+    android/skin/keycode-buffer_unittest.cpp \
+    android/skin/rect_unittest.cpp \
+    android/skin/region_unittest.cpp \
+
+LOCAL_C_INCLUDES += \
+    $(LIBXML2_INCLUDES) \
+
+LOCAL_CFLAGS += -O0
+LOCAL_STATIC_LIBRARIES += \
+    emulator-libui \
+    emulator-libgtest \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
+
+# Link against static libstdc++ on Linux and Windows since the unit-tests
+# cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/
+$(call local-link-static-c++lib)
+
+$(call end-emulator-program)
 
 # Done
 
