@@ -86,9 +86,9 @@ TEST(EmuglBackendList, getBackendLibPath) {
         const char* libName;
     } kData[] = {
 #ifdef _WIN32
-        { EmuglBackendList::LIBRARY_EGL, "EGL.dll" },
-        { EmuglBackendList::LIBRARY_GLESv1, "GLES_CM.dll" },
-        { EmuglBackendList::LIBRARY_GLESv2, "GLESv2.dll" },
+        { EmuglBackendList::LIBRARY_EGL, "libEGL.dll" },
+        { EmuglBackendList::LIBRARY_GLESv1, "libGLES_CM.dll" },
+        { EmuglBackendList::LIBRARY_GLESv2, "libGLESv2.dll" },
 #elif defined(__APPLE__)
         { EmuglBackendList::LIBRARY_EGL, "libEGL.dylib" },
         { EmuglBackendList::LIBRARY_GLESv1, "libGLES_CM.dylib" },
