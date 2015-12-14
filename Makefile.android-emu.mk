@@ -248,7 +248,7 @@ LOCAL_SRC_FILES := \
     android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
     android/loadpng.c \
-    android/main-common-ui.c \
+    android/main-common.c \
     android/metrics/metrics_reporter.cpp \
     android/metrics/metrics_reporter_ga.cpp \
     android/metrics/metrics_reporter_toolbar.cpp \
@@ -474,11 +474,9 @@ $(call end-emulator-program)
 #  static libraries. The plan is to remove these completely in the future.
 #
 
-# TODO(digit): main-common.c: Move non-UI dependent code to main-common-ui.c
 # TODO(digit): Remove ANDROID_QEMU2_SPECIFIC from qemu-setup.c and
 #              android_pipe.c
 _ANDROID_EMU_DEPENDENT_SOURCES := \
-    android/main-common.c \
     android/qemu-setup.c \
     android/emulation/android_pipe.c \
 
@@ -545,6 +543,7 @@ LOCAL_SRC_FILES += \
     $(ANDROID_SKIN_SOURCES) \
     android/gpu_frame.cpp \
     android/emulator-window.c \
+    android/main-common-ui.c \
     android/resource.c \
     android/user-config.c \
 
@@ -559,6 +558,7 @@ $(call end-emulator-library)
 $(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)_libui_unittests)
 
 LOCAL_C_INCLUDES += \
+    $(EMULATOR_COMMON_INCLUDES) \
     $(ANDROID_EMU_INCLUDES) \
     $(EMULATOR_GTEST_INCLUDES) \
 
@@ -581,6 +581,7 @@ LOCAL_STATIC_LIBRARIES += \
 # cannot pick up our custom versions of the library from
 # $(BUILD_OBJS_DIR)/lib[64]/
 $(call local-link-static-c++lib)
+$(call gen-hw-config-defs)
 
 $(call end-emulator-program)
 

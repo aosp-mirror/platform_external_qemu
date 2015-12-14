@@ -55,6 +55,7 @@
 #include "android/utils/sockets.h"
 
 #include "android/main-common.h"
+#include "android/main-common-ui.h"
 #include "android/help.h"
 #include "hw/android/goldfish/nand.h"
 
