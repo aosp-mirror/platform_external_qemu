@@ -24,6 +24,7 @@
 #include "android/help.h"
 #include "android/kernel/kernel_utils.h"
 #include "android/main-common.h"
+#include "android/main-common-ui.h"
 #include "android/opengl/emugl_config.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
