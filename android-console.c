@@ -658,7 +658,7 @@ void android_console_event_codes(Monitor* mon, const QDict* qdict) {
         for (nn = 0; nn < count; nn++) {
             char temp[20], *p = temp;
             gf_get_event_code_name(arg, nn, p);
-            monitor_printf(mon, "    %-12s\r\n", p);
+            monitor_printf(mon, "    %-12s\n", p);
         }
     }
 
@@ -1059,20 +1059,20 @@ void android_console_sms_send(Monitor* mon, const QDict* qdict) {
     if (!args) {
         monitor_printf(mon,
                        "KO: missing argument, try 'sms send <phonenumber> "
-                       "<text message>'\r\n");
+                       "<text message>'\n");
         return;
     }
     p = strchr(args, ' ');
     if (!p) {
         monitor_printf(mon,
                        "KO: missing argument, try 'sms send <phonenumber> "
-                       "<text message>'\r\n");
+                       "<text message>'\n");
         return;
     }
 
     if (sms_address_from_str(&sender, args, p - args) < 0) {
         monitor_printf(mon,
-                       "KO: bad phone number format, must be [+](0-9)*\r\n");
+                       "KO: bad phone number format, must be [+](0-9)*\n");
         return;
     }
 
@@ -1083,18 +1083,18 @@ void android_console_sms_send(Monitor* mon, const QDict* qdict) {
     if (textlen < 0) {
         monitor_printf(
                 mon,
-                "message must be utf8 and can use the following escapes:\r\n"
-                "    \\n      for a newline\r\n"
-                "    \\xNN    where NN are two hexadecimal numbers\r\n"
-                "    \\uNNNN  where NNNN are four hexadecimal numbers\r\n"
-                "    \\\\     to send a '\\' character\r\n\r\n"
-                "    anything else is an error\r\n"
-                "KO: badly formatted text\r\n");
+                "message must be utf8 and can use the following escapes:\n"
+                "    \\n      for a newline\n"
+                "    \\xNN    where NN are two hexadecimal numbers\n"
+                "    \\uNNNN  where NNNN are four hexadecimal numbers\n"
+                "    \\\\     to send a '\\' character\n\n"
+                "    anything else is an error\n"
+                "KO: badly formatted text\n");
         return;
     }
 
     if (!android_modem) {
-        monitor_printf(mon, "KO: modem emulation not running\r\n");
+        monitor_printf(mon, "KO: modem emulation not running\n");
         return;
     }
 
@@ -1120,18 +1120,18 @@ void android_console_sms_pdu(Monitor* mon, const QDict* qdict) {
     /* check that we have a phone number made of digits */
     if (!args) {
         monitor_printf(
-                mon, "KO: missing argument, try 'sms sendpdu <hexstring>'\r\n");
+                mon, "KO: missing argument, try 'sms sendpdu <hexstring>'\n");
         return;
     }
 
     if (!android_modem) {
-        monitor_printf(mon, "KO: modem emulation not running\r\n");
+        monitor_printf(mon, "KO: modem emulation not running\n");
         return;
     }
 
     pdu = smspdu_create_from_hex(args, strlen(args));
     if (pdu == NULL) {
-        monitor_printf(mon, "KO: badly formatted <hexstring>\r\n");
+        monitor_printf(mon, "KO: badly formatted <hexstring>\n");
         return;
     }
 
@@ -1235,7 +1235,7 @@ void android_console_cdma_prl_version(Monitor* mon, const QDict* qdict) {
     if (!args) {
         monitor_printf(
                 mon,
-                "KO: missing argument, try 'cdma prl_version <version>'\r\n");
+                "KO: missing argument, try 'cdma prl_version <version>'\n");
         return;
     }
 
@@ -1427,7 +1427,7 @@ void android_console_gsm_list(Monitor* mon, const QDict* qdict) {
             dir = "inbound from";
 
         monitor_printf(mon,
-                       "%s %-10s : %s\r\n",
+                       "%s %-10s : %s\n",
                        dir,
                        call->number,
                        call_state_to_string(call->state));
@@ -1455,19 +1455,19 @@ void android_console_gsm_call(Monitor* mon, const QDict* qdict) {
     /* check that we have a phone number made of digits */
     if (!args) {
         monitor_printf(
-                mon, "KO: missing argument, try 'gsm call <phonenumber>'\r\n");
+                mon, "KO: missing argument, try 'gsm call <phonenumber>'\n");
         return;
     }
 
     if (gsm_check_number(args)) {
         monitor_printf(
                 mon,
-                "KO: bad phone number format, use digits, # and + only\r\n");
+                "KO: bad phone number format, use digits, # and + only\n");
         return;
     }
 
     if (!android_modem) {
-        monitor_printf(mon, "KO: modem emulation not running\r\n");
+        monitor_printf(mon, "KO: modem emulation not running\n");
         return;
     }
     amodem_add_inbound_call(android_modem, args);
@@ -1480,20 +1480,20 @@ void android_console_gsm_busy(Monitor* mon, const QDict* qdict) {
     char* args = (char*)qdict_get_try_str(qdict, "arg");
     if (!args) {
         monitor_printf(
-                mon, "KO: missing argument, try 'gsm busy <phonenumber>'\r\n");
+                mon, "KO: missing argument, try 'gsm busy <phonenumber>'\n");
         return;
     }
     call = amodem_find_call_by_number(android_modem, args);
     if (call == NULL || call->dir != A_CALL_OUTBOUND) {
         monitor_printf(
                 mon,
-                "KO: no current outbound call to number '%s' (call %p)\r\n",
+                "KO: no current outbound call to number '%s' (call %p)\n",
                 args,
                 call);
         return;
     }
     if (amodem_disconnect_call(android_modem, args) < 0) {
-        monitor_printf(mon, "KO: could not cancel this number\r\n");
+        monitor_printf(mon, "KO: could not cancel this number\n");
         return;
     }
     monitor_printf(mon, "OK\n");
@@ -1506,17 +1506,17 @@ void android_console_gsm_hold(Monitor* mon, const QDict* qdict) {
     if (!args) {
         monitor_printf(
                 mon,
-                "KO: missing argument, try 'gsm out hold <phonenumber>'\r\n");
+                "KO: missing argument, try 'gsm out hold <phonenumber>'\n");
         return;
     }
     call = amodem_find_call_by_number(android_modem, args);
     if (call == NULL) {
         monitor_printf(
-                mon, "KO: no current call to/from number '%s'\r\n", args);
+                mon, "KO: no current call to/from number '%s'\n", args);
         return;
     }
     if (amodem_update_call(android_modem, args, A_CALL_HELD) < 0) {
-        monitor_printf(mon, "KO: could put this call on hold\r\n");
+        monitor_printf(mon, "KO: could put this call on hold\n");
         return;
     }
     monitor_printf(mon, "OK\n");
@@ -1529,17 +1529,17 @@ void android_console_gsm_accept(Monitor* mon, const QDict* qdict) {
     if (!args) {
         monitor_printf(
                 mon,
-                "KO: missing argument, try 'gsm accept <phonenumber>'\r\n");
+                "KO: missing argument, try 'gsm accept <phonenumber>'\n");
         return;
     }
     call = amodem_find_call_by_number(android_modem, args);
     if (call == NULL) {
         monitor_printf(
-                mon, "KO: no current call to/from number '%s'\r\n", args);
+                mon, "KO: no current call to/from number '%s'\n", args);
         return;
     }
     if (amodem_update_call(android_modem, args, A_CALL_ACTIVE) < 0) {
-        monitor_printf(mon, "KO: could not activate this call\r\n");
+        monitor_printf(mon, "KO: could not activate this call\n");
         return;
     }
     monitor_printf(mon, "OK\n");
@@ -1549,21 +1549,21 @@ void android_console_gsm_cancel(Monitor* mon, const QDict* qdict) {
     char* args = (char*)qdict_get_try_str(qdict, "arg");
     if (!args) {
         monitor_printf(
-                mon, "KO: missing argument, try 'gsm call <phonenumber>'\r\n");
+                mon, "KO: missing argument, try 'gsm call <phonenumber>'\n");
         return;
     }
     if (gsm_check_number(args)) {
         monitor_printf(
                 mon,
-                "KO: bad phone number format, use digits, # and + only\r\n");
+                "KO: bad phone number format, use digits, # and + only\n");
         return;
     }
     if (!android_modem) {
-        monitor_printf(mon, "KO: modem emulation not running\r\n");
+        monitor_printf(mon, "KO: modem emulation not running\n");
         return;
     }
     if (amodem_disconnect_call(android_modem, args) < 0) {
-        monitor_printf(mon, "KO: could not cancel this number\r\n");
+        monitor_printf(mon, "KO: could not cancel this number\n");
         return;
     }
     monitor_printf(mon, "OK\n");
@@ -1573,8 +1573,8 @@ void android_console_gsm_data(Monitor* mon, const QDict* qdict) {
     int nn;
     monitor_printf(mon,
                    "the 'gsm data <state>' allows you to change the state of "
-                   "your GPRS connection\r\n"
-                   "valid values for <state> are the following:\r\n\r\n");
+                   "your GPRS connection\n"
+                   "valid values for <state> are the following:\n\n");
     for (nn = 0;; nn++) {
         const char* name = _gsm_states[nn].name;
         const char* display = _gsm_states[nn].display;
@@ -1582,9 +1582,9 @@ void android_console_gsm_data(Monitor* mon, const QDict* qdict) {
         if (!name)
             break;
 
-        monitor_printf(mon, "  %-15s %s\r\n", name, display);
+        monitor_printf(mon, "  %-15s %s\n", name, display);
     }
-    monitor_printf(mon, "\r\n");
+    monitor_printf(mon, "\n");
     monitor_printf(mon, "OK\n");
 }
 
@@ -1592,8 +1592,8 @@ void android_console_gsm_voice(Monitor* mon, const QDict* qdict) {
     int nn;
     monitor_printf(mon,
                    "the 'gsm voice <state>' allows you to change the state of "
-                   "your GPRS connection\r\n"
-                   "valid values for <state> are the following:\r\n\r\n");
+                   "your GPRS connection\n"
+                   "valid values for <state> are the following:\n\n");
     for (nn = 0;; nn++) {
         const char* name = _gsm_states[nn].name;
         const char* display = _gsm_states[nn].display;
@@ -1601,29 +1601,29 @@ void android_console_gsm_voice(Monitor* mon, const QDict* qdict) {
         if (!name)
             break;
 
-        monitor_printf(mon, "  %-15s %s\r\n", name, display);
+        monitor_printf(mon, "  %-15s %s\n", name, display);
     }
-    monitor_printf(mon, "\r\n");
+    monitor_printf(mon, "\n");
     monitor_printf(mon, "OK\n");
 }
 
 void android_console_gsm_status(Monitor* mon, const QDict* qdict) {
     char* args = (char*)qdict_get_try_str(qdict, "arg");
     if (args) {
-        monitor_printf(mon, "KO: no argument required\r\n");
+        monitor_printf(mon, "KO: no argument required\n");
         return;
     }
     if (!android_modem) {
-        monitor_printf(mon, "KO: modem emulation not running\r\n");
+        monitor_printf(mon, "KO: modem emulation not running\n");
         return;
     }
     monitor_printf(
             mon,
-            "gsm voice state: %s\r\n",
+            "gsm voice state: %s\n",
             gsm_state_to_string(amodem_get_voice_registration(android_modem)));
     monitor_printf(
             mon,
-            "gsm data state:  %s\r\n",
+            "gsm data state:  %s\n",
             gsm_state_to_string(amodem_get_data_registration(android_modem)));
     monitor_printf(mon, "OK\n");
 }
@@ -1663,13 +1663,13 @@ void android_console_gsm_signal(Monitor* mon, const QDict* qdict) {
     if (top_param < SIGNAL_RSSI) {
         monitor_printf(mon,
                        "KO: not enough arguments: see 'help gsm signal' for "
-                       "details\r\n");
+                       "details\n");
         return;
     }
 
     int rssi = params[SIGNAL_RSSI];
     if ((rssi < 0 || rssi > 31) && rssi != 99) {
-        monitor_printf(mon, "KO: invalid RSSI - must be 0..31 or 99\r\n");
+        monitor_printf(mon, "KO: invalid RSSI - must be 0..31 or 99\n");
         return;
     }
 
@@ -1677,7 +1677,7 @@ void android_console_gsm_signal(Monitor* mon, const QDict* qdict) {
     if (top_param >= SIGNAL_BER) {
         int ber = params[SIGNAL_BER];
         if ((ber < 0 || ber > 7) && ber != 99) {
-            monitor_printf(mon, "KO: invalid BER - must be 0..7 or 99\r\n");
+            monitor_printf(mon, "KO: invalid BER - must be 0..7 or 99\n");
             return;
         }
         last_ber = ber;

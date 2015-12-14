@@ -5378,9 +5378,6 @@ static void monitor_event(void *opaque, int event)
         }
         mon->reset_seen = 1;
         mon_refcount++;
-#ifdef CONFIG_ANDROID
-        monitor_printf(mon, "OK\n");
-#endif
         break;
 
     case CHR_EVENT_CLOSED:
@@ -5502,7 +5499,11 @@ Monitor * monitor_init(CharDriverState *chr, int flags)
     if (flags & MONITOR_ANDROID_CONSOLE) {
         mon->cmds.static_table = android_cmds;
         mon->prompt = "";
-        mon->banner = "Android Console: type 'help' for a list of commands";
+        mon->banner = "Android Console: type 'help' for a list of commands"
+#ifdef CONFIG_ANDROID
+            "\nOK"
+#endif
+            ;
         mon->print_error = android_monitor_print_error;
     }
 
