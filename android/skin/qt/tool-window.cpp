@@ -160,6 +160,22 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
     QTextStream stream(&default_shortcuts);
     mShortcutKeyStore.populateFromTextStream(stream, parseQtUICommand);
 
+    // Update tool tips on all push buttons.
+    QList<QPushButton*> child_buttons = findChildren<QPushButton*>();
+    for(auto button : child_buttons) {
+        QVariant ui_command = button->property("uiCommand");
+        if (ui_command.isValid()) {
+            QtUICommand cmd;
+            if (parseQtUICommand(ui_command.toString(), &cmd)) {
+                QVector<QKeySequence> shortcuts;
+                mShortcutKeyStore.reverseLookup(cmd, &shortcuts);
+                if (shortcuts.length() > 0) {
+                    button->setToolTip(shortcuts[0].toString());
+                }
+            }
+        }
+    }
+    
     // Need to add this one separately because QKeySequence cannot parse
     // the string "Ctrl+Alt".
     mShortcutKeyStore.add(
