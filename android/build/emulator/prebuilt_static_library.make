@@ -1,4 +1,4 @@
-# Copyright (C) 2008 The Android Open Source Project
+# Copyright (C) 2015 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,12 @@
 # limitations under the License.
 #
 
-# used to return in 'dir' the name of the current operating system
-# we really get the value from the configuration script
-#
-dir := $(HOST_OS)
+#$(info PREBUILT_STATIC_LIBRARY $(LOCAL_MODULE) SRCS=$(LOCAL_SRC_FILES))
+LOCAL_BUILT_MODULE := $(call local-library-path,$(LOCAL_MODULE))
+
+$(LOCAL_BUILT_MODULE): $(LOCAL_SRC_FILES)
+	@mkdir -p $(dir $@)
+	@echo "PrebuiltLibrary: $@"
+	$(hide) cp -f $< $@
+
+_BUILD_LIBRARIES += $(LOCAL_BUILT_MODULE)

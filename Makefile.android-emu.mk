@@ -131,7 +131,7 @@ LOCAL_SRC_FILES := \
     android/utils/vector.c \
     android/utils/x86_cpuid.cpp \
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
 LOCAL_SRC_FILES += \
     android/base/synchronization/ConditionVariable_win32.cpp \
     android/base/threads/Thread_win32.cpp \
@@ -206,7 +206,7 @@ LOCAL_SRC_FILES := \
     android/cpu_accelerator.cpp \
     android/crashreport/CrashSystem.cpp \
     android/crashreport/CrashReporter_common.cpp \
-    android/crashreport/CrashReporter_$(HOST_OS).cpp \
+    android/crashreport/CrashReporter_$(BUILD_TARGET_OS).cpp \
     android/curl-support.c \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
@@ -290,17 +290,17 @@ LOCAL_SRC_FILES := \
     android/wear-agent/PairUpWearPhone.cpp \
 
 # Platform-specific camera capture
-ifeq ($(HOST_OS),linux)
+ifeq ($(BUILD_TARGET_OS),linux)
     LOCAL_SRC_FILES += \
         android/camera/camera-capture-linux.c
 endif
 
-ifeq ($(HOST_OS),darwin)
+ifeq ($(BUILD_TARGET_OS),darwin)
     LOCAL_SRC_FILES += \
         android/camera/camera-capture-mac.m
 endif
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
     LOCAL_SRC_FILES += \
         android/camera/camera-capture-windows.cpp \
         android/windows_installer.cpp \
@@ -329,7 +329,7 @@ ANDROID_EMU_LDLIBS := \
     $(LIBCURL_LDLIBS) \
     $(BREAKPAD_CLIENT_LDLIBS) \
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
 # For capCreateCaptureWindow used in camera-capture-windows.cpp
 ANDROID_EMU_LDLIBS += -lvfw32
 endif
@@ -340,7 +340,7 @@ endif
 #
 #
 
-$(call start-emulator-program, android_emu$(HOST_SUFFIX)_unittests)
+$(call start-emulator-program, android_emu$(BUILD_TARGET_SUFFIX)_unittests)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
@@ -432,7 +432,7 @@ LOCAL_SRC_FILES := \
   android/wear-agent/testing/WearAgentTestUtils.cpp \
   android/wear-agent/WearAgent_unittest.cpp \
 
-ifeq (windows,$(HOST_OS))
+ifeq (windows,$(BUILD_TARGET_OS))
 LOCAL_SRC_FILES += \
   android/base/files/ScopedHandle_unittest.cpp \
   android/base/files/ScopedRegKey_unittest.cpp \
@@ -454,7 +454,8 @@ LOCAL_STATIC_LIBRARIES += \
     emulator-libgtest \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
-# cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/
+# cannot pick up our custom versions of the library from
+# $(BUILD_OBJS_DIR)/lib[64]/
 $(call local-link-static-c++lib)
 
 $(call end-emulator-program)
@@ -555,7 +556,7 @@ $(call end-emulator-library)
 
 # emulator-libui unit tests
 
-$(call start-emulator-program, emulator$(HOST_SUFFIX)_libui_unittests)
+$(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)_libui_unittests)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
@@ -577,7 +578,8 @@ LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
-# cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/
+# cannot pick up our custom versions of the library from
+# $(BUILD_OBJS_DIR)/lib[64]/
 $(call local-link-static-c++lib)
 
 $(call end-emulator-program)

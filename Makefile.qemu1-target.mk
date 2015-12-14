@@ -20,11 +20,11 @@ endif
 ###  Used by both the core and standalone programs.
 ###
 
-TCG_TARGET := $(HOST_ARCH)
-ifeq ($(HOST_ARCH),x86)
+TCG_TARGET := $(BUILD_TARGET_ARCH)
+ifeq ($(BUILD_TARGET_ARCH),x86)
   TCG_TARGET := i386
 endif
-ifeq ($(HOST_ARCH),x86_64)
+ifeq ($(BUILD_TARGET_ARCH),x86_64)
   TCG_TARGET := i386
 endif
 
@@ -161,21 +161,21 @@ LOCAL_SRC_FILES += \
     target-i386/svm_helper.c \
     target-i386/translate.c \
 
-ifeq ($(HOST_OS),darwin)
+ifeq ($(BUILD_TARGET_OS),darwin)
 LOCAL_SRC_FILES += \
     target-i386/hax-all.c \
     target-i386/hax-darwin.c \
 
 endif
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
 LOCAL_SRC_FILES += \
     target-i386/hax-all.c \
     target-i386/hax-windows.c \
 
 endif
 
-ifeq ($(HOST_OS),linux)
+ifeq ($(BUILD_TARGET_OS),linux)
 LOCAL_SRC_FILES += \
     target-i386/kvm.c \
     target-i386/kvm-gs-restore.c \
@@ -205,7 +205,7 @@ endif  # EMULATOR_TARGET_ARCH == mips
 
 # What a mess, os-posix.c depends on the exact values of options
 # which are target specific.
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
     LOCAL_SRC_FILES += \
         os-win32.c \
         tap-win32.c \
@@ -229,7 +229,7 @@ $(call end-emulator-library)
 ###
 ###
 
-$(call start-emulator-program, emulator$(HOST_SUFFIX)-$(EMULATOR_TARGET_ARCH))
+$(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)-$(EMULATOR_TARGET_ARCH))
 
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
@@ -254,7 +254,7 @@ LOCAL_GENERATE_SYMBOLS := true
 $(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)
 $(call gen-hw-config-defs)
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
   $(eval $(call insert-windows-icon))
 endif
 

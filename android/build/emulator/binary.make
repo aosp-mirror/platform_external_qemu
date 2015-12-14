@@ -16,6 +16,42 @@
 # definitions shared by host_executable.make and host_static_library.make
 #
 
+# Sanity check
+LOCAL_BITS ?= 64
+ifneq (,$(filter-out 32 64,$(LOCAL_BITS)))
+    $(error LOCAL_BITS should be defined to either 32 or 64))
+endif
+
+$(call local-build-define,CC)
+$(call local-build-define,CXX)
+$(call local-build-define,AR)
+$(call local-build-define,LD)
+$(call local-build-define,DUMPSYMS)
+
+LOCAL_CFLAGS := \
+    $(call local-build-var,CFLAGS$(LOCAL_BITS)) \
+    $(call local-build-var,CFLAGS) \
+    $(LOCAL_CFLAGS)
+
+LOCAL_LDFLAGS := \
+    $(call local-build-var,LDFLAGS$(LOCAL_BITS)) \
+    $(call local-build-var,LDFLAGS) \
+    $(LOCAL_LDFLAGS)
+
+LOCAL_LDLIBS := \
+    $(LOCAL_LDLIBS) \
+    $(call local-build-var,LDLIBS) \
+    $(call local-build-var,LDLIBS$(LOCAL_BITS))
+
+# Ensure only one of -m32 or -m64 is being used and place it first.
+LOCAL_CFLAGS := \
+    -m$(LOCAL_BITS) \
+    $(filter-out -m32 -m64, $(LOCAL_CFLAGS))
+
+LOCAL_LDFLAGS := \
+    -m$(LOCAL_BITS) \
+    $(filter-out -m32 -m64, $(LOCAL_LDFLAGS))
+
 LOCAL_CPP_EXTENSIONS := .cpp .cc .C .cxx .c++
 LOCAL_CXX_EXTENSION_PATTERNS := $(foreach pattern,$(LOCAL_CPP_EXTENSIONS),%$(pattern))
 
@@ -36,7 +72,7 @@ LOCAL_CFLAGS := $(strip $(patsubst %,-I%,$(LOCAL_C_INCLUDES)) $(LOCAL_CFLAGS))
 
 # HACK ATTACK: For the Darwin x86 build, we need to add
 # '-read_only_relocs suppress' to the linker command to avoid errors.
-ifeq ($(HOST_OS)-$(HOST_BITS),darwin-32)
+ifeq ($(BUILD_TARGET_OS)-$(BUILD_TARGET_BITS),darwin-32)
   LOCAL_LDLIBS += -Wl,-read_only_relocs,suppress
 endif
 
@@ -76,5 +112,3 @@ $(foreach src,$(LOCAL_OBJC_SOURCES), \
 $(LOCAL_OBJECTS): | $(LOCAL_GENERATED_SOURCES) $(LOCAL_ADDITIONAL_DEPENDENCIES)
 
 LOCAL_OBJECTS += $(LOCAL_PREBUILT_OBJ_FILES)
-
-CLEAN_OBJS_DIRS += $(LOCAL_OBJS_DIR)

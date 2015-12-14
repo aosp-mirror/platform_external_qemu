@@ -19,7 +19,7 @@ host_commonSources := $(commonSources)
 
 host_commonLdLibs := $(CXX_STD_LIB)
 
-ifneq (windows,$(HOST_OS))
+ifneq (windows,$(BUILD_TARGET_OS))
     host_commonSources += \
         thread_pthread.cpp \
 
@@ -52,12 +52,12 @@ host_commonSources := \
     thread_unittest.cpp \
     unique_integer_map_unittest.cpp \
 
-$(call emugl-begin-host-executable,emugl$(HOST_SUFFIX)_common_host_unittests)
+$(call emugl-begin-host-executable,emugl$(BUILD_TARGET_SUFFIX)_common_host_unittests)
 LOCAL_SRC_FILES := $(host_commonSources)
 $(call emugl-import,libemugl_common libemugl_gtest)
 $(call emugl-end-module)
 
-$(call emugl-begin-host-shared-library,lib$(HOST_SUFFIX)emugl_test_shared_library)
+$(call emugl-begin-host-shared-library,lib$(BUILD_TARGET_SUFFIX)emugl_test_shared_library)
 LOCAL_SRC_FILES := testing/test_shared_library.cpp
 LOCAL_CFLAGS := -fvisibility=default
 $(call emugl-end-module)

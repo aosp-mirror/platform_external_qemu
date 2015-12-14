@@ -19,13 +19,13 @@
 
 #$(info STATIC_LIBRARY SRCS=$(LOCAL_SRC_FILES))
 LOCAL_BUILT_MODULE := $(call local-library-path,$(LOCAL_MODULE))
-LOCAL_CC ?= $(call local-host-tool,CC)
-LOCAL_CXX ?= $(call local-host-tool,CXX)
-include $(BUILD_SYSTEM)/binary.make
+LOCAL_CC ?= $(call local-build-var,CC)
+LOCAL_CXX ?= $(call local-build-var,CXX)
+include $(_BUILD_CORE_DIR)/emulator/binary.make
 
 LOCAL_AR := $(strip $(LOCAL_AR))
 ifndef LOCAL_AR
-    LOCAL_AR := $(call local-host-tool,AR)
+    LOCAL_AR := $(call local-build-var,AR)
 endif
 ARFLAGS := crs
 
@@ -36,4 +36,4 @@ $(LOCAL_BUILT_MODULE): $(LOCAL_OBJECTS)
 	@echo "Library: $@"
 	$(hide) $(PRIVATE_AR) $(ARFLAGS) $@ $(PRIVATE_OBJECTS)
 
-LIBRARIES += $(LOCAL_BUILT_MODULE)
+_BUILD_LIBRARIES += $(LOCAL_BUILT_MODULE)

@@ -17,7 +17,7 @@ LIBEXT4_UTILS_SOURCES := \
 LIBEXT4_UTILS_INCLUDES := $(LOCAL_PATH)/include
 
 LIBEXT4_UTILS_CFLAGS := -DHOST
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
     LIBEXT4_UTILS_CFLAGS += -DUSE_MINGW=1
 endif
 
@@ -30,7 +30,7 @@ LOCAL_C_INCLUDES := \
 LOCAL_CFLAGS := $(LIBEXT4_UTILS_CFLAGS)
 $(call end-emulator-library)
 
-$(call start-emulator-program,emulator$(HOST_SUFFIX)_make_ext4fs)
+$(call start-emulator-program,emulator$(BUILD_TARGET_SUFFIX)_make_ext4fs)
 LOCAL_SRC_FILES := src/make_ext4fs_main.c
 LOCAL_C_INCLUDES := \
     $(LIBEXT4_UTILS_INCLUDES) \

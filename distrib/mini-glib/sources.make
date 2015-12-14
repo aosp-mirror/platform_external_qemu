@@ -7,7 +7,7 @@ MINIGLIB_INCLUDES := $(MINIGLIB_DIR)/include
 MINIGLIB_SOURCES := \
     $(MINIGLIB_DIR)/src/glib-mini.c \
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
 MINIGLIB_SOURCES += \
     $(MINIGLIB_DIR)/src/glib-mini-win32.c \
 

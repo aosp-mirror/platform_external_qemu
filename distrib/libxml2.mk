@@ -1,6 +1,6 @@
 # Build rules for prebuilt libxml2 static library
 
-LIBXML2_TOP_DIR := $(LIBXML2_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
+LIBXML2_TOP_DIR := $(LIBXML2_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
 
 $(call define-emulator-prebuilt-library, \
     emulator-libxml2, \

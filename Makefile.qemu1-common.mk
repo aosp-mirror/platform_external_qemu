@@ -45,23 +45,23 @@ AUDIO_SOURCES := noaudio.c wavaudio.c wavcapture.c mixeng.c
 AUDIO_CFLAGS  := -I$(LOCAL_PATH)/audio -DHAS_AUDIO
 AUDIO_LDLIBS  :=
 
-ifeq ($(HOST_OS),darwin)
+ifeq ($(BUILD_TARGET_OS),darwin)
   CONFIG_COREAUDIO ?= yes
   AUDIO_CFLAGS += -DHOST_BSD=1
 endif
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
   CONFIG_WINAUDIO ?= yes
 endif
 
-ifeq ($(HOST_OS),linux)
+ifeq ($(BUILD_TARGET_OS),linux)
   CONFIG_OSS  ?= yes
   CONFIG_ALSA ?= yes
   CONFIG_PULSEAUDIO ?= yes
   CONFIG_ESD  ?= yes
 endif
 
-ifeq ($(HOST_OS),freebsd)
+ifeq ($(BUILD_TARGET_OS),freebsd)
   CONFIG_OSS ?= yes
 endif
 
@@ -102,7 +102,7 @@ endif
 AUDIO_SOURCES := $(call sort,$(AUDIO_SOURCES:%=audio/%))
 
 # other flags
-ifneq ($(HOST_OS),windows)
+ifneq ($(BUILD_TARGET_OS),windows)
     AUDIO_LDLIBS += -ldl
 else
 endif
@@ -153,7 +153,7 @@ LOCAL_CFLAGS := \
 
 # this is very important, otherwise the generated binaries may
 # not link properly on our build servers
-ifeq ($(HOST_OS),linux)
+ifeq ($(BUILD_TARGET_OS),linux)
 LOCAL_CFLAGS += -fno-stack-protector
 endif
 
@@ -246,14 +246,14 @@ LOCAL_SRC_FILES += \
     util/yield-android.c \
     $(MINIGLIB_SOURCES) \
 
-ifeq ($(HOST_ARCH),x86)
+ifeq ($(BUILD_TARGET_ARCH),x86)
     LOCAL_SRC_FILES += disas/i386.c
 endif
-ifeq ($(HOST_ARCH),x86_64)
+ifeq ($(BUILD_TARGET_ARCH),x86_64)
     LOCAL_SRC_FILES += disas/i386.c
 endif
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
     LOCAL_SRC_FILES += \
         block/raw-win32.c \
         util/qemu-thread-win32.c \

@@ -8,11 +8,11 @@
 #       EMULATOR_PROGRAM_BITNESS.
 #
 
-$(call start-emulator-program, emulator$(HOST_SUFFIX)-crash-service)
+$(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)-crash-service)
 LOCAL_SRC_FILES := \
     android/crashreport/main-crash-service.cpp \
     android/crashreport/CrashService_common.cpp \
-    android/crashreport/CrashService_$(HOST_OS).cpp \
+    android/crashreport/CrashService_$(BUILD_TARGET_OS).cpp \
     android/crashreport/ui/ConfirmDialog.cpp \
     android/resource.c \
     android/skin/resource.c \
@@ -27,7 +27,7 @@ LOCAL_QT_MOC_SRC_FILES := \
     android/crashreport/ui/ConfirmDialog.h \
 
 LOCAL_LDFLAGS :=
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
 LOCAL_LDFLAGS += -L$(QT_TOP_DIR)/bin
 else
 LOCAL_LDFLAGS += $(EMULATOR_LIBUI_LDFLAGS)
@@ -57,7 +57,7 @@ LOCAL_C_INCLUDES += \
     $(BREAKPAD_INCLUDES) \
     $(BREAKPAD_CLIENT_INCLUDES) \
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
 $(eval $(call insert-windows-icon))
 endif
 
@@ -73,7 +73,7 @@ $(call end-emulator-program)
 #       EMULATOR_PROGRAM_BITNESS.
 #
 
-$(call start-emulator-program, emulator$(HOST_SUFFIX)_test_crasher)
+$(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)_test_crasher)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
@@ -85,7 +85,7 @@ LOCAL_CFLAGS += -O0 $(LIBCURL_CFLAGS)
 
 LOCAL_SRC_FILES += \
     android/crashreport/CrashService_common.cpp \
-    android/crashreport/CrashService_$(HOST_OS).cpp \
+    android/crashreport/CrashService_$(BUILD_TARGET_OS).cpp \
     android/crashreport/CrashService_unittest.cpp \
     android/crashreport/CrashSystem_unittest.cpp \
     android/crashreport/testing/main-test-crasher.cpp \
@@ -99,7 +99,8 @@ LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
-# cannot pick up our custom versions of the library from $(OBJS_DIR)/lib[64]/
+# cannot pick up our custom versions of the library from
+# $(BUILD_OBJS_DIR)/lib[64]/
 $(call local-link-static-c++lib)
 
 $(call end-emulator-program)

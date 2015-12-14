@@ -1,3 +1,5 @@
+BUILD_TARGET_TAG := $(BUILD_TARGET_OS)-$(BUILD_TARGET_ARCH)
+
 # Build libext4_utils and related modules/
 include $(LOCAL_PATH)/distrib/zlib.mk
 include $(LOCAL_PATH)/distrib/libcurl.mk
@@ -29,7 +31,7 @@ EMULATOR_COMMON_CFLAGS := -Werror=implicit-function-declaration
 # Include the emulator version definition from Makefile.common.mk
 EMULATOR_COMMON_CFLAGS += $(EMULATOR_VERSION_CFLAGS)
 
-ifeq (true,$(BUILD_DEBUG_EMULATOR))
+ifeq (true,$(BUILD_DEBUG))
     EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=1
 else
     EMULATOR_COMMON_CFLAGS += -DENABLE_DLOG=0
@@ -42,7 +44,7 @@ endif
 
 # Required to access config-host.h
 EMULATOR_COMMON_INCLUDES := \
-    $(OBJS_DIR)/build
+    $(BUILD_OBJS_DIR)/build
 
 ##############################################################################
 ##############################################################################
@@ -62,7 +64,7 @@ EMULATOR_COMMON_INCLUDES := \
 
 # First, define a rule to generate a dummy "emulator_hw_config_defs" module
 # which purpose is simply to host the generated header in its output directory.
-intermediates := $(call intermediates-dir-for,$(HOST_BITS),emulator_hw_config_defs)
+intermediates := $(call intermediates-dir-for,$(BUILD_TARGET_BITS),emulator_hw_config_defs)
 
 QEMU_HARDWARE_PROPERTIES_INI := $(LOCAL_PATH)/android/avd/hardware-properties.ini
 QEMU_HW_CONFIG_DEFS_H := $(intermediates)/android/avd/hw-config-defs.h
@@ -83,7 +85,7 @@ gen-hw-config-defs = \
 include $(LOCAL_PATH)/Makefile.android-emu.mk
 include $(LOCAL_PATH)/Makefile.qemu1-common.mk
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
   # on Windows, link the icon file as well into the executable
   # unfortunately, our build system doesn't help us much, so we need
   # to use some weird pathnames to make this work...
@@ -91,18 +93,18 @@ ifeq ($(HOST_OS),windows)
 WINDRES_CPU_32 := i386
 WINDRES_CPU_64 := x86-64
 
-EMULATOR_ICON_OBJ := $(OBJS_DIR)/build/emulator_icon$(HOST_BITS).o
-$(EMULATOR_ICON_OBJ): PRIVATE_TARGET := $(WINDRES_CPU_$(HOST_BITS))
+EMULATOR_ICON_OBJ := $(BUILD_OBJS_DIR)/build/emulator_icon$(BUILD_TARGET_BITS).o
+$(EMULATOR_ICON_OBJ): PRIVATE_TARGET := $(WINDRES_CPU_$(BUILD_TARGET_BITS))
 $(EMULATOR_ICON_OBJ): $(LOCAL_PATH)/images/emulator_icon.rc
 	@echo "Windres ($(PRIVATE_TARGET)): $@"
-	$(hide) $(MY_WINDRES) --target=pe-$(PRIVATE_TARGET) $< -I $(LOCAL_PATH)/images -o $@
+	$(hide) $(BUILD_TARGET_WINDRES) --target=pe-$(PRIVATE_TARGET) $< -I $(LOCAL_PATH)/images -o $@
 
 # Usage: $(eval $(call insert-windows-icon))
 define insert-windows-icon
     LOCAL_PREBUILT_OBJ_FILES += $(EMULATOR_ICON_OBJ)
 endef
 
-endif  # HOST_OS == windows
+endif  # BUILD_TARGET_OS == windows
 
 # We want to build all variants of the emulator binaries. This makes
 # it easier to catch target-specific regressions during emulator development.
@@ -124,7 +126,7 @@ include $(LOCAL_PATH)/Makefile.qemu1-target.mk
 
 # NOTE: Build as 32-bit or 64-bit executable, depending on the value of
 #       EMULATOR_PROGRAM_BITNESS.
-ifeq ($(HOST_BITS),$(EMULATOR_PROGRAM_BITNESS))
+ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
 $(call start-emulator-program, emulator)
 
 LOCAL_SRC_FILES := \
@@ -140,12 +142,12 @@ LOCAL_IGNORE_BITNESS := true
 
 LOCAL_GENERATE_SYMBOLS := true
 
-ifeq ($(HOST_OS),windows)
+ifeq ($(BUILD_TARGET_OS),windows)
 $(eval $(call insert-windows-icon))
 endif
 
 # To avoid runtime linking issues on Linux and Windows, a custom copy of the
-# C++ standard library is copied to $(OBJS_DIR)/lib[64], a path that is added
+# C++ standard library is copied to $(BUILD_OBJS_DIR)/lib[64], a path that is added
 # to the runtime library search path by the top-level 'emulator' launcher
 # program before it spawns the emulation engine. However, 'emulator' cannot
 # use these versions of the library, so statically link it against the
@@ -153,7 +155,7 @@ endif
 $(call local-link-static-c++lib)
 
 $(call end-emulator-program)
-endif  # HOST_BITS == EMULATOR_PROGRAM_BITNESS
+endif  # BUILD_TARGET_BITS == EMULATOR_PROGRAM_BITNESS
 
 include $(LOCAL_PATH)/Makefile.crash-service.mk
 
@@ -162,17 +164,13 @@ include $(LOCAL_PATH)/Makefile.crash-service.mk
 ###
 ###  GPU emulation libraries
 ###
-###  Build directly from sources when using the standalone build.
+include $(LOCAL_PATH)/distrib/android-emugl/Android.mk
+
+##############################################################################
+##############################################################################
 ###
-ifeq (,$(strip $(wildcard $(EMULATOR_EMUGL_SOURCES_DIR))))
-$(error Cannot find GPU emulation sources directory: $(EMULATOR_EMUGL_SOURCES_DIR))
-endif
-
-ifeq (true,$(BUILD_DEBUG_EMULATOR))
-EMUGL_BUILD_DEBUG := 1
-endif
-include $(EMULATOR_EMUGL_SOURCES_DIR)/Android.mk
-
+###  QEMU2
+###
 ifdef QEMU2_TOP_DIR
 include $(QEMU2_TOP_DIR)/android-qemu2-glue/build/Makefile.qemu2.mk
 endif

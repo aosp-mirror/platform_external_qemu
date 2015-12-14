@@ -13,30 +13,19 @@
 # limitations under the License.
 #
 
-# this turns off the suffix rules built into make
-.SUFFIXES:
+BUILD_SYSTEM_ROOT := $(_BUILD_CORE_DIR)
 
-# this turns off the RCS / SCCS implicit rules of GNU Make
-% : RCS/%,v
-% : RCS/%
-% : %,v
-% : s.%
-% : SCCS/s.%
+# We use the GNU Make Standard Library
+include $(BUILD_SYSTEM_ROOT)/gmsl/gmsl
 
-# If a rule fails, delete $@.
-.DELETE_ON_ERROR:
-
-# shared definitions
-ifeq ($(strip $(SHOW)$(V)),)
-define pretty
-@echo $1
-endef
-hide := @
-else
-define pretty
-endef
-hide :=
-endif
+include $(_BUILD_CORE_DIR)/core/definitions-tests.mk
+include $(_BUILD_CORE_DIR)/core/definitions-init.mk
+include $(_BUILD_CORE_DIR)/core/definitions-utils.mk
+include $(_BUILD_CORE_DIR)/core/definitions-host.mk
+include $(_BUILD_CORE_DIR)/core/definitions-graph.mk
+include $(_BUILD_CORE_DIR)/core/definitions-modules.mk
+include $(_BUILD_CORE_DIR)/core/definitions-files.mk
+#include $(_BUILD_CORE_DIR)/core/definitions-build.mk
 
 # Replace all extensions in files from $1 matching any of
 # $(LOCAL_CXX_EXTENSION_PATTERNS) with .o
@@ -46,48 +35,40 @@ local-cxx-src-to-obj = $(strip \
         $(eval _local_cxx_src := $$(_local_cxx_src:$(pattern)=%.o)))\
     $(_local_cxx_src))
 
-# Return the parent directory of a given path.
-# $1: path
-parent-dir = $(dir $1)
-
-# Return the directory of the current Makefile / Android.mk.
-my-dir = $(call parent-dir,$(lastword $(MAKEFILE_LIST)))
-
 # Return the directory containing the intermediate files for a given
 # kind of executable
 # $1 = bitness (32 or 64)
 # $2 = module name
-intermediates-dir-for = $(OBJS_DIR)/build/intermediates$(1)/$(2)
+intermediates-dir-for = $(BUILD_OBJS_DIR)/build/intermediates$(1)/$(2)
 
-# Return the name of a given host tool, based on the value of
-# LOCAL_HOST_BUILD. If the variable is defined, return $(BUILD_$1),
-# otherwise return $(HOST_$1).
-# $1: Tool name (e.g. CC, LD, etc...)
-#
-local-host-tool = $(if $(strip $(LOCAL_HOST_BUILD)),$(BUILD_$1),$(MY_$1))
-local-host-exe = $(call local-host-tool,EXEEXT)
-local-host-dll = $(call local-host-tool,DLLEXT)
+# Return the name of a given build-related variable that can be defined either
+# for the build host or build target. I.e. if LOCAL_HOST_BUILD is not defined,
+# return $(BUILD_TARGET_$1), or $(BUILD_HOST_$1) instead.
+# $1: Variable name suffix (e.g. CC, LD, etc...)
+local-build-var = $(if $(strip $(LOCAL_HOST_BUILD)),$(BUILD_HOST_$1),$(BUILD_TARGET_$1))
 
-local-host-define = $(if $(strip $(LOCAL_$1)),,$(eval LOCAL_$1 := $$(call local-host-tool,$1)))
+# If LOCAL_XXX is not defined, set it to the value of BUILD_TARGET_XXX or
+# BUILD_HOST_XXX depending on the definition of LOCAL_HOST_BUILD.
+local-build-define = $(if $(strip $(LOCAL_$1)),,$(eval LOCAL_$1 := $$(call local-build-var,$1)))
 
 # Return the directory containing the intermediate files for the current
 # module. LOCAL_MODULE must be defined before calling this.
-local-intermediates-dir = $(call intermediates-dir-for,$(HOST_BITS),$(LOCAL_MODULE))
+local-intermediates-dir = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(LOCAL_MODULE))
 
 # Location of intermediate static libraries during build.
-local-library-path = $(call intermediates-dir-for,$(HOST_BITS),$(1))/$(1).a
+local-library-path = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(1))/$(1).a
 
 # Location of unstripped executables during build.
-local-executable-path = $(call intermediates-dir-for,$(HOST_BITS),$(1))/$(1)$(call local-host-tool,EXEEXT)
+local-executable-path = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(1))/$(1)$(call local-build-var,EXEEXT)
 
 # Location of unstripped shared libraries during build.
-local-shared-library-path = $(call intermediates-dir-for,$(HOST_BITS),$(1))/$(1)$(call local-host-tool,DLLEXT)
+local-shared-library-path = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(1))/$(1)$(call local-build-var,DLLEXT)
 
 # Location of final (potentially stripped) executables.
-local-executable-install-path = $(OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)$(1)$(call local-host-tool,EXEEXT)
+local-executable-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)$(1)$(call local-build-var,EXEEXT)
 
 # Location of final (potentially stripped) shared libraries.
-local-shared-library-install-path = $(OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR),lib$(HOST_SUFFIX))/$(1)$(call local-host-tool,DLLEXT)
+local-shared-library-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR),lib$(BUILD_TARGET_SUFFIX))/$(1)$(call local-build-var,DLLEXT)
 
 ldlibs_start_whole := -Wl,--whole-archive
 ldlibs_end_whole := -Wl,--no-whole-archive
@@ -111,13 +92,13 @@ local-static-libraries-ldlibs-linux = $(strip \
 
 local-static-libraries-ldlibs-windows =  $(local-static-libraries-ldlibs-linux)
 
-local-static-libraries-ldlibs = $(local-static-libraries-ldlibs-$(HOST_OS))
+local-static-libraries-ldlibs = $(local-static-libraries-ldlibs-$(BUILD_TARGET_OS))
 
 # Expand to a shell statement that changes the runtime library search path.
 # Note that this is only used for Qt-related stuff, and on Windows, the
 # Windows libraries are placed under bin/ instead of lib/ so there is no
 # point in changing the PATH variable.
-set-host-library-search-path = $(call set-host-library-search-path-$(HOST_OS),$1)
+set-host-library-search-path = $(call set-host-library-search-path-$(BUILD_TARGET_OS),$1)
 set-host-library-search-path-linux = LD_LIBRARY_PATH=$1
 set-host-library-search-path-darwin = DYLD_LIBRARY_PATH=$1
 set-host-library-search-path-windows =
@@ -132,7 +113,7 @@ define  compile-c-source
 SRC:=$(1)
 OBJ:=$$(LOCAL_OBJS_DIR)/$$(SRC:%.c=%.o)
 LOCAL_OBJECTS += $$(OBJ)
-DEPENDENCY_DIRS += $$(dir $$(OBJ))
+_BUILD_DEPENDENCY_DIRS += $$(dir $$(OBJ))
 $$(OBJ): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
 $$(OBJ): PRIVATE_CC     := $$(LOCAL_CC)
 $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
@@ -143,7 +124,7 @@ $$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
-	$(hide) $$(BUILD_SYSTEM)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
 # Compile a C++ source file
@@ -152,7 +133,7 @@ define  compile-cxx-source
 SRC:=$(1)
 OBJ:=$$(LOCAL_OBJS_DIR)/$$(call local-cxx-src-to-obj,$$(SRC))
 LOCAL_OBJECTS += $$(OBJ)
-DEPENDENCY_DIRS += $$(dir $$(OBJ))
+_BUILD_DEPENDENCY_DIRS += $$(dir $$(OBJ))
 $$(OBJ): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
 $$(OBJ): PRIVATE_CXX    := $$(LOCAL_CXX)
 $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
@@ -163,7 +144,7 @@ $$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CXX) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
-	$(hide) $$(BUILD_SYSTEM)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
 # Compile an Objective-C source file
@@ -172,7 +153,7 @@ define  compile-objc-source
 SRC:=$(1)
 OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%.m=%.o))
 LOCAL_OBJECTS += $$(OBJ)
-DEPENDENCY_DIRS += $$(dir $$(OBJ))
+_BUILD_DEPENDENCY_DIRS += $$(dir $$(OBJ))
 $$(OBJ): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
 $$(OBJ): PRIVATE_CC     := $$(LOCAL_CC)
 $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
@@ -183,7 +164,7 @@ $$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
-	$(hide) $$(BUILD_SYSTEM)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
 # Compile a generated C source files#
@@ -192,7 +173,7 @@ define compile-generated-c-source
 SRC:=$(1)
 OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%.c=%.o))
 LOCAL_OBJECTS += $$(OBJ)
-DEPENDENCY_DIRS += $$(dir $$(OBJ))
+_BUILD_DEPENDENCY_DIRS += $$(dir $$(OBJ))
 $$(OBJ): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
 $$(OBJ): PRIVATE_CC     := $$(LOCAL_CC)
 $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
@@ -203,14 +184,14 @@ $$(OBJ): $$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
-	$(hide) $$(BUILD_SYSTEM)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
 define compile-generated-cxx-source
 SRC:=$(1)
 OBJ:=$$(LOCAL_OBJS_DIR)/$$(call local-cxx-src-to-obj,$$(notdir $$(SRC)))
 LOCAL_OBJECTS += $$(OBJ)
-DEPENDENCY_DIRS += $$(dir $$(OBJ))
+_BUILD_DEPENDENCY_DIRS += $$(dir $$(OBJ))
 $$(OBJ): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
 $$(OBJ): PRIVATE_CXX    := $$(LOCAL_CXX)
 $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
@@ -221,7 +202,7 @@ $$(OBJ): $$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CXX) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
-	$(hide) $$(BUILD_SYSTEM)/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
 # Install a file
@@ -255,23 +236,23 @@ define install-stripped-binary
 _SRC := $(1)
 _SRC1 := $$(notdir $$(_SRC))
 _DST := $(2)
-EXECUTABLES += $$(_DST)
+_BUILD_EXECUTABLES += $$(_DST)
 $$(_DST): PRIVATE_DST := $$(_DST)
 $$(_DST): PRIVATE_SRC := $$(_SRC)
-$$(_DST): PRIVATE_OBJCOPY := $$(HOST_OBJCOPY)
+$$(_DST): PRIVATE_OBJCOPY := $$(BUILD_TARGET_OBJCOPY)
 $$(_DST): PRIVATE_OBJCOPY_FLAGS := $(3)
 $$(_DST): $$(_SRC)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Install: $$(PRIVATE_DST)"
-ifeq (true,$$(EMULATOR_STRIP_BINARIES))
-ifeq (darwin,$$(HOST_OS))
+ifeq (true,$$(BUILD_STRIP_BINARIES))
+ifeq (darwin,$$(BUILD_TARGET_OS))
 	$(hide) strip -S -o $$(PRIVATE_DST) $$(PRIVATE_SRC)
-else  # HOST_OS != darwin
+else  # BUILD_TARGET_OS != darwin
 	$(hide) $$(PRIVATE_OBJCOPY) $$(PRIVATE_OBJCOPY_FLAGS) $$(PRIVATE_SRC) $$(PRIVATE_DST)
-endif  # HOST_OS != darwin
-else  # EMULATOR_STRIP_BINARIES != true
+endif  # BUILD_TARGET_OS != darwin
+else  # BUILD_STRIP_BINARIES != true
 	$(hide) cp -f $$(PRIVATE_SRC) $$(PRIVATE_DST)
-endif # EMULATOR_STRIP_BINARIES != true
+endif # BUILD_STRIP_BINARIES != true
 endef
 
 # Install an existing symbol file into the symbols directory
@@ -284,8 +265,8 @@ endif
 $$(eval _SYMB_HEADER := $$(shell head -n1 $$(_INTERMEDIATE_SYMBOL)))
 $$(eval _SYMB_CODE := $$(word 4,$$(_SYMB_HEADER)))
 $$(eval _SYMB_NAME := $$(word 5,$$(_SYMB_HEADER)))
-$$(eval _SYMB_DEST := $(SYMBOLS_DIR)/$$(_SYMB_NAME)/$$(_SYMB_CODE))
-SYMBOLS += $$(_SYMB_DEST)
+$$(eval _SYMB_DEST := $(_BUILD_SYMBOLS_DIR)/$$(_SYMB_NAME)/$$(_SYMB_CODE))
+_BUILD_SYMBOLS += $$(_SYMB_DEST)
 $$(_SYMB_DEST): PRIVATE_INTERMEDIATE_SYMBOL := $$(_INTERMEDIATE_SYMBOL)
 $$(_SYMB_DEST): PRIVATE_SYMBOL_DEST := $$(_SYMB_DEST)
 $$(_SYMB_DEST): $$(_INTERMEDIATE_SYMBOL)
@@ -299,8 +280,8 @@ endef
 define build-install-symbol
 _MODULE := $(1)
 _INTERMEDIATE_SYMBOL := $$(_MODULE).sym
-INTERMEDIATE_SYMBOLS += $$(_INTERMEDIATE_SYMBOL)
-$$(_INTERMEDIATE_SYMBOL): PRIVATE_DUMPSYMS := $$(HOST_DUMPSYMS)
+_BUILD_INTERMEDIATE_SYMBOLS += $$(_INTERMEDIATE_SYMBOL)
+$$(_INTERMEDIATE_SYMBOL): PRIVATE_DUMPSYMS := $$(BUILD_TARGET_DUMPSYMS)
 $$(_INTERMEDIATE_SYMBOL): PRIVATE_MODULE  := $$(_MODULE)
 $$(_INTERMEDIATE_SYMBOL): PRIVATE_INTERMEDIATE_SYMBOL := $$(_INTERMEDIATE_SYMBOL)
 $$(_INTERMEDIATE_SYMBOL): $$(_MODULE)
@@ -309,7 +290,7 @@ $$(_INTERMEDIATE_SYMBOL): $$(_MODULE)
 	$(hide) $$(PRIVATE_DUMPSYMS) $$(PRIVATE_MODULE) > $$(PRIVATE_INTERMEDIATE_SYMBOL)
 	@SYMB_CODE=`head -n1 $$(PRIVATE_INTERMEDIATE_SYMBOL) | cut -d" " -f4` && \
 	SYMB_NAME=`head -n1 $$(PRIVATE_INTERMEDIATE_SYMBOL) | cut -d" " -f5` && \
-	SYMB_DEST=$(SYMBOLS_DIR)/$$$$SYMB_NAME/$$$$SYMB_CODE && \
+	SYMB_DEST=$(_BUILD_SYMBOLS_DIR)/$$$$SYMB_NAME/$$$$SYMB_CODE && \
 	mkdir -p $$$$SYMB_DEST && \
 	echo "Install Symbol: $$$$SYMB_DEST\$$(notdir $$(PRIVATE_INTERMEDIATE_SYMBOL))" && \
 	cp $$(PRIVATE_INTERMEDIATE_SYMBOL) $$$$SYMB_DEST
@@ -329,7 +310,7 @@ OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%.entries=%.def))
 LOCAL_GENERATED_SYMBOL_FILE:=$$(OBJ)
 $$(OBJ): PRIVATE_SRC := $$(SRC)
 $$(OBJ): PRIVATE_DST := $$(OBJ)
-$$(OBJ): PRIVATE_MODE := $$(GEN_ENTRIES_MODE_$(HOST_OS))
+$$(OBJ): PRIVATE_MODE := $$(GEN_ENTRIES_MODE_$(BUILD_TARGET_OS))
 $$(OBJ): $$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Generate symbol file: $$(notdir $$(PRIVATE_DST))"
@@ -344,7 +325,7 @@ EXPORTED_SYMBOL_LIST_windows :=
 EXPORTED_SYMBOL_LIST_darwin := -Wl,-exported_symbols_list,
 EXPORTED_SYMBOL_LIST_linux := -Wl,--version-script=
 
-symbol-file-linker-flags = $(EXPORTED_SYMBOL_LIST_$(HOST_OS))$1
+symbol-file-linker-flags = $(EXPORTED_SYMBOL_LIST_$(BUILD_TARGET_OS))$1
 
 # Generate and compile source file through the Qt 'moc' tool
 # NOTE: This expects QT_MOC_TOOL to be defined.
@@ -408,3 +389,19 @@ $$(UIC_SRC): $$(SRC) $$(QT_UIC_TOOL)
 
 LOCAL_GENERATED_SOURCES += $$(UIC_SRC)
 endef
+
+# Call this function to force a module to link statically to the C++ standard
+# library on platforms that support it (i.e. Linux and Windows).
+local-link-static-c++lib = $(eval $(ev-local-link-static-c++lib))
+define ev-local-link-static-c++lib
+ifeq (darwin,$(BUILD_TARGET_OS))
+LOCAL_LDLIBS += $(CXX_STD_LIB)
+else  # BUILD_TARGET_OS != darwin
+LOCAL_LD := $$(call local-build-var,CXX)
+LOCAL_LDLIBS += -static-libstdc++
+endif  # BUILD_TARGET_OS != darwin
+endef
+
+ifneq (,$(BUILD_SYSTEM_UNIT_TESTS))
+$(call -build-run-all-tests)
+endif

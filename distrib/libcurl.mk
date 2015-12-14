@@ -4,7 +4,7 @@ LIBCURL_OLD_LOCAL_PATH := $(LOCAL_PATH)
 
 LOCAL_PATH := $(call my-dir)
 
-LIBCURL_TOP_DIR := $(LIBCURL_PREBUILTS_DIR)/$(HOST_OS)-$(HOST_ARCH)
+LIBCURL_TOP_DIR := $(LIBCURL_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
 
 $(call define-emulator-prebuilt-library,\
     emulator-libcurl,\
@@ -26,7 +26,7 @@ LIBCURL_STATIC_LIBRARIES := \
     emulator-libcrypto \
     emulator-zlib
 
-ifneq ($(HOST_OS),windows)
+ifneq ($(BUILD_TARGET_OS),windows)
     LIBCURL_LDLIBS += -ldl
 endif
 
