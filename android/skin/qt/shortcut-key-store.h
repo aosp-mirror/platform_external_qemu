@@ -13,13 +13,15 @@
 #include <QKeySequence>
 #include <QString>
 #include <QTextStream>
-#include <map>
+#include <QVector>
+#include <QMap>
 
 // Provides a generic way of mapping keyboard shortcuts to commands.
 // CommandType must be DefaultConstructable.
 template <class CommandType>
 class ShortcutKeyStore {
-    using Container = std::map<QKeySequence, CommandType>;
+    using Container = QMap<QKeySequence, CommandType>;
+    using ReverseContainer = QMap<CommandType, QVector<QKeySequence>>;
 public:
     using iterator = typename Container::iterator;
     using const_iterator = typename Container::const_iterator;
@@ -54,7 +56,7 @@ public:
             if (!command_parse_result || key_seq.isEmpty()) {
                 break;
             } else {
-                mKeySequenceToCommandMap[key_seq] = command;
+                add(key_seq, command);
             }
         }
     }
@@ -62,6 +64,7 @@ public:
     // Explicitly maps the given key sequence to the given command.
     void add(const QKeySequence& key_seq, const CommandType &command) {
         mKeySequenceToCommandMap[key_seq] = command;
+        mCommandToKeySequenceMap[command].push_back(key_seq);
     }
 
     // If the given key sequence matches that of a command in the store,
@@ -72,10 +75,21 @@ public:
         auto it = mKeySequenceToCommandMap.find(key_seq);
         bool must_call_handler = (it != mKeySequenceToCommandMap.end());
         if (must_call_handler) {
-            handler(it->second);
+            handler(it.value());
         }
         return must_call_handler;
     }
+
+    // Performs a reverse lookup: return a vector with all the shortcut keys
+    // (or nullptr if no shortucts correspond to the given command)
+    QVector<QKeySequence>* reverseLookup(CommandType cmd) {
+        auto it = mCommandToKeySequenceMap.find(cmd);
+        if (it != mCommandToKeySequenceMap.end()) {
+            return &(it.value());
+        } else {
+            return nullptr;
+        }
+     }
 
     iterator begin() { return mKeySequenceToCommandMap.begin(); }
     iterator end() { return mKeySequenceToCommandMap.end(); }
@@ -86,5 +100,6 @@ public:
 
 private:
     Container mKeySequenceToCommandMap;
+    ReverseContainer mCommandToKeySequenceMap;
 };
 
