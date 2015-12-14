@@ -267,4 +267,12 @@ extern int android_pipe_send(void* pipe, const AndroidPipeBuffer* buffer,
 // Call the wakeOn() callback of the client associated with |pipe|.
 extern void android_pipe_wake_on(void* pipe_, unsigned wakes);
 
+// As a special case, QEMU2 uses its own ADB pipe connector that uses
+// raw pipe, instead of the legacy framing protocol defined by qemud:adb.
+// Call this function at initialization time to enable or disable this
+// mode. NOTE: By default, this feature is enabled to ensure the QEMU2
+// code continues to compile and work as expected. The QEMU1 setup glue
+// should call this with a value of 'false' though.
+extern void android_pipe_set_raw_adb_mode(bool enabled);
+
 ANDROID_END_HEADER

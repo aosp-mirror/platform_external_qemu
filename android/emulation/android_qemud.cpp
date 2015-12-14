@@ -422,6 +422,7 @@ static void _android_qemud_pipe_init(void) {
 
     if (!_qemud_pipe_initialized) {
         android_pipe_add_type("qemud", looper_getForThread(), &_qemudPipe_funcs);
+        android_pipe_set_raw_adb_mode(false);
         _qemud_pipe_initialized = true;
     }
 }

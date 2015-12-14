@@ -208,6 +208,7 @@ LOCAL_SRC_FILES := \
     android/crashreport/CrashReporter_common.cpp \
     android/crashreport/CrashReporter_$(BUILD_TARGET_OS).cpp \
     android/curl-support.c \
+    android/emulation/android_pipe.c \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
     android/emulation/android_pipe_zero.c \
@@ -474,11 +475,9 @@ $(call end-emulator-program)
 #  static libraries. The plan is to remove these completely in the future.
 #
 
-# TODO(digit): Remove ANDROID_QEMU2_SPECIFIC from qemu-setup.c and
-#              android_pipe.c
+# TODO(digit): Remove ANDROID_QEMU2_SPECIFIC from qemu-setup.c.
 _ANDROID_EMU_DEPENDENT_SOURCES := \
     android/qemu-setup.c \
-    android/emulation/android_pipe.c \
 
 $(call start-emulator-library,android-emu-qemu1)
 LOCAL_CFLAGS := $(_ANDROID_EMU_INTERNAL_CFLAGS)
