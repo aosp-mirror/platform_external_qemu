@@ -31,6 +31,7 @@
 #define IS_ESC  1
 #define IS_CSI  2
 #define IS_SS3  3
+#define IS_SAWR 4
 
 void readline_show_prompt(ReadLineState *rs)
 {
@@ -364,6 +365,7 @@ void readline_handle_byte(ReadLineState *rs, int ch)
 {
     switch(rs->esc_state) {
     case IS_NORM:
+    case IS_SAWR:
         switch(ch) {
         case 1:
             readline_bol(rs);
@@ -380,8 +382,15 @@ void readline_handle_byte(ReadLineState *rs, int ch)
         case 12:
             readline_clear_screen(rs);
             break;
-        case 10:
-        case 13:
+
+        case '\r':
+        case '\n':
+            if (ch == '\n' && rs->esc_state == IS_SAWR) {
+                // we've already processed this 'return' for the '\r' character,
+                // just ignore the '\n'
+                rs->esc_state = IS_NORM;
+                return;
+            }
             rs->cmd_buf[rs->cmd_buf_size] = '\0';
             if (!rs->read_password)
                 readline_hist_add(rs, rs->cmd_buf);
@@ -391,6 +400,10 @@ void readline_handle_byte(ReadLineState *rs, int ch)
             rs->last_cmd_buf_index = 0;
             rs->last_cmd_buf_size = 0;
             rs->readline_func(rs->opaque, rs->cmd_buf, rs->readline_opaque);
+            if (ch == '\r') {
+                // remember that '\r' has been handled
+                rs->esc_state = IS_SAWR;
+            }
             break;
         case 23:
             /* ^W */
