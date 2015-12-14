@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "852462f4_075eb625",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-14T17:12:38Z",
+      "side": 1,
+      "message": "could you please remove the code, not comment it out?",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 39
+      },
+      "revId": "9b934ac835dffe5119634d3c9b1177d0d65fc937",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25fc967c_8c5da7c7",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 703,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-14T17:12:38Z",
+      "side": 1,
+      "message": "spaces",
+      "range": {
+        "startLine": 703,
+        "startChar": 0,
+        "endLine": 703,
+        "endChar": 4
+      },
+      "revId": "9b934ac835dffe5119634d3c9b1177d0d65fc937",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "65f20ea9_51c4f665",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 722,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-14T17:12:38Z",
+      "side": 1,
+      "message": "what if primary screen has this ratio different from the one displaying tool window?",
+      "range": {
+        "startLine": 720,
+        "startChar": 3,
+        "endLine": 722,
+        "endChar": 5
+      },
+      "revId": "9b934ac835dffe5119634d3c9b1177d0d65fc937",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
