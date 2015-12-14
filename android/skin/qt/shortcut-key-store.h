@@ -13,6 +13,7 @@
 #include <QKeySequence>
 #include <QString>
 #include <QTextStream>
+#include <QVector>
 #include <map>
 
 // Provides a generic way of mapping keyboard shortcuts to commands.
@@ -20,6 +21,7 @@
 template <class CommandType>
 class ShortcutKeyStore {
     using Container = std::map<QKeySequence, CommandType>;
+    using ReverseContainer = std::map<CommandType, QVector<QKeySequence>>;
 public:
     using iterator = typename Container::iterator;
     using const_iterator = typename Container::const_iterator;
@@ -54,7 +56,7 @@ public:
             if (!command_parse_result || key_seq.isEmpty()) {
                 break;
             } else {
-                mKeySequenceToCommandMap[key_seq] = command;
+                add(key_seq, command);
             }
         }
     }
@@ -62,6 +64,7 @@ public:
     // Explicitly maps the given key sequence to the given command.
     void add(const QKeySequence& key_seq, const CommandType &command) {
         mKeySequenceToCommandMap[key_seq] = command;
+        mCommandToKeySequenceMap[command].push_back(key_seq);
     }
 
     // If the given key sequence matches that of a command in the store,
@@ -77,6 +80,16 @@ public:
         return must_call_handler;
     }
 
+    // Performs a reverse lookup: places all the shortcut keys corresponding
+    // to the given command into the vector pointed to by output.
+    void reverseLookup(CommandType cmd, QVector<QKeySequence>* output) {
+        output->clear();
+        auto it = mCommandToKeySequenceMap.find(cmd);
+        if (it != mCommandToKeySequenceMap.end()) {
+            *output = it->second;
+        }
+     }
+
     iterator begin() { return mKeySequenceToCommandMap.begin(); }
     iterator end() { return mKeySequenceToCommandMap.end(); }
     const_iterator cbegin() { return mKeySequenceToCommandMap.cbegin(); }
@@ -86,5 +99,6 @@ public:
 
 private:
     Container mKeySequenceToCommandMap;
+    ReverseContainer mCommandToKeySequenceMap;
 };
 
