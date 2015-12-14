@@ -54,6 +54,9 @@ color: #f0f0f0</string>
    <property name="themeIconName" stdset="0">
     <string notr="true">power_settings</string>
    </property>
+   <property name="uiCommand" stdset="0">
+    <string>POWER</string>
+   </property>
   </widget>
   <widget class="QPushButton" name="volume_up_button">
    <property name="geometry">
@@ -86,6 +89,9 @@ color: #f0f0f0</string>
    <property name="themeIconName" stdset="0">
     <string notr="true">volume_up</string>
    </property>
+   <property name="uiCommand" stdset="0">
+    <string>VOLUME_UP</string>
+   </property>
   </widget>
   <widget class="QPushButton" name="volume_down_button">
    <property name="geometry">
@@ -117,6 +123,9 @@ color: #f0f0f0</string>
    </property>
    <property name="themeIconName" stdset="0">
     <string notr="true">volume_down</string>
+   </property>
+   <property name="uiCommand" stdset="0">
+    <string>VOLUME_DOWN</string>
    </property>
   </widget>
   <widget class="QPushButton" name="rotate_button">
@@ -182,6 +191,9 @@ color: #f0f0f0</string>
    <property name="themeIconName" stdset="0">
     <string notr="true">back</string>
    </property>
+   <property name="uiCommand" stdset="0">
+    <string>BACK</string>
+   </property>
   </widget>
   <widget class="QPushButton" name="zoom_button">
    <property name="geometry">
@@ -216,6 +228,9 @@ color: #f0f0f0</string>
    </property>
    <property name="themeIconName" stdset="0">
     <string notr="true">zoom</string>
+   </property>
+   <property name="uiCommand" stdset="0">
+    <string>ENTER_ZOOM</string>
    </property>
   </widget>
   <widget class="QPushButton" name="more_button">
@@ -281,6 +296,9 @@ color: #f0f0f0</string>
    <property name="themeIconName" stdset="0">
     <string notr="true">screen_shot</string>
    </property>
+   <property name="uiCommand" stdset="0">
+    <string>TAKE_SCREENSHOT</string>
+   </property>
   </widget>
   <widget class="QPushButton" name="home_button">
    <property name="geometry">
@@ -313,6 +331,9 @@ color: #f0f0f0</string>
    <property name="themeIconName" stdset="0">
     <string notr="true">home</string>
    </property>
+   <property name="uiCommand" stdset="0">
+    <string>HOME</string>
+   </property>
   </widget>
   <widget class="QPushButton" name="overview_button">
    <property name="geometry">
@@ -344,6 +365,9 @@ color: #f0f0f0</string>
    </property>
    <property name="themeIconName" stdset="0">
     <string notr="true">overview</string>
+   </property>
+   <property name="uiCommand" stdset="0">
+    <string>OVERVIEW</string>
    </property>
   </widget>
   <widget class="QPushButton" name="close_button">

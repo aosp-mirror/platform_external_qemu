@@ -159,12 +159,26 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
 
     QTextStream stream(&default_shortcuts);
     mShortcutKeyStore.populateFromTextStream(stream, parseQtUICommand);
-
     // Need to add this one separately because QKeySequence cannot parse
     // the string "Ctrl+Alt".
     mShortcutKeyStore.add(
             QKeySequence(Qt::Key_Alt | Qt::AltModifier | Qt::ControlModifier),
             QtUICommand::UNGRAB_KEYBOARD);
+
+    // Update tool tips on all push buttons.
+    const QList<QPushButton*> childButtons = findChildren<QPushButton*>();
+    for(auto button : childButtons) {
+        QVariant uiCommand = button->property("uiCommand");
+        if (uiCommand.isValid()) {
+            QtUICommand cmd;
+            if (parseQtUICommand(uiCommand.toString(), &cmd)) {
+                QVector<QKeySequence>* shortcuts = mShortcutKeyStore.reverseLookup(cmd);
+                if (shortcuts && shortcuts->length() > 0) {
+                    button->setToolTip(shortcuts->at(0).toString(QKeySequence::NativeText));
+                }
+            }
+        }
+    }
 }
 
 void ToolWindow::hide()
