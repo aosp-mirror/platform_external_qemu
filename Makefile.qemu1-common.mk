@@ -19,7 +19,7 @@ QEMU1_COMMON_INCLUDES := \
 
 # Need to include "qapi-types.h" and other auto-generated files from
 # android-configure.sh
-QEMU1_COMMON_INCLUDES += $(OBJS_DIR)/build/qemu1-qapi-auto-generated
+QEMU1_COMMON_INCLUDES += $(BUILD_OBJS_DIR)/build/qemu1-qapi-auto-generated
 
 # Zlib sources
 QEMU1_COMMON_INCLUDES += $(ZLIB_INCLUDES)
