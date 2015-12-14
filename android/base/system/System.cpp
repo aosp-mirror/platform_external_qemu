@@ -43,6 +43,7 @@
 #include <pwd.h>
 #include <sys/times.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #endif
 #include <assert.h>
 #include <stdlib.h>
@@ -459,7 +460,7 @@ public:
         return time(NULL);
     }
 
-    bool runSilentCommand(const StringVector& commandLine) {
+    bool runSilentCommand(const StringVector& commandLine, bool wait) {
         // Sanity check.
         if (commandLine.empty()) {
             return false;
@@ -496,7 +497,7 @@ public:
                             NULL,  /* process handle is not inheritable */
                             NULL,  /* thread handle is not inheritable */
                             FALSE, /* no, don't inherit any handles */
-                            DETACHED_PROCESS, /* the new process doesn't
+                            CREATE_NO_WINDOW, /* the new process doesn't
                                                  have a console */
                             NULL,     /* use parent's environment block */
                             NULL,     /* use parent's starting directory */
@@ -505,23 +506,33 @@ public:
             return false;
         }
 
-        CloseHandle(pinfo.hProcess);
         CloseHandle(pinfo.hThread);
+
+        if (wait) {
+            ::WaitForSingleObject(pinfo.hProcess, INFINITE);
+        }
+
+        CloseHandle(pinfo.hProcess);
 
         return true;
 #else  // !_WIN32
-        char** params = new char*[commandLine.size()];
+        char** const params = new char*[commandLine.size() + 1];
         for (size_t n = 0; n < commandLine.size(); ++n) {
             params[n] = (char*)commandLine[n].c_str();
         }
+        params[commandLine.size()] = nullptr;
 
         int pid = fork();
         if (pid < 0) {
             return false;
         }
         if (pid != 0) {
-            // Parent process returns immediately.
+            // Parent process returns.
             delete [] params;
+            if (wait) {
+                int status;
+                HANDLE_EINTR(waitpid(pid, &status, 0));
+            }
             return true;
         }
 
@@ -529,9 +540,13 @@ public:
         int fd = open("/dev/null", O_WRONLY);
         dup2(fd, 1);
         dup2(fd, 2);
-        execvp(commandLine[0].c_str(), params);
-        // Should not happen.
-        exit(1);
+        if (execvp(commandLine[0].c_str(), params) == -1) {
+            // no sense in trying to print anything - we've just passed
+            // '/dev/null' as stdout and stderr
+            exit(1);
+        }
+        // Should not happen, but let's keep the compiler happy
+        exit(2);
 #endif  // !_WIN32
     }
 
