@@ -135,7 +135,7 @@ if [ ! -f "$CONFIG_MAKE" ]; then
 fi
 
 echo "Building sources."
-run make -j$HOST_NUM_CPUS OBJS_DIR="$OUT_DIR" ||
+run make -j$HOST_NUM_CPUS BUILD_OBJS_DIR="$OUT_DIR" ||
     panic "Could not build sources, please run 'make' to see why."
 
 RUN_32BIT_TESTS=
