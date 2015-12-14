@@ -12,14 +12,13 @@
 
 #pragma once
 
-#include <stdint.h>
 #include "android/avd/hw-config.h"
 #include "android/avd/info.h"
 #include "android/cmdline-option.h"
-#include "android/skin/keyset.h"
-#include "android/ui-emu-agent.h"
 #include "android/utils/aconfig-file.h"
 #include "android/utils/compiler.h"
+
+#include <stdint.h>
 
 ANDROID_BEGIN_HEADER
 
@@ -29,44 +28,14 @@ ANDROID_BEGIN_HEADER
 // will free() the previous value of |*string| first.
 void reassign_string(char** string, const char* new_value);
 
-/** Emulator user configuration (e.g. last window position)
- **/
-
-void user_config_init( void );
-void user_config_done( void );
-
-void user_config_get_window_pos( int *window_x, int *window_y );
-
 unsigned convertBytesToMB( uint64_t  size );
 uint64_t convertMBToBytes( unsigned  megaBytes );
-
-extern SkinKeyset*  android_keyset;
-void parse_keyset(const char*  keyset, AndroidOptions*  opts);
-void write_default_keyset( void );
 
 #define NETWORK_SPEED_DEFAULT  "full"
 #define NETWORK_DELAY_DEFAULT  "none"
 
 extern const char*  skin_network_speed;
 extern const char*  skin_network_delay;
-
-/* Find the skin corresponding to our options, and return an AConfig pointer
- * and the base path to load skin data from
- */
-void parse_skin_files(const char*      skinDirPath,
-                      const char*      skinName,
-                      AndroidOptions*  opts,
-                      AndroidHwConfig* hwConfig,
-                      AConfig*        *skinConfig,
-                      char*           *skinPath);
-
-/* Returns the amount of pixels used by the default display. */
-int64_t  get_screen_pixels(AConfig*  skinConfig);
-
-void init_sdl_ui(AConfig*          skinConfig,
-                 const char*       skinPath,
-                 AndroidOptions*   opts,
-                 const UiEmuAgent* uiEmuAgent);
 
 /* Sanitize options. This deals with a few legacy options that are now
  * handled differently. Call before anything else that needs to read
