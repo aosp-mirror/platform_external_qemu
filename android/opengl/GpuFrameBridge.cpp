@@ -115,6 +115,16 @@ private:
         if (events & Looper::FdWatch::kEventRead) {
             char c = 0;
             android::base::socketRecv(bridge->mOutSocket, &c, 1);
+            // char c; is the "confirmation" bit
+            // that actual data was grabbed by the socket.
+            // In a more multithreaded situation,
+            // we aren't guaranteed 1:1
+            // onSocketEvent and postFrame calls.
+            // If we simply quit if the confirm bit is not set,
+            // we can avoid a deadlock.
+            if (!c) {
+                return;
+            }
             Frame* frame = NULL;
             bridge->mFrames.receive(&frame);
             if (frame) {
