@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "05e5d2f2_70949625",
+        "filename": "android/skin/qt/shortcut-key-store.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-15T21:37:07Z",
+      "side": 1,
+      "message": "I\u0027d just prefer not to use Qt-specific code unless it is required - std is much more common and portable",
+      "parentUuid": "65e04ee1_2d7b990b",
+      "range": {
+        "startLine": 24,
+        "startChar": 51,
+        "endLine": 24,
+        "endChar": 58
+      },
+      "revId": "b02fed9540b938d8245fa872815b553f5ac52ec1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c5b81ad7_2d7ba50b",
         "filename": "android/skin/qt/shortcut-key-store.h",
         "patchSetId": 2
