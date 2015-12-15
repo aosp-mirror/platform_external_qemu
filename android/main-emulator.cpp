@@ -31,16 +31,13 @@
 #include "android/opengl/emugl_config.h"
 #include "android/qt/qt_setup.h"
 #include "android/utils/compiler.h"
+#include "android/utils/debug.h"
 #include "android/utils/exec.h"
 #include "android/utils/host_bitness.h"
 #include "android/utils/panic.h"
 #include "android/utils/path.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/win32_cmdline_quote.h"
-
-
-/* Required by android/utils/debug.h */
-int android_verbose;
 
 #define DEBUG 1
 
@@ -121,7 +118,7 @@ static bool isCpuArchSupportedByRanchu(const char* avdArch) {
 int main(int argc, char** argv)
 {
     const char* avdName = NULL;
-    char*       avdArch = NULL;
+    const char* avdArch = NULL;
     const char* gpu = NULL;
     char*       emulatorPath;
     const char* engine = NULL;
@@ -295,6 +292,7 @@ int main(int argc, char** argv)
     /* Find program directory. */
     char* progDir = NULL;
     path_split(argv[0], &progDir, NULL);
+    D("argv[0] = '%s'\n", argv[0]);
 
     /* Only search in current path if there is no directory separator
      * in |progName|. */
