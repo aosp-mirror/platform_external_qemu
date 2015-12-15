@@ -94,16 +94,6 @@ int formatGAPostData(char** ptr, const AndroidMetrics* metrics) {
     return result;
 }
 
-// Dummy write function to pass to curl to avoid dumping the returned output to
-// stdout.
-static size_t curlWriteFunction(CURL* handle,
-                                size_t size,
-                                size_t nmemb,
-                                void* userdata) {
-    // Report that we "took care of" all the data provided.
-    return size * nmemb;
-}
-
 /* typedef'ed to: androidMetricsUploaderFunction */
 bool androidMetrics_uploadMetricsGA(const AndroidMetrics* metrics) {
     static const char analytics_url[] =
@@ -111,49 +101,21 @@ bool androidMetrics_uploadMetricsGA(const AndroidMetrics* metrics) {
     static const char analytics_url_debug[] =
             "https://ssl.google-analytics.com/debug/collect";
 
-    bool success = true;
-    CURL* const curl = curl_easy_default_init();
-    CURLcode curlRes;
-    if (!curl) {
-        return false;
-    }
-
-    char* fields;
+    char* fields = nullptr;
     if (formatGAPostData(&fields, metrics) < 0) {
         mwarning("Failed to allocate memory for a request");
-        curl_easy_cleanup(curl);
         return false;
     }
 
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fields);
-    if (use_debug_ga_server) {
-        curl_easy_setopt(curl, CURLOPT_URL, analytics_url_debug);
-    } else {
-        curl_easy_setopt(curl, CURLOPT_URL, analytics_url);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriteFunction);
-    }
-    curlRes = curl_easy_perform(curl);
-    if (curlRes != CURLE_OK) {
+    bool success = true;
+    const char* url = use_debug_ga_server ? analytics_url_debug : analytics_url;
+    char* error = nullptr;
+    if (!curl_download_null(url, fields, false, &error)) {
+        mwarning("Could not upload metrics: %s", error);
+        ::free(error);
         success = false;
-        mwarning("curl_easy_perform() failed with code %d (%s)", curlRes,
-                 curl_easy_strerror(curlRes));
-    }
-
-    long http_response = 0;
-    curlRes = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_response);
-    if (curlRes == CURLE_OK) {
-        if (http_response != 200) {
-            mwarning("Got HTTP response code %ld", http_response);
-            success = false;
-        }
-    } else if (curlRes == CURLE_UNKNOWN_OPTION) {
-        mwarning("Can not get a valid response code: not supported");
-    } else {
-        mwarning("Unexpected error while checking http response: %s",
-                 curl_easy_strerror(curlRes));
     }
 
     android_free(fields);
-    curl_easy_cleanup(curl);
     return success;
 }

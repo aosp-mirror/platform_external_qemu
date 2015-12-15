@@ -60,14 +60,14 @@ void android_checkForUpdates(const char* homePath) {
 namespace android {
 namespace update_check {
 
-static size_t curlWriteCallback(void* contents,
+static size_t curlWriteCallback(char* contents,
                                 size_t size,
                                 size_t nmemb,
                                 void* userp) {
     std::string* const xml = static_cast<std::string*>(userp);
     const size_t total = size * nmemb;
 
-    xml->insert(xml->end(), static_cast<char*>(contents),
+    xml->insert(xml->end(), contents,
                 static_cast<char*>(contents) + total);
 
     return total;
@@ -77,18 +77,11 @@ class DataLoader : public IDataLoader {
 public:
     virtual std::string load() {
         std::string xml;
-        if (CURL* const curl = curl_easy_default_init()) {
-            curl_easy_setopt(curl, CURLOPT_URL, kVersionUrl);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &curlWriteCallback);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &xml);
-            const CURLcode res = curl_easy_perform(curl);
-            if (res != CURLE_OK) {
-                dwarning("UpdateCheck: failed to get a URL: %d (%s)\n", res,
-                         curl_easy_strerror(res));
-            }
-            curl_easy_cleanup(curl);
+        char* error = nullptr;
+        if (!curl_download(kVersionUrl, nullptr, &curlWriteCallback, &xml, &error)) {
+            dwarning("UpdateCheck: Failure: %s", error);
+            ::free(error);
         }
-
         return xml;
     }
 };

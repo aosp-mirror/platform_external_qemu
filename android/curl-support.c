@@ -51,20 +51,97 @@ void curl_cleanup() {
     }
 }
 
-CURL* curl_easy_default_init() {
-    CURL* const curl = curl_easy_init();
+void* curl_easy_default_init(char** error) {
+    CURL* curl = curl_easy_init();
     CURLcode curlRes;
 
     if (!curl) {
-        dwarning("Failed to initialize libcurl");
+        *error = strdup("Failed to initialize libcurl");
         return NULL;
     }
     if (cached_ca_info != NULL) {
         curlRes = curl_easy_setopt(curl, CURLOPT_CAINFO, cached_ca_info);
         if (curlRes != CURLE_OK) {
-            dwarning("Could not set CURLOPT_CAINFO: %s",
+            asprintf(error, "Could not set CURLOPT_CAINFO: %s",
                      curl_easy_strerror(curlRes));
+            curl_easy_cleanup(curl);
+            curl = NULL;
         }
     }
     return curl;
+}
+
+// A CurlWriteCallback that drops any downloaded data.
+// Using it avoids dumping the content to stdout, the default CURL behaviour.
+static size_t null_write_callback(char* ptr,
+                                  size_t size,
+                                  size_t nmemb,
+                                  void* userdata) {
+    return size * nmemb;
+}
+
+static bool curl_download_internal(const char* url,
+                                   const char* post_fields,
+                                   CurlWriteCallback callback_func,
+                                   void* callback_userdata,
+                                   bool allow_404,
+                                   char** error) {
+    CURL* curl = curl_easy_default_init(error);
+    if (!curl) {
+        return false;
+    }
+
+    bool result = false;
+
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    if (callback_func) {
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, callback_func);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, callback_userdata);
+    } else {
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, null_write_callback);
+    }
+
+    if (post_fields) {
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_fields);
+    }
+
+    const CURLcode res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+        asprintf(error, "%s", curl_easy_strerror(res));
+    } else {
+        // toolbar returns a 404 by design.
+        long http_response = 0;
+        int curlRes = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_response);
+        if (curlRes == CURLE_OK) {
+            if (http_response == 200) {
+                result = true;
+            } else if (http_response == 404 && allow_404) {
+                result = true;
+            } else {
+                asprintf(error, "%s", curl_easy_strerror(curlRes));
+            }
+        } else {
+            asprintf(error, "Unexpected error while checking http response: %s",
+                    curl_easy_strerror(curlRes));
+        }
+    }
+
+    curl_easy_cleanup(curl);
+
+    return result;
+}
+
+bool curl_download(const char* url,
+                   const char* post_fields,
+                   CurlWriteCallback callback_func,
+                   void* callback_userdata,
+                   char** error) {
+    return curl_download_internal(url, post_fields, callback_func, callback_userdata, false, error);
+}
+
+extern bool curl_download_null(const char* url,
+                               const char* post_fields,
+                               bool allow_404,
+                               char** error) {
+    return curl_download_internal(url, post_fields, NULL, NULL, allow_404, error);
 }
