@@ -130,9 +130,9 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
 $(call start-emulator-program, emulator)
 
 LOCAL_SRC_FILES := \
-    android/main-emulator.c \
+    android/main-emulator.cpp \
 
-# Needed to compile the call to androidQtSetupEnv() in main-emulator.c
+# Needed to compile the call to androidQtSetupEnv() in main-emulator.cpp
 LOCAL_CFLAGS += -DCONFIG_QT
 
 LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
