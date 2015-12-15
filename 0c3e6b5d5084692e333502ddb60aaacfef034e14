@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "85a702bf_321a2e4a",
+        "filename": "android/opengl/GpuFrameBridge.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T22:59:15Z",
+      "side": 1,
+      "message": "There is always a 1:1 mapping between postFrame() and onSocketEvent(), I think the real reason is that QEMU2 is more heavily multi-threaded and probably uses more signals, this implies that  the socketRecv() may sometimes return with an error like EINTR or EAGAIN, i.e. nothing is recv()-ed at all.\n\nThe check for !c seems ok given the circumstances, but it\u0027s probably a little cleaner to check that socketRecv() returns +1, i.e. that a byte has indeed been read from the socket.\n\nAnyway, thanks for finding this!",
+      "revId": "0c3e6b5d5084692e333502ddb60aaacfef034e14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
