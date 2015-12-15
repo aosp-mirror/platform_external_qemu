@@ -2,6 +2,244 @@
   "comments": [
     {
       "key": {
+        "uuid": "e59a7e77_12f60cfc",
+        "filename": "android-qemu1-glue/qemu-aeb-agent-impl.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T09:09:14Z",
+      "side": 1,
+      "message": "Coding style issue, \"android/aeb.h\", or \"android/emulator_bridge.h\" should be the first included header. See docs/CODING-STYLE.TXT guide.",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "85b2a2f4_dab901ed",
+        "filename": "android-qemu1-glue/qemu-aeb-agent-impl.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T09:09:14Z",
+      "side": 1,
+      "message": "nit: install(void), and trailing whitespace.",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5532654_fed21924",
+        "filename": "android-qemu1-glue/qemu-aeb-agent-impl.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T09:09:14Z",
+      "side": 1,
+      "message": "Prefer VERBOSE_PRINT(init, \"....\") after including \"android/utils/debug.h\"",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e5599e74_9a5dedc7",
+        "filename": "android/aeb.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T09:09:14Z",
+      "side": 1,
+      "message": "Please explain what the \"HACK\" is, and how that works.",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "85b2a2f4_5abfb1cc",
+        "filename": "android/aeb.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T09:09:14Z",
+      "side": 1,
+      "message": "indentation is wrong. See style guide and use \u0027git clang-format\u0027 after ensuring you have configured it globally to use the .clang_format file under android/",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "85b2a2f4_3acafd73",
+        "filename": "android/aeb.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T09:09:14Z",
+      "side": 1,
+      "message": "use the D() or E() macros defined above instead of fprintf(stderr,...)",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c55c9a66_bce70dd5",
+        "filename": "android/aeb.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T09:09:14Z",
+      "side": 1,
+      "message": "There is no reason to use a Qemud client here (QEMUD is really legacy), you should prefer defining a new pipe service instead.",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25673634_74a3c8db",
+        "filename": "android/aeb.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T09:09:14Z",
+      "side": 1,
+      "message": "nit: sizeof(char) is always 1 by definition.",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "85b2a2f4_7ac47566",
+        "filename": "android/aeb.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T09:09:14Z",
+      "side": 1,
+      "message": "There must be a better way to read data than 1 byte at a time !? Otherwise, your performance number will depend on implementation details of the C library and system call overhead, not direct I/O transfer speed.",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "85a702bf_afb31955",
+        "filename": "android/aeb.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T09:09:14Z",
+      "side": 1,
+      "message": "unexplained magic number?",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c55c9a66_5ce351ca",
+        "filename": "android/aeb.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T09:09:14Z",
+      "side": 1,
+      "message": "this file is missing a copyright disclaimer + documentation about its purpose and what the functions do.\n\nAlso don\u0027t use () when declaring C functions that take no parameter, but (void) instead (I know this is contrary to C++).\n\nPlease use:\n\n  #include \"android/utils/compiler.h\"\n\n   ANDROID_BEGIN_HEADER\n\n   .... your C declarations\n\n   ANDROID_END_HEADER\n\nTo ensure that this can be included from a C++ file properly.\n\nFinally, rename this file, no weird acronyms please! android_emulator_bridge.h or just emulator_bridge.h is perfectly fine and a lot better. Same for naming the functions,, i.e.\n\n    android_emulator_bridge_init(void);\n    android_emulator_bridge_install(void);",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5532654_decf557c",
+        "filename": "android/emulation/control/aeb_agent.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T09:09:14Z",
+      "side": 1,
+      "message": "\u003cstdint.h\u003e doesn\u0027t seem to be needed here.",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e5599e74_fa5a29cb",
+        "filename": "android/emulation/control/aeb_agent.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T09:09:14Z",
+      "side": 1,
+      "message": "This needs documentation about what |args| means, at a minimum.",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "65acceb5_be91f9c6",
+        "filename": "android/emulation/qemud/android_qemud_client.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T09:09:14Z",
+      "side": 1,
+      "message": "why?",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "85b2a2f4_baac4db0",
         "filename": "android/emulation/qemud/android_qemud_common.h",
         "patchSetId": 9
@@ -30,6 +268,23 @@
       "writtenOn": "2015-12-15T08:58:32Z",
       "side": 1,
       "message": "similarly, this may break emulation of older system images!",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "65acceb5_9e963dbb",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T09:09:14Z",
+      "side": 1,
+      "message": "Please try to insert header in alphabetical order, see coding style.",
       "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
