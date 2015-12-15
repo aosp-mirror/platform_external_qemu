@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "65e04ee1_2d7b990b",
+        "filename": "android/skin/qt/shortcut-key-store.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-15T21:31:52Z",
+      "side": 1,
+      "message": "This class has Qt-specific code so might as well use Qt containers.",
+      "parentUuid": "45db4a39_f768a03b",
+      "range": {
+        "startLine": 24,
+        "startChar": 51,
+        "endLine": 24,
+        "endChar": 58
+      },
+      "revId": "b02fed9540b938d8245fa872815b553f5ac52ec1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c5b81ad7_2d7ba50b",
         "filename": "android/skin/qt/shortcut-key-store.h",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2015-12-15T02:00:12Z",
       "side": 1,
       "message": "can\u0027t you just return a pointer to the object if found or null if not? then one won\u0027t need to copy it every single time",
+      "range": {
+        "startLine": 85,
+        "startChar": 9,
+        "endLine": 85,
+        "endChar": 22
+      },
+      "revId": "b02fed9540b938d8245fa872815b553f5ac52ec1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25ead6c4_3159323e",
+        "filename": "android/skin/qt/shortcut-key-store.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-15T21:31:52Z",
+      "side": 1,
+      "message": "Yeah I don\u0027t know what I was thinking :-)",
+      "parentUuid": "c5b81ad7_2d7ba50b",
       "range": {
         "startLine": 85,
         "startChar": 9,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "a50966b1_08a1e765",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-15T21:31:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "25157684_33421246",
+      "range": {
+        "startLine": 164,
+        "startChar": 4,
+        "endLine": 164,
+        "endChar": 9
+      },
+      "revId": "b02fed9540b938d8245fa872815b553f5ac52ec1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25ead6c4_50979c6a",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2015-12-15T02:00:12Z",
       "side": 1,
       "message": "usually we have camelCaseIdentifiers",
+      "range": {
+        "startLine": 166,
+        "startChar": 17,
+        "endLine": 166,
+        "endChar": 27
+      },
+      "revId": "b02fed9540b938d8245fa872815b553f5ac52ec1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e598be91_5119be5e",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-15T21:31:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "25ead6c4_50979c6a",
       "range": {
         "startLine": 166,
         "startChar": 17,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "25157684_799c6b8c",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-15T21:31:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "25157684_f366bafe",
+      "range": {
+        "startLine": 178,
+        "startChar": 0,
+        "endLine": 178,
+        "endChar": 4
+      },
+      "revId": "b02fed9540b938d8245fa872815b553f5ac52ec1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e5cc3e7f_1102764e",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 2
@@ -140,6 +260,54 @@
     },
     {
       "key": {
+        "uuid": "65e04ee1_cd823528",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-15T21:31:52Z",
+      "side": 1,
+      "message": "It doesn\u0027t correspond to any buttons on the panel, so it doesn\u0027t matter anyway. I\u0027ll move it up for the sake of consistency though.",
+      "parentUuid": "e5cc3e7f_1102764e",
+      "range": {
+        "startLine": 179,
+        "startChar": 0,
+        "endLine": 183,
+        "endChar": 42
+      },
+      "revId": "b02fed9540b938d8245fa872815b553f5ac52ec1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a50966b1_48c0ffff",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-15T21:31:52Z",
+      "side": 1,
+      "message": "It doesn\u0027t correspond to any buttons on the panel, so it doesn\u0027t matter anyway. I\u0027ll move it up for the sake of consistency though.",
+      "parentUuid": "e5cc3e7f_1102764e",
+      "range": {
+        "startLine": 179,
+        "startChar": 0,
+        "endLine": 183,
+        "endChar": 42
+      },
+      "revId": "b02fed9540b938d8245fa872815b553f5ac52ec1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25157684_734c8a76",
         "filename": "android/skin/qt/tools.ui",
         "patchSetId": 2
@@ -151,6 +319,24 @@
       "writtenOn": "2015-12-15T02:00:12Z",
       "side": 1,
       "message": "this property has to be documented somewhere - otherwise no one would remember it in a year",
+      "revId": "b02fed9540b938d8245fa872815b553f5ac52ec1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05e5d2f2_701bb6ac",
+        "filename": "android/skin/qt/tools.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-15T21:31:52Z",
+      "side": 1,
+      "message": "Where is a good place to document it?",
+      "parentUuid": "25157684_734c8a76",
       "revId": "b02fed9540b938d8245fa872815b553f5ac52ec1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
