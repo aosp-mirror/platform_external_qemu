@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a50966b1_4858ff04",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-15T21:37:07Z",
+      "side": 1,
+      "message": "nit: camelCase ?",
+      "range": {
+        "startLine": 169,
+        "startChar": 30,
+        "endLine": 169,
+        "endChar": 43
+      },
+      "revId": "fd371834c384aca1fe05e2586b6fc373d62b4b3f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
