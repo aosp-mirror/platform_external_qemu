@@ -27,6 +27,7 @@
 
 #include "android/avd/scanner.h"
 #include "android/avd/util.h"
+#include "android/base/system/System.h"
 #include "android/cpu_accelerator.h"
 #include "android/opengl/emugl_config.h"
 #include "android/qt/qt_setup.h"
@@ -62,7 +63,6 @@
 
 /* Forward declarations */
 static char* getClassicEmulatorPath(const char* progDir,
-                                    bool tryCurrentPath,
                                     const char* avdArch,
                                     int* wantedBitness);
 
@@ -290,17 +290,7 @@ int main(int argc, char** argv)
     }
 
     /* Find program directory. */
-    char* progDir = NULL;
-    path_split(argv[0], &progDir, NULL);
-    D("argv[0] = '%s'\n", argv[0]);
-
-    /* Only search in current path if there is no directory separator
-     * in |progName|. */
-#ifdef _WIN32
-    bool tryCurrentPath = (!strchr(argv[0], '/') && !strchr(argv[0], '\\'));
-#else
-    bool tryCurrentPath = !strchr(argv[0], '/');
-#endif
+    const auto progDir = android::base::System::get()->getProgramDirectory();
 
     enum RanchuState {
         RANCHU_AUTODETECT,
@@ -370,12 +360,11 @@ int main(int argc, char** argv)
 #endif
 
     if (ranchu == RANCHU_ON) {
-        emulatorPath = getQemuExecutablePath(progDir,
+        emulatorPath = getQemuExecutablePath(progDir.c_str(),
                                              avdArch,
                                              wantedBitness);
     } else {
-        emulatorPath = getClassicEmulatorPath(progDir,
-                                              tryCurrentPath,
+        emulatorPath = getClassicEmulatorPath(progDir.c_str(),
                                               avdArch,
                                               &wantedBitness);
     }
@@ -479,15 +468,12 @@ static char* bufprint_emulatorName(char* p,
  * the program. The function might modify it, in the case where it is 64
  * but only 32-bit versions of the executables are found (in this case,
  * |*wantedBitness| is set to 32).
- * If |try_current_path| is true, try to look into the current path if no
- * executable was found under |progDir|.
  * On success, returns the path of the executable (string must be freed by
  * the caller). On failure, return NULL.
  */
 static char* probeTargetEmulatorPath(const char* progDir,
                                      const char* archSuffix,
-                                     int* wantedBitness,
-                                     bool try_current_path) {
+                                     int* wantedBitness) {
     char path[PATH_MAX], *pathEnd = path + sizeof(path), *p;
 
     static const char kEmulatorPrefix[] = "emulator-";
@@ -518,50 +504,14 @@ static char* probeTargetEmulatorPath(const char* progDir,
         return strdup(path);
     }
 
-    // Not found, try in the current path then
-    if (try_current_path) {
-        char* result;
-
-        if (*wantedBitness == 64) {
-            p = bufprint_emulatorName(path,
-                                      pathEnd,
-                                      NULL,
-                                      kEmulator64Prefix,
-                                      archSuffix);
-            if (p < pathEnd) {
-                D("Probing path for: %s\n", path);
-                result = path_search_exec(path);
-                if (result) {
-                    return result;
-                }
-            }
-        }
-
-        p = bufprint_emulatorName(path,
-                                    pathEnd,
-                                    NULL,
-                                    kEmulatorPrefix,
-                                    archSuffix);
-        if (p < pathEnd) {
-            D("Probing path for: %s\n", path);
-            result = path_search_exec(path);
-            if (result) {
-                *wantedBitness = 32;
-                return result;
-            }
-        }
-    }
-
     return NULL;
 }
 
 // Find the path to the classic emulator binary that supports CPU architecture
-// |avdArch|. |progDir| is the program's directory. If |tryCurrentPath|, then
+// |avdArch|. |progDir| is the program's directory.
 static char* getClassicEmulatorPath(const char* progDir,
-                                    bool tryCurrentPath,
                                     const char* avdArch,
                                     int* wantedBitness) {
-    /* Try look for classic emulator first */
     const char* emulatorSuffix = emulator_getBackendSuffix(avdArch);
     if (!emulatorSuffix) {
         APANIC("This emulator cannot emulate %s CPUs!\n", avdArch);
@@ -571,8 +521,7 @@ static char* getClassicEmulatorPath(const char* progDir,
 
     char* result = probeTargetEmulatorPath(progDir,
                                            emulatorSuffix,
-                                           wantedBitness,
-                                           tryCurrentPath);
+                                           wantedBitness);
     if (!result) {
         APANIC("Missing emulator engine program for '%s' CPU.\n", avdArch);
     }
