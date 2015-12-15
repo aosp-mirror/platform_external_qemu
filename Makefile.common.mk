@@ -127,11 +127,11 @@ $(call start-emulator-program, emulator)
 
 LOCAL_SRC_FILES := \
     android/cpu_accelerator.cpp \
-    android/main-emulator.c \
+    android/main-emulator.cpp \
     android/qt/qt_path.cpp \
     android/qt/qt_setup.cpp \
 
-# Needed to compile the call to androidQtSetupEnv() in main-emulator.c
+# Needed to compile the call to androidQtSetupEnv() in main-emulator.cpp
 LOCAL_CFLAGS += -DCONFIG_QT
 
 LOCAL_STATIC_LIBRARIES := emulator-common $(ANDROID_EMU_STATIC_LIBRARIES_QEMU1)
