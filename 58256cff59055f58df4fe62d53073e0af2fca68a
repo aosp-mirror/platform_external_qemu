@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "85b2a2f4_baac4db0",
+        "filename": "android/emulation/qemud/android_qemud_common.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T08:58:32Z",
+      "side": 1,
+      "message": "Please don\u0027t, you can\u0027t do that without breaking support for emulating older system images!!",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e59a7e77_d25ac4cb",
+        "filename": "android/emulation/qemud/android_qemud_serial.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-15T08:58:32Z",
+      "side": 1,
+      "message": "similarly, this may break emulation of older system images!",
+      "revId": "58256cff59055f58df4fe62d53073e0af2fca68a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
