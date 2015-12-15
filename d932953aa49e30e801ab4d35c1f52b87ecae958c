@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05107294_dd3e2b63",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-15T17:02:39Z",
+      "side": 1,
+      "message": "some debug warning about bad code calling this function when it\u0027s not supported?",
+      "range": {
+        "startLine": 216,
+        "startChar": 7,
+        "endLine": 216,
+        "endChar": 17
+      },
+      "revId": "d932953aa49e30e801ab4d35c1f52b87ecae958c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
