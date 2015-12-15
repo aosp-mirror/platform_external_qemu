@@ -74,9 +74,9 @@ endif
 ifeq ($(BUILD_TARGET_OS),windows)
   # we need Win32 features that are available since Windows 2000 Professional/Server (NT 5.0)
   BUILD_TARGET_CFLAGS += -DWINVER=0x501
-  MY_LDFLAGS += -Xlinker --build-id
   # LARGEADDRESSAWARE gives more address space to 32-bit process
-  BUILD_TARGET_LDFLAGS32 += -Xlinker --large-address-aware
+  BUILD_TARGET_LDFLAGS32 += -Xlinker --large-address-aware -Xlinker --build-id
+  BUILD_TARGET_LDFLAGS64 += -Xlinker --build-id
 endif
 
 ifeq ($(BUILD_TARGET_OS),darwin)
