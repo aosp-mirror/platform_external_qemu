@@ -1,0 +1,7 @@
+Code-Review+2: Yurii Zubrytskyi <zyy@google.com>
+Verified+1: David Turner <digit@google.com>
+Submitted-by: David Turner <digit@google.com>
+Submitted-at: Wed, 16 Dec 2015 16:22:00 +0000
+Reviewed-on: https://android-review.googlesource.com/187376
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
