@@ -12,9 +12,15 @@
 #include "android/update-check/UpdateChecker.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/base/memory/ScopedPtr.h"
+#include "android/base/String.h"
+#include "android/base/StringFormat.h"
+#include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Async.h"
+#include "android/base/Uri.h"
 #include "android/curl-support.h"
+#include "android/metrics/studio-helper.h"
 #include "android/update-check/update_check.h"
 #include "android/update-check/VersionExtractor.h"
 #include "android/utils/debug.h"
@@ -44,12 +50,18 @@ R"(Your emulator is out of date, please update by launching Android Studio:
  - Click "OK"
 )";
 
+using android::base::ScopedCPtr;
+using android::base::String;
+using android::base::StringFormat;
+using android::base::StringView;
+using android::base::System;
+using android::base::Uri;
 using android::base::Version;
 using android::update_check::UpdateChecker;
 
-void android_checkForUpdates(const char* homePath) {
-    std::unique_ptr<UpdateChecker> checker(new (std::nothrow)
-                                               UpdateChecker(homePath));
+void android_checkForUpdates(const char* homePath, const char* coreVersion) {
+    std::unique_ptr<UpdateChecker> checker(
+                new (std::nothrow) UpdateChecker(homePath, coreVersion));
 
     if (checker->init() && checker->needsCheck() && checker->runAsyncCheck()) {
         // checker will delete itself after the check in the worker thread
@@ -66,21 +78,31 @@ static size_t curlWriteCallback(char* contents,
                                 size_t size,
                                 size_t nmemb,
                                 void* userp) {
-    std::string* const xml = static_cast<std::string*>(userp);
+    auto& xml = *static_cast<std::string*>(userp);
     const size_t total = size * nmemb;
 
-    xml->insert(xml->end(), contents,
-                static_cast<char*>(contents) + total);
+    xml.insert(xml.end(), contents, contents + total);
 
     return total;
 }
 
-class DataLoader : public IDataLoader {
+class DataLoader final : public IDataLoader {
 public:
-    virtual std::string load() {
+    virtual std::string load(const char* version) override {
         std::string xml;
+        String url;
+        if (!version) {
+            url = kVersionUrl;
+        } else {
+            const ScopedCPtr<char> id(
+                    android_studio_get_installation_id());
+            url = Uri::Encode(android::base::StringView(StringFormat(
+                    "%s?tool=emulator&uid=%s&os=%s&version=%s",
+                    kVersionUrl, id.get(),
+                    toString(System::get()->getOsType()).c_str(), version)));
+        }
         char* error = nullptr;
-        if (!curl_download(kVersionUrl, nullptr, &curlWriteCallback, &xml, &error)) {
+        if (!curl_download(url.c_str(), nullptr, &curlWriteCallback, &xml, &error)) {
             dwarning("UpdateCheck: Failure: %s", error);
             ::free(error);
         }
@@ -88,7 +110,7 @@ public:
     }
 };
 
-class TimeStorage : public ITimeStorage {
+class TimeStorage final : public ITimeStorage {
 public:
     TimeStorage(const char* configPath) : mFileLock(NULL) {
         mDataFileName =
@@ -102,7 +124,7 @@ public:
         }
     }
 
-    bool lock() {
+    bool lock() override {
         if (mFileLock) {
             dwarning("UpdateCheck: lock() called twice by the same process");
             return true;
@@ -113,7 +135,7 @@ public:
         return mFileLock != NULL;
     }
 
-    time_t getTime() {
+    time_t getTime() override {
         std::ifstream dataFile(mDataFileName.c_str());
         if (!dataFile) {
             return time_t();  // no data file
@@ -123,7 +145,7 @@ public:
         return static_cast<time_t>(intTime);
     }
 
-    void setTime(time_t time) {
+    void setTime(time_t time) override {
         std::ofstream dataFile(mDataFileName.c_str());
         if (!dataFile) {
             dwarning("UpdateCheck: couldn't open data file for writing");
@@ -137,16 +159,18 @@ private:
     FileLock* mFileLock;
 };
 
-class NewerVersionReporter : public INewerVersionReporter {
+class NewerVersionReporter final : public INewerVersionReporter {
 public:
-    virtual void reportNewerVersion(const android::base::Version& /*existing*/,
-                                    const android::base::Version& /*newer*/) {
+    virtual void reportNewerVersion(
+            const android::base::Version& /*existing*/,
+            const android::base::Version& /*newer*/) override {
         printf("%s\n", kNewerVersionMessage);
     }
 };
 
-UpdateChecker::UpdateChecker(const char* configPath)
-    : mVersionExtractor(new VersionExtractor()),
+UpdateChecker::UpdateChecker(const char* configPath, const char* coreVersion)
+    : mCoreVersion(coreVersion),
+      mVersionExtractor(new VersionExtractor()),
       mDataLoader(new DataLoader()),
       mTimeStorage(new TimeStorage(configPath)),
       mReporter(new NewerVersionReporter()) {}
@@ -155,7 +179,8 @@ UpdateChecker::UpdateChecker(IVersionExtractor* extractor,
                              IDataLoader* loader,
                              ITimeStorage* storage,
                              INewerVersionReporter* reporter)
-    : mVersionExtractor(extractor),
+    : mCoreVersion(nullptr),
+      mVersionExtractor(extractor),
       mDataLoader(loader),
       mTimeStorage(storage),
       mReporter(reporter) {}
@@ -169,22 +194,13 @@ bool UpdateChecker::init() {
 }
 
 bool UpdateChecker::needsCheck() const {
-    const time_t now = android::base::System::get()->getUnixTime();
-    // Check only if the date of previous check is before today date
-    return clearHMS(mTimeStorage->getTime()) < clearHMS(now);
+    const time_t now = System::get()->getUnixTime();
+    // Check only if the previous check was 4+ hours ago
+    return now - mTimeStorage->getTime() >= 4*60*60;
 }
 
 bool UpdateChecker::runAsyncCheck() {
     return android::base::async([this] { asyncWorker(); delete this; return 0; });
-}
-
-time_t UpdateChecker::clearHMS(time_t t) {
-    tm local = *localtime(&t);
-
-    // clear the time part
-    local.tm_hour = local.tm_min = local.tm_sec = 0;
-
-    return mktime(&local);
 }
 
 void UpdateChecker::asyncWorker() {
@@ -207,11 +223,11 @@ void UpdateChecker::asyncWorker() {
     }
 
     // Update the last version check time
-    mTimeStorage->setTime(android::base::System::get()->getUnixTime());
+    mTimeStorage->setTime(System::get()->getUnixTime());
 }
 
 Version UpdateChecker::getLatestVersion() {
-    const std::string xml = mDataLoader->load();
+    const std::string xml = mDataLoader->load(mCoreVersion);
     const Version ver = mVersionExtractor->extractVersion(xml);
     return ver;
 }

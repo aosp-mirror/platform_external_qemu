@@ -51,8 +51,9 @@ class MockDataLoader : public IDataLoader {
 public:
     MockDataLoader() : mLoadCallCount(0) {}
 
-    virtual std::string load() {
+    virtual std::string load(const char* version) override {
         ++mLoadCallCount;
+        EXPECT_EQ(nullptr, version);
         return mLoadResult;
     }
 
@@ -135,7 +136,7 @@ public:
                                         mTimeStorage, mReporter));
     }
 
-    std::auto_ptr<TestUpdateChecker> mUC;
+    std::unique_ptr<TestUpdateChecker> mUC;
     MockDataLoader* mDataLoader;
     MockNewerVersionReporter* mReporter;
     MockTimeStorage* mTimeStorage;
