@@ -164,6 +164,30 @@
       "revId": "9b934ac835dffe5119634d3c9b1177d0d65fc937",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "455a6ade_88f61780",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 722,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-16T19:38:45Z",
+      "side": 1,
+      "message": "Used QDesktopWidget::screenNumber",
+      "parentUuid": "c5e3ba48_6139d6aa",
+      "range": {
+        "startLine": 720,
+        "startChar": 3,
+        "endLine": 722,
+        "endChar": 5
+      },
+      "revId": "9b934ac835dffe5119634d3c9b1177d0d65fc937",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
