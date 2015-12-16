@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "45db4a39_d510f768",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1010055
+      },
+      "writtenOn": "2015-12-16T03:14:54Z",
+      "side": 1,
+      "message": "nit: I\u0027d change the title to say:\n\nCheck repository-12.xml for new versions of the emulator",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 3
+      },
+      "revId": "5fde8f84dd2c9e1e64f1b3938f97182fffae1873",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
