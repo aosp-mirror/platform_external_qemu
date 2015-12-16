@@ -313,6 +313,18 @@ public:
 #endif // !_WIN32
     }
 
+    virtual OsType getOsType() const override {
+#ifdef _WIN32
+        return OsType::Windows;
+#elif defined(__APPLE__)
+        return OsType::Mac;
+#elif defined(__linux__)
+        return OsType::Linux;
+#else
+        #error getOsType(): unsupported OS;
+#endif
+    }
+
     virtual StringVector scanDirEntries(const char* dirPath,
                                         bool fullPath = false) const {
         StringVector result = scanDirInternal(dirPath);
@@ -834,6 +846,19 @@ void System::sleepMs(unsigned n) {
 #else
     usleep(n * 1000);
 #endif
+}
+
+String toString(OsType osType) {
+    switch (osType) {
+    case OsType::Windows:
+        return "Windows";
+    case OsType::Linux:
+        return "Linux";
+    case OsType::Mac:
+        return "Mac";
+    default:
+        return "Unknown";
+    }
 }
 
 }  // namespace base

@@ -23,9 +23,17 @@
 #include <stdint.h>
 #include <time.h>
 
-
 namespace android {
 namespace base {
+
+// Type of the current operating system
+enum class OsType {
+    Windows,
+    Mac,
+    Linux
+};
+
+String toString(OsType osType);
 
 // Interface class to the underlying operating system.
 class System {
@@ -74,6 +82,9 @@ public:
     // a 32-bit program runs under a 64-bit host, getProgramBitness()
     // shall return 32, but getHostBitness() shall return 64.
     virtual int getHostBitness() const = 0;
+
+    // Return the current OS type
+    virtual OsType getOsType() const = 0;
 
     // Return the program bitness as an integer, either 32 or 64.
 #ifdef __x86_64__
