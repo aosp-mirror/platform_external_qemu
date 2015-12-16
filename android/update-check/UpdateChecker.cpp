@@ -30,8 +30,10 @@
 #include <string>
 
 static const char kDataFileName[] = ".emu-update-last-check";
+// TODO: kVersionUrl should not be fixed; XY in repository-XY.xml
+//       might change with studio updates irrelevant to the emulator
 static const char kVersionUrl[] =
-        "https://dl.google.com/android/repository/repository-10.xml";
+        "https://dl.google.com/android/repository/repository-12.xml";
 
 static const char kNewerVersionMessage[] =
 R"(Your emulator is out of date, please update by launching Android Studio:

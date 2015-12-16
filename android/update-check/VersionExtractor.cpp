@@ -30,7 +30,7 @@ namespace update_check {
 using android::base::Version;
 
 const char* const VersionExtractor::kXmlNamespace =
-        "http://schemas.android.com/sdk/android/repository/10";
+        "http://schemas.android.com/sdk/android/repository/12";
 
 namespace {
 
