@@ -444,9 +444,6 @@ hwaddr isa_mem_base = 0;
 PicState2 *isa_pic;
 
 /////////////////////////////////////////////////////////////
-// Metrics reporting globals.
-static Looper* metrics_looper = NULL;
-/////////////////////////////////////////////////////////////
 
 static IOPortReadFunc default_ioport_readb, default_ioport_readw, default_ioport_readl;
 static IOPortWriteFunc default_ioport_writeb, default_ioport_writew, default_ioport_writel;
@@ -1910,12 +1907,7 @@ static void android_init_metrics(int opengl_alive)
 
     async(androidMetrics_tryReportAll);
 
-    metrics_looper = looper_getForThread();
-    if (!metrics_looper) {
-        dwarning("Failed to initialize metrics looper (OOM?).");
-        return;
-    }
-    androidMetrics_keepAlive(metrics_looper);
+    androidMetrics_keepAlive(looper_getForThread());
 }
 
 static void android_teardown_metrics()
@@ -1923,7 +1915,6 @@ static void android_teardown_metrics()
     // NB: It is safe to cleanup metrics reporting even if we never initialized
     // it.
     androidMetrics_seal();
-    looper_free(metrics_looper);
     androidMetrics_moduleFini();
 }
 
