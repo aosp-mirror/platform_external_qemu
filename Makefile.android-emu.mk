@@ -5,8 +5,9 @@
 #
 #  - android-emu-base
 #  - android-emu
-#  - android-emu-qemu1
-#  - android-emu-qemu2
+#  - emulator-libui
+#
+# And corresponding unit-tests.
 #
 # See below for their documentation. Moreoever, it defines the following
 # variables that can be used outside of this script:
@@ -19,15 +20,10 @@
 #       List of static libraries to be used by any executable that depends on
 #       AndroidEmu.
 #
-#   ANDROID_EMU_STATIC_LIBRARIES_QEMU1
-#       List of static libraries to be used by any QEMU1 executable. Includes
-#       the items of ANDROID_EMU_STATIC_LIBRARIES.
+#   ANDROID_EMU_LDLIBS
+#       List of system libraries to be used by any executable or shared library
+#       that depends on AndroidEmu.
 #
-#   ANDROID_EMU_STATIC_LIBRARIES_QEMU2
-#       Same, but for QEMU2 executables.
-#
-#
-#  IMPORTANT: For now, this does not include any declaration related to the UI!
 
 ###############################################################################
 # public variables
@@ -208,6 +204,7 @@ LOCAL_SRC_FILES := \
     android/crashreport/CrashReporter_common.cpp \
     android/crashreport/CrashReporter_$(BUILD_TARGET_OS).cpp \
     android/curl-support.c \
+    android/emulation/android_pipe.c \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
     android/emulation/android_pipe_zero.c \
@@ -264,6 +261,7 @@ LOCAL_SRC_FILES := \
     android/proxy/proxy_http.c \
     android/proxy/proxy_http_connector.c \
     android/proxy/proxy_http_rewriter.c \
+    android/qemu-setup.c \
     android/qemu-tcpdump.c \
     android/qt/qt_path.cpp \
     android/qt/qt_setup.cpp \
@@ -459,53 +457,6 @@ LOCAL_STATIC_LIBRARIES += \
 $(call local-link-static-c++lib)
 
 $(call end-emulator-program)
-
-###############################################################################
-#
-#  android-emu-qemu1 and android-emu-qemu2
-#
-#  Some of the sources under android/ are logically part of AndroidEmu
-#  but cannot be part of android-emu yet due to the following reasons:
-#
-#  - They compile differently based on the ANDROID_QEMU2_SPECIFIC macro.
-#  - They depend on Android UI code that is not part of android-emu.
-#
-#  These sources are grouped into the android-emu-qemu1 and android-emu-qemu2
-#  static libraries. The plan is to remove these completely in the future.
-#
-
-# TODO(digit): Remove ANDROID_QEMU2_SPECIFIC from qemu-setup.c and
-#              android_pipe.c
-_ANDROID_EMU_DEPENDENT_SOURCES := \
-    android/qemu-setup.c \
-    android/emulation/android_pipe.c \
-
-$(call start-emulator-library,android-emu-qemu1)
-LOCAL_CFLAGS := $(_ANDROID_EMU_INTERNAL_CFLAGS)
-LOCAL_C_INCLUDES := $(_ANDROID_EMU_INTERNAL_INCLUDES)
-LOCAL_SRC_FILES := $(_ANDROID_EMU_DEPENDENT_SOURCES)
-$(call gen-hw-config-defs)
-$(call end-emulator-library)
-
-$(call start-emulator-library,android-emu-qemu2)
-LOCAL_CFLAGS := $(_ANDROID_EMU_INTERNAL_CFLAGS)
-LOCAL_CFLAGS += -DANDROID_QEMU2_SPECIFIC
-LOCAL_C_INCLUDES := $(_ANDROID_EMU_INTERNAL_INCLUDES)
-LOCAL_SRC_FILES := $(_ANDROID_EMU_DEPENDENT_SOURCES)
-$(call gen-hw-config-defs)
-$(call end-emulator-library)
-
-# List of static libraries that anything that depends on android-emu-qemu1
-# should use.
-ANDROID_EMU_STATIC_LIBRARIES_QEMU1 := \
-    android-emu-qemu1 \
-    $(ANDROID_EMU_STATIC_LIBRARIES) \
-
-# List of static libraries that anything that depends on android-emu-qemu2
-# should use.
-ANDROID_EMU_STATIC_LIBRARIES_QEMU2 := \
-    android-emu-qemu2 \
-    $(ANDROID_EMU_STATIC_LIBRARIES) \
 
 ##############################################################################
 #

@@ -18,6 +18,10 @@
 #include "android-qemu1-glue/qemu-control-impl.h"
 
 void qemu_android_emulation_setup() {
+
+    android_emulation_setup_use_android_emu_console(true);
+    android_emulation_setup_use_configurable_ports(true);
+
     android_emulation_setup(
             gQAndroidBatteryAgent,
             gQAndroidCellularAgent,

@@ -294,6 +294,14 @@ void android_pipe_wake_on(void* pipe_, unsigned wakes) {
  *****
  *****/
 
+// NOTE: This must be 'false' by default until QEMU2 is updated to call
+//       android_pipe_set_raw_adb_mode(true) explicitly.
+static bool s_use_qemud_adb_pipe = false;
+
+void android_pipe_set_raw_adb_mode(bool enabled) {
+    s_use_qemud_adb_pipe = !enabled;
+}
+
 /* These are used to handle the initial connection attempt, where the
  * client is going to write the name of the pipe service it wants to
  * connect to, followed by a terminating zero.
@@ -377,16 +385,16 @@ pipeConnector_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int n
         pipeName = pcon->buffer + 5;
         pipeArgs = strchr(pipeName, ':');
 
-#ifdef ANDROID_QEMU2_SPECIFIC
-        // Qemu2 uses its own implementation of ADB connector, which talks
-        // through raw pipes; make sure the qemud:adb pipes don't go through
-        // qemud multiplexer
-        if (pipeArgs && pipeArgs - pipeName == 5
-                && strncmp(pipeName, "qemud", 5) == 0
-                && strncmp(pipeArgs + 1, "adb", 3) == 0) {
-            pipeArgs = strchr(pipeArgs + 1, ':');
+        if (s_use_qemud_adb_pipe) {
+            // Qemu2 uses its own implementation of ADB connector, which talks
+            // through raw pipes; make sure the qemud:adb pipes don't go through
+            // qemud multiplexer
+            if (pipeArgs && pipeArgs - pipeName == 5
+                    && strncmp(pipeName, "qemud", 5) == 0
+                    && strncmp(pipeArgs + 1, "adb", 3) == 0) {
+                pipeArgs = strchr(pipeArgs + 1, ':');
+            }
         }
-#endif
 
         if (pipeArgs != NULL) {
             *pipeArgs++ = '\0';
@@ -473,4 +481,3 @@ static const AndroidPipeFuncs  pipeConnector_funcs = {
     pipeConnector_save,
     pipeConnector_load,
 };
-

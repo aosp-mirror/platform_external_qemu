@@ -25,6 +25,8 @@
 #include "android/utils/bufprint.h"
 #include "android/version.h"
 
+#include <stdbool.h>
+
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
 /* Contains arguments for -android-ports option. */
@@ -40,7 +42,17 @@ int    android_base_port;
 /* ADB port */
 int    android_adb_port = 5037; // Default
 
-#ifndef ANDROID_QEMU2_SPECIFIC
+// Global configuration flags, 'true' to indicate that the AndroidEmu console
+// code should be used, 'false' otherwise, which is the default used by QEMU2
+// which currently provides its own console code.
+static bool s_support_android_emu_console = false;
+
+// Global configuration flag, 'true' to indicate that configurable ADB and
+// console ports are supported (e.g. -ports <port1>,<port2> option). Note that
+// this requires s_support_android_emu_console == true too to work properly.
+static bool s_support_configurable_ports = false;
+
+
 
 enum {
     REPORT_CONSOLE_SERVER = (1 << 0),
@@ -200,6 +212,10 @@ static int qemu_control_console_start(int port, const QAndroidBatteryAgent* batt
                                       const QAndroidUserEventAgent* userEventAgent,
                                       const QAndroidVmOperations* vmOperations,
                                       const QAndroidNetAgent* netAgent) {
+    if (!s_support_android_emu_console) {
+        return 0;
+    }
+
     return control_console_start(port, batteryAgent,
                                  fingerAgent, locationAgent,
                                  userEventAgent,
@@ -207,7 +223,13 @@ static int qemu_control_console_start(int port, const QAndroidBatteryAgent* batt
                                  netAgent);
 }
 
-#endif  // ANDROID_QEMU2_SPECIFIC
+void android_emulation_setup_use_android_emu_console(bool enabled) {
+    s_support_android_emu_console = enabled;
+}
+
+void android_emulation_setup_use_configurable_ports(bool enabled) {
+    s_support_configurable_ports = enabled;
+}
 
 /* this function is called from qemu_main() once all arguments have been parsed
  * it should be used to setup any Android-specific items in the emulation before the
@@ -239,146 +261,139 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
 
     inet_strtoip("10.0.2.15", &guest_ip);
 
-#if 0
-    if (opts->adb_port) {
-        fprintf( stderr, "option -adb-port is obsolete, use -port instead\n" );
-        exit(1);
-    }
-#endif
-
     if (android_op_port && android_op_ports) {
         fprintf( stderr, "options -port and -ports cannot be used together.\n");
         exit(1);
     }
 
-#ifndef ANDROID_QEMU2_SPECIFIC
-    int tries = MAX_ANDROID_EMULATORS;
-    int success   = 0;
-    int adb_port = -1;
-    int base_port = 5554;
-    int legacy_adb = avdInfo_getAdbdCommunicationMode(android_avdInfo) ? 0 : 1;
+    if (s_support_configurable_ports) {
+        int tries = MAX_ANDROID_EMULATORS;
+        int success   = 0;
+        int adb_port = -1;
+        int base_port = 5554;
+        int legacy_adb = avdInfo_getAdbdCommunicationMode(android_avdInfo) ? 0 : 1;
 
-    if (android_op_ports) {
-        char* comma_location;
-        char* end;
-        int console_port = strtol( android_op_ports, &comma_location, 0 );
+        if (android_op_ports) {
+            char* comma_location;
+            char* end;
+            int console_port = strtol( android_op_ports, &comma_location, 0 );
 
-        if ( comma_location == NULL || *comma_location != ',' ) {
-            derror( "option -ports must be followed by two comma separated positive integer numbers" );
-            exit(1);
-        }
-
-        adb_port = strtol( comma_location+1, &end, 0 );
-
-        if ( end == NULL || *end ) {
-            derror( "option -ports must be followed by two comma separated positive integer numbers" );
-            exit(1);
-        }
-
-        if ( console_port == adb_port ) {
-            derror( "option -ports must be followed by two different integer numbers" );
-            exit(1);
-        }
-
-        // Set up redirect from host to guest system. adbd on the guest listens
-        // on 5555.
-        if (legacy_adb) {
-            netAgent->slirpRedir(false, adb_port, guest_ip, 5555);
-        } else {
-            adb_server_init(adb_port);
-            android_adb_service_init();
-        }
-        if (qemu_control_console_start(console_port, batteryAgent, fingerAgent,
-                                       locationAgent, userEventAgent,
-                                       vmOperations, netAgent) < 0) {
-            if (legacy_adb) {
-                netAgent->slirpUnredir(false, adb_port);
-            }
-        }
-
-        base_port = console_port;
-    } else {
-        if (android_op_port) {
-            char*  end;
-            int    port = strtol( android_op_port, &end, 0 );
-            if ( end == NULL || *end ||
-                (unsigned)((port - base_port) >> 1) >= (unsigned)tries ) {
-                derror( "option -port must be followed by an even integer number between %d and %d\n",
-                        base_port, base_port + (tries-1)*2 );
+            if ( comma_location == NULL || *comma_location != ',' ) {
+                derror( "option -ports must be followed by two comma separated positive integer numbers" );
                 exit(1);
             }
-            if ( (port & 1) != 0 ) {
-                port &= ~1;
-                dwarning( "option -port must be followed by an even integer, using  port number %d\n",
-                          port );
+
+            adb_port = strtol( comma_location+1, &end, 0 );
+
+            if ( end == NULL || *end ) {
+                derror( "option -ports must be followed by two comma separated positive integer numbers" );
+                exit(1);
             }
-            base_port = port;
-            tries     = 1;
-        }
 
-        for ( ; tries > 0; tries--, base_port += 2 ) {
+            if ( console_port == adb_port ) {
+                derror( "option -ports must be followed by two different integer numbers" );
+                exit(1);
+            }
 
-            /* setup first redirection for ADB, the Android Debug Bridge */
-            adb_port = base_port + 1;
+            // Set up redirect from host to guest system. adbd on the guest listens
+            // on 5555.
             if (legacy_adb) {
-                if (!netAgent->slirpRedir(false, adb_port, guest_ip, 5555))
-                    continue;
+                netAgent->slirpRedir(false, adb_port, guest_ip, 5555);
             } else {
-                if (adb_server_init(adb_port))
-                    continue;
+                adb_server_init(adb_port);
                 android_adb_service_init();
             }
-
-            /* setup second redirection for the emulator console */
-            if (qemu_control_console_start(base_port, batteryAgent, fingerAgent,
-                                           locationAgent, userEventAgent,
-                                           vmOperations, netAgent) < 0) {
+            if (qemu_control_console_start(console_port, batteryAgent, fingerAgent,
+                                        locationAgent, userEventAgent,
+                                        vmOperations, netAgent) < 0) {
                 if (legacy_adb) {
                     netAgent->slirpUnredir(false, adb_port);
                 }
-                continue;
             }
 
-            D( "control console listening on port %d, ADB on port %d", base_port, adb_port );
-            success = 1;
-            break;
+            base_port = console_port;
+        } else {
+            if (android_op_port) {
+                char*  end;
+                int    port = strtol( android_op_port, &end, 0 );
+                if ( end == NULL || *end ||
+                    (unsigned)((port - base_port) >> 1) >= (unsigned)tries ) {
+                    derror( "option -port must be followed by an even integer number between %d and %d\n",
+                            base_port, base_port + (tries-1)*2 );
+                    exit(1);
+                }
+                if ( (port & 1) != 0 ) {
+                    port &= ~1;
+                    dwarning( "option -port must be followed by an even integer, using  port number %d\n",
+                            port );
+                }
+                base_port = port;
+                tries     = 1;
+            }
+
+            for ( ; tries > 0; tries--, base_port += 2 ) {
+
+                /* setup first redirection for ADB, the Android Debug Bridge */
+                adb_port = base_port + 1;
+                if (legacy_adb) {
+                    if (!netAgent->slirpRedir(false, adb_port, guest_ip, 5555))
+                        continue;
+                } else {
+                    if (adb_server_init(adb_port))
+                        continue;
+                    android_adb_service_init();
+                }
+
+                /* setup second redirection for the emulator console */
+                if (qemu_control_console_start(base_port, batteryAgent, fingerAgent,
+                                            locationAgent, userEventAgent,
+                                            vmOperations, netAgent) < 0) {
+                    if (legacy_adb) {
+                        netAgent->slirpUnredir(false, adb_port);
+                    }
+                    continue;
+                }
+
+                D( "control console listening on port %d, ADB on port %d", base_port, adb_port );
+                success = 1;
+                break;
+            }
+
+            if (!success) {
+                fprintf(stderr, "it seems too many emulator instances are running on this machine. Aborting\n" );
+                exit(1);
+            }
         }
 
-        if (!success) {
-            fprintf(stderr, "it seems too many emulator instances are running on this machine. Aborting\n" );
-            exit(1);
+        if (android_op_report_console) {
+            report_console(android_op_report_console, base_port);
+        }
+
+        /* Save base port. */
+        android_base_port = base_port;
+
+        /* send a simple message to the ADB host server to tell it we just started.
+        * it should be listening on port 5037. if we can't reach it, don't bother
+        */
+        int s = socket_loopback_client(android_adb_port, SOCKET_STREAM);
+        if (s < 0) {
+            D("can't connect to ADB server: %s (errno = %d)", errno_str, errno );
+        } else {
+            char tmp[32];
+            char header[5];
+
+            // Expected format: <hex4>host:emulator:<port>
+            // Where <port> is the decimal adb port number, and <hex4> is the length
+            // of the payload that follows it in hex.
+            int len = snprintf(tmp, sizeof tmp, "0000host:emulator:%d", adb_port);
+            snprintf(header, sizeof header, "%04x", len - 4);
+            memcpy(tmp, header, 4);
+            socket_send(s, tmp, len);
+            D("sent '%s' to ADB server", tmp);
+
+            socket_close(s);
         }
     }
-
-    if (android_op_report_console) {
-        report_console(android_op_report_console, base_port);
-    }
-
-    /* Save base port. */
-    android_base_port = base_port;
-
-    /* send a simple message to the ADB host server to tell it we just started.
-     * it should be listening on port 5037. if we can't reach it, don't bother
-     */
-    int s = socket_loopback_client(android_adb_port, SOCKET_STREAM);
-    if (s < 0) {
-        D("can't connect to ADB server: %s (errno = %d)", errno_str, errno );
-    } else {
-        char tmp[32];
-        char header[5];
-
-        // Expected format: <hex4>host:emulator:<port>
-        // Where <port> is the decimal adb port number, and <hex4> is the length
-        // of the payload that follows it in hex.
-        int len = snprintf(tmp, sizeof tmp, "0000host:emulator:%d", adb_port);
-        snprintf(header, sizeof header, "%04x", len - 4);
-        memcpy(tmp, header, 4);
-        socket_send(s, tmp, len);
-        D("sent '%s' to ADB server", tmp);
-
-        socket_close(s);
-    }
-#endif  // ANDROID_QEMU2_SPECIFIC
 
     telephonyAgent->initModem(android_base_port);
 
