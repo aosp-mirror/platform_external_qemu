@@ -38,7 +38,7 @@ public:
 class IDataLoader {
 public:
     virtual ~IDataLoader() {}
-    virtual std::string load() = 0;
+    virtual std::string load(const char* version) = 0;
 };
 
 class ITimeStorage {
@@ -77,7 +77,11 @@ class UpdateChecker {
 public:
     // |configPath| is the path to the emulator configuration directory
     // where the checker can store its records about last check time
-    explicit UpdateChecker(const char* configPath);
+    // |coreVersion| is a core-specific application version (e.g. 25.0.0.1/2)
+    //      'nullptr' means 'don't send any emulator-specific information in the
+    //      request, just check the version
+    explicit UpdateChecker(const char* configPath,
+                           const char* coreVersion = nullptr);
 
     bool init();
 
@@ -94,11 +98,10 @@ protected:
                   ITimeStorage*,
                   INewerVersionReporter*);
 
-    static time_t clearHMS(time_t t);
-
     void asyncWorker();
 
 private:
+    const char* mCoreVersion;
     std::unique_ptr<IVersionExtractor> mVersionExtractor;
     std::unique_ptr<IDataLoader> mDataLoader;
     std::unique_ptr<ITimeStorage> mTimeStorage;
