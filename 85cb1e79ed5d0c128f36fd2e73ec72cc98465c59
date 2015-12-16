@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "057b1238_8e461bfe",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-16T20:02:25Z",
+      "side": 1,
+      "message": "which one? of the guest? IMO it\u0027s too much of the information for an \u0027always on\u0027 reporting",
+      "parentUuid": "2580164e_4f9a7130",
+      "range": {
+        "startLine": 99,
+        "startChar": 12,
+        "endLine": 102,
+        "endChar": 77
+      },
+      "revId": "85cb1e79ed5d0c128f36fd2e73ec72cc98465c59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c56e5a7a_6cb4133e",
         "filename": "android/update-check/UpdateChecker.cpp",
         "patchSetId": 1
@@ -59,6 +83,30 @@
       "writtenOn": "2015-12-16T19:48:16Z",
       "side": 1,
       "message": "Generally safer to use difftime (http://www.cplusplus.com/reference/ctime/difftime/), although subtraction is safe in this case, prefer that to avoid gotchas down the line.",
+      "range": {
+        "startLine": 199,
+        "startChar": 15,
+        "endLine": 199,
+        "endChar": 16
+      },
+      "revId": "85cb1e79ed5d0c128f36fd2e73ec72cc98465c59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "45718a52_30d50664",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-16T20:02:25Z",
+      "side": 1,
+      "message": "that\u0027s true, but now \"everyone knows (tm)\" that time_t is in seconds. Yeah, I found out about difftime couple month ago",
+      "parentUuid": "655f6ecc_a91f5996",
       "range": {
         "startLine": 199,
         "startChar": 15,
