@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "655f6ecc_89ddbd01",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-16T20:10:50Z",
+      "side": 1,
+      "message": "Wokay, let\u0027s start with what we have here.",
+      "parentUuid": "057b1238_8e461bfe",
+      "range": {
+        "startLine": 99,
+        "startChar": 12,
+        "endLine": 102,
+        "endChar": 77
+      },
+      "revId": "85cb1e79ed5d0c128f36fd2e73ec72cc98465c59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c56e5a7a_6cb4133e",
         "filename": "android/update-check/UpdateChecker.cpp",
         "patchSetId": 1
@@ -107,6 +131,30 @@
       "side": 1,
       "message": "that\u0027s true, but now \"everyone knows (tm)\" that time_t is in seconds. Yeah, I found out about difftime couple month ago",
       "parentUuid": "655f6ecc_a91f5996",
+      "range": {
+        "startLine": 199,
+        "startChar": 15,
+        "endLine": 199,
+        "endChar": 16
+      },
+      "revId": "85cb1e79ed5d0c128f36fd2e73ec72cc98465c59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5e3ba48_e457b406",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-16T20:10:50Z",
+      "side": 1,
+      "message": "It\u0027s not so much about seconds vs milliseconds as it is about signed vs unsigned. Implementations can choose to have this in unsigned, and if someone this code to do a reverse difference in the future, they\u0027ll get trash results.",
+      "parentUuid": "45718a52_30d50664",
       "range": {
         "startLine": 199,
         "startChar": 15,
