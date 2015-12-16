@@ -212,7 +212,7 @@ if [ -z "$NO_TESTS" ]; then
 
     if [ "$RUN_32BIT_TESTS" ]; then
         echo "Running 32-bit unit test suite."
-        for UNIT_TEST in android_emu_unittests emugl_common_host_unittests emulator_libui_unittests; do
+        for UNIT_TEST in android_emu_unittests emugl_common_host_unittests emulator_libui_unittests emulator_crashreport_unittests; do
         echo "   - $UNIT_TEST"
         run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
         done
@@ -220,7 +220,7 @@ if [ -z "$NO_TESTS" ]; then
 
     if [ "$RUN_64BIT_TESTS" ]; then
         echo "Running 64-bit unit test suite."
-        for UNIT_TEST in android_emu64_unittests emugl64_common_host_unittests emulator64_libui_unittests; do
+        for UNIT_TEST in android_emu64_unittests emugl64_common_host_unittests emulator64_libui_unittests emulator64_crashreport_unittests; do
             echo "   - $UNIT_TEST"
             run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
         done

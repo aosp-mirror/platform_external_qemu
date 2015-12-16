@@ -239,7 +239,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         EXTRA_FLAGS=
         case $SYSTEM in
             windows-*)
-                export LDFLAGS="-static -s"
+                export LDFLAGS="-static -s -Xlinker --build-id"
                 export CXXFLAGS="-std=gnu++11"
                 var_append EXTRA_FLAGS "platform=windows toolchain=crossmingw"
                 # 'libgl-gdi' is the target that implements desktop GL
@@ -277,7 +277,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 dump "$(builder_text) Building $PKG_NAME"
                 case $SYSTEM in
                     windows-*)
-                        export LDFLAGS="-static -s"
+                        export LDFLAGS="-static -s -Xlinker --build-id"
                         export CXXFLAGS="-std=gnu++11"
                         ;;
                 esac
