@@ -146,13 +146,12 @@
 #include "android/opengles.h"
 #include "android/version.h"
 
+#define QEMU2_EMULATOR_VERSION_STRING EMULATOR_VERSION_STRING "/2"
+
 int android_display_width  = 640;
 int android_display_height = 480;
 int android_display_bpp    = 32;
 
-/////////////////////////////////////////////////////////////
-// Metrics reporting globals.
-static Looper* metrics_looper = NULL;
 /////////////////////////////////////////////////////////////
 
 #endif  /* USE_ANDROID_EMU */
@@ -2828,7 +2827,7 @@ static void android_check_for_updates()
 {
     char configPath[MAX_PATH];
     bufprint_config_path(configPath, configPath + sizeof(configPath));
-    android_checkForUpdates(configPath);
+    android_checkForUpdates(configPath, QEMU2_EMULATOR_VERSION_STRING);
 }
 
 static void android_init_metrics()
@@ -2849,7 +2848,8 @@ static void android_init_metrics()
 
     androidMetrics_init(&metrics);
     // mark the qemu2-based emulator with special suffix
-    ANDROID_METRICS_STRASSIGN(metrics.emulator_version, EMULATOR_VERSION_STRING "/2");
+    ANDROID_METRICS_STRASSIGN(metrics.emulator_version,
+                              QEMU2_EMULATOR_VERSION_STRING);
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, android_hw->hw_cpu_arch);
     metrics.guest_gpu_enabled = android_hw->hw_gpu_enabled;
     if (android_hw->hw_gpu_enabled) {
@@ -2872,12 +2872,7 @@ static void android_init_metrics()
 
     async(androidMetrics_tryReportAll);
 
-    metrics_looper = looper_getForThread();
-    if (!metrics_looper) {
-        printf("Failed to initialize metrics looper (OOM?).\n");
-        return;
-    }
-    androidMetrics_keepAlive(metrics_looper);
+    androidMetrics_keepAlive(looper_getForThread());
 }
 
 static void android_teardown_metrics()
@@ -2885,7 +2880,6 @@ static void android_teardown_metrics()
     // NB: It is safe to cleanup metrics reporting even if we never initialized
     // it.
     androidMetrics_seal();
-    looper_free(metrics_looper);
     androidMetrics_moduleFini();
 }
 
