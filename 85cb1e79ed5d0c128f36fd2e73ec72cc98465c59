@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2580164e_4f9a7130",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-16T19:48:16Z",
+      "side": 1,
+      "message": "We also want architecture in here.",
+      "range": {
+        "startLine": 99,
+        "startChar": 12,
+        "endLine": 102,
+        "endChar": 77
+      },
+      "revId": "85cb1e79ed5d0c128f36fd2e73ec72cc98465c59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c56e5a7a_6cb4133e",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-16T19:48:16Z",
+      "side": 1,
+      "message": "Let\u0027s make this 4 hours. That\u0027s big enough to not be annoying for users, while tightening the net a bit more.",
+      "range": {
+        "startLine": 198,
+        "startChar": 44,
+        "endLine": 198,
+        "endChar": 47
+      },
+      "revId": "85cb1e79ed5d0c128f36fd2e73ec72cc98465c59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "655f6ecc_a91f5996",
+        "filename": "android/update-check/UpdateChecker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-16T19:48:16Z",
+      "side": 1,
+      "message": "Generally safer to use difftime (http://www.cplusplus.com/reference/ctime/difftime/), although subtraction is safe in this case, prefer that to avoid gotchas down the line.",
+      "range": {
+        "startLine": 199,
+        "startChar": 15,
+        "endLine": 199,
+        "endChar": 16
+      },
+      "revId": "85cb1e79ed5d0c128f36fd2e73ec72cc98465c59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
