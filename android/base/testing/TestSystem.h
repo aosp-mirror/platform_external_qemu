@@ -93,6 +93,14 @@ public:
         return mHostBitness;
     }
 
+    virtual OsType getOsType() const override {
+        return mOsType;
+    }
+
+    void setOsType(OsType type) {
+        mOsType = type;
+    }
+
     virtual String envGet(const char* varname) const {
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
             const String& name = mEnvPairs[n];
@@ -286,6 +294,7 @@ private:
     SilentCommandShell* mSilentShellFunc;
     void* mSilentShellOpaque;
     time_t mUnixTime;
+    OsType mOsType = OsType::Windows;
 };
 
 }  // namespace base
