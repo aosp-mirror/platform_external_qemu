@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a565e697_4b0019e1",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-16T19:11:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "852462f4_075eb625",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 39
+      },
+      "revId": "9b934ac835dffe5119634d3c9b1177d0d65fc937",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25fc967c_8c5da7c7",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2015-12-14T17:12:38Z",
       "side": 1,
       "message": "spaces",
+      "range": {
+        "startLine": 703,
+        "startChar": 0,
+        "endLine": 703,
+        "endChar": 4
+      },
+      "revId": "9b934ac835dffe5119634d3c9b1177d0d65fc937",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a565e697_0b0a21ff",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 703,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-16T19:11:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "25fc967c_8c5da7c7",
       "range": {
         "startLine": 703,
         "startChar": 0,
@@ -82,6 +130,30 @@
       "writtenOn": "2015-12-16T18:50:24Z",
       "side": 1,
       "message": "?",
+      "parentUuid": "65f20ea9_51c4f665",
+      "range": {
+        "startLine": 720,
+        "startChar": 3,
+        "endLine": 722,
+        "endChar": 5
+      },
+      "revId": "9b934ac835dffe5119634d3c9b1177d0d65fc937",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5e3ba48_6139d6aa",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 722,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-16T19:11:00Z",
+      "side": 1,
+      "message": "Unfortunately, this is the best approach I could find. I couldn\u0027t find anything in the Qt docs about how to get the screen that contains a particular widget...",
       "parentUuid": "65f20ea9_51c4f665",
       "range": {
         "startLine": 720,
