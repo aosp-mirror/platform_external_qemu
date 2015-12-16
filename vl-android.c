@@ -1389,7 +1389,7 @@ int vm_can_run(void)
 
 void version(void)
 {
-    printf("QEMU PC emulator version " QEMU_VERSION QEMU_PKGVERSION ", Copyright (c) 2003-2008 Fabrice Bellard\n");
+    printf("QEMU PC emulator version " QEMU_VERSION " " QEMU_PKGVERSION ", Copyright (c) 2003-2008 Fabrice Bellard\n");
 }
 
 void qemu_help(int exitcode)

@@ -296,7 +296,7 @@ int main(int argc, char** argv)
     }
 
     if (avdArch == NULL) {
-        avdArch = "arm";
+        avdArch = "x86";
         D("Can't determine target AVD architecture: defaulting to %s\n", avdArch);
     }
 
@@ -323,46 +323,51 @@ int main(int argc, char** argv)
     }
 
     if (ranchu == RANCHU_AUTODETECT) {
-        // Auto-detect which emulation engine to launch.
-        bool cpuHasRanchu = isCpuArchSupportedByRanchu(avdArch);
-        bool cpuHasGoldfish = isCpuArchSupportedByGoldfish(avdArch);
-
-        if (cpuHasRanchu) {
-            if (cpuHasGoldfish) {
-                // Need to auto-detect the default engine.
-                // TODO: Deal with -kernel <file>, -systemdir <dir> and platform
-                // builds appropriately. For now this only works reliably for
-                // regular SDK AVD configurations.
-                if (checkAvdSystemDirForKernelRanchu(avdName, avdArch,
-                                                     androidOut)) {
-                    D("Auto-config: -engine qemu2 (based on configuration)\n");
-                    ranchu = RANCHU_ON;
-                } else {
-                    D("Auto-config: -engine classic (based on configuration)\n");
-                    ranchu = RANCHU_OFF;
-                }
-            } else {
-                D("Auto-config: -engine qemu2 (%s default)\n", avdArch);
-                ranchu = RANCHU_ON;
-            }
-        } else if (cpuHasGoldfish) {
-            D("Auto-config: -engine classic (%s default)\n", avdArch);
-            ranchu = RANCHU_OFF;
+        if (!avdName) {
+            ranchu = RANCHU_ON;
         } else {
-            APANIC("CPU architecture '%s' is not supported\n", avdArch);
+            // Auto-detect which emulation engine to launch.
+            bool cpuHasRanchu = isCpuArchSupportedByRanchu(avdArch);
+            bool cpuHasGoldfish = isCpuArchSupportedByGoldfish(avdArch);
+
+            if (cpuHasRanchu) {
+                if (cpuHasGoldfish) {
+                    // Need to auto-detect the default engine.
+                    // TODO: Deal with -kernel <file>, -systemdir <dir> and platform
+                    // builds appropriately. For now this only works reliably for
+                    // regular SDK AVD configurations.
+                    if (checkAvdSystemDirForKernelRanchu(avdName, avdArch,
+                                                         androidOut)) {
+                        D("Auto-config: -engine qemu2 (based on configuration)\n");
+                        ranchu = RANCHU_ON;
+                    } else {
+                        D("Auto-config: -engine classic (based on configuration)\n");
+                        ranchu = RANCHU_OFF;
+                    }
+                } else {
+                    D("Auto-config: -engine qemu2 (%s default)\n", avdArch);
+                    ranchu = RANCHU_ON;
+                }
+            } else if (cpuHasGoldfish) {
+                D("Auto-config: -engine classic (%s default)\n", avdArch);
+                ranchu = RANCHU_OFF;
+            } else {
+                APANIC("CPU architecture '%s' is not supported\n", avdArch);
+            }
         }
     }
 
     // Sanity checks.
-    if (ranchu == RANCHU_OFF && !isCpuArchSupportedByGoldfish(avdArch)) {
-        APANIC("CPU Architecture '%s' is not supported by the classic emulator",
-               avdArch);
+    if (avdName) {
+        if (ranchu == RANCHU_OFF && !isCpuArchSupportedByGoldfish(avdArch)) {
+            APANIC("CPU Architecture '%s' is not supported by the classic emulator",
+                   avdArch);
+        }
+        if (ranchu == RANCHU_ON && !isCpuArchSupportedByRanchu(avdArch)) {
+            APANIC("CPU Architecture '%s' is not supported by the QEMU2 emulator",
+                   avdArch);
+        }
     }
-    if (ranchu == RANCHU_ON && !isCpuArchSupportedByRanchu(avdArch)) {
-        APANIC("CPU Architecture '%s' is not supported by the QEMU2 emulator",
-               avdArch);
-    }
-
 #ifdef _WIN32
     // Windows version of Qemu1 works only in x86 mode
     if (ranchu == RANCHU_OFF) {
