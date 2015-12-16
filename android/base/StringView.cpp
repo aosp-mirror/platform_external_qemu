@@ -11,10 +11,15 @@
 
 #include "android/base/StringView.h"
 
+#include "android/base/String.h"
+
 #include <algorithm>
 
 namespace android {
 namespace base {
+
+StringView::StringView(const String& str) :
+    mString(str.c_str()), mSize(str.size()) {}
 
 int StringView::compare(const StringView& other) const {
     size_t minSize = std::min(mSize, other.size());
