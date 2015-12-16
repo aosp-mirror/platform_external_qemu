@@ -90,16 +90,16 @@ class DataLoader final : public IDataLoader {
 public:
     virtual std::string load(const char* version) override {
         std::string xml;
-        String url;
-        if (!version) {
-            url = kVersionUrl;
-        } else {
+        String url = kVersionUrl;
+        if (version) {
             const ScopedCPtr<char> id(
                     android_studio_get_installation_id());
-            url = Uri::Encode(android::base::StringView(StringFormat(
-                    "%s?tool=emulator&uid=%s&os=%s&version=%s",
+            const auto parameters = Uri::Encode(StringView(StringFormat(
+                    "tool=emulator&uid=%s&os=%s&version=%s",
                     kVersionUrl, id.get(),
                     toString(System::get()->getOsType()).c_str(), version)));
+            url += '?';
+            url += parameters;
         }
         char* error = nullptr;
         if (!curl_download(url.c_str(), nullptr, &curlWriteCallback, &xml, &error)) {
