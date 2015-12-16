@@ -205,7 +205,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
     SkinUIParams my_ui_params = {
         .enable_touch = !androidHwConfig_isScreenNoTouch(android_hw),
         .enable_dpad = android_hw->hw_dPad != 0,
-        .enable_keyboard = android_hw->hw_keyboard != 0,
+        .enable_keyboard = 1, // Always
         .enable_trackball = android_hw->hw_trackBall != 0,
 
         .window_x = emulator->win_x,

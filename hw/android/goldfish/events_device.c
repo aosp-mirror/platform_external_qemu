@@ -419,32 +419,39 @@ void events_dev_init(uint32_t base, qemu_irq irq)
         events_set_bit(s, EV_KEY, KEY_CAMERA);
     }
 
-    if (config->hw_keyboard) {
-        /* since we want to implement Unicode reverse-mapping
-         * allow any kind of key, even those not available on
-         * the skin.
-         *
-         * the previous code did set the [1..0x1ff] range, but
-         * we don't want to enable certain bits in the middle
-         * of the range that are registered for mouse/trackball/joystick
-         * events.
-         *
-         * see "linux_keycodes.h" for the list of events codes.
-         */
-        events_set_bits(s, EV_KEY, 1, 0xff);
-        events_set_bits(s, EV_KEY, 0x160, 0x1ff);
+    // Since we want to implement Unicode reverse-mapping,
+    // allow any kind of key, even those not available on
+    // the skin.
+    //
+    // The previous code set the full [1..0x1ff] range, but
+    // we don't want to enable certain bits in the middle
+    // of the range that are registered for mouse/trackball/joystick
+    // events.
+    //
+    // See "linux_keycodes.h" for the list of events codes.
+    events_set_bits(s, EV_KEY, 1, 0xff);
+    events_set_bits(s, EV_KEY, 0x160, 0x1ff);
 
-        /* If there is a keyboard, but no DPad, we need to clear the
-         * corresponding bits. Doing this is simpler than trying to exclude
-         * the DPad values from the ranges above.
-         */
-        if (!config->hw_dPad) {
-            events_clr_bit(s, EV_KEY, KEY_DOWN);
-            events_clr_bit(s, EV_KEY, KEY_UP);
-            events_clr_bit(s, EV_KEY, KEY_LEFT);
-            events_clr_bit(s, EV_KEY, KEY_RIGHT);
-            events_clr_bit(s, EV_KEY, KEY_CENTER);
-        }
+    if ( !android_hw->hw_keyboard ) {
+        // Disable the 'Q' key.
+        // The System uses ('Q' key enabled) to indicate
+        // (hardware keyboard is present).
+        // See frameworks/native/services/inputflinger/EventHub.cpp
+        // The kernel will process 'Q' as a special case, even
+        // though it is disabled here.
+        events_clr_bit(s, EV_KEY, KEY_Q);
+    }
+
+    /* If there is no DPad, we need to clear the corresponding bits.
+     * Doing this is simpler than trying to exclude the DPad values
+     * from the ranges above.
+     */
+    if (!config->hw_dPad) {
+        events_clr_bit(s, EV_KEY, KEY_DOWN);
+        events_clr_bit(s, EV_KEY, KEY_UP);
+        events_clr_bit(s, EV_KEY, KEY_LEFT);
+        events_clr_bit(s, EV_KEY, KEY_RIGHT);
+        events_clr_bit(s, EV_KEY, KEY_CENTER);
     }
 
     /* configure EV_REL array

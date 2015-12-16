@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2010 The Android Open Source Project
+/* Copyright (C) 2006-2015 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -54,7 +54,7 @@ typedef struct SkinUIFuncs {
 // |window_scale| is the window scaling factor. Use 1.0 for unscaled display.
 // |enable_touch| is true iff touch emulation is needed.
 // |enable_dpad| is true iff DPad emulation is needed.
-// |enable_keyboard| is true iff a hardware keyboard must be emulated.
+// |enable_keyboard| is true always to allow keyboard input to the AVD.
 // |enable_trackball| is true iff a trackball must be emulated.
 // |keyboard_charmap| is the name of the keyboard charmap, if any. If NULL,
 // or empty, the default value will be used.
