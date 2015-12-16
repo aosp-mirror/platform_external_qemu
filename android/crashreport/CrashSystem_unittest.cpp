@@ -25,38 +25,67 @@ using namespace android::crashreport;
 // TODO fix validatePaths_nonWritableHomeDir
 // TODO windows tests
 
-void makeCaBundle(TestTempDir* rootDir) {
-    EXPECT_TRUE(rootDir->makeSubDir("progdir/lib"));
-    EXPECT_TRUE(rootDir->makeSubFile("progdir/lib/ca-bundle.pem"));
-}
-
-void makeCrashService(TestTempDir* rootDir) {
+class CrashSystemTest: public ::testing::Test {
+public:
+    CrashSystemTest() : mTestSystem("/progdir", System::kProgramBitness,
+                                     "/homedir", "/appdir"),
+                        mTestDir(mTestSystem.getTempRoot()),
+                        mCrashServiceName() {
+        EXPECT_TRUE(mTestDir->makeSubDir("progdir"));
+        EXPECT_TRUE(mTestDir->makeSubDir("homedir"));
+        EXPECT_TRUE(mTestDir->makeSubDir("appdir"));
+        if (System::kProgramBitness == 32) {
+            mCrashServiceName = "emulator-crash-service";
+        } else {
+            mCrashServiceName = "emulator64-crash-service";
+        }
 #ifdef _WIN32
-    EXPECT_TRUE(rootDir->makeSubFile("progdir/emulator-crash-service.exe"));
-#else
-    EXPECT_TRUE(rootDir->makeSubFile("progdir/emulator-crash-service"));
+        mCrashServiceName+=".exe";
 #endif
-}
+    }
 
-void makeAndroidHome(TestTempDir* rootDir) {
-    EXPECT_TRUE(rootDir->makeSubDir("homedir/.android"));
-}
+    TestTempDir* getTestDir() {
+        return mTestDir;
+    }
+    void makeCaBundle() {
+        EXPECT_TRUE(mTestDir->makeSubDir("progdir/lib"));
+        EXPECT_TRUE(mTestDir->makeSubFile("progdir/lib/ca-bundle.pem"));
+    }
 
-void makeBreakpadHome(TestTempDir* rootDir) {
-    makeAndroidHome(rootDir);
-    EXPECT_TRUE(rootDir->makeSubDir("homedir/.android/breakpad"));
-}
+    std::string getCrashServiceTestDirPath() {
+        std::string crashpath ("progdir");
+        crashpath += System::kDirSeparator;
+        crashpath += mCrashServiceName;
+        return crashpath;
+    }
 
-#define BUILD_TESTSYSTEM32                                     \
-    TestSystem testsys("/progdir", 32, "/homedir", "/appdir"); \
-    TestTempDir* testDir = testsys.getTempRoot();              \
-    EXPECT_TRUE(testDir->makeSubDir("progdir"));               \
-    EXPECT_TRUE(testDir->makeSubDir("homedir"));               \
-    EXPECT_TRUE(testDir->makeSubDir("appdir"));
+    std::string getCrashServicePath() {
+        std::string crashpath ("/");
+        crashpath += getCrashServiceTestDirPath();
+        return crashpath;
+    }
 
-TEST(CrashSystem, getCrashDirectory) {
-    BUILD_TESTSYSTEM32
-    makeBreakpadHome(testDir);
+    void makeCrashService() {
+        EXPECT_TRUE(mTestDir->makeSubFile(getCrashServiceTestDirPath().c_str()));
+    }
+
+    void makeAndroidHome() {
+        EXPECT_TRUE(mTestDir->makeSubDir("homedir/.android"));
+    }
+
+    void makeBreakpadHome() {
+        makeAndroidHome();
+        EXPECT_TRUE(mTestDir->makeSubDir("homedir/.android/breakpad"));
+    }
+
+private:
+    android::base::TestSystem mTestSystem;
+    TestTempDir* mTestDir;
+    std::string mCrashServiceName;
+};
+
+
+TEST_F(CrashSystemTest, getCrashDirectory) {
     std::string tmp1 = CrashSystem::get()->getCrashDirectory();
 #ifdef _WIN32
     EXPECT_STREQ(tmp1.c_str(), "/homedir\\.android\\breakpad");
@@ -65,9 +94,7 @@ TEST(CrashSystem, getCrashDirectory) {
 #endif
 }
 
-TEST(CrashSystem, getCaBundlePath) {
-    BUILD_TESTSYSTEM32
-    makeCaBundle(testDir);
+TEST_F(CrashSystemTest, getCaBundlePath) {
     std::string tmp1 = CrashSystem::get()->getCaBundlePath();
 #ifdef _WIN32
     EXPECT_STREQ(tmp1.c_str(), "/progdir\\lib\\ca-bundle.pem");
@@ -76,83 +103,63 @@ TEST(CrashSystem, getCaBundlePath) {
 #endif
 }
 
-TEST(CrashSystem, getCrashServicePath) {
-    BUILD_TESTSYSTEM32
-    makeCrashService(testDir);
+TEST_F(CrashSystemTest, getCrashServicePath) {
     std::string tmp1 = CrashSystem::get()->getCrashServicePath();
-#ifdef _WIN32
-    EXPECT_STREQ(tmp1.c_str(), "/progdir\\emulator-crash-service.exe");
-#else
-    EXPECT_STREQ(tmp1.c_str(), "/progdir/emulator-crash-service");
-#endif
+    std::string crashpath = getCrashServicePath();
+    EXPECT_STREQ(tmp1.c_str(), crashpath.c_str());
 }
 
-TEST(CrashSystem, getCrashServiceCmdLine) {
-    BUILD_TESTSYSTEM32
+TEST_F(CrashSystemTest, getCrashServiceCmdLine) {
     std::string pipe("pipeval");
     std::string proc("procval");
     ::android::base::StringVector tmp1 =
             CrashSystem::get()->getCrashServiceCmdLine(pipe, proc);
     EXPECT_EQ(tmp1.size(), 5);
-#ifdef _WIN32
-    EXPECT_STREQ(tmp1[0].c_str(), "/progdir\\emulator-crash-service.exe");
-#else
-    EXPECT_STREQ(tmp1[0].c_str(), "/progdir/emulator-crash-service");
-#endif
+    EXPECT_STREQ(tmp1[0].c_str(), getCrashServicePath().c_str());
     EXPECT_STREQ(tmp1[1].c_str(), "-pipe");
     EXPECT_STREQ(tmp1[2].c_str(), pipe.c_str());
     EXPECT_STREQ(tmp1[3].c_str(), "-ppid");
     EXPECT_STREQ(tmp1[4].c_str(), proc.c_str());
 }
 
-TEST(CrashSystem, validatePaths_ValidPaths) {
-    BUILD_TESTSYSTEM32
-    makeCaBundle(testDir);
-    makeCrashService(testDir);
-    makeBreakpadHome(testDir);
+TEST_F(CrashSystemTest, validatePaths_ValidPaths) {
+    makeCaBundle();
+    makeCrashService();
+    makeBreakpadHome();
     EXPECT_TRUE(CrashSystem::get()->validatePaths());
 }
 
-TEST(CrashSystem, validatePaths_NoCrashServiceFile) {
-    BUILD_TESTSYSTEM32
-    makeCaBundle(testDir);
-    makeBreakpadHome(testDir);
+TEST_F(CrashSystemTest, validatePaths_NoCrashServiceFile) {
+    makeCaBundle();
+    makeBreakpadHome();
     EXPECT_FALSE(CrashSystem::get()->validatePaths());
 }
 
-TEST(CrashSystem, validatePaths_CrashServiceIsDir) {
-    BUILD_TESTSYSTEM32
-#ifdef _WIN32
-    EXPECT_TRUE(testDir->makeSubDir("progdir/emulator-crash-service.exe"));
-#else
-    EXPECT_TRUE(testDir->makeSubDir("progdir/emulator-crash-service"));
-#endif
-    makeBreakpadHome(testDir);
+TEST_F(CrashSystemTest, validatePaths_CrashServiceIsDir) {
+    EXPECT_TRUE(getTestDir()->makeSubDir(getCrashServiceTestDirPath().c_str()));
+    makeBreakpadHome();
     EXPECT_FALSE(CrashSystem::get()->validatePaths());
 }
 
-TEST(CrashSystem, validatePaths_NoCaBundle) {
-    BUILD_TESTSYSTEM32
-    makeCrashService(testDir);
-    makeBreakpadHome(testDir);
+TEST_F(CrashSystemTest, validatePaths_NoCaBundle) {
+    makeCrashService();
+    makeBreakpadHome();
     EXPECT_FALSE(CrashSystem::get()->validatePaths());
 }
 
-TEST(CrashSystem, validatePaths_CaBundleIsDir) {
-    BUILD_TESTSYSTEM32
-    EXPECT_TRUE(testDir->makeSubDir("progdir/lib"));
-    EXPECT_TRUE(testDir->makeSubDir("progdir/lib/ca-bundle.pem"));
-    makeCrashService(testDir);
-    makeBreakpadHome(testDir);
+TEST_F(CrashSystemTest, validatePaths_CaBundleIsDir) {
+    EXPECT_TRUE(getTestDir()->makeSubDir("progdir/lib"));
+    EXPECT_TRUE(getTestDir()->makeSubDir("progdir/lib/ca-bundle.pem"));
+    makeCrashService();
+    makeBreakpadHome();
     EXPECT_FALSE(CrashSystem::get()->validatePaths());
 }
 
-TEST(CrashSystem, validatePaths_crashDirIsFile) {
-    BUILD_TESTSYSTEM32
-    makeCaBundle(testDir);
-    makeCrashService(testDir);
-    makeAndroidHome(testDir);
-    EXPECT_TRUE(testDir->makeSubFile("homedir/.android/breakpad"));
+TEST_F(CrashSystemTest, validatePaths_crashDirIsFile) {
+    makeCaBundle();
+    makeCrashService();
+    makeAndroidHome();
+    EXPECT_TRUE(getTestDir()->makeSubFile("homedir/.android/breakpad"));
     EXPECT_FALSE(CrashSystem::get()->validatePaths());
 }
 
@@ -162,9 +169,8 @@ TEST(CrashSystem, validatePaths_crashDirIsFile) {
 //  This function does not use the System/TestSystem infrastructure and does
 //    ignores the testroot, instead trying to mkdir at the system root "/".
 //    This has the same result as if the HOME directory path was not writable.
-//  TEST(CrashSystem, validatePaths_nonWritableHomeDir) {
-//       BUILD_TESTSYSTEM32
-//       makeCaBundle(testDir);
-//       makeCrashService(testDir);
+//  TEST(CrashSystemTest, validatePaths_nonWritableHomeDir) {
+//       makeCaBundle();
+//       makeCrashService();
 //       EXPECT_FALSE(CrashSystem::get()->validatePaths());
 //}

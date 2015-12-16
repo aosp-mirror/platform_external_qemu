@@ -77,18 +77,48 @@ $(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)_test_crasher)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
+    $(BREAKPAD_INCLUDES) \
+
+LOCAL_CFLAGS += -O0
+
+LOCAL_SRC_FILES += \
+    android/crashreport/testing/main-test-crasher.cpp \
+
+LOCAL_STATIC_LIBRARIES += \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
+    $(BREAKPAD_STATIC_LIBRARIES) \
+
+# Link against static libstdc++ on Linux and Windows since the unit-tests
+# cannot pick up our custom versions of the library from
+# $(BUILD_OBJS_DIR)/lib[64]/
+$(call local-link-static-c++lib)
+
+$(call end-emulator-program)
+
+##############################################################################
+##############################################################################
+###
+###  crash reporter unit tests
+
+# NOTE: Build as 32-bit or 64-bit executable, depending on the value of
+#       EMULATOR_PROGRAM_BITNESS.
+#
+
+$(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)_crashreport_unittests)
+
+LOCAL_C_INCLUDES += \
+    $(ANDROID_EMU_INCLUDES) \
     $(EMULATOR_GTEST_INCLUDES) \
     $(LIBCURL_INCLUDES) \
     $(BREAKPAD_INCLUDES) \
 
 LOCAL_CFLAGS += -O0 $(LIBCURL_CFLAGS)
 
-LOCAL_SRC_FILES += \
+LOCAL_SRC_FILES := \
     android/crashreport/CrashService_common.cpp \
     android/crashreport/CrashService_$(BUILD_TARGET_OS).cpp \
     android/crashreport/CrashService_unittest.cpp \
     android/crashreport/CrashSystem_unittest.cpp \
-    android/crashreport/testing/main-test-crasher.cpp \
 
 LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
