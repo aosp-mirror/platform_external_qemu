@@ -103,59 +103,23 @@ int formatToolbarGetUrl(char** ptr,
     return result;
 }
 
-// Dummy write function to pass to curl to avoid dumping the returned output to
-// stdout.
-static size_t curlWriteFunction(CURL* handle,
-                                size_t size,
-                                size_t nmemb,
-                                void* userdata) {
-    // Report that we "took care of" all the data provided.
-    return size * nmemb;
-}
-
 /* typedef'ed to: androidMetricsUploaderFunction */
 bool androidMetrics_uploadMetricsToolbar(const AndroidMetrics* metrics) {
     static const char toolbar_url[] = "https://tools.google.com/service/update";
     bool success = true;
 
-    CURL* const curl = curl_easy_default_init();
-    CURLcode curlRes;
-    if (!curl) {
-        return false;
-    }
-
     char* formatted_url = NULL;
     if (formatToolbarGetUrl(&formatted_url, toolbar_url, metrics) < 0) {
         mwarning("Failed to allocate memory for a request");
-        curl_easy_cleanup(curl);
         return false;
     }
 
-    curl_easy_setopt(curl, CURLOPT_URL, formatted_url);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriteFunction);
-    curlRes = curl_easy_perform(curl);
-    if (curlRes != CURLE_OK) {
+    char* error = nullptr;
+    if (!curl_download_null(formatted_url, nullptr, true, &error)) {
+        mwarning("Can't upload usage metrics: %s", error);
+        ::free(error);
         success = false;
-        mwarning("curl_easy_perform() failed with code %d (%s)", curlRes,
-                 curl_easy_strerror(curlRes));
     }
-
-    // toolbar returns a 404 by design.
-    long http_response = 0;
-    curlRes = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_response);
-    if (curlRes == CURLE_OK) {
-        if (http_response != 200 && http_response != 404) {
-            mwarning("Got HTTP response code %ld", http_response);
-            success = false;
-        }
-    } else if (curlRes == CURLE_UNKNOWN_OPTION) {
-        mwarning("Can not get a valid response code: not supported");
-    } else {
-        mwarning("Unexpected error while checking http response: %s",
-                 curl_easy_strerror(curlRes));
-    }
-
     free(formatted_url);
-    curl_easy_cleanup(curl);
     return success;
 }

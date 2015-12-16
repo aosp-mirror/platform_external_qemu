@@ -25,6 +25,8 @@
 #include "google_breakpad/processor/process_state.h"
 #include "processor/stackwalk_common.h"
 
+#include <curl/curl.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -94,9 +96,11 @@ std::string CrashService::getReportId() const {
 bool CrashService::uploadCrash(const std::string& url) {
     curl_init(::android::crashreport::CrashSystem::get()
                       ->getCaBundlePath().c_str());
-    CURL* const curl = curl_easy_default_init();
+    char* error = nullptr;
+    CURL* const curl = curl_easy_default_init(&error);
     if (!curl) {
-        E("Curl instantiation failed\n");
+        E("Curl instantiation failed: %s\n", error);
+        ::free(error);
         return false;
     }
 
