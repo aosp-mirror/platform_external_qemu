@@ -331,6 +331,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                     -xplatform win32-g++ \
                     -device-option CROSS_COMPILE=$BINPREFIX \
                     -no-warnings-are-errors
+                var_append LDFLAGS "-Xlinker --build-id"
                 ;;
             darwin*)
                 var_append EXTRA_CONFIGURE_FLAGS \
