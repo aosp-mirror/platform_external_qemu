@@ -29,10 +29,12 @@ static void addShortcutsTableRow(QTableWidget* table_widget,
 void ExtendedWindow::initKbdShorts() {
     QTableWidget* table_widget = mExtendedUi->shortcutsTableWidget;
     if (mQtUIShortcuts) {
-        for (const auto& key_sequence_and_command : *mQtUIShortcuts) {
+        for (auto key_sequence_and_command = mQtUIShortcuts->begin();
+             key_sequence_and_command != mQtUIShortcuts->end();
+             ++key_sequence_and_command) {
             addShortcutsTableRow(table_widget,
-                                 key_sequence_and_command.first.toString(QKeySequence::NativeText),
-                                 getQtUICommandDescription(key_sequence_and_command.second));
+                                 key_sequence_and_command.key().toString(QKeySequence::NativeText),
+                                 getQtUICommandDescription(key_sequence_and_command.value()));
         }
     }
 
