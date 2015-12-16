@@ -3811,7 +3811,7 @@ int main(int argc, char **argv, char **envp)
 void android_check_for_updates() {
     char configPath[PATH_MAX];
     bufprint_config_path(configPath, configPath + sizeof(configPath));
-    android_checkForUpdates(configPath);
+    android_checkForUpdates(configPath, EMULATOR_VERSION_STRING);
 }
 
 void
