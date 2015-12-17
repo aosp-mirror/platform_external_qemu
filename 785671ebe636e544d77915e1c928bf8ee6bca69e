@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "850622ce_a01be0bc",
+        "filename": "android/skin/surface.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-17T18:24:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "459d0ad3_135e74c1",
+      "range": {
+        "startLine": 46,
+        "startChar": 40,
+        "endLine": 46,
+        "endChar": 49
+      },
+      "revId": "785671ebe636e544d77915e1c928bf8ee6bca69e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "850622ce_3d6ff745",
         "filename": "android/skin/surface.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-12-17T17:08:23Z",
       "side": 1,
       "message": "what are these dimensions? scaling from original_* to (x,y)?\nIt\u0027s really not obvious - comment would help",
+      "range": {
+        "startLine": 47,
+        "startChar": 41,
+        "endLine": 47,
+        "endChar": 86
+      },
+      "revId": "785671ebe636e544d77915e1c928bf8ee6bca69e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "653e8e9d_ce60e3b9",
+        "filename": "android/skin/surface.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-17T18:24:49Z",
+      "side": 1,
+      "message": "Yes, scaling from original_(w,h) to (w,h). A pretty significant chunk of the skinning process is pretty unnecessary since a lot of it supported the SDL2 UI, so a refactor will make sense in the future. For example, this struct basically just wraps a QImage.",
+      "parentUuid": "850622ce_3d6ff745",
       "range": {
         "startLine": 47,
         "startChar": 41,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "459d0ad3_16d6621a",
+        "filename": "android/skin/surface.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-17T18:24:49Z",
+      "side": 1,
+      "message": "Updated the capitalization in the rest of the comments as well.",
+      "parentUuid": "05a79224_d4fcd298",
+      "revId": "785671ebe636e544d77915e1c928bf8ee6bca69e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c5dadaa8_8f199957",
         "filename": "android/skin/window.c",
         "patchSetId": 1
@@ -88,6 +154,30 @@
     },
     {
       "key": {
+        "uuid": "c5b1fa58_faf73db3",
+        "filename": "android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1576,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-17T18:24:49Z",
+      "side": 1,
+      "message": "The old surface doesn\u0027t exist - window-\u003esurface is NULL here, thus why we create a new one! I\u0027ve simplified this to just call skin_surface_resize, which will do the NULL check.",
+      "parentUuid": "c5dadaa8_8f199957",
+      "range": {
+        "startLine": 1576,
+        "startChar": 11,
+        "endLine": 1576,
+        "endChar": 28
+      },
+      "revId": "785671ebe636e544d77915e1c928bf8ee6bca69e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0512320e_07a626d3",
         "filename": "android/skin/window.c",
         "patchSetId": 1
@@ -99,6 +189,30 @@
       "writtenOn": "2015-12-17T17:08:23Z",
       "side": 1,
       "message": "... and here?",
+      "range": {
+        "startLine": 1579,
+        "startChar": 12,
+        "endLine": 1579,
+        "endChar": 32
+      },
+      "revId": "785671ebe636e544d77915e1c928bf8ee6bca69e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5d1668e_4eb4c70b",
+        "filename": "android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1579,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-17T18:24:49Z",
+      "side": 1,
+      "message": "Comments added, let me know if they make things clear enough.",
+      "parentUuid": "0512320e_07a626d3",
       "range": {
         "startLine": 1579,
         "startChar": 12,

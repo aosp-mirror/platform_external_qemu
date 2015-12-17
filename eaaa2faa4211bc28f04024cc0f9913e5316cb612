@@ -16,6 +16,24 @@
       "revId": "eaaa2faa4211bc28f04024cc0f9913e5316cb612",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e5335ed5_0ae81ba3",
+        "filename": "android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1549,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-17T18:24:49Z",
+      "side": 0,
+      "message": "Yep - this unref was actually de-allocating the surface, and skin_surface_create_window was allocating a new, unitialized one, meaning for a few frames, the background would disappear! See the comments I added to address Yurii\u0027s comments below.\n\nIt may actually make more sense to remove unrefp altogether, since it will *always* call skin_surface_free because skin_surface_ref was unused and therefore removed. Thoughts?",
+      "parentUuid": "85bb823a_98fa79dc",
+      "revId": "eaaa2faa4211bc28f04024cc0f9913e5316cb612",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
