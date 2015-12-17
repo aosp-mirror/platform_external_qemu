@@ -252,7 +252,7 @@ trackball_init(TrackBall  ball, int  diameter, int  ring,
     ball->rotation   = SKIN_ROTATION_0;
 
     ball->pixels   = (unsigned*)calloc( diameter2*diameter2, sizeof(unsigned) );
-    ball->surface  = skin_surface_create_fast(diameter2, diameter2);
+    ball->surface  = skin_surface_create(diameter2, diameter2, diameter2, diameter2);
 
     /* init axes */
     ball->axes[0][0] = 1.; ball->axes[0][1] = 0.; ball->axes[0][2] = 0.;

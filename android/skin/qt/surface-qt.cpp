@@ -37,7 +37,7 @@
 
 static int next_id = 0;
 
-static SkinSurface *create_surface(int w, int h, int original_w, int original_h)
+extern SkinSurface *skin_surface_create(int w, int h, int original_w, int original_h)
 {
     auto s = new SkinSurface();
     auto window = EmulatorQtWindow::getInstancePtr();
@@ -61,10 +61,10 @@ static SkinSurface *create_surface(int w, int h, int original_w, int original_h)
     return  s;
 }
 
-extern SkinSurface *skin_surface_create_fast(int w, int h)
+extern SkinSurface *skin_surface_create(int w, int h)
 {
-    D("skin_surface_create_fast %d, %d", w, h);
-    return create_surface(w, h, w, h);
+    D("skin_surface_create %d, %d", w, h);
+    return skin_surface_create(w, h, w, h);
 }
 
 static void skin_surface_free(SkinSurface *s)
@@ -80,27 +80,6 @@ extern int skin_surface_height(SkinSurface *s)
 {
     D("skin_surface_height %d", s->id);
     return s->h;
-}
-
-extern int skin_surface_lock(SkinSurface *s, SkinSurfacePixels *pix)
-{
-    D("skin_surface_lock %d", s->id);
-    s->window->getBitmapInfo(s, pix);
-    return 0;
-}
-
-extern SkinSurface* skin_surface_ref(SkinSurface *surface)
-{
-    if (surface) {
-        D("skin_surface_ref %d", surface->id);
-        surface->refcount += 1;
-    }
-    return surface;
-}
-
-extern void skin_surface_unlock(SkinSurface *s)
-{
-    D("skin_surface_unlock %d", s->id);
 }
 
 extern void skin_surface_unrefp(SkinSurface* *psurface)
@@ -120,40 +99,43 @@ extern int skin_surface_width(SkinSurface *s)
     return s->w;
 }
 
-extern SkinSurface *skin_surface_create_slow(int w, int h)
-{
-    D("skin_surface_create_slow %d, %d ", w, h);
-    return create_surface(w, h, w, h);
-}
-
 extern SkinSurface* skin_surface_create_argb32_from(int w, int h, int pitch, uint32_t *pixels)
 {
     D("skin_surface_create_argb32_from %d, %d, pitch %d (%d)", w, h, pitch);
-    SkinSurface* s = create_surface(w, h, w, h);
+    SkinSurface* s = skin_surface_create(w, h, w, h);
     SkinRect rect;
     rect.size.h = h;
     rect.size.w = w;
     rect.pos.x = 0;
     rect.pos.y = 0;
-    SkinSurfacePixels p;
-    skin_surface_lock(s, &p);
     skin_surface_upload(s, &rect, pixels, pitch);
-    skin_surface_unlock(s);
     return s;
 }
 
-extern SkinSurface* skin_surface_create_window(int x, int y, int w, int h, int original_w, int original_h, int is_fullscreen)
+extern SkinSurface* skin_surface_resize(SkinSurface *surface, int w, int h, int original_w, int original_h)
 {
-    D("skin_surface_create_window  %d, %d, %d, %d, %d, %d, fullscreen: %d", x, y, w, h, original_w, original_h, is_fullscreen);
+    if ( surface == NULL ) {
+        return skin_surface_create(w, h, original_w, original_h);
+    } else if ( surface->original_w == original_w && surface->original_h == original_h ) {
+        surface->w = w;
+        surface->h = h;
+        return surface;
+    } else {
+        skin_surface_unrefp(&surface);
+        return skin_surface_create(w, h, original_w, original_h);
+    }
+}
+
+extern void skin_surface_create_window(SkinSurface* surface, int x, int y, int w, int h, int is_fullscreen)
+{
+    D("skin_surface_create_window  %d, %d, %d, %d, fullscreen: %d", x, y, w, h,  is_fullscreen);
     QSemaphore semaphore;
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
-    if (window == NULL) return NULL;
-    SkinSurface *surface = create_surface(w, h, original_w, original_h);
+    if (window == NULL) return;
     QRect rect(x, y, w, h);
     window->showWindow(surface, &rect, is_fullscreen, &semaphore);
     semaphore.acquire();
     D("ID of backing bitmap surface is %d", surface->id);
-    return surface;
 }
 
 extern void skin_surface_get_format(SkinSurface *s, SkinSurfacePixelFormat *format)
@@ -167,11 +149,6 @@ extern void skin_surface_get_format(SkinSurface *s, SkinSurfacePixelFormat *form
     format->r_shift = 16;
     format->g_shift = 8;
     format->b_shift = 0;
-}
-
-extern void skin_surface_set_alpha_blending(SkinSurface *s, int)
-{
-    D("skin_surface_set_alpha_blending %d", s->id);
 }
 
 extern void skin_surface_update(SkinSurface *surface, SkinRect *rect)
