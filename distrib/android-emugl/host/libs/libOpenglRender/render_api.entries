@@ -74,9 +74,10 @@ void getHardwareStrings(const char** vendor, const char** renderer, const char**
 # always be the same as the ones passed to initOpenGLRenderer().
 void setPostCallback(OnPostFn onPost, void* onPostContext);
 
-# createOpenGLSubwindow -
-#     Create a native subwindow which is a child of 'window'
-#     to be used for framebuffer display.
+# showOpenGLSubwindow -
+#     Create or modify a native subwindow which is a child of 'window'
+#     to be used for framebuffer display. If a subwindow already exists,
+#     its properties will be updated to match the given parameters.
 #     wx,wy is the top left corner of the rendering subwindow.
 #     ww,wh are the dimensions of the rendering subwindow.
 #     fbw,fbh are the dimensions of the underlying guest framebuffer.
@@ -88,7 +89,7 @@ void setPostCallback(OnPostFn onPost, void* onPostContext);
 #     a software-only renderer like OSMesa. In this case, the client should
 #     call setPostCallback to get the content of each new frame when it is
 #     posted, and will be responsible for displaying it.
-bool createOpenGLSubwindow(FBNativeWindowType window, int wx, int wy, int ww, int wh, int fbw, int fbh, float dpr, float zRot);
+bool showOpenGLSubwindow(FBNativeWindowType window, int wx, int wy, int ww, int wh, int fbw, int fbh, float dpr, float zRot);
 
 # destroyOpenGLSubwindow -
 #   destroys the created native subwindow. Once destroyed,
@@ -96,10 +97,6 @@ bool createOpenGLSubwindow(FBNativeWindowType window, int wx, int wy, int ww, in
 #   subwindow will be created.
 #   Return true on success, false otherwise.
 bool destroyOpenGLSubwindow(void);
-
-# moveOpenGLSubwindow
-#   moves and resizes the created native subwindow
-bool moveOpenGLSubwindow(int x, int y, int width, int height);
 
 # setOpenGLDisplayRotation -
 #    set the framebuffer display image rotation in units

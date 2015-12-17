@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2011 The Android Open Source Project
+* Copyright (C) 2011-2015 The Android Open Source Project
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -175,7 +175,7 @@ RENDER_APICALL int RENDER_APIENTRY stopOpenGLRenderer(void)
     return ret;
 }
 
-RENDER_APICALL bool RENDER_APIENTRY createOpenGLSubwindow(
+RENDER_APICALL bool RENDER_APIENTRY showOpenGLSubwindow(
         FBNativeWindowType window_id,
         int wx,
         int wy,
@@ -204,21 +204,6 @@ RENDER_APICALL bool RENDER_APIENTRY destroyOpenGLSubwindow(void)
 
     if (window) {
         return window->removeSubWindow();
-    }
-
-    // XXX: should be implemented by sending the renderer process
-    //      a request
-    ERR("%s not implemented for separate renderer process !!!\n",
-            __FUNCTION__);
-    return false;
-}
-
-RENDER_APICALL bool RENDER_APIENTRY moveOpenGLSubwindow(int x, int y, int width, int height)
-{
-    RenderWindow* window = s_renderWindow;
-
-    if (window) {
-        return window->moveSubWindow(x, y, width, height);
     }
 
     // XXX: should be implemented by sending the renderer process

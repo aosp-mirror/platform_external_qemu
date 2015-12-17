@@ -1288,23 +1288,6 @@ skin_window_show_opengles( SkinWindow* window )
     skin_winsys_run_ui_update(&skin_window_run_opengles_show, &data);
 }
 
-static void skin_window_run_opengles_move(void* p) {
-    const gles_show_data* data = (const gles_show_data*)p;
-    data->window->win_funcs->opengles_move(data->wx,
-                                           data->wy,
-                                           data->ww,
-                                           data->wh);
-}
-
-static void
-skin_window_move_opengles( SkinWindow* window )
-{
-    gles_show_data data;
-    skin_window_setup_opengles_subwindow(window, &data);
-
-    skin_winsys_run_ui_update(&skin_window_run_opengles_move, &data);
-}
-
 static void
 skin_window_redraw_opengles( SkinWindow* window )
 {
@@ -1504,7 +1487,7 @@ skin_window_scroll_updated( SkinWindow* window, int dx, int xmax, int dy, int ym
     subwindow.size.h = window->framebuffer.h;
 
     if (skin_window_recompute_subwindow_rect(window, &subwindow)) {
-        skin_window_move_opengles(window);
+        skin_window_show_opengles(window);
     }
 
     // Compute the margins around the sub-window, then transform the current scroll values
@@ -1546,7 +1529,6 @@ static void
 skin_window_resize( SkinWindow*  window, int resize_container )
 {
     if ( !window->no_display ) {
-        skin_window_hide_opengles(window);
 
         int           layout_w = window->layout.rect.size.w;
         int           layout_h = window->layout.rect.size.h;
@@ -1682,7 +1664,7 @@ skin_window_zoomed_window_resized( SkinWindow* window, int dx, int dy, int w, in
     window->scroll_h = scroll_h;
 
     if (skin_window_recompute_subwindow_rect(window, &subwindow)) {
-        skin_window_move_opengles(window);
+        skin_window_show_opengles(window);
         skin_window_redraw_opengles(window);
     }
 }

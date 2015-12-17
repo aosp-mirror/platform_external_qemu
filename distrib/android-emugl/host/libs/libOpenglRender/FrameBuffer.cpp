@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2011 The Android Open Source Project
+* Copyright (C) 2011-2015 The Android Open Source Project
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -494,9 +494,18 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
     }
 
     m_lock.lock();
+
+    // If the subwindow doesn't exist, create it with the appropriate dimensions
     if (!m_subWin) {
-        // create native subwindow for FB display output
-        m_subWin = createSubWindow(p_window, wx, wy, ww, wh, subWindowRepaint, this);
+
+        // Create native subwindow for FB display output
+        m_x = wx;
+        m_y = wy;
+        m_windowWidth = ww;
+        m_windowHeight = wh;
+
+        m_subWin = createSubWindow(p_window, m_x, m_y,
+                                   m_windowWidth, m_windowHeight, subWindowRepaint, this);
         if (m_subWin) {
             m_nativeWindow = p_window;
 
@@ -511,31 +520,52 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                 destroySubWindow(m_subWin);
                 m_subWin = (EGLNativeWindowType)0;
             } else {
-                if (bindSubwin_locked()) {
-                    // Subwin creation was successfull,
-                    // update viewport and z rotation and draw
-                    // the last posted color buffer.
-                    s_gles2.glViewport(0, 0, fbw * dpr, fbh * dpr);
-                    m_windowWidth = ww;
-                    m_windowHeight = wh;
-                    m_dpr = dpr;
-                    m_zRot = zRot;
-                    m_px = 0;
-                    m_py = 0;
-                    if (m_lastPostedColorBuffer) {
-                        post(m_lastPostedColorBuffer, false);
-                    } else {
-                        s_gles2.glClear(GL_COLOR_BUFFER_BIT |
-                                        GL_DEPTH_BUFFER_BIT |
-                                        GL_STENCIL_BUFFER_BIT);
-                        s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
-                    }
-                    unbind_locked();
-                    success = true;
-                }
+                m_px = 0;
+                m_py = 0;
+
+                success = true;
             }
         }
     }
+
+    // At this point, if the subwindow doesn't exist, it is because it either couldn't be created
+    // in the first place or the EGLSurface couldn't be created.
+    if (m_subWin && bindSubwin_locked()) {
+
+        // Only attempt to update window geometry if anything has actually changed.
+        if (!(m_x == wx &&
+              m_y == wy &&
+              m_windowWidth == ww &&
+              m_windowHeight == wh)) {
+
+            m_x = wx;
+            m_y = wy;
+            m_windowWidth = ww;
+            m_windowHeight = wh;
+
+            success = ::moveSubWindow(m_nativeWindow, m_subWin,
+                                      m_x, m_y, m_windowWidth, m_windowHeight);
+        }
+
+        if (success) {
+            // Subwin creation or movement was successful,
+            // update viewport and z rotation and draw
+            // the last posted color buffer.
+            s_gles2.glViewport(0, 0, fbw * dpr, fbh * dpr);
+            m_dpr = dpr;
+            m_zRot = zRot;
+            if (m_lastPostedColorBuffer) {
+                post(m_lastPostedColorBuffer, false);
+            } else {
+                s_gles2.glClear(GL_COLOR_BUFFER_BIT |
+                                GL_DEPTH_BUFFER_BIT |
+                                GL_STENCIL_BUFFER_BIT);
+                s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
+            }
+        }
+        unbind_locked();
+    }
+
     m_lock.unlock();
     return success;
 }
@@ -559,42 +589,6 @@ bool FrameBuffer::removeSubWindow() {
     }
     m_lock.unlock();
     return removed;
-}
-
-bool FrameBuffer::moveSubWindow(int x, int y, int width, int height) {
-    if (!m_useSubWindow) {
-        ERR("%s: Cannot move native sub-window in this configuration\n",
-            __FUNCTION__);
-        return false;
-    }
-    bool success = false;
-    m_lock.lock();
-    if (m_subWin) {
-        if (bindSubwin_locked()) {
-            m_windowWidth = width;
-            m_windowHeight = height;
-
-#ifdef __APPLE__
-            // The OSX-specific implementation of moveSubWindow doesn't behave nicely. In order
-            // to force the sub-window NSView to resize properly, you must remove it from the view
-            // hierarchy entirely and re-add it. However, this improperly resets the GL viewport
-            // of the subwindow to match the sub-window frame, so to counteract this, we get the
-            // original viewport before moving the subwindow, then reset it afterwards.
-            GLint vp[4];
-            s_gles2.glGetIntegerv(GL_VIEWPORT, vp);
-#endif
-
-            success = ::moveSubWindow(m_nativeWindow, m_subWin, x, y, width, height);
-
-#ifdef __APPLE__
-            s_gles2.glViewport(vp[0], vp[1], vp[2], vp[3]);
-#endif
-
-            unbind_locked();
-        }
-    }
-    m_lock.unlock();
-    return success;
 }
 
 HandleType FrameBuffer::genHandle()

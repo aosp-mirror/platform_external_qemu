@@ -54,8 +54,6 @@ int android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
 
 int android_hideOpenglesWindow(void);
 
-int android_moveOpenglesWindow(int x, int y, int width, int height);
-
 void android_setOpenglesTranslation(float px, float py);
 
 void android_redrawOpenglesWindow(void);
