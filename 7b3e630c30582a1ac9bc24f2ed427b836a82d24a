@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c5dadaa8_9201c222",
+        "filename": "android/metrics/AutoFlushedIniFile.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-17T19:30:52Z",
+      "side": 1,
+      "message": "vs file scoped static variable?\n\nI prefer class scoped static variables since they can be accessed from the friend test class. \n\nThat way, the test can start with setting the timeout to 0, to speed up the test execution.",
+      "parentUuid": "d67c5259_625e1655",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56278298_665b8e63",
         "filename": "android/metrics/AutoFlushedIniFile.h",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "c5b1fa58_5a3929aa",
+        "filename": "android/metrics/AutoFlushedIniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-17T19:30:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "56278298_665b8e63",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "569062ca_de7c259d",
         "filename": "android/metrics/AutoFlushedIniFile.h",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2015-11-10T15:58:23Z",
       "side": 1,
       "message": "s/recieve/receive/",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5b1fa58_ba6655d3",
+        "filename": "android/metrics/AutoFlushedIniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-17T19:30:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "569062ca_de7c259d",
       "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -88,6 +142,42 @@
     },
     {
       "key": {
+        "uuid": "c5dadaa8_b2d326f7",
+        "filename": "android/metrics/AutoFlushedIniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-17T19:30:52Z",
+      "side": 1,
+      "message": "Updated comment. Also, we no longer write on destruction when there aren\u0027t any changes.",
+      "parentUuid": "96865a95_40966e0c",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "653e8e9d_b18e9a15",
+        "filename": "android/metrics/AutoFlushedIniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-17T19:30:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "368beea4_7d2dd7ce",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d67c5259_42611214",
         "filename": "android/metrics/AutoFlushedIniFile.h",
         "patchSetId": 4
@@ -99,6 +189,24 @@
       "writtenOn": "2015-11-10T15:58:23Z",
       "side": 1,
       "message": "s/destructed/destroyed/",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05a79224_3f4c0fc3",
+        "filename": "android/metrics/AutoFlushedIniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-17T19:30:52Z",
+      "side": 1,
+      "message": "destructed is valid english :)",
+      "parentUuid": "d67c5259_42611214",
       "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -122,6 +230,24 @@
     },
     {
       "key": {
+        "uuid": "459d0ad3_96c7f2bb",
+        "filename": "android/metrics/AutoFlushedIniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-17T19:30:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b67fde4b_c145224a",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56278298_86d6cae6",
         "filename": "android/metrics/AutoFlushedIniFile.h",
         "patchSetId": 4
@@ -133,6 +259,24 @@
       "writtenOn": "2015-11-10T15:58:23Z",
       "side": 1,
       "message": "should this be const ?",
+      "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5b1fa58_9a8c31b0",
+        "filename": "android/metrics/AutoFlushedIniFile.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-17T19:30:52Z",
+      "side": 1,
+      "message": "Nope. The point of this function is so that users don\u0027t need to keep a separate reference to the IniFile. They\u0027d want to change the IniFile after grabbing it from here, so not const.",
+      "parentUuid": "56278298_86d6cae6",
       "revId": "7b3e630c30582a1ac9bc24f2ed427b836a82d24a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
