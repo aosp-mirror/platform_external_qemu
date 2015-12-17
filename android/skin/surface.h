@@ -25,9 +25,6 @@ typedef struct SkinSurface  SkinSurface;
 
 struct SkinScaler;
 
-/* increment surface's reference count */
-extern SkinSurface*  skin_surface_ref( SkinSurface*  surface );
-
 /* decrement a surface's reference count. takes the surface's address as parameter.
    it will be set to NULL on exit */
 extern void          skin_surface_unrefp( SkinSurface*  *psurface );
@@ -46,11 +43,8 @@ extern int skin_surface_height(SkinSurface* s);
      system memory.
 */
 
-/* create a 'fast' surface that contains a copy of an input ARGB32 pixmap */
-extern SkinSurface*  skin_surface_create_fast( int  w, int  h );
-
-/* create an empty 'slow' surface containing an ARGB32 pixmap */
-extern SkinSurface*  skin_surface_create_slow( int  w, int  h );
+/* create a surface for the appropriate dimensons */
+extern SkinSurface*  skin_surface_create( int w, int h, int original_w, int original_h );
 
 /* create a 'slow' surface from a given pixel buffer. if 'do_copy' is TRUE, then
  * the content of 'pixels' is copied into a heap-allocated buffer. otherwise
@@ -62,13 +56,24 @@ extern SkinSurface*  skin_surface_create_argb32_from(
                             int                  pitch,
                             uint32_t*            pixels);
 
-extern SkinSurface* skin_surface_create_window(
+/* check if a surface needs to be resized at all: only when the "original" dimensions change
+ * does the surface need to be re-created. otherwise, it can simply be updated with the appropriate
+ * information to avoid extra computation.
+ */
+extern SkinSurface*  skin_surface_resize(
+                            SkinSurface* surface,
+                            int w,
+                            int h,
+                            int original_w,
+                            int original_h );
+
+
+extern void  skin_surface_create_window(
+                            SkinSurface* surface,
                             int x,
                             int y,
                             int w,
                             int h,
-                            int original_w,
-                            int original_h,
                             int is_fullscreen);
 
 extern void skin_surface_reverse_map(SkinSurface* surface,
@@ -101,14 +106,7 @@ typedef struct {
 extern void    skin_surface_get_format(SkinSurface* s,
                                        SkinSurfacePixelFormat* format);
 
-extern void    skin_surface_set_alpha_blending( SkinSurface*  s, int alpha );
-
 extern void    skin_surface_update(SkinSurface* surface, SkinRect* rect);
-
-extern void    skin_surface_update_scaled(SkinSurface* dst_surface,
-                                          struct SkinScaler* scaler,
-                                          SkinSurface* src_surface,
-                                          const SkinRect* src_rect);
 
 extern void    skin_surface_upload(SkinSurface* surface,
                                    SkinRect* rect,
