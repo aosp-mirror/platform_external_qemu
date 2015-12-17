@@ -442,6 +442,24 @@ private:
 }  // namespace
 
 // static
+const char* Looper::clockTypeToString(Looper::ClockType clock) {
+    static const char kRealtimeStr[] = "kRealTime";
+    static const char kVirtualStr[] = "kVirtual";
+    static const char kHostStr[] = "kHost";
+    static const char kInvalidStr[] = "Invalid";
+    switch (clock) {
+        case Looper::ClockType::kRealtime:
+            return kRealtimeStr;
+        case Looper::ClockType::kVirtual:
+            return kVirtualStr;
+        case Looper::ClockType::kHost:
+            return kHostStr;
+        default:
+            return kInvalidStr;
+    }
+}
+
+// static
 Looper* Looper::create() {
     return new GenLooper();
 }

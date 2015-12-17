@@ -47,6 +47,8 @@ public:
         kHost
     };
 
+    static const char* clockTypeToString(ClockType clock);
+
     // Create a new generic Looper instance.
     static Looper* create();
 
