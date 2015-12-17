@@ -90,6 +90,7 @@ LOCAL_SRC_FILES := \
     android/utils/bufprint_system.cpp \
     android/utils/cbuffer.c \
     android/utils/debug.c \
+    android/utils/dns.cpp \
     android/utils/dll.c \
     android/utils/dirscanner.cpp \
     android/utils/eintr_wrapper.c \

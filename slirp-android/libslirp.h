@@ -105,8 +105,9 @@ int slirp_redir(int is_udp, int host_port,
 
 int slirp_unredir(int is_udp, int host_port);
 
-int slirp_add_dns_server(const SockAddress*  dns_addr);
 int slirp_get_system_dns_servers(void);
+int slirp_parse_dns_servers(const char* servers);
+int slirp_get_max_dns_servers(void);
 int slirp_add_exec(int do_pty, const void *args, int addr_low_byte,
                    int guest_port);
 
