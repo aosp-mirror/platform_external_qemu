@@ -1608,29 +1608,6 @@ char *qemu_find_file(int type, const char *name)
     return buf;
 }
 
-static int
-add_dns_server( const char*  server_name )
-{
-    SockAddress   addr;
-
-    if (sock_address_init_resolve( &addr, server_name, 55, 0 ) < 0) {
-        fprintf(stdout,
-                "### WARNING: can't resolve DNS server name '%s'\n",
-                server_name );
-        return -1;
-    }
-
-    fprintf(stderr,
-            "DNS server name '%s' resolved to %s\n", server_name, sock_address_to_string(&addr) );
-
-    if ( slirp_add_dns_server( &addr ) < 0 ) {
-        fprintf(stderr,
-                "### WARNING: could not add DNS server '%s' to the network stack\n", server_name);
-        return -1;
-    }
-    return 0;
-}
-
 /* Parses an integer
  * Pararm:
  *  str      String containing a number to be parsed.
@@ -3112,34 +3089,14 @@ int main(int argc, char **argv, char **envp)
     }
 
     if (android_op_dns_server) {
-        char*  x = strchr(android_op_dns_server, ',');
-        dns_count = 0;
-        if (x == NULL)
-        {
-            if ( add_dns_server( android_op_dns_server ) == 0 )
-                dns_count = 1;
+        dns_count = slirp_parse_dns_servers(android_op_dns_server);
+        if (dns_count < 0) {
+            PANIC("invalid -dns-server parameter '%s'\n",
+                    android_op_dns_server);
         }
-        else
-        {
-            x = android_op_dns_server;
-            while (*x) {
-                char*  y = strchr(x, ',');
-
-                if (y != NULL) {
-                    *y = 0;
-                    y++;
-                } else {
-                    y = x + strlen(x);
-                }
-
-                if (y > x && add_dns_server( x ) == 0) {
-                    dns_count += 1;
-                }
-                x = y;
-            }
-        }
-        if (dns_count == 0)
+        if (dns_count == 0) {
             fprintf( stdout, "### WARNING: will use system default DNS server\n" );
+        }
     }
 
     if (dns_count == 0)
