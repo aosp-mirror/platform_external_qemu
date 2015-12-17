@@ -21,6 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#ifdef USE_ANDROID_EMU
+#include "android/utils/dns.h"
+#include "android/utils/ipaddr.h"
+#include "android/utils/sockets.h"
+#endif  // USE_ANDROID_EMU
+
 #include "qemu-common.h"
 #include "qemu/timer.h"
 #include "sysemu/char.h"
@@ -42,8 +48,18 @@ u_int curtime;
 static QTAILQ_HEAD(slirp_instances, Slirp) slirp_instances =
     QTAILQ_HEAD_INITIALIZER(slirp_instances);
 
+#ifdef USE_ANDROID_EMU
+#define SPECIAL_ADDRESS_IP "10.0.2.0"
+#define DNS_ADDR_MAX 4
+#define DNS_ADDR_BASE 3
+
+static uint32_t dns_addr[DNS_ADDR_MAX];
+static size_t dns_addr_count = 0;
+static struct in_addr special_addr_ip;
+#else  // !(USE_ANDROID_EMU)
 static struct in_addr dns_addr;
 static u_int dns_addr_time;
+#endif  // USE_ANDROID_EMU
 
 #define TIMEOUT_FAST 2  /* milliseconds */
 #define TIMEOUT_SLOW 499  /* milliseconds */
@@ -51,8 +67,70 @@ static u_int dns_addr_time;
 #define TIMEOUT_DEFAULT 1000  /* milliseconds */
 
 #ifdef _WIN32
+static void winsock_cleanup(void)
+{
+    WSACleanup();
+}
+#endif
 
-int get_dns_addr(struct in_addr *pdns_addr)
+#ifdef USE_ANDROID_EMU
+static size_t get_dns_index(uint32_t addr) {
+    /* Use unsigned underflow so that values less than DNS_BASE_ADDR become
+     * huge and invalid */
+    return (addr & 0xff) - DNS_ADDR_BASE;
+}
+
+// The Slirp parameter is just there to maintain the same interface that would
+// be used for non-Android compiles. This makes calling code cleaner.
+int is_dns_addr(Slirp* slirp, const struct in_addr* address)  {
+    /* special_addr is stored in host byte order but the incoming parameter is
+     * in network order. Make sure they're both in host order */
+    uint32_t addr = ntohl(address->s_addr);
+    uint32_t network = addr & 0xffffff00;
+    return network == special_addr_ip.s_addr &&
+            get_dns_index(addr) < DNS_ADDR_MAX;
+}
+
+int get_dns_addr(const struct in_addr* guest_addr,
+                 struct in_addr* pdns_addr)
+{
+    size_t dns_index = get_dns_index(ntohl(guest_addr->s_addr));
+
+    if (dns_index < dns_addr_count && dns_addr[dns_index] != 0) {
+        pdns_addr->s_addr = htonl(dns_addr[dns_index]);
+        return 0;
+    }
+    return -1;
+}
+
+int slirp_get_system_dns_servers(void)
+{
+    int num_servers = android_dns_get_system_servers(dns_addr, DNS_ADDR_MAX);
+    if (num_servers >= 0)
+        dns_addr_count = num_servers;
+    return num_servers;
+}
+
+int slirp_parse_dns_servers(const char* servers) {
+    int num_servers = android_dns_parse_servers(servers, dns_addr, DNS_ADDR_MAX);
+    if (num_servers >= 0)
+        dns_addr_count = num_servers;
+    return num_servers;
+}
+
+int slirp_get_max_dns_servers(void) {
+    return DNS_ADDR_MAX;
+}
+
+#else  // !(USE_ANDROID_EMU)
+
+int is_dns_addr(Slirp* slirp, const struct in_addr* address)  {
+    return address->s_addr == slirp->vnameserver_addr.s_addr;
+}
+
+#ifdef _WIN32
+int get_dns_addr(const struct in_addr* /* guest_addr */,
+                 struct in_addr* pdns_addr)
 {
     FIXED_INFO *FixedInfo=NULL;
     ULONG    BufLen;
@@ -97,16 +175,12 @@ int get_dns_addr(struct in_addr *pdns_addr)
     return 0;
 }
 
-static void winsock_cleanup(void)
-{
-    WSACleanup();
-}
-
-#else
+#else  // !(_WIN32)
 
 static struct stat dns_addr_stat;
 
-int get_dns_addr(struct in_addr *pdns_addr)
+int get_dns_addr(const struct in_addr* guest_addr,
+                 struct in_addr* pdns_addr)
 {
     char buff[512];
     char buff2[257];
@@ -170,8 +244,8 @@ int get_dns_addr(struct in_addr *pdns_addr)
         return -1;
     return 0;
 }
-
-#endif
+#endif  // _WIN32
+#endif  // USE_ANDROID_EMU
 
 static void slirp_init_once(void)
 {
@@ -233,6 +307,10 @@ Slirp *slirp_init(int restricted, struct in_addr vnetwork,
     }
 
     slirp->opaque = opaque;
+
+#ifdef USE_ANDROID_EMU
+    inet_strtoip(SPECIAL_ADDRESS_IP, &special_addr_ip.s_addr);
+#endif
 
     register_savevm(NULL, "slirp", 0, 3,
                     slirp_state_save, slirp_state_load, slirp);
