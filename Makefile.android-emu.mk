@@ -246,6 +246,7 @@ LOCAL_SRC_FILES := \
     android/kernel/kernel_utils.cpp \
     android/loadpng.c \
     android/main-common.c \
+    android/metrics/AutoFlushedIniFile.cpp \
     android/metrics/metrics_reporter.cpp \
     android/metrics/metrics_reporter_ga.cpp \
     android/metrics/metrics_reporter_toolbar.cpp \
