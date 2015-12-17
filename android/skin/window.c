@@ -160,8 +160,10 @@ static int adisplay_init(ADisplay* disp,
 
     disp->gpu_frame = NULL;
 
-    disp->surface = skin_surface_create_slow(disp->rect.size.w,
-                                             disp->rect.size.h);
+    disp->surface = skin_surface_create(disp->rect.size.w,
+                                        disp->rect.size.h,
+                                        disp->rect.size.w,
+                                        disp->rect.size.h);
 
     return (disp->data == NULL) ? -1 : 0;
 }
@@ -1357,6 +1359,7 @@ skin_window_create(SkinLayout* slayout,
     window->win_funcs    = win_funcs;
     window->scale = scale;
     window->no_display   = no_display;
+    window->surface = NULL;
 
     /* enable everything by default */
     window->enable_touch     = 1;
@@ -1542,13 +1545,9 @@ skin_window_scroll_updated( SkinWindow* window, int dx, int xmax, int dy, int ym
 static void
 skin_window_resize( SkinWindow*  window, int resize_container )
 {
-    if ( !window->no_display )
+    if ( !window->no_display ) {
         skin_window_hide_opengles(window);
 
-    /* now resize window */
-    skin_surface_unrefp(&window->surface);
-
-    if ( !window->no_display ) {
         int           layout_w = window->layout.rect.size.w;
         int           layout_h = window->layout.rect.size.h;
         int           window_w = layout_w;
@@ -1573,13 +1572,19 @@ skin_window_resize( SkinWindow*  window, int resize_container )
             window_h = (int) ceil(layout_h * scale);
         }
 
-        window->surface = skin_surface_create_window(window_x,
-                                                     window_y,
-                                                     window_w,
-                                                     window_h,
-                                                     layout_w,
-                                                     layout_h,
-                                                     fullscreen);
+        // Attempt to resize the window surface. If it doesn't exist, a new one will be
+        // allocated. If it does exist, but it's original dimensions do not match the new
+        // ones, it will be de-allocated and a new one will be returned.
+        window->surface = skin_surface_resize(window->surface,
+                                              window_w, window_h,
+                                              layout_w, layout_h);
+
+        skin_surface_create_window(window->surface,
+                                   window_x,
+                                   window_y,
+                                   window_w,
+                                   window_h,
+                                   fullscreen);
 
         // Calculate the framebuffer and window sizes and locations
         ADisplay* disp = window->layout.displays;
