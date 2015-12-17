@@ -23,11 +23,13 @@ namespace base {
 // for most operations.
 class StringVector : public PodVector<String> {
 public:
-    // Default constructor. The vector will be empty.
-    StringVector() : PodVector<String>() {}
+    StringVector() = default;
 
     // Copy-constructor.
     StringVector(const StringVector& other);
+
+    // bring the constructor from initializer-list
+    using PodVector::PodVector;
 
     // Assignment operator
     StringVector& operator=(const StringVector& other);

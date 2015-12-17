@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <string>
 #include <string.h>
 
 namespace android {
@@ -61,19 +62,25 @@ class String;
 //
 class StringView {
 public:
-    StringView() : mString(NULL), mSize(0U) {}
+    StringView() : mString(""), mSize(0U) {}
 
     StringView(const StringView& other) :
         mString(other.data()), mSize(other.size()) {}
 
     // IMPORTANT: This is intentionally not 'explicit'.
     StringView(const char* string) :
-            mString(string), mSize(strlen(string)) {}
+            mString(string ? string : ""), mSize(string ? strlen(string) : 0) {}
 
-    explicit StringView(const String& str);
+    // IMPORTANT: This is intentionally not 'explicit'.
+    StringView(const String& str);
 
-    StringView(const char* str, size_t len) : mString(str), mSize(len) {}
+    // IMPORTANT: This is intentionally not 'explicit'.
+    StringView(const std::string& str) :
+        mString(str.c_str()), mSize(str.size()) {}
 
+    StringView(const char* str, size_t len) : mString(str ? str : ""), mSize(len) {}
+
+    const char* c_str() const { return mString; }
     const char* str() const { return mString; }
     const char* data() const { return mString; }
     size_t size() const { return mSize; }
@@ -88,7 +95,7 @@ public:
 
     void clear() {
         mSize = 0;
-        mString = NULL;
+        mString = "";
     }
 
     char operator[](size_t index) {
@@ -96,13 +103,13 @@ public:
     }
 
     void set(const char* data, size_t len) {
-        mString = data;
+        mString = data ? data : "";
         mSize = len;
     }
 
     void set(const char* str) {
-        mString = str;
-        mSize = ::strlen(str);
+        mString = str ? str : "";
+        mSize = ::strlen(mString);
     }
 
     void set(const StringView& other) {

@@ -94,10 +94,10 @@ public:
         if (version) {
             const ScopedCPtr<char> id(
                     android_studio_get_installation_id());
-            const auto parameters = Uri::Encode(StringView(StringFormat(
+            const auto parameters = Uri::Encode(StringFormat(
                     "tool=emulator&uid=%s&os=%s&version=%s",
                     kVersionUrl, id.get(),
-                    toString(System::get()->getOsType()).c_str(), version)));
+                    toString(System::get()->getOsType()).c_str(), version));
             url += '?';
             url += parameters;
         }

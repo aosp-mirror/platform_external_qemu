@@ -23,11 +23,11 @@ namespace android {
 namespace base {
 
 // static
-String Uri::Encode(const StringView& uri) {
+String Uri::Encode(StringView uri) {
     String encodedUri;
-    for (StringView::const_iterator cit = uri.begin(); cit != uri.end();
-         ++cit) {
-        switch (*cit) {
+    encodedUri.reserve(uri.size());
+    for (const char c : uri) {
+        switch (c) {
             case '!':
             case '#':
             case '$':
@@ -48,10 +48,10 @@ String Uri::Encode(const StringView& uri) {
             case ']':
             case ' ':
             case '%':
-                StringAppendFormat(&encodedUri, "%%%02X", *cit);
+                StringAppendFormat(&encodedUri, "%%%02X", c);
                 break;
             default:
-                encodedUri.append(*cit);
+                encodedUri.append(c);
                 break;
         }
     }
@@ -59,8 +59,9 @@ String Uri::Encode(const StringView& uri) {
 }
 
 // static
-String Uri::Decode(const StringView& uri) {
+String Uri::Decode(StringView uri) {
     String decodedUri;
+    decodedUri.reserve(uri.size());
     for (StringView::const_iterator cit = uri.begin(); cit != uri.end();
          ++cit) {
         if (*cit == '%') {
