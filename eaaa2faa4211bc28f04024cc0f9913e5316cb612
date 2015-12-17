@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "85bb823a_98fa79dc",
+        "filename": "android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1549,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-17T15:53:10Z",
+      "side": 0,
+      "message": "Is it right to remove this unref?",
+      "revId": "eaaa2faa4211bc28f04024cc0f9913e5316cb612",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

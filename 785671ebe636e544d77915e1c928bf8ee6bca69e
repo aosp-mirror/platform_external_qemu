@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05a79224_d4fcd298",
+        "filename": "android/skin/surface.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-17T15:53:10Z",
+      "side": 1,
+      "message": "Super nit: s/otherwise/Otherwise/",
+      "revId": "785671ebe636e544d77915e1c928bf8ee6bca69e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
