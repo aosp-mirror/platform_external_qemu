@@ -39,6 +39,24 @@
       "revId": "71a4c57f684a337d7cbe71c7edc9f94d9c64720f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a5c6f37_5b44c3a0",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-18T22:35:56Z",
+      "side": 1,
+      "message": "Sorry for the nagging, but ui_done really needs to be moved here. It shouldn\u0027t be Qt specific.",
+      "parentUuid": "6a53bb27_8fb55def",
+      "revId": "71a4c57f684a337d7cbe71c7edc9f94d9c64720f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
