@@ -44,7 +44,7 @@ TEST(StringView, Clear) {
     view.clear();
     EXPECT_TRUE(view.empty());
     EXPECT_EQ(0U, view.size());
-    EXPECT_FALSE(view.str());
+    EXPECT_STREQ("", view.str());
 }
 
 TEST(StringView, SetEmpty) {
