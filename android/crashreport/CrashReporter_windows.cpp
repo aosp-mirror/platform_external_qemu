@@ -64,7 +64,7 @@ public:
                               const int timeout_ms) override {
         bool serviceReady = false;
         for (int i = 0; i < timeout_ms / kWaitIntervalMS; i++) {
-            if (::android::base::System::get()->pathIsFile(pipename.c_str())) {
+            if (WaitNamedPipe(pipename.c_str(),0) != 0) {
                 serviceReady = true;
                 D("Crash Server Ready after %d ms\n", i * kWaitIntervalMS);
                 break;
