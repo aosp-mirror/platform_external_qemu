@@ -810,34 +810,38 @@ void System::addLibrarySearchDir(const char* path) {
 
 // static
 String System::findBundledExecutable(const char* programName) {
-    System* system = System::get();
+    System* const system = System::get();
+    const String executableName = PathUtils::toExecutableName(programName);
 
-    String executableName(programName);
-#ifdef _WIN32
-    executableName += ".exe";
-#endif
-    StringVector pathList;
-    pathList.push_back(system->getLauncherDirectory());
-    pathList.push_back(kBinSubDir);
-    pathList.push_back(executableName);
-
+    // first, try the root launcher directory
+    StringVector pathList = { system->getLauncherDirectory(), executableName };
     String executablePath = PathUtils::recompose(pathList);
-    if (!system->pathIsFile(executablePath.c_str())) {
-#if defined(_WIN32) && defined(__x86_64)
-        // On Windows we don't have a x64 version e2fsprogs, so let's try
-        // 32-bit directory if 64-bit lookup failed
-        assert(pathList[1] == kBinSubDir);
-        pathList[1] = kBin32SubDir;
-        executablePath = PathUtils::recompose(pathList);
-        if (!system->pathIsFile(executablePath.c_str())) {
-            executablePath.clear();
-        }
-#else
-        executablePath.clear();
-#endif
+    if (system->pathIsFile(executablePath.c_str())) {
+        return executablePath;
     }
 
-    return executablePath;
+    // it's not there - let's try the 'bin/' subdirectory
+    assert(pathList.size() == 2);
+    assert(pathList[1] == executableName);
+    pathList[1] = kBinSubDir;
+    pathList.push_back(executableName);
+    executablePath = PathUtils::recompose(pathList);
+    if (system->pathIsFile(executablePath.c_str())) {
+        return executablePath;
+    }
+
+#if defined(_WIN32) && defined(__x86_64)
+    // On Windows we don't have a x64 version e2fsprogs, so let's try
+    // 32-bit directory if 64-bit lookup failed
+    assert(pathList[1] == kBinSubDir);
+    pathList[1] = kBin32SubDir;
+    executablePath = PathUtils::recompose(pathList);
+    if (system->pathIsFile(executablePath.c_str())) {
+        return executablePath;
+    }
+#endif
+
+    return String();
 }
 
 void System::sleepMs(unsigned n) {
