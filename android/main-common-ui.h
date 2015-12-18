@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include "android/avd/hw-config.h"
+#include "android/cmdline-option.h"
 #include "android/skin/keyset.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/compiler.h"
@@ -47,5 +49,7 @@ void init_sdl_ui(AConfig*          skinConfig,
                  const char*       skinPath,
                  AndroidOptions*   opts,
                  const UiEmuAgent* uiEmuAgent);
+
+void deinit_sdl_ui(void);
 
 ANDROID_END_HEADER

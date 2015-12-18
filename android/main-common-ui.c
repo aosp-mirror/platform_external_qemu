@@ -181,11 +181,12 @@ const char*  skin_network_speed = NULL;
 const char*  skin_network_delay = NULL;
 
 
-static void android_ui_at_exit(void)
+void deinit_sdl_ui(void)
 {
     user_config_done();
     emulator_window_done(emulator_window_get());
-    skin_winsys_quit();
+    skin_winsys_quit_request();
+    skin_winsys_destroy();
 }
 
 
@@ -635,7 +636,6 @@ init_sdl_ui(AConfig*          skinConfig,
                     kIconFile);
         }
     }
-    atexit(android_ui_at_exit);
 
     user_config_get_window_pos(&win_x, &win_y);
 

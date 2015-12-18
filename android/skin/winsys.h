@@ -70,7 +70,10 @@ void skin_winsys_set_window_icon(const unsigned char* icon_data,
                                  size_t icon_data_size);
 
 // Stop main window and quit program. Must be called from inside event loop.
-void skin_winsys_quit(void);
+void skin_winsys_quit_request(void);
+
+// Kill the skin-related objects
+void skin_winsys_destroy(void);
 
 typedef void (*StartFunction)(int argc, char** argv);
 

@@ -21,6 +21,7 @@
 #include "android/skin/winsys.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/utils/setenv.h"
+#include "android/main-common-ui.h"
 
 #include <QtCore>
 #include <QApplication>
@@ -97,9 +98,7 @@ extern void skin_winsys_enter_main_loop(int argc, char **argv)
     g->argv = argv;
     g->app->exec();
     D("Finished QT main loop\n");
-
-    // There are some atexit cleanups that need to happen before this
-    atexit([] { delete qApp; });
+    deinit_sdl_ui();
 }
 
 extern void skin_winsys_get_monitor_rect(SkinRect *rect)
@@ -214,7 +213,7 @@ extern bool skin_winsys_is_window_fully_visible()
     return value;
 }
 
-extern void skin_winsys_quit()
+extern void skin_winsys_quit_request()
 {
     D("skin_winsys_quit");
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
@@ -223,6 +222,12 @@ extern void skin_winsys_quit()
         return;
     }
     window->requestClose();
+}
+
+void skin_winsys_destroy() {
+    D(__FUNCTION__);
+    delete globalState()->app;
+    globalState()->app = nullptr;
 }
 
 extern void skin_winsys_set_relative_mouse_mode(bool)
