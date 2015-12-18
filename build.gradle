@@ -31,6 +31,10 @@ sdk {
             executable true
             builtBy buildDefaultEmulator
         }
+        item("$buildDefaultEmulator.output/emulator-check") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
         item("$buildDefaultEmulator.output/bin64") {
             into 'bin64'
             builtBy buildDefaultEmulator
@@ -105,6 +109,9 @@ sdk {
             notice null
         }
         item("$buildWindowsEmulator.output/emulator.exe") {
+            builtBy buildWindowsEmulator
+        }
+        item("$buildWindowsEmulator.output/emulator-check.exe") {
             builtBy buildWindowsEmulator
         }
         item("$buildWindowsEmulator.output/bin") {
