@@ -127,34 +127,57 @@ include $(LOCAL_PATH)/Makefile.qemu1-target.mk
 # NOTE: Build as 32-bit or 64-bit executable, depending on the value of
 #       EMULATOR_PROGRAM_BITNESS.
 ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
-$(call start-emulator-program, emulator)
+    $(call start-emulator-program, emulator)
 
-LOCAL_SRC_FILES := \
-    android/main-emulator.cpp \
+    LOCAL_SRC_FILES := \
+        android/main-emulator.cpp \
 
-# Needed to compile the call to androidQtSetupEnv() in main-emulator.cpp
-LOCAL_CFLAGS += -DCONFIG_QT
+    # Needed to compile the call to androidQtSetupEnv() in main-emulator.cpp
+    LOCAL_CFLAGS += -DCONFIG_QT
 
-LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
+    LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
 
-# Ensure this is always built, even if 32-bit binaries are disabled.
-LOCAL_IGNORE_BITNESS := true
+    # Ensure this is always built, even if 32-bit binaries are disabled.
+    LOCAL_IGNORE_BITNESS := true
 
-LOCAL_GENERATE_SYMBOLS := true
+    LOCAL_GENERATE_SYMBOLS := true
 
-ifeq ($(BUILD_TARGET_OS),windows)
-$(eval $(call insert-windows-icon))
-endif
+    ifeq ($(BUILD_TARGET_OS),windows)
+    $(eval $(call insert-windows-icon))
+    endif
 
-# To avoid runtime linking issues on Linux and Windows, a custom copy of the
-# C++ standard library is copied to $(BUILD_OBJS_DIR)/lib[64], a path that is added
-# to the runtime library search path by the top-level 'emulator' launcher
-# program before it spawns the emulation engine. However, 'emulator' cannot
-# use these versions of the library, so statically link it against the
-# executable instead.
-$(call local-link-static-c++lib)
+    # To avoid runtime linking issues on Linux and Windows, a custom copy of the
+    # C++ standard library is copied to $(BUILD_OBJS_DIR)/lib[64], a path that is added
+    # to the runtime library search path by the top-level 'emulator' launcher
+    # program before it spawns the emulation engine. However, 'emulator' cannot
+    # use these versions of the library, so statically link it against the
+    # executable instead.
+    $(call local-link-static-c++lib)
 
-$(call end-emulator-program)
+    $(call end-emulator-program)
+
+    ##############################################################################
+    ###
+    ###  emulator-check: a standalone question answering service
+    ###
+
+    $(call start-emulator-program, emulator-check)
+
+    LOCAL_SRC_FILES := \
+        android/emulator-check-main.cpp \
+
+    LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
+
+    LOCAL_IGNORE_BITNESS := true
+    LOCAL_GENERATE_SYMBOLS := true
+
+    ifeq ($(BUILD_TARGET_OS),windows)
+    $(eval $(call insert-windows-icon))
+    endif
+
+    $(call local-link-static-c++lib)
+
+    $(call end-emulator-program)
 endif  # BUILD_TARGET_BITS == EMULATOR_PROGRAM_BITNESS
 
 include $(LOCAL_PATH)/Makefile.crash-service.mk
