@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6a53bb27_ac338731",
+        "filename": "android/base/EnumFlags.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-18T17:01:42Z",
+      "side": 1,
+      "message": "Just as usual :(\nThanks",
+      "parentUuid": "cad587d0_51e934d5",
+      "revId": "bac0fa683b3de4bbaff37da28d9a007caa594d89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a7c37a4_95b804e8",
         "filename": "android/base/EnumFlags.h",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-12-18T10:10:01Z",
       "side": 1,
       "message": "It looks like this is actually enforced by this header (on its last line). Can you update this comment then?",
+      "revId": "bac0fa683b3de4bbaff37da28d9a007caa594d89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a2adb7b_5181561f",
+        "filename": "android/base/EnumFlags.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-18T17:01:42Z",
+      "side": 1,
+      "message": "It is enforced for the all namespaces this header is aware of (android, android::base, ::). For the cusotm one (e.g. ::digit), one has to manually add a using",
+      "parentUuid": "4a7c37a4_95b804e8",
       "revId": "bac0fa683b3de4bbaff37da28d9a007caa594d89",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
