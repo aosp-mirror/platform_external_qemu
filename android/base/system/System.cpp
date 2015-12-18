@@ -21,6 +21,7 @@
 #include "android/base/StringFormat.h"
 
 #ifdef _WIN32
+#include "android/base/files/ScopedHandle.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/system/Win32Utils.h"
 #endif
@@ -472,94 +473,129 @@ public:
         return time(NULL);
     }
 
-    bool runSilentCommand(const StringVector& commandLine, bool wait) {
+    virtual int runCommand(const StringVector& commandLine,
+                           RunOptions options) override {
         // Sanity check.
         if (commandLine.empty()) {
-            return false;
+            return RunFailed;
+        }
+        // ReturnExitCode may only be used with WaitForCompletion
+        if ((options & RunOptions::ReturnExitCode) != 0
+            && (options & RunOptions::WaitForCompletion) == 0) {
+            return RunFailed;
         }
 
 #ifdef _WIN32
-        STARTUPINFOW startup;
-        ZeroMemory(&startup, sizeof(startup));
+        STARTUPINFOW startup = {};
         startup.cb = sizeof(startup);
-        startup.dwFlags = STARTF_USESHOWWINDOW;
-        startup.wShowWindow = SW_SHOWMINIMIZED;
-
-        PROCESS_INFORMATION pinfo;
-        ZeroMemory(&pinfo, sizeof(pinfo));
-
-        const wchar_t* comspec = _wgetenv(L"COMSPEC");
-        if (!comspec || !comspec[0]) {
-            comspec = L"cmd.exe";
+        if ((options & RunOptions::ShowOutput) == 0) {
+            startup.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+            startup.wShowWindow = SW_SHOWMINIMIZED;
+            startup.hStdInput = nullptr;
+            startup.hStdOutput = nullptr;
+            startup.hStdError = nullptr;
         }
 
-        // Run the command.
-        String command = "/C";
-        for (size_t n = 0; n < commandLine.size(); ++n) {
-            command += " ";
-            command += android::base::Win32Utils::quoteCommandLine(commandLine[n].c_str());
+        PROCESS_INFORMATION pinfo = {};
+
+        String args;
+        args = commandLine[0];
+        for (size_t i = 1; i < commandLine.size(); ++i) {
+            args += ' ';
+            args += android::base::Win32Utils::quoteCommandLine(commandLine[i].c_str());
         }
 
-        Win32UnicodeString command_unicode(command);
+        Win32UnicodeString commandUnicode(commandLine[0]);
+        Win32UnicodeString argsUnicode(args);
 
-        // NOTE: CreateProcessW expects a _writable_ pointer as its second
-        // parameter, so use .data() instead of .c_str().
-        if (!CreateProcessW(comspec,                /* program path */
-                            command_unicode.data(), /* command line args */
-                            NULL,  /* process handle is not inheritable */
-                            NULL,  /* thread handle is not inheritable */
-                            FALSE, /* no, don't inherit any handles */
-                            CREATE_NO_WINDOW, /* the new process doesn't
-                                                 have a console */
-                            NULL,     /* use parent's environment block */
-                            NULL,     /* use parent's starting directory */
-                            &startup, /* startup info, i.e. std handles */
-                            &pinfo)) {
-            return false;
+        const int flags =
+                ((options & RunOptions::ShowOutput) != 0) ? 0 : CREATE_NO_WINDOW;
+        if (!::CreateProcessW(commandUnicode.c_str(), // program path
+                argsUnicode.data(), // command line args, has to be writable
+                nullptr,            // process handle is not inheritable
+                nullptr,            // thread handle is not inheritable
+                FALSE,              // no, don't inherit any handles
+                flags,              // do we want to have a console?
+                nullptr,            // use parent's environment block
+                nullptr,            // use parent's starting directory
+                &startup,           // startup info, i.e. std handles
+                &pinfo)) {
+            return RunFailed;
         }
 
         CloseHandle(pinfo.hThread);
+        // make sure we close the process handle on exit
+        const ScopedHandle process(pinfo.hProcess);
 
-        if (wait) {
+        // by default we return the child process id
+        int result = pinfo.dwProcessId;
+        if ((options & RunOptions::WaitForCompletion) != 0) {
             ::WaitForSingleObject(pinfo.hProcess, INFINITE);
+            if ((options & RunOptions::ReturnExitCode) != 0) {
+                DWORD exitCode;
+                if (!::GetExitCodeProcess(pinfo.hProcess, &exitCode)) {
+                    exitCode = static_cast<DWORD>(RunFailed);
+                }
+                result = static_cast<int>(exitCode);
+            }
         }
 
-        CloseHandle(pinfo.hProcess);
-
-        return true;
-#else  // !_WIN32
+        return result;
+#else   // !_WIN32
         char** const params = new char*[commandLine.size() + 1];
-        for (size_t n = 0; n < commandLine.size(); ++n) {
-            params[n] = (char*)commandLine[n].c_str();
+        for (size_t i = 0; i < commandLine.size(); ++i) {
+            params[i] = const_cast<char*>(commandLine[i].c_str());
         }
         params[commandLine.size()] = nullptr;
 
         int pid = fork();
         if (pid < 0) {
-            return false;
+            return RunFailed;
         }
         if (pid != 0) {
             // Parent process returns.
             delete [] params;
-            if (wait) {
+            if ((options & RunOptions::WaitForCompletion) != 0) {
                 int status;
                 HANDLE_EINTR(waitpid(pid, &status, 0));
+                if ((options & RunOptions::ReturnExitCode) != 0) {
+                    return WIFEXITED(status)
+                            ? WEXITSTATUS(status)
+                            : RunFailed;
+                } else {
+                    return pid;
+                }
             }
-            return true;
+            return pid;
         }
 
         // In the child process.
-        int fd = open("/dev/null", O_WRONLY);
-        dup2(fd, 1);
-        dup2(fd, 2);
+
+        // save stderr in case we will redirect it to /dev/null
+        const int savedStderr = dup(2);
+        if (!(options & RunOptions::ShowOutput)) {
+            int fd = open("/dev/null", O_WRONLY);
+            dup2(fd, 1);
+            dup2(fd, 2);
+        }
         if (execvp(commandLine[0].c_str(), params) == -1) {
-            // no sense in trying to print anything - we've just passed
-            // '/dev/null' as stdout and stderr
-            exit(1);
+            dup2(savedStderr, 2);
+            fprintf(stderr, "Failed to run command '%s', error code %d\n",
+                    commandLine[0].c_str(), errno);
+            // emulator doesn't really like exit calls from a forked process
+            // (it just hangs), so let's just kill it
+            if (raise(SIGKILL) != 0) {
+                exit(RunFailed);
+            }
         }
         // Should not happen, but let's keep the compiler happy
-        exit(2);
+        return RunFailed;
 #endif  // !_WIN32
+    }
+
+    bool runSilentCommand(const StringVector& commandLine, bool wait) override {
+        return RunFailed != runCommand(commandLine,
+                 wait ? RunOptions::WaitForCompletion : RunOptions::Default);
     }
 
     virtual String getTempDir() const {

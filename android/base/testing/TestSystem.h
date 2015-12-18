@@ -240,16 +240,26 @@ public:
         mSilentShellOpaque = shellOpaque;
     }
 
-    virtual bool runSilentCommand(const StringVector& commandLine, bool wait = false) {
+    virtual bool runSilentCommand(const StringVector& commandLine,
+                                  bool wait = false) {
+        return RunFailed != runCommand(commandLine,
+                  wait ? RunOptions::WaitForCompletion : RunOptions::Default);
+    }
+
+    virtual int runCommand(const StringVector& commandLine,
+                           RunOptions options) override {
         if (!commandLine.size()) {
-            return false;
+            return RunFailed;
         }
         // If a silent shell function was registered, invoke it, otherwise
         // ignore the command completely.
         if (mSilentShellFunc) {
-            return (*mSilentShellFunc)(mSilentShellOpaque, commandLine);
+            return (*mSilentShellFunc)(mSilentShellOpaque, commandLine)
+                    ? ((options & RunOptions::ReturnExitCode) != 0)
+                        ? 0 : 1
+                    : RunFailed;
         } else {
-            return true;
+            return ((options & RunOptions::ReturnExitCode) != 0) ? 0 : 1;
         }
     }
 
