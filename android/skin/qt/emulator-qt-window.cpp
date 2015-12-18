@@ -827,8 +827,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
             }
         }
     }
-    // TODO(birenbaum): re-enable multi-touch UI when it works in QEMU2.
-#ifdef ENABLE_MULTITOUCH
+
     if (!grab &&
          event->key() == Qt::Key_Alt &&
          event->modifiers() == Qt::AltModifier) {
@@ -844,7 +843,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
             mOverlay.hide();
         }
     }
-#endif
+
     if (grab ||
          !tool_window->handleQtKeyEvent(event)) {
         forwardKeyEventToEmulator(type, event);
