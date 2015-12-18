@@ -105,6 +105,24 @@
       "revId": "bac0fa683b3de4bbaff37da28d9a007caa594d89",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a7c37a4_d51f5c4c",
+        "filename": "android/base/EnumFlags.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-18T21:57:18Z",
+      "side": 1,
+      "message": "Oh ... thanks, that\u0027s informative :)",
+      "parentUuid": "ca62e7ed_4f9401bb",
+      "revId": "bac0fa683b3de4bbaff37da28d9a007caa594d89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
