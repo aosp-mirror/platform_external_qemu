@@ -181,14 +181,6 @@ const char*  skin_network_speed = NULL;
 const char*  skin_network_delay = NULL;
 
 
-static void android_ui_at_exit(void)
-{
-    user_config_done();
-    emulator_window_done(emulator_window_get());
-    skin_winsys_quit();
-}
-
-
 typedef struct part_properties part_properties;
 struct part_properties {
     const char*      name;
@@ -587,10 +579,10 @@ DEFAULT_SKIN:
 
 
 void
-init_sdl_ui(AConfig*          skinConfig,
-            const char*       skinPath,
-            AndroidOptions*   opts,
-            const UiEmuAgent* uiEmuAgent)
+ui_init(AConfig*          skinConfig,
+        const char*       skinPath,
+        AndroidOptions*   opts,
+        const UiEmuAgent* uiEmuAgent)
 {
     int  win_x, win_y;
 
@@ -635,7 +627,6 @@ init_sdl_ui(AConfig*          skinConfig,
                     kIconFile);
         }
     }
-    atexit(android_ui_at_exit);
 
     user_config_get_window_pos(&win_x, &win_y);
 
@@ -664,4 +655,12 @@ init_sdl_ui(AConfig*          skinConfig,
         emulator_window_get()->onion_alpha    = alpha;
         emulator_window_get()->onion_rotation = rotate;
     }
+}
+
+void ui_done(void)
+{
+    user_config_done();
+    emulator_window_done(emulator_window_get());
+    skin_winsys_quit_request();
+    skin_winsys_destroy();
 }
