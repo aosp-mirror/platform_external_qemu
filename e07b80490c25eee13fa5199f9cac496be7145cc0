@@ -103,6 +103,24 @@
       "revId": "e07b80490c25eee13fa5199f9cac496be7145cc0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca62e7ed_4f1d21f7",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-18T19:33:11Z",
+      "side": 1,
+      "message": "Sorry, I\u0027m still not understanding.\n\nIn deinit_sdl_ui, you have:\n\n    skin_winsys_quit_request();\n    skin_winsys_destroy();\n\nHow is that different than just appending the contents of destroy to quit[_request]? Is it just better naming?",
+      "parentUuid": "8a438f4f_63a00ab1",
+      "revId": "e07b80490c25eee13fa5199f9cac496be7145cc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
