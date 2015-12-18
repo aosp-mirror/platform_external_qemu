@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cad587d0_51e934d5",
+        "filename": "android/base/EnumFlags.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-18T10:10:01Z",
+      "side": 1,
+      "message": "nit: Missing copyright disclaimer",
+      "revId": "bac0fa683b3de4bbaff37da28d9a007caa594d89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a7c37a4_95b804e8",
+        "filename": "android/base/EnumFlags.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-18T10:10:01Z",
+      "side": 1,
+      "message": "It looks like this is actually enforced by this header (on its last line). Can you update this comment then?",
+      "revId": "bac0fa683b3de4bbaff37da28d9a007caa594d89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
