@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a3463db_c0b1ee4a",
+        "filename": "android/crashreport/CrashReporter_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-18T23:51:36Z",
+      "side": 1,
+      "message": "why not replace with a non-0 wait here?\n\nusing 0 in WaitNamedPipe also risks waiting longer if the server set a higher default than kWaitIntervalMS",
+      "range": {
+        "startLine": 66,
+        "startChar": 8,
+        "endLine": 73,
+        "endChar": 9
+      },
+      "revId": "1e589f5fd052e0dd218fe349758259bd56ba9763",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
