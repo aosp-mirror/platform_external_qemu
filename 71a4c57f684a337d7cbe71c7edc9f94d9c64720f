@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8a5c6f37_b0619e11",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1019,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-18T19:42:38Z",
+      "side": 1,
+      "message": "This will be necessary in qemu2 as well.",
+      "range": {
+        "startLine": 1019,
+        "startChar": 4,
+        "endLine": 1019,
+        "endChar": 11
+      },
+      "revId": "71a4c57f684a337d7cbe71c7edc9f94d9c64720f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a53bb27_8fb55def",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-18T19:42:38Z",
+      "side": 1,
+      "message": "I really think ui_done should go here instead.",
+      "revId": "71a4c57f684a337d7cbe71c7edc9f94d9c64720f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
