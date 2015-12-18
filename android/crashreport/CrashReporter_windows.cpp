@@ -62,14 +62,31 @@ public:
 
     bool waitServicePipeReady(const std::string& pipename,
                               const int timeout_ms) override {
+        const int kWaitNamedPipeTimeoutMS = 1;
         bool serviceReady = false;
+        static_assert(kWaitIntervalMS >= kWaitNamedPipeTimeoutMS,
+                      "kWaitIntervalMS must be greater or equal to "
+                      "kWaitNamedPipeTimeout");
         for (int i = 0; i < timeout_ms / kWaitIntervalMS; i++) {
-            if (::android::base::System::get()->pathIsFile(pipename.c_str())) {
+            // WaitNamedPipe returns 0 immediately if pipe doesn't exist
+            //               returns 0 after timeout if pipe exists with error =
+            //                   ERROR_SEM_TIMEOUT
+            //               returns non 0 if pipe ready
+            // WaitNamedPipe does not have a timeout of 0 value
+            if (WaitNamedPipe(pipename.c_str(), kWaitNamedPipeTimeoutMS) != 0) {
                 serviceReady = true;
                 D("Crash Server Ready after %d ms\n", i * kWaitIntervalMS);
                 break;
             }
-            ::android::base::System::sleepMs(kWaitIntervalMS);
+            if (ERROR_SEM_TIMEOUT == GetLastError()) {
+                // ERROR_SEM_TIMEOUT error when WaitNamedPipe exceeds timeout
+                // A timeout means that we waited kWaitNamedPipeTimeoutMS
+                // already
+                ::android::base::System::sleepMs(kWaitIntervalMS -
+                                                 kWaitNamedPipeTimeoutMS);
+            } else {
+                ::android::base::System::sleepMs(kWaitIntervalMS);
+            }
         }
         return serviceReady;
     }
