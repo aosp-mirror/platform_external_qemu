@@ -20,9 +20,9 @@
 using android::base::Uri;
 
 char* uri_encode(const char* uri) {
-    return strdup(Uri::Encode(uri).c_str());
+    return Uri::Encode(uri).release();
 }
 
 char* uri_decode(const char* uri) {
-    return strdup(Uri::Decode(uri).c_str());
+    return Uri::Decode(uri).release();
 }
