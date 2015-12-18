@@ -62,14 +62,14 @@ extern "C" bool crashhandler_init() {
 
     int pid = CrashSystem::spawnService(cmdline);
     if (!pid) {
-        E("Could not spawn crash service\n");
+        W("Could not spawn crash service\n");
         return false;
     } else {
         CrashReporter::get()->setupChildCrashProcess(pid);
     }
 
     if (!CrashReporter::get()->waitServicePipeReady(crashpipe.mClient)) {
-        E("Crash service did not start\n");
+        W("Crash service did not start\n");
         return false;
     }
 

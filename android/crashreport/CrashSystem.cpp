@@ -94,11 +94,11 @@ public:
         std::string crashDir = getCrashDirectory();
         if (!System::get()->pathExists(crashDir.c_str())) {
             if (path_mkdir_if_needed(crashDir.c_str(), 0744) == -1) {
-                E("Couldn't create crash dir %s\n", crashDir.c_str());
+                W("Couldn't create crash dir %s\n", crashDir.c_str());
                 valid = false;
             }
         } else if (System::get()->pathIsFile(crashDir.c_str())) {
-            E("Crash dir is a file! %s\n", crashDir.c_str());
+            W("Crash dir is a file! %s\n", crashDir.c_str());
             valid = false;
         }
         return valid;
@@ -241,7 +241,7 @@ const CrashSystem::CrashPipe& CrashSystem::getCrashPipe() {
         int client_fd;
         if (!google_breakpad::CrashGenerationServer::CreateReportChannel(
                     &server_fd, &client_fd)) {
-            E("CrashReporter CreateReportChannel failed!\n");
+            W("CrashReporter CreateReportChannel failed!\n");
         } else {
             mCrashPipe = CrashPipe(server_fd, client_fd);
         }
@@ -273,11 +273,11 @@ bool CrashSystem::validatePaths() {
     std::string caBundlePath = getCaBundlePath();
     std::string crashServicePath = getCrashServicePath();
     if (!System::get()->pathIsFile(caBundlePath.c_str())) {
-        E("Couldn't find file %s\n", caBundlePath.c_str());
+        W("Couldn't find file %s\n", caBundlePath.c_str());
         valid = false;
     }
     if (!System::get()->pathIsFile(crashServicePath.c_str())) {
-        E("Couldn't find crash service executable %s\n",
+        W("Couldn't find crash service executable %s\n",
           crashServicePath.c_str());
         valid = false;
     }
