@@ -87,6 +87,24 @@
       "revId": "bac0fa683b3de4bbaff37da28d9a007caa594d89",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca62e7ed_4f9401bb",
+        "filename": "android/base/EnumFlags.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-18T18:56:59Z",
+      "side": 1,
+      "message": "it pushes it only into the global namespace\nADL works this way: it looks for the function in the namespaces of all its parameters and in the _current_ namespace\nSo if you\u0027re currently in namespace ::digit, your enum is defined in namespace ::zyy, digit::enum::a | digit::enum::b will only try ::digit and ::zyy. So you need to manually bring all operators into your enum\u0027s namespace for this to work",
+      "parentUuid": "ead24be6_d253e4ee",
+      "revId": "bac0fa683b3de4bbaff37da28d9a007caa594d89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
