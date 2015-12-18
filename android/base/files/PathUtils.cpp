@@ -19,11 +19,20 @@
 namespace android {
 namespace base {
 
+const char* const PathUtils::kExeNameSuffixes[kHostTypeCount] = { "", ".exe" };
+
+const char* const PathUtils::kExeNameSuffix =
+        PathUtils::kExeNameSuffixes[PathUtils::HOST_TYPE];
+
+String PathUtils::toExecutableName(StringView baseName,
+                                   HostType hostType) {
+    return String(baseName).append(kExeNameSuffixes[hostType]);
+}
+
 // static
 bool PathUtils::isDirSeparator(int ch, HostType hostType) {
     return (ch == '/') || (hostType == HOST_WIN32 && ch == '\\');
 }
-
 
 // static
 bool PathUtils::isPathSeparator(int ch, HostType hostType) {
@@ -32,8 +41,8 @@ bool PathUtils::isPathSeparator(int ch, HostType hostType) {
 }
 
 // static
-size_t PathUtils::rootPrefixSize(const char* path, HostType hostType) {
-    if (!path || !path[0])
+size_t PathUtils::rootPrefixSize(StringView path, HostType hostType) {
+    if (path.empty())
         return 0;
 
     if (hostType != HOST_WIN32)
@@ -44,8 +53,8 @@ size_t PathUtils::rootPrefixSize(const char* path, HostType hostType) {
         int ch = path[0];
         if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z'))
             result = 2U;
-    } else if (!strncmp(path, "\\\\.\\", 4) ||
-            !strncmp(path, "\\\\?\\", 4)) {
+    } else if (!strncmp(path.begin(), "\\\\.\\", 4) ||
+            !strncmp(path.begin(), "\\\\?\\", 4)) {
         // UNC prefixes.
         return 4U;
     } else if (isDirSeparator(path[0], hostType)) {
@@ -63,7 +72,7 @@ size_t PathUtils::rootPrefixSize(const char* path, HostType hostType) {
 }
 
 // static
-bool PathUtils::isAbsolute(const char* path, HostType hostType) {
+bool PathUtils::isAbsolute(StringView path, HostType hostType) {
     size_t prefixSize = rootPrefixSize(path, hostType);
     if (!prefixSize) {
         return false;
@@ -75,7 +84,7 @@ bool PathUtils::isAbsolute(const char* path, HostType hostType) {
 }
 
 // static
-String PathUtils::removeTrailingDirSeparator(const String& path,
+String PathUtils::removeTrailingDirSeparator(StringView path,
                                              HostType hostType) {
     String result = path;
     size_t pathLen = result.size();
@@ -88,26 +97,26 @@ String PathUtils::removeTrailingDirSeparator(const String& path,
 }
 
 // static
-String PathUtils::addTrailingDirSeparator(const String& path,
+String PathUtils::addTrailingDirSeparator(StringView path,
                                           HostType hostType) {
     String result = path;
     if (result.size() > 0 && !isDirSeparator(result[result.size() - 1U])) {
-        result += (hostType == HOST_WIN32) ? '\\' : '/';
+        result += getDirSeparator(hostType);
     }
     return result;
 }
 
 // static
-bool PathUtils::split(const char* path,
+bool PathUtils::split(StringView path,
                       HostType hostType,
                       String* dirName,
                       String* baseName) {
-    if (!path || !path[0]) {
+    if (path.empty()) {
         return false;
     }
 
     // If there is a trailing directory separator, return an error.
-    size_t end = ::strlen(path);
+    size_t end = path.size();
     if (isDirSeparator(path[end - 1U], hostType)) {
         return false;
     }
@@ -122,10 +131,10 @@ bool PathUtils::split(const char* path,
     // Handle common case.
     if (pos > prefixLen) {
         if (dirName) {
-            dirName->assign(path, pos);
+            dirName->assign(path.begin(), pos);
         }
         if (baseName) {
-            baseName->assign(path + pos, end - pos);
+            baseName->assign(path.begin() + pos, end - pos);
         }
         return true;
     }
@@ -135,27 +144,27 @@ bool PathUtils::split(const char* path,
         if (!prefixLen) {
             dirName->assign(".");
         } else {
-            dirName->assign(path, prefixLen);
+            dirName->assign(path.begin(), prefixLen);
         }
     }
     if (baseName) {
-        baseName->assign(path + prefixLen, end - prefixLen);
+        baseName->assign(path.begin() + prefixLen, end - prefixLen);
     }
     return true;
 }
 
 // static
-String PathUtils::join(const char* path1,
-                       const char* path2,
+String PathUtils::join(StringView path1,
+                       StringView path2,
                        HostType hostType) {
-    if (!path1 || !path1[0]) {
-        return String(path2 ? path2 : "");
+    if (path1.empty()) {
+        return path2;
     }
-    if (!path2 || !path2[0]) {
-        return String(path1 ? path1 : "");
+    if (path2.empty()) {
+        return path1;
     }
     if (isAbsolute(path2, hostType)) {
-        return String(path2);
+        return path2;
     }
     size_t prefixLen = rootPrefixSize(path1, hostType);
     String result(path1);
@@ -168,27 +177,28 @@ String PathUtils::join(const char* path1,
 }
 
 // static
-StringVector PathUtils::decompose(const char* path, HostType hostType) {
+StringVector PathUtils::decompose(StringView path, HostType hostType) {
     StringVector result;
-    if (!path || !path[0])
+    if (path.empty())
         return result;
 
     size_t prefixLen = rootPrefixSize(path, hostType);
+    auto it = path.begin();
     if (prefixLen) {
-        result.push_back(String(path, prefixLen));
-        path += prefixLen;
+        result.push_back(String(it, prefixLen));
+        it += prefixLen;
     }
     for (;;) {
-        const char* p = path;
+        auto p = it;
         while (*p && !isDirSeparator(*p, hostType))
             p++;
-        if (p > path) {
-            result.push_back(String(path, p - path));
+        if (p > it) {
+            result.push_back(String(it, p - it));
         }
         if (!*p) {
             break;
         }
-        path = p + 1;
+        it = p + 1;
     }
     return result;
 }
@@ -196,7 +206,7 @@ StringVector PathUtils::decompose(const char* path, HostType hostType) {
 // static
 String PathUtils::recompose(const StringVector& components,
                             HostType hostType) {
-    const char dirSeparator = (hostType == HOST_WIN32) ? '\\' : '/';
+    const char dirSeparator = getDirSeparator(hostType);
     String result;
     size_t capacity = 0;
     // To reduce memory allocations, compute capacity before doing the
