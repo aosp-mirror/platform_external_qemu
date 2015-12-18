@@ -22,6 +22,30 @@
       "revId": "f4752477484008dd54a12019d3072d18ab86edf2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a2adb7b_ce85a332",
+        "filename": "android/crashreport/CrashSystem.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-18T00:38:23Z",
+      "side": 0,
+      "message": "Just updated fix for this.",
+      "parentUuid": "6a2adb7b_aebb77fa",
+      "range": {
+        "startLine": 132,
+        "startChar": 22,
+        "endLine": 132,
+        "endChar": 42
+      },
+      "revId": "f4752477484008dd54a12019d3072d18ab86edf2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
