@@ -1294,9 +1294,10 @@ extern "C" int main(int argc, char **argv) {
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, NULL);
 #endif  // !_WIN32
-    init_sdl_ui(skinConfig, skinPath, opts, &uiEmuAgent);
+    ui_init(skinConfig, skinPath, opts, &uiEmuAgent);
     skin_winsys_spawn_thread(enter_qemu_main_loop, n, (char**)args);
     skin_winsys_enter_main_loop(argc, argv);
+    ui_done();
     aconfig_node_free(skinConfig);
 
     return 0;
