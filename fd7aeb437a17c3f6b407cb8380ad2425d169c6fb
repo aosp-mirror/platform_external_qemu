@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ead24be6_120acc6d",
+        "filename": "android/base/containers/PodVector.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-18T14:45:26Z",
+      "side": 1,
+      "message": "nit: It would be nice to have a small comment here.",
+      "revId": "fd7aeb437a17c3f6b407cb8380ad2425d169c6fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a7c37a4_15bcf4d5",
+        "filename": "android/base/containers/PodVector.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-18T14:45:26Z",
+      "side": 1,
+      "message": "And here.",
+      "revId": "fd7aeb437a17c3f6b407cb8380ad2425d169c6fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
