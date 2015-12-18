@@ -23,12 +23,12 @@ class Uri {
 public:
     // |Encode| is aggressive -- it will always encode a reserved character,
     // disregarding a possibly included URL scheme.
-    static String Encode(const StringView& uri);
+    static String Encode(StringView uri);
 
     // |Decode| is aggressive. It will decode every occurance of %XX in a single
     // pass -- even for unreserved characters.
     // Returns empty string on error.
-    static String Decode(const StringView& uri);
+    static String Decode(StringView uri);
 };
 
 }  // namespace base
