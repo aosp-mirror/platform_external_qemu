@@ -61,17 +61,26 @@ public:
     }
 
     bool waitServicePipeReady(const std::string& pipename,
-                              const int timeout_ms) override {
-        bool serviceReady = false;
-        for (int i = 0; i < timeout_ms / kWaitIntervalMS; i++) {
-            if (::android::base::System::get()->pathIsFile(pipename.c_str())) {
-                serviceReady = true;
-                D("Crash Server Ready after %d ms\n", i * kWaitIntervalMS);
-                break;
+                              int timeout_ms) override {
+
+        static_assert(kWaitIntervalMS > 0, "kWaitIntervalMS must be greater than 0");
+
+        while (timeout_ms > 0) {
+            if (WaitNamedPipe(pipename.c_str(), timeout_ms) != 0) {
+                return true;
             }
-            ::android::base::System::sleepMs(kWaitIntervalMS);
+
+            if (ERROR_SEM_TIMEOUT == GetLastError()) {
+                // Pipe exists but timed out waiting to become ready
+                return false;
+            } else {
+                // Pipe does not exist yet, sleep and try again
+                ::android::base::System::sleepMs(kWaitIntervalMS);
+                timeout_ms -= kWaitIntervalMS;
+            }
+
         }
-        return serviceReady;
+        return false;
     }
 
     void setupChildCrashProcess(int pid) override {}
