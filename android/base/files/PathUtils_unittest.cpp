@@ -447,7 +447,30 @@ TEST(PathUtils, simplifyComponents) {
         EXPECT_STREQ(expectedPath.c_str(), path.c_str())
             << "When simplifying " << inputPath.c_str();
     }
-};
+}
+
+TEST(PathUtils, toExecutableName) {
+    static const struct {
+        PathUtils::HostType host;
+        const char* input;
+        const char* expected;
+    } kData[] = {
+        { PathUtils::HOST_POSIX, "blah", "blah" },
+        { PathUtils::HOST_WIN32, "blah", "blah.exe" },
+    };
+    for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
+        EXPECT_STREQ(
+            kData[n].expected,
+            PathUtils::toExecutableName(kData[n].input, kData[n].host).c_str());
+
+        // make sure the overload without host parameter works correctly too
+        if (kData[n].host == PathUtils::HOST_TYPE) {
+            EXPECT_STREQ(
+                PathUtils::toExecutableName(kData[n].input, kData[n].host).c_str(),
+                PathUtils::toExecutableName(kData[n].input).c_str());
+        }
+    }
+}
 
 }  // namespace android
 }  // namespace base
