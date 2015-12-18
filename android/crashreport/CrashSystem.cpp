@@ -94,11 +94,11 @@ public:
         std::string crashDir = getCrashDirectory();
         if (!System::get()->pathExists(crashDir.c_str())) {
             if (path_mkdir_if_needed(crashDir.c_str(), 0744) == -1) {
-                E("Couldn't create crash dir %s\n", crashDir.c_str());
+                W("Couldn't create crash dir %s\n", crashDir.c_str());
                 valid = false;
             }
         } else if (System::get()->pathIsFile(crashDir.c_str())) {
-            E("Crash dir is a file! %s\n", crashDir.c_str());
+            W("Crash dir is a file! %s\n", crashDir.c_str());
             valid = false;
         }
         return valid;
@@ -129,8 +129,6 @@ int CrashSystem::spawnService(
     STARTUPINFOW startup;
     ZeroMemory(&startup, sizeof(startup));
     startup.cb = sizeof(startup);
-    startup.dwFlags = STARTF_USESHOWWINDOW;
-    startup.wShowWindow = SW_SHOWMINIMIZED;
 
     PROCESS_INFORMATION pinfo;
     ZeroMemory(&pinfo, sizeof(pinfo));
@@ -157,7 +155,7 @@ int CrashSystem::spawnService(
                         nullptr, /* process handle is not inheritable */
                         nullptr, /* thread handle is not inheritable */
                         FALSE,   /* Do not Inherit handles */
-                        CREATE_NO_WINDOW, /* the new process doesn't
+                        0, /* the new process doesn't
                                              have a console */
                         nullptr,          /* use parent's environment block */
                         nullptr,          /* use parent's starting directory */
@@ -183,12 +181,12 @@ int CrashSystem::spawnService(
         delete[] params;
         return pid;
     }
-
+/*
     // In the child process.
     int fd = open("/dev/null", O_WRONLY);
     dup2(fd, 1);
     dup2(fd, 2);
-
+*/
     execvp(commandLine[0].c_str(), params);
     // Should not happen.
     exit(1);
@@ -241,7 +239,7 @@ const CrashSystem::CrashPipe& CrashSystem::getCrashPipe() {
         int client_fd;
         if (!google_breakpad::CrashGenerationServer::CreateReportChannel(
                     &server_fd, &client_fd)) {
-            E("CrashReporter CreateReportChannel failed!\n");
+            W("CrashReporter CreateReportChannel failed!\n");
         } else {
             mCrashPipe = CrashPipe(server_fd, client_fd);
         }
@@ -273,11 +271,11 @@ bool CrashSystem::validatePaths() {
     std::string caBundlePath = getCaBundlePath();
     std::string crashServicePath = getCrashServicePath();
     if (!System::get()->pathIsFile(caBundlePath.c_str())) {
-        E("Couldn't find file %s\n", caBundlePath.c_str());
+        W("Couldn't find file %s\n", caBundlePath.c_str());
         valid = false;
     }
     if (!System::get()->pathIsFile(crashServicePath.c_str())) {
-        E("Couldn't find crash service executable %s\n",
+        W("Couldn't find crash service executable %s\n",
           crashServicePath.c_str());
         valid = false;
     }
