@@ -69,6 +69,24 @@
       "revId": "bac0fa683b3de4bbaff37da28d9a007caa594d89",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ead24be6_d253e4ee",
+        "filename": "android/base/EnumFlags.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-18T18:12:33Z",
+      "side": 1,
+      "message": "But what about the last line, which seems to push the using into the global namespace ??",
+      "parentUuid": "6a2adb7b_5181561f",
+      "revId": "bac0fa683b3de4bbaff37da28d9a007caa594d89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
