@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a2f9f8d_d4853232",
+        "filename": "android/main-common-ui.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-18T19:11:51Z",
+      "side": 1,
+      "message": "Rename to ui_init/ui_done for consistency with the other *_init/*_done pairs?\n\nWe should probably remove the SDL too since it\u0027s not SDL anymore.",
+      "range": {
+        "startLine": 184,
+        "startChar": 5,
+        "endLine": 184,
+        "endChar": 18
+      },
+      "revId": "e07b80490c25eee13fa5199f9cac496be7145cc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a3463db_557c9e97",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-18T19:11:51Z",
+      "side": 1,
+      "message": "Move to bottom of glue/main.c for symmetry with the init? We\u0027d need to change the qemu2-glue/main.c too.",
+      "range": {
+        "startLine": 101,
+        "startChar": 4,
+        "endLine": 101,
+        "endChar": 20
+      },
+      "revId": "e07b80490c25eee13fa5199f9cac496be7145cc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a438f4f_58b3b127",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-18T19:11:51Z",
+      "side": 1,
+      "message": "__FUNCTION__?",
+      "range": {
+        "startLine": 218,
+        "startChar": 7,
+        "endLine": 218,
+        "endChar": 23
+      },
+      "revId": "e07b80490c25eee13fa5199f9cac496be7145cc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a2517a8_5665cabf",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-18T19:11:51Z",
+      "side": 1,
+      "message": "Why does this need to be separate from skin_winsys_quit?",
+      "revId": "e07b80490c25eee13fa5199f9cac496be7145cc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
