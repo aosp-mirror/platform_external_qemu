@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa593347_a266f265",
+        "filename": "android/crashreport/CrashReporter_windows.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-19T04:01:30Z",
+      "side": 1,
+      "message": "Yoda syntax? https://en.wikipedia.org/wiki/Yoda_conditions",
+      "range": {
+        "startLine": 73,
+        "startChar": 16,
+        "endLine": 73,
+        "endChar": 51
+      },
+      "revId": "600f975cb222e7339d7f15280246aec03a78de96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
