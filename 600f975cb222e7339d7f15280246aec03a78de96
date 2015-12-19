@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "aa593347_1df87fa0",
+        "filename": "android/crashreport/CrashReporter_windows.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-19T07:39:34Z",
+      "side": 1,
+      "message": "This is guaranteed english as it is generated from a char string in CrashSystem.cpp.  I do convert it to Win32UnicodeStrings to give breakpad wchars (breakpad is creating the pipe).  I guess it would be safer for me to convert this also to keep it consistent.",
+      "parentUuid": "6a2adb7b_62f0fe4a",
+      "range": {
+        "startLine": 69,
+        "startChar": 30,
+        "endLine": 69,
+        "endChar": 38
+      },
+      "revId": "600f975cb222e7339d7f15280246aec03a78de96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aa593347_a266f265",
         "filename": "android/crashreport/CrashReporter_windows.cpp",
         "patchSetId": 6
@@ -59,6 +83,30 @@
       "writtenOn": "2015-12-19T06:07:46Z",
       "side": 1,
       "message": "Well, we\u0027re already into Egyptian brackets :)\nhttps://en.wikipedia.org/wiki/Indent_style#Variant:_Stroustrup",
+      "parentUuid": "aa593347_a266f265",
+      "range": {
+        "startLine": 73,
+        "startChar": 16,
+        "endLine": 73,
+        "endChar": 51
+      },
+      "revId": "600f975cb222e7339d7f15280246aec03a78de96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a2517a8_a7ccb68c",
+        "filename": "android/crashreport/CrashReporter_windows.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-19T07:39:34Z",
+      "side": 1,
+      "message": "got it.",
       "parentUuid": "aa593347_a266f265",
       "range": {
         "startLine": 73,
