@@ -62,11 +62,10 @@ public:
 
     bool waitServicePipeReady(const std::string& pipename,
                               int timeout_ms) override {
-
         static_assert(kWaitIntervalMS > 0, "kWaitIntervalMS must be greater than 0");
         ::android::base::Win32UnicodeString pipename_unicode(pipename.c_str(),
                                                              pipename.length());
-        while (timeout_ms > 0) {
+        for (; timeout_ms > 0; timeout_ms -= kWaitIntervalMS) {
             if (WaitNamedPipeW(pipename_unicode.c_str(), timeout_ms) != 0) {
                 return true;
             }
@@ -77,7 +76,6 @@ public:
             } else {
                 // Pipe does not exist yet, sleep and try again
                 ::android::base::System::sleepMs(kWaitIntervalMS);
-                timeout_ms -= kWaitIntervalMS;
             }
 
         }
