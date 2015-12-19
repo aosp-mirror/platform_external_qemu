@@ -46,6 +46,30 @@
       "revId": "e67d27ed79192aa9ac805f26cb72430d8b8ddd80",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a2adb7b_022dba66",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-19T21:32:18Z",
+      "side": 0,
+      "message": "But Linux would be okay with 20ms sleeps though, right? It should only be OS specific if it\u0027s impossible to have one value for all OS\u0027s.",
+      "parentUuid": "6a53bb27_b58aaaff",
+      "range": {
+        "startLine": 29,
+        "startChar": 4,
+        "endLine": 29,
+        "endChar": 41
+      },
+      "revId": "e67d27ed79192aa9ac805f26cb72430d8b8ddd80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
