@@ -115,6 +115,30 @@
       "revId": "22ff7d2d1be8be4cc2ef3a04e62d2fab9d51da71",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a53bb27_fa0b71ad",
+        "filename": "android/crashreport/CrashReporter_windows.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-19T03:17:17Z",
+      "side": 1,
+      "message": "I\u0027ve rewritten in this format.",
+      "parentUuid": "4a2517a8_dc855932",
+      "range": {
+        "startLine": 70,
+        "startChar": 8,
+        "endLine": 90,
+        "endChar": 9
+      },
+      "revId": "22ff7d2d1be8be4cc2ef3a04e62d2fab9d51da71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
