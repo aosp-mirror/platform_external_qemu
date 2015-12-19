@@ -26,7 +26,6 @@ namespace crashreport {
 class CrashReporter {
 public:
     static const int kWaitExpireMS = 500;
-    static const int kWaitIntervalMS = 2;
     CrashReporter();
 
     virtual ~CrashReporter();

@@ -62,7 +62,7 @@ public:
 
     bool waitServicePipeReady(const std::string& pipename,
                               int timeout_ms) override {
-
+        const int kWaitIntervalMS = 20;
         static_assert(kWaitIntervalMS > 0, "kWaitIntervalMS must be greater than 0");
         ::android::base::Win32UnicodeString pipename_unicode(pipename.c_str(),
                                                              pipename.length());

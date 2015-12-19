@@ -52,21 +52,21 @@ public:
     }
 
     bool waitServicePipeReady(const std::string& pipename,
-                              const int timeout_ms) override {
-        bool serviceReady = false;
+                              int timeout_ms) override {
+        const int kWaitIntervalMS = 20;
+        static_assert(kWaitIntervalMS > 0, "kWaitIntervalMS must be greater than 0");
         mach_port_t task_bootstrap_port = 0;
         mach_port_t port;
         task_get_bootstrap_port(mach_task_self(), &task_bootstrap_port);
-        for (int i = 0; i < timeout_ms / kWaitIntervalMS; i++) {
+        while (timeout_ms > 0) {
             if (bootstrap_look_up(task_bootstrap_port, pipename.c_str(),
                                   &port) == KERN_SUCCESS) {
-                serviceReady = true;
-                D("Crash Server Ready after %d ms\n", i * kWaitIntervalMS);
-                break;
+                return true;
             }
             ::android::base::System::sleepMs(kWaitIntervalMS);
+            timeout_ms -= kWaitIntervalMS;
         }
-        return serviceReady;
+        return false;
     }
 
     void setupChildCrashProcess(int pid) override {}
