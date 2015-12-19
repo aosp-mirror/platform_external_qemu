@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca62e7ed_f8da5d6c",
+        "filename": "android/crashreport/CrashReporter_windows.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-19T03:19:21Z",
+      "side": 1,
+      "message": "You can wait for timeout_ms here. You only need to sleep for kWaitIntervalMS.",
+      "range": {
+        "startLine": 69,
+        "startChar": 48,
+        "endLine": 69,
+        "endChar": 63
+      },
+      "revId": "1e1bd33723e99327425995ae13a35947f208e9e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a2517a8_9c8fd150",
+        "filename": "android/crashreport/CrashReporter_windows.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-19T03:19:21Z",
+      "side": 1,
+      "message": "This should not be necessary.",
+      "range": {
+        "startLine": 89,
+        "startChar": 8,
+        "endLine": 89,
+        "endChar": 64
+      },
+      "revId": "1e1bd33723e99327425995ae13a35947f208e9e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
