@@ -118,6 +118,30 @@
       "revId": "e67d27ed79192aa9ac805f26cb72430d8b8ddd80",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a53bb27_356eba06",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-19T21:52:02Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "ca62e7ed_e3362e23",
+      "range": {
+        "startLine": 29,
+        "startChar": 4,
+        "endLine": 29,
+        "endChar": 41
+      },
+      "revId": "e67d27ed79192aa9ac805f26cb72430d8b8ddd80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
