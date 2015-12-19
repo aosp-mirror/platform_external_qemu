@@ -84,7 +84,7 @@ public:
         initCrashServer();
 
         ::android::base::Win32UnicodeString pipe_unicode(pipe.c_str(),
-                                                         strlen(pipe.c_str()));
+                                                         pipe.length());
         ::std::wstring pipe_string(pipe_unicode.data());
         ::android::base::Win32UnicodeString crashdir_unicode(
                 ::android::crashreport::CrashSystem::get()
