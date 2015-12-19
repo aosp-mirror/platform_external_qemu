@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "ea5fab25_1e251de7",
+        "filename": "android/crashreport/CrashReporter_windows.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-19T03:30:05Z",
+      "side": 1,
+      "message": "Do this after the sleep. It makes more logical sense there.\n\"The sleep took kWaitIntervalMS out of timeout_ms\"",
+      "range": {
+        "startLine": 73,
+        "startChar": 12,
+        "endLine": 73,
+        "endChar": 42
+      },
+      "revId": "1e1bd33723e99327425995ae13a35947f208e9e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a5c6f37_160f427e",
         "filename": "android/crashreport/CrashReporter_windows.cpp",
         "patchSetId": 5
