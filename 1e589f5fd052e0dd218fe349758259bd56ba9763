@@ -22,6 +22,30 @@
       "revId": "1e589f5fd052e0dd218fe349758259bd56ba9763",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa593347_62a6ba7f",
+        "filename": "android/crashreport/CrashReporter_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-19T00:00:54Z",
+      "side": 1,
+      "message": "WaitNamedPipe returns immediately (no matter the timeout) if the pipe does not exist.  In our case, the crash service takes a bit of time to create this pipe so the WaitNamedPipe will return 0 immediately for some number of tries.\n\nI was planning on changing it to a timeout of 1 ms, which would cause the maximum over the limit timeout to be 1ms.",
+      "parentUuid": "2a3463db_c0b1ee4a",
+      "range": {
+        "startLine": 66,
+        "startChar": 8,
+        "endLine": 73,
+        "endChar": 9
+      },
+      "revId": "1e589f5fd052e0dd218fe349758259bd56ba9763",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
