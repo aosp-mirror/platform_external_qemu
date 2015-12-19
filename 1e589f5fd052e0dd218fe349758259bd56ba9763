@@ -70,6 +70,30 @@
       "revId": "1e589f5fd052e0dd218fe349758259bd56ba9763",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a5c6f37_7bdd4798",
+        "filename": "android/crashreport/CrashReporter_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2015-12-19T00:13:31Z",
+      "side": 1,
+      "message": "Under remarks:\n\nIf no instances of the specified named pipe exist, the WaitNamedPipe function returns immediately, regardless of the time-out value.\n\nIn this case, there are no instances as the crash service has not created it.  I believe this function is used to wait until an existing named pipe becomes non-busy.\n\nActually what I said earlier is not correct. The maximum over the limit would be the following:\nThe named pipe is ready right away but busy.\nIn this case I am waiting an extra 1ms per iteration until the timeout count is exceeded.",
+      "parentUuid": "ea5fab25_33701a71",
+      "range": {
+        "startLine": 66,
+        "startChar": 8,
+        "endLine": 73,
+        "endChar": 9
+      },
+      "revId": "1e589f5fd052e0dd218fe349758259bd56ba9763",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
