@@ -92,6 +92,29 @@
       "revId": "22ff7d2d1be8be4cc2ef3a04e62d2fab9d51da71",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a2517a8_dc855932",
+        "filename": "android/crashreport/CrashReporter_windows.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-19T02:47:53Z",
+      "side": 1,
+      "message": "Instead of waiting a fixed small amount each time, try waiting for the entire timeout_ms? And every time the wait fails because the pipe doesn\u0027t exist, sleep for a few ms subtract that from timeout_ms for the next wait.",
+      "range": {
+        "startLine": 70,
+        "startChar": 8,
+        "endLine": 90,
+        "endChar": 9
+      },
+      "revId": "22ff7d2d1be8be4cc2ef3a04e62d2fab9d51da71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
