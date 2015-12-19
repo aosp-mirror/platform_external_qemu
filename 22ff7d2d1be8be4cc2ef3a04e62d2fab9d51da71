@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "aa593347_82c76e96",
+        "filename": "android/crashreport/CrashReporter_windows.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-19T02:29:44Z",
+      "side": 1,
+      "message": "Precompute this so you don\u0027t do it for every iteration.",
+      "range": {
+        "startLine": 70,
+        "startChar": 28,
+        "endLine": 70,
+        "endChar": 56
+      },
+      "revId": "22ff7d2d1be8be4cc2ef3a04e62d2fab9d51da71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a2f9f8d_a0fa608c",
+        "filename": "android/crashreport/CrashReporter_windows.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-19T02:29:44Z",
+      "side": 1,
+      "message": "Just return true here (move the debug print up), and false at the end?",
+      "range": {
+        "startLine": 77,
+        "startChar": 16,
+        "endLine": 77,
+        "endChar": 36
+      },
+      "revId": "22ff7d2d1be8be4cc2ef3a04e62d2fab9d51da71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a53bb27_bada9999",
         "filename": "android/crashreport/CrashReporter_windows.cpp",
         "patchSetId": 4
