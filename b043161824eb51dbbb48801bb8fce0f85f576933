@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8a5c6f37_76a1de64",
+        "filename": "android/crashreport/CrashReporter_darwin.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-19T20:45:02Z",
+      "side": 1,
+      "message": "If you wanna get fancy you can also do\n\n    for (; timeout_ms \u003e 0; timeout_ms -\u003d kWaitIntervalMS) {",
+      "range": {
+        "startLine": 61,
+        "startChar": 8,
+        "endLine": 61,
+        "endChar": 32
+      },
+      "revId": "b043161824eb51dbbb48801bb8fce0f85f576933",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea5fab25_5ecdd53c",
+        "filename": "android/crashreport/CrashService_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2015-12-19T20:45:02Z",
+      "side": 1,
+      "message": "For future reference, things like this should be in its own separate tiny CL that can be submitted without review. Let\u0027s keep CLs modular.",
+      "range": {
+        "startLine": 87,
+        "startChar": 57,
+        "endLine": 87,
+        "endChar": 68
+      },
+      "revId": "b043161824eb51dbbb48801bb8fce0f85f576933",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
