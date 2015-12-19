@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a53bb27_bada9999",
+        "filename": "android/crashreport/CrashReporter_windows.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2015-12-19T01:48:48Z",
+      "side": 1,
+      "message": "Is 0 a valid value?",
+      "range": {
+        "startLine": 85,
+        "startChar": 49,
+        "endLine": 86,
+        "endChar": 72
+      },
+      "revId": "22ff7d2d1be8be4cc2ef3a04e62d2fab9d51da71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
