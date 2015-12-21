@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "aa593347_cffd8e88",
+        "filename": "android/emulator-check-main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-21T18:56:42Z",
+      "side": 1,
+      "message": "Well, it\u0027s exactly as it used to be in the emulator launcher. I\u0027m just moving the code out into a separate binary.\nAnyway, I\u0027ll add a comment\n-- update --\nactually, cpu_accelerator.h already has this:\n\n// don\u0027t change these numbers\n// Android Studio depends on them",
+      "parentUuid": "cad587d0_919ebc26",
+      "revId": "779d6a8f47563299a5ce3a473a511245df9268f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cad587d0_b19bc035",
         "filename": "android/emulator-check-main.cpp",
         "patchSetId": 1
