@@ -147,7 +147,7 @@ typedef struct SkinFile {
     } while (0);
 
 extern SkinFile* skin_file_create_from_aconfig(
-        AConfig* aconfig,
+        const AConfig* aconfig,
         const char* basepath,
         const SkinFramebufferFuncs* fb_funcs);
 
