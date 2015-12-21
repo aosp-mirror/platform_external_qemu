@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "65276e99_69db6168",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-21T20:19:50Z",
+      "side": 1,
+      "message": "Seems like it would be better to just get rid of this flag altogether, since I don\u0027t think any user would want to disable the physical keyboard because it only serves as a convenience.",
+      "range": {
+        "startLine": 208,
+        "startChar": 8,
+        "endLine": 208,
+        "endChar": 39
+      },
+      "revId": "79b0e746dd82ad397ff7620c03ea00318691cd2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a52de678_510ba63a",
+        "filename": "hw/android/goldfish/events_device.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 435,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2015-12-21T20:19:50Z",
+      "side": 1,
+      "message": "Following my previous comment, can\u0027t this *never* happen anymore, since we\u0027re not honoring config.ini anyway?",
+      "range": {
+        "startLine": 435,
+        "startChar": 4,
+        "endLine": 435,
+        "endChar": 37
+      },
+      "revId": "79b0e746dd82ad397ff7620c03ea00318691cd2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
