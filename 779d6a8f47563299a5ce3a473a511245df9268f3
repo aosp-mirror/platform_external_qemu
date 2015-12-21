@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a76bfc5_b39bd835",
+        "filename": "android/emulator-check-main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-21T13:20:54Z",
+      "side": 1,
+      "message": "nit: copyright disclaimer.",
+      "revId": "779d6a8f47563299a5ce3a473a511245df9268f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cad587d0_919ebc26",
+        "filename": "android/emulator-check-main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-21T13:20:54Z",
+      "side": 1,
+      "message": "I\u0027m really concerned that you\u0027re using the actual numerical value of ANDROID_CPU_ACCELERATION_XXX constants as part of the protocol between the emulator and Android Studio. This is likely to be a source of problems in the future, if we need to change this.\n\nAt a minimum, you should change the declaration of AndroidCpuAcceleration to add a comment explaining that the order of values cannot be changed anymore, nor any deletion happen, because of this.",
+      "revId": "779d6a8f47563299a5ce3a473a511245df9268f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cad587d0_b19bc035",
+        "filename": "android/emulator-check-main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-21T13:20:54Z",
+      "side": 1,
+      "message": "nit: Add a little blurb explaining what this program does.",
+      "revId": "779d6a8f47563299a5ce3a473a511245df9268f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
