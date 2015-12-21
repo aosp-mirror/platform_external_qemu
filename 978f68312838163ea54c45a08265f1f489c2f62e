@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a2adb7b_82188a09",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-21T16:36:50Z",
+      "side": 1,
+      "message": "\"2011-2015\"?",
+      "revId": "978f68312838163ea54c45a08265f1f489c2f62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca62e7ed_634fde17",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-21T16:36:50Z",
+      "side": 1,
+      "message": "I usually leave the earliest date (\"2011-2015\") but I don\u0027t know if we have an official policy on that.",
+      "revId": "978f68312838163ea54c45a08265f1f489c2f62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa593347_afcc9a8c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderWindow.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-21T16:36:50Z",
+      "side": 1,
+      "message": "etc. ...",
+      "revId": "978f68312838163ea54c45a08265f1f489c2f62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
