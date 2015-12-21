@@ -18,6 +18,7 @@
 #include "android/utils/aconfig-file.h"
 #include "android/utils/compiler.h"
 
+#include <stdbool.h>
 #include <stdint.h>
 
 ANDROID_BEGIN_HEADER
@@ -36,48 +37,6 @@ uint64_t convertMBToBytes( unsigned  megaBytes );
 
 extern const char*  skin_network_speed;
 extern const char*  skin_network_delay;
-
-/* Sanitize options. This deals with a few legacy options that are now
- * handled differently. Call before anything else that needs to read
- * the options list.
- */
-void sanitizeOptions( AndroidOptions* opts );
-
-/* Creates and initializes AvdInfo instance for the given options.
- * Param:
- *  opts - Options passed to the main()
- *  inAndroidBuild - Upon exit contains 0 if AvdInfo has been initialized from
- *      AVD file, or 1 if AvdInfo has been initialized from the build directory.
- * Return:
- *  AvdInfo instance initialized for the given options.
- */
-struct AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild);
-
-/* Handle the command-line options that are common to both the classic and
- * and new emulator code bases. |opts| is the set of options, that may be
- * modified by the function, |hw| is the hardware configuration that will
- * be modified by the function, and |avd| is the AVD information data.
- */
-void handleCommonEmulatorOptions(AndroidOptions* opts,
-                                 AndroidHwConfig* hw,
-                                 AvdInfo* avd);
-
-/* Populate the hwConfig fields corresponding to the kernel/disk images
- * used by the emulator. This will zero *hwConfig first.
- */
-void findImagePaths( AndroidHwConfig*  hwConfig,
-                     AndroidOptions*   opts );
-
-/* Updates hardware configuration for the given AVD and options.
- * Param:
- *  hwConfig - Hardware configuration to update.
- *  avd - AVD info containig paths for the hardware configuration.
- *  opts - Options passed to the main()
- *  inAndroidBuild - 0 if AVD has been initialized from AVD file, or 1 if AVD
- *      has been initialized from the build directory.
- */
-void updateHwConfigFromAVD(AndroidHwConfig* hwConfig, struct AvdInfo* avd,
-                           AndroidOptions* opts, int inAndroidBuild);
 
 typedef enum {
     ACCEL_OFF = 0,
@@ -105,5 +64,31 @@ typedef enum {
  */
 bool handleCpuAcceleration(AndroidOptions* opts, AvdInfo* avd,
                            CpuAccelMode* accel_mode, char* accel_status);
+
+// Parse command-line options and setups |opt| and |hw| structures.
+// |p_argc| and |p_argv| are pointers to the command-line parameters
+// received from main(). |targetArch| is the target architecture for
+// platform build. |is_qemu2| is true if this is called from QEMU2,
+// false if called from the classic emulator. |opt| and |hw| are
+// caller-provided structures that will be initialized by the function.
+// |*the_avd| will receive a pointer to a new AvdInfo if the function
+// returns +1.
+//
+// The return value is an integer with several meanings:
+//   +2 : A QEMU positional parameter was detected. The caller
+//        should copy all arguments from |*p_argc| and |*p_argv|
+//        and call the QEMU main function with them, then exit.
+//
+//   +1 : Normal emulation start.
+//
+//    n, with n <= 0 : Exit program immediately with status code -n.
+//
+int handleEmulatorCommandLine(int* p_argc,
+                              char*** p_argv,
+                              const char* targetArch,
+                              bool is_qemu2,
+                              AndroidOptions* opt,
+                              AndroidHwConfig* hw,
+                              AvdInfo** the_avd);
 
 ANDROID_END_HEADER
