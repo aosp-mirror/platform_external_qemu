@@ -296,7 +296,8 @@ int main(int argc, char **argv) {
                 return 1;
             }
         }
-        snapshot_print_and_exit(opts->snapstorage);
+        snapshot_print(opts->snapstorage);
+        exit(0);
     }
 
     /* Both |argc| and |argv| have been modified by the big while loop above:
