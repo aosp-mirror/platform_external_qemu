@@ -35,32 +35,19 @@
 
 typedef struct AndroidConsoleRec_ {
     // Interfaces to call into QEMU specific code.
-    QAndroidBatteryAgent battery_agent;
-    QAndroidFingerAgent finger_agent;
-    QAndroidLocationAgent location_agent;
-    QAndroidUserEventAgent user_event_agent;
-    QAndroidVmOperations vm_operations;
-    QAndroidNetAgent net_agent;
+#define DEFINE_AGENT_FIELD(type,name) type name ## _agent;
+    ANDROID_CONSOLE_AGENTS_LIST(DEFINE_AGENT_FIELD)
 } AndroidConsoleRec;
 
 static AndroidConsoleRec _g_global;
 
-void qemu2_android_console_setup(const QAndroidBatteryAgent* battery_agent,
-                                 const QAndroidFingerAgent* finger_agent,
-                                 const QAndroidLocationAgent* location_agent,
-                                 const QAndroidUserEventAgent* user_event_agent,
-                                 const QAndroidVmOperations* vm_operations,
-                                 const QAndroidNetAgent* net_agent) {
+void qemu2_android_console_setup(const AndroidConsoleAgents* agents) {
     AndroidConsoleRec* global = &_g_global;
     memset(global, 0, sizeof(*global));
     // Copy the QEMU specific interfaces passed in to make lifetime management
     // simpler.
-    global->battery_agent = *battery_agent;
-    global->finger_agent = *finger_agent;
-    global->location_agent = *location_agent;
-    global->user_event_agent = *user_event_agent;
-    global->vm_operations = *vm_operations;
-    global->net_agent = *net_agent;
+#define COPY_AGENT(type,name)  global->name ## _agent = agents->name [0];
+    ANDROID_CONSOLE_AGENTS_LIST(COPY_AGENT)
 }
 #endif
 

@@ -19,12 +19,7 @@
 #ifndef ANDROID_CONSOLE_H
 #define ANDROID_CONSOLE_H
 #ifdef USE_ANDROID_EMU
-#include "android/emulation/control/battery_agent.h"
-#include "android/emulation/control/finger_agent.h"
-#include "android/emulation/control/location_agent.h"
-#include "android/emulation/control/net_agent.h"
-#include "android/emulation/control/user_event_agent.h"
-#include "android/emulation/control/vm_operations.h"
+#include "android/console.h"
 #include "android/telephony/modem_driver.h"
 #endif
 #include "qemu-common.h"
@@ -97,11 +92,6 @@ void android_console_rotate_screen(Monitor *mon, const QDict *qdict);
 void android_monitor_print_error(Monitor *mon, const char *fmt, ...);
 
 #ifdef USE_ANDROID_EMU
-void qemu2_android_console_setup( const QAndroidBatteryAgent* battery_agent,
-        const QAndroidFingerAgent* finger_agent,
-        const QAndroidLocationAgent* location_agent,
-        const QAndroidUserEventAgent* user_event_agent,
-        const QAndroidVmOperations* vm_operations,
-        const QAndroidNetAgent* net_agent);
+void qemu2_android_console_setup(const AndroidConsoleAgents* agents);
 #endif
 #endif
