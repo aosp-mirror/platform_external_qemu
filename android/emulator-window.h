@@ -23,7 +23,7 @@
 #include "android/ui-emu-agent.h"
 
 typedef struct {
-    AConfig*       aconfig;
+    const AConfig* aconfig;
     SkinFile*      layout_file;
     int            win_x;
     int            win_y;
@@ -44,14 +44,13 @@ void
 android_emulator_set_window_scale(double  scale, int  is_dpi);
 
 /* Initializes EmulatorWindow structure instance. */
-int
-emulator_window_init(EmulatorWindow*   emulator,
-                     AConfig*          aconfig,
-                     const char*       basepath,
-                     int               x,
-                     int               y,
-                     AndroidOptions*   opts,
-                     const UiEmuAgent* uiEmuAgent);
+int emulator_window_init(EmulatorWindow* emulator,
+                         const AConfig* aconfig,
+                         const char* basepath,
+                         int x,
+                         int y,
+                         const AndroidOptions* opts,
+                         const UiEmuAgent* uiEmuAgent);
 
 /* Uninitializes EmulatorWindow structure instance on exit. */
 void

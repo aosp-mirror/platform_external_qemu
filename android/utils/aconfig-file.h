@@ -39,24 +39,30 @@ extern void   aconfig_load(AConfig*  root, char*  data);
 extern int    aconfig_load_file(AConfig*  root, const char*  path);
 
 /* save a config node tree into a file, return 0 in case of success, -1 otherwise */
-extern int    aconfig_save_file(AConfig*  root, const char* path);
+extern int aconfig_save_file(const AConfig* root, const char* path);
 
 /* create a single config node */
 extern AConfig*  aconfig_node(const char *name, const char *value);
 
 /* locate a named child of a config node */
-extern AConfig*  aconfig_find(AConfig *root, const char *name);
+extern const AConfig* aconfig_find_const(const AConfig* root, const char* name);
+
+/* locate a named child of a config node. NULL if it doesn't exist. */
+extern AConfig* aconfig_find(AConfig* root, const char* name);
 
 /* add a named child to a config node (or modify it if it already exists) */
-extern void      aconfig_set(AConfig *root, const char *name, const char *value);
-
+extern void aconfig_set(AConfig* root, const char* name, const char* value);
 
 /* look up a child by name and return its value, eventually converted
  * into a boolean or integer */
-extern int          aconfig_bool    (AConfig *root, const char *name, int _default);
-extern unsigned     aconfig_unsigned(AConfig *root, const char *name, unsigned _default);
-extern int          aconfig_int     (AConfig *root, const char *name, int _default);
-extern const char*  aconfig_str     (AConfig *root, const char *name, const char *_default);
+extern int aconfig_bool(const AConfig* root, const char* name, int _default);
+extern unsigned aconfig_unsigned(const AConfig* root,
+                                 const char* name,
+                                 unsigned _default);
+extern int aconfig_int(const AConfig* root, const char* name, int _default);
+extern const char* aconfig_str(const AConfig* root,
+                               const char* name,
+                               const char* _default);
 
 /* Recusively destroy a node and its children. */
 extern void aconfig_node_free(AConfig *root);
