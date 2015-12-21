@@ -239,7 +239,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         EXTRA_FLAGS=
         case $SYSTEM in
             windows-*)
-                export LDFLAGS="-static -s -Xlinker --build-id"
+                export LDFLAGS="-static -s"
                 export CXXFLAGS="-std=gnu++11"
                 var_append EXTRA_FLAGS "platform=windows toolchain=crossmingw"
                 # 'libgl-gdi' is the target that implements desktop GL
@@ -248,7 +248,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 # official OpenGL shared library name.
                 MESA_TARGET="libgl-gdi"
                 OSMESA_TARGET="libgl-osmesa"
-                MESA_LIBS="opengl32.dll"
+                MESA_LIBS="opengl32.dll osmesa.dll"
                 BUILD_OSMESA=true
                 ;;
 
@@ -258,7 +258,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 # This generates a libGL.so.
                 MESA_TARGET="libgl-xlib"
                 OSMESA_TARGET="libgl-osmesa"
-                MESA_LIBS="libGL.so"
+                MESA_LIBS="libGL.so libosmesa.so"
                 BUILD_OSMESA=true
                 ;;
 
@@ -277,7 +277,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 dump "$(builder_text) Building $PKG_NAME"
                 case $SYSTEM in
                     windows-*)
-                        export LDFLAGS="-static -s -Xlinker --build-id"
+                        export LDFLAGS="-static -s"
                         export CXXFLAGS="-std=gnu++11"
                         ;;
                 esac

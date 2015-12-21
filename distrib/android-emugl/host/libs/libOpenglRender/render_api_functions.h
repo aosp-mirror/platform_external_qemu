@@ -16,9 +16,8 @@ typedef void (*OnPostFn)(void* context, int width, int height, int ydir,
   X(int, initOpenGLRenderer, (int width, int height, bool useSubWindow, char* addr, size_t addrLen)) \
   X(void, getHardwareStrings, (const char** vendor, const char** renderer, const char** version)) \
   X(void, setPostCallback, (OnPostFn onPost, void* onPostContext)) \
-  X(bool, createOpenGLSubwindow, (FBNativeWindowType window, int wx, int wy, int ww, int wh, int fbw, int fbh, float dpr, float zRot)) \
+  X(bool, showOpenGLSubwindow, (FBNativeWindowType window, int wx, int wy, int ww, int wh, int fbw, int fbh, float dpr, float zRot)) \
   X(bool, destroyOpenGLSubwindow, ()) \
-  X(bool, moveOpenGLSubwindow, (int x, int y, int width, int height)) \
   X(void, setOpenGLDisplayRotation, (float zRot)) \
   X(void, setOpenGLDisplayTranslation, (float px, float py)) \
   X(void, repaintOpenGLDisplay, ()) \
