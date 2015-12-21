@@ -1,4 +1,4 @@
-// Copyright 2014 The Android Open Source Project
+// Copyright 2014-2015 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -56,7 +56,6 @@ enum Command {
     CMD_SET_POST_CALLBACK,
     CMD_SETUP_SUBWINDOW,
     CMD_REMOVE_SUBWINDOW,
-    CMD_MOVE_SUBWINDOW,
     CMD_SET_ROTATION,
     CMD_SET_TRANSLATION,
     CMD_REPAINT,
@@ -163,19 +162,6 @@ struct RenderWindowMessage {
             case CMD_REMOVE_SUBWINDOW:
                 D("CMD_REMOVE_SUBWINDOW\n");
                 result = FrameBuffer::getFB()->removeSubWindow();
-                break;
-
-            case CMD_MOVE_SUBWINDOW:
-                D("CMD_move_SUBWINDOW: wx=%d wy=%d ww=%d wh=%d\n",
-                    msg.subwindow.wx,
-                    msg.subwindow.wy,
-                    msg.subwindow.ww,
-                    msg.subwindow.wh);
-                result = FrameBuffer::getFB()->moveSubWindow(
-                        msg.subwindow.wx,
-                        msg.subwindow.wy,
-                        msg.subwindow.ww,
-                        msg.subwindow.wh);
                 break;
 
             case CMD_SET_ROTATION:
@@ -392,9 +378,6 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
                                   float dpr,
                                   float zRot) {
     D("Entering mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
-    if (mHasSubWindow) {
-        return false;
-    }
 
     RenderWindowMessage msg;
     msg.cmd = CMD_SETUP_SUBWINDOW;
@@ -422,20 +405,6 @@ bool RenderWindow::removeSubWindow() {
 
     RenderWindowMessage msg;
     msg.cmd = CMD_REMOVE_SUBWINDOW;
-    bool result = processMessage(msg);
-    D("Exiting result=%s\n", result ? "success" : "failure");
-    return result;
-}
-
-bool RenderWindow::moveSubWindow(int x, int y, int width, int height) {
-    D("Entering window move %d,%d with dimensions %d,%d\n", x, y, width, height);
-    RenderWindowMessage msg;
-    msg.cmd = CMD_MOVE_SUBWINDOW;
-    msg.subwindow.wx = x;
-    msg.subwindow.wy = y;
-    msg.subwindow.ww = width;
-    msg.subwindow.wh = height;
-
     bool result = processMessage(msg);
     D("Exiting result=%s\n", result ? "success" : "failure");
     return result;
