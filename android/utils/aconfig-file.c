@@ -43,41 +43,44 @@ aconfig_node_free(AConfig *root) {
     free(node);
 }
 
-static AConfig*
-_aconfig_find(AConfig *root, const char *name, int create)
-{
+static AConfig* _aconfig_find_create(AConfig* root, const char* name) {
     AConfig *node;
 
     for(node = root->first_child; node; node = node->next) {
-        if(!strcmp(node->name, name)) return node;
-    }
-
-    if(create) {
-        node = (AConfig*) calloc(sizeof(AConfig), 1);
-        node->name = name;
-        node->value = "";
-
-        if(root->last_child) {
-            root->last_child->next = node;
-        } else {
-            root->first_child = node;
+        if (!strcmp(node->name, name)) {
+            return node;
         }
-        root->last_child = node;
     }
+
+    node = aconfig_node(name, NULL);
+
+    if (root->last_child) {
+        root->last_child->next = node;
+    } else {
+        root->first_child = node;
+    }
+    root->last_child = node;
 
     return node;
 }
 
-AConfig*
-aconfig_find(AConfig *root, const char *name)
-{
-    return _aconfig_find(root, name, 0);
+const AConfig* aconfig_find_const(const AConfig* root, const char* name) {
+    const AConfig* node;
+
+    for (node = root->first_child; node; node = node->next) {
+        if (!strcmp(node->name, name))
+            return node;
+    }
+
+    return NULL;
 }
 
-int
-aconfig_bool(AConfig *root, const char *name, int _default)
-{
-    AConfig *n = _aconfig_find(root, name, 0);
+AConfig* aconfig_find(AConfig* root, const char* name) {
+    return (AConfig*)aconfig_find_const(root, name);
+}
+
+int aconfig_bool(const AConfig* root, const char* name, int _default) {
+    const AConfig* n = aconfig_find_const(root, name);
     if(n == 0) {
         return _default;
     } else {
@@ -94,10 +97,10 @@ aconfig_bool(AConfig *root, const char *name, int _default)
     }
 }
 
-unsigned
-aconfig_unsigned(AConfig *root, const char *name, unsigned _default)
-{
-    AConfig *n = _aconfig_find(root, name, 0);
+unsigned aconfig_unsigned(const AConfig* root,
+                          const char* name,
+                          unsigned _default) {
+    const AConfig* n = aconfig_find_const(root, name);
     if(n == 0) {
         return _default;
     } else {
@@ -105,10 +108,8 @@ aconfig_unsigned(AConfig *root, const char *name, unsigned _default)
     }
 }
 
-int
-aconfig_int(AConfig *root, const char *name, int _default)
-{
-    AConfig *n = _aconfig_find(root, name, 0);
+int aconfig_int(const AConfig* root, const char* name, int _default) {
+    const AConfig* n = aconfig_find_const(root, name);
     if(n == 0) {
         return _default;
     } else {
@@ -116,11 +117,10 @@ aconfig_int(AConfig *root, const char *name, int _default)
     }
 }
 
-
-const char*
-aconfig_str(AConfig *root, const char *name, const char *_default)
-{
-    AConfig *n = _aconfig_find(root, name, 0);
+const char* aconfig_str(const AConfig* root,
+                        const char* name,
+                        const char* _default) {
+    const AConfig* n = aconfig_find_const(root, name);
     if(n == 0) {
         return _default;
     } else {
@@ -131,7 +131,7 @@ aconfig_str(AConfig *root, const char *name, const char *_default)
 void
 aconfig_set(AConfig *root, const char *name, const char *value)
 {
-    AConfig *node = _aconfig_find(root, name, 1);
+    AConfig* node = _aconfig_find_create(root, name);
     node->value = value;
 }
 
@@ -306,25 +306,26 @@ static int
 parse_expr(cstate *cs, AConfig *node)
 {
         /* last token was T_TEXT */
-    node = _aconfig_find(node, cs->text, 1);
+        node = _aconfig_find_create(node, cs->text);
 
-    for(;;) {
-        switch(lex(cs, 1)) {
-        case T_DOT:
-            if(lex(cs, 0) != T_TEXT) return -1;
-            node = _aconfig_find(node, cs->text, 1);
-            continue;
+        for (;;) {
+            switch (lex(cs, 1)) {
+                case T_DOT:
+                    if (lex(cs, 0) != T_TEXT)
+                        return -1;
+                    node = _aconfig_find_create(node, cs->text);
+                    continue;
 
-        case T_TEXT:
-            node->value = cs->text;
-            return 0;
+                case T_TEXT:
+                    node->value = cs->text;
+                    return 0;
 
-        case T_OBRACE:
-            return parse_block(cs, node);
+                case T_OBRACE:
+                    return parse_block(cs, node);
 
-        default:
-            return -1;
-        }
+                default:
+                    return -1;
+            }
     }
 }
 
@@ -440,9 +441,7 @@ writer_str(Writer*  w, const char*  str)
     writer_write(w, str, strlen(str));
 }
 
-static void
-writer_node(Writer*  w, AConfig*  node, int  margin)
-{
+static void writer_node(Writer* w, const AConfig* node, int margin) {
     writer_margin(w,margin);
     writer_str(w, node->name);
     writer_c(w,' ');
@@ -467,9 +466,7 @@ writer_node(Writer*  w, AConfig*  node, int  margin)
     }
 }
 
-int
-aconfig_save_file(AConfig *root, const char *fn)
-{
+int aconfig_save_file(const AConfig* root, const char* fn) {
     AConfig*  child;
     Writer    w[1];
 

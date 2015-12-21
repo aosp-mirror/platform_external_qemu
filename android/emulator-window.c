@@ -336,16 +336,13 @@ static int emulator_window_framebuffer_get_depth(void* opaque) {
     return fb->bits_per_pixel;
 }
 
-int
-emulator_window_init(
-        EmulatorWindow* emulator,
-        AConfig* aconfig,
-        const char* basepath,
-        int x,
-        int y,
-        AndroidOptions* opts,
-        const UiEmuAgent* uiEmuAgent)
-{
+int emulator_window_init(EmulatorWindow* emulator,
+                         const AConfig* aconfig,
+                         const char* basepath,
+                         int x,
+                         int y,
+                         const AndroidOptions* opts,
+                         const UiEmuAgent* uiEmuAgent) {
     static const SkinFramebufferFuncs skin_fb_funcs = {
         .create_framebuffer = &emulator_window_framebuffer_create,
         .free_framebuffer = &emulator_window_framebuffer_free,
