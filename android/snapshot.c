@@ -328,7 +328,7 @@ snapshot_read_qcow_header( int fd, uint32_t *nb_snapshots, uint64_t *snapshots_o
  * 'snapstorage', then exit()s.
  */
 void
-snapshot_print_and_exit( const char *snapstorage )
+snapshot_print(const char *snapstorage)
 {
     /* open snapshot file */
     int fd = open(snapstorage, O_RDONLY);
@@ -351,5 +351,4 @@ snapshot_print_and_exit( const char *snapstorage )
     }
 
     close(fd);
-    exit(0);
 }
