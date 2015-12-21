@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8a6aafd7_1abc19d6",
+        "filename": "android/emulator-check-main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-21T13:20:54Z",
+      "side": 1,
+      "message": "This behaviour (switching between stdout/stderr) is pretty subtle and should be documented very precisely, imho.",
+      "revId": "a28510abbc04bc01ad8bd28010885bb3797a8607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cad587d0_f10868b3",
+        "filename": "android/emulator-check-main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-21T13:20:54Z",
+      "side": 1,
+      "message": "I\u0027m concerned you\u0027re using ANDROID_CPU_ACCELERATION_XXX values as part of the protocol between the emulator and Android Studio, this could very easily break if someone changes the declarations of the values.\n\nPlease add a big WARNING where these constants are declared to indicate that their order should not be touched, and that no value should be removed from the list due to this.\n\nAlternatively, consider returning a textual message instead.",
+      "revId": "a28510abbc04bc01ad8bd28010885bb3797a8607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a81fbc7_f6e14029",
+        "filename": "android/emulator-check-main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-21T13:20:54Z",
+      "side": 1,
+      "message": "I\u0027d recommend using |--name| instead of |-name| for options. The fact that the emulator only supports |-name| is a mistake and we should fix it (e.g. by making --name and -name equivalent).\n\nAlso -name or --name is normally reserved for options, why not make it a simple command instead? (i.e. just \u0027name\u0027).",
+      "revId": "a28510abbc04bc01ad8bd28010885bb3797a8607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ead24be6_12a88caf",
+        "filename": "android/emulator-check-main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-21T13:20:54Z",
+      "side": 1,
+      "message": "nit: That\u0027s a rather liberal std::string creation, where a simple use of strcmp() would suffice below.",
+      "revId": "a28510abbc04bc01ad8bd28010885bb3797a8607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cad587d0_91055c9a",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-21T13:20:54Z",
+      "side": 1,
+      "message": "nit: Don\u0027t you want to do something sensible is the executable is not found?",
+      "revId": "a28510abbc04bc01ad8bd28010885bb3797a8607",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
