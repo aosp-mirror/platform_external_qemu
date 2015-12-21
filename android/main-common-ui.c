@@ -44,33 +44,25 @@
 
 static AUserConfig*  userConfig;
 
-void
-user_config_init( void )
-{
+static void user_config_init(void) {
     userConfig = auserConfig_new( android_avdInfo );
 }
 
 /* only call this function on normal exits, so that ^C doesn't save the configuration */
-void
-user_config_done( void )
-{
-    int  win_x, win_y;
-
+static void user_config_done(void) {
     if (!userConfig) {
         D("no user configuration?");
         return;
     }
-
+    int  win_x, win_y;
     skin_winsys_get_window_pos(&win_x, &win_y);
+
     auserConfig_setWindowPos(userConfig, win_x, win_y);
     auserConfig_save(userConfig);
 }
 
-void
-user_config_get_window_pos( int *window_x, int *window_y )
-{
+static void user_config_get_window_pos(int* window_x, int* window_y) {
     *window_x = *window_y = 10;
-
     if (userConfig)
         auserConfig_getWindowPos(userConfig, window_x, window_y);
 }
@@ -85,70 +77,10 @@ user_config_get_window_pos( int *window_x, int *window_y )
 
 #define  KEYSET_FILE    "default.keyset"
 
-static int
-load_keyset(const char*  path)
-{
-    if (path_can_read(path)) {
-        AConfig*  root = aconfig_node("","");
-        if (!aconfig_load_file(root, path)) {
-            SkinKeyset* keyset = skin_keyset_new(root);
-            if (keyset != NULL) {
-                D( "keyset loaded from: %s", path);
-                skin_keyset_set_default(keyset);
-                return 0;
-            }
-        }
-    }
-    return -1;
-}
+static void write_default_keyset(void) {
+    char path[MAX_PATH];
 
-void
-parse_keyset(const char*  keyset, AndroidOptions*  opts)
-{
-    char   kname[MAX_PATH];
-    char   temp[MAX_PATH];
-    char*  p;
-    char*  end;
-
-    /* append .keyset suffix if needed */
-    if (strchr(keyset, '.') == NULL) {
-        p   =  kname;
-        end = p + sizeof(kname);
-        p   = bufprint(p, end, "%s.keyset", keyset);
-        if (p >= end) {
-            derror( "keyset name too long: '%s'\n", keyset);
-            exit(1);
-        }
-        keyset = kname;
-    }
-
-    /* look for a the keyset file */
-    p   = temp;
-    end = p + sizeof(temp);
-    p = bufprint_config_file(p, end, keyset);
-    if (p < end && load_keyset(temp) == 0)
-        return;
-
-    p = temp;
-    p = bufprint(p, end, "%s" PATH_SEP "keysets" PATH_SEP "%s", opts->sysdir, keyset);
-    if (p < end && load_keyset(temp) == 0)
-        return;
-
-    p = temp;
-    p = bufprint_app_dir(p, end);
-    p = bufprint(p, end, PATH_SEP "keysets" PATH_SEP "%s", keyset);
-    if (p < end && load_keyset(temp) == 0)
-        return;
-
-    return;
-}
-
-void
-write_default_keyset( void )
-{
-    char   path[MAX_PATH];
-
-    bufprint_config_file( path, path+sizeof(path), KEYSET_FILE );
+    bufprint_config_file(path, path+sizeof(path), KEYSET_FILE);
 
     /* only write if there is no file here */
     if (!path_exists(path)) {
@@ -180,6 +112,9 @@ write_default_keyset( void )
 const char*  skin_network_speed = NULL;
 const char*  skin_network_delay = NULL;
 
+static AConfig* android_skinConfig = NULL;
+static char* android_skinPath = NULL;
+
 
 typedef struct part_properties part_properties;
 struct part_properties {
@@ -189,9 +124,7 @@ struct part_properties {
     part_properties* next;
 };
 
-part_properties*
-read_all_part_properties(AConfig* parts)
-{
+static part_properties* read_all_part_properties(AConfig* parts) {
     part_properties* head = NULL;
     part_properties* prev = NULL;
 
@@ -218,9 +151,7 @@ read_all_part_properties(AConfig* parts)
     return head;
 }
 
-void
-free_all_part_properties(part_properties* head)
-{
+static void free_all_part_properties(part_properties* head) {
     part_properties* prev = head;
     while (head) {
         prev = head;
@@ -229,9 +160,8 @@ free_all_part_properties(part_properties* head)
     }
 }
 
-part_properties*
-get_part_properties(part_properties* allparts, char *partname)
-{
+static part_properties* get_part_properties(part_properties* allparts,
+                                            const char* partname) {
     part_properties* p;
     for (p = allparts; p != NULL; p = p->next) {
         if (!strcmp(partname, p->name))
@@ -241,15 +171,13 @@ get_part_properties(part_properties* allparts, char *partname)
     return NULL;
 }
 
-void
-add_parts_to_layout(AConfig* layout,
-                    char* parts[],
-                    int n_parts,
-                    part_properties *props,
-                    int xoffset,
-                    int x_margin,
-                    int y_margin)
-{
+static void add_parts_to_layout(AConfig* layout,
+                                char* parts[],
+                                int n_parts,
+                                part_properties *props,
+                                int xoffset,
+                                int x_margin,
+                                int y_margin) {
     int     i;
     int     y = 10;
     char    tmp[512];
@@ -271,13 +199,11 @@ add_parts_to_layout(AConfig* layout,
     }
 }
 
-int
-load_dynamic_skin(AndroidHwConfig* hwConfig,
-                  char**           skinDirPath,
-                  int              width,
-                  int              height,
-                  AConfig*         root)
-{
+static int load_dynamic_skin(AndroidHwConfig* hwConfig,
+                             char**           skinDirPath,
+                             int              width,
+                             int              height,
+                             AConfig*         root) {
     char      tmp[1024];
     AConfig*  node;
     int       i;
@@ -396,7 +322,7 @@ static const struct {
     { NULL, NULL }
 };
 
-void
+static void
 parse_skin_files(const char*      skinDirPath,
                  const char*      skinName,
                  AndroidOptions*  opts,
@@ -577,19 +503,51 @@ DEFAULT_SKIN:
     goto FOUND_SKIN;
 }
 
+bool handleEmulatorUiConfiguration(AndroidOptions* opts,
+                                   AvdInfo* avd,
+                                   AndroidHwConfig* hw) {
+    if (skin_charmap_setup(opts->charmap)) {
+        return false;
+    }
 
-void
-ui_init(AConfig*          skinConfig,
-        const char*       skinPath,
-        AndroidOptions*   opts,
-        const UiEmuAgent* uiEmuAgent)
-{
-    int  win_x, win_y;
+    /* The Qt UI handles keyboard shortcuts on its own. Don't load any keyset. */
+    SkinKeyset* keyset = skin_keyset_new_from_text("");
+    if (!keyset) {
+        derror("Unable to create empty default keyset!!\n" );
+        return false;
+    }
+    skin_keyset_set_default(keyset);
+    if (!opts->keyset) {
+        write_default_keyset();
+    }
 
-    signal(SIGINT, SIG_DFL);
-#ifndef _WIN32
-    signal(SIGQUIT, SIG_DFL);
-#endif
+    parse_skin_files(opts->skindir, opts->skin, opts, hw,
+                     &android_skinConfig, &android_skinPath);
+
+    // The following is disabled because the update to hw->hw_keyboard_charmap
+    // must happen before calling this function, i.e. before writing the
+    // hardware-qemu.ini file.
+    if (opts->charmap) {
+        char charmap_name[SKIN_CHARMAP_NAME_SIZE];
+
+        if (!path_exists(opts->charmap)) {
+            derror("Charmap file does not exist: %s", opts->charmap);
+            return false;
+        }
+        /* We need to store the charmap name in the hardware configuration.
+         * However, the charmap file itself is only used by the UI component
+         * and doesn't need to be set to the emulation engine.
+         */
+        kcm_extract_charmap_name(opts->charmap, charmap_name,
+                                 sizeof(charmap_name));
+        reassign_string(&hw->hw_keyboard_charmap, charmap_name);
+    }
+
+    return true;
+}
+
+bool initEmulatorUi(const AndroidOptions* opts, const UiEmuAgent* uiEmuAgent) {
+    user_config_init();
 
     skin_winsys_start(opts->no_window, opts->raw_keys);
 
@@ -622,18 +580,17 @@ ui_init(AConfig*          skinConfig,
         if (icon_data) {
             skin_winsys_set_window_icon(icon_data, icon_size);
         } else {
-            fprintf(stderr,
-                    "### Error: could not find emulator icon resource: %s\n",
-                    kIconFile);
+            dwarning("Could not find emulator icon resource: %s\n", kIconFile);
         }
     }
 
+    int  win_x, win_y;
     user_config_get_window_pos(&win_x, &win_y);
 
-    if (emulator_window_init(emulator_window_get(), skinConfig, skinPath,
+    if (emulator_window_init(emulator_window_get(), android_skinConfig, android_skinPath,
                              win_x, win_y, opts, uiEmuAgent) < 0) {
-        fprintf(stderr, "### Error: could not load emulator skin from '%s'\n", skinPath);
-        exit(1);
+        derror("Could not load emulator skin from '%s'\n", android_skinPath);
+        return false;
     }
 
     /* add an onion overlay image if needed */
@@ -655,11 +612,18 @@ ui_init(AConfig*          skinConfig,
         emulator_window_get()->onion_alpha    = alpha;
         emulator_window_get()->onion_rotation = rotate;
     }
+
+    return true;
 }
 
-void ui_done(void)
-{
+void finiEmulatorUi(void) {
+    if (android_skinConfig) {
+        aconfig_node_free(android_skinConfig);
+        free(android_skinPath);
+    }
+
     user_config_done();
+
     emulator_window_done(emulator_window_get());
     skin_winsys_quit_request();
     skin_winsys_destroy();
