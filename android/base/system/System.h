@@ -16,6 +16,7 @@
 
 #include "android/base/Compiler.h"
 
+#include "android/base/EnumFlags.h"
 #include "android/base/String.h"
 #include "android/base/containers/StringVector.h"
 
@@ -35,6 +36,22 @@ enum class OsType {
 
 String toString(OsType osType);
 
+enum class RunOptions {
+    None = 0,
+
+    // some pseudo flags to just state the default behavior
+    ReturnPid = 0,
+    DontWait = 0,
+    HideAllOutput = 0,
+
+    WaitForCompletion = 1,
+    ReturnExitCode = 2, // can only be used with WaitForCompletion
+                        // for an obvious reason
+    ShowOutput = 4,
+
+    Default = 0,    // don't wait, return PID, hide all output
+};
+
 // Interface class to the underlying operating system.
 class System {
 public:
@@ -47,15 +64,21 @@ public:
         Duration systemMs;
     };
 
+    enum {
+        RunFailed = -1,
+    };
+
+    using RunOptions = android::base::RunOptions;
+
 public:
     // Call this function to get the instance
     static System* get();
 
     // Default constructor doesn't do anything.
-    System() {}
+    System() = default;
 
     // Default destructor is empty but virtual.
-    virtual ~System() {}
+    virtual ~System() = default;
 
     // Return the path of the current program's directory.
     virtual const String& getProgramDirectory() const = 0;
@@ -195,14 +218,17 @@ public:
     // Returns the current Unix timestamp
     virtual time_t getUnixTime() const = 0;
 
+    // Run a shell command. |commandLine| is a set of command to run + its
+    // arguments, |options| allows one to control the behavior of a function.
+    virtual int runCommand(const StringVector& commandLine,
+                           RunOptions options = RunOptions::Default) = 0;
+
     // Run a shell command silently. This doesn't try to wait for it to
-    // complete and will return as soon as possible. |commandLine| is a list
-    // of parameters, where |commandLine[0]| is the full path to the
-    // executable. If |wait| is true it returns only after the process
-    // exited.
-    // Return true on success, false on failure (i.e. if the
-    // executable could not be found, not whether the command itself
-    // succeeded).
+    // complete by default and will return as soon as possible.
+    // |commandLine| is a list of parameters, where |commandLine[0]| is the
+    // full path to the executable.
+    // If |wait| is true it returns only after the process exited.
+    // Returns true if command was launched succesfully
     virtual bool runSilentCommand(const StringVector& commandLine,
                                   bool wait = false) = 0;
 

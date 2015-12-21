@@ -13,6 +13,7 @@
 
 #include "android/base/containers/StringVector.h"
 #include "android/base/String.h"
+#include "android/base/StringView.h"
 
 namespace android {
 namespace base {
@@ -39,6 +40,20 @@ public:
     // The number of distinct items in the HostType enumeration above.
     static const int kHostTypeCount = 2;
 
+    // Suffixes for an executable file (.exe on Windows, empty otherwise)
+    static const char* const kExeNameSuffixes[kHostTypeCount];
+
+    // Suffixe for an executable file on the current platform
+    static const char* const kExeNameSuffix;
+
+    // Returns the executable name for a base name |baseName|
+    static String toExecutableName(StringView baseName,
+                                   HostType hostType);
+
+    static String toExecutableName(StringView baseName) {
+        return toExecutableName(baseName, HOST_TYPE);
+    }
+
     // Return true if |ch| is a directory separator for a given |hostType|.
     static bool isDirSeparator(int ch, HostType hostType);
 
@@ -61,20 +76,20 @@ public:
     }
 
     // Remove trailing separators from a |path| string, for a given |hostType|.
-    static String removeTrailingDirSeparator(const String& path,
+    static String removeTrailingDirSeparator(StringView path,
                                              HostType hostType);
 
     // Remove trailing separators from a |path| string for the current host.
-    static inline String removeTrailingDirSeparator(const String& path) {
+    static inline String removeTrailingDirSeparator(StringView path) {
         return removeTrailingDirSeparator(path, HOST_TYPE);
     }
 
     // Add a trailing separator if needed.
-    static String addTrailingDirSeparator(const String& path,
+    static String addTrailingDirSeparator(StringView path,
                                           HostType hostType);
 
     // Add a trailing separator if needed.
-    static String addTrailingDirSeparator(const String& path) {
+    static String addTrailingDirSeparator(StringView path) {
         return addTrailingDirSeparator(path, HOST_TYPE);
     }
 
@@ -86,19 +101,19 @@ public:
     //    <drive>:
     //    <drive>:<sep>
     //    <sep><sep>volumeName<sep>
-    static size_t rootPrefixSize(const char* path, HostType hostType);
+    static size_t rootPrefixSize(StringView path, HostType hostType);
 
     // Return the root prefix for the current platform. See above for
     // documentation.
-    static inline size_t rootPrefixSize(const char* path) {
+    static inline size_t rootPrefixSize(StringView path) {
         return rootPrefixSize(path, HOST_TYPE);
     }
 
     // Return true iff |path| is an absolute path for a given |hostType|.
-    static bool isAbsolute(const char* path, HostType hostType);
+    static bool isAbsolute(StringView path, HostType hostType);
 
     // Return true iff |path| is an absolute path for the current host.
-    static inline bool isAbsolute(const char* path) {
+    static inline bool isAbsolute(StringView path) {
         return isAbsolute(path, HOST_TYPE);
     }
 
@@ -117,13 +132,13 @@ public:
     //     <drive>:foo  -> '<drive>:' + 'foo'
     //     <drive>:\foo -> '<drive>:\' + 'foo'
     //
-    static bool split(const char* path,
+    static bool split(StringView path,
                       HostType hostType,
                       String* dirName,
                       String* baseName);
 
     // A variant of split() for the current process' host type.
-    static inline bool split(const char* path,
+    static inline bool split(StringView path,
                              String* dirName,
                              String* baseName) {
         return split(path, HOST_TYPE, dirName, baseName);
@@ -134,10 +149,10 @@ public:
     // the result will be the concatenation of |path1| and |path2|, if
     // |path1| doesn't end with a directory separator, a |hostType| specific
     // one will be inserted between the two paths in the result.
-    static String join(const char* path1, const char* path2, HostType hostType);
+    static String join(StringView path1, StringView path2, HostType hostType);
 
     // A variant of join() for the current process' host type.
-    static inline String join(const char* path1, const char* path2) {
+    static inline String join(StringView path1, StringView path2) {
         return join(path1, path2, HOST_TYPE);
     }
 
@@ -150,11 +165,11 @@ public:
     // each one being a path component (prefix or subdirectory or file
     // name). Directory separators do not appear in components, except
     // for the root prefix, if any.
-    static StringVector decompose(const char* path, HostType hostType);
+    static StringVector decompose(StringView path, HostType hostType);
 
     // Decompose |path| into individual components for the host platform.
     // See comments above for more details.
-    static inline StringVector decompose(const char* path) {
+    static inline StringVector decompose(StringView path) {
         return decompose(path, HOST_TYPE);
     }
 

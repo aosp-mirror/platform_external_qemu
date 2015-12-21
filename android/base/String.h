@@ -34,7 +34,7 @@ public:
     String(const String& other);
 
     // Constructor from a StringView.
-    explicit String(const StringView& other);
+    String(const StringView& other);
 
     // Constructor from a sized C string.
     String(const char* str, size_t len);

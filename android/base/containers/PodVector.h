@@ -13,6 +13,8 @@
 
 #include <android/base/Log.h>
 
+#include <initializer_list>
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -114,11 +116,20 @@ template <typename T>
 class PodVector : public PodVectorBase {
 public:
     // Default constructor for an empty PodVector<T>
-    PodVector() : PodVectorBase() {}
+    PodVector() = default;
 
     // Copy constructor. This copies all items from |other| into
     // the new instance with ::memmove().
-    PodVector(const PodVector& other) : PodVectorBase(other) {}
+    PodVector(const PodVector& other) = default;
+
+    // Initializer list ctor. Enables convenient initialization syntax, e.g.
+    //   PodVector<int> pv = { 1, 2, 3 };
+    PodVector(std::initializer_list<T> list) {
+        reserve(list.size());
+        for (auto&& t : list) {
+            push_back(t);
+        }
+    }
 
     // Assignment operator.
     PodVector& operator=(const PodVector& other) {
@@ -126,9 +137,19 @@ public:
         return *this;
     }
 
+    // Initializer list assignment operator.
+    PodVector& operator=(std::initializer_list<T> list) {
+        resize(list.size()); // reuse the capacity if possible
+        size_t i = 0;
+        for (auto&& t : list) {
+            (*this)[i++] = t;
+        }
+        return *this;
+    }
+
     // Destructor, this simply releases the internal storage block that
     // holds all the items, but doesn't touch them otherwise.
-    ~PodVector() {}
+    ~PodVector() = default;
 
     // Return true iff the PodVector<T> instance is empty, i.e. does not
     // have any items.
@@ -246,6 +267,7 @@ public:
     // Compatibility methods for std::vector<>
     void push_back(const T& item) { append(item); }
     void pop() { remove(0U); }
+    void pop_back() { resize(size() - 1); }
 
     typedef T* iterator;
     typedef const T* const_iterator;
