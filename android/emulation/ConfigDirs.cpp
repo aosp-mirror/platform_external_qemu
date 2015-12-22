@@ -14,13 +14,13 @@
 
 #include "android/emulation/ConfigDirs.h"
 
-#include "android/base/StringFormat.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 
 namespace android {
 
 using ::android::base::String;
-using ::android::base::StringFormat;
+using ::android::base::PathUtils;
 using ::android::base::System;
 
 // static
@@ -34,8 +34,7 @@ String ConfigDirs::getUserDirectory() {
     }
     home = system->envGet("ANDROID_SDK_HOME");
     if (home.size()) {
-        return StringFormat("%s%c%s", home.c_str(), System::kDirSeparator,
-                            kAndroidSubDir);
+        return PathUtils::join(home, kAndroidSubDir);
     }
     home = system->getHomeDirectory();
     if (home.empty()) {
@@ -44,8 +43,7 @@ String ConfigDirs::getUserDirectory() {
             home = "/tmp";
         }
     }
-    return StringFormat("%s%c%s", home.c_str(), System::kDirSeparator,
-                        kAndroidSubDir);
+    return PathUtils::join(home, kAndroidSubDir);
 }
 
 // static
@@ -56,9 +54,7 @@ String ConfigDirs::getAvdRootDirectory() {
     if (home.size()) {
         return home;
     }
-    String result = getUserDirectory();
-    result += System::kDirSeparator;
-    result += kAvdSubDir;
+    String result = PathUtils::join(getUserDirectory(), kAvdSubDir);
     return result;
 }
 

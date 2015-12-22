@@ -80,7 +80,7 @@ public:
 
     // Create the path of a directory entry under the temporary directory.
     String makeSubPath(const char* subpath) {
-        return StringFormat("%s/%s", mPath.c_str(), subpath);
+        return StringFormat("%s/%s", mPath, subpath);
     }
 
     // Create an empty directory under the temporary directory.
@@ -127,7 +127,7 @@ private:
             if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) {
                 continue;
             }
-            String entry_path = StringFormat("%s/%s", path.c_str(), entry->d_name);
+            String entry_path = StringFormat("%s/%s", path, entry->d_name);
             struct stat stats;
             lstat(entry_path.c_str(), &stats);
             if (S_ISDIR(stats.st_mode)) {

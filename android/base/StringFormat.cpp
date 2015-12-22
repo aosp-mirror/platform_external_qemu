@@ -16,7 +16,7 @@
 namespace android {
 namespace base {
 
-String StringFormat(const char* format, ...) {
+String StringFormatRaw(const char* format, ...) {
     va_list args;
     va_start(args, format);
     String result = StringFormatWithArgs(format, args);
@@ -30,7 +30,7 @@ String StringFormatWithArgs(const char* format, va_list args) {
     return result;
 }
 
-void StringAppendFormat(String* string, const char* format, ...) {
+void StringAppendFormatRaw(String* string, const char* format, ...) {
     va_list args;
     va_start(args, format);
     StringAppendFormatWithArgs(string, format, args);
@@ -77,6 +77,9 @@ void StringAppendFormatWithArgs(String* string,
     }
 }
 
+const char* unpackFormatArg(StringView str) {
+    return str.c_str();
+}
 
 }  // namespace base
 }  // namespace android

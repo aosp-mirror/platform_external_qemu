@@ -17,6 +17,7 @@
 #include <windows.h>
 
 #include "android/base/String.h"
+#include "android/base/StringView.h"
 
 #ifndef _WIN32
 #error "Only include this file when compiling for Windows!"
@@ -47,7 +48,7 @@ public:
 // |commandLine| is an input string, that may contain spaces, quotes or
 // backslashes. The function returns a new String that contains a version
 // of |commandLine| that can be decoded properly by CommandLineToArgv().
-static String quoteCommandLine(const char* commandLine);
+static String quoteCommandLine(StringView commandLine);
 
 // Creates a UTF-8 encoded error message string from a Windows System Error
 // Code.  String returned depends on current language id.  See FormatMessage.

@@ -21,12 +21,12 @@ namespace android {
 namespace base {
 
 // static
-String Win32Utils::quoteCommandLine(const char* commandLine) {
+String Win32Utils::quoteCommandLine(StringView commandLine) {
   // If |commandLine| doesn't contain any problematic character, just return
   // it as-is.
-  size_t n = strcspn(commandLine, " \t\v\n\"");
+  size_t n = strcspn(commandLine.c_str(), " \t\v\n\"");
   if (commandLine[n] == '\0') {
-      return String(commandLine);
+      return commandLine;
   }
 
   // Otherwise, we need to quote some of the characters.

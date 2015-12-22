@@ -56,7 +56,7 @@ bool EmuglBackendList::contains(const char* name) const {
 String EmuglBackendList::getLibDirPath(const char* name) {
     return android::base::StringFormat(
             "%s/%s/gles_%s",
-            mExecDir.c_str(),
+            mExecDir,
             mProgramBitness == 64 ? "lib64" : "lib",
             name);
 }
@@ -89,7 +89,7 @@ bool EmuglBackendList::getBackendLibPath(const char* name,
 
     String path = android::base::StringFormat(
             "%s/%s%s%s",
-            getLibDirPath(name).c_str(),
+            getLibDirPath(name),
             kLibPrefix,
             libraryName,
             kLibSuffix);
