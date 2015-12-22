@@ -20,6 +20,7 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/String.h"
+#include "android/base/StringView.h"
 
 #include <wchar.h>
 
@@ -45,7 +46,7 @@ public:
     Win32UnicodeString(const char* str, size_t len);
 
     // Initialize a new instance from an existing String instance |str|.
-    explicit Win32UnicodeString(const String& str);
+    explicit Win32UnicodeString(StringView str);
 
     // Initialize by reserving enough room for a string of |size| UTF-16
     // codepoints.
@@ -60,8 +61,9 @@ public:
     // Destructor.
     ~Win32UnicodeString();
 
-    // Assignment operator.
+    // Assignment operators.
     Win32UnicodeString& operator=(const Win32UnicodeString& other);
+    Win32UnicodeString& operator=(const wchar_t* str);
 
     // Return pointer to first wchar_t in the string.
     const wchar_t* c_str() const { return mStr ? mStr : L""; }

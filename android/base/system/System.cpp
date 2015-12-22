@@ -498,14 +498,45 @@ public:
 
         PROCESS_INFORMATION pinfo = {};
 
-        String args;
-        args = commandLine[0];
+        // this will point to either the commandLine[0] or the executable path
+        // found by the system
+        StringView executableRef;
+        // a buffer to store the executable path if we need to search for it
+        String executable;
+        if (PathUtils::isAbsolute(commandLine[0])) {
+            executableRef = commandLine[0];
+        } else {
+            // try searching %PATH% and current directory for the binary
+            const Win32UnicodeString name(commandLine[0]);
+            const Win32UnicodeString extension(PathUtils::kExeNameSuffix);
+            Win32UnicodeString buffer(MAX_PATH);
+
+            DWORD size = ::SearchPathW(nullptr, name.c_str(), extension.c_str(),
+                          buffer.size() + 1, buffer.data(), nullptr);
+            if (size > buffer.size()) {
+                // function may ask for more space
+                buffer.resize(size);
+                size = ::SearchPathW(nullptr, name.c_str(), extension.c_str(),
+                                     buffer.size() + 1, buffer.data(), nullptr);
+            }
+            if (size == 0) {
+                // Couldn't find anything matching the passed name
+                return RunFailed;
+            }
+            if (buffer.size() != size) {
+                buffer.resize(size);
+            }
+            executable = buffer.toString();
+            executableRef = executable;
+        }
+
+        String args = executableRef;
         for (size_t i = 1; i < commandLine.size(); ++i) {
             args += ' ';
             args += android::base::Win32Utils::quoteCommandLine(commandLine[i].c_str());
         }
 
-        Win32UnicodeString commandUnicode(commandLine[0]);
+        Win32UnicodeString commandUnicode(executableRef);
         Win32UnicodeString argsUnicode(args);
 
         const int flags =
