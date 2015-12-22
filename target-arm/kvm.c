@@ -48,6 +48,9 @@ bool kvm_arm_create_scratch_host_vcpu(const uint32_t *cpus_to_try,
     if (kvmfd < 0) {
         goto err;
     }
+
+    fcntl(kvmfd, F_SETFD, FD_CLOEXEC);
+
     vmfd = ioctl(kvmfd, KVM_CREATE_VM, 0);
     if (vmfd < 0) {
         goto err;
