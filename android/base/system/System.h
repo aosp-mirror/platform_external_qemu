@@ -80,26 +80,6 @@ public:
     // Default destructor is empty but virtual.
     virtual ~System() = default;
 
-    // Return the path of the current program's directory.
-    virtual const String& getProgramDirectory() const = 0;
-
-    // Return the path of the emulator launcher's directory.
-    virtual const String& getLauncherDirectory() const = 0;
-
-    // Return the path to user's home directory (as defined in the
-    // underlying platform) or an empty string if it can't be found
-    virtual const String& getHomeDirectory() const = 0;
-
-    // Return the path to user's App Data directory (only applies
-    // in Microsoft Windows) or an empty string if it can't be found
-    virtual const String& getAppDataDirectory() const = 0;
-
-    // Return the current directory path. Because this can change at
-    // runtime, this returns a new String instance, not a const-reference
-    // to a constant one held by the object. Return an empty string if there is
-    // a problem with the system when getting the current directory.
-    virtual String getCurrentDirectory() const = 0;
-
     // Return the host bitness as an integer, either 32 or 64.
     // Note that this is different from the program's bitness. I.e. if
     // a 32-bit program runs under a 64-bit host, getProgramBitness()
@@ -150,20 +130,9 @@ public:
     // Return program's bitness, either 32 or 64.
     static int getProgramBitness() { return kProgramBitness; }
 
-    // Prepend a new directory to the system's library search path. This
-    // only alters an environment variable like PATH or LD_LIBRARY_PATH,
-    // and thus typically takes effect only after spawning/executing a new
-    // process.
-    static void addLibrarySearchDir(StringView dirPath);
-
-    // Find a bundled executable named |programName|, it must appear in the
-    // kBinSubDir of getLauncherDirectory(). The name should not include the
-    // executable extension (.exe) on Windows.
-    // Return an empty string if the file doesn't exist.
-    static String findBundledExecutable(StringView programName);
-
-    // Sleep for |n| milliseconds
-    static void sleepMs(unsigned n);
+    // /////////////////////////////////////////////////////////////////////////
+    // Environment variables.
+    // /////////////////////////////////////////////////////////////////////////
 
     // Retrieve the value of a given environment variable.
     // Equivalent to getenv() but returns a String instance.
@@ -179,6 +148,17 @@ public:
 
     // Returns true if environment variable |varname| is set and non-empty.
     virtual bool envTest(StringView varname) const = 0;
+
+    // Prepend a new directory to the system's library search path. This
+    // only alters an environment variable like PATH or LD_LIBRARY_PATH,
+    // and thus typically takes effect only after spawning/executing a new
+    // process.
+    static void addLibrarySearchDir(StringView dirPath);
+
+    // /////////////////////////////////////////////////////////////////////////
+    // Path functions that interact with the file system.
+    //     Pure path manipulation functions are in android::base::PathUtils.
+    // /////////////////////////////////////////////////////////////////////////
 
     // Return true iff |path| exists on the file system.
     virtual bool pathExists(StringView path) const = 0;
@@ -206,6 +186,39 @@ public:
     virtual StringVector scanDirEntries(StringView dirPath,
                                         bool fullPath = false) const = 0;
 
+    // Find a bundled executable named |programName|, it must appear in the
+    // kBinSubDir of getLauncherDirectory(). The name should not include the
+    // executable extension (.exe) on Windows.
+    // Return an empty string if the file doesn't exist.
+    static String findBundledExecutable(StringView programName);
+
+    // Return the path of the current program's directory.
+    virtual const String& getProgramDirectory() const = 0;
+
+    // Return the path of the emulator launcher's directory.
+    virtual const String& getLauncherDirectory() const = 0;
+
+    // Return the path to user's home directory (as defined in the
+    // underlying platform) or an empty string if it can't be found
+    virtual const String& getHomeDirectory() const = 0;
+
+    // Return the path to user's App Data directory (only applies
+    // in Microsoft Windows) or an empty string if it can't be found
+    virtual const String& getAppDataDirectory() const = 0;
+
+    // Return the current directory path. Because this can change at
+    // runtime, this returns a new String instance, not a const-reference
+    // to a constant one held by the object. Return an empty string if there is
+    // a problem with the system when getting the current directory.
+    virtual String getCurrentDirectory() const = 0;
+
+    // Return the path of a temporary directory appropriate for the system.
+    virtual String getTempDir() const = 0;
+
+    // /////////////////////////////////////////////////////////////////////////
+    // Time related functions.
+    // /////////////////////////////////////////////////////////////////////////
+
     // Checks the system to see if it is running under a remoting session
     // like Nomachine's NX, Chrome Remote Desktop or Windows Terminal Services.
     // On success, return true and sets |*sessionType| to the detected
@@ -217,6 +230,13 @@ public:
 
     // Returns the current Unix timestamp
     virtual time_t getUnixTime() const = 0;
+
+    // Sleep for |n| milliseconds
+    static void sleepMs(unsigned n);
+
+    // /////////////////////////////////////////////////////////////////////////
+    // Execute commands.
+    // /////////////////////////////////////////////////////////////////////////
 
     // Run a shell command. |commandLine| is a set of command to run + its
     // arguments, |options| allows one to control the behavior of a function.
@@ -231,9 +251,6 @@ public:
     // Returns true if command was launched succesfully
     virtual bool runSilentCommand(const StringVector& commandLine,
                                   bool wait = false) = 0;
-
-    // Return the path of a temporary directory appropriate for the system.
-    virtual String getTempDir() const = 0;
 
 protected:
     static System* setForTesting(System* system);
