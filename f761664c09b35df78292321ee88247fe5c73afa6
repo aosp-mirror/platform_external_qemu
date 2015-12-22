@@ -1,0 +1,395 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0abebfc6_93393c17",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 19
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "please change the name to something legible, like adb_emulator_bridge.c instead.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0abebfc6_b3363822",
+        "filename": "android-qemu1-glue/qemu-aeb-agent-impl.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "nit: trailing whitespace here and below.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eab5ebda_5addf505",
+        "filename": "android-qemu1-glue/qemu-aeb-agent-impl.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "looks like debug message that should be wrapped in macros like VERBOSE_PRINT(init, ...) or VERBOSE_PRINT(adb_bridge, ...) instead.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aaaf738e_38d84917",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "nit: Copyright disclaimer.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ac9fb78_f630a026",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "nit: Header ordering, see style guide.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea9a4b77_725d982d",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "Please explain the \"HACK\"",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0abebfc6_5397a42e",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "nit: indentation should be 4-spaces. Use \u0027git clang-format\u0027",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4ac43761_158d141f",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "nit: encapsulate debug messages in macro,. This is also valid for all uses of printf/fprintf below.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0abebfc6_d333b430",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "not the right location for these headers.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ab2aff4_57978c2e",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "nit: no error testing? seriously?",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cab827d7_d9f03388",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "nit: return on second line.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ac9fb78_168d1c1f",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "nit: use:\n\n  char cmd[16] \u003d {};\n\ninstead, which will avoid the creation of a 2-byte constant string for \"\\0\" in your executable.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eab5ebda_9ae6add1",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "nit: Not sure if relying on terminating zeros here is good protocol. Did you mean %016x instead?",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ab2aff4_b77d48c2",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "nit: trailing whitespace here and everywhere. Use \u0027git clang-format\u0027",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ac9fb78_36921840",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "shouldn\u0027t you release all pending messages here?",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea9a4b77_92711cb6",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "nit: Might want to deal with \u0027numBuffers \u003d\u003d 1\u0027 which will be the most common case to avoid need-less memory allocations and improve throughput.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aaaf738e_78e2c1c0",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "nit: Add a TODO to handle snapshots properly. You need to save pending messages for the guest.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea9a4b77_b26e20d1",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "nit: Add TODO here too.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ac3835c_34a6907e",
+        "filename": "android/aeb.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "nit: Missing copyright disclaimer + use of \"android/utils/compiler.h\" + ANDROID_BEGIN_HEADER + ANDROID_END_HEADER to make this usable from C++ code.\n\nAlso use (void) instead of () for C functions that do not take parameters.\n\nUse consistent naming if possible, e.g.\n\n  void android_adb_bridge_init(void);\n  void android_adb_bridge_install(void);\n\n+ Provide proper documentation for each function.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0ae5dff2_bbe367c0",
+        "filename": "android/emulation/control/aeb_agent.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "stdint.h doesn\u0027t seem necessary here.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eab5ebda_faede9ac",
+        "filename": "android/emulation/control/aeb_agent.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "Documentation?",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ac3835c_745d682d",
+        "filename": "android/emulation/qemud/android_qemud_client.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 476,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "un-necessary?",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cab827d7_19faab65",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T15:43:05Z",
+      "side": 1,
+      "message": "ordering, please.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
