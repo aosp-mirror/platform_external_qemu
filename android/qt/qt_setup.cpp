@@ -29,13 +29,13 @@ bool androidQtSetupEnv(int bitness) {
     String  qtLibSubDir = androidQtGetLibraryDir(bitness);
     System* system = System::get();
 
-    if (!system->pathIsDir(qtLibSubDir.c_str())) {
+    if (!system->pathIsDir(qtLibSubDir)) {
         LOG(ERROR) << "Qt library not found at " << qtLibSubDir.c_str();
         return false;
     }
     VERBOSE_PRINT(init,
         "Adding library search path for Qt: '%s'", qtLibSubDir.c_str());
-    system->addLibrarySearchDir(qtLibSubDir.c_str());
+    system->addLibrarySearchDir(qtLibSubDir);
 
     // Set the platforms plugin path too.
     String qtPluginsSubDir = androidQtGetPluginsDir(bitness);
@@ -43,7 +43,7 @@ bool androidQtSetupEnv(int bitness) {
     VERBOSE_PRINT(init,
         "Setting Qt plugin search path: QT_QPA_PLATFORM_PLUGIN_PATH=%s",
         qtPluginsSubDir.c_str());
-    system->envSet("QT_QPA_PLATFORM_PLUGIN_PATH", qtPluginsSubDir.c_str());
+    system->envSet("QT_QPA_PLATFORM_PLUGIN_PATH", qtPluginsSubDir);
 
     return true;
 }

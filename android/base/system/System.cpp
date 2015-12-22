@@ -161,7 +161,7 @@ public:
             pathList.push_back(launcherName);
             String launcherPath = PathUtils::recompose(pathList);
 
-            if (pathIsFile(launcherPath.c_str())) {
+            if (pathIsFile(launcherPath)) {
                 mLauncherDir = programDir;
                 return mLauncherDir;
             }
@@ -176,7 +176,7 @@ public:
                 String grandparentDir = PathUtils::recompose(programDirVector);
                 programDirVector.push_back(launcherName);
                 String launcherPath = PathUtils::recompose(programDirVector);
-                if (pathIsFile(launcherPath.c_str())) {
+                if (pathIsFile(launcherPath)) {
                     mLauncherDir = grandparentDir;
                     return mLauncherDir;
                 }
@@ -326,13 +326,12 @@ public:
 #endif
     }
 
-    virtual StringVector scanDirEntries(const char* dirPath,
+    virtual StringVector scanDirEntries(StringView dirPath,
                                         bool fullPath = false) const {
         StringVector result = scanDirInternal(dirPath);
         if (fullPath) {
             // Pre-pend |dirPath| to each entry.
-            String prefix =
-                    PathUtils::addTrailingDirSeparator(String(dirPath));
+            String prefix = PathUtils::addTrailingDirSeparator(dirPath);
             for (size_t n = 0; n < result.size(); ++n) {
                 String path = prefix;
                 path.append(result[n]);
@@ -342,9 +341,9 @@ public:
         return result;
     }
 
-    virtual String envGet(const char* varname) const {
+    virtual String envGet(StringView varname) const {
 #ifdef _WIN32
-        Win32UnicodeString varname_unicode(varname);
+        Win32UnicodeString varname_unicode(varname.c_str());
         const wchar_t* value = _wgetenv(varname_unicode.c_str());
         if (!value) {
             return String();
@@ -352,7 +351,7 @@ public:
             return Win32UnicodeString::convertToUtf8(value);
         }
 #else
-        const char* value = getenv(varname);
+        const char* value = getenv(varname.c_str());
         if (!value) {
             value = "";
         }
@@ -360,30 +359,28 @@ public:
 #endif
     }
 
-    virtual void envSet(const char* varname, const char* varvalue) {
+    virtual void envSet(StringView varname, StringView varvalue) {
 #ifdef _WIN32
-        if (!varvalue || !varvalue[0]) {
-            varvalue = "";
-        }
-        String envStr = StringFormat("%s=%s", varname, varvalue);
+        String envStr =
+                StringFormat("%s=%s", varname.c_str(), varvalue.c_str());
         // Note: this leaks the result of release().
         _wputenv(Win32UnicodeString(envStr).release());
 #else
-        if (!varvalue || !varvalue[0]) {
-            unsetenv(varname);
+        if (varvalue.empty()) {
+            unsetenv(varname.c_str());
         } else {
-            setenv(varname, varvalue, 1);
+            setenv(varname.c_str(), varvalue.c_str(), 1);
         }
 #endif
     }
 
-    virtual bool envTest(const char* varname) const {
+    virtual bool envTest(StringView varname) const {
 #ifdef _WIN32
-        Win32UnicodeString varname_unicode(varname);
+        Win32UnicodeString varname_unicode(varname.c_str());
         const wchar_t* value = _wgetenv(varname_unicode.c_str());
         return value && value[0] != L'\0';
 #else
-        const char* value = getenv(varname);
+        const char* value = getenv(varname.c_str());
         return value && value[0] != '\0';
 #endif
     }
@@ -412,27 +409,27 @@ public:
         return false;
     }
 
-    virtual bool pathExists(const char* path) const {
+    virtual bool pathExists(StringView path) const {
         return pathExistsInternal(path);
     }
 
-    virtual bool pathIsFile(const char* path) const {
+    virtual bool pathIsFile(StringView path) const {
         return pathIsFileInternal(path);
     }
 
-    virtual bool pathIsDir(const char* path) const {
+    virtual bool pathIsDir(StringView path) const {
         return pathIsDirInternal(path);
     }
 
-    virtual bool pathCanRead(const char* path) const override {
+    virtual bool pathCanRead(StringView path) const override {
         return pathCanReadInternal(path);
     }
 
-    virtual bool pathCanWrite(const char* path) const override {
+    virtual bool pathCanWrite(StringView path) const override {
         return pathCanWriteInternal(path);
     }
 
-    virtual bool pathCanExec(const char* path) const override {
+    virtual bool pathCanExec(StringView path) const override {
         return pathCanExecInternal(path);
     }
 
@@ -676,8 +673,8 @@ System* sSystemForTesting = NULL;
 
 #ifdef _WIN32
 // Return |path| as a Unicode string, while discarding trailing separators.
-Win32UnicodeString win32Path(const char* path) {
-    Win32UnicodeString wpath(path, ::strlen(path));
+Win32UnicodeString win32Path(StringView path) {
+    Win32UnicodeString wpath(path.c_str(), path.size());
     // Get rid of trailing directory separators, Windows doesn't like them.
     size_t size = wpath.size();
     while (size > 0U &&
@@ -698,19 +695,19 @@ using PathStat = struct stat;
 
 #endif  // _WIN32
 
-int pathStat(const char* path, PathStat* st) {
+int pathStat(StringView path, PathStat* st) {
 #ifdef _WIN32
-    return _wstat(win32Path(path).c_str(), st);
+    return _wstat(win32Path(path.c_str()).c_str(), st);
 #else   // !_WIN32
-    return HANDLE_EINTR(stat(path, st));
+    return HANDLE_EINTR(stat(path.c_str(), st));
 #endif  // !_WIN32
 }
 
-int pathAccess(const char* path, int mode) {
+int pathAccess(StringView path, int mode) {
 #ifdef _WIN32
-    return _waccess(win32Path(path).c_str(), mode);
+    return _waccess(win32Path(path.c_str()).c_str(), mode);
 #else   // !_WIN32
-    return HANDLE_EINTR(access(path, mode));
+    return HANDLE_EINTR(access(path.c_str(), mode));
 #endif  // !_WIN32
 }
 
@@ -757,15 +754,14 @@ System* System::setForTesting(System* system) {
 }
 
 // static
-StringVector System::scanDirInternal(const char* dirPath) {
+StringVector System::scanDirInternal(StringView dirPath) {
     StringVector result;
 
-    if (!dirPath) {
+    if (dirPath.empty()) {
         return result;
     }
 #ifdef _WIN32
-    String root(dirPath);
-    root = PathUtils::addTrailingDirSeparator(root);
+    auto root = PathUtils::addTrailingDirSeparator(dirPath);
     root += '*';
     Win32UnicodeString rootUnicode(root);
     struct _wfinddata_t findData;
@@ -780,7 +776,7 @@ StringVector System::scanDirInternal(const char* dirPath) {
         _findclose(findIndex);
     }
 #else  // !_WIN32
-    DIR* dir = ::opendir(dirPath);
+    DIR* dir = ::opendir(dirPath.c_str());
     if (dir) {
         for (;;) {
             struct dirent* entry = ::readdir(dir);
@@ -800,21 +796,21 @@ StringVector System::scanDirInternal(const char* dirPath) {
 }
 
 // static
-bool System::pathExistsInternal(const char* path) {
-    if (!path) {
+bool System::pathExistsInternal(StringView path) {
+    if (path.empty()) {
         return false;
     }
-    int ret = pathAccess(path, F_OK);
+    int ret = pathAccess(path.c_str(), F_OK);
     return (ret == 0) || (errno != ENOENT);
 }
 
 // static
-bool System::pathIsFileInternal(const char* path) {
-    if (!path) {
+bool System::pathIsFileInternal(StringView path) {
+    if (path.empty()) {
         return false;
     }
     PathStat st;
-    int ret = pathStat(path, &st);
+    int ret = pathStat(path.c_str(), &st);
     if (ret < 0) {
         return false;
     }
@@ -822,12 +818,12 @@ bool System::pathIsFileInternal(const char* path) {
 }
 
 // static
-bool System::pathIsDirInternal(const char* path) {
-    if (!path) {
+bool System::pathIsDirInternal(StringView path) {
+    if (path.empty()) {
         return false;
     }
     PathStat st;
-    int ret = pathStat(path, &st);
+    int ret = pathStat(path.c_str(), &st);
     if (ret < 0) {
         return false;
     }
@@ -835,39 +831,37 @@ bool System::pathIsDirInternal(const char* path) {
 }
 
 // static
-bool System::pathCanReadInternal(const char* path) {
-    if (!path) {
+bool System::pathCanReadInternal(StringView path) {
+    if (path.empty()) {
         return false;
     }
-    return pathAccess(path, R_OK) == 0;
+    return pathAccess(path.c_str(), R_OK) == 0;
 }
 
 // static
-bool System::pathCanWriteInternal(const char* path) {
-    if (!path) {
+bool System::pathCanWriteInternal(StringView path) {
+    if (path.empty()) {
         return false;
     }
-    return pathAccess(path, W_OK) == 0;
+    return pathAccess(path.c_str(), W_OK) == 0;
 }
 
 // static
-bool System::pathCanExecInternal(const char* path) {
-    if (!path) {
+bool System::pathCanExecInternal(StringView path) {
+    if (path.empty()) {
         return false;
     }
-    return pathAccess(path, X_OK) == 0;
+    return pathAccess(path.c_str(), X_OK) == 0;
 }
 
 // static
-void System::addLibrarySearchDir(const char* path) {
+void System::addLibrarySearchDir(StringView path) {
     System* system = System::get();
     const char* varName = kLibrarySearchListEnvVarName;
 
     String libSearchPath = system->envGet(varName);
     if (libSearchPath.size()) {
-        libSearchPath = StringFormat("%s%c%s",
-                                     path,
-                                     kPathSeparator,
+        libSearchPath = StringFormat("%s%c%s", path.c_str(), kPathSeparator,
                                      libSearchPath.c_str());
     } else {
         libSearchPath = path;
@@ -876,14 +870,14 @@ void System::addLibrarySearchDir(const char* path) {
 }
 
 // static
-String System::findBundledExecutable(const char* programName) {
+String System::findBundledExecutable(StringView programName) {
     System* const system = System::get();
     const String executableName = PathUtils::toExecutableName(programName);
 
     // first, try the root launcher directory
     StringVector pathList = { system->getLauncherDirectory(), executableName };
     String executablePath = PathUtils::recompose(pathList);
-    if (system->pathIsFile(executablePath.c_str())) {
+    if (system->pathIsFile(executablePath)) {
         return executablePath;
     }
 
@@ -893,7 +887,7 @@ String System::findBundledExecutable(const char* programName) {
     pathList[1] = kBinSubDir;
     pathList.push_back(executableName);
     executablePath = PathUtils::recompose(pathList);
-    if (system->pathIsFile(executablePath.c_str())) {
+    if (system->pathIsFile(executablePath)) {
         return executablePath;
     }
 
@@ -903,7 +897,7 @@ String System::findBundledExecutable(const char* programName) {
     assert(pathList[1] == kBinSubDir);
     pathList[1] = kBin32SubDir;
     executablePath = PathUtils::recompose(pathList);
-    if (system->pathIsFile(executablePath.c_str())) {
+    if (system->pathIsFile(executablePath)) {
         return executablePath;
     }
 #endif

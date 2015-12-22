@@ -42,7 +42,7 @@ StringVector EmuglBackendScanner::scanDir(const char* execDir,
     const char* subdir = (programBitness == 64) ? "lib64" : "lib";
     String subDir = StringFormat("%s/%s/", execDir, subdir);
 
-    StringVector entries = System::get()->scanDirEntries(subDir.c_str());
+    StringVector entries = System::get()->scanDirEntries(subDir);
 
     static const char kBackendPrefix[] = "gles_";
     const size_t kBackendPrefixSize = sizeof(kBackendPrefix) - 1U;
@@ -56,7 +56,7 @@ StringVector EmuglBackendScanner::scanDir(const char* execDir,
 
         // Check that it is a directory.
         String full_dir = StringFormat("%s/%s", subDir.c_str(), entry.c_str());
-        if (!System::get()->pathIsDir(full_dir.c_str())) {
+        if (!System::get()->pathIsDir(full_dir)) {
             continue;
         }
         names.push_back(String(entry.c_str() + kBackendPrefixSize));
