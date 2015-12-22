@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4ac43761_556eac06",
+        "filename": "android/utils/dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T16:46:04Z",
+      "side": 1,
+      "message": "I suggest printing a human-friendly message here if this happens, or at the caller\u0027s location.",
+      "revId": "5f20ad5131dd3ea70f8797843398e57994dbd4e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ac9fb78_d6cf2480",
+        "filename": "android/utils/dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T16:46:04Z",
+      "side": 1,
+      "message": "I would suggest to use derror() here because if this happens you\u0027re in a really bad situation, and it would help the user understanding what\u0027s going on.",
+      "revId": "5f20ad5131dd3ea70f8797843398e57994dbd4e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0ae5dff2_7b255fe6",
+        "filename": "android/utils/dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T16:46:04Z",
+      "side": 1,
+      "message": "nit: indentation",
+      "revId": "5f20ad5131dd3ea70f8797843398e57994dbd4e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ab2aff4_576eac06",
+        "filename": "android/utils/dns.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T16:46:04Z",
+      "side": 1,
+      "message": "nit: \"Return the number of servers ...\"",
+      "revId": "5f20ad5131dd3ea70f8797843398e57994dbd4e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
