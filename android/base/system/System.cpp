@@ -170,7 +170,7 @@ public:
             // <launcher-dir>/qemu/<os>-<arch>/
             // look for the launcher in grandparent directory
             StringVector programDirVector =
-                    PathUtils::decompose(programDir.c_str());
+                    PathUtils::decompose(programDir);
             if (programDirVector.size() >= 2) {
                 programDirVector.resize(programDirVector.size() - 2);
                 String grandparentDir = PathUtils::recompose(programDirVector);
@@ -343,7 +343,7 @@ public:
 
     virtual String envGet(StringView varname) const {
 #ifdef _WIN32
-        Win32UnicodeString varname_unicode(varname.c_str());
+        Win32UnicodeString varname_unicode(varname);
         const wchar_t* value = _wgetenv(varname_unicode.c_str());
         if (!value) {
             return String();
@@ -362,7 +362,7 @@ public:
     virtual void envSet(StringView varname, StringView varvalue) {
 #ifdef _WIN32
         String envStr =
-                StringFormat("%s=%s", varname.c_str(), varvalue.c_str());
+                StringFormat("%s=%s", varname, varvalue);
         // Note: this leaks the result of release().
         _wputenv(Win32UnicodeString(envStr).release());
 #else
@@ -376,7 +376,7 @@ public:
 
     virtual bool envTest(StringView varname) const {
 #ifdef _WIN32
-        Win32UnicodeString varname_unicode(varname.c_str());
+        Win32UnicodeString varname_unicode(varname);
         const wchar_t* value = _wgetenv(varname_unicode.c_str());
         return value && value[0] != L'\0';
 #else
@@ -530,7 +530,7 @@ public:
         String args = executableRef;
         for (size_t i = 1; i < commandLine.size(); ++i) {
             args += ' ';
-            args += android::base::Win32Utils::quoteCommandLine(commandLine[i].c_str());
+            args += android::base::Win32Utils::quoteCommandLine(commandLine[i]);
         }
 
         Win32UnicodeString commandUnicode(executableRef);
@@ -674,7 +674,7 @@ System* sSystemForTesting = NULL;
 #ifdef _WIN32
 // Return |path| as a Unicode string, while discarding trailing separators.
 Win32UnicodeString win32Path(StringView path) {
-    Win32UnicodeString wpath(path.c_str(), path.size());
+    Win32UnicodeString wpath(path);
     // Get rid of trailing directory separators, Windows doesn't like them.
     size_t size = wpath.size();
     while (size > 0U &&
@@ -697,7 +697,7 @@ using PathStat = struct stat;
 
 int pathStat(StringView path, PathStat* st) {
 #ifdef _WIN32
-    return _wstat(win32Path(path.c_str()).c_str(), st);
+    return _wstat(win32Path(path).c_str(), st);
 #else   // !_WIN32
     return HANDLE_EINTR(stat(path.c_str(), st));
 #endif  // !_WIN32
@@ -705,7 +705,7 @@ int pathStat(StringView path, PathStat* st) {
 
 int pathAccess(StringView path, int mode) {
 #ifdef _WIN32
-    return _waccess(win32Path(path.c_str()).c_str(), mode);
+    return _waccess(win32Path(path).c_str(), mode);
 #else   // !_WIN32
     return HANDLE_EINTR(access(path.c_str(), mode));
 #endif  // !_WIN32
@@ -735,6 +735,11 @@ const char* System::kBinSubDir = "bin";
 #endif
 
 const char* System::kBin32SubDir = "bin";
+
+// These need to be defined so one can take an address of them.
+const int System::kProgramBitness;
+const char System::kDirSeparator;
+const char System::kPathSeparator;
 
 #ifdef _WIN32
 // static
@@ -800,7 +805,7 @@ bool System::pathExistsInternal(StringView path) {
     if (path.empty()) {
         return false;
     }
-    int ret = pathAccess(path.c_str(), F_OK);
+    int ret = pathAccess(path, F_OK);
     return (ret == 0) || (errno != ENOENT);
 }
 
@@ -810,7 +815,7 @@ bool System::pathIsFileInternal(StringView path) {
         return false;
     }
     PathStat st;
-    int ret = pathStat(path.c_str(), &st);
+    int ret = pathStat(path, &st);
     if (ret < 0) {
         return false;
     }
@@ -823,7 +828,7 @@ bool System::pathIsDirInternal(StringView path) {
         return false;
     }
     PathStat st;
-    int ret = pathStat(path.c_str(), &st);
+    int ret = pathStat(path, &st);
     if (ret < 0) {
         return false;
     }
@@ -835,7 +840,7 @@ bool System::pathCanReadInternal(StringView path) {
     if (path.empty()) {
         return false;
     }
-    return pathAccess(path.c_str(), R_OK) == 0;
+    return pathAccess(path, R_OK) == 0;
 }
 
 // static
@@ -843,7 +848,7 @@ bool System::pathCanWriteInternal(StringView path) {
     if (path.empty()) {
         return false;
     }
-    return pathAccess(path.c_str(), W_OK) == 0;
+    return pathAccess(path, W_OK) == 0;
 }
 
 // static
@@ -851,7 +856,7 @@ bool System::pathCanExecInternal(StringView path) {
     if (path.empty()) {
         return false;
     }
-    return pathAccess(path.c_str(), X_OK) == 0;
+    return pathAccess(path, X_OK) == 0;
 }
 
 // static
@@ -861,12 +866,12 @@ void System::addLibrarySearchDir(StringView path) {
 
     String libSearchPath = system->envGet(varName);
     if (libSearchPath.size()) {
-        libSearchPath = StringFormat("%s%c%s", path.c_str(), kPathSeparator,
-                                     libSearchPath.c_str());
+        libSearchPath =
+                StringFormat("%s%c%s", path, kPathSeparator, libSearchPath);
     } else {
         libSearchPath = path;
     }
-    system->envSet(varName, libSearchPath.c_str());
+    system->envSet(varName, libSearchPath);
 }
 
 // static

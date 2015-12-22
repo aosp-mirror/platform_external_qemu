@@ -12,6 +12,11 @@
 #pragma once
 
 #include "android/base/String.h"
+#include "android/base/StringView.h"
+
+#include <string>
+#include <type_traits>
+#include <utility>
 
 #include <stdarg.h>
 
@@ -20,7 +25,7 @@ namespace base {
 
 // Create a new String instance that contains the printf-style formatted
 // output from |format| and potentially any following arguments.
-String StringFormat(const char* format, ...);
+String StringFormatRaw(const char* format, ...);
 
 // A variant of StringFormat() which uses a va_list to list formatting
 // parameters instead.
@@ -30,13 +35,45 @@ String StringFormatWithArgs(const char* format, va_list args);
 // |string| is the target String instance, |format| the format string,
 // followed by any formatting parameters. This is more efficient than
 // appending the result of StringFormat(format,...) to |*string| directly.
-void StringAppendFormat(String* string, const char* format, ...);
+void StringAppendFormatRaw(String* string, const char* format, ...);
 
 // A variant of StringAppendFormat() that takes a va_list to list
 // formatting parameters.
 void StringAppendFormatWithArgs(String* string,
                                 const char* format,
                                 va_list args);
+
+// unpackFormatArg() is a set of overloaded functions needed to unpack
+// an argument of the formatting list to a POD value which can be passed
+// into the sprintf()-like C function
+
+// Anything which can be used to construct a string view goes here and unpacks
+// into a const char*
+const char* unpackFormatArg(StringView str);
+
+// Forward all PODs as-is
+template <class T>
+T&& unpackFormatArg(T&& t,
+        typename std::enable_if<
+                    std::is_pod<typename std::decay<T>::type>::value
+                 >::type* = nullptr) {
+    return std::forward<T>(t);
+}
+
+// These templated versions of StringFormat*() allow one to pass all kinds of
+// string objects into the argument list
+template <class... Args>
+String StringFormat(const char* format, Args&&... args)
+{
+    return StringFormatRaw(format, unpackFormatArg(std::forward<Args>(args))...);
+}
+
+template <class... Args>
+void StringAppendFormat(String* string, const char* format, Args&&... args)
+{
+    StringAppendFormatRaw(string, format,
+                          unpackFormatArg(std::forward<Args>(args))...);
+}
 
 }  // namespace base
 }  // namespace android
