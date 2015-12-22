@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "eafecb6e_729f7888",
+        "filename": "android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 679,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-22T18:17:36Z",
+      "side": 1,
+      "message": "It almost doesn\u0027t. We don\u0027t really care of anything but detecting that we\u0027re in guest: emulator won\u0027t run even if Qemu supports it :)\nBut it\u0027s really good to know that, thanks",
+      "parentUuid": "4ac43761_75f808a2",
+      "revId": "a62441f320cd58447b9efbc74fd1339edd34c9d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aaaf738e_d8fd8d88",
         "filename": "android/emulation/CpuAccelerator.cpp",
         "patchSetId": 1
