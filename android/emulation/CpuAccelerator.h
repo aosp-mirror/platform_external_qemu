@@ -14,6 +14,7 @@
 #include "android/base/String.h"
 #include "android/cpu_accelerator.h"
 #include <string>
+#include <utility>
 #include <stdlib.h>
 
 namespace android {
@@ -61,5 +62,9 @@ AndroidCpuAcceleration GetCurrentCpuAcceleratorStatusCode();
 void SetCurrentCpuAcceleratorForTesting(CpuAccelerator accel,
                                         AndroidCpuAcceleration status_code,
                                         const char* status);
+
+// Returns the Hyper-V configuration of the current system
+// and a short message describing it.
+std::pair<AndroidHyperVStatus, std::string> GetHyperVStatus();
 
 }  // namespace android

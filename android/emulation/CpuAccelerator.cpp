@@ -39,6 +39,8 @@
 #ifdef _WIN32
 #include "android/base/files/ScopedHandle.h"
 #include "android/windows_installer.h"
+#include "android/base/system/Win32UnicodeString.h"
+#include "android/base/files/PathUtils.h"
 #endif
 
 #ifdef __APPLE__
@@ -664,6 +666,86 @@ void SetCurrentCpuAcceleratorForTesting(CpuAccelerator accel,
     g->accel = accel;
     g->status_code = status_code;
     ::snprintf(g->status, sizeof(g->status), "%s", status);
+}
+
+std::pair<AndroidHyperVStatus, std::string> GetHyperVStatus() {
+#ifndef _WIN32
+    // this was easy
+    return std::make_pair(ANDROID_HYPERV_ABSENT, "Hyper-V runs only on Windows");
+#else // _WIN32
+    if (!android_get_x86_cpuid_vmx_support() && android_get_x86_cpuid_is_vcpu()) {
+        // The simple part: if we're running under a hypervisor, it's either Hyper-V
+        // (meaning it's installed and running) or not Hyper-V (so we're in a guest
+        // and Hyper-V is not supported)
+        char vendor_id[16];
+        android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
+
+        if (android_get_x86_cpuid_vendor_id_is_vmhost(vendor_id)) {
+            // we're in a guest
+            return std::make_pair(ANDROID_HYPERV_ABSENT,
+                "Running in a guest VM, Hyper-V is not supported");
+        }
+
+        // The vcpu bit is set but your vendor id is not one of the known VM ids
+        // You are probably running under Hyper-V
+        return std::make_pair(ANDROID_HYPERV_RUNNING, "Hyper-V is enabled");
+    }
+
+    using android::base::String;
+    using android::base::Win32UnicodeString;
+    using android::base::PathUtils;
+
+    // Now the hard part: we know Hyper-V is not running. We need to find out if
+    // it's installed.
+    // The only reliable way of detecting it is to query the list of optional
+    // features through the WMI and check if Hyper-V is installed there. But it
+    // runs for tens of seconds, and can be even slower under memory pressure.
+    // Instead, let's take a shortcut: Hyper-V engine file is vmms.exe. If it's
+    // installed it has to be in system32 directory. So we can just check if
+    // it's there.
+    Win32UnicodeString winPath(MAX_PATH);
+    UINT size = ::GetWindowsDirectoryW(winPath.data(), winPath.size() + 1);
+    if (size > winPath.size()) {
+        winPath.resize(size);
+        size = ::GetWindowsDirectoryW(winPath.data(), winPath.size() + 1);
+    }
+    if (size == 0) {
+        // Last chance call
+        winPath = L"C:\\Windows";
+    } else if (winPath.size() != size) {
+        winPath.resize(size);
+    }
+
+#ifdef __x86_64__
+    const String sysPath = PathUtils::join(winPath.toString(), "System32");
+#else
+    // For the 32-bit application everything's a little bit more complicated:
+    // the main Hyper-V executable is 64-bit on 64-bit OS; but we're running
+    // under file system redirector which redirects access into 32-bit System32.
+    // even more: if we're running under 32-bit Windows, there's no 64-bit
+    // directory. So we need to select the proper one here.
+    // First, try a symlink which only exists on 64-bit Windows and leads to
+    // the native, 64-bit directory
+    String sysPath = PathUtils::join(winPath.toString(), "Sysnative");
+
+    // check only if path exists: path_is_dir() would fail as it's not a
+    // directory but a symlink
+    if (!path_exists(sysPath.c_str())) {
+        // If it doesn't exist, we're on 32-bit Windows and let's just use
+        // the plain old System32
+        sysPath = PathUtils::join(winPath.toString(), "System32");
+    }
+#endif
+    const String hyperVExe = PathUtils::join(sysPath, "vmms.exe");
+
+    if (path_is_regular(hyperVExe.c_str())) {
+        // hyper-v is installed but not running
+        return std::make_pair(ANDROID_HYPERV_INSTALLED, "Hyper-V is disabled");
+    }
+
+    // not a slightest sign of it
+    return std::make_pair(ANDROID_HYPERV_ABSENT, "Hyper-V is not installed");
+#endif // _WIN32
 }
 
 }  // namespace android
