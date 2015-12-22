@@ -14,6 +14,10 @@
 
 #define  SKIN_POS_INITIALIZER   { 0, 0 }
 
+extern SkinRotation skin_rotation_rotate(SkinRotation rotation, SkinRotation by) {
+    return (rotation + by) % (SKIN_ROTATION_270 + 1);
+}
+
 void skin_pos_rotate(SkinPos* dst, const SkinPos* src, SkinRotation rotation) {
     int  x = src->x;
     int  y = src->y;
@@ -117,7 +121,6 @@ void skin_rect_rotate(SkinRect* dst, const SkinRect* src, SkinRotation rot) {
             dst[0] = src[0];
     }
 }
-
 
 bool skin_rect_contains(const SkinRect* r, int x, int y) {
     return ( (unsigned)(x - r->pos.x) < (unsigned)r->size.w &&
