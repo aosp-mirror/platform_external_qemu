@@ -37,6 +37,11 @@ typedef struct {
     int  x, y;
 } SkinPos;
 
+// Rotates the given rotation by the given amount, i.e.
+// skin_rotation_rotate(SKIN_ROTATION_90, SKIN_ROTATION_180)
+// will return SKIN_ROTATION_270
+extern SkinRotation skin_rotation_rotate(SkinRotation rotation, SkinRotation by);
+
 // Rotate input position |src| by rotation |rot|, writing the result into
 // position |*dst|. One can use the same address for |src| and |dst|.
 extern void skin_pos_rotate(SkinPos* dst,
