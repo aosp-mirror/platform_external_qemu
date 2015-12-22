@@ -449,6 +449,8 @@ int kvm_init(int smp_cpus)
         goto err;
     }
 
+    fcntl(s->fd, F_SETFD, FD_CLOEXEC);
+
     ret = kvm_ioctl(s, KVM_GET_API_VERSION, 0);
     if (ret < KVM_API_VERSION) {
         if (ret > 0)
