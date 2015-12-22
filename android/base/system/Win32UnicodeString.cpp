@@ -30,7 +30,7 @@ Win32UnicodeString::Win32UnicodeString(const char* str, size_t len)
     reset(str, len);
 }
 
-Win32UnicodeString::Win32UnicodeString(const String& str)
+Win32UnicodeString::Win32UnicodeString(StringView str)
     : mStr(nullptr), mSize(0u) {
     reset(str.c_str(), str.size());
 }
