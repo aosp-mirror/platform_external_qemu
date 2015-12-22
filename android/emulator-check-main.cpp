@@ -11,6 +11,9 @@
 
 #include "android/base/StringView.h"
 #include "android/cpu_accelerator.h"
+#include "android/emulation/CpuAccelerator.h"
+
+#include <tuple>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,6 +34,13 @@ static int checkCpuAcceleration() {
     return capability;
 }
 
+static int checkHyperV() {
+    AndroidHyperVStatus status;
+    std::string message;
+    std::tie(status, message) = android::GetHyperVStatus();
+    printf("%s\n", message.c_str());
+    return status;
+}
 
 static void usage() {
     printf("%s\n",
@@ -41,6 +51,7 @@ of return code and text message
 
 Argument is one of:
     accel       Check the CPU acceleration support
+    hyper-v     Check if hyper-v is installed and running (Windows)
     -help       Show this help message
 )");
 }
@@ -68,6 +79,9 @@ int main(int argc, char** argv) {
 
     if (argument == "accel") {
         return checkCpuAcceleration();
+    }
+    if (argument == "hyper-v") {
+        return checkHyperV();
     }
     if (argument == "--help" || argument == "-help" || argument == "-h") {
         return help();

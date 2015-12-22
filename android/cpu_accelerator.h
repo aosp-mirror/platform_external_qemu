@@ -39,6 +39,14 @@ typedef enum {
     ANDROID_CPU_ACCELERATION_ERROR                    = 138, // Some other error occurred
 } AndroidCpuAcceleration;
 
+// ditto
+typedef enum {
+    ANDROID_HYPERV_ABSENT       = 0,    // No hyper-V found
+    ANDROID_HYPERV_INSTALLED    = 1,    // Hyper-V is installed but not running
+    ANDROID_HYPERV_RUNNING      = 2,    // Hyper-V is up and running
+    ANDROID_HYPERV_ERROR        = 100,  // Failed to detect status
+} AndroidHyperVStatus;
+
 /* Returns ANDROID_CPU_ACCELERATION_READY if CPU acceleration is
  *  possible on this machine.  If |status| is not NULL, on exit,
  * |*status| will be set to a heap-allocated string describing
