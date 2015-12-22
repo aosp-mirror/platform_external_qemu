@@ -647,6 +647,7 @@ static void enqueue_event(GoldfishEvDevState *s,
     s->last = (s->last + 1) & (MAX_EVENTS-1);
     s->events[s->last] = value;
     s->last = (s->last + 1) & (MAX_EVENTS-1);
+
 }
 
 static unsigned dequeue_event(GoldfishEvDevState *s)
@@ -922,9 +923,11 @@ static void gf_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
     int qcode = kv->qcode;
     
     enqueue_event(s, EV_KEY, qcode, evt->key->down);
-    
+
+    int qemu2_qcode = qemu_input_key_value_to_qcode(evt->key->key);
+
     /* Keep our modifier state up to date */
-    switch (qcode) {
+    switch (qemu2_qcode) {
     case Q_KEY_CODE_SHIFT:
     case Q_KEY_CODE_SHIFT_R:
         mod = MODSTATE_SHIFT;
@@ -953,15 +956,15 @@ static void gf_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
     if (s->modifier_state & MODSTATE_ALT) {
         /* No alt-keys defined currently */
     } else if (s->modifier_state & MODSTATE_CTRL) {
-        lkey = hardbutton_control_map[qcode];
+        lkey = hardbutton_control_map[qemu2_qcode];
     } else if (s->modifier_state & MODSTATE_SHIFT) {
-        lkey = hardbutton_shift_map[qcode];
+        lkey = hardbutton_shift_map[qemu2_qcode];
     } else {
-        lkey = hardbutton_map[qcode];
+      lkey = hardbutton_map[qemu2_qcode];
     }
 
     if (!lkey && s->have_dpad && s->modifier_state == 0) {
-        lkey = dpad_map[qcode];
+        lkey = dpad_map[qemu2_qcode];
     }
 
     if (lkey) {
