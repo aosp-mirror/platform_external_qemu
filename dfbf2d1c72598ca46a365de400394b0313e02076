@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "2afc637c_4f9c5152",
+        "filename": "android/base/async/Looper.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 446,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-22T20:10:48Z",
+      "side": 1,
+      "message": "Yep. Missed it.",
+      "parentUuid": "ea9a4b77_92383cca",
+      "revId": "dfbf2d1c72598ca46a365de400394b0313e02076",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0abebfc6_53dde405",
         "filename": "android/skin/qt/QtLooper.cpp",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "8a0b8f60_52c7d21b",
+        "filename": "android/skin/qt/QtLooper.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-22T20:10:48Z",
+      "side": 1,
+      "message": "Do you have spell check turned on for cpp files?\n\nI find the variable name flagging annoying. But, I know I\u0027m really bad with spellings, so it\u0027d be nice to have it on...",
+      "parentUuid": "0abebfc6_53dde405",
+      "revId": "dfbf2d1c72598ca46a365de400394b0313e02076",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0abebfc6_73e2e0c0",
         "filename": "android/skin/qt/QtLooper.cpp",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2015-12-22T16:57:33Z",
       "side": 1,
       "message": "typo: efficient",
+      "revId": "dfbf2d1c72598ca46a365de400394b0313e02076",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca2ae7be_8cb4873c",
+        "filename": "android/skin/qt/QtLooper.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-22T20:10:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0abebfc6_73e2e0c0",
       "revId": "dfbf2d1c72598ca46a365de400394b0313e02076",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
