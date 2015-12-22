@@ -27,8 +27,9 @@
 
 #include "android/avd/scanner.h"
 #include "android/avd/util.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/containers/StringVector.h"
 #include "android/base/system/System.h"
-#include "android/cpu_accelerator.h"
 #include "android/opengl/emugl_config.h"
 #include "android/qt/qt_setup.h"
 #include "android/utils/compiler.h"
@@ -39,6 +40,9 @@
 #include "android/utils/path.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/win32_cmdline_quote.h"
+
+using android::base::System;
+using android::base::RunOptions;
 
 #define DEBUG 1
 
@@ -139,24 +143,22 @@ int main(int argc, char** argv)
      * 3) '-verbose'/'-debug-all'/'-debug all'/'-debug-init'/'-debug init'
      *    to enable verbose mode.
      */
-    int  nn;
-    for (nn = 1; nn < argc; nn++) {
+    for (int nn = 1; nn < argc; nn++) {
         const char* opt = argv[nn];
 
         if (!strcmp(opt, "-accel-check")) {
-            // check ability to launch haxm/kvm accelerated VM and exit
-            // designed for use by Android Studio
-            char* status = 0;
-            AndroidCpuAcceleration capability =
-                    androidCpuAcceleration_getStatus(&status);
-            if (status) {
-                FILE* out = stderr;
-                if (capability == ANDROID_CPU_ACCELERATION_READY)
-                    out = stdout;
-                fprintf(out, "%s\n", status);
-                free(status);
+            // forward the option to our answering machine
+            auto& sys = *System::get();
+            const auto path = sys.findBundledExecutable("emulator-check");
+            if (path.empty()) {
+                derror("can't find the emulator-check executable "
+                       "(corrupted tools installation?)");
+                return 1;
             }
-            exit(capability);
+            return sys.runCommand({path, "accel"},
+                                  RunOptions::WaitForCompletion
+                                  | RunOptions::ReturnExitCode
+                                  | RunOptions::ShowOutput);
         }
 
         if (!strcmp(opt,"-qemu"))

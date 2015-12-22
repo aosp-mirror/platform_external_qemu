@@ -370,6 +370,14 @@ of them:
 
     For more details, see docs/GPU-EMULATION.TXT
 
+  - The 'query answering machine', a small application which only purpose is
+    to answer queries from Android Studio:
+
+        $EXEC_DIR/emulator-check
+
+    Currently the only parameter is '-accel', which returns the status of
+    the hypervisor support on the current machine (if emulator can use
+    hardware acceleration).
 
 VI. Rebuilding prebuilt binaries:
 ---------------------------------
