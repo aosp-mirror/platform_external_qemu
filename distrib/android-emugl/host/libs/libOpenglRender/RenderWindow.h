@@ -1,4 +1,4 @@
-// Copyright 2014 The Android Open Source Project
+// Copyright 2014-2015 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -89,6 +89,10 @@ public:
     // |rotation| is a clockwise-rotation for the content. Only multiples of
     // 90. are accepted. Returns true on success, false otherwise.
     //
+    // If the subwindow already exists, this function will update
+    // the dimensions of the subwindow, backing framebuffer, and rendering
+    // pipeline to reflect the new values.
+    //
     // One can call removeSubWindow() to remove the sub-window.
     bool setupSubWindow(FBNativeWindowType window,
                         int wx,
@@ -105,11 +109,6 @@ public:
     // it just hides it from the main window. Returns true on success, false
     // otherwise.
     bool removeSubWindow();
-
-    // Moves the sub-window created by calling setupSubWindow().
-    // |x|,|y| are the new top-right corner of the sub-window, and
-    // |width|,|height| are the new dimensions of the sub-window.
-    bool moveSubWindow(int x, int y, int width, int height);
 
     // Change the display rotation on the fly. |zRot| is a clockwise rotation
     // angle in degrees. Only multiples of 90. are accepted.

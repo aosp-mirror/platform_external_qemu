@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2011 The Android Open Source Project
+* Copyright (C) 2011-2015 The Android Open Source Project
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public:
     // Returns true on success, false otherwise.
     static bool initialize(int width, int height, bool useSubWindow);
 
-    // Setup a new sub-window to display the content of the emulated GPU
+    // Setup a sub-window to display the content of the emulated GPU
     // on-top of an existing UI window. |p_window| is the platform-specific
     // parent window handle. |wx|, |wy|, |ww| and |wh| are the
     // dimensions in pixels of the sub-window, relative to the parent window's
@@ -86,6 +86,10 @@ public:
     // proper panning on high-density displays (like retina)
     // |zRot| is a rotation angle in degrees, (clockwise in the Y-upwards GL
     // coordinate space).
+    //
+    // If a sub-window already exists, this function updates the subwindow
+    // and framebuffer properties to match the given values.
+    //
     // Return true on success, false otherwise.
     //
     // NOTE: This can return false for software-only EGL engines like OSMesa.
@@ -97,11 +101,6 @@ public:
     // Remove the sub-window created by setupSubWindow(), if any.
     // Return true on success, false otherwise.
     bool removeSubWindow();
-
-    // Move the sub-window created by setupSubWindow(), if any,
-    // to |x|,|y| with dimensions |width|,|height|. Returns true on
-    // success, false otherwise.
-    bool moveSubWindow(int x, int y, int width, int height);
 
     // Finalize the instance.
     void finalize();
