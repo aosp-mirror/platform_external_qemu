@@ -645,6 +645,48 @@ skin_image_rotate( SkinImage*  source, SkinRotation  rotation )
     return image;
 }
 
+SkinImage*
+skin_image_clone_rotated( SkinImage* source, SkinRotation by ) {
+    SkinImage*   image;
+
+    if (source == NULL || source == _no_image)
+        return SKIN_IMAGE_NONE;
+
+    image = calloc(1, sizeof(*image));
+    if (image == NULL)
+        goto Fail;
+
+    image->desc  = source->desc;
+    image->desc.rotation = SKIN_ROTATION_0;
+    image->hash  = source->hash;
+    image->flags = SKIN_IMAGE_CLONE;
+    if (by == SKIN_ROTATION_90 || by == SKIN_ROTATION_270) {
+        image->w     = source->h;
+        image->h     = source->w;
+    } else {
+        image->w     = source->w;
+        image->h     = source->h;
+    }
+    image->pixels = rotate_image( source->pixels, source->w, source->h, by );
+    if (image->pixels == NULL) {
+        goto Fail;
+    }
+
+    image->surface = skin_surface_create_argb32_from(image->w,
+                                                     image->h,
+                                                     image->w * 4,
+                                                     image->pixels);
+    if (image->surface == NULL) {
+        goto Fail;
+    }
+
+    return image;
+Fail:
+    if (image != NULL) {
+        skin_image_free(image);
+    }
+    return SKIN_IMAGE_NONE;
+}
 
 SkinImage*
 skin_image_clone( SkinImage*  source )
@@ -746,6 +788,12 @@ skin_image_org_h( SkinImage*  image )
             return image->h;
     }
     return 0;
+}
+
+SkinRotation
+skin_image_rot( SkinImage*  image )
+{
+    return image->desc.rotation;
 }
 
 SkinSurface*

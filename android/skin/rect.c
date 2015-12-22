@@ -14,6 +14,10 @@
 
 #define  SKIN_POS_INITIALIZER   { 0, 0 }
 
+extern SkinRotation skin_rotation_rotate(SkinRotation rotation, SkinRotation by) {
+    return (rotation + by) % (SKIN_ROTATION_270 + 1);
+}
+
 void skin_pos_rotate(SkinPos* dst, const SkinPos* src, SkinRotation rotation) {
     int  x = src->x;
     int  y = src->y;
@@ -115,6 +119,15 @@ void skin_rect_rotate(SkinRect* dst, const SkinRect* src, SkinRotation rot) {
 
         default:
             dst[0] = src[0];
+    }
+}
+
+void skin_rect_rotate_inplace(SkinRect* dst, const SkinRect* src, SkinRotation rot) {
+    if (rot == SKIN_ROTATION_90 || rot == SKIN_ROTATION_270) {
+        int tmp_w = src->size.w;
+        int tmp_h = src->size.h;
+        dst->size.h = tmp_w;
+        dst->size.w = tmp_h; 
     }
 }
 
