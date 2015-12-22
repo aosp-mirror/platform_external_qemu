@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa2133e4_084fe717",
+        "filename": "android/metrics/AutoFlushedIniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-22T17:32:13Z",
+      "side": 1,
+      "message": "\u003d std::move(...) ?",
+      "range": {
+        "startLine": 33,
+        "startChar": 11,
+        "endLine": 33,
+        "endChar": 38
+      },
+      "revId": "40eecdabd290176b03fefb28b93ccadbb149c6a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca01073f_31ae90c0",
+        "filename": "android/metrics/AutoFlushedIniFile.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-22T17:32:13Z",
+      "side": 1,
+      "message": "could you please add \u0027\u0027 around the file name? sometimes it gets really messy without them",
+      "range": {
+        "startLine": 50,
+        "startChar": 54,
+        "endLine": 50,
+        "endChar": 55
+      },
+      "revId": "40eecdabd290176b03fefb28b93ccadbb149c6a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
