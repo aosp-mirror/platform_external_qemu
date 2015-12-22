@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea9a4b77_92383cca",
+        "filename": "android/base/async/Looper.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 446,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T16:57:33Z",
+      "side": 1,
+      "message": "nit: static const char kRealTimeStr[] \u003d \"kRealTime\" is slightly better because it creates one less constant pointer in the binary\u0027s .rodata section.",
+      "revId": "dfbf2d1c72598ca46a365de400394b0313e02076",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0abebfc6_53dde405",
+        "filename": "android/skin/qt/QtLooper.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T16:57:33Z",
+      "side": 1,
+      "message": "typo: implementation",
+      "revId": "dfbf2d1c72598ca46a365de400394b0313e02076",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0abebfc6_73e2e0c0",
+        "filename": "android/skin/qt/QtLooper.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T16:57:33Z",
+      "side": 1,
+      "message": "typo: efficient",
+      "revId": "dfbf2d1c72598ca46a365de400394b0313e02076",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
