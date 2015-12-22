@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0ae5dff2_3b2bd7bf",
+        "filename": "android/cpu_accelerator.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T11:10:38Z",
+      "side": 1,
+      "message": "nit: wouldn\u0027t it be more logical to have ABSENT / INSTALLED / RUNNING instead?",
+      "revId": "a62441f320cd58447b9efbc74fd1339edd34c9d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4ac43761_75f808a2",
+        "filename": "android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 679,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T11:10:38Z",
+      "side": 1,
+      "message": "Not sure if this applies here, but recent versions of QEMU provide support for running Hyper-V aware guests! See http://blog.wikichoon.com/2014/07/enabling-hyper-v-enlightenments-with-kvm.html",
+      "revId": "a62441f320cd58447b9efbc74fd1339edd34c9d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aaaf738e_d8fd8d88",
+        "filename": "android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 728,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2015-12-22T11:10:38Z",
+      "side": 1,
+      "message": "wow, just wow :)",
+      "revId": "a62441f320cd58447b9efbc74fd1339edd34c9d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
