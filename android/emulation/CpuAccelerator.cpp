@@ -395,9 +395,8 @@ AndroidCpuAcceleration ProbeHAX(String* status) {
     if (haxm_installer_version < HAXM_INSTALLER_VERSION_MINIMUM) {
         StringAppendFormat(
                 status, "HAXM must be updated (version %s < %s).",
-                cpuAcceleratorFormatVersion(haxm_installer_version).c_str(),
-                cpuAcceleratorFormatVersion(HAXM_INSTALLER_VERSION_MINIMUM)
-                        .c_str());
+                cpuAcceleratorFormatVersion(haxm_installer_version),
+                cpuAcceleratorFormatVersion(HAXM_INSTALLER_VERSION_MINIMUM));
         return ANDROID_CPU_ACCELERATION_ACCEL_OBSOLETE;
     }
 
@@ -484,7 +483,7 @@ AndroidCpuAcceleration ProbeHAX(String* status) {
     // 4) Profit!
     StringAppendFormat(
             status, "HAXM version %s (%d) is installed and usable.",
-            cpuAcceleratorFormatVersion(haxm_installer_version).c_str(),
+            cpuAcceleratorFormatVersion(haxm_installer_version),
             hax_version.current_version);
     return ANDROID_CPU_ACCELERATION_READY;
 }
@@ -532,9 +531,8 @@ AndroidCpuAcceleration ProbeHAX(String* status) {
         // HAXM was found but version number was too old or missing
         StringAppendFormat(
                 status, "HAXM must be updated (version %s < %s).",
-                cpuAcceleratorFormatVersion(version).c_str(),
-                cpuAcceleratorFormatVersion(HAXM_INSTALLER_VERSION_MINIMUM)
-                        .c_str());
+                cpuAcceleratorFormatVersion(version),
+                cpuAcceleratorFormatVersion(HAXM_INSTALLER_VERSION_MINIMUM));
         return ANDROID_CPU_ACCELERATION_ACCEL_OBSOLETE;
     }
 
@@ -592,7 +590,7 @@ AndroidCpuAcceleration ProbeHAX(String* status) {
 
     // 6) Profit!
     StringAppendFormat(status, "HAXM version %s (%d) is installed and usable.",
-                       cpuAcceleratorFormatVersion(version).c_str(),
+                       cpuAcceleratorFormatVersion(version),
                        hax_version.current_version);
     return ANDROID_CPU_ACCELERATION_READY;
 }

@@ -226,7 +226,7 @@ String PathUtils::recompose(const StringVector& components,
             result += dirSeparator;
         addSeparator = true;
         if (n == 0) {
-            size_t prefixLen = rootPrefixSize(component.c_str(), hostType);
+            size_t prefixLen = rootPrefixSize(component, hostType);
             if (prefixLen == component.size()) {
                 addSeparator = false;
             }
