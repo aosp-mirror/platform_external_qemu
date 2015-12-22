@@ -94,7 +94,7 @@ bool EmuglBackendList::getBackendLibPath(const char* name,
             libraryName,
             kLibSuffix);
 
-    if (!System::get()->pathIsFile(path.c_str())) {
+    if (!System::get()->pathIsFile(path)) {
         D("%s(name=%s lib=%s): File does not exist: %s\n",
           __FUNCTION__, name, libraryName, path.c_str());
         return false;

@@ -26,10 +26,10 @@ namespace base {
 
 class TestSystem : public System {
 public:
-    TestSystem(const char* launcherDir,
+    TestSystem(StringView launcherDir,
                int hostBitness,
-               const char* homeDir = "/home",
-               const char* appDataDir = "")
+               StringView homeDir = "/home",
+               StringView appDataDir = "")
         : mProgramDir(launcherDir),
           mLauncherDir(launcherDir),
           mHomeDir(homeDir),
@@ -87,7 +87,7 @@ public:
     virtual String getCurrentDirectory() const { return mCurrentDir; }
 
     // Set current directory during unit-testing.
-    void setCurrentDirectoryForTesting(const char* path) { mCurrentDir = path; }
+    void setCurrentDirectoryForTesting(StringView path) { mCurrentDir = path; }
 
     virtual int getHostBitness() const {
         return mHostBitness;
@@ -101,7 +101,7 @@ public:
         mOsType = type;
     }
 
-    virtual String envGet(const char* varname) const {
+    virtual String envGet(StringView varname) const {
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
             const String& name = mEnvPairs[n];
             if (name == varname) {
@@ -111,7 +111,7 @@ public:
         return String();
     }
 
-    virtual void envSet(const char* varname, const char* varvalue) {
+    virtual void envSet(StringView varname, StringView varvalue) {
         // First, find if the name is in the array.
         int index = -1;
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
@@ -120,7 +120,7 @@ public:
                 break;
             }
         }
-        if (!varvalue || !varvalue[0]) {
+        if (varvalue.empty()) {
             // Remove definition, if any.
             if (index >= 0) {
                 mEnvPairs.remove(index);
@@ -138,7 +138,7 @@ public:
         }
     }
 
-    virtual bool envTest(const char* varname) const {
+    virtual bool envTest(StringView varname) const {
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
             const String& name = mEnvPairs[n];
             if (name == varname) {
@@ -148,31 +148,31 @@ public:
         return false;
     }
 
-    virtual bool pathExists(const char* path) const {
-        return pathExistsInternal(toTempRoot(path).c_str());
+    virtual bool pathExists(StringView path) const {
+        return pathExistsInternal(toTempRoot(path));
     }
 
-    virtual bool pathIsFile(const char* path) const {
-        return pathIsFileInternal(toTempRoot(path).c_str());
+    virtual bool pathIsFile(StringView path) const {
+        return pathIsFileInternal(toTempRoot(path));
     }
 
-    virtual bool pathIsDir(const char* path) const {
-        return pathIsDirInternal(toTempRoot(path).c_str());
+    virtual bool pathIsDir(StringView path) const {
+        return pathIsDirInternal(toTempRoot(path));
     }
 
-    virtual bool pathCanRead(const char* path) const override {
-        return pathCanReadInternal(toTempRoot(path).c_str());
+    virtual bool pathCanRead(StringView path) const override {
+        return pathCanReadInternal(toTempRoot(path));
     }
 
-    virtual bool pathCanWrite(const char* path) const override {
-        return pathCanWriteInternal(toTempRoot(path).c_str());
+    virtual bool pathCanWrite(StringView path) const override {
+        return pathCanWriteInternal(toTempRoot(path));
     }
 
-    virtual bool pathCanExec(const char* path) const override {
-        return pathCanExecInternal(toTempRoot(path).c_str());
+    virtual bool pathCanExec(StringView path) const override {
+        return pathCanExecInternal(toTempRoot(path));
     }
 
-    virtual StringVector scanDirEntries(const char* dirPath,
+    virtual StringVector scanDirEntries(StringView dirPath,
                                         bool fullPath = false) const {
         if (!mTempDir) {
             // Nothing to return for now.
@@ -180,7 +180,7 @@ public:
             return StringVector();
         }
         String newPath = toTempRoot(dirPath);
-        StringVector result = scanDirInternal(newPath.c_str());
+        StringVector result = scanDirInternal(newPath);
         if (fullPath) {
             String prefix = PathUtils::addTrailingDirSeparator(
                     String(dirPath));
@@ -212,8 +212,8 @@ public:
     // Force the remote session type. If |sessionType| is NULL or empty,
     // this sets the session as local. Otherwise, |*sessionType| must be
     // a session type.
-    void setRemoteSessionType(const char* sessionType) {
-        mIsRemoteSession = (sessionType != NULL) && *sessionType;
+    void setRemoteSessionType(StringView sessionType) {
+        mIsRemoteSession = !sessionType.empty();
         if (mIsRemoteSession) {
             mRemoteSessionType = sessionType;
         }
@@ -274,18 +274,17 @@ public:
     }
 
 private:
-    String toTempRoot(const char* path) const {
+    String toTempRoot(StringView path) const {
         String result = mTempRootPrefix;
         result += path;
         return result;
     }
 
-    String fromTempRoot(const char* path) {
-        String result = path;
-        if (result.size() > mTempRootPrefix.size()) {
-            result = path + mTempRootPrefix.size();
+    String fromTempRoot(StringView path) {
+        if (path.size() > mTempRootPrefix.size()) {
+            return path.c_str() + mTempRootPrefix.size();
         }
-        return result;
+        return path;
     }
 
     String mProgramDir;
