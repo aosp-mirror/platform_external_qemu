@@ -61,8 +61,9 @@ public:
     // Destructor.
     ~Win32UnicodeString();
 
-    // Assignment operator.
+    // Assignment operators.
     Win32UnicodeString& operator=(const Win32UnicodeString& other);
+    Win32UnicodeString& operator=(const wchar_t* str);
 
     // Return pointer to first wchar_t in the string.
     const wchar_t* c_str() const { return mStr ? mStr : L""; }
