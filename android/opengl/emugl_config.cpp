@@ -179,7 +179,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
         String dir = sBackendList->getLibDirPath(config->backend);
         if (dir.size()) {
             D("Adding to the library search path: %s\n", newDirs.c_str());
-            system->addLibrarySearchDir(dir.c_str());
+            system->addLibrarySearchDir(dir);
         }
     }
 
@@ -199,15 +199,15 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     String lib;
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_EGL, &lib)) {
-        system->envSet("ANDROID_EGL_LIB", lib.c_str());
+        system->envSet("ANDROID_EGL_LIB", lib);
     }
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_GLESv1, &lib)) {
-        system->envSet("ANDROID_GLESv1_LIB", lib.c_str());
+        system->envSet("ANDROID_GLESv1_LIB", lib);
     }
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_GLESv2, &lib)) {
-        system->envSet("ANDROID_GLESv2_LIB", lib.c_str());
+        system->envSet("ANDROID_GLESv2_LIB", lib);
     }
 
     if (!strcmp(config->backend, "mesa")) {

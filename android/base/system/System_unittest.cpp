@@ -202,78 +202,78 @@ TEST(System, pathOperations) {
     String fooPath = tempDir.path();
     fooPath += "/foo";
 
-    EXPECT_FALSE(sys->pathExists(fooPath.c_str()));
-    EXPECT_FALSE(sys->pathIsFile(fooPath.c_str()));
-    EXPECT_FALSE(sys->pathIsDir(fooPath.c_str()));
-    EXPECT_FALSE(sys->pathCanRead(fooPath.c_str()));
-    EXPECT_FALSE(sys->pathCanWrite(fooPath.c_str()));
-    EXPECT_FALSE(sys->pathCanExec(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathExists(fooPath));
+    EXPECT_FALSE(sys->pathIsFile(fooPath));
+    EXPECT_FALSE(sys->pathIsDir(fooPath));
+    EXPECT_FALSE(sys->pathCanRead(fooPath));
+    EXPECT_FALSE(sys->pathCanWrite(fooPath));
+    EXPECT_FALSE(sys->pathCanExec(fooPath));
 
     make_subfile(tempDir.path(), "foo");
 
-    EXPECT_TRUE(sys->pathExists(fooPath.c_str()));
-    EXPECT_TRUE(sys->pathIsFile(fooPath.c_str()));
-    EXPECT_FALSE(sys->pathIsDir(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathExists(fooPath));
+    EXPECT_TRUE(sys->pathIsFile(fooPath));
+    EXPECT_FALSE(sys->pathIsDir(fooPath));
 
     // NOTE: Windows doesn't have 'execute' permission bits.
     // Any readable file can be executed. Also any writable file
     // is readable.
     EXPECT_FALSE(HANDLE_EINTR(chmod(fooPath.c_str(), S_IRUSR|S_IWUSR|S_IXUSR)));
-    EXPECT_TRUE(sys->pathCanRead(fooPath.c_str()));
-    EXPECT_TRUE(sys->pathCanWrite(fooPath.c_str()));
-    EXPECT_TRUE(sys->pathCanExec(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanRead(fooPath));
+    EXPECT_TRUE(sys->pathCanWrite(fooPath));
+    EXPECT_TRUE(sys->pathCanExec(fooPath));
 
     EXPECT_FALSE(HANDLE_EINTR(chmod(fooPath.c_str(), S_IRUSR)));
-    EXPECT_TRUE(sys->pathCanRead(fooPath.c_str()));
-    EXPECT_FALSE(sys->pathCanWrite(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanRead(fooPath));
+    EXPECT_FALSE(sys->pathCanWrite(fooPath));
 #ifdef _WIN32
-    EXPECT_TRUE(sys->pathCanExec(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanExec(fooPath));
 #else
-    EXPECT_FALSE(sys->pathCanExec(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathCanExec(fooPath));
 #endif
 
     EXPECT_FALSE(HANDLE_EINTR(chmod(fooPath.c_str(), S_IWUSR)));
 #ifdef _WIN32
-    EXPECT_TRUE(sys->pathCanRead(fooPath.c_str()));
-    EXPECT_TRUE(sys->pathCanWrite(fooPath.c_str()));
-    EXPECT_TRUE(sys->pathCanExec(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanRead(fooPath));
+    EXPECT_TRUE(sys->pathCanWrite(fooPath));
+    EXPECT_TRUE(sys->pathCanExec(fooPath));
 #else
-    EXPECT_FALSE(sys->pathCanRead(fooPath.c_str()));
-    EXPECT_TRUE(sys->pathCanWrite(fooPath.c_str()));
-    EXPECT_FALSE(sys->pathCanExec(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathCanRead(fooPath));
+    EXPECT_TRUE(sys->pathCanWrite(fooPath));
+    EXPECT_FALSE(sys->pathCanExec(fooPath));
 #endif
 
     EXPECT_FALSE(HANDLE_EINTR(chmod(fooPath.c_str(), S_IXUSR)));
 #ifdef _WIN32
-    EXPECT_TRUE(sys->pathCanRead(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanRead(fooPath));
 #else
-    EXPECT_FALSE(sys->pathCanRead(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathCanRead(fooPath));
 #endif
-    EXPECT_FALSE(sys->pathCanWrite(fooPath.c_str()));
-    EXPECT_TRUE(sys->pathCanExec(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathCanWrite(fooPath));
+    EXPECT_TRUE(sys->pathCanExec(fooPath));
 
     EXPECT_FALSE(HANDLE_EINTR(chmod(fooPath.c_str(), S_IRUSR|S_IWUSR)));
-    EXPECT_TRUE(sys->pathCanRead(fooPath.c_str()));
-    EXPECT_TRUE(sys->pathCanWrite(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanRead(fooPath));
+    EXPECT_TRUE(sys->pathCanWrite(fooPath));
 #ifdef _WIN32
-    EXPECT_TRUE(sys->pathCanExec(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanExec(fooPath));
 #else
-    EXPECT_FALSE(sys->pathCanExec(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathCanExec(fooPath));
 #endif
 
     EXPECT_FALSE(HANDLE_EINTR(chmod(fooPath.c_str(), S_IRUSR|S_IXUSR)));
-    EXPECT_TRUE(sys->pathCanRead(fooPath.c_str()));
-    EXPECT_FALSE(sys->pathCanWrite(fooPath.c_str()));
-    EXPECT_TRUE(sys->pathCanExec(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanRead(fooPath));
+    EXPECT_FALSE(sys->pathCanWrite(fooPath));
+    EXPECT_TRUE(sys->pathCanExec(fooPath));
 
     EXPECT_FALSE(HANDLE_EINTR(chmod(fooPath.c_str(), S_IWUSR|S_IXUSR)));
 #ifdef _WIN32
-    EXPECT_TRUE(sys->pathCanRead(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanRead(fooPath));
 #else
-    EXPECT_FALSE(sys->pathCanRead(fooPath.c_str()));
+    EXPECT_FALSE(sys->pathCanRead(fooPath));
 #endif
-    EXPECT_TRUE(sys->pathCanWrite(fooPath.c_str()));
-    EXPECT_TRUE(sys->pathCanExec(fooPath.c_str()));
+    EXPECT_TRUE(sys->pathCanWrite(fooPath));
+    EXPECT_TRUE(sys->pathCanExec(fooPath));
 }
 
 TEST(System, scanDirEntriesWithFullPaths) {

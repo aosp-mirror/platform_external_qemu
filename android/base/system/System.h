@@ -154,13 +154,13 @@ public:
     // only alters an environment variable like PATH or LD_LIBRARY_PATH,
     // and thus typically takes effect only after spawning/executing a new
     // process.
-    static void addLibrarySearchDir(const char* dirPath);
+    static void addLibrarySearchDir(const StringView& dirPath);
 
     // Find a bundled executable named |programName|, it must appear in the
     // kBinSubDir of getLauncherDirectory(). The name should not include the
     // executable extension (.exe) on Windows.
     // Return an empty string if the file doesn't exist.
-    static String findBundledExecutable(const char* programName);
+    static String findBundledExecutable(const StringView& programName);
 
     // Sleep for |n| milliseconds
     static void sleepMs(unsigned n);
@@ -170,40 +170,41 @@ public:
     // If the variable is not defined, return an empty string.
     // NOTE: On Windows, this uses _wgetenv() and returns the corresponding
     // UTF-8 text string.
-    virtual String envGet(const char* varname) const = 0;
+    virtual String envGet(const StringView& varname) const = 0;
 
     // Set the value of a given environment variable.
     // If |varvalue| is NULL or empty, this unsets the variable.
     // Equivalent to setenv().
-    virtual void envSet(const char* varname, const char* varvalue) = 0;
+    virtual void envSet(const StringView& varname,
+                        const StringView& varvalue) = 0;
 
     // Returns true if environment variable |varname| is set and non-empty.
-    virtual bool envTest(const char* varname) const = 0;
+    virtual bool envTest(const StringView& varname) const = 0;
 
     // Return true iff |path| exists on the file system.
-    virtual bool pathExists(const char* path) const = 0;
+    virtual bool pathExists(const StringView& path) const = 0;
 
     // Return true iff |path| exists and is a regular file on the file system.
-    virtual bool pathIsFile(const char* path) const = 0;
+    virtual bool pathIsFile(const StringView& path) const = 0;
 
     // Return true iff |path| exists and is a directory on the file system.
-    virtual bool pathIsDir(const char* path) const = 0;
+    virtual bool pathIsDir(const StringView& path) const = 0;
 
     // Return true iff |path| exists and can be read by the current user.
-    virtual bool pathCanRead(const char* path) const = 0;
+    virtual bool pathCanRead(const StringView& path) const = 0;
 
     // Return true iff |path| exists and can be written to by the current
     // user.
-    virtual bool pathCanWrite(const char* path) const = 0;
+    virtual bool pathCanWrite(const StringView& path) const = 0;
 
     // Return true iff |path| exists and can be executed to by the current
     // user.
-    virtual bool pathCanExec(const char* path) const = 0;
+    virtual bool pathCanExec(const StringView& path) const = 0;
 
     // Scan directory |dirPath| for entries, and return them as a sorted
     // vector or entries. If |fullPath| is true, then each item of the
     // result vector contains a full path.
-    virtual StringVector scanDirEntries(const char* dirPath,
+    virtual StringVector scanDirEntries(const StringView& dirPath,
                                         bool fullPath = false) const = 0;
 
     // Checks the system to see if it is running under a remoting session
@@ -241,14 +242,14 @@ protected:
     // Internal implementation of scanDirEntries() that can be used by
     // mock implementation using a fake file system rooted into a temporary
     // directory or something like that. Always returns short paths.
-    static StringVector scanDirInternal(const char* dirPath);
+    static StringVector scanDirInternal(const StringView& dirPath);
 
-    static bool pathExistsInternal(const char* path);
-    static bool pathIsFileInternal(const char* path);
-    static bool pathIsDirInternal(const char* path);
-    static bool pathCanReadInternal(const char* path);
-    static bool pathCanWriteInternal(const char* path);
-    static bool pathCanExecInternal(const char* path);
+    static bool pathExistsInternal(const StringView& path);
+    static bool pathIsFileInternal(const StringView& path);
+    static bool pathIsDirInternal(const StringView& path);
+    static bool pathCanReadInternal(const StringView& path);
+    static bool pathCanWriteInternal(const StringView& path);
+    static bool pathCanExecInternal(const StringView& path);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(System);
