@@ -46,6 +46,30 @@
       "revId": "a11d28bbf967ebcf645083aa3de32b6642c407d4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca2ae7be_b20ba6ae",
+        "filename": "android/skin/file.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 935,
+      "author": {
+        "id": 1003723
+      },
+      "writtenOn": "2015-12-23T18:12:42Z",
+      "side": 1,
+      "message": "+srhines for Grigory\u0027s toolchain question",
+      "parentUuid": "eafecb6e_18172d29",
+      "range": {
+        "startLine": 934,
+        "startChar": 8,
+        "endLine": 935,
+        "endChar": 14
+      },
+      "revId": "a11d28bbf967ebcf645083aa3de32b6642c407d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
