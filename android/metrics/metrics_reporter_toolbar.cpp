@@ -15,6 +15,8 @@
 #include "android/metrics/metrics_reporter_toolbar.h"
 #include "android/metrics/internal/metrics_reporter_toolbar_internal.h"
 
+#include "android/base/String.h"
+#include "android/base/Uri.h"
 #include "android/curl-support.h"
 #include "android/metrics/studio-helper.h"
 #include "android/utils/compiler.h"
@@ -31,6 +33,9 @@
 int formatToolbarGetUrl(char** ptr,
                         const char* url,
                         const AndroidMetrics* metrics) {
+    using android::base::String;
+    using android::base::Uri;
+
     // This is of the form: androidsdk_<product_name>_<event_name>
     static const char product_name[] = "androidsdk_emu_crash";
     static const char guest_arch_key[] = "guest_arch";
@@ -44,62 +49,36 @@ int formatToolbarGetUrl(char** ptr,
     static const char version_key[] = "version";
     static const char num_crashes_key[] = "exf";
     static const char opengl_alive_key[] = "opengl_alive";
-    char* out_buf;
 
     assert(ptr != NULL);
     assert(*ptr == NULL);
 
-    char* client_id = android_studio_get_installation_id();
-    int result = asprintf(
-            &out_buf,
-            "as=%s&%s=%s&%s=%s&%s=%s"
-            "&%s=%d&%s=%d&%s=%" PRId64 "&%s=%" PRId64,
-            product_name,
-            version_key, metrics->emulator_version,
-            client_id_key, client_id,
-            guest_arch_key, metrics->guest_arch,
+    String fullUrl = url;
 
-            num_crashes_key, metrics->is_dirty ? 1 : 0,
-            opengl_alive_key, metrics->opengl_alive,
-            system_time_key, metrics->system_time,
-            user_time_key, metrics->user_time);
+    char* client_id = android_studio_get_installation_id();
+    fullUrl += Uri::FormatEncodeArguments(
+        "?as=%s&%s=%s&%s=%s&%s=%s"
+        "&%s=%d&%s=%d&%s=%" PRId64 "&%s=%" PRId64,
+        product_name,
+        version_key, metrics->emulator_version,
+        client_id_key, client_id,
+        guest_arch_key, metrics->guest_arch,
+
+        num_crashes_key, metrics->is_dirty ? 1 : 0,
+        opengl_alive_key, metrics->opengl_alive,
+        system_time_key, metrics->system_time,
+        user_time_key, metrics->user_time);
     free(client_id);
 
-    if (result >= 0 && metrics->guest_gpu_enabled > 0) {
-        char* new_out_buf;
-        result = asprintf(
-                &new_out_buf,
-                "%s&%s=%s&%s=%s&%s=%s",
-                out_buf,
-                guest_gl_vendor_key, metrics->guest_gl_vendor,
-                guest_gl_renderer_key, metrics->guest_gl_renderer,
-                guest_gl_version_key, metrics->guest_gl_version);
-        free(out_buf);
-        out_buf = new_out_buf;
+    if (metrics->guest_gpu_enabled > 0) {
+        fullUrl += Uri::FormatEncodeArguments("&%s=%s&%s=%s&%s=%s",
+                    guest_gl_vendor_key, metrics->guest_gl_vendor,
+                    guest_gl_renderer_key, metrics->guest_gl_renderer,
+                    guest_gl_version_key, metrics->guest_gl_version);
     }
 
-    if (result >= 0) {
-        char* new_out_buf = uri_encode(out_buf);
-        // There is no real reason to ping the empty string "" either.
-        result = (new_out_buf == NULL || new_out_buf[0] == 0) ? -1 : result;
-        free(out_buf);
-        out_buf = new_out_buf;
-    }
-
-    if (result >= 0) {
-        char* new_out_buf;
-        result = asprintf(&new_out_buf, "%s?%s", url, out_buf);
-        free(out_buf);
-        out_buf = new_out_buf;
-    }
-
-    if (result >= 0) {
-        *ptr = out_buf;
-    } else {
-        // |asprintf| returns garbage if result < 0. Let's be safer than that.
-        *ptr = NULL;
-    }
-
+    const int result = fullUrl.size();
+    *ptr = fullUrl.release();
     return result;
 }
 
