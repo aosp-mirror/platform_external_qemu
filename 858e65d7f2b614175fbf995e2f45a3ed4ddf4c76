@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca2ae7be_afda1d6b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-23T00:02:15Z",
+      "side": 1,
+      "message": "It\u0027s recommended that the first line \u003c 65 chars.\n\nAlso, add a BUG\u003dXXX line.\n\nSee https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/docs/ANDROID-CODING-STYLE.TXT\n\nIn bug fixes like this where the change is pretty simple, but understanding the reasoning is hard, I recommend including a short description of why this CL fixes the given bug in the commit message. Nothing too long, but right now I don\u0027t know why \"not release the shader for mesa\" is the right thing to do.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 69
+      },
+      "revId": "858e65d7f2b614175fbf995e2f45a3ed4ddf4c76",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
