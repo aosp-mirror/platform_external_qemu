@@ -22,6 +22,30 @@
       "revId": "a11d28bbf967ebcf645083aa3de32b6642c407d4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eafecb6e_18172d29",
+        "filename": "android/skin/file.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 935,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-23T06:57:19Z",
+      "side": 1,
+      "message": "Yeah :( I\u0027m still not sure how it compiled on both my machines but failed after check-in. Shouldn\u0027t it be using the same tool chain with the same parameters? We should look into this.",
+      "parentUuid": "eafecb6e_3812f138",
+      "range": {
+        "startLine": 934,
+        "startChar": 8,
+        "endLine": 935,
+        "endChar": 14
+      },
+      "revId": "a11d28bbf967ebcf645083aa3de32b6642c407d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
