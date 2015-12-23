@@ -1,0 +1,7 @@
+Code-Review+2: Yurii Zubrytskyi <zyy@google.com>
+Verified+1: Grigory Dzhavadyan <grigoryj@google.com>
+Submitted-by: Grigory Dzhavadyan <grigoryj@google.com>
+Submitted-at: Wed, 23 Dec 2015 05:39:18 +0000
+Reviewed-on: https://android-review.googlesource.com/189031
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
