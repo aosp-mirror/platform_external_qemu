@@ -11,8 +11,9 @@
 
 #include "android/base/files/PathUtils.h"
 
-#include "android/base/containers/StringVector.h"
 #include "android/base/String.h"
+#include "android/base/containers/StringVector.h"
+#include "android/base/testing/TestSystem.h"
 
 #include <gtest/gtest.h>
 
@@ -165,16 +166,12 @@ TEST(PathUtils, isAbsolute) {
         const char* path;
         bool expected[kHostTypeCount];
     } kData[] = {
-        { "foo", { false, false } },
-        { "/foo", { true, true } },
-        { "\\foo", { false, true } },
-        { "/foo/bar", { true, true } },
-        { "\\foo\\bar", { false, true } },
-        { "C:foo", { false, false } },
-        { "C:/foo", { false, true } },
-        { "C:\\foo", { false, true } },
-        { "//server", { true, false } },
-        { "//server/path", { true, true } },
+            {"foo", {false, false}},       {"/foo", {true, true}},
+            {"\\foo", {false, true}},      {"/foo/bar", {true, true}},
+            {"\\foo\\bar", {false, true}}, {"C:foo", {false, false}},
+            {"C:/foo", {false, true}},     {"C:\\foo", {false, true}},
+            {"//server", {true, false}},   {"//server/path", {true, true}},
+            {nullptr, {false, false}},
     };
     for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
         const char* path = kData[n].path;
@@ -469,6 +466,65 @@ TEST(PathUtils, toExecutableName) {
                 PathUtils::toExecutableName(kData[n].input, kData[n].host).c_str(),
                 PathUtils::toExecutableName(kData[n].input).c_str());
         }
+    }
+}
+
+TEST(PathUtils, normalizePosix) {
+    TestSystem testSystem("", 32, "/home/testdir");
+
+    static const struct {
+        const char* path;
+        const char* expected;
+    } kData[] = {
+            {"foo", "/home/testdir/foo"},   {"/foo", "/foo"},
+            {"../foo", "/home/foo"},        {"../foo/../foo", "/home/foo"},
+            {"./foo", "/home/testdir/foo"}, {"//foo", "/foo"},
+            {"..//foo", "/home/foo"},       {"../testdir/", "/home/testdir"},
+            {"foo/", "/home/testdir/foo"},  {".", "/home/testdir"},
+            {nullptr, "/home/testdir"},
+    };
+
+    for (size_t i = 0; i < ARRAY_SIZE(kData); ++i) {
+        auto path = kData[i].path;
+        EXPECT_STREQ(kData[i].expected,
+                     PathUtils::normalize(path, PathUtils::HOST_POSIX).c_str())
+                << "Testing '" << (path ? path : "<NULL>") << "'";
+    }
+}
+
+TEST(PathUtils, normalizeWin32) {
+    TestSystem testSystem("", 32, "C:\\home\\testdir");
+
+    static const struct {
+        const char* path;
+        const char* expected;
+    } kData[] = {
+            {"foo", "C:\\home\\testdir\\foo"},
+            {"C:/home/foo", "C:\\home\\foo"},
+            {"D:/home/foo", "D:\\home\\foo"},
+            {"/foo", "\\foo"},
+            {"../foo", "C:\\home\\foo"},
+            {"../foo/../foo", "C:\\home\\foo"},
+            {"./foo", "C:\\home\\testdir\\foo"},
+            {"..//foo", "C:\\home\\foo"},
+            {"../testdir/", "C:\\home\\testdir"},
+            {"foo/", "C:\\home\\testdir\\foo"},
+            {".", "C:\\home\\testdir"},
+            {nullptr, "C:\\home\\testdir"},
+            // NOTE: Per definition, if |path| is not absolute, prepend the
+            // current directory. On Windows, C:foo and //server are not
+            // absolute paths, hence the funky results. There is no way to
+            // get a correct result otherwise.
+            {"//foo", "C:\\home\\testdir\\//foo"},
+            // TODO(pprabhu) Verify behaviour against win32 box.
+            {"D:home", "C:\\home\\testdir\\D:\\home"},
+    };
+
+    for (size_t i = 0; i < ARRAY_SIZE(kData); ++i) {
+        auto path = kData[i].path;
+        EXPECT_STREQ(kData[i].expected,
+                     PathUtils::normalize(path, PathUtils::HOST_WIN32).c_str())
+                << "Testing '" << (path ? path : "<NULL>") << "'";
     }
 }
 

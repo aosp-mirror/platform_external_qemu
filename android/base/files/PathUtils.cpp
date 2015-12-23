@@ -84,6 +84,38 @@ bool PathUtils::isAbsolute(StringView path, HostType hostType) {
 }
 
 // static
+String PathUtils::normalize(StringView path, HostType hostType) {
+    StringVector pathItems;
+    if (isAbsolute(path, hostType)) {
+        pathItems = decompose(path, hostType);
+        // On Win32, |decompose| leaves the path separators untouched in the
+        // path prefix. We need to normalize that ourselves.
+        if (hostType == HOST_WIN32) {
+            for (size_t i = 0; i < pathItems[0].size(); ++i) {
+                if (pathItems[0][i] == '/') {
+                    pathItems[0][i] = '\\';
+                }
+            }
+        }
+    } else {
+        auto currentDir = System::get()->getCurrentDirectory();
+        pathItems = decompose(currentDir, hostType);
+        auto relPathItems = decompose(path, hostType);
+        for (const auto& item : relPathItems) {
+            pathItems.push_back(item);
+        }
+    }
+
+    simplifyComponents(&pathItems);
+
+    for (const auto& item : pathItems) {
+        LOG(ERROR) << item;
+    }
+
+    return recompose(pathItems, hostType);
+}
+
+// static
 String PathUtils::removeTrailingDirSeparator(StringView path,
                                              HostType hostType) {
     String result = path;
