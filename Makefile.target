@@ -145,10 +145,10 @@ obj-$(call lnot,$(CONFIG_XEN_I386)) += xen-hvm-stub.o
 
 # HAX support
 ifdef CONFIG_WIN32
-obj-$(CONFIG_HAX) += target-i386/hax-all.o target-i386/hax-windows.o
+obj-$(CONFIG_HAX) += target-i386/hax-all.o target-i386/hax-slot.o target-i386/hax-windows.o
 endif
 ifdef CONFIG_DARWIN
-obj-$(CONFIG_HAX) += target-i386/hax-all.o target-i386/hax-darwin.o
+obj-$(CONFIG_HAX) += target-i386/hax-all.o target-i386/hax-slot.o target-i386/hax-darwin.o
 endif
 obj-$(call lnot,$(CONFIG_HAX)) += hax-stub.o
 

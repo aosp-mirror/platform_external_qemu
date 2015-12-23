@@ -896,6 +896,7 @@ QEMU2_TARGET_x86_64_SOURCES_linux-x86_64 := \
 QEMU2_TARGET_x86_64_SOURCES_windows-x86_64 := \
     kvm-stub.c \
     target-i386/hax-all.c \
+    target-i386/hax-slot.c \
     target-i386/hax-windows.c \
     target-i386/kvm-stub.c \
 
@@ -919,6 +920,7 @@ QEMU2_TARGET_x86_64_SOURCES_linux-x86 := \
 QEMU2_TARGET_x86_64_SOURCES_windows-x86 := \
     kvm-stub.c \
     target-i386/hax-all.c \
+    target-i386/hax-slot.c \
     target-i386/hax-windows.c \
     target-i386/kvm-stub.c \
 
@@ -926,6 +928,7 @@ QEMU2_TARGET_x86_64_SOURCES_darwin-x86_64 := \
     kvm-stub.c \
     target-i386/hax-all.c \
     target-i386/hax-darwin.c \
+    target-i386/hax-slot.c \
     target-i386/kvm-stub.c \
 
 QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
@@ -948,6 +951,7 @@ QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
 QEMU2_TARGET_i386_SOURCES_windows-x86_64 := \
     kvm-stub.c \
     target-i386/hax-all.c \
+    target-i386/hax-slot.c \
     target-i386/hax-windows.c \
     target-i386/kvm-stub.c \
 
@@ -971,6 +975,7 @@ QEMU2_TARGET_i386_SOURCES_linux-x86 := \
 QEMU2_TARGET_i386_SOURCES_windows-x86 := \
     kvm-stub.c \
     target-i386/hax-all.c \
+    target-i386/hax-slot.c \
     target-i386/hax-windows.c \
     target-i386/kvm-stub.c \
 
@@ -978,6 +983,7 @@ QEMU2_TARGET_i386_SOURCES_darwin-x86_64 := \
     kvm-stub.c \
     target-i386/hax-all.c \
     target-i386/hax-darwin.c \
+    target-i386/hax-slot.c \
     target-i386/kvm-stub.c \
 
 QEMU2_TARGET_mipsel_SOURCES_linux-x86_64 := \

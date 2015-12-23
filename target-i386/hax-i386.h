@@ -69,6 +69,7 @@ int hax_sync_fpu(CPUArchState * env, struct fx_layout *fl, int set);
 int hax_vm_destroy(struct hax_vm *vm);
 int hax_capability(struct hax_state *hax, struct hax_capabilityinfo *cap);
 int hax_notify_qemu_version(hax_fd vm_fd, struct hax_qemu_version *qversion);
+int hax_set_ram(uint64_t start_pa, uint32_t size, uint64_t host_va, int flags);
 
 /* Common host function */
 int hax_host_create_vm(struct hax_state *hax, int *vm_id);

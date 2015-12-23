@@ -42,7 +42,6 @@ void hax_cpu_synchronize_state(CPUState *cpu);
 void hax_cpu_synchronize_post_reset(CPUState *cpu);
 void hax_cpu_synchronize_post_init(CPUState *cpu);
 int hax_populate_ram(uint64_t va, uint32_t size);
-int hax_set_phys_mem(MemoryRegionSection *section);
 int hax_vcpu_emulation_mode(CPUState *cpu);
 int hax_stop_emulation(CPUState *cpu);
 int hax_stop_translate(CPUState *cpu);
