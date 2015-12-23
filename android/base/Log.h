@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "android/base/StringView.h"
+
 #include <errno.h>
 #include <stdarg.h>
 #include <stddef.h>
@@ -292,6 +294,7 @@ public:
     LogStream& operator<<(float v);
     LogStream& operator<<(double v);
     LogStream& operator<<(const std::string& v);
+    LogStream& operator<<(android::base::StringView v);
 
     const char* string() const { return mString ? mString : ""; }
     size_t size() const { return mSize; }
