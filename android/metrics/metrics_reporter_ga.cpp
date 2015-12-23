@@ -15,6 +15,8 @@
 #include "android/metrics/metrics_reporter_ga.h"
 #include "android/metrics/internal/metrics_reporter_ga_internal.h"
 
+#include "android/base/String.h"
+#include "android/base/StringFormat.h"
 #include "android/curl-support.h"
 #include "android/metrics/studio-helper.h"
 #include "android/utils/compiler.h"
@@ -34,6 +36,8 @@
 static const bool use_debug_ga_server = false;
 
 int formatGAPostData(char** ptr, const AndroidMetrics* metrics) {
+    using android::base::StringFormat;
+
     // Base GA keys.
     static const char ga_protocol_version_key[] = "v";
     static const char ga_tracking_id_key[] = "tid";
@@ -71,26 +75,28 @@ int formatGAPostData(char** ptr, const AndroidMetrics* metrics) {
     char* ga_client_id = android_studio_get_installation_id();
 
     // TODO(pprabhu) Decide whether we want to report gpu_enabled.
-    int result = asprintf(
-            ptr,
-            "%s=%s&%s=%s&%s=%s&%s=%s&%s=%s"
-            "&%s=%s"
-            "&%s=%s&%s=%s&%s=%s&%s=%s"
-            "&%s=%" PRId64 "&%s=%" PRId64,
-            ga_protocol_version_key, ga_protocol_version,
-            ga_tracking_id_key, ga_tracking_id, ga_application_name_key,
-            ga_application_name, ga_application_version_key,
-            metrics->emulator_version, ga_client_id_key, ga_client_id,
+    auto args = StringFormat(
+        "%s=%s&%s=%s&%s=%s&%s=%s&%s=%s"
+        "&%s=%s"
+        "&%s=%s&%s=%s&%s=%s&%s=%s"
+        "&%s=%" PRId64 "&%s=%" PRId64,
+        ga_protocol_version_key, ga_protocol_version,
+        ga_tracking_id_key, ga_tracking_id, ga_application_name_key,
+        ga_application_name, ga_application_version_key,
+        metrics->emulator_version, ga_client_id_key, ga_client_id,
 
-            ga_cd_guest_arch_key, metrics->guest_arch,
+        ga_cd_guest_arch_key, metrics->guest_arch,
 
-            ga_hit_type_key, ga_hit_type_event, ga_event_category_key,
-            ga_event_category_emulator, ga_event_action_key,
-            ga_event_action_single_run_info, ga_event_label_key, label,
+        ga_hit_type_key, ga_hit_type_event, ga_event_category_key,
+        ga_event_category_emulator, ga_event_action_key,
+        ga_event_action_single_run_info, ga_event_label_key, label,
 
-            ga_cm_user_time_key, metrics->user_time,
-            ga_cm_system_time_key, metrics->system_time);
+        ga_cm_user_time_key, metrics->user_time,
+        ga_cm_system_time_key, metrics->system_time);
     free(ga_client_id);
+
+    const int result = args.size();
+    *ptr = args.release();
     return result;
 }
 
