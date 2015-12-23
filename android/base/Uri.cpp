@@ -27,33 +27,7 @@ String Uri::Encode(StringView uri) {
     String encodedUri;
     encodedUri.reserve(uri.size());
     for (const char c : uri) {
-        switch (c) {
-            case '!':
-            case '#':
-            case '$':
-            case '&':
-            case '\'':
-            case '(':
-            case ')':
-            case '*':
-            case '+':
-            case ',':
-            case '/':
-            case ':':
-            case ';':
-            case '=':
-            case '?':
-            case '@':
-            case '[':
-            case ']':
-            case ' ':
-            case '%':
-                StringAppendFormat(&encodedUri, "%%%02X", c);
-                break;
-            default:
-                encodedUri.append(c);
-                break;
-        }
+        AppendEncodedChar(c, &encodedUri);
     }
     return encodedUri;
 }
@@ -90,6 +64,42 @@ String Uri::Decode(StringView uri) {
         }
     }
     return decodedUri;
+}
+
+void Uri::AppendEncodedChar(char c, String* res)
+{
+    switch (c) {
+        case '!':
+        case '#':
+        case '$':
+        case '&':
+        case '\'':
+        case '(':
+        case ')':
+        case '*':
+        case '+':
+        case ',':
+        case '/':
+        case ':':
+        case ';':
+        case '=':
+        case '?':
+        case '@':
+        case '[':
+        case ']':
+        case ' ':
+        case '%':
+            StringAppendFormat(res, "%%%02X", c);
+            break;
+        default:
+            res->append(c);
+            break;
+    }
+}
+
+String Uri::FormatHelper::encodeArg(StringView str)
+{
+    return Uri::Encode(str);
 }
 
 }  // namespace base

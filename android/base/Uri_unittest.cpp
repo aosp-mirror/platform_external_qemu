@@ -52,5 +52,21 @@ TEST(Uri, Decode) {
                          .c_str());
 }
 
+TEST(Uri, AppendEncodedChar) {
+    String res;
+    Uri::AppendEncodedChar('a', &res);
+    EXPECT_STREQ("a", res.c_str());
+    Uri::AppendEncodedChar('&', &res);
+    EXPECT_STREQ("a%26", res.c_str());
+}
+
+TEST(Uri, FormatEncodeArguments) {
+    EXPECT_STREQ("", Uri::FormatEncodeArguments("").c_str());
+    EXPECT_STREQ("aa=b", Uri::FormatEncodeArguments("%s=%s", "aa", "b").c_str());
+    EXPECT_STREQ("1=2&%26=%3D", Uri::FormatEncodeArguments("%d=%u&%s=%s",
+                                                           1, 2u, "&", "=").c_str());
+}
+
+
 }  // namespace base
 }  // namespace android
