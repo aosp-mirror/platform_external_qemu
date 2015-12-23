@@ -117,6 +117,14 @@ public:
         return isAbsolute(path, HOST_TYPE);
     }
 
+    // Convert |path| to absolute path for a given |hostType| && try to
+    // convert it to a normalized form.
+    static String normalize(StringView path, HostType hostType);
+
+    static inline String normalize(StringView path) {
+        return normalize(path, HOST_TYPE);
+    }
+
     // Split |path| into a directory name and a file name. |dirName| and
     // |baseName| are optional pointers to strings that will receive the
     // corresponding components on success. |hostType| is a host type.
