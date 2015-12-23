@@ -931,7 +931,8 @@ skin_file_load_from_v2(SkinFile* file,
         // versions of the first layout.
         SkinLayout* layout = file->layouts;
         SkinLayout* first_layout = layout;
-        for (SkinRotation r = SKIN_ROTATION_90; r <= SKIN_ROTATION_270; r++) {
+        SkinRotation r;
+        for (r = SKIN_ROTATION_90; r <= SKIN_ROTATION_270; r++) {
             layout->next = skin_layout_create_rotated(first_layout, last_part_ptr, r);
             if (layout->next != NULL) {
                 layout = layout->next;
