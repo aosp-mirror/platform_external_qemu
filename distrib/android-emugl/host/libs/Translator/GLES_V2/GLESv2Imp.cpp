@@ -1755,6 +1755,17 @@ GL_APICALL void  GL_APIENTRY glReadPixels(GLint x, GLint y, GLsizei width, GLsiz
 GL_APICALL void  GL_APIENTRY glReleaseShaderCompiler(void){
 // this function doesn't work on Mac OS with MacOSX10.9sdk
 #ifndef __APPLE__
+
+    /* Use this function with mesa will cause potential bug. Specifically,
+     * calling this function between glCompileShader() and glLinkProgram() will
+     * release resources that would be potentially used by glLinkProgram,
+     * resulting in a segmentation fault.
+     */
+    const char* env = ::getenv("ANDROID_GL_LIB");
+    if (env && !strcmp(env, "mesa")) {
+        return;
+    }
+
     GET_CTX();
 
     if(ctx->dispatcher().glReleaseShaderCompiler != NULL)
