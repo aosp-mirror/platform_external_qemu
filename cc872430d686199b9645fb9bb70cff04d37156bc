@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "ca01073f_77700872",
+        "filename": "android/base/files/PathUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-23T04:13:41Z",
+      "side": 1,
+      "message": "is it possible that we have more than one separator in a path like C:\\ here?",
+      "range": {
+        "startLine": 94,
+        "startChar": 11,
+        "endLine": 98,
+        "endChar": 13
+      },
+      "revId": "cc872430d686199b9645fb9bb70cff04d37156bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a0b8f60_958764c9",
+        "filename": "android/base/files/PathUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-23T04:13:41Z",
+      "side": 1,
+      "message": "on Windows it\u0027s just GetFullPathName() + PathCchCanonicalizeEx()",
+      "range": {
+        "startLine": 88,
+        "startChar": 3,
+        "endLine": 111,
+        "endChar": 1
+      },
+      "revId": "cc872430d686199b9645fb9bb70cff04d37156bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a1bbbb8_8c912b19",
         "filename": "android/base/files/PathUtils_unittest.cpp",
         "patchSetId": 2
@@ -18,6 +64,52 @@
         "startChar": 0,
         "endLine": 15,
         "endChar": 49
+      },
+      "revId": "cc872430d686199b9645fb9bb70cff04d37156bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca2ae7be_529eaadb",
+        "filename": "android/base/files/PathUtils_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-23T04:13:41Z",
+      "side": 1,
+      "message": "this has to be just \\\\",
+      "range": {
+        "startLine": 518,
+        "startChar": 40,
+        "endLine": 518,
+        "endChar": 44
+      },
+      "revId": "cc872430d686199b9645fb9bb70cff04d37156bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a1bbbb8_ec19bf67",
+        "filename": "android/base/files/PathUtils_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-23T04:13:41Z",
+      "side": 1,
+      "message": "in batch files C:path means \u0027path\u0027 on the current directory on drive C:, so the correct result is C:\\%cur_dir%\\home\nin normal applications it\u0027s just a completely invalid path",
+      "range": {
+        "startLine": 519,
+        "startChar": 24,
+        "endLine": 519,
+        "endChar": 51
       },
       "revId": "cc872430d686199b9645fb9bb70cff04d37156bc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
