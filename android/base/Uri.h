@@ -15,6 +15,10 @@
 
 #include "android/base/String.h"
 #include "android/base/StringView.h"
+#include "android/base/StringFormat.h"
+
+#include <type_traits>
+#include <utility>
 
 namespace android {
 namespace base {
@@ -29,6 +33,39 @@ public:
     // pass -- even for unreserved characters.
     // Returns empty string on error.
     static String Decode(StringView uri);
+
+    // Set of functions for arguments encoding
+    struct FormatHelper {
+        // Anything which can potentially have encodable character goes here and
+        // is encoded into a const char*
+        static String encodeArg(StringView str);
+
+        // Don't allow single char parameters as they have a '%c' format
+        // specifier but potentially may encode into a whole string
+        static String encodeArg(char c) = delete;
+
+        // Forward the rest as-is (non-StringView and non-char types)
+        template <class T>
+        static T&& encodeArg(T&& t,
+                typename std::enable_if<
+                    !std::is_convertible<typename std::decay<T>::type, StringView>::value
+                    && !std::is_same<typename std::decay<T>::type, char>::value
+                >::type* = nullptr) {
+            return std::forward<T>(t);
+        }
+    };
+
+    // A small convenience method to encode all arguments when formatting the
+    // string, but don't touch the |format| string itself
+    template <class... Args>
+    static String FormatEncodeArguments(StringView format, Args&&... args) {
+        return android::base::StringFormat(
+                    format.c_str(),
+                    FormatHelper::encodeArg(std::forward<Args>(args))...);
+    }
+
+    // Function to encode an individual character and append it to *|res|
+    static void EncodeChar(char c, String* res);
 };
 
 }  // namespace base
