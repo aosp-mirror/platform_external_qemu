@@ -594,6 +594,215 @@ Fail:
     return NULL;
 }
 
+// Rotates a given rect that is inside another rect around the center of its parent
+// 'dst' is a pointer to the location where the result will be stored
+// 'src' is a pointer to the rect that will be rotated and can be the same as 'dst'
+// 'parent_size' is the width and height of src's parent rect
+// 'by' is the amount of rotation, in 90-degree increments
+static void
+skin_rect_rotate_in_rect(SkinRect* dst, const SkinRect* src, const SkinSize* parent_size, SkinRotation by) {
+    int x = src->pos.x;
+    int y = src->pos.y;
+
+    skin_size_rotate(&(dst->size), &(src->size), by);
+
+    switch(by) {
+    case SKIN_ROTATION_90:
+        dst->pos.x = parent_size->w - y - dst->size.w;
+        dst->pos.y = x;
+        break;
+
+    case SKIN_ROTATION_180:
+        dst->pos.x = parent_size->w - x - dst->size.w;
+        dst->pos.y = parent_size->h - y - dst->size.h;
+        break;
+
+    case SKIN_ROTATION_270:
+        dst->pos.x = y;
+        dst->pos.y = parent_size->h - x - dst->size.h;
+        break;
+
+    case SKIN_ROTATION_0:
+    default:
+        break;
+    }
+}
+
+// Creates a version of the given button rotated around the center of the given part.
+// 'src' is the button that needs rotation
+// 'part_size' is the width and height of the part containing the button
+// 'by' is the amount of rotation in 90-degree increments
+static SkinButton*
+skin_button_create_rotated(const SkinButton* src, const SkinSize* part_size, SkinRotation by) {
+    SkinButton* new_button;
+    ANEW0(new_button);
+    *new_button = *src;
+    new_button->next = NULL;
+    skin_rect_rotate_in_rect(&(new_button->rect), &(src->rect), part_size, by);
+    new_button->image = skin_image_clone_rotated(src->image, by);
+    if (new_button->image == SKIN_IMAGE_NONE) {
+        goto Fail;
+    }
+    return new_button;
+
+Fail:
+    skin_button_free(new_button);
+    return NULL;
+}
+
+// Creates a version of the given skin part that is rotated around the center of the given
+// layout.
+// 'src' is the part that needs rotation
+// 'layout_size' is the width and height of the parent layout
+// 'by' is the amount of rotation in 90-degree increments
+static SkinPart*
+skin_part_create_rotated(const SkinPart* src, const SkinSize* layout_size, SkinRotation by) {
+    SkinPart* new_part;
+    ANEW0(new_part);
+
+    *new_part = *src;
+    new_part->next = NULL;
+    new_part->buttons = NULL;
+
+    // Rotate the background image
+    if (new_part->background->image &&
+        new_part->background->image != SKIN_IMAGE_NONE) {
+        new_part->background->image =
+            skin_image_clone_rotated(src->background->image, by);
+        skin_size_rotate(&(new_part->background->rect.size), &(src->background->rect.size), by);
+        if (new_part->background->image == SKIN_IMAGE_NONE) {
+            goto Fail;
+        }
+    }
+
+    // If the part has a display, rotate that too
+    if (src->display->valid) {
+        skin_size_rotate(&(new_part->display->rect.size), &(src->display->rect.size), by);
+        new_part->display->rotation = skin_rotation_rotate(new_part->display->rotation, by);
+        new_part->display->framebuffer =
+            new_part->display->framebuffer_funcs->create_framebuffer(
+                new_part->display->rect.size.w,
+                new_part->display->rect.size.h,
+                new_part->display->bpp);
+    }
+
+    // Rotate each of the part's buttons so that they align with the rotated
+    // background properly.
+    SkinButton** new_btn = &(new_part->buttons);
+    SKIN_PART_LOOP_BUTTONS(src, btn)
+        *new_btn = skin_button_create_rotated(btn, &(new_part->background->rect.size), by);
+        if (*new_btn == NULL) {
+            goto Fail;
+        }
+        new_btn = &((*new_btn)->next);
+    SKIN_PART_LOOP_END
+
+    return new_part;
+
+Fail:
+    skin_part_free(new_part);
+    return NULL;
+}
+
+// Rotates a given SkinLocation within its parent layout. It will create a rotated copy of
+// the skin part that the location refernces.
+static SkinLocation*
+skin_location_create_rotated(const SkinLocation* src, const SkinSize* layout_size, SkinRotation by)
+{
+    SkinLocation* new_location;
+    ANEW0(new_location);
+
+    *new_location = *src;
+    new_location->next = NULL;
+    new_location->part = skin_part_create_rotated(src->part, layout_size, by);
+    if (new_location->part == NULL) {
+        goto Fail;
+    }
+
+    SkinRect r;
+    r.pos = src->anchor;
+    r.size = new_location->part->display->valid ?
+        src->part->display->rect.size :
+        src->part->background->rect.size;
+
+    skin_rect_rotate_in_rect(&r, &r, layout_size, by);
+    new_location->anchor.x = r.pos.x;
+    new_location->anchor.y = r.pos.y;
+    return new_location;
+
+Fail:
+    AFREE(new_location);
+    return NULL;
+}
+
+// Create a new layout which is the same as src, but rotated by a given amount.
+// This will also create rotated clones of all the parts used by the source layout.
+// 'src' is the source layout.
+// 'new_parts_ptr' is the pointer to the location where the head of the linked list
+//                 of the new parts should be stored.
+// 'by' is the amount of rotation to apply, in 90-degree increments.
+static SkinLayout*
+skin_layout_create_rotated(const SkinLayout* src, SkinPart** new_parts_ptr, SkinRotation by)
+{
+    SkinLayout* new_layout;
+    ANEW0(new_layout);
+
+    *new_layout = *src;
+
+    new_layout->next = NULL;
+    new_layout->has_dpad_rotation = false;
+    skin_size_rotate(&(new_layout->size), &(src->size), by);
+
+    new_layout->locations = NULL;
+    SkinLocation** current_loc_ptr = &(new_layout->locations);
+    SkinPart* new_parts = NULL; // A linked list of newly generated, rotated parts.
+
+    SKIN_LAYOUT_LOOP_LOCS(src, loc)
+        *current_loc_ptr = skin_location_create_rotated(loc, &(new_layout->size), by);
+        if (current_loc_ptr == NULL) {
+            goto Fail;
+        }
+        // Prepend the part generated for this location to the linked list of new parts
+        (*current_loc_ptr)->part->next = new_parts;
+        new_parts = (*current_loc_ptr)->part;
+
+        (*current_loc_ptr)->next = NULL;
+        current_loc_ptr = &((*current_loc_ptr)->next);
+    SKIN_LAYOUT_LOOP_END
+
+    // Rotate the onion image if there is one.
+    if (src->onion_image && src->onion_image != SKIN_IMAGE_NONE) {
+        new_layout->onion_rotation =
+            skin_rotation_rotate(src->onion_rotation, by);
+        new_layout->onion_image = skin_image_clone_rotated(src->onion_image, by);
+        if (new_layout->onion_image == SKIN_IMAGE_NONE) {
+            goto Fail;
+        }
+        new_layout->onion_image =
+            skin_image_clone_rotated(
+                new_layout->onion_image,
+                skin_rotation_rotate(skin_image_rot(new_layout->onion_image), by));
+        if (new_layout->onion_image == SKIN_IMAGE_NONE) {
+            goto Fail;
+        }
+    }
+
+    *new_parts_ptr = new_parts;
+    return new_layout;
+
+Fail:
+    // Free the newly created skins because they're not going to be used.
+    while (new_parts) {
+        SkinPart* next = new_parts->next;
+        skin_part_free(new_parts);
+        new_parts = next;
+    }
+
+    // Free the layout itself.
+    skin_layout_free(new_layout);
+    return NULL;
+}
+
 /** SKIN FILE
  **/
 
@@ -705,18 +914,31 @@ skin_file_load_from_v2(SkinFile* file,
         return -1;
     else
     {
-        SkinLayout**  ptail = &file->layouts;
-        for (node = node->first_child; node != NULL; node = node->next)
-        {
-            SkinLayout*  layout = skin_layout_create_from_v2(
-                    node, file->parts, basepath);
-            if (layout == NULL) {
-                dprint( "## WARNING: ignoring layout in skin file" );
-                continue;
+        SkinLayout* next = skin_layout_create_from_v2(node->first_child, file->parts, basepath);
+
+        // We need to find the last element in the list of parts defined by the skin.
+        // The automatically parts generated parts (generated by rotation) will be appended
+        // after that part.
+        SkinPart** last_part_ptr = &(file->parts);
+        while (*last_part_ptr) {
+            last_part_ptr = &((*last_part_ptr)->next);
+        }
+
+        if (next == NULL) return -1;
+        file->layouts = next;
+
+        // Generate new layouts from the first layout. The new layouts are rotated
+        // versions of the first layout.
+        SkinLayout* layout = file->layouts;
+        SkinLayout* first_layout = layout;
+        for (SkinRotation r = SKIN_ROTATION_90; r <= SKIN_ROTATION_270; r++) {
+            layout->next = skin_layout_create_rotated(first_layout, last_part_ptr, r);
+            if (layout->next != NULL) {
+                layout = layout->next;
+                layout->next = NULL;
+            } else {
+                dprint("## WARNING: failed to auto-generate rotated layout");
             }
-            *ptail = layout;
-            layout->next = NULL;
-            ptail        = &layout->next;
         }
     }
     if (file->layouts == NULL)

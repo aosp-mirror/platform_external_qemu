@@ -43,6 +43,7 @@ extern int           skin_image_w      ( SkinImage*  image );
 extern int           skin_image_h      ( SkinImage*  image );
 extern int           skin_image_org_w  ( SkinImage*  image );
 extern int           skin_image_org_h  ( SkinImage*  image );
+extern SkinRotation  skin_image_rot    ( SkinImage*  image );
 
 /* get an image from the cache (load it from the file if necessary).
  * returns SKIN_IMAGE_NONE in case of error. cannot return NULL
@@ -68,6 +69,9 @@ extern void          skin_image_unref( SkinImage**  pimage );
  * of the source after returning the target, whose reference count is incremented
  */
 extern SkinImage*    skin_image_rotate( SkinImage*  source, SkinRotation  rotation );
+
+/* Similar to skin_image_clone, but it also rotates the image by a given amount */
+extern SkinImage* skin_image_clone_rotated( SkinImage* source, SkinRotation by );
 
 /* create a skin image clone. the clone is not part of the cache and will
  * be destroyed immediately when its reference count reaches 0. this is useful
