@@ -12,12 +12,8 @@
 
 #pragma once
 
-#include "android/emulation/control/battery_agent.h"
-#include "android/emulation/control/cellular_agent.h"
-#include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/sensors_agent.h"
-#include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/gps/GpsFix.h"
 #include "android/hw-sensors.h"
@@ -74,22 +70,6 @@ private:
     GeoDataLoaderThread *mGeoDataLoader;
     GpsFixArray          mGpsFixesArray;
 
-    class BatteryState {
-    public:
-        int            mChargeLevel; // Percent
-        BatteryCharger mCharger;
-        BatteryHealth  mHealth;
-        BatteryStatus  mStatus;
-
-        BatteryState() :
-            mChargeLevel(50),
-            mCharger(BATTERY_CHARGER_AC),
-            mHealth(BATTERY_HEALTH_GOOD),
-            mStatus(BATTERY_STATUS_CHARGING) { }
-    };
-
-    typedef enum { Call_Inactive, Call_Active, Call_Held } CallActivity;
-
     bool eventFilter (QObject* object, QEvent* event) override;
 
     class SettingsState {
@@ -103,45 +83,18 @@ private:
             { }
     };
 
-    class TelephonyState {
-    public:
-
-        CallActivity  mActivity;
-        QString       mPhoneNumber;
-
-        TelephonyState() :
-            mActivity(Call_Inactive),
-            mPhoneNumber("6505551212")
-        { }
-    };
-
-    void initBattery();
-    void initCellular();
-    void initDPad();
-    void initFinger();
-    void initHelp();
-    void initKbdShorts();
     void initLocation();
     void initSettings();
-    void initSms();
-    void initTelephony();
     void initVirtualSensors();
 
     void completeSettingsInitialization();
 
-    BatteryState    mBatteryState;
     SettingsState   mSettingsState;
-    TelephonyState  mTelephonyState;
 
-    const QAndroidBatteryAgent* mBatteryAgent;
-    const QAndroidCellularAgent* mCellularAgent;
     const QAndroidEmulatorWindowAgent* mEmulatorWindowAgent;
-    const QAndroidFingerAgent* mFingerAgent;
     const QAndroidLocationAgent* mLocationAgent;
     const QAndroidSensorsAgent* mSensorsAgent;
-    const QAndroidTelephonyAgent* mTelephonyAgent;
     const SettingsAgent* mSettingsAgent;
-    const QAndroidUserEventAgent* mUserEventsAgent;
 
     int      mLoc_mSecRemaining;
     bool     mLoc_nowPlaying;
@@ -164,14 +117,6 @@ private:
                               const std::string& description,
                               time_t time);
 
-    static void setButtonEnabled(QPushButton*  theButton,
-                                 SettingsTheme theme,
-                                 bool          isEnabled);
-    void    dpad_setPressed(QPushButton* button);
-    void    dpad_setReleased(QPushButton* button);
-
-    static QString apiVersionString(int apiVersion);
-
     QIcon getIconForCurrentTheme(const QString& icon_name) {
         QString iconType =
             mSettingsState.mTheme == SETTINGS_THEME_LIGHT ? LIGHT_PATH : DARK_PATH;
@@ -187,36 +132,6 @@ private slots:
     void on_locationButton_clicked();
     void on_settingsButton_clicked();
     void on_telephoneButton_clicked();
-
-    // Battery
-    void on_bat_chargerBox_activated(int value);
-    void on_bat_healthBox_activated(int index);
-    void on_bat_levelSlider_valueChanged(int value);
-    void on_bat_statusBox_activated(int index);
-
-    // Cellular
-    void on_cell_dataStatusBox_currentIndexChanged(int index);
-    void on_cell_delayBox_currentIndexChanged(int index);
-    void on_cell_standardBox_currentIndexChanged(int index);
-    void on_cell_voiceStatusBox_currentIndexChanged(int index);
-
-    // DPad
-#define ON_PRESS_RELEASE(button) \
-    void on_dpad_ ## button ## Button_pressed(); \
-    void on_dpad_ ## button ## Button_released(); \
-
-    ON_PRESS_RELEASE(back);
-    ON_PRESS_RELEASE(down);
-    ON_PRESS_RELEASE(forward);
-    ON_PRESS_RELEASE(left);
-    ON_PRESS_RELEASE(play);
-    ON_PRESS_RELEASE(right);
-    ON_PRESS_RELEASE(select);
-    ON_PRESS_RELEASE(up);
-
-    // Fingerprint
-    void on_finger_touchButton_pressed();
-    void on_finger_touchButton_released();
 
     // Location
     void on_loc_GpxKmlButton_clicked();
@@ -247,11 +162,6 @@ private slots:
     void on_set_sdkPathButton_clicked();
     void on_set_themeBox_currentIndexChanged(int index);
 
-    // Help
-    void on_help_docs_clicked();
-    void on_help_fileBug_clicked();
-    void on_help_sendFeedback_clicked();
-
     // Sensors
     void on_temperatureSensorValueWidget_valueChanged(double value);
     void on_proximitySensorValueWidget_valueChanged(double value);
@@ -259,19 +169,6 @@ private slots:
     void on_pressureSensorValueWidget_valueChanged(double value);
     void on_humiditySensorValueWidget_valueChanged(double value);
     void onPhoneRotationChanged();
-
-    // SMS messaging
-    void on_sms_sendButton_clicked();
-
-    // Telephony
-    void on_tel_startEndButton_clicked();
-    void on_tel_holdCallButton_clicked();
-};
-
-class phoneNumberValidator : public QValidator
-{
-public:
-    State validate(QString &input, int &pos) const;
 };
 
 class GeoDataLoaderThread : public QThread {
@@ -299,14 +196,4 @@ private:
     GeoDataLoaderThread() : mFixes(nullptr) {}
     QString mFileName;
     GpsFixArray* mFixes;
-};
-
-class LatestVersionLoadTask : public QObject {
-    Q_OBJECT
-
-public slots:
-    void run();
-
-signals:
-    void finished(QString version);
 };
