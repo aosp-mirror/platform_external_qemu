@@ -37,6 +37,7 @@
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/winsys-qt.h"
 #include "android/ui-emu-agent.h"
@@ -218,10 +219,10 @@ void EmulatorQtWindow::dropEvent(QDropEvent *event)
         // If any of the files is an APK, intent was ambiguous
         for (int i = 0; i < urls.length(); i++) {
             if (urls[i].path().endsWith(".apk")) {
-                tool_window->showErrorDialog(tr("Drag-and-drop can either install a single APK"
-                                                " file or copy one or more non-APK files to the"
-                                                " Emulator SD card."),
-                                             tr("Drag and Drop"));
+                showErrorDialog(tr("Drag-and-drop can either install a single APK"
+                                   " file or copy one or more non-APK files to the"
+                                   " Emulator SD card."),
+                                tr("Drag and Drop"));
                 return;
             }
         }
@@ -612,7 +613,7 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
         QByteArray er = mScreencapProcess.readAllStandardError();
         er = er.replace('\n', "<br/>");
         QString msg = tr("The screenshot could not be captured. Output:<br/><br/>") + QString(er);
-        tool_window->showErrorDialog(msg, tr("Screenshot"));
+        showErrorDialog(msg, tr("Screenshot"));
     } else {
 
         // Pull the image from its remote location to the desired location
@@ -628,10 +629,10 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
 
         QString fileName = tool_window->getScreenshotSaveFile();
         if (fileName.isEmpty()) {
-            tool_window->showErrorDialog(tr("The screenshot save location is invalid.<br/>"
-                                            "Check the settings page and ensure the directory "
-                                            "exists and is writeable."),
-                                         tr("Screenshot"));
+            showErrorDialog(tr("The screenshot save location is invalid.<br/>"
+                               "Check the settings page and ensure the directory "
+                               "exists and is writeable."),
+                            tr("Screenshot"));
             return;
         }
 
@@ -650,7 +651,7 @@ void EmulatorQtWindow::slot_screencapPullFinished(int exitStatus)
         er = er.replace('\n', "<br/>");
         QString msg = tr("The screenshot could not be loaded from the device. Output:<br/><br/>")
                         + QString(er);
-        tool_window->showErrorDialog(msg, tr("Screenshot"));
+        showErrorDialog(msg, tr("Screenshot"));
     }
 }
 
@@ -835,9 +836,9 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
             if (androidHwConfig_isScreenMultiTouch(android_hw)) {
                 mOverlay.showForMultitouch();
             } else {
-                tool_window->showErrorDialog(tr("Your virtual device is not configured for "
-                                                "multi-touch input."),
-                                             tr("Multi-touch"));
+                showErrorDialog(tr("Your virtual device is not configured for "
+                                   "multi-touch input."),
+                                tr("Multi-touch"));
             }
         } else if (type == kEventKeyUp) {
             mOverlay.hide();
