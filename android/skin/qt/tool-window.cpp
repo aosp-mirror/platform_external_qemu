@@ -27,6 +27,7 @@
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/qt-settings.h"
@@ -206,13 +207,6 @@ void ToolWindow::show()
     QFrame::show();
 
     if (extendedWindow) extendedWindow->show();
-}
-
-void ToolWindow::showErrorDialog(const QString &message, const QString &title)
-{
-    QErrorMessage *err = QErrorMessage::qtHandler();
-    err->setWindowTitle(title);
-    err->showMessage(message);
 }
 
 QString ToolWindow::findAndroidSdkRoot()

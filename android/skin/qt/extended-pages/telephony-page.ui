@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TelephonyPage</class>
+ <widget class="QWidget" name="TelephonyPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>622</width>
+    <height>580</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QPlainTextEdit" name="sms_messageBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>110</y>
+     <width>280</width>
+     <height>140</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">padding: 4px 2px 2px 2px;</string>
+   </property>
+   <property name="plainText">
+    <string>Don't forget the marshmallows!</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>SmsBox</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="tel_fromGroup">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>0</y>
+     <width>51</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+   </property>
+   <property name="title">
+    <string>From</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string notr="true">Title</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="tel_startEndButton">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>50</y>
+     <width>110</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>10</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Start call</string>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">text-align: right</string>
+   </property>
+   <property name="text">
+    <string>CALL DEVICE</string>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/light/phone_button</normaloff>:/light/phone_button</iconset>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>phone_button</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Tool</string>
+   </property>
+   <property name="themeIconName_disabled" stdset="0">
+    <string>phone_disabled</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="tel_numberBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>18</y>
+     <width>280</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="editable">
+    <bool>true</bool>
+   </property>
+   <property name="insertPolicy">
+    <enum>QComboBox::InsertAtTop</enum>
+   </property>
+   <item>
+    <property name="text">
+     <string>(650) 555-1212</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>+1 650 555-6789</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QPushButton" name="sms_sendButton">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>250</y>
+     <width>120</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>10</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Start call</string>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">text-align: right</string>
+   </property>
+   <property name="text">
+    <string>SEND MESSAGE</string>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/dark/send</normaloff>:/dark/send</iconset>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>send</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Tool</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="tel_holdCallButton">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>50</y>
+     <width>111</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>10</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="toolTip">
+    <string>Hold call</string>
+   </property>
+   <property name="text">
+    <string>HOLD CALL</string>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/light/phone_paused</normaloff>
+     <disabledoff>:/light/phone_paused_disabled</disabledoff>:/light/phone_paused</iconset>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>phone_paused</string>
+   </property>
+   <property name="themeIconName_disabled" stdset="0">
+    <string>phone_paused_disabled</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Tool</string>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

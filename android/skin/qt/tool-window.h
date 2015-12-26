@@ -61,8 +61,6 @@ public:
     void setToolEmuAgent(const UiEmuAgent* agPtr) { uiEmuAgent = agPtr; }
     const UiEmuAgent* getUiEmuAgent() const { return uiEmuAgent; }
 
-    void showErrorDialog(const QString &message, const QString &title);
-
     QString getAdbFullPath(QStringList *args);
     QString getScreenshotSaveDirectory();
     QString getScreenshotSaveFile();
