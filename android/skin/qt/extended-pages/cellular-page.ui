@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CellularPage</class>
+ <widget class="QWidget" name="CellularPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>622</width>
+    <height>580</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QComboBox" name="cell_standardBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>18</y>
+     <width>280</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">padding: 3px 3px 3px 3px;</string>
+   </property>
+   <property name="currentIndex">
+    <number>6</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>GSM</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>HSCSD</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>GPRS</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>EDGE</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>UMTS</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>HSDPA</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Full</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QGroupBox" name="cell_vStatusGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>74</y>
+     <width>111</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+   </property>
+   <property name="title">
+    <string>Voice status</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string notr="true">Title</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="cell_dStatusGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>324</x>
+     <y>74</y>
+     <width>91</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+   </property>
+   <property name="title">
+    <string>Data status</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string notr="true">Title</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="cell_stdGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>0</y>
+     <width>131</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+   </property>
+   <property name="title">
+    <string>Network type</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string notr="true">Title</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="cell_voiceStatusBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>92</y>
+     <width>280</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">padding: 3px 3px 3px 3px;</string>
+   </property>
+   <item>
+    <property name="text">
+     <string>Home</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Roaming</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Searching</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Denied (emergency calls only)</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Unregistered (off)</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="cell_dataStatusBox">
+   <property name="geometry">
+    <rect>
+     <x>324</x>
+     <y>92</y>
+     <width>280</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">padding: 3px 3px 3px 3px;</string>
+   </property>
+   <item>
+    <property name="text">
+     <string>Home</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Roaming</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Searching</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Denied</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Unregistered (off)</string>
+    </property>
+   </item>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

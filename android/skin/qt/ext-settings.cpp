@@ -14,6 +14,8 @@
 
 #include "android/settings-agent.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/error-dialog.h"
+ #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "extended-window.h"
 #include "extended-window-styles.h"
@@ -149,7 +151,7 @@ void ExtendedWindow::on_set_saveLocFolderButton_clicked()
     if ( !fInfo.isDir() || !fInfo.isWritable() ) {
         QString errStr = tr("The path is not writable:<br>")
                          + dirName;
-        mToolWindow->showErrorDialog(errStr, tr("Save location"));
+        showErrorDialog(errStr, tr("Save location"));
         return;
     }
 
@@ -223,42 +225,6 @@ void ExtendedWindow::switchAllIconsForTheme(SettingsTheme theme)
         }
     }
 }
-
-// static member function
-void ExtendedWindow::setButtonEnabled(QPushButton*  theButton,
-                                      SettingsTheme theme,
-                                      bool          isEnabled)
-{
-    theButton->setEnabled(isEnabled);
-    // If this button has icon image properties, reset its
-    // image.
-    QString enabledPropStr  = theButton->property("themeIconName"         ).toString();
-    QString disabledPropStr = theButton->property("themeIconName_disabled").toString();
-
-    // Get the resource name based on the light/dark theme
-    QString resName = ":/";
-    resName += (theme == SETTINGS_THEME_DARK) ? DARK_PATH : LIGHT_PATH;
-    resName += "/";
-
-    if (!isEnabled  &&  !disabledPropStr.isNull()) {
-        // The button is disabled and has a specific
-        // icon for when it is disabled.
-        // Apply this icon and tell Qt to use it
-        // directly (don't gray it out) even though
-        // it is disabled.
-        resName += disabledPropStr;
-        QIcon theIcon(resName);
-        theIcon.addPixmap(QPixmap(resName), QIcon::Disabled);
-        theButton->setIcon(theIcon);
-    } else if ( !enabledPropStr.isNull() ) {
-        // Use the 'enabled' version of the icon
-        // (Let Qt grey the icon if it wants to)
-        resName += enabledPropStr;
-        QIcon theIcon(resName);
-        theButton->setIcon(theIcon);
-    }
-}
-
 
 void ExtendedWindow::on_set_saveLocBox_textEdited(const QString&) {
     mExtendedUi->set_saveLocBox->setText(mSettingsState.mSavePath);

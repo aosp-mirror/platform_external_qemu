@@ -31,21 +31,15 @@ ExtendedWindow::ExtendedWindow(
     mEmulatorWindow(eW),
     mToolWindow(tW),
     mGeoDataLoader(nullptr),
-    mBatteryAgent       (agentPtr ? agentPtr->battery   : nullptr),
-    mCellularAgent      (agentPtr ? agentPtr->cellular  : nullptr),
     mEmulatorWindowAgent(agentPtr ? agentPtr->window    : nullptr),
-    mFingerAgent        (agentPtr ? agentPtr->finger    : nullptr),
     mLocationAgent      (agentPtr ? agentPtr->location  : nullptr),
     mSensorsAgent       (agentPtr ? agentPtr->sensors   : nullptr),
-    mTelephonyAgent     (agentPtr ? agentPtr->telephony : nullptr),
     mSettingsAgent      (agentPtr ? agentPtr->settings  : nullptr),
-    mUserEventsAgent    (agentPtr ? agentPtr->userEvents : nullptr),
     mLoc_mSecRemaining(-1),
     mLoc_nowPlaying(false),
     mLoc_nowLoadingGeoData(false),
     mLoc_rowToSend(-1),
     mCloseRequested(false),
-    mQtUIShortcuts(shortcuts),
     mExtendedUi(new Ui::ExtendedControls)
 {
     Q_INIT_RESOURCE(resources);
@@ -64,18 +58,16 @@ ExtendedWindow::ExtendedWindow(
     setAttribute(Qt::WA_DeleteOnClose);
 
     mExtendedUi->setupUi(this);
+    mExtendedUi->cellular_page->setCellularAgent(agentPtr->cellular);
+    mExtendedUi->batteryPage->setBatteryAgent(agentPtr->battery);
+    mExtendedUi->telephonyPage->setTelephonyAgent(agentPtr->telephony);
+    mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
+    mExtendedUi->helpPage->initializeKeyboardShortcutList(shortcuts);
+    mExtendedUi->dpadPage->setUserEventsAgent(agentPtr->userEvents);
 
     // Do any sub-window-specific initialization
-    initBattery();
-    initCellular();
-    initDPad();
-    initFinger();
-    initHelp();
-    initKbdShorts();
     initLocation();
     initSettings();
-    initSms();
-    initTelephony();
     initVirtualSensors();
 
     mPaneButtonMap = {
@@ -190,41 +182,3 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
     thisButton->clearFocus(); // It looks better when not highlighted
     mExtendedUi->stackedWidget->setCurrentIndex(static_cast<int>(thisIndex));
 }
-
-////////////////////////////////////////////////////////////
-//
-// phoneNumberValidator
-//
-// Validate the input of a telephone number.
-// We allow '+' only in the first position.
-// One or more digits (0-9) are required.
-// Some additional characters are allowed, but ignored.
-
-QValidator::State phoneNumberValidator::validate(QString &input, int &pos) const
-{
-    int numDigits = 0;
-    const int MAX_DIGITS = 16;
-
-    if (input.length() >= 32) return QValidator::Invalid;
-
-    for (int ii=0; ii<input.length(); ii++) {
-        if (input[ii] >= '0' &&  input[ii] <= '9') {
-            numDigits++;
-            if (numDigits > MAX_DIGITS) return QValidator::Invalid;
-        } else if (input[ii] == '+' && ii != 0) {
-            // '+' is only allowed as the first character
-            return QValidator::Invalid;
-        } else if (input[ii] != '-' &&
-                   input[ii] != '.' &&
-                   input[ii] != '(' &&
-                   input[ii] != ')' &&
-                   input[ii] != '/' &&
-                   input[ii] != ' ' &&
-                   input[ii] != '+'   )
-        {
-            return QValidator::Invalid;
-        }
-    }
-
-    return ((numDigits > 0) ? QValidator::Acceptable : QValidator::Intermediate);
-} // end validate()
