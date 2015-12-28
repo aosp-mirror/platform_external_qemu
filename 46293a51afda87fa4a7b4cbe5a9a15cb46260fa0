@@ -22,6 +22,30 @@
       "revId": "46293a51afda87fa4a7b4cbe5a9a15cb46260fa0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a1bbbb8_af2cd96b",
+        "filename": "android/base/StringFormat.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-28T19:00:14Z",
+      "side": 1,
+      "message": "because format strings are supposed to be plain string literals? I just don\u0027t want to encourage formatting on formatted format strings :)",
+      "parentUuid": "ea27abf2_934f86ba",
+      "range": {
+        "startLine": 66,
+        "startChar": 20,
+        "endLine": 66,
+        "endChar": 38
+      },
+      "revId": "46293a51afda87fa4a7b4cbe5a9a15cb46260fa0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
