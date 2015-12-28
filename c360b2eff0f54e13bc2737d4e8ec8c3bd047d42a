@@ -261,6 +261,30 @@
     },
     {
       "key": {
+        "uuid": "aa2133e4_b12c426c",
+        "filename": "android/skin/qt/extended-pages/dpad-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-28T22:01:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2afc637c_15e25651",
+      "range": {
+        "startLine": 18,
+        "startChar": 8,
+        "endLine": 18,
+        "endChar": 24
+      },
+      "revId": "c360b2eff0f54e13bc2737d4e8ec8c3bd047d42a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4aed17c9_61d67e4b",
         "filename": "android/skin/qt/extended-pages/finger-page.cpp",
         "patchSetId": 2
