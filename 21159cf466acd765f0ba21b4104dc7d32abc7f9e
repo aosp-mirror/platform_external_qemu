@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2afc637c_75e75a61",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderWindow.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-28T19:08:50Z",
+      "side": 1,
+      "message": "Nit: That comment tells me what you\u0027re doing. It\u0027s better if you tell me why you\u0027re doing it, viz., \"blah blah situation leads to us getting here before a framebuffer has been created.\"\n\nOtherwise, I\u0027d drop the comment.",
+      "range": {
+        "startLine": 127,
+        "startChar": 16,
+        "endLine": 128,
+        "endChar": 68
+      },
+      "revId": "21159cf466acd765f0ba21b4104dc7d32abc7f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
