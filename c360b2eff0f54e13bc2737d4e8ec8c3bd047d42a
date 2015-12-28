@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "eafecb6e_fb618310",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-28T19:04:20Z",
+      "side": 1,
+      "message": "it\u0027s not big, it just adds a lot of noise into many files",
+      "parentUuid": "6a1bbbb8_6f8141b7",
+      "range": {
+        "startLine": 99,
+        "startChar": 8,
+        "endLine": 99,
+        "endChar": 23
+      },
+      "revId": "c360b2eff0f54e13bc2737d4e8ec8c3bd047d42a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a0b8f60_b50b88ae",
         "filename": "android/skin/qt/extended-pages/dpad-page.cpp",
         "patchSetId": 2
