@@ -124,7 +124,11 @@ struct RenderWindowMessage {
 
             case CMD_FINALIZE:
                 D("CMD_FINALIZE\n");
-                FrameBuffer::getFB()->finalize();
+                // this command may be issued even when frame buffer is not
+                // yet created, so make sure we check if it is there
+                if (const auto fb = FrameBuffer::getFB()) {
+                    fb->finalize();
+                }
                 result = true;
                 break;
 
