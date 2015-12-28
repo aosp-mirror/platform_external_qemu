@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2afc637c_3512f238",
+        "filename": "android/utils/aconfig-file.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-28T16:35:28Z",
+      "side": 1,
+      "message": "you can just cast-away constness from aconfig_find_const here to get rid of copy-pasted code (which can easily result in a bug after, e.g., change to do case-insensitive comparisons)",
+      "range": {
+        "startLine": 79,
+        "startChar": 0,
+        "endLine": 86,
+        "endChar": 16
+      },
+      "revId": "c1386a14b9a0c50ac91db4b9ab589696ba2b1c98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
