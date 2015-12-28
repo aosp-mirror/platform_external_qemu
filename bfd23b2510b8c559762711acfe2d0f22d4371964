@@ -22,6 +22,30 @@
       "revId": "bfd23b2510b8c559762711acfe2d0f22d4371964",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eafecb6e_7b2633a6",
+        "filename": "android/skin/qt/extended-pages/help-page.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-28T22:01:18Z",
+      "side": 1,
+      "message": "Cleaned up here and in other places as well.",
+      "parentUuid": "6a1bbbb8_8f5abdd2",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 18
+      },
+      "revId": "bfd23b2510b8c559762711acfe2d0f22d4371964",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
