@@ -53,6 +53,7 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(asyncsocket,  "Asynchronous socket") \
     _VERBOSE_TAG(sdkctlsocket, "Socket tethering to SdkControl server") \
     _VERBOSE_TAG(updater,      "Update checker")  \
+    _VERBOSE_TAG(metrics,      "Metrics reporting")  \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
