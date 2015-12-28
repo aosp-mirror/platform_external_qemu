@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0af79f9a_d4e3b2ed",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-28T19:04:59Z",
+      "side": 1,
+      "message": "nit: Please import names in the namespace at the head of the file (rather than function) for uniformity.",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 29
+      },
+      "revId": "17935cf51c06eb71092f2722bfa87ee97061bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a0b8f60_9800394a",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-28T19:04:59Z",
+      "side": 1,
+      "message": "No uniform initialization? :)",
+      "range": {
+        "startLine": 56,
+        "startChar": 4,
+        "endLine": 56,
+        "endChar": 24
+      },
+      "revId": "17935cf51c06eb71092f2722bfa87ee97061bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
