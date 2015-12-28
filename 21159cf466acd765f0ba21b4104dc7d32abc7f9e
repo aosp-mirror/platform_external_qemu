@@ -22,6 +22,30 @@
       "revId": "21159cf466acd765f0ba21b4104dc7d32abc7f9e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4aed17c9_bc524d62",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderWindow.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-28T21:33:02Z",
+      "side": 1,
+      "message": "the idea behind this comment is to show that the check is intentional, so it\u0027s not removed later as unneeded. I\u0027ll add some content to make it more convincing, thanks",
+      "parentUuid": "2afc637c_75e75a61",
+      "range": {
+        "startLine": 127,
+        "startChar": 16,
+        "endLine": 128,
+        "endChar": 68
+      },
+      "revId": "21159cf466acd765f0ba21b4104dc7d32abc7f9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
