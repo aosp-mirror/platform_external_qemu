@@ -237,6 +237,30 @@
     },
     {
       "key": {
+        "uuid": "2afc637c_15e25651",
+        "filename": "android/skin/qt/extended-pages/dpad-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-28T19:04:58Z",
+      "side": 1,
+      "message": "at least #undef it please :)",
+      "parentUuid": "4aed17c9_a16ea6d0",
+      "range": {
+        "startLine": 18,
+        "startChar": 8,
+        "endLine": 18,
+        "endChar": 24
+      },
+      "revId": "c360b2eff0f54e13bc2737d4e8ec8c3bd047d42a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2afc637c_d5056ef0",
         "filename": "android/skin/qt/extended-pages/help-page.cpp",
         "patchSetId": 2
