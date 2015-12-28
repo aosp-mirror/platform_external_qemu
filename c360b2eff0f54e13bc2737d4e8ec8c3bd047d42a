@@ -278,6 +278,24 @@
     },
     {
       "key": {
+        "uuid": "8a0b8f60_38faed65",
+        "filename": "android/skin/qt/extended-pages/finger-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-28T20:50:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4aed17c9_61d67e4b",
+      "revId": "c360b2eff0f54e13bc2737d4e8ec8c3bd047d42a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2afc637c_d5056ef0",
         "filename": "android/skin/qt/extended-pages/help-page.cpp",
         "patchSetId": 2
