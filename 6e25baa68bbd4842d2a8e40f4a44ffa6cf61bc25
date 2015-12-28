@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8a0b8f60_98915919",
+        "filename": "android/base/Uri.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-28T21:20:20Z",
+      "side": 1,
+      "message": "Well, I was going to use it as an API, but ended up disabling individual char encoding.\nI actually think it\u0027s OK to expose it",
+      "parentUuid": "0af79f9a_b4dc263a",
+      "range": {
+        "startLine": 69,
+        "startChar": 10,
+        "endLine": 69,
+        "endChar": 20
+      },
+      "revId": "6e25baa68bbd4842d2a8e40f4a44ffa6cf61bc25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aa2133e4_117c2e97",
         "filename": "android/base/Uri.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-12-28T18:57:49Z",
       "side": 1,
       "message": "I find this behavior most confusing than helpful -- as a user, when I call a function that encodes argument, I\u0027m prepared for a char turning into a string after encoding. It\u0027s wrong to make assumptions about string length, and a comment to that effect on the API functions suffices.\n\nOTOH, arbitrarily disabling an already somewhat arbitrary format string syntax is confusing, IMO.",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 49
+      },
+      "revId": "6e25baa68bbd4842d2a8e40f4a44ffa6cf61bc25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eafecb6e_9b915719",
+        "filename": "android/base/Uri.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-28T21:20:20Z",
+      "side": 1,
+      "message": "You might be prepared, but the format string is different for char and String - %c/%s. It\u0027s very non-obvious to the reader if one passes char into the argument list with a corresponding %s format specifier. It\u0027s also very error-prone as most people would just write %c there without even thinking\nSo I really prefer the safest case - disable it. If you really need a char, just explicitly pass temporary string there - both String and std::string have shrot-string optimization which makes 1-char string very cheap",
+      "parentUuid": "aa2133e4_117c2e97",
       "range": {
         "startLine": 43,
         "startChar": 0,
