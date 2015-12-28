@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "aa2133e4_31ddf299",
+        "filename": "android/base/Uri.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-28T22:31:49Z",
+      "side": 1,
+      "message": "I\u0027d still request that you remove it. I think it makes the API unnecessarily dirty.",
+      "parentUuid": "8a0b8f60_98915919",
+      "range": {
+        "startLine": 69,
+        "startChar": 10,
+        "endLine": 69,
+        "endChar": 20
+      },
+      "revId": "6e25baa68bbd4842d2a8e40f4a44ffa6cf61bc25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aa2133e4_117c2e97",
         "filename": "android/base/Uri.h",
         "patchSetId": 1
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "You might be prepared, but the format string is different for char and String - %c/%s. It\u0027s very non-obvious to the reader if one passes char into the argument list with a corresponding %s format specifier. It\u0027s also very error-prone as most people would just write %c there without even thinking\nSo I really prefer the safest case - disable it. If you really need a char, just explicitly pass temporary string there - both String and std::string have shrot-string optimization which makes 1-char string very cheap",
       "parentUuid": "aa2133e4_117c2e97",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 49
+      },
+      "revId": "6e25baa68bbd4842d2a8e40f4a44ffa6cf61bc25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0af79f9a_b438a6c9",
+        "filename": "android/base/Uri.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-28T22:31:49Z",
+      "side": 1,
+      "message": "I guess we\u0027re down to a matter of choice then, and this is your CL ;)\n\nIf I try to pass in a char to Uri::FormatEncodeArguments, the error I get is:\n\n./android/base/Uri.h: In instantiation of \u0027static android::base::String android::base::Uri::FormatEncodeArguments(android::base::StringView, Args\u0026\u0026 ...) [with Args \u003d int, unsigned int, char, const char (\u0026)[2]]\u0027:\n./android/base/Uri_unittest.cpp:68:283:   required from here\n./android/base/Uri.h:64:69: error: use of deleted function \u0027static android::base::String android::base::Uri::FormatHelper::encodeArg(char)\u0027\n                     FormatHelper::encodeArg(std::forward\u003cArgs\u003e(args))...);\n                                                                     ^\n./android/base/Uri.h:45:23: error: declared here\n         static String encodeArg(char c) \u003d delete;\n\n\n\nI\u0027d like a more direct error, something like \"Uri::FormatEncodeArguments does not support arguments of type \u0027char\u0027.\". Instead of deleting the char specialization, perhaps static_assert that argument is not of type char?\nYou\u0027d still not be able to print the name of the API function that was incorrectly though...",
+      "parentUuid": "eafecb6e_9b915719",
       "range": {
         "startLine": 43,
         "startChar": 0,
