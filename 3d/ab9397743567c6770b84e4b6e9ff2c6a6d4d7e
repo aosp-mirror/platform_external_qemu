@@ -1,0 +1,7 @@
+Code-Review+2: Jim Kaye <jameskaye@google.com>
+Verified+1: Grigory Dzhavadyan <grigoryj@google.com>
+Submitted-by: Grigory Dzhavadyan <grigoryj@google.com>
+Submitted-at: Mon, 28 Dec 2015 17:12:24 +0000
+Reviewed-on: https://android-review.googlesource.com/194010
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
