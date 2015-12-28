@@ -261,6 +261,23 @@
     },
     {
       "key": {
+        "uuid": "4aed17c9_61d67e4b",
+        "filename": "android/skin/qt/extended-pages/finger-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-28T19:46:38Z",
+      "side": 1,
+      "message": "Lost a comment here that tried to explain/excuse the magic numbers:\n\n    // Initialize 10 \"fingers\", each with a fixed\n    // random fingerprint ID value",
+      "revId": "c360b2eff0f54e13bc2737d4e8ec8c3bd047d42a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2afc637c_d5056ef0",
         "filename": "android/skin/qt/extended-pages/help-page.cpp",
         "patchSetId": 2
