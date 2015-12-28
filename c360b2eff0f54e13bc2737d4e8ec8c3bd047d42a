@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "aa2133e4_91001e4a",
+        "filename": "android/skin/qt/error-dialog.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-28T17:18:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a1bbbb8_2fa10966",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 2,
+        "endChar": 24
+      },
+      "revId": "c360b2eff0f54e13bc2737d4e8ec8c3bd047d42a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0af79f9a_31ae88c0",
         "filename": "android/skin/qt/ext-location.cpp",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "6a1bbbb8_6f8141b7",
+        "filename": "android/skin/qt/ext-location.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-28T17:18:20Z",
+      "side": 1,
+      "message": "I thought it wasn\u0027t worth it, not a very big change...",
+      "parentUuid": "0af79f9a_31ae88c0",
+      "range": {
+        "startLine": 99,
+        "startChar": 8,
+        "endLine": 99,
+        "endChar": 23
+      },
+      "revId": "c360b2eff0f54e13bc2737d4e8ec8c3bd047d42a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a0b8f60_b50b88ae",
         "filename": "android/skin/qt/extended-pages/dpad-page.cpp",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2015-12-28T16:32:40Z",
       "side": 1,
       "message": "copyright header?",
+      "range": {
+        "startLine": 1,
+        "startChar": 1,
+        "endLine": 1,
+        "endChar": 8
+      },
+      "revId": "c360b2eff0f54e13bc2737d4e8ec8c3bd047d42a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a1bbbb8_0f7c0d97",
+        "filename": "android/skin/qt/extended-pages/dpad-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-28T17:18:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a0b8f60_b50b88ae",
       "range": {
         "startLine": 1,
         "startChar": 1,
@@ -117,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "4aed17c9_a16ea6d0",
+        "filename": "android/skin/qt/extended-pages/dpad-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-28T17:18:20Z",
+      "side": 1,
+      "message": "We used this macro in the original code (you\u0027ll see it if you look at the current version of extended-window.h). Do you want to get rid of it?",
+      "parentUuid": "aa2133e4_11154e8f",
+      "range": {
+        "startLine": 18,
+        "startChar": 8,
+        "endLine": 18,
+        "endChar": 24
+      },
+      "revId": "c360b2eff0f54e13bc2737d4e8ec8c3bd047d42a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2afc637c_d5056ef0",
         "filename": "android/skin/qt/extended-pages/help-page.cpp",
         "patchSetId": 2
@@ -134,6 +230,24 @@
     },
     {
       "key": {
+        "uuid": "6a1bbbb8_2f7749b6",
+        "filename": "android/skin/qt/extended-pages/help-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-28T17:18:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2afc637c_d5056ef0",
+      "revId": "c360b2eff0f54e13bc2737d4e8ec8c3bd047d42a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ca01073f_da04792d",
         "filename": "android/skin/qt/extended-pages/help-page.h",
         "patchSetId": 2
@@ -145,6 +259,30 @@
       "writtenOn": "2015-12-28T16:32:40Z",
       "side": 1,
       "message": "+1",
+      "range": {
+        "startLine": 1,
+        "startChar": 1,
+        "endLine": 1,
+        "endChar": 7
+      },
+      "revId": "c360b2eff0f54e13bc2737d4e8ec8c3bd047d42a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca01073f_9ab83191",
+        "filename": "android/skin/qt/extended-pages/help-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-28T17:18:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca01073f_da04792d",
       "range": {
         "startLine": 1,
         "startChar": 1,
