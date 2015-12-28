@@ -17,6 +17,8 @@
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/error-dialog.h"
+#include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 
 
@@ -94,9 +96,7 @@ void ExtendedWindow::loc_geoDataLoadingFinished(QString file_name, bool ok, QStr
             return;
         }
     } else {
-        mToolWindow->showErrorDialog(
-                error,
-                tr("Geo Data Parser"));
+        showErrorDialog(error, tr("Geo Data Parser"));
     }
     setButtonEnabled(mExtendedUi->loc_GpxKmlButton, mSettingsState.mTheme, true);
     setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, true);
@@ -122,8 +122,8 @@ void ExtendedWindow::locationPlaybackStart()
     for (int row = 0; row < mExtendedUi->loc_pathTable->rowCount(); row++) {
         for (int col = 0; col < mExtendedUi->loc_pathTable->columnCount(); col++) {
             if (!loc_cellIsValid(mExtendedUi->loc_pathTable, row, col)) {
-                mToolWindow->showErrorDialog(tr("The table contains errors.<br>No locations were sent."),
-                                             tr("GPS Playback"));
+                showErrorDialog(tr("The table contains errors.<br>No locations were sent."),
+                                tr("GPS Playback"));
                 mExtendedUi->loc_pathTable->scrollToItem(mExtendedUi->loc_pathTable->item(row, 0));
                 return;
             }
