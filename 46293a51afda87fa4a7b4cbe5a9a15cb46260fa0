@@ -46,6 +46,30 @@
       "revId": "46293a51afda87fa4a7b4cbe5a9a15cb46260fa0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca2ae7be_78810db7",
+        "filename": "android/base/StringFormat.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2015-12-28T19:06:03Z",
+      "side": 1,
+      "message": "Agreed on that. :)\n\nCould you update Uri::FormatEncodeArguments then. Let\u0027s keep it the same for both.",
+      "parentUuid": "6a1bbbb8_af2cd96b",
+      "range": {
+        "startLine": 66,
+        "startChar": 20,
+        "endLine": 66,
+        "endChar": 38
+      },
+      "revId": "46293a51afda87fa4a7b4cbe5a9a15cb46260fa0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
