@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca01073f_6054bc01",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T23:05:31Z",
+      "side": 1,
+      "message": "can we have a single function with rotate_direction parameter? I\u0027m already seeing TODO duplication which is troubling",
+      "range": {
+        "startLine": 622,
+        "startChar": 0,
+        "endLine": 625,
+        "endChar": 52
+      },
+      "revId": "0ced52c2cb9a986ce76e9b416ba820e6ec07db36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
