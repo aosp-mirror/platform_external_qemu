@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca01073f_80f3a0c5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T20:37:26Z",
+      "side": 1,
+      "message": "typo: output",
+      "range": {
+        "startLine": 9,
+        "startChar": 57,
+        "endLine": 9,
+        "endChar": 60
+      },
+      "revId": "bc260744f6e7473a20b7e173e29353268aed190e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a1bbbb8_f55ce278",
+        "filename": "android/crashreport/CrashSystem.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T20:37:26Z",
+      "side": 1,
+      "message": "this is the default value, so you could just omit it",
+      "range": {
+        "startLine": 120,
+        "startChar": 39,
+        "endLine": 120,
+        "endChar": 75
+      },
+      "revId": "bc260744f6e7473a20b7e173e29353268aed190e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
