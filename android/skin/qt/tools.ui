@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>60</width>
-    <height>480</height>
+    <height>516</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>60</width>
-    <height>480</height>
+    <height>516</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>60</width>
-    <height>480</height>
+    <height>516</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -140,7 +140,7 @@ color: #f0f0f0</string>
     <string>VOLUME_DOWN</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="rotate_button">
+  <widget class="QPushButton" name="prev_layout_button">
    <property name="geometry">
     <rect>
      <x>12</x>
@@ -157,7 +157,7 @@ color: #f0f0f0</string>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/light/screen_rotation</normaloff>:/light/screen_rotation</iconset>
+     <normaloff>:/light/screen_rotation_left</normaloff>:/light/screen_rotation_left</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -169,14 +169,14 @@ color: #f0f0f0</string>
     <bool>true</bool>
    </property>
    <property name="themeIconName" stdset="0">
-    <string notr="true">screen_rotation</string>
+    <string notr="true">screen_rotation_left</string>
    </property>
   </widget>
   <widget class="QPushButton" name="back_button">
    <property name="geometry">
     <rect>
      <x>12</x>
-     <y>292</y>
+     <y>336</y>
      <width>36</width>
      <height>36</height>
     </rect>
@@ -211,7 +211,7 @@ color: #f0f0f0</string>
    <property name="geometry">
     <rect>
      <x>12</x>
-     <y>248</y>
+     <y>292</y>
      <width>36</width>
      <height>36</height>
     </rect>
@@ -249,7 +249,7 @@ color: #f0f0f0</string>
    <property name="geometry">
     <rect>
      <x>12</x>
-     <y>424</y>
+     <y>468</y>
      <width>36</width>
      <height>36</height>
     </rect>
@@ -281,7 +281,7 @@ color: #f0f0f0</string>
    <property name="geometry">
     <rect>
      <x>12</x>
-     <y>204</y>
+     <y>248</y>
      <width>36</width>
      <height>36</height>
     </rect>
@@ -316,7 +316,7 @@ color: #f0f0f0</string>
    <property name="geometry">
     <rect>
      <x>12</x>
-     <y>336</y>
+     <y>380</y>
      <width>36</width>
      <height>36</height>
     </rect>
@@ -351,7 +351,7 @@ color: #f0f0f0</string>
    <property name="geometry">
     <rect>
      <x>12</x>
-     <y>380</y>
+     <y>424</y>
      <width>36</width>
      <height>36</height>
     </rect>
@@ -446,12 +446,44 @@ color: #f0f0f0</string>
     <string notr="true">minimize</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="next_layout_button">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>204</y>
+     <width>36</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Rotate</string>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/light/screen_rotation_right</normaloff>:/light/screen_rotation_right</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string notr="true">screen_rotation_right</string>
+   </property>
+  </widget>
  </widget>
  <tabstops>
   <tabstop>power_button</tabstop>
   <tabstop>volume_up_button</tabstop>
   <tabstop>volume_down_button</tabstop>
-  <tabstop>rotate_button</tabstop>
+  <tabstop>prev_layout_button</tabstop>
   <tabstop>scrShot_button</tabstop>
   <tabstop>zoom_button</tabstop>
   <tabstop>back_button</tabstop>

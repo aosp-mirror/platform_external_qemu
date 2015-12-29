@@ -123,7 +123,8 @@ private slots:
     void on_power_button_released();
     void on_overview_button_pressed();
     void on_overview_button_released();
-    void on_rotate_button_clicked();
+    void on_prev_layout_button_clicked();
+    void on_next_layout_button_clicked();
     void on_scrShot_button_clicked();
     void on_volume_down_button_pressed();
     void on_volume_down_button_released();
