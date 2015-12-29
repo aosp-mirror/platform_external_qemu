@@ -1054,7 +1054,7 @@ static const DisplayChangeListenerOps dcl_ops = {
     .dpy_cursor_define = sdl_mouse_define,
 };
 
-void sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
+bool sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
 {
     int flags;
     uint8_t data = 0;
@@ -1172,5 +1172,7 @@ void sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
     sdl_cursor_normal = SDL_GetCursor();
 
     atexit(sdl_cleanup);
+
+    return true;
 }
 #endif

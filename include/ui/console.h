@@ -9,6 +9,8 @@
 #include "qapi-types.h"
 #include "qapi/error.h"
 
+#include <stdbool.h>
+
 /* keyboard/mouse support */
 
 #define MOUSE_EVENT_LBUTTON 0x01
@@ -337,7 +339,7 @@ DisplaySurface *qemu_console_surface(QemuConsole *con);
 DisplayState *qemu_console_displaystate(QemuConsole *console);
 
 /* sdl.c */
-void sdl_display_init(DisplayState *ds, int full_screen, int no_frame);
+bool sdl_display_init(DisplayState *ds, int full_screen, int no_frame);
 
 /* cocoa.m */
 void cocoa_display_init(DisplayState *ds, int full_screen);

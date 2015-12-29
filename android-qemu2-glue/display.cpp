@@ -95,26 +95,28 @@ android_display_refresh(DisplayChangeListener* dcl)
     qframebuffer_poll(qfbuff);
 }
 
-static DisplayChangeListenerOps dclOps = {};
-
-void android_display_init(DisplayState* ds, QFrameBuffer* qf)
-{
-    // find the first graphic console
-    QemuConsole* con = NULL;
-    int i;
-    for (i = 0;; i++) {
-        QemuConsole* c = qemu_console_lookup_by_index(i);
+static QemuConsole* find_graphic_console() {
+    // find the first graphic console (Android emulator has only one usually)
+    for (int i = 0; ; i++) {
+        QemuConsole* const c = qemu_console_lookup_by_index(i);
         if (!c) {
             break;
         }
         if (qemu_console_is_graphic(c)) {
-            con = c;
-            break;
+            return c;
         }
     }
 
+    return NULL;
+}
+
+static DisplayChangeListenerOps dclOps = {};
+
+bool android_display_init(DisplayState* ds, QFrameBuffer* qf)
+{
+    QemuConsole* const con = find_graphic_console();
     if (!con) {
-        exit(1);
+        return false;
     }
 
     qframebuffer_set_producer(qf, ds,
@@ -143,10 +145,12 @@ void android_display_init(DisplayState* ds, QFrameBuffer* qf)
     dclOps.dpy_gfx_switch = &android_display_switch;
     dcl->ops = &dclOps;
     register_displaychangelistener(dcl);
+
+    return true;
 }
 
 extern "C"
-void sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
+bool sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
 {
     EmulatorWindow* emulator = emulator_window_get();
     SkinDisplay* disp =
@@ -163,5 +167,5 @@ void sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
     }
     snprintf(buf, sizeof buf, "width=%d,height=%d", width, height);
 
-    android_display_init(ds, qframebuffer_fifo_get());
+    return android_display_init(ds, qframebuffer_fifo_get());
 }
