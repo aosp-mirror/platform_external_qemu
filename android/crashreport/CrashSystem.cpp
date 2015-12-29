@@ -114,85 +114,9 @@ CrashSystem* sCrashSystemForTesting = nullptr;
 
 }  // namespace
 
-// spawnService was extracted from android::base::System::runSilentCommand
-// Spawning crash service required the following modification:
-//    Returns pid of spawned process on success, 0 otherwise
-//
 int CrashSystem::spawnService(
         const ::android::base::StringVector& commandLine) {
-    // Sanity check.
-    if (commandLine.empty()) {
-        return 0;
-    }
-
-#ifdef _WIN32
-    STARTUPINFOW startup;
-    ZeroMemory(&startup, sizeof(startup));
-    startup.cb = sizeof(startup);
-    startup.dwFlags = STARTF_USESHOWWINDOW;
-    startup.wShowWindow = SW_SHOWMINIMIZED;
-
-    PROCESS_INFORMATION pinfo;
-    ZeroMemory(&pinfo, sizeof(pinfo));
-
-    const wchar_t* comspec = _wgetenv(L"COMSPEC");
-    if (!comspec || !comspec[0]) {
-        comspec = L"cmd.exe";
-    }
-
-    // Run the command.
-    ::android::base::String command = "/C";
-    for (size_t n = 0; n < commandLine.size(); ++n) {
-        command += " ";
-        command += android::base::Win32Utils::quoteCommandLine(
-                commandLine[n].c_str());
-    }
-
-    ::android::base::Win32UnicodeString command_unicode(command);
-
-    // NOTE: CreateProcessW expects a _writable_ pointer as its second
-    // parameter, so use .data() instead of .c_str().
-    if (!CreateProcessW(comspec,                /* program path */
-                        command_unicode.data(), /* command line args */
-                        nullptr, /* process handle is not inheritable */
-                        nullptr, /* thread handle is not inheritable */
-                        FALSE,   /* Do not Inherit handles */
-                        CREATE_NO_WINDOW, /* the new process doesn't
-                                             have a console */
-                        nullptr,          /* use parent's environment block */
-                        nullptr,          /* use parent's starting directory */
-                        &startup,         /* startup info, i.e. std handles */
-                        &pinfo)) {
-        return 0;
-    }
-
-    CloseHandle(pinfo.hProcess);
-    CloseHandle(pinfo.hThread);
-
-    return pinfo.dwProcessId;
-#else   // !_WIN32
-    char** params = new char*[commandLine.size() + 1];
-    for (size_t n = 0; n < commandLine.size(); ++n) {
-        params[n] = (char*)commandLine[n].c_str();
-    }
-    params[commandLine.size()] = nullptr;
-
-    int pid = fork();
-    if (pid != 0) {
-        // Parent process returns immediately.
-        delete[] params;
-        return pid;
-    }
-
-    // In the child process.
-    int fd = open("/dev/null", O_WRONLY);
-    dup2(fd, 1);
-    dup2(fd, 2);
-
-    execvp(commandLine[0].c_str(), params);
-    // Should not happen.
-    exit(1);
-#endif  // !_WIN32
+    return ::android::base::System::get()->runCommand(commandLine);
 }
 
 const std::string& CrashSystem::getCaBundlePath() {
