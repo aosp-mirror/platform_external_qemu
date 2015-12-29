@@ -1,0 +1,320 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca2ae7be_1ef0b949",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T19:20:03Z",
+      "side": 1,
+      "message": "could you please also add comments for these? fnstr isn\u0027t very descriptive for me to understand anything at all :)",
+      "range": {
+        "startLine": 74,
+        "startChar": 0,
+        "endLine": 76,
+        "endChar": 17
+      },
+      "revId": "8df0d0a1267aa019fb2b284b5895ef1c96706841",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eafecb6e_46c432ba",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T19:20:03Z",
+      "side": 1,
+      "message": "why not just a variable, why [1]? Do you really prefer -\u003e over . ?\nAlso, don\u0027t start names from _ - it\u0027s just ugly and doesn\u0027t really help anything now",
+      "revId": "8df0d0a1267aa019fb2b284b5895ef1c96706841",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a1bbbb8_fabb31f9",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T19:20:03Z",
+      "side": 1,
+      "message": "assert() should be enough here",
+      "range": {
+        "startLine": 99,
+        "startChar": 4,
+        "endLine": 99,
+        "endChar": 22
+      },
+      "revId": "8df0d0a1267aa019fb2b284b5895ef1c96706841",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca01073f_05bce2f1",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T19:20:03Z",
+      "side": 1,
+      "message": "why 1024?",
+      "range": {
+        "startLine": 123,
+        "startChar": 44,
+        "endLine": 123,
+        "endChar": 48
+      },
+      "revId": "8df0d0a1267aa019fb2b284b5895ef1c96706841",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca01073f_c5dada6c",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T19:20:03Z",
+      "side": 1,
+      "message": "why 16 and not the real message length? or did you forget to pad with 0s? %08x is enough for an int (so array size of 9 is also more than enough)",
+      "range": {
+        "startLine": 132,
+        "startChar": 19,
+        "endLine": 132,
+        "endChar": 21
+      },
+      "revId": "8df0d0a1267aa019fb2b284b5895ef1c96706841",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a0b8f60_03b69ea2",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T19:20:03Z",
+      "side": 1,
+      "message": "how are you going to close this descriptor later?",
+      "range": {
+        "startLine": 141,
+        "startChar": 4,
+        "endLine": 141,
+        "endChar": 32
+      },
+      "revId": "8df0d0a1267aa019fb2b284b5895ef1c96706841",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0af79f9a_ff42073f",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T19:20:03Z",
+      "side": 1,
+      "message": "switch ?",
+      "range": {
+        "startLine": 165,
+        "startChar": 8,
+        "endLine": 165,
+        "endChar": 36
+      },
+      "revId": "8df0d0a1267aa019fb2b284b5895ef1c96706841",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea27abf2_1ee27d51",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T19:20:03Z",
+      "side": 1,
+      "message": "why 1024?",
+      "range": {
+        "startLine": 168,
+        "startChar": 45,
+        "endLine": 168,
+        "endChar": 49
+      },
+      "revId": "8df0d0a1267aa019fb2b284b5895ef1c96706841",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4aed17c9_c7dae26c",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T19:20:03Z",
+      "side": 1,
+      "message": "what about unmapping and closing the file?",
+      "range": {
+        "startLine": 234,
+        "startChar": 4,
+        "endLine": 234,
+        "endChar": 15
+      },
+      "revId": "8df0d0a1267aa019fb2b284b5895ef1c96706841",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea27abf2_9ecdcde4",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T19:20:03Z",
+      "side": 1,
+      "message": "any explanation?",
+      "range": {
+        "startLine": 254,
+        "startChar": 4,
+        "endLine": 254,
+        "endChar": 35
+      },
+      "revId": "8df0d0a1267aa019fb2b284b5895ef1c96706841",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0af79f9a_bf1fdf4c",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T19:20:03Z",
+      "side": 1,
+      "message": "to_transfer is unsigned, so unless we\u0027re going to hit 0 here this would spin forever",
+      "range": {
+        "startLine": 257,
+        "startChar": 11,
+        "endLine": 257,
+        "endChar": 22
+      },
+      "revId": "8df0d0a1267aa019fb2b284b5895ef1c96706841",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a1bbbb8_7a762120",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T19:20:03Z",
+      "side": 1,
+      "message": "these have to be enums or constants.",
+      "range": {
+        "startLine": 284,
+        "startChar": 0,
+        "endLine": 293,
+        "endChar": 37
+      },
+      "revId": "8df0d0a1267aa019fb2b284b5895ef1c96706841",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca01073f_45aeeac0",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T19:20:03Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 306,
+        "startChar": 0,
+        "endLine": 315,
+        "endChar": 4
+      },
+      "revId": "8df0d0a1267aa019fb2b284b5895ef1c96706841",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea27abf2_1ec9ddd1",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T19:20:03Z",
+      "side": 1,
+      "message": "who will free it?",
+      "range": {
+        "startLine": 337,
+        "startChar": 8,
+        "endLine": 337,
+        "endChar": 43
+      },
+      "revId": "8df0d0a1267aa019fb2b284b5895ef1c96706841",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
