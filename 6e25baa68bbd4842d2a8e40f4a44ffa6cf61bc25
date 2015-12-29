@@ -141,6 +141,30 @@
       "revId": "6e25baa68bbd4842d2a8e40f4a44ffa6cf61bc25",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea27abf2_d3b8deff",
+        "filename": "android/base/Uri.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T00:52:16Z",
+      "side": 1,
+      "message": "\u0027Use of deleted function\u0027 was good for me - as it clearly says that the function is intentionally disabled, but here\u0027s the update:\n\nIn file included from ./android/base/Uri_unittest.cpp:12:0:\n./android/base/Uri.h: In instantiation of \u0027static T\u0026\u0026 android::base::Uri::FormatHelper::encodeArg(T\u0026\u0026, typename std::enable_if\u003c(! std::is_convertible\u003ctypename std::decay\u003c_Tp\u003e::type, android::base::StringView\u003e::value)\u003e::type*) [with T \u003d char; typename std::enable_if\u003c(! std::is_convertible\u003ctypename std::decay\u003c_Tp\u003e::type, android::base::StringView\u003e::value)\u003e::type \u003d void]\u0027:\n./android/base/Uri.h:68:69:   required from \u0027static android::base::String android::base::Uri::FormatEncodeArguments(const char*, Args\u0026\u0026 ...) [with Args \u003d {char}]\u0027\n./android/base/Uri_unittest.cpp:69:5:   required from here\n./android/base/Uri.h:55:13: error: static assertion failed: Uri::FormatEncodeArguments doesn\u0027t support arguments of type \u0027char\u0027\n             static_assert(!std::is_same\u003ctypename std::decay\u003cT\u003e::type, char\u003e::value,",
+      "parentUuid": "0af79f9a_b438a6c9",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 49
+      },
+      "revId": "6e25baa68bbd4842d2a8e40f4a44ffa6cf61bc25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
