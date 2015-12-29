@@ -83,7 +83,7 @@ TEST(CrashService, validDumpFile) {
 // invalidURLUpload hangs on wine, but passes on windows host
 TEST(CrashService, invalidURLUpload) {
     TestTempDir crashdir("crashdir");
-    TestCrashSystem crashsystem(crashdir.path(), "localhost");
+    TestCrashSystem crashsystem(crashdir.path(), "non-existent-domain-name-for-crash-reports.com");
     crashdir.makeSubFile("bar.dmp");
     std::unique_ptr<CrashService> crash(
             CrashService::makeCrashService("foo", "bar"));
