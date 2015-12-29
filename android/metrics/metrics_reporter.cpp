@@ -383,6 +383,13 @@ void androidMetrics_injectUploader(
 
 /* typedef'ed to: androidMetricsUploaderFunction */
 ABool androidMetrics_uploadMetrics(const AndroidMetrics* metrics) {
+    VERBOSE_PRINT(metrics, "metrics: Uploading a report with status '%s', "
+                           "num failures '%d' "
+                           "(version '%s', sys/user times '%ld/%ld').",
+                  metrics->is_dirty ? "crash" : "clean",
+                  metrics->num_failed_reports,
+                  metrics->emulator_version, metrics->system_time, metrics->user_time);
+
     ABool success = (ABool)androidMetrics_uploadMetricsGA(metrics);
     success &= (ABool)androidMetrics_uploadMetricsToolbar(metrics);
     return success;
