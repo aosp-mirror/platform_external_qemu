@@ -1,0 +1,7 @@
+Code-Review+2: Joshua Lang <joshualang@google.com>
+Verified+1: Grigory Dzhavadyan <grigoryj@google.com>
+Submitted-by: Grigory Dzhavadyan <grigoryj@google.com>
+Submitted-at: Tue, 29 Dec 2015 22:01:59 +0000
+Reviewed-on: https://android-review.googlesource.com/194170
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
