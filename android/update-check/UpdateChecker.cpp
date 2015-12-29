@@ -14,7 +14,6 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/String.h"
-#include "android/base/StringFormat.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Async.h"
@@ -52,7 +51,6 @@ R"(Your emulator is out of date, please update by launching Android Studio:
 
 using android::base::ScopedCPtr;
 using android::base::String;
-using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
 using android::base::Uri;
@@ -94,11 +92,9 @@ public:
         if (version) {
             const ScopedCPtr<char> id(
                     android_studio_get_installation_id());
-            const auto parameters = Uri::Encode(StringFormat(
-                    "tool=emulator&uid=%s&os=%s&version=%s", id.get(),
-                    toString(System::get()->getOsType()).c_str(), version));
-            url += '?';
-            url += parameters;
+            url += Uri::FormatEncodeArguments(
+                    "?tool=emulator&uid=%s&os=%s&version=%s", id.get(),
+                    toString(System::get()->getOsType()), version);
         }
         char* error = nullptr;
         if (!curl_download(url.c_str(), nullptr, &curlWriteCallback, &xml, &error)) {
