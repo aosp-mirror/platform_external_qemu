@@ -142,6 +142,7 @@ public:
     void scaleDown();
     void scaleUp();
     void screenshot();
+    void setOnTop(bool onTop, bool showNow);
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateScrollBarChanged(int x, int y);
     void simulateSetScale(double scale);
@@ -220,6 +221,7 @@ private:
     void handleKeyEvent(SkinEventType type, QKeyEvent *event);
     void handleMouseEvent(SkinEventType type, SkinMouseButtonType button, const QPoint &pos);
     QString getTmpImagePath();
+    void setFrameOnTop(QFrame* frame, bool onTop);
 
 
     void             *batteryState;

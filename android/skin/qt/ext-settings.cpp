@@ -72,6 +72,16 @@ void ExtendedWindow::completeSettingsInitialization()
 
     mExtendedUi->set_allowKeyboardGrab->setChecked(
             settings.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool());
+
+#ifdef __linux__
+    // "Always on top" is not supported for Linux (see emulator-qt-window.cpp)
+    // Make the control invisible
+    mExtendedUi->set_onTopTitle->hide();
+    mExtendedUi->set_onTop->hide();
+#else // Windows or OSX
+    bool onTopOnly = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
+    mExtendedUi->set_onTop->setCheckState(onTopOnly ? Qt::Checked : Qt::Unchecked);
+#endif
 }
 
 void ExtendedWindow::on_set_themeBox_currentIndexChanged(int index)
@@ -255,4 +265,11 @@ bool ExtendedWindow::eventFilter(QObject* object, QEvent* event) {
 void ExtendedWindow::on_set_allowKeyboardGrab_toggled(bool checked) {
     QSettings settings;
     settings.setValue(Ui::Settings::ALLOW_KEYBOARD_GRAB, checked);
+}
+
+void ExtendedWindow::on_set_onTop_toggled(bool checked) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::ALWAYS_ON_TOP, checked);
+
+    mEmulatorWindow->setOnTop(checked, true);
 }

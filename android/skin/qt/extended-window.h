@@ -156,6 +156,7 @@ private slots:
 
     // Settings
     void on_set_allowKeyboardGrab_toggled(bool);
+    void on_set_onTop_toggled(bool);
     void on_set_saveLocBox_textEdited(const QString&);
     void on_set_saveLocFolderButton_clicked();
     void on_set_sdkPathBox_textEdited(const QString&);
