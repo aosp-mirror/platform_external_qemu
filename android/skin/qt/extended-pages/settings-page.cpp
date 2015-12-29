@@ -1,4 +1,4 @@
-// Copyright (C) 2015 The Android Open Source Project
+// Copyright (C) 2015-2016 The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
@@ -59,6 +59,16 @@ SettingsPage::SettingsPage(QWidget *parent) :
 
     mUi->set_allowKeyboardGrab->setChecked(
             settings.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool());
+
+#ifdef __linux__
+    // "Always on top" is not supported for Linux (see emulator-qt-window.cpp)
+    // Make the control invisible
+    mUi->set_onTopTitle->hide();
+    mUi->set_onTop->hide();
+#else // Windows or OSX
+    bool onTopOnly = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
+    mUi->set_onTop->setCheckState(onTopOnly ? Qt::Checked : Qt::Unchecked);
+#endif
 }
 
 bool SettingsPage::eventFilter (QObject* object, QEvent* event)
@@ -190,4 +200,11 @@ void SettingsPage::on_set_sdkPathBox_textEdited(const QString&) {
 void SettingsPage::on_set_allowKeyboardGrab_toggled(bool checked) {
     QSettings settings;
     settings.setValue(Ui::Settings::ALLOW_KEYBOARD_GRAB, checked);
+}
+
+void SettingsPage::on_set_onTop_toggled(bool checked) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::ALWAYS_ON_TOP, checked);
+
+    emit(onTopChanged(checked));
 }

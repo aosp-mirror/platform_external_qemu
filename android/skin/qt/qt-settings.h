@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 The Android Open Source Project
+/* Copyright (C) 2015-2016 The Android Open Source Project
  **
  ** This software is licensed under the terms of the GNU General Public
  ** License version 2, as published by the Free Software Foundation, and
@@ -26,6 +26,7 @@ namespace Ui {
         //       we're in "namespace Settings".
 
         const QString ALLOW_KEYBOARD_GRAB("set/allow_keyboard_grab");
+        const QString ALWAYS_ON_TOP("set/alwaysOnTop");
         const QString SAVE_PATH("set/savePath");
         const QString SDK_PATH("set/sdkPath");
         const QString UI_THEME("set/theme");
