@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a1bbbb8_95912e19",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 30
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T22:01:03Z",
+      "side": 1,
+      "message": "close and clear the fd here if it failed? so the user doesn\u0027t need to bother with it if function returned null",
+      "range": {
+        "startLine": 165,
+        "startChar": 8,
+        "endLine": 165,
+        "endChar": 45
+      },
+      "revId": "0c0ba7a633cb2a3e3f3797fbc8eb2e15a2c068eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca01073f_2092b43f",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 30
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T22:01:03Z",
+      "side": 1,
+      "message": "you don\u0027t need to copy it here just to be able to free it inside of android_emulator_bridge_recv()\ninstead, add a flag \"need_to_free_msg\", set it only if you\u0027re allocated memory and call free in this function after the call to android_emulator_bridge_recv(). It\u0027s very inefficient to malloc and memcpy if there\u0027s just one buffer",
+      "range": {
+        "startLine": 432,
+        "startChar": 8,
+        "endLine": 433,
+        "endChar": 50
+      },
+      "revId": "0c0ba7a633cb2a3e3f3797fbc8eb2e15a2c068eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea27abf2_599c0f52",
+        "filename": "android/android_emulator_bridge.h",
+        "patchSetId": 30
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-29T22:01:03Z",
+      "side": 1,
+      "message": "this isn\u0027t very useful. almost like #define one 1\nyou won\u0027t ever change AEB_MEGABYTE to be anything else but 1024*1024",
+      "range": {
+        "startLine": 21,
+        "startChar": 8,
+        "endLine": 21,
+        "endChar": 20
+      },
+      "revId": "0c0ba7a633cb2a3e3f3797fbc8eb2e15a2c068eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
