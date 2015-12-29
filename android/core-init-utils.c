@@ -86,7 +86,6 @@ android_core_init_failure(const char* fmt, ...)
     // process.
     android_core_send_init_response(msg);
     fprintf(stderr, "%s\n", msg);
-    exit(1);
 }
 
 void
@@ -96,5 +95,4 @@ android_core_init_exit(int exit_status)
     // Build "ok" message with the exit status, and send it back to the UI.
     snprintf(msg, sizeof(msg), "ok:status=%d", exit_status);
     android_core_send_init_response(msg);
-    exit(exit_status);
 }
