@@ -46,6 +46,47 @@
       "revId": "fd715af5fc3957da8ce10e3a7a9691c9db5a79bd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa2133e4_dc80ed68",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-29T20:33:00Z",
+      "side": 1,
+      "message": "I agree with Yurii here, we can simply set Qt::WindowStaysOnTopHint without bypassing the window manager. If it doesn\u0027t break anything, the worst case is that the behavior will simply not be changed on Linux.",
+      "parentUuid": "ea27abf2_3e230150",
+      "range": {
+        "startLine": 330,
+        "startChar": 0,
+        "endLine": 333,
+        "endChar": 53
+      },
+      "revId": "fd715af5fc3957da8ce10e3a7a9691c9db5a79bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa2133e4_3cddc999",
+        "filename": "android/skin/qt/ext-settings.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-29T20:33:00Z",
+      "side": 1,
+      "message": "Have you verified this with the default window manager on Ubuntu? I would be surprised if it doesn\u0027t work there. I think the \"some window managers\" in the Qt docs might be referring to weird tiling window managers like xmonad or something.",
+      "revId": "fd715af5fc3957da8ce10e3a7a9691c9db5a79bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
