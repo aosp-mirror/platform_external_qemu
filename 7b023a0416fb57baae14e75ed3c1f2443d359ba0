@@ -93,6 +93,30 @@
       "revId": "7b023a0416fb57baae14e75ed3c1f2443d359ba0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2afc637c_dbfabf8d",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-29T21:40:17Z",
+      "side": 1,
+      "message": "Otherwise the CMD_SHUTDOWN enum is assigned only for debugging purposes.",
+      "parentUuid": "eafecb6e_86761a1d",
+      "range": {
+        "startLine": 251,
+        "startChar": 20,
+        "endLine": 251,
+        "endChar": 32
+      },
+      "revId": "7b023a0416fb57baae14e75ed3c1f2443d359ba0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
