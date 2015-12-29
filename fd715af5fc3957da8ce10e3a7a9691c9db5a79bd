@@ -22,6 +22,30 @@
       "revId": "fd715af5fc3957da8ce10e3a7a9691c9db5a79bd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca2ae7be_b2aba191",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-29T20:29:56Z",
+      "side": 1,
+      "message": "I found that X11BypassWindowManagerHint made no difference on Windows and OSX.\nOn Linux, setting that flag bit \"worked\"--the windows did stay on top, but the side effects were unacceptable (IMO).\nI\u0027ll try _NET_WM_STATE_ABOVE to see if it helps with Linux.",
+      "parentUuid": "ea27abf2_3e230150",
+      "range": {
+        "startLine": 330,
+        "startChar": 0,
+        "endLine": 333,
+        "endChar": 53
+      },
+      "revId": "fd715af5fc3957da8ce10e3a7a9691c9db5a79bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
