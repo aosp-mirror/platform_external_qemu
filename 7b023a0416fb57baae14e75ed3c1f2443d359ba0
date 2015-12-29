@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "aa2133e4_1c4f2518",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-29T21:38:23Z",
+      "side": 1,
+      "message": "getting basenames of file paths\n\nIs there a more appropriate thing to use?",
+      "parentUuid": "eafecb6e_4618b208",
+      "range": {
+        "startLine": 26,
+        "startChar": 10,
+        "endLine": 26,
+        "endChar": 19
+      },
+      "revId": "7b023a0416fb57baae14e75ed3c1f2443d359ba0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea27abf2_1ecc3db9",
         "filename": "android/android_emulator_bridge.c",
         "patchSetId": 27
@@ -36,6 +60,30 @@
       "writtenOn": "2015-12-29T19:46:17Z",
       "side": 1,
       "message": "I don\u0027t see this command processing anywhere else. Is that OK?",
+      "range": {
+        "startLine": 251,
+        "startChar": 20,
+        "endLine": 251,
+        "endChar": 32
+      },
+      "revId": "7b023a0416fb57baae14e75ed3c1f2443d359ba0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eafecb6e_86761a1d",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-29T21:38:23Z",
+      "side": 1,
+      "message": "Yeah that\u0027s intended. There\u0027s also a guest-side process (also WIP hack) that does the actual shutting down.",
+      "parentUuid": "ea27abf2_1ecc3db9",
       "range": {
         "startLine": 251,
         "startChar": 20,
