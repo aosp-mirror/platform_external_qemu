@@ -616,14 +616,25 @@ void ToolWindow::on_overview_button_released()
     handleUICommand(QtUICommand::OVERVIEW, false);
 }
 
-void ToolWindow::on_rotate_button_clicked()
-{
+void ToolWindow::sendRotateCommand(ToolWindow::RotationDirection d) {
     // TODO: remove this after we preserve zoom after rotate
     if (emulator_window->isInZoomMode())
         toolsUi->zoom_button->click();
-
-    handleUICommand(QtUICommand::ROTATE_RIGHT, true);
+    handleUICommand(d == RotationDirection::Left ?
+                        QtUICommand::ROTATE_LEFT :
+                        QtUICommand::ROTATE_RIGHT,
+                    true);
 }
+void ToolWindow::on_prev_layout_button_clicked()
+{
+    sendRotateCommand(RotationDirection::Left);
+}
+
+void ToolWindow::on_next_layout_button_clicked()
+{
+    sendRotateCommand(RotationDirection::Right);
+}
+
 void ToolWindow::on_scrShot_button_clicked()
 {
     handleUICommand(QtUICommand::TAKE_SCREENSHOT, true);
