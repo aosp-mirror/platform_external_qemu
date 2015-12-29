@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "4aed17c9_a23504d1",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2015-12-29T22:32:25Z",
+      "side": 1,
+      "message": "I don\u0027t like that. It would create a control that performs no function. I expect a number of users would file bugs saying that the control doesn\u0027t work.",
+      "parentUuid": "aa2133e4_dc80ed68",
+      "range": {
+        "startLine": 330,
+        "startChar": 0,
+        "endLine": 333,
+        "endChar": 53
+      },
+      "revId": "fd715af5fc3957da8ce10e3a7a9691c9db5a79bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aa2133e4_3cddc999",
         "filename": "android/skin/qt/ext-settings.cpp",
         "patchSetId": 1
