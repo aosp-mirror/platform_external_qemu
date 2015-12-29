@@ -570,6 +570,22 @@ void GLEScontext::buildStrings(const char* baseVendor,
     const size_t VENDOR_LEN   = sizeof(VENDOR) - 1;
     const size_t RENDERER_LEN = sizeof(RENDERER) - 1;
 
+    // Sanitize the strings as some OpenGL implementations return NULL
+    // when asked the basic questions (this happened at least once on a client
+    // machine)
+    if (!baseVendor) {
+        baseVendor = "N/A";
+    }
+    if (!baseRenderer) {
+        baseRenderer = "N/A";
+    }
+    if (!baseVersion) {
+        baseVersion = "N/A";
+    }
+    if (!version) {
+        version = "N/A";
+    }
+
     size_t baseVendorLen = strlen(baseVendor);
     s_glVendor.clear();
     s_glVendor.reserve(baseVendorLen + VENDOR_LEN + 1);
