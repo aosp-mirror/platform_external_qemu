@@ -203,7 +203,8 @@ static void initialize_console_and_adb(void)
      * consecutive TCP ports starting from 5555 and working up until
      * we manage to open both connections.
      */
-    int baseport = ANDROID_CONSOLE_BASEPORT;
+    int baseport = (android_base_port > ANDROID_CONSOLE_BASEPORT) ?
+        android_base_port : ANDROID_CONSOLE_BASEPORT;
     int tries = MAX_ANDROID_EMULATORS;
     CharDriverState *chr;
     struct Monitor* android_monitor;

@@ -457,7 +457,8 @@ static void pc_init1(MachineState *machine,
     #define ANDROID_CONSOLE_BASEPORT 5554
     #define MAX_ANDROID_EMULATORS 64
 
-    android_init_console_and_adb(ANDROID_CONSOLE_BASEPORT,
+    android_init_console_and_adb((android_base_port > ANDROID_CONSOLE_BASEPORT) ?
+            android_base_port : ANDROID_CONSOLE_BASEPORT,
                                  MAX_ANDROID_EMULATORS);
 /* end of Android initialization */
 #endif

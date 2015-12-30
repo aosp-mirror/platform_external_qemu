@@ -511,13 +511,21 @@ static mon_cmd_t rotate_cmd = {
     .mhandler.cmd = android_console_rotate_screen,
 };
 
+#ifdef USE_ANDROID_EMU
+extern int android_base_port;
+#else
+static int android_base_port = ANDROID_CONSOLE_BASEPORT;
+#endif
+
 static void initialize_console_and_adb(VirtBoardInfo *vbi)
 {
     /* Initialize the console and ADB, which must listen on two
      * consecutive TCP ports starting from 5555 and working up until
      * we manage to open both connections.
      */
-    int baseport = ANDROID_CONSOLE_BASEPORT;
+    int baseport = (android_base_port > ANDROID_CONSOLE_BASEPORT) ?
+        android_base_port : ANDROID_CONSOLE_BASEPORT;
+
     int tries = MAX_ANDROID_EMULATORS;
     CharDriverState *chr;
 
@@ -545,6 +553,7 @@ static void initialize_console_and_adb(VirtBoardInfo *vbi)
                             &rotate_cmd);
 
         printf("console on port %d, ADB on port %d\n", baseport, baseport + 1);
+        android_base_port = baseport;
         return;
     }
     error_report("it seems too many emulator instances are running "

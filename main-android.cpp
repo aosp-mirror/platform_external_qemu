@@ -61,9 +61,10 @@ extern "C" {
 #include <unistd.h>
 
 #include "android/version.h"
-
+#define ANDROID_CONSOLE_BASEPORT 5554
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
+extern int android_base_port;
 using namespace android::base;
 
 namespace {
@@ -832,9 +833,15 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = opts->ports;
     }
 
+    android_base_port = ANDROID_CONSOLE_BASEPORT;
     if (opts->port) {
-        args[n++] = "-android-port";
-        args[n++] = opts->port;
+        android_base_port = atoi(opts->port);
+        if (android_base_port % 2 || android_base_port < ANDROID_CONSOLE_BASEPORT) {
+            fprintf(stderr, "WARNING: -port only supports even number that is equal to"
+                    " or greater than %d; invalid input '%s' ignored.\n",
+                    ANDROID_CONSOLE_BASEPORT, opts->port);
+            android_base_port = ANDROID_CONSOLE_BASEPORT;
+        }
     }
 
     if (opts->report_console) {
