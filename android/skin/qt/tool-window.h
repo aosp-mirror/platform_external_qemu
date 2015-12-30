@@ -79,9 +79,6 @@ private:
     void paintEvent(QPaintEvent*) override;
     void handleUICommand(QtUICommand cmd, bool down);
 
-    enum class RotationDirection {Left, Right};
-    void sendRotateCommand(RotationDirection direction);
-
     // Use this function only if SDK_PATH is not available in QSettings
     QString findAndroidSdkRoot();
 
