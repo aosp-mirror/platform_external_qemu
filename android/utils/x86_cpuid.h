@@ -17,6 +17,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 ANDROID_BEGIN_HEADER
 
@@ -80,30 +81,42 @@ void android_get_x86_cpuid_vendor_id(char* vendor_id, size_t vendor_id_len);
  * Returns 1 if |vendor_id| retrieved from cpuid is one of four known VM
  * host vendor id strings.  Returns 0 otherwise.
  */
-int android_get_x86_cpuid_vendor_id_is_vmhost(const char* vendor_id);
+bool android_get_x86_cpuid_vendor_id_is_vmhost(const char* vendor_id);
+
+// Possible vendor ID types
+typedef enum {
+    VENDOR_ID_AMD,
+    VENDOR_ID_INTEL,
+    VENDOR_ID_VIA,
+    VENDOR_ID_VM,
+    VENDOR_ID_OTHER,
+} CpuVendorIdType;
+
+// Returns the type of vendor ID
+CpuVendorIdType android_get_x86_cpuid_vendor_id_type(const char* vendor_id);
 
 /*
  * android_get_x86_cpuid_vmx_support: returns 1 if the CPU supports Intel
  * VM-x features, returns 0 otherwise
  */
-int android_get_x86_cpuid_vmx_support();
+bool android_get_x86_cpuid_vmx_support();
 
 /*
  * android_get_x86_cpuid_svm_support: returns 1 if the CPU supports AMD
  * SVM features, returns 0 otherwise
  */
-int android_get_x86_cpuid_svm_support();
+bool android_get_x86_cpuid_svm_support();
 
 /*
  * android_get_x86_cpuid_nx_support: returns 1 if the CPU supports Intel
  * NX (no execute) features, returns 0 otherwise
  */
-int android_get_x86_cpuid_nx_support();
+bool android_get_x86_cpuid_nx_support();
 
 /*
  * android_get_x86_cpuid_is_vcpu: returns 1 if the CPU is a running under
  * a Hypervisor
  */
-int android_get_x86_cpuid_is_vcpu();
+bool android_get_x86_cpuid_is_vcpu();
 
 ANDROID_END_HEADER

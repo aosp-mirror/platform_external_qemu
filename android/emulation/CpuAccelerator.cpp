@@ -671,7 +671,9 @@ std::pair<AndroidHyperVStatus, std::string> GetHyperVStatus() {
     // this was easy
     return std::make_pair(ANDROID_HYPERV_ABSENT, "Hyper-V runs only on Windows");
 #else // _WIN32
-    if (!android_get_x86_cpuid_vmx_support() && android_get_x86_cpuid_is_vcpu()) {
+    if (!android_get_x86_cpuid_vmx_support()
+        && !android_get_x86_cpuid_svm_support()
+        && android_get_x86_cpuid_is_vcpu()) {
         // The simple part: if we're running under a hypervisor, it's either Hyper-V
         // (meaning it's installed and running) or not Hyper-V (so we're in a guest
         // and Hyper-V is not supported)
