@@ -116,6 +116,30 @@
       "revId": "6d576328a62a75ad0f1ba3ae710436d8520737f5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2afc637c_e668c2c5",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 31
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2afc637c_fb085b0a",
+      "range": {
+        "startLine": 489,
+        "startChar": 57,
+        "endLine": 489,
+        "endChar": 66
+      },
+      "revId": "6d576328a62a75ad0f1ba3ae710436d8520737f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
