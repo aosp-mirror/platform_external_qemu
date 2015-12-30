@@ -22,6 +22,30 @@
       "revId": "cb7208c7d7e37b7ad80f68737598d23b8cd11999",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4aed17c9_a2e1842a",
+        "filename": "docs/ANDROID-SKIN-FILES.TXT",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2015-12-30T00:50:50Z",
+      "side": 1,
+      "message": "Good catch",
+      "parentUuid": "eafecb6e_4177fcb4",
+      "range": {
+        "startLine": 17,
+        "startChar": 14,
+        "endLine": 17,
+        "endChar": 70
+      },
+      "revId": "cb7208c7d7e37b7ad80f68737598d23b8cd11999",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
