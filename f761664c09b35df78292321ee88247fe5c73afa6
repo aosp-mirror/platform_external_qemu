@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ca2ae7be_0b34f418",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 19
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0abebfc6_93393c17",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0abebfc6_b3363822",
         "filename": "android-qemu1-glue/qemu-aeb-agent-impl.c",
         "patchSetId": 19
@@ -30,6 +48,24 @@
       "writtenOn": "2015-12-22T15:43:05Z",
       "side": 1,
       "message": "nit: trailing whitespace here and below.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eafecb6e_6c54b701",
+        "filename": "android-qemu1-glue/qemu-aeb-agent-impl.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0abebfc6_b3363822",
       "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ea27abf2_4439c2af",
+        "filename": "android-qemu1-glue/qemu-aeb-agent-impl.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eab5ebda_5addf505",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aaaf738e_38d84917",
         "filename": "android/aeb.c",
         "patchSetId": 19
@@ -64,6 +118,24 @@
       "writtenOn": "2015-12-22T15:43:05Z",
       "side": 1,
       "message": "nit: Copyright disclaimer.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a0b8f60_3e23f54f",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aaaf738e_38d84917",
       "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "ca2ae7be_4b8d4c1e",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6ac9fb78_f630a026",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea9a4b77_725d982d",
         "filename": "android/aeb.c",
         "patchSetId": 19
@@ -98,6 +188,24 @@
       "writtenOn": "2015-12-22T15:43:05Z",
       "side": 1,
       "message": "Please explain the \"HACK\"",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2afc637c_4645564d",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea9a4b77_725d982d",
       "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "ca2ae7be_2b92983f",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0abebfc6_5397a42e",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4ac43761_158d141f",
         "filename": "android/aeb.c",
         "patchSetId": 19
@@ -132,6 +258,24 @@
       "writtenOn": "2015-12-22T15:43:05Z",
       "side": 1,
       "message": "nit: encapsulate debug messages in macro,. This is also valid for all uses of printf/fprintf below.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eafecb6e_cc3843cb",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4ac43761_158d141f",
       "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "8a0b8f60_1e28b128",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0abebfc6_d333b430",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8ab2aff4_57978c2e",
         "filename": "android/aeb.c",
         "patchSetId": 19
@@ -166,6 +328,24 @@
       "writtenOn": "2015-12-22T15:43:05Z",
       "side": 1,
       "message": "nit: no error testing? seriously?",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca01073f_4b23994e",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8ab2aff4_57978c2e",
       "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "aa2133e4_d75446a7",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cab827d7_d9f03388",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ac9fb78_168d1c1f",
         "filename": "android/aeb.c",
         "patchSetId": 19
@@ -200,6 +398,24 @@
       "writtenOn": "2015-12-22T15:43:05Z",
       "side": 1,
       "message": "nit: use:\n\n  char cmd[16] \u003d {};\n\ninstead, which will avoid the creation of a 2-byte constant string for \"\\0\" in your executable.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a1bbbb8_206596c1",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6ac9fb78_168d1c1f",
       "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "6a1bbbb8_805a8a05",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eab5ebda_9ae6add1",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8ab2aff4_b77d48c2",
         "filename": "android/aeb.c",
         "patchSetId": 19
@@ -234,6 +468,24 @@
       "writtenOn": "2015-12-22T15:43:05Z",
       "side": 1,
       "message": "nit: trailing whitespace here and everywhere. Use \u0027git clang-format\u0027",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a0b8f60_7e2d7d38",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8ab2aff4_b77d48c2",
       "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "ea27abf2_64484644",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6ac9fb78_36921840",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea9a4b77_92711cb6",
         "filename": "android/aeb.c",
         "patchSetId": 19
@@ -268,6 +538,24 @@
       "writtenOn": "2015-12-22T15:43:05Z",
       "side": 1,
       "message": "nit: Might want to deal with \u0027numBuffers \u003d\u003d 1\u0027 which will be the most common case to avoid need-less memory allocations and improve throughput.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca01073f_cb36698c",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea9a4b77_92711cb6",
       "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "aa2133e4_37f16200",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aaaf738e_78e2c1c0",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea9a4b77_b26e20d1",
         "filename": "android/aeb.c",
         "patchSetId": 19
@@ -302,6 +608,24 @@
       "writtenOn": "2015-12-22T15:43:05Z",
       "side": 1,
       "message": "nit: Add TODO here too.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a0b8f60_5e32399a",
+        "filename": "android/aeb.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea9a4b77_b26e20d1",
       "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -325,6 +649,24 @@
     },
     {
       "key": {
+        "uuid": "ea27abf2_243e4e99",
+        "filename": "android/aeb.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2ac3835c_34a6907e",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0ae5dff2_bbe367c0",
         "filename": "android/emulation/control/aeb_agent.h",
         "patchSetId": 19
@@ -342,6 +684,24 @@
     },
     {
       "key": {
+        "uuid": "0af79f9a_25176229",
+        "filename": "android/emulation/control/aeb_agent.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0ae5dff2_bbe367c0",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eab5ebda_faede9ac",
         "filename": "android/emulation/control/aeb_agent.h",
         "patchSetId": 19
@@ -353,6 +713,24 @@
       "writtenOn": "2015-12-22T15:43:05Z",
       "side": 1,
       "message": "Documentation?",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea27abf2_c42c926d",
+        "filename": "android/emulation/control/aeb_agent.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eab5ebda_faede9ac",
       "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -405,6 +783,24 @@
       "writtenOn": "2015-12-22T15:43:05Z",
       "side": 1,
       "message": "ordering, please.",
+      "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca01073f_ab33259a",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T22:39:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cab827d7_19faab65",
       "revId": "f761664c09b35df78292321ee88247fe5c73afa6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
