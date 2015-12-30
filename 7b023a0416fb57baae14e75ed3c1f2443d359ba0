@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "8a0b8f60_6317aad6",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T00:08:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2afc637c_7b490bb8",
+      "range": {
+        "startLine": 26,
+        "startChar": 10,
+        "endLine": 26,
+        "endChar": 19
+      },
+      "revId": "7b023a0416fb57baae14e75ed3c1f2443d359ba0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea27abf2_1ecc3db9",
         "filename": "android/android_emulator_bridge.c",
         "patchSetId": 27
