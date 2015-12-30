@@ -154,7 +154,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
         "Ctrl+Shift+H  HOME\n"
 #endif
         "Ctrl+O     OVERVIEW\n"
-        "Ctrl+Backspace BACK\n";
+        "Ctrl+Backspace BACK\n"
+        "Ctrl+Left ROTATE_LEFT\n"
+        "Ctrl+Right ROTATE_RIGHT\n";
 
     QTextStream stream(&default_shortcuts);
     mShortcutKeyStore.populateFromTextStream(stream, parseQtUICommand);
@@ -489,19 +491,20 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         uiEmuAgent->userEvents->sendKey(kKeyCodeAppSwitch, down);
         break;
     case QtUICommand::ROTATE_RIGHT:
-        {
-            SkinEvent* skin_event = new SkinEvent();
-            skin_event->type = kEventLayoutNext;
-            skinUIEvent(skin_event);
-            break;
-        }
     case QtUICommand::ROTATE_LEFT:
-        {
+        if (down) {
+            // TODO: remove this after we preserve zoom after rotate
+            if (emulator_window->isInZoomMode()) {
+                toolsUi->zoom_button->click();
+            }
             SkinEvent* skin_event = new SkinEvent();
-            skin_event->type = kEventLayoutPrev;
+            skin_event->type =
+                cmd == QtUICommand::ROTATE_RIGHT ?
+                    kEventLayoutNext :
+                    kEventLayoutPrev;
             skinUIEvent(skin_event);
-            break;
         }
+        break;
     case QtUICommand::UNGRAB_KEYBOARD:
         // Ungrabbing is handled in EmulatorQtWindow, and doesn't
         // really need an element in the QtUICommand enum. This
@@ -509,7 +512,9 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         // it in the list of keyboard shortcuts in the Help page.
     default:;
     }
+   
 }
+
 
 bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
     QKeySequence event_key_sequence(event->key() + event->modifiers());
@@ -616,23 +621,14 @@ void ToolWindow::on_overview_button_released()
     handleUICommand(QtUICommand::OVERVIEW, false);
 }
 
-void ToolWindow::sendRotateCommand(ToolWindow::RotationDirection d) {
-    // TODO: remove this after we preserve zoom after rotate
-    if (emulator_window->isInZoomMode())
-        toolsUi->zoom_button->click();
-    handleUICommand(d == RotationDirection::Left ?
-                        QtUICommand::ROTATE_LEFT :
-                        QtUICommand::ROTATE_RIGHT,
-                    true);
-}
 void ToolWindow::on_prev_layout_button_clicked()
 {
-    sendRotateCommand(RotationDirection::Left);
+    handleUICommand(QtUICommand::ROTATE_LEFT);
 }
 
 void ToolWindow::on_next_layout_button_clicked()
 {
-    sendRotateCommand(RotationDirection::Right);
+    handleUICommand(QtUICommand::ROTATE_RIGHT);
 }
 
 void ToolWindow::on_scrShot_button_clicked()
