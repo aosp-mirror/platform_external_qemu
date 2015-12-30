@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8a0b8f60_be8085e2",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 31
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T20:24:37Z",
+      "side": 1,
+      "message": "Damnit! Thanks :)",
+      "parentUuid": "8a0b8f60_03e5fe23",
+      "range": {
+        "startLine": 114,
+        "startChar": 42,
+        "endLine": 114,
+        "endChar": 48
+      },
+      "revId": "6d576328a62a75ad0f1ba3ae710436d8520737f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aa2133e4_379b228f",
         "filename": "android/android_emulator_bridge.c",
         "patchSetId": 31
@@ -36,6 +60,30 @@
       "writtenOn": "2015-12-30T00:34:19Z",
       "side": 1,
       "message": "no, %u is totally not the right thing for size_t\nhttp://stackoverflow.com/questions/1546789/clean-code-to-printf-size-t-in-c-or-nearest-equivalent-of-c99s-z-in-c\n\nI personally think it\u0027s one of the most dangerous types to use in C++",
+      "range": {
+        "startLine": 224,
+        "startChar": 40,
+        "endLine": 224,
+        "endChar": 41
+      },
+      "revId": "6d576328a62a75ad0f1ba3ae710436d8520737f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a1bbbb8_f5922279",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 31
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2015-12-30T20:24:37Z",
+      "side": 1,
+      "message": "Done. Thanks for the pointer!",
+      "parentUuid": "aa2133e4_379b228f",
       "range": {
         "startLine": 224,
         "startChar": 40,
