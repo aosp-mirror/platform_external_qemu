@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa2133e4_974f6eba",
+        "filename": "docs/ANDROID-SKIN-FILES.TXT",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2015-12-30T01:47:53Z",
+      "side": 1,
+      "message": "same.\nCould you please do a search for \u0027layout\u0027 and clean all of those?",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 69
+      },
+      "revId": "e3130015b038415b22c91f8a65f28ca20e2220e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
