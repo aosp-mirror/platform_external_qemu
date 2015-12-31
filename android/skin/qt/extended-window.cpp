@@ -16,6 +16,7 @@
 #include "android/main-common.h"
 #include "android/skin/keyset.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/tool-window.h"
 
 #include "ui_extended.h"
@@ -65,9 +66,12 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->helpPage->initializeKeyboardShortcutList(shortcuts);
     mExtendedUi->dpadPage->setUserEventsAgent(agentPtr->userEvents);
 
+    connect(
+        mExtendedUi->settingsPage, SIGNAL(themeChanged(SettingsTheme)),
+        this, SLOT(switchToTheme(SettingsTheme)));
+
     // Do any sub-window-specific initialization
     initLocation();
-    initSettings();
     initVirtualSensors();
 
     mPaneButtonMap = {
@@ -88,23 +92,6 @@ ExtendedWindow::ExtendedWindow(
 void ExtendedWindow::showPane(ExtendedWindowPane pane) {
     show();
     adjustTabs(pane);
-}
-
-void ExtendedWindow::completeInitialization()
-{
-    // This function has things that must be performed
-    // after the ctor and after show() is called
-
-    completeSettingsInitialization();
-
-    // Set the first tab active
-    on_locationButton_clicked();
-}
-
-ExtendedWindow::~ExtendedWindow()
-{
-    // Do not delete 'extendedState'--we'll want it if
-    // this window gets re-created.
 }
 
 void ExtendedWindow::closeEvent(QCloseEvent *ce)
@@ -140,14 +127,15 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
         return;
     }
     QPushButton* thisButton = it->second;
+    SettingsTheme theme = getSelectedTheme();
 
     // Make all the tab buttons the same except for the one whose
     // pane is on top.
     QString colorStyle("text-align: left; color:");
-    colorStyle += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
+    colorStyle += (theme == SETTINGS_THEME_DARK) ?
                       DARK_MAJOR_TAB_COLOR : LIGHT_MAJOR_TAB_COLOR;
     colorStyle += "; background-color:";
-    colorStyle += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
+    colorStyle += (theme == SETTINGS_THEME_DARK) ?
                       DARK_TAB_BKG_COLOR : LIGHT_TAB_BKG_COLOR;
 
     mExtendedUi->batteryButton    ->setStyleSheet(colorStyle);
@@ -161,10 +149,10 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
     mExtendedUi->telephoneButton  ->setStyleSheet(colorStyle);
 
     QString activeStyle("text-align: left; color:");
-    activeStyle += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
+    activeStyle += (theme == SETTINGS_THEME_DARK) ?
                       DARK_MAJOR_TAB_COLOR : LIGHT_MAJOR_TAB_COLOR;
     activeStyle += "; background-color:";
-    activeStyle += (mSettingsState.mTheme == SETTINGS_THEME_DARK) ?
+    activeStyle += (theme == SETTINGS_THEME_DARK) ?
                       DARK_TAB_SELECTED_COLOR : LIGHT_TAB_SELECTED_COLOR;
     thisButton->setStyleSheet(activeStyle);
 
@@ -181,4 +169,59 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
 
     thisButton->clearFocus(); // It looks better when not highlighted
     mExtendedUi->stackedWidget->setCurrentIndex(static_cast<int>(thisIndex));
+}
+
+void ExtendedWindow::switchToTheme(SettingsTheme theme)
+{
+    // Switch to the icon images that are appropriate for this theme.
+    switchAllIconsForTheme(theme);
+
+    // Set the Qt style.
+
+    // The first part is based on the display's pixel density.
+    // Most displays give 1.0; high density displays give 2.0.
+    double densityFactor = 1.0;
+    if (skin_winsys_get_device_pixel_ratio(&densityFactor) != 0) {
+        // Failed: use 1.0
+        densityFactor = 1.0;
+    }
+    QString styleString = (densityFactor > 1.5) ? QT_FONTS(HI) : QT_FONTS(LO);
+
+
+    // The second part is based on the theme
+    // Set the style for this theme
+    switch (theme) {
+        case SETTINGS_THEME_DARK:
+            styleString += QT_STYLE(DARK);
+            break;
+        case SETTINGS_THEME_LIGHT:
+        default:
+            styleString += QT_STYLE(LIGHT);
+            break;
+    }
+
+    // Apply this style to the extended window (this),
+    // and to the main tool-bar.
+    this->setStyleSheet(styleString);
+    mToolWindow->setStyleSheet(styleString);
+
+    // Force a re-draw to make the new style take effect
+    this->style()->unpolish(mExtendedUi->stackedWidget);
+    this->style()->polish(mExtendedUi->stackedWidget);
+    this->update();
+
+    // Make the Settings pane active (still)
+    adjustTabs(PANE_IDX_SETTINGS);
+}
+
+void ExtendedWindow::showEvent(QShowEvent* e) {
+    if (!e->spontaneous()) {
+        // This function has things that must be performed
+        // after the ctor and after show() is called
+        switchToTheme(getSelectedTheme());
+
+        // Set the first tab active
+        on_locationButton_clicked();
+    }
+    QFrame::showEvent(e);
 }

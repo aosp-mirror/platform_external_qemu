@@ -24,9 +24,9 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/dpad-page.cpp \
     android/skin/qt/extended-pages/finger-page.cpp \
     android/skin/qt/extended-pages/help-page.cpp \
+    android/skin/qt/extended-pages/settings-page.cpp \
     android/skin/qt/extended-pages/telephony-page.cpp \
     android/skin/qt/ext-location.cpp \
-    android/skin/qt/ext-settings.cpp \
     android/skin/qt/ext-virtsensors.cpp \
     android/skin/qt/extended-window.cpp \
     android/skin/qt/QtLooper.cpp \
@@ -42,6 +42,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-pages/dpad-page.h \
     android/skin/qt/extended-pages/finger-page.h \
     android/skin/qt/extended-pages/help-page.h \
+    android/skin/qt/extended-pages/settings-page.h \
     android/skin/qt/extended-pages/telephony-page.h \
     android/skin/qt/extended-window.h \
     android/skin/qt/QtTimerImpl.h \
@@ -57,5 +58,6 @@ ANDROID_SKIN_QT_UI_SRC_FILES := \
     android/skin/qt/extended-pages/dpad-page.ui \
     android/skin/qt/extended-pages/finger-page.ui \
     android/skin/qt/extended-pages/help-page.ui \
+    android/skin/qt/extended-pages/settings-page.ui \
     android/skin/qt/extended-pages/telephony-page.ui \
     android/skin/qt/tools.ui \
