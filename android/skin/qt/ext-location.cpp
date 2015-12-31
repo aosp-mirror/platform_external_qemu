@@ -33,7 +33,7 @@ void ExtendedWindow::initLocation()
     mExtendedUi->loc_latitudeInput->setMinValue(-90.0);
     mExtendedUi->loc_latitudeInput->setMaxValue(90.0);
     QObject::connect(&mLoc_timer, &QTimer::timeout, this, &ExtendedWindow::loc_slot_timeout);
-    setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, false);
+    setButtonEnabled(mExtendedUi->loc_playStopButton, getSelectedTheme(), false);
 
     // Restore previous values.
     QSettings settings;
@@ -56,11 +56,12 @@ void ExtendedWindow::initLocation()
 
 void ExtendedWindow::loc_geoDataLoadingStarted() {
     mExtendedUi->loc_pathTable->setRowCount(0);
+    SettingsTheme theme = getSelectedTheme();
 
     // Prevent the user from initiating a load gpx/kml while another load is already
     // in progress
-    setButtonEnabled(mExtendedUi->loc_GpxKmlButton, mSettingsState.mTheme, false);
-    setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, false);
+    setButtonEnabled(mExtendedUi->loc_GpxKmlButton, theme, false);
+    setButtonEnabled(mExtendedUi->loc_playStopButton, theme, false);
 }
 
 void ExtendedWindow::loc_startupGeoDataLoadingFinished(QString, bool ok, QString) {
@@ -79,8 +80,10 @@ void ExtendedWindow::loc_startupGeoDataLoadingFinished(QString, bool ok, QString
             return;
         }
     }
-    setButtonEnabled(mExtendedUi->loc_GpxKmlButton, mSettingsState.mTheme, true);
-    setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, true);
+
+    SettingsTheme theme = getSelectedTheme();
+    setButtonEnabled(mExtendedUi->loc_GpxKmlButton, theme, true);
+    setButtonEnabled(mExtendedUi->loc_playStopButton, theme, true);
 }
 
 void ExtendedWindow::loc_geoDataLoadingFinished(QString file_name, bool ok, QString error) {
@@ -98,8 +101,9 @@ void ExtendedWindow::loc_geoDataLoadingFinished(QString file_name, bool ok, QStr
     } else {
         showErrorDialog(error, tr("Geo Data Parser"));
     }
-    setButtonEnabled(mExtendedUi->loc_GpxKmlButton, mSettingsState.mTheme, true);
-    setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, true);
+    SettingsTheme theme = getSelectedTheme();
+    setButtonEnabled(mExtendedUi->loc_GpxKmlButton, theme, true);
+    setButtonEnabled(mExtendedUi->loc_playStopButton, theme, true);
 }
 
 void ExtendedWindow::on_loc_pathTable_cellChanged(int row, int col)
@@ -107,7 +111,7 @@ void ExtendedWindow::on_loc_pathTable_cellChanged(int row, int col)
     // If the cell's contents are bad, turn the cell red
     bool cellOK = loc_cellIsValid(mExtendedUi->loc_pathTable, row, col);
     QColor normalColor =
-        mSettingsState.mTheme == SETTINGS_THEME_LIGHT ? Qt::black : Qt::white;
+        getSelectedTheme() == SETTINGS_THEME_LIGHT ? Qt::black : Qt::white;
     QColor newColor = (cellOK ? normalColor : Qt::red);
     mExtendedUi->loc_pathTable->item(row, col)->setForeground(QBrush(newColor));
 }
@@ -132,7 +136,7 @@ void ExtendedWindow::locationPlaybackStart()
 
     mLoc_rowToSend = std::max(0, mExtendedUi->loc_pathTable->currentRow());
 
-    SettingsTheme theme = mSettingsState.mTheme;
+    SettingsTheme theme = getSelectedTheme();
 
     // Disable editing the data in the table while playback is in progress.
     mExtendedUi->loc_pathTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -223,7 +227,7 @@ void ExtendedWindow::locationPlaybackStop()
         mExtendedUi->loc_pathTable->item(mLoc_rowToSend - 1, 0)->setIcon(QIcon());
     }
     mLoc_rowToSend = -1;
-    SettingsTheme theme = mSettingsState.mTheme;
+    SettingsTheme theme = getSelectedTheme();
     setButtonEnabled(mExtendedUi->loc_GpxKmlButton,  theme, true);
     mExtendedUi->loc_playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
     mExtendedUi->loc_playStopButton->setProperty("themeIconName", "play_arrow");
@@ -339,7 +343,7 @@ void ExtendedWindow::loc_populateTable(GpsFixArray *fixes)
     }
     mLoc_nowLoadingGeoData = false;
     mExtendedUi->loc_pathTable->blockSignals(false);
-    setButtonEnabled(mExtendedUi->loc_playStopButton, mSettingsState.mTheme, true);
+    setButtonEnabled(mExtendedUi->loc_playStopButton, getSelectedTheme(), true);
 }
 
 ////////////////////////////////////////////////////////////

@@ -12,6 +12,7 @@
 
 // This file contains values that are used for saving and
 // restoring user settings associated with the Qt-based UI.
+#pragma once
 
 namespace Ui {
     namespace Settings {
