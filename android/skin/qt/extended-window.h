@@ -21,6 +21,7 @@
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/shortcut-key-store.h"
 #include "android/skin/qt/qt-ui-commands.h"
+#include "android/skin/qt/extended-pages/common.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/path.h"
 
@@ -32,6 +33,7 @@
 #include <QThread>
 #include <QTimer>
 #include <QDoubleValidator>
+#include <QShowEvent>
 
 #include <vector>
 #include <map>
@@ -55,14 +57,9 @@ public:
         const UiEmuAgent *agentPtr,
         const ShortcutKeyStore<QtUICommand>* shortcuts);
 
-    void completeInitialization();
     void showPane(ExtendedWindowPane pane);
 
-    static void switchAllIconsForTheme(SettingsTheme theme);
-
 private:
-
-    ~ExtendedWindow();
     void closeEvent(QCloseEvent *ce) override;
 
     EmulatorQtWindow    *mEmulatorWindow;
@@ -70,26 +67,8 @@ private:
     GeoDataLoaderThread *mGeoDataLoader;
     GpsFixArray          mGpsFixesArray;
 
-    bool eventFilter (QObject* object, QEvent* event) override;
-
-    class SettingsState {
-    public:
-        SettingsTheme mTheme;
-        QString       mSavePath;
-        QString       mSdkPath;
-
-        SettingsState() :
-            mTheme(SETTINGS_THEME_LIGHT)
-            { }
-    };
-
     void initLocation();
-    void initSettings();
     void initVirtualSensors();
-
-    void completeSettingsInitialization();
-
-    SettingsState   mSettingsState;
 
     const QAndroidEmulatorWindowAgent* mEmulatorWindowAgent;
     const QAndroidLocationAgent* mLocationAgent;
@@ -119,10 +98,13 @@ private:
 
     QIcon getIconForCurrentTheme(const QString& icon_name) {
         QString iconType =
-            mSettingsState.mTheme == SETTINGS_THEME_LIGHT ? LIGHT_PATH : DARK_PATH;
+            getSelectedTheme() == SETTINGS_THEME_LIGHT ? LIGHT_PATH : DARK_PATH;
         return QIcon(":/" + iconType + "/" + icon_name);
     }
+
 private slots:
+    void switchToTheme(SettingsTheme theme);
+
     // Master tabs
     void on_batteryButton_clicked();
     void on_cellularButton_clicked();
@@ -154,14 +136,6 @@ private slots:
     void locationPlaybackStart();
     void locationPlaybackStop();
 
-    // Settings
-    void on_set_allowKeyboardGrab_toggled(bool);
-    void on_set_saveLocBox_textEdited(const QString&);
-    void on_set_saveLocFolderButton_clicked();
-    void on_set_sdkPathBox_textEdited(const QString&);
-    void on_set_sdkPathButton_clicked();
-    void on_set_themeBox_currentIndexChanged(int index);
-
     // Sensors
     void on_temperatureSensorValueWidget_valueChanged(double value);
     void on_proximitySensorValueWidget_valueChanged(double value);
@@ -169,6 +143,9 @@ private slots:
     void on_pressureSensorValueWidget_valueChanged(double value);
     void on_humiditySensorValueWidget_valueChanged(double value);
     void onPhoneRotationChanged();
+
+private:
+    void showEvent(QShowEvent* e) override;
 };
 
 class GeoDataLoaderThread : public QThread {
