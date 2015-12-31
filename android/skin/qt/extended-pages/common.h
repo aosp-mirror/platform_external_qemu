@@ -11,7 +11,18 @@
 
 #include "android/settings-agent.h"
 #include <QPushButton>
+#include <QString>
 
 // Sets the button state to enabled or disabled, and sets the
 // corresponding icon for the button.
 void setButtonEnabled(QPushButton*  button, SettingsTheme theme, bool isEnabled);
+
+
+// Get the path to the folder where screenshots are saved.
+QString getScreenshotSaveDirectory();
+
+// Get the currently active UI theme.
+SettingsTheme getSelectedTheme();
+
+// Changes icons on all push buttons to fit the given theme.
+void switchAllIconsForTheme(SettingsTheme theme);

@@ -28,6 +28,7 @@
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/error-dialog.h"
+#include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/qt-settings.h"
@@ -105,7 +106,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
         settings.setValue(Ui::Settings::UI_THEME, 0);
     }
 
-    ExtendedWindow::switchAllIconsForTheme(theme);
+    switchAllIconsForTheme(theme);
 
     if (theme == SETTINGS_THEME_DARK) {
         this->setStyleSheet(QT_STYLE(DARK));
@@ -652,8 +653,6 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
 
     extendedWindow = new ExtendedWindow(emulator_window, this, uiEmuAgent, &mShortcutKeyStore);
     extendedWindow->show();
-    // completeInitialization() must be called AFTER show()
-    extendedWindow->completeInitialization();
     extendedWindow->showPane(pane);
     extendedWindow->raise();
 }

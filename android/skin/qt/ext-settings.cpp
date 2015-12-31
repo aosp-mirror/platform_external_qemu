@@ -15,7 +15,7 @@
 #include "android/settings-agent.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/error-dialog.h"
- #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "extended-window.h"
 #include "extended-window-styles.h"
@@ -235,7 +235,6 @@ void ExtendedWindow::on_set_sdkPathBox_textEdited(const QString&) {
 }
 
 bool ExtendedWindow::eventFilter(QObject* object, QEvent* event) {
-
     if (object == mExtendedUi->set_saveLocBox) {
         if (event->type() == QEvent::FocusIn) {
             mExtendedUi->set_saveLocBox->setText(mSettingsState.mSavePath);
