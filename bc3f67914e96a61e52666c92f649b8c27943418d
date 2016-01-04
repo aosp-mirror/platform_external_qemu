@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eafecb6e_075d0473",
+        "filename": "android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-01-04T18:38:32Z",
+      "side": 1,
+      "message": "Missing copyright notice",
+      "revId": "bc3f67914e96a61e52666c92f649b8c27943418d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea27abf2_dfe1ff17",
+        "filename": "android/skin/qt/qt-settings.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-01-04T18:38:32Z",
+      "side": 1,
+      "message": "associated with \"settings-page\", not because",
+      "revId": "bc3f67914e96a61e52666c92f649b8c27943418d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
