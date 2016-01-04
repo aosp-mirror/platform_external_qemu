@@ -12,6 +12,7 @@
 
 // This file contains values that are used for saving and
 // restoring user settings associated with the Qt-based UI.
+#pragma once
 
 namespace Ui {
     namespace Settings {
@@ -21,7 +22,7 @@ namespace Ui {
         const QString APP_NAME("Emulator");
 
         // Note: The "set/" here is because these settings are
-        //       associated with "ext-settings", not because
+        //       associated with "settings-page", not because
         //       we're in "namespace Settings".
 
         const QString ALLOW_KEYBOARD_GRAB("set/allow_keyboard_grab");

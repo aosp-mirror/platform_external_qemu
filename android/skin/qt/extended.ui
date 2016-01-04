@@ -61,7 +61,7 @@ font-family: &quot;Roboto&quot;</string>
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="currentIndex">
-    <number>5</number>
+    <number>7</number>
    </property>
    <widget class="QWidget" name="location_page">
     <widget class="QTableWidget" name="loc_pathTable">
@@ -954,257 +954,7 @@ font-family: &quot;Roboto&quot;</string>
    </widget>
    <widget class="DPadPage" name="dpadPage"/>
    <widget class="FingerPage" name="finger_page"/>
-   <widget class="QWidget" name="settingsPage">
-    <widget class="QGroupBox" name="themeTitle">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>0</y>
-       <width>181</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Emulator window theme</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="set_themeBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>18</y>
-       <width>280</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">padding: 3px 3px 3px 3px;</string>
-     </property>
-     <item>
-      <property name="text">
-       <string>Light</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Dark</string>
-      </property>
-     </item>
-    </widget>
-    <widget class="QGroupBox" name="saveLocationTitle">
-     <property name="geometry">
-      <rect>
-       <x>324</x>
-       <y>0</y>
-       <width>280</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Screenshot save location</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="set_saveLocBox">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>324</x>
-       <y>18</y>
-       <width>240</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="readOnly">
-      <bool>false</bool>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="set_saveLocFolderButton">
-     <property name="geometry">
-      <rect>
-       <x>572</x>
-       <y>18</y>
-       <width>32</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string notr="true"/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/dark/folder</normaloff>:/dark/folder</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>32</width>
-       <height>32</height>
-      </size>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string notr="true">folder</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="themeTitle_2">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>74</y>
-       <width>211</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Grab screen focus with mouse</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="themeTitle_4">
-     <property name="geometry">
-      <rect>
-       <x>324</x>
-       <y>74</y>
-       <width>211</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Android SDK path</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="set_allowKeyboardGrab">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>92</y>
-       <width>211</width>
-       <height>24</height>
-      </rect>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>24</width>
-       <height>24</height>
-      </size>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Toggle</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="set_sdkPathBox">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>324</x>
-       <y>92</y>
-       <width>240</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="readOnly">
-      <bool>false</bool>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="set_sdkPathButton">
-     <property name="geometry">
-      <rect>
-       <x>572</x>
-       <y>92</y>
-       <width>32</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string notr="true"/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/dark/folder</normaloff>:/dark/folder</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>32</width>
-       <height>32</height>
-      </size>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="themeIconName" stdset="0">
-      <string notr="true">folder</string>
-     </property>
-    </widget>
-   </widget>
+   <widget class="SettingsPage" name="settingsPage"/>
    <widget class="HelpPage" name="helpPage"/>
    <widget class="QWidget" name="page">
     <widget class="QGroupBox" name="locationGroup_4">
@@ -1929,6 +1679,12 @@ font-family: &quot;Roboto&quot;</string>
    <header>android/skin/qt/extended-pages/dpad-page.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>SettingsPage</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/settings-page.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>locationButton</tabstop>
@@ -1941,7 +1697,6 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>helpButton</tabstop>
   <tabstop>spacer2Button</tabstop>
   <tabstop>loc_pathTable</tabstop>
-  <tabstop>set_themeBox</tabstop>
   <tabstop>spacer1Button</tabstop>
   <tabstop>loc_GpxKmlButton</tabstop>
   <tabstop>loc_playStopButton</tabstop>
@@ -1954,8 +1709,6 @@ font-family: &quot;Roboto&quot;</string>
   <tabstop>magNorthWidget</tabstop>
   <tabstop>magEastWidget</tabstop>
   <tabstop>magVerticalWidget</tabstop>
-  <tabstop>set_saveLocBox</tabstop>
-  <tabstop>set_saveLocFolderButton</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>
