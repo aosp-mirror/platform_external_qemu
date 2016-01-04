@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "2afc637c_53f193fe",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-04T22:38:47Z",
+      "side": 1,
+      "message": "I definitely agree with Jim from a user standpoint here - showing a control that doesn\u0027t actually do anything is more frustrating that not having the control at all.",
+      "parentUuid": "4aed17c9_a23504d1",
+      "range": {
+        "startLine": 330,
+        "startChar": 0,
+        "endLine": 333,
+        "endChar": 53
+      },
+      "revId": "fd715af5fc3957da8ce10e3a7a9691c9db5a79bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aa2133e4_3cddc999",
         "filename": "android/skin/qt/ext-settings.cpp",
         "patchSetId": 1
