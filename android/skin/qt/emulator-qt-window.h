@@ -424,6 +424,7 @@ private:
               mMultitouchCenter(-1,-1),
               mPrimaryTouchPoint(-1,-1),
               mReleaseOnClose(false),
+              mFlashValue(0),
               mMode(OverlayMode::Hidden)
         {
             setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
@@ -466,9 +467,7 @@ private:
 
         void keyReleaseEvent(QKeyEvent *event)
         {
-            if (event->key() == Qt::Key_Control && mMode == OverlayMode::Zoom) {
-                this->hide();
-            } else if (event->key() == Qt::Key_Alt && mMode == OverlayMode::Multitouch) {
+            if (event->key() == Qt::Key_Alt && mMode == OverlayMode::Multitouch) {
                 this->hide();
             }
         }

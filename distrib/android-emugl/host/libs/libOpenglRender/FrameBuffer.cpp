@@ -545,6 +545,10 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
 
             success = ::moveSubWindow(m_nativeWindow, m_subWin,
                                       m_x, m_y, m_windowWidth, m_windowHeight);
+
+        // Otherwise, ensure that at least viewport parameters are properly updated.
+        } else {
+            success = true;
         }
 
         if (success) {
