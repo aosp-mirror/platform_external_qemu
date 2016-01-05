@@ -81,6 +81,7 @@ public:
         if (mCrashServer) {
             return false;
         }
+
         initCrashServer();
 
         ::android::base::Win32UnicodeString pipe_unicode(pipe.c_str(),
@@ -126,6 +127,23 @@ public:
         } else {
             return true;
         }
+    }
+
+    virtual std::string getHWInfo() const {
+        system("dxdiag /dontskip /whql:off /64bit /tdxdiag-out.txt");
+
+        FILE* hwinfo_fh = fopen("dxdiag-out.txt", "r");
+        fseek(hwinfo_fh, 0, SEEK_END);
+        size_t fsize = ftell(hwinfo_fh);
+        fseek(hwinfo_fh, 0, SEEK_SET);
+
+        char* res = (char*)malloc(fsize);
+        fread(res, fsize, 1, hwinfo_fh);
+        fclose(hwinfo_fh);
+
+        std::string str_res = std::string(res);
+        free(res);
+        return str_res;
     }
 
 private:
