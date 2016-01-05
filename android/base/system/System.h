@@ -206,6 +206,10 @@ public:
     // in Microsoft Windows) or an empty string if it can't be found
     virtual const String& getAppDataDirectory() const = 0;
 
+    // Return the path to user's Local App Data directory (only applies
+    // in Microsoft Windows) or an empty string if it can't be found
+    virtual const String& getLocalAppDataDirectory() const = 0;
+
     // Return the current directory path. Because this can change at
     // runtime, this returns a new String instance, not a const-reference
     // to a constant one held by the object. Return an empty string if there is

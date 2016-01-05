@@ -71,6 +71,16 @@ TEST(System, getAppDataDirectory) {
     LOG(INFO) << "AppData directory: [" << dir.c_str() << "]";
 }
 
+TEST(System, getLocalAppDataDirectory) {
+    String dir = System::get()->getLocalAppDataDirectory();
+#ifdef _WIN32
+    EXPECT_FALSE(dir.empty());
+#else
+    EXPECT_TRUE(dir.empty());
+#endif
+    LOG(INFO) << "LocalAppData directory: [" << dir.c_str() << "]";
+}
+
 TEST(System, getCurrentDirectory) {
     String dir = System::get()->getCurrentDirectory();
     EXPECT_FALSE(dir.empty());
@@ -87,7 +97,8 @@ TEST(TestSystem, getDirectory) {
     // Mac OS X, Microsoft Windows
     const char  kAppDataDir[] = "/lala/kaka";
 #endif // __linux__
-    TestSystem testSys(kLauncherDir, 32, kHomeDir, kAppDataDir);
+    const char* kLocalAppData = "/outer/space";
+    TestSystem testSys(kLauncherDir, 32, kHomeDir, kAppDataDir, kLocalAppData);
     String ldir = System::get()->getLauncherDirectory();
     EXPECT_STREQ(kLauncherDir, ldir.c_str());
     String pdir = System::get()->getProgramDirectory();
@@ -101,6 +112,8 @@ TEST(TestSystem, getDirectory) {
     // Mac OS X, Microsoft Windows
     EXPECT_STREQ(kAppDataDir, adir.c_str());
 #endif  // __linux__
+    String localAppDataDir = System::get()->getLocalAppDataDirectory();
+    EXPECT_STREQ(kLocalAppData, localAppDataDir.c_str());
 }
 
 // Tests case where program directory is a subdirectory of launcher directory

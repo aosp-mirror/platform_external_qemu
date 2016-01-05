@@ -99,6 +99,46 @@ path_parent( const char*  path, int  levels )
     return result;
 }
 
+char* path_join(const char* firstPath, const char* secondPath) {
+    size_t firstLength = strlen(firstPath);
+    size_t secondLength = strlen(secondPath);
+    size_t totalLength;
+    char* result = NULL;
+
+    // Strip trailing and leading separators from paths
+#ifdef _WIN32
+    // Check for both kind of separator on Windows since it supports both
+    while (firstLength > 0 &&
+           (firstPath[firstLength - 1] == '/' ||
+            firstPath[firstLength - 1] == '\\')) {
+        --firstLength;
+    }
+    while (secondLength > 0 && (*secondPath == '/' || *secondPath == '\\')) {
+        --secondLength;
+        ++secondPath;
+    }
+#else
+    while (firstLength > 0 && firstPath[firstLength - 1] == '/') {
+        --firstLength;
+    }
+    while (secondLength > 0 && *secondPath == '/') {
+        --secondLength;
+        ++secondPath;
+    }
+#endif
+    // Length of both strings plus one byte for separator and one for null
+    totalLength = firstLength + secondLength + 2;
+
+    result = malloc(totalLength);
+
+    strncpy(result, firstPath, firstLength);
+    result[firstLength] = PATH_SEP_C;
+    strncpy(result + firstLength + 1u, secondPath, secondLength);
+    result[totalLength - 1] = '\0';
+
+    return result;
+}
+
 /** MISC FILE AND DIRECTORY HANDLING
  **/
 

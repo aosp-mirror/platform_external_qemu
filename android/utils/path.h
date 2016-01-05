@@ -103,6 +103,16 @@ extern char*  path_parent( const char*  path, int  levels );
  */
 extern int    path_split( const char*  path, char* *pdirname, char* *pbasename );
 
+/* join two paths together. Any trailing path separators in |firstPath| will be
+ * be removed and and leading path separators in |secondPath| will be removed.
+ * After this the two paths will be joined, separated by a platform specific
+ * path separator. Note that this means that if |secondPath| is an absolute path
+ * in a UNIX system then it will still be treated as a relative path without the
+ * leading path separator. Returns NULL if the paths cannot be joined,
+ * otherwise a new string is returned which must be freed by the caller.
+ */
+extern char* path_join(const char* firstPath, const char* secondPath);
+
 /* a convenience function to retrieve the directory name as returned by
  * path_split(). Returns NULL if path_split() returns an error.
  * the result string must be freed by the caller

@@ -13,6 +13,7 @@
 #include "android/avd/util.h"
 
 #include "android/emulation/bufprint_config_dirs.h"
+#include "android/metrics/studio-helper.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/ini.h"
@@ -94,6 +95,21 @@ path_getSdkRoot( char *pFromEnv )
     }
 
     free((char*)parent);
+
+    if (sdkPath) {
+        // Check if there is a system-images folder in this path
+        char* systemImagesPath = path_join(sdkPath, "system-images");
+        if (path_is_dir(systemImagesPath)) {
+            // If there is it should indicate that this is the SDK path
+            D("found SDK root at %s", sdkPath);
+            free(systemImagesPath);
+            return sdkPath;
+        }
+        free(systemImagesPath);
+    }
+
+    // Attempt to use the default Android SDK locations
+    sdkPath = android_sdk_default_path();
 
     if (sdkPath == NULL) {
         D("%s: can't find root of SDK directory", __FUNCTION__);

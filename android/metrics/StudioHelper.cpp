@@ -51,6 +51,13 @@ static const char kAndroidStudioDirPreview[] = "Preview";
 static const char kAndroidStudioUuidHexPattern[] =
         "00000000-0000-0000-0000-000000000000";
 
+static const char kAndroidSdkBase[] = "Android";
+#ifdef __linux__
+static const char kAndroidSdkSdk[] = "Sdk";
+#else //  !__linux__
+static const char kAndroidSdkSdk[] = "sdk";
+#endif  // __linux__
+
 // StudioXML describes the XML parameters we are seeking for in a
 // Studio preferences file. StudioXml structs are statically
 // defined and used in  android_studio_get_installation_id()
@@ -188,6 +195,29 @@ String StudioHelper::pathToStudioUUIDWindows() {
     return retval;
 }
 #endif
+
+//static
+String StudioHelper::defaultAndroidSdkPath() {
+    System* sys = System::get();
+    StringVector paths;
+#if defined(__linux__)
+    paths.append(sys->getHomeDirectory());
+#elif defined(__APPLE__)
+    paths.append(sys->getHomeDirectory());
+    paths.append("Library");
+#elif defined(_WIN32)
+    paths.append(sys->getLocalAppDataDirectory());
+#endif
+    for (const auto& path : paths) {
+        if (path.empty()) {
+            return String();
+        }
+    }
+    paths.append(String(kAndroidSdkBase));
+    paths.append(String(kAndroidSdkSdk));
+
+    return PathUtils::recompose(paths);
+}
 
 /*****************************************************************************/
 
@@ -370,4 +400,12 @@ char* android_studio_get_installation_id() {
     }
 
     return strdup(retval.c_str());
+}
+
+char* android_sdk_default_path(void) {
+    String path = StudioHelper::defaultAndroidSdkPath();
+    if (path.empty()) {
+        return nullptr;
+    }
+    return path.release();
 }

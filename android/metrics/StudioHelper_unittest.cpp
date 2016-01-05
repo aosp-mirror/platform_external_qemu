@@ -202,3 +202,19 @@ TEST(DotAndroidStudio, androidStudioUUIDWindows) {
     EXPECT_STREQ(foundStudioUUIDPath.c_str(), UUIDPath);
 }
 #endif  // _WIN32
+
+TEST(DotAndroidStudio, androidStudioDefaultSdkPath) {
+    TestSystem sys("/root", 32, "/root/home", "/root/appdata",
+                   "/root/localappdata");
+
+    String sdkPath = StudioHelper::defaultAndroidSdkPath();
+#if defined(__linux__)
+    EXPECT_STREQ(sdkPath.c_str(), "/root/home/Android/Sdk");
+#elif defined(__APPLE__)
+    EXPECT_STREQ(sdkPath.c_str(), "/root/home/Library/Android/sdk");
+#elif defined(_WIN32)
+    EXPECT_STREQ(sdkPath.c_str(), "/root/localappdata\\Android\\sdk");
+#else
+#error "Unsupported platform!"
+#endif
+}
