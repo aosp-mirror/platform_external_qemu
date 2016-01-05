@@ -14,6 +14,7 @@
 
 #include "android/base/threads/Thread.h"
 
+#include "android/base/Log.h"
 #include "android/base/threads/ThreadStore.h"
 
 #include <signal.h>
@@ -44,9 +45,7 @@ private:
 
 Thread::Thread(ThreadFlags flags) :
     mThread((pthread_t)NULL),
-    mExitStatus(0),
-    mFlags(flags),
-    mIsRunning(false) {
+    mFlags(flags) {
     pthread_mutex_init(&mLock, NULL);
 }
 
@@ -55,21 +54,29 @@ Thread::~Thread() {
 }
 
 bool Thread::start() {
+    if (mStarted) {
+        return false;
+    }
+
     bool ret = true;
-    pthread_mutex_lock(&mLock);
-    mIsRunning = true;
+    mStarted = true;
     if (pthread_create(&mThread, NULL, thread_main, this)) {
         ret = false;
-        mIsRunning = false;
+        // We _do not_ need to guard this access to |mFinished| because we're
+        // sure that the launched thread failed, so there can't be parallel
+        // access.
+        mFinished = true;
     }
-    pthread_mutex_unlock(&mLock);
     return ret;
 }
 
 bool Thread::wait(intptr_t *exitStatus) {
+    if (!mStarted) {
+        return false;
+    }
     {
         ScopedLocker locker(&mLock);
-        if (!mIsRunning) {
+        if (mFinished) {
             // Thread already stopped.
             if (exitStatus) {
                 *exitStatus = mExitStatus;
@@ -79,23 +86,29 @@ bool Thread::wait(intptr_t *exitStatus) {
     }
 
     // NOTE: Do not hold the lock when waiting for the thread to ensure
-    // it can update mIsRunning and mExitStatus properly in thread_main
+    // it can update mFinished and mExitStatus properly in thread_main
     // without blocking.
-    void *retval;
-    if (pthread_join(mThread, &retval)) {
+    if (pthread_join(mThread, NULL)) {
         return false;
     }
+    DCHECK(mFinished);
+
     if (exitStatus) {
-        *exitStatus = (intptr_t)retval;
+        *exitStatus = mExitStatus;
     }
     return true;
 }
 
 bool Thread::tryWait(intptr_t *exitStatus) {
-    ScopedLocker locker(&mLock);
-    if (!mIsRunning) {
+    if (!mStarted) {
         return false;
     }
+
+    ScopedLocker locker(&mLock);
+    if (!mFinished) {
+        return false;
+    }
+
     if (exitStatus) {
         *exitStatus = mExitStatus;
     }
@@ -115,7 +128,7 @@ void* Thread::thread_main(void *arg) {
         ret = self->main();
 
         pthread_mutex_lock(&self->mLock);
-        self->mIsRunning = false;
+        self->mFinished = true;
         self->mExitStatus = ret;
         pthread_mutex_unlock(&self->mLock);
 
@@ -125,7 +138,8 @@ void* Thread::thread_main(void *arg) {
 
     ::android::base::ThreadStoreBase::OnThreadExit();
 
-    return (void*)ret;
+    // This return value is ignored.
+    return NULL;
 }
 
 // static

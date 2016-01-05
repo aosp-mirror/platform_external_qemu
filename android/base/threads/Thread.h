@@ -99,8 +99,8 @@ private:
 #ifdef _WIN32
     static DWORD WINAPI thread_main(void* arg);
 
-    HANDLE mThread;
-    DWORD mThreadId;
+    HANDLE mThread = INVALID_HANDLE_VALUE;
+    DWORD mThreadId = 0;
     CRITICAL_SECTION mLock;
 #else // !WIN32
     static void* thread_main(void* arg);
@@ -108,9 +108,12 @@ private:
     pthread_t mThread;
     pthread_mutex_t mLock;
 #endif
-    intptr_t mExitStatus;
+    // Access guarded by |mLock|.
+    intptr_t mExitStatus = 0;
     ThreadFlags mFlags;
-    bool mIsRunning;
+    bool mStarted = false;
+    // Access guarded by |mLock|.
+    bool mFinished = false;
 };
 
 }  // namespace base
