@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "android/base/String.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/system/System.h"
+
 #include "android/crashreport/CrashService.h"
 
 #include "android/crashreport/CrashSystem.h"
@@ -22,13 +26,22 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <memory>
+#include <sstream>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
 #define D(...) VERBOSE_PRINT(init, __VA_ARGS__)
 #define I(...) printf(__VA_ARGS__)
 
+#define CMD_BUF_SIZE 1024
+#define HWINFO_CMD "lshw"
+
 namespace android {
+
+using ::android::base::String;
+using ::android::base::PathUtils;
+using ::android::base::System;
+
 namespace crashreport {
 
 namespace {
@@ -67,6 +80,7 @@ public:
         if (mCrashServer) {
             return false;
         }
+
         initCrashServer();
 
         mCrashServer.reset(new ::google_breakpad::CrashGenerationServer(
@@ -97,6 +111,59 @@ public:
             return false;
         } else {
             return true;
+        }
+    }
+
+    virtual std::string getHWInfo() {
+        std::ostringstream err_stream;
+
+        mHWTmpFilePath.clear();
+        System* sys = System::get();
+        String tmp_dir = sys->getTempDir();
+
+        String tmp_file_path_template = PathUtils::join(
+                tmp_dir, "android_emulator_crash_report_XXXXXX");
+
+        int tmpfd = mkstemp((char*)tmp_file_path_template.data());
+
+        if (tmpfd == -1) {
+            err_stream << "Error: Can't create temporary file! errno=" << errno
+                       << std::endl;
+            return err_stream.str();
+        }
+
+        String syscmd(HWINFO_CMD);
+        syscmd += " > ";
+        syscmd += tmp_file_path_template;
+        system(syscmd.c_str());
+
+        FILE* hwinfo_fh = fopen(tmp_file_path_template.c_str(), "r");
+
+        if (!hwinfo_fh) {
+            err_stream << "Error: Can't open temp file "
+                       << tmp_file_path_template.c_str()
+                       << " for reading. errno=" << errno << std::endl;
+            return err_stream.str();
+        }
+
+        mHWTmpFilePath = tmp_file_path_template.c_str();
+
+        fseek(hwinfo_fh, 0, SEEK_END);
+        size_t fsize = ftell(hwinfo_fh);
+        fseek(hwinfo_fh, 0, SEEK_SET);
+
+        std::string out(fsize, '\0');
+        fread(&out[0], fsize, 1, hwinfo_fh);
+        fclose(hwinfo_fh);
+
+        return out;
+    }
+
+    virtual void cleanupHWInfo() {
+        int rm_ret = remove(mHWTmpFilePath.c_str());
+
+        if (rm_ret == -1) {
+            E("Failed to delete HW info at %s", mHWTmpFilePath.c_str());
         }
     }
 
