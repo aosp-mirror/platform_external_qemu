@@ -121,9 +121,6 @@ DWORD WINAPI Thread::thread_main(void *arg) {
         self->mIsRunning = false;
         self->mExitStatus = ret;
         LeaveCriticalSection(&self->mLock);
-
-        self->onExit();
-        // |self| is not valid beyond this point
     }
 
     // Ensure all thread-local values are released for this thread.

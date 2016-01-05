@@ -32,7 +32,7 @@ public:
     explicit FunctorThread(const Functor& func,
                            ThreadFlags flags = ThreadFlags::MaskSignals);
 
-private:
+protected:
     virtual intptr_t main() override;
 
 private:

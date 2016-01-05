@@ -118,9 +118,6 @@ void* Thread::thread_main(void *arg) {
         self->mIsRunning = false;
         self->mExitStatus = ret;
         pthread_mutex_unlock(&self->mLock);
-
-        self->onExit();
-        // |self| is not valid beyond this point
     }
 
     ::android::base::ThreadStoreBase::OnThreadExit();
