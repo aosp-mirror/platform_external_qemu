@@ -15,8 +15,11 @@
 #include "android/base/threads/Async.h"
 
 #include "android/base/threads/FunctorThread.h"
+#include "android/base/threads/ThreadStore.h"
 
 #include <memory>
+
+#include <inttypes.h>
 
 namespace android {
 namespace base {
@@ -27,9 +30,15 @@ class SelfDeletingThread final : public FunctorThread {
 public:
     using FunctorThread::FunctorThread;
 
-    virtual void onExit() override {
-        delete this;
+    intptr_t main() override {
+        // Ensure that this object is deleted automatically when the thread
+        // exits.
+        myStore.set(this);
+        return FunctorThread::main();
     }
+
+private:
+    ThreadStore<SelfDeletingThread> myStore;
 };
 
 }
@@ -42,7 +51,6 @@ bool async(const ThreadFunctor& func, ThreadFlags flags) {
         thread.release();
         return true;
     }
-
     return false;
 }
 
