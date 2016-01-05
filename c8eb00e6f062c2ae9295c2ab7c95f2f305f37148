@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cae3c748_614b9635",
+        "filename": "android/utils/dns.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-05T19:32:57Z",
+      "side": 1,
+      "message": "nit: I would still prefer a prefixed name like android_dns_get_system_servers() to make it explicit that this is part of AndroidEmu",
+      "revId": "c8eb00e6f062c2ae9295c2ab7c95f2f305f37148",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a68ef71_a7f9ca37",
+        "filename": "android/utils/dns.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-05T19:32:57Z",
+      "side": 1,
+      "message": "same here: android_dns_parse_servers()",
+      "revId": "c8eb00e6f062c2ae9295c2ab7c95f2f305f37148",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
