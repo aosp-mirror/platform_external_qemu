@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca2ae7be_17e53724",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-05T02:15:34Z",
+      "side": 1,
+      "message": "Nit: typo",
+      "range": {
+        "startLine": 198,
+        "startChar": 15,
+        "endLine": 198,
+        "endChar": 27
+      },
+      "revId": "e86273361ccee8f4881dab08e2d80ec22a0110b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a1bbbb8_43fa5966",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-05T02:15:34Z",
+      "side": 1,
+      "message": "Nit: trailing space.",
+      "range": {
+        "startLine": 199,
+        "startChar": 22,
+        "endLine": 199,
+        "endChar": 23
+      },
+      "revId": "e86273361ccee8f4881dab08e2d80ec22a0110b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
