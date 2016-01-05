@@ -27,12 +27,15 @@
 #include "UnixStream.h"
 #endif
 
+#include "DecoderContext.h"
 #include "EGLDispatch.h"
 #include "GLESv1Dispatch.h"
 #include "GLESv2Dispatch.h"
 
 #include <string.h>
 
+gles2_decoder_context_t s_gles2;
+gles1_decoder_context_t s_gles1;
 static RenderServer* s_renderThread = NULL;
 static char s_renderAddr[256];
 
@@ -55,14 +58,14 @@ RENDER_APICALL int RENDER_APIENTRY initLibrary(void)
     //
     // Load GLES Plugin
     //
-    if (!init_gles1_dispatch()) {
+    if (!init_gles1_dispatch(&s_gles1)) {
         // Failed to load GLES
         ERR("Failed to init_gles1_dispatch\n");
         return false;
     }
 
     /* failure to init the GLES2 dispatch table is not fatal */
-    if (!init_gles2_dispatch()) {
+    if (!init_gles2_dispatch(&s_gles2)) {
         ERR("Failed to init_gles2_dispatch\n");
         return false;
     }

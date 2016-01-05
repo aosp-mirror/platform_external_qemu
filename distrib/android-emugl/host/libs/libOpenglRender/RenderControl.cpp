@@ -15,11 +15,10 @@
 */
 #include "RenderControl.h"
 
+#include "DecoderContext.h"
 #include "FbConfig.h"
 #include "FrameBuffer.h"
 #include "EGLDispatch.h"
-#include "GLESv2Dispatch.h"
-#include "GLESv1Dispatch.h"
 #include "RenderThreadInfo.h"
 
 static const GLint rendererVersion = 1;

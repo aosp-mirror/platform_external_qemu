@@ -15,7 +15,7 @@
 */
 #include "TextureResize.h"
 
-#include "GLESv2Dispatch.h"
+#include "DecoderContext.h"
 
 #include <stdio.h>
 #include <sstream>

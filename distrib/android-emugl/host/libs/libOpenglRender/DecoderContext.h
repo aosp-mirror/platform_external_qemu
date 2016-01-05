@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2011 The Android Open Source Project
+* Copyright (C) 2011-2015 The Android Open Source Project
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -13,14 +13,8 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef _GLES_V2_DISPATCH_H
-#define _GLES_V2_DISPATCH_H
-
+#pragma once
 #include "gles2_dec.h"
-
-bool init_gles2_dispatch();
-void *gles2_dispatch_get_proc_func(const char *name, void *userData);
-
+#include "gles1_dec.h"
 extern gles2_decoder_context_t s_gles2;
-
-#endif  // _GLES_V2_DISPATCH_H
+extern gles1_decoder_context_t s_gles1;
