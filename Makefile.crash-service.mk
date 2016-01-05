@@ -14,6 +14,9 @@ LOCAL_SRC_FILES := \
     android/crashreport/CrashService_common.cpp \
     android/crashreport/CrashService_$(BUILD_TARGET_OS).cpp \
     android/crashreport/ui/ConfirmDialog.cpp \
+    android/crashreport/ui/CrashProgress.cpp \
+    android/crashreport/ui/DetailsGetter.cpp \
+    android/crashreport/ui/WantHWInfo.cpp \
     android/resource.c \
     android/skin/resource.c \
 
@@ -25,6 +28,9 @@ LOCAL_STATIC_LIBRARIES := \
 
 LOCAL_QT_MOC_SRC_FILES := \
     android/crashreport/ui/ConfirmDialog.h \
+    android/crashreport/ui/CrashProgress.h \
+    android/crashreport/ui/DetailsGetter.h \
+    android/crashreport/ui/WantHWInfo.h
 
 LOCAL_LDFLAGS :=
 ifeq ($(BUILD_TARGET_OS),windows)

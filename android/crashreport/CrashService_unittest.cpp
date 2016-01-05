@@ -107,7 +107,7 @@ TEST(CrashService, startAttachWaitCrash) {
     int64_t waitduration = crash->waitForDumpFile(pid, 10000);
     EXPECT_NE(waitduration, -1);
     EXPECT_TRUE(CrashSystem::isDump(crash->getDumpFile()));
-    std::string details = crash->getCrashDetails();
+    std::string details = crash->getCrashDetails(false);
     EXPECT_NE(details.find("Crash reason:"), std::string::npos);
     EXPECT_NE(details.find("Thread 0"), std::string::npos);
     EXPECT_NE(details.find("Loaded modules:"), std::string::npos);

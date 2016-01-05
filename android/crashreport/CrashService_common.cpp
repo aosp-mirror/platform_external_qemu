@@ -118,6 +118,9 @@ bool CrashService::uploadCrash(const std::string& url) {
     curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "upload_file_minidump",
                  CURLFORM_FILE, mDumpFile.c_str(), CURLFORM_END);
 
+    curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "hw_info",
+                 CURLFORM_FILE, mHWTmpFilePath.c_str(), CURLFORM_END);
+
     curl_easy_setopt(curl, CURLOPT_FAILONERROR, true);
     curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
@@ -160,10 +163,11 @@ bool CrashService::uploadCrash(const std::string& url) {
 
     curl_formfree(formpost);
     curl_easy_cleanup(curl);
+    cleanupHWInfo();
     return success;
 }
 
-std::string CrashService::getCrashDetails() const {
+std::string CrashService::getCrashDetails(bool wantHWInfo) {
     std::string details;
     google_breakpad::BasicSourceLineResolver resolver;
     google_breakpad::MinidumpProcessor minidump_processor(nullptr, &resolver);
@@ -191,6 +195,12 @@ std::string CrashService::getCrashDetails() const {
     }
     google_breakpad::SetPrintStream(fp);
     google_breakpad::PrintProcessState(process_state, true, &resolver);
+
+    if (wantHWInfo) {
+        // Write system-specific hardware info
+        mHWInfo = getHWInfo();
+        fprintf(fp, "HW info (Stored at %s):\nBEGIN HW INFO\n%s\nEND HW INFO", mHWTmpFilePath.c_str(), mHWInfo.c_str());
+    } else { mHWInfo = ""; }
 
     fseek(fp, 0, SEEK_END);
     details.resize(std::ftell(fp));

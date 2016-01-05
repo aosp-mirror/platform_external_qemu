@@ -84,7 +84,11 @@ public:
     virtual bool stopCrashServer() = 0;
 
     // Processes the saved dumpfile with breakpad processor libraries
-    std::string getCrashDetails() const;
+    std::string getCrashDetails(bool wantHWInfo);
+
+    // Uploads system-specific hardware information.
+    virtual std::string getHWInfo() = 0;
+    virtual void cleanupHWInfo() = 0;
 
     // Uploads the saved dumpfile to server defined by CrashSystem
     bool uploadCrash(const std::string& url);
@@ -112,6 +116,8 @@ protected:
     ServerState mServerState;
     int mClientPID = 0;
 
+    std::string mHWTmpFilePath;
+
 private:
     CrashService();
     std::string mVersion;
@@ -119,6 +125,7 @@ private:
     std::string mVersionId;
     std::string mDumpFile;
     std::string mReportId;
+    std::string mHWInfo;
 };
 
 }  // namespace crashreport
