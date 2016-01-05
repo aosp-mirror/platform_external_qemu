@@ -32,8 +32,11 @@
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/tool-window.h"
 #include "ui_tools.h"
+
+#include <cassert>
 
 using namespace android::base;
 
@@ -181,9 +184,19 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
             if (parseQtUICommand(uiCommand.toString(), &cmd)) {
                 QVector<QKeySequence>* shortcuts = mShortcutKeyStore.reverseLookup(cmd);
                 if (shortcuts && shortcuts->length() > 0) {
-                    button->setToolTip(shortcuts->at(0).toString(QKeySequence::NativeText));
+                    button->setToolTip(
+                        getQtUICommandDescription(cmd) +
+                        " (" + shortcuts->at(0).toString(QKeySequence::NativeText) + ")");
                 }
             }
+        } else if (
+            button != toolsUi->close_button &&
+            button != toolsUi->minimize_button &&
+            button != toolsUi->more_button)
+                {
+            // Almost all toolbar buttons are required to have a uiCommand property.
+            // Unfortunately, we have no way of enforcing it at compile time.
+            assert(0);
         }
     }
 }
