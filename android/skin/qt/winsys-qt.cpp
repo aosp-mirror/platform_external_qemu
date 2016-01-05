@@ -20,11 +20,13 @@
 #include "android/skin/resource.h"
 #include "android/skin/winsys.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/emulator-qt-no-window.h"
 #include "android/utils/setenv.h"
 #include "android/main-common-ui.h"
 
 #include <QtCore>
 #include <QApplication>
+#include <QCoreApplication>
 #include <QDesktopWidget>
 #include <QFontDatabase>
 #include <QRect>
@@ -48,7 +50,7 @@ using android::base::String;
 struct GlobalState {
     int argc;
     char** argv;
-    QApplication* app;
+    QCoreApplication* app;
     bool window_pos_saved;
     int window_pos_x;
     int window_pos_y;
@@ -66,7 +68,7 @@ static GlobalState* globalState() {
     return &sGlobalState;
 }
 
-extern void skin_winsys_enter_main_loop(int argc, char **argv)
+extern void skin_winsys_enter_main_loop(bool no_window, int argc, char **argv)
 {
     D("Starting QT main loop\n");
 
@@ -76,21 +78,23 @@ extern void skin_winsys_enter_main_loop(int argc, char **argv)
     QCoreApplication::setLibraryPaths(pathList);
     D("Qt lib path: %s\n", qtPath.c_str());
 
-    // Give Qt the fonts from our resource file
-    QFontDatabase  fontDb;
-    int fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto");
-    if (fontId < 0) {
-        D("Could not load font resource: \":/lib/fonts/Roboto");
-    }
+    if(!no_window) {
+        // Give Qt the fonts from our resource file
+        QFontDatabase  fontDb;
+        int fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto");
+        if (fontId < 0) {
+            D("Could not load font resource: \":/lib/fonts/Roboto");
+        }
 
-    fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto-Bold");
-    if (fontId < 0) {
-        D("Could not load font resource: \":/lib/fonts/Roboto-Bold");
-    }
+        fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto-Bold");
+        if (fontId < 0) {
+            D("Could not load font resource: \":/lib/fonts/Roboto-Bold");
+        }
 
-    fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto-Medium");
-    if (fontId < 0) {
-        D("Could not load font resource: \":/lib/fonts/Roboto-Medium");
+        fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto-Medium");
+        if (fontId < 0) {
+            D("Could not load font resource: \":/lib/fonts/Roboto-Medium");
+        }
     }
 
     GlobalState* g = globalState();
@@ -293,23 +297,37 @@ extern void skin_winsys_set_window_title(const char *title)
     semaphore.acquire();
 }
 
-extern void skin_winsys_spawn_thread(StartFunction f, int argc, char **argv)
+extern void skin_winsys_spawn_thread(bool no_window, StartFunction f, int argc, char **argv)
 {
     D("skin_spawn_thread");
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
-    if (window == NULL) {
-        D("%s: Could not get window handle", __FUNCTION__);
-        return;
+    if(no_window) {
+        EmulatorQtNoWindow *guiless_window = EmulatorQtNoWindow::getInstance();
+        if (guiless_window == NULL) {
+            D("%s: Could not get window handle", __FUNCTION__);
+            return;
+        }
+        guiless_window->startThread([f, argc, argv] { f(argc, argv); });
+    } else {
+        EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+        if (window == NULL) {
+            D("%s: Could not get window handle", __FUNCTION__);
+            return;
+        }
+        window->startThread(f, argc, argv);
     }
-    window->startThread(f, argc, argv);
 }
 
-extern void skin_winsys_start(bool, bool)
+extern void skin_winsys_start(bool no_window, bool raw_keys)
 {
     GlobalState* g = globalState();
-    g->app = new QApplication(g->argc, g->argv);
-    g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
-    EmulatorQtWindow::create();
+    if(no_window) {
+        g->app = new QCoreApplication(g->argc, g->argv);
+        EmulatorQtNoWindow::create();
+    } else {
+        g->app = new QApplication(g->argc, g->argv);
+        g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
+        EmulatorQtWindow::create();
+    }
 }
 
 extern void skin_winsys_run_ui_update(SkinGenericFunction f, void* data) {

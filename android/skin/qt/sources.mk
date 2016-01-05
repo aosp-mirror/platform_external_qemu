@@ -17,6 +17,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/angle-input-widget.cpp \
     android/skin/qt/editable-slider-widget.cpp \
     android/skin/qt/emulator-qt-window.cpp \
+    android/skin/qt/emulator-qt-no-window.cpp \
     android/skin/qt/error-dialog.cpp \
     android/skin/qt/extended-pages/common.cpp \
     android/skin/qt/extended-pages/battery-page.cpp \
@@ -37,6 +38,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/angle-input-widget.h \
     android/skin/qt/editable-slider-widget.h \
     android/skin/qt/emulator-qt-window.h \
+    android/skin/qt/emulator-qt-no-window.h \
     android/skin/qt/extended-pages/battery-page.h \
     android/skin/qt/extended-pages/cellular-page.h \
     android/skin/qt/extended-pages/dpad-page.h \

@@ -56,7 +56,7 @@ void skin_winsys_set_window_title(const char* title);
 bool skin_winsys_is_window_fully_visible(void);
 
 // Start main window support. |no_window| must be true to indicate that
-// no window needs to be shown, but that the SDL backend still needs to be
+// no window needs to be shown, but that the GUI backend still needs to be
 // initialized.
 void skin_winsys_start(bool no_window, bool raw_keys);
 
@@ -78,10 +78,10 @@ void skin_winsys_destroy(void);
 typedef void (*StartFunction)(int argc, char** argv);
 
 // Spawn a thread and run the given function in it.
-void skin_winsys_spawn_thread(StartFunction f, int argc, char** argv);
+void skin_winsys_spawn_thread(bool no_window, StartFunction f, int argc, char** argv);
 
 // Enter the main event handling loop for the UI subsystem.
-void skin_winsys_enter_main_loop(int argc, char** argv);
+void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv);
 
 // Run some UI update in a way that UI subsystem needs
 // E.g. for Qt UI, it makes sure the function runs on the main Qt UI thread,
