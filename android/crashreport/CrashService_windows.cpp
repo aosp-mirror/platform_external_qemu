@@ -28,6 +28,9 @@
 #define D(...) VERBOSE_PRINT(init, __VA_ARGS__)
 #define I(...) printf(__VA_ARGS__)
 
+#define CMD_BUF_SIZE 1024
+#define HWINFO_CMD "dxdiag /dontskip /whql:off /64bit /t"
+
 namespace android {
 namespace crashreport {
 
@@ -81,6 +84,7 @@ public:
         if (mCrashServer) {
             return false;
         }
+
         initCrashServer();
 
         ::android::base::Win32UnicodeString pipe_unicode(pipe.c_str(),
@@ -126,6 +130,56 @@ public:
         } else {
             return true;
         }
+    }
+
+    virtual std::string getHWInfo() const {
+
+        char tmp_dir[CMD_BUF_SIZE] = {};
+        char tmp_filename[CMD_BUF_SIZE] = {};
+        char syscmd[CMD_BUF_SIZE] = {};
+        char errstr[CMD_BUF_SIZE] = {};
+
+        DWORD temp_dir_ret = GetTempPath(CMD_BUF_SIZE, tmp_dir);
+
+        if (!temp_dir_ret) {
+            snprintf(errstr, CMD_BUF_SIZE, "Error: Can't find temp dir path! error code = %lu\n", GetLastError());
+            return std::string(errstr);
+        }
+
+        DWORD temp_file_ret = GetTempFileName(tmp_dir, "emu", 0, tmp_filename);
+
+        if (!temp_file_ret) {
+            snprintf(errstr, CMD_BUF_SIZE, "Error: Can't create temp file! error code = %lu\n", GetLastError());
+            return std::string(errstr);
+        }
+
+        snprintf(syscmd, CMD_BUF_SIZE, HWINFO_CMD "%s", tmp_filename);
+        system(syscmd);
+
+        FILE* hwinfo_fh = fopen(tmp_filename, "r");
+
+        if (!hwinfo_fh) {
+            snprintf(errstr, CMD_BUF_SIZE, "Error: Can't open temp file %s for reading. error code = %lu\n", tmp_filename, GetLastError());
+            return std::string(errstr);
+        }
+
+        fseek(hwinfo_fh, 0, SEEK_END);
+        size_t fsize = ftell(hwinfo_fh);
+        fseek(hwinfo_fh, 0, SEEK_SET);
+
+        char* out = (char*)malloc(fsize);
+        fread(out, fsize, 1, hwinfo_fh);
+        fclose(hwinfo_fh);
+
+        DWORD del_ret = DeleteFile(tmp_filename);
+
+        if (!del_ret) {
+            snprintf(errstr, CMD_BUF_SIZE, "Error: Failed to delete temp file! Filename=%s, error code = %lu\n", tmp_filename, GetLastError());
+        }
+
+        std::string str_res = std::string(out);
+        free(out);
+        return str_res + std::string(errstr);
     }
 
 private:
