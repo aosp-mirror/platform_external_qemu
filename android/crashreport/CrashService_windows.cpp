@@ -81,6 +81,7 @@ public:
         if (mCrashServer) {
             return false;
         }
+
         initCrashServer();
 
         ::android::base::Win32UnicodeString pipe_unicode(pipe.c_str(),
@@ -126,6 +127,10 @@ public:
         } else {
             return true;
         }
+    }
+
+    virtual char* getHWInfo() const {
+        return "Hi there! I'm on Windows!";
     }
 
 private:
