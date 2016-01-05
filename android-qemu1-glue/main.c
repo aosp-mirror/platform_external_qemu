@@ -1017,8 +1017,8 @@ int main(int argc, char **argv) {
     pthread_sigmask(SIG_SETMASK, &set, NULL);
 #endif
     ui_init(skinConfig, skinPath, opts, &uiEmuAgent);
-    skin_winsys_spawn_thread(enter_qemu_main_loop, n, args);
-    skin_winsys_enter_main_loop(argc, argv);
+    skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, n, args);
+    skin_winsys_enter_main_loop(opts->no_window, argc, argv);
     ui_done();
 
     return 0;
