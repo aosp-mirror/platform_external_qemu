@@ -377,6 +377,30 @@
     },
     {
       "key": {
+        "uuid": "6a1bbbb8_03b6a1a2",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-05T02:34:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2afc637c_76759d60",
+      "range": {
+        "startLine": 210,
+        "startChar": 0,
+        "endLine": 219,
+        "endChar": 1
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eafecb6e_1c4efa45",
         "filename": "android/android_emulator_bridge.c",
         "patchSetId": 42
@@ -400,6 +424,30 @@
     },
     {
       "key": {
+        "uuid": "cac4a77f_a2e1e4bc",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-05T02:34:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eafecb6e_1c4efa45",
+      "range": {
+        "startLine": 237,
+        "startChar": 0,
+        "endLine": 240,
+        "endChar": 80
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a0b8f60_5b9b668d",
         "filename": "android/android_emulator_bridge.c",
         "patchSetId": 42
@@ -411,6 +459,30 @@
       "writtenOn": "2016-01-05T00:50:30Z",
       "side": 1,
       "message": "is it possible that msglen is 0 here or it\u0027s not 0-terminated? it would segfault in that case",
+      "range": {
+        "startLine": 266,
+        "startChar": 54,
+        "endLine": 266,
+        "endChar": 57
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cac4a77f_82e700ce",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-05T02:34:41Z",
+      "side": 1,
+      "message": "Not according to the model of what\u0027s supposed to happen, no. Added a check, though.",
+      "parentUuid": "8a0b8f60_5b9b668d",
       "range": {
         "startLine": 266,
         "startChar": 54,
