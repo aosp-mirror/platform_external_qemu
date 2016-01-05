@@ -156,8 +156,13 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
 #endif
         "Ctrl+O     OVERVIEW\n"
         "Ctrl+Backspace BACK\n"
+#ifdef __APPLE__
+        "Ctrl+Num+Left ROTATE_LEFT\n"
+        "Ctrl+Num+Right ROTATE_RIGHT\n";
+#else
         "Ctrl+Left ROTATE_LEFT\n"
         "Ctrl+Right ROTATE_RIGHT\n";
+#endif
 
     QTextStream stream(&default_shortcuts);
     mShortcutKeyStore.populateFromTextStream(stream, parseQtUICommand);
