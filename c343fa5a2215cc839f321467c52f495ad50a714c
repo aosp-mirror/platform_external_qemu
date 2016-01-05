@@ -1,0 +1,464 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca2ae7be_176c17d8",
+        "filename": "android-qemu1-glue/qemu-aeb-agent-impl.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "nit: space\u0027s on the wrong side",
+      "range": {
+        "startLine": 49,
+        "startChar": 77,
+        "endLine": 49,
+        "endChar": 79
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca2ae7be_575e8f2e",
+        "filename": "android-qemu1-glue/qemu-aeb-agent-impl.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "nit: bad formatting",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 1
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aabbf3f0_a15e84f8",
+        "filename": "android-qemu1-glue/qemu-aeb-agent-impl.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "nit: no address-of operator while it\u0027s present on the rest",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 60,
+        "endChar": 52
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eafecb6e_9c4f8a6d",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "how much slower is it for Windows? I\u0027m curious if mmap absence contributes to slowness\nP.S. It\u0027s just a question, please don\u0027t try implementing Windows version of mmap or whatever now :)",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 18
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2afc637c_f64a2d2f",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "is it possible to have enqueue_msg to be called often? in that case this linked list walking could become a performance bottleneck. double-linked list could turn it into a O(1) operation\nif it is called often, of course",
+      "range": {
+        "startLine": 132,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 5
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca2ae7be_77fab32b",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "nit: please cleanup all commented code",
+      "range": {
+        "startLine": 153,
+        "startChar": 2,
+        "endLine": 153,
+        "endChar": 62
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cac4a77f_7fc2477c",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "you don\u0027t need to keep the fd open after mmap():\n\nThe mmap() function adds an extra reference to the file associated with the file descriptor fildes which is not removed by a subsequent close() on that file descriptor. This reference is removed when there are no more mappings to the file.\nhttp://pubs.opengroup.org/onlinepubs/7908799/xsh/mmap.html\n\nso we can just return the mapped pointer and the length",
+      "range": {
+        "startLine": 159,
+        "startChar": 46,
+        "endLine": 159,
+        "endChar": 53
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa2133e4_4f5efe2e",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "looks like it has to be PROT_READ",
+      "range": {
+        "startLine": 173,
+        "startChar": 33,
+        "endLine": 173,
+        "endChar": 43
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2afc637c_76759d60",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "should these be static?",
+      "range": {
+        "startLine": 210,
+        "startChar": 0,
+        "endLine": 219,
+        "endChar": 1
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eafecb6e_1c4efa45",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "I\u0027ve seen this couple of times already. helper function?",
+      "range": {
+        "startLine": 237,
+        "startChar": 0,
+        "endLine": 240,
+        "endChar": 80
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a0b8f60_5b9b668d",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "is it possible that msglen is 0 here or it\u0027s not 0-terminated? it would segfault in that case",
+      "range": {
+        "startLine": 266,
+        "startChar": 54,
+        "endLine": 266,
+        "endChar": 57
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea27abf2_a76cfd4a",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "%s already long enough. Please make it easier to parse later, e.g. \nFile name \u0027%s\u0027 is too long.",
+      "range": {
+        "startLine": 402,
+        "startChar": 45,
+        "endLine": 402,
+        "endChar": 47
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca2ae7be_979927f5",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "check if it\u0027s not null?",
+      "range": {
+        "startLine": 407,
+        "startChar": 4,
+        "endLine": 407,
+        "endChar": 24
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a1bbbb8_f0b86dff",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "free file_basename ?",
+      "range": {
+        "startLine": 418,
+        "startChar": 0,
+        "endLine": 418,
+        "endChar": 15
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2afc637c_7632bd9a",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "this has already been calculated. Cache it?",
+      "range": {
+        "startLine": 436,
+        "startChar": 26,
+        "endLine": 436,
+        "endChar": 42
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0af79f9a_574a1f08",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 467,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "cast is redundant",
+      "range": {
+        "startLine": 467,
+        "startChar": 36,
+        "endLine": 467,
+        "endChar": 44
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa2133e4_afb85a90",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "it\u0027s better to at least assert() for double-init. even better to be safe and ignore it, just print some debug message (but assert is enough for me)",
+      "range": {
+        "startLine": 527,
+        "startChar": 13,
+        "endLine": 527,
+        "endChar": 26
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eafecb6e_1c09da0c",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 532,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "we should init print callback here to some empty callback and monitor ptr to null to make sure it works even if the user forgot to set those",
+      "range": {
+        "startLine": 532,
+        "startChar": 4,
+        "endLine": 532,
+        "endChar": 33
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a0b8f60_381dc8f8",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 677,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "is is really dangerous, some D() would be much better here instead",
+      "range": {
+        "startLine": 676,
+        "startChar": 0,
+        "endLine": 677,
+        "endChar": 5
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea27abf2_c736518c",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 42
+      },
+      "lineNbr": 703,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-05T00:50:30Z",
+      "side": 1,
+      "message": "check for null argument and set some empty callback in that case?",
+      "range": {
+        "startLine": 703,
+        "startChar": 1,
+        "endLine": 703,
+        "endChar": 48
+      },
+      "revId": "c343fa5a2215cc839f321467c52f495ad50a714c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
