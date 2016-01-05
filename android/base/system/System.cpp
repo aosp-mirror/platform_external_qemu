@@ -263,6 +263,26 @@ public:
         return mAppDataDir;
     }
 
+    virtual const String& getLocalAppDataDirectory() const override {
+#ifdef _WIN32
+        if (mLocalAppDataDir.empty()) {
+            // NOTE: See comment in getHomeDirectory().
+            wchar_t path[MAX_PATH] = {0};
+            if (SUCCEEDED(
+                        SHGetFolderPathW(NULL, CSIDL_LOCAL_APPDATA,
+                                         NULL, 0, path))) {
+                mLocalAppDataDir = Win32UnicodeString::convertToUtf8(path);
+            } else {
+                const wchar_t* localappdata = _wgetenv(L"LOCALAPPDATA");
+                if(localappdata != NULL) {
+                    mLocalAppDataDir =
+                            Win32UnicodeString::convertToUtf8(localappdata);
+                }
+            }
+        }
+#endif
+        return mLocalAppDataDir;
+    }
 
     virtual int getHostBitness() const {
 #ifdef _WIN32
@@ -666,6 +686,7 @@ private:
     mutable String mLauncherDir;
     mutable String mHomeDir;
     mutable String mAppDataDir;
+    mutable String mLocalAppDataDir;
 };
 
 LazyInstance<HostSystem> sHostSystem = LAZY_INSTANCE_INIT;

@@ -50,6 +50,8 @@ struct StudioHelper {
     //
     static android::base::String pathToStudioUUIDWindows();
 #endif
+
+    static android::base::String defaultAndroidSdkPath();
 };
 
 }  // namespace android

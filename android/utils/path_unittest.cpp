@@ -10,12 +10,14 @@
 // GNU General Public License for more details.
 
 #include "android/utils/path.h"
+#include "android/base/memory/ScopedPtr.h"
 
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
 #include "gtest/gtest.h"
 
+using android::base::ScopedCPtr;
 using android::base::TestTempDir;
 
 namespace android {
@@ -117,5 +119,103 @@ TEST(Path, EscapePath) {
     free(result);
 }
 
+TEST(Path, JoinPathsBaseCase) {
+    const char* left = "/foo/";
+    const char* right = "bar";
+
+    ScopedCPtr<char> result(path_join(left, right));
+#ifdef _WIN32
+    EXPECT_STREQ("/foo\\bar", result.get());
+#else
+    EXPECT_STREQ("/foo/bar", result.get());
+#endif
+}
+
+TEST(Path, JoinPathsNoSeparator) {
+    const char* left = "/foo";
+    const char* right = "bar";
+
+    ScopedCPtr<char> result(path_join(left, right));
+#ifdef _WIN32
+    EXPECT_STREQ("/foo\\bar", result.get());
+#else
+    EXPECT_STREQ("/foo/bar", result.get());
+#endif
+}
+
+TEST(Path, JoinPathsMultipleSeparators) {
+    const char* left = "/foo///";
+    const char* right = "bar";
+
+    ScopedCPtr<char> result(path_join(left, right));
+#ifdef _WIN32
+    EXPECT_STREQ("/foo\\bar", result.get());
+#else
+    EXPECT_STREQ("/foo/bar", result.get());
+#endif
+}
+
+TEST(Path, JoinPathsLeadingSeparator) {
+    const char* left = "/foo/";
+    const char* right = "/bar";
+
+    ScopedCPtr<char> result(path_join(left, right));
+#ifdef _WIN32
+    EXPECT_STREQ("/foo\\bar", result.get());
+#else
+    EXPECT_STREQ("/foo/bar", result.get());
+#endif
+}
+
+TEST(Path, JoinPathsLeadingSeparatorNoTrailingSeparator) {
+    const char* left = "/foo";
+    const char* right = "/bar";
+
+    ScopedCPtr<char> result(path_join(left, right));
+#ifdef _WIN32
+    EXPECT_STREQ("/foo\\bar", result.get());
+#else
+    EXPECT_STREQ("/foo/bar", result.get());
+#endif
+}
+
+TEST(Path, JoinPathsMultipleLeadingSeparators) {
+    const char* left = "/foo//";
+    const char* right = "///bar";
+
+    ScopedCPtr<char> result(path_join(left, right));
+#ifdef _WIN32
+    EXPECT_STREQ("/foo\\bar", result.get());
+#else
+    EXPECT_STREQ("/foo/bar", result.get());
+#endif
+}
+
+#ifdef _WIN32
+TEST(Path, JoinPathsWindowsSeparator) {
+    const char* left = "/foo\\";
+    const char* right = "bar";
+
+    ScopedCPtr<char> result(path_join(left, right));
+    EXPECT_STREQ("/foo\\bar", result.get());
+}
+
+TEST(Path, JoinPathsMultipleWindowsSeparators) {
+    const char* left = "/foo\\\\";
+    const char* right = "bar";
+
+    ScopedCPtr<char> result(path_join(left, right));
+    EXPECT_STREQ("/foo\\bar", result.get());
+}
+
+TEST(Path, JoinPathsLeadingWindowsSeparator) {
+    const char* left = "/foo\\\\";
+    const char* right = "\\\\bar";
+
+    ScopedCPtr<char> result(path_join(left, right));
+    EXPECT_STREQ("/foo\\bar", result.get());
+}
+
+#endif
 }  // namespace path
 }  // namespace android
