@@ -67,6 +67,7 @@ public:
         if (mCrashServer) {
             return false;
         }
+
         initCrashServer();
 
         mCrashServer.reset(new ::google_breakpad::CrashGenerationServer(
@@ -98,6 +99,23 @@ public:
         } else {
             return true;
         }
+    }
+
+    virtual std::string getHWInfo() const {
+        system("lshw > crash-reporter-hw-info.txt");
+
+        FILE* hwinfo_fh = fopen("crash-reporter-hw-info.txt", "r");
+        fseek(hwinfo_fh, 0, SEEK_END);
+        uint64_t filesize = (uint64_t)ftell(hwinfo_fh);
+        fseek(hwinfo_fh, 0, SEEK_SET);
+
+        char* res = (char*)malloc(filesize);
+        fread(res, filesize, 1, hwinfo_fh);
+        fclose(hwinfo_fh);
+
+        std::string str_res = std::string(res);
+        free(res);
+        return str_res;
     }
 
 private:
