@@ -81,6 +81,7 @@ public:
         if (mCrashServer) {
             return false;
         }
+
         initCrashServer();
 
         ::android::base::Win32UnicodeString pipe_unicode(pipe.c_str(),
@@ -126,6 +127,19 @@ public:
         } else {
             return true;
         }
+    }
+
+    virtual char* getHWInfo() const {
+        system("dxdiag /dontskip /whql:off /64bit /tdxdiag-out.txt");
+
+        FILE* fh = fopen("dxdiag-out.txt", "r");
+        fseek(fh, 0, SEEK_END);
+        size_t fsize = ftell(fh);
+        fseek(fh, 0, SEEK_SET);
+
+        char* out = (char*)malloc(fsize);
+        fread(out, fsize, 1, fh);
+        return out;
     }
 
 private:

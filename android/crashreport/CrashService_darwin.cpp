@@ -101,6 +101,22 @@ public:
         }
     }
 
+    virtual char* getHWInfo() const {
+        fprintf(stderr, "Getting system info for crash dump...\n");
+        system("system_profiler > crash-reporter-hw-info.txt");
+        fprintf(stderr, "Got system info. Loading info\n");
+
+        FILE* hwinfo_fh = fopen("crash-reporter-hw-info.txt", "r");
+        fseek(hwinfo_fh, 0, SEEK_END);
+        uint64_t filesize = (uint64_t)ftell(hwinfo_fh);
+        fseek(hwinfo_fh, 0, SEEK_SET);
+
+        char* res = (char*)malloc(filesize);
+        fread(res, filesize, 1, hwinfo_fh);
+        fclose(hwinfo_fh);
+        return res;
+    }
+
 private:
     std::unique_ptr<::google_breakpad::CrashGenerationServer> mCrashServer;
 };
