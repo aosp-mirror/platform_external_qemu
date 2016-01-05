@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "android/base/String.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/system/System.h"
+
 #include "android/crashreport/CrashService.h"
 
 #include "android/base/system/Win32UnicodeString.h"
@@ -22,13 +26,23 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <memory>
+#include <iostream>
+#include <sstream>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
 #define D(...) VERBOSE_PRINT(init, __VA_ARGS__)
 #define I(...) printf(__VA_ARGS__)
 
+#define CMD_BUF_SIZE 1024
+#define HWINFO_CMD "dxdiag /dontskip /whql:off /64bit /t"
+
 namespace android {
+
+using ::android::base::String;
+using ::android::base::PathUtils;
+using ::android::base::System;
+
 namespace crashreport {
 
 namespace {
@@ -81,6 +95,7 @@ public:
         if (mCrashServer) {
             return false;
         }
+
         initCrashServer();
 
         ::android::base::Win32UnicodeString pipe_unicode(pipe.c_str(),
@@ -126,6 +141,58 @@ public:
         } else {
             return true;
         }
+    }
+
+    virtual std::string getHWInfo() const {
+        std::ostringstream err_stream;
+
+        System* sys = System::get();
+        String tmp_dir = sys->getTempDir();
+
+        char tmp_filename_buffer[CMD_BUF_SIZE] = {};
+        DWORD temp_file_ret =
+                GetTempFileName(tmp_dir.c_str(), "emu", 0, tmp_filename_buffer);
+
+        if (!temp_file_ret) {
+            err_stream << "Error: Can't create temporary file! error code="
+                       << GetLastError() << std::endl;
+            return err_stream.str();
+        }
+
+        String tmp_filename(tmp_filename_buffer);
+        String syscmd(HWINFO_CMD);
+        syscmd += tmp_filename;
+        system(syscmd.c_str());
+
+        FILE* hwinfo_fh = fopen(tmp_filename.c_str(), "r");
+
+        if (!hwinfo_fh) {
+            err_stream << "Error: Can't open temp file " << tmp_filename.c_str()
+                       << " for reading. error code=" << GetLastError()
+                       << std::endl;
+            return err_stream.str();
+        }
+
+        fseek(hwinfo_fh, 0, SEEK_END);
+        size_t fsize = ftell(hwinfo_fh);
+        fseek(hwinfo_fh, 0, SEEK_SET);
+
+        char* out = (char*)malloc(fsize);
+        fread(out, fsize, 1, hwinfo_fh);
+        fclose(hwinfo_fh);
+
+        DWORD del_ret = DeleteFile(tmp_filename.c_str());
+
+        if (!del_ret) {
+            err_stream << "Error: Failed to delete temp file at "
+                       << tmp_filename.c_str()
+                       << " ; error code=" << GetLastError() << std::endl;
+        }
+
+        std::string str_res = std::string(out);
+        free(out);
+
+        return str_res + err_stream.str();
     }
 
 private:
