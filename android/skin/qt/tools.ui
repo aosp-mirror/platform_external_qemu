@@ -171,6 +171,9 @@ color: #f0f0f0</string>
    <property name="themeIconName" stdset="0">
     <string notr="true">screen_rotation_left</string>
    </property>
+   <property name="uiCommand" stdset="0">
+    <string>ROTATE_LEFT</string>
+   </property>
   </widget>
   <widget class="QPushButton" name="back_button">
    <property name="geometry">
@@ -476,6 +479,9 @@ color: #f0f0f0</string>
    </property>
    <property name="themeIconName" stdset="0">
     <string notr="true">screen_rotation_right</string>
+   </property>
+   <property name="uiCommand" stdset="0">
+    <string>ROTATE_RIGHT</string>
    </property>
   </widget>
  </widget>
