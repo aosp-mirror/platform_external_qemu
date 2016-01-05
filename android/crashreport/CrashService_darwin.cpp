@@ -101,6 +101,10 @@ public:
         }
     }
 
+    virtual char* getHWInfo() const {
+        return "Hi there! I'm on Darwin!";
+    }
+
 private:
     std::unique_ptr<::google_breakpad::CrashGenerationServer> mCrashServer;
 };

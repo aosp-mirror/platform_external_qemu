@@ -118,6 +118,9 @@ bool CrashService::uploadCrash(const std::string& url) {
     curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "upload_file_minidump",
                  CURLFORM_FILE, mDumpFile.c_str(), CURLFORM_END);
 
+    curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "upload_hw_info",
+                 CURLFORM_FILE, mHWInfo, CURLFORM_END);
+
     curl_easy_setopt(curl, CURLOPT_FAILONERROR, true);
     curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
@@ -163,7 +166,7 @@ bool CrashService::uploadCrash(const std::string& url) {
     return success;
 }
 
-std::string CrashService::getCrashDetails() const {
+std::string CrashService::getCrashDetails(bool wantHWInfo) {
     std::string details;
     google_breakpad::BasicSourceLineResolver resolver;
     google_breakpad::MinidumpProcessor minidump_processor(nullptr, &resolver);
@@ -191,6 +194,12 @@ std::string CrashService::getCrashDetails() const {
     }
     google_breakpad::SetPrintStream(fp);
     google_breakpad::PrintProcessState(process_state, true, &resolver);
+
+    if (wantHWInfo) {
+        mHWInfo = getHWInfo();
+        // // Write system-specific hardware info
+        // fprintf(fp, "BEGIN HARDWARE SETUP\n%s\nEND HARDWARE SETUP", getHWInfo());
+    } else { mHWInfo = ""; }
 
     fseek(fp, 0, SEEK_END);
     details.resize(std::ftell(fp));
