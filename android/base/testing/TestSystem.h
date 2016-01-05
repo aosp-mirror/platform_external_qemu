@@ -29,11 +29,13 @@ public:
     TestSystem(StringView launcherDir,
                int hostBitness,
                StringView homeDir = "/home",
-               StringView appDataDir = "")
+               StringView appDataDir = "",
+               StringView localAppDataDir = "")
         : mProgramDir(launcherDir),
           mLauncherDir(launcherDir),
           mHomeDir(homeDir),
           mAppDataDir(appDataDir),
+          mLocalAppDataDir(localAppDataDir),
           mCurrentDir(homeDir),
           mHostBitness(hostBitness),
           mIsRemoteSession(false),
@@ -88,6 +90,10 @@ public:
 
     void setAppDataDirectory(StringView appDataDir) {
         mAppDataDir = appDataDir;
+    }
+
+    virtual const String& getLocalAppDataDirectory() const override {
+        return mLocalAppDataDir;
     }
 
     virtual String getCurrentDirectory() const { return mCurrentDir; }
@@ -297,6 +303,7 @@ private:
     String mLauncherDir;
     String mHomeDir;
     String mAppDataDir;
+    String mLocalAppDataDir;
     String mCurrentDir;
     int mHostBitness;
     bool mIsRemoteSession;

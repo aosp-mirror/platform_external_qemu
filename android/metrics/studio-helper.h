@@ -42,4 +42,11 @@ int android_studio_get_optins(void);
 //
 char* android_studio_get_installation_id(void);
 
+// This function returns the default Android SDK path for the current host
+// system. Note that this may not be where the SDK is actually installed, it's
+// just the path where it is installed if the user did not manually select
+// anything else. If this path cannot be retrieved a NULL pointer is returned.
+// It is the callers responsibility to free the returned string.
+char* android_sdk_default_path(void);
+
 ANDROID_END_HEADER
