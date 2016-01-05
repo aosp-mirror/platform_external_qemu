@@ -163,7 +163,7 @@ bool CrashService::uploadCrash(const std::string& url) {
     return success;
 }
 
-std::string CrashService::getCrashDetails() const {
+std::string CrashService::getCrashDetails(bool wantHWInfo) const {
     std::string details;
     google_breakpad::BasicSourceLineResolver resolver;
     google_breakpad::MinidumpProcessor minidump_processor(nullptr, &resolver);
@@ -191,6 +191,11 @@ std::string CrashService::getCrashDetails() const {
     }
     google_breakpad::SetPrintStream(fp);
     google_breakpad::PrintProcessState(process_state, true, &resolver);
+
+    if (wantHWInfo) {
+        // Write system-specific hardware info
+        fprintf(fp, "BEGIN HARDWARE SETUP\n%s\nEND HARDWARE SETUP", getHWInfo());
+    }
 
     fseek(fp, 0, SEEK_END);
     details.resize(std::ftell(fp));
