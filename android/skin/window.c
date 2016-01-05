@@ -1561,6 +1561,18 @@ skin_window_resize( SkinWindow*  window, int resize_container )
                                               window_w, window_h,
                                               layout_w, layout_h);
 
+        // Force redraw the background and skin to avoid drawing empty frames. This reduces flicker
+        // on resize and rotate.
+        Layout* layout = &window->layout;
+        skin_surface_fill(window->surface,
+                          &layout->rect,
+                          layout->color);
+
+        Background*  back = layout->backgrounds;
+        Background*  end  = back + layout->num_backgrounds;
+        for ( ; back < end; back++ )
+            background_redraw( back, &layout->rect, window->surface );
+
         skin_surface_create_window(window->surface,
                                    window_x,
                                    window_y,
