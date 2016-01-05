@@ -15,10 +15,9 @@
 */
 #include "ColorBuffer.h"
 
+#include "DecoderContext.h"
 #include "EGLDispatch.h"
-#include "GLESv1Dispatch.h"
 #include "GLcommon/GLutils.h"
-#include "GLESv2Dispatch.h"
 #include "RenderThreadInfo.h"
 #include "TextureDraw.h"
 #include "TextureResize.h"

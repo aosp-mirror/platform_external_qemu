@@ -92,10 +92,15 @@ done
 LIBRENDER_DIR=distrib/android-emugl/host/libs/libOpenglRender
 gen_functions_header "$LIBRENDER_DIR"/render_api.entries \
         "$LIBRENDER_DIR"/render_api_functions.h "$GEN_ENTRIES"
-gen_functions_header "$LIBRENDER_DIR"/render_egl.entries \
-        "$LIBRENDER_DIR"/RenderEGL_functions.h "$GEN_ENTRIES"
-gen_functions_header "$LIBRENDER_DIR"/render_egl_extensions.entries \
-        "$LIBRENDER_DIR"/RenderEGL_extensions_functions.h "$GEN_ENTRIES"
+
+##
+## libOpenGLESDispatch headers.
+##
+OPENGLES_DISPATCH_DIR=distrib/android-emugl/host/libs/libOpenGLESDispatch
+gen_functions_header "$OPENGLES_DISPATCH_DIR/render_egl.entries \
+        "$OPENGLES_DISPATCH_DIR"/RenderEGL_functions.h "$GEN_ENTRIES"
+gen_functions_header "$OPENGLES_DISPATCH_DIR"/render_egl_extensions.entries \
+        "$OPENGLES_DISPATCH_DIR"/RenderEGL_extensions_functions.h "$GEN_ENTRIES"
 
 if [ "$FAILURES" ]; then
     exit 1
