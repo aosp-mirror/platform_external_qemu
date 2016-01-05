@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 
+#include <iostream>
 #include <memory>
 
 namespace android {
@@ -27,6 +28,9 @@ namespace base {
 namespace {
 
 using ::android::base::Thread;
+using std::cin;
+using std::cout;
+using std::endl;
 
 // A simple thread instance that does nothing at all and exits immediately.
 class EmptyThread : public Thread {
@@ -84,7 +88,11 @@ public:
     CountingThread(State* state) : Thread(), mState(state) {}
 
     intptr_t main() {
+        cout << "OK, waiting by the mount of doom" << endl;
+        ::android::base::System::get()->sleepMs(2000);
+        cout << "About to access the taboo memory... falllllling off the ed" << endl;
         mState->increment();
+        cout << "I'm still here ;)" << endl;
         return 0;
     }
 
@@ -194,6 +202,50 @@ TEST(ThreadTest, tryWait) {
     result = 0;
     EXPECT_TRUE(thread.tryWait(&result));
     EXPECT_EQ(42, result);
+}
+
+
+void launcher() {
+    int i;
+    cout << "Enter 0 ";
+    cin >> i;
+    if (i != 0) {
+        launcher();
+        return;
+    }
+
+    CountingThread::State state;
+    CountingThread thread(&state);
+    thread.start();
+    cout << "Started thread" << endl;
+}
+
+void stomper() {
+    cout << "Stomp. Stomp. Stomp." << endl;
+    int i;
+    cout << "Enter 0 ";
+    cin >> i;
+    if (i != 0) {
+        stomper();
+        return;
+    }
+
+    intptr_t x[10] = {0,0,0,0,0,0,0,0,0,0};
+    for (int j =0; j < 10; ++j) {
+        cout << "Enter x[" << j << "] ";
+        cin >> x[j];
+    }
+    for (int j = 0; j <10; j+=2) {
+        cout << x[j] << endl;
+    }
+}
+
+TEST(ThreadTest, onStack) {
+    launcher();
+    stomper();
+    cout << "Sleeping for 5..." << endl;
+    android::base::System::get()->sleepMs(5000);
+    cout << "Done" << endl;
 }
 
 }  // namespace base
