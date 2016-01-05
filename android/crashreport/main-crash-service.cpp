@@ -24,11 +24,17 @@
 #include "android/crashreport/CrashService.h"
 #include "android/crashreport/CrashSystem.h"
 #include "android/crashreport/ui/ConfirmDialog.h"
+#include "android/crashreport/ui/CrashProgress.h"
+#include "android/crashreport/ui/DetailsGetter.h"
+#include "android/crashreport/ui/WantHWInfo.h"
 #include "android/qt/qt_path.h"
 #include "android/utils/debug.h"
 #include "android/version.h"
 
 #include <QApplication>
+#include <QProgressDialog>
+#include <QTimer>
+#include <QThread>
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory>
@@ -42,6 +48,13 @@ const char kMessageBoxTitle[] = "Android Emulator";
 const char kMessageBoxMessage[] =
         "<p>Android Emulator closed unexpectedly.</p>"
         "<p>Do you want to send a crash report about the problem?</p>";
+const char kMessageBoxMessageDetailHW[] =
+        "An error report containing the information shown below, "
+        "including system-specific information, "
+        "will be sent to Google's Android team to help identify "
+        "and fix the problem. "
+        "<a href=\"https://www.google.com/policies/privacy/\">Privacy "
+        "Policy</a>.";
 const char kMessageBoxMessageDetail[] =
         "An error report containing the information shown below "
         "will be sent to Google's Android team to help identify "
@@ -52,7 +65,37 @@ const char kMessageBoxMessageDetail[] =
 extern "C" const unsigned char* android_emulator_icon_find(const char* name,
                                                            size_t* psize);
 
-static bool displayConfirmDialog(const std::string& details) {
+
+static bool displayHWInfoDialog() {
+    static const char kIconFile[] = "emulator_icon_128.png";
+    size_t icon_size;
+    QPixmap icon;
+
+    const unsigned char* icon_data =
+            android_emulator_icon_find(kIconFile, &icon_size);
+
+    icon.loadFromData(icon_data, icon_size);
+
+    WantHWInfo msgBox(nullptr, icon, kMessageBoxTitle, 
+                         QCoreApplication::tr(
+                         "<p>Android Emulator closed unexpectedly.</p>"
+                         "<p>In order to help ensure we can fix the problem,</p>"
+                         "<p>do you want to generate system-specific info?</p>"),
+                         QCoreApplication::tr(
+                         "This system information "
+                         "will be sent to Google's Android team to help identify "
+                         "and fix the problem. Otherwise, we will collect "
+                         "only information directly related to the emulator. "
+                         "We will ask you again to confirm whether you want to send anything."
+                         "<a href=\"https://www.google.com/policies/privacy/\">Privacy "
+                         "Policy</a>."));
+                         
+    msgBox.show();
+    int ret = msgBox.exec();
+    return ret == WantHWInfo::Accepted;
+}
+
+static bool displayConfirmDialog(const std::string& details, bool wantHWInfo) {
     static const char kIconFile[] = "emulator_icon_128.png";
     size_t icon_size;
     QPixmap icon;
@@ -63,7 +106,8 @@ static bool displayConfirmDialog(const std::string& details) {
     icon.loadFromData(icon_data, icon_size);
 
     ConfirmDialog msgBox(nullptr, icon, kMessageBoxTitle, kMessageBoxMessage,
-                         kMessageBoxMessageDetail, details.c_str());
+                         wantHWInfo ? kMessageBoxMessageDetailHW : kMessageBoxMessageDetail, 
+                         details.c_str());
     msgBox.show();
     int ret = msgBox.exec();
     return ret == ConfirmDialog::Accepted;
@@ -87,6 +131,7 @@ static void InitQt(int argc, char** argv) {
         D("Count not load font resource: \":/lib/fonts/Roboto-Medium");
     }
 }
+
 
 /* Main routine */
 int main(int argc, char** argv) {
@@ -145,14 +190,33 @@ int main(int argc, char** argv) {
 
     InitQt(argc, argv);
 
-    const std::string crashDetails (crashservice->getCrashDetails());
+    bool wantHWInfo = displayHWInfoDialog();
+
+    CrashProgress crash_progress(0);
+    crash_progress.start();
+
+    QThread work_thread;
+    DetailsGetter details_getter(crashservice.get(), wantHWInfo);
+    details_getter.moveToThread(&work_thread);
+
+    QObject::connect(&work_thread, &QThread::started, &details_getter, &DetailsGetter::getDetails);
+    QObject::connect(&details_getter, &DetailsGetter::finished, &work_thread, &QThread::quit);
+    QObject::connect(&details_getter, &DetailsGetter::finished, &app, &QApplication::quit);
+
+    work_thread.start();
+    app.exec();
+
+    // app has quit
+    crash_progress.stop();
+
+    const std::string crashDetails (details_getter.crash_details);
 
     if (crashDetails.empty()) {
         E("Crash details could not be processed, skipping upload\n");
         return 1;
     }
 
-    if (!displayConfirmDialog(crashDetails)) {
+    if (!displayConfirmDialog(crashDetails, wantHWInfo)) {
         return 1;
     }
 
