@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0af79f9a_8af57e3c",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-05T02:26:43Z",
+      "side": 1,
+      "message": "It took me longer than I would like to admit to actually see the typo :D",
+      "parentUuid": "ca2ae7be_17e53724",
+      "range": {
+        "startLine": 198,
+        "startChar": 15,
+        "endLine": 198,
+        "endChar": 27
+      },
+      "revId": "e86273361ccee8f4881dab08e2d80ec22a0110b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a1bbbb8_43fa5966",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-05T02:15:34Z",
       "side": 1,
       "message": "Nit: trailing space.",
+      "range": {
+        "startLine": 199,
+        "startChar": 22,
+        "endLine": 199,
+        "endChar": 23
+      },
+      "revId": "e86273361ccee8f4881dab08e2d80ec22a0110b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a0b8f60_db38f6ca",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-05T02:26:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a1bbbb8_43fa5966",
       "range": {
         "startLine": 199,
         "startChar": 22,
