@@ -21,7 +21,6 @@ endif
 host_common_SRC_FILES := \
     $(host_OS_SRCS) \
     ColorBuffer.cpp \
-    EGLDispatch.cpp \
     FbConfig.cpp \
     FrameBuffer.cpp \
     GLESv1Dispatch.cpp \
@@ -57,8 +56,10 @@ $(call emugl-export,C_INCLUDES,$(LOCAL_PATH))
 
 # use Translator's egl/gles headers
 LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/include
+LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/EGLDispatch
 
 LOCAL_STATIC_LIBRARIES += libemugl_common
+LOCAL_STATIC_LIBRARIES += libEGLDispatch
 
 LOCAL_SYMBOL_FILE := render_api.entries
 
