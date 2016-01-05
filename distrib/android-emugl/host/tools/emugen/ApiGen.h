@@ -71,7 +71,6 @@ public:
     int genProcTypes(const std::string &filename, SideType side);
     int genFuncTable(const std::string &filename, SideType side);
 
-    int genBase(const std::string &filename, SideType side);
     int genContext(const std::string &filename, SideType side);
     int genContextImpl(const std::string &filename, SideType side);
 

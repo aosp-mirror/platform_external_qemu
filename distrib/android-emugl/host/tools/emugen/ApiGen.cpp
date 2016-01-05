@@ -129,40 +129,6 @@ int ApiGen::genFuncTable(const std::string &filename, SideType side)
     return 0;
 }
 
-int ApiGen::genBase(const std::string & filename, SideType side)
-{
-  FILE *fp = fopen(filename.c_str(), "wt");
-  if (fp == NULL) {
-    perror(filename.c_str());
-    return -1;
-  }
-  printHeader(fp);
-
-  fprintf(fp, "#ifndef __%s_%s_base_t_h\n", m_basename.c_str(), sideString(side));
-  fprintf(fp, "#define __%s_%s_base_t_h\n\n", m_basename.c_str(), sideString(side));
-
-  //  fprintf(fp, "\n#include \"%s_types.h\"\n", m_basename.c_str());
-  fprintf(fp, "#include \"%s_%s_proc.h\"\n", m_basename.c_str(), sideString(side));
-
-  StringVec & contextHeaders = side == CLIENT_SIDE ? m_clientContextHeaders : m_serverContextHeaders;
-  for (size_t i = 0; i < contextHeaders.size(); i++) {
-    fprintf(fp, "#include %s\n", contextHeaders[i].c_str());
-  }
-  fprintf(fp, "\n");
-
-  fprintf(fp, "\nstruct %s_%s_base_t {\n\n", m_basename.c_str(), sideString(side));
-  for (size_t i = 0; i < size(); i++) {
-    EntryPoint *e = &at(i);
-    fprintf(fp, "\t%s_%s_proc_t %s;\n", e->name().c_str(), sideString(side), e->name().c_str());
-  }
-
-  fprintf(fp, "};\n\n");
-
-  fprintf(fp, "#endif\n");
-  fclose(fp);
-  return 0;
-}
-
 int ApiGen::genContext(const std::string & filename, SideType side)
 {
     FILE *fp = fopen(filename.c_str(), "wt");
@@ -175,8 +141,10 @@ int ApiGen::genContext(const std::string & filename, SideType side)
     fprintf(fp, "#ifndef __%s_%s_context_t_h\n", m_basename.c_str(), sideString(side));
     fprintf(fp, "#define __%s_%s_context_t_h\n", m_basename.c_str(), sideString(side));
 
-    //  fprintf(fp, "\n#include \"%s_types.h\"\n", m_basename.c_str());
-    fprintf(fp, "\n#include \"%s_%s_base.h\"\n", m_basename.c_str(), sideString(side));
+    fprintf(fp, "\n#include \"%s_%s_proc.h\"\n",
+            m_basename.c_str(),
+            side == CLIENT_SIDE ? "client" : "server");
+    fprintf(fp, "\n#include \"%s_types.h\"\n", m_basename.c_str());
 
     StringVec & contextHeaders = side == CLIENT_SIDE ? m_clientContextHeaders : m_serverContextHeaders;
     for (size_t i = 0; i < contextHeaders.size(); i++) {
@@ -184,9 +152,14 @@ int ApiGen::genContext(const std::string & filename, SideType side)
     }
     fprintf(fp, "\n");
 
-    fprintf(fp, "\nstruct %s_%s_context_t : %s_%s_base_t {\n\n",
-            m_basename.c_str(), sideString(side),
+    fprintf(fp, "\nstruct %s_%s_context_t {\n\n",
             m_basename.c_str(), sideString(side));
+
+    // API entry points
+    for (size_t i = 0; i < size(); i++) {
+        EntryPoint *e = &at(i);
+        fprintf(fp, "\t%s_%s_proc_t %s;\n", e->name().c_str(), sideString(side), e->name().c_str());
+    }
 
     // virtual destructor
     fprintf(fp, "\t virtual ~%s_%s_context_t() {}\n", m_basename.c_str(), sideString(side));

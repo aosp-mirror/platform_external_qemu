@@ -14,7 +14,7 @@
 
 #include "TextureDraw.h"
 
-#include "GLESv2Dispatch.h"
+#include "DecoderContext.h"
 
 #include <math.h>
 #include <string.h>
