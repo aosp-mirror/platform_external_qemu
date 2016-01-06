@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa1773d7_4192280b",
+        "filename": "android/base/threads/Async.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-06T00:46:24Z",
+      "side": 1,
+      "message": "this is a huge overkill: we\u0027re using a limited resource (TLS slot) here to get something it\u0027s not even designed for (run a function on thread exit). The original code looked much more specific here\nAlso, for Windows this code is not any better - we do call OnThreadExit() in the same place where we used to call onExit()",
+      "range": {
+        "startLine": 36,
+        "startChar": 8,
+        "endLine": 36,
+        "endChar": 26
+      },
+      "revId": "55dab2daf1547aedf0ed8fb369e3fa8d65174d0b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
