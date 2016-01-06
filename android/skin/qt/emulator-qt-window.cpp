@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 The Android Open Source Project
+/* Copyright (C) 2015-2016 The Android Open Source Project
  **
  ** This software is licensed under the terms of the GNU General Public
  ** License version 2, as published by the Free Software Foundation, and
@@ -128,6 +128,10 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     mFlashAnimation.setEasingCurve(QEasingCurve::Linear);
     QObject::connect(&mFlashAnimation, SIGNAL(finished()), this, SLOT(slot_animationFinished()));
     QObject::connect(&mFlashAnimation, SIGNAL(valueChanged(QVariant)), this, SLOT(slot_animationValueChanged(QVariant)));
+
+    QSettings settings;
+    bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
+    setOnTop(onTop, false);
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr()
@@ -318,6 +322,36 @@ void EmulatorQtWindow::show()
     tool_window->dockMainWindow();
 
     QObject::connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen *)), this, SLOT(slot_screenChanged(QScreen *)));
+}
+
+void EmulatorQtWindow::setOnTop(bool onTop, bool showNow)
+{
+#ifndef __linux__
+    // On Linux, the Qt::WindowStaysOnTopHint only works if X11 window managment
+    // is bypassed (Qt::X11BypassWindowManagerHint). Unfortunately, this prevents
+    // a lot of common operations (like moving or resizing the window!), so the
+    // "always on top" feature is disabled for Linux.
+
+    setFrameOnTop(&mContainer, onTop);
+    setFrameOnTop(tool_window, onTop);
+
+    if (showNow) {
+        mContainer.show();
+        tool_window->show();
+    }
+#endif
+}
+
+void EmulatorQtWindow::setFrameOnTop(QFrame* frame, bool onTop)
+{
+    Qt::WindowFlags flags = frame->windowFlags();
+
+    if (onTop) {
+        flags |=  Qt::WindowStaysOnTopHint;
+    } else {
+        flags &= ~Qt::WindowStaysOnTopHint;
+    }
+    frame->setWindowFlags(flags);
 }
 
 void EmulatorQtWindow::showMinimized()

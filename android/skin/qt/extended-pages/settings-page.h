@@ -1,4 +1,4 @@
-// Copyright (C) 2015 The Android Open Source Project
+// Copyright (C) 2015-2016 The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
@@ -25,15 +25,17 @@ public:
     explicit SettingsPage(QWidget *parent = 0);
 
 signals:
+    void onTopChanged(bool isOnTop);
     void themeChanged(SettingsTheme new_theme);
 
 private slots:
-    void on_set_themeBox_currentIndexChanged(int index);
-    void on_set_sdkPathButton_clicked();
-    void on_set_saveLocFolderButton_clicked();
-    void on_set_saveLocBox_textEdited(const QString&);
-    void on_set_sdkPathBox_textEdited(const QString&);
     void on_set_allowKeyboardGrab_toggled(bool checked);
+    void on_set_onTop_toggled(bool checked);
+    void on_set_saveLocBox_textEdited(const QString&);
+    void on_set_saveLocFolderButton_clicked();
+    void on_set_sdkPathBox_textEdited(const QString&);
+    void on_set_sdkPathButton_clicked();
+    void on_set_themeBox_currentIndexChanged(int index);
 
 private:
     bool eventFilter (QObject* object, QEvent* event) override;

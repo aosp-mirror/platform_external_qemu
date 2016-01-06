@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 The Android Open Source Project
+/* Copyright (C) 2015-2016 The Android Open Source Project
  **
  ** This software is licensed under the terms of the GNU General Public
  ** License version 2, as published by the Free Software Foundation, and
@@ -142,6 +142,7 @@ public:
     void scaleDown();
     void scaleUp();
     void screenshot();
+    void setOnTop(bool onTop, bool showNow);
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateScrollBarChanged(int x, int y);
     void simulateSetScale(double scale);
@@ -220,6 +221,7 @@ private:
     void handleKeyEvent(SkinEventType type, QKeyEvent *event);
     void handleMouseEvent(SkinEventType type, SkinMouseButtonType button, const QPoint &pos);
     QString getTmpImagePath();
+    void setFrameOnTop(QFrame* frame, bool onTop);
 
 
     void             *batteryState;

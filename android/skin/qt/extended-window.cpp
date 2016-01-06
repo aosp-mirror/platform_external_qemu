@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 The Android Open Source Project
+/* Copyright (C) 2015-2016 The Android Open Source Project
  **
  ** This software is licensed under the terms of the GNU General Public
  ** License version 2, as published by the Free Software Foundation, and
@@ -65,6 +65,10 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
     mExtendedUi->helpPage->initializeKeyboardShortcutList(shortcuts);
     mExtendedUi->dpadPage->setUserEventsAgent(agentPtr->userEvents);
+
+    connect(
+        mExtendedUi->settingsPage, SIGNAL(onTopChanged(bool)),
+        this, SLOT(switchOnTop(bool)));
 
     connect(
         mExtendedUi->settingsPage, SIGNAL(themeChanged(SettingsTheme)),
@@ -169,6 +173,11 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
 
     thisButton->clearFocus(); // It looks better when not highlighted
     mExtendedUi->stackedWidget->setCurrentIndex(static_cast<int>(thisIndex));
+}
+
+void ExtendedWindow::switchOnTop(bool isOnTop)
+{
+    mEmulatorWindow->setOnTop(isOnTop, true);
 }
 
 void ExtendedWindow::switchToTheme(SettingsTheme theme)
