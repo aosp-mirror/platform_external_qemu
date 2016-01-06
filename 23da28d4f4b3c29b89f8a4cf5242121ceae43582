@@ -2,6 +2,75 @@
   "comments": [
     {
       "key": {
+        "uuid": "ea1debf7_af0be900",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-06T22:15:05Z",
+      "side": 1,
+      "message": "nit: no?",
+      "range": {
+        "startLine": 365,
+        "startChar": 15,
+        "endLine": 365,
+        "endChar": 18
+      },
+      "revId": "23da28d4f4b3c29b89f8a4cf5242121ceae43582",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a4ddf0f_d5103c2f",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-06T22:15:05Z",
+      "side": 1,
+      "message": "in Windows this will die for localized user names (which are quite common)",
+      "range": {
+        "startLine": 369,
+        "startChar": 0,
+        "endLine": 371,
+        "endChar": 47
+      },
+      "revId": "23da28d4f4b3c29b89f8a4cf5242121ceae43582",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a4357e2_17654cc0",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-06T22:15:05Z",
+      "side": 1,
+      "message": "strdup isn\u0027t needed here",
+      "range": {
+        "startLine": 384,
+        "startChar": 15,
+        "endLine": 384,
+        "endChar": 21
+      },
+      "revId": "23da28d4f4b3c29b89f8a4cf5242121ceae43582",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a52a3ad_16c9ccd1",
         "filename": "android/metrics/StudioHelper.cpp",
         "patchSetId": 2
