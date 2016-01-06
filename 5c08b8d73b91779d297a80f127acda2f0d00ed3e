@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea1debf7_7489284e",
+        "filename": "distrib/android-emugl/host/libs/openGLESDispatch/Android.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-06T20:23:16Z",
+      "side": 1,
+      "message": "nit: tabs",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 7
+      },
+      "revId": "5c08b8d73b91779d297a80f127acda2f0d00ed3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
