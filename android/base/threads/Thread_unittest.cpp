@@ -15,16 +15,21 @@
 #include "android/base/threads/Thread.h"
 
 #include "android/base/synchronization/Lock.h"
+#include "android/base/system/System.h"
 
 #include <gtest/gtest.h>
+
+#include <memory>
 
 namespace android {
 namespace base {
 
 namespace {
 
+using ::android::base::Thread;
+
 // A simple thread instance that does nothing at all and exits immediately.
-class EmptyThread : public ::android::base::Thread {
+class EmptyThread : public Thread {
 public:
     intptr_t main() { return 42; }
 };
@@ -50,7 +55,7 @@ public:
 bool OnExitThread::onExitCalled = false;
 bool OnExitThread::dtorCalled = false;
 
-class CountingThread : public ::android::base::Thread {
+class CountingThread : public Thread {
 public:
     class State {
     public:
@@ -76,7 +81,7 @@ public:
         int mCount;
     };
 
-    CountingThread(State* state) : mState(state) {}
+    CountingThread(State* state) : Thread(), mState(state) {}
 
     intptr_t main() {
         mState->increment();
@@ -87,15 +92,52 @@ private:
     State* mState;
 };
 
+// A thread that blocks till it's instructed to continue.
+class BlockingThread : public Thread {
+ public:
+    BlockingThread() : Thread(), mLock(), mSharedContinueFlag(new bool) {
+        *mSharedContinueFlag = false;
+    }
+
+    void unblock() {
+        mLock.lock();
+        *mSharedContinueFlag = true;
+        mLock.unlock();
+    }
+
+    intptr_t main() {
+        bool continueFlag;
+        do {
+            mLock.lock();
+            continueFlag = *mSharedContinueFlag;
+            mLock.unlock();
+
+        } while (!continueFlag);
+        return 42;
+    }
+
+ private:
+    mutable Lock mLock;
+    std::unique_ptr<bool> mSharedContinueFlag;
+};
+
 }  // namespace
 
 TEST(ThreadTest, SimpleThread) {
     Thread* thread = new EmptyThread();
+    intptr_t status;
+    // Can't wait on threads before starting them.
+    EXPECT_FALSE(thread->wait(&status));
+    EXPECT_FALSE(thread->tryWait(&status));
+
     EXPECT_TRUE(thread);
     EXPECT_TRUE(thread->start());
-    intptr_t status;
+    status = 0;
     EXPECT_TRUE(thread->wait(&status));
     EXPECT_EQ(42, status);
+
+    // Thread objects are single use.
+    EXPECT_FALSE(thread->start());
 }
 
 TEST(ThreadTest, MultipleThreads) {
@@ -138,6 +180,21 @@ TEST(ThreadTest, OnExit) {
     EXPECT_TRUE(OnExitThread::dtorCalled);
 }
 
+TEST(ThreadTest, tryWait) {
+    BlockingThread thread;
+    intptr_t result = 0;
+    EXPECT_FALSE(thread.tryWait(&result));
+    EXPECT_TRUE(thread.start());
+    EXPECT_FALSE(thread.tryWait(&result));
+    thread.unblock();
+
+    result = 0;
+    EXPECT_TRUE(thread.wait(&result));
+    EXPECT_EQ(42, result);
+    result = 0;
+    EXPECT_TRUE(thread.tryWait(&result));
+    EXPECT_EQ(42, result);
+}
 
 }  // namespace base
 }  // namespace android

@@ -14,6 +14,7 @@
 
 #include "android/base/threads/Thread.h"
 
+#include "android/base/Log.h"
 #include "android/base/threads/ThreadStore.h"
 
 namespace android {
@@ -40,11 +41,7 @@ private:
 }  // namespace
 
 Thread::Thread(ThreadFlags flags) :
-    mThread(INVALID_HANDLE_VALUE),
-    mThreadId(0),
-    mExitStatus(0),
-    mFlags(flags),
-    mIsRunning(false) {
+    mFlags(flags) {
     InitializeCriticalSection(&mLock);
 }
 
@@ -56,22 +53,31 @@ Thread::~Thread() {
 }
 
 bool Thread::start() {
-    ScopedLocker locker(&mLock);
+    if (mStarted) {
+        return false;
+    }
 
+    ScopedLocker locker(&mLock);
     bool ret = true;
-    mIsRunning = true;
+    mStarted = true;
     mThread = CreateThread(NULL, 0, &Thread::thread_main, this, 0, &mThreadId);
     if (!mThread) {
         ret = false;
-        mIsRunning = false;
+        // We _do not_ need to guard this access to |mFinished| because we're
+        // sure that the launched thread failed, so there can't be parallel
+        // access.
+        mFinished = false;
     }
     return ret;
 }
 
 bool Thread::wait(intptr_t* exitStatus) {
+    if (!mStarted) {
+        return false;
+    }
     {
         ScopedLocker locker(&mLock);
-        if (!mIsRunning) {
+        if (mFinished) {
             // Thread already stopped.
             if (exitStatus) {
                 *exitStatus = mExitStatus;
@@ -85,18 +91,21 @@ bool Thread::wait(intptr_t* exitStatus) {
     if (WaitForSingleObject(mThread, INFINITE) == WAIT_FAILED) {
         return false;
     }
+    DCHECK(mFinished);
 
     if (exitStatus) {
-        ScopedLocker locker(&mLock);
         *exitStatus = mExitStatus;
     }
     return true;
 }
 
 bool Thread::tryWait(intptr_t* exitStatus) {
-    ScopedLocker locker(&mLock);
+    if (!mStarted) {
+        return false;
+    }
 
-    if (!mIsRunning ||
+    ScopedLocker locker(&mLock);
+    if (!mFinished ||
         WaitForSingleObject(mThread, 0) != WAIT_OBJECT_0) {
         return false;
     }
@@ -118,7 +127,7 @@ DWORD WINAPI Thread::thread_main(void *arg) {
         ret = self->main();
 
         EnterCriticalSection(&self->mLock);
-        self->mIsRunning = false;
+        self->mFinished = true;
         self->mExitStatus = ret;
         LeaveCriticalSection(&self->mLock);
 
@@ -129,7 +138,8 @@ DWORD WINAPI Thread::thread_main(void *arg) {
     // Ensure all thread-local values are released for this thread.
     ::android::base::ThreadStoreBase::OnThreadExit();
 
-    return static_cast<DWORD>(ret);
+    // This return value is ignored.
+    return static_cast<DWORD>(NULL);
 }
 
 // static
