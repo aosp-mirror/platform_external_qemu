@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4a4357e2_668ae48d",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-06T01:15:22Z",
+      "side": 1,
+      "message": "Might be nicer to simply replace this with an #ifndef - just makes things a bit clearer.",
+      "range": {
+        "startLine": 329,
+        "startChar": 0,
+        "endLine": 334,
+        "endChar": 5
+      },
+      "revId": "0db9deb41ca565c4bc5ad382bb186466e809624e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
