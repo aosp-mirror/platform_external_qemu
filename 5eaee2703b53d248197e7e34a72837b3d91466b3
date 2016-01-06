@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a52a3ad_768130e5",
+        "filename": "android/avd/util.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-01-06T21:01:11Z",
+      "side": 1,
+      "message": "I would suggest putting this logic somewhere in studio_helper (where you already added  android_sdk_default_path() ) and getting rid off the path.[ch] changes . You can use string/path joining from  android/base/files/PathUtils.h .\nIn general, C++ APIs are recommended and C APIs are being deprecated.",
+      "range": {
+        "startLine": 98,
+        "startChar": 0,
+        "endLine": 112,
+        "endChar": 41
+      },
+      "revId": "5eaee2703b53d248197e7e34a72837b3d91466b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
