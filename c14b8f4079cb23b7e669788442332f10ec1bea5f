@@ -25,6 +25,54 @@
     },
     {
       "key": {
+        "uuid": "8a41cfd9_08652bc0",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-06T01:50:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a1aaf01_ddc7fb1c",
+      "range": {
+        "startLine": 90,
+        "startChar": 11,
+        "endLine": 90,
+        "endChar": 17
+      },
+      "revId": "c14b8f4079cb23b7e669788442332f10ec1bea5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a4357e2_26585cda",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-06T01:50:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a1aaf01_ddc7fb1c",
+      "range": {
+        "startLine": 90,
+        "startChar": 11,
+        "endLine": 90,
+        "endChar": 17
+      },
+      "revId": "c14b8f4079cb23b7e669788442332f10ec1bea5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a1aaf01_9dc1830a",
         "filename": "android/crashreport/CrashService_darwin.cpp",
         "patchSetId": 1
@@ -36,6 +84,30 @@
       "writtenOn": "2016-01-06T00:30:00Z",
       "side": 1,
       "message": ":)",
+      "range": {
+        "startLine": 104,
+        "startChar": 15,
+        "endLine": 105,
+        "endChar": 41
+      },
+      "revId": "c14b8f4079cb23b7e669788442332f10ec1bea5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a4357e2_e6f034fe",
+        "filename": "android/crashreport/CrashService_darwin.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-06T01:50:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a1aaf01_9dc1830a",
       "range": {
         "startLine": 104,
         "startChar": 15,
@@ -71,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "4a4357e2_4655689f",
+        "filename": "android/crashreport/CrashService_linux.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-06T01:50:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aa3e9347_a659d214",
+      "range": {
+        "startLine": 105,
+        "startChar": 7,
+        "endLine": 105,
+        "endChar": 38
+      },
+      "revId": "c14b8f4079cb23b7e669788442332f10ec1bea5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a52a3ad_e52b4c6e",
         "filename": "android/crashreport/CrashService_linux.cpp",
         "patchSetId": 1
@@ -82,6 +178,30 @@
       "writtenOn": "2016-01-06T00:30:00Z",
       "side": 1,
       "message": "pwd might be non-writable. What about popen() instead of the whole system() + redirection?",
+      "range": {
+        "startLine": 110,
+        "startChar": 33,
+        "endLine": 110,
+        "endChar": 59
+      },
+      "revId": "c14b8f4079cb23b7e669788442332f10ec1bea5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a41cfd9_c8c2e3ab",
+        "filename": "android/crashreport/CrashService_linux.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-06T01:50:27Z",
+      "side": 1,
+      "message": "Will need to investigate further, either find temp dirs or something. E.g., dxdiag won\u0027t print to stdout.",
+      "parentUuid": "2a52a3ad_e52b4c6e",
       "range": {
         "startLine": 110,
         "startChar": 33,
@@ -117,6 +237,30 @@
     },
     {
       "key": {
+        "uuid": "ea1debf7_aeaa0f40",
+        "filename": "android/crashreport/ui/CrashProgress.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-06T01:50:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0a4ddf0f_21bccaf1",
+      "range": {
+        "startLine": 19,
+        "startChar": 4,
+        "endLine": 19,
+        "endChar": 19
+      },
+      "revId": "c14b8f4079cb23b7e669788442332f10ec1bea5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a481bfe_042bdabf",
         "filename": "android/crashreport/ui/WantHWInfo.h",
         "patchSetId": 1
@@ -128,6 +272,30 @@
       "writtenOn": "2016-01-06T00:30:00Z",
       "side": 1,
       "message": "by value?",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 38
+      },
+      "revId": "c14b8f4079cb23b7e669788442332f10ec1bea5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa1773d7_c1315896",
+        "filename": "android/crashreport/ui/WantHWInfo.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-06T01:50:27Z",
+      "side": 1,
+      "message": "Working on it",
+      "parentUuid": "6a481bfe_042bdabf",
       "range": {
         "startLine": 26,
         "startChar": 0,
