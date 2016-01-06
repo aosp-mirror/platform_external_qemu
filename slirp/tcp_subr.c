@@ -40,6 +40,10 @@
 
 #include <slirp.h>
 
+#ifdef USE_ANDROID_EMU
+#include "android/proxy/proxy_common.h"
+#endif  // USE_ANDROID_EMU
+
 /* patchable/settable parameters for tcp */
 /* Don't do rfc1323 performance enhancements */
 #define TCP_DO_RFC1323 0
@@ -314,6 +318,23 @@ tcp_sockclosed(struct tcpcb *tp)
 		tcp_output(tp);
 }
 
+#ifdef USE_ANDROID_EMU
+static void
+tcp_proxy_event(struct socket*  so, int s, ProxyEvent event) {
+    so->so_state &= ~SS_PROXIFIED;
+
+    if (event == PROXY_EVENT_CONNECTED) {
+        so->s         = s;
+        so->so_state &= ~(SS_ISFCONNECTING);
+    } else {
+        so->so_state = SS_NOFDREF;
+    }
+
+    /* continue the connect */
+    tcp_input(NULL, sizeof(struct ip), so);
+}
+#endif  // USE_ANDROID_EMU
+
 /*
  * Connect to a host on the Internet
  * Called by tcp_input
@@ -328,6 +349,7 @@ int tcp_fconnect(struct socket *so)
 {
   Slirp *slirp = so->slirp;
   int ret=0;
+  int try_proxy = 0;
 
   DEBUG_CALL("tcp_fconnect");
   DEBUG_ARG("so = %lx", (long )so);
@@ -351,13 +373,32 @@ int tcp_fconnect(struct socket *so)
       } else {
 	addr.sin_addr = loopback_addr;
       }
-    } else
+    } else {
+      try_proxy = 1;
       addr.sin_addr = so->so_faddr;
+    }
     addr.sin_port = so->so_fport;
 
     DEBUG_MISC((dfd, " connect()ing, addr.sin_port=%d, "
-		"addr.sin_addr.s_addr=%.16s\n",
-		ntohs(addr.sin_port), inet_ntoa(addr.sin_addr)));
+        "addr.sin_addr.s_addr=%.16s, proxy=%d\n",
+        ntohs(addr.sin_port), inet_ntoa(addr.sin_addr), try_proxy));
+
+#ifdef USE_ANDROID_EMU
+    if (try_proxy) {
+        SockAddress sockaddr;
+        sock_address_init_inet(&sockaddr,
+                               ntohl(addr.sin_addr.s_addr),
+                               ntohs(addr.sin_port));
+        if (!proxy_manager_add(&sockaddr, SOCKET_STREAM,
+                               (ProxyEventFunc)tcp_proxy_event, so)) {
+            soisfconnecting(so);
+            so->s = -1;
+            so->so_state |= SS_PROXIFIED;
+            return 0;
+        }
+    }
+#endif  // USE_ANDROID_EMU
+
     /* We don't care what port we get */
     ret = connect(s,(struct sockaddr *)&addr,sizeof (addr));
 

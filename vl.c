@@ -228,6 +228,7 @@ char* android_op_netdelay = NULL;
 int android_op_netfast = 0;
 int lcd_density = LCD_DENSITY_MDPI;
 #ifdef USE_ANDROID_EMU
+extern char* op_http_proxy;
 static const char* android_hw_file = NULL;
 #endif  // USE_ANDROID_EMU
 #endif  // CONFIG_ANDROID
@@ -4066,6 +4067,9 @@ int run_qemu_main(int argc, const char **argv)
                 }
                 break;
 #ifdef USE_ANDROID_EMU
+            case QEMU_OPTION_http_proxy:
+                op_http_proxy = (char*)optarg;
+                break;
             case QEMU_OPTION_android_hw:
                 android_hw_file = optarg;
                 break;

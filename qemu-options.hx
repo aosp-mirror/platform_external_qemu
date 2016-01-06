@@ -3388,6 +3388,8 @@ Dump json-encoded vmstate information for current machine type to file
 in @var{file}
 ETEXI
 
+#ifdef CONFIG_ANDROID
+
 DEF("netspeed", HAS_ARG, QEMU_OPTION_netspeed,
     "-netspeed <speed> maximum network download/upload speeds\n", QEMU_ARCH_ALL)
 STEXI
@@ -3421,7 +3423,13 @@ STEXI
 Select lcd display density value (default is 160)
 ETEXI
 
-#ifdef CONFIG_ANDROID
+DEF("http-proxy", HAS_ARG, QEMU_OPTION_http_proxy,
+    "-http-proxy <proxy> make TCP connections through a HTTP/HTTPS proxy\n", QEMU_ARCH_ALL)
+STEXI
+@item -http-proxy @var{proxy}
+@findex -http-proxy
+make TCP connections through a HTTP/HTTPS proxy
+ETEXI
 
 DEF("android-hw", HAS_ARG, QEMU_OPTION_android_hw,
     "-android-hw <file>\n"
