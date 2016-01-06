@@ -214,6 +214,30 @@
     },
     {
       "key": {
+        "uuid": "2a52a3ad_cbac21c6",
+        "filename": "android/crashreport/CrashService_linux.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-06T20:20:37Z",
+      "side": 1,
+      "message": "what have you decided? current dir is definitely a no-go; we need to peek something",
+      "parentUuid": "8a41cfd9_c8c2e3ab",
+      "range": {
+        "startLine": 110,
+        "startChar": 33,
+        "endLine": 110,
+        "endChar": 59
+      },
+      "revId": "c14b8f4079cb23b7e669788442332f10ec1bea5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a4ddf0f_21bccaf1",
         "filename": "android/crashreport/ui/CrashProgress.h",
         "patchSetId": 1
