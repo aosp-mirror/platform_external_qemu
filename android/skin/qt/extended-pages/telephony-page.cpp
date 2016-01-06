@@ -1,4 +1,4 @@
-// Copyright (C) 2015 The Android Open Source Project
+// Copyright (C) 2015-2016 The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
@@ -92,7 +92,11 @@ void TelephonyPage::on_tel_startEndButton_clicked()
             TelephonyResponse tResp;
             tResp = mTelephonyAgent->telephonyCmd(Tel_Op_Disconnect_Call,
                                                   cleanNumber.toStdString().c_str());
-            if (tResp != Tel_Resp_OK) {
+            if (tResp != Tel_Resp_OK  &&
+                tResp != Tel_Resp_Invalid_Action)
+            {
+                // Don't show an error for Invalid Action: that
+                // just means that the AVD already hanged up.
                 showErrorDialog(tr("The end-call failed."), tr("Telephony"));
                 return;
             }
