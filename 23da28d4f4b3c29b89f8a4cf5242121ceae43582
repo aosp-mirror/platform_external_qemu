@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a52a3ad_16c9ccd1",
+        "filename": "android/metrics/StudioHelper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 1010055
+      },
+      "writtenOn": "2016-01-06T22:10:05Z",
+      "side": 1,
+      "message": "if you eventually see a number of these, do let me know.",
+      "range": {
+        "startLine": 388,
+        "startChar": 18,
+        "endLine": 388,
+        "endChar": 46
+      },
+      "revId": "23da28d4f4b3c29b89f8a4cf5242121ceae43582",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
