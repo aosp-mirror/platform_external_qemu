@@ -346,6 +346,8 @@ static void enter_qemu_main_loop(int argc, char **argv) {
 #define main qt_main
 #endif
 
+extern bool android_op_wipe_data;
+
 extern "C" int main(int argc, char **argv) {
     if (!crashhandler_init()) {
         VERBOSE_PRINT(init, "Crash handling not initialized\n");
@@ -965,7 +967,7 @@ extern "C" int main(int argc, char **argv) {
 #endif
 
     // Create userdata file from init version if needed.
-    if (!path_exists(hw->disk_dataPartition_path)) {
+    if (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path)) {
         if (!path_exists(hw->disk_dataPartition_initPath)) {
             derror("Missing initial data partition file: %s",
                    hw->disk_dataPartition_initPath);
