@@ -17,6 +17,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/sockets/SocketErrors.h"
 #include "android/base/sockets/SocketWaiter.h"
+#include "android/base/system/System.h"
 
 #include <sys/time.h>
 
@@ -327,6 +328,15 @@ public:
                 return EWOULDBLOCK;
             }
 
+            // Return immediately with ETIMEDOUT if we've overrun the deadline.
+            // This can happen in two ways:
+            //     - We waited till timeout on some FDs.
+            //     - We have no FDs to watch, but some timers overran the looper
+            //       deadline.
+            if (nowMs() > deadlineMs) {
+                return ETIMEDOUT;
+            }
+
             // Compute next deadline from timers.
             Duration nextDeadline = kDurationInfinite;
 
@@ -346,33 +356,39 @@ public:
                 if (timeOut < 0) timeOut = 0;
             }
 
-            int ret = mWaiter->wait(timeOut);
-            if (ret < 0) {
-                // Error, force stop.
-                break;
-            }
-            DCHECK(mPendingFdWatches.empty());
+            if (!mFdWatches.empty()) {
+                int ret = mWaiter->wait(timeOut);
+                if (ret < 0) {
+                    // Error, force stop.
+                    break;
+                }
+                DCHECK(mPendingFdWatches.empty());
 
-            if (ret > 0) {
-                // Queue pending FdWatch instances.
-                for (;;) {
-                    unsigned events;
-                    int fd = mWaiter->nextPendingFd(&events);
-                    if (fd < 0) {
-                        break;
-                    }
-
-                    // Find the FdWatch for this file descriptor.
-                    // TODO(digit): Improve efficiency with a map?
-                    FdWatchSet::Iterator iter(&mFdWatches);
-                    while (iter.hasNext()) {
-                        FdWatch* watch = iter.next();
-                        if (watch->fd() == fd) {
-                            watch->setPending(events);
+                if (ret > 0) {
+                    // Queue pending FdWatch instances.
+                    for (;;) {
+                        unsigned events;
+                        int fd = mWaiter->nextPendingFd(&events);
+                        if (fd < 0) {
                             break;
+                        }
+
+                        // Find the FdWatch for this file descriptor.
+                        // TODO(digit): Improve efficiency with a map?
+                        FdWatchSet::Iterator iter(&mFdWatches);
+                        while (iter.hasNext()) {
+                            FdWatch* watch = iter.next();
+                            if (watch->fd() == fd) {
+                                watch->setPending(events);
+                                break;
+                            }
                         }
                     }
                 }
+            } else {
+                // We don't have any FDs to watch, so just sleep till the next
+                // timer expires.
+                System::get()->sleepMs(timeOut);
             }
 
             // Queue pending expired timers.
@@ -411,10 +427,6 @@ public:
                 }
                 watch->clearPending();
                 watch->fire();
-            }
-
-            if (ret == 0) {
-                return ETIMEDOUT;
             }
         }
 
