@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea1debf7_c1dcf10c",
+        "filename": "android/crashreport/CrashService_darwin.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-06T23:30:38Z",
+      "side": 1,
+      "message": "please use C++ strings here. It\u0027s much safer and cleaner",
+      "range": {
+        "startLine": 109,
+        "startChar": 4,
+        "endLine": 112,
+        "endChar": 39
+      },
+      "revId": "797d830c3968839518d5518ff1730baedc592b4d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a41cfd9_19949bb9",
+        "filename": "android/crashreport/CrashService_darwin.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-06T23:30:38Z",
+      "side": 1,
+      "message": "AFAIK you\u0027re already linking to the Emulib. Please use System and PathUtils from it to simplify this code",
+      "range": {
+        "startLine": 109,
+        "startChar": 0,
+        "endLine": 112,
+        "endChar": 39
+      },
+      "revId": "797d830c3968839518d5518ff1730baedc592b4d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
