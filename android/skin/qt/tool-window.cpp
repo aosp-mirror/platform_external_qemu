@@ -86,7 +86,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
 
     mPushDialog.setWindowTitle(tr("File Copy"));
     mPushDialog.setLabelText(tr("Copying files..."));
-    mPushDialog.setRange(0, 0); // Makes it a "busy" dialog
+    mPushDialog.setRange(0, 0);
     mPushDialog.close();
     QObject::connect(&mPushDialog, SIGNAL(canceled()), this, SLOT(slot_pushCanceled()));
     QObject::connect(&mPushProcess, SIGNAL(finished(int)), this, SLOT(slot_pushFinished(int)));
@@ -382,6 +382,7 @@ void ToolWindow::runAdbPush(const QList<QUrl> &urls)
     for (int i = 0; i < urls.length(); i++) {
         mFilesToPush.enqueue(urls[i]);
     }
+    mPushDialog.setMaximum(mPushDialog.maximum() + urls.size());
 
     if (mPushProcess.state() == QProcess::NotRunning) {
 
@@ -715,6 +716,7 @@ void ToolWindow::slot_pushCanceled()
     if (mPushProcess.state() != QProcess::NotRunning) {
         mPushProcess.kill();
     }
+    mPushDialog.setMaximum(0); // Reset the dialog for next time.
     mFilesToPush.clear();
 }
 
@@ -728,8 +730,10 @@ void ToolWindow::slot_pushFinished(int exitStatus)
     }
 
     if (mFilesToPush.isEmpty()) {
+        mPushDialog.setMaximum(0); // Reset the dialog for next time.
         mPushDialog.close();
     } else {
+        mPushDialog.setValue(mPushDialog.value() + 1);
 
         // Prepare the base command
         QStringList args;
