@@ -967,8 +967,14 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
             derror( "-memory must be followed by a positive integer" );
             exit(1);
         }
-        if (ramSize < 32 || ramSize > 4096) {
-            derror( "physical memory size must be between 32 and 4096 MB" );
+        if (ramSize < 32) {
+            derror( "physical memory size must be over 32 MB" );
+            exit(1);
+        }
+        // all 64 bit archs we support include "64"
+        bool is_32_bit = strstr(hw->hw_cpu_arch, "64") == 0;
+        if (is_32_bit && ramSize > 4096) {
+            derror( "physical memory size must be less than or equal to 4096 MB" );
             exit(1);
         }
         hw->hw_ramSize = ramSize;
