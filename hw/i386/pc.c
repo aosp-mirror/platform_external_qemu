@@ -1209,44 +1209,10 @@ FWCfgState *pc_memory_init(MachineState *machine,
     memory_region_allocate_system_memory(ram, NULL, "pc.ram",
                                          machine->ram_size);
     *ram_memory = ram;
-
-    // HACK: RAM_PREMAPPING:
-    // Preemptively map RAM into:
-    // 1. RESERVED_MEM_SIZE bytes at the beginning
-    // for the bios/kernel portion
-    // 2. user-space RAM.
-    // This is in order to skip one extra call to hax_set_phys_mem()
-    // on startup, which can be expensive (seconds) on OS X.
-    // Note that RESERVED_MEM_SIZE must be known beforehand.
-    // Therefore, it is a _fragile_ value subject to possible changes
-    // by future versions of QEMU2, HAX, bios, and kernel.
-    // Ideally, we just want hax_set_phys_mem() itself
-    // to be faster on OS X.
-#ifdef __APPLE__
-    #define RAM_PREMAPPING
-#endif
-
-#ifdef RAM_PREMAPPING
-    #define RESERVED_MEM_SIZE 0x100000
-    assert (below_4g_mem_size > 0x100000);
-
-    MemoryRegion* pre_mapped_kernel_space = g_malloc(sizeof(*ram_below_4g));
-    memory_region_init_alias(pre_mapped_kernel_space, NULL, "pre-mapped-kernel-space", ram, 0, RESERVED_MEM_SIZE);
-    memory_region_add_subregion(system_memory, 0, pre_mapped_kernel_space);
-
-    ram_below_4g = g_malloc(sizeof(*ram_below_4g));
-
-    // Adjust ram_below_4g to account for RESERVED_MEM
-    ram_below_4g->size = int128_sub(int128_make64(below_4g_mem_size), int128_make64(RESERVED_MEM_SIZE));
-    memory_region_init_alias(ram_below_4g, NULL, "pre-mapped-user-ram-below-4g", ram, RESERVED_MEM_SIZE, below_4g_mem_size);
-    memory_region_add_subregion(system_memory, 0x100000, ram_below_4g);
-#else
     ram_below_4g = g_malloc(sizeof(*ram_below_4g));
     memory_region_init_alias(ram_below_4g, NULL, "ram-below-4g", ram,
                              0, below_4g_mem_size);
     memory_region_add_subregion(system_memory, 0, ram_below_4g);
-#endif
-
     e820_add_entry(0, below_4g_mem_size, E820_RAM);
     if (above_4g_mem_size > 0) {
         ram_above_4g = g_malloc(sizeof(*ram_above_4g));
