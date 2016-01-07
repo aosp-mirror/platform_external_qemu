@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a52a3ad_1776a370",
+        "filename": "android/crashreport/CrashService_windows.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-07T22:57:59Z",
+      "side": 1,
+      "message": "nit: There\u0027s a WinAPI Sleep(\u003cms\u003e) call and System::sleepMs() in android::base.\nLet\u0027s not introduce non-native calls in platform-specific files please",
+      "range": {
+        "startLine": 186,
+        "startChar": 0,
+        "endLine": 187,
+        "endChar": 27
+      },
+      "revId": "2d47159692f5104d1f6184b03f33c43c69ced693",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
