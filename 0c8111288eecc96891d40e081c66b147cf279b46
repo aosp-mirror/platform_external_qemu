@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ea1debf7_773a870b",
+        "filename": "android/skin/qt/emulator-qt-no-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-01-07T17:26:21Z",
+      "side": 1,
+      "message": "Habit, will remove if it breaks style.",
+      "parentUuid": "aa1773d7_cda3c9ca",
+      "range": {
+        "startLine": 74,
+        "startChar": 4,
+        "endLine": 74,
+        "endChar": 10
+      },
+      "revId": "0c8111288eecc96891d40e081c66b147cf279b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a52a3ad_0612fb38",
         "filename": "android/skin/qt/emulator-qt-no-window.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-07T07:31:34Z",
       "side": 1,
       "message": "nit: bad alignment",
+      "range": {
+        "startLine": 80,
+        "startChar": 4,
+        "endLine": 80,
+        "endChar": 6
+      },
+      "revId": "0c8111288eecc96891d40e081c66b147cf279b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a4ddf0f_67d89da2",
+        "filename": "android/skin/qt/emulator-qt-no-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-01-07T17:26:21Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "2a52a3ad_0612fb38",
       "range": {
         "startLine": 80,
         "startChar": 4,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "2a52a3ad_06951b67",
+        "filename": "android/skin/qt/emulator-qt-no-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-01-07T17:26:21Z",
+      "side": 1,
+      "message": "Habit, will remove.",
+      "parentUuid": "0a4ddf0f_07a19965",
+      "range": {
+        "startLine": 84,
+        "startChar": 4,
+        "endLine": 84,
+        "endChar": 11
+      },
+      "revId": "0c8111288eecc96891d40e081c66b147cf279b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea1debf7_04951767",
         "filename": "android/skin/qt/emulator-qt-no-window.h",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2016-01-07T07:31:34Z",
       "side": 1,
       "message": "it\u0027s actually not a good practice to inherit QThread; instead, please create a task and run it on QThread:\nhttps://android-review.googlesource.com/#/c/185356/\n\nit just provides a better separation of concerns: thread is only responsible for threading, task only executes the logic",
+      "range": {
+        "startLine": 22,
+        "startChar": 5,
+        "endLine": 22,
+        "endChar": 45
+      },
+      "revId": "0c8111288eecc96891d40e081c66b147cf279b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa1773d7_7f8100e5",
+        "filename": "android/skin/qt/emulator-qt-no-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-01-07T17:26:21Z",
+      "side": 1,
+      "message": "Copied the MainLoopThred layout from emulator-qt-window.* ; will follow your suggestions to improve both.",
+      "parentUuid": "ea1debf7_04951767",
       "range": {
         "startLine": 22,
         "startChar": 5,
@@ -174,6 +270,30 @@
       "writtenOn": "2016-01-07T07:31:34Z",
       "side": 1,
       "message": "I don\u0027t believe you :)",
+      "range": {
+        "startLine": 306,
+        "startChar": 19,
+        "endLine": 306,
+        "endChar": 46
+      },
+      "revId": "0c8111288eecc96891d40e081c66b147cf279b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa1773d7_1f924440",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-01-07T17:26:21Z",
+      "side": 1,
+      "message": ":) Will change this message to something that makes more sense",
+      "parentUuid": "4a4357e2_c643b3ef",
       "range": {
         "startLine": 306,
         "startChar": 19,
