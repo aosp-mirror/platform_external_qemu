@@ -226,7 +226,9 @@ int graphic_rotate = 0;
 char* android_op_netspeed = NULL;
 char* android_op_netdelay = NULL;
 int android_op_netfast = 0;
+char* android_op_dns_server = NULL;
 int lcd_density = LCD_DENSITY_MDPI;
+char* additional_kernel_params = NULL;
 #ifdef USE_ANDROID_EMU
 extern char* op_http_proxy;
 static const char* android_hw_file = NULL;
@@ -639,6 +641,9 @@ static void res_free(void)
         g_free(boot_splash_filedata);
         boot_splash_filedata = NULL;
     }
+#ifdef CONFIG_ANDROID
+    g_free(additional_kernel_params);
+#endif  // CONFIG_ANDROID
 }
 
 static int default_driver_check(QemuOpts *opts, void *opaque)
@@ -4066,6 +4071,9 @@ int run_qemu_main(int argc, const char **argv)
                         return 1;
                 }
                 break;
+            case QEMU_OPTION_dns_server:
+                android_op_dns_server = (char*)optarg;
+                break;
 #ifdef USE_ANDROID_EMU
             case QEMU_OPTION_http_proxy:
                 op_http_proxy = (char*)optarg;
@@ -4241,6 +4249,38 @@ int run_qemu_main(int argc, const char **argv)
         qemu_net_min_latency = 0;
         qemu_net_max_latency = 0;
     }
+
+    int dns_count = 0;
+    if (android_op_dns_server) {
+        dns_count = slirp_parse_dns_servers(android_op_dns_server);
+        if (dns_count == -2) {
+            // Special case for better user feedback on this error message
+            fprintf(stderr,
+                    "too many servers specified in -dns-server-parameter "
+                    "argument '%s'. A maximum of %d is supported.\n",
+                    android_op_dns_server,
+                    slirp_get_max_dns_servers());
+            return 1;
+        } else if (dns_count < 0) {
+            fprintf(stderr, "invalid -dns-server parameter '%s'\n",
+                    android_op_dns_server);
+            return 1;
+        }
+        if (dns_count == 0) {
+            printf("### WARNING: will use system default DNS server\n");
+        }
+    }
+    if (dns_count == 0) {
+        dns_count = slirp_get_system_dns_servers();
+        if (dns_count < 0) {
+            printf("### WARNING: unable to configure any DNS servers, "
+                   "name resolution will not work\n");
+        }
+    }
+    if (dns_count > 1) {
+        additional_kernel_params = g_strdup_printf("ndns=%d", dns_count);
+    }
+
 #endif // USE_ANDROID_EMU
 
 #endif // CONFIG_ANDROID
@@ -4558,6 +4598,19 @@ int run_qemu_main(int argc, const char **argv)
     }
 
     current_machine->kernel_cmdline = kernel_cmdline ? (char *)kernel_cmdline : "";
+
+#ifdef CONFIG_ANDROID
+    if (additional_kernel_params) {
+        char* combined = g_strdup_printf("%s %s",
+                                         current_machine->kernel_cmdline,
+                                         additional_kernel_params);
+        current_machine->kernel_cmdline = combined;
+        // Free the original buffer and put the newly allocated one in there
+        // to make sure it gets deallocated.
+        g_free(additional_kernel_params);
+        additional_kernel_params = combined;
+    }
+#endif  // CONFIG_ANDROID
 
     linux_boot = (kernel_filename != NULL);
 

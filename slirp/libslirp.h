@@ -3,7 +3,15 @@
 
 #include "qemu-common.h"
 
-int get_dns_addr(struct in_addr *pdns_addr);
+int is_dns_addr(Slirp* slirp, const struct in_addr* guest_addr);
+
+int get_dns_addr(const struct in_addr* guest_addr, struct in_addr* host_addr);
+
+int slirp_get_system_dns_servers(void);
+
+int slirp_parse_dns_servers(const char* servers);
+
+int slirp_get_max_dns_servers(void);
 
 Slirp *slirp_init(int restricted, struct in_addr vnetwork,
                   struct in_addr vnetmask, struct in_addr vhost,

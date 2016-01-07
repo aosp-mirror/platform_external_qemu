@@ -367,8 +367,8 @@ int tcp_fconnect(struct socket *so)
     if ((so->so_faddr.s_addr & slirp->vnetwork_mask.s_addr) ==
         slirp->vnetwork_addr.s_addr) {
       /* It's an alias */
-      if (so->so_faddr.s_addr == slirp->vnameserver_addr.s_addr) {
-	if (get_dns_addr(&addr.sin_addr) < 0)
+      if (is_dns_addr(slirp, &so->so_faddr)) {
+	if (get_dns_addr(&so->so_faddr, &addr.sin_addr) < 0)
 	  addr.sin_addr = loopback_addr;
       } else {
 	addr.sin_addr = loopback_addr;
