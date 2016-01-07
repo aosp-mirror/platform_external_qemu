@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "android/metrics/StudioHelper.h"
-#include "android/metrics/studio-helper.h"
 
 #include "android/base/containers/StringVector.h"
 #include "android/base/testing/TestSystem.h"
@@ -23,8 +22,6 @@
 #include "android/utils/path.h"
 
 #include <gtest/gtest.h>
-
-#include <fstream>
 
 /***************************************************************************/
 // These macros are replicated as consts in StudioHelper.cpp
@@ -46,8 +43,6 @@
 
 using namespace android::base;
 using namespace android;
-using std::endl;
-using std::ofstream;
 
 TEST(DotAndroidStudio, androidStudioVersioning) {
     const char* str = NULL;
@@ -187,51 +182,23 @@ TEST(DotAndroidStudio, androidStudioXMLPathBuilder) {
     EXPECT_STREQ(foundStudioXMLPath.c_str(), studioXMLPath);
 }
 
-TEST(DotAndroidStudio, androidStudioUuid) {
-    TestSystem testSys("/root", 32);
+#ifdef _WIN32
+// This is a Windows-only test
+TEST(DotAndroidStudio, androidStudioUUIDWindows) {
+    TestSystem testSys("/root", 32, "/root/home", "/root/appdata");
     TestTempDir* testDir = testSys.getTempRoot();
-    testSys.setHomeDirectory(String(testDir->path()).append("/root/home"));
-    testSys.setAppDataDirectory(
-            String(testDir->path()).append("/root/appdata"));
 
     testDir->makeSubDir("root");
     testDir->makeSubDir("root/home");
-    testDir->makeSubDir("root/home/.android");
-
-    char* zeroUuid = android_studio_get_installation_id();
-    EXPECT_STREQ("00000000-0000-0000-0000-000000000000", zeroUuid);
-    free(zeroUuid);
-
-#ifdef _WIN32
-    auto expectedLegacyUuid = "10101000-0000-0000-0000-000000000000";
     testDir->makeSubDir("root/appdata");
+
     testDir->makeSubDir("root/appdata/" ANDROID_STUDIO_UUID_DIR);
     testDir->makeSubFile("root/appdata/" ANDROID_STUDIO_UUID_DIR
                          "/" ANDROID_STUDIO_UUID);
 
-    auto legacyUuidFilePath =
-            String(testDir->path())
-                    .append("/root/appdata/" ANDROID_STUDIO_UUID_DIR
-                            "/" ANDROID_STUDIO_UUID);
-    ofstream legacyUuidFile(legacyUuidFilePath.c_str());
-    ASSERT_TRUE(legacyUuidFile);
-    legacyUuidFile << expectedLegacyUuid << endl;
-    legacyUuidFile.close();
-
-    char* legacyUuid = android_studio_get_installation_id();
-    EXPECT_STREQ(expectedLegacyUuid, legacyUuid);
-    free(legacyUuid);
-#endif  // _WIN32
-
-    auto expectedUuid = "20220000-0000-0000-0000-000000000000";
-    auto uuidFilePath =
-            String(testDir->path()).append("/root/home/.android/uid.txt");
-    ofstream uuidFile(uuidFilePath.c_str());
-    ASSERT_TRUE(uuidFile);
-    uuidFile << expectedUuid << endl;
-    uuidFile.close();
-
-    char* uuid = android_studio_get_installation_id();
-    EXPECT_STREQ(expectedUuid, uuid);
-    free(uuid);
+    String foundStudioUUIDPath = StudioHelper::pathToStudioUUIDWindows();
+    const char* UUIDPath =
+            "/root/appdata" FS ANDROID_STUDIO_UUID_DIR FS ANDROID_STUDIO_UUID;
+    EXPECT_STREQ(foundStudioUUIDPath.c_str(), UUIDPath);
 }
+#endif  // _WIN32
