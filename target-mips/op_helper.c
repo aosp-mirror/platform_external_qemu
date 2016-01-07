@@ -60,6 +60,20 @@ static inline void compute_hflags(CPUMIPSState *env)
     if (env->CP0_Status & (1 << CP0St_FR)) {
         env->hflags |= MIPS_HFLAG_F64;
     }
+    if (env->insn_flags & ASE_DSPR2) {
+        /* Enables access MIPS DSP resources, now our cpu is DSP ASER2,
+           so enable to access DSPR2 resources. */
+        if (env->CP0_Status & (1 << CP0St_MX)) {
+            env->hflags |= MIPS_HFLAG_DSP | MIPS_HFLAG_DSPR2;
+        }
+
+    } else if (env->insn_flags & ASE_DSP) {
+        /* Enables access MIPS DSP resources, now our cpu is DSP ASE,
+           so enable to access DSP resources. */
+        if (env->CP0_Status & (1 << CP0St_MX)) {
+            env->hflags |= MIPS_HFLAG_DSP;
+        }
+    }
     if (env->insn_flags & ISA_MIPS32R2) {
         if (env->active_fpu.fcr0 & (1 << FCR0_F64)) {
             env->hflags |= MIPS_HFLAG_COP1X;
