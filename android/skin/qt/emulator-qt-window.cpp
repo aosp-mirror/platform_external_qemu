@@ -11,8 +11,8 @@
  */
 
 #include <QtCore>
-#include <QCursor>
 #include <QAbstractSlider>
+#include <QCheckBox>
 #include <QCursor>
 #include <QDesktopWidget>
 #include <QFileDialog>
@@ -32,6 +32,7 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/cpu_accelerator.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/globals.h"
 #include "android/skin/event.h"
@@ -73,7 +74,12 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         mNextIsZoom(false),
         mGrabKeyboardInput(false),
         mMouseInside(false),
-        mMainLoopThread(nullptr)
+        mMainLoopThread(nullptr),
+        mAvdWarningBox(QMessageBox::Information,
+                       tr("Recommended AVD"),
+                       tr("Running an x86 based Android Virtual Device (AVD) is 10x faster.<br/>"
+                          "We strongly recommend creating a new AVD."),
+                       QMessageBox::Ok)
 {
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
@@ -128,6 +134,24 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     mFlashAnimation.setEasingCurve(QEasingCurve::Linear);
     QObject::connect(&mFlashAnimation, SIGNAL(finished()), this, SLOT(slot_animationFinished()));
     QObject::connect(&mFlashAnimation, SIGNAL(valueChanged(QVariant)), this, SLOT(slot_animationValueChanged(QVariant)));
+
+    // If the user isn't using an x86 AVD, make sure its because their machine doesn't support
+    // CPU acceleration. If it does, recommend switching to an x86 AVD.
+    char *arch = avdInfo_getTargetCpuArch(android_avdInfo);
+    if ( strcmp(arch, "x86") && strcmp(arch, "x86_64")) {
+        if (isAccelerationSupported()) {
+            QSettings settings;
+            if (settings.value(Ui::Settings::SHOW_AVD_WARNING, true).toBool()) {
+                QCheckBox *checkbox = new QCheckBox(tr("Never show this again."));
+                checkbox->setCheckState(Qt::Unchecked);
+                mAvdWarningBox.setCheckBox(checkbox);
+                mAvdWarningBox.show();
+
+                QObject::connect(&mAvdWarningBox, SIGNAL(buttonClicked(QAbstractButton*)),
+                                 this, SLOT(slot_avdWarningMessageAccepted()));
+            }
+        }
+    }
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr()
@@ -144,6 +168,30 @@ EmulatorQtWindow::~EmulatorQtWindow()
 {
     delete tool_window;
     delete mMainLoopThread;
+}
+
+bool EmulatorQtWindow::isAccelerationSupported() const
+{
+    // OSX systems fall under one of two categories:
+    // - Physical Mac machines, which should have Intel CPU's and therefore support virtualization.
+    // - Virtual Mac machines, meaning the base machine supports virtualization (we do not worry
+    //   about support for nested virtualization).
+#ifdef __APPLE__
+    return true;
+#endif
+
+    // Linux and Windows systems may or may not support acceleration, so we must check.
+    // Statuses 2 through 5 indicate hardware that doesn't support acceleration. These machines
+    // should never show a popup indicating to switch to x86. See android/cpu_accelerator.h for
+    // details on what these statuses mean.
+    AndroidCpuAcceleration status = androidCpuAcceleration_getStatus(nullptr);
+    if (status >= 2 && status <= 5) {
+        return false;
+    }
+
+    // Any other status indicates a software related issue that can be fixed through Android
+    // Studio. These users should see the popup indicating to switch to x86.
+    return true;
 }
 
 void EmulatorQtWindow::slot_startupTick() {
@@ -177,6 +225,15 @@ void EmulatorQtWindow::slot_startupTick() {
     mStartupDialog.setRange(0, 0); // Don't show % complete
     mStartupDialog.setCancelButton(0);   // No "cancel" button
     mStartupDialog.show();
+}
+
+void EmulatorQtWindow::slot_avdWarningMessageAccepted()
+{
+    QCheckBox *checkbox = mAvdWarningBox.checkBox();
+    if (checkbox->checkState() == Qt::Checked) {
+        QSettings settings;
+        settings.setValue(Ui::Settings::SHOW_AVD_WARNING, false);
+    }
 }
 
 void EmulatorQtWindow::closeEvent(QCloseEvent *event)
