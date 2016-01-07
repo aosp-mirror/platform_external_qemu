@@ -29,6 +29,7 @@
 #include "sysemu/accel.h"
 #include "exec/address-spaces.h"
 #include "qemu/main-loop.h"
+#include "hax-slot.h"
 
 /* #define DEBUG_HAX */
 
@@ -352,6 +353,7 @@ struct hax_vm *hax_vm_create(struct hax_state *hax)
     }
 
     hax->vm = vm;
+    hax_slot_init_registry();
     return vm;
 
   error:
@@ -364,6 +366,7 @@ int hax_vm_destroy(struct hax_vm *vm)
 {
     int i;
 
+    hax_slot_free_registry();
     for (i = 0; i < HAX_MAX_VCPU; i++)
         if (vm->vcpus[i]) {
             fprintf(stderr, "VCPU should be cleaned before vm clean\n");
@@ -375,15 +378,45 @@ int hax_vm_destroy(struct hax_vm *vm)
     return 0;
 }
 
+static void hax_set_phys_mem(MemoryRegionSection *section)
+{
+    MemoryRegion *mr = section->mr;
+    hwaddr start_pa = section->offset_within_address_space;
+    ram_addr_t size = int128_get64(section->size);
+    unsigned int delta;
+    void *host_ptr;
+    int flags;
+
+    /* We only care about RAM and ROM */
+    if (!memory_region_is_ram(mr)) {
+        return;
+    }
+
+    /* Adjust start_pa and size so that they are page-aligned. (Cf
+     * kvm_set_phys_mem() in kvm-all.c).
+     */
+    delta = TARGET_PAGE_SIZE - (start_pa & ~TARGET_PAGE_MASK);
+    delta &= ~TARGET_PAGE_MASK;
+    if (delta > size) {
+        return;
+    }
+    start_pa += delta;
+    size -= delta;
+    size &= TARGET_PAGE_MASK;
+    if (!size || start_pa & ~TARGET_PAGE_MASK) {
+        return;
+    }
+
+    host_ptr = memory_region_get_ram_ptr(mr) + section->offset_within_region
+               + delta;
+    flags = memory_region_is_rom(mr) ? 1 : 0;
+    hax_slot_register(start_pa, size, (uintptr_t) host_ptr, flags);
+}
+
 static void hax_region_add(MemoryListener * listener,
                            MemoryRegionSection * section)
 {
-    int ret = hax_set_phys_mem(section);
-    if (ret) {
-        fprintf(stderr, "Failed to add memory region section (error: %d)\n",
-                ret);
-        exit(1);
-    }
+    hax_set_phys_mem(section);
 }
 
 static void hax_region_del(MemoryListener * listener,

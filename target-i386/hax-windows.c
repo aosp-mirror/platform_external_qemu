@@ -93,44 +93,20 @@ int hax_populate_ram(uint64_t va, uint32_t size)
     return 0;
 }
 
-
-/*
- * much simpler than kvm, at least in first stage because:
- * We don't need consider the device pass-through, we don't need
- * consider the framebuffer, and we may even remove the bios at all
- */
-
-int hax_set_phys_mem(MemoryRegionSection * section)
+int hax_set_ram(uint64_t start_pa, uint32_t size, uint64_t host_va, int flags)
 {
-    struct hax_set_ram_info info, *pinfo = &info;
-    MemoryRegion *mr = section->mr;
-    hwaddr start_addr = section->offset_within_address_space;
-    ram_addr_t size = int128_get64(section->size);
-    HANDLE hDeviceVM;
+    struct hax_set_ram_info info;
+    HANDLE hDeviceVM = hax_global.vm->fd;
     DWORD dSize = 0;
-    int ret = 0;
+    int ret;
 
-    /* We only care for the  RAM and ROM */
-    if (!memory_region_is_ram(mr)) {
-        return 0;
-    }
-
-    if ((start_addr & ~TARGET_PAGE_MASK) || (size & ~TARGET_PAGE_MASK)) {
-        fprintf(stderr, "set_phys_mem %x %lx requires page aligned addr and size\n",
-                start_addr, size);
-        return -1;
-    }
-
-    info.pa_start = start_addr;
+    info.pa_start = start_pa;
     info.size = size;
-    info.va = (uint64_t) (intptr_t) (memory_region_get_ram_ptr(mr) +
-                                     section->offset_within_region);
-    info.flags = memory_region_is_rom(mr) ? 1 : 0;
-
-    hDeviceVM = hax_global.vm->fd;
+    info.va = host_va;
+    info.flags = (uint8_t) flags;
 
     ret = DeviceIoControl(hDeviceVM, HAX_VM_IOCTL_SET_RAM,
-                          pinfo, sizeof(*pinfo), NULL, 0, &dSize,
+                          &info, sizeof(info), NULL, 0, &dSize,
                           (LPOVERLAPPED) NULL);
 
     if (!ret)
