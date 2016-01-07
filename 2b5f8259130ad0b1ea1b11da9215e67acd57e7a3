@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ca202730_d3ffecc8",
+        "filename": "android/crashreport/CrashService_linux.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-07T01:47:26Z",
+      "side": 1,
+      "message": "Doesn\u0027t seem to work. Tried it with the member variable and everything.",
+      "parentUuid": "4a4357e2_4c81076a",
+      "range": {
+        "startLine": 112,
+        "startChar": 20,
+        "endLine": 112,
+        "endChar": 44
+      },
+      "revId": "2b5f8259130ad0b1ea1b11da9215e67acd57e7a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a4357e2_2cdb5ba1",
         "filename": "android/crashreport/CrashService_windows.cpp",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-06T20:20:37Z",
       "side": 1,
       "message": "it looks like the only difference in all three platforms are the string to execute. If you decide to keep system() call (which I think is not the best choice), we can at least generalize the call and move it to the common base class. Specific implementations would just pass the command line",
+      "range": {
+        "startLine": 133,
+        "startChar": 0,
+        "endLine": 146,
+        "endChar": 23
+      },
+      "revId": "2b5f8259130ad0b1ea1b11da9215e67acd57e7a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a4357e2_d2e132bc",
+        "filename": "android/crashreport/CrashService_windows.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-07T01:47:26Z",
+      "side": 1,
+      "message": "Yes I also wish they were the same, but it\u0027s not the same now with how temp files are found and created in Windows.",
+      "parentUuid": "4a4357e2_2cdb5ba1",
       "range": {
         "startLine": 133,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "6a481bfe_ed3811af",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-07T01:47:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a52a3ad_f69a2089",
+      "range": {
+        "startLine": 80,
+        "startChar": 25,
+        "endLine": 80,
+        "endChar": 32
+      },
+      "revId": "2b5f8259130ad0b1ea1b11da9215e67acd57e7a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a481bfe_72206086",
         "filename": "android/crashreport/main-crash-service.cpp",
         "patchSetId": 6
@@ -82,6 +154,30 @@
       "writtenOn": "2016-01-06T20:20:37Z",
       "side": 1,
       "message": "maybe it\u0027s time to return to the classic QApplication\u0027s exec() here?",
+      "range": {
+        "startLine": 196,
+        "startChar": 4,
+        "endLine": 196,
+        "endChar": 14
+      },
+      "revId": "2b5f8259130ad0b1ea1b11da9215e67acd57e7a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a1aaf01_71205886",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-07T01:47:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a481bfe_72206086",
       "range": {
         "startLine": 196,
         "startChar": 4,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "8a41cfd9_798a878d",
+        "filename": "android/crashreport/ui/CrashProgress.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-07T01:47:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aa1773d7_2784e47a",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 35
+      },
+      "revId": "2b5f8259130ad0b1ea1b11da9215e67acd57e7a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ca202730_c8f737b0",
         "filename": "android/crashreport/ui/DetailsGetter.cpp",
         "patchSetId": 6
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "0a4ddf0f_b0fa5eda",
+        "filename": "android/crashreport/ui/DetailsGetter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-07T01:47:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca202730_c8f737b0",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 35
+      },
+      "revId": "2b5f8259130ad0b1ea1b11da9215e67acd57e7a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a4357e2_acbd2b24",
         "filename": "android/crashreport/ui/WantHWInfo.h",
         "patchSetId": 6
@@ -151,6 +295,30 @@
       "writtenOn": "2016-01-06T20:20:37Z",
       "side": 1,
       "message": "cref?",
+      "range": {
+        "startLine": 36,
+        "startChar": 18,
+        "endLine": 36,
+        "endChar": 25
+      },
+      "revId": "2b5f8259130ad0b1ea1b11da9215e67acd57e7a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a481bfe_18d81d17",
+        "filename": "android/crashreport/ui/WantHWInfo.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-07T01:47:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a4357e2_acbd2b24",
       "range": {
         "startLine": 36,
         "startChar": 18,
