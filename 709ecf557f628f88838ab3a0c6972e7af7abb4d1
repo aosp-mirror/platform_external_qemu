@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa1773d7_4258e3da",
+        "filename": "android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 975,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-07T22:50:11Z",
+      "side": 1,
+      "message": "should we also check if the emulator executable is 64-bit?",
+      "range": {
+        "startLine": 974,
+        "startChar": 4,
+        "endLine": 975,
+        "endChar": 59
+      },
+      "revId": "709ecf557f628f88838ab3a0c6972e7af7abb4d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
