@@ -17,9 +17,8 @@
 #if defined(USE_ANDROID_EMU)
 #include "android/globals.h"  /* for android_hw */
 #include "android-qemu2-glue/qemu-control-impl.h"
-#endif
-
 #include "android/multitouch-screen.h"
+#endif
 
 #include "hw/sysbus.h"
 #include "ui/input.h"
@@ -795,6 +794,7 @@ static void gf_evdev_put_mouse(void *opaque,
 {
     GoldfishEvDevState *s = (GoldfishEvDevState *)opaque;
 
+#ifdef USE_ANDROID_EMU
     /* Note that unlike the "classic" Android emulator, we don't
      * have the "dz == 0 for touchscreen, == 1 for trackball"
      * distinction.
@@ -805,6 +805,7 @@ static void gf_evdev_put_mouse(void *opaque,
                                       (buttons_state & 1) ? 0x81 : 0);
         return;
     }
+#endif
     if (s->have_touch) {
         enqueue_event(s, EV_ABS, ABS_X, dx);
         enqueue_event(s, EV_ABS, ABS_Y, dy);
@@ -1273,6 +1274,7 @@ static void gf_evdev_realize(DeviceState *dev, Error **errp)
             events_set_bit(s, EV_ABS, ABS_MT_TOUCH_MAJOR);
             events_set_bit(s, EV_ABS, ABS_MT_PRESSURE);
 
+#ifdef USE_ANDROID_EMU
             abs_values[ABS_MT_SLOT].max = multitouch_get_max_slot();
             abs_values[ABS_MT_TRACKING_ID].max
                 = abs_values[ABS_MT_SLOT].max + 1;
@@ -1281,6 +1283,7 @@ static void gf_evdev_realize(DeviceState *dev, Error **errp)
             /* TODO : make next 2 less random */
             abs_values[ABS_MT_TOUCH_MAJOR].max = 0x7fffffff;
             abs_values[ABS_MT_PRESSURE].max = 0x100;
+#endif  // USE_ANDROID_EMU
         }
     }
 

@@ -13,4 +13,3 @@ obj-$(CONFIG_PXA2XX) += pxa2xx_keypad.o
 obj-$(CONFIG_TSC210X) += tsc210x.o
 obj-$(CONFIG_GOLDFISH) += goldfish_events.o
 obj-$(CONFIG_GOLDFISH) += goldfish_sensors.o
-obj-$(CONFIG_GOLDFISH) += multitouch-screen.o

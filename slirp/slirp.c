@@ -129,7 +129,7 @@ int is_dns_addr(Slirp* slirp, const struct in_addr* address)  {
 }
 
 #ifdef _WIN32
-int get_dns_addr(const struct in_addr* /* guest_addr */,
+int get_dns_addr(const struct in_addr* guest_addr,
                  struct in_addr* pdns_addr)
 {
     FIXED_INFO *FixedInfo=NULL;
@@ -137,6 +137,8 @@ int get_dns_addr(const struct in_addr* /* guest_addr */,
     DWORD    ret;
     IP_ADDR_STRING *pIPAddr;
     struct in_addr tmp_addr;
+
+    (void)guest_addr;
 
     if (dns_addr.s_addr != 0 && (curtime - dns_addr_time) < TIMEOUT_DEFAULT) {
         *pdns_addr = dns_addr;

@@ -69,7 +69,9 @@
 #include "exec/cpu_ldst.h"
 #include "qmp-commands.h"
 #include "hmp.h"
+#ifdef CONFIG_ANDROID
 #include "android-console.h"
+#endif
 #include "qemu/thread.h"
 #include "block/qapi.h"
 #include "qapi/qmp-event.h"
@@ -217,7 +219,9 @@ static int mon_refcount;
 
 static mon_cmd_t mon_cmds[];
 static mon_cmd_t info_cmds[];
+#ifdef CONFIG_ANDROID
 static mon_cmd_t android_cmds[];
+#endif
 
 static const mon_cmd_t qmp_cmds[];
 
@@ -911,6 +915,7 @@ static mon_cmd_t * get_command_table(Monitor *mon, cmd_table_t cmds)
     }
 }
 
+#ifdef CONFIG_ANDROID
 static void android_console_help(Monitor *mon, const QDict *qdict)
 {
     const char *name = qdict_get_try_str(qdict, "helptext");
@@ -984,6 +989,7 @@ static void android_console_help(Monitor *mon, const QDict *qdict)
         cmds = sub_cmds;
     }
 }
+#endif  // CONFIG_ANDROID
 
 static void do_trace_event_set_state(Monitor *mon, const QDict *qdict)
 {
@@ -3044,7 +3050,9 @@ static const mon_cmd_t qmp_cmds[] = {
     { /* NULL */ },
 };
 
+#ifdef CONFIG_ANDROID
 #include "android-commands.h"
+#endif  // CONFIG_ANDROID
 
 /*******************************************************************/
 
@@ -5496,16 +5504,16 @@ Monitor * monitor_init(CharDriverState *chr, int flags)
         "QEMU " QEMU_VERSION " monitor - type 'help' for more information";
     mon->print_error = monitor_printf;
 
+#ifdef CONFIG_ANDROID
     if (flags & MONITOR_ANDROID_CONSOLE) {
         mon->cmds.static_table = android_cmds;
         mon->prompt = "";
         mon->banner = "Android Console: type 'help' for a list of commands"
-#ifdef CONFIG_ANDROID
             "\nOK"
-#endif
             ;
         mon->print_error = android_monitor_print_error;
     }
+#endif  // CONFIG_ANDROID
 
     if (flags & MONITOR_DYNAMIC_CMDS) {
         mon->cmds.dynamic_table = make_dynamic_table(mon->cmds.static_table);
