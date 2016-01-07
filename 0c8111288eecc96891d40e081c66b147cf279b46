@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa1773d7_cda3c9ca",
+        "filename": "android/skin/qt/emulator-qt-no-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-07T07:31:34Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 74,
+        "startChar": 4,
+        "endLine": 74,
+        "endChar": 10
+      },
+      "revId": "0c8111288eecc96891d40e081c66b147cf279b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a52a3ad_0612fb38",
+        "filename": "android/skin/qt/emulator-qt-no-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-07T07:31:34Z",
+      "side": 1,
+      "message": "nit: bad alignment",
+      "range": {
+        "startLine": 80,
+        "startChar": 4,
+        "endLine": 80,
+        "endChar": 6
+      },
+      "revId": "0c8111288eecc96891d40e081c66b147cf279b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a4ddf0f_07a19965",
+        "filename": "android/skin/qt/emulator-qt-no-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-07T07:31:34Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 84,
+        "startChar": 4,
+        "endLine": 84,
+        "endChar": 11
+      },
+      "revId": "0c8111288eecc96891d40e081c66b147cf279b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea1debf7_04951767",
+        "filename": "android/skin/qt/emulator-qt-no-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-07T07:31:34Z",
+      "side": 1,
+      "message": "it\u0027s actually not a good practice to inherit QThread; instead, please create a task and run it on QThread:\nhttps://android-review.googlesource.com/#/c/185356/\n\nit just provides a better separation of concerns: thread is only responsible for threading, task only executes the logic",
+      "range": {
+        "startLine": 22,
+        "startChar": 5,
+        "endLine": 22,
+        "endChar": 45
+      },
+      "revId": "0c8111288eecc96891d40e081c66b147cf279b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa3e9347_5a3455b0",
+        "filename": "android/skin/qt/emulator-qt-no-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-07T07:31:34Z",
+      "side": 1,
+      "message": "std::function\u003cvoid()\u003e and a lambda or std::bind passed would make it much more generic",
+      "range": {
+        "startLine": 26,
+        "startChar": 27,
+        "endLine": 26,
+        "endChar": 65
+      },
+      "revId": "0c8111288eecc96891d40e081c66b147cf279b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a1aaf01_ac09b77a",
+        "filename": "android/skin/qt/emulator-qt-no-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-07T07:31:34Z",
+      "side": 1,
+      "message": "this is a compatibility macro. We can freely use the \u0027override\u0027 keyword instead",
+      "range": {
+        "startLine": 27,
+        "startChar": 15,
+        "endLine": 27,
+        "endChar": 30
+      },
+      "revId": "0c8111288eecc96891d40e081c66b147cf279b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a41cfd9_74c28e7c",
+        "filename": "android/skin/qt/emulator-qt-no-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-07T07:31:34Z",
+      "side": 1,
+      "message": "std::unique_ptr\u003c\u003e ?",
+      "range": {
+        "startLine": 44,
+        "startChar": 28,
+        "endLine": 44,
+        "endChar": 43
+      },
+      "revId": "0c8111288eecc96891d40e081c66b147cf279b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a4357e2_c643b3ef",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-07T07:31:34Z",
+      "side": 1,
+      "message": "I don\u0027t believe you :)",
+      "range": {
+        "startLine": 306,
+        "startChar": 19,
+        "endLine": 306,
+        "endChar": 46
+      },
+      "revId": "0c8111288eecc96891d40e081c66b147cf279b46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
