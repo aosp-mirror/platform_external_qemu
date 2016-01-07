@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ca202730_42ef8315",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-07T22:02:41Z",
+      "side": 1,
+      "message": "Vince and I talked it over and said we shouldn\u0027t worry about it. Then again, its an error that shouldn\u0027t be seen too often, and it just involves looking for status \u003d 1 below. Changed.",
+      "parentUuid": "2a52a3ad_5cfbf292",
+      "range": {
+        "startLine": 181,
+        "startChar": 81,
+        "endLine": 182,
+        "endChar": 48
+      },
+      "revId": "f09b64a538981b1c7d0ed15c63b415a28782bb20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a1aaf01_a0653b1e",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-07T19:49:24Z",
       "side": 1,
       "message": "curious if we could get rid of this #ifdef and leave it to the androidCpuAcceleration_getStatus() to determine",
+      "range": {
+        "startLine": 183,
+        "startChar": 0,
+        "endLine": 185,
+        "endChar": 6
+      },
+      "revId": "f09b64a538981b1c7d0ed15c63b415a28782bb20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a1aaf01_a0b53b38",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-07T22:02:41Z",
+      "side": 1,
+      "message": "Probably makes sense to do, I\u0027ll check and make sure.",
+      "parentUuid": "8a1aaf01_a0653b1e",
       "range": {
         "startLine": 183,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "0a4ddf0f_9db5f638",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-07T22:02:41Z",
+      "side": 1,
+      "message": "Fair enough. Done.",
+      "parentUuid": "8a41cfd9_4bd00822",
+      "range": {
+        "startLine": 192,
+        "startChar": 8,
+        "endLine": 192,
+        "endChar": 34
+      },
+      "revId": "f09b64a538981b1c7d0ed15c63b415a28782bb20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea1debf7_9ad3c22f",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 2
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "8a1aaf01_0023c74f",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-07T22:02:41Z",
+      "side": 1,
+      "message": "I actually suggested just putting whatever \"emulator-check accel\" outputs into the popup - it should indicate what needs to be installed/fixed.",
+      "parentUuid": "ea1debf7_9ad3c22f",
+      "range": {
+        "startLine": 197,
+        "startChar": 15,
+        "endLine": 197,
+        "endChar": 75
+      },
+      "revId": "f09b64a538981b1c7d0ed15c63b415a28782bb20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea1debf7_1a2b32c0",
         "filename": "android/skin/qt/qt-settings.h",
         "patchSetId": 2
@@ -105,6 +201,30 @@
       "writtenOn": "2016-01-07T19:49:24Z",
       "side": 1,
       "message": "showAvdArchWarning?",
+      "range": {
+        "startLine": 24,
+        "startChar": 40,
+        "endLine": 24,
+        "endChar": 54
+      },
+      "revId": "f09b64a538981b1c7d0ed15c63b415a28782bb20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa3e9347_675f4153",
+        "filename": "android/skin/qt/qt-settings.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-07T22:02:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea1debf7_1a2b32c0",
       "range": {
         "startLine": 24,
         "startChar": 40,
