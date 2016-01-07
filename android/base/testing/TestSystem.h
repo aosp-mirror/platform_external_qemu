@@ -80,14 +80,8 @@ public:
         return mHomeDir;
     }
 
-    void setHomeDirectory(StringView homeDir) { mHomeDir = homeDir; }
-
     virtual const String& getAppDataDirectory() const {
         return mAppDataDir;
-    }
-
-    void setAppDataDirectory(StringView appDataDir) {
-        mAppDataDir = appDataDir;
     }
 
     virtual String getCurrentDirectory() const { return mCurrentDir; }

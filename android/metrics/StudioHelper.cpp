@@ -18,7 +18,6 @@
 #include "android/base/system/System.h"
 #include "android/base/String.h"
 #include "android/base/Version.h"
-#include "android/emulation/ConfigDirs.h"
 #include "android/metrics/studio-helper.h"
 #include "android/utils/debug.h"
 #include "android/utils/dirscanner.h"
@@ -332,7 +331,13 @@ int android_studio_get_optins() {
     return retval;
 }
 
-static String android_studio_get_installation_id_legacy() {
+// Get the installation.id reported by Android Studio (string).
+// If there is not Android Studio installation or a value
+// cannot be retrieved, a random installation ID will
+// be generated. Caller is responsible for freeing returned
+// string
+//
+char* android_studio_get_installation_id() {
     String retval;
 #ifndef __WIN32
     static const StudioXml uuid = {
@@ -358,32 +363,11 @@ static String android_studio_get_installation_id_legacy() {
           kAndroidStudioUuid);
     }
 #endif
-    return retval;
-}
 
-// Get the installation.id reported by Android Studio (string).
-// If there is no Android Studio installation or a value
-// cannot be retrieved, a fixed dummy UUID will be returned.  Caller is
-// responsible for freeing returned string.
-char* android_studio_get_installation_id() {
-    String uuid_path =
-            PathUtils::join(ConfigDirs::getUserDirectory(), "uid.txt");
-    std::ifstream uuid_file(uuid_path.c_str());
-    if (uuid_file) {
-        std::string line;
-        std::getline(uuid_file, line);
-        if (!line.empty()) {
-            return strdup(line.c_str());
-        }
+    if (retval.empty()) {
+        D("Defaulting to zero installation ID");
+        retval = String(kAndroidStudioUuidHexPattern);
     }
 
-    // Couldn't find uuid in the android specific location. Try legacy uuid
-    // locations.
-    auto uuid = android_studio_get_installation_id_legacy();
-    if (!uuid.empty()) {
-        return uuid.release();
-    }
-
-    D("Defaulting to zero installation ID");
-    return strdup(kAndroidStudioUuidHexPattern);
+    return strdup(retval.c_str());
 }
