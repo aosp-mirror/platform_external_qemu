@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "4a4357e2_d27a9202",
+        "filename": "distrib/android-emugl/Android.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-07T07:33:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a68ef71_4a04935d",
+      "revId": "5c08b8d73b91779d297a80f127acda2f0d00ed3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea1debf7_7489284e",
         "filename": "distrib/android-emugl/host/libs/openGLESDispatch/Android.mk",
         "patchSetId": 2
@@ -59,6 +77,24 @@
     },
     {
       "key": {
+        "uuid": "aa3e9347_4f67b963",
+        "filename": "distrib/android-emugl/host/libs/openGLESDispatch/EGLDispatch.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-07T07:33:31Z",
+      "side": 1,
+      "message": "Okay :)",
+      "parentUuid": "6a5f3bcc_69372120",
+      "revId": "5c08b8d73b91779d297a80f127acda2f0d00ed3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a2c372e_780b5d3f",
         "filename": "distrib/android-emugl/host/libs/openGLESDispatch/GLESv2Dispatch.h",
         "patchSetId": 2
@@ -70,6 +106,24 @@
       "writtenOn": "2016-01-06T22:32:12Z",
       "side": 1,
       "message": "we certainly don\u0027t want gles2_dec.h to be part of this library, i.e. there must be a way to decouple the dispatching from the decoding. This may require changing the generation scripts, and this makes this work \"interesting\" :)\n\nCan you handle that too?",
+      "revId": "5c08b8d73b91779d297a80f127acda2f0d00ed3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a41cfd9_94e4f2c9",
+        "filename": "distrib/android-emugl/host/libs/openGLESDispatch/GLESv2Dispatch.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-07T07:33:31Z",
+      "side": 1,
+      "message": "I\u0027ve done it the way I described in the e-mail.  Also made some changes to emugen.",
+      "parentUuid": "4a2c372e_780b5d3f",
       "revId": "5c08b8d73b91779d297a80f127acda2f0d00ed3e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
