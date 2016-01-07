@@ -21,6 +21,8 @@ namespace Ui {
         const QString ORG_DOMAIN("android.com");
         const QString APP_NAME("Emulator");
 
+        const QString SHOW_AVD_ARCH_WARNING("showAvdArchWarning");
+
         // Note: The "set/" here is because these settings are
         //       associated with "settings-page", not because
         //       we're in "namespace Settings".
