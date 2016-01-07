@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4a4357e2_ff1752d6",
+        "filename": "android/crashreport/CrashService_darwin.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-07T23:34:03Z",
+      "side": 1,
+      "message": "this is as inefficient as one can imagine. please just use mHWTmpFilePath.clear()",
+      "range": {
+        "startLine": 120,
+        "startChar": 8,
+        "endLine": 120,
+        "endChar": 40
+      },
+      "revId": "22f2c9114f92346c313fb883bcd3303242eeaeec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
