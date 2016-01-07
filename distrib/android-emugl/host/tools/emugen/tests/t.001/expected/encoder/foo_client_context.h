@@ -3,11 +3,18 @@
 #ifndef __foo_client_context_t_h
 #define __foo_client_context_t_h
 
-#include "foo_client_base.h"
+#include "foo_client_proc.h"
+
+#include "foo_types.h"
 
 
-struct foo_client_context_t : foo_client_base_t {
+struct foo_client_context_t {
 
+	fooAlphaFunc_client_proc_t fooAlphaFunc;
+	fooIsBuffer_client_proc_t fooIsBuffer;
+	fooUnsupported_client_proc_t fooUnsupported;
+	fooDoEncoderFlush_client_proc_t fooDoEncoderFlush;
+	fooTakeConstVoidPtrConstPtr_client_proc_t fooTakeConstVoidPtrConstPtr;
 	 virtual ~foo_client_context_t() {}
 
 	typedef foo_client_context_t *CONTEXT_ACCESSOR_TYPE(void);

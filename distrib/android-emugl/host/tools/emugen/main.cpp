@@ -126,7 +126,6 @@ int main(int argc, char *argv[])
         apiEntries.genContextImpl(encoderDir + "/" + baseName + "_client_context.cpp", ApiGen::CLIENT_SIDE);
 
         apiEntries.genProcTypes(encoderDir + "/" + baseName + "_client_proc.h", ApiGen::CLIENT_SIDE);
-        apiEntries.genBase(encoderDir + "/" + baseName + "_client_base.h", ApiGen::CLIENT_SIDE);
         apiEntries.genFuncTable(encoderDir + "/" + baseName + "_ftable.h", ApiGen::CLIENT_SIDE);
 
         apiEntries.genEntryPoints(encoderDir + "/" + baseName + "_entry.cpp", ApiGen::CLIENT_SIDE);
@@ -137,7 +136,6 @@ int main(int argc, char *argv[])
     if (decoderDir.size() != 0) {
         apiEntries.genOpcodes(decoderDir + "/" + baseName + "_opcodes.h");
         apiEntries.genProcTypes(decoderDir + "/" + baseName + "_server_proc.h", ApiGen::SERVER_SIDE);
-        apiEntries.genBase(decoderDir + "/" + baseName + "_server_base.h", ApiGen::SERVER_SIDE);
         apiEntries.genContext(decoderDir + "/" + baseName + "_server_context.h", ApiGen::SERVER_SIDE);
         apiEntries.genContextImpl(decoderDir + "/" + baseName + "_server_context.cpp", ApiGen::SERVER_SIDE);
         apiEntries.genDecoderHeader(decoderDir + "/" + baseName + "_dec.h");
@@ -146,7 +144,6 @@ int main(int argc, char *argv[])
 
     if (wrapperDir.size() != 0) {
         apiEntries.genProcTypes(wrapperDir + "/" + baseName + "_wrapper_proc.h", ApiGen::WRAPPER_SIDE);
-        apiEntries.genBase(wrapperDir + "/" + baseName + "_wrapper_base.h", ApiGen::WRAPPER_SIDE);
         apiEntries.genContext(wrapperDir + "/" + baseName + "_wrapper_context.h", ApiGen::WRAPPER_SIDE);
         apiEntries.genContextImpl(wrapperDir + "/" + baseName + "_wrapper_context.cpp", ApiGen::WRAPPER_SIDE);
         apiEntries.genEntryPoints(wrapperDir + "/" + baseName + "_wrapper_entry.cpp", ApiGen::WRAPPER_SIDE);
