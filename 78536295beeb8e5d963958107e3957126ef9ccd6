@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a52a3ad_f79d37de",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-07T22:54:25Z",
+      "side": 1,
+      "message": "check for null and free in the end?\nalso, it looks to me that it\u0027s simpler to have an early-return here if the arch is x86\nYou can use a ScopedCPtr class to make it simpler",
+      "range": {
+        "startLine": 165,
+        "startChar": 3,
+        "endLine": 166,
+        "endChar": 56
+      },
+      "revId": "78536295beeb8e5d963958107e3957126ef9ccd6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
