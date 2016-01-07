@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "8a41cfd9_a8099ab7",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-07T19:25:37Z",
+      "side": 1,
+      "message": "since this is a key value pair (not a file), you need to follow the kVersionKey example above that uses CURLFORM_COPYCONTENTS instead of CURLFORM_FILE.  Also your key doesn\u0027t need to include \u0027upload\u0027.  See the following report: https://crash-staging.corp.google.com/browse?stbtiq\u003de131b8ce73b7215c#2 where \"TestKey\" shows up as another entry.",
+      "range": {
+        "startLine": 120,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 63
+      },
+      "revId": "a1a6d8b4e18bf25487e03b5b9222d608b11ebbb9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aa3e9347_15921e40",
         "filename": "android/crashreport/CrashService_darwin.cpp",
         "patchSetId": 8
