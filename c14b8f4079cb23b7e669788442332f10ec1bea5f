@@ -238,6 +238,30 @@
     },
     {
       "key": {
+        "uuid": "4a4357e2_72685ef7",
+        "filename": "android/crashreport/CrashService_linux.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-07T01:47:26Z",
+      "side": 1,
+      "message": "tmp dirs and unique filenames that are deleted once we\u0027re done",
+      "parentUuid": "2a52a3ad_cbac21c6",
+      "range": {
+        "startLine": 110,
+        "startChar": 33,
+        "endLine": 110,
+        "endChar": 59
+      },
+      "revId": "c14b8f4079cb23b7e669788442332f10ec1bea5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a4ddf0f_21bccaf1",
         "filename": "android/crashreport/ui/CrashProgress.h",
         "patchSetId": 1
