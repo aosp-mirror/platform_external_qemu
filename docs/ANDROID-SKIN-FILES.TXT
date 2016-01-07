@@ -15,9 +15,6 @@ keyboard).
 
 The content of this window is dictated by a "skin", i.e. a collection of
 images and configuration data that indicates how to populate the window.
-Each skin can have several "layouts" (e.g. "landscape" and "portrait")
-corresponding to different orientation / physical configurations of the
-emulated handset.
 
 This document specifies how to generate a new skin for the emulator.
 The emulator also supports dynamically creating the layout section of
@@ -45,10 +42,10 @@ The format of this file must follow the "aconfig" specification, see
 docs/ANDROID-CONFIG-FILES.TXT for details about it.
 
 
-Layouts & Parts:
+Parts:
 ----------------
 
-Each skin file must define a list of 'parts' and a list of 'layouts'.
+Each skin file must define a list of 'parts'.
 
 A 'skin part' correspond to a named item that can contain a set of
 visual/control elements that can be of the following types:
@@ -60,31 +57,27 @@ visual/control elements that can be of the following types:
  - 'buttons': A set of clickable control areas (e.g. for a D-Pad, or
               a Keyboard)
 
-Each part can be independently positioned and/or rotated in a 'layout'.
-A 'skin layout' is simply a specific arrangement of parts. A typical device
-skin file contains two layouts: one for landscape mode, and another one for
-portrait mode. More layouts can be used if needed. For example, one could
-use portrait + landscape-with-keyboard-closed + landscape-with-keyboard-opened)
+Each part can be independently positioned and/or rotated in the layout.
+A skin layout is simply an arrangement of parts.
 
-
-Skin Layouts:
+Skin Layout:
 -------------
 
-Each skin layout is a named sub-key of the top-level 'layouts' key in the
+The layout is a named sub-key of the top-level 'layouts' key in the
 config file, for example:
 
     layouts {
-        portrait {
-            ....
-        }
-        landscape {
+        main {
             ....
         }
     }
 
-Defines two layouts named 'portrait' and 'landscape'.
+NOTE: previously, you could specify multiple layouts in the "layouts" section.
+You can still do that, but all the layouts except the first one will be ignored.
+Instead, there will be 3 additional layouts generated automatically from the first one:
+rotated by 90, 180, and 270 degrees clockwise.
 
-Each layout can have the following keys (and corresponding values):
+The layout can have the following keys (and corresponding values):
 
 - 'width': The width of the emulator window in pixels, as an integer
 
