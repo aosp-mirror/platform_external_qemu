@@ -26,6 +26,7 @@
 #include "android/android.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"  /* for dprint */
+#include "android/utils/dns.h"
 #include "android/utils/ipaddr.h"
 #include "android/utils/sockets.h"
 
@@ -81,134 +82,24 @@ fd_set *global_readfds, *global_writefds, *global_xfds;
 
 char slirp_hostname[33];
 
-int slirp_add_dns_server(const SockAddress*  new_dns_addr)
-{
-    int   dns_ip;
-
-    if (dns_addr_count >= DNS_ADDR_MAX)
-        return -1;
-
-    dns_ip = sock_address_get_ip(new_dns_addr);
-    if (dns_ip == -1)
-        return -1;
-
-    dns_addr[dns_addr_count++] = dns_ip;
-    return 0;
-}
-
-
-#ifdef _WIN32
-
 int slirp_get_system_dns_servers(void)
 {
-    FIXED_INFO *FixedInfo=NULL;
-    ULONG    BufLen;
-    DWORD    ret;
-    IP_ADDR_STRING *pIPAddr;
-
-    if (dns_addr_count > 0)
-        return dns_addr_count;
-
-    FixedInfo = (FIXED_INFO *)GlobalAlloc(GPTR, sizeof(FIXED_INFO));
-    BufLen = sizeof(FIXED_INFO);
-
-    if (ERROR_BUFFER_OVERFLOW == GetNetworkParams(FixedInfo, &BufLen)) {
-        if (FixedInfo) {
-            GlobalFree(FixedInfo);
-            FixedInfo = NULL;
-        }
-        FixedInfo = GlobalAlloc(GPTR, BufLen);
-    }
-
-    if ((ret = GetNetworkParams(FixedInfo, &BufLen)) != ERROR_SUCCESS) {
-        printf("GetNetworkParams failed. ret = %08x\n", (u_int)ret );
-        if (FixedInfo) {
-            GlobalFree(FixedInfo);
-            FixedInfo = NULL;
-        }
-        return -1;
-    }
-
-    D( "DNS Servers:");
-    pIPAddr = &(FixedInfo->DnsServerList);
-    while (pIPAddr && dns_addr_count < DNS_ADDR_MAX) {
-        uint32_t  ip;
-        D( "  %s", pIPAddr->IpAddress.String );
-        if (inet_strtoip(pIPAddr->IpAddress.String, &ip) == 0) {
-            if (ip == loopback_addr_ip)
-                ip = our_addr_ip;
-            if (dns_addr_count < DNS_ADDR_MAX)
-                dns_addr[dns_addr_count++] = ip;
-        }
-        pIPAddr = pIPAddr->Next;
-    }
-
-    if (FixedInfo) {
-        GlobalFree(FixedInfo);
-        FixedInfo = NULL;
-    }
-    if (dns_addr_count <= 0)
-        return -1;
-
-    return dns_addr_count;
+    int num_servers = android_dns_get_system_servers(dns_addr, DNS_ADDR_MAX);
+    if (num_servers >= 0)
+        dns_addr_count = num_servers;
+    return num_servers;
 }
 
-#else
-
-int slirp_get_system_dns_servers(void)
-{
-    char buff[512];
-    char buff2[257];
-    FILE *f;
-
-    if (dns_addr_count > 0)
-        return dns_addr_count;
-
-#ifdef CONFIG_DARWIN
-    /* on Darwin /etc/resolv.conf is a symlink to /private/var/run/resolv.conf
-     * in some siutations, the symlink can be destroyed and the system will not
-     * re-create it. Darwin-aware applications will continue to run, but "legacy"
-     * Unix ones will not.
-     */
-     f = fopen("/private/var/run/resolv.conf", "r");
-     if (!f)
-        f = fopen("/etc/resolv.conf", "r");  /* desperate attempt to sanity */
-#else
-    f = fopen("/etc/resolv.conf", "r");
-#endif
-    if (!f)
-        return -1;
-
-    DN("emulator: IP address of your DNS(s): ");
-    while (fgets(buff, 512, f) != NULL) {
-        if (sscanf(buff, "nameserver%*[ \t]%256s", buff2) == 1) {
-            uint32_t  tmp_ip;
-
-            if (inet_strtoip(buff2, &tmp_ip) < 0)
-                continue;
-            if (tmp_ip == loopback_addr_ip)
-                tmp_ip = our_addr_ip;
-            if (dns_addr_count < DNS_ADDR_MAX) {
-                dns_addr[dns_addr_count++] = tmp_ip;
-                if (dns_addr_count > 1)
-                    DN(", ");
-                DN("%s", inet_iptostr(tmp_ip));
-            } else {
-                DN("(more)");
-                break;
-            }
-        }
-    }
-    DN("\n");
-    fclose(f);
-
-    if (!dns_addr_count)
-        return -1;
-
-    return dns_addr_count;
+int slirp_parse_dns_servers(const char* servers) {
+    int num_servers = android_dns_parse_servers(servers, dns_addr, DNS_ADDR_MAX);
+    if (num_servers >= 0)
+        dns_addr_count = num_servers;
+    return num_servers;
 }
 
-#endif
+int slirp_get_max_dns_servers(void) {
+    return DNS_ADDR_MAX;
+}
 
 static void slirp_state_save(QEMUFile *f, void *opaque);
 static int slirp_state_load(QEMUFile *f, void *opaque, int version_id);
