@@ -17,6 +17,7 @@
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QFrame>
+#include <QMessageBox>
 #include <QMouseEvent>
 #include <QMoveEvent>
 #include <QObject>
@@ -189,6 +190,8 @@ private slots:
     void slot_animationValueChanged(const QVariant &value);
     void slot_startupTick();
 
+    void slot_avdArchWarningMessageAccepted();
+
     /*
      Here are conventional slots that perform interesting high-level functions in the emulator. These can be hooked up to signals
      from UI elements or called independently.
@@ -211,6 +214,8 @@ private:
         mStartupTimer.stop();
         mStartupDialog.close();
     }
+
+    void showAvdArchWarning();
 
     bool mouseInside();
     void doResize(const QSize &size);
@@ -697,6 +702,9 @@ private:
     QProcess mScreencapProcess;
     QProcess mScreencapPullProcess;
     MainLoopThread *mMainLoopThread;
+
+    QMessageBox mAvdWarningBox;
+    bool mFirstShowEvent;
 };
 
 struct SkinSurface {
