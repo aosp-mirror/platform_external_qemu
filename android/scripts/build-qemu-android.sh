@@ -76,6 +76,10 @@ OPT_DEBUG=
 option_register_var "--debug" OPT_DEBUG \
         "Generate debuggable binaries."
 
+OPT_NO_ANDROID=
+option_register_var "--no-android" OPT_NO_ANDROID \
+        "Only rebuild upstream version of the sources (no Android support)"
+
 prebuilts_dir_register_option
 aosp_dir_register_option
 install_dir_register_option qemu-android
@@ -109,6 +113,12 @@ install_dir_parse_option
 package_builder_process_options qemu-android
 
 QEMU_ANDROID_DEPS_INSTALL_DIR=$PREBUILTS_DIR/qemu-android-deps
+
+if [ "$OPT_NO_ANDROID" -a -z "$OPT_INSTALL_DIR" ]; then
+    # The default installation directory for --no-android binaries is
+    # 'qemu-upstream' instead of 'qemu-android'
+    INSTALL_DIR=${INSTALL_DIR%%-android}-upstream
+fi
 
 ##
 ## Handle target system list
@@ -192,6 +202,12 @@ build_qemu_android () {
         BUILD_FLAGS=
         if [ "$(get_verbosity)" -gt 3 ]; then
             var_append BUILD_FLAGS "V=1"
+        fi
+
+        LINKPROG_FLAGS=
+        if [ -z "$OPT_NO_ANDROID" ]; then
+            # If --no-android is used, don't try to generate LINK-qemu-* files
+            LINKPROG_FLAGS="LINKPROG=$BUILD_DIR/link-prog"
         fi
 
         run mkdir -p "$BUILD_DIR"
@@ -311,8 +327,9 @@ EOF
         # --enable-android to enable Android support, so add the
         # flag when required.
         ENABLE_ANDROID=
-        fgrep -q -e "--enable-android" $QEMU_ANDROID/configure &&
-                ENABLE_ANDROID="--enable-android"
+        if [ -z "$OPT_NO_ANDROID" ]; then
+            ENABLE_ANDROID="--enable-android"
+        fi
 
         run $QEMU_ANDROID/configure \
             $CROSS_PREFIX_FLAG \
@@ -368,7 +385,7 @@ EOF
             esac
 
             # Now build everything else in parallel.
-            run make -j$NUM_JOBS $BUILD_FLAGS LINKPROG=$BUILD_DIR/link-prog
+            run make -j$NUM_JOBS $BUILD_FLAGS $LINKPROG_FLAGS
 
             for QEMU_EXE in $QEMU_TARGET_BUILDS; do
                 if [ ! -f "$QEMU_EXE" ]; then
@@ -396,13 +413,15 @@ EOF
     done
 
     # Copy LINK-* files, adjusting hard-coded paths in them.
-    for LINK_FILE in "$BUILD_DIR"/LINK-qemu-system-*; do
-        sed \
-            -e 's|'${PREBUILTS_DIR}'|@PREBUILTS_DIR@|g' \
-            -e 's|'${QEMU_ANDROID}'|@SRC_DIR@|g' \
-            -e 's|'${BUILD_DIR}'||g' \
-            "$LINK_FILE" > $INSTALL_DIR/$1/$(basename "$LINK_FILE")
-    done
+    if [ -z "$OPT_NO_ANDROID" ]; then
+        for LINK_FILE in "$BUILD_DIR"/LINK-qemu-system-*; do
+            sed \
+                -e 's|'${PREBUILTS_DIR}'|@PREBUILTS_DIR@|g' \
+                -e 's|'${QEMU_ANDROID}'|@SRC_DIR@|g' \
+                -e 's|'${BUILD_DIR}'||g' \
+                "$LINK_FILE" > $INSTALL_DIR/$1/$(basename "$LINK_FILE")
+        done
+    fi
 
     unset PKG_CONFIG PKG_CONFIG_PATH PKG_CONFIG_LIBDIR SDL_CONFIG
     unset LIBFFI_CFLAGS LIBFFI_LIBS GLIB_CFLAGS GLIB_LIBS
@@ -426,6 +445,10 @@ do_remote_darwin_build () {
     copy_directory "$PREBUILTS_DIR"/archive "$PKG_DIR/prebuilts/archive"
 
     local REMOTE_DIR=/tmp/$DARWIN_PKG_NAME
+
+    if [ "$OPT_NO_ANDROID" ]; then
+        var_append DARWIN_BUILD_FLAGS "--no-android"
+    fi
 
     # Generate a script to rebuild all binaries from sources.
     # Note that the use of the '-l' flag is important to ensure
