@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define DPRINT(...) do { fprintf(stderr, "%s: ", __FUNCTION__), fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); } while(0)
+
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
 #define  D(...)  VERBOSE_PRINT(sensors,__VA_ARGS__)
@@ -387,14 +389,14 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
     snprintf(buffer, sizeof buffer, "sync:%" PRId64, now_ns / 1000);
     _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
 
-    /* rearm timer, use a minimum delay of 20 ms, just to
+    /* rearm timer, use a minimum delay of 4 ms, just to
      * be safe.
      */
     if (mask == 0)
         return;
 
-    if (delay < 20)
-        delay = 20;
+    if (delay < 4)
+        delay = 4;
 
     loopTimer_startRelative(cl->timer, delay);
 }
@@ -406,6 +408,7 @@ _hwSensorClient_receive( HwSensorClient*  cl, uint8_t*  msg, int  msglen )
     HwSensors*  hw = cl->sensors;
 
     D("%s: '%.*s'", __FUNCTION__, msglen, msg);
+    DPRINT("'%.*s'", msg);
 
     /* "list-sensors" is used to get an integer bit map of
      * available emulated sensors. We compute the mask from the
@@ -723,6 +726,8 @@ _hwSensors_setCoarseOrientation( HwSensors*  h, AndroidCoarseOrientation  orient
 static void
 _hwSensors_init( HwSensors*  h )
 {
+
+    DPRINT("init");
     h->sensors_port = NULL;
 
     h->service = qemud_service_register("sensors", 0, h, _hwSensors_connect,
