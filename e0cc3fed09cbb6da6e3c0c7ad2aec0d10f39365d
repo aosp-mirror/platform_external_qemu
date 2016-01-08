@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa1773d7_d516ebd8",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-08T01:14:01Z",
+      "side": 1,
+      "message": "birenbaum@/jameskaye@: I think the intention here _was_ to only enforce this on direct children, right?\n\nThis was complaining because I made the dialogs children, and the buttons on those dialogs don\u0027t have any tool tips.",
+      "range": {
+        "startLine": 181,
+        "startChar": 54,
+        "endLine": 181,
+        "endChar": 76
+      },
+      "revId": "e0cc3fed09cbb6da6e3c0c7ad2aec0d10f39365d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
