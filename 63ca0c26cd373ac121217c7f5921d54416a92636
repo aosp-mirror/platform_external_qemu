@@ -22,6 +22,30 @@
       "revId": "63ca0c26cd373ac121217c7f5921d54416a92636",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a41cfd9_7e202886",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-08T00:26:20Z",
+      "side": 0,
+      "message": "ToolWindow _always_ ignores this event. This call is a no-op.\n\nI think our exit code path is very complicated, and I\u0027d rather not have red herrings in it :)\n\nToolWindow is actually closed by Qt because it\u0027s a child window of the MainWindow (which is accepting the close event in the next line).",
+      "parentUuid": "6a481bfe_084a0808",
+      "range": {
+        "startLine": 193,
+        "startChar": 8,
+        "endLine": 193,
+        "endChar": 29
+      },
+      "revId": "63ca0c26cd373ac121217c7f5921d54416a92636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
