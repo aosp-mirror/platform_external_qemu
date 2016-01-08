@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0a95dfbc_bb168729",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-08T18:10:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a1aaf01_d6c275ab",
+      "range": {
+        "startLine": 173,
+        "startChar": 4,
+        "endLine": 173,
+        "endChar": 26
+      },
+      "revId": "d06bc90f9707a4b611602b3e9b8caca4507d3db4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aa1773d7_d8af024f",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-08T04:00:40Z",
       "side": 1,
       "message": "c++ range for?",
+      "range": {
+        "startLine": 182,
+        "startChar": 4,
+        "endLine": 182,
+        "endChar": 33
+      },
+      "revId": "d06bc90f9707a4b611602b3e9b8caca4507d3db4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea65ebc4_faf8096c",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-08T18:10:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aa1773d7_d8af024f",
       "range": {
         "startLine": 182,
         "startChar": 4,
