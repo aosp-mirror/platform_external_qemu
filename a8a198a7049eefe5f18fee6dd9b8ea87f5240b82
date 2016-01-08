@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a95dfbc_7e922d0b",
+        "filename": "android/skin/qt/emulator-qt-no-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-08T20:00:12Z",
+      "side": 1,
+      "message": "please don\u0027t use the C block comments, use // instead",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 80
+      },
+      "revId": "a8a198a7049eefe5f18fee6dd9b8ea87f5240b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa5f73f8_bb2a13b9",
+        "filename": "android/skin/qt/emulator-qt-no-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-08T20:00:12Z",
+      "side": 1,
+      "message": "one line about the purpose of this class? (it\u0027s the first time I met the word \u0027Chore\u0027)",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 28
+      },
+      "revId": "a8a198a7049eefe5f18fee6dd9b8ea87f5240b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a74377b_987399f0",
+        "filename": "android/skin/qt/emulator-qt-no-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-08T20:00:12Z",
+      "side": 1,
+      "message": "this isn\u0027t really needed",
+      "range": {
+        "startLine": 27,
+        "startChar": 1,
+        "endLine": 27,
+        "endChar": 13
+      },
+      "revId": "a8a198a7049eefe5f18fee6dd9b8ea87f5240b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a62afbe_3aac3da9",
+        "filename": "android/skin/qt/emulator-qt-no-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-08T20:00:12Z",
+      "side": 1,
+      "message": "maybe \u0027run()\u0027?\n\"complete\" is usually related to the end of the task, the completion part",
+      "range": {
+        "startLine": 30,
+        "startChar": 9,
+        "endLine": 30,
+        "endChar": 17
+      },
+      "revId": "a8a198a7049eefe5f18fee6dd9b8ea87f5240b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a901bcb_7ee2311d",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-08T20:00:12Z",
+      "side": 1,
+      "message": "I would prefer a lambda here if you consider this to be easier to read:\n\n   startThread([f, argc, argv] { f(argc, argv); });\n\nif you think it\u0027s more messy - please disregard the comment. I could be biased as I like lambdas in general :)",
+      "range": {
+        "startLine": 310,
+        "startChar": 36,
+        "endLine": 310,
+        "endChar": 40
+      },
+      "revId": "a8a198a7049eefe5f18fee6dd9b8ea87f5240b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
