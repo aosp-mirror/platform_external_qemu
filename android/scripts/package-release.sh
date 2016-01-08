@@ -348,6 +348,10 @@ OPT_CRASH_PROD=
 option_register_var "--crash-prod" OPT_CRASH_PROD \
        "Upload crashes to production."
 
+OPT_DEBUG=
+option_register_var "--debug" OPT_DEBUG \
+       "Generate debuggable binaries."
+
 package_builder_register_options
 aosp_prebuilts_dir_register_options
 prebuilts_dir_register_option
@@ -413,6 +417,11 @@ prebuilts_dir_parse_option
 if [ -z "$OPT_SOURCES" -a "$DARWIN_SSH" ]; then
     OPT_SOURCES=true
     log "Auto-config: --sources  [darwin-ssh]"
+fi
+
+if [ "$OPT_DEBUG" -a -z "$OPT_NO_STRIP" ]; then
+    log "Auto-config: --no-strip   (--debug)"
+    OPT_NO_STRIP=true
 fi
 
 TARGET_AOSP=
@@ -672,6 +681,9 @@ build_darwin_binaries_on () {
     fi
     if [ "$OPT_NO_STRIP" ]; then
         var_append DARWIN_BUILD_FLAGS "--no-strip"
+    fi
+    if [ "$OPT_DEBUG" ]; then
+        var_append DARWIN_BUILD_FLAGS "--debug"
     fi
     if [ "$OPT_SYMBOLS" ]; then
         var_append DARWIN_BUILD_FLAGS "--symbols"
