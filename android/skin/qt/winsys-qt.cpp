@@ -24,6 +24,7 @@
 #include "android/main-common-ui.h"
 
 #include <QtCore>
+#include <QtGlobal>
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QFontDatabase>
@@ -96,7 +97,9 @@ extern void skin_winsys_enter_main_loop(int argc, char **argv)
     GlobalState* g = globalState();
     g->argc = argc;
     g->argv = argv;
+    qWarning("[xkcd] skin_winsys_enter_main_loop: Entering Qt main loop");
     g->app->exec();
+    qWarning("[xkcd] skin_winsys_enter_main_loop: Done with main loop");
     D("Finished QT main loop\n");
 }
 
@@ -214,16 +217,18 @@ extern bool skin_winsys_is_window_fully_visible()
 
 extern void skin_winsys_quit_request()
 {
+    fprintf(stderr, "[xkcd] skin_winsys_quit_request \n");
     D(__FUNCTION__);
     auto window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
-        D("%s: Could not get window handle", __FUNCTION__);
+        fprintf(stderr, "[xkcd] skin_winsys_quit_request Could not get window handle\n");
         return;
     }
     window->requestClose();
 }
 
 void skin_winsys_destroy() {
+    fprintf(stderr, "[xkcd] skin_winsys_destroy\n");
     D(__FUNCTION__);
 
     // Mac is still causing us troubles - it somehow manages to not call the

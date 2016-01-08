@@ -659,6 +659,7 @@ ui_init(AConfig*          skinConfig,
 
 void ui_done(void)
 {
+    fprintf(stderr, "[xkcd] ui_done\n");
     user_config_done();
     emulator_window_done(emulator_window_get());
     skin_winsys_quit_request();

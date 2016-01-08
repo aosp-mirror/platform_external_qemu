@@ -496,10 +496,13 @@ static void emulator_window_refresh(EmulatorWindow* emulator)
 
     if (emulator->ui) {
         if (skin_ui_process_events(emulator->ui)) {
+            fprintf(stderr, "[xkcd] emulator_window_refresh: free ui and stuff\n");
             // Quit program.
             skin_ui_free(emulator->ui);
             emulator->ui = NULL;
+            fprintf(stderr, "[xkcd] emulator_window_refresh: Calling qemu_system_shutdown_request\n");
             qemu_system_shutdown_request();
+            fprintf(stderr, "[xkcd] emulator_window_refresh: Returned from qemu_system_shutdown_request\n");
         }
     }
 }

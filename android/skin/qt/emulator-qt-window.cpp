@@ -10,6 +10,7 @@
  ** GNU General Public License for more details.
  */
 
+#include <QtGlobal>
 #include <QtCore>
 #include <QCursor>
 #include <QAbstractSlider>
@@ -186,6 +187,7 @@ void EmulatorQtWindow::slot_startupTick() {
 
 void EmulatorQtWindow::closeEvent(QCloseEvent *event)
 {
+    qWarning("[xkcd] EmulatorQtWindow::closeEvent");
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
         // run "adb shell stop" and call queueQuitEvent afterwards
         tool_window->runAdbShellStopAndQuit();
@@ -197,6 +199,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent *event)
 
 void EmulatorQtWindow::queueQuitEvent()
 {
+    qWarning("[xkcd] EmulatorQtWindow::queueQuitEvent");
     queueEvent(createSkinEvent(kEventQuit));
 }
 
@@ -382,6 +385,7 @@ void EmulatorQtWindow::slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoin
 
 void EmulatorQtWindow::slot_clearInstance()
 {
+    qWarning("[xkcd] EmulatorQtWindow::slot_clearInstance");
     skin_winsys_save_window_pos();
     sInstance.get().reset();
 }
@@ -517,6 +521,7 @@ void EmulatorQtWindow::slot_releaseBitmap(SkinSurface *s, QSemaphore *semaphore)
 
 void EmulatorQtWindow::slot_requestClose(QSemaphore *semaphore)
 {
+    qWarning("[xkcd] EmulatorQtWindow::slot_requestClose");
     mContainer.close();
     if (semaphore != NULL) semaphore->release();
 }

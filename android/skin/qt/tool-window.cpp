@@ -210,6 +210,7 @@ void ToolWindow::hide()
 }
 
 void ToolWindow::closeEvent(QCloseEvent* ce) {
+    qWarning("[xkcd] ToolWindow::closeEvent");
     // make sure only parent processes the event - otherwise some
     // siblings won't get it, e.g. main window
     ce->ignore();
@@ -531,7 +532,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         // it in the list of keyboard shortcuts in the Help page.
     default:;
     }
-   
+
 }
 
 

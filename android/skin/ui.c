@@ -130,24 +130,30 @@ SkinUI* skin_ui_create(SkinFile* layout_file, const char* initial_orientation,
 }
 
 void skin_ui_free(SkinUI* ui) {
+    fprintf(stderr, "[xkcd] skin_ui_free\n");
     if (ui->window) {
+    fprintf(stderr, "[xkcd] skin_ui_free calling skin_window_free\n");
         skin_window_free(ui->window);
         ui->window = NULL;
     }
     if (ui->trackball) {
+    fprintf(stderr, "[xkcd] skin_ui_free calling skin_trackball_destroy\n");
         skin_trackball_destroy(ui->trackball);
         ui->trackball = NULL;
     }
     if (ui->keyboard) {
+    fprintf(stderr, "[xkcd] skin_ui_free calling skin_keyboard_free\n");
         skin_keyboard_free(ui->keyboard);
         ui->keyboard = NULL;
     }
 
+    fprintf(stderr, "[xkcd] skin_ui_free calling skin_image_unref\n");
     skin_image_unref(&ui->onion);
 
     ui->layout = NULL;
 
     AFREE(ui);
+    fprintf(stderr, "[xkcd] skin_ui_free done\n");
 }
 
 void skin_ui_set_lcd_brightness(SkinUI* ui, int lcd_brightness) {

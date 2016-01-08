@@ -82,8 +82,7 @@ android_core_init_failure(const char* fmt, ...)
     vbufprint(msg + strlen(msg), msg + sizeof(msg), fmt, args);
     va_end(args);
 
-    // Send message back to the UI, print it to the error stdout, and exit the
-    // process.
+    // Send message back to the UI and print it to the stderr.
     android_core_send_init_response(msg);
     fprintf(stderr, "%s\n", msg);
 }

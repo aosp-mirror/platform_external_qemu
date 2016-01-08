@@ -1364,6 +1364,7 @@ void qemu_system_killed(int signal, pid_t pid)
 
 void qemu_system_shutdown_request(void)
 {
+    fprintf(stderr, "[xkcd] qemu_system_shutdown_request\n");
     shutdown_requested = 1;
     qemu_notify_event();
 }
@@ -2851,6 +2852,13 @@ int main(int argc, char **argv, char **envp)
             }
         }
     }
+
+#if 1
+    fprintf(stderr, "[xkcd] Wait for it....\n");
+    sleep(3);
+    fprintf(stderr, "[xkcd] Kaboom in qemu _after_ command parsing\n");
+    return 1;
+#endif
 
     /* Initialize character map. */
     if (skin_charmap_setup(op_charmap_file)) {
