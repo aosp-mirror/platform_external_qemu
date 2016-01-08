@@ -19,12 +19,11 @@
 // Task is a simple wrapper class, used to move the execution
 // of function f to a separate QT Thread
 
-class Task : public QObject
-{
+class Task : public QObject {
     Q_OBJECT
 
 public:
-    Task(std::function<void ()> f);
+    Task(std::function<void()> f);
 
 public slots:
     void run();
@@ -33,7 +32,7 @@ signals:
     void finished();
 
 private:
-    std::function<void ()> fptr;
+    std::function<void()> fptr;
 };
 
 // The EmulatorQTNoWindow class is used to build a QT-Widget-less
@@ -41,8 +40,7 @@ private:
 // emulator. Much like EmulatorQtWindow, startThread(f) will spawn
 // a new QT Thread to execute function f (qemu main loop).
 
-class EmulatorQtNoWindow final : public QObject
-{
+class EmulatorQtNoWindow final : public QObject {
     Q_OBJECT
 
 public:
@@ -52,10 +50,10 @@ public:
     static EmulatorQtNoWindow* getInstance();
     static Ptr getInstancePtr();
 
-    void startThread(std::function<void ()> f);
+    void startThread(std::function<void()> f);
 
 private:
-    explicit EmulatorQtNoWindow(QObject *parent = 0);
+    explicit EmulatorQtNoWindow(QObject* parent = 0);
 
 private slots:
     void slot_clearInstance();

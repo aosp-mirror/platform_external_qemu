@@ -19,22 +19,20 @@
 
 #include "android/base/memory/LazyInstance.h"
 
-#define  DEBUG 0
+#define DEBUG 0
 
 #if DEBUG
-#define  D(...)   qDebug(__VA_ARGS__)
+#define D(...) qDebug(__VA_ARGS__)
 #else
-#define  D(...)   ((void)0)
+#define D(...) ((void)0)
 #endif
 
-static android::base::LazyInstance<EmulatorQtNoWindow::Ptr> sNoWindowInstance = LAZY_INSTANCE_INIT;
+static android::base::LazyInstance<EmulatorQtNoWindow::Ptr> sNoWindowInstance =
+        LAZY_INSTANCE_INIT;
 
-Task::Task(std::function<void ()> f) : fptr(f)
-{
-}
+Task::Task(std::function<void()> f) : fptr(f) {}
 
-void Task::run()
-{
+void Task::run() {
     fptr();
     D("Task finished, notify connected slots");
     emit finished();
@@ -42,38 +40,35 @@ void Task::run()
 
 /******************************************************************************/
 
-void EmulatorQtNoWindow::create()
-{
+void EmulatorQtNoWindow::create() {
     sNoWindowInstance.get() = Ptr(new EmulatorQtNoWindow());
 }
 
-EmulatorQtNoWindow::EmulatorQtNoWindow(QObject *parent)
-{
-    QObject::connect(QCoreApplication::instance(),&QCoreApplication::aboutToQuit,this,&EmulatorQtNoWindow::slot_clearInstance);
+EmulatorQtNoWindow::EmulatorQtNoWindow(QObject* parent) {
+    QObject::connect(QCoreApplication::instance(),
+                     &QCoreApplication::aboutToQuit, this,
+                     &EmulatorQtNoWindow::slot_clearInstance);
 }
 
-EmulatorQtNoWindow::Ptr EmulatorQtNoWindow::getInstancePtr()
-{
+EmulatorQtNoWindow::Ptr EmulatorQtNoWindow::getInstancePtr() {
     return sNoWindowInstance.get();
 }
 
-EmulatorQtNoWindow* EmulatorQtNoWindow::getInstance()
-{
+EmulatorQtNoWindow* EmulatorQtNoWindow::getInstance() {
     return getInstancePtr().get();
 }
 
-void EmulatorQtNoWindow::startThread(std::function<void ()> f)
-{
+void EmulatorQtNoWindow::startThread(std::function<void()> f) {
     auto thread = new QThread();
     auto task = new Task(f);
 
     // pass task object to thread and start task when thread starts
     task->moveToThread(thread);
-    connect(thread, SIGNAL(started()),  task,  SLOT(run()));
+    connect(thread, SIGNAL(started()), task, SLOT(run()));
     // when the task is finished, signal the thread to quit
     connect(task, SIGNAL(finished()), thread, SLOT(quit()));
     // queue up task object for deletion when the thread is finished
-    connect(thread, SIGNAL(finished()), task,  SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), task, SLOT(deleteLater()));
     // queue up thread object for deletion when the thread is finished
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
     // when the thread is finished, quit this GUI-less window too
@@ -82,13 +77,11 @@ void EmulatorQtNoWindow::startThread(std::function<void ()> f)
     thread->start();
 }
 
-void EmulatorQtNoWindow::slot_clearInstance()
-{
+void EmulatorQtNoWindow::slot_clearInstance() {
     sNoWindowInstance.get().reset();
 }
 
-void EmulatorQtNoWindow::slot_finished()
-{
+void EmulatorQtNoWindow::slot_finished() {
     D("Closing GUI-less window, quiting application");
     QCoreApplication::instance()->quit();
 }

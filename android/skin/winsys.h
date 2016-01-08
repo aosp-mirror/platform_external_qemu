@@ -78,7 +78,10 @@ void skin_winsys_destroy(void);
 typedef void (*StartFunction)(int argc, char** argv);
 
 // Spawn a thread and run the given function in it.
-void skin_winsys_spawn_thread(bool no_window, StartFunction f, int argc, char** argv);
+void skin_winsys_spawn_thread(bool no_window,
+                              StartFunction f,
+                              int argc,
+                              char** argv);
 
 // Enter the main event handling loop for the UI subsystem.
 void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv);
