@@ -66,6 +66,7 @@ void EmulatorQtWindow::create()
 
 EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         QFrame(parent),
+        mStartupDialog(this),
         mContainer(this),
         mOverlay(this, &mContainer),
         mZoomFactor(1.0),
@@ -190,7 +191,6 @@ void EmulatorQtWindow::closeEvent(QCloseEvent *event)
         tool_window->runAdbShellStopAndQuit();
         event->ignore();
     } else {
-        tool_window->close();
         event->accept();
     }
 }
