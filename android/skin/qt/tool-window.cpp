@@ -48,13 +48,14 @@ extern "C" void setUiEmuAgent(const UiEmuAgent *agentPtr) {
     }
 }
 
-ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
-    QFrame(parent),
-    emulator_window(window),
-    extendedWindow(NULL),
-    uiEmuAgent(NULL),
-    toolsUi(new Ui::ToolControls)
-{
+ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
+    : QFrame(parent),
+      emulator_window(window),
+      extendedWindow(NULL),
+      uiEmuAgent(NULL),
+      toolsUi(new Ui::ToolControls),
+      mPushDialog(this),
+      mInstallDialog(this) {
     Q_INIT_RESOURCE(resources);
     twInstance = this;
 
@@ -176,7 +177,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow *window, QWidget *parent) :
             QtUICommand::UNGRAB_KEYBOARD);
 
     // Update tool tips on all push buttons.
-    const QList<QPushButton*> childButtons = findChildren<QPushButton*>();
+    const QList<QPushButton*> childButtons =
+            findChildren<QPushButton*>(QString(), Qt::FindDirectChildrenOnly);
     for(auto button : childButtons) {
         QVariant uiCommand = button->property("uiCommand");
         if (uiCommand.isValid()) {
@@ -531,7 +533,6 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         // it in the list of keyboard shortcuts in the Help page.
     default:;
     }
-   
 }
 
 
