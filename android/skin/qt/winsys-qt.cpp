@@ -68,8 +68,7 @@ static GlobalState* globalState() {
     return &sGlobalState;
 }
 
-extern void skin_winsys_enter_main_loop(bool no_window, int argc, char **argv)
-{
+extern void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv) {
     D("Starting QT main loop\n");
 
     // Make Qt look at the libraries within this installation
@@ -78,9 +77,9 @@ extern void skin_winsys_enter_main_loop(bool no_window, int argc, char **argv)
     QCoreApplication::setLibraryPaths(pathList);
     D("Qt lib path: %s\n", qtPath.c_str());
 
-    if(!no_window) {
+    if (!no_window) {
         // Give Qt the fonts from our resource file
-        QFontDatabase  fontDb;
+        QFontDatabase fontDb;
         int fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto");
         if (fontId < 0) {
             D("Could not load font resource: \":/lib/fonts/Roboto");
@@ -297,18 +296,20 @@ extern void skin_winsys_set_window_title(const char *title)
     semaphore.acquire();
 }
 
-extern void skin_winsys_spawn_thread(bool no_window, StartFunction f, int argc, char **argv)
-{
+extern void skin_winsys_spawn_thread(bool no_window,
+                                     StartFunction f,
+                                     int argc,
+                                     char** argv) {
     D("skin_spawn_thread");
-    if(no_window) {
-        EmulatorQtNoWindow *guiless_window = EmulatorQtNoWindow::getInstance();
+    if (no_window) {
+        EmulatorQtNoWindow* guiless_window = EmulatorQtNoWindow::getInstance();
         if (guiless_window == NULL) {
             D("%s: Could not get window handle", __FUNCTION__);
             return;
         }
         guiless_window->startThread([f, argc, argv] { f(argc, argv); });
     } else {
-        EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+        EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
         if (window == NULL) {
             D("%s: Could not get window handle", __FUNCTION__);
             return;
@@ -317,10 +318,9 @@ extern void skin_winsys_spawn_thread(bool no_window, StartFunction f, int argc, 
     }
 }
 
-extern void skin_winsys_start(bool no_window, bool raw_keys)
-{
+extern void skin_winsys_start(bool no_window, bool raw_keys) {
     GlobalState* g = globalState();
-    if(no_window) {
+    if (no_window) {
         g->app = new QCoreApplication(g->argc, g->argv);
         EmulatorQtNoWindow::create();
     } else {
