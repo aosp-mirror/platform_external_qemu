@@ -1186,6 +1186,9 @@ extern "C" int main(int argc, char **argv) {
     // Graphics
     if (opts->no_window) {
         args[n++] = "-nographic";
+        // also disable the qemu monitor which will otherwise grab stdio
+        args[n++] = "-monitor";
+        args[n++] = "none";
     }
 
     // Data directory (for keymaps and PC Bios).
@@ -1304,8 +1307,8 @@ extern "C" int main(int argc, char **argv) {
     pthread_sigmask(SIG_SETMASK, &set, NULL);
 #endif  // !_WIN32
     ui_init(skinConfig, skinPath, opts, &uiEmuAgent);
-    skin_winsys_spawn_thread(enter_qemu_main_loop, n, (char**)args);
-    skin_winsys_enter_main_loop(argc, argv);
+    skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, n, (char**)args);
+    skin_winsys_enter_main_loop(opts->no_window, argc, argv);
     ui_done();
     aconfig_node_free(skinConfig);
 
