@@ -22,6 +22,30 @@
       "revId": "e0cc3fed09cbb6da6e3c0c7ad2aec0d10f39365d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea65ebc4_faa9e99c",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-01-08T15:37:42Z",
+      "side": 1,
+      "message": "This seems fine.\nI\u0027m surprised the tool-tip handling code can\u0027t deal with buttons that don\u0027t have tool tips and/or short-cut keys.",
+      "parentUuid": "aa1773d7_d516ebd8",
+      "range": {
+        "startLine": 181,
+        "startChar": 54,
+        "endLine": 181,
+        "endChar": 76
+      },
+      "revId": "e0cc3fed09cbb6da6e3c0c7ad2aec0d10f39365d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
