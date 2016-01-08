@@ -387,14 +387,14 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
     snprintf(buffer, sizeof buffer, "sync:%" PRId64, now_ns / 1000);
     _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
 
-    /* rearm timer, use a minimum delay of 20 ms, just to
+    /* rearm timer, use a minimum delay of 4 ms, just to
      * be safe.
      */
     if (mask == 0)
         return;
 
-    if (delay < 20)
-        delay = 20;
+    if (delay < 4)
+        delay = 4;
 
     loopTimer_startRelative(cl->timer, delay);
 }
@@ -723,6 +723,7 @@ _hwSensors_setCoarseOrientation( HwSensors*  h, AndroidCoarseOrientation  orient
 static void
 _hwSensors_init( HwSensors*  h )
 {
+
     h->sensors_port = NULL;
 
     h->service = qemud_service_register("sensors", 0, h, _hwSensors_connect,
