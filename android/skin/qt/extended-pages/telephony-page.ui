@@ -143,9 +143,6 @@
      <bold>true</bold>
     </font>
    </property>
-   <property name="toolTip">
-    <string>Start call</string>
-   </property>
    <property name="styleSheet">
     <string notr="true">text-align: right</string>
    </property>
