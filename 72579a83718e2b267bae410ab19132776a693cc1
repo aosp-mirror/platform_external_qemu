@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4a8b57a3_e6bb14de",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-08T23:54:16Z",
+      "side": 1,
+      "message": "CL comment says \u00278\u0027",
+      "range": {
+        "startLine": 396,
+        "startChar": 16,
+        "endLine": 396,
+        "endChar": 18
+      },
+      "revId": "72579a83718e2b267bae410ab19132776a693cc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
