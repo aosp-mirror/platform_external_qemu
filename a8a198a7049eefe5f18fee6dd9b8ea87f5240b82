@@ -2,6 +2,121 @@
   "comments": [
     {
       "key": {
+        "uuid": "ea65ebc4_fa7ac901",
+        "filename": "android/skin/qt/emulator-qt-no-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-08T20:16:37Z",
+      "side": 1,
+      "message": "Your own header should be the first header included.",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 49
+      },
+      "revId": "a8a198a7049eefe5f18fee6dd9b8ea87f5240b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a95dfbc_5e43b144",
+        "filename": "android/skin/qt/emulator-qt-no-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-08T20:16:37Z",
+      "side": 1,
+      "message": "Won\u0027t work. Since most of these objects are being used on the Qt thread, you have to use qDebug, qWarning etc. iirc, VERBOSE_PRINT is gobbled up.",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 6
+      },
+      "revId": "a8a198a7049eefe5f18fee6dd9b8ea87f5240b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a79fb72_56e55422",
+        "filename": "android/skin/qt/emulator-qt-no-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-08T20:16:37Z",
+      "side": 1,
+      "message": "nit: google style discourages including namespaces. Just include the specific class you need.\n\n  using android::base::Foo;\n\netc",
+      "range": {
+        "startLine": 31,
+        "startChar": 6,
+        "endLine": 31,
+        "endChar": 15
+      },
+      "revId": "a8a198a7049eefe5f18fee6dd9b8ea87f5240b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea65ebc4_7a679963",
+        "filename": "android/skin/qt/emulator-qt-no-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-08T20:16:37Z",
+      "side": 1,
+      "message": "If it\u0027s a non-virtual default destructor, you don\u0027t need to specify it.",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 43,
+        "endChar": 1
+      },
+      "revId": "a8a198a7049eefe5f18fee6dd9b8ea87f5240b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca6827a1_bcfe8d56",
+        "filename": "android/skin/qt/emulator-qt-no-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-08T20:16:37Z",
+      "side": 1,
+      "message": "Not needed.",
+      "range": {
+        "startLine": 73,
+        "startChar": 0,
+        "endLine": 75,
+        "endChar": 1
+      },
+      "revId": "a8a198a7049eefe5f18fee6dd9b8ea87f5240b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a95dfbc_7e922d0b",
         "filename": "android/skin/qt/emulator-qt-no-window.h",
         "patchSetId": 2
@@ -19,6 +134,23 @@
         "endLine": 19,
         "endChar": 80
       },
+      "revId": "a8a198a7049eefe5f18fee6dd9b8ea87f5240b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a8b57a3_c0a52072",
+        "filename": "android/skin/qt/emulator-qt-no-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-08T20:16:37Z",
+      "side": 1,
+      "message": "Please add a brief comment here explain what this class is / is used for.\n\nThe name does not make it clear to me.",
       "revId": "a8a198a7049eefe5f18fee6dd9b8ea87f5240b82",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -94,6 +226,29 @@
     },
     {
       "key": {
+        "uuid": "ca6827a1_5c62d115",
+        "filename": "android/skin/qt/emulator-qt-no-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-08T20:16:37Z",
+      "side": 1,
+      "message": "nit: I think we prefer this to be on the same line as the class name. Just double check that you ran \u0027git clang-format\u0027 on the CL. I\u0027ll accept anything that clang-format accepts ;)",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 1
+      },
+      "revId": "a8a198a7049eefe5f18fee6dd9b8ea87f5240b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a901bcb_7ee2311d",
         "filename": "android/skin/qt/winsys-qt.cpp",
         "patchSetId": 2
@@ -105,6 +260,30 @@
       "writtenOn": "2016-01-08T20:00:12Z",
       "side": 1,
       "message": "I would prefer a lambda here if you consider this to be easier to read:\n\n   startThread([f, argc, argv] { f(argc, argv); });\n\nif you think it\u0027s more messy - please disregard the comment. I could be biased as I like lambdas in general :)",
+      "range": {
+        "startLine": 310,
+        "startChar": 36,
+        "endLine": 310,
+        "endChar": 40
+      },
+      "revId": "a8a198a7049eefe5f18fee6dd9b8ea87f5240b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca6827a1_5c081141",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-08T20:16:37Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "6a901bcb_7ee2311d",
       "range": {
         "startLine": 310,
         "startChar": 36,
