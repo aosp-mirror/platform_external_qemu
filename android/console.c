@@ -53,6 +53,12 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
+
 extern void android_emulator_set_window_scale(double, int);
 
 #define  DEBUG  1
@@ -2651,7 +2657,11 @@ static int
 do_kill( ControlClient  client, char*  args )
 {
     control_write( client, "OK: killing emulator, bye bye\r\n" );
-    exit(0);
+#ifdef _WIN32
+    ExitThread(0);
+#else  // !_WIN32
+    pthread_exit(0);
+#endif
 }
 
 static const CommandDefRec   main_commands[] =
