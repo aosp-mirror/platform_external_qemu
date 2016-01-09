@@ -186,6 +186,30 @@
       "revId": "afea780d19f449a023aca48926110917a558d54a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca6827a1_7f3ea763",
+        "filename": "android/base/threads/internal/LooperThreadBase.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-09T01:27:22Z",
+      "side": 1,
+      "message": "It\u0027s because I can just run a piece of code without having to (1) create a subclass, (2) allocate it, (3) bother with lifetimes and possible failures",
+      "parentUuid": "aa5f73f8_fe471931",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 36
+      },
+      "revId": "afea780d19f449a023aca48926110917a558d54a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
