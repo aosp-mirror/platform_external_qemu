@@ -22,6 +22,30 @@
       "revId": "72579a83718e2b267bae410ab19132776a693cc1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a901bcb_84b32ab1",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-09T00:01:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a8b57a3_e6bb14de",
+      "range": {
+        "startLine": 396,
+        "startChar": 16,
+        "endLine": 396,
+        "endChar": 18
+      },
+      "revId": "72579a83718e2b267bae410ab19132776a693cc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
