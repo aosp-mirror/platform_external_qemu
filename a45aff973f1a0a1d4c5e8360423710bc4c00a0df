@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa5f73f8_5e43a544",
+        "filename": "android/utils/x86_cpuid.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-09T00:08:40Z",
+      "side": 1,
+      "message": "nit: false please.",
+      "range": {
+        "startLine": 89,
+        "startChar": 11,
+        "endLine": 89,
+        "endChar": 12
+      },
+      "revId": "a45aff973f1a0a1d4c5e8360423710bc4c00a0df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a95dfbc_24e7b8cf",
+        "filename": "android/utils/x86_cpuid.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-09T00:08:40Z",
+      "side": 1,
+      "message": "nit: false please.",
+      "range": {
+        "startLine": 175,
+        "startChar": 11,
+        "endLine": 175,
+        "endChar": 12
+      },
+      "revId": "a45aff973f1a0a1d4c5e8360423710bc4c00a0df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a79fb72_7c06b1fc",
+        "filename": "android/utils/x86_cpuid.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-09T00:08:40Z",
+      "side": 1,
+      "message": "nit: false please.",
+      "range": {
+        "startLine": 211,
+        "startChar": 15,
+        "endLine": 211,
+        "endChar": 16
+      },
+      "revId": "a45aff973f1a0a1d4c5e8360423710bc4c00a0df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea65ebc4_e057760c",
+        "filename": "android/utils/x86_cpuid_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-09T00:08:40Z",
+      "side": 1,
+      "message": "nit: format.",
+      "range": {
+        "startLine": 26,
+        "startChar": 39,
+        "endLine": 27,
+        "endChar": 60
+      },
+      "revId": "a45aff973f1a0a1d4c5e8360423710bc4c00a0df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
