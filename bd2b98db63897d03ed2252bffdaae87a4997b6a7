@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a901bcb_440922b5",
+        "filename": "android/base/threads/LooperThread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-09T01:27:22Z",
+      "side": 1,
+      "message": "this class implements a classic future(func1).then(func2) pattern\nSadly, I don\u0027t really know how to call it\nShould we just add a .then() to our async() instead?",
+      "range": {
+        "startLine": 59,
+        "startChar": 6,
+        "endLine": 59,
+        "endChar": 18
+      },
+      "revId": "bd2b98db63897d03ed2252bffdaae87a4997b6a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca6827a1_1f892b4f",
+        "filename": "android/base/threads/LooperThread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-09T01:27:22Z",
+      "side": 1,
+      "message": "10 seconds feels like a huge timeout to me. checking for a thread status is a _very_ lightweight task, can we make a default somewhat shorter?",
+      "range": {
+        "startLine": 69,
+        "startChar": 66,
+        "endLine": 69,
+        "endChar": 75
+      },
+      "revId": "bd2b98db63897d03ed2252bffdaae87a4997b6a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a79fb72_5c0655a5",
+        "filename": "android/base/threads/LooperThread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-09T01:27:22Z",
+      "side": 1,
+      "message": "if any thread is killed in a middle of its operation, the whole app state is completely screwed. We shouldn\u0027t even care about such cases (and should never do anything like that)\n\nE.g. if the thread was in a middle of new() call, which locked the memory manager\u0027s mutex, and it was shot dead, mutex would remain locked for the whole app forever. Any other library call might do the same thing.",
+      "range": {
+        "startLine": 88,
+        "startChar": 7,
+        "endLine": 89,
+        "endChar": 37
+      },
+      "revId": "bd2b98db63897d03ed2252bffdaae87a4997b6a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a9aa3ee_30953004",
+        "filename": "android/base/threads/LooperThread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-09T01:27:22Z",
+      "side": 1,
+      "message": "*|thread| ?",
+      "range": {
+        "startLine": 91,
+        "startChar": 62,
+        "endLine": 91,
+        "endChar": 68
+      },
+      "revId": "bd2b98db63897d03ed2252bffdaae87a4997b6a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa5f73f8_9e17fdd7",
+        "filename": "android/base/threads/LooperThread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-09T01:27:22Z",
+      "side": 1,
+      "message": "std::move() needs \u003cutility\u003e",
+      "range": {
+        "startLine": 95,
+        "startChar": 47,
+        "endLine": 95,
+        "endChar": 56
+      },
+      "revId": "bd2b98db63897d03ed2252bffdaae87a4997b6a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a901bcb_64effe15",
+        "filename": "android/base/threads/LooperThread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-09T01:27:22Z",
+      "side": 1,
+      "message": "why do you need to allocate it dynamically?",
+      "range": {
+        "startLine": 114,
+        "startChar": 1,
+        "endLine": 114,
+        "endChar": 46
+      },
+      "revId": "bd2b98db63897d03ed2252bffdaae87a4997b6a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a79fb72_dc750513",
+        "filename": "android/base/threads/LooperThread_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-09T01:27:22Z",
+      "side": 1,
+      "message": "volatile, please. atomic\u003cbool\u003e would be even better, but mingw might screw us there",
+      "range": {
+        "startLine": 60,
+        "startChar": 9,
+        "endLine": 60,
+        "endChar": 19
+      },
+      "revId": "bd2b98db63897d03ed2252bffdaae87a4997b6a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa5f73f8_1ed12d80",
+        "filename": "android/base/threads/internal/LooperThreadBase.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-09T01:27:22Z",
+      "side": 1,
+      "message": "is this really helping? :)",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 22
+      },
+      "revId": "bd2b98db63897d03ed2252bffdaae87a4997b6a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
