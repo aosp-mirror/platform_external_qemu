@@ -144,7 +144,7 @@ int resizeExt4Partition(const char* partitionPath, int64_t newByteSize) {
     } else if (child == 0) {
         execlp(executable.c_str(), executable.c_str(), "-f", partitionPath,
                size_in_MB, NULL);
-        exit(-1);
+        return -1;
     }
 
     while ((pid = waitpid(-1, &exitCode, 0)) != child) {

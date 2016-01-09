@@ -14,6 +14,8 @@
 
 #include "android/emulation/serial_line.h"
 
+#include <stdbool.h>
+
 /* this chardriver is used to read the kernel messages coming
  * from the first serial port (i.e. /dev/ttyS0) and store them
  * in memory for later...
@@ -24,6 +26,6 @@ typedef enum {
     ANDROID_KMSG_PRINT_MESSAGES = (1 << 1),
 } AndroidKmsgFlags;
 
-extern void  android_kmsg_init(AndroidKmsgFlags flags);
+extern bool  android_kmsg_init(AndroidKmsgFlags flags);
 
 extern CSerialLine* android_kmsg_get_serial_line(void);
