@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2a9aa3ee_10c11457",
+        "filename": "android/base/threads/internal/LooperThreadBase.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-09T00:32:18Z",
+      "side": 1,
+      "message": "Earlier, I was doing more than just deleting |this| in ::cleanup() at one point.\n\nI agree that it\u0027s better to explicitly delete it in ::fireAndForget.\n\nDone.",
+      "parentUuid": "ea65ebc4_80695aca",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 5
+      },
+      "revId": "afea780d19f449a023aca48926110917a558d54a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a8b57a3_e64874b7",
         "filename": "android/base/threads/internal/LooperThreadBase.cpp",
         "patchSetId": 2
@@ -94,6 +118,30 @@
     },
     {
       "key": {
+        "uuid": "ea65ebc4_401d8252",
+        "filename": "android/base/threads/internal/LooperThreadBase.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-09T00:32:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aa5f73f8_3e6fd1cf",
+      "range": {
+        "startLine": 43,
+        "startChar": 19,
+        "endLine": 43,
+        "endChar": 20
+      },
+      "revId": "afea780d19f449a023aca48926110917a558d54a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a74377b_1b378389",
         "filename": "android/base/threads/internal/LooperThreadBase.h",
         "patchSetId": 2
@@ -105,6 +153,30 @@
       "writtenOn": "2016-01-09T00:11:04Z",
       "side": 1,
       "message": "do we really need to make these overridable? std::function IMO would be much simpler interface",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 36
+      },
+      "revId": "afea780d19f449a023aca48926110917a558d54a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa5f73f8_fe471931",
+        "filename": "android/base/threads/internal/LooperThreadBase.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-09T00:32:18Z",
+      "side": 1,
+      "message": "I don\u0027t really have an opinion either way.\n\nWhy do you think std::function is simpler? I\u0027ve seen both usages. Is it because it completely hides this part of the interface from users of LooperThread\u003cT\u003e?",
+      "parentUuid": "4a74377b_1b378389",
       "range": {
         "startLine": 46,
         "startChar": 0,
