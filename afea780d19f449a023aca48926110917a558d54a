@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea65ebc4_80695aca",
+        "filename": "android/base/threads/internal/LooperThreadBase.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-09T00:11:04Z",
+      "side": 1,
+      "message": "this is scary. can you make the cleanup explicit and external instead?",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 5
+      },
+      "revId": "afea780d19f449a023aca48926110917a558d54a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a8b57a3_e64874b7",
+        "filename": "android/base/threads/internal/LooperThreadBase.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-09T00:11:04Z",
+      "side": 1,
+      "message": "and what if start() fails?\nupdate: I got the logic, but it seems a little bit too complicated",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 21
+      },
+      "revId": "afea780d19f449a023aca48926110917a558d54a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a79fb72_9c446d53",
+        "filename": "android/base/threads/internal/LooperThreadBase.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-09T00:11:04Z",
+      "side": 1,
+      "message": "this part can even go to the .cpp file (just fyi)",
+      "range": {
+        "startLine": 34,
+        "startChar": 32,
+        "endLine": 34,
+        "endChar": 42
+      },
+      "revId": "afea780d19f449a023aca48926110917a558d54a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa5f73f8_3e6fd1cf",
+        "filename": "android/base/threads/internal/LooperThreadBase.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-09T00:11:04Z",
+      "side": 1,
+      "message": "const ?",
+      "range": {
+        "startLine": 43,
+        "startChar": 19,
+        "endLine": 43,
+        "endChar": 20
+      },
+      "revId": "afea780d19f449a023aca48926110917a558d54a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a74377b_1b378389",
+        "filename": "android/base/threads/internal/LooperThreadBase.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-09T00:11:04Z",
+      "side": 1,
+      "message": "do we really need to make these overridable? std::function IMO would be much simpler interface",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 36
+      },
+      "revId": "afea780d19f449a023aca48926110917a558d54a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
