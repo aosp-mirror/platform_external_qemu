@@ -1,0 +1,259 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca6e677a_898059b5",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 44
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:43Z",
+      "side": 1,
+      "message": "nit: please respect alphabetical ordering.",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea6b2b68_8a0b6b01",
+        "filename": "Makefile.qemu1-common.mk",
+        "patchSetId": 44
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:43Z",
+      "side": 1,
+      "message": "nit: please respect alphabetical ordering",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a2c372e_7592881d",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 44
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:43Z",
+      "side": 1,
+      "message": "This function should be static, otherwise give it a better name and expose it in android_emulator_bridge.h with documentation.",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cae3c748_61b396b2",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 44
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:43Z",
+      "side": 1,
+      "message": "This should use HANDLE_EINTR() from android/utils/eintr_wrapper.h",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cae3c748_a17bde9f",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 44
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:43Z",
+      "side": 1,
+      "message": "Please handle errors correctly here. If you don\u0027t, at least zero-initialize |sb| with:\n\n  struct stats sb \u003d {};",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca6e677a_099549f1",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 44
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:43Z",
+      "side": 1,
+      "message": "Please use proper error checks here. ftell() will return -1 in case of error, which you\u0027ll cast to UIN64_MAX on the line below, which will make malloc() return NULL, and fread() crash mysteriously.",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a5f3bcc_468b32d8",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 44
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:43Z",
+      "side": 1,
+      "message": "Please fclose(fh) before returning.",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a68ef71_e7a58271",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 44
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:43Z",
+      "side": 1,
+      "message": "use double instead of float for intermediate computations, and cast the result to float just before returning it.",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a2c372e_95c1640a",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 44
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:43Z",
+      "side": 1,
+      "message": "memory over-read here if |msglen| is smaller than AEB_COMMAND_WIDTH, please don\u0027t do that. Also if |msg[msglen - 1]| is not \\0, will not work correctly at all.",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a2c372e_b5afc04f",
+        "filename": "android/android_emulator_bridge.h",
+        "patchSetId": 44
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:43Z",
+      "side": 1,
+      "message": "Please document these constants, do you really need to expose them in this header by the way ?",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a54ffaf_631d0253",
+        "filename": "android/android_emulator_bridge.h",
+        "patchSetId": 44
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:43Z",
+      "side": 1,
+      "message": "Please document what these functions are supposed to do, what are the conditions to use them (e.g. I assume android_emulator_bridge_init() must be called first), and their failure mode.",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a5f3bcc_06953af1",
+        "filename": "android/emulation/control/aeb_agent.h",
+        "patchSetId": 44
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:43Z",
+      "side": 1,
+      "message": "Please document the meaning of the return value for this function and other ones.",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a2c372e_f5cc5843",
+        "filename": "android/emulation/control/aeb_agent.h",
+        "patchSetId": 44
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:43Z",
+      "side": 1,
+      "message": "Can you specify where these files go / come from?",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a68ef71_a7af8a4f",
+        "filename": "android/emulation/control/aeb_agent.h",
+        "patchSetId": 44
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:43Z",
+      "side": 1,
+      "message": "nit: Please don\u0027t put a _t suffix in the name of a parameter, it\u0027s confusing because one would think it\u0027s a type name instead. Just call the parameter something simple like \"output\" and document how it is used on line 42.",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a31fb81_9625ec99",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 44
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:43Z",
+      "side": 1,
+      "message": "since you\u0027re fixing one typo, can you fid s/fingperprint/fingerprint/ too ? :) Thanks.",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
