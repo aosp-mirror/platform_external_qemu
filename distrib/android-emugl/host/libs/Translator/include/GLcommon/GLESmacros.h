@@ -4,6 +4,7 @@
 #define GET_CTX() \
             if(!s_eglIface) return; \
             GLEScontext *ctx = s_eglIface->getGLESContext(); \
+            if(!ctx) return;
 
 #define GET_CTX_CM() \
             if(!s_eglIface) return; \
