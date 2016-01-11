@@ -281,6 +281,24 @@
     },
     {
       "key": {
+        "uuid": "87df0af2_affb5990",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-01-11T18:37:55Z",
+      "side": 1,
+      "message": "ping yu and wei: any comment here ?",
+      "parentUuid": "aa5f73f8_4c013f4c",
+      "revId": "a45aff973f1a0a1d4c5e8360423710bc4c00a0df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea65ebc4_e057760c",
         "filename": "android/utils/x86_cpuid_unittest.cpp",
         "patchSetId": 4
