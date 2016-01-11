@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c75ca266_199f2b79",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2663,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-11T19:47:55Z",
+      "side": 1,
+      "message": "this just doesn\u0027t feel right to me. We\u0027ve got a function for a proper UI close request: skin_winsys_quit_request()\nCan we call it instead of just terminating the thread, with destructors not running and other bad stuff?",
+      "range": {
+        "startLine": 2661,
+        "startChar": 0,
+        "endLine": 2663,
+        "endChar": 20
+      },
+      "revId": "0e4265be927df91e178a2a795b24dc70246a9ad7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
