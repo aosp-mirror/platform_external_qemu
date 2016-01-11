@@ -22,6 +22,30 @@
       "revId": "0e4265be927df91e178a2a795b24dc70246a9ad7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e759a674_7a0bb970",
+        "filename": "android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2663,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-11T19:57:15Z",
+      "side": 1,
+      "message": "skin_winsys_quit_request is not the right function to call here. It does cleanup _after_ skin_winsys_enter_main_loop finishes. That means that the Qt UI has exited it\u0027s main loop (and qemu has also exited it\u0027s main loop), when this is called.\n\nI\u0027d rather not call this for another reason -- our exit code path is obscenely complicated, and I don\u0027t want a new entry point into the path.\n\nThe safest thing to do would be to somehow raise EmultorQtWindow::closeEvent. Let me see if I can do that.\n\nThe second option is to call qemu_system_shutdown_request, since console processing happens on qemu\u0027s event loop. Qt UI cleansup correctly if qemu dies. But that doesn\u0027t feel right either.",
+      "parentUuid": "c75ca266_199f2b79",
+      "range": {
+        "startLine": 2661,
+        "startChar": 0,
+        "endLine": 2663,
+        "endChar": 20
+      },
+      "revId": "0e4265be927df91e178a2a795b24dc70246a9ad7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
