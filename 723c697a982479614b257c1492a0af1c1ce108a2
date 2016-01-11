@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c7d582d0_11f2ccc3",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 44
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-11T21:16:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca6e677a_898059b5",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea6b2b68_8a0b6b01",
         "filename": "Makefile.qemu1-common.mk",
         "patchSetId": 44
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "a7dc0efe_30c2685d",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 44
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-11T21:16:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a2c372e_7592881d",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cae3c748_61b396b2",
         "filename": "android/android_emulator_bridge.c",
         "patchSetId": 44
@@ -64,6 +100,24 @@
       "writtenOn": "2016-01-11T16:09:43Z",
       "side": 1,
       "message": "This should use HANDLE_EINTR() from android/utils/eintr_wrapper.h",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a7dc0efe_b0cdf888",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 44
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-11T21:16:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cae3c748_61b396b2",
       "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -104,6 +158,24 @@
     },
     {
       "key": {
+        "uuid": "c7d582d0_3174b0d5",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 44
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-11T21:16:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca6e677a_099549f1",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a5f3bcc_468b32d8",
         "filename": "android/android_emulator_bridge.c",
         "patchSetId": 44
@@ -115,6 +187,24 @@
       "writtenOn": "2016-01-11T16:09:43Z",
       "side": 1,
       "message": "Please fclose(fh) before returning.",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "477c32a4_15f5d472",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 44
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-11T21:16:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a5f3bcc_468b32d8",
       "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -138,6 +228,24 @@
     },
     {
       "key": {
+        "uuid": "87df0af2_cf7fbdb7",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 44
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-11T21:16:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a68ef71_e7a58271",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a2c372e_95c1640a",
         "filename": "android/android_emulator_bridge.c",
         "patchSetId": 44
@@ -149,6 +257,24 @@
       "writtenOn": "2016-01-11T16:09:43Z",
       "side": 1,
       "message": "memory over-read here if |msglen| is smaller than AEB_COMMAND_WIDTH, please don\u0027t do that. Also if |msg[msglen - 1]| is not \\0, will not work correctly at all.",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "67c69632_8ee53bf7",
+        "filename": "android/android_emulator_bridge.c",
+        "patchSetId": 44
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-11T21:16:25Z",
+      "side": 1,
+      "message": "Will add asserts that explicitly say what the expected invariants are. Btw, I haven\u0027t encountered a situation yet, where the pipe chops messages into little bits when the original message is \u003c\u003d 1024. When can we expect this to happen, anyway?",
+      "parentUuid": "4a2c372e_95c1640a",
       "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -172,6 +298,24 @@
     },
     {
       "key": {
+        "uuid": "87562a44_77a470c5",
+        "filename": "android/android_emulator_bridge.h",
+        "patchSetId": 44
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-11T21:16:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a2c372e_b5afc04f",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a54ffaf_631d0253",
         "filename": "android/android_emulator_bridge.h",
         "patchSetId": 44
@@ -183,6 +327,24 @@
       "writtenOn": "2016-01-11T16:09:43Z",
       "side": 1,
       "message": "Please document what these functions are supposed to do, what are the conditions to use them (e.g. I assume android_emulator_bridge_init() must be called first), and their failure mode.",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a7532e54_98d85544",
+        "filename": "android/android_emulator_bridge.h",
+        "patchSetId": 44
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-11T21:16:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0a54ffaf_631d0253",
       "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -206,6 +368,24 @@
     },
     {
       "key": {
+        "uuid": "274e5eac_3cc93132",
+        "filename": "android/emulation/control/aeb_agent.h",
+        "patchSetId": 44
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-11T21:16:25Z",
+      "side": 1,
+      "message": "Done. Actually I\u0027d prefer them to be void return type, the error handling will be in the aeb library itself.",
+      "parentUuid": "6a5f3bcc_06953af1",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a2c372e_f5cc5843",
         "filename": "android/emulation/control/aeb_agent.h",
         "patchSetId": 44
@@ -223,6 +403,24 @@
     },
     {
       "key": {
+        "uuid": "07495aa4_3b7657ba",
+        "filename": "android/emulation/control/aeb_agent.h",
+        "patchSetId": 44
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-11T21:16:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a2c372e_f5cc5843",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a68ef71_a7af8a4f",
         "filename": "android/emulation/control/aeb_agent.h",
         "patchSetId": 44
@@ -234,6 +432,24 @@
       "writtenOn": "2016-01-11T16:09:43Z",
       "side": 1,
       "message": "nit: Please don\u0027t put a _t suffix in the name of a parameter, it\u0027s confusing because one would think it\u0027s a type name instead. Just call the parameter something simple like \"output\" and document how it is used on line 42.",
+      "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4768b202_35fb106a",
+        "filename": "android/emulation/control/aeb_agent.h",
+        "patchSetId": 44
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-11T21:16:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a68ef71_a7af8a4f",
       "revId": "723c697a982479614b257c1492a0af1c1ce108a2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
