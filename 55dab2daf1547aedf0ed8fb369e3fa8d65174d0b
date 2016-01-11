@@ -22,6 +22,30 @@
       "revId": "55dab2daf1547aedf0ed8fb369e3fa8d65174d0b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a2c372e_f5c8d8cf",
+        "filename": "android/base/threads/Async.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:09:24Z",
+      "side": 1,
+      "message": "I agree this is overkill. Creating one ThreadStore instance per thread means you\u0027ll be limited to 64 threads (or likely even less due to the use of other ThreadStore instances). At the very minimum, you should only use a single static ThreadStore\u003c\u003e, which seems much more acceptable.",
+      "parentUuid": "aa1773d7_4192280b",
+      "range": {
+        "startLine": 36,
+        "startChar": 8,
+        "endLine": 36,
+        "endChar": 26
+      },
+      "revId": "55dab2daf1547aedf0ed8fb369e3fa8d65174d0b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
