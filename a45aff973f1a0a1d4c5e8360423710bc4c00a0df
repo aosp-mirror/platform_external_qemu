@@ -42,6 +42,24 @@
     },
     {
       "key": {
+        "uuid": "4a74377b_24209c85",
+        "filename": "android/utils/x86_cpuid.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-11T18:20:08Z",
+      "side": 1,
+      "message": "there\u0027s a memset() before that line",
+      "parentUuid": "8a570fe9_2f50895a",
+      "revId": "a45aff973f1a0a1d4c5e8360423710bc4c00a0df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a95dfbc_24e7b8cf",
         "filename": "android/utils/x86_cpuid.cpp",
         "patchSetId": 4
@@ -105,6 +123,24 @@
     },
     {
       "key": {
+        "uuid": "477c32a4_f501384e",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-11T18:20:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca4d875b_1153ec69",
+      "revId": "a45aff973f1a0a1d4c5e8360423710bc4c00a0df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ca4d875b_3150f05a",
         "filename": "android/utils/x86_cpuid.h",
         "patchSetId": 4
@@ -116,6 +152,24 @@
       "writtenOn": "2016-01-11T09:47:29Z",
       "side": 1,
       "message": "please specify truncation policy (i.e. is the buffer guaranteed to be always zero-terminated).",
+      "revId": "a45aff973f1a0a1d4c5e8360423710bc4c00a0df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a95dfbc_754ec846",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-11T18:20:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca4d875b_3150f05a",
       "revId": "a45aff973f1a0a1d4c5e8360423710bc4c00a0df",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -139,6 +193,24 @@
     },
     {
       "key": {
+        "uuid": "0a95dfbc_b55f70f8",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-11T18:20:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aa54d3e4_b03058dc",
+      "revId": "a45aff973f1a0a1d4c5e8360423710bc4c00a0df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a6ebfb0_f3e110bc",
         "filename": "android/utils/x86_cpuid.h",
         "patchSetId": 4
@@ -156,6 +228,24 @@
     },
     {
       "key": {
+        "uuid": "477c32a4_95e564f7",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-11T18:20:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0a6ebfb0_f3e110bc",
+      "revId": "a45aff973f1a0a1d4c5e8360423710bc4c00a0df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea4a4b41_b249406c",
         "filename": "android/utils/x86_cpuid.h",
         "patchSetId": 4
@@ -167,6 +257,24 @@
       "writtenOn": "2016-01-11T09:47:29Z",
       "side": 1,
       "message": "Please specify/clarify what NOTVM and OTHER really mean here. The distinction between them seems superfluous to me, but I may be wrong. Also, how does this relate to android_get_x86_cpuid_vendir_id_is_vmhost()?\n\nAlso why isn\u0027t HAXM part of this list? This is pretty important for us :)",
+      "revId": "a45aff973f1a0a1d4c5e8360423710bc4c00a0df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa5f73f8_4c013f4c",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-11T18:20:08Z",
+      "side": 1,
+      "message": "HAXM isn\u0027t part of this list as (1) we usually don\u0027t run in an OS under HAXM virtualization - we initiate the virtualization ourselves; (2) I don\u0027t know the ID it returns :)",
+      "parentUuid": "ea4a4b41_b249406c",
       "revId": "a45aff973f1a0a1d4c5e8360423710bc4c00a0df",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
