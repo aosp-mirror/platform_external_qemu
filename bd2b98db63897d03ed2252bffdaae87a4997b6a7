@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "87df0af2_8f41b53e",
+        "filename": "android/base/threads/LooperThread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-11T19:24:03Z",
+      "side": 1,
+      "message": "tl;dr\n- I\u0027ll name this ParallelTask\n- I _may_ re-implement async based on this object (I ask for your opinion below).\n- I\u0027ll provide a async(...).then(...) API based on this object.\n\n------------\nIt does indeed implement future-\u003ethen, but...\n\n- I don\u0027t like the term \"async\" used to mean \"parallel\". An async task can run in parallel or not (three options: launch a thread, post to an existing event loop, defer computation to point of first use). In this case, I necessarily want parallel execution, since the intention is to do blocking IO.\n\n- Going with the OOP interface we have for android::base::Thread, I do want to create a similar object here.\n\n- As for async(), I was first going to rewrite async to use this instead. \n  - I _really_ don\u0027t like Thrad::onExit. ;-)\n  - But, in it\u0027s current implementation, async() can be used without a running event loop, but not this object. This object necessarily needs the event loop, since that\u0027s where the \u0027then\u0027 part is posted.\n  - How do you feel about the async--\u003elooper dependence?",
+      "parentUuid": "6a901bcb_440922b5",
+      "range": {
+        "startLine": 59,
+        "startChar": 6,
+        "endLine": 59,
+        "endChar": 18
+      },
+      "revId": "bd2b98db63897d03ed2252bffdaae87a4997b6a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ca6827a1_1f892b4f",
         "filename": "android/base/threads/LooperThread.h",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-09T01:27:22Z",
       "side": 1,
       "message": "10 seconds feels like a huge timeout to me. checking for a thread status is a _very_ lightweight task, can we make a default somewhat shorter?",
+      "range": {
+        "startLine": 69,
+        "startChar": 66,
+        "endLine": 69,
+        "endChar": 75
+      },
+      "revId": "bd2b98db63897d03ed2252bffdaae87a4997b6a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0776bac5_d37214b9",
+        "filename": "android/base/threads/LooperThread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-11T19:24:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca6827a1_1f892b4f",
       "range": {
         "startLine": 69,
         "startChar": 66,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "477c32a4_152714a3",
+        "filename": "android/base/threads/LooperThread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-11T19:24:03Z",
+      "side": 1,
+      "message": "wokay.\n\nSo that\u0027s similar to malloc failing even with overcomitting on. If you see it, you\u0027re really screwed. So don\u0027t resist :)",
+      "parentUuid": "6a79fb72_5c0655a5",
+      "range": {
+        "startLine": 88,
+        "startChar": 7,
+        "endLine": 89,
+        "endChar": 37
+      },
+      "revId": "bd2b98db63897d03ed2252bffdaae87a4997b6a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a9aa3ee_30953004",
         "filename": "android/base/threads/LooperThread.h",
         "patchSetId": 4
@@ -82,6 +154,30 @@
       "writtenOn": "2016-01-09T01:27:22Z",
       "side": 1,
       "message": "*|thread| ?",
+      "range": {
+        "startLine": 91,
+        "startChar": 62,
+        "endLine": 91,
+        "endChar": 68
+      },
+      "revId": "bd2b98db63897d03ed2252bffdaae87a4997b6a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c7d582d0_71e1d84c",
+        "filename": "android/base/threads/LooperThread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-11T19:24:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a9aa3ee_30953004",
       "range": {
         "startLine": 91,
         "startChar": 62,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "27d01ee4_ec864bce",
+        "filename": "android/base/threads/LooperThread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-11T19:24:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aa5f73f8_9e17fdd7",
+      "range": {
+        "startLine": 95,
+        "startChar": 47,
+        "endLine": 95,
+        "endChar": 56
+      },
+      "revId": "bd2b98db63897d03ed2252bffdaae87a4997b6a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a901bcb_64effe15",
         "filename": "android/base/threads/LooperThread.h",
         "patchSetId": 4
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "277bbeaf_9407a4f9",
+        "filename": "android/base/threads/LooperThread.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-11T19:24:03Z",
+      "side": 1,
+      "message": "tl;dr --\u003e Dropped.\n\n----\n\nhttps://android-review.googlesource.com/#/c/194825/\n\nSo that even if the ThreadLooper object is on the stack, the result is on the free store.\nBut other things go wrong when that happens. A full-proof implementation that allows the ThreadLooper (or Thread) object to be on the stack of the calling thread would need to use pimpl, and pass in the address of the containing (real) object.\n\nI\u0027m not going to bother.",
+      "parentUuid": "6a901bcb_64effe15",
+      "range": {
+        "startLine": 114,
+        "startChar": 1,
+        "endLine": 114,
+        "endChar": 46
+      },
+      "revId": "bd2b98db63897d03ed2252bffdaae87a4997b6a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a79fb72_dc750513",
         "filename": "android/base/threads/LooperThread_unittest.cpp",
         "patchSetId": 4
@@ -151,6 +295,30 @@
       "writtenOn": "2016-01-09T01:27:22Z",
       "side": 1,
       "message": "volatile, please. atomic\u003cbool\u003e would be even better, but mingw might screw us there",
+      "range": {
+        "startLine": 60,
+        "startChar": 9,
+        "endLine": 60,
+        "endChar": 19
+      },
+      "revId": "bd2b98db63897d03ed2252bffdaae87a4997b6a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e7d286e6_b24bc032",
+        "filename": "android/base/threads/LooperThread_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-11T19:24:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a79fb72_dc750513",
       "range": {
         "startLine": 60,
         "startChar": 9,
