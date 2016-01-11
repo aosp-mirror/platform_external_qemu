@@ -38,11 +38,11 @@ static void kernel_log_read(void* opaque, const uint8_t* from, int len) {
     /* XXXX: TODO: save messages into in-memory buffer for later retrieval */
 }
 
-static void kernel_log_init(KernelLog* k, AndroidKmsgFlags flags) {
+static bool kernel_log_init(KernelLog* k, AndroidKmsgFlags flags) {
     if (android_serialline_pipe_open(&k->serial_line,
                                      &android_kmsg_serial_line) < 0) {
         derror( "could not create kernel log charpipe" );
-        exit(1);
+        return false;
     }
 
     android_serialline_addhandlers(k->serial_line,
@@ -50,15 +50,17 @@ static void kernel_log_init(KernelLog* k, AndroidKmsgFlags flags) {
                                    kernel_log_can_read,
                                    kernel_log_read);
     k->flags = flags;
+    return true;
 }
 
 static KernelLog  _kernel_log[1];
 
-void
+bool
 android_kmsg_init(AndroidKmsgFlags flags) {
     if (_kernel_log->serial_line == NULL) {
-        kernel_log_init(_kernel_log, flags);
+        return kernel_log_init(_kernel_log, flags);
     }
+    return true;
 }
 
 

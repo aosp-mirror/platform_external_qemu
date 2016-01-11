@@ -33,12 +33,6 @@ using android::ConfigDirs;
 
 char* bufprint_app_dir(char* buff, char* end) {
     String appDir = System::get()->getLauncherDirectory();
-
-    if (appDir.empty()) {
-        derror("Cannot locate application directory");
-        exit(1);
-    }
-
     return bufprint(buff, end, "%s", appDir.c_str());
 }
 

@@ -101,7 +101,6 @@ void emulator_help( void )
     android_help_main(out);
     printf( "%.*s", out->n, out->s );
     stralloc_reset(out);
-    exit(1);
 }
 
 /*
@@ -200,7 +199,7 @@ int main(int argc, char **argv) {
     args[0] = argv[0];
 
     if ( android_parse_options( &argc, &argv, opts ) < 0 ) {
-        exit(1);
+        return 1;
     }
 
     // we know it's qemu1, and don't care what user wanted to trick us into
@@ -221,6 +220,7 @@ int main(int argc, char **argv) {
 
         if (!strcmp(opt, "-help")) {
             emulator_help();
+            return 0;
         }
 
         if (!strncmp(opt, "-help-",6)) {
@@ -238,24 +238,24 @@ int main(int argc, char **argv) {
             }
             if (out->n > 0) {
                 printf("\n%.*s", out->n, out->s);
-                exit(0);
+                return 0;
             }
 
             fprintf(stderr, "unknown option: -help-%s\n", opt);
             fprintf(stderr, "please use -help for a list of valid topics\n");
-            exit(1);
+            return 1;
         }
 
         if (opt[0] == '-') {
             fprintf(stderr, "unknown option: %s\n", opt);
             fprintf(stderr, "please use -help for a list of valid options\n");
-            exit(1);
+            return 1;
         }
 
         fprintf(stderr, "invalid command-line parameter: %s.\n", opt);
         fprintf(stderr, "Hint: use '@foo' to launch a virtual device named 'foo'.\n");
         fprintf(stderr, "please use -help for more information\n");
-        exit(1);
+        return 1;
     }
 
     if (opts->version) {
@@ -277,7 +277,7 @@ int main(int argc, char **argv) {
                "  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
                "  GNU General Public License for more details.\n\n");
 
-        exit(0);
+        return 0;
     }
 
     if (opts->snapshot_list) {
@@ -293,7 +293,7 @@ int main(int argc, char **argv) {
                 } else {
                     derror("This AVD doesn't have snapshotting enabled!\n");
                 }
-                exit(1);
+                return 1;
             }
         }
         snapshot_print_and_exit(opts->snapstorage);
@@ -333,7 +333,7 @@ int main(int argc, char **argv) {
     /* -charmap is incompatible with -attach-core, because particular
      * charmap gets set up in the running core. */
     if (skin_charmap_setup(opts->charmap)) {
-        exit(1);
+        return 1;
     }
 
     /* Parses options and builds an appropriate AVD. */
@@ -344,7 +344,7 @@ int main(int argc, char **argv) {
         if (opts->skin == NULL) {
             /* NOTE: Normally handled by sanitizeOptions(), just be safe */
             derror("The -skindir <path> option requires a -skin <name> option");
-            exit(2);
+            return 2;
         }
     } else {
         char* skinName;
@@ -373,14 +373,14 @@ int main(int argc, char **argv) {
     hw = android_hw;
     if (avdInfo_initHwConfig(avd, hw) < 0) {
         derror("could not read hardware configuration ?");
-        exit(1);
+        return 1;
     }
 
     /* The Qt UI handles keyboard shortcuts on its own. Don't load any keyset. */
     SkinKeyset* keyset = skin_keyset_new_from_text("");
     if (!keyset) {
         fprintf(stderr, "PANIC: unable to create empty default keyset!!\n" );
-        exit(1);
+        return 1;
     }
     skin_keyset_set_default(keyset);
     if (!opts->keyset) {
@@ -392,7 +392,7 @@ int main(int argc, char **argv) {
         long   shared_net_id = strtol(opts->shared_net_id, &end, 0);
         if (end == NULL || *end || shared_net_id < 1 || shared_net_id > 255) {
             fprintf(stderr, "option -shared-net-id must be an integer between 1 and 255\n");
-            exit(1);
+            return 1;
         }
         snprintf(boot_prop_ip, sizeof(boot_prop_ip),
                  "net.shared_net_ip=10.1.2.%ld", shared_net_id);
@@ -422,12 +422,12 @@ int main(int argc, char **argv) {
 
         if (profilePath == NULL) {
             derror( "bad -code-profile parameter" );
-            exit(1);
+            return 1;
         }
         ret = path_mkdir_if_needed( profilePath, 0755 );
         if (ret < 0) {
             fprintf(stderr, "could not create directory '%s'\n", profilePath);
-            exit(2);
+            return 2;
         }
         opts->code_profile = profilePath;
     }
@@ -619,7 +619,7 @@ int main(int argc, char **argv) {
         if ((strcmp(opts->selinux, "permissive") != 0)
                 && (strcmp(opts->selinux, "disabled") != 0)) {
             derror("-selinux must be \"disabled\" or \"permissive\"");
-            exit(1);
+            return 1;
         }
     }
 
@@ -727,7 +727,7 @@ int main(int argc, char **argv) {
 
         if (p >= end) {
             fprintf(stderr, "### ERROR: kernel parameters too long\n");
-            exit(1);
+            return 1;
         }
 
         hw->kernel_parameters = strdup(params);
@@ -767,7 +767,7 @@ int main(int argc, char **argv) {
 
         if (!path_exists(opts->charmap)) {
             derror("Charmap file does not exist: %s", opts->charmap);
-            exit(1);
+            return 1;
         }
         /* We need to store the charmap name in the hardware configuration.
          * However, the charmap file itself is only used by the UI component
@@ -788,14 +788,14 @@ int main(int argc, char **argv) {
                               0,
                               opts->no_window)) {
             derror("%s", config.status);
-            exit(1);
+            return 1;
         }
         hw->hw_gpu_enabled = config.enabled;
         if (use_software_gpu_and_screen_too_large(hw)) {
             derror("GPU emulation is disabled.\n"
                    "Only screen size of 768 X 1280 or smaller is supported "
                    "when GPU emulation is disabled.");
-            exit(1);
+            return 1;
         }
         if (config.enabled)
         {
@@ -815,7 +815,7 @@ int main(int argc, char **argv) {
     if (hw->hw_gpu_enabled && opts->snapstorage && (!opts->no_snapshot_load ||
                                                     !opts->no_snapshot_save)) {
         derror("Snapshots and gpu are mutually exclusive at this point. Please turn one of them off, and restart the emulator.");
-        exit(1);
+        return 1;
     }
 
     /* Deal with camera emulation */
@@ -832,7 +832,7 @@ int main(int argc, char **argv) {
             derror("Invalid value for -camera-back <mode> parameter: %s\n"
                    "Valid values are: 'emulated', 'webcam<N>', or 'none'\n",
                    opts->camera_back);
-            exit(1);
+            return 1;
         }
         hw->hw_camera_back = ASTRDUP(opts->camera_back);
     }
@@ -845,7 +845,7 @@ int main(int argc, char **argv) {
             derror("Invalid value for -camera-front <mode> parameter: %s\n"
                    "Valid values are: 'emulated', 'webcam<N>', or 'none'\n",
                    opts->camera_front);
-            exit(1);
+            return 1;
         }
         hw->hw_camera_front = ASTRDUP(opts->camera_front);
     }
@@ -883,7 +883,7 @@ int main(int argc, char **argv) {
         if (!accel_ok) {
             derror("CPU acceleration not supported on this machine!");
             derror("Reason: %s", accel_status);
-            exit(1);
+            return 1;
         }
         args[n++] = ASTRDUP(kEnableAccelerator);
     } else {
@@ -913,7 +913,7 @@ int main(int argc, char **argv) {
             derror("Invalid value for -screen <mode> parameter: %s\n"
                    "Valid values are: touch, multi-touch, or no-touch\n",
                    opts->screen);
-            exit(1);
+            return 1;
         }
         hw->hw_screen = ASTRDUP(opts->screen);
     }
@@ -951,7 +951,7 @@ int main(int argc, char **argv) {
          * VM starts from a snapshot for this instance of emulator). */
         if (iniFile_saveToFileClean(hwIni, coreHwIniPath) < 0) {
             derror("Could not write hardware.ini to %s: %s", coreHwIniPath, strerror(errno));
-            exit(2);
+            return 2;
         }
         args[n++] = "-android-hw";
         args[n++] = strdup(coreHwIniPath);
