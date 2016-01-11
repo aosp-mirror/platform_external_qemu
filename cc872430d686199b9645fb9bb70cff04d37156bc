@@ -94,6 +94,30 @@
     },
     {
       "key": {
+        "uuid": "4a3997b3_ed74c566",
+        "filename": "android/base/files/PathUtils_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:49:08Z",
+      "side": 1,
+      "message": "Not necessarily, technically, it needs a trailing backslash (or slash) to be absolute.\n\nMaybe one solution would be to do like Chromium does, i.e. implement a Path class that encapsulates everything a path needs to be. See https://github.com/adobe/chromium/blob/master/base/file_path.h for more information.",
+      "parentUuid": "ca2ae7be_529eaadb",
+      "range": {
+        "startLine": 518,
+        "startChar": 40,
+        "endLine": 518,
+        "endChar": 44
+      },
+      "revId": "cc872430d686199b9645fb9bb70cff04d37156bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a1bbbb8_ec19bf67",
         "filename": "android/base/files/PathUtils_unittest.cpp",
         "patchSetId": 2
@@ -105,6 +129,30 @@
       "writtenOn": "2015-12-23T04:13:41Z",
       "side": 1,
       "message": "in batch files C:path means \u0027path\u0027 on the current directory on drive C:, so the correct result is C:\\%cur_dir%\\home\nin normal applications it\u0027s just a completely invalid path",
+      "range": {
+        "startLine": 519,
+        "startChar": 24,
+        "endLine": 519,
+        "endChar": 51
+      },
+      "revId": "cc872430d686199b9645fb9bb70cff04d37156bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea4a4b41_7267d863",
+        "filename": "android/base/files/PathUtils_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-11T16:49:08Z",
+      "side": 1,
+      "message": "On batch files, because it\u0027s a feature that cmd.exe implements for legacy reasons. Otherwise, each Win32 process has a single current directory, made of a drive/server designator, and a path on the corresponding volume. See [1]\n\nI think you\u0027re the one who gave me this link earlier.\n\nGiven that we\u0027re not implementing a cmd.exe replacement, I think it\u0027s ok not to deal with this edge case and just leave this as that.\n\nI\u0027m a bit surprised the result isn\u0027t C:\\\\home\\\\testdir\\\\D:home though. Not sure if this matters though.\n\n[1] https://blogs.msdn.microsoft.com/oldnewthing/20101011-00/?p\u003d12563",
+      "parentUuid": "6a1bbbb8_ec19bf67",
       "range": {
         "startLine": 519,
         "startChar": 24,
