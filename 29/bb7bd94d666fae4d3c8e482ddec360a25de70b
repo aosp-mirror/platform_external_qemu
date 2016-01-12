@@ -1,0 +1,7 @@
+Code-Review+2: Bo Hu <bohu@google.com>
+Verified+1: David Turner <digit@google.com>
+Submitted-by: David Turner <digit@google.com>
+Submitted-at: Tue, 12 Jan 2016 08:42:46 +0000
+Reviewed-on: https://android-review.googlesource.com/182635
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
