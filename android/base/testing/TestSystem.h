@@ -43,8 +43,8 @@ public:
           mEnvPairs(),
           mPrevSystem(System::setForTesting(this)),
           mTimes(),
-          mSilentShellFunc(NULL),
-          mSilentShellOpaque(NULL),
+          mShellFunc(NULL),
+          mShellOpaque(NULL),
           mUnixTime() {}
 
     virtual ~TestSystem() {
@@ -234,39 +234,39 @@ public:
     }
 
     // Type of a helper function that can be used during unit-testing to
-    // receive the parameters of a runSilentCommand() call. Register it
-    // with setSilentCommandShell().
-    typedef bool (SilentCommandShell)(void* opaque,
-                                      const StringVector& commandLine);
+    // receive the parameters of a runCommand() call. Register it
+    // with setShellCommand().
+    typedef bool(ShellCommand)(void* opaque,
+                               const StringVector& commandLine,
+                               System::Duration timeoutMs,
+                               System::ProcessExitCode* outExitCode,
+                               System::Pid* outChildPid);
 
     // Register a silent shell function. |shell| is the function callback,
     // and |shellOpaque| a user-provided pointer passed as its first parameter.
-    void setSilentCommandShell(SilentCommandShell* shell, void* shellOpaque) {
-        mSilentShellFunc = shell;
-        mSilentShellOpaque = shellOpaque;
+    void setShellCommand(ShellCommand* shell, void* shellOpaque) {
+        mShellFunc = shell;
+        mShellOpaque = shellOpaque;
     }
 
-    virtual bool runSilentCommand(const StringVector& commandLine,
-                                  bool wait = false) {
-        return RunFailed != runCommand(commandLine,
-                  wait ? RunOptions::WaitForCompletion : RunOptions::Default);
-    }
-
-    virtual int runCommand(const StringVector& commandLine,
-                           RunOptions options) override {
+    bool runCommand(const StringVector& commandLine,
+                    RunOptions options,
+                    System::Duration timeoutMs,
+                    System::ProcessExitCode* outExitCode,
+                    System::Pid* outChildPid) override {
         if (!commandLine.size()) {
-            return RunFailed;
+            return false;
         }
         // If a silent shell function was registered, invoke it, otherwise
         // ignore the command completely.
-        if (mSilentShellFunc) {
-            return (*mSilentShellFunc)(mSilentShellOpaque, commandLine)
-                    ? ((options & RunOptions::ReturnExitCode) != 0)
-                        ? 0 : 1
-                    : RunFailed;
-        } else {
-            return ((options & RunOptions::ReturnExitCode) != 0) ? 0 : 1;
+        bool result = true;
+        ;
+        if (mShellFunc) {
+            result = (*mShellFunc)(mShellOpaque, commandLine, timeoutMs,
+                                   outExitCode, outChildPid);
         }
+
+        return result;
     }
 
     virtual String getTempDir() const { return String("/tmp"); }
@@ -306,8 +306,8 @@ private:
     StringVector mEnvPairs;
     System* mPrevSystem;
     Times mTimes;
-    SilentCommandShell* mSilentShellFunc;
-    void* mSilentShellOpaque;
+    ShellCommand* mShellFunc;
+    void* mShellOpaque;
     time_t mUnixTime;
     OsType mOsType = OsType::Windows;
 };

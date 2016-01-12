@@ -153,12 +153,15 @@ int main(int argc, char** argv)
             if (path.empty()) {
                 derror("can't find the emulator-check executable "
                        "(corrupted tools installation?)");
-                return 1;
+                return -1;
             }
-            return sys.runCommand({path, "accel"},
-                                  RunOptions::WaitForCompletion
-                                  | RunOptions::ReturnExitCode
-                                  | RunOptions::ShowOutput);
+
+            System::ProcessExitCode exit_code;
+            bool ret = sys.runCommand(
+                    {path, "accel"},
+                    RunOptions::WaitForCompletion | RunOptions::ShowOutput,
+                    System::kInfinite, &exit_code);
+            return ret ? exit_code : -1;
         }
 
         if (!strcmp(opt,"-qemu"))

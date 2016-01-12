@@ -24,6 +24,17 @@
 #include <stdint.h>
 #include <time.h>
 
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN 1
+#endif
+#include <windows.h>
+#undef ERROR  // necessary to compile LOG(ERROR) statements
+#else  // !_WIN32
+#include <unistd.h>
+#endif        // !_WIN32
+
+
 namespace android {
 namespace base {
 
@@ -40,16 +51,21 @@ enum class RunOptions {
     None = 0,
 
     // some pseudo flags to just state the default behavior
-    ReturnPid = 0,
     DontWait = 0,
     HideAllOutput = 0,
 
+    // Wait for the launched shell command to finish, and return true only if
+    // the command was successful.
     WaitForCompletion = 1,
-    ReturnExitCode = 2, // can only be used with WaitForCompletion
-                        // for an obvious reason
+    // Attempt to terminate the launched process if it doesn't finish in time.
+    // Note that terminating a mid-flight process can leave the whole system in
+    // a weird state.
+    // Only make sense with |WaitForCompletion|.
+    TerminateOnTimeout = 2,
+
     ShowOutput = 4,
 
-    Default = 0,    // don't wait, return PID, hide all output
+    Default = 0,  // don't wait, hide all output
 };
 
 // Interface class to the underlying operating system.
@@ -64,11 +80,17 @@ public:
         Duration systemMs;
     };
 
-    enum {
-        RunFailed = -1,
-    };
+    enum { RunFailed = -1 };
 
     using RunOptions = android::base::RunOptions;
+
+#ifdef _WIN32
+    using Pid = DWORD;
+    using ProcessExitCode = DWORD;
+#else
+    using Pid = pid_t;
+    using ProcessExitCode = int;
+#endif
 
 public:
     // Call this function to get the instance
@@ -238,19 +260,27 @@ public:
     // Execute commands.
     // /////////////////////////////////////////////////////////////////////////
 
-    // Run a shell command. |commandLine| is a set of command to run + its
-    // arguments, |options| allows one to control the behavior of a function.
-    virtual int runCommand(const StringVector& commandLine,
-                           RunOptions options = RunOptions::Default) = 0;
-
-    // Run a shell command silently. This doesn't try to wait for it to
-    // complete by default and will return as soon as possible.
-    // |commandLine| is a list of parameters, where |commandLine[0]| is the
-    // full path to the executable.
-    // If |wait| is true it returns only after the process exited.
-    // Returns true if command was launched succesfully
-    virtual bool runSilentCommand(const StringVector& commandLine,
-                                  bool wait = false) = 0;
+    // Run a shell command.
+    // Args:
+    //     commandLine: Set of command to run + its arguments
+    //     options: options to controls shell behaviour in various ways.
+    //     timeoutMs: If |options| includes WaitForCompletion, this argument
+    //             specifies the maximum time to wait before aborting the
+    //             command. Waits forever if set to 0.
+    //     outChildPid: An optional pointer to an existing location where the
+    //             pid for the launched child process is returned. Only valid if
+    //             function returns true.
+    //
+    // Returns true if the function succeeded in running the command. If you
+    // request |RunOptions::WaitForCompletion|, this does not mean that the
+    // command finished with "success" exit status, just that we succeeded in
+    // running it, cf |outExitCode|.
+    static const System::Duration kInfinite = 0;
+    virtual bool runCommand(const StringVector& commandLine,
+                            RunOptions options = RunOptions::Default,
+                            System::Duration timeoutMs = kInfinite,
+                            System::ProcessExitCode* outExitCode = nullptr,
+                            System::Pid* outChildPid = nullptr) = 0;
 
 protected:
     static System* setForTesting(System* system);
