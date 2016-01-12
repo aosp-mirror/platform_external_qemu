@@ -385,7 +385,8 @@ int ToolWindow::adbShellStopRunner() {
     fullArgs.push_back("shell");
     fullArgs.push_back("stop");
 
-    System::get()->runSilentCommand(fullArgs, true);
+    System::get()->runCommand(fullArgs, RunOptions::WaitForCompletion |
+                                                RunOptions::HideAllOutput);
 
     emulator_window->queueQuitEvent();
     return 0;

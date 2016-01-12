@@ -362,5 +362,45 @@ TEST(System, getUnixTime) {
     ASSERT_GE(time2, time1);
 }
 
+TEST(System, runCommandTrue) {
+#ifndef _WIN32
+    StringVector cmd = {"ls"};
+#else
+    // 'dir' is a builtin command, so all you need is a sane cmd.exe
+    StringVector cmd = {"cmd.exe", "/C", "dir"};
+#endif
+
+    EXPECT_TRUE(System::get()->runCommand(cmd));
+    EXPECT_TRUE(System::get()->runCommand(cmd, RunOptions::WaitForCompletion));
+
+    System::Pid pid = 0;
+    System::ProcessExitCode exitCode = 666;
+    EXPECT_TRUE(System::get()->runCommand(cmd, RunOptions::WaitForCompletion,
+                                          System::kInfinite, &exitCode, &pid));
+    EXPECT_EQ(0, exitCode);
+    EXPECT_GT(pid, 0);
+}
+
+TEST(System, runCommandTimeout) {
+#ifndef _WIN32
+    StringVector cmd = {"sleep", "0.5"};
+#else
+    // 2 Attempts give us a delay of 1 second.
+    // 'ping' is not listed as an internal cmd.exe command, but seems to be that
+    // way on recent windows boxes and wine. Safe to assume?
+    StringVector cmd = {"cmd.exe", "/C", "ping", "-n", "2", "127.0.0.1"};
+#endif
+
+    EXPECT_FALSE(
+            System::get()->runCommand(cmd, RunOptions::WaitForCompletion, 20));
+
+    System::Pid pid = 0;
+    System::ProcessExitCode exitCode = 666;
+    EXPECT_TRUE(System::get()->runCommand(cmd, RunOptions::WaitForCompletion,
+                                          System::kInfinite, &exitCode, &pid));
+    EXPECT_EQ(0, exitCode);
+    EXPECT_GT(pid, 0);
+}
+
 }  // namespace base
 }  // namespace android
