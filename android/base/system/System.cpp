@@ -37,11 +37,13 @@
 #endif  // __APPLE__
 
 #include <array>
+#include <chrono>
 
 #ifndef _WIN32
 #include <fcntl.h>
 #include <dirent.h>
 #include <pwd.h>
+#include <signal.h>
 #include <sys/times.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -470,16 +472,14 @@ public:
         return time(NULL);
     }
 
-    virtual int runCommand(const StringVector& commandLine,
-                           RunOptions options) override {
+    bool runCommand(const StringVector& commandLine,
+                    RunOptions options,
+                    System::Duration timeoutMs,
+                    System::ProcessExitCode* outExitCode,
+                    System::Pid* outChildPid) override {
         // Sanity check.
         if (commandLine.empty()) {
-            return RunFailed;
-        }
-        // ReturnExitCode may only be used with WaitForCompletion
-        if ((options & RunOptions::ReturnExitCode) != 0
-            && (options & RunOptions::WaitForCompletion) == 0) {
-            return RunFailed;
+            return false;
         }
 
 #ifdef _WIN32
@@ -540,7 +540,7 @@ public:
             }
             if (size == 0) {
                 // Couldn't find anything matching the passed name
-                return RunFailed;
+                return false;
             }
             if (buffer.size() != size) {
                 buffer.resize(size);
@@ -568,27 +568,39 @@ public:
                 nullptr,            // use parent's starting directory
                 &startup,           // startup info, i.e. std handles
                 &pinfo)) {
-            return RunFailed;
+            return false;
         }
 
         CloseHandle(pinfo.hThread);
         // make sure we close the process handle on exit
         const ScopedHandle process(pinfo.hProcess);
 
-        // by default we return the child process id
-        int result = pinfo.dwProcessId;
-        if ((options & RunOptions::WaitForCompletion) != 0) {
-            ::WaitForSingleObject(pinfo.hProcess, INFINITE);
-            if ((options & RunOptions::ReturnExitCode) != 0) {
-                DWORD exitCode;
-                if (!::GetExitCodeProcess(pinfo.hProcess, &exitCode)) {
-                    exitCode = static_cast<DWORD>(RunFailed);
-                }
-                result = static_cast<int>(exitCode);
-            }
+        if (outChildPid) {
+            *outChildPid = pinfo.dwProcessId;
         }
 
-        return result;
+        if ((options & RunOptions::WaitForCompletion) == 0) {
+            return true;
+        }
+
+        // We were requested to wait for the process to complete.
+        DWORD ret = ::WaitForSingleObject(pinfo.hProcess,
+                                          timeoutMs ? timeoutMs : INFINITE);
+        if (ret == WAIT_FAILED || ret == WAIT_TIMEOUT) {
+            if ((options & RunOptions::TerminateOnTimeout) != 0) {
+                ::TerminateProcess(pinfo.hProcess, 1);
+            }
+            return false;
+        }
+
+        DWORD exitCode;
+        auto exitCodeSuccess = ::GetExitCodeProcess(pinfo.hProcess, &exitCode);
+        assert(exitCodeSuccess);
+        if (outExitCode) {
+            *outExitCode = exitCode;
+        }
+        return true;
+
 #else   // !_WIN32
         char** const params = new char*[commandLine.size() + 1];
         for (size_t i = 0; i < commandLine.size(); ++i) {
@@ -598,23 +610,57 @@ public:
 
         int pid = fork();
         if (pid < 0) {
-            return RunFailed;
+            return false;
         }
         if (pid != 0) {
             // Parent process returns.
-            delete [] params;
-            if ((options & RunOptions::WaitForCompletion) != 0) {
-                int status;
-                HANDLE_EINTR(waitpid(pid, &status, 0));
-                if ((options & RunOptions::ReturnExitCode) != 0) {
-                    return WIFEXITED(status)
-                            ? WEXITSTATUS(status)
-                            : RunFailed;
-                } else {
-                    return pid;
-                }
+            delete[] params;
+            if (outChildPid) {
+                *outChildPid = pid;
             }
-            return pid;
+
+            if ((options & RunOptions::WaitForCompletion) == 0) {
+                return true;
+            }
+
+            // We were requested to wait for the process to complete.
+            int exitCode;
+            // Do not use SIGCHLD here because we're not sure if we're
+            // running on the main thread and/or what our sigmask is.
+            if (timeoutMs == kInfinite) {
+                // Let's just wait forever and hope that the child process
+                // exits.
+                pid_t waitPid = HANDLE_EINTR(waitpid(pid, &exitCode, 0));
+                if (outExitCode) {
+                    *outExitCode = WEXITSTATUS(exitCode);
+                }
+                return WIFEXITED(exitCode);
+            }
+
+            auto startTime = std::chrono::steady_clock::now();
+            auto elapsed = std::chrono::milliseconds::zero();
+            while (elapsed.count() < timeoutMs) {
+                pid_t waitPid = HANDLE_EINTR(waitpid(pid, &exitCode, WNOHANG));
+                if (waitPid < 0) {
+                    return false;
+                }
+
+                if (waitPid > 0) {
+                    if (outExitCode) {
+                        *outExitCode = WEXITSTATUS(exitCode);
+                    }
+                    return WIFEXITED(exitCode);
+                }
+
+                sleepMs(10);
+                elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::steady_clock::now() - startTime);
+            }
+            // Timeout occured.
+            if ((options & RunOptions::TerminateOnTimeout) != 0) {
+                kill(pid, SIGKILL);
+            }
+            return false;
         }
 
         // In the child process.
@@ -637,13 +683,8 @@ public:
             }
         }
         // Should not happen, but let's keep the compiler happy
-        return RunFailed;
+        return false;
 #endif  // !_WIN32
-    }
-
-    bool runSilentCommand(const StringVector& commandLine, bool wait) override {
-        return RunFailed != runCommand(commandLine,
-                 wait ? RunOptions::WaitForCompletion : RunOptions::Default);
     }
 
     virtual String getTempDir() const {
