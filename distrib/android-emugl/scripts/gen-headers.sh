@@ -78,7 +78,7 @@ gen_funcargs_header () {
 ##
 GLCOMMON_SRC_DIR=distrib/android-emugl/host/libs/Translator
 GLCOMMON_ENTRIES="gles_common gles_extensions gles1_only gles1_extensions gles2_only \
-gles2_extensions"
+gles2_extensions gles3_only"
 
 for ENTRY in $GLCOMMON_ENTRIES; do
     SRC_FILE=$GLCOMMON_SRC_DIR/GLcommon/${ENTRY}.entries
@@ -97,7 +97,7 @@ gen_functions_header "$LIBRENDER_DIR"/render_api.entries \
 ## libOpenGLESDispatch headers.
 ##
 OPENGLES_DISPATCH_DIR=distrib/android-emugl/host/libs/libOpenGLESDispatch
-gen_functions_header "$OPENGLES_DISPATCH_DIR/render_egl.entries \
+gen_functions_header "$OPENGLES_DISPATCH_DIR"/render_egl.entries \
         "$OPENGLES_DISPATCH_DIR"/RenderEGL_functions.h "$GEN_ENTRIES"
 gen_functions_header "$OPENGLES_DISPATCH_DIR"/render_egl_extensions.entries \
         "$OPENGLES_DISPATCH_DIR"/RenderEGL_extensions_functions.h "$GEN_ENTRIES"
