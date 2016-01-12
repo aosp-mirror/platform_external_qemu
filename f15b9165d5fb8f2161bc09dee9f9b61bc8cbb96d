@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "678e9643_31494a69",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-12T23:06:49Z",
+      "side": 1,
+      "message": "Current Assumptions: The call stack contains either library names or function names that are part of the emulator (when compiled with debug symbols). If the call stack contains one of the strings within, then one of the library names is part of the call stack and we should suggest a driver update. \n\nWill update assumptions as I test along.",
+      "parentUuid": "678e9643_b1e29abc",
+      "range": {
+        "startLine": 304,
+        "startChar": 42,
+        "endLine": 304,
+        "endChar": 47
+      },
+      "revId": "f15b9165d5fb8f2161bc09dee9f9b61bc8cbb96d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "27673e34_a3b5243a",
         "filename": "android/crashreport/ui/ConfirmDialog.cpp",
         "patchSetId": 1
