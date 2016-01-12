@@ -143,7 +143,7 @@ public:
     void scaleDown();
     void scaleUp();
     void screenshot();
-    void setOnTop(bool onTop, bool showNow);
+    void setOnTop(bool onTop);
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateScrollBarChanged(int x, int y);
     void simulateSetScale(double scale);

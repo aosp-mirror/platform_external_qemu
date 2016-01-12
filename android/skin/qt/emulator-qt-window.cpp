@@ -141,7 +141,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
 
     QSettings settings;
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
-    setOnTop(onTop, false);
+    setOnTop(onTop);
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr()
@@ -379,7 +379,7 @@ void EmulatorQtWindow::show()
     QObject::connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen *)), this, SLOT(slot_screenChanged(QScreen *)));
 }
 
-void EmulatorQtWindow::setOnTop(bool onTop, bool showNow)
+void EmulatorQtWindow::setOnTop(bool onTop)
 {
 #ifndef __linux__
     // On Linux, the Qt::WindowStaysOnTopHint only works if X11 window managment
@@ -387,10 +387,12 @@ void EmulatorQtWindow::setOnTop(bool onTop, bool showNow)
     // a lot of common operations (like moving or resizing the window!), so the
     // "always on top" feature is disabled for Linux.
 
+    const bool oldVisible = mContainer.isVisible();
+
     setFrameOnTop(&mContainer, onTop);
     setFrameOnTop(tool_window, onTop);
 
-    if (showNow) {
+    if (oldVisible) {
         mContainer.show();
         tool_window->show();
     }
