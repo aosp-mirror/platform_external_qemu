@@ -11,30 +11,42 @@
 */
 
 #include "android/crashreport/ui/ConfirmDialog.h"
+#include "android/crashreport/ui/DetailsGetter.h"
+
+#include <QThread>
+#include <QEventLoop>
 
 ConfirmDialog::ConfirmDialog(QWidget* parent,
                              const QPixmap& icon,
                              const char* windowTitle,
                              const char* message,
                              const char* info,
-                             const char* detail)
-    : QDialog(parent) {
+                             const char* detail,
+                             android::crashreport::CrashService* crashservice)
+    : QDialog(parent), mCrashService(crashservice) {
     mSendButton = new QPushButton(tr("Send Report"));
     mDontSendButton = new QPushButton(tr("Don't Send"));
     mDetailsButton = new QPushButton(tr(""));
     mLabelText = new QLabel(message);
     mInfoText = new QLabel(info);
     mIcon = new QLabel();
+
     mDetailsText = new QPlainTextEdit(detail);
+    mDetailsProgressText = new QLabel(tr("Collecting crash info..."));
+    mDetailsProgress = new QProgressBar;
+
+    mExtension = new QWidget;
     mYesNoButtonBox = new QDialogButtonBox(Qt::Horizontal);
     mDetailsButtonBox = new QDialogButtonBox(Qt::Horizontal);
-    mExtension = new QWidget;
 
     mIcon->setPixmap(icon);
     mSendButton->setDefault(true);
     mInfoText->setWordWrap(true);
     mInfoText->setOpenExternalLinks(true);
     mDetailsText->setReadOnly(true);
+    mDetailsProgressText->hide();
+    mDetailsProgress->setRange(0,0);
+    mDetailsProgress->hide();
     mYesNoButtonBox->addButton(mSendButton, QDialogButtonBox::AcceptRole);
     mYesNoButtonBox->addButton(mDontSendButton, QDialogButtonBox::RejectRole);
     mDetailsButtonBox->addButton(mDetailsButton, QDialogButtonBox::ActionRole);
@@ -47,6 +59,9 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     QVBoxLayout* extensionLayout = new QVBoxLayout;
     extensionLayout->setMargin(0);
     extensionLayout->addWidget(mDetailsText);
+    extensionLayout->addWidget(mDetailsProgressText);
+    extensionLayout->addWidget(mDetailsProgress);
+
     mExtension->setLayout(extensionLayout);
 
     QGridLayout* mainLayout = new QGridLayout;
@@ -67,6 +82,7 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     setLayout(mainLayout);
     setWindowTitle(tr(windowTitle));
     hideDetails();
+    mDidGetSysInfo = false;
 }
 
 void ConfirmDialog::hideDetails() {
@@ -77,8 +93,49 @@ void ConfirmDialog::hideDetails() {
 
 void ConfirmDialog::showDetails() {
     mDetailsButton->setText(tr("Hide details"));
+
+    if (!mDidGetSysInfo) {
+        // Disable buttons to prevent concurrent hijinks
+        mSendButton->setEnabled(false);
+        mDontSendButton->setEnabled(false);
+        mDetailsButton->setEnabled(false);
+
+        QEventLoop event_loop;
+        QThread work_thread;
+
+        DetailsGetter details_getter(mCrashService);
+        details_getter.moveToThread(&work_thread);
+
+        mDetailsProgressText->show();
+        mDetailsProgress->show();
+        QObject::connect(&work_thread, &QThread::started, &details_getter, &DetailsGetter::getSysInfo);
+
+        QObject::connect(&details_getter, &DetailsGetter::finished, &work_thread, &QThread::quit);
+        QObject::connect(&details_getter, &DetailsGetter::finished, &event_loop, &QEventLoop::quit);
+        work_thread.start();
+        event_loop.exec();
+
+        // event loop quits here
+        mDetailsProgressText->hide();
+        mDetailsProgress->hide();
+
+        QString currentText = mDetailsText->toPlainText();
+        QString to_show = currentText + QString::fromStdString(details_getter.hw_info);
+        mDetailsText->document()->setPlainText(to_show);
+
+        // Put the buttons back
+        mSendButton->setEnabled(true);
+        mDontSendButton->setEnabled(true);
+        mDetailsButton->setEnabled(true);
+    }
+
     mDetailsText->show();
     mDetailsHidden = false;
+    mDidGetSysInfo = true;
+}
+
+bool ConfirmDialog::didGetSysInfo() const {
+    return mDidGetSysInfo;
 }
 
 void ConfirmDialog::sl_detailtoggle() {

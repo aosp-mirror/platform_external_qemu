@@ -12,13 +12,12 @@
 
 #include "android/crashreport/ui/DetailsGetter.h"
 
-DetailsGetter::DetailsGetter(android::crashreport::CrashService* crashservice, bool wantHWInfo) {
+DetailsGetter::DetailsGetter(android::crashreport::CrashService* crashservice) {
     mCrashService = crashservice;
-    mWantHWInfo = wantHWInfo;
 }
 
-void DetailsGetter::getDetails() {
-    crash_details = mCrashService->getCrashDetails(mWantHWInfo);
+void DetailsGetter::getSysInfo() {
+    hw_info = mCrashService->collectSysInfo();
     emit finished();
 }
 

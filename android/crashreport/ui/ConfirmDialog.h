@@ -10,6 +10,8 @@
 ** GNU General Public License for more details.
 */
 
+#include "android/crashreport/CrashService.h"
+
 #include <QDialogButtonBox>
 #include <QFontDatabase>
 #include <QGridLayout>
@@ -18,6 +20,7 @@
 #include <QPixmap>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QProgressBar>
 
 // QT Component that displays the send crash dump confirmation
 class ConfirmDialog : public QDialog {
@@ -29,13 +32,20 @@ private:
     QLabel* mLabelText;
     QLabel* mInfoText;
     QLabel* mIcon;
-    QWidget* mExtension;
+
     QPlainTextEdit* mDetailsText;
+    QLabel* mDetailsProgressText;
+    QProgressBar* mDetailsProgress;
+
+    QWidget* mExtension;
     QDialogButtonBox* mYesNoButtonBox;
     QDialogButtonBox* mDetailsButtonBox;
     bool mDetailsHidden;
+    bool mDidGetSysInfo;
     void hideDetails(void);
     void showDetails(void);
+
+    android::crashreport::CrashService* mCrashService;
 
 public:
     ConfirmDialog(QWidget* parent,
@@ -43,7 +53,9 @@ public:
                   const char* windowTitle,
                   const char* message,
                   const char* info,
-                  const char* detail);
+                  const char* detail,
+                  android::crashreport::CrashService* crashservice);
+    bool didGetSysInfo() const;
 public slots:
     void sl_detailtoggle(void);
 };

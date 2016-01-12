@@ -25,7 +25,6 @@
 #include "android/crashreport/CrashSystem.h"
 #include "android/crashreport/ui/ConfirmDialog.h"
 #include "android/crashreport/ui/CrashProgress.h"
-#include "android/crashreport/ui/DetailsGetter.h"
 #include "android/crashreport/ui/WantHWInfo.h"
 #include "android/qt/qt_path.h"
 #include "android/utils/debug.h"
@@ -95,7 +94,10 @@ static bool displayHWInfoDialog() {
     return ret == WantHWInfo::Accepted;
 }
 
-static bool displayConfirmDialog(const std::string& details, bool wantHWInfo) {
+static bool _postprocess_collectsysinfo = false;
+
+static bool displayConfirmDialog(const std::string& details, 
+                                 android::crashreport::CrashService* crashservice) {
     static const char kIconFile[] = "emulator_icon_128.png";
     size_t icon_size;
     QPixmap icon;
@@ -106,10 +108,17 @@ static bool displayConfirmDialog(const std::string& details, bool wantHWInfo) {
     icon.loadFromData(icon_data, icon_size);
 
     ConfirmDialog msgBox(nullptr, icon, kMessageBoxTitle, kMessageBoxMessage,
-                         wantHWInfo ? kMessageBoxMessageDetailHW : kMessageBoxMessageDetail, 
-                         details.c_str());
+                         kMessageBoxMessageDetailHW,
+                         details.c_str(), crashservice);
+
     msgBox.show();
     int ret = msgBox.exec();
+    if (msgBox.didGetSysInfo()) {
+        _postprocess_collectsysinfo = false;
+    } else {
+        _postprocess_collectsysinfo = true;
+    }
+
     return ret == ConfirmDialog::Accepted;
 }
 
@@ -190,34 +199,20 @@ int main(int argc, char** argv) {
 
     InitQt(argc, argv);
 
-    bool wantHWInfo = displayHWInfoDialog();
 
-    CrashProgress crash_progress(0);
-    crash_progress.start();
-
-    QThread work_thread;
-    DetailsGetter details_getter(crashservice.get(), wantHWInfo);
-    details_getter.moveToThread(&work_thread);
-
-    QObject::connect(&work_thread, &QThread::started, &details_getter, &DetailsGetter::getDetails);
-    QObject::connect(&details_getter, &DetailsGetter::finished, &work_thread, &QThread::quit);
-    QObject::connect(&details_getter, &DetailsGetter::finished, &app, &QApplication::quit);
-
-    work_thread.start();
-    app.exec();
-
-    // app has quit
-    crash_progress.stop();
-
-    const std::string crashDetails (details_getter.crash_details);
+    const std::string crashDetails (crashservice->getCrashDetails());
 
     if (crashDetails.empty()) {
         E("Crash details could not be processed, skipping upload\n");
         return 1;
     }
 
-    if (!displayConfirmDialog(crashDetails, wantHWInfo)) {
+    if (!displayConfirmDialog(crashDetails, crashservice.get())) {
         return 1;
+    }
+
+    if (_postprocess_collectsysinfo) {
+        crashservice->collectSysInfo();
     }
 
     if (!crashservice->uploadCrash(
