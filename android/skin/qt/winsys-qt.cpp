@@ -34,6 +34,13 @@
 #include <QThread>
 #include <QWidget>
 
+#ifdef Q_OS_LINUX
+// This include needs to be after all the Qt includes
+// because it defines macros/types that conflict with
+// qt's own macros/types.
+#include <X11/Xlib.h>
+#endif
+
 using android::base::System;
 using android::base::String;
 
@@ -320,6 +327,12 @@ extern void skin_winsys_spawn_thread(bool no_window,
 
 extern void skin_winsys_start(bool no_window, bool raw_keys) {
     GlobalState* g = globalState();
+#ifdef Q_OS_LINUX
+    // This call is required to make doing OpenGL stuff on the UI
+    // thread safe. The AA_X11InitThreads flag in Qt does not actually
+    // work (confirmed by grepping through Qt code).
+    XInitThreads();
+#endif
     if (no_window) {
         g->app = new QCoreApplication(g->argc, g->argv);
         EmulatorQtNoWindow::create();
