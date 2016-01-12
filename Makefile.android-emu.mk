@@ -472,7 +472,11 @@ $(call end-emulator-program)
 EMULATOR_LIBUI_INCLUDES :=
 EMULATOR_LIBUI_LDLIBS :=
 EMULATOR_LIBUI_LDFLAGS :=
-EMULATOR_LIBUI_STATIC_LIBRARIES :=
+EMULATOR_LIBUI_STATIC_LIBRARIES := libOpenGLESDispatch libemugl_common
+
+ifeq (linux,$(BUILD_TARGET_OS))
+    EMULATOR_LIBUI_LDFLAGS += -lX11
+endif
 
 EMULATOR_LIBUI_INCLUDES += $(QT_INCLUDES)
 EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
@@ -483,6 +487,7 @@ include $(LOCAL_PATH)/android/skin/sources.mk
 
 $(call start-emulator-library, emulator-libui)
 
+$(call emugl-gen-decoder,distrib/android-emugl/host/libs/GLESv2_dec,gles2)
 LOCAL_CFLAGS += \
     $(EMULATOR_COMMON_CFLAGS) \
     $(ANDROID_SKIN_CFLAGS) \
