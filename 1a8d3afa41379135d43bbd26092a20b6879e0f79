@@ -22,6 +22,30 @@
       "revId": "1a8d3afa41379135d43bbd26092a20b6879e0f79",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07495aa4_8f2c853d",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-12T21:32:50Z",
+      "side": 1,
+      "message": "Sorry, missed this. Taking it out.",
+      "parentUuid": "676db610_c5b82432",
+      "range": {
+        "startLine": 114,
+        "startChar": 0,
+        "endLine": 130,
+        "endChar": 29
+      },
+      "revId": "1a8d3afa41379135d43bbd26092a20b6879e0f79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
