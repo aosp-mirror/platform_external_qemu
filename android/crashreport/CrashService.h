@@ -14,7 +14,13 @@
 
 #pragma once
 
+#include "google_breakpad/processor/process_state.h"
+
+#include <algorithm>
+#include <map>
+#include <set>
 #include <string>
+#include <vector>
 
 namespace android {
 namespace crashreport {
@@ -106,6 +112,11 @@ public:
     static CrashService* makeCrashService(const std::string& version,
                                           const std::string& build);
 
+    // Get the stack dump (for parsing, and generating user suggestions)
+    std::string getInitialDump() const;
+
+    google_breakpad::ProcessState process_state;
+
 protected:
     // Initialize serverstate
     void initCrashServer();
@@ -124,6 +135,7 @@ protected:
 
     std::string mHWTmpFilePath;
 
+
 private:
     CrashService();
     std::string mVersion;
@@ -131,7 +143,27 @@ private:
     std::string mVersionId;
     std::string mDumpFile;
     std::string mReportId;
-    std::string mHWInfo;
+    std::string mDumpDetails; // Initial stack trace and live library dump from breakpad
+    std::string mHWInfo; // System-specific information
+};
+
+// The Suggestion type represents possible suggestions
+// presented to the user upon
+// analyzing a crash report.
+enum Suggestion {
+    // TODO: Add more suggestion types
+    // (Update OS, Get more RAM, etc)
+    // as we find them
+    UpdateGfxDrivers
+};
+
+// Class UserSuggestions parses and generates user suggestions.
+
+class UserSuggestions {
+public:
+    std::set<Suggestion> suggestions;
+
+    UserSuggestions(google_breakpad::ProcessState* process_state);
 };
 
 }  // namespace crashreport
