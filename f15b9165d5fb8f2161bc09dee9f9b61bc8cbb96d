@@ -22,6 +22,52 @@
       "revId": "f15b9165d5fb8f2161bc09dee9f9b61bc8cbb96d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "678e9643_b1e29abc",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-12T22:56:15Z",
+      "side": 1,
+      "message": "if the string contains something other than the call stack, or even if the call stack has function names, we can easily find such common strings there. Afaik libGL is a very common substring, \"igd\" too\nCould you at least add a comment of how the string is expected to look like?",
+      "range": {
+        "startLine": 304,
+        "startChar": 42,
+        "endLine": 304,
+        "endChar": 47
+      },
+      "revId": "f15b9165d5fb8f2161bc09dee9f9b61bc8cbb96d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "27673e34_a3b5243a",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-12T22:56:15Z",
+      "side": 1,
+      "message": "newline here? so the actual suggestion strings don\u0027t need to bother about it?",
+      "range": {
+        "startLine": 154,
+        "startChar": 47,
+        "endLine": 154,
+        "endChar": 50
+      },
+      "revId": "f15b9165d5fb8f2161bc09dee9f9b61bc8cbb96d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
