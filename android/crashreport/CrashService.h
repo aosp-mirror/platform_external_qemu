@@ -14,7 +14,12 @@
 
 #pragma once
 
+#include "google_breakpad/processor/process_state.h"
+
+#include <map>
+#include <set>
 #include <string>
+#include <vector>
 
 namespace android {
 namespace crashreport {
@@ -106,6 +111,11 @@ public:
     static CrashService* makeCrashService(const std::string& version,
                                           const std::string& build);
 
+    // Get the stack dump (for parsing, and generating user suggestions)
+    std::string getInitialDump() const;
+
+    google_breakpad::ProcessState process_state;
+
 protected:
     // Initialize serverstate
     void initCrashServer();
@@ -124,6 +134,7 @@ protected:
 
     std::string mHWTmpFilePath;
 
+
 private:
     CrashService();
     std::string mVersion;
@@ -131,7 +142,32 @@ private:
     std::string mVersionId;
     std::string mDumpFile;
     std::string mReportId;
-    std::string mHWInfo;
+    std::string mDumpDetails; // Initial stack trace and live library dump from breakpad
+    std::string mHWInfo; // System-specific information
+};
+
+// Class UserSuggestions parses and generates user suggestions.
+
+#define CRASHSERVICE_NUM_SUGGESTIONS 1
+#define CRASHSERVICE_SUGGEST_UPDATE_GFX_DRIVERS 0
+
+enum Suggestion {
+    // TODO: Add more suggestion types
+    // (Update OS, Get more RAM, etc)
+    // as we find them
+    UpdateGfxDrivers
+};
+
+class UserSuggestions {
+public:
+    std::set<Suggestion> suggestions;
+
+    // List of driver basenames that can be flagged
+    std::vector<std::string> gfx_driver_list;
+
+    UserSuggestions(google_breakpad::ProcessState* process_state);
+private:
+    std::string mCrashedLibs; // String containing names of libraries that crashed.
 };
 
 }  // namespace crashreport
