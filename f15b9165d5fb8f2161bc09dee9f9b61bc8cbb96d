@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "87562a44_c604ac61",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-12T22:51:24Z",
+      "side": 1,
+      "message": "an array of bitflags? or, even better, a map\u003cstring -\u003e bool\u003e, with a separate static array of possible strings to search for",
+      "range": {
+        "startLine": 151,
+        "startChar": 0,
+        "endLine": 161,
+        "endChar": 15
+      },
+      "revId": "f15b9165d5fb8f2161bc09dee9f9b61bc8cbb96d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
