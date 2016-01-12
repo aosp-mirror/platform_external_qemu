@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4768b202_0fb35954",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-12T22:24:43Z",
+      "side": 1,
+      "message": "The Qt docs state that repaint \"Repaints the widget directly by calling paintEvent() immediately, unless updates are disabled or the widget is hidden.\" Since we\u0027re making this widget in the Qt hierarchy, we should keep overridden methods doing what they\u0027re supposed to do. Switching the above implementation into paintEvent should do that, right?",
+      "range": {
+        "startLine": 121,
+        "startChar": 0,
+        "endLine": 134,
+        "endChar": 1
+      },
+      "revId": "fcd7652c88837c02b8431233785d8d640f42a91a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e759a674_94981cef",
+        "filename": "android/skin/qt/gl-widget.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-12T22:24:43Z",
+      "side": 1,
+      "message": "As I understand from this, a subclass implements initGL, repaintGL, and resizeGL correct (effectively making this widget a simple-to-extend blank canvas). If so, pure virtual?",
+      "range": {
+        "startLine": 20,
+        "startChar": 4,
+        "endLine": 22,
+        "endChar": 42
+      },
+      "revId": "fcd7652c88837c02b8431233785d8d640f42a91a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "27673e34_03085806",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-12T22:24:43Z",
+      "side": 1,
+      "message": "Nit: trailing space",
+      "range": {
+        "startLine": 18,
+        "startChar": 91,
+        "endLine": 18,
+        "endChar": 92
+      },
+      "revId": "fcd7652c88837c02b8431233785d8d640f42a91a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
