@@ -72,7 +72,7 @@ void android_get_x86_cpuid(uint32_t function,
 
 
 
-int android_get_x86_cpuid_vendor_id_is_vmhost(const char* vendor_id) {
+bool android_get_x86_cpuid_vendor_id_is_vmhost(const char* vendor_id) {
     static const char* const VMHostCPUID[] = {
         "KVMKVMKVM",    // KVM
         "Microsoft Hv", // Microsoft Hyper-V or Windows Virtual PC
@@ -84,9 +84,9 @@ int android_get_x86_cpuid_vendor_id_is_vmhost(const char* vendor_id) {
     for (int i = 0; i < VMHostCPUIDCount; i++) {
         /* I don't think HAXM supports nesting */
         if (memcmp(vendor_id, VMHostCPUID[i], strlen(VMHostCPUID[i])) == 0)
-            return 1;
+            return true;
     }
-    return 0;
+    return false;
 }
 
 void android_get_x86_cpuid_vendor_id(char* buf, size_t buf_len)
@@ -96,29 +96,104 @@ void android_get_x86_cpuid_vendor_id(char* buf, size_t buf_len)
     {
         return;
     }
-    android_get_x86_cpuid(0, 0, 0, (uint32_t*)buf, (uint32_t*)(buf+8), (uint32_t*)(buf+4));
+    android_get_x86_cpuid(0, 0,
+            0, (uint32_t*)buf, (uint32_t*)(buf+8), (uint32_t*)(buf+4));
 }
 
+void android_get_x86_cpuid_vmhost_vendor_id(char* buf, size_t buf_len)
+{
+    memset(buf, 0, buf_len);
+    if (buf_len < 13)
+    {
+        return;
+    }
+    android_get_x86_cpuid(0x40000000, 0,
+            0, (uint32_t*)buf, (uint32_t*)(buf+4), (uint32_t*)(buf+8));
+}
 
-int android_get_x86_cpuid_vmx_support()
+CpuVendorIdType android_get_x86_cpuid_vendor_id_type(const char* vendor_id)
+{
+    if (!vendor_id) {
+        return VENDOR_ID_OTHER;
+    }
+
+    if (strcmp(vendor_id, "AuthenticAMD") == 0) {
+        return VENDOR_ID_AMD;
+    }
+    if (strcmp(vendor_id, "GenuineIntel") == 0) {
+        return VENDOR_ID_INTEL;
+    }
+    if (strcmp(vendor_id, "VIA VIA VIA ") == 0) {
+        return VENDOR_ID_VIA;
+    }
+    if (android_get_x86_cpuid_vendor_id_is_vmhost(vendor_id)) {
+        return VENDOR_ID_VM;
+    }
+
+    return VENDOR_ID_OTHER;
+}
+
+CpuVendorVmType android_get_x86_cpuid_vendor_vmhost_type(const char* vendor_id) {
+    if (!vendor_id) {
+        return VENDOR_VM_OTHER;
+    }
+
+    if (vendor_id[0] == 0) {
+        return VENDOR_VM_NOTVM;
+    }
+    if (strcmp(vendor_id, "VMWareVMWare") == 0) {
+        return VENDOR_VM_VMWARE;
+    }
+    if (strcmp(vendor_id, "KVMKVMKVM") == 0) {
+        return VENDOR_VM_KVM;
+    }
+    if (strcmp(vendor_id, "VBoxVBoxVBox") == 0) {
+        return VENDOR_VM_VBOX;
+    }
+    if (strcmp(vendor_id, "Microsoft Hv") == 0) {
+        return VENDOR_VM_HYPERV;
+    }
+
+    return VENDOR_VM_OTHER;
+}
+
+bool android_get_x86_cpuid_vmx_support()
 {
     uint32_t cpuid_function1_ecx;
     android_get_x86_cpuid(1, 0, NULL, NULL, &cpuid_function1_ecx, NULL);
 
     const uint32_t CPUID_1_ECX_VMX = (1<<5); // Intel VMX support
-    return (cpuid_function1_ecx & CPUID_1_ECX_VMX) != 0;
+    if ((cpuid_function1_ecx & CPUID_1_ECX_VMX) != 0) {
+        // now we need to confirm that this is an Intel CPU
+        char vendor_id[13];
+        android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
+        if (android_get_x86_cpuid_vendor_id_type(vendor_id) == VENDOR_ID_INTEL) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
-int android_get_x86_cpuid_svm_support()
+bool android_get_x86_cpuid_svm_support()
 {
-    uint32_t cpuid_function1_ecx;
-    android_get_x86_cpuid(1, 0, NULL, NULL, &cpuid_function1_ecx, NULL);
+    uint32_t cpuid_ecx;
+    android_get_x86_cpuid(0x80000001, 0, NULL, NULL, &cpuid_ecx, NULL);
 
-    const uint32_t CPUID_1_ECX_SVM = (1<<6); // AMD SVM support
-    return (cpuid_function1_ecx & CPUID_1_ECX_SVM) != 0;
+    const uint32_t CPUID_ECX_SVM = (1<<2); // AMD SVM support
+    if ((cpuid_ecx & CPUID_ECX_SVM) != 0) {
+        // make sure it's an AMD processor
+        char vendor_id[13];
+        android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
+        if (android_get_x86_cpuid_vendor_id_type(vendor_id) == VENDOR_ID_AMD) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
-int android_get_x86_cpuid_is_vcpu()
+bool android_get_x86_cpuid_is_vcpu()
 {
     uint32_t cpuid_function1_ecx;
     android_get_x86_cpuid(1, 0, NULL, NULL, &cpuid_function1_ecx, NULL);
@@ -130,10 +205,10 @@ int android_get_x86_cpuid_is_vcpu()
     return (cpuid_function1_ecx & CPUID_1_ECX_VCPU) != 0;
 }
 
-int android_get_x86_cpuid_nx_support()
+bool android_get_x86_cpuid_nx_support()
 {
     if (android_get_x86_cpuid_extended_function_max() < 0x80000001)
-        return 0;
+        return false;
 
     uint32_t cpuid_80000001_edx;
     android_get_x86_cpuid(0x80000001, 0, NULL, NULL, NULL, &cpuid_80000001_edx);
@@ -141,5 +216,3 @@ int android_get_x86_cpuid_nx_support()
     const uint32_t CPUID_80000001_EDX_NX = (1<<20); // NX support
     return (cpuid_80000001_edx & CPUID_80000001_EDX_NX) != 0;
 }
-
-
