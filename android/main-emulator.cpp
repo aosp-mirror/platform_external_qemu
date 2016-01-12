@@ -155,10 +155,11 @@ int main(int argc, char** argv)
                        "(corrupted tools installation?)");
                 return 1;
             }
-            return sys.runCommand({path, "accel"},
-                                  RunOptions::WaitForCompletion
-                                  | RunOptions::ReturnExitCode
-                                  | RunOptions::ShowOutput);
+
+            bool ret = sys.runCommand(
+                    {path, "accel"},
+                    RunOptions::WaitForCompletion | RunOptions::ShowOutput);
+            return !ret;
         }
 
         if (!strcmp(opt,"-qemu"))

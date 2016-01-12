@@ -362,5 +362,32 @@ TEST(System, getUnixTime) {
     ASSERT_GE(time2, time1);
 }
 
+// Following tests are hard to run for windows -- we need a "reasonable"
+// external program to launch, but no sunch program exists under wine, where
+// unittests often run.
+#ifndef _WIN32
+
+TEST(System, runCommandTrue) {
+    StringVector cmd = {"ls"};
+
+    EXPECT_TRUE(System::get()->runCommand(cmd));
+    EXPECT_TRUE(System::get()->runCommand(cmd, RunOptions::WaitForCompletion));
+
+    System::Pid pid = 0;
+    EXPECT_TRUE(System::get()->runCommand(cmd, RunOptions::WaitForCompletion,
+                                          System::kInfinite, &pid));
+    EXPECT_GT(pid, 0);
+}
+
+TEST(System, runCommandTimeout) {
+    StringVector cmd = {"sleep", "0.5"};
+
+    EXPECT_FALSE(
+            System::get()->runCommand(cmd, RunOptions::WaitForCompletion, 20));
+    EXPECT_TRUE(System::get()->runCommand(cmd, RunOptions::WaitForCompletion));
+}
+
+#endif  // _WIN32
+
 }  // namespace base
 }  // namespace android
