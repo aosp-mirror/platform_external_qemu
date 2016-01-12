@@ -1955,7 +1955,10 @@ static void main_loop(void)
     int64_t ti;
 #endif
 
-    hax_sync_vcpus();
+    if (hax_sync_vcpus() < 0) {
+        fprintf(stderr, "Internal error: hax sync failed\n");
+        return;
+    }
 
     do {
         nonblocking = !kvm_enabled() && !xen_enabled() && !hax_enabled() && last_io > 0;
@@ -4770,7 +4773,10 @@ int run_qemu_main(int argc, const char **argv)
     set_numa_modes();
 
     if (hax_enabled()) {
-        hax_sync_vcpus();
+        if (hax_sync_vcpus() < 0) {
+        fprintf(stderr, "Internal error: initial hax sync failed\n");
+            return 1;
+        }
     }
 
     /* init USB devices */

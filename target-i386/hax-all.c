@@ -1403,7 +1403,7 @@ int hax_sync_vcpus(void)
             ret = hax_arch_set_registers(cpu->env_ptr);
             if (ret < 0) {
                 fprintf(stderr, "Failed to sync HAX vcpu context\n");
-                exit(1);
+                return -1;
             }
         }
     }
