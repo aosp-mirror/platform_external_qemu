@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "27673e34_aeaa2b8b",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-01-12T23:33:30Z",
+      "side": 1,
+      "message": "If I understand correctly, s_egl will be initiliazed by the qemu main loop thread. Is s_egl guaranteed to have been fully initialized when setupContextAndSurface() is called?",
+      "range": {
+        "startLine": 40,
+        "startChar": 4,
+        "endLine": 40,
+        "endChar": 41
+      },
+      "revId": "fcd7652c88837c02b8431233785d8d640f42a91a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4768b202_0fb35954",
         "filename": "android/skin/qt/gl-widget.cpp",
         "patchSetId": 6
