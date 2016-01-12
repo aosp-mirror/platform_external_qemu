@@ -10,15 +10,38 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/mac-native-window.mm
 endif
 
-ANDROID_SKIN_CFLAGS += -I$(LIBXML2_INCLUDES)
-ANDROID_SKIN_STATIC_LIBRARIES += $(LIBXML2_STATIC_LIBRARIES)
+include distrib/android-emugl/common.mk
+
+OPENGLES_DISPATCH_INCLUDES := distrib/android-emugl/host/libs/libOpenGLESDispatch
+OPENGLES_DISPATCH_LIB := libOpenGLESDispatch
+EGL_INCLUDES := distrib/android-emugl/host/libs/Translator/include
+GLES2_DEC_INTERMEDIATE_INCLUDES := $(call intermediates-dir-for,$(BUILD_TARGET_BITS),gles2) 
+GLES2_DEC_INCLUDES := distrib/android-emugl/host/libs/GLESv2_dec
+GL_CODEC_COMMON_INCLUDES := distrib/android-emugl/shared/OpenglCodecCommon
+GL_TRANSLATOR_INCLUDES := distrib/android-emugl/host/libs/Translator/include
+
+ANDROID_SKIN_CFLAGS += \
+                       -I$(LIBXML2_INCLUDES) \
+                       -I$(OPENGLES_DISPATCH_INCLUDES) \
+                       -I$(EGL_INCLUDES) \
+                       -I$(GLES2_DEC_INTERMEDIATE_INCLUDES) \
+                       -I$(GLES2_DEC_INCLUDES) \
+                       -I$(GL_CODEC_COMMON_INCLUDES) \
+                       -I$(GL_TRANSLATOR_INCLUDES) \
+                       -Idistrib/android-emugl/host/include/libOpenglRender
+
+GL_LIBS := libemugl_common libGLESv2_dec
+
+ANDROID_SKIN_STATIC_LIBRARIES += $(LIBXML2_STATIC_LIBRARIES) $(OPENGLES_DISPATCH_LIB) $(GL_LIBS)
 
 ANDROID_SKIN_SOURCES += \
+    $(call intermediates-dir-for,$(BUILD_TARGET_BITS),glwidget-gles2)/gles2_server_context.h \
     android/skin/qt/angle-input-widget.cpp \
     android/skin/qt/editable-slider-widget.cpp \
     android/skin/qt/emulator-qt-window.cpp \
     android/skin/qt/emulator-qt-no-window.cpp \
     android/skin/qt/error-dialog.cpp \
+    android/skin/qt/gl-widget.cpp \
     android/skin/qt/extended-pages/common.cpp \
     android/skin/qt/extended-pages/battery-page.cpp \
     android/skin/qt/extended-pages/cellular-page.cpp \
@@ -37,6 +60,7 @@ ANDROID_SKIN_SOURCES += \
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/angle-input-widget.h \
     android/skin/qt/editable-slider-widget.h \
+    android/skin/qt/gl-widget.h \
     android/skin/qt/emulator-qt-window.h \
     android/skin/qt/emulator-qt-no-window.h \
     android/skin/qt/extended-pages/battery-page.h \
