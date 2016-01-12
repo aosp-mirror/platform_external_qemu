@@ -76,7 +76,6 @@ signals:
 
 private:
     int adbShellStopRunner();
-    void paintEvent(QPaintEvent*) override;
     void handleUICommand(QtUICommand cmd, bool down);
 
     // Use this function only if SDK_PATH is not available in QSettings
@@ -96,6 +95,8 @@ private:
 
     virtual void closeEvent(QCloseEvent* ce) override;
     virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void paintEvent(QPaintEvent*) override;
+    virtual void hideEvent(QHideEvent* event) override;
 
     QWidget *button_area;
     EmulatorQtWindow *emulator_window;
@@ -110,6 +111,7 @@ private:
     QProgressDialog mInstallDialog;
     QQueue<QUrl> mFilesToPush;
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
+    bool mIsExtendedWindowActiveOnHide = false;
 
 private slots:
     void on_back_button_pressed();

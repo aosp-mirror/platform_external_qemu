@@ -205,10 +205,10 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
 
 void ToolWindow::hide()
 {
+    QFrame::hide();
     if (extendedWindow) {
         extendedWindow->hide();
     }
-    QFrame::hide();
 }
 
 void ToolWindow::closeEvent(QCloseEvent* ce) {
@@ -223,13 +223,26 @@ void ToolWindow::mousePressEvent(QMouseEvent *event)
     QFrame::mousePressEvent(event);
 }
 
+void ToolWindow::hideEvent(QHideEvent*) {
+    mIsExtendedWindowActiveOnHide =
+            extendedWindow != nullptr
+            && QApplication::activeWindow() == extendedWindow;
+}
+
 void ToolWindow::show()
 {
     dockMainWindow();
     setFixedSize(size());
     QFrame::show();
 
-    if (extendedWindow) extendedWindow->show();
+    if (extendedWindow) {
+        extendedWindow->show();
+
+        if (mIsExtendedWindowActiveOnHide) {
+            extendedWindow->raise();
+            extendedWindow->activateWindow();
+        }
+    }
 }
 
 QString ToolWindow::findAndroidSdkRoot()
@@ -680,6 +693,7 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
 void ToolWindow::on_more_button_clicked()
 {
     showOrRaiseExtendedWindow(PANE_IDX_LOCATION);
+    extendedWindow->activateWindow();
 }
 
 void ToolWindow::slot_installCanceled()

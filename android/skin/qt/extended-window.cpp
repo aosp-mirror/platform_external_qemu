@@ -177,7 +177,7 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
 
 void ExtendedWindow::switchOnTop(bool isOnTop)
 {
-    mEmulatorWindow->setOnTop(isOnTop, true);
+    mEmulatorWindow->setOnTop(isOnTop);
 }
 
 void ExtendedWindow::switchToTheme(SettingsTheme theme)
@@ -224,13 +224,15 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme)
 }
 
 void ExtendedWindow::showEvent(QShowEvent* e) {
-    if (!e->spontaneous()) {
+    if (mFirstShowEvent && !e->spontaneous()) {
         // This function has things that must be performed
         // after the ctor and after show() is called
         switchToTheme(getSelectedTheme());
 
         // Set the first tab active
         on_locationButton_clicked();
+
+        mFirstShowEvent = false;
     }
     QFrame::showEvent(e);
 }
