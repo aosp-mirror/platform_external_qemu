@@ -72,6 +72,47 @@
     },
     {
       "key": {
+        "uuid": "27673e34_2e9f3b79",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-01-12T23:36:56Z",
+      "side": 1,
+      "message": "We should only search the callstack of the crashing thread.",
+      "parentUuid": "678e9643_31494a69",
+      "range": {
+        "startLine": 304,
+        "startChar": 42,
+        "endLine": 304,
+        "endChar": 47
+      },
+      "revId": "f15b9165d5fb8f2161bc09dee9f9b61bc8cbb96d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "678e9643_512c163c",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-01-12T23:36:56Z",
+      "side": 1,
+      "message": "This crash appears to be in your computer\u0027s graphics driver.  Please check your manufacturer\u0027s website for updated graphics drivers.  (Windows/Linux only)  If problems persist, try adding \"-gpu mesa\" to the emulator command line.",
+      "revId": "f15b9165d5fb8f2161bc09dee9f9b61bc8cbb96d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "27673e34_a3b5243a",
         "filename": "android/crashreport/ui/ConfirmDialog.cpp",
         "patchSetId": 1
