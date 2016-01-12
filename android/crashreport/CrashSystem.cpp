@@ -116,7 +116,10 @@ CrashSystem* sCrashSystemForTesting = nullptr;
 
 int CrashSystem::spawnService(
         const ::android::base::StringVector& commandLine) {
-    return ::android::base::System::get()->runCommand(commandLine);
+    System::Pid pid;
+    auto success = ::android::base::System::get()->runCommand(
+            commandLine, RunOptions::Default, System::kInfinite, nullptr, &pid);
+    return success ? pid : -1;
 }
 
 const std::string& CrashSystem::getCaBundlePath() {

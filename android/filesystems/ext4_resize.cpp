@@ -86,10 +86,12 @@ int resizeExt4Partition(const char* partitionPath, int64_t newByteSize) {
     }
 
     auto& sys = *System::get();
-    auto exitCode = sys.runCommand({executable, "-f", partitionPath, size_in_MB}, RunOptions::WaitForCompletion
-                                  | RunOptions::ReturnExitCode);
+    System::ProcessExitCode exitCode;
+    auto success = sys.runCommand({executable, "-f", partitionPath, size_in_MB},
+                                  RunOptions::WaitForCompletion,
+                                  System::kInfinite, &exitCode);
 
-    if (exitCode != 0) {
+    if (success) {
         fprintf(stderr, "ERROR: resizing partition failed with exit code %d\n",
                 (int)exitCode);
         return exitCode;
