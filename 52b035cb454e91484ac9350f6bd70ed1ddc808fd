@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e727e6f2_4ac2735d",
+        "filename": "android/utils/x86_cpuid.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-12T08:48:56Z",
+      "side": 1,
+      "message": "thanks, all this documentation makes the code have much more sense now :)",
+      "revId": "52b035cb454e91484ac9350f6bd70ed1ddc808fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
