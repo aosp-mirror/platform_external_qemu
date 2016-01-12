@@ -21,8 +21,7 @@
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 
-
-#include <QtWidgets>
+#include <QFileDialog>
 #include <unistd.h>
 
 void ExtendedWindow::initLocation()
