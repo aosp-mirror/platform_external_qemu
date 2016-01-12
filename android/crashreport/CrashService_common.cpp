@@ -20,11 +20,14 @@
 #include "android/curl-support.h"
 #include "android/utils/debug.h"
 #include "google_breakpad/processor/basic_source_line_resolver.h"
+#include "google_breakpad/processor/call_stack.h"
+#include "google_breakpad/processor/code_module.h"
+#include "google_breakpad/processor/code_modules.h"
 #include "google_breakpad/processor/minidump.h"
 #include "google_breakpad/processor/minidump_processor.h"
-#include "google_breakpad/processor/process_state.h"
+#include "google_breakpad/processor/stack_frame_cpu.h"
 #include "processor/stackwalk_common.h"
-
+#include "processor/pathname_stripper.h"
 #include <curl/curl.h>
 
 #include <stdio.h>
@@ -178,7 +181,6 @@ std::string CrashService::getCrashDetails() {
         E("Minidump %s could not be read", dump.path().c_str());
         return details;
     }
-    google_breakpad::ProcessState process_state;
     if (minidump_processor.Process(&dump, &process_state) !=
         google_breakpad::PROCESS_OK) {
         E("MinidumpProcessor::Process failed");
@@ -196,6 +198,7 @@ std::string CrashService::getCrashDetails() {
     google_breakpad::SetPrintStream(fp);
     google_breakpad::PrintProcessState(process_state, true, &resolver);
 
+    fprintf(fp, "thread requested=%d\n", process_state.requesting_thread());
     fseek(fp, 0, SEEK_END);
     details.resize(std::ftell(fp));
     rewind(fp);
@@ -204,7 +207,13 @@ std::string CrashService::getCrashDetails() {
     fclose(fp);
     remove(detailsFile.c_str());
 
+    // Record dump details
+    mDumpDetails = details;
     return details;
+}
+
+std::string CrashService::getInitialDump() const {
+    return mDumpDetails;
 }
 
 std::string CrashService::collectSysInfo() {
@@ -251,6 +260,53 @@ bool CrashService::setClient(int clientpid) {
     }
     mClientPID = clientpid;
     return true;
+}
+
+
+UserSuggestions::UserSuggestions(google_breakpad::ProcessState* process_state) {
+    mCrashedLibs.clear();
+    suggestions.clear();
+
+    gfx_driver_list.push_back(std::string("nvidia_cpl"));
+    gfx_driver_list.push_back(std::string("nvoglv"));
+    gfx_driver_list.push_back(std::string("nvidia_icd_gl"));
+    gfx_driver_list.push_back(std::string("geforce_gl"));
+    gfx_driver_list.push_back(std::string("ati_gl"));
+    gfx_driver_list.push_back(std::string("atig"));
+    gfx_driver_list.push_back(std::string("r600"));
+    gfx_driver_list.push_back(std::string("intel_915"));
+    gfx_driver_list.push_back(std::string("intel_igd"));
+    gfx_driver_list.push_back(std::string("intel_icd"));
+    gfx_driver_list.push_back(std::string("libGL"));
+
+    // Go through all frames of the stack of
+    // the thread requesting dump.
+
+    int crashed_thread_id = process_state->requesting_thread();
+    google_breakpad::CallStack* crashed_stack = process_state->threads()->at(crashed_thread_id);
+    int frame_count = crashed_stack->frames()->size();
+    if (frame_count == 0) {
+        return;
+    } else {
+        for (int frame_index = 0; frame_index < frame_count; ++frame_index) {
+            google_breakpad::StackFrame* frame = crashed_stack->frames()->at(frame_index);
+            if (frame->module) {
+                mCrashedLibs += google_breakpad::PathnameStripper::File(frame->module->code_file()) + "\n";
+            }
+        }
+    }
+
+    char entry[2048] = {};
+    snprintf(entry, 2048, "threadid crashed=%d\n", crashed_thread_id);
+
+    // Should the user update their graphics drivers?
+    for (std::size_t i = 0; i < gfx_driver_list.size(); i++) {
+        std::string driver_basename = gfx_driver_list[i];
+        std::size_t pos = mCrashedLibs.find(driver_basename);
+        if (pos != std::string::npos) {
+            suggestions.insert(UpdateGfxDrivers);
+        }
+    }
 }
 
 }  // namespace crashreport
