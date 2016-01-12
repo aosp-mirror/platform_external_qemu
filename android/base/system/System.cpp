@@ -51,6 +51,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 namespace android {
@@ -470,16 +471,14 @@ public:
         return time(NULL);
     }
 
-    virtual int runCommand(const StringVector& commandLine,
-                           RunOptions options) override {
+    bool runCommand(const StringVector& commandLine,
+                    RunOptions options,
+                    unsigned long timeoutMs,
+                    System::ProcessExitCode* outExitCode,
+                    System::Pid* outChildPid) override {
         // Sanity check.
         if (commandLine.empty()) {
-            return RunFailed;
-        }
-        // ReturnExitCode may only be used with WaitForCompletion
-        if ((options & RunOptions::ReturnExitCode) != 0
-            && (options & RunOptions::WaitForCompletion) == 0) {
-            return RunFailed;
+            return false;
         }
 
 #ifdef _WIN32
@@ -518,7 +517,7 @@ public:
             }
             if (size == 0) {
                 // Couldn't find anything matching the passed name
-                return RunFailed;
+                return false;
             }
             if (buffer.size() != size) {
                 buffer.resize(size);
@@ -548,27 +547,26 @@ public:
                 nullptr,            // use parent's starting directory
                 &startup,           // startup info, i.e. std handles
                 &pinfo)) {
-            return RunFailed;
+            return false;
         }
 
         CloseHandle(pinfo.hThread);
         // make sure we close the process handle on exit
         const ScopedHandle process(pinfo.hProcess);
 
-        // by default we return the child process id
-        int result = pinfo.dwProcessId;
-        if ((options & RunOptions::WaitForCompletion) != 0) {
-            ::WaitForSingleObject(pinfo.hProcess, INFINITE);
-            if ((options & RunOptions::ReturnExitCode) != 0) {
-                DWORD exitCode;
-                if (!::GetExitCodeProcess(pinfo.hProcess, &exitCode)) {
-                    exitCode = static_cast<DWORD>(RunFailed);
-                }
-                result = static_cast<int>(exitCode);
-            }
+        if (outChildPid) {
+            *outChildPid = pinfo.dwProcessId;
         }
 
-        return result;
+        if ((options & RunOptions::WaitForCompletion) != 0) {
+            ::WaitForSingleObject(pinfo.hProcess, timeoutMs);
+            if (outExitCode) {
+                if (!::GetExitCodeProcess(pinfo.hProcess, outExitCode)) {
+                    return false;
+                }
+            }
+        }
+        return true;
 #else   // !_WIN32
         char** const params = new char*[commandLine.size() + 1];
         for (size_t i = 0; i < commandLine.size(); ++i) {
@@ -578,23 +576,50 @@ public:
 
         int pid = fork();
         if (pid < 0) {
-            return RunFailed;
+            return false;
         }
         if (pid != 0) {
             // Parent process returns.
+            if (outChildPid) {
+                *outChildPid = pid;
+            }
+
             delete [] params;
             if ((options & RunOptions::WaitForCompletion) != 0) {
                 int status;
-                HANDLE_EINTR(waitpid(pid, &status, 0));
-                if ((options & RunOptions::ReturnExitCode) != 0) {
-                    return WIFEXITED(status)
-                            ? WEXITSTATUS(status)
-                            : RunFailed;
-                } else {
-                    return pid;
+                // Do not use SIGCHLD here because we're not sure if we're
+                // running on the main thread and/or what our sigmask is.
+                struct timeval tVal;
+                if (!gettimeofday(&tVal, NULL)) {
+                    // Let's just wait forever and hope that the child process
+                    // exits.
+                    HANDLE_EINTR(waitpid(pid, &status, 0));
+                }
+
+                uint64_t startTime =
+                        tVal.tv_sec * 1000ULL + tVal.tv_usec / 1000ULL;
+                uint64_t nowTime = startTime;
+                while (nowTime - startTime < timeoutMs) {
+                    int ret = HANDLE_EINTR(waitpid(pid, &status, WNOHANG));
+                    if (ret < 0) {
+                        return false;
+                    }
+
+                    if (ret > 0) {
+                        if (outExitCode) {
+                            *outExitCode = WIFEXITED(ret);
+                        }
+                        return true;
+                    }
+
+                    sleepMs(10);
+                    if (!gettimeofday(&tVal, NULL)) {
+                        return false;
+                    }
+                    nowTime = tVal.tv_sec * 1000ULL + tVal.tv_usec / 1000ULL;
                 }
             }
-            return pid;
+            return true;
         }
 
         // In the child process.
@@ -617,13 +642,8 @@ public:
             }
         }
         // Should not happen, but let's keep the compiler happy
-        return RunFailed;
+        return false;
 #endif  // !_WIN32
-    }
-
-    bool runSilentCommand(const StringVector& commandLine, bool wait) override {
-        return RunFailed != runCommand(commandLine,
-                 wait ? RunOptions::WaitForCompletion : RunOptions::Default);
     }
 
     virtual String getTempDir() const {
