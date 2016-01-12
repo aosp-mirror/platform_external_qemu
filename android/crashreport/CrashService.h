@@ -84,7 +84,13 @@ public:
     virtual bool stopCrashServer() = 0;
 
     // Processes the saved dumpfile with breakpad processor libraries
-    std::string getCrashDetails(bool wantHWInfo);
+    // Contains stack trace and loaded modules.
+    // Is parsed for suggestions on debugging
+    // (driver update etc)
+    std::string getCrashDetails();
+
+    // Collects system info, resulting in the "full" dump file.
+    std::string collectSysInfo();
 
     // Uploads system-specific hardware information.
     virtual std::string getHWInfo() = 0;
