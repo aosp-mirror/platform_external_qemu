@@ -37,15 +37,21 @@ private:
     QLabel* mDetailsProgressText;
     QProgressBar* mDetailsProgress;
 
+    QLabel* mSuggestionText;
+
     QWidget* mExtension;
     QDialogButtonBox* mYesNoButtonBox;
     QDialogButtonBox* mDetailsButtonBox;
-    bool mDetailsHidden;
-    bool mDidGetSysInfo;
-    void hideDetails(void);
-    void showDetails(void);
 
     android::crashreport::CrashService* mCrashService;
+    android::crashreport::UserSuggestions* mSuggestions;
+
+    bool mDetailsHidden;
+    bool mDidGetSysInfo;
+
+    void addSuggestion(const QString& str);
+    void hideDetails(void);
+    void showDetails(void);
 
 public:
     ConfirmDialog(QWidget* parent,
@@ -54,8 +60,10 @@ public:
                   const char* message,
                   const char* info,
                   const char* detail,
-                  android::crashreport::CrashService* crashservice);
+                  android::crashreport::CrashService* crashservice,
+                  android::crashreport::UserSuggestions* suggestions);
     bool didGetSysInfo() const;
 public slots:
     void sl_detailtoggle(void);
 };
+

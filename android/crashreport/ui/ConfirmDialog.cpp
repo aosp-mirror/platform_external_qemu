@@ -22,8 +22,10 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
                              const char* message,
                              const char* info,
                              const char* detail,
-                             android::crashreport::CrashService* crashservice)
-    : QDialog(parent), mCrashService(crashservice) {
+                             android::crashreport::CrashService* crashservice,
+                             android::crashreport::UserSuggestions* suggestions)
+    : QDialog(parent), mCrashService(crashservice),
+      mSuggestions(suggestions) {
     mSendButton = new QPushButton(tr("Send Report"));
     mDontSendButton = new QPushButton(tr("Don't Send"));
     mDetailsButton = new QPushButton(tr(""));
@@ -34,6 +36,8 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mDetailsText = new QPlainTextEdit(detail);
     mDetailsProgressText = new QLabel(tr("Collecting crash info..."));
     mDetailsProgress = new QProgressBar;
+
+    mSuggestionText = new QLabel(tr("Suggestions based on crash info:\n"));
 
     mExtension = new QWidget;
     mYesNoButtonBox = new QDialogButtonBox(Qt::Horizontal);
@@ -47,6 +51,16 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mDetailsProgressText->hide();
     mDetailsProgress->setRange(0,0);
     mDetailsProgress->hide();
+
+    if (mSuggestions->suggestions_exist) {
+        if (mSuggestions->should_update_gfx_drivers) {
+            addSuggestion(tr("Your graphics drivers may be out of date. Please update them to the latest version.\n"));
+        }
+        mSuggestionText->show(); 
+    } else {
+        mSuggestionText->hide();
+    }
+
     mYesNoButtonBox->addButton(mSendButton, QDialogButtonBox::AcceptRole);
     mYesNoButtonBox->addButton(mDontSendButton, QDialogButtonBox::RejectRole);
     mDetailsButtonBox->addButton(mDetailsButton, QDialogButtonBox::ActionRole);
@@ -74,10 +88,12 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mainLayout->addWidget(hLineFrame, 1, 0, 1, 3);
     mainLayout->addWidget(mInfoText, 2, 0, 1, 3);
 
-    mainLayout->addWidget(mDetailsButtonBox, 3, 0, Qt::AlignLeft);
-    mainLayout->addWidget(mYesNoButtonBox, 3, 1, 1, 2);
+    mainLayout->addWidget(mSuggestionText, 3, 0, 1, 3);
 
-    mainLayout->addWidget(mExtension, 4, 0, 1, 3);
+    mainLayout->addWidget(mDetailsButtonBox, 4, 0, Qt::AlignLeft);
+    mainLayout->addWidget(mYesNoButtonBox, 4, 1, 1, 2);
+
+    mainLayout->addWidget(mExtension, 5, 0, 1, 3);
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
     setLayout(mainLayout);
     setWindowTitle(tr(windowTitle));
@@ -133,6 +149,13 @@ void ConfirmDialog::showDetails() {
     mDetailsHidden = false;
     mDidGetSysInfo = true;
 }
+
+void ConfirmDialog::addSuggestion(const QString& str) {
+    QString next_text = mSuggestionText->text() + str;
+    mSuggestionText->setText(next_text);
+}
+
+
 
 bool ConfirmDialog::didGetSysInfo() const {
     return mDidGetSysInfo;

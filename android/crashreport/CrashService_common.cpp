@@ -204,11 +204,18 @@ std::string CrashService::getCrashDetails() {
     fclose(fp);
     remove(detailsFile.c_str());
 
+    // Record dump details
+    mDumpDetails = details;
     return details;
 }
 
+std::string CrashService::getInitialDump() const {
+    return mDumpDetails;
+}
+
 std::string CrashService::collectSysInfo() {
-    mHWInfo = getHWInfo();
+    // mHWInfo = getHWInfo();
+    mHWInfo = std::string("DUMMY HW INFO");
     return mHWInfo;
 }
 
@@ -251,6 +258,84 @@ bool CrashService::setClient(int clientpid) {
     }
     mClientPID = clientpid;
     return true;
+}
+
+UserSuggestions::UserSuggestions(std::string report) {
+    suggestions_exist = false;
+    should_update_gfx_drivers = false;
+
+    nvidia_cpl = false;
+    nvoglv = false;
+    nvidia_icd_gl = false;
+    geforce_gl = false;
+    ati_gl = false;
+    atig = false;
+    r600 = false;
+    intel_915 = false;
+    intel_igd = false;
+    intel_icd = false;
+    libgl = false;
+
+    // If debug info is present, we need to strip off
+    // "Loaded Modules" and everything that follows,
+    // or we'll find a driver in there and suggest to update
+    // gfx drivers when it looks like we don't need to.
+
+    std::size_t loaded_pos = report.find("Loaded modules:");
+    if (loaded_pos == std::string::npos) {
+        mReport = report;
+    } else {
+        mReport = report.substr(0, loaded_pos);
+    }
+    generate();
+}
+
+void UserSuggestions::generate() {
+    std::size_t nvidia_cpl_pos = mReport.find("nvcpl");
+    std::size_t nvoglv_pos = mReport.find("nvoglv");
+    std::size_t nvidia_icd_gl_pos = mReport.find("ig4icd");
+    std::size_t geforce_gl_pos = mReport.find("GeForceGLDriver");
+    std::size_t ati_gl_pos = mReport.find("atioglxx");
+    std::size_t atig_pos = mReport.find("atig6txx");
+    std::size_t r600_pos = mReport.find("r600");
+    std::size_t intel_915_pos = mReport.find("i915");
+    std::size_t intel_igd_pos = mReport.find("igd");
+    std::size_t intel_icd_pos = mReport.find("ig75icd");
+    std::size_t libgl_pos = mReport.find("libGL");
+
+    // std::size_t test_pos = mReport.find("amd65");
+
+    std::size_t not_found = std::string::npos;
+    
+    if (
+            // test_pos != not_found ||
+            nvoglv_pos != not_found ||
+            nvidia_cpl_pos != not_found ||
+            nvidia_icd_gl_pos != not_found ||
+            geforce_gl_pos != not_found ||
+            ati_gl_pos != not_found ||
+            atig_pos != not_found ||
+            r600_pos != not_found ||
+            intel_915_pos != not_found ||
+            intel_igd_pos != not_found ||
+            intel_icd_pos != not_found ||
+            libgl_pos != not_found
+       ) {
+        suggestions_exist = true;
+        should_update_gfx_drivers = true;
+    }
+
+    if (nvoglv_pos != not_found) { nvoglv = true; }
+    if (nvidia_cpl_pos != not_found) { nvidia_cpl = true; }
+    if (nvidia_icd_gl_pos != not_found) { nvidia_icd_gl = true; }
+    if (geforce_gl_pos != not_found) { geforce_gl = true; }
+    if (ati_gl_pos != not_found) { ati_gl = true; }
+    if (atig_pos != not_found) { atig = true; }
+    if (r600_pos != not_found) { r600 = true; }
+    if (intel_915_pos != not_found) { intel_915 = true; }
+    if (intel_igd_pos != not_found) { intel_igd = true; }
+    if (intel_icd_pos != not_found) { intel_icd = true; }
+    if (libgl_pos != not_found) { libgl = true; }
 }
 
 }  // namespace crashreport

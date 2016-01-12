@@ -106,6 +106,9 @@ public:
     static CrashService* makeCrashService(const std::string& version,
                                           const std::string& build);
 
+    // Get the stack dump (for parsing, and generating user suggestions)
+    std::string getInitialDump() const;
+
 protected:
     // Initialize serverstate
     void initCrashServer();
@@ -131,7 +134,36 @@ private:
     std::string mVersionId;
     std::string mDumpFile;
     std::string mReportId;
-    std::string mHWInfo;
+    std::string mDumpDetails; // Initial stack trace and live library dump from breakpad
+    std::string mHWInfo; // System-specific information
+};
+
+// Class UserSuggestions parses and generates user suggestions.
+class UserSuggestions {
+public:
+    // Suggestion data structure:
+    bool suggestions_exist;
+    // Currently just bool's
+    bool should_update_gfx_drivers;
+    // TODO: Add more cases as we find them
+
+    // Specific flags for each driver
+    bool nvidia_cpl;
+    bool nvoglv;
+    bool nvidia_icd_gl;
+    bool geforce_gl;
+    bool ati_gl;
+    bool atig;
+    bool r600;
+    bool intel_915;
+    bool intel_igd;
+    bool intel_icd;
+    bool libgl;
+
+    UserSuggestions(std::string dumpDetails);
+private:
+    void generate(); // Function to parse and generate suggestions
+    std::string mReport;
 };
 
 }  // namespace crashreport
