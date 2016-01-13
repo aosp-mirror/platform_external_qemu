@@ -160,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "678e9643_e85b4f7c",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-13T20:08:28Z",
+      "side": 1,
+      "message": "The list has been updated in the latest patch set and fixed to reflect dll names specifically. I think I mislabeled them at one point, where I was searching for the labels and not the DLL names themselves. \n\nI\u0027ve been going through nvidia/ati/intel crash reports on crash/ and in the web to find them. NVIDIA dlls don\u0027t usually have \"nvidia\" in them just \"nv\".",
+      "parentUuid": "c75ca266_a56fe9ff",
+      "revId": "78cb93d8abbb35e986eeda591d0407dcf65de3df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "274e5eac_317af2c3",
         "filename": "android/crashreport/CrashService_common.cpp",
         "patchSetId": 2
