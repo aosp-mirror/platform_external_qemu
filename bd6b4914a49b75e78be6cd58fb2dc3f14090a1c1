@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "27673e34_aebfcbe6",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 568,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-13T02:17:48Z",
+      "side": 1,
+      "message": "this has to be controlled by some flag - I personally think it is _very_ bad to terminate any process",
+      "range": {
+        "startLine": 568,
+        "startChar": 12,
+        "endLine": 568,
+        "endChar": 30
+      },
+      "revId": "bd6b4914a49b75e78be6cd58fb2dc3f14090a1c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4768b202_becc18e6",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 604,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-13T02:17:48Z",
+      "side": 1,
+      "message": "it\u0027s too C",
+      "range": {
+        "startLine": 604,
+        "startChar": 12,
+        "endLine": 604,
+        "endChar": 18
+      },
+      "revId": "bd6b4914a49b75e78be6cd58fb2dc3f14090a1c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e759a674_c1e2d1bd",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-13T02:17:48Z",
+      "side": 1,
+      "message": "how to get the exit code with this new interface?",
+      "range": {
+        "startLine": 271,
+        "startChar": 28,
+        "endLine": 271,
+        "endChar": 62
+      },
+      "revId": "bd6b4914a49b75e78be6cd58fb2dc3f14090a1c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4768b202_3ecac8c5",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-13T02:17:48Z",
+      "side": 1,
+      "message": "\u0026 -\u003e |",
+      "range": {
+        "startLine": 375,
+        "startChar": 70,
+        "endLine": 375,
+        "endChar": 71
+      },
+      "revId": "bd6b4914a49b75e78be6cd58fb2dc3f14090a1c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

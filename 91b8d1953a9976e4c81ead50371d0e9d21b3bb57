@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "676db610_9df4c440",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-13T02:17:48Z",
+      "side": 0,
+      "message": "this needs to return the specific error code, as it\u0027s an enum - not a simple \u0027succeeded/failed\u0027",
+      "range": {
+        "startLine": 158,
+        "startChar": 13,
+        "endLine": 158,
+        "endChar": 20
+      },
+      "revId": "91b8d1953a9976e4c81ead50371d0e9d21b3bb57",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
