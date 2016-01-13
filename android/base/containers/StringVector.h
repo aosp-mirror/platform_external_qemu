@@ -45,19 +45,12 @@ public:
 
     void remove(size_t index);
     String* emplace(size_t index);
-    void insert(size_t index, const String& str);
-    void prepend(const String& str);
-    void append(const String& str);
     void swap(StringVector* other);
 
     // std::vector<> compatibility.
-    void push_back(const String& str) { append(str);  }
+    void push_back(const StringView& str) { append(str);  }
     void pop() { remove(0U);  }
 
-    // The following specializations allow one to add items with
-    // a StringView reference instead, this avoids the need-less
-    // creation of a String instance when one wants to append
-    // a simple C string.
     void insert(size_t index, const StringView& view);
     void prepend(const StringView& view);
     void append(const StringView& view);
