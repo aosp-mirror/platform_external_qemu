@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4768b202_7e2c4083",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-13T01:46:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c75ca266_d3b8ec31",
+      "range": {
+        "startLine": 150,
+        "startChar": 0,
+        "endLine": 151,
+        "endChar": 49
+      },
+      "revId": "78cb93d8abbb35e986eeda591d0407dcf65de3df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4768b202_1eb8ace4",
         "filename": "android/crashreport/CrashService.h",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-13T00:45:17Z",
       "side": 1,
       "message": "1. do we really need to store lookup results for all substrings? I don\u0027t think so\n2. as a matter of fact, the only thing that needs to be here is some kind of a collection of suggestions.\n\nThis should work:\n\nenum Suggestions {\n    UpdateGfxDrivers\n};\n\nclass UserSuggestions {\n    std::set\u003cSuggestions\u003e suggestions;\n};\n\n// later\nUserSuggestions sg;\nif (!sg.suggestions.empty()) {\n    if (sg.suggestions.find(UpdateGfxDrivers) !\u003d sg.suggestions.end()) {\n        // show the suggestion\n    }\n}",
+      "range": {
+        "startLine": 157,
+        "startChar": 0,
+        "endLine": 171,
+        "endChar": 52
+      },
+      "revId": "78cb93d8abbb35e986eeda591d0407dcf65de3df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07495aa4_950db416",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-13T01:46:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4768b202_1eb8ace4",
       "range": {
         "startLine": 157,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "07495aa4_d5261c93",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-13T01:46:19Z",
+      "side": 1,
+      "message": "Debugging purposes. Taken out.",
+      "parentUuid": "676db610_abb5f939",
+      "range": {
+        "startLine": 273,
+        "startChar": 43,
+        "endLine": 273,
+        "endChar": 47
+      },
+      "revId": "78cb93d8abbb35e986eeda591d0407dcf65de3df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "274e5eac_317af2c3",
         "filename": "android/crashreport/CrashService_common.cpp",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2016-01-13T00:45:17Z",
       "side": 1,
       "message": "this should be a static array\n\n// global\nstatic const char* gfx_driver_list[] \u003d { ... };\n\n// then the lookup would become something like this -\nbool hasGfxDriver(...) {\n        for (int frame_index \u003d 0; frame_index \u003c frame_count; ++frame_index) {\n            google_breakpad::StackFrame* frame \u003d crashed_stack-\u003eframes()-\u003eat(frame_index);\n            if (frame-\u003emodule) {\n                const auto\u0026 file \u003d google_breakpad::PathnameStripper::File(frame-\u003emodule-\u003ecode_file());\n                for (const char* pattern : gfx_driver_list) {\n                    if (file.find(pattern) !\u003d std::string::npos) {\n                       return true;\n                   }\n                }\n            }\n        }\n\n        return false;\n}",
+      "range": {
+        "startLine": 274,
+        "startChar": 0,
+        "endLine": 288,
+        "endChar": 5
+      },
+      "revId": "78cb93d8abbb35e986eeda591d0407dcf65de3df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07495aa4_b528b055",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-13T01:46:19Z",
+      "side": 1,
+      "message": "Done for the static array. Thanks for the c++11 example!\n\nI\u0027d actually like to do it the non-fused way so as to logically separate getting module names from processing them. We might want to process the module stack in different ways depending on the sort of suggestion we want to pass to the user.",
+      "parentUuid": "274e5eac_317af2c3",
       "range": {
         "startLine": 274,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "678e9643_f4e09015",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-13T01:46:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c75ca266_73312095",
+      "range": {
+        "startLine": 295,
+        "startChar": 22,
+        "endLine": 295,
+        "endChar": 34
+      },
+      "revId": "78cb93d8abbb35e986eeda591d0407dcf65de3df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "676db610_0bb34d54",
         "filename": "android/crashreport/CrashService_common.cpp",
         "patchSetId": 2
@@ -128,6 +248,30 @@
       "writtenOn": "2016-01-13T00:45:17Z",
       "side": 1,
       "message": "?",
+      "range": {
+        "startLine": 307,
+        "startChar": 0,
+        "endLine": 308,
+        "endChar": 70
+      },
+      "revId": "78cb93d8abbb35e986eeda591d0407dcf65de3df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "676db610_9df5e475",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-13T01:46:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "676db610_0bb34d54",
       "range": {
         "startLine": 307,
         "startChar": 0,
