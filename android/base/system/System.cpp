@@ -483,28 +483,50 @@ public:
         }
 
 #ifdef _WIN32
+        StringVector commandLineCopy = commandLine;
         STARTUPINFOW startup = {};
         startup.cb = sizeof(startup);
         if ((options & RunOptions::ShowOutput) == 0) {
-            startup.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
-            startup.wShowWindow = SW_SHOWMINIMIZED;
-            startup.hStdInput = nullptr;
-            startup.hStdOutput = nullptr;
-            startup.hStdError = nullptr;
+            startup.dwFlags = STARTF_USESHOWWINDOW;
+
+            // 'Normal' way of hiding console output is passing null std handles
+            // to the CreateProcess() function and CREATE_NO_WINDOW as a flag.
+            // Sadly, in this case Cygwin runtime goes completely mad - its
+            // whole FILE* machinery just stops working. E.g., resize2fs always
+            // creates corrupted images if you try doing it in a 'normal' way.
+            // So, instead, we do the following: run the command in a cmd.exe
+            // with stdout and stderr redirected to nul.
+
+            // 1. Find the commmand-line interpreter - which hides behind the
+            // %COMSPEC% environment variable
+            String comspec = envGet("COMSPEC");
+            if (comspec.empty()) {
+                comspec = "cmd.exe";
+            }
+
+            // 2. Now turn the command into the proper cmd command:
+            //   cmd.exe /C "command" "arguments" ... >nul 2>&1
+            // This executes a command with arguments passed and redirects
+            // stdout to nul, stderr is attached to stdout (so it also
+            // goes to nul)
+            commandLineCopy.prepend("/C");
+            commandLineCopy.prepend(comspec);
+            commandLineCopy.append(">nul");
+            commandLineCopy.append("2>&1");
         }
 
         PROCESS_INFORMATION pinfo = {};
 
-        // this will point to either the commandLine[0] or the executable path
-        // found by the system
+        // this will point to either the commandLineCopy[0] or the executable
+        // path found by the system
         StringView executableRef;
         // a buffer to store the executable path if we need to search for it
         String executable;
-        if (PathUtils::isAbsolute(commandLine[0])) {
-            executableRef = commandLine[0];
+        if (PathUtils::isAbsolute(commandLineCopy[0])) {
+            executableRef = commandLineCopy[0];
         } else {
             // try searching %PATH% and current directory for the binary
-            const Win32UnicodeString name(commandLine[0]);
+            const Win32UnicodeString name(commandLineCopy[0]);
             const Win32UnicodeString extension(PathUtils::kExeNameSuffix);
             Win32UnicodeString buffer(MAX_PATH);
 
@@ -528,22 +550,20 @@ public:
         }
 
         String args = executableRef;
-        for (size_t i = 1; i < commandLine.size(); ++i) {
+        for (size_t i = 1; i < commandLineCopy.size(); ++i) {
             args += ' ';
-            args += android::base::Win32Utils::quoteCommandLine(commandLine[i]);
+            args += android::base::Win32Utils::quoteCommandLine(commandLineCopy[i]);
         }
 
         Win32UnicodeString commandUnicode(executableRef);
         Win32UnicodeString argsUnicode(args);
 
-        const int flags =
-                ((options & RunOptions::ShowOutput) != 0) ? 0 : CREATE_NO_WINDOW;
         if (!::CreateProcessW(commandUnicode.c_str(), // program path
                 argsUnicode.data(), // command line args, has to be writable
                 nullptr,            // process handle is not inheritable
                 nullptr,            // thread handle is not inheritable
                 FALSE,              // no, don't inherit any handles
-                flags,              // do we want to have a console?
+                0,                  // default creation flags
                 nullptr,            // use parent's environment block
                 nullptr,            // use parent's starting directory
                 &startup,           // startup info, i.e. std handles
