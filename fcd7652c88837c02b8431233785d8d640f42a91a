@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c75ca266_82ff3bc9",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-13T19:14:27Z",
+      "side": 1,
+      "message": "Discussed offline",
+      "parentUuid": "27673e34_aeaa2b8b",
+      "range": {
+        "startLine": 40,
+        "startChar": 4,
+        "endLine": 40,
+        "endChar": 41
+      },
+      "revId": "fcd7652c88837c02b8431233785d8d640f42a91a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4768b202_0fb35954",
         "filename": "android/skin/qt/gl-widget.cpp",
         "patchSetId": 6
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "c75ca266_42e1a34c",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-13T19:14:27Z",
+      "side": 1,
+      "message": "Sorry, that was some really bad naming. I did not intend to override the QWidget::repaint method. I wanted to provide a method that could be used to forcibly re-render a frame independent of a paint event.",
+      "parentUuid": "4768b202_0fb35954",
+      "range": {
+        "startLine": 121,
+        "startChar": 0,
+        "endLine": 134,
+        "endChar": 1
+      },
+      "revId": "fcd7652c88837c02b8431233785d8d640f42a91a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e759a674_94981cef",
         "filename": "android/skin/qt/gl-widget.h",
         "patchSetId": 6
@@ -59,6 +107,30 @@
       "writtenOn": "2016-01-12T22:24:43Z",
       "side": 1,
       "message": "As I understand from this, a subclass implements initGL, repaintGL, and resizeGL correct (effectively making this widget a simple-to-extend blank canvas). If so, pure virtual?",
+      "range": {
+        "startLine": 20,
+        "startChar": 4,
+        "endLine": 22,
+        "endChar": 42
+      },
+      "revId": "fcd7652c88837c02b8431233785d8d640f42a91a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07495aa4_f0b9a601",
+        "filename": "android/skin/qt/gl-widget.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-13T19:14:27Z",
+      "side": 1,
+      "message": "Correct, but I decided to leave in empty default implementations for convenience (i.e. if the user doesn\u0027t want special actions on resize, they won\u0027t have to implement them). This is similar to how QOpenGLWidget works.",
+      "parentUuid": "e759a674_94981cef",
       "range": {
         "startLine": 20,
         "startChar": 4,
@@ -111,6 +183,24 @@
     },
     {
       "key": {
+        "uuid": "07495aa4_b0d6fe46",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-13T19:14:27Z",
+      "side": 1,
+      "message": "The problem is, the generated files include IOStream.h from libOpenGLRender. That\u0027s why I had to put this flag here. Using a forward declaration for IOStream doesn\u0027t work because, apparently, the cpp file with the decoder implementation gets compiled as a part of call to emugl-gen-decoder in the libui target. I would appreciate some help here...",
+      "parentUuid": "47ed12c9_8d32c196",
+      "revId": "fcd7652c88837c02b8431233785d8d640f42a91a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "47ed12c9_ed3f055d",
         "filename": "android/skin/qt/sources.mk",
         "patchSetId": 6
@@ -122,6 +212,24 @@
       "writtenOn": "2016-01-13T15:20:14Z",
       "side": 1,
       "message": "Damn, we should not need this, I\u0027ll also take a look.",
+      "revId": "fcd7652c88837c02b8431233785d8d640f42a91a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "27673e34_a9322596",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-13T19:14:27Z",
+      "side": 1,
+      "message": "Sorry - that line was some leftover code. It builds fine without it.",
+      "parentUuid": "47ed12c9_ed3f055d",
       "revId": "fcd7652c88837c02b8431233785d8d640f42a91a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
