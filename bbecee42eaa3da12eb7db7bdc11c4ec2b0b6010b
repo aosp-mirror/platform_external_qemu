@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "678e9643_c332f497",
+        "filename": "android/filesystems/ext4_resize.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-13T23:08:45Z",
+      "side": 1,
+      "message": "it looks like we should use the actual exit code here, not 0 or 1",
+      "range": {
+        "startLine": 93,
+        "startChar": 1,
+        "endLine": 96,
+        "endChar": 24
+      },
+      "revId": "bbecee42eaa3da12eb7db7bdc11c4ec2b0b6010b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
