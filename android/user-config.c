@@ -46,6 +46,13 @@ struct AUserConfig {
 #define  DEFAULT_X  100
 #define  DEFAULT_Y  100
 
+void auserConfig_free( AUserConfig* uconfig) {
+    if (uconfig->iniPath) {
+        free(uconfig->iniPath);
+    }
+    free(uconfig);
+}
+
 /* Create a new AUserConfig object from a given AvdInfo */
 AUserConfig*
 auserConfig_new( AvdInfo*  info )
@@ -76,7 +83,8 @@ auserConfig_new( AvdInfo*  info )
         p = bufprint_temp_file(temp, end, USER_CONFIG_FILE);
         if (p >= end) {
             derror("Weird: Cannot create temporary user-config file?");
-            exit(2);
+            auserConfig_free(uc);
+            return NULL;
         }
         dwarning("Weird: Content path too long, using temporary user-config.");
     }
@@ -90,19 +98,22 @@ auserConfig_new( AvdInfo*  info )
     if (parentPath == NULL) {
         derror("Weird: Can't find parent of user-config file: %s",
                uc->iniPath);
-        exit(2);
+        auserConfig_free(uc);
+        return NULL;
     }
 
     if (!path_exists(parentPath)) {
         if (!inAndroidBuild) {
             derror("Weird: No content path for this AVD: %s", parentPath);
-            exit(2);
+            auserConfig_free(uc);
+            return NULL;
         }
         DD("creating missing directory: %s", parentPath);
         if (path_mkdir_if_needed(parentPath, 0755) < 0) {
             derror("Using empty user-config, can't create %s: %s",
                    parentPath, strerror(errno));
-            exit(2);
+            auserConfig_free(uc);
+            return NULL;
         }
     }
 

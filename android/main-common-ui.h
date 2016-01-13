@@ -18,12 +18,14 @@
 #include "android/ui-emu-agent.h"
 #include "android/utils/compiler.h"
 
+#include <stdbool.h>
+
 ANDROID_BEGIN_HEADER
 
 /** Emulator user configuration (e.g. last window position)
  **/
 
-void user_config_init( void );
+bool user_config_init( void );
 void user_config_done( void );
 
 void user_config_get_window_pos( int *window_x, int *window_y );

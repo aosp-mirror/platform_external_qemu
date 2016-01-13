@@ -346,7 +346,6 @@ EOF
     echo "  --symbols                   Generating Breakpad symbol files."
     echo "  --no-symbols                Do not generate Breakpad symbol files (default)."
     echo "  --crash-[staging,prod]      Send crashes to specific server (no crash reporting by default)."
-    echo "  --debug                     Enable debug (-O0 -g) build"
     echo "  --gles=dgl                  Build the OpenGLES to Desktop OpenGL Translator (default)"
     echo "  --gles=angle                Build the OpenGLES to ANGLE wrapper"
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"

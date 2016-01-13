@@ -44,10 +44,11 @@
 
 static AUserConfig*  userConfig;
 
-void
+bool
 user_config_init( void )
 {
     userConfig = auserConfig_new( android_avdInfo );
+    return userConfig != NULL;
 }
 
 /* only call this function on normal exits, so that ^C doesn't save the configuration */

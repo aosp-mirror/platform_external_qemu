@@ -23,7 +23,7 @@ namespace utils {
 static const uint32_t CPUID_EDX_LM = 1 << 29;
 
 // Prints to stdout a line stating whether a feature is supported or not.
-static inline void PrintCpuFeatureTestResult(const char *feature,
+static void PrintCpuFeatureTestResult(const char *feature,
                                              bool supported) {
     printf("%s -%s supported\n", feature, supported ? "" : " not");
 }
@@ -71,7 +71,7 @@ TEST(x86_cpuid, Default) {
     }
 }
 
-TEST(android_get_x86_cpuid_vendor_id_is_vmhost,Test) {
+TEST(x86_cpuid, android_get_x86_cpuid_vendor_id_is_vmhost) {
     EXPECT_TRUE(android_get_x86_cpuid_vendor_id_is_vmhost("KVMKVMKVM"));
     EXPECT_TRUE(android_get_x86_cpuid_vendor_id_is_vmhost("Microsoft Hv"));
     EXPECT_TRUE(android_get_x86_cpuid_vendor_id_is_vmhost("VMwareVMware"));
@@ -79,7 +79,7 @@ TEST(android_get_x86_cpuid_vendor_id_is_vmhost,Test) {
     EXPECT_FALSE(android_get_x86_cpuid_vendor_id_is_vmhost("GenuineIntel"));
 }
 
-TEST(android_get_x86_cpuid_vmx_support,Test) {
+TEST(x86_cpuid, android_get_x86_cpuid_vmx_support) {
     // These might fail if you have an AMD, Atom processor or an incredibly
     // old Intel processor
     EXPECT_LE(0x80000001, android_get_x86_cpuid_extended_function_max());
@@ -88,16 +88,32 @@ TEST(android_get_x86_cpuid_vmx_support,Test) {
     EXPECT_TRUE(android_get_x86_cpuid_nx_support());
 }
 
-TEST(android_get_x86_cpuid_vendor_id,Test) {
-    char vendor_id[16];
-    android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
-
-    EXPECT_TRUE(
-                android_get_x86_cpuid_vendor_id_is_vmhost(vendor_id) ||
-                strcmp(vendor_id, "GenuineIntel") == 0 ||
-                strcmp(vendor_id, "AuthenticAMD") == 0
-                );
+TEST(x86_cpuid, android_get_x86_cpuid_vendor_id_type) {
+    EXPECT_EQ(VENDOR_ID_AMD,
+              android_get_x86_cpuid_vendor_id_type("AuthenticAMD"));
+    EXPECT_EQ(VENDOR_ID_INTEL,
+              android_get_x86_cpuid_vendor_id_type("GenuineIntel"));
+    EXPECT_EQ(VENDOR_ID_VM,
+              android_get_x86_cpuid_vendor_id_type("KVMKVMKVM"));
+    EXPECT_EQ(VENDOR_ID_OTHER,
+              android_get_x86_cpuid_vendor_id_type("any other string"));
 }
+
+TEST(x86_cpuid, android_get_x86_cpuid_vendor_vmhost_type) {
+    EXPECT_EQ(VENDOR_VM_VMWARE,
+              android_get_x86_cpuid_vendor_vmhost_type("VMWareVMWare"));
+    EXPECT_EQ(VENDOR_VM_HYPERV,
+              android_get_x86_cpuid_vendor_vmhost_type("Microsoft Hv"));
+    EXPECT_EQ(VENDOR_VM_KVM,
+              android_get_x86_cpuid_vendor_vmhost_type("KVMKVMKVM"));
+    EXPECT_EQ(VENDOR_VM_VBOX,
+              android_get_x86_cpuid_vendor_vmhost_type("VBoxVBoxVBox"));
+    EXPECT_EQ(VENDOR_VM_NOTVM,
+              android_get_x86_cpuid_vendor_vmhost_type(""));
+    EXPECT_EQ(VENDOR_VM_OTHER,
+              android_get_x86_cpuid_vendor_vmhost_type("blah"));
+}
+
 
 }  // namespace utils
 }  // namespace android

@@ -167,7 +167,7 @@ bool CrashService::uploadCrash(const std::string& url) {
     return success;
 }
 
-std::string CrashService::getCrashDetails(bool wantHWInfo) {
+std::string CrashService::getCrashDetails() {
     std::string details;
     google_breakpad::BasicSourceLineResolver resolver;
     google_breakpad::MinidumpProcessor minidump_processor(nullptr, &resolver);
@@ -196,12 +196,6 @@ std::string CrashService::getCrashDetails(bool wantHWInfo) {
     google_breakpad::SetPrintStream(fp);
     google_breakpad::PrintProcessState(process_state, true, &resolver);
 
-    if (wantHWInfo) {
-        // Write system-specific hardware info
-        mHWInfo = getHWInfo();
-        fprintf(fp, "HW info (Stored at %s):\nBEGIN HW INFO\n%s\nEND HW INFO", mHWTmpFilePath.c_str(), mHWInfo.c_str());
-    } else { mHWInfo = ""; }
-
     fseek(fp, 0, SEEK_END);
     details.resize(std::ftell(fp));
     rewind(fp);
@@ -212,6 +206,12 @@ std::string CrashService::getCrashDetails(bool wantHWInfo) {
 
     return details;
 }
+
+std::string CrashService::collectSysInfo() {
+    mHWInfo = getHWInfo();
+    return mHWInfo;
+}
+
 
 void CrashService::initCrashServer() {
     mServerState.waiting = true;

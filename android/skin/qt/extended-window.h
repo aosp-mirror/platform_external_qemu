@@ -86,6 +86,7 @@ private:
     std::map<ExtendedWindowPane, QPushButton*> mPaneButtonMap;
     const ShortcutKeyStore<QtUICommand>* mQtUIShortcuts;
     Ui::ExtendedControls *mExtendedUi;
+    bool mFirstShowEvent = true;
 
     void    adjustTabs(ExtendedWindowPane thisIndex);
     void    loc_appendToTable(int row,
