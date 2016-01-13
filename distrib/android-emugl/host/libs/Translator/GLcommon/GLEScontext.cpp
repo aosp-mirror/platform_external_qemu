@@ -132,10 +132,62 @@ bool Version::operator<(const Version& ver) const{
     return false;
 }
 
+static std::string getHostExtensionsString(GLDispatch* dispatch) {
+    // glGetString(GL_EXTENSIONS) is deprecated in GL 3.0, one has to use
+    // glGetStringi(GL_EXTENSIONS, index) instead to get individual extension
+    // names. Recent desktop drivers implement glGetStringi() but have a
+    // version of glGetString() that returns NULL, so deal with this by
+    // doing the following:
+    //
+    //  - If glGetStringi() is available, use it to build the extensions
+    //    string, using simple spaces to separate the names.
+    //
+    //  - Otherwise, fallback to getGetString(). If it returns NULL, return
+    //    an empty string.
+    //
+    std::string result;
+    if (dispatch->glGetStringi != nullptr) {
+        int count = 0;
+        dispatch->glGetIntegerv(GL_NUM_EXTENSIONS, &count);
+        for (int n = 0; n < count; n++) {
+            const char* ext = reinterpret_cast<const char*>(
+                    dispatch->glGetStringi(GL_EXTENSIONS, n));
+            if (ext != NULL) {
+                if (!result.empty()) {
+                    result += " ";
+                }
+                result += ext;
+            }
+        }
+    } else {
+        const char* extensions = reinterpret_cast<const char*>(
+                dispatch->glGetString(GL_EXTENSIONS));
+        if (extensions) {
+            result = extensions;
+        }
+    }
+    // For the sake of initCapsLocked() add a starting and trailing space.
+    if (!result.empty()) {
+        if (result[0] != ' ') {
+            result.insert(0, 1, ' ');
+        }
+        if (result[result.size() - 1U] != ' ') {
+            result += ' ';
+        }
+    }
+    return result;
+}
+
 void GLEScontext::init(GlLibrary* glLib) {
 
     if (!s_glExtensions) {
-        initCapsLocked(s_glDispatch.glGetString(GL_EXTENSIONS));
+        initCapsLocked(reinterpret_cast<const GLubyte*>(
+                getHostExtensionsString(&s_glDispatch).c_str()));
+        // NOTE: the string below corresponds to the extensions reported
+        // by this context, which is initialized in each GLESv1 or GLESv2
+        // context implementation, based on the parsing of the host
+        // extensions string performed by initCapsLocked(). I.e. it will
+        // be populated after calling this ::init() method.
         s_glExtensions = new std::string("");
     }
 

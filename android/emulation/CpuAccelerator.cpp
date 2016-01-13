@@ -313,7 +313,7 @@ AndroidCpuAcceleration ProbeHaxCpu(String* status) {
     }
 
     /* HAXM only supports GenuineIntel processors */
-    if (strcmp(vendor_id, "GenuineIntel") != 0) {
+    if (android_get_x86_cpuid_vendor_id_type(vendor_id) != VENDOR_ID_INTEL) {
         StringAppendFormat(status,
                            "Android Emulator requires an Intel processor with "
                            "VT-x and NX support.  Your CPU: '%s'",
@@ -671,22 +671,33 @@ std::pair<AndroidHyperVStatus, std::string> GetHyperVStatus() {
     // this was easy
     return std::make_pair(ANDROID_HYPERV_ABSENT, "Hyper-V runs only on Windows");
 #else // _WIN32
-    if (!android_get_x86_cpuid_vmx_support() && android_get_x86_cpuid_is_vcpu()) {
-        // The simple part: if we're running under a hypervisor, it's either Hyper-V
-        // (meaning it's installed and running) or not Hyper-V (so we're in a guest
-        // and Hyper-V is not supported)
-        char vendor_id[16];
-        android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
-
-        if (android_get_x86_cpuid_vendor_id_is_vmhost(vendor_id)) {
-            // we're in a guest
+    char vendor_id[16];
+    android_get_x86_cpuid_vmhost_vendor_id(vendor_id, sizeof(vendor_id));
+    const auto vmType = android_get_x86_cpuid_vendor_vmhost_type(vendor_id);
+    if (vmType == VENDOR_VM_HYPERV) {
+        // The simple part: there's currently a Hyper-V hypervisor running.
+        // Let's find out if we're in a host or guest.
+        // Hyper-V has a CPUID function 0x40000003 which returns a set of
+        // supported features in ebx register. Ebx[0] is a 'CreatePartitions'
+        // feature bit, which is only enabled in host as of now
+        uint32_t ebx;
+        android_get_x86_cpuid(0x40000003, 0, nullptr, &ebx, nullptr, nullptr);
+        if (ebx & 0x1) {
+            return std::make_pair(ANDROID_HYPERV_RUNNING,
+                    "Hyper-V is enabled");
+        } else {
+            // TODO: update this part when Hyper-V officially implements
+            // nesting support
             return std::make_pair(ANDROID_HYPERV_ABSENT,
-                "Running in a guest VM, Hyper-V is not supported");
+                    "Running in a guest Hyper-V VM, Hyper-V is not supported");
         }
-
-        // The vcpu bit is set but your vendor id is not one of the known VM ids
-        // You are probably running under Hyper-V
-        return std::make_pair(ANDROID_HYPERV_RUNNING, "Hyper-V is enabled");
+    } else if (vmType != VENDOR_VM_NOTVM) {
+        // some CPUs may return something strange even if we're not under a VM,
+        // so let's double-check it
+        if (android_get_x86_cpuid_is_vcpu()) {
+            return std::make_pair(ANDROID_HYPERV_ABSENT,
+                    "Running in a guest VM, Hyper-V is not supported");
+        }
     }
 
     using android::base::String;

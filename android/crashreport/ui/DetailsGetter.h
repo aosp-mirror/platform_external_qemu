@@ -21,13 +21,12 @@ class DetailsGetter : public QObject {
 private:
     Q_OBJECT
     android::crashreport::CrashService* mCrashService;
-    bool mWantHWInfo;
 public:
-    DetailsGetter(android::crashreport::CrashService* crashservice, bool wantHWInfo);
-    std::string crash_details;
+    DetailsGetter(android::crashreport::CrashService* crashservice);
+    std::string hw_info;
 
 public slots:
-    void getDetails();
+    void getSysInfo();
 
 signals:
     void finished();

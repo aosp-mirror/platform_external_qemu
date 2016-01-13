@@ -2782,8 +2782,9 @@ int main(int argc, char **argv, char **envp)
                 break;
 
             case QEMU_OPTION_show_kernel:
-                android_kmsg_init(ANDROID_KMSG_PRINT_MESSAGES);
-                break;
+                if(!android_kmsg_init(ANDROID_KMSG_PRINT_MESSAGES)) {
+                    return 1;
+                }
 
 #ifdef CONFIG_NAND_LIMITS
             case QEMU_OPTION_nand_limits:

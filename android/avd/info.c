@@ -1150,6 +1150,13 @@ avdInfo_initHwConfig( AvdInfo*  i, AndroidHwConfig*  hw )
         }
     }
 
+    // for api <= 10, there is no multi-touch support
+    // and GUI won't respond as a result;
+    // force it to be "touch"
+    if (i->apiLevel <= 10) {
+        hw->hw_screen = ASTRDUP("touch");
+    }
+
     return ret;
 }
 

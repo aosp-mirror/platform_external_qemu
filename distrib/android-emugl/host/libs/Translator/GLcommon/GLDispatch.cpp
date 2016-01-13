@@ -109,5 +109,9 @@ void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
         LIST_GLES2_ONLY_FUNCTIONS(LOAD_GL_FUNC)
         LIST_GLES2_EXTENSIONS_FUNCTIONS(LOAD_GLEXT_FUNC)
     }
+
+    /* Load glGetStringi() if it is available, so use LOAD_GLEXT_FUNC */
+    LIST_GLES3_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
+
     m_isLoaded = true;
 }

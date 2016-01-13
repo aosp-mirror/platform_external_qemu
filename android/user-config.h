@@ -29,6 +29,7 @@ typedef struct AUserConfig   AUserConfig;
 
 /* Create a new AUserConfig object from a given AvdInfo */
 AUserConfig*   auserConfig_new( AvdInfo*  info );
+void           auserConfig_free( AUserConfig* uconfig );
 
 /* Retrieve the unique UID for this AVD */
 uint64_t       auserConfig_getUUID( AUserConfig*  uconfig );
