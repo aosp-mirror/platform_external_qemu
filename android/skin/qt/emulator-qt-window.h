@@ -158,6 +158,9 @@ public:
     void zoomReset();
     void zoomTo(const QPoint &focus, const QSize &rectSize);
 
+    void setOrientation(SkinRotation rot) { mOrientation = rot;  }
+    SkinRotation orientation()            { return mOrientation; }
+
 private slots:
     void slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore = NULL);
     void slot_clearInstance();
@@ -227,6 +230,7 @@ private:
     void handleMouseEvent(SkinEventType type, SkinMouseButtonType button, const QPoint &pos);
     QString getTmpImagePath();
     void setFrameOnTop(QFrame* frame, bool onTop);
+    void setSkinMask();
 
 
     void             *batteryState;
@@ -671,6 +675,19 @@ private:
             show();
         }
 
+        void show()
+        {
+            // When running frameless on Windows, this overlay is not aligned with
+            // its parent. Set the position.
+            QRect myPosition = geometry();
+            QRect parentPosition = parentWidget()->geometry();
+            if (myPosition != parentPosition) {
+                setGeometry(parentPosition);
+            }
+
+            QFrame::show();
+        }
+
     private:
         QPoint getSecondaryTouchPoint() const
         {
@@ -714,6 +731,10 @@ private:
 
     QMessageBox mAvdWarningBox;
     bool mFirstShowEvent;
+
+    bool         mIsSkinned;
+    QSize        mPreviousSize;  // Size of the main window
+    SkinRotation mOrientation;   // Rotation of the main window
 };
 
 struct SkinSurface {
