@@ -20,11 +20,14 @@
 #include "android/curl-support.h"
 #include "android/utils/debug.h"
 #include "google_breakpad/processor/basic_source_line_resolver.h"
+#include "google_breakpad/processor/call_stack.h"
+#include "google_breakpad/processor/code_module.h"
+#include "google_breakpad/processor/code_modules.h"
 #include "google_breakpad/processor/minidump.h"
 #include "google_breakpad/processor/minidump_processor.h"
-#include "google_breakpad/processor/process_state.h"
+#include "google_breakpad/processor/stack_frame_cpu.h"
 #include "processor/stackwalk_common.h"
-
+#include "processor/pathname_stripper.h"
 #include <curl/curl.h>
 
 #include <stdio.h>
@@ -178,7 +181,6 @@ std::string CrashService::getCrashDetails() {
         E("Minidump %s could not be read", dump.path().c_str());
         return details;
     }
-    google_breakpad::ProcessState process_state;
     if (minidump_processor.Process(&dump, &process_state) !=
         google_breakpad::PROCESS_OK) {
         E("MinidumpProcessor::Process failed");
@@ -196,6 +198,7 @@ std::string CrashService::getCrashDetails() {
     google_breakpad::SetPrintStream(fp);
     google_breakpad::PrintProcessState(process_state, true, &resolver);
 
+    fprintf(fp, "thread requested=%d\n", process_state.requesting_thread());
     fseek(fp, 0, SEEK_END);
     details.resize(std::ftell(fp));
     rewind(fp);
@@ -204,7 +207,13 @@ std::string CrashService::getCrashDetails() {
     fclose(fp);
     remove(detailsFile.c_str());
 
+    // Record dump details
+    mDumpDetails = details;
     return details;
+}
+
+std::string CrashService::getInitialDump() const {
+    return mDumpDetails;
 }
 
 std::string CrashService::collectSysInfo() {
@@ -251,6 +260,82 @@ bool CrashService::setClient(int clientpid) {
     }
     mClientPID = clientpid;
     return true;
+}
+
+static const char* const gfx_drivers[] = {
+    // NVIDIA
+    "nvcpl", // Control Panel
+    "nvshell", // Desktop Explorer
+    "nvinit", // initializer
+    "nv4_disp", // Windows 2000 (!) display driver
+    "nvcod", // CoInstaller
+    "nvcuda", // Cuda
+    "nvopencl", // OpenCL
+    "nvcuvid", // Video decode
+    "nvogl", // OpenGL (modern)
+    "ig4icd", // OpenGL (icd?)
+    "GeForceGLDriver", // OpenGL (old)
+    "nvd3d", // Direct3D
+    "nvwgf2", // D3D10
+    "nvdx", // D3D shim drivers
+    "nvml", // management library
+    "nvfbc", // front buffer capture library
+    "nvapi", // NVAPI Library
+
+    // ATI
+    "atioglxx", // OpenGL
+    "atig6txx", // OpenGL
+    "r600", // Radeon r600 series
+    "aticfx", // DX11
+    "atiumd", // D3D
+    "atidxx", // "TMM Com Clone Control Module" (???)
+    "atimpenc", // video encoder
+
+    // Intel
+    "i915", // Intel i915 gpu
+    "igd", // 'igd' series of Intel GPU's
+    "igl", // ?
+    "igfx", // ?
+    "ig75icd", // Intel icd
+    "intelocl", // Intel OpenCL
+
+    // Others
+    "libGL" // Low-level Linux OpenGL
+};
+
+UserSuggestions::UserSuggestions(google_breakpad::ProcessState* process_state) {
+    suggestions.clear();
+
+    // Go through all frames of the stack of
+    // the thread requesting dump.
+
+    int crashed_thread_id = process_state->requesting_thread();
+    google_breakpad::CallStack* crashed_stack = process_state->threads()->at(crashed_thread_id);
+
+    if (crashed_stack) {
+        int frame_count = crashed_stack->frames()->size();
+        if (frame_count == 0) {
+            return;
+        } else {
+            for (int frame_index = 0; frame_index < frame_count; ++frame_index) {
+                google_breakpad::StackFrame* frame = crashed_stack->frames()->at(frame_index);
+                if (frame) {
+                    const auto* module = frame->module;
+                    if (frame->module) {
+                        std::string file = google_breakpad::PathnameStripper::File(module->code_file()) + "\n";
+                        std::transform(file.begin(), file.end(), file.begin(), ::tolower);
+                        // Should the user update their graphics drivers?
+                        for (const char* pattern : gfx_drivers) {
+                            if (file.find(pattern) != std::string::npos) {
+                                suggestions.insert(UpdateGfxDrivers);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 }  // namespace crashreport

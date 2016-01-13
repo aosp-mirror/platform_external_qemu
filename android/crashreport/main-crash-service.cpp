@@ -88,7 +88,6 @@ static bool displayHWInfoDialog() {
                          "We will ask you again to confirm whether you want to send anything."
                          "<a href=\"https://www.google.com/policies/privacy/\">Privacy "
                          "Policy</a>."));
-                         
     msgBox.show();
     int ret = msgBox.exec();
     return ret == WantHWInfo::Accepted;
@@ -96,8 +95,9 @@ static bool displayHWInfoDialog() {
 
 static bool _postprocess_collectsysinfo = false;
 
-static bool displayConfirmDialog(const std::string& details, 
-                                 android::crashreport::CrashService* crashservice) {
+static bool displayConfirmDialog(const std::string& details,
+                                 android::crashreport::CrashService* crashservice,
+                                 android::crashreport::UserSuggestions* suggestions) {
     static const char kIconFile[] = "emulator_icon_128.png";
     size_t icon_size;
     QPixmap icon;
@@ -109,7 +109,9 @@ static bool displayConfirmDialog(const std::string& details,
 
     ConfirmDialog msgBox(nullptr, icon, kMessageBoxTitle, kMessageBoxMessage,
                          kMessageBoxMessageDetailHW,
-                         details.c_str(), crashservice);
+                         details.c_str(),
+                         crashservice,
+                         suggestions);
 
     msgBox.show();
     int ret = msgBox.exec();
@@ -202,12 +204,14 @@ int main(int argc, char** argv) {
 
     const std::string crashDetails (crashservice->getCrashDetails());
 
+    android::crashreport::UserSuggestions suggestions(&crashservice->process_state);
+
     if (crashDetails.empty()) {
         E("Crash details could not be processed, skipping upload\n");
         return 1;
     }
 
-    if (!displayConfirmDialog(crashDetails, crashservice.get())) {
+    if (!displayConfirmDialog(crashDetails, crashservice.get(), &suggestions)) {
         return 1;
     }
 
