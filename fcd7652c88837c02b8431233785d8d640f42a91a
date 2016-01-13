@@ -91,6 +91,40 @@
       "revId": "fcd7652c88837c02b8431233785d8d640f42a91a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "47ed12c9_8d32c196",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-13T15:20:14Z",
+      "side": 1,
+      "message": "Seriously? That looks like way more than what should be needed here. I\u0027ll take a look at that to clean things up.",
+      "revId": "fcd7652c88837c02b8431233785d8d640f42a91a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "47ed12c9_ed3f055d",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-13T15:20:14Z",
+      "side": 1,
+      "message": "Damn, we should not need this, I\u0027ll also take a look.",
+      "revId": "fcd7652c88837c02b8431233785d8d640f42a91a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
