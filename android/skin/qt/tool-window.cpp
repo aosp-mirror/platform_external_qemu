@@ -505,25 +505,39 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         }
         break;
     case QtUICommand::VOLUME_UP:
-        uiEmuAgent->userEvents->sendKey(kKeyCodeVolumeUp, down);
+        uiAgentAction([down](const UiEmuAgent& agent) {
+            agent.userEvents->sendKey(kKeyCodeVolumeUp, down);
+        });
         break;
     case QtUICommand::VOLUME_DOWN:
-        uiEmuAgent->userEvents->sendKey(kKeyCodeVolumeDown, down);
+        uiAgentAction([down](const UiEmuAgent& agent) {
+            agent.userEvents->sendKey(kKeyCodeVolumeDown, down);
+        });
         break;
     case QtUICommand::POWER:
-        uiEmuAgent->userEvents->sendKey(kKeyCodePower, down);
+        uiAgentAction([down](const UiEmuAgent& agent) {
+            agent.userEvents->sendKey(kKeyCodePower, down);
+        });
         break;
     case QtUICommand::MENU:
-        uiEmuAgent->userEvents->sendKey(kKeyCodeMenu, down);
+        uiAgentAction([down](const UiEmuAgent& agent) {
+            agent.userEvents->sendKey(kKeyCodeMenu, down);
+        });
         break;
     case QtUICommand::HOME:
-        uiEmuAgent->userEvents->sendKey(kKeyCodeHome, down);
+        uiAgentAction([down](const UiEmuAgent& agent) {
+            agent.userEvents->sendKey(kKeyCodeHome, down);
+        });
         break;
     case QtUICommand::BACK:
-        uiEmuAgent->userEvents->sendKey(kKeyCodeBack, down);
+        uiAgentAction([down](const UiEmuAgent& agent) {
+            agent.userEvents->sendKey(kKeyCodeBack, down);
+        });
         break;
     case QtUICommand::OVERVIEW:
-        uiEmuAgent->userEvents->sendKey(kKeyCodeAppSwitch, down);
+        uiAgentAction([down](const UiEmuAgent& agent) {
+            agent.userEvents->sendKey(kKeyCodeAppSwitch, down);
+        });
         break;
     case QtUICommand::ROTATE_RIGHT:
     case QtUICommand::ROTATE_LEFT:
@@ -549,6 +563,12 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
     }
 }
 
+template <class Action>
+void ToolWindow::uiAgentAction(Action a) const {
+    if (uiEmuAgent) {
+        a(*uiEmuAgent);
+    }
+}
 
 bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
     QKeySequence event_key_sequence(event->key() + event->modifiers());
@@ -684,7 +704,8 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
         return;
     }
 
-    extendedWindow = new ExtendedWindow(emulator_window, this, uiEmuAgent, &mShortcutKeyStore);
+    extendedWindow = new ExtendedWindow(emulator_window, this, uiEmuAgent,
+                                        &mShortcutKeyStore);
     extendedWindow->show();
     extendedWindow->showPane(pane);
     extendedWindow->raise();
