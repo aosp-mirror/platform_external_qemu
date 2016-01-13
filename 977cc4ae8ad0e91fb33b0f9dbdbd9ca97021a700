@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "07623a24_a2840037",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-13T02:07:32Z",
+      "side": 1,
+      "message": "what I now think is that it has to be somewhere close to the crash point. Otherwise if it\u0027s somewhere in the middle and we\u0027ve crashed in emulator\u0027s callback called from the GL library, we would blame the driver\nThat\u0027s not really critical for now - we can always fix it later, but that\u0027s something to consider",
+      "range": {
+        "startLine": 266,
+        "startChar": 0,
+        "endLine": 288,
+        "endChar": 37
+      },
+      "revId": "977cc4ae8ad0e91fb33b0f9dbdbd9ca97021a700",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
