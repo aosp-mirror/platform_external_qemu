@@ -12,6 +12,7 @@
 
 #include <QtCore>
 #include <QAbstractSlider>
+#include <QBitmap>
 #include <QCheckBox>
 #include <QCursor>
 #include <QDesktopWidget>
@@ -42,6 +43,7 @@
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/winsys-qt.h"
+#include "android/skin/rect.h"
 #include "android/ui-emu-agent.h"
 
 #define  DEBUG  1
@@ -83,7 +85,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
                           "We strongly recommend creating a new AVD."),
                        QMessageBox::Ok,
                        this),
-        mFirstShowEvent(true)
+        mFirstShowEvent(true),
+        mPreviousSize(0, 0),
+        mOrientation(SKIN_ROTATION_0)
 {
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
@@ -97,6 +101,18 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
 
     backing_surface = NULL;
     batteryState    = NULL;
+
+    // Skinless emulators will still have names (that are "magically" generated"), but will have
+    // NULL directories.
+    char *skinName;
+    char *skinDir;
+    avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+    mIsSkinned = (skinDir != NULL);
+
+    if (mIsSkinned) {
+        // TODO: Set frameless based on some appropriate criterion
+        mContainer.setWindowFlags( mContainer.windowFlags() | Qt::FramelessWindowHint );
+    }
 
     tool_window = new ToolWindow(this, &mContainer);
 
@@ -337,8 +353,56 @@ void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent *event)
                      event->pos());
 }
 
+// Mask off the background of the skin PNG if we
+// are running frameless.
+
+void EmulatorQtWindow::setSkinMask()
+{
+    QSize newSize = mContainer.size();
+
+    if (mIsSkinned
+        && (mContainer.windowFlags() & Qt::FramelessWindowHint)
+        && (newSize != mPreviousSize) )
+    {
+        // We are skinned AND frameless AND the size changed.
+        // Reload the skin PNG file.
+        char *skinName;
+        char *skinDir;
+        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+        QString skinPath = skinDir;
+        skinPath += skinName;
+        skinPath += "/port_back.png";
+        QPixmap rawPixmap(skinPath);
+        if ( !rawPixmap.isNull() ) {
+            // Rotate the skin to match the emulator window
+            QTransform rotater;
+            int rotationAmount;
+            switch (mOrientation) {
+                case SKIN_ROTATION_0:    rotationAmount =   0;   break;
+                case SKIN_ROTATION_90:   rotationAmount =  90;   break;
+                case SKIN_ROTATION_180:  rotationAmount = 180;   break;
+                case SKIN_ROTATION_270:  rotationAmount = 270;   break;
+                default:                 rotationAmount =   0;   break;
+            }
+            rotater.rotate(rotationAmount);
+            QPixmap rotatedPMap(rawPixmap.transformed(rotater));
+
+            // Scale the bitmap to the current window size
+            int width = mContainer.width();
+            QPixmap scaledPixmap = rotatedPMap.scaledToWidth(width);
+
+            // Convert from bit map to mask and apply the mask
+            QBitmap bitmap = scaledPixmap.mask();
+            mContainer.setMask(bitmap);
+        }
+    }
+    mPreviousSize = newSize;
+}
+
 void EmulatorQtWindow::paintEvent(QPaintEvent *)
 {
+    setSkinMask();
+
     if (backing_surface) {
         QPainter painter(this);
 
