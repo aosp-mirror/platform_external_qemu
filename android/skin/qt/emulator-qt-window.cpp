@@ -98,6 +98,19 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     backing_surface = NULL;
     batteryState    = NULL;
 
+    // Skinless emulators will still have names (that are "magically" generated"), but will have
+    // NULL directories.
+    char *skinName;
+    char *skinDir;
+    avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+    mIsSkinned = (skinDir != NULL);
+
+    if (mIsSkinned) {
+        setAttribute(Qt::WA_TranslucentBackground, true);
+        mContainer.setAttribute(Qt::WA_TranslucentBackground, true);
+//        mContainer.setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    }
+
     tool_window = new ToolWindow(this, &mContainer);
 
     this->setAcceptDrops(true);
@@ -342,8 +355,10 @@ void EmulatorQtWindow::paintEvent(QPaintEvent *)
     if (backing_surface) {
         QPainter painter(this);
 
-        QRect bg(QPoint(0, 0), this->size());
-        painter.fillRect(bg, Qt::black);
+        if (!mIsSkinned) {
+            QRect bg(QPoint(0, 0), this->size());
+            painter.fillRect(bg, Qt::black);
+        }
 
         QRect r(0, 0, backing_surface->w, backing_surface->h);
         // Rescale with smooth transformation to avoid aliasing
@@ -945,7 +960,6 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
             mOverlay.hide();
         }
     }
-
     if (grab ||
          !tool_window->handleQtKeyEvent(event)) {
         forwardKeyEventToEmulator(type, event);

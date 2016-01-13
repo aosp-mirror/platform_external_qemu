@@ -546,7 +546,14 @@ skin_layout_create_from_v2(AConfig* root,
     }
 
     layout->name  = root->name;
-    layout->color = aconfig_unsigned( root, "color", 0x808080 ) | 0xff000000;
+    layout->color = aconfig_unsigned( root, "color", 0xff808080 );
+
+    // Default to 255 alpha if no alpha is included, meaning the color is of form 0x######
+    const char *col = aconfig_str( root, "color", "0xff808080" );
+    if ( strlen(col) == 8 && !strncmp(col, "0x", 2) ) {
+        layout->color |= 0xff000000;
+    }
+
     ptail         = &layout->locations;
 
     node = aconfig_find( root, "dpad-rotation" );

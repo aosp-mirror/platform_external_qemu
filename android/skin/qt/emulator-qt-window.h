@@ -705,6 +705,8 @@ private:
 
     QMessageBox mAvdWarningBox;
     bool mFirstShowEvent;
+
+    bool mIsSkinned;
 };
 
 struct SkinSurface {

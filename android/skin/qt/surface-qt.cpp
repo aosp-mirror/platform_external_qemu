@@ -188,7 +188,7 @@ extern void skin_surface_fill(SkinSurface *dst, SkinRect *rect, uint32_t argb_pr
 {
     D("skin_surface_fill %d: %d, %d, %d, %d: %x", dst->id, rect->pos.x, rect->pos.y, rect->size.w, rect->size.h, argb_premul);
     QRect qrect(rect->pos.x, rect->pos.y, rect->size.w, rect->size.h);
-    QColor color(argb_premul);
+    QColor color = QColor::fromRgba(argb_premul);
     QSemaphore semaphore;
     dst->window->fill(dst, &qrect, &color, &semaphore);
     semaphore.acquire();
