@@ -16,11 +16,8 @@
 
 #include "google_breakpad/processor/process_state.h"
 
-#include <algorithm>
-#include <map>
 #include <set>
 #include <string>
-#include <vector>
 
 namespace android {
 namespace crashreport {
