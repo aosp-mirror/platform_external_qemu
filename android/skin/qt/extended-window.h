@@ -64,8 +64,6 @@ private:
 
     EmulatorQtWindow    *mEmulatorWindow;
     ToolWindow          *mToolWindow;
-    GeoDataLoaderThread *mGeoDataLoader;
-    GpsFixArray          mGpsFixesArray;
 
     void initLocation();
     void initVirtualSensors();
@@ -75,11 +73,6 @@ private:
     const QAndroidSensorsAgent* mSensorsAgent;
     const SettingsAgent* mSettingsAgent;
 
-    int      mLoc_mSecRemaining;
-    bool     mLoc_nowPlaying;
-    bool     mLoc_nowLoadingGeoData;
-    int      mLoc_rowToSend;
-    QTimer   mLoc_timer;
     bool     mCloseRequested;
     QDoubleValidator mMagFieldValidator;
     QDoubleValidator mAltitudeValidator;
@@ -96,12 +89,6 @@ private:
                               const std::string& description,
                               time_t time);
 
-    QIcon getIconForCurrentTheme(const QString& icon_name) {
-        QString iconType =
-            getSelectedTheme() == SETTINGS_THEME_LIGHT ? LIGHT_PATH : DARK_PATH;
-        return QIcon(":/" + iconType + "/" + icon_name);
-    }
-
 private slots:
     void switchOnTop(bool isOntop);
     void switchToTheme(SettingsTheme theme);
@@ -116,27 +103,6 @@ private slots:
     void on_settingsButton_clicked();
     void on_telephoneButton_clicked();
 
-    // Location
-    void on_loc_GpxKmlButton_clicked();
-    void on_loc_pathTable_cellChanged(int row, int col);
-    void on_loc_playStopButton_clicked();
-    void on_loc_decimalModeSwitch_toggled(bool checked);
-    void on_loc_sexagesimalModeSwitch_toggled(bool checked);
-    void on_loc_sendPointButton_clicked();
-    void on_loc_longitudeInput_valueChanged(double);
-    void on_loc_latitudeInput_valueChanged(double);
-    void on_loc_altitudeInput_editingFinished();
-    void on_loc_playbackSpeed_currentIndexChanged(int index);
-    bool loc_cellIsValid(QTableWidget *table, int row, int col);
-    void loc_populateTable(GpsFixArray *fixes);
-    void loc_slot_timeout();
-    void loc_geoDataLoadingStarted();
-    void loc_geoDataLoadingFinished(QString file_name, bool ok, QString error);
-    void loc_startupGeoDataLoadingFinished(QString file_name, bool ok, QString error);
-
-    void locationPlaybackStart();
-    void locationPlaybackStop();
-
     // Sensors
     void on_temperatureSensorValueWidget_valueChanged(double value);
     void on_proximitySensorValueWidget_valueChanged(double value);
@@ -149,29 +115,3 @@ private:
     void showEvent(QShowEvent* e) override;
 };
 
-class GeoDataLoaderThread : public QThread {
-Q_OBJECT
-public:
-    // Loads geo data from a gpx or kml file specified
-    // by file_name into the GpsFixArray pointed to
-    // by fixes
-    void loadGeoDataFromFile(const QString& file_name, GpsFixArray* fixes);
-
-
-    static GeoDataLoaderThread* newInstance(
-            const QObject* handler,
-            const char* started_slot,
-            const char* finished_slot);
-
-signals:
-    void loadingFinished(QString file_name, bool ok, QString error);
-
-protected:
-    // Reimplemented to load the file into the given fixes array.
-    void run() override;
-
-private:
-    GeoDataLoaderThread() : mFixes(nullptr) {}
-    QString mFileName;
-    GpsFixArray* mFixes;
-};

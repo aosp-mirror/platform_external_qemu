@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/settings-agent.h"
+#include <QIcon>
 #include <QPushButton>
 #include <QString>
 
@@ -26,3 +27,6 @@ SettingsTheme getSelectedTheme();
 
 // Changes icons on all push buttons to fit the given theme.
 void switchAllIconsForTheme(SettingsTheme theme);
+
+// Obtains the given icon for the current theme.
+QIcon getIconForCurrentTheme(const QString& icon_name);

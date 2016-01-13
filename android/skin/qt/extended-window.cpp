@@ -31,15 +31,10 @@ ExtendedWindow::ExtendedWindow(
     QFrame(nullptr),
     mEmulatorWindow(eW),
     mToolWindow(tW),
-    mGeoDataLoader(nullptr),
     mEmulatorWindowAgent(agentPtr ? agentPtr->window    : nullptr),
     mLocationAgent      (agentPtr ? agentPtr->location  : nullptr),
     mSensorsAgent       (agentPtr ? agentPtr->sensors   : nullptr),
     mSettingsAgent      (agentPtr ? agentPtr->settings  : nullptr),
-    mLoc_mSecRemaining(-1),
-    mLoc_nowPlaying(false),
-    mLoc_nowLoadingGeoData(false),
-    mLoc_rowToSend(-1),
     mCloseRequested(false),
     mExtendedUi(new Ui::ExtendedControls)
 {
@@ -65,6 +60,7 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
     mExtendedUi->helpPage->initializeKeyboardShortcutList(shortcuts);
     mExtendedUi->dpadPage->setUserEventsAgent(agentPtr->userEvents);
+    mExtendedUi->location_page->setLocationAgent(agentPtr->location);
 
     connect(
         mExtendedUi->settingsPage, SIGNAL(onTopChanged(bool)),
@@ -75,7 +71,6 @@ ExtendedWindow::ExtendedWindow(
         this, SLOT(switchToTheme(SettingsTheme)));
 
     // Do any sub-window-specific initialization
-    initLocation();
     initVirtualSensors();
 
     mPaneButtonMap = {
@@ -100,15 +95,11 @@ void ExtendedWindow::showPane(ExtendedWindowPane pane) {
 
 void ExtendedWindow::closeEvent(QCloseEvent *ce)
 {
-    if (mLoc_nowLoadingGeoData) {
-        mCloseRequested = true;
+    if (mExtendedUi->location_page->isLoadingGeoData()) {
+        mExtendedUi->location_page->requestStopLoadingGeoData();
+        connect(mExtendedUi->location_page, SIGNAL(geoDataLoadingFinished()), this, SLOT(close()));
         ce->ignore();
     } else {
-        if (mGeoDataLoader) {
-            // This might cause lag when closing the extended window
-            // when loading a very large KML/GPX file.
-            mGeoDataLoader->wait();
-        }
         mToolWindow->extendedIsClosing();
         ce->accept();
     }
