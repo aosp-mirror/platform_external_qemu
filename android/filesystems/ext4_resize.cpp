@@ -32,6 +32,7 @@ using android::base::Win32Utils;
 #include <sys/wait.h>
 #endif
 
+using android::base::RunOptions;
 using android::base::String;
 using android::base::System;
 
@@ -84,76 +85,10 @@ int resizeExt4Partition(const char* partitionPath, int64_t newByteSize) {
         return -1;
     }
 
-#ifdef _WIN32
-    STARTUPINFO startup;
-    PROCESS_INFORMATION pinfo;
-    DWORD exitCode;
+    auto& sys = *System::get();
+    auto exitCode = sys.runCommand({executable, "-f", partitionPath, size_in_MB}, RunOptions::WaitForCompletion
+                                  | RunOptions::ReturnExitCode);
 
-    ZeroMemory(&startup, sizeof(startup));
-    ZeroMemory(&pinfo, sizeof(pinfo));
-    startup.cb = sizeof(startup);
-
-    char args[PATH_MAX * 2 + 1];
-    copied = snprintf(args, sizeof(args), "resize2fs.exe -f %s %s",
-                      Win32Utils::quoteCommandLine(partitionPath).c_str(),
-                      size_in_MB);
-    args[sizeof(args) - 1] = '\0';
-    if (copied < 0 || copied >= static_cast<int>(sizeof(args))) {
-        fprintf(stderr, "ERROR: failed to format resize2fs command\n");
-        return -1;
-    }
-
-    BOOL success = CreateProcess(
-            Win32Utils::quoteCommandLine(executable.c_str())
-                    .c_str(), /* program path */
-            args,             /* command line args */
-            NULL,             /* process handle is not inheritable */
-            NULL,             /* thread handle is not inheritable */
-            FALSE,            /* no, don't inherit any handles */
-            CREATE_NO_WINDOW, /* the new process doesn't have a console */
-            NULL,             /* use parent's environment block */
-            NULL,             /* use parent's starting directory */
-            &startup,         /* startup info, i.e. std handles */
-            &pinfo);
-    if (!success) {
-        explainSystemErrors(
-                "failed to create process while resizing partition");
-        return -2;
-    }
-
-    WaitForSingleObject(pinfo.hProcess, INFINITE);
-    if (!GetExitCodeProcess(pinfo.hProcess, &exitCode)) {
-        explainSystemErrors(
-                "couldn't get exit code from resizing partition process");
-        CloseHandle(pinfo.hProcess);
-        CloseHandle(pinfo.hThread);
-        return -2;
-    }
-    CloseHandle(pinfo.hProcess);
-    CloseHandle(pinfo.hThread);
-
-#else
-    int32_t exitCode = 0;
-    pid_t pid;
-    pid_t child = fork();
-
-    if (child < 0) {
-        explainSystemErrors(
-                "couldn't create a child process to resize the partition");
-        return -2;
-    } else if (child == 0) {
-        execlp(executable.c_str(), executable.c_str(), "-f", partitionPath,
-               size_in_MB, NULL);
-        return -1;
-    }
-
-    while ((pid = waitpid(-1, &exitCode, 0)) != child) {
-        if (pid == -1) {
-            explainSystemErrors("resizing partition waitpid failed");
-            return -2;
-        }
-    }
-#endif
     if (exitCode != 0) {
         fprintf(stderr, "ERROR: resizing partition failed with exit code %d\n",
                 (int)exitCode);
