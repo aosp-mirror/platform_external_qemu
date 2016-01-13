@@ -143,6 +143,7 @@ public:
     void scaleDown();
     void scaleUp();
     void screenshot();
+    void setFrameAlways(bool showFrame);
     void setOnTop(bool onTop);
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateScrollBarChanged(int x, int y);
@@ -157,6 +158,9 @@ public:
     void zoomOut(const QPoint &focus, const QPoint &viewportFocus);
     void zoomReset();
     void zoomTo(const QPoint &focus, const QSize &rectSize);
+
+    void setOrientation(SkinRotation rot) { mOrientation = rot;  }
+    SkinRotation orientation()            { return mOrientation; }
 
 private slots:
     void slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore = NULL);
@@ -213,6 +217,7 @@ private:
     void showEvent(QShowEvent* event) {
         mStartupTimer.stop();
         mStartupDialog.close();
+        queueEvent(createSkinEvent(kEventRedrawOpenGLES));
     }
 
     void showAvdArchWarning();
@@ -227,6 +232,7 @@ private:
     void handleMouseEvent(SkinEventType type, SkinMouseButtonType button, const QPoint &pos);
     QString getTmpImagePath();
     void setFrameOnTop(QFrame* frame, bool onTop);
+    void setSkinMask(bool unconditional);
 
 
     void             *batteryState;
@@ -237,6 +243,15 @@ private:
     SkinSurface *backing_surface;
     QQueue<SkinEvent*> event_queue;
     ToolWindow *tool_window;
+
+    // Window flags to use for frameless and framed appearance
+    const Qt::WindowFlags FRAMELESS_WINDOW_FLAGS  = (Qt::Window |
+                                                     Qt::FramelessWindowHint);
+    const Qt::WindowFlags FRAMED_WINDOW_FLAGS     = (Qt::Window               |
+                                                     Qt::WindowTitleHint      |
+                                                     Qt::CustomizeWindowHint    );
+    const Qt::WindowFlags FRAME_WINDOW_FLAGS_MASK = (FRAMELESS_WINDOW_FLAGS |
+                                                     FRAMED_WINDOW_FLAGS     );
 
     // Class contained by EmulatorQtWindow so it has access to private members
     class EmulatorWindowContainer : public QScrollArea
@@ -403,7 +418,7 @@ private:
 
         void showEvent(QShowEvent *event)
         {
-            // Disable to maximize button on OSX. See the comment in the constructor for an
+            // Disable the maximize button on OSX. See the comment in the constructor for an
             // explanation of why this is necessary.
 #ifdef __APPLE__
             WId wid;
@@ -671,6 +686,19 @@ private:
             show();
         }
 
+        void show()
+        {
+            // When running frameless on Windows, this overlay is not aligned with
+            // its parent. Set the position.
+            QRect myPosition = geometry();
+            QRect parentPosition = parentWidget()->geometry();
+            if (myPosition != parentPosition) {
+                setGeometry(parentPosition);
+            }
+
+            QFrame::show();
+        }
+
     private:
         QPoint getSecondaryTouchPoint() const
         {
@@ -715,6 +743,11 @@ private:
 
     QMessageBox mAvdWarningBox;
     bool mFirstShowEvent;
+
+    bool         mIsSkinned;
+    bool         mFrameAlways;   // true = no floating emulator
+    QSize        mPreviousSize;  // Size of the main window
+    SkinRotation mOrientation;   // Rotation of the main window
 };
 
 struct SkinSurface {

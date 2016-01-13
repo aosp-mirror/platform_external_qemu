@@ -58,6 +58,10 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->location_page->setLocationAgent(agentPtr->location);
 
     connect(
+        mExtendedUi->settingsPage, SIGNAL(frameAlwaysChanged(bool)),
+        this, SLOT(switchFrameAlways(bool)));
+
+    connect(
         mExtendedUi->settingsPage, SIGNAL(onTopChanged(bool)),
         this, SLOT(switchOnTop(bool)));
 
@@ -156,6 +160,11 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
 
     thisButton->clearFocus(); // It looks better when not highlighted
     mExtendedUi->stackedWidget->setCurrentIndex(static_cast<int>(thisIndex));
+}
+
+void ExtendedWindow::switchFrameAlways(bool showFrame)
+{
+    mEmulatorWindow->setFrameAlways(showFrame);
 }
 
 void ExtendedWindow::switchOnTop(bool isOnTop)

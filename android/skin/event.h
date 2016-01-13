@@ -29,10 +29,10 @@ typedef enum {
     kEventMouseButtonUp,
     kEventMouseMotion,
     kEventQuit,
+    kEventRedrawOpenGLES,
     kEventScrollBarChanged,
     kEventSetScale,
     kEventSetZoom,
-    kEventVideoExpose,
     kEventWindowMoved,
     kEventScreenChanged,
     kEventZoomedWindowResized

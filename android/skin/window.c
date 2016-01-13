@@ -1952,7 +1952,7 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         }
         break;
 
-    case kEventVideoExpose:
+    case kEventRedrawOpenGLES:
         skin_window_redraw_opengles(window);
         break;
 

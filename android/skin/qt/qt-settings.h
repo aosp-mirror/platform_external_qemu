@@ -29,6 +29,7 @@ namespace Ui {
 
         const QString ALLOW_KEYBOARD_GRAB("set/allow_keyboard_grab");
         const QString ALWAYS_ON_TOP("set/alwaysOnTop");
+        const QString FRAME_ALWAYS("set/frameAlways");
         const QString SAVE_PATH("set/savePath");
         const QString SDK_PATH("set/sdkPath");
         const QString UI_THEME("set/theme");
