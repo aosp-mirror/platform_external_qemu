@@ -84,18 +84,6 @@ String* StringVector::emplace(size_t index) {
     return result;
 }
 
-void StringVector::append(const String& str) {
-    *(this->emplace(this->size())) = str;
-}
-
-void StringVector::prepend(const String& str) {
-    *(this->emplace(0U)) = str;
-}
-
-void StringVector::insert(size_t index, const String& str) {
-    *(this->emplace(index)) = str;
-}
-
 void StringVector::append(const StringView& view) {
     *(this->emplace(this->size())) = view;
 }
