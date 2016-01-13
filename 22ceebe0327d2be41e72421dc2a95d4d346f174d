@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "678e9643_b790ca14",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-13T02:13:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "274e5eac_b1e0c226",
+      "range": {
+        "startLine": 170,
+        "startChar": 16,
+        "endLine": 170,
+        "endChar": 28
+      },
+      "revId": "22ceebe0327d2be41e72421dc2a95d4d346f174d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c75ca266_cebcbf86",
         "filename": "android/crashreport/CrashService_common.cpp",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-13T02:04:27Z",
       "side": 1,
       "message": "1. please don\u0027t use names with starting underscore. Those are reserved by the language implementation (in global scope at least), so it\u0027s an undefined behavior; also they look really ugly\n\n2. I forgot one const\nconst char* const - otherwise it is a modifiable array of \"const char*\"-s",
+      "range": {
+        "startLine": 265,
+        "startChar": 19,
+        "endLine": 265,
+        "endChar": 20
+      },
+      "revId": "22ceebe0327d2be41e72421dc2a95d4d346f174d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c75ca266_0e94f7f5",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-13T02:13:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c75ca266_cebcbf86",
       "range": {
         "startLine": 265,
         "startChar": 19,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "07623a24_a26d2047",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-13T02:13:04Z",
+      "side": 1,
+      "message": "That\u0027s true :) Done.",
+      "parentUuid": "e759a674_e13a7507",
+      "range": {
+        "startLine": 284,
+        "startChar": 0,
+        "endLine": 286,
+        "endChar": 5
+      },
+      "revId": "22ceebe0327d2be41e72421dc2a95d4d346f174d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "678e9643_b7652a20",
         "filename": "android/crashreport/CrashService_common.cpp",
         "patchSetId": 6
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "676db610_7d2c4883",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-13T02:13:04Z",
+      "side": 1,
+      "message": "Done. This just got taken out.",
+      "parentUuid": "678e9643_b7652a20",
+      "range": {
+        "startLine": 309,
+        "startChar": 4,
+        "endLine": 309,
+        "endChar": 62
+      },
+      "revId": "22ceebe0327d2be41e72421dc2a95d4d346f174d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07623a24_e2e0b815",
         "filename": "android/crashreport/CrashService_common.cpp",
         "patchSetId": 6
@@ -105,6 +201,30 @@
       "writtenOn": "2016-01-13T02:04:27Z",
       "side": 1,
       "message": "break after the first match? we don\u0027t do anything useful after that",
+      "range": {
+        "startLine": 313,
+        "startChar": 2,
+        "endLine": 313,
+        "endChar": 49
+      },
+      "revId": "22ceebe0327d2be41e72421dc2a95d4d346f174d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "274e5eac_51afbeba",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-13T02:13:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "07623a24_e2e0b815",
       "range": {
         "startLine": 313,
         "startChar": 2,
