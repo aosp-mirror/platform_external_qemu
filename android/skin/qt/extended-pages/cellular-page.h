@@ -26,9 +26,11 @@ public:
 
 private slots:
     void on_cell_dataStatusBox_currentIndexChanged(int index);
-    void on_cell_delayBox_currentIndexChanged(int index);
     void on_cell_standardBox_currentIndexChanged(int index);
     void on_cell_voiceStatusBox_currentIndexChanged(int index);
+
+    // TODO: Implement Network delay setting
+    // http://developer.android.com/tools/devices/emulator.html#netdelay
 
 private:
     std::unique_ptr<Ui::CellularPage> mUi;
