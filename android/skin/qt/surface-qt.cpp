@@ -101,7 +101,7 @@ extern int skin_surface_width(SkinSurface *s)
 
 extern SkinSurface* skin_surface_create_argb32_from(int w, int h, int pitch, uint32_t *pixels)
 {
-    D("skin_surface_create_argb32_from %d, %d, pitch %d (%d)", w, h, pitch);
+    D("skin_surface_create_argb32_from %d, %d, pitch %d", w, h, pitch);
     SkinSurface* s = skin_surface_create(w, h, w, h);
     SkinRect rect;
     rect.size.h = h;
