@@ -289,6 +289,7 @@ static const char* const gfx_drivers_lcase[] = {
     "nvml", // management library
     "nvfbc", // front buffer capture library
     "nvapi", // NVAPI Library
+    "libnvidia", // NVIDIA Linux
 
     // ATI
     "atioglxx", // OpenGL
@@ -298,6 +299,7 @@ static const char* const gfx_drivers_lcase[] = {
     "atiumd", // D3D
     "atidxx", // "TMM Com Clone Control Module" (???)
     "atimpenc", // video encoder
+    "atigl", // another ATI OpenGL driver
 
     // Intel
     "i915", // Intel i915 gpu
