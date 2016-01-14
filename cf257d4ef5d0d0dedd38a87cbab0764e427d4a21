@@ -257,6 +257,30 @@
       "revId": "cf257d4ef5d0d0dedd38a87cbab0764e427d4a21",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4768b202_63f021fd",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-14T18:52:13Z",
+      "side": 1,
+      "message": "that\u0027s my bad :)\nmy change in 0320267 introduced it, I forgot the \u0027-\u0027 sign",
+      "parentUuid": "c75ca266_f126c392",
+      "range": {
+        "startLine": 164,
+        "startChar": 36,
+        "endLine": 164,
+        "endChar": 38
+      },
+      "revId": "cf257d4ef5d0d0dedd38a87cbab0764e427d4a21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
