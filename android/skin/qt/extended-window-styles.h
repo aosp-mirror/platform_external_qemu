@@ -68,8 +68,8 @@ enum ExtendedWindowPane {
 #define LIGHT_MAJOR_TAB_COLOR      "#91a4ad"  // Text of major tabs
 #define LIGHT_MAJOR_TITLE_COLOR    "#617d8a"  // Text of major tab separators
 #define LIGHT_PATH                 "light"    // Icon directory under images/
-#define LIGHT_SCROLL_BKG_COLOR     "f6f6f6"   // Background of scroll bar
-#define LIGHT_SCROLL_HANDLE_COLOR  "d9d9d9"   // Handle of scroller
+#define LIGHT_SCROLL_BKG_COLOR     "#f6f6f6"  // Background of scroll bar
+#define LIGHT_SCROLL_HANDLE_COLOR  "#d9d9d9"   // Handle of scroller
 #define LIGHT_TAB_BKG_COLOR        "#ffffff"  // Background of major tabs
 #define LIGHT_TAB_SELECTED_COLOR   "#fafafa"  // Background of the selected major tab
 #define LIGHT_TABLE_BOTTOM_COLOR   "#e0e0e0"
