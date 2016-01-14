@@ -40,3 +40,7 @@ char* get_launcher_directory() {
 void add_library_search_dir(const char* dirPath) {
     System::get()->addLibrarySearchDir(dirPath);
 }
+
+char* get_host_os_type() {
+    return android::base::toString(System::get()->getOsType()).release();
+}

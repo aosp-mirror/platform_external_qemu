@@ -25,6 +25,7 @@
 #endif
 
 METRICS_STRING(emulator_version, "emulator_version", "unknown")
+METRICS_STRING(host_os_type, "host_os_type", "unknown")
 METRICS_STRING(guest_arch, "guest_arch", "unknown")
 METRICS_INT(guest_gpu_enabled, "guest_gpu_enabled", -99)
 METRICS_STRING(guest_gl_vendor, "guest_gl_vendor", "NotApplicable")
