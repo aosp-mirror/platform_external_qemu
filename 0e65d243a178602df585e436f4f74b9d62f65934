@@ -46,6 +46,30 @@
       "revId": "0e65d243a178602df585e436f4f74b9d62f65934",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4768b202_23bd89ee",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 598,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-14T19:09:45Z",
+      "side": 1,
+      "message": "Nope, WaitForSingleObject stated that process have exited, and CreateProcess reported that process launched fine. So it\u0027s either not enough privileges for us, or something bad\u0027s happening to the OS\n\n\u003e// Returns true if the function succeeded in running the command. If you\n\u003e// request |RunOptions::WaitForCompletion|, this does not mean that the\n\u003e// command finished with \"success\" exit status, just that we succeeded in\n\u003e// running it",
+      "parentUuid": "c75ca266_11a9b7f6",
+      "range": {
+        "startLine": 598,
+        "startChar": 12,
+        "endLine": 598,
+        "endChar": 25
+      },
+      "revId": "0e65d243a178602df585e436f4f74b9d62f65934",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
