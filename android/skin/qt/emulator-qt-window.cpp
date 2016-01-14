@@ -68,7 +68,7 @@ void EmulatorQtWindow::create()
 
 EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         QFrame(parent),
-        mStartupDialog(this),
+        mStartupDialog(parent),
         mContainer(this),
         mOverlay(this, &mContainer),
         mZoomFactor(1.0),
