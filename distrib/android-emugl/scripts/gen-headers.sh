@@ -73,18 +73,6 @@ gen_funcargs_header () {
     fi
 }
 
-##
-##  Translator/GLcommon headers.
-##
-GLCOMMON_SRC_DIR=distrib/android-emugl/host/libs/Translator
-GLCOMMON_ENTRIES="gles_common gles_extensions gles1_only gles1_extensions gles2_only \
-gles2_extensions gles3_only"
-
-for ENTRY in $GLCOMMON_ENTRIES; do
-    SRC_FILE=$GLCOMMON_SRC_DIR/GLcommon/${ENTRY}.entries
-    DST_FILE=$GLCOMMON_SRC_DIR/include/GLcommon/${ENTRY}_functions.h
-    gen_funcargs_header "$SRC_FILE" "$DST_FILE" "$GEN_ENTRIES"
-done
 
 ##
 ##  libOpenglRender headers.
@@ -96,11 +84,27 @@ gen_functions_header "$LIBRENDER_DIR"/render_api.entries \
 ##
 ## libOpenGLESDispatch headers.
 ##
-OPENGLES_DISPATCH_DIR=distrib/android-emugl/host/libs/libOpenGLESDispatch
-gen_functions_header "$OPENGLES_DISPATCH_DIR"/render_egl.entries \
-        "$OPENGLES_DISPATCH_DIR"/RenderEGL_functions.h "$GEN_ENTRIES"
-gen_functions_header "$OPENGLES_DISPATCH_DIR"/render_egl_extensions.entries \
-        "$OPENGLES_DISPATCH_DIR"/RenderEGL_extensions_functions.h "$GEN_ENTRIES"
+OPENGLES_DISPATCH_SRCDIR=distrib/android-emugl/host/libs/libOpenGLESDispatch
+OPENGLES_DISPATCH_INCLUDE=distrib/android-emugl/host/include/OpenGLESDispatch
+
+gen_functions_header \
+        "$OPENGLES_DISPATCH_SRCDIR"/render_egl.entries \
+        "$OPENGLES_DISPATCH_INCLUDE"/RenderEGL_functions.h \
+        "$GEN_ENTRIES"
+
+gen_functions_header \
+        "$OPENGLES_DISPATCH_SRCDIR"/render_egl_extensions.entries \
+        "$OPENGLES_DISPATCH_INCLUDE"/RenderEGL_extensions_functions.h \
+        "$GEN_ENTRIES"
+
+GLES_ENTRIES="gles_common gles_extensions gles1_only gles1_extensions gles2_only \
+gles2_extensions gles3_only"
+
+for ENTRY in $GLES_ENTRIES; do
+    SRC_FILE=$OPENGLES_DISPATCH_SRCDIR/${ENTRY}.entries
+    DST_FILE=$OPENGLES_DISPATCH_INCLUDE/${ENTRY}_functions.h
+    gen_funcargs_header "$SRC_FILE" "$DST_FILE" "$GEN_ENTRIES"
+done
 
 if [ "$FAILURES" ]; then
     exit 1

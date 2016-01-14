@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#include "GLESv2Dispatch.h"
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,14 +28,13 @@ static emugl::SharedLibrary *s_gles2_lib = NULL;
 // This function is called only once during initialiation before
 // any thread has been created - hence it should NOT be thread safe.
 //
-bool init_gles2_dispatch(gles2_server_context_t *dispatch_table)
+bool init_gles2_dispatch(GLESv2Dispatch* dispatch_table)
 {
     const char *libName = getenv("ANDROID_GLESv2_LIB");
-    if (!libName) libName = DEFAULT_GLES_V2_LIB;
+    if (!libName) {
+        libName = DEFAULT_GLES_V2_LIB;
+    }
 
-    //
-    // Load the GLES library
-    //
     char error[256];
     s_gles2_lib = emugl::SharedLibrary::open(libName, error, sizeof(error));
     if (!s_gles2_lib) {
@@ -47,9 +46,15 @@ bool init_gles2_dispatch(gles2_server_context_t *dispatch_table)
     //
     // init the GLES dispatch table
     //
-    dispatch_table->initDispatchByName(gles2_dispatch_get_proc_func, NULL);
+#define LOOKUP_SYMBOL(return_type,function_name,signature,callargs) \
+    dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+            s_gles2_lib->findSymbol(#function_name));
+
+    LIST_GLES2_FUNCTIONS(LOOKUP_SYMBOL,LOOKUP_SYMBOL)
+
     return true;
 }
+
 
 //
 // This function is called only during initialiation before

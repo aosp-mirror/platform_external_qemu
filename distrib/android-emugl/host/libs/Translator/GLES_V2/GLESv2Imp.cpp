@@ -21,18 +21,20 @@
 #endif
 
 #define GL_GLEXT_PROTOTYPES
-#include <stdio.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+
 #include <OpenglCodecCommon/ErrorLog.h>
 #include <GLcommon/TranslatorIfaces.h>
-#include <GLcommon/gldefs.h>
+#include <OpenGLESDispatch/gldefs.h>
 #include "GLESv2Context.h"
 #include "GLESv2Validate.h"
 #include "ShaderParser.h"
 #include "ProgramData.h"
 #include <GLcommon/TextureUtils.h>
 #include <GLcommon/FramebufferData.h>
+
+#include <stdio.h>
 
 extern "C" {
 

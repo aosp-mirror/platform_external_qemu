@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#include "EGLDispatch.h"
+#include "OpenGLESDispatch/EGLDispatch.h"
 
 #include "emugl/common/shared_library.h"
 
