@@ -32,13 +32,6 @@ void CellularPage::on_cell_standardBox_currentIndexChanged(int index)
     }
 }
 
-void CellularPage::on_cell_delayBox_currentIndexChanged(int index)
-{
-    // See http://developer.android.com/tools/devices/emulator.html#netdelay
-    // TODO: Implement Network delay setting
-    printf("===== ext-cellular.cpp: The Network delay setting is not implemented!\n");
-}
-
 void CellularPage::on_cell_voiceStatusBox_currentIndexChanged(int index)
 {
     if (mCellularAgent && mCellularAgent->setVoiceStatus) {
