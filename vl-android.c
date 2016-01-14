@@ -1872,6 +1872,7 @@ static void android_init_metrics(int opengl_alive)
 
     androidMetrics_init(&metrics);
     ANDROID_METRICS_STRASSIGN(metrics.emulator_version, EMULATOR_VERSION_STRING);
+    ANDROID_METRICS_STRASSIGN(metrics.host_os_type, get_host_os_type());
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, android_hw->hw_cpu_arch);
     metrics.guest_gpu_enabled = android_hw->hw_gpu_enabled;
     if (android_hw->hw_gpu_enabled) {

@@ -49,6 +49,8 @@ int formatToolbarGetUrl(char** ptr,
     static const char version_key[] = "version";
     static const char num_crashes_key[] = "exf";
     static const char opengl_alive_key[] = "opengl_alive";
+    // Matches the key used by the update ping.
+    static const char host_os_key[] = "os";
 
     assert(ptr != NULL);
     assert(*ptr == NULL);
@@ -57,17 +59,15 @@ int formatToolbarGetUrl(char** ptr,
 
     char* client_id = android_studio_get_installation_id();
     fullUrl += Uri::FormatEncodeArguments(
-        "?as=%s&%s=%s&%s=%s&%s=%s"
-        "&%s=%d&%s=%d&%s=%" PRId64 "&%s=%" PRId64,
-        product_name,
-        version_key, metrics->emulator_version,
-        client_id_key, client_id,
-        guest_arch_key, metrics->guest_arch,
+            "?as=%s&%s=%s&%s=%s&%s=%s&%s=%s"
+            "&%s=%d&%s=%d&%s=%" PRId64 "&%s=%" PRId64,
+            product_name, version_key, metrics->emulator_version, host_os_key,
+            metrics->host_os_type, client_id_key, client_id, guest_arch_key,
+            metrics->guest_arch,
 
-        num_crashes_key, metrics->is_dirty ? 1 : 0,
-        opengl_alive_key, metrics->opengl_alive,
-        system_time_key, metrics->system_time,
-        user_time_key, metrics->user_time);
+            num_crashes_key, metrics->is_dirty ? 1 : 0, opengl_alive_key,
+            metrics->opengl_alive, system_time_key, metrics->system_time,
+            user_time_key, metrics->user_time);
     free(client_id);
 
     if (metrics->guest_gpu_enabled > 0) {
