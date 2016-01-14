@@ -22,6 +22,30 @@
       "revId": "1096dc3db48f9b22602a8ae66ab9a8932431a01a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "274e5eac_4eff157f",
+        "filename": "android/skin/qt/extended-window-styles.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-14T22:02:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "07495aa4_b398c3ee",
+      "range": {
+        "startLine": 71,
+        "startChar": 46,
+        "endLine": 71,
+        "endChar": 47
+      },
+      "revId": "1096dc3db48f9b22602a8ae66ab9a8932431a01a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
