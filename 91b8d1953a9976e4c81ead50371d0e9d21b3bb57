@@ -22,6 +22,30 @@
       "revId": "91b8d1953a9976e4c81ead50371d0e9d21b3bb57",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c75ca266_7860d8af",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-14T01:15:38Z",
+      "side": 0,
+      "message": "This was already broken. The said function was returning 1 for success and 0 otherwise (WIFEXTED(...)).\n\nFixed.",
+      "parentUuid": "676db610_9df4c440",
+      "range": {
+        "startLine": 158,
+        "startChar": 13,
+        "endLine": 158,
+        "endChar": 20
+      },
+      "revId": "91b8d1953a9976e4c81ead50371d0e9d21b3bb57",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

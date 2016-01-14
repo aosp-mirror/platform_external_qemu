@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "676db610_2ce61c02",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 568,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-14T01:15:38Z",
+      "side": 1,
+      "message": "Not sure what the best way here is.\n\n(1) Let it leak... it\u0027ll eventually finish.\n(2) Terminate it dead. That\u0027s what I did here\n\n(3) Send WM_CLOSE.\n    - Window may prompt the user for confirmation. We don\u0027t really want that. The use case here is things like doing some background network pinging etc. User has no idea what\u0027s running.\n    - Console apps seem to not do what you expect here -- the default behaviour will kill the console window without affecting the \"main\" process of the app\n    - If you wanted to act on a failed attempt with a heavy handed TerminateProcess, you need to block even longer or delay stuff on the event loop. We don\u0027t want to do either here.\n\n(4) GenerateConsoleCtrlEvent. You can\u0027t control the process group this signal is sent to. It goes to *everybody* in the calling process\u0027 group. That\u0027s bad. Very bad. I guess the only intended use case is when a dying process wants to warn it\u0027s children.\n\n\nI could use (4) if I launched a subprocess inside a process group that then launched the command. That seems wasteful, and wee bit non-trivial.",
+      "parentUuid": "27673e34_aebfcbe6",
+      "range": {
+        "startLine": 568,
+        "startChar": 12,
+        "endLine": 568,
+        "endChar": 30
+      },
+      "revId": "bd6b4914a49b75e78be6cd58fb2dc3f14090a1c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4768b202_becc18e6",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-13T02:17:48Z",
       "side": 1,
       "message": "it\u0027s too C",
+      "range": {
+        "startLine": 604,
+        "startChar": 12,
+        "endLine": 604,
+        "endChar": 18
+      },
+      "revId": "bd6b4914a49b75e78be6cd58fb2dc3f14090a1c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "678e9643_959d83df",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 604,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-14T01:15:38Z",
+      "side": 1,
+      "message": "std::chrono::steady_clock ftw.\n\nI like the whole std::chrono API very much. :)",
+      "parentUuid": "4768b202_becc18e6",
       "range": {
         "startLine": 604,
         "startChar": 12,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "4768b202_32b799a1",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-14T01:15:38Z",
+      "side": 1,
+      "message": "You can now get exit code using another out parameter.\nNote that this function did not correctly return exit code on unix before this CL. (It returned 1 for correctly finished process, 0 otherwise)\nI noticed that and that\u0027s why I was following the same convention.\n\nI have updated the relevant callsite to use the exit code now.",
+      "parentUuid": "e759a674_c1e2d1bd",
+      "range": {
+        "startLine": 271,
+        "startChar": 28,
+        "endLine": 271,
+        "endChar": 62
+      },
+      "revId": "bd6b4914a49b75e78be6cd58fb2dc3f14090a1c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4768b202_3ecac8c5",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 3
@@ -82,6 +154,30 @@
       "writtenOn": "2016-01-13T02:17:48Z",
       "side": 1,
       "message": "\u0026 -\u003e |",
+      "range": {
+        "startLine": 375,
+        "startChar": 70,
+        "endLine": 375,
+        "endChar": 71
+      },
+      "revId": "bd6b4914a49b75e78be6cd58fb2dc3f14090a1c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07495aa4_e7872d3a",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-14T01:15:38Z",
+      "side": 1,
+      "message": "Done, thanks.",
+      "parentUuid": "4768b202_3ecac8c5",
       "range": {
         "startLine": 375,
         "startChar": 70,
