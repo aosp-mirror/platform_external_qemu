@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "87562a44_b44559f7",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-14T21:06:27Z",
+      "side": 1,
+      "message": "well, now it\u0027s owned by no one:\n\nvoid EmulatorQtWindow::create()\n{\n    sInstance.get() \u003d Ptr(new EmulatorQtWindow());\n}",
+      "range": {
+        "startLine": 71,
+        "startChar": 23,
+        "endLine": 71,
+        "endChar": 29
+      },
+      "revId": "1789abf98c3d1c5cc88c4f6cf5c030e087e70975",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
