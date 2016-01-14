@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "678e9643_8e76506d",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 603,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-14T18:31:30Z",
+      "side": 1,
+      "message": "just true?",
+      "range": {
+        "startLine": 603,
+        "startChar": 15,
+        "endLine": 603,
+        "endChar": 29
+      },
+      "revId": "cf257d4ef5d0d0dedd38a87cbab0764e427d4a21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4768b202_433245e5",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 659,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-14T18:31:30Z",
+      "side": 1,
+      "message": "boo to the POSIX api",
+      "range": {
+        "startLine": 659,
+        "startChar": 16,
+        "endLine": 659,
+        "endChar": 28
+      },
+      "revId": "cf257d4ef5d0d0dedd38a87cbab0764e427d4a21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4768b202_481ee2f4",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-14T18:31:30Z",
+      "side": 1,
+      "message": "we\u0027ve already got a Duration typedef nearby, can we just use it?",
+      "range": {
+        "startLine": 277,
+        "startChar": 0,
+        "endLine": 277,
+        "endChar": 45
+      },
+      "revId": "cf257d4ef5d0d0dedd38a87cbab0764e427d4a21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "274e5eac_6ddc9a9c",
+        "filename": "android/base/system/System_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-14T18:31:30Z",
+      "side": 1,
+      "message": "this IMO is too slow for a unit-test. Maybe one attempt in ping?",
+      "range": {
+        "startLine": 399,
+        "startChar": 4,
+        "endLine": 400,
+        "endChar": 79
+      },
+      "revId": "cf257d4ef5d0d0dedd38a87cbab0764e427d4a21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4768b202_e3fd5121",
+        "filename": "android/filesystems/ext4_resize.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-14T18:31:30Z",
+      "side": 1,
+      "message": "!success || exitCode !\u003d 0\nalso, exitCode is uninitialized if !success",
+      "range": {
+        "startLine": 94,
+        "startChar": 8,
+        "endLine": 94,
+        "endChar": 15
+      },
+      "revId": "cf257d4ef5d0d0dedd38a87cbab0764e427d4a21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "676db610_67f02dfd",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-14T18:31:30Z",
+      "side": 1,
+      "message": "-1\n?",
+      "range": {
+        "startLine": 164,
+        "startChar": 36,
+        "endLine": 164,
+        "endChar": 38
+      },
+      "revId": "cf257d4ef5d0d0dedd38a87cbab0764e427d4a21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
