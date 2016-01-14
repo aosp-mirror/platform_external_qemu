@@ -31,11 +31,6 @@ ExtendedWindow::ExtendedWindow(
     QFrame(nullptr),
     mEmulatorWindow(eW),
     mToolWindow(tW),
-    mEmulatorWindowAgent(agentPtr ? agentPtr->window    : nullptr),
-    mLocationAgent      (agentPtr ? agentPtr->location  : nullptr),
-    mSensorsAgent       (agentPtr ? agentPtr->sensors   : nullptr),
-    mSettingsAgent      (agentPtr ? agentPtr->settings  : nullptr),
-    mCloseRequested(false),
     mExtendedUi(new Ui::ExtendedControls)
 {
     Q_INIT_RESOURCE(resources);
@@ -69,9 +64,6 @@ ExtendedWindow::ExtendedWindow(
     connect(
         mExtendedUi->settingsPage, SIGNAL(themeChanged(SettingsTheme)),
         this, SLOT(switchToTheme(SettingsTheme)));
-
-    // Do any sub-window-specific initialization
-    initVirtualSensors();
 
     mPaneButtonMap = {
         {PANE_IDX_LOCATION,  mExtendedUi->locationButton},
