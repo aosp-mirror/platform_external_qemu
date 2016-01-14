@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e759a674_abc8532b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-14T21:24:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "676db610_76762570",
+      "revId": "3307e498a161f3376871e30a33c44d6330b10277",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07623a24_75c8db2a",
         "filename": "android/skin/qt/extended-pages/location-page.ui",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-01-14T18:15:38Z",
       "side": 1,
       "message": "\"GPS data points\"\nshould be\n\"GPS point\"\n(The bottom half of this page correctly says \"GPS data points\")",
+      "revId": "3307e498a161f3376871e30a33c44d6330b10277",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "27673e34_af4502f7",
+        "filename": "android/skin/qt/extended-pages/location-page.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-14T21:24:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "07623a24_75c8db2a",
       "revId": "3307e498a161f3376871e30a33c44d6330b10277",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
