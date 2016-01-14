@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "27673e34_8afab45f",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-14T22:42:59Z",
+      "side": 1,
+      "message": "nit: extra /",
+      "range": {
+        "startLine": 41,
+        "startChar": 6,
+        "endLine": 41,
+        "endChar": 7
+      },
+      "revId": "a4e73fb39416edf6d11493d86078899c5eb32ccc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07495aa4_d3bf4fe6",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-14T22:42:59Z",
+      "side": 1,
+      "message": "nit: extra blank line",
+      "revId": "a4e73fb39416edf6d11493d86078899c5eb32ccc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
