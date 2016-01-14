@@ -30,6 +30,9 @@
 #include "processor/pathname_stripper.h"
 #include <curl/curl.h>
 
+#include <algorithm>
+#include <string>
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -262,7 +265,12 @@ bool CrashService::setClient(int clientpid) {
     return true;
 }
 
-static const char* const gfx_drivers[] = {
+// This is a list of all substrings that definitely belong to some graphics
+// drivers.
+// NB: all names have to be lower-case - we transform the string from the stack
+// trace to lowe case before doing the comparisons
+
+static const char* const gfx_drivers_lcase[] = {
     // NVIDIA
     "nvcpl", // Control Panel
     "nvshell", // Desktop Explorer
@@ -274,7 +282,7 @@ static const char* const gfx_drivers[] = {
     "nvcuvid", // Video decode
     "nvogl", // OpenGL (modern)
     "ig4icd", // OpenGL (icd?)
-    "GeForceGLDriver", // OpenGL (old)
+    "geforcegldriver", // OpenGL (old)
     "nvd3d", // Direct3D
     "nvwgf2", // D3D10
     "nvdx", // D3D shim drivers
@@ -300,8 +308,19 @@ static const char* const gfx_drivers[] = {
     "intelocl", // Intel OpenCL
 
     // Others
-    "libGL" // Low-level Linux OpenGL
+    "libgl.", // Low-level Linux OpenGL
+    "opengl32.dll", // Low-level Windows OpenGL
 };
+
+static bool containsGfxPattern(const std::string& str) {
+    for (const char* pattern : gfx_drivers_lcase) {
+        if (str.find(pattern) != std::string::npos) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 UserSuggestions::UserSuggestions(google_breakpad::ProcessState* process_state) {
     suggestions.clear();
@@ -310,30 +329,32 @@ UserSuggestions::UserSuggestions(google_breakpad::ProcessState* process_state) {
     // the thread requesting dump.
 
     int crashed_thread_id = process_state->requesting_thread();
-    google_breakpad::CallStack* crashed_stack = process_state->threads()->at(crashed_thread_id);
+    google_breakpad::CallStack* crashed_stack =
+            process_state->threads()->at(crashed_thread_id);
+    if (!crashed_stack) {
+        return;
+    }
 
-    if (crashed_stack) {
-        int frame_count = crashed_stack->frames()->size();
-        if (frame_count == 0) {
-            return;
-        } else {
-            for (int frame_index = 0; frame_index < frame_count; ++frame_index) {
-                google_breakpad::StackFrame* frame = crashed_stack->frames()->at(frame_index);
-                if (frame) {
-                    const auto* module = frame->module;
-                    if (frame->module) {
-                        std::string file = google_breakpad::PathnameStripper::File(module->code_file()) + "\n";
-                        std::transform(file.begin(), file.end(), file.begin(), ::tolower);
-                        // Should the user update their graphics drivers?
-                        for (const char* pattern : gfx_drivers) {
-                            if (file.find(pattern) != std::string::npos) {
-                                suggestions.insert(UpdateGfxDrivers);
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
+    const int frame_count = crashed_stack->frames()->size();
+    for (int frame_index = 0; frame_index < frame_count; ++frame_index) {
+        google_breakpad::StackFrame* const frame =
+                crashed_stack->frames()->at(frame_index);
+        if (!frame) {
+            continue;
+        }
+        const auto& module = frame->module;
+        if (!module) {
+            continue;
+        }
+
+        std::string file =
+                google_breakpad::PathnameStripper::File(module->code_file());
+        std::transform(file.begin(), file.end(), file.begin(), ::tolower);
+        // Should the user update their graphics drivers?
+
+        if (containsGfxPattern(file)) {
+            suggestions.insert(UpdateGfxDrivers);
+            break;
         }
     }
 }
