@@ -70,6 +70,30 @@
       "revId": "0e65d243a178602df585e436f4f74b9d62f65934",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e759a674_68ce413b",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 598,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-14T19:28:05Z",
+      "side": 1,
+      "message": "The handle returned by CreateProcess is guaranteed to have PROCESS_ALL_ACCESS.\n\nhttps://msdn.microsoft.com/en-us/library/windows/desktop/ms684880(v\u003dvs.85).aspx\n\nI\u0027ll go with the assert you suggested, since something gone wonky with the OS at this point. Returning |true| is not an option since |outExitCode| is still invalid.",
+      "parentUuid": "4768b202_23bd89ee",
+      "range": {
+        "startLine": 598,
+        "startChar": 12,
+        "endLine": 598,
+        "endChar": 25
+      },
+      "revId": "0e65d243a178602df585e436f4f74b9d62f65934",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
