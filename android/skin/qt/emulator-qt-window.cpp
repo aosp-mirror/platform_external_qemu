@@ -156,7 +156,10 @@ EmulatorQtWindow* EmulatorQtWindow::getInstance()
 
 EmulatorQtWindow::~EmulatorQtWindow()
 {
-    delete tool_window;
+    if (tool_window) {
+        delete tool_window;
+        tool_window = NULL;
+    }
     delete mMainLoopThread;
 }
 
@@ -439,6 +442,11 @@ void EmulatorQtWindow::slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoin
 
 void EmulatorQtWindow::slot_clearInstance()
 {
+    if (tool_window) {
+        delete tool_window;
+        tool_window = NULL;
+    }
+
     skin_winsys_save_window_pos();
     sInstance.get().reset();
 }
