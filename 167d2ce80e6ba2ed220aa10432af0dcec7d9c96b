@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "676db610_42507fb7",
+        "filename": "android/utils/system_wrapper.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-14T21:11:12Z",
+      "side": 1,
+      "message": "String has a release() method",
+      "range": {
+        "startLine": 45,
+        "startChar": 11,
+        "endLine": 45,
+        "endChar": 79
+      },
+      "revId": "167d2ce80e6ba2ed220aa10432af0dcec7d9c96b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
