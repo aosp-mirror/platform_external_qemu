@@ -99,3 +99,11 @@ void switchAllIconsForTheme(SettingsTheme theme)
         }
     }
 }
+
+
+QIcon getIconForCurrentTheme(const QString& icon_name) {
+    QString iconType =
+        getSelectedTheme() == SETTINGS_THEME_LIGHT ? LIGHT_PATH : DARK_PATH;
+    return QIcon(":/" + iconType + "/" + icon_name);
+}
+
