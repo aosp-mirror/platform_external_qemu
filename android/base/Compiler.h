@@ -20,6 +20,11 @@
 //       ....
 //   };
 //
+// Note: this macro is sometimes defined in 3rd-party libs, so let's check first
+#ifndef DISALLOW_COPY_AND_ASSIGN
+
 #define DISALLOW_COPY_AND_ASSIGN(T) \
     T(const T& other) = delete; \
     T& operator=(const T& other) = delete
+
+#endif
