@@ -46,7 +46,7 @@ TEST_F(MetricsReporterToolbarTest, defaultMetrics) {
     AndroidMetrics metrics;
     static const char kExpected[] =
             "https://tools.google.com/service/update?"
-            "as=androidsdk_emu_crash&version=unknown"
+            "as=androidsdk_emu_crash&version=unknown&os=unknown"
             "&id=00000000-0000-0000-0000-000000000000"
             "&guest_arch=unknown&exf=1&opengl_alive=0&system_time=0"
             "&user_time=0";
@@ -65,13 +65,14 @@ TEST_F(MetricsReporterToolbarTest, cleanRun) {
     AndroidMetrics metrics;
     static const char kExpected[] =
             "https://tools.google.com/service/update?"
-            "as=androidsdk_emu_crash&version=standalone"
+            "as=androidsdk_emu_crash&version=standalone&os=lynx"
             "&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&exf=0&opengl_alive=1&system_time=1170&user_time=220";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
     ANDROID_METRICS_STRASSIGN(metrics.emulator_version, "standalone");
+    ANDROID_METRICS_STRASSIGN(metrics.host_os_type, "lynx");
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, "x86_64");
     metrics.guest_gpu_enabled = 0;
     metrics.opengl_alive = 1;
@@ -93,13 +94,14 @@ TEST_F(MetricsReporterToolbarTest, dirtyRun) {
     AndroidMetrics metrics;
     static const char kExpected[] =
             "https://tools.google.com/service/update?"
-            "as=androidsdk_emu_crash&version=standalone"
+            "as=androidsdk_emu_crash&version=standalone&os=lynx"
             "&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&exf=1&opengl_alive=1&system_time=1080&user_time=180";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
     ANDROID_METRICS_STRASSIGN(metrics.emulator_version, "standalone");
+    ANDROID_METRICS_STRASSIGN(metrics.host_os_type, "lynx");
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, "x86_64");
     metrics.guest_gpu_enabled = 0;
     metrics.opengl_alive = 1;
@@ -121,13 +123,14 @@ TEST_F(MetricsReporterToolbarTest, openGLErrorRun) {
     AndroidMetrics metrics;
     static const char kExpected[] =
             "https://tools.google.com/service/update?"
-            "as=androidsdk_emu_crash&version=standalone"
+            "as=androidsdk_emu_crash&version=standalone&os=lynx"
             "&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&exf=1&opengl_alive=0&system_time=1080&user_time=180";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
     ANDROID_METRICS_STRASSIGN(metrics.emulator_version, "standalone");
+    ANDROID_METRICS_STRASSIGN(metrics.host_os_type, "lynx");
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, "x86_64");
     metrics.guest_gpu_enabled = 0;
     metrics.opengl_alive = 0;
@@ -149,7 +152,7 @@ TEST_F(MetricsReporterToolbarTest, gpuStrings) {
     AndroidMetrics metrics;
     static const char kExpected[] =
             "https://tools.google.com/service/update?as=androidsdk_emu_crash"
-            "&version=standalone&id="
+            "&version=standalone&os=lynx&id="
             "00000000-0000-0000-0000-000000000000&guest_arch=x86_64&exf"
             "=0&opengl_alive=1&system_time=1170&user_time=220&ggl_vendor="
             "Some_Vendor&ggl_renderer=&ggl_version=1%20.%200";
@@ -157,6 +160,7 @@ TEST_F(MetricsReporterToolbarTest, gpuStrings) {
 
     androidMetrics_init(&metrics);
     ANDROID_METRICS_STRASSIGN(metrics.emulator_version, "standalone");
+    ANDROID_METRICS_STRASSIGN(metrics.host_os_type, "lynx");
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, "x86_64");
     metrics.tick = 1;
     metrics.system_time = 1170;
