@@ -201,6 +201,24 @@
     },
     {
       "key": {
+        "uuid": "076cfa46_a6d3482f",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-14T17:32:37Z",
+      "side": 1,
+      "message": "Yes, we need to decouple libOpenGLESDispatch from the decodering stuff (which is really part of libOpenglRender). Let me handle this, I think I can provide useful patches to do that quickly...",
+      "parentUuid": "07495aa4_b0d6fe46",
+      "revId": "fcd7652c88837c02b8431233785d8d640f42a91a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "47ed12c9_ed3f055d",
         "filename": "android/skin/qt/sources.mk",
         "patchSetId": 6
