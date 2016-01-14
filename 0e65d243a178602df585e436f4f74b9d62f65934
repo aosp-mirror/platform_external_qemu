@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e759a674_88e8f5d2",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 598,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-14T19:04:19Z",
+      "side": 1,
+      "message": "well, your current function comment suggests it should be true here, just exitCode is bad",
+      "range": {
+        "startLine": 598,
+        "startChar": 12,
+        "endLine": 598,
+        "endChar": 25
+      },
+      "revId": "0e65d243a178602df585e436f4f74b9d62f65934",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
