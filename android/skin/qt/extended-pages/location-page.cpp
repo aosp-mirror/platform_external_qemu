@@ -37,14 +37,15 @@ LocationPage::LocationPage(QWidget *parent) :
     QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout);
     setButtonEnabled(mUi->loc_playStopButton, getSelectedTheme(), false);
 
-    // Restore previous values.
+    // Restore previous values. If there are no previous values, use the
+    // Googleplex's longitude and latitude.
     QSettings settings;
     mUi->loc_altitudeInput->setText(
             settings.value(Ui::Settings::LOCATION_ALTITUDE, "0.0").toString());
     mUi->loc_longitudeInput->setValue(
-            settings.value(Ui::Settings::LOCATION_LONGITUDE, 0.0).toDouble());
+            settings.value(Ui::Settings::LOCATION_LONGITUDE, -122.084).toDouble());
     mUi->loc_latitudeInput->setValue(
-            settings.value(Ui::Settings::LOCATION_LATITUDE, 0.0).toDouble());
+            settings.value(Ui::Settings::LOCATION_LATITUDE, 37.422).toDouble());
     mUi->loc_playbackSpeed->setCurrentIndex(
             settings.value(Ui::Settings::LOCATION_PLAYBACK_SPEED, 0).toInt());
     QString location_data_file =
@@ -228,7 +229,7 @@ void LocationPage::populateTable(GpsFixArray* fixes)
         mUi->loc_pathTable->setItem(i, 5, itemForTable(QString::fromStdString(fix.description)));
 
         // If the fixes array contains a lot of elements, this loop can cause
-        // a lag in the UI. Just make sure we let the application handle UI 
+        // a lag in the UI. Just make sure we let the application handle UI
         // events for every few rows we add.
         if (i % 100 == 0) {
             qApp->processEvents();
@@ -388,7 +389,6 @@ void LocationPage::finishGeoDataLoading(
     setButtonEnabled(mUi->loc_playStopButton, theme, true);
     mNowLoadingGeoData = false;
     emit(geoDataLoadingFinished());
-   
 }
 
 void LocationPage::startupGeoDataThreadFinished(QString file_name, bool ok, QString error_message) {
