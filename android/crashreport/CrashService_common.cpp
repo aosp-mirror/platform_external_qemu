@@ -298,6 +298,7 @@ static const char* const gfx_drivers_lcase[] = {
     "atiumd", // D3D
     "atidxx", // "TMM Com Clone Control Module" (???)
     "atimpenc", // video encoder
+    "atigl", // another ATI OpenGL driver
 
     // Intel
     "i915", // Intel i915 gpu
