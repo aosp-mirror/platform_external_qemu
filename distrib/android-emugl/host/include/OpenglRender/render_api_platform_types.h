@@ -14,8 +14,10 @@
 * limitations under the License.
 */
 
-#ifndef _RENDER_API_PLATFORM_TYPES_H
-#define _RENDER_API_PLATFORM_TYPES_H
+#pragma once
+
+// Define FBNativeWindowType which corresponds to the type of native
+// host UI window handles.
 
 #if defined(_WIN32) || defined(__VC32__) && !defined(__CYGWIN__) && !defined(__SCITECH_SNAP__) /* Win32 and WinCE */
 #include <windows.h>
@@ -24,10 +26,9 @@ typedef HWND    FBNativeWindowType;
 
 #elif defined(__linux__)
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-
-typedef Window   FBNativeWindowType;
+// Really a Window handle, but we don't want to include the X11 headers here.
+#include <stdint.h>
+typedef uint32_t FBNativeWindowType;
 
 #elif defined(__APPLE__)
 
@@ -36,5 +37,3 @@ typedef void*   FBNativeWindowType;
 #else
 #warning "Unsupported platform"
 #endif
-
-#endif // of  _RENDER_API_PLATFORM_TYPES_H

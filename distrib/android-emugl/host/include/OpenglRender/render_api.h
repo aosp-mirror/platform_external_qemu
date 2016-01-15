@@ -13,8 +13,11 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef _OPENGL_RENDERER_RENDER_API_H
-#define _OPENGL_RENDERER_RENDER_API_H
+#pragma once
+
+#include "OpenglRender/render_api_functions.h"
+
+#include <KHR/khrplatform.h>
 
 /* This header and its declarations must be usable from C code.
  *
@@ -30,23 +33,12 @@
 extern "C" {
 #endif
 
-#include "render_api_functions.h"
-
-#include <KHR/khrplatform.h>
-
 // Use KHRONOS_APICALL to control visibility, but do not use KHRONOS_APIENTRY
 // because we don't need the functions to be __stdcall on Win32.
 #define RENDER_APICALL  KHRONOS_APICALL
 #define RENDER_APIENTRY
 
-/* list of constants to be passed to setStreamMode */
-#define STREAM_MODE_DEFAULT   0
-#define STREAM_MODE_TCP       1
-#define STREAM_MODE_UNIX      2
-#define STREAM_MODE_PIPE      3
-
-
-#define RENDER_API_DECLARE(return_type, func_name, signature) \
+#define RENDER_API_DECLARE(return_type, func_name, signature, callargs) \
     typedef return_type (RENDER_APIENTRY *func_name ## Fn) signature; \
     RENDER_APICALL return_type RENDER_APIENTRY func_name signature;
 
@@ -54,6 +46,4 @@ LIST_RENDER_API_FUNCTIONS(RENDER_API_DECLARE)
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

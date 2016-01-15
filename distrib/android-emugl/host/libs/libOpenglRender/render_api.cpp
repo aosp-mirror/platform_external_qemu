@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#include "render_api.h"
+#include "OpenglRender/render_api.h"
 
 #include "IOStream.h"
 #include "RenderServer.h"
@@ -264,7 +264,7 @@ RENDER_APICALL void RENDER_APIENTRY repaintOpenGLDisplay(void)
 /* NOTE: For now, always use TCP mode by default, until the emulator
  *        has been updated to support Unix and Win32 pipes
  */
-#define  DEFAULT_STREAM_MODE  STREAM_MODE_TCP
+#define  DEFAULT_STREAM_MODE  RENDER_API_STREAM_MODE_TCP
 
 int gRendererStreamMode = DEFAULT_STREAM_MODE;
 
@@ -272,7 +272,7 @@ IOStream *createRenderThread(int p_stream_buffer_size, unsigned int clientFlags)
 {
     SocketStream*  stream = NULL;
 
-    if (gRendererStreamMode == STREAM_MODE_TCP) {
+    if (gRendererStreamMode == RENDER_API_STREAM_MODE_TCP) {
         stream = new TcpStream(p_stream_buffer_size);
     } else {
 #ifdef _WIN32
@@ -306,18 +306,18 @@ IOStream *createRenderThread(int p_stream_buffer_size, unsigned int clientFlags)
 RENDER_APICALL int RENDER_APIENTRY setStreamMode(int mode)
 {
     switch (mode) {
-        case STREAM_MODE_DEFAULT:
+        case RENDER_API_STREAM_MODE_DEFAULT:
             mode = DEFAULT_STREAM_MODE;
             break;
 
-        case STREAM_MODE_TCP:
+        case RENDER_API_STREAM_MODE_TCP:
             break;
 
 #ifndef _WIN32
-        case STREAM_MODE_UNIX:
+        case RENDER_API_STREAM_MODE_UNIX:
             break;
 #else /* _WIN32 */
-        case STREAM_MODE_PIPE:
+        case RENDER_API_STREAM_MODE_PIPE:
             break;
 #endif /* _WIN32 */
         default:
