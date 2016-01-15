@@ -12,12 +12,28 @@ endif
 
 ANDROID_SKIN_INCLUDES += $(EMUGL_INCLUDES)
 
+# gl-widget.cpp needs to call XInitThreads() directly to work around
+# a Qt bug. This implies a direct dependency to libX11.so
+ifeq (linux,$(BUILD_TARGET_OS))
+ANDROID_SKIN_LDLIBS += -lX11
+endif
+
+# gl-widget.cpp depends on libOpenGLESDispatch, which depends on
+# libemugl_common. Using libOpenGLESDispatch ensures that the code
+# will find and use the same host EGL/GLESv2 libraries as the ones
+# used by EmuGL. Doing anything else is prone to really bad failure
+# cases.
+ANDROID_SKIN_STATIC_LIBRARIES += \
+    libOpenGLESDispatch \
+    libemugl_common
+
 ANDROID_SKIN_SOURCES += \
     android/skin/qt/angle-input-widget.cpp \
     android/skin/qt/editable-slider-widget.cpp \
     android/skin/qt/emulator-qt-window.cpp \
     android/skin/qt/emulator-qt-no-window.cpp \
     android/skin/qt/error-dialog.cpp \
+    android/skin/qt/gl-widget.cpp \
     android/skin/qt/extended-pages/common.cpp \
     android/skin/qt/extended-pages/battery-page.cpp \
     android/skin/qt/extended-pages/cellular-page.cpp \
@@ -36,6 +52,7 @@ ANDROID_SKIN_SOURCES += \
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/angle-input-widget.h \
     android/skin/qt/editable-slider-widget.h \
+    android/skin/qt/gl-widget.h \
     android/skin/qt/emulator-qt-window.h \
     android/skin/qt/emulator-qt-no-window.h \
     android/skin/qt/extended-pages/battery-page.h \
