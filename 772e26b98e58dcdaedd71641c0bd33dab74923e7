@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "27673e34_a68528c6",
+        "filename": "android/base/async/RecurrentTask.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-15T20:22:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2752dead_a2769a1d",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 49
+      },
+      "revId": "772e26b98e58dcdaedd71641c0bd33dab74923e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07495aa4_f0d87c44",
         "filename": "android/base/async/RecurrentTask.h",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-15T19:01:01Z",
       "side": 1,
       "message": "I doubt there\u0027s any reasonable default here. Let\u0027s just force users to explicitly set it",
+      "range": {
+        "startLine": 34,
+        "startChar": 53,
+        "endLine": 34,
+        "endChar": 64
+      },
+      "revId": "772e26b98e58dcdaedd71641c0bd33dab74923e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "87562a44_a947bf33",
+        "filename": "android/base/async/RecurrentTask.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-15T20:22:01Z",
+      "side": 1,
+      "message": "Agreed.",
+      "parentUuid": "07495aa4_f0d87c44",
       "range": {
         "startLine": 34,
         "startChar": 53,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "2752dead_85660829",
+        "filename": "android/base/async/RecurrentTask.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-15T20:22:01Z",
+      "side": 1,
+      "message": "Done.\nHere and in ParallelTask.",
+      "parentUuid": "274e5eac_f71d1054",
+      "revId": "772e26b98e58dcdaedd71641c0bd33dab74923e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07495aa4_b0c2745a",
         "filename": "android/base/async/RecurrentTask.h",
         "patchSetId": 2
@@ -76,6 +142,30 @@
       "writtenOn": "2016-01-15T19:01:01Z",
       "side": 1,
       "message": "return? :)",
+      "range": {
+        "startLine": 39,
+        "startChar": 8,
+        "endLine": 39,
+        "endChar": 14
+      },
+      "revId": "772e26b98e58dcdaedd71641c0bd33dab74923e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e759a674_b7a9d4b5",
+        "filename": "android/base/async/RecurrentTask.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-15T20:22:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "07495aa4_b0c2745a",
       "range": {
         "startLine": 39,
         "startChar": 8,
@@ -135,6 +225,30 @@
     },
     {
       "key": {
+        "uuid": "e759a674_57b4b80f",
+        "filename": "android/base/async/RecurrentTask.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-15T20:22:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "87562a44_c94e7370",
+      "range": {
+        "startLine": 53,
+        "startChar": 16,
+        "endLine": 53,
+        "endChar": 28
+      },
+      "revId": "772e26b98e58dcdaedd71641c0bd33dab74923e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4768b202_77445a53",
         "filename": "android/base/async/RecurrentTask.h",
         "patchSetId": 2
@@ -146,6 +260,30 @@
       "writtenOn": "2016-01-15T19:01:01Z",
       "side": 1,
       "message": "why do we always recreate the timer? I thought just startRelative() is enough after it was created",
+      "range": {
+        "startLine": 56,
+        "startChar": 12,
+        "endLine": 56,
+        "endChar": 36
+      },
+      "revId": "772e26b98e58dcdaedd71641c0bd33dab74923e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "87562a44_8938fbac",
+        "filename": "android/base/async/RecurrentTask.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-15T20:22:01Z",
+      "side": 1,
+      "message": "Done.\nBrainfreeze. So many objects are one time use only that I thought this one was the same.",
+      "parentUuid": "4768b202_77445a53",
       "range": {
         "startLine": 56,
         "startChar": 12,
