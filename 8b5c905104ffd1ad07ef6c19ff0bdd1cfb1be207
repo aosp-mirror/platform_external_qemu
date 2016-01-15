@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "07495aa4_16aec0a2",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-15T23:59:08Z",
+      "side": 1,
+      "message": "it looks like there\u0027s no real difference here in both branches of #ifdef. Can we leave just one?",
+      "range": {
+        "startLine": 159,
+        "startChar": 0,
+        "endLine": 166,
+        "endChar": 6
+      },
+      "revId": "8b5c905104ffd1ad07ef6c19ff0bdd1cfb1be207",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
