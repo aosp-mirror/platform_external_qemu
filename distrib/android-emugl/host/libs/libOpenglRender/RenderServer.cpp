@@ -16,7 +16,6 @@
 #include "RenderServer.h"
 
 #include "RenderThread.h"
-#include "render_api.h"
 #include "TcpStream.h"
 #ifndef _WIN32
 #include "UnixStream.h"
@@ -26,6 +25,8 @@
 #ifdef _WIN32
 #include "Win32PipeStream.h"
 #endif
+
+#include "OpenglRender/render_api.h"
 
 #include <set>
 
@@ -55,7 +56,7 @@ RenderServer *RenderServer::create(char* addr, size_t addrLen)
         return NULL;
     }
 
-    if (gRendererStreamMode == STREAM_MODE_TCP) {
+    if (gRendererStreamMode == RENDER_API_STREAM_MODE_TCP) {
         server->m_listenSock = new TcpStream();
     } else {
 #ifdef _WIN32

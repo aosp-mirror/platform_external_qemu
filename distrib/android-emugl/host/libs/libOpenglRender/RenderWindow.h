@@ -15,7 +15,7 @@
 #ifndef ANDROID_EMUGL_LIBRENDER_RENDER_WINDOW_H
 #define ANDROID_EMUGL_LIBRENDER_RENDER_WINDOW_H
 
-#include "render_api.h"
+#include "OpenglRender/render_api.h"
 
 namespace emugl {
 class Thread;

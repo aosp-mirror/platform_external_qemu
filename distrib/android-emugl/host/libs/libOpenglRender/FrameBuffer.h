@@ -20,9 +20,10 @@
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
 #include "RenderContext.h"
-#include "render_api.h"
 #include "TextureDraw.h"
 #include "WindowSurface.h"
+
+#include "OpenglRender/render_api.h"
 
 #include <EGL/egl.h>
 
