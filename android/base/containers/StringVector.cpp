@@ -28,6 +28,13 @@ StringVector::StringVector(const StringVector& other) : PodVector<String>() {
     }
 }
 
+StringVector::StringVector(std::initializer_list<StringView> list) {
+    reserve(list.size());
+    for (StringView s : list) {
+        push_back(s);
+    }
+}
+
 StringVector& StringVector::operator=(const StringVector& other) {
     reserve(0U);
     resize(other.size());

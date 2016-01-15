@@ -28,10 +28,10 @@ public:
     // Copy-constructor.
     StringVector(const StringVector& other);
 
-    // bring the constructor from initializer-list
-    using PodVector::PodVector;
+    // Initializer-list constructor.
+    StringVector(std::initializer_list<StringView> list);
 
-    // Assignment operator
+    // Assignment operator.
     StringVector& operator=(const StringVector& other);
 
     // Destructor.
