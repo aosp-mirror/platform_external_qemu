@@ -9,15 +9,10 @@ EMUGL_PATH := $(call my-dir)
 
 EMUGL_OLD_LOCAL_PATH := $(LOCAL_PATH)
 
-# Directory containing common headers used by several modules
-# This is always set to a module's LOCAL_C_INCLUDES
-# See the definition of emugl-begin-module in common.mk
-#
-EMUGL_COMMON_INCLUDES := \
-    $(EMUGL_PATH)/host/include/libOpenglRender \
-    $(EMUGL_PATH)/shared
-
-EMUGL_COMMON_INCLUDES := $(EMUGL_PATH)/host/libs/Translator/include
+# Directory containing common headers that are part of EmuGL's public API.
+# This is always set to a module's LOCAL_C_INCLUDES. See the definition of
+# emugl-begin-module in common.mk
+EMUGL_COMMON_INCLUDES := $(EMUGL_PATH)/host/include
 
 # common cflags used by several modules
 # This is always set to a module's LOCAL_CFLAGS
@@ -84,11 +79,11 @@ endif
 include $(EMUGL_PATH)/host/libs/GLESv1_dec/Android.mk
 include $(EMUGL_PATH)/host/libs/GLESv2_dec/Android.mk
 include $(EMUGL_PATH)/host/libs/renderControl_dec/Android.mk
+include $(EMUGL_PATH)/host/libs/libOpenGLESDispatch/Android.mk
 include $(EMUGL_PATH)/host/libs/Translator/GLcommon/Android.mk
 include $(EMUGL_PATH)/host/libs/Translator/GLES_CM/Android.mk
 include $(EMUGL_PATH)/host/libs/Translator/GLES_V2/Android.mk
 include $(EMUGL_PATH)/host/libs/Translator/EGL/Android.mk
-include $(EMUGL_PATH)/host/libs/libOpenGLESDispatch/Android.mk
 
 # Host shared libraries
 include $(EMUGL_PATH)/host/libs/libOpenglRender/Android.mk

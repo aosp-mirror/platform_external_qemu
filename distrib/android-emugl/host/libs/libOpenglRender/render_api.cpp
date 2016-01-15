@@ -28,14 +28,15 @@
 #endif
 
 #include "DecoderContext.h"
-#include "EGLDispatch.h"
-#include "GLESv1Dispatch.h"
-#include "GLESv2Dispatch.h"
+
+#include "OpenGLESDispatch/EGLDispatch.h"
+#include "OpenGLESDispatch/GLESv1Dispatch.h"
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
 
 #include <string.h>
 
-gles2_decoder_context_t s_gles2;
-gles1_decoder_context_t s_gles1;
+GLESv2Dispatch s_gles2;
+GLESv1Dispatch s_gles1;
 static RenderServer* s_renderThread = NULL;
 static char s_renderAddr[256];
 

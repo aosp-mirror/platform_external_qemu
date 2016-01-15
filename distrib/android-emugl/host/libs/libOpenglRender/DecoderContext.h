@@ -14,7 +14,9 @@
 * limitations under the License.
 */
 #pragma once
-#include "gles2_dec.h"
-#include "gles1_dec.h"
-extern gles2_decoder_context_t s_gles2;
-extern gles1_decoder_context_t s_gles1;
+
+#include "OpenGLESDispatch/GLESv1Dispatch.h"
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
+
+extern GLESv2Dispatch s_gles2;
+extern GLESv1Dispatch s_gles1;

@@ -17,11 +17,12 @@
 #include "FrameBuffer.h"
 
 #include "DecoderContext.h"
-#include "EGLDispatch.h"
 #include "NativeSubWindow.h"
 #include "RenderThreadInfo.h"
 #include "TimeUtils.h"
 #include "gles2_dec.h"
+
+#include "OpenGLESDispatch/EGLDispatch.h"
 
 #include <stdio.h>
 
