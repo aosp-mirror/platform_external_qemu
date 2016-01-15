@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4768b202_d7344ed6",
+        "filename": "android/base/threads/ParallelTask.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-15T18:47:23Z",
+      "side": 1,
+      "message": "Wish I could hide this in a separate header. But then, I can\u0027t keep the intended function |runParallelTask| back in this header :/",
+      "range": {
+        "startLine": 141,
+        "startChar": 0,
+        "endLine": 141,
+        "endChar": 20
+      },
+      "revId": "772e26b98e58dcdaedd71641c0bd33dab74923e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
