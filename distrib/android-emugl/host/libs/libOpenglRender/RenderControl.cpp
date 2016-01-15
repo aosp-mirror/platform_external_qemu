@@ -18,9 +18,8 @@
 #include "DecoderContext.h"
 #include "FbConfig.h"
 #include "FrameBuffer.h"
+#include "EGLDispatch.h"
 #include "RenderThreadInfo.h"
-
-#include "OpenGLESDispatch/EGLDispatch.h"
 
 static const GLint rendererVersion = 1;
 
