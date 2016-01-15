@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 
 #include <atomic>
+#include <functional>
 #include <memory>
 
 namespace {
@@ -30,87 +31,85 @@ using std::unique_ptr;
 
 struct Result {
     bool mWasJoined = false;
-    bool mWasDeleted = false;
     int mExitStatus = 0;
 };
 
-class TestParallelTask : public ParallelTask<Result> {
+class ParallelTaskTest : public testing::Test {
 public:
-    // set mCheckTimeoutMs to 10 to speed up things.
-    TestParallelTask(Looper* looper, Result* result)
-        : ParallelTask<Result>(looper, 10), mResult(result) {}
+    // set mCheckTimeoutMs to 10 to speed things up.
+    ParallelTaskTest()
+        : mLooper(android::base::ThreadLooper::get()),
+          mParallelTask(mLooper,
+                        std::bind(&ParallelTaskTest::taskFunction,
+                                  this,
+                                  std::placeholders::_1),
+                        std::bind(&ParallelTaskTest::taskDoneFunction,
+                                  this,
+                                  std::placeholders::_1),
+                        10) {}
 
-    virtual ~TestParallelTask() { mResult->mWasDeleted = true; }
-
-    void main(Result* outResult) override {
+    void taskFunction(Result* outResult) {
         while (!mShouldRun) {
             android::base::System::get()->sleepMs(10);
         }
         outResult->mExitStatus = 42;
     }
 
-    void onJoined(const Result& result) override {
-        ASSERT_NE(nullptr, mResult);
-        mResult->mExitStatus = result.mExitStatus;
-        mResult->mWasJoined = true;
+    void taskDoneFunction(const Result& result) {
+        mResult = result;
+        mResult.mWasJoined = true;
     }
 
     void unblock() { mShouldRun = true; }
 
-private:
-    std::atomic_bool mShouldRun = {false};
-    Result* mResult = nullptr;
-};
-
-class ParallelTaskTest : public testing::Test {
-public:
-    ParallelTaskTest()
-        : mLooper(android::base::ThreadLooper::get()),
-          mTestParallelTask(new TestParallelTask(mLooper, &mResult)) {}
-
 protected:
-    Result mResult;
     Looper* mLooper;
-    unique_ptr<TestParallelTask> mTestParallelTask;
+    ParallelTask<Result> mParallelTask;
+    Result mResult;
+    std::atomic_bool mShouldRun = {false};
 };
 
 TEST_F(ParallelTaskTest, start) {
-    mTestParallelTask->unblock();
-    EXPECT_TRUE(mTestParallelTask->start());
+    unblock();
+    EXPECT_TRUE(mParallelTask.start());
     mLooper->runWithTimeoutMs(2000);
 
-    EXPECT_FALSE(mTestParallelTask->inFlight());
+    EXPECT_FALSE(mParallelTask.inFlight());
     EXPECT_TRUE(mResult.mWasJoined);
     EXPECT_EQ(42, mResult.mExitStatus);
-    EXPECT_FALSE(mResult.mWasDeleted);
-}
-
-TEST_F(ParallelTaskTest, fireAndForget) {
-    mTestParallelTask->unblock();
-    EXPECT_TRUE(mTestParallelTask->fireAndForget(std::move(mTestParallelTask)));
-    mLooper->runWithTimeoutMs(2000);
-
-    // |mTestParallelTask| is invalid now.
-    EXPECT_TRUE(mResult.mWasJoined);
-    EXPECT_EQ(42, mResult.mExitStatus);
-    EXPECT_TRUE(mResult.mWasDeleted);
 }
 
 TEST_F(ParallelTaskTest, inFlight) {
-    EXPECT_TRUE(mTestParallelTask->start());
+    EXPECT_TRUE(mParallelTask.start());
     // The test will actually block here till timeout. Use a small value.
     mLooper->runWithTimeoutMs(200);
     EXPECT_FALSE(mResult.mWasJoined);
-    EXPECT_TRUE(mTestParallelTask->inFlight());
+    EXPECT_TRUE(mParallelTask.inFlight());
 
-    // This call races with the check in |mTestParallelTask|. This race is
-    // OK though. Worst case, |mTestParallelTask::main| will loop one extra
-    // time.
-    mTestParallelTask->unblock();
+    unblock();
     mLooper->runWithTimeoutMs(2000);
-    EXPECT_FALSE(mTestParallelTask->inFlight());
+    EXPECT_FALSE(mParallelTask.inFlight());
     EXPECT_EQ(42, mResult.mExitStatus);
     EXPECT_TRUE(mResult.mWasJoined);
+}
+
+static bool parJoined = false;
+
+void setPar(int* outResult) {
+    *outResult = 42;
+}
+
+void onJoined(const int& outResult) {
+    EXPECT_EQ(42, outResult);
+    parJoined = true;
+}
+
+TEST(ParallelTaskFunctionTest, basic) {
+    android::base::Looper* looper = android::base::ThreadLooper::get();
+    EXPECT_TRUE(android::base::runParallelTask<int>(looper, &setPar, &onJoined));
+    EXPECT_FALSE(parJoined);
+    looper->runWithTimeoutMs(2000);
+    EXPECT_TRUE(parJoined);
 }
 
 }  // namespace
