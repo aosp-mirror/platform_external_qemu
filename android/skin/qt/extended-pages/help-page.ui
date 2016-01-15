@@ -17,9 +17,9 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>0</y>
+     <y>20</y>
      <width>600</width>
-     <height>570</height>
+     <height>550</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -34,8 +34,8 @@
       <rect>
        <x>10</x>
        <y>10</y>
-       <width>580</width>
-       <height>520</height>
+       <width>570</width>
+       <height>500</height>
       </rect>
      </property>
      <property name="focusPolicy">
