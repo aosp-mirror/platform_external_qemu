@@ -46,6 +46,9 @@ endif
 EMULATOR_COMMON_INCLUDES := \
     $(BUILD_OBJS_DIR)/build
 
+EMUGL_DIR := $(LOCAL_PATH)/distrib/android-emugl
+EMUGL_INCLUDE_DIR := $(EMUGL_DIR)/host/include
+
 ##############################################################################
 ##############################################################################
 ###
