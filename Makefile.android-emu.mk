@@ -480,8 +480,14 @@ EMULATOR_LIBUI_INCLUDES += $(QT_INCLUDES)
 EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
 EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
 
+ifeq (linux,$(BUILD_TARGET_OS))
+    EMULATOR_LIBUI_LDFLAGS += -lX11
+endif
+
 # The skin support sources
 include $(LOCAL_PATH)/android/skin/sources.mk
+
+EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES)
 
 $(call start-emulator-library, emulator-libui)
 
@@ -505,6 +511,7 @@ LOCAL_SRC_FILES += \
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
 LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES)
+
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
