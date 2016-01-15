@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "07623a24_066a1fbb",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 673,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-15T01:38:26Z",
+      "side": 1,
+      "message": "This should work fine, but if so, it\u0027s worth removing any other code that attempts to set  position of the overlay. It might actually be better to just always do this, not just when the position is wrong.",
+      "range": {
+        "startLine": 673,
+        "startChar": 16,
+        "endLine": 673,
+        "endChar": 44
+      },
+      "revId": "277ec12763d636f56de23766edfbc66f58d904c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
