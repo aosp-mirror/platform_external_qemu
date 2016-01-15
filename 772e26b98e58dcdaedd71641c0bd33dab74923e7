@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "27673e34_008fa350",
+        "filename": "android/base/async/RecurrentTask.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-15T18:54:06Z",
+      "side": 1,
+      "message": "This can get called _after_ a RecurrentTask object has been deleted. I need to handle that case gracefully, and add a unittest for it.",
+      "range": {
+        "startLine": 53,
+        "startChar": 16,
+        "endLine": 53,
+        "endChar": 28
+      },
+      "revId": "772e26b98e58dcdaedd71641c0bd33dab74923e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4768b202_d7344ed6",
         "filename": "android/base/threads/ParallelTask.h",
         "patchSetId": 2
