@@ -111,6 +111,30 @@
     },
     {
       "key": {
+        "uuid": "87562a44_c94e7370",
+        "filename": "android/base/async/RecurrentTask.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-15T19:03:48Z",
+      "side": 1,
+      "message": "just stop the timer in dtor",
+      "parentUuid": "27673e34_008fa350",
+      "range": {
+        "startLine": 53,
+        "startChar": 16,
+        "endLine": 53,
+        "endChar": 28
+      },
+      "revId": "772e26b98e58dcdaedd71641c0bd33dab74923e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4768b202_77445a53",
         "filename": "android/base/async/RecurrentTask.h",
         "patchSetId": 2
