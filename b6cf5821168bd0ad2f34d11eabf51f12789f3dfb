@@ -22,6 +22,30 @@
       "revId": "b6cf5821168bd0ad2f34d11eabf51f12789f3dfb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "87562a44_45f529eb",
+        "filename": "android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-01-15T17:34:10Z",
+      "side": 1,
+      "message": "I didn\u0027t like it either---it is what git-clang-format did.\nI left it like that thinking that, otherwise, the next person editing and clang-formatting this file will be surprised to see this change.",
+      "parentUuid": "87562a44_65614db6",
+      "range": {
+        "startLine": 368,
+        "startChar": 1,
+        "endLine": 380,
+        "endChar": 5
+      },
+      "revId": "b6cf5821168bd0ad2f34d11eabf51f12789f3dfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
