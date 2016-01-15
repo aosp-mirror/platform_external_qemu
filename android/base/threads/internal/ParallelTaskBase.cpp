@@ -42,18 +42,6 @@ bool ParallelTaskBase::inFlight() const {
 }
 
 // static
-bool ParallelTaskBase::fireAndForget(unique_ptr<ParallelTaskBase> thread) {
-    thread->shouldGarbageCollect = true;
-    if (!thread->start()) {
-        return false;
-    }
-
-    // |thread| is responsible for its own cleanup.
-    thread.release();
-    return true;
-}
-
-// static
 void ParallelTaskBase::tryWaitTillJoined(void* opaqueThis,
                                          Looper::Timer* timer) {
     auto thisPtr = static_cast<ParallelTaskBase*>(opaqueThis);
@@ -62,12 +50,8 @@ void ParallelTaskBase::tryWaitTillJoined(void* opaqueThis,
         return;
     }
 
-    thisPtr->onJoinedImpl();
+    thisPtr->taskDoneImpl();
     thisPtr->isRunning = false;
-    // We've joined the thread. Now check if we were requested to cleanup.
-    if (thisPtr->shouldGarbageCollect) {
-        delete thisPtr;
-    }
 }
 
 }  // namespace internal
