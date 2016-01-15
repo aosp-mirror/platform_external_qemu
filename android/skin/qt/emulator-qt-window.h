@@ -662,6 +662,19 @@ private:
             show();
         }
 
+        void show()
+        {
+            // Ensure that this overlay is aligned with its parent.
+            // (When running frameless on Windows, this overlay starts
+            // off misaligned.)
+            QRect myPosition = geometry();
+            QRect parentPosition = parentWidget()->geometry();
+            if (myPosition != parentPosition) {
+                setGeometry(parentPosition);
+            }
+            QFrame::show();
+        }
+
     private:
         QPoint getSecondaryTouchPoint() const
         {
