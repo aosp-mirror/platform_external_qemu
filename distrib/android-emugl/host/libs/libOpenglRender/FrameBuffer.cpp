@@ -972,14 +972,17 @@ HandleType FrameBuffer::createClientImage(HandleType context, EGLenum target, GL
     }
 
     EGLContext eglContext = ctx ? ctx->getEGLContext() : EGL_NO_CONTEXT;
-    EGLImageKHR image = s_egl.eglCreateImageKHR(m_eglDisplay, eglContext, target, (EGLClientBuffer)buffer, NULL);
+    EGLImageKHR image = s_egl.eglCreateImageKHR(
+                            m_eglDisplay, eglContext, target,
+                            reinterpret_cast<EGLClientBuffer>(buffer), NULL);
 
     return (HandleType)reinterpret_cast<uintptr_t>(image);
 }
 
 EGLBoolean FrameBuffer::destroyClientImage(HandleType image)
 {
-    return s_egl.eglDestroyImageKHR(m_eglDisplay, (EGLImageKHR)image);
+    return s_egl.eglDestroyImageKHR(m_eglDisplay,
+                                    reinterpret_cast<EGLImageKHR>(image));
 }
 
 //

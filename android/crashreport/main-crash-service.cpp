@@ -64,35 +64,6 @@ const char kMessageBoxMessageDetail[] =
 extern "C" const unsigned char* android_emulator_icon_find(const char* name,
                                                            size_t* psize);
 
-
-static bool displayHWInfoDialog() {
-    static const char kIconFile[] = "emulator_icon_128.png";
-    size_t icon_size;
-    QPixmap icon;
-
-    const unsigned char* icon_data =
-            android_emulator_icon_find(kIconFile, &icon_size);
-
-    icon.loadFromData(icon_data, icon_size);
-
-    WantHWInfo msgBox(nullptr, icon, kMessageBoxTitle, 
-                         QCoreApplication::tr(
-                         "<p>Android Emulator closed unexpectedly.</p>"
-                         "<p>In order to help ensure we can fix the problem,</p>"
-                         "<p>do you want to generate system-specific info?</p>"),
-                         QCoreApplication::tr(
-                         "This system information "
-                         "will be sent to Google's Android team to help identify "
-                         "and fix the problem. Otherwise, we will collect "
-                         "only information directly related to the emulator. "
-                         "We will ask you again to confirm whether you want to send anything."
-                         "<a href=\"https://www.google.com/policies/privacy/\">Privacy "
-                         "Policy</a>."));
-    msgBox.show();
-    int ret = msgBox.exec();
-    return ret == WantHWInfo::Accepted;
-}
-
 static bool _postprocess_collectsysinfo = false;
 
 static bool displayConfirmDialog(const std::string& details,

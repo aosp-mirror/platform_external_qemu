@@ -40,14 +40,6 @@ static std::string getTestCrasher() {
     return path;
 }
 
-static StringVector getTestCrasherCmdLine(std::string pipe) {
-    StringVector cmdline;
-    cmdline.append(StringView(getTestCrasher().c_str()));
-    cmdline.append(StringView("-pipe"));
-    cmdline.append(StringView(pipe.c_str()));
-    return cmdline;
-}
-
 TEST(CrashService, get_set_dumpfile) {
     std::unique_ptr<CrashService> crash(
             CrashService::makeCrashService("foo", "bar"));
@@ -80,6 +72,12 @@ TEST(CrashService, validDumpFile) {
 }
 
 #ifndef _WIN32
+
+static StringVector getTestCrasherCmdLine(std::string pipe) {
+    const StringVector cmdline = { getTestCrasher(), "-pipe", pipe };
+    return cmdline;
+}
+
 // invalidURLUpload hangs on wine, but passes on windows host
 TEST(CrashService, invalidURLUpload) {
     TestTempDir crashdir("crashdir");

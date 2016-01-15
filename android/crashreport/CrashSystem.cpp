@@ -186,12 +186,9 @@ const CrashSystem::CrashPipe& CrashSystem::getCrashPipe() {
 const StringVector CrashSystem::getCrashServiceCmdLine(
         const std::string& pipe,
         const std::string& proc) {
-    StringVector cmdline;
-    cmdline.append(::android::base::StringView(getCrashServicePath().c_str()));
-    cmdline.append(::android::base::StringView("-pipe"));
-    cmdline.append(::android::base::StringView(pipe.c_str()));
-    cmdline.append(::android::base::StringView("-ppid"));
-    cmdline.append(::android::base::StringView(proc.c_str()));
+    const StringVector cmdline = {
+        getCrashServicePath(), "-pipe", pipe, "-ppid", proc
+    };
     return cmdline;
 }
 
