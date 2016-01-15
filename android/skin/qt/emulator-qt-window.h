@@ -448,6 +448,15 @@ private:
             mRubberBand.hide();
         }
 
+        void changeEvent(QEvent *event)
+        {
+            if (event->type() == QEvent::ActivationChange) {
+                if (!this->isActiveWindow()) {
+                    this->hide();
+                }
+            }
+        }
+
         void hide()
         {
             QFrame::hide();
@@ -613,6 +622,7 @@ private:
             this->activateWindow();
 
             if (mMode == OverlayMode::Multitouch) {
+                mMultitouchCenter = QPoint(width() / 2, height() / 2);
                 mPrimaryTouchPoint = mMultitouchCenter;
             }
         }
