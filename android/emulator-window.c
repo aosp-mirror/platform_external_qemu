@@ -350,10 +350,14 @@ emulator_window_init(
     };
 
     emulator->aconfig = aconfig;
-    emulator->layout_file =
-            skin_file_create_from_aconfig(aconfig,
-                                          basepath,
-                                          &skin_fb_funcs);
+
+    // if not building for a gui-less window, create a skin layout file,
+    // else skip as no skin will be displayed
+    if (!opts->no_window) {
+        emulator->layout_file = skin_file_create_from_aconfig(aconfig, basepath,
+                                                              &skin_fb_funcs);
+    }
+
     emulator->ui = NULL;
     emulator->win_x = x;
     emulator->win_y = y;
@@ -361,7 +365,8 @@ emulator_window_init(
     *(emulator->uiEmuAgent) = *uiEmuAgent;
 
     /* register as a framebuffer clients for all displays defined in the skin file */
-    SKIN_FILE_LOOP_PARTS( emulator->layout_file, part )
+    if (emulator->layout_file) {
+        SKIN_FILE_LOOP_PARTS(emulator->layout_file, part)
         SkinDisplay*  disp = part->display;
         if (disp->valid) {
             qframebuffer_add_client( disp->framebuffer,
@@ -372,6 +377,7 @@ emulator_window_init(
                                     NULL );
         }
     SKIN_FILE_LOOP_END_PARTS
+    }
 
     /* initialize hardware control support */
     AndroidHwControlFuncs funcs;
