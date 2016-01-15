@@ -11,7 +11,10 @@
 */
 #include "android/metrics/metrics_reporter.h"
 
+#include "android/base/async/ThreadLooper.h"
+#include "android/base/files/IniFile.h"
 #include "android/metrics/internal/metrics_reporter_internal.h"
+#include "android/metrics/IniFileAutoFlusher.h"
 #include "android/metrics/metrics_reporter_ga.h"
 #include "android/metrics/metrics_reporter_toolbar.h"
 #include "android/utils/bufprint.h"
@@ -29,6 +32,7 @@
 #include <unistd.h>
 #endif
 
+#include <memory>
 #define mwarning(fmt, ...) \
     dwarning("%s:%d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
@@ -43,6 +47,7 @@
  */
 static char* metricsDirPath;
 static char* metricsFilePath;
+static android::metrics::IniFileAutoFlusher* sMetricsFileFlusher;
 
 static const char metricsRelativeDir[] = "metrics";
 static const char metricsFilePrefix[] = "metrics";
@@ -78,8 +83,10 @@ ABool androidMetrics_moduleInit(const char* avdHome) {
 
 /* Make sure this is safe to call without ever calling _moduleInit */
 void androidMetrics_moduleFini(void) {
+    delete sMetricsFileFlusher;
     AFREE(metricsDirPath);
     AFREE(metricsFilePath);
+    sMetricsFileFlusher = NULL;
     metricsDirPath = metricsFilePath = NULL;
 }
 
@@ -122,8 +129,14 @@ const char* androidMetrics_getMetricsFilePath() {
         return NULL;
     }
 
-    /* This string will be freed by androidMetrics_seal. */
+    /* The AutoFileFlusher will be stoped and path string will be freed by
+     * androidMetrics_seal. */
     metricsFilePath = ASTRDUP(path);
+    sMetricsFileFlusher = new android::metrics::IniFileAutoFlusher(
+            android::base::ThreadLooper::get());
+    auto iniFile = std::unique_ptr<android::base::IniFile>(
+            new android::base::IniFile(metricsFilePath));
+    sMetricsFileFlusher->start(std::move(iniFile));
     return metricsFilePath;
 }
 
@@ -153,36 +166,20 @@ void androidMetrics_fini(AndroidMetrics* androidMetrics) {
 }
 
 ABool androidMetrics_write(const AndroidMetrics* androidMetrics) {
-    const char* path = androidMetrics_getMetricsFilePath();
+    if (!androidMetrics_getMetricsFilePath()) {
+        return 0;
+    }
+
+    auto ini = sMetricsFileFlusher->iniFile();
     const AndroidMetrics* am = androidMetrics;
-    CIniFile* ini;
-
-    if (path == NULL) {
-        return 0;
-    }
-
-    ini = iniFile_newEmpty(path);
-    if (ini == NULL) {
-        mwarning("Failed to malloc ini file.");
-        return 0;
-    }
-
 /* Use magic macros to write all fields to the ini file. */
 #undef METRICS_INT
 #undef METRICS_STRING
 #undef METRICS_DURATION
-#define METRICS_INT(n, s, d) iniFile_setInteger(ini, s, am->n);
-#define METRICS_STRING(n, s, d) iniFile_setValue(ini, s, am->n);
-#define METRICS_DURATION(n, s, d) iniFile_setInt64(ini, s, am->n);
-
+#define METRICS_INT(n, s, d) ini->setInt(s, am->n);
+#define METRICS_STRING(n, s, d) ini->setString(s, am->n);
+#define METRICS_DURATION(n, s, d) ini->setInt64(s, am->n);
 #include "android/metrics/metrics_fields.h"
-
-    if (iniFile_saveToFile(ini, path) != 0) {
-        mwarning("Failed to save to file at %s", path);
-        iniFile_free(ini);
-        return 0;
-    }
-    iniFile_free(ini);
     return 1;
 }
 
@@ -244,6 +241,8 @@ ABool androidMetrics_seal() {
         androidMetrics_fini(&metrics);
     }
 
+    delete sMetricsFileFlusher;
+    sMetricsFileFlusher = NULL;
     AFREE(metricsFilePath);
     metricsFilePath = NULL;
     return success;
@@ -280,11 +279,22 @@ ABool androidMetrics_readPath(AndroidMetrics* androidMetrics,
 }
 
 ABool androidMetrics_read(AndroidMetrics* androidMetrics) {
-    const char* path = androidMetrics_getMetricsFilePath();
-    if (path == NULL) {
+    if(!androidMetrics_getMetricsFilePath()) {
         return 0;
     }
-    return androidMetrics_readPath(androidMetrics, path);
+
+    auto ini = sMetricsFileFlusher->iniFile();
+    AndroidMetrics* am = androidMetrics;
+/* Use magic macros to write all fields to the ini file. */
+#undef METRICS_INT
+#undef METRICS_STRING
+#undef METRICS_DURATION
+#define METRICS_INT(n, s, d) am->n = ini->getInt(s, d);
+#define METRICS_STRING(n, s, d) \
+    ANDROID_METRICS_STRASSIGN(am->n, ini->getString(s, d).c_str());
+#define METRICS_DURATION(n, s, d) am->n = ini->getInt64(s, d);
+#include "android/metrics/metrics_fields.h"
+    return 1;
 }
 
 /* Forward declaration. */
