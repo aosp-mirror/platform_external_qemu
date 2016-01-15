@@ -630,7 +630,7 @@ public:
             if (timeoutMs == kInfinite) {
                 // Let's just wait forever and hope that the child process
                 // exits.
-                pid_t waitPid = HANDLE_EINTR(waitpid(pid, &exitCode, 0));
+                HANDLE_EINTR(waitpid(pid, &exitCode, 0));
                 if (outExitCode) {
                     *outExitCode = WEXITSTATUS(exitCode);
                 }
