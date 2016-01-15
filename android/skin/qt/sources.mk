@@ -28,7 +28,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/location-page.cpp \
     android/skin/qt/extended-pages/settings-page.cpp \
     android/skin/qt/extended-pages/telephony-page.cpp \
-    android/skin/qt/ext-virtsensors.cpp \
+    android/skin/qt/extended-pages/virtual-sensors-page.cpp \
     android/skin/qt/extended-window.cpp \
     android/skin/qt/QtLooper.cpp \
     android/skin/qt/qt-ui-commands.cpp \
@@ -47,6 +47,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-pages/location-page.h \
     android/skin/qt/extended-pages/settings-page.h \
     android/skin/qt/extended-pages/telephony-page.h \
+    android/skin/qt/extended-pages/virtual-sensors-page.h \
     android/skin/qt/extended-window.h \
     android/skin/qt/QtTimerImpl.h \
     android/skin/qt/tool-window.h \
@@ -64,4 +65,5 @@ ANDROID_SKIN_QT_UI_SRC_FILES := \
     android/skin/qt/extended-pages/help-page.ui \
     android/skin/qt/extended-pages/settings-page.ui \
     android/skin/qt/extended-pages/telephony-page.ui \
+    android/skin/qt/extended-pages/virtual-sensors-page.ui \
     android/skin/qt/tools.ui \
