@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "07623a24_05da146c",
+        "filename": "android/base/async/RecurrentTask.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-15T21:54:22Z",
+      "side": 1,
+      "message": "not-not-not! double negation cancels itself :)",
+      "range": {
+        "startLine": 50,
+        "startChar": 9,
+        "endLine": 50,
+        "endChar": 16
+      },
+      "revId": "55c3926d0ed7628c804daa0fffae3ecaca9abcc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07495aa4_d30bca6e",
+        "filename": "android/base/async/RecurrentTask.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-15T21:54:22Z",
+      "side": 1,
+      "message": "hm. memegen: I don\u0027t believe you!",
+      "range": {
+        "startLine": 55,
+        "startChar": 5,
+        "endLine": 55,
+        "endChar": 36
+      },
+      "revId": "55c3926d0ed7628c804daa0fffae3ecaca9abcc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07495aa4_538a1a01",
+        "filename": "android/base/threads/ParallelTask.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-15T21:54:22Z",
+      "side": 1,
+      "message": "just a lambda?",
+      "range": {
+        "startLine": 152,
+        "startChar": 22,
+        "endLine": 154,
+        "endChar": 53
+      },
+      "revId": "55c3926d0ed7628c804daa0fffae3ecaca9abcc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "676db610_f835fb81",
+        "filename": "android/base/threads/ParallelTask.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-15T21:54:22Z",
+      "side": 1,
+      "message": "something\u0027s off with alignment here",
+      "range": {
+        "startLine": 136,
+        "startChar": 0,
+        "endLine": 169,
+        "endChar": 2
+      },
+      "revId": "55c3926d0ed7628c804daa0fffae3ecaca9abcc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
