@@ -21,6 +21,7 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QProgressBar>
+#include <QTextEdit>
 
 // QT Component that displays the send crash dump confirmation
 class ConfirmDialog : public QDialog {
@@ -33,37 +34,41 @@ private:
     QLabel* mInfoText;
     QLabel* mIcon;
 
+    QWidget* mComment;
+    QWidget* mExtension;
+    QTextEdit* mCommentsText;
     QPlainTextEdit* mDetailsText;
-    QLabel* mDetailsProgressText;
-    QProgressBar* mDetailsProgress;
+    QLabel* mProgressText;
+    QProgressBar* mProgress;
 
     QLabel* mSuggestionText;
 
-    QWidget* mExtension;
     QDialogButtonBox* mYesNoButtonBox;
     QDialogButtonBox* mDetailsButtonBox;
 
     android::crashreport::CrashService* mCrashService;
-    android::crashreport::UserSuggestions* mSuggestions;
 
     bool mDetailsHidden;
     bool mDidGetSysInfo;
-
+    bool mDidUpdateDetails;
+    void disableInput();
+    void enableInput();
+    void showProgressBar(const std::string& msg);
+    void hideProgressBar();
+    void getDetails();
+    bool uploadCrash();
     void addSuggestion(const QString& str);
     void hideDetails(void);
     void showDetails(void);
 
 public:
     ConfirmDialog(QWidget* parent,
-                  const QPixmap& icon,
-                  const char* windowTitle,
-                  const char* message,
-                  const char* info,
-                  const char* detail,
-                  android::crashreport::CrashService* crashservice,
-                  android::crashreport::UserSuggestions* suggestions);
+                  android::crashreport::CrashService* crashservice);
     bool didGetSysInfo() const;
+
+    QString getUserComments();
 public slots:
-    void sl_detailtoggle(void);
+    void sendReport();
+    void detailtoggle();
 };
 
