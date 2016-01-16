@@ -19,7 +19,7 @@
 #include "android/crashreport/CrashSystem.h"
 #include "android/curl-support.h"
 #include "android/utils/debug.h"
-#include "google_breakpad/processor/basic_source_line_resolver.h"
+#include "google_breakpad/processor/fast_source_line_resolver.h"
 #include "google_breakpad/processor/call_stack.h"
 #include "google_breakpad/processor/code_module.h"
 #include "google_breakpad/processor/code_modules.h"
@@ -31,8 +31,9 @@
 #include <curl/curl.h>
 
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 #include <string>
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -49,6 +50,7 @@ extern "C" const unsigned char* android_emulator_icon_find(const char* name,
 const char kNameKey[] = "prod";
 const char kVersionKey[] = "ver";
 const char kName[] = "AndroidEmulator";
+const char kCommentsKey[] = "comments";
 
 // Callback to get the response data from server.
 static size_t WriteCallback(void* ptr, size_t size, size_t nmemb, void* userp) {
@@ -71,7 +73,8 @@ CrashService::CrashService(const std::string& version, const std::string& build)
       mBuild(build),
       mVersionId(),
       mDumpFile(),
-      mReportId() {
+      mReportId(),
+      mComments() {
     mVersionId = version;
     mVersionId += "-";
     mVersionId += build;
@@ -95,11 +98,50 @@ bool CrashService::validDumpFile() const {
     return ::android::crashreport::CrashSystem::get()->isDump(mDumpFile);
 }
 
+std::string CrashService::getReport() {
+    // Capture printf's from PrintProcessState to file
+    std::string reportFile(mDumpFile);
+    reportFile += "report";
+
+    FILE* fp = fopen(reportFile.c_str(), "w+");
+    if (!fp) {
+        std::string errmsg;
+        errmsg += "Error, Couldn't open " + reportFile +
+                  "for writing crash report.";
+        errmsg += "\n";
+        return errmsg;
+    }
+    google_breakpad::SetPrintStream(fp);
+    google_breakpad::PrintProcessState(mProcessState, true, &mLineResolver);
+
+    fprintf(fp, "thread requested=%d\n", mProcessState.requesting_thread());
+    fclose(fp);
+
+    std::string report(readFile(reportFile));
+    remove(reportFile.c_str());
+
+    return report;
+}
+
 std::string CrashService::getReportId() const {
     return mReportId;
 }
 
-bool CrashService::uploadCrash(const std::string& url) {
+void CrashService::addReportValue(const std::string& key,
+                                  const std::string& value) {
+    mReportValues[key] = value;
+}
+
+void CrashService::addReportFile(const std::string& key,
+                                 const std::string& path) {
+    mReportFiles[key] = path;
+}
+
+void CrashService::addUserComments(const std::string& comments) {
+    addReportValue(kCommentsKey, comments);
+}
+
+bool CrashService::uploadCrash() {
     curl_init(::android::crashreport::CrashSystem::get()
                       ->getCaBundlePath().c_str());
     char* error = nullptr;
@@ -110,22 +152,26 @@ bool CrashService::uploadCrash(const std::string& url) {
         return false;
     }
 
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_URL,
+                     CrashSystem::get()->getCrashURL().c_str());
 
     curl_httppost* formpost = nullptr;
     curl_httppost* lastptr = nullptr;
 
-    curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, kNameKey,
-                 CURLFORM_COPYCONTENTS, kName, CURLFORM_END);
+    addReportValue(kNameKey, kName);
+    addReportValue(kVersionKey, mVersionId);
+    addReportFile("upload_file_minidump", mDumpFile);
+    addReportFile("hw_info", mHWTmpFilePath);
 
-    curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, kVersionKey,
-                 CURLFORM_COPYCONTENTS, mVersionId.c_str(), CURLFORM_END);
+    for (auto const& x : mReportValues) {
+        curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, x.first.c_str(),
+                     CURLFORM_COPYCONTENTS, x.second.c_str(), CURLFORM_END);
+    }
 
-    curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "upload_file_minidump",
-                 CURLFORM_FILE, mDumpFile.c_str(), CURLFORM_END);
-
-    curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "hw_info",
-                 CURLFORM_FILE, mHWTmpFilePath.c_str(), CURLFORM_END);
+    for (auto const& x : mReportFiles) {
+        curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, x.first.c_str(),
+                     CURLFORM_FILE, x.second.c_str(), CURLFORM_END);
+    }
 
     curl_easy_setopt(curl, CURLOPT_FAILONERROR, true);
     curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
@@ -169,61 +215,54 @@ bool CrashService::uploadCrash(const std::string& url) {
 
     curl_formfree(formpost);
     curl_easy_cleanup(curl);
-    cleanupHWInfo();
     return success;
 }
 
-std::string CrashService::getCrashDetails() {
-    std::string details;
-    google_breakpad::BasicSourceLineResolver resolver;
-    google_breakpad::MinidumpProcessor minidump_processor(nullptr, &resolver);
+UserSuggestions CrashService::getSuggestions() {
+    return UserSuggestions(&mProcessState);
+}
+
+bool CrashService::processCrash() {
+    mMinidump.reset(new google_breakpad::Minidump(mDumpFile));
+    google_breakpad::MinidumpProcessor minidump_processor(nullptr,
+                                                          &mLineResolver);
 
     // Process the minidump.
-    google_breakpad::Minidump dump(mDumpFile);
-    if (!dump.Read()) {
-        E("Minidump %s could not be read", dump.path().c_str());
-        return details;
+    if (!mMinidump->Read()) {
+        E("Minidump %s could not be read", mMinidump->path().c_str());
+        return false;
     }
-    if (minidump_processor.Process(&dump, &process_state) !=
+    if (minidump_processor.Process(mMinidump.get(), &mProcessState) !=
         google_breakpad::PROCESS_OK) {
         E("MinidumpProcessor::Process failed");
-        return details;
+        return false;
+    }
+    return true;
+}
+
+bool CrashService::collectSysInfo() {
+    return getHWInfo();
+}
+
+std::string CrashService::readFile(const std::string& path) {
+    std::ifstream is(path.c_str());
+
+    if (!is) {
+        std::string errmsg;
+        errmsg = "Error, Can't open file " + path + " for reading. Errno=" +
+                 std::to_string(errno);
+        errmsg += "\n";
+        return errmsg;
     }
 
-    // Capture printf's from PrintProcessState to file
-    std::string detailsFile(mDumpFile);
-    detailsFile += "details";
-    FILE* fp = fopen (detailsFile.c_str(), "w+");
-    if (!fp) {
-        E("Couldn't open %s for writing crash details\n", detailsFile.c_str());
-        return details;
-    }
-    google_breakpad::SetPrintStream(fp);
-    google_breakpad::PrintProcessState(process_state, true, &resolver);
-
-    fprintf(fp, "thread requested=%d\n", process_state.requesting_thread());
-    fseek(fp, 0, SEEK_END);
-    details.resize(std::ftell(fp));
-    rewind(fp);
-    fread(&details[0], 1, details.size(), fp);
-
-    fclose(fp);
-    remove(detailsFile.c_str());
-
-    // Record dump details
-    mDumpDetails = details;
-    return details;
+    std::ostringstream ss;
+    ss << is.rdbuf();
+    return ss.str();
 }
 
-std::string CrashService::getInitialDump() const {
-    return mDumpDetails;
+std::string CrashService::getSysInfo() {
+    return readFile(mHWTmpFilePath);
 }
-
-std::string CrashService::collectSysInfo() {
-    mHWInfo = getHWInfo();
-    return mHWInfo;
-}
-
 
 void CrashService::initCrashServer() {
     mServerState.waiting = true;
@@ -355,7 +394,7 @@ UserSuggestions::UserSuggestions(google_breakpad::ProcessState* process_state) {
         // Should the user update their graphics drivers?
 
         if (containsGfxPattern(file)) {
-            suggestions.insert(UpdateGfxDrivers);
+            suggestions.insert(Suggestion::UpdateGfxDrivers);
             break;
         }
     }
