@@ -52,9 +52,9 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>198</x>
-     <y>20</y>
+     <y>0</y>
      <width>622</width>
-     <height>580</height>
+     <height>600</height>
     </rect>
    </property>
    <property name="layoutDirection">
