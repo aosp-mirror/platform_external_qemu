@@ -448,6 +448,14 @@ private:
             mRubberBand.hide();
         }
 
+        void focusOutEvent(QFocusEvent *event)
+        {
+            if (mMode == OverlayMode::Multitouch) {
+                this->hide();
+            }
+            QFrame::focusOutEvent(event);
+        }
+
         void hide()
         {
             QFrame::hide();
@@ -613,6 +621,7 @@ private:
             this->activateWindow();
 
             if (mMode == OverlayMode::Multitouch) {
+                mMultitouchCenter = QPoint(width() / 2, height() / 2);
                 mPrimaryTouchPoint = mMultitouchCenter;
             }
         }
