@@ -31,12 +31,12 @@
 
 #include "hw/hw.h"
 #include "hw/sysbus.h"
+
 #include "hw/misc/android_pipe.h"
 #include "hw/misc/android_boot_properties.h"
 #include "qemu-common.h"
 #include "qemu/timer.h"
 #include "qemu/error-report.h"
-#include "qemu/thread.h"
 
 /* Set to > 0 for debug output */
 #define PIPE_DEBUG 0
@@ -104,7 +104,6 @@ typedef struct {
     PipeDevice *dev;
 } AndroidPipeState;
 
-
 /***********************************************************************
  ***********************************************************************
  *****
@@ -120,22 +119,7 @@ typedef struct HwPipe {
     unsigned char               wanted;
     char                        closed;
     void                        *pipe;
-    QemuMutex                   lock;
 } HwPipe;
-
-static unsigned char get_and_clear_pipe_wanted(HwPipe* pipe) {
-    qemu_mutex_lock(&pipe->lock);
-    unsigned char val = pipe->wanted;
-    pipe->wanted = 0;
-    qemu_mutex_unlock(&pipe->lock);
-    return val;
-}
-
-static void set_pipe_wanted_bits(HwPipe* pipe, unsigned char val) {
-    qemu_mutex_lock(&pipe->lock);
-    pipe->wanted |= val;
-    qemu_mutex_unlock(&pipe->lock);
-}
 
 #ifndef USE_ANDROID_EMU
 
@@ -162,7 +146,6 @@ pipe_new(uint64_t channel, PipeDevice* dev)
     HwPipe*  pipe = pipe_new0(dev);
     pipe->channel = channel;
     pipe->pipe  = android_pipe_new(pipe);
-    qemu_mutex_init(&pipe->lock);
     return pipe;
 }
 
@@ -182,7 +165,6 @@ pipe_list_findp_channel(HwPipe **list, uint64_t channel)
 
 static void pipe_free(HwPipe* pipe)
 {
-    qemu_mutex_destroy(&pipe->lock);
     android_pipe_free(pipe->pipe);
     /* Free stuff */
     g_free(pipe);
@@ -514,10 +496,6 @@ struct PipeDevice {
     /* the list of all pipes */
     HwPipe*  pipes;
     HwPipe*  save_pipes;
-    HwPipe*  cache_pipe;
-    HwPipe*  cache_pipe_64bit;
-
-    QemuMutex lock;
 
 
     /* i/o registers */
@@ -528,25 +506,6 @@ struct PipeDevice {
     uint32_t  wakes;
     uint64_t  params_addr;
 };
-
-static HwPipe* get_and_clear_cache_pipe(PipeDevice* dev) {
-    if (dev->cache_pipe_64bit) {
-        HwPipe* val = dev->cache_pipe_64bit;
-        dev->cache_pipe_64bit = NULL;
-        return val;
-    }
-    qemu_mutex_lock(&dev->lock);
-    HwPipe* val = dev->cache_pipe;
-    dev->cache_pipe = NULL;
-    qemu_mutex_unlock(&dev->lock);
-    return val;
-}
-
-static void set_cache_pipe(PipeDevice* dev, HwPipe* cache_pipe) {
-    qemu_mutex_lock(&dev->lock);
-    dev->cache_pipe = cache_pipe;
-    qemu_mutex_unlock(&dev->lock);
-}
 
 /* Update this version number if the device's interface changes. */
 #define PIPE_DEVICE_VERSION  1
@@ -786,7 +745,6 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
 {
     AndroidPipeState *s = (AndroidPipeState *)opaque;
     PipeDevice *dev = s->dev;
-    HwPipe* cache_pipe = NULL;
 
     switch (offset) {
     case PIPE_REG_STATUS:
@@ -794,16 +752,12 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
         return dev->status;
 
     case PIPE_REG_CHANNEL:
-        cache_pipe = get_and_clear_cache_pipe(dev);
-        if (cache_pipe != NULL) {
-            dev->wakes = get_and_clear_pipe_wanted(cache_pipe);
-            return (uint32_t)(cache_pipe->channel & 0xFFFFFFFFUL);
-        }
         if (dev->pipes != NULL) {
             HwPipe* pipe = dev->pipes;
             DR("%s: channel=0x%llx wanted=%d", __FUNCTION__,
                (unsigned long long)pipe->channel, pipe->wanted);
-            dev->wakes = get_and_clear_pipe_wanted(pipe);
+            dev->wakes = pipe->wanted;
+            pipe->wanted = 0;
             dev->pipes = pipe->next;
             pipe->next_waked = NULL;
             if (dev->pipes == NULL) {
@@ -818,11 +772,6 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
         return 0;
 
     case PIPE_REG_CHANNEL_HIGH:
-        cache_pipe = get_and_clear_cache_pipe(dev);
-        if (cache_pipe != NULL) {
-            dev->cache_pipe_64bit = cache_pipe;
-            return (uint32_t)(cache_pipe->channel >> 32);
-        }
         if (dev->pipes != NULL) {
             HwPipe* pipe = dev->pipes;
             DR("%s: channel_high=0x%llx wanted=%d", __FUNCTION__,
@@ -884,9 +833,6 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
 
     s->dev = (PipeDevice *) g_malloc0(sizeof(PipeDevice));
     s->dev->ps = s; /* HACK: backlink */
-    s->dev->cache_pipe = NULL;
-    s->dev->cache_pipe_64bit = NULL;
-    qemu_mutex_init(&s->dev->lock);
 
     memory_region_init_io(&s->iomem, OBJECT(s), &android_pipe_iomem_ops, s,
                           "android_pipe", 0x2000 /*TODO: ?how big?*/);
@@ -919,8 +865,8 @@ static void qemu2_android_pipe_wake( void* hwpipe, unsigned flags )
 
     DD("%s: channel=0x%llx flags=%d", __FUNCTION__, (unsigned long long)pipe->channel, flags);
 
-    set_pipe_wanted_bits(pipe, (unsigned char)flags);
-    set_cache_pipe(dev, pipe);
+    pipe->wanted |= (unsigned)flags;
+
     /* Raise IRQ to indicate there are items on our list ! */
     /* android_device_set_irq(&dev->dev, 0, 1);*/
     qemu_set_irq(dev->ps->irq, 1);
