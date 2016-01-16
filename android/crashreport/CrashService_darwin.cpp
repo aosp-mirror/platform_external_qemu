@@ -114,9 +114,7 @@ public:
         }
     }
 
-    virtual std::string getHWInfo() {
-        std::ostringstream err_stream;
-
+    virtual bool getHWInfo() {
         mHWTmpFilePath.clear();
         System* sys = System::get();
         String tmp_dir = sys->getTempDir();
@@ -127,9 +125,8 @@ public:
         int tmpfd = mkstemp((char*)tmp_file_path_template.data());
 
         if (tmpfd == -1) {
-            err_stream << "Error: Can't create temporary file! errno=" << errno
-                       << std::endl;
-            return err_stream.str();
+            E("Error: Can't create temporary file! errno=%d", errno);
+            return false;
         }
 
         String syscmd(HWINFO_CMD);
@@ -137,26 +134,8 @@ public:
         syscmd += tmp_file_path_template;
         system(syscmd.c_str());
 
-        FILE* hwinfo_fh = fopen(tmp_file_path_template.c_str(), "r");
-
-        if (!hwinfo_fh) {
-            err_stream << "Error: Can't open temp file "
-                       << tmp_file_path_template.c_str()
-                       << " for reading. errno=" << errno << std::endl;
-            return err_stream.str();
-        }
-
         mHWTmpFilePath = tmp_file_path_template.c_str();
-
-        fseek(hwinfo_fh, 0, SEEK_END);
-        size_t fsize = ftell(hwinfo_fh);
-        fseek(hwinfo_fh, 0, SEEK_SET);
-
-        std::string out(fsize, '\0');
-        fread(&out[0], fsize, 1, hwinfo_fh);
-        fclose(hwinfo_fh);
-
-        return out;
+        return true;
     }
 
     virtual void cleanupHWInfo() {
