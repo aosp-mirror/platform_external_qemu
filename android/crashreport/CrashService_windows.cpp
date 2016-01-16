@@ -26,7 +26,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <memory>
-#include <sstream>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -56,6 +55,7 @@ public:
         if (mClientProcess) {
             CloseHandle(mClientProcess);
         }
+        cleanupHWInfo();
     }
 
     static void OnClientConnect(
@@ -142,9 +142,7 @@ public:
         }
     }
 
-    virtual std::string getHWInfo() {
-        std::ostringstream err_stream;
-
+    bool getHWInfo() override {
         mHWTmpFilePath.clear();
         System* sys = System::get();
         String tmp_dir = sys->getTempDir();
@@ -154,38 +152,25 @@ public:
                 GetTempFileName(tmp_dir.c_str(), "emu", 0, tmp_filename_buffer);
 
         if (!temp_file_ret) {
-            err_stream << "Error: Can't create temporary file! error code="
-                       << GetLastError() << std::endl;
-            return err_stream.str();
+            E("Error: Can't create temporary file! error code=%d",
+              GetLastError());
+            return false;
         }
 
         String tmp_filename(tmp_filename_buffer);
-        mHWTmpFilePath = tmp_filename.c_str();
         String syscmd(HWINFO_CMD);
         syscmd += tmp_filename;
         system(syscmd.c_str());
 
-        FILE* hwinfo_fh = fopen(tmp_filename.c_str(), "r");
-
-        if (!hwinfo_fh) {
-            err_stream << "Error: Can't open temp file " << tmp_filename.c_str()
-                       << " for reading. error code=" << GetLastError()
-                       << std::endl;
-            return err_stream.str();
-        }
-
-        fseek(hwinfo_fh, 0, SEEK_END);
-        size_t fsize = ftell(hwinfo_fh);
-        fseek(hwinfo_fh, 0, SEEK_SET);
-
-        std::string out(fsize, '\0');
-        fread(&out[0], fsize, 1, hwinfo_fh);
-        fclose(hwinfo_fh);
-
-        return out;
+        mHWTmpFilePath = tmp_filename.c_str();
+        return true;
     }
 
-    virtual void cleanupHWInfo() {
+    void cleanupHWInfo() {
+        if (mHWTmpFilePath.empty()) {
+            return;
+        }
+
         DWORD del_ret = DeleteFile(mHWTmpFilePath.c_str());
 
         if (!del_ret) {

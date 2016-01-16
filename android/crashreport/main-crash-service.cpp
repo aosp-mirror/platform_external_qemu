@@ -24,8 +24,6 @@
 #include "android/crashreport/CrashService.h"
 #include "android/crashreport/CrashSystem.h"
 #include "android/crashreport/ui/ConfirmDialog.h"
-#include "android/crashreport/ui/CrashProgress.h"
-#include "android/crashreport/ui/WantHWInfo.h"
 #include "android/qt/qt_path.h"
 #include "android/utils/debug.h"
 #include "android/version.h"
@@ -43,55 +41,12 @@
 #define D(...) VERBOSE_PRINT(init, __VA_ARGS__)
 #define I(...) printf(__VA_ARGS__)
 
-const char kMessageBoxTitle[] = "Android Emulator";
-const char kMessageBoxMessage[] =
-        "<p>Android Emulator closed unexpectedly.</p>"
-        "<p>Do you want to send a crash report about the problem?</p>";
-const char kMessageBoxMessageDetailHW[] =
-        "An error report containing the information shown below, "
-        "including system-specific information, "
-        "will be sent to Google's Android team to help identify "
-        "and fix the problem. "
-        "<a href=\"https://www.google.com/policies/privacy/\">Privacy "
-        "Policy</a>.";
-const char kMessageBoxMessageDetail[] =
-        "An error report containing the information shown below "
-        "will be sent to Google's Android team to help identify "
-        "and fix the problem. "
-        "<a href=\"https://www.google.com/policies/privacy/\">Privacy "
-        "Policy</a>.";
-
-extern "C" const unsigned char* android_emulator_icon_find(const char* name,
-                                                           size_t* psize);
-
-static bool _postprocess_collectsysinfo = false;
-
-static bool displayConfirmDialog(const std::string& details,
-                                 android::crashreport::CrashService* crashservice,
-                                 android::crashreport::UserSuggestions* suggestions) {
-    static const char kIconFile[] = "emulator_icon_128.png";
-    size_t icon_size;
-    QPixmap icon;
-
-    const unsigned char* icon_data =
-            android_emulator_icon_find(kIconFile, &icon_size);
-
-    icon.loadFromData(icon_data, icon_size);
-
-    ConfirmDialog msgBox(nullptr, icon, kMessageBoxTitle, kMessageBoxMessage,
-                         kMessageBoxMessageDetailHW,
-                         details.c_str(),
-                         crashservice,
-                         suggestions);
+static bool displayConfirmDialog(
+        android::crashreport::CrashService* crashservice) {
+    ConfirmDialog msgBox(nullptr, crashservice);
 
     msgBox.show();
     int ret = msgBox.exec();
-    if (msgBox.didGetSysInfo()) {
-        _postprocess_collectsysinfo = false;
-    } else {
-        _postprocess_collectsysinfo = true;
-    }
-
     return ret == ConfirmDialog::Accepted;
 }
 
@@ -158,6 +113,10 @@ int main(int argc, char** argv) {
             return 1;
         }
         crashservice->stopCrashServer();
+        if (crashservice->getDumpFile().empty()) {
+            // No crash dump created
+            return 0;
+        }
     } else {
         E("Must supply a dump path\n");
         return 1;
@@ -172,30 +131,9 @@ int main(int argc, char** argv) {
 
     InitQt(argc, argv);
 
-
-    const std::string crashDetails (crashservice->getCrashDetails());
-
-    android::crashreport::UserSuggestions suggestions(&crashservice->process_state);
-
-    if (crashDetails.empty()) {
-        E("Crash details could not be processed, skipping upload\n");
+    if (!displayConfirmDialog(crashservice.get())) {
         return 1;
     }
 
-    if (!displayConfirmDialog(crashDetails, crashservice.get(), &suggestions)) {
-        return 1;
-    }
-
-    if (_postprocess_collectsysinfo) {
-        crashservice->collectSysInfo();
-    }
-
-    if (!crashservice->uploadCrash(
-                ::android::crashreport::CrashSystem::get()->getCrashURL())) {
-        E("Crash Report could not be uploaded\n");
-        return 1;
-    }
-
-    D("Crash Report %s submitted\n", crashservice->getReportId().c_str());
     return 0;
 }
