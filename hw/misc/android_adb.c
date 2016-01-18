@@ -95,6 +95,7 @@ typedef struct {
     gboolean    data_out;       /* can we output data? */
     adb_pipe *adb_pipes[PIPE_QUEUE_LEN];
     adb_pipe *connected_pipe;
+    guint    adb_data_timer_id;
 } adb_backend_state;
 
 static adb_backend_state adb_state;
@@ -242,6 +243,15 @@ static gboolean tcp_adb_server_data(GIOChannel *channel, GIOCondition cond,
 
     /* Done, we must re-add watch next time we are waiting for data */
     return FALSE;
+}
+
+static gboolean tcp_adb_server_timer(void *opaque) {
+    adb_backend_state *bs = (adb_backend_state *) opaque;
+    if (bs->chan && bs->connected_pipe && bs->connected_pipe->state == ADB_CONNECTION_STATE_CONNECTED) {
+        g_io_add_watch(bs->chan, G_IO_IN|G_IO_ERR|G_IO_HUP,
+                           tcp_adb_server_data, bs);
+    }
+    return TRUE;
 }
 
 static gboolean tcp_adb_connect(adb_backend_state *bs, int fd)
@@ -467,6 +477,10 @@ static const char *handle_request(adb_pipe *apipe, const char *request, int len)
         }
 
         apipe->state = ADB_CONNECTION_STATE_CONNECTED;
+        if (bs->adb_data_timer_id) {
+            g_source_remove(bs->adb_data_timer_id);
+        }
+        bs->adb_data_timer_id = g_timeout_add(1000, /* ms */ tcp_adb_server_timer, bs);
         return NULL; /* start proxying data */
     } else {
         /* unrecognized command */
@@ -759,6 +773,7 @@ bool qemu2_adb_server_init(int port)
         adb_state.listen_chan = NULL;
         adb_state.data_in = FALSE;
         adb_state.connected_pipe = NULL;
+        adb_state.adb_data_timer_id = 0;
 
         android_pipe_add_type("qemud:adb", NULL, &adb_pipe_funcs);
         pipe_backend_initialized = true;
