@@ -1033,6 +1033,7 @@ extern "C" int main(int argc, char **argv) {
     args[n++] = "type=ranchu";
 #endif  // !TARGET_X86_64 && !TARGET_I386
 
+#if defined(TARGET_X86_64) || defined(TARGET_I386)
     // SMP Support.
     String ncores;
     if (hw->hw_cpu_ncore > 1) {
@@ -1040,6 +1041,7 @@ extern "C" int main(int argc, char **argv) {
         ncores = StringFormat("cores=%ld", hw->hw_cpu_ncore);
         args[n++] = ncores.c_str();
     }
+#endif  // !TARGET_X86_64 && !TARGET_I386
 
     /* Setup screen emulation */
     if (opts->screen) {
