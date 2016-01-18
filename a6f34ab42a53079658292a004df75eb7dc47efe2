@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e798c691_28912f06",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 10
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-18T09:29:57Z",
+      "side": 1,
+      "message": "This should be LDLIBS, not LDFLAGS :-) Also, it\u0027s probably more logical to add:\n\n    EMULATOR_LIBUI_LDLIBS +\u003d $(ANDROID_SKIN_STATIC_LDLIBS)\n\nafter the include on line 488.",
+      "revId": "a6f34ab42a53079658292a004df75eb7dc47efe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8780ea14_2a3d5f9b",
+        "filename": "android/skin/qt/gl-widget.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-18T09:29:57Z",
+      "side": 1,
+      "message": "nit: ah ah, I meant \"needs to be resized and updates\" here :)",
+      "revId": "a6f34ab42a53079658292a004df75eb7dc47efe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
