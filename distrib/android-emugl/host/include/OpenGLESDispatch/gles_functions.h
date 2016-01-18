@@ -1,13 +1,13 @@
 #ifndef GLES_FUNCTIONS_H
 #define GLES_FUNCTIONS_H
 
-#include "gles_common_functions.h"
-#include "gles_extensions_functions.h"
-#include "gles1_only_functions.h"
-#include "gles1_extensions_functions.h"
-#include "gles2_only_functions.h"
-#include "gles2_extensions_functions.h"
-#include "gles3_only_functions.h"
+#include "OpenGLESDispatch/gles_common_functions.h"
+#include "OpenGLESDispatch/gles_extensions_functions.h"
+#include "OpenGLESDispatch/gles1_only_functions.h"
+#include "OpenGLESDispatch/gles1_extensions_functions.h"
+#include "OpenGLESDispatch/gles2_only_functions.h"
+#include "OpenGLESDispatch/gles2_extensions_functions.h"
+#include "OpenGLESDispatch/gles3_only_functions.h"
 
 #define LIST_GLES_FUNCTIONS(X,Y) \
     LIST_GLES_COMMON_FUNCTIONS(X) \

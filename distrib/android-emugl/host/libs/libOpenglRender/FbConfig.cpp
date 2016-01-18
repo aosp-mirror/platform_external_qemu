@@ -14,7 +14,7 @@
 
 #include "FbConfig.h"
 
-#include "EGLDispatch.h"
+#include "OpenGLESDispatch/EGLDispatch.h"
 
 #include <stdio.h>
 #include <string.h>

@@ -13,12 +13,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef _GLES_V1_DISPATCH_H
-#define _GLES_V1_DISPATCH_H
+#pragma once
 
-#include "gles1_server_context.h"
+#include "gles2_server_context.h"
 
-bool init_gles1_dispatch(gles1_server_context_t *dispatch_table);
-void *gles1_dispatch_get_proc_func(const char *name, void *userData);
-
-#endif  // _GLES_V1_DISPATCH_H
+bool init_gles2_dispatch(gles2_server_context_t *dispatch_table);
+void *gles2_dispatch_get_proc_func(const char *name, void *userData);

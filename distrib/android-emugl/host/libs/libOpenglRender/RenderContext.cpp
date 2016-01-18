@@ -15,7 +15,7 @@
 */
 #include "RenderContext.h"
 
-#include "EGLDispatch.h"
+#include "OpenGLESDispatch/EGLDispatch.h"
 
 RenderContext* RenderContext::create(EGLDisplay display,
                                      EGLConfig config,

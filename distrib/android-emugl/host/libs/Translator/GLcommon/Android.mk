@@ -33,7 +33,6 @@ endif
 
 $(call emugl-begin-host-static-library,libGLcommon)
 
-translator_path := $(LOCAL_PATH)/..
 LOCAL_SRC_FILES := $(host_common_SRC_FILES)
 $(call emugl-export,LDLIBS,$(host_common_LDLIBS))
 $(call emugl-export,LDFLAGS,$(host_common_LDFLAGS))

@@ -19,8 +19,8 @@
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 
-#include "gldefs.h"
-#include "gles_functions.h"
+#include "OpenGLESDispatch/gldefs.h"
+#include "OpenGLESDispatch/gles_functions.h"
 #include "GLutils.h"
 
 #include "emugl/common/mutex.h"
