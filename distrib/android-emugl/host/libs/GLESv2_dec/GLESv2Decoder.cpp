@@ -55,24 +55,7 @@ void *GLESv2Decoder::s_getProc(const char *name, void *userData)
 
 int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
 {
-    if (getProcFunc == NULL) {
-        const char *libname = GLES2_LIBNAME;
-        if (getenv(GLES2_LIBNAME_VAR) != NULL) {
-            libname = getenv(GLES2_LIBNAME_VAR);
-        }
-
-        char error[256];
-        m_GL2library = emugl::SharedLibrary::open(
-                libname, error, sizeof(error));
-        if (m_GL2library == NULL) {
-            fprintf(stderr, "%s: Couldn't load %s [%s]\n", __FUNCTION__,
-                    libname, error);
-            return -1;
-        }
-        this->initDispatchByName(s_getProc, this);
-    } else {
-        this->initDispatchByName(getProcFunc, getProcFuncData);
-    }
+    this->initDispatchByName(getProcFunc, getProcFuncData);
 
     glGetCompressedTextureFormats = s_glGetCompressedTextureFormats;
     glVertexAttribPointerData = s_glVertexAttribPointerData;

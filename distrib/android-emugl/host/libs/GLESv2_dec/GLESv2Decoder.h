@@ -17,9 +17,6 @@
 #ifndef _GL2_DECODER_H_
 #define _GL2_DECODER_H_
 
-#define GLES2_LIBNAME_VAR "ANDROID_GLESv2_LIB"
-#define GLES2_LIBNAME     "libGLESv2.so"
-
 #include "gles2_dec.h"
 #include "GLDecoderContextData.h"
 #include "emugl/common/shared_library.h"
@@ -30,7 +27,7 @@ public:
     typedef void *(*get_proc_func_t)(const char *name, void *userData);
     GLESv2Decoder();
     ~GLESv2Decoder();
-    int initGL(get_proc_func_t getProcFunc = NULL, void *getProcFuncData = NULL);
+    int initGL(get_proc_func_t getProcFunc, void *getProcFuncData);
     void setContextData(GLDecoderContextData *contextData) { m_contextData = contextData; }
 private:
     GLDecoderContextData *m_contextData;
