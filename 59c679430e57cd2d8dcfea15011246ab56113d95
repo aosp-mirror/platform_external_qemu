@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c75ca266_7c271ff4",
+        "filename": "distrib/android-emugl/host/include/OpenGLESDispatch/GLESv1Dispatch.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-19T19:45:57Z",
+      "side": 1,
+      "message": "nit: typo: initializer -\u003e initialize",
+      "range": {
+        "startLine": 39,
+        "startChar": 11,
+        "endLine": 39,
+        "endChar": 22
+      },
+      "revId": "59c679430e57cd2d8dcfea15011246ab56113d95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2752dead_599b0436",
+        "filename": "distrib/android-emugl/host/include/OpenGLESDispatch/GLESv1Dispatch.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-19T19:45:57Z",
+      "side": 1,
+      "message": "nit: void * -\u003e void* (as per the coding standard convention)",
+      "range": {
+        "startLine": 40,
+        "startChar": 5,
+        "endLine": 40,
+        "endChar": 6
+      },
+      "revId": "59c679430e57cd2d8dcfea15011246ab56113d95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "274e5eac_c3a936b5",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/GLESv1Dispatch.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-19T19:45:57Z",
+      "side": 1,
+      "message": "Do you think it would make sense to write a template function for dispatch table initialization to avoid code duplication? The template parameter can be either GLESv1Dispatch or GLESv2Dispatch something like \n\ntemplate \u003cclass TableType\u003e\nbool init_gles_dispatch(TableType* table) {\n...\n}\n\nparts like the environment variable name and default library location could be made static members of the dispatch table type.\n\n\nWhat do you think?",
+      "revId": "59c679430e57cd2d8dcfea15011246ab56113d95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07495aa4_47637419",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/DecoderContext.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-19T19:45:57Z",
+      "side": 1,
+      "message": "maybe rename this file to something more appropriate since it no longer tied with decoder?",
+      "revId": "59c679430e57cd2d8dcfea15011246ab56113d95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
