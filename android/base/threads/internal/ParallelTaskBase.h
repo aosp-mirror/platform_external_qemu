@@ -41,11 +41,10 @@ protected:
     // API functions.
     bool start();
     bool inFlight() const;
-    static bool fireAndForget(std::unique_ptr<ParallelTaskBase> thread);
 
     // |ParallelTask<T>| implements these hooks.
-    virtual void mainImpl() = 0;
-    virtual void onJoinedImpl() = 0;
+    virtual void taskImpl() = 0;
+    virtual void taskDoneImpl() = 0;
 
 private:
     class ManagedThread : public ::android::base::Thread {
@@ -54,7 +53,7 @@ private:
             : Thread(flags), mManager(manager) {}
 
         intptr_t main() {
-            mManager->mainImpl();
+            mManager->taskImpl();
             // This return value is ignored.
             return 0;
         }
@@ -72,8 +71,6 @@ private:
     std::unique_ptr<ManagedThread> mManagedThread;
 
     bool isRunning = false;
-    void* mResultBuffer = nullptr;
-    bool shouldGarbageCollect = false;
     std::unique_ptr<android::base::Looper::Timer> mTimer;
 
     DISALLOW_COPY_AND_ASSIGN(ParallelTaskBase);

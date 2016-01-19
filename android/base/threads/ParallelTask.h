@@ -19,99 +19,166 @@
 #include "android/base/threads/internal/ParallelTaskBase.h"
 #include "android/base/threads/Types.h"
 
+#include <functional>
 #include <memory>
 #include <utility>
 
 namespace android {
 namespace base {
 
-// A ParallelTask<Result> is an object that allows you to launch a thread from a
-// main thread that has an associated looper, and then take follow up action on
-// the looper once the thread finishes. Additionally, the |onJoined| function is
-// called with a result of type |Result| returned from the launched thread.
-//
+// A ParallelTask<Result> is an object that allows you to run a task in a
+// separate thread, and take follow up action back on the current thread's event
+// loop. Additionally, the |taskDoneFunction| function is called with a result
+// of type |Result| returned from the launched thread.
 //
 // An example of a thread returning the typical int exitStatus:
 //
-//   class MyThread : public android::base::ParallelTask<int> {
-//      intptr_t main(int* exitStatus) overrride {
-//          *exitStatus = 42;
-//      }
+//   class LifeUniverseAndEverythingInParallel {
+//   public:
+//       LifeUniverseAndEverythingInParallel(Looper* looper) :
+//               mEarth(looper,
+//                      std::bind(&LifeUniverseAndEverythingInParallel::compute,
+//                                this, std::placeholders::_1),
+//                      std::bind(
+//                          &LifeUniverseAndEverythingInParallel::printAnswer,
+//                          this, std::placeholders::_1) {}
 //
-//      void onJoined(const int& exitStatus) override {
-//          cout << "Our special thread finished with " << exitStatus;
-//      }
+//       // This is the entry point of computation.
+//       bool startOfTime() {
+//           return mEarth.start();
+//       }
+//       // Called by the parallel task.
+//       void compute(int* outResult) {
+//           *outResult = 42;
+//       }
+//
+//       void printAnswer(const int& outResult) {
+//           std::cout << "The mice say it's " << outResult << std::endl;
+//       }
+//
+//   private:
+//       ParallelTask<int> mEarth;
 //   };
 //
 //   int main() {
-//      unique_ptr<android::base::ParallelTask> myThread(new MyThread(looper));
-//
-//      // |threadObj| will execute |main| on a separate thread. Then, it will
-//      join thread on a function called from the event loop, which will call
-//      |onJoined|.
-//      myThread->start();
-//
-//      // Or, additionally, when |onJoined| finishes, |threadObj| can be
-//      automatically deleted.
-//      ParallelTask::fireAndForget(std::move(myThread));
+//     LifeUniverseAndEverythingInParallel whatsTheAnswer;
+//     whatsTheAnswer.startOfTime();
+//     android::base::ThreadLooper::get()->runWithDeadline(
+//             // 10 million years);
+//     // ... Do other stuff while the mice run inside contraptions ...
 //   }
 //
+//   If you just want to run a free function to compute something in parallel
+//   and then take follow up action using another free function, a templatized
+//   helper function is provided as well:
+//
+//   void computeStandalone(int* outResult) {
+//       *outResult = 42;
+//   }
+//
+//   void printAnswer(const int& outResult) {
+//       std::cout << "The mice say it's " << outResult << std::endl;
+//   }
+//
+//   runParallelTask<int>(
+//           android::base::ThreadLooper::get(),
+//           &computeStandalone,
+//           &printAnswer);
+//
 template <class ResultType>
-class ParallelTask : public internal::ParallelTaskBase {
+class ParallelTask final : public internal::ParallelTaskBase {
 public:
+    using TaskFunction = std::function<void(ResultType*)>;
+    using TaskDoneFunction = std::function<void(const ResultType&)>;
+
     // Args:
     //     looper: A running looper for the current thread.
+    //     taskFunction: The function you want to be called on a separate thread
+    //             to perform the task.
+    //     taskDoneFunction: The function you want to be called on the event
+    //             loop in the current thread once the task is completed.
     //     checkTimeoutMs: The time in milliseconds between consecutive checks
     //             for thread termination. A bigger value possibly delayes the
-    //             call to |onJoined|, but leads to fewer checks.
+    //             call to |taskDoneFunction|, but leads to fewer checks.
     //             Default: 1 second.
     //     flags: See android::base::Thread.
     ParallelTask(android::base::Looper* looper,
+                 TaskFunction taskFunction,
+                 TaskDoneFunction taskDoneFunction,
                  android::base::Looper::Duration checkTimeoutMs = 1 * 1000,
                  ThreadFlags flags = ThreadFlags::MaskSignals)
-        : ParallelTaskBase(looper, checkTimeoutMs, flags) {}
+        : ParallelTaskBase(looper, checkTimeoutMs, flags),
+        mTaskFunction(taskFunction), mTaskDoneFunction(taskDoneFunction) {}
 
     // Start the thread instance. Returns true on success, false otherwise.
     // (e.g. if the thread was already started or terminated).
     bool start() { return ParallelTaskBase::start(); }
 
-    // Returns true if the thread has been |start|'ed, but the call to
-    // |onJoined| hasn't finished yet.
+    // Returns true if the task has been |start|'ed, but the call to
+    // |taskDone| hasn't finished yet.
     // This function should be called from the same thread that called |start|.
-    // It is an error to call this function on a |fireAndForget|ed thread.
     bool inFlight() const { return ParallelTaskBase::inFlight(); }
 
-    // |start| a thread, and request that |this| be garbage collected whenever
-    // the thread has finished. This is useful if you don't want to remember to
-    // delete the object after the thread finishes |onJoined|.
-    //
-    // NOTE: A call to |fireAndForget| **always** invalidates |*thread|. It's an
-    // error to use |this| object from the caller after a call to
-    // |fireAndForget|. (We now just take ownership to make it explicit).
-    static bool fireAndForget(std::unique_ptr<ParallelTask> thread) {
-        return ParallelTaskBase::fireAndForget(std::move(thread));
-    }
-
 protected:
-    // Override this method in your own sub-classes. This will
-    // be called when |fireAndForget| is invoked on the Thread instance.
-    virtual void main(ResultType* outResult) = 0;
+    void taskImpl() override final { mTaskFunction(&mResultBuffer); }
 
-    // Override this method in your own sub-classes. This will be dispatched on
-    // |looper| after |main| finishes on the |fireAndForget|ed thread.
-    // The exit status from the thread is provided as argument.
-    virtual void onJoined(const ResultType& result){};
-
-protected:
-    void mainImpl() override final { main(&mResultBuffer); }
-
-    void onJoinedImpl() override final { onJoined(mResultBuffer); }
+    void taskDoneImpl() override final { mTaskDoneFunction(mResultBuffer); }
 
 private:
     ResultType mResultBuffer;
+    TaskFunction mTaskFunction;
+    TaskDoneFunction mTaskDoneFunction;
 
     DISALLOW_COPY_AND_ASSIGN(ParallelTask);
 };
+
+namespace internal {
+
+template <class ResultType>
+class SelfDeletingParallelTask {
+public:
+    using TaskFunction = typename ParallelTask<ResultType>::TaskFunction;
+    using TaskDoneFunction =
+            typename ParallelTask<ResultType>::TaskDoneFunction;
+
+    SelfDeletingParallelTask(android::base::Looper* looper,
+                             TaskFunction taskFunction,
+                             TaskDoneFunction taskDoneFunction,
+                             android::base::Looper::Duration checkTimeoutMs)
+        : mTaskDoneFunction(taskDoneFunction),
+          mParallelTask(looper,
+                        taskFunction,
+                        std::bind(&SelfDeletingParallelTask::taskDoneFunction,
+                                  this,
+                                  std::placeholders::_1),
+                        checkTimeoutMs) {}
+
+    bool start() { return mParallelTask.start(); };
+
+    void taskDoneFunction(const ResultType& result) {
+        mTaskDoneFunction(result);
+        delete this;
+    }
+
+private:
+    TaskDoneFunction mTaskDoneFunction;
+    ParallelTask<ResultType> mParallelTask;
+
+    DISALLOW_COPY_AND_ASSIGN(SelfDeletingParallelTask);
+};
+
+}  // namespace internal
+
+template<class ResultType>
+bool runParallelTask(android::base::Looper* looper,
+                     std::function<void(ResultType*)> taskFunction,
+                     std::function<void(const ResultType&)> taskDoneFunction,
+                     android::base::Looper::Duration checkTimeoutMs = 1 * 1000) {
+    auto flyaway = new internal::SelfDeletingParallelTask<ResultType>(
+            looper, taskFunction, taskDoneFunction, checkTimeoutMs);
+    return flyaway->start();
+
+}
 
 }  // namespace base
 }  // namespace android
