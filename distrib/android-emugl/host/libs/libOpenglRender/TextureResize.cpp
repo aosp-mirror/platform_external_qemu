@@ -15,7 +15,7 @@
 */
 #include "TextureResize.h"
 
-#include "DecoderContext.h"
+#include "DispatchTables.h"
 
 #include <stdio.h>
 #include <sstream>

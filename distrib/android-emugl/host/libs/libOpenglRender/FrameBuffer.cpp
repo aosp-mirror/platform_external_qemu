@@ -16,7 +16,7 @@
 
 #include "FrameBuffer.h"
 
-#include "DecoderContext.h"
+#include "DispatchTables.h"
 #include "NativeSubWindow.h"
 #include "RenderThreadInfo.h"
 #include "TimeUtils.h"
