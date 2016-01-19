@@ -97,6 +97,24 @@
       "revId": "59c679430e57cd2d8dcfea15011246ab56113d95",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a77deeee_118e0eab",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/DecoderContext.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-19T21:30:18Z",
+      "side": 1,
+      "message": "Good idea, will do.",
+      "parentUuid": "07495aa4_47637419",
+      "revId": "59c679430e57cd2d8dcfea15011246ab56113d95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
