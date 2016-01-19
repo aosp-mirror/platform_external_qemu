@@ -1,0 +1,251 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4768b202_02d4bd16",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-19T18:36:16Z",
+      "side": 1,
+      "message": "please use std::unique_ptr from \u003cmemory\u003e instead",
+      "range": {
+        "startLine": 17,
+        "startChar": 1,
+        "endLine": 17,
+        "endChar": 42
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07495aa4_7c38c3ab",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-19T18:36:16Z",
+      "side": 1,
+      "message": "these consts only make things more complicated without real help. e.g. they prevent move semantics to kick in",
+      "range": {
+        "startLine": 135,
+        "startChar": 4,
+        "endLine": 135,
+        "endChar": 9
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07623a24_190559f0",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-19T18:36:16Z",
+      "side": 1,
+      "message": "c++ headers should go before C headers",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 17
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c75ca266_8161ecb8",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-19T18:36:16Z",
+      "side": 1,
+      "message": "std::string",
+      "range": {
+        "startLine": 246,
+        "startChar": 0,
+        "endLine": 246,
+        "endChar": 6
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07623a24_d923e180",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-19T18:36:16Z",
+      "side": 1,
+      "message": "1. please initialize it in the scope where you\u0027re using it\n2. you could use std::string and std::to_string() instead of creating the whole stream object - those are slow as hell",
+      "range": {
+        "startLine": 247,
+        "startChar": 4,
+        "endLine": 247,
+        "endChar": 34
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07495aa4_3cac7b07",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-19T18:36:16Z",
+      "side": 1,
+      "message": "I\u0027ve seen it enough times to ask for a helper function for reading whole file",
+      "range": {
+        "startLine": 257,
+        "startChar": 3,
+        "endLine": 263,
+        "endChar": 22
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e759a674_4859b283",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-19T18:36:16Z",
+      "side": 1,
+      "message": "do we need to free it afterwards?",
+      "range": {
+        "startLine": 65,
+        "startChar": 25,
+        "endLine": 65,
+        "endChar": 34
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4768b202_8291ed3d",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-19T18:36:16Z",
+      "side": 1,
+      "message": "nope\ntr() is supposed to be used with constant string literals only. Please explicitly construct a QString here",
+      "range": {
+        "startLine": 230,
+        "startChar": 27,
+        "endLine": 230,
+        "endChar": 29
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07623a24_194c394a",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-19T18:36:16Z",
+      "side": 1,
+      "message": "tr(), here an on the next lines",
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "27673e34_3a35a717",
+        "filename": "android/crashreport/ui/ConfirmDialog.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-19T18:36:16Z",
+      "side": 1,
+      "message": "const ref?",
+      "range": {
+        "startLine": 56,
+        "startChar": 30,
+        "endLine": 56,
+        "endChar": 36
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e759a674_e84886b5",
+        "filename": "android/crashreport/ui/ConfirmDialog.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-19T18:36:16Z",
+      "side": 1,
+      "message": "please don\u0027t use any prefixes - those in emulator qt window are really a bad idea",
+      "range": {
+        "startLine": 71,
+        "startChar": 9,
+        "endLine": 71,
+        "endChar": 12
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
