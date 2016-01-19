@@ -524,7 +524,12 @@ void EmulatorQtWindow::slot_getWindowPos(int *xx, int *yy, QSemaphore *semaphore
 
 void EmulatorQtWindow::slot_isWindowFullyVisible(bool *out_value, QSemaphore *semaphore)
 {
-    *out_value = ((QApplication*)QApplication::instance())->desktop()->screenGeometry().contains(mContainer.geometry());
+    QDesktopWidget *desktop = ((QApplication*)QApplication::instance())->desktop();
+    int   screenNum = desktop->screenNumber(&mContainer); // Screen holding the app
+    QRect screenGeo = desktop->screenGeometry(screenNum);
+
+    *out_value = screenGeo.contains( mContainer.geometry() );
+
     if (semaphore != NULL) semaphore->release();
 }
 
