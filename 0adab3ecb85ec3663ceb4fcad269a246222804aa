@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "274e5eac_48e42529",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-19T17:27:25Z",
+      "side": 1,
+      "message": "This should be done one of two ways:\n1. If the background color in the \"layout\" file has 0 alpha, default to a frameless emulator. This is a bit more seamless and makes sense because it wouldn\u0027t make sense to have a transparent background with a frame (I think), but isn\u0027t very explicit.\n2. Add another value to the layout file, perhaps like \"frameless on\", so that making a frameless emulator is explicit.",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 47
+      },
+      "revId": "0adab3ecb85ec3663ceb4fcad269a246222804aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
