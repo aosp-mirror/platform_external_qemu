@@ -15,7 +15,7 @@
 */
 #include "ColorBuffer.h"
 
-#include "DecoderContext.h"
+#include "DispatchTables.h"
 #include "GLcommon/GLutils.h"
 #include "RenderThreadInfo.h"
 #include "TextureDraw.h"
