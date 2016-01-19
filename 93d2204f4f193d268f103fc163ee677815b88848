@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "274e5eac_352c8d69",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-19T23:36:26Z",
+      "side": 1,
+      "message": "changed.",
+      "parentUuid": "4768b202_02d4bd16",
+      "range": {
+        "startLine": 17,
+        "startChar": 1,
+        "endLine": 17,
+        "endChar": 42
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07495aa4_7c38c3ab",
         "filename": "android/crashreport/CrashService.h",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-19T18:36:16Z",
       "side": 1,
       "message": "these consts only make things more complicated without real help. e.g. they prevent move semantics to kick in",
+      "range": {
+        "startLine": 135,
+        "startChar": 4,
+        "endLine": 135,
+        "endChar": 9
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "87562a44_2318e85f",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-19T23:36:26Z",
+      "side": 1,
+      "message": "got it. fixed.",
+      "parentUuid": "07495aa4_7c38c3ab",
       "range": {
         "startLine": 135,
         "startChar": 4,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "e759a674_8350cbb8",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-19T23:36:26Z",
+      "side": 1,
+      "message": "fixed.",
+      "parentUuid": "07623a24_190559f0",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 17
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c75ca266_8161ecb8",
         "filename": "android/crashreport/CrashService_common.cpp",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2016-01-19T18:36:16Z",
       "side": 1,
       "message": "std::string",
+      "range": {
+        "startLine": 246,
+        "startChar": 0,
+        "endLine": 246,
+        "endChar": 6
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4768b202_40b50ded",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-19T23:36:26Z",
+      "side": 1,
+      "message": "fixed",
+      "parentUuid": "c75ca266_8161ecb8",
       "range": {
         "startLine": 246,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "676db610_c1e123bd",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-19T23:36:26Z",
+      "side": 1,
+      "message": "fixed.",
+      "parentUuid": "07623a24_d923e180",
+      "range": {
+        "startLine": 247,
+        "startChar": 4,
+        "endLine": 247,
+        "endChar": 34
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07495aa4_3cac7b07",
         "filename": "android/crashreport/CrashService_common.cpp",
         "patchSetId": 2
@@ -128,6 +248,30 @@
       "writtenOn": "2016-01-19T18:36:16Z",
       "side": 1,
       "message": "I\u0027ve seen it enough times to ask for a helper function for reading whole file",
+      "range": {
+        "startLine": 257,
+        "startChar": 3,
+        "endLine": 263,
+        "endChar": 22
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4768b202_80c8c57d",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-19T23:36:26Z",
+      "side": 1,
+      "message": "moved to a helper function.",
+      "parentUuid": "07495aa4_3cac7b07",
       "range": {
         "startLine": 257,
         "startChar": 3,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "e759a674_c3ebe329",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-19T23:36:26Z",
+      "side": 1,
+      "message": "This is just giving me a pointer to a const char array in a header file.",
+      "parentUuid": "e759a674_4859b283",
+      "range": {
+        "startLine": 65,
+        "startChar": 25,
+        "endLine": 65,
+        "endChar": 34
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4768b202_8291ed3d",
         "filename": "android/crashreport/ui/ConfirmDialog.cpp",
         "patchSetId": 2
@@ -174,6 +342,30 @@
       "writtenOn": "2016-01-19T18:36:16Z",
       "side": 1,
       "message": "nope\ntr() is supposed to be used with constant string literals only. Please explicitly construct a QString here",
+      "range": {
+        "startLine": 230,
+        "startChar": 27,
+        "endLine": 230,
+        "endChar": 29
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e759a674_63dad79b",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-19T23:36:26Z",
+      "side": 1,
+      "message": "fixed",
+      "parentUuid": "4768b202_8291ed3d",
       "range": {
         "startLine": 230,
         "startChar": 27,
@@ -203,6 +395,24 @@
     },
     {
       "key": {
+        "uuid": "27673e34_75445053",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-19T23:36:26Z",
+      "side": 1,
+      "message": "fixed.",
+      "parentUuid": "07623a24_194c394a",
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "27673e34_3a35a717",
         "filename": "android/crashreport/ui/ConfirmDialog.h",
         "patchSetId": 2
@@ -226,6 +436,30 @@
     },
     {
       "key": {
+        "uuid": "07623a24_541e78f4",
+        "filename": "android/crashreport/ui/ConfirmDialog.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-19T23:36:26Z",
+      "side": 1,
+      "message": "fixed.",
+      "parentUuid": "27673e34_3a35a717",
+      "range": {
+        "startLine": 56,
+        "startChar": 30,
+        "endLine": 56,
+        "endChar": 36
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e759a674_e84886b5",
         "filename": "android/crashreport/ui/ConfirmDialog.h",
         "patchSetId": 2
@@ -237,6 +471,30 @@
       "writtenOn": "2016-01-19T18:36:16Z",
       "side": 1,
       "message": "please don\u0027t use any prefixes - those in emulator qt window are really a bad idea",
+      "range": {
+        "startLine": 71,
+        "startChar": 9,
+        "endLine": 71,
+        "endChar": 12
+      },
+      "revId": "93d2204f4f193d268f103fc163ee677815b88848",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e759a674_635937dd",
+        "filename": "android/crashreport/ui/ConfirmDialog.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-19T23:36:26Z",
+      "side": 1,
+      "message": "got it. fixed.",
+      "parentUuid": "e759a674_e84886b5",
       "range": {
         "startLine": 71,
         "startChar": 9,
