@@ -65,6 +65,24 @@
     },
     {
       "key": {
+        "uuid": "47727221_eba8a5f4",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/GLESv1Dispatch.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-19T21:29:17Z",
+      "side": 1,
+      "message": "We\u0027re only using two variants of the same code, I don\u0027t think a template is going to be a large benefit here. It would if we had 3 or 4 copies of the code instead.",
+      "parentUuid": "274e5eac_c3a936b5",
+      "revId": "59c679430e57cd2d8dcfea15011246ab56113d95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07495aa4_47637419",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/DecoderContext.h",
         "patchSetId": 1
