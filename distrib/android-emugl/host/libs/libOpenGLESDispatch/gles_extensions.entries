@@ -18,3 +18,7 @@ void glFramebufferTexture3DEXT(GLenum target, GLenum attachment, GLenum textarge
 void glFramebufferRenderbufferEXT(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
 void glGetFramebufferAttachmentParameterivEXT(GLenum target, GLenum attachment, GLenum pname, GLint *params);
 void glGenerateMipmapEXT(GLenum target);
+
+# The following extensions are used by GLESv1Dispatch and GLESv2Dispatch, but not by GLDispatch
+void glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image);
+void glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image);

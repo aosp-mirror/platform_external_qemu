@@ -26,7 +26,6 @@
 
 #include <OpenglCodecCommon/ErrorLog.h>
 #include <GLcommon/TranslatorIfaces.h>
-//#include <OpenGLESDispatch/gldefs.h>
 #include "GLESv2Context.h"
 #include "GLESv2Validate.h"
 #include "ShaderParser.h"

@@ -22,6 +22,8 @@
   X(void, glFramebufferRenderbufferEXT, (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer), (target, attachment, renderbuffertarget, renderbuffer)) \
   X(void, glGetFramebufferAttachmentParameterivEXT, (GLenum target, GLenum attachment, GLenum pname, GLint * params), (target, attachment, pname, params)) \
   X(void, glGenerateMipmapEXT, (GLenum target), (target)) \
+  X(void, glEGLImageTargetTexture2DOES, (GLenum target, GLeglImageOES image), (target, image)) \
+  X(void, glEGLImageTargetRenderbufferStorageOES, (GLenum target, GLeglImageOES image), (target, image)) \
 
 
 #endif  // GLES_EXTENSIONS_FUNCTIONS_H

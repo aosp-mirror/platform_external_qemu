@@ -67,6 +67,11 @@
   X(void, glGetUniformiv, (GLuint program, GLint location, GLint* params), (program, location, params)) \
   X(int, glGetUniformLocation, (GLuint program, const GLchar* name), (program, name)) \
   X(void, glShaderSource, (GLuint shader, GLsizei count, const GLchar* const* string, const GLint* length), (shader, count, string, length)) \
+  X(void, glBindFramebuffer, (GLenum target, GLuint framebuffer), (target, framebuffer)) \
+  X(void, glGenFramebuffers, (GLsizei n, GLuint* framebuffers), (n, framebuffers)) \
+  X(void, glFramebufferTexture2D, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level), (target, attachment, textarget, texture, level)) \
+  X(GLenum, glCheckFramebufferStatus, (GLenum target), (target)) \
+  X(void, glDeleteFramebuffers, (GLsizei n, const GLuint* framebuffers), (n, framebuffers)) \
 
 
 #endif  // GLES2_ONLY_FUNCTIONS_H
