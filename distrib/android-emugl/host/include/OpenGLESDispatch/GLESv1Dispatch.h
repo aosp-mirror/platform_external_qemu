@@ -15,7 +15,26 @@
 */
 #pragma once
 
-#include "gles1_server_context.h"
+#include "OpenGLESDispatch/gldefs.h"
+#include "OpenGLESDispatch/gles_functions.h"
 
-bool init_gles1_dispatch(gles1_server_context_t *dispatch_table);
-void *gles1_dispatch_get_proc_func(const char *name, void *userData);
+// Define function pointer types.
+#define GLES1_DISPATCH_DEFINE_TYPE(return_type,func_name,signature,callargs) \
+    typedef return_type (* func_name ## _t) signature;
+
+LIST_GLES1_FUNCTIONS(GLES1_DISPATCH_DEFINE_TYPE,GLES1_DISPATCH_DEFINE_TYPE)
+
+struct GLESv1Dispatch {
+#define GLES1_DISPATCH_DECLARE_POINTER(return_type,func_name,signature,callargs) \
+        func_name ## _t func_name;
+    LIST_GLES1_FUNCTIONS(GLES1_DISPATCH_DECLARE_POINTER,
+                         GLES1_DISPATCH_DECLARE_POINTER)
+};
+
+#undef GLES1_DISPATCH_DECLARE_POINTER
+#undef GLES1_DISPATCH_DEFINE_TYPE
+
+bool init_gles1_dispatch(GLESv1Dispatch* dispatch_table);
+
+// Used to initializer decoder.
+void *gles1_dispatch_get_proc_func(const char* name, void* userData);
