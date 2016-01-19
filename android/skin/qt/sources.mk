@@ -10,8 +10,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/mac-native-window.mm
 endif
 
-ANDROID_SKIN_CFLAGS += -I$(LIBXML2_INCLUDES)
-ANDROID_SKIN_STATIC_LIBRARIES += $(LIBXML2_STATIC_LIBRARIES)
+ANDROID_SKIN_INCLUDES += $(EMUGL_INCLUDES)
 
 ANDROID_SKIN_SOURCES += \
     android/skin/qt/angle-input-widget.cpp \

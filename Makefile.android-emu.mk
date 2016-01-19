@@ -485,6 +485,9 @@ include $(LOCAL_PATH)/android/skin/sources.mk
 
 $(call start-emulator-library, emulator-libui)
 
+EMULATOR_LIBUI_INCLUDES += $(ANDROID_SKIN_INCLUDES)
+EMULATOR_LIBUI_LDLIBS += $(ANDROID_SKIN_LDLIBS)
+
 LOCAL_CFLAGS += \
     $(EMULATOR_COMMON_CFLAGS) \
     $(ANDROID_SKIN_CFLAGS) \
