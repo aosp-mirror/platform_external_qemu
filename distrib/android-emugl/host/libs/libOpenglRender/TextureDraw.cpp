@@ -14,7 +14,7 @@
 
 #include "TextureDraw.h"
 
-#include "DecoderContext.h"
+#include "DispatchTables.h"
 
 #include <math.h>
 #include <string.h>

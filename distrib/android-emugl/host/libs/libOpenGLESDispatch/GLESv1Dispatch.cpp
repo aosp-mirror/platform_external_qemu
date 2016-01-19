@@ -29,10 +29,11 @@ static emugl::SharedLibrary *s_gles1_lib = NULL;
 
 #define DEFAULT_GLES_CM_LIB EMUGL_LIBNAME("GLES_CM_translator")
 
-bool init_gles1_dispatch(gles1_server_context_t *dispatch_table)
-{
-    const char *libName = getenv("ANDROID_GLESv1_LIB");
-    if (!libName) libName = DEFAULT_GLES_CM_LIB;
+bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
+    const char* libName = getenv("ANDROID_GLESv1_LIB");
+    if (!libName) {
+        libName = DEFAULT_GLES_CM_LIB;
+    }
 
     char error[256];
     s_gles1_lib = emugl::SharedLibrary::open(libName, error, sizeof(error));
@@ -45,12 +46,17 @@ bool init_gles1_dispatch(gles1_server_context_t *dispatch_table)
     //
     // init the GLES dispatch table
     //
-    dispatch_table->initDispatchByName(gles1_dispatch_get_proc_func, NULL);
+#define LOOKUP_SYMBOL(return_type,function_name,signature,callargs) \
+    dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+            s_gles1_lib->findSymbol(#function_name));
+
+    LIST_GLES1_FUNCTIONS(LOOKUP_SYMBOL,LOOKUP_SYMBOL)
+
     return true;
 }
 
 //
-// This function is called only during initialiation before
+// This function is called only during initialization of the decoder before
 // any thread has been created - hence it should NOT be thread safe.
 //
 void *gles1_dispatch_get_proc_func(const char *name, void *userData)
