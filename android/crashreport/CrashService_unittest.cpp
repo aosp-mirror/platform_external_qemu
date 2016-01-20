@@ -25,21 +25,6 @@
 using namespace android::base;
 using namespace android::crashreport;
 
-static std::string getTestCrasher() {
-    std::string path = System::get()->getLauncherDirectory().c_str();
-    path += System::kDirSeparator;
-    path += "emulator";
-    if (System::get()->getProgramBitness() == 64) {
-        path += "64";
-    }
-    path += "_test_crasher";
-#ifdef _WIN32
-    path += ".exe";
-#endif
-    EXPECT_TRUE(System::get()->pathIsFile(path));
-    return path;
-}
-
 TEST(CrashService, get_set_dumpfile) {
     std::unique_ptr<CrashService> crash(
             CrashService::makeCrashService("foo", "bar"));
@@ -71,7 +56,24 @@ TEST(CrashService, validDumpFile) {
     EXPECT_FALSE(crash->validDumpFile());
 }
 
-#ifndef _WIN32
+// Unittest limited to linux as wine seems incompatible, and mac shows
+// inconsistent results.
+#ifdef __linux__
+
+static std::string getTestCrasher() {
+    std::string path = System::get()->getLauncherDirectory().c_str();
+    path += System::kDirSeparator;
+    path += "emulator";
+    if (System::get()->getProgramBitness() == 64) {
+        path += "64";
+    }
+    path += "_test_crasher";
+#ifdef _WIN32
+    path += ".exe";
+#endif
+    EXPECT_TRUE(System::get()->pathIsFile(path));
+    return path;
+}
 
 static StringVector getTestCrasherCmdLine(std::string pipe) {
     const StringVector cmdline = { getTestCrasher(), "-pipe", pipe };
@@ -89,7 +91,8 @@ TEST(CrashService, invalidURLUpload) {
     EXPECT_FALSE(crash->uploadCrash(crashsystem.getCrashURL()));
 }
 
-//Crashing binary doesn't work well in Wine
+// Crashing binary doesn't work well in Wine
+// Fails intermittently on mac build systems
 TEST(CrashService, startAttachWaitCrash) {
     TestTempDir crashdir("crashdir");
     TestCrashSystem crashsystem(crashdir.path(), "localhost");
@@ -161,4 +164,4 @@ TEST(CrashService, startAttachWaitTimeout) {
     waitduration = crash->waitForDumpFile(pid, 200);
     EXPECT_NE(waitduration, -1);
 }
-#endif  // !_WIN32
+#endif  // __linux__
