@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "274e5eac_6bdab89b",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-20T02:01:04Z",
+      "side": 1,
+      "message": "That\u0027s true, but I still want the painter object to at least fill the background with black so that we\u0027re not stuck with a glitchy looking window.",
+      "parentUuid": "676db610_7f3d4a9a",
+      "range": {
+        "startLine": 356,
+        "startChar": 8,
+        "endLine": 356,
+        "endChar": 49
+      },
+      "revId": "d5ec9c70521cb489d11fd9b4a5fb877d76666e3c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07495aa4_56eb2307",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "274e5eac_4bd7fc72",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 468,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-20T02:01:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "07495aa4_56eb2307",
+      "range": {
+        "startLine": 468,
+        "startChar": 65,
+        "endLine": 468,
+        "endChar": 66
+      },
+      "revId": "d5ec9c70521cb489d11fd9b4a5fb877d76666e3c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4768b202_d66f27ff",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2016-01-20T01:44:22Z",
       "side": 1,
       "message": "Something more specific?",
+      "range": {
+        "startLine": 469,
+        "startChar": 20,
+        "endLine": 469,
+        "endChar": 25
+      },
+      "revId": "d5ec9c70521cb489d11fd9b4a5fb877d76666e3c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07623a24_fa8a0b89",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-20T02:01:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4768b202_d66f27ff",
       "range": {
         "startLine": 469,
         "startChar": 20,
@@ -130,6 +202,30 @@
       "side": 1,
       "message": "Whoops, my bad. Yes, an else statement.",
       "parentUuid": "2752dead_8dd0667e",
+      "range": {
+        "startLine": 471,
+        "startChar": 4,
+        "endLine": 471,
+        "endChar": 23
+      },
+      "revId": "d5ec9c70521cb489d11fd9b4a5fb877d76666e3c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "87562a44_b2443f54",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-20T02:01:04Z",
+      "side": 1,
+      "message": "Yeah, it won\u0027t crash here because QImage::fill explicitly checks for null and return, but it\u0027s a good idea to not rely on that.",
+      "parentUuid": "07623a24_1a3387cb",
       "range": {
         "startLine": 471,
         "startChar": 4,
