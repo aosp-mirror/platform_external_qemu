@@ -25,21 +25,6 @@
 using namespace android::base;
 using namespace android::crashreport;
 
-static std::string getTestCrasher() {
-    std::string path = System::get()->getLauncherDirectory().c_str();
-    path += System::kDirSeparator;
-    path += "emulator";
-    if (System::get()->getProgramBitness() == 64) {
-        path += "64";
-    }
-    path += "_test_crasher";
-#ifdef _WIN32
-    path += ".exe";
-#endif
-    EXPECT_TRUE(System::get()->pathIsFile(path));
-    return path;
-}
-
 TEST(CrashService, get_set_dumpfile) {
     std::unique_ptr<CrashService> crash(
             CrashService::makeCrashService("foo", "bar"));
@@ -71,7 +56,22 @@ TEST(CrashService, validDumpFile) {
     EXPECT_FALSE(crash->validDumpFile());
 }
 
-#ifndef _WIN32
+#ifdef __linux__
+
+static std::string getTestCrasher() {
+    std::string path = System::get()->getLauncherDirectory().c_str();
+    path += System::kDirSeparator;
+    path += "emulator";
+    if (System::get()->getProgramBitness() == 64) {
+        path += "64";
+    }
+    path += "_test_crasher";
+#ifdef _WIN32
+    path += ".exe";
+#endif
+    EXPECT_TRUE(System::get()->pathIsFile(path));
+    return path;
+}
 
 static StringVector getTestCrasherCmdLine(std::string pipe) {
     const StringVector cmdline = { getTestCrasher(), "-pipe", pipe };
