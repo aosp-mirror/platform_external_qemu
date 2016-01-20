@@ -76,5 +76,9 @@ extern "C" bool crashhandler_init() {
     return CrashReporter::get()->attachCrashHandler(crashpipe);
 };
 
+extern "C" void crashhandler_die(const char* message) {
+    CrashReporter::get()->GenerateDump(message);
+    abort();
+}
 }  // namespace crashreport
 }  // namespace android

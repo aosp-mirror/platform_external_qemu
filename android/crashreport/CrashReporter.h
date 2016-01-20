@@ -50,6 +50,8 @@ public:
     // Gets a handle to single instance of crash reporter
     static CrashReporter* get();
 
+    virtual void GenerateDump(const char* message) = 0;
+
 private:
     DISALLOW_COPY_AND_ASSIGN(CrashReporter);
     const std::string mDumpDir;

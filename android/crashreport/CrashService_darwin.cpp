@@ -60,9 +60,12 @@ public:
             void* context,
             const google_breakpad::ClientInfo& client_info,
             const std::string& file_path) {
-        D("Client Requesting dump %s\n", file_path.c_str());
-        static_cast<CrashService::DumpRequestContext*>(context)->file_path =
-                file_path;
+        if (static_cast<CrashService::DumpRequestContext*>(context)
+                    ->file_path.empty()) {
+            D("Client Requesting dump %s\n", file_path.c_str());
+            static_cast<CrashService::DumpRequestContext*>(context)->file_path =
+                    file_path;
+        }
     }
 
     static void OnClientExit(void* context,

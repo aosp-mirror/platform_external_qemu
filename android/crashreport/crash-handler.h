@@ -30,4 +30,6 @@ ANDROID_BEGIN_HEADER
 //    Success on previous call
 bool crashhandler_init(void);
 
+void crashhandler_die(const char* message);
+
 ANDROID_END_HEADER

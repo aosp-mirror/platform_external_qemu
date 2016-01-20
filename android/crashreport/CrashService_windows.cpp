@@ -69,12 +69,15 @@ public:
             void* context,
             const google_breakpad::ClientInfo* client_info,
             const std::wstring* file_path) {
-        ::android::base::String file_path_string =
-                ::android::base::Win32UnicodeString::convertToUtf8(
-                        file_path->c_str());
-        D("Client Requesting dump %s\n", file_path_string.c_str());
-        static_cast<CrashService::DumpRequestContext*>(context)
-                ->file_path.assign(file_path_string.c_str());
+        if (static_cast<CrashService::DumpRequestContext*>(context)
+                    ->file_path.empty()) {
+            ::android::base::String file_path_string =
+                    ::android::base::Win32UnicodeString::convertToUtf8(
+                            file_path->c_str());
+            D("Client Requesting dump %s\n", file_path_string.c_str());
+            static_cast<CrashService::DumpRequestContext*>(context)
+                    ->file_path.assign(file_path_string.c_str());
+        }
     }
 
     static void OnClientExit(void* context,
