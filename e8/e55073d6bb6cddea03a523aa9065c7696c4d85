@@ -1,0 +1,7 @@
+Code-Review+2: Yurii Zubrytskyi <zyy@google.com>
+Verified+1: Lingfeng Yang <lfy@google.com>
+Submitted-by: Lingfeng Yang <lfy@google.com>
+Submitted-at: Wed, 20 Jan 2016 22:19:31 +0000
+Reviewed-on: https://android-review.googlesource.com/197330
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
