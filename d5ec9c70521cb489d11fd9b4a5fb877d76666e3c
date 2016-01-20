@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "676db610_7f3d4a9a",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2016-01-20T01:54:28Z",
+      "side": 1,
+      "message": "You can check this much earlier. Just change\n    if (backing_surface)\nto\n    if (backing_surface \u0026\u0026 backing_surface-\u003ebitmap \u0026\u0026 !backing_surface-\u003ebitmap-\u003eisNull())\n?",
+      "range": {
+        "startLine": 356,
+        "startChar": 8,
+        "endLine": 356,
+        "endChar": 49
+      },
+      "revId": "d5ec9c70521cb489d11fd9b4a5fb877d76666e3c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07495aa4_56eb2307",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
