@@ -1,0 +1,8 @@
+Code-Review+2: Bo Hu <bohu@google.com>
+Code-Review+2: Jim Kaye <jameskaye@google.com>
+Verified+1: Evan Birenbaum <birenbaum@google.com>
+Submitted-by: Evan Birenbaum <birenbaum@google.com>
+Submitted-at: Wed, 20 Jan 2016 21:58:18 +0000
+Reviewed-on: https://android-review.googlesource.com/197293
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
