@@ -123,6 +123,14 @@ std::string CrashService::getReport() {
     return report;
 }
 
+std::string CrashService::getReportValues() {
+    std::string report;
+    for (auto const& x : mReportValues) {
+        report += x.first + ": " + x.second + "\n";
+    }
+    return report;
+}
+
 std::string CrashService::getReportId() const {
     return mReportId;
 }
@@ -291,6 +299,8 @@ int64_t CrashService::waitForDumpFile(int clientpid, int timeout) {
     }
     if (!mDumpRequestContext.file_path.empty()) {
         mDumpFile = mDumpRequestContext.file_path;
+        mReportValues.insert(mDumpRequestContext.custom_info.begin(),
+                             mDumpRequestContext.custom_info.end());
     }
     return waitduration_ms;
 }

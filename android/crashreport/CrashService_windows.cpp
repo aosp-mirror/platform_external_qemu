@@ -73,8 +73,25 @@ public:
                 ::android::base::Win32UnicodeString::convertToUtf8(
                         file_path->c_str());
         D("Client Requesting dump %s\n", file_path_string.c_str());
+
         static_cast<CrashService::DumpRequestContext*>(context)
                 ->file_path.assign(file_path_string.c_str());
+        google_breakpad::CustomClientInfo custom_info =
+                client_info->GetCustomInfo();
+        for (int i = 0; i < custom_info.count; i++) {
+            const google_breakpad::CustomInfoEntry* entry =
+                    &custom_info.entries[i];
+            std::string key =
+                    ::android::base::Win32UnicodeString::convertToUtf8(
+                            entry->name)
+                            .c_str();
+            std::string value =
+                    ::android::base::Win32UnicodeString::convertToUtf8(
+                            entry->value)
+                            .c_str();
+            static_cast<CrashService::DumpRequestContext*>(context)
+                    ->custom_info[key] = value;
+        }
     }
 
     static void OnClientExit(void* context,

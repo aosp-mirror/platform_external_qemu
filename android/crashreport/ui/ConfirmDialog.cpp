@@ -202,7 +202,9 @@ void ConfirmDialog::getDetails() {
 void ConfirmDialog::showDetails() {
     getDetails();
     if (!mDidUpdateDetails) {
-        QString details = QString::fromStdString(mCrashService->getReport());
+        QString details =
+                QString::fromStdString(mCrashService->getReportValues());
+        details += QString::fromStdString(mCrashService->getReport());
         details += QString::fromStdString(mCrashService->getSysInfo());
 
         mDetailsText->document()->setPlainText(details);

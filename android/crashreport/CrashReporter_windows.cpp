@@ -34,7 +34,13 @@ namespace {
 
 class HostCrashReporter : public CrashReporter {
 public:
-    HostCrashReporter() : CrashReporter(), mHandler() {}
+    HostCrashReporter() : CrashReporter(), mHandler() {
+        // Build list of data to send
+        mCustomInfoEntries.push_back(
+                google_breakpad::CustomInfoEntry(L"TestKey", L"TestValue"));
+
+        mClientInfo = {&mCustomInfoEntries[0], mCustomInfoEntries.size()};
+    }
 
     virtual ~HostCrashReporter() {}
 
@@ -56,7 +62,7 @@ public:
         mHandler.reset(new google_breakpad::ExceptionHandler(
                 dumpDir_wstr, nullptr, nullptr, nullptr,
                 google_breakpad::ExceptionHandler::HANDLER_ALL, MiniDumpNormal,
-                crashPipe.c_str(), nullptr));
+                crashPipe.c_str(), &mClientInfo));
         return mHandler != nullptr;
     }
 
@@ -86,6 +92,8 @@ public:
 
 private:
     std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
+    google_breakpad::CustomClientInfo mClientInfo;
+    std::vector<google_breakpad::CustomInfoEntry> mCustomInfoEntries;
 };
 
 ::android::base::LazyInstance<HostCrashReporter> sCrashReporter =

@@ -69,6 +69,7 @@ public:
     // Context state used by breakpad crash server dump request callbacks
     struct DumpRequestContext {
         std::string file_path;
+        std::map<std::string, std::string> custom_info;
     };
 
     // Server state used by breakpad crash server connect / exit callbacks
@@ -140,6 +141,9 @@ public:
     // Factory method
     static CrashService* makeCrashService(const std::string& version,
                                           const std::string& build);
+
+    // Returns report key value pairs in a new line delimited string
+    std::string getReportValues();
 
     // Key value pair to be added to crash report
     void addReportValue(const std::string& key, const std::string& value);
