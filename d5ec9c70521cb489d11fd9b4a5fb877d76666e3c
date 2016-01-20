@@ -68,6 +68,30 @@
       "revId": "d5ec9c70521cb489d11fd9b4a5fb877d76666e3c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2752dead_8dd0667e",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2016-01-20T01:48:29Z",
+      "side": 1,
+      "message": "Shouldn\u0027t it be in an else statement, since it assumes there\u0027s data to be set to zero?",
+      "parentUuid": "2752dead_0d77766e",
+      "range": {
+        "startLine": 471,
+        "startChar": 4,
+        "endLine": 471,
+        "endChar": 23
+      },
+      "revId": "d5ec9c70521cb489d11fd9b4a5fb877d76666e3c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
