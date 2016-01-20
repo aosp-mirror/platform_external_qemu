@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "07f95afe_1e1e694f",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-20T21:32:42Z",
+      "side": 1,
+      "message": "Understood. You mean the windows crash reporter dialog right?\n\nAnother possibility is try modifying breakpad to handle SIGABRT?",
+      "parentUuid": "47efd232_2066a42a",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 12
+      },
+      "revId": "628b59985e5a247c4511b6537d17aa4bc293bff6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4718b22c_b812f537",
         "filename": "android/crashreport/CrashReporter_darwin.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "671db61a_b9e95b68",
+        "filename": "android/crashreport/CrashReporter_darwin.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-20T21:32:42Z",
+      "side": 1,
+      "message": "How this could work is we add this message to the crash dump and it gets parsed and added as a field in the web front end.\n\nThis functionality is available on windows breakpad, but not on mac or linux for some reason.  I have another CL for windows that I\u0027m working on to start using the functionality for adding additional information to our crashes.  linux and mac will need some breakpad work before we can do the same.",
+      "parentUuid": "4718b22c_b812f537",
+      "range": {
+        "startLine": 72,
+        "startChar": 34,
+        "endLine": 72,
+        "endChar": 41
+      },
+      "revId": "628b59985e5a247c4511b6537d17aa4bc293bff6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c7b10259_944fea14",
         "filename": "android/crashreport/CrashService_darwin.cpp",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2016-01-20T21:07:29Z",
       "side": 1,
       "message": "I\u0027m curious if this could be called from multiple threads?",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 5
+      },
+      "revId": "628b59985e5a247c4511b6537d17aa4bc293bff6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c70ca2f0_dfc7d31a",
+        "filename": "android/crashreport/CrashService_darwin.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-20T21:32:42Z",
+      "side": 1,
+      "message": "Doesn\u0027t seem like it.  This is actually run on the CrashServer(crash_generation_server) which which is single threaded and (on linux) is just spinning on a pipe then calling this callback when it receives some data.",
+      "parentUuid": "c7b10259_944fea14",
       "range": {
         "startLine": 63,
         "startChar": 0,
