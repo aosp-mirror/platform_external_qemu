@@ -59,12 +59,14 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
             mSuggestions->suggestions.end()) {
 #ifdef __APPLE__
             addSuggestion("This crash appears to be in your computer's graphics driver. Please check your\n"
-                          "manufacturer's website for updated graphics drivers.\n");
+                          "manufacturer's website for updated graphics drivers.\n\n"
+                          "If problems persist, try using software rendering: uncheck \"Use Host GPU\"\n"
+                          "in your AVD configuration.");
 #else
-
             addSuggestion("This crash appears to be in your computer's graphics driver. Please check your\n"
-                          "manufacturer's website for updated graphics drivers.\n"
-                          "If problems persist, try adding \"-gpu mesa\" to the emulator command line.");
+                          "manufacturer's website for updated graphics drivers.\n\n"
+                          "If problems persist, try using software rendering: add \"-gpu mesa\" to\n"
+                          "the emulator command line, or uncheck \"Use Host GPU\" in your AVD configuration.");
 #endif
         }
         mSuggestionText->show();
