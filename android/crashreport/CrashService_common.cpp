@@ -377,6 +377,7 @@ UserSuggestions::UserSuggestions(google_breakpad::ProcessState* process_state) {
     }
 
     const int frame_count = crashed_stack->frames()->size();
+    int first_valid_index = -1;
     for (int frame_index = 0; frame_index < frame_count; ++frame_index) {
         google_breakpad::StackFrame* const frame =
                 crashed_stack->frames()->at(frame_index);
@@ -388,12 +389,17 @@ UserSuggestions::UserSuggestions(google_breakpad::ProcessState* process_state) {
             continue;
         }
 
+        if (first_valid_index == -1) {
+            first_valid_index = frame_index;
+        }
+
         std::string file =
                 google_breakpad::PathnameStripper::File(module->code_file());
         std::transform(file.begin(), file.end(), file.begin(), ::tolower);
-        // Should the user update their graphics drivers?
 
-        if (containsGfxPattern(file)) {
+        // Should the user update their graphics drivers?
+        // Only allow if the driver appears at the top of the stack
+        if (containsGfxPattern(file) && first_valid_index == frame_index) {
             suggestions.insert(Suggestion::UpdateGfxDrivers);
             break;
         }
