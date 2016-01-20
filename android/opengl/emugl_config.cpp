@@ -212,5 +212,6 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
 
     if (!strcmp(config->backend, "mesa")) {
         system->envSet("ANDROID_GL_LIB", "mesa");
+        system->envSet("ANDROID_GL_SOFTWARE_RENDERER", "1");
     }
 }
