@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "87562a44_5e27af5a",
+        "filename": "android/crashreport/CrashService.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-20T00:59:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "07495aa4_f6dcef0b",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 42
+      },
+      "revId": "db20f8d6f081a1373f56859d5bc3abf195c60e94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "274e5eac_0bab3492",
         "filename": "android/crashreport/CrashService_common.cpp",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "27673e34_20829870",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-20T00:59:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "274e5eac_0bab3492",
+      "range": {
+        "startLine": 250,
+        "startChar": 8,
+        "endLine": 250,
+        "endChar": 17
+      },
+      "revId": "db20f8d6f081a1373f56859d5bc3abf195c60e94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4768b202_db711078",
         "filename": "android/crashreport/CrashService_windows.cpp",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2016-01-20T00:35:04Z",
       "side": 1,
       "message": "virtual function calls in destructor are not really good (any derived class which overrides it will get a surprise)\nWhy is it virtual, btw?",
+      "range": {
+        "startLine": 58,
+        "startChar": 8,
+        "endLine": 58,
+        "endChar": 21
+      },
+      "revId": "db20f8d6f081a1373f56859d5bc3abf195c60e94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4768b202_9b19580e",
+        "filename": "android/crashreport/CrashService_windows.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-20T00:59:03Z",
+      "side": 1,
+      "message": "right, this function was moved from other callers into destructor. Making non virtual.",
+      "parentUuid": "4768b202_db711078",
       "range": {
         "startLine": 58,
         "startChar": 8,
