@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "c75ca266_13e371c3",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2016-01-20T02:03:48Z",
+      "side": 1,
+      "message": "Can\u0027t you put that outside instead?",
+      "parentUuid": "274e5eac_6bdab89b",
+      "range": {
+        "startLine": 356,
+        "startChar": 8,
+        "endLine": 356,
+        "endChar": 49
+      },
+      "revId": "d5ec9c70521cb489d11fd9b4a5fb877d76666e3c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07495aa4_56eb2307",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
