@@ -121,6 +121,30 @@
     },
     {
       "key": {
+        "uuid": "27fe5ee6_1c0af5a9",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-20T19:09:06Z",
+      "side": 1,
+      "message": "Theoretically yes, but it\u0027s trickier because that would involve repositioning/resizing the native subwindow containing the device display output. It would be easier if that window was contained in its own Qt widget - we\u0027re doing some work towards that.\nRight now I think this behavior is acceptable (this situation doesn\u0027t happen that often anyway). I\u0027d rather keep it simple and introduce the behavior you mentioned (get rid of extra space) after we have a widget for a display subwindow.",
+      "parentUuid": "274e5eac_6b40f8e8",
+      "range": {
+        "startLine": 356,
+        "startChar": 8,
+        "endLine": 356,
+        "endChar": 49
+      },
+      "revId": "d5ec9c70521cb489d11fd9b4a5fb877d76666e3c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4768b202_569e7727",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
