@@ -1064,7 +1064,7 @@ skin_window_move_mouse( SkinWindow*  window,
 {
     ButtonState*  button = &window->button;
 
-    if (finger->tracking) {
+    if (finger->tracking && finger->display) {
         ADisplay*  disp   = finger->display;
         char       inside = 1;
         int        dx     = x - disp->rect.pos.x;
@@ -1919,7 +1919,7 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
             window->button.hover   = NULL;
             skin_window_move_mouse( window, finger, mx, my );
         }
-        else if (finger->tracking || ev->u.mouse.button == kMouseButtonSecondaryTouch )
+        else if (finger->tracking)
         {
             skin_window_move_mouse( window, finger, mx, my );
             finger->tracking = 0;
