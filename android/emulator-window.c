@@ -183,8 +183,8 @@ emulator_window_setup( EmulatorWindow*  emulator )
     };
 
     static const SkinTrackBallParameters my_trackball_params = {
-        .diameter = 30,
-        .ring = 2,
+        .diameter = 60,
+        .ring = 4,
         .ball_color = 0xffe0e0e0,
         .dot_color = 0xff202020,
         .ring_color = 0xff000000,

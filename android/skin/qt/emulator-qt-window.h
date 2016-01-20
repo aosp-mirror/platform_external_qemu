@@ -706,6 +706,7 @@ private:
     bool mNextIsZoom;
     bool mGrabKeyboardInput;
     bool mMouseInside;
+    QPoint mPrevMousePosition;
 
     QVariantAnimation mFlashAnimation;
     QProcess mScreencapProcess;
