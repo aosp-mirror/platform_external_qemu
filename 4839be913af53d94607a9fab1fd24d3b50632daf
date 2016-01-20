@@ -46,6 +46,30 @@
       "revId": "4839be913af53d94607a9fab1fd24d3b50632daf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4718b22c_db252be9",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 528,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-20T22:56:31Z",
+      "side": 1,
+      "message": "Gotcha. I\u0027m not really sure what the expected behavior should be here - this function is used to move the window to be fully visible, but being between screens is technically fully visible.",
+      "parentUuid": "07123a0e_7607cea1",
+      "range": {
+        "startLine": 528,
+        "startChar": 22,
+        "endLine": 528,
+        "endChar": 57
+      },
+      "revId": "4839be913af53d94607a9fab1fd24d3b50632daf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
