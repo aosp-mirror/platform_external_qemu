@@ -350,13 +350,18 @@ void EmulatorQtWindow::paintEvent(QPaintEvent *)
         painter.fillRect(bg, Qt::black);
 
         QRect r(0, 0, backing_surface->w, backing_surface->h);
-        // Rescale with smooth transformation to avoid aliasing
-        QImage scaled_bitmap =
-                backing_surface->bitmap->scaled(r.size() * devicePixelRatio(),
-                                                Qt::KeepAspectRatio,
-                                                Qt::SmoothTransformation);
-        scaled_bitmap.setDevicePixelRatio(devicePixelRatio());
-        painter.drawImage(r, scaled_bitmap);
+
+        // Ensure we actually have a valid bitmap before attempting to
+        // rescale.
+        if (!backing_surface->bitmap->isNull()) {
+            // Rescale with smooth transformation to avoid aliasing
+            QImage scaled_bitmap =
+                    backing_surface->bitmap->scaled(r.size() * devicePixelRatio(),
+                                                    Qt::KeepAspectRatio,
+                                                    Qt::SmoothTransformation);
+            scaled_bitmap.setDevicePixelRatio(devicePixelRatio());
+            painter.drawImage(r, scaled_bitmap);
+        }
     } else {
         D("Painting emulator window, but no backing bitmap");
     }
@@ -456,6 +461,13 @@ void EmulatorQtWindow::slot_clearInstance()
 
 void EmulatorQtWindow::slot_createBitmap(SkinSurface *s, int w, int h, QSemaphore *semaphore) {
     s->bitmap = new QImage(w, h, QImage::Format_ARGB32);
+    if (s->bitmap->isNull()) {
+        // Failed to create image, warn user.
+        showErrorDialog(
+                tr("Failed to allocate memory for the skin bitmap."
+                   "Try configuring your AVD to not have a skin.")
+                tr("Error"));
+    }
     s->bitmap->fill(0);
     if (semaphore != NULL) semaphore->release();
 }
