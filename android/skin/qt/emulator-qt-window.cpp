@@ -35,6 +35,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/cpu_accelerator.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/emulator-window.h"
 #include "android/globals.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
@@ -76,6 +77,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         mNextIsZoom(false),
         mGrabKeyboardInput(false),
         mMouseInside(false),
+        mPrevMousePosition(0, 0),
         mMainLoopThread(nullptr),
         mAvdWarningBox(QMessageBox::Information,
                        tr("Recommended AVD"),
@@ -314,8 +316,15 @@ void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
         skin_event->u.text.text[sizeof(skin_event->u.text.text)-1] = 0;
         queueEvent(skin_event);
     }
-}
 
+    // If we enabled trackball mode, tell Qt to always forward mouse movement
+    // events. Otherwise, Qt will forward them only when a button is pressed.
+    EmulatorWindow* ew = emulator_window_get();
+    bool trackballActive = skin_ui_is_trackball_active(ew->ui);
+    if ( trackballActive != hasMouseTracking() ) {
+        setMouseTracking(trackballActive);
+    }
+}
 void EmulatorQtWindow::mouseMoveEvent(QMouseEvent *event)
 {
     handleMouseEvent(kEventMouseMotion,
@@ -908,8 +917,10 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type, SkinMouseButtonType 
     skin_event->u.mouse.button = button;
     skin_event->u.mouse.x = pos.x();
     skin_event->u.mouse.y = pos.y();
-    skin_event->u.mouse.xrel = 0;
-    skin_event->u.mouse.yrel = 0;
+
+    skin_event->u.mouse.xrel = pos.x() - mPrevMousePosition.x();
+    skin_event->u.mouse.yrel = pos.y() - mPrevMousePosition.y();
+    mPrevMousePosition = pos;
 
     queueEvent(skin_event);
 }

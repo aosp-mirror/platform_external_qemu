@@ -299,9 +299,11 @@ _skin_ui_handle_key_command(void* opaque, SkinKeyCommand command, int  down)
         break;
 
     case SKIN_KEY_COMMAND_TOGGLE_TRACKBALL:
-        ui->show_trackball = !ui->show_trackball;
-        skin_window_show_trackball(ui->window, ui->show_trackball);
-        skin_ui_reset_title(ui);
+        if (ui->ui_params.enable_trackball) {
+            ui->show_trackball = !ui->show_trackball;
+            skin_window_show_trackball(ui->window, ui->show_trackball);
+            skin_ui_reset_title(ui);
+        }
         break;
 
     case SKIN_KEY_COMMAND_ONION_ALPHA_UP:
@@ -512,4 +514,8 @@ void skin_ui_set_name(SkinUI* ui, const char* name) {
              "%s",
              name);
     skin_ui_reset_title(ui);
+}
+
+bool skin_ui_is_trackball_active(SkinUI* ui) {
+    return (ui->ui_params.enable_trackball && ui->show_trackball);
 }

@@ -18,6 +18,8 @@
 
 #include <stdbool.h>
 
+ANDROID_BEGIN_HEADER
+
 typedef struct SkinUI SkinUI;
 
 // Avoid including headers if possible.
@@ -127,3 +129,9 @@ struct SkinKeyset* skin_ui_get_current_keyset(SkinUI* ui);
 bool skin_ui_process_events(SkinUI* ui);
 
 void skin_ui_reset_title(SkinUI* ui);
+
+// Return true if a trackball exists and the mouse is
+// currently emulating it
+bool skin_ui_is_trackball_active(SkinUI* ui);
+
+ANDROID_END_HEADER
