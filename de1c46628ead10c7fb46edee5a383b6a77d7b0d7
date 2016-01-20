@@ -22,6 +22,30 @@
       "revId": "de1c46628ead10c7fb46edee5a383b6a77d7b0d7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c70ca2f0_796b4731",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-20T18:51:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e7ae06f9_f2412822",
+      "range": {
+        "startLine": 152,
+        "startChar": 8,
+        "endLine": 152,
+        "endChar": 16
+      },
+      "revId": "de1c46628ead10c7fb46edee5a383b6a77d7b0d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
