@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "47efd232_2066a42a",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-20T21:07:29Z",
+      "side": 1,
+      "message": "this will cause a popup message box on Windows from the OS\nThat\u0027s why I wanted to have an explicit crash here",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 12
+      },
+      "revId": "628b59985e5a247c4511b6537d17aa4bc293bff6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4718b22c_b812f537",
+        "filename": "android/crashreport/CrashReporter_darwin.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-20T21:07:29Z",
+      "side": 1,
+      "message": "message?",
+      "range": {
+        "startLine": 72,
+        "startChar": 34,
+        "endLine": 72,
+        "endChar": 41
+      },
+      "revId": "628b59985e5a247c4511b6537d17aa4bc293bff6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c7b10259_944fea14",
+        "filename": "android/crashreport/CrashService_darwin.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-20T21:07:29Z",
+      "side": 1,
+      "message": "I\u0027m curious if this could be called from multiple threads?",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 5
+      },
+      "revId": "628b59985e5a247c4511b6537d17aa4bc293bff6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
