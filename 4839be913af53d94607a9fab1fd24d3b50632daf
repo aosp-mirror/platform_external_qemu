@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c70ca2f0_1f294b59",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 528,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-20T22:04:49Z",
+      "side": 1,
+      "message": "Just curious, how does this behave when the app is between screens?",
+      "range": {
+        "startLine": 528,
+        "startChar": 22,
+        "endLine": 528,
+        "endChar": 57
+      },
+      "revId": "4839be913af53d94607a9fab1fd24d3b50632daf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
