@@ -139,17 +139,30 @@ static std::string getHostExtensionsString(GLDispatch* dispatch) {
     // version of glGetString() that returns NULL, so deal with this by
     // doing the following:
     //
-    //  - If glGetStringi() is available, use it to build the extensions
+    //  - If glGetStringi() is available, and glGetIntegerv(GL_NUM_EXTENSIONS &num_exts)
+    //    gives a nonzero value, use it to build the extensions
     //    string, using simple spaces to separate the names.
     //
     //  - Otherwise, fallback to getGetString(). If it returns NULL, return
     //    an empty string.
     //
+   
     std::string result;
+    bool use_gl3_extension_get = false;
+    int num_exts = -666;
+
     if (dispatch->glGetStringi != nullptr) {
-        int count = 0;
-        dispatch->glGetIntegerv(GL_NUM_EXTENSIONS, &count);
-        for (int n = 0; n < count; n++) {
+        // If glGetIntegerv does not affect the value,
+        // our system does not actually support
+        // GL 3.0 style extension getting.
+        dispatch->glGetIntegerv(GL_NUM_EXTENSIONS, &num_exts);
+        if (num_exts != -666) {
+            use_gl3_extension_get = true;
+        }
+    }
+
+    if (use_gl3_extension_get) {
+        for (int n = 0; n < num_exts; n++) {
             const char* ext = reinterpret_cast<const char*>(
                     dispatch->glGetStringi(GL_EXTENSIONS, n));
             if (ext != NULL) {
@@ -166,6 +179,7 @@ static std::string getHostExtensionsString(GLDispatch* dispatch) {
             result = extensions;
         }
     }
+
     // For the sake of initCapsLocked() add a starting and trailing space.
     if (!result.empty()) {
         if (result[0] != ' ') {
