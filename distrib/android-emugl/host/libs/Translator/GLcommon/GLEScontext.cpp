@@ -152,14 +152,17 @@ static std::string getHostExtensionsString(GLDispatch* dispatch) {
 
     if (dispatch->glGetStringi) {
         dispatch->glGetIntegerv(GL_NUM_EXTENSIONS, &num_exts);
-        for (int n = 0; n < num_exts; n++) {
-            const char* ext = reinterpret_cast<const char*>(
-                    dispatch->glGetStringi(GL_EXTENSIONS, n));
-            if (ext != NULL) {
-                if (!result.empty()) {
-                    result += " ";
+        GLenum err = dispatch->glGetError();
+        if (err == GL_NO_ERROR) {
+            for (int n = 0; n < num_exts; n++) {
+                const char* ext = reinterpret_cast<const char*>(
+                        dispatch->glGetStringi(GL_EXTENSIONS, n));
+                if (ext != NULL) {
+                    if (!result.empty()) {
+                        result += " ";
+                    }
+                    result += ext;
                 }
-                result += ext;
             }
         }
     }
