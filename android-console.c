@@ -82,6 +82,13 @@ void android_monitor_print_error(Monitor* mon, const char* fmt, ...) {
     va_end(ap);
 }
 
+void android_console_crash(Monitor* mon, const QDict* qdict) {
+    monitor_printf(mon, "OK: crashing emulator, bye bye\n");
+    monitor_suspend(mon);
+    volatile int * ptr = NULL;
+    *ptr+=1;
+}
+
 void android_console_kill(Monitor* mon, const QDict* qdict) {
     monitor_printf(mon, "OK: killing emulator, bye bye\n");
     monitor_suspend(mon);

@@ -29,6 +29,7 @@
 #endif
 #include "qemu-common.h"
 
+void android_console_crash(Monitor *mon, const QDict *qdict);
 void android_console_kill(Monitor *mon, const QDict *qdict);
 void android_console_quit(Monitor *mon, const QDict *qdict);
 void android_console_redir(Monitor *mon, const QDict *qdict);

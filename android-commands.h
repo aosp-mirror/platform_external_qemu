@@ -367,6 +367,13 @@ static mon_cmd_t android_cmds[] = {
         .mhandler.cmd = android_console_help,
     },
     {
+        .name = "crash",
+        .args_type = "",
+        .params = "",
+        .help = "crash the emulator instance",
+        .mhandler.cmd = android_console_crash,
+    },
+    {
         .name = "kill",
         .args_type = "",
         .params = "",
