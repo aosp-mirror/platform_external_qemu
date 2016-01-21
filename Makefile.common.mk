@@ -46,6 +46,9 @@ endif
 EMULATOR_COMMON_INCLUDES := \
     $(BUILD_OBJS_DIR)/build
 
+EMUGL_SRCDIR := $(LOCAL_PATH)/distrib/android-emugl
+EMUGL_INCLUDES := $(EMUGL_SRCDIR)/host/include
+
 ##############################################################################
 ##############################################################################
 ###
@@ -187,7 +190,7 @@ include $(LOCAL_PATH)/Makefile.crash-service.mk
 ###
 ###  GPU emulation libraries
 ###
-include $(LOCAL_PATH)/distrib/android-emugl/Android.mk
+include $(EMUGL_SRCDIR)/Android.mk
 
 ##############################################################################
 ##############################################################################

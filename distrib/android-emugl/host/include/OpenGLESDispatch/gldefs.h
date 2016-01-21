@@ -14,8 +14,11 @@
 * limitations under the License.
 */
 
+#pragma once
+
 typedef double      GLclampd;   /* double precision float in [0,1] */
 typedef double      GLdouble;   /* double precision float */
+typedef void*       GLeglImageOES;
 
 #define GL_S                    0x2000
 #define GL_T                    0x2001

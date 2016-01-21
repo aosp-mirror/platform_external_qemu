@@ -1,0 +1,26 @@
+#ifndef GLES_FUNCTIONS_H
+#define GLES_FUNCTIONS_H
+
+#include "OpenGLESDispatch/gles_common_functions.h"
+#include "OpenGLESDispatch/gles_extensions_functions.h"
+#include "OpenGLESDispatch/gles1_only_functions.h"
+#include "OpenGLESDispatch/gles1_extensions_functions.h"
+#include "OpenGLESDispatch/gles2_only_functions.h"
+#include "OpenGLESDispatch/gles2_extensions_functions.h"
+#include "OpenGLESDispatch/gles3_only_functions.h"
+
+// As a special case, LIST_GLES3_ONLY_FUNCTIONS below uses the Y parameter
+// instead of the X one, meaning that the corresponding functions are
+// optional extensions. This is only because currently, the only GLESv3
+// API we support is glGetStringi(), which is not always provided by
+// host desktop GL drivers (though most do).
+#define LIST_GLES_FUNCTIONS(X,Y) \
+    LIST_GLES_COMMON_FUNCTIONS(X) \
+    LIST_GLES_EXTENSIONS_FUNCTIONS(Y) \
+    LIST_GLES1_ONLY_FUNCTIONS(X) \
+    LIST_GLES1_EXTENSIONS_FUNCTIONS(Y) \
+    LIST_GLES2_ONLY_FUNCTIONS(X) \
+    LIST_GLES2_EXTENSIONS_FUNCTIONS(Y) \
+    LIST_GLES3_ONLY_FUNCTIONS(Y) \
+
+#endif  // GLES_FUNCTIONS_H

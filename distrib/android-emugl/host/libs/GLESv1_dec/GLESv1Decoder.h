@@ -22,9 +22,6 @@
 #include "GLDecoderContextData.h"
 #include "emugl/common/shared_library.h"
 
-#define GLES_LIBNAME_VAR "ANDROID_GLESv1_LIB"
-#define GLES_LIBNAME "libGLES_CM.so"
-
 class GLESv1Decoder : public gles1_decoder_context_t
 {
 public:
@@ -32,7 +29,7 @@ public:
 
     GLESv1Decoder();
     ~GLESv1Decoder();
-    int initGL(get_proc_func_t getProcFunc = NULL, void *getProcFuncData = NULL);
+    int initGL(get_proc_func_t getProcFunc, void *getProcFuncData);
     void setContextData(GLDecoderContextData *contextData) { m_contextData = contextData; }
 
 private:

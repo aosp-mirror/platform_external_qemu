@@ -13,11 +13,10 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef RENDER_EGL_DISPATCH_H
-#define RENDER_EGL_DISPATCH_H
+#pragma once
 
-#include "RenderEGL_functions.h"
-#include "RenderEGL_extensions_functions.h"
+#include "OpenGLESDispatch/RenderEGL_functions.h"
+#include "OpenGLESDispatch/RenderEGL_extensions_functions.h"
 
 // This header is used to define the EGLDispatch structure that contains
 // pointers to the EGL shared library used by libOpenglRender. Normally,
@@ -52,5 +51,3 @@ bool init_egl_dispatch();
 
 // Global EGLDispatch instance. Call init_egl_dispatch() before using it.
 extern EGLDispatch s_egl;
-
-#endif  // RENDER_EGL_DISPATCH_H

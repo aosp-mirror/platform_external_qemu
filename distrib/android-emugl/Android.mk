@@ -9,15 +9,10 @@ EMUGL_PATH := $(call my-dir)
 
 EMUGL_OLD_LOCAL_PATH := $(LOCAL_PATH)
 
-# Directory containing common headers used by several modules
-# This is always set to a module's LOCAL_C_INCLUDES
-# See the definition of emugl-begin-module in common.mk
-#
-EMUGL_COMMON_INCLUDES := \
-    $(EMUGL_PATH)/host/include/libOpenglRender \
-    $(EMUGL_PATH)/shared
-
-EMUGL_COMMON_INCLUDES := $(EMUGL_PATH)/host/libs/Translator/include
+# Directory containing common headers that are part of EmuGL's public API.
+# This is always set to a module's LOCAL_C_INCLUDES. See the definition of
+# emugl-begin-module in common.mk
+EMUGL_COMMON_INCLUDES := $(EMUGL_INCLUDES)
 
 # common cflags used by several modules
 # This is always set to a module's LOCAL_CFLAGS

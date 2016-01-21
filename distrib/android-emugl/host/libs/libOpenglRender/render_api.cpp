@@ -28,9 +28,10 @@
 #endif
 
 #include "DecoderContext.h"
-#include "EGLDispatch.h"
-#include "GLESv1Dispatch.h"
-#include "GLESv2Dispatch.h"
+
+#include "OpenGLESDispatch/EGLDispatch.h"
+#include "OpenGLESDispatch/GLESv1Dispatch.h"
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
 
 #include <string.h>
 

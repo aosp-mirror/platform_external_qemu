@@ -16,11 +16,12 @@
 #include "ColorBuffer.h"
 
 #include "DecoderContext.h"
-#include "EGLDispatch.h"
 #include "GLcommon/GLutils.h"
 #include "RenderThreadInfo.h"
 #include "TextureDraw.h"
 #include "TextureResize.h"
+
+#include "OpenGLESDispatch/EGLDispatch.h"
 
 #include <stdio.h>
 

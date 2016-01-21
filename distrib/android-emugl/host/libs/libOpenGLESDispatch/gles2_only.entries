@@ -63,3 +63,10 @@ void glGetUniformfv(GLuint program, GLint location, GLfloat* params);
 void glGetUniformiv(GLuint program, GLint location, GLint* params);
 int  glGetUniformLocation(GLuint program, const GLchar* name);
 void glShaderSource(GLuint shader, GLsizei count, const GLchar* const* string, const GLint* length);
+
+# The following are not used by GLDispatch but by GLESv2Dispatch
+void glBindFramebuffer(GLenum target, GLuint framebuffer);
+void glGenFramebuffers(GLsizei n, GLuint* framebuffers);
+void glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+GLenum glCheckFramebufferStatus(GLenum target);
+void glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers);

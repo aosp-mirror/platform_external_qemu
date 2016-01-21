@@ -15,14 +15,15 @@
 */
 #include "RenderThread.h"
 
-#include "EGLDispatch.h"
 #include "FrameBuffer.h"
-#include "GLESv2Dispatch.h"
-#include "GLESv1Dispatch.h"
 #include "ReadBuffer.h"
 #include "RenderControl.h"
 #include "RenderThreadInfo.h"
 #include "TimeUtils.h"
+
+#include "OpenGLESDispatch/EGLDispatch.h"
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
+#include "OpenGLESDispatch/GLESv1Dispatch.h"
 
 #define STREAM_BUFFER_SIZE 4*1024*1024
 
