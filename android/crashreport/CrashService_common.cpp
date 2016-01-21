@@ -384,17 +384,17 @@ UserSuggestions::UserSuggestions(google_breakpad::ProcessState* process_state) {
             continue;
         }
         const auto& module = frame->module;
-        if (!module) {
-            continue;
-        }
 
-        std::string file =
-                google_breakpad::PathnameStripper::File(module->code_file());
-        std::transform(file.begin(), file.end(), file.begin(), ::tolower);
-        // Should the user update their graphics drivers?
+        if (module) {
+            std::string file = google_breakpad::PathnameStripper::File(
+                    module->code_file());
+            std::transform(file.begin(), file.end(), file.begin(), ::tolower);
 
-        if (containsGfxPattern(file)) {
-            suggestions.insert(Suggestion::UpdateGfxDrivers);
+            // Should the user update their graphics drivers?
+            // Only allow if the driver appears at the top of the stack
+            if (containsGfxPattern(file)) {
+                suggestions.insert(Suggestion::UpdateGfxDrivers);
+            }
             break;
         }
     }
