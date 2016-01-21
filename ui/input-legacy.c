@@ -30,6 +30,8 @@
 #include "ui/keymaps.h"
 #include "ui/input.h"
 
+#include <stdbool.h>
+
 struct QEMUPutMouseEntry {
     QEMUPutMouseEvent *qemu_put_mouse_event;
     void *qemu_put_mouse_event_opaque;
@@ -40,6 +42,7 @@ struct QEMUPutMouseEntry {
     QemuInputHandlerState *s;
     int axis[INPUT_AXIS__MAX];
     int buttons;
+    bool is_trackball;
 };
 
 struct QEMUPutKbdEntry {
@@ -154,6 +157,8 @@ static void legacy_mouse_event(DeviceState *dev, QemuConsole *src,
     InputBtnEvent *btn;
     InputMoveEvent *move;
 
+    s->is_trackball = false;
+
     switch (evt->type) {
     case INPUT_EVENT_KIND_BTN:
         btn = evt->u.btn.data;
@@ -184,6 +189,7 @@ static void legacy_mouse_event(DeviceState *dev, QemuConsole *src,
     case INPUT_EVENT_KIND_REL:
         move = evt->u.rel.data;
         s->axis[move->axis] += move->value;
+        s->is_trackball = true;
         break;
     default:
         break;
@@ -197,7 +203,7 @@ static void legacy_mouse_sync(DeviceState *dev)
     s->qemu_put_mouse_event(s->qemu_put_mouse_event_opaque,
                             s->axis[INPUT_AXIS_X],
                             s->axis[INPUT_AXIS_Y],
-                            0,
+                            s->is_trackball ? 1 : 0, // "dz"
                             s->buttons);
 
     if (!s->qemu_put_mouse_event_absolute) {
