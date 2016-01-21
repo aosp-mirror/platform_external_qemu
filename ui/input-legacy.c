@@ -41,6 +41,7 @@ struct QEMUPutMouseEntry {
     QemuInputHandlerState *s;
     int axis[INPUT_AXIS_MAX];
     int buttons;
+    bool isTrackball;
 };
 
 struct QEMUPutKbdEntry {
@@ -159,6 +160,8 @@ static void legacy_mouse_event(DeviceState *dev, QemuConsole *src,
     };
     QEMUPutMouseEntry *s = (QEMUPutMouseEntry *)dev;
 
+    s->isTrackball = false;
+
     switch (evt->kind) {
     case INPUT_EVENT_KIND_BTN:
         if (evt->btn->down) {
@@ -186,6 +189,7 @@ static void legacy_mouse_event(DeviceState *dev, QemuConsole *src,
         break;
     case INPUT_EVENT_KIND_REL:
         s->axis[evt->rel->axis] += evt->rel->value;
+        s->isTrackball = true;
         break;
     default:
         break;
@@ -199,7 +203,7 @@ static void legacy_mouse_sync(DeviceState *dev)
     s->qemu_put_mouse_event(s->qemu_put_mouse_event_opaque,
                             s->axis[INPUT_AXIS_X],
                             s->axis[INPUT_AXIS_Y],
-                            0,
+                            s->isTrackball ? 1 : 0, // "dz"
                             s->buttons);
 
     if (!s->qemu_put_mouse_event_absolute) {

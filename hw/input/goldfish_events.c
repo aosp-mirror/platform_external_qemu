@@ -795,18 +795,17 @@ static void gf_evdev_put_mouse(void *opaque,
     GoldfishEvDevState *s = (GoldfishEvDevState *)opaque;
 
 #ifdef USE_ANDROID_EMU
-    /* Note that unlike the "classic" Android emulator, we don't
-     * have the "dz == 0 for touchscreen, == 1 for trackball"
-     * distinction.
+    /* Note that, like the "classic" Android emulator, we
+     * have dz == 0 for touchscreen, == 1 for trackball
      */
-    if (s->have_multitouch) {
+    if (s->have_multitouch  &&  dz == 0) {
         /* Convert mouse event into multi-touch event */
         multitouch_update_pointer(MTES_DEVICE, (buttons_state & 2) ? 1 : 0, dx, dy,
                                       (buttons_state & 1) ? 0x81 : 0);
         return;
     }
 #endif
-    if (s->have_touch) {
+    if (s->have_touch  &&  dz == 0) {
         enqueue_event(s, EV_ABS, ABS_X, dx);
         enqueue_event(s, EV_ABS, ABS_Y, dy);
         enqueue_event(s, EV_ABS, ABS_Z, dz);
@@ -814,7 +813,7 @@ static void gf_evdev_put_mouse(void *opaque,
         enqueue_event(s, EV_SYN, 0, 0);
         return;
     }
-    if (s->have_trackball) {
+    if (s->have_trackball  &&  dz == 1) {
         enqueue_event(s, EV_REL, REL_X, dx);
         enqueue_event(s, EV_REL, REL_Y, dy);
         enqueue_event(s, EV_SYN, 0, 0);
@@ -922,7 +921,7 @@ static void gf_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
     KeyValue* kv = evt->key->key;
 
     int qcode = kv->qcode;
-    
+
     enqueue_event(s, EV_KEY, qcode, evt->key->down);
 
     int qemu2_qcode = qemu_input_key_value_to_qcode(evt->key->key);
@@ -1104,7 +1103,10 @@ static void gf_evdev_init(Object *obj)
     sysbus_init_irq(sbd, &s->irq);
 
     qemu_input_handler_register(dev, &gf_evdev_key_input_handler);
+    // Register the mouse handler for both absolute and relative position
+    // reports. (Relative reports are used in trackball mode.)
     qemu_add_mouse_event_handler(gf_evdev_put_mouse, s, 1, "goldfish-events");
+    qemu_add_mouse_event_handler(gf_evdev_put_mouse, s, 0, "goldfish-events-rel");
 
 #if defined(USE_ANDROID_EMU)
     s->have_dpad = android_hw->hw_dPad;
