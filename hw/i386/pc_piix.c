@@ -53,13 +53,21 @@
 #  include <xen/hvm/hvm_info_table.h>
 #endif
 // android related header
-#  include "hw/acpi/goldfish_defs.h"
+
+#ifdef CONFIG_ANDROID
+#include "hw/acpi/goldfish_defs.h"
+#include "hw/misc/android_pipe.h"
+#include "monitor/monitor.h"
 #include "qemu/error-report.h"
 #include "sysemu/char.h"
-#include "monitor/monitor.h"
-#ifdef CONFIG_ANDROID
-#include "hw/misc/android_pipe.h"
+
+#ifdef USE_ANDROID_EMU
+#include "android/android.h"
+#else
+#include "android-console.h"
 #endif
+#endif  // CONFIG_ANDROID
+
 // end of android related header
 
 #define MAX_IDE_BUS 2
@@ -113,15 +121,6 @@ static CharDriverState *android_try_create_console_chardev(int portno)
     qemu_chr_fe_claim_no_fail(chr);
     return chr;
 }
-
-// android_base_port is used across AndroidEmu library to report
-// the control console and adb server ports
-#ifdef USE_ANDROID_EMU
-extern int android_base_port;
-#else
-// just a fake to reduce the number of conditionals
-static int android_base_port = 0;
-#endif
 
 static void android_init_console_and_adb(int console_baseport,
                                          int max_nb_emulators)
@@ -329,7 +328,7 @@ static void pc_init1(MachineState *machine,
 
     pc_register_ferr_irq(gsi[13]);
 
-/* create android devices */
+#if defined(CONFIG_ANDROID)
     sysbus_create_simple("goldfish_battery", GF_BATTERY_IOMEM_BASE,
                          gsi[GF_BATTERY_IRQ]);
     sysbus_create_simple("goldfish-events", GF_EVENTS_IOMEM_BASE,
@@ -337,7 +336,7 @@ static void pc_init1(MachineState *machine,
     sysbus_create_simple("android_pipe", GF_PIPE_IOMEM_BASE, gsi[GF_PIPE_IRQ]);
     sysbus_create_simple("goldfish_fb", GF_FB_IOMEM_BASE, gsi[GF_FB_IRQ]);
     sysbus_create_simple("goldfish_audio", GF_AUDIO_IOMEM_BASE, gsi[GF_AUDIO_IRQ]);
-/* end of create android devices */
+#endif  // CONFIG_ANDROID
 
     pc_vga_init(isa_bus, pci_enabled ? pci_bus : NULL);
 

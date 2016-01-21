@@ -64,6 +64,10 @@ void qemu2_android_console_setup(const QAndroidBatteryAgent* battery_agent,
 }
 #endif
 
+#ifndef USE_ANDROID_EMU
+int android_base_port;
+#endif
+
 typedef struct {
     int is_udp;
     int host_port;

@@ -19,6 +19,14 @@
 #include "hw/intc/goldfish_pic.h"
 #include "hw/irq.h"
 
+#ifdef CONFIG_ANDROID
+#ifdef USE_ANDROID_EMU
+#include "android/android.h"
+#else
+#include "android-console.h"
+#endif
+#endif  // CONFIG_ANDROID
+
 #define PHYS_TO_VIRT(x) ((x) | ~(target_ulong)0x7fffffff)
 
 #define ANDROID_CONSOLE_BASEPORT 5554
@@ -147,15 +155,6 @@ static CharDriverState *try_to_create_console_chardev(int portno)
     qemu_chr_fe_claim_no_fail(chr);
     return chr;
 }
-
-// android_base_port is used across AndroidEmu library to report
-// the control console and adb server ports
-#ifdef USE_ANDROID_EMU
-extern int android_base_port;
-#else
-// just a fake to reduce the number of conditionals
-static int android_base_port = 0;
-#endif
 
 static void initialize_console_and_adb(void)
 {

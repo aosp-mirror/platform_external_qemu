@@ -40,6 +40,12 @@
 #include "monitor/monitor.h"
 #include "hw/misc/android_pipe.h"
 
+#ifdef USE_ANDROID_EMU
+#include "android/android.h"
+#else
+#include "android-console.h"
+#endif
+
 /* Maximum number of emulators that can run at once (affects how
  * far through the TCP port space from 5554 we will scan to find
  * a pair of ports we can listen on)
@@ -467,12 +473,6 @@ static CharDriverState *try_to_create_console_chardev(int portno)
     qemu_chr_fe_claim_no_fail(chr);
     return chr;
 }
-
-#ifdef USE_ANDROID_EMU
-extern int android_base_port;
-#else
-static int android_base_port = ANDROID_CONSOLE_BASEPORT;
-#endif
 
 static void initialize_console_and_adb(VirtBoardInfo *vbi)
 {

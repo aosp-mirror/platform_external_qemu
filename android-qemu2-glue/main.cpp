@@ -64,7 +64,8 @@ extern "C" {
 #define ANDROID_CONSOLE_BASEPORT 5554
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
-extern int android_base_port;
+int android_base_port;
+
 using namespace android::base;
 
 namespace {
