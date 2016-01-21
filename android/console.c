@@ -2648,6 +2648,15 @@ static const CommandDefRec  qemu_commands[] =
 /********************************************************************************************/
 
 static int
+do_crash( ControlClient  client, char*  args )
+{
+    control_write( client, "OK: crashing emulator, bye bye\r\n" );
+    volatile int * ptr = NULL;
+    *ptr+=1;
+    return 0;
+}
+
+static int
 do_kill( ControlClient  client, char*  args )
 {
     control_write( client, "OK: killing emulator, bye bye\r\n" );
@@ -2673,6 +2682,9 @@ static const CommandDefRec   main_commands[] =
     { "cdma", "CDMA related commands",
       "allows you to change CDMA-related settings\r\n", NULL,
       NULL, cdma_commands },
+
+    { "crash", "crash the emulator instance", NULL, NULL,
+      do_crash, NULL },
 
     { "kill", "kill the emulator instance", NULL, NULL,
       do_kill, NULL },
