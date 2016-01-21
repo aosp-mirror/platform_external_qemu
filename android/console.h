@@ -36,4 +36,7 @@ extern int control_console_start(int port,
                                  const QAndroidVmOperations* vm_operations,
                                  const QAndroidNetAgent* net_agent);
 
+// Get the port that the control console is listening at.
+// Return value is undefined if the control console hasn't been setup.
+extern int control_console_get_port();
 ANDROID_END_HEADER
