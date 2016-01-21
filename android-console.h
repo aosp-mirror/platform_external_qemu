@@ -90,6 +90,8 @@ void android_console_gsm_status(Monitor *mon, const QDict *qdict);
 void android_console_gsm_signal(Monitor *mon, const QDict *qdict);
 void android_console_gsm(Monitor *mon, const QDict *qdict);
 
+void android_console_rotate_screen(Monitor *mon, const QDict *qdict);
+
 void android_monitor_print_error(Monitor *mon, const char *fmt, ...);
 
 #ifdef USE_ANDROID_EMU

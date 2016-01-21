@@ -39,8 +39,6 @@
 #include "sysemu/char.h"
 #include "monitor/monitor.h"
 #include "hw/misc/android_pipe.h"
-#include "hw/display/goldfish_fb.h"
-#include "hw/input/goldfish_sensors.h"
 
 /* Maximum number of emulators that can run at once (affects how
  * far through the TCP port space from 5554 we will scan to find
@@ -94,7 +92,6 @@ typedef struct VirtBoardInfo {
     void *fdt;
     int fdt_size;
     uint32_t clock_phandle;
-    struct Monitor *android_monitor;
 } VirtBoardInfo;
 
 /* Addresses and sizes of our components.
@@ -471,46 +468,6 @@ static CharDriverState *try_to_create_console_chardev(int portno)
     return chr;
 }
 
-/* Console hooks for rotation state */
-
-static int ranchu_rotation_state = 0;       /* 0-3 */
-
-static void android_console_rotate_screen(Monitor *mon, const QDict *qdict)
-{
-    ranchu_rotation_state = ((ranchu_rotation_state + 1) % 4);
-    goldfish_sensors_set_rotation(ranchu_rotation_state);
-    /* The mapping between QEMU and Android's idea of rotation are
-       reversed */
-    switch (ranchu_rotation_state) {
-    case 0:
-        goldfish_fb_set_rotation(0);
-        graphic_rotate = 0;
-        break;
-    case 1:
-        goldfish_fb_set_rotation(3);
-        graphic_rotate = 90;
-        break;
-    case 2:
-        goldfish_fb_set_rotation(2);
-        graphic_rotate = 180;
-        break;
-    case 3:
-        goldfish_fb_set_rotation(1);
-        graphic_rotate = 270;
-        break;
-    default:
-        g_assert_not_reached();
-    }
-}
-
-static mon_cmd_t rotate_cmd = {
-    .name = "rotate",
-    .args_type = "",
-    .params = "",
-    .help = "rotate the screen by 90 degrees",
-    .mhandler.cmd = android_console_rotate_screen,
-};
-
 #ifdef USE_ANDROID_EMU
 extern int android_base_port;
 #else
@@ -545,13 +502,10 @@ static void initialize_console_and_adb(VirtBoardInfo *vbi)
          * This is equivalent to
          * "-mon chardev=private-chardev,mode=android-console"
          */
-        vbi->android_monitor = monitor_init(chr,
-                                            MONITOR_ANDROID_CONSOLE |
-                                            MONITOR_USE_READLINE |
-                                            MONITOR_DYNAMIC_CMDS);
-        monitor_add_command(vbi->android_monitor,
-                            &rotate_cmd);
-
+        monitor_init(chr,
+                     MONITOR_ANDROID_CONSOLE |
+                     MONITOR_USE_READLINE |
+                     MONITOR_DYNAMIC_CMDS);
         printf("console on port %d, ADB on port %d\n", baseport, baseport + 1);
         android_base_port = baseport;
         return;

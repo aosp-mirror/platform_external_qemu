@@ -57,9 +57,9 @@
 #include "qemu/error-report.h"
 #include "sysemu/char.h"
 #include "monitor/monitor.h"
+#ifdef CONFIG_ANDROID
 #include "hw/misc/android_pipe.h"
-#include "hw/display/goldfish_fb.h"
-#include "hw/input/goldfish_sensors.h"
+#endif
 // end of android related header
 
 #define MAX_IDE_BUS 2
@@ -114,46 +114,6 @@ static CharDriverState *android_try_create_console_chardev(int portno)
     return chr;
 }
 
-/* Console hooks for rotation state */
-
-static int ranchu_rotation_state = 0;       /* 0-3 */
-
-static void android_console_rotate_screen(Monitor *mon, const QDict *qdict)
-{
-    ranchu_rotation_state = ((ranchu_rotation_state + 1) % 4);
-    goldfish_sensors_set_rotation(ranchu_rotation_state);
-    /* The mapping between QEMU and Android's idea of rotation are
-       reversed */
-    switch (ranchu_rotation_state) {
-    case 0:
-        goldfish_fb_set_rotation(0);
-        graphic_rotate = 0;
-        break;
-    case 1:
-        goldfish_fb_set_rotation(3);
-        graphic_rotate = 90;
-        break;
-    case 2:
-        goldfish_fb_set_rotation(2);
-        graphic_rotate = 180;
-        break;
-    case 3:
-        goldfish_fb_set_rotation(1);
-        graphic_rotate = 270;
-        break;
-    default:
-        g_assert_not_reached();
-    }
-}
-
-static mon_cmd_t rotate_cmd = {
-    .name = "rotate",
-    .args_type = "",
-    .params = "",
-    .help = "rotate the screen by 90 degrees",
-    .mhandler.cmd = android_console_rotate_screen,
-};
-
 // android_base_port is used across AndroidEmu library to report
 // the control console and adb server ports
 #ifdef USE_ANDROID_EMU
@@ -173,7 +133,6 @@ static void android_init_console_and_adb(int console_baseport,
     int baseport = console_baseport;
     int tries = max_nb_emulators;
     CharDriverState *chr;
-    struct Monitor *android_monitor;
     // TODO: reconsider a better place to store this monitor handler
 
     for (; tries > 0; tries--, baseport += 2) {
@@ -192,12 +151,10 @@ static void android_init_console_and_adb(int console_baseport,
          * This is equivalent to
          * "-mon chardev=private-chardev,mode=android-console"
          */
-        android_monitor = monitor_init(chr,
-                                       MONITOR_ANDROID_CONSOLE |
-                                       MONITOR_USE_READLINE |
-                                       MONITOR_DYNAMIC_CMDS);
-        monitor_add_command(android_monitor, &rotate_cmd);
-
+        monitor_init(chr,
+                     MONITOR_ANDROID_CONSOLE |
+                     MONITOR_USE_READLINE |
+                     MONITOR_DYNAMIC_CMDS);
         android_base_port = baseport;
 
         printf("console on port %d, ADB on port %d\n", baseport, baseport + 1);

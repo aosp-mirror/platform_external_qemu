@@ -451,5 +451,13 @@ static mon_cmd_t android_cmds[] = {
         .mhandler.cmd = android_console_gsm,
         .sub_cmds.static_table = android_gsm_cmds,
     },
+    {
+        .name = "rotate",
+        .args_type = "",
+        .params = "",
+        .help = "rotate the screen by 90 degrees",
+        .mhandler.cmd = android_console_rotate_screen,
+    },
+
     { NULL, NULL, },
 };
