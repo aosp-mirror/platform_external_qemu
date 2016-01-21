@@ -108,6 +108,8 @@ typedef struct ControlGlobalRec_
     QAndroidVmOperations* vm_operations;
     QAndroidNetAgent* net_agent;
 
+    // Bookkeeping.
+    int control_port;
     /* IO */
     Looper* looper;
     LoopIo* listen_loopio;
@@ -675,10 +677,17 @@ int control_console_start(int control_port,
             loopIo_new(global->looper, fd, control_global_accept, global);
     loopIo_wantRead(global->listen_loopio);
     loopIo_dontWantWrite(global->listen_loopio);
+
+    // All done, update bookkeeping data that is only valid for an active
+    // console.
+    global->control_port = control_port;
     return 0;
 }
 
 
+int control_console_get_port() {
+    return _g_global.control_port;
+}
 
 static int
 do_quit( ControlClient  client, char*  args )

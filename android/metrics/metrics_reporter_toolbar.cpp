@@ -44,6 +44,8 @@ int formatToolbarGetUrl(char** ptr,
     static const char guest_gl_version_key[] = "ggl_version";
     static const char system_time_key[] = "system_time";
     static const char user_time_key[] = "user_time";
+    static const char adb_online_key[] = "adb_online";
+    static const char adb_error_key[] = "adb_error";
     // These keys are the same as AndroidStudio already uses.
     static const char client_id_key[] = "id";
     static const char version_key[] = "version";
@@ -60,14 +62,15 @@ int formatToolbarGetUrl(char** ptr,
     char* client_id = android_studio_get_installation_id();
     fullUrl += Uri::FormatEncodeArguments(
             "?as=%s&%s=%s&%s=%s&%s=%s&%s=%s"
-            "&%s=%d&%s=%d&%s=%" PRId64 "&%s=%" PRId64,
+            "&%s=%d&%s=%d&%s=%" PRId64 "&%s=%" PRId64 "&%s=%d&%s=%d",
             product_name, version_key, metrics->emulator_version, host_os_key,
             metrics->host_os_type, client_id_key, client_id, guest_arch_key,
             metrics->guest_arch,
 
             num_crashes_key, metrics->is_dirty ? 1 : 0, opengl_alive_key,
             metrics->opengl_alive, system_time_key, metrics->system_time,
-            user_time_key, metrics->user_time);
+            user_time_key, metrics->user_time, adb_online_key,
+            metrics->adb_online, adb_error_key, metrics->adb_error);
     free(client_id);
 
     if (metrics->guest_gpu_enabled > 0) {
