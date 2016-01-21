@@ -11,52 +11,81 @@
 */
 
 #include "android/crashreport/ui/ConfirmDialog.h"
-#include "android/crashreport/ui/DetailsGetter.h"
 
-#include <QThread>
+#include <QScrollBar>
 #include <QEventLoop>
+#include <QFutureWatcher>
+#include "QtConcurrent/qtconcurrentrun.h"
 
-#include <set>
+static const char kMessageBoxTitle[] = "Android Emulator";
+static const char kMessageBoxMessage[] =
+        "<p>Android Emulator closed unexpectedly.</p>"
+        "<p>Do you want to send a crash report about the problem?</p>";
+static const char kMessageBoxMessageDetailHW[] =
+        "An error report containing the information shown below, "
+        "including system-specific information, "
+        "will be sent to Google's Android team to help identify "
+        "and fix the problem. "
+        "<a href=\"https://www.google.com/policies/privacy/\">Privacy "
+        "Policy</a>.";
+
+static const char kIconFile[] = "emulator_icon_128.png";
+
+extern "C" const unsigned char* android_emulator_icon_find(const char* name,
+                                                           size_t* psize);
 
 ConfirmDialog::ConfirmDialog(QWidget* parent,
-                             const QPixmap& icon,
-                             const char* windowTitle,
-                             const char* message,
-                             const char* info,
-                             const char* detail,
-                             android::crashreport::CrashService* crashservice,
-                             android::crashreport::UserSuggestions* suggestions)
-    : QDialog(parent), mCrashService(crashservice),
-      mSuggestions(suggestions) {
+                             android::crashreport::CrashService* crashservice)
+    : QDialog(parent),
+      mCrashService(crashservice),
+      mDetailsHidden(true),
+      mDidGetSysInfo(false),
+      mDidUpdateDetails(false) {
     mSendButton = new QPushButton(tr("Send Report"));
     mDontSendButton = new QPushButton(tr("Don't Send"));
     mDetailsButton = new QPushButton(tr(""));
-    mLabelText = new QLabel(message);
-    mInfoText = new QLabel(info);
+    mLabelText = new QLabel(kMessageBoxMessage);
+    mInfoText = new QLabel(kMessageBoxMessageDetailHW);
     mIcon = new QLabel();
-
-    mDetailsText = new QPlainTextEdit(detail);
-    mDetailsProgressText = new QLabel(tr("Collecting crash info..."));
-    mDetailsProgress = new QProgressBar;
+    mCommentsText = new QTextEdit();
+    mDetailsText = new QPlainTextEdit();
+    mProgressText = new QLabel(tr("Working..."));
+    mProgress = new QProgressBar;
 
     mSuggestionText = new QLabel(tr("Suggestion(s) based on crash info:\n\n"));
+    mSuggestionText->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     mExtension = new QWidget;
     mYesNoButtonBox = new QDialogButtonBox(Qt::Horizontal);
     mDetailsButtonBox = new QDialogButtonBox(Qt::Horizontal);
+    mComment = new QWidget;
+
+    size_t icon_size;
+    QPixmap icon;
+
+    const unsigned char* icon_data =
+            android_emulator_icon_find(kIconFile, &icon_size);
+
+    icon.loadFromData(icon_data, icon_size);
 
     mIcon->setPixmap(icon);
     mSendButton->setDefault(true);
     mInfoText->setWordWrap(true);
     mInfoText->setOpenExternalLinks(true);
+    mCommentsText->setPlaceholderText(
+            tr("(Optional) Please describe what you were doing when the crash "
+               "occured."));
     mDetailsText->setReadOnly(true);
-    mDetailsProgressText->hide();
-    mDetailsProgress->setRange(0,0);
-    mDetailsProgress->hide();
+    mProgressText->hide();
+    mProgress->setRange(0, 0);
+    mProgress->hide();
 
-    if (!mSuggestions->suggestions.empty()) {
-        if (mSuggestions->suggestions.find(android::crashreport::UpdateGfxDrivers) !=
-            mSuggestions->suggestions.end()) {
+    crashservice->processCrash();
+    auto suggestions = crashservice->getSuggestions().suggestions;
+    if (!suggestions.empty()) {
+        if (suggestions.find(
+                    android::crashreport::Suggestion::UpdateGfxDrivers) !=
+            suggestions.end()) {
 #ifdef __APPLE__
             addSuggestion("This crash appears to be in your computer's graphics driver. Please check your\n"
                           "manufacturer's website for updated graphics drivers.\n\n"
@@ -79,15 +108,20 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mDetailsButtonBox->addButton(mDetailsButton, QDialogButtonBox::ActionRole);
 
     setWindowIcon(icon);
-    connect(mSendButton, SIGNAL(clicked()), this, SLOT(accept()));
+    connect(mSendButton, SIGNAL(clicked()), this, SLOT(sendReport()));
     connect(mDontSendButton, SIGNAL(clicked()), this, SLOT(reject()));
-    connect(mDetailsButton, SIGNAL(clicked()), this, SLOT(sl_detailtoggle()));
+    connect(mDetailsButton, SIGNAL(clicked()), this, SLOT(detailtoggle()));
+
+    QVBoxLayout* commentLayout = new QVBoxLayout;
+    commentLayout->setMargin(0);
+    commentLayout->addWidget(mCommentsText);
+    mComment->setLayout(commentLayout);
+    mComment->setMaximumHeight(
+            QFontMetrics(mCommentsText->currentFont()).height() * 7);
 
     QVBoxLayout* extensionLayout = new QVBoxLayout;
     extensionLayout->setMargin(0);
     extensionLayout->addWidget(mDetailsText);
-    extensionLayout->addWidget(mDetailsProgressText);
-    extensionLayout->addWidget(mDetailsProgress);
 
     mExtension->setLayout(extensionLayout);
 
@@ -98,20 +132,27 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
 
     mainLayout->addWidget(mIcon, 0, 0);
     mainLayout->addWidget(mLabelText, 0, 1, 1, 2);
-    mainLayout->addWidget(hLineFrame, 1, 0, 1, 3);
-    mainLayout->addWidget(mInfoText, 2, 0, 1, 3);
 
-    mainLayout->addWidget(mSuggestionText, 3, 0, 1, 3);
+    mainLayout->addWidget(mSuggestionText, 1, 0, 1, 3);
 
-    mainLayout->addWidget(mDetailsButtonBox, 4, 0, Qt::AlignLeft);
-    mainLayout->addWidget(mYesNoButtonBox, 4, 1, 1, 2);
+    mainLayout->addWidget(hLineFrame, 2, 0, 1, 3);
 
-    mainLayout->addWidget(mExtension, 5, 0, 1, 3);
+    mainLayout->addWidget(mInfoText, 3, 0, 1, 3);
+
+    mainLayout->addWidget(mComment, 4, 0, 1, 3);
+
+    mainLayout->addWidget(mDetailsButtonBox, 5, 0, Qt::AlignLeft);
+    mainLayout->addWidget(mYesNoButtonBox, 5, 1, 1, 2);
+
+    mainLayout->addWidget(mExtension, 6, 0, 1, 3);
+
+    mainLayout->addWidget(mProgressText, 7, 0, 1, 3);
+    mainLayout->addWidget(mProgress, 8, 0, 1, 3);
+
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
     setLayout(mainLayout);
-    setWindowTitle(tr(windowTitle));
+    setWindowTitle(tr(kMessageBoxTitle));
     hideDetails();
-    mDidGetSysInfo = false;
 }
 
 void ConfirmDialog::hideDetails() {
@@ -120,47 +161,59 @@ void ConfirmDialog::hideDetails() {
     mDetailsHidden = true;
 }
 
-void ConfirmDialog::showDetails() {
-    mDetailsButton->setText(tr("Hide details"));
+void ConfirmDialog::disableInput() {
+    mSendButton->setEnabled(false);
+    mDontSendButton->setEnabled(false);
+    mDetailsButton->setEnabled(false);
+    mCommentsText->setEnabled(false);
+}
 
+void ConfirmDialog::enableInput() {
+    mSendButton->setEnabled(true);
+    mDontSendButton->setEnabled(true);
+    mDetailsButton->setEnabled(true);
+    mCommentsText->setEnabled(true);
+}
+
+void ConfirmDialog::getDetails() {
     if (!mDidGetSysInfo) {
-        // Disable buttons to prevent concurrent hijinks
-        mSendButton->setEnabled(false);
-        mDontSendButton->setEnabled(false);
-        mDetailsButton->setEnabled(false);
+        disableInput();
 
-        QEventLoop event_loop;
-        QThread work_thread;
+        showProgressBar("Collecting crash info... this may take a minute.");
+        QEventLoop eventloop;
 
-        DetailsGetter details_getter(mCrashService);
-        details_getter.moveToThread(&work_thread);
+        QFutureWatcher<bool> watcher;
+        connect(&watcher, SIGNAL(finished()), &eventloop, SLOT(quit()));
 
-        mDetailsProgressText->show();
-        mDetailsProgress->show();
-        QObject::connect(&work_thread, &QThread::started, &details_getter, &DetailsGetter::getSysInfo);
+        // Start the computation.
+        QFuture<bool> future = QtConcurrent::run(
+                mCrashService,
+                &::android::crashreport::CrashService::collectSysInfo);
+        watcher.setFuture(future);
 
-        QObject::connect(&details_getter, &DetailsGetter::finished, &work_thread, &QThread::quit);
-        QObject::connect(&details_getter, &DetailsGetter::finished, &event_loop, &QEventLoop::quit);
-        work_thread.start();
-        event_loop.exec();
+        eventloop.exec();
 
-        // event loop quits here
-        mDetailsProgressText->hide();
-        mDetailsProgress->hide();
+        hideProgressBar();
+        enableInput();
+    }
+    mDidGetSysInfo = true;
+}
 
-        QString currentText = mDetailsText->toPlainText();
-        QString to_show = currentText + QString::fromStdString(details_getter.hw_info);
-        mDetailsText->document()->setPlainText(to_show);
+void ConfirmDialog::showDetails() {
+    getDetails();
+    if (!mDidUpdateDetails) {
+        QString details = QString::fromStdString(mCrashService->getReport());
+        details += QString::fromStdString(mCrashService->getSysInfo());
 
-        // Put the buttons back
-        mSendButton->setEnabled(true);
-        mDontSendButton->setEnabled(true);
-        mDetailsButton->setEnabled(true);
+        mDetailsText->document()->setPlainText(details);
+        mDidUpdateDetails = true;
     }
 
+    mDetailsButton->setText(tr("Hide details"));
     mDetailsText->show();
+    mDetailsText->verticalScrollBar()->setValue(
+            mDetailsText->verticalScrollBar()->minimum());
     mDetailsHidden = false;
-    mDidGetSysInfo = true;
 }
 
 void ConfirmDialog::addSuggestion(const QString& str) {
@@ -172,7 +225,56 @@ bool ConfirmDialog::didGetSysInfo() const {
     return mDidGetSysInfo;
 }
 
-void ConfirmDialog::sl_detailtoggle() {
+QString ConfirmDialog::getUserComments() {
+    return mCommentsText->toPlainText();
+}
+
+void ConfirmDialog::showProgressBar(const std::string& msg) {
+    mProgressText->setText(msg.c_str());
+    mProgressText->show();
+    mProgress->show();
+}
+
+void ConfirmDialog::hideProgressBar() {
+    mProgressText->hide();
+    mProgress->hide();
+}
+
+bool ConfirmDialog::uploadCrash() {
+    disableInput();
+    showProgressBar("Sending crash report...");
+    QEventLoop eventloop;
+
+    QFutureWatcher<bool> watcher;
+    connect(&watcher, SIGNAL(finished()), &eventloop, SLOT(quit()));
+
+    // Start the computation.
+    QFuture<bool> future = QtConcurrent::run(
+            mCrashService, &::android::crashreport::CrashService::uploadCrash);
+    watcher.setFuture(future);
+
+    eventloop.exec();
+
+    hideProgressBar();
+    return watcher.result();
+}
+void ConfirmDialog::sendReport() {
+    getDetails();
+    mCrashService->addUserComments(mCommentsText->toPlainText().toStdString());
+    if (uploadCrash()) {
+        QMessageBox msgbox(this);
+        msgbox.setWindowTitle(tr("Crash Report Submitted"));
+        msgbox.setText(tr("Thank you for submitting a crash report."));
+        std::string msg = "ReportId: " + mCrashService->getReportId();
+        msgbox.setInformativeText(msg.c_str());
+        msgbox.setTextInteractionFlags(Qt::TextSelectableByMouse);
+        msgbox.exec();
+    }
+
+    accept();
+}
+
+void ConfirmDialog::detailtoggle() {
     if (mDetailsHidden) {
         showDetails();
     } else {

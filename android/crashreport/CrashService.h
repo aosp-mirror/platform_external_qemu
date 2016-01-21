@@ -13,14 +13,34 @@
 // limitations under the License.
 
 #pragma once
-
 #include "google_breakpad/processor/process_state.h"
+#include "google_breakpad/processor/basic_source_line_resolver.h"
 
+#include <memory>
 #include <set>
 #include <string>
 
 namespace android {
 namespace crashreport {
+
+// The Suggestion type represents possible suggestions
+// presented to the user upon
+// analyzing a crash report.
+enum class Suggestion {
+    // TODO: Add more suggestion types
+    // (Update OS, Get more RAM, etc)
+    // as we find them
+    UpdateGfxDrivers
+};
+
+// Class UserSuggestions parses and generates user suggestions.
+
+class UserSuggestions {
+public:
+    std::set<Suggestion> suggestions;
+
+    UserSuggestions(google_breakpad::ProcessState* process_state);
+};
 
 // Class CrashService wraps Breakpad platform specific crash generation server
 //
@@ -35,13 +55,14 @@ namespace crashreport {
 //        waitForDumpFile
 //        stopCrashServer
 //
+//    Process the crash for details:
+//        processCrash
+//
 //    Finally, to upload the crash:
 //        uploadCrash
 //
 //    After uploading, the report id is populated:
 //        getReportId
-//
-//    The dump can be processed locally with getCrashDetails
 //
 class CrashService {
 public:
@@ -86,21 +107,32 @@ public:
     // Returns false if not started
     virtual bool stopCrashServer() = 0;
 
+    UserSuggestions getSuggestions();
+
     // Processes the saved dumpfile with breakpad processor libraries
     // Contains stack trace and loaded modules.
     // Is parsed for suggestions on debugging
     // (driver update etc)
-    std::string getCrashDetails();
+    // Return true on success
+    bool processCrash();
 
     // Collects system info, resulting in the "full" dump file.
-    std::string collectSysInfo();
+    bool collectSysInfo();
+
+    // Utility function for reading a txt file into string
+    std::string readFile(const std::string& path);
+
+    // Return string containing collectSysInfo result
+    std::string getSysInfo();
 
     // Uploads system-specific hardware information.
-    virtual std::string getHWInfo() = 0;
-    virtual void cleanupHWInfo() = 0;
+    virtual bool getHWInfo() = 0;
 
     // Uploads the saved dumpfile to server defined by CrashSystem
-    bool uploadCrash(const std::string& url);
+    bool uploadCrash();
+
+    // Get the processed crash report
+    std::string getReport();
 
     // Get the crash report ID returned by the crash servers
     std::string getReportId() const;
@@ -109,10 +141,14 @@ public:
     static CrashService* makeCrashService(const std::string& version,
                                           const std::string& build);
 
-    // Get the stack dump (for parsing, and generating user suggestions)
-    std::string getInitialDump() const;
+    // Key value pair to be added to crash report
+    void addReportValue(const std::string& key, const std::string& value);
 
-    google_breakpad::ProcessState process_state;
+    // Key filepath pair to be added to crash report
+    void addReportFile(const std::string& key, const std::string& path);
+
+    // User comments to be added to crash report
+    void addUserComments(const std::string& comments);
 
 protected:
     // Initialize serverstate
@@ -128,10 +164,9 @@ protected:
 
     DumpRequestContext mDumpRequestContext;
     ServerState mServerState;
+
     int mClientPID = 0;
-
     std::string mHWTmpFilePath;
-
 
 private:
     CrashService();
@@ -140,27 +175,12 @@ private:
     std::string mVersionId;
     std::string mDumpFile;
     std::string mReportId;
-    std::string mDumpDetails; // Initial stack trace and live library dump from breakpad
-    std::string mHWInfo; // System-specific information
-};
-
-// The Suggestion type represents possible suggestions
-// presented to the user upon
-// analyzing a crash report.
-enum Suggestion {
-    // TODO: Add more suggestion types
-    // (Update OS, Get more RAM, etc)
-    // as we find them
-    UpdateGfxDrivers
-};
-
-// Class UserSuggestions parses and generates user suggestions.
-
-class UserSuggestions {
-public:
-    std::set<Suggestion> suggestions;
-
-    UserSuggestions(google_breakpad::ProcessState* process_state);
+    std::string mComments;
+    std::map<std::string, std::string> mReportValues;
+    std::map<std::string, std::string> mReportFiles;
+    google_breakpad::ProcessState mProcessState;
+    google_breakpad::BasicSourceLineResolver mLineResolver;
+    std::unique_ptr<google_breakpad::Minidump> mMinidump;
 };
 
 }  // namespace crashreport
