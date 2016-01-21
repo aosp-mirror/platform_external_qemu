@@ -43,7 +43,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_CFLAGS += -DNEED_CPU_H
 
 LOCAL_SRC_FILES += \
-    main-android.cpp \
+    android-qemu2-glue/main.cpp \
     $(QEMU2_TARGET_SOURCES) \
     $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES) \
     $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES_$(BUILD_TARGET_TAG))
