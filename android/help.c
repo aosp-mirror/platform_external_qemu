@@ -1702,7 +1702,7 @@ android_help_list_options( stralloc_t*  out )
     PRINTF( "     %-*s  %s\n", maxwidth, "-qemu args...",    "pass arguments to qemu");
     PRINTF( "     %-*s  %s\n", maxwidth, "-qemu -h", "display qemu help");
     PRINTF( "\n" );
-    PRINTF( "     %-*s  %s\n", maxwidth, "-verbose",       "same as '-debug-init'");
+    PRINTF( "     %-*s  %s\n", maxwidth, "-verbose",       "same as '-debug-all'");
     PRINTF( "     %-*s  %s\n", maxwidth, "-debug <tags>",  "enable/disable debug messages");
     PRINTF( "     %-*s  %s\n", maxwidth, "-debug-<tag>",   "enable specific debug messages");
     PRINTF( "     %-*s  %s\n", maxwidth, "-debug-no-<tag>","disable specific debug messages");
