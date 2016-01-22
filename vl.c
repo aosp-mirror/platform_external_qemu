@@ -152,6 +152,7 @@
 int android_display_width  = 640;
 int android_display_height = 480;
 int android_display_bpp    = 32;
+int android_display_use_host_gpu = 0;
 
 /////////////////////////////////////////////////////////////
 
@@ -4185,6 +4186,7 @@ int run_qemu_main(int argc, const char **argv)
                                               android_hw->hw_lcd_height) != 0) {
                 is_opengl_alive = 0;
             } else {
+                android_display_use_host_gpu = 1;
                 qemu_gles = 1;   // Using emugl
             }
         } else {
