@@ -630,7 +630,7 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     // We should be able to count on this being in most desktop OpenGL implementations,
     // but display a message if it is in fact not supported (e.g., Mesa)
     if (strstr(cstring,"GL_EXT_texture_filter_anisotropic") == NULL) {
-        ERR("OpenGL warning: Anisotropic filtering not supported in underlying system OpenGL\n");
+        ERR("Anisotropic filtering not supported in underlying system OpenGL\n");
     }
 }
 
