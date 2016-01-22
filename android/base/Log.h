@@ -40,6 +40,7 @@ enum LogSeverity {
 
 // Returns the minimal log level.
 LogSeverity getMinLogLevel();
+void setMinLogLevel(LogSeverity level);
 
 // Convert a log level name (e.g. 'INFO') into the equivalent
 // ::android::base LOG_<name> constant.
