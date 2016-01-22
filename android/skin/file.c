@@ -106,7 +106,7 @@ skin_display_init_from(SkinDisplay* display,
         display->framebuffer = fb_funcs->create_framebuffer(
                 r.size.w,
                 r.size.h,
-                display->bpp);
+                32/*display->bpp*/);
 #if 0
         qframebuffer_init( display->qfbuff,
                            r.size.w,
