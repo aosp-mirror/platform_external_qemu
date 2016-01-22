@@ -482,6 +482,7 @@ trackball_move( TrackBall  ball,  int  dx, int  dy )
     if ( ball->ticks_last == 0 )
         ball->ticks_last = now;
     else if ( now > ball->ticks_last + (1000/60) ) {
+        // At least 1/60 of a second has elapsed
         ball->ticks_last = now;
         return 1;
     }
@@ -499,6 +500,7 @@ trackball_refresh( TrackBall  ball )
     Fix16VectorRec  faxes[3];
     Fix16           dot_threshold = DOT_THRESHOLD * diameter;
     int             nn;
+    SkinRect        sRect = { { 0, 0 }, { diameter, diameter } };
 
     fixedvector_from_vector( (Fix16Vector)&faxes[0], (Vector)&ball->axes[0] );
     fixedvector_from_vector( (Fix16Vector)&faxes[1], (Vector)&ball->axes[1] );
@@ -563,7 +565,7 @@ trackball_refresh( TrackBall  ball )
 
         pixels[coord->x + diameter*coord->y] = color;
     }
-    skin_surface_upload(ball->surface, NULL, pixels, ball->diameter * 4);
+    skin_surface_upload(ball->surface, &sRect, pixels, ball->diameter * 4);
 }
 
 void

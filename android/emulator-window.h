@@ -22,6 +22,8 @@
 #include "android/skin/ui.h"
 #include "android/ui-emu-agent.h"
 
+ANDROID_BEGIN_HEADER
+
 typedef struct {
     AConfig*       aconfig;
     SkinFile*      layout_file;
@@ -64,3 +66,5 @@ emulator_window_get_layout(EmulatorWindow* emulator);
 /* Gets framebuffer for the first display. */
 QFrameBuffer*
 emulator_window_get_first_framebuffer(EmulatorWindow* emulator);
+
+ANDROID_END_HEADER
