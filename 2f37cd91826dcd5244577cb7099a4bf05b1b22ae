@@ -16,6 +16,24 @@
       "revId": "2f37cd91826dcd5244577cb7099a4bf05b1b22ae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4be1290_0c4717a8",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 633,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-22T19:25:28Z",
+      "side": 1,
+      "message": "Got it. Then seeing as how if aniso is not supported, attempts to set the anisotropy level will be no-ops (not crashes), I\u0027ll just take this out.",
+      "parentUuid": "54c14218_8df0e1f4",
+      "revId": "2f37cd91826dcd5244577cb7099a4bf05b1b22ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
