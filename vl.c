@@ -2897,7 +2897,7 @@ static void android_init_metrics()
 
     async((async_function_t)androidMetrics_tryReportAll);
 
-    androidMetrics_keepAlive(looper_getForThread());
+    androidMetrics_keepAlive(looper_getForThread(), android_base_port);
 }
 
 static void android_teardown_metrics()
