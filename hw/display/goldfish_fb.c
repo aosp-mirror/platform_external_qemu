@@ -19,6 +19,9 @@
 
 #ifdef USE_ANDROID_EMU
 extern int android_display_bpp;
+extern int android_display_use_host_gpu;
+#else
+static const int android_display_use_host_gpu = 0;
 #endif
 
 #define DEST_BITS 8
@@ -448,6 +451,7 @@ static void goldfish_fb_write(void *opaque, hwaddr offset, uint64_t val,
             /* The guest is waiting for us to complete an update cycle
              * and notify it, so make sure we do a redraw immediately.
              */
+            if (android_display_use_host_gpu) return;
             graphic_hw_update(s->con);
             qemu_set_irq(s->irq, s->int_status & s->int_enable);
             break;
