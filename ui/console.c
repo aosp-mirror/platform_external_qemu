@@ -2120,7 +2120,7 @@ void kbd_mouse_event(int dx, int dy, int dz, int buttonsState) {
         y = dy;
     }
 
-    if (isAbsolute) {
+    if (isAbsolute  &&  dz == 0) {
         int w = surface_width(qemu_console_surface(active_console));
         int h = surface_height(qemu_console_surface(active_console));
 
