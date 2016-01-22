@@ -64,6 +64,10 @@ typedef enum {
 
 extern uint64_t android_verbose;
 
+// Enable verbose logs for all tags.
+// Additionally, enable verbose logs from the base/* family.
+extern void enable_verbose_logs();
+
 #define  VERBOSE_ENABLE(tag)    \
     android_verbose |= (1ULL << VERBOSE_##tag)
 

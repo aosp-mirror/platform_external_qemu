@@ -84,8 +84,9 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
         nargs--;
         aread++;
 
-        /* for backwards compatibility with previous versions */
+        // Take |verbose| to mean be verbose for all tags.
         if (!strcmp(arg, "verbose")) {
+            enable_verbose_logs();
             arg = "debug-init";
         }
 
@@ -127,6 +128,7 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
                 remove = 1;
             }
             if (!strcmp(arg2, "all")) {
+                enable_verbose_logs();
                 mask = ~0;
             }
             for (nn = 0; debug_tags[nn].name; nn++) {
@@ -262,9 +264,10 @@ parse_debug_tags( const char*  tags )
                 x += 1;
             }
 
-            if (!strcmp( "all", x ))
+            if (!strcmp( "all", x )) {
+                enable_verbose_logs();
                 mask = ~0;
-            else {
+            } else {
                 char  temp[32];
                 buffer_translate_char(temp, sizeof temp, x, '-', '_');
 

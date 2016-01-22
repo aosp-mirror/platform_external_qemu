@@ -135,7 +135,7 @@ int main(int argc, char** argv)
     const char* debug = getenv("ANDROID_EMULATOR_DEBUG");
 
     if (debug != NULL && *debug && *debug != '0')
-        android_verbose = 1;
+        enable_verbose_logs();
 
     /* Parse command-line and look for
      * 1) an avd name either in the form or '-avd <name>' or '@<name>'
@@ -169,12 +169,12 @@ int main(int argc, char** argv)
 
         if (!strcmp(opt,"-verbose") || !strcmp(opt,"-debug-all")
                  || !strcmp(opt,"-debug-init")) {
-            android_verbose = 1;
+            enable_verbose_logs();
         }
 
         if (!strcmp(opt,"-debug") && nn + 1 < argc &&
             (!strcmp(argv[nn + 1], "all") || !strcmp(argv[nn + 1], "init"))) {
-            android_verbose = 1;
+            enable_verbose_logs();
         }
 
         if (!strcmp(opt,"-gpu") && nn + 1 < argc) {
