@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54c14218_8df0e1f4",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 633,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-01-22T19:05:53Z",
+      "side": 1,
+      "message": "After thinking about this for a second, I think it is only important in verbose output",
+      "revId": "2f37cd91826dcd5244577cb7099a4bf05b1b22ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
