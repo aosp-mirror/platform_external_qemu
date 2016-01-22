@@ -67,10 +67,12 @@ static void termsig_handler(int signal)
     qemu_system_shutdown_request();
 }
 
+#ifndef CONFIG_ANDROID
 static void sigchld_handler(int signal)
 {
     waitpid(-1, NULL, WNOHANG);
 }
+#endif  // !CONFIG_ANDROID
 
 void os_setup_signal_handling(void)
 {
@@ -82,7 +84,11 @@ void os_setup_signal_handling(void)
     sigaction(SIGHUP,  &act, NULL);
     sigaction(SIGTERM, &act, NULL);
 
+#ifdef CONFIG_ANDROID
+    act.sa_handler = SIG_DFL;
+#else
     act.sa_handler = sigchld_handler;
+#endif
     act.sa_flags = SA_NOCLDSTOP;
     sigaction(SIGCHLD, &act, NULL);
 }
