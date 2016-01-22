@@ -15,7 +15,6 @@
 #include "android/base/files/IniFile.h"
 #include "android/metrics/internal/metrics_reporter_internal.h"
 #include "android/metrics/IniFileAutoFlusher.h"
-#include "android/metrics/metrics_reporter_ga.h"
 #include "android/metrics/metrics_reporter_toolbar.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -400,7 +399,5 @@ ABool androidMetrics_uploadMetrics(const AndroidMetrics* metrics) {
                   metrics->num_failed_reports,
                   metrics->emulator_version, metrics->system_time, metrics->user_time);
 
-    ABool success = (ABool)androidMetrics_uploadMetricsGA(metrics);
-    success &= (ABool)androidMetrics_uploadMetricsToolbar(metrics);
-    return success;
+    return androidMetrics_uploadMetricsToolbar(metrics);
 }
