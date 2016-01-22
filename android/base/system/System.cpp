@@ -602,88 +602,16 @@ public:
         return true;
 
 #else   // !_WIN32
-        char** const params = new char*[commandLine.size() + 1];
-        for (size_t i = 0; i < commandLine.size(); ++i) {
-            params[i] = const_cast<char*>(commandLine[i].c_str());
-        }
-        params[commandLine.size()] = nullptr;
-
-        int pid = fork();
-        if (pid < 0) {
+        sigset_t oldset;
+        sigset_t set;
+        if (sigemptyset(&set) || sigaddset(&set, SIGCHLD) ||
+            pthread_sigmask(SIG_UNBLOCK, &set, &oldset)) {
             return false;
         }
-        if (pid != 0) {
-            // Parent process returns.
-            delete[] params;
-            if (outChildPid) {
-                *outChildPid = pid;
-            }
-
-            if ((options & RunOptions::WaitForCompletion) == 0) {
-                return true;
-            }
-
-            // We were requested to wait for the process to complete.
-            int exitCode;
-            // Do not use SIGCHLD here because we're not sure if we're
-            // running on the main thread and/or what our sigmask is.
-            if (timeoutMs == kInfinite) {
-                // Let's just wait forever and hope that the child process
-                // exits.
-                HANDLE_EINTR(waitpid(pid, &exitCode, 0));
-                if (outExitCode) {
-                    *outExitCode = WEXITSTATUS(exitCode);
-                }
-                return WIFEXITED(exitCode);
-            }
-
-            auto startTime = std::chrono::steady_clock::now();
-            auto elapsed = std::chrono::milliseconds::zero();
-            while (elapsed.count() < timeoutMs) {
-                pid_t waitPid = HANDLE_EINTR(waitpid(pid, &exitCode, WNOHANG));
-                if (waitPid < 0) {
-                    return false;
-                }
-
-                if (waitPid > 0) {
-                    if (outExitCode) {
-                        *outExitCode = WEXITSTATUS(exitCode);
-                    }
-                    return WIFEXITED(exitCode);
-                }
-
-                sleepMs(10);
-                elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-                        std::chrono::steady_clock::now() - startTime);
-            }
-            // Timeout occured.
-            if ((options & RunOptions::TerminateOnTimeout) != 0) {
-                kill(pid, SIGKILL);
-            }
-            return false;
-        }
-
-        // In the child process.
-
-        // save stderr in case we will redirect it to /dev/null
-        const int savedStderr = dup(2);
-        if (!(options & RunOptions::ShowOutput)) {
-            int fd = open("/dev/null", O_WRONLY);
-            dup2(fd, 1);
-            dup2(fd, 2);
-        }
-        if (execvp(commandLine[0].c_str(), params) == -1) {
-            dup2(savedStderr, 2);
-            fprintf(stderr, "Failed to run command '%s', error code %d\n",
-                    commandLine[0].c_str(), errno);
-            // emulator doesn't really like exit calls from a forked process
-            // (it just hangs), so let's just kill it
-            if (raise(SIGKILL) != 0) {
-                exit(RunFailed);
-            }
-        }
-        // Should not happen, but let's keep the compiler happy
-        return false;
+        auto result = runCommandPosix(commandLine, options, timeoutMs,
+                                      outExitCode, outChildPid);
+        pthread_sigmask(SIG_SETMASK, &oldset, nullptr);
+        return result;
 #endif  // !_WIN32
     }
 
@@ -721,6 +649,111 @@ public:
         return result;
 #endif  // !_WIN32
     }
+
+#ifndef _WIN32
+    bool runCommandPosix(const StringVector& commandLine,
+                         RunOptions options,
+                         System::Duration timeoutMs,
+                         System::ProcessExitCode* outExitCode,
+                         System::Pid* outChildPid) {
+        char** const params = new char*[commandLine.size() + 1];
+        for (size_t i = 0; i < commandLine.size(); ++i) {
+            params[i] = const_cast<char*>(commandLine[i].c_str());
+        }
+        params[commandLine.size()] = nullptr;
+
+        String cmd = "";
+        if(LOG_IS_ON(VERBOSE)) {
+            cmd = "|";
+            for (const auto& param : commandLine) {
+                cmd += param;
+                cmd += " ";
+            }
+            cmd += "|";
+        }
+
+        int pid = fork();
+        if (pid < 0) {
+            LOG(VERBOSE) << "Failed to fork for command " << cmd;
+            return false;
+        }
+        if (pid != 0) {
+            // Parent process returns.
+            delete[] params;
+            if (outChildPid) {
+                *outChildPid = pid;
+            }
+
+            if ((options & RunOptions::WaitForCompletion) == 0) {
+                return true;
+            }
+
+            // We were requested to wait for the process to complete.
+            int exitCode;
+            // Do not use SIGCHLD here because we're not sure if we're
+            // running on the main thread and/or what our sigmask is.
+            if (timeoutMs == kInfinite) {
+                // Let's just wait forever and hope that the child process
+                // exits.
+                HANDLE_EINTR(waitpid(pid, &exitCode, 0));
+                if (outExitCode) {
+                    *outExitCode = WEXITSTATUS(exitCode);
+                }
+                return WIFEXITED(exitCode);
+            }
+
+            auto startTime = std::chrono::steady_clock::now();
+            auto elapsed = std::chrono::milliseconds::zero();
+            while (elapsed.count() < timeoutMs) {
+                pid_t waitPid = HANDLE_EINTR(waitpid(pid, &exitCode, WNOHANG));
+                if (waitPid < 0) {
+                    auto local_errno = errno;
+                    LOG(VERBOSE) << "Error running command " << cmd
+                                 << ". waitpid failed with |"
+                                 << strerror(local_errno) << "|";
+                    return false;
+                }
+
+                if (waitPid > 0) {
+                    if (outExitCode) {
+                        *outExitCode = WEXITSTATUS(exitCode);
+                    }
+                    return WIFEXITED(exitCode);
+                }
+
+                sleepMs(10);
+                elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::steady_clock::now() - startTime);
+            }
+            // Timeout occured.
+            if ((options & RunOptions::TerminateOnTimeout) != 0) {
+                kill(pid, SIGKILL);
+            }
+            LOG(VERBOSE) << "Timed out with running command " << cmd;
+            return false;
+        }
+
+        // In the child process.
+        // Do not do __anything__ except execve. That includes printing to
+        // stdout/stderr. None of it is safe in the child process forked from a
+        // parent with multiple threads.
+
+        if (!(options & RunOptions::ShowOutput)) {
+            int fd = open("/dev/null", O_WRONLY);
+            dup2(fd, 1);
+            dup2(fd, 2);
+        }
+        if (execvp(commandLine[0].c_str(), params) == -1) {
+            // emulator doesn't really like exit calls from a forked process
+            // (it just hangs), so let's just kill it
+            if (raise(SIGKILL) != 0) {
+                exit(RunFailed);
+            }
+        }
+        // Should not happen, but let's keep the compiler happy
+        return false;
+    }
+#endif  // !_WIN32
 
 private:
     mutable String mProgramDir;
