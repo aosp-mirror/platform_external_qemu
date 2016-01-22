@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "742ac67b_d12b0653",
+        "filename": "os-posix.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-22T10:03:19Z",
+      "side": 1,
+      "message": "*very* interesting, can you put that in a #ifdef CONFIG_ANDROID block so we can identify this change more easily and see if it needs to be ported to QEMU2?",
+      "revId": "6d060b40c3512316a0364421f8d1938369f13a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
