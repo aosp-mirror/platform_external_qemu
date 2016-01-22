@@ -166,4 +166,8 @@ SharedLibrary::FunctionPtr SharedLibrary::findSymbol(
 
 #endif  // !_WIN32
 
+void gl_unimplemented() {
+    fprintf(stderr, "called unimplemented OpenGL API\n");
+}
+
 }  // namespace emugl
