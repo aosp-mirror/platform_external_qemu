@@ -453,7 +453,7 @@ parse_skin_files(const char*      skinDirPath,
         if(x && isdigit(x[1])) {
             int width = atoi(skinName);
             int height = atoi(x+1);
-            int bpp   = 16;
+            int bpp   = hwConfig->hw_lcd_depth; // respect the depth setting in the config.ini
             char* y = strchr(x+1, 'x');
             if (y && isdigit(y[1])) {
                 bpp = atoi(y+1);
