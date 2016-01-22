@@ -95,10 +95,16 @@ typedef struct {
     gboolean    data_out;       /* can we output data? */
     adb_pipe *adb_pipes[PIPE_QUEUE_LEN];
     adb_pipe *connected_pipe;
-    guint    adb_data_timer_id;
 } adb_backend_state;
 
+struct adb_timer_data_struct {
+    adb_backend_state* bs;
+    guint              adb_data_timer_id;
+};
+
 static adb_backend_state adb_state;
+
+static struct adb_timer_data_struct adb_timer_data;
 
 static void adb_reply(adb_pipe *apipe, const char *reply);
 
@@ -246,7 +252,15 @@ static gboolean tcp_adb_server_data(GIOChannel *channel, GIOCondition cond,
 }
 
 static gboolean tcp_adb_server_timer(void *opaque) {
-    adb_backend_state *bs = (adb_backend_state *) opaque;
+    struct adb_timer_data_struct *timer_data = (struct adb_timer_data_struct*) opaque;
+    adb_backend_state *bs = timer_data->bs;
+    if(g_main_context_find_source_by_user_data(NULL, bs)) {
+        // since the io watcher for adb server data is still there, do nothing;
+        // otherwise, we are adding too many fds to the main thread's select
+        // and will slow it down on linux/mac and quit the program on windows
+        // after a while
+        return TRUE;
+    }
     if (bs->chan && bs->connected_pipe && bs->connected_pipe->state == ADB_CONNECTION_STATE_CONNECTED) {
         g_io_add_watch(bs->chan, G_IO_IN|G_IO_ERR|G_IO_HUP,
                            tcp_adb_server_data, bs);
@@ -477,10 +491,10 @@ static const char *handle_request(adb_pipe *apipe, const char *request, int len)
         }
 
         apipe->state = ADB_CONNECTION_STATE_CONNECTED;
-        if (bs->adb_data_timer_id) {
-            g_source_remove(bs->adb_data_timer_id);
+        if (adb_timer_data.adb_data_timer_id) {
+            g_source_remove(adb_timer_data.adb_data_timer_id);
         }
-        bs->adb_data_timer_id = g_timeout_add(1000, /* ms */ tcp_adb_server_timer, bs);
+        adb_timer_data.adb_data_timer_id = g_timeout_add(1000, /* ms */ tcp_adb_server_timer, &adb_timer_data);
         return NULL; /* start proxying data */
     } else {
         /* unrecognized command */
@@ -773,11 +787,13 @@ bool qemu2_adb_server_init(int port)
         adb_state.listen_chan = NULL;
         adb_state.data_in = FALSE;
         adb_state.connected_pipe = NULL;
-        adb_state.adb_data_timer_id = 0;
 
         android_pipe_add_type("qemud:adb", NULL, &adb_pipe_funcs);
         pipe_backend_initialized = true;
     }
+
+    adb_timer_data.bs = &adb_state;
+    adb_timer_data.adb_data_timer_id = 0;
 
     if (!adb_server_listen_incoming(port)) {
         return false;
