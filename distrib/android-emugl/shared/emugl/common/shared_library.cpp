@@ -17,6 +17,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
+#include "OpenglCodecCommon/ErrorLog.h"
 
 #ifndef _WIN32
 #include <dlfcn.h>
@@ -165,5 +166,9 @@ SharedLibrary::FunctionPtr SharedLibrary::findSymbol(
 }
 
 #endif  // !_WIN32
+
+void gl_unimplemented() {
+    ERR("called unimplemented OpenGL API\n");
+}
 
 }  // namespace emugl

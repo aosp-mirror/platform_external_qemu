@@ -55,8 +55,14 @@ bool init_gles1_dispatch(gles1_server_context_t *dispatch_table)
 //
 void *gles1_dispatch_get_proc_func(const char *name, void *userData)
 {
+    void* func = NULL;
     if (!s_gles1_lib) {
-        return NULL;
+        func = (void *)s_gles1_lib->findSymbol(name);
     }
-    return (void *)s_gles1_lib->findSymbol(name);
+    // To make it consistent with the guest, redirect any unsupported functions
+    // to gl_unimplemented.
+    if (!func) {
+        func = (void *)emugl::gl_unimplemented;
+    }
+    return func;
 }
