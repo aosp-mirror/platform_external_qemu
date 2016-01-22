@@ -564,8 +564,17 @@ build_symbols () {
         BINARY_FULLNAME="$(basename "$BINARY")"
         BINARY_DIR="$(dirname "$BINARY")"
         run mkdir -p $SYMBOL_DIR/$BINARY_DIR
-        $SYMTOOL $SRC_ROOT/$BINARY > $SYMBOL_DIR/$BINARY.sym ||
-            panic "Failed to create symbol file for $SRC_ROOT/$BINARY"
+        if [ "$(get_build_os)" = "darwin" ]; then
+            DSYM_DIR=$(mktemp -d /tmp/$BINARY_FULLNAME.dsym.XXXXXX)
+            dsymutil --out=$DSYM_DIR $SRC_ROOT/$BINARY ||
+                panic "Failed to create dsym for $SRC_ROOT/$BINARY"
+            $SYMTOOL -g $DSYM_DIR $SRC_ROOT/$BINARY > $SYMBOL_DIR/$BINARY.sym ||
+                panic "Failed to create symbol file for $SRC_ROOT/$BINARY"
+            rm -rf "$DSYM_DIR"
+        else
+            $SYMTOOL $SRC_ROOT/$BINARY > $SYMBOL_DIR/$BINARY.sym ||
+                panic "Failed to create symbol file for $SRC_ROOT/$BINARY"
+        fi
     done
 }
 
