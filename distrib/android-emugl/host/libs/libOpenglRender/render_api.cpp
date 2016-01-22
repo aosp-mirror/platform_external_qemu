@@ -85,24 +85,25 @@ RENDER_APICALL int RENDER_APIENTRY initOpenGLRenderer(
 
     // kUseThread is used to determine whether the RenderWindow should use
     // a separate thread to manage its subwindow GL/GLES context.
-    // Experience shows that:
+    // For now, this feature is disabled entirely for the following
+    // reasons:
     //
-    // - It is necessary on Linux/XGL and OSX/Cocoa to avoid corruption
-    //   issues with the GL state of the main window, resulting in garbage
-    //   or black content of the non-framebuffer UI parts.
-    //
-    // - It must be disabled on Windows, otherwise the main window becomes
+    // - It must be disabled on Windows at all times, otherwise the main window becomes
     //   unresponsive after a few seconds of user interaction (e.g. trying to
     //   move it over the desktop). Probably due to the subtle issues around
     //   input on this platform (input-queue is global, message-queue is
     //   per-thread). Also, this messes considerably the display of the
     //   main window when running the executable under Wine.
     //
-#ifdef _WIN32
+    // - On Linux/XGL and OSX/Cocoa, this used to be necessary to avoid corruption
+    //   issues with the GL state of the main window when using the SDL UI.
+    //   After the switch to Qt, this is no longer necessary and may actually cause
+    //   undesired interactions between the UI thread and the RenderWindow thread:
+    //   for example, in a multi-monitor setup the context might be recreated when
+    //   dragging the window between monitors, triggering a Qt-specific callback
+    //   in the context of RenderWindow thread, which will become blocked on the UI
+    //   thread, which may in turn be blocked on something else.
     bool kUseThread = false;
-#else
-    bool kUseThread = true;
-#endif
 
     //
     // initialize the renderer and listen to connections
