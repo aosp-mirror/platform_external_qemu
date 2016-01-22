@@ -24,6 +24,14 @@ static emugl::SharedLibrary *s_gles2_lib = NULL;
 
 #define DEFAULT_GLES_V2_LIB EMUGL_LIBNAME("GLES_V2_translator")
 
+// An unimplemented function which prints out an error message.
+// To make it consistent with the guest, all GLES2 functions not supported by
+// the driver should be redirected to this function.
+
+static void gles2_unimplemented() {
+    fprintf(stderr, "Called unimplemented GLESv2 API\n");
+}
+
 //
 // This function is called only once during initialiation before
 // any thread has been created - hence it should NOT be thread safe.
@@ -57,8 +65,14 @@ bool init_gles2_dispatch(gles2_server_context_t *dispatch_table)
 //
 void *gles2_dispatch_get_proc_func(const char *name, void *userData)
 {
-    if (!s_gles2_lib) {
-        return NULL;
+    void* func = NULL;
+    if (s_gles2_lib) {
+        func = (void *)s_gles2_lib->findSymbol(name);
     }
-    return (void *)s_gles2_lib->findSymbol(name);
+    // To make it consistent with the guest, redirect any unsupported functions
+    // to gles2_unimplemented.
+    if (!func) {
+        func = (void *)gles2_unimplemented;
+    }
+    return func;
 }
