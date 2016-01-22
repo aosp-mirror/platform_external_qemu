@@ -100,6 +100,11 @@ private:
 /* This header is included by target w/o using EMUGL_LIBNAME().  Don't #error, leave it undefined */
 #endif
 
+// An unimplemented function which prints out an error message.
+// To make it consistent with the guest, all GL functions not supported by the
+// driver should be redirected to this function.
+void gl_unimplemented();
+
 }  // namespace emugl
 
 #endif  // EMUGL_COMMON_SHARED_LIBRARY_H
