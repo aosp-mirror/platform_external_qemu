@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4599e47_2b7f858b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/render_api.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-22T10:23:45Z",
+      "side": 1,
+      "message": "nit: trailing space.",
+      "revId": "f532dabed4a9907d92fb8d9a0c37182f66e64b81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
