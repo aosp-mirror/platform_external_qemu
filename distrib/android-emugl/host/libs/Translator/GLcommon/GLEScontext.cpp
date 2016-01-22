@@ -626,13 +626,6 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     if (!(Version((const char*)glVersion) < Version("3.0")) || strstr(cstring,"GL_OES_rgb8_rgba8")!=NULL)
         s_glSupport.GL_OES_RGB8_RGBA8 = true;
 
-    // Check for anisotropic filtering support.
-    // We should be able to count on this being in most desktop OpenGL
-    // implementations, but display a message if it is not (e.g., Mesa)
-    if (strstr(cstring,"GL_EXT_texture_filter_anisotropic") == NULL) {
-        ERR("Anisotropic filtering not supported"
-            "in underlying system OpenGL\n");
-    }
 }
 
 void GLEScontext::buildStrings(const char* baseVendor,
