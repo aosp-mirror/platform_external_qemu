@@ -193,7 +193,7 @@ public:
     // only valid until the next call to any function that changes the
     // size of capacity of the vector.
     const T* begin() const {
-        return reinterpret_cast<T*>(PodVectorBase::begin());
+        return reinterpret_cast<const T*>(PodVectorBase::begin());
     }
 
     // Return a pointer past the last item in the vector. I.e. if the
@@ -207,7 +207,7 @@ public:
     // the result is not NULL, then |result - 1| points to the last item.
     // Can be NULL if the vector is empty.
     const T* end() const {
-        return reinterpret_cast<T*>(PodVectorBase::end());
+        return reinterpret_cast<const T*>(PodVectorBase::end());
     }
 
     // Returns a reference to the item a position |index| in the vector.
