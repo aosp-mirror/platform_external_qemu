@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "945c9a37_4a40731e",
+        "filename": "android/skin/ui.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-22T10:38:46Z",
+      "side": 1,
+      "message": "nit: If it\u0027s a C function, call it skin_ui_is_trackball_active() instead?",
+      "revId": "f98563cafebcaa22934f482cf5831ec952e43eae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
