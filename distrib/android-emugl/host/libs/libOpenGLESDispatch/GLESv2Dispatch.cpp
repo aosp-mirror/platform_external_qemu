@@ -57,8 +57,12 @@ bool init_gles2_dispatch(gles2_server_context_t *dispatch_table)
 //
 void *gles2_dispatch_get_proc_func(const char *name, void *userData)
 {
-    if (!s_gles2_lib) {
-        return NULL;
+    void* func = NULL;
+    if (s_gles2_lib) {
+        func = (void *)s_gles2_lib->findSymbol(name);
     }
-    return (void *)s_gles2_lib->findSymbol(name);
+    if (!func) {
+        func = (void *)emugl::gl_unimplemented;
+    }
+    return func;
 }
