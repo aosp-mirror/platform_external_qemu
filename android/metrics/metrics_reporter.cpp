@@ -177,7 +177,7 @@ ABool androidMetrics_write(const AndroidMetrics* androidMetrics) {
 #undef METRICS_STRING
 #undef METRICS_DURATION
 #define METRICS_INT(n, s, d) ini->setInt(s, am->n);
-#define METRICS_STRING(n, s, d) ini->setString(s, am->n);
+#define METRICS_STRING(n, s, d) ini->setString(s, am->n ? am->n : "");
 #define METRICS_DURATION(n, s, d) ini->setInt64(s, am->n);
 #include "android/metrics/metrics_fields.h"
     return 1;
