@@ -16,6 +16,24 @@
       "revId": "6d060b40c3512316a0364421f8d1938369f13a52",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14cb4a3e_2b23d9e6",
+        "filename": "os-posix.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-22T17:48:29Z",
+      "side": 1,
+      "message": "Done. qemu2 does not duplicate this file.\niiuc, this was added in at some point while integrating from qemu upstream.\n\nBoth qemu and qemu2 actually have a bottom half SIGCHLD handling routine in iohandler.c\nqemu doesn\u0027t use that at all.\nqemu2 would use it only if slirp is in use somehow. I need to test if that interferes with runCommand. If it does, I\u0027ll try to use waitid with WNOWAIT in iohandler.c to play nice.",
+      "parentUuid": "742ac67b_d12b0653",
+      "revId": "6d060b40c3512316a0364421f8d1938369f13a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
