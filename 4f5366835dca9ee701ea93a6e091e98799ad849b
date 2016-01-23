@@ -16,6 +16,23 @@
       "revId": "4f5366835dca9ee701ea93a6e091e98799ad849b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74f2c6a8_4ea8d399",
+        "filename": "distrib/android-emugl/shared/emugl/common/shared_library.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-23T12:35:53Z",
+      "side": 1,
+      "message": "nit: This source file should *not* depend on OpenglCodecCommon/ stuff, emugl/common/ is supposed to be like android/base/, a low-level layer that only depends on system/platform APIs.",
+      "revId": "4f5366835dca9ee701ea93a6e091e98799ad849b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
