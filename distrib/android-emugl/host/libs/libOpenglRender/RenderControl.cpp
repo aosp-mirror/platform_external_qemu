@@ -15,7 +15,7 @@
 */
 #include "RenderControl.h"
 
-#include "DecoderContext.h"
+#include "DispatchTables.h"
 #include "FbConfig.h"
 #include "FrameBuffer.h"
 #include "RenderThreadInfo.h"

@@ -15,7 +15,27 @@
 */
 #pragma once
 
-#include "gles2_server_context.h"
+#include "OpenGLESDispatch/gldefs.h"
+#include "OpenGLESDispatch/gles_functions.h"
+#include "KHR/khrplatform.h"
 
-bool init_gles2_dispatch(gles2_server_context_t *dispatch_table);
-void *gles2_dispatch_get_proc_func(const char *name, void *userData);
+// Define function pointer types.
+#define GLES2_DISPATCH_DEFINE_TYPE(return_type,func_name,signature,callargs) \
+    typedef return_type (KHRONOS_APIENTRY * func_name ## _t) signature;
+
+LIST_GLES2_FUNCTIONS(GLES2_DISPATCH_DEFINE_TYPE,GLES2_DISPATCH_DEFINE_TYPE)
+
+struct GLESv2Dispatch {
+#define GLES2_DISPATCH_DECLARE_POINTER(return_type,func_name,signature,callargs) \
+        func_name ## _t func_name;
+    LIST_GLES2_FUNCTIONS(GLES2_DISPATCH_DECLARE_POINTER,
+                         GLES2_DISPATCH_DECLARE_POINTER)
+};
+
+#undef GLES2_DISPATCH_DECLARE_POINTER
+#undef GLES2_DISPATCH_DEFINE_TYPE
+
+bool gles2_dispatch_init(GLESv2Dispatch* dispatch_table);
+
+// Used to initialize the decoder.
+void* gles2_dispatch_get_proc_func(const char* name, void* userData);
