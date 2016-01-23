@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1410aa94_63a322bf",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/GLESv1Dispatch.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-23T12:34:36Z",
+      "side": 1,
+      "message": "I think you meant:\n\n  if (s_gles1_lib) { ... }\n\ninstead",
+      "revId": "4f5366835dca9ee701ea93a6e091e98799ad849b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
