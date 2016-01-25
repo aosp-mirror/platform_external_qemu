@@ -109,7 +109,7 @@ TEST(TestSystem, getDirectoryProgramDir) {
     const char kLauncherDir[] = "/foo/bar";
     const char kProgramDir[] = "qemu/os-arch";
     TestSystem testSys(kLauncherDir, 32, "/home", "/app");
-    testSys.setProgramDir(kProgramDir);
+    testSys.setProgramSubDir(kProgramDir);
 
     String ldir = System::get()->getLauncherDirectory();
     EXPECT_STREQ(kLauncherDir, ldir.c_str());
