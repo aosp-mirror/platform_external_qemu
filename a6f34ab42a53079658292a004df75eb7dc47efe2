@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "54c14218_3619fe07",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 10
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-25T03:30:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e798c691_28912f06",
+      "revId": "a6f34ab42a53079658292a004df75eb7dc47efe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8780ea14_2a3d5f9b",
         "filename": "android/skin/qt/gl-widget.h",
         "patchSetId": 10
@@ -30,6 +48,24 @@
       "writtenOn": "2016-01-18T09:29:57Z",
       "side": 1,
       "message": "nit: ah ah, I meant \"needs to be resized and updates\" here :)",
+      "revId": "a6f34ab42a53079658292a004df75eb7dc47efe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74af2662_dade952f",
+        "filename": "android/skin/qt/gl-widget.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-25T03:30:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8780ea14_2a3d5f9b",
       "revId": "a6f34ab42a53079658292a004df75eb7dc47efe2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
