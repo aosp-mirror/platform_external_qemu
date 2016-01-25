@@ -49,6 +49,7 @@
 #include "android-qemu1-glue/qemu-setup.h"
 #include "android/android.h"
 #include "android/camera/camera-service.h"
+#include "android/console.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/curl-support.h"
 #include "android/emulation/bufprint_config_dirs.h"
@@ -1894,8 +1895,7 @@ static void android_init_metrics(int opengl_alive)
     androidMetrics_fini(&metrics);
 
     async((async_function_t)androidMetrics_tryReportAll);
-
-    androidMetrics_keepAlive(looper_getForThread());
+    androidMetrics_keepAlive(looper_getForThread(), android_base_port);
 }
 
 static void android_teardown_metrics()
