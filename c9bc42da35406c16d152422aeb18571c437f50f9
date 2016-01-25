@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "74af2662_3a19e907",
+        "filename": "android/build/emulator/definitions.make",
+        "patchSetId": 2
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-25T18:57:30Z",
+      "side": 1,
+      "message": "nit: tabs",
+      "range": {
+        "startLine": 292,
+        "startChar": 0,
+        "endLine": 292,
+        "endChar": 1
+      },
+      "revId": "c9bc42da35406c16d152422aeb18571c437f50f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
