@@ -113,7 +113,6 @@ struct AvdInfo {
     /* for the normal virtual device case */
     char*     deviceName;
     char*     sdkRootPath;
-    char      sdkRootPathFromEnv;
     char*     searchPaths[ MAX_SEARCH_PATHS ];
     int       numSearchPaths;
     char*     contentPath;
@@ -412,7 +411,7 @@ static int
 _avdInfo_getSdkRoot( AvdInfo*  i )
 {
 
-    i->sdkRootPath = path_getSdkRoot(&i->sdkRootPathFromEnv);
+    i->sdkRootPath = path_getSdkRoot();
     if (i->sdkRootPath == NULL) {
         derror("can't find SDK installation directory");
         return -1;

@@ -191,6 +191,7 @@ LOCAL_SRC_FILES := \
     android/avd/info.c \
     android/avd/scanner.c \
     android/avd/util.c \
+    android/avd/util_wrapper.cpp \
     android/async-console.c \
     android/async-socket.c \
     android/async-socket-connector.c \
