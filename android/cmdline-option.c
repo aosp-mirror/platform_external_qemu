@@ -2,8 +2,9 @@
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
-#include <stdlib.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define  _VERBOSE_TAG(x,y)   { #x, VERBOSE_##x, y },
@@ -119,8 +120,8 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
 
         /* special handling for -debug-<tag> and -debug-no-<tag> */
         if (!memcmp(arg2, "debug_", 6)) {
-            int            remove = 0;
-            unsigned long  mask   = 0;
+            int remove = 0;
+            uint64_t mask   = 0;
             arg2 += 6;
             if (!memcmp(arg2, "no_", 3)) {
                 arg2  += 3;
@@ -131,7 +132,7 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
             }
             for (nn = 0; debug_tags[nn].name; nn++) {
                 if (!strcmp(arg2, debug_tags[nn].name)) {
-                    mask = (1UL << debug_tags[nn].flag);
+                    mask = (1ULL << debug_tags[nn].flag);
                     break;
                 }
             }
@@ -255,7 +256,7 @@ parse_debug_tags( const char*  tags )
 
         if (y > x+1) {
             int  nn, remove = 0;
-            unsigned mask = 0;
+            uint64_t mask = 0;
 
             if (x[0] == '-') {
                 remove = 1;
@@ -270,7 +271,7 @@ parse_debug_tags( const char*  tags )
 
                 for (nn = 0; debug_tags[nn].name != NULL; nn++) {
                     if ( !strcmp( debug_tags[nn].name, temp ) ) {
-                        mask |= (1 << debug_tags[nn].flag);
+                        mask |= (1ULL << debug_tags[nn].flag);
                         break;
                     }
                 }
