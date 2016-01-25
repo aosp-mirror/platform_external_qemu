@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "54c14218_012cba6a",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-25T20:06:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1410aa94_e3cd528c",
+      "revId": "880f351a54d4cec54bf94e28a5c5db5ba9f17f98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "940bba60_4fbf2dc9",
         "filename": "android/skin/qt/gl-widget.cpp",
         "patchSetId": 12
@@ -30,6 +48,24 @@
       "writtenOn": "2016-01-25T08:57:48Z",
       "side": 1,
       "message": "nit: since this is already included on line 16, remove this line?",
+      "revId": "880f351a54d4cec54bf94e28a5c5db5ba9f17f98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74c64632_62dfbe90",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-25T20:06:13Z",
+      "side": 1,
+      "message": "Didn\u0027t notice it, thanks",
+      "parentUuid": "940bba60_4fbf2dc9",
       "revId": "880f351a54d4cec54bf94e28a5c5db5ba9f17f98",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
