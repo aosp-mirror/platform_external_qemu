@@ -22,6 +22,30 @@
       "revId": "1677874c2814cd2628ac8aedc13fcab27f252e57",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54c4e260_d5b39c4e",
+        "filename": "android/emulation/ConfigDirs.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-25T22:17:06Z",
+      "side": 1,
+      "message": "Stack too deep. :)\n\nI\u0027m not going down into System::get*Directory functions. They all return \u003cunknown-*-dir\u003e answers.\n\nInstead, I updated the implementation here to once again check that the returned directory exists and is readable.\n\nAs it happens, our TestSystem is not ready to let me test this easily (it inconsistently prefixes paths the tempRoot()-\u003epath(), so that the check always fails)",
+      "parentUuid": "b4afde8e_b8f9b933",
+      "range": {
+        "startLine": 81,
+        "startChar": 3,
+        "endLine": 84,
+        "endChar": 39
+      },
+      "revId": "1677874c2814cd2628ac8aedc13fcab27f252e57",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
