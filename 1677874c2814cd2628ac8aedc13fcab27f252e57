@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4afde8e_b8f9b933",
+        "filename": "android/emulation/ConfigDirs.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-25T20:55:35Z",
+      "side": 1,
+      "message": "in case of failure getLauncherDirectory() does this:\nmLauncherDir.assign(\"\u003cunknown-launcher-dir\u003e\");\n\nplease don\u0027t forget to clean that as well :)",
+      "range": {
+        "startLine": 81,
+        "startChar": 3,
+        "endLine": 84,
+        "endChar": 39
+      },
+      "revId": "1677874c2814cd2628ac8aedc13fcab27f252e57",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
