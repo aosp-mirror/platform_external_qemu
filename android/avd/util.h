@@ -22,13 +22,9 @@ ANDROID_BEGIN_HEADER
  */
 
 /* Return the path to the Android SDK root installation.
- *
- * (*pFromEnv) will be set to 1 if it comes from the $ANDROID_SDK_ROOT
- * environment variable, or 0 otherwise.
- *
  * Caller must free() returned string.
  */
-char* path_getSdkRoot( char *pFromEnv );
+char* path_getSdkRoot();
 
 /* Return the path to the AVD's root configuration .ini file. it is located in
  * ~/.android/avd/<name>.ini or Windows equivalent

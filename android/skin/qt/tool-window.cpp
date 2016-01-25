@@ -17,11 +17,10 @@
 #include <QtWidgets>
 
 #include "android/android.h"
-#include "android/avd/util.h"
 #include "android/base/files/PathUtils.h"
-#include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Async.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/globals.h"
 #include "android/main-common.h"
 #include "android/skin/event.h"
@@ -247,15 +246,14 @@ void ToolWindow::show()
 
 QString ToolWindow::findAndroidSdkRoot()
 {
-    char isFromEnv = 0;
-    const ScopedCPtr<const char> sdkRoot(path_getSdkRoot(&isFromEnv));
-    if (!sdkRoot) {
+    auto sdkRoot = android::ConfigDirs::getSdkRootDirectory();
+    if (sdkRoot.empty()) {
         showErrorDialog(tr("The ANDROID_SDK_ROOT environment variable must be "
                            "set to use this."),
                         tr("Android SDK Root"));
         return QString::null;
     }
-    return QString::fromUtf8(sdkRoot.get());
+    return QString::fromUtf8(sdkRoot.c_str());
 }
 
 QString ToolWindow::getAdbFullPath(QStringList *args)
