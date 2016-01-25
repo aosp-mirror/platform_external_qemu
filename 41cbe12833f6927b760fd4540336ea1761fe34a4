@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f4b5d6da_9d8227eb",
+        "filename": "android/emulation/ConfigDirs.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-25T22:30:18Z",
+      "side": 1,
+      "message": "I tried updating android::base::String, but it\u0027s a little involved, and I really don\u0027t want to be too deep in the stack :)",
+      "parentUuid": "f49a3677_522b3427",
+      "range": {
+        "startLine": 76,
+        "startChar": 0,
+        "endLine": 78,
+        "endChar": 52
+      },
+      "revId": "41cbe12833f6927b760fd4540336ea1761fe34a4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f49a3677_d2dc8497",
         "filename": "android/emulation/ConfigDirs.cpp",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-25T22:28:26Z",
       "side": 1,
       "message": "String() is more efficient",
+      "range": {
+        "startLine": 93,
+        "startChar": 11,
+        "endLine": 93,
+        "endChar": 13
+      },
+      "revId": "41cbe12833f6927b760fd4540336ea1761fe34a4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4b5d6da_bd7febb5",
+        "filename": "android/emulation/ConfigDirs.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-25T22:30:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f49a3677_d2dc8497",
       "range": {
         "startLine": 93,
         "startChar": 11,
