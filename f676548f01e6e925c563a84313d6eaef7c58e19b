@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "14beeac6_56f23289",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-25T22:27:56Z",
+      "side": 1,
+      "message": "Updated to still be NULL.",
+      "parentUuid": "f4b5d6da_bd4d2bc6",
+      "range": {
+        "startLine": 415,
+        "startChar": 8,
+        "endLine": 415,
+        "endChar": 30
+      },
+      "revId": "f676548f01e6e925c563a84313d6eaef7c58e19b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f4b5d6da_1d3d370b",
         "filename": "android/avd/util_wrapper.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-25T22:23:09Z",
       "side": 1,
       "message": "this won\u0027t be needed after .release()",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 19
+      },
+      "revId": "f676548f01e6e925c563a84313d6eaef7c58e19b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14beeac6_76f72e78",
+        "filename": "android/avd/util_wrapper.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-25T22:27:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f4b5d6da_1d3d370b",
       "range": {
         "startLine": 19,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "94b2daf4_1a2459ef",
+        "filename": "android/avd/util_wrapper.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-25T22:27:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f4b5d6da_fdfc038a",
+      "range": {
+        "startLine": 24,
+        "startChar": 11,
+        "endLine": 24,
+        "endChar": 61
+      },
+      "revId": "f676548f01e6e925c563a84313d6eaef7c58e19b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f49a3677_32e4f05e",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 1
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "f49a3677_3226b060",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-25T22:27:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f49a3677_32e4f05e",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 41
+      },
+      "revId": "f676548f01e6e925c563a84313d6eaef7c58e19b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f4b5d6da_dd5adf78",
         "filename": "target-i386/hax-all.c",
         "patchSetId": 1
@@ -105,6 +201,30 @@
       "writtenOn": "2016-01-25T22:23:09Z",
       "side": 1,
       "message": "same: is this still correct?",
+      "range": {
+        "startLine": 149,
+        "startChar": 8,
+        "endLine": 149,
+        "endChar": 24
+      },
+      "revId": "f676548f01e6e925c563a84313d6eaef7c58e19b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74c9e678_f989730e",
+        "filename": "target-i386/hax-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-25T22:27:56Z",
+      "side": 1,
+      "message": "Updated to still be NULL.",
+      "parentUuid": "f4b5d6da_dd5adf78",
       "range": {
         "startLine": 149,
         "startChar": 8,
