@@ -31,6 +31,7 @@ public:
                StringView homeDir = "/home",
                StringView appDataDir = "")
         : mProgramDir(launcherDir),
+          mProgramSubdir(""),
           mLauncherDir(launcherDir),
           mHomeDir(homeDir),
           mAppDataDir(appDataDir),
@@ -56,16 +57,14 @@ public:
 
     // Set directory of currently executing binary.  This must be a subdirectory
     // of mLauncherDir and specified relative to mLauncherDir
-    void setProgramDir(const String& programDir) {
-        if (programDir.empty()) {
-            mProgramDir = mLauncherDir;
-            return;
+    void setProgramSubDir(StringView programSubDir) {
+        mProgramSubdir = programSubDir;
+        if (programSubDir.empty()) {
+            mProgramDir = getLauncherDirectory();
+        } else {
+            mProgramDir = PathUtils::join(getLauncherDirectory(),
+                                          programSubDir);
         }
-
-        StringVector pathList;
-        pathList.push_back(getLauncherDirectory());
-        pathList.push_back(programDir);
-        mProgramDir = PathUtils::recompose(pathList);
     }
 
     virtual const String& getLauncherDirectory() const {
@@ -74,6 +73,12 @@ public:
         } else {
             return mTempDir->pathString();
         }
+    }
+
+    void setLauncherDirectory(StringView launcherDir) {
+        mLauncherDir = launcherDir;
+        // Update directories that are suffixes of |mLauncherDir|.
+        setProgramSubDir(mProgramSubdir);
     }
 
     virtual const String& getHomeDirectory() const {
@@ -294,6 +299,7 @@ private:
     }
 
     String mProgramDir;
+    String mProgramSubdir;
     String mLauncherDir;
     String mHomeDir;
     String mAppDataDir;
