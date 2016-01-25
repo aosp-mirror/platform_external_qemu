@@ -92,11 +92,15 @@ extern ABool androidMetrics_write(const AndroidMetrics* androidMetrics);
  * This is used to semi-regularly dump and updated view of the time this
  * emulator process has been running.
  *
+ * |control_console_port| is the port the control console is listening on. This
+ * is used by adb to identify the current instance of the emluator.
+ *
  * You should call |androidMetrics_seal| when done to cleanup.
  *
  * Returns: 1 if a regular update was successfullly setup, 0 otherwise.
  */
-extern ABool androidMetrics_keepAlive(Looper* metrics_looper);
+extern ABool androidMetrics_keepAlive(Looper* metrics_looper,
+                                      int control_console_port);
 
 /* Helper to easily replace string fields */
 #define ANDROID_METRICS_STRASSIGN(name, val) \
