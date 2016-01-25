@@ -15,12 +15,16 @@
 #include "android/emulation/ConfigDirs.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+
+#include <assert.h>
 
 namespace android {
 
 using ::android::base::String;
 using ::android::base::PathUtils;
+using ::android::base::ScopedCPtr;
 using ::android::base::System;
 
 // static
@@ -56,6 +60,37 @@ String ConfigDirs::getAvdRootDirectory() {
     }
     String result = PathUtils::join(getUserDirectory(), kAvdSubDir);
     return result;
+}
+
+// static
+String ConfigDirs::getSdkRootDirectory() {
+    String sdkRoot;
+    auto system = System::get();
+
+    sdkRoot = system->envGet("ANDROID_SDK_ROOT");
+    if (sdkRoot.size()) {
+        // Unquote a possibly "quoted" path.
+        if (sdkRoot[0] == '"') {
+            assert(sdkRoot[sdkRoot.size() - 1] == '"');
+            // String does not support assigning a part of the string to itself.
+            auto copySize = sdkRoot.size() - 2;
+            ScopedCPtr<char> buf(sdkRoot.release());
+            sdkRoot.assign(buf.get() + 1, copySize);
+        }
+        if (system->pathIsDir(sdkRoot) && system->pathCanRead(sdkRoot)) {
+            return sdkRoot;
+        }
+    }
+
+    // Otherwise, infer from the path of the emulator's binary.
+    auto parts = PathUtils::decompose(system->getLauncherDirectory());
+    parts.push_back("..");
+    PathUtils::simplifyComponents(&parts);
+    sdkRoot = PathUtils::recompose(parts);
+    if (system->pathIsDir(sdkRoot) && system->pathCanRead(sdkRoot)) {
+        return sdkRoot;
+    }
+    return String();
 }
 
 }  // namespace android
