@@ -22,6 +22,30 @@
       "revId": "c9bc42da35406c16d152422aeb18571c437f50f9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4bb169e_bfa70b25",
+        "filename": "android/build/emulator/definitions.make",
+        "patchSetId": 2
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-25T18:59:17Z",
+      "side": 1,
+      "message": "Oh, these are makefile rules though.",
+      "parentUuid": "74af2662_3a19e907",
+      "range": {
+        "startLine": 292,
+        "startChar": 0,
+        "endLine": 292,
+        "endChar": 1
+      },
+      "revId": "c9bc42da35406c16d152422aeb18571c437f50f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
