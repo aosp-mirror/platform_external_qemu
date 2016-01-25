@@ -657,8 +657,7 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                  androidBuildTop, avdArch, "kernel-ranchu");
     } else {
         // This is a regular SDK AVD launch.
-        char fromEnv = 0;
-        char* sdkRootPath = path_getSdkRoot(&fromEnv);
+        char* sdkRootPath = path_getSdkRoot();
         char* systemImagePath = path_getAvdSystemPath(avdName, sdkRootPath);
         asprintf(&kernel_file, "%s/%s", systemImagePath, "kernel-ranchu");
 

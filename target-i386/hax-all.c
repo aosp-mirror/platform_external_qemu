@@ -145,8 +145,7 @@ static char* hax_get_intel_HAXM_installer_path() {
 #endif
 
     char buf[PATH_MAX];
-    char from_env = false;
-    char* sdk_home = path_getSdkRoot(&from_env);
+    char* sdk_home = path_getSdkRoot();
     if (sdk_home == NULL) return NULL;
     int length = strlen(sdk_home);
     if (length > PATH_MAX - 1) return NULL;
