@@ -42,6 +42,14 @@ struct ConfigDirs {
     // - Otherwise, a sub-directory named 'avd' of getUserDirectory()'s
     //   output is returned.
     static android::base::String getAvdRootDirectory();
+
+    // Returns the path to the root of the android sdk.
+    // - If ANDROID_SDK_ROOT is defined in the environment and the path exists,
+    //   its value is returned.
+    //
+    // - Otherwise, Sdk root is inferred from the path of the runnign emulator
+    //   binary.
+    static android::base::String getSdkRootDirectory();
 };
 
 }  // namespace android

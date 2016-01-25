@@ -17,6 +17,8 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 
+#include <assert.h>
+
 namespace android {
 
 using ::android::base::String;
@@ -56,6 +58,30 @@ String ConfigDirs::getAvdRootDirectory() {
     }
     String result = PathUtils::join(getUserDirectory(), kAvdSubDir);
     return result;
+}
+
+// static
+String ConfigDirs::getSdkRootDirectory() {
+    String sdkRoot;
+    auto system = System::get();
+
+    sdkRoot = system->envGet("ANDROID_SDK_ROOT");
+    if (sdkRoot.size() && system->pathIsDir(sdkRoot) &&
+        system->pathCanRead(sdkRoot)) {
+        // Unquote a possible "quoted" path.
+        if (sdkRoot[0] == '"') {
+            assert(sdkRoot[sdkRoot.size() - 1] == '"');
+            sdkRoot[sdkRoot.size() - 1] = 0;
+            return (sdkRoot.c_str() + 1);
+        }
+        return sdkRoot;
+    }
+
+    // Otherwise, infer from the path of the emulator's binary.
+    auto parts = PathUtils::decompose(system->getLauncherDirectory());
+    parts.push_back("..");
+    PathUtils::simplifyComponents(&parts);
+    return PathUtils::recompose(parts);
 }
 
 }  // namespace android

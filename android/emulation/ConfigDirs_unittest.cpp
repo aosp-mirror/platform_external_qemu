@@ -14,6 +14,7 @@
 
 #include "android/emulation/ConfigDirs.h"
 
+#include "android/base/files/PathUtils.h"
 #include "android/base/testing/TestSystem.h"
 
 #include <gtest/gtest.h>
@@ -48,4 +49,27 @@ TEST(ConfigDirs, getUserDirectoryWithAndroidEmulatorHome) {
     TestSystem sys("/bin", 32, "/myhome");
     sys.envSet("ANDROID_EMULATOR_HOME", "/android/home");
     EXPECT_STREQ("/android/home", ConfigDirs::getUserDirectory().c_str());
+}
+
+
+TEST(ConfigDirs, getSdkRootDirectory) {
+    TestSystem sys("", 32, "/myhome");
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Sdk"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Sdk/tools"));
+    ASSERT_TRUE(sys.pathIsDir("Sdk"));
+
+    sys.envSet("ANDROID_SDK_ROOT", "Sdk");
+    EXPECT_STREQ("Sdk", ConfigDirs::getSdkRootDirectory().c_str());
+
+    sys.envSet("ANDROID_SDK_ROOT", "");
+    EXPECT_STRNE("Sdk", ConfigDirs::getSdkRootDirectory().c_str());
+
+    auto sdkRoot = PathUtils::join(sys.getTempRoot()->path(), "Sdk");
+    sys.setLauncherDirectory(PathUtils::join(sdkRoot, "tools"));
+    // On windows, we can't guarantee that the same path separator is used
+    // through the various test paths.
+    EXPECT_STREQ(
+            PathUtils::recompose(PathUtils::decompose(sdkRoot)).c_str(),
+            PathUtils::recompose(PathUtils::decompose(
+                    ConfigDirs::getSdkRootDirectory())).c_str());
 }
