@@ -882,8 +882,17 @@ extern "C" int main(int argc, char **argv) {
         reassign_string(&hw->hw_keyboard_charmap, charmap_name);
     }
 
+    bool win32_disable_bootanim_when_using_mesa = false;
+
     {
         EmuglConfig emuglConfig;
+
+#ifdef _WIN32
+        if (opts->gpu && !strcmp(opts->gpu, "mesa")) {
+            win32_disable_bootanim_when_using_mesa = true;
+            fprintf(stderr, "Starting AVD without boot animation.\n");
+        }
+#endif
 
         if (!emuglConfig_init(&emuglConfig,
                               hw->hw_gpu_enabled,
@@ -1092,7 +1101,7 @@ extern "C" int main(int argc, char **argv) {
         kernelCommandLine += " android.checkjni=1";
     }
 
-    if (opts->no_boot_anim) {
+    if (opts->no_boot_anim || win32_disable_bootanim_when_using_mesa) {
         kernelCommandLine += " android.bootanim=0";
     }
 
