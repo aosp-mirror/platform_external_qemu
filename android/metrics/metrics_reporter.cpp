@@ -13,6 +13,8 @@
 
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/IniFile.h"
+#include "android/base/StringFormat.h"
+#include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/internal/metrics_reporter_internal.h"
 #include "android/metrics/IniFileAutoFlusher.h"
 #include "android/metrics/metrics_reporter_toolbar.h"
@@ -47,6 +49,7 @@
 static char* metricsDirPath;
 static char* metricsFilePath;
 static android::metrics::IniFileAutoFlusher* sMetricsFileFlusher;
+static android::metrics::AdbLivenessChecker* sAdbLivenessChecker;
 
 static const char metricsRelativeDir[] = "metrics";
 static const char metricsFilePrefix[] = "metrics";
@@ -82,6 +85,10 @@ ABool androidMetrics_moduleInit(const char* avdHome) {
 
 /* Make sure this is safe to call without ever calling _moduleInit */
 void androidMetrics_moduleFini(void) {
+    // Must go before the inifile is cleaned up.
+    delete sAdbLivenessChecker;
+    sAdbLivenessChecker = nullptr;
+
     delete sMetricsFileFlusher;
     AFREE(metricsDirPath);
     AFREE(metricsFilePath);
@@ -206,7 +213,8 @@ static void on_metrics_timer(void* ignored, LoopTimer* timer) {
     loopTimer_startRelative(timer, metrics_timer_timeout_ms);
 }
 
-ABool androidMetrics_keepAlive(Looper* metrics_looper) {
+ABool androidMetrics_keepAlive(Looper* metrics_looper,
+                               int control_console_port) {
     ABool success = 1;
 
     success &= androidMetrics_tick();
@@ -214,6 +222,13 @@ ABool androidMetrics_keepAlive(Looper* metrics_looper) {
     // Initialize a timer for recurring metrics update
     metrics_timer = loopTimer_new(metrics_looper, &on_metrics_timer, NULL);
     loopTimer_startRelative(metrics_timer, metrics_timer_timeout_ms);
+
+    auto emulatorName = android::base::StringFormat(
+            "emulator-%d", control_console_port);
+    sAdbLivenessChecker = new android::metrics::AdbLivenessChecker(
+            android::base::ThreadLooper::get(), sMetricsFileFlusher->iniFile(),
+            emulatorName, 20 * 1000);
+    sAdbLivenessChecker->start();
 
     return success;
 }
@@ -239,6 +254,10 @@ ABool androidMetrics_seal() {
         success = androidMetrics_write(&metrics);
         androidMetrics_fini(&metrics);
     }
+
+    // Must go before the inifile is cleaned up.
+    delete sAdbLivenessChecker;
+    sAdbLivenessChecker = nullptr;
 
     delete sMetricsFileFlusher;
     sMetricsFileFlusher = NULL;
