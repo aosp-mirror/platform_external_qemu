@@ -1692,11 +1692,22 @@ skin_window_set_lcd_brightness( SkinWindow*  window, int  brightness )
     }
 }
 
+static void skin_window_run_opengles_free(void* p) {
+    const SkinWindow* window = (const SkinWindow*)p;
+    window->win_funcs->opengles_free();
+}
+
+static void
+skin_window_free_opengles( SkinWindow* window )
+{
+    skin_winsys_run_ui_update(&skin_window_run_opengles_free,window);
+}
+
 void
 skin_window_free( SkinWindow*  window )
 {
     if (window) {
-        window->win_funcs->opengles_free();
+        skin_window_free_opengles(window);
 
         skin_surface_unrefp(&window->surface);
 
