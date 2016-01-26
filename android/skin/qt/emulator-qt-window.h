@@ -14,6 +14,7 @@
 
 #include <QtCore>
 #include <QApplication>
+#include <QCursor>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QFrame>
@@ -445,6 +446,7 @@ private:
               mFlashValue(0),
               mMode(OverlayMode::Hidden)
         {
+            setMouseTracking(true);
             setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
             setAttribute(Qt::WA_TranslucentBackground);
 
@@ -504,10 +506,10 @@ private:
                 mRubberBand.setGeometry(QRect(mRubberbandOrigin, event->pos()).normalized()
                                             .intersected(QRect(0, 0, width(), height())));
             } else if (mMode == OverlayMode::Multitouch) {
-                if (event->buttons() & Qt::LeftButton) {
-                    mPrimaryTouchPoint = event->pos();
-                    update();
+                mPrimaryTouchPoint = event->pos();
+                update();
 
+                if (event->buttons() & Qt::LeftButton) {
                     mEmulatorWindow->handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mPrimaryTouchPoint);
                     mEmulatorWindow->handleMouseEvent(kEventMouseMotion, kMouseButtonSecondaryTouch, getSecondaryTouchPoint());
                 } else if (event->buttons() & Qt::RightButton) {
@@ -605,19 +607,26 @@ private:
 
 
             QPainter painter(this);
+            painter.setRenderHint(QPainter::Antialiasing);
             QRect bg(QPoint(0, 0), this->size());
             painter.fillRect(bg, QColor(255,255,255,alpha));
 
             if (mMode == OverlayMode::Multitouch) {
-                painter.setOpacity(.6);
-                painter.setBrush(mRubberBand.palette().highlight());
-                painter.setPen(QPen(painter.brush(), 2));
-                painter.drawEllipse(mMultitouchCenter, 10, 10);
 
-                if (mReleaseOnClose) {
-                    painter.drawEllipse(getSecondaryTouchPoint(), 20, 20);
-                    painter.drawEllipse(mPrimaryTouchPoint, 20, 20);
-                }
+                // Draw the transparent gray circles
+                painter.setOpacity(.6);
+                painter.setBrush(QBrush(Qt::gray));
+                painter.drawEllipse(mMultitouchCenter, 10, 10);
+                painter.drawEllipse(getSecondaryTouchPoint(), 20, 20);
+                painter.drawEllipse(mPrimaryTouchPoint, 20, 20);
+
+                // Draw the same geometry, but make solid black circles instead
+                painter.setOpacity(1);
+                painter.setPen(QPen(Qt::black, 1));
+                painter.setBrush(QBrush(Qt::transparent));
+                painter.drawEllipse(mMultitouchCenter, 10, 10);
+                painter.drawEllipse(getSecondaryTouchPoint(), 20, 20);
+                painter.drawEllipse(mPrimaryTouchPoint, 20, 20);
             }
         }
 
@@ -630,11 +639,6 @@ private:
         {
             this->setFocus();
             this->activateWindow();
-
-            if (mMode == OverlayMode::Multitouch) {
-                mMultitouchCenter = QPoint(width() / 2, height() / 2);
-                mPrimaryTouchPoint = mMultitouchCenter;
-            }
         }
 
         void setFlashValue(double val)
@@ -671,6 +675,7 @@ private:
 
             mMode = OverlayMode::Multitouch;
             setCursor(Qt::ArrowCursor);
+            mPrimaryTouchPoint = mapFromGlobal(QCursor::pos());
         }
 
         void showForZoom()
