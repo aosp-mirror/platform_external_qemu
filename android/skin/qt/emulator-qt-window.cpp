@@ -144,6 +144,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QSettings settings;
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
     setOnTop(onTop);
+
+    mResizeTimer.setSingleShot(true);
+    QObject::connect(&mResizeTimer, SIGNAL(timeout()), this, SLOT(slot_resizeDone()));
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr()
@@ -789,6 +792,23 @@ void EmulatorQtWindow::slot_screencapPullFinished(int exitStatus)
                         + QString(er);
         showErrorDialog(msg, tr("Screenshot"));
     }
+}
+
+void EmulatorQtWindow::slot_resizeDone()
+{
+    // This function should never actually be called on Linux/Windows, since the timer is never
+    // started on those systems.
+#ifdef __APPLE__
+
+    // A hacky way of determining if the user is still holding down for a resize. This queries the
+    // global event state to see if any mouse buttons are held down. If there are, then the user must
+    // not be done resizing yet.
+    if (numHeldMouseButtons() == 0) {
+        doResize(mContainer.size());
+    } else {
+        mResizeTimer.start(500);
+    }
+#endif
 }
 
 // Convert a Qt::Key_XXX code into the corresponding Linux keycode value.
