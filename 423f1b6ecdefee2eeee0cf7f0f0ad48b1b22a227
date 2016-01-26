@@ -236,6 +236,30 @@
       "revId": "423f1b6ecdefee2eeee0cf7f0f0ad48b1b22a227",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4b8d2d6_cd0a29ac",
+        "filename": "android/skin/qt/mac-native-window.mm",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-01-26T20:33:09Z",
+      "side": 1,
+      "message": "Do you say \"won\u0027t work\" because of the queuing? \n\nI don\u0027t think it matters if we see the mouse state when the timer fired vs. when we handle the timer event.",
+      "parentUuid": "14beeac6_7cf8ed2f",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 43,
+        "endChar": 47
+      },
+      "revId": "423f1b6ecdefee2eeee0cf7f0f0ad48b1b22a227",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
