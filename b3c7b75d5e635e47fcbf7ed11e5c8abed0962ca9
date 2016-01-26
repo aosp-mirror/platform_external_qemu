@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b4a43ebb_04cb2677",
+        "filename": "android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-26T18:35:16Z",
+      "side": 1,
+      "message": "Starts off false.\nWe want to be sure that we saw emulator come online at least once before we claim that it \"died\".\n\nThis is because adb failure is expected during emulator boot, when it\u0027s not responding yet.",
+      "parentUuid": "d4b8d2d6_3f4d8f20",
+      "range": {
+        "startLine": 115,
+        "startChar": 9,
+        "endLine": 115,
+        "endChar": 18
+      },
+      "revId": "b3c7b75d5e635e47fcbf7ed11e5c8abed0962ca9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b4a43ebb_99de9f2e",
         "filename": "android/metrics/AdbLivenessChecker.h",
         "patchSetId": 8
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-26T03:42:33Z",
       "side": 1,
       "message": "why do you need to specify all these values? enums do it on their own :)",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 32
+      },
+      "revId": "b3c7b75d5e635e47fcbf7ed11e5c8abed0962ca9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4b5d6da_a3bfc8e6",
+        "filename": "android/metrics/AdbLivenessChecker.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-26T18:35:16Z",
+      "side": 1,
+      "message": "Because I want to use these values in the backend metrics processing. Want to be. really. sure.",
+      "parentUuid": "b4a43ebb_99de9f2e",
       "range": {
         "startLine": 45,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "b4a43ebb_e45aa278",
+        "filename": "android/metrics/AdbLivenessChecker.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-26T18:35:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f4b5d6da_e3ff007c",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 41
+      },
+      "revId": "b3c7b75d5e635e47fcbf7ed11e5c8abed0962ca9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b4a43ebb_39177397",
         "filename": "android/metrics/AdbLivenessChecker.h",
         "patchSetId": 8
@@ -82,6 +154,30 @@
       "writtenOn": "2016-01-26T03:42:33Z",
       "side": 1,
       "message": "const?",
+      "range": {
+        "startLine": 67,
+        "startChar": 36,
+        "endLine": 67,
+        "endChar": 52
+      },
+      "revId": "b3c7b75d5e635e47fcbf7ed11e5c8abed0962ca9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4b5d6da_c36e7c44",
+        "filename": "android/metrics/AdbLivenessChecker.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-26T18:35:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b4a43ebb_39177397",
       "range": {
         "startLine": 67,
         "startChar": 36,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "f49a3677_5b70afdf",
+        "filename": "android/metrics/AdbLivenessChecker.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-26T18:35:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f4b5d6da_c302fc52",
+      "range": {
+        "startLine": 70,
+        "startChar": 8,
+        "endLine": 70,
+        "endChar": 20
+      },
+      "revId": "b3c7b75d5e635e47fcbf7ed11e5c8abed0962ca9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "74c9e678_7fab83ae",
         "filename": "android/metrics/metrics_reporter.cpp",
         "patchSetId": 8
@@ -128,6 +248,30 @@
       "writtenOn": "2016-01-26T03:42:33Z",
       "side": 1,
       "message": "nit: same, nullptr",
+      "range": {
+        "startLine": 261,
+        "startChar": 26,
+        "endLine": 261,
+        "endChar": 30
+      },
+      "revId": "b3c7b75d5e635e47fcbf7ed11e5c8abed0962ca9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4afde8e_8cd4b740",
+        "filename": "android/metrics/metrics_reporter.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-01-26T18:35:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "74c9e678_7fab83ae",
       "range": {
         "startLine": 261,
         "startChar": 26,
