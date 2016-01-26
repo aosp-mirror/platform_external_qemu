@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "34c3ee5c_bab60940",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 585,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-26T23:55:33Z",
+      "side": 1,
+      "message": "FYI - bad rebase here. Left side is correct.",
+      "revId": "7cc86248db2e72abe3dcbd1759cad171c708f291",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4afde8e_5b97b7bc",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 653,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-26T23:55:33Z",
+      "side": 1,
+      "message": "Again, bad rebase?",
+      "revId": "7cc86248db2e72abe3dcbd1759cad171c708f291",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4b5d6da_b4ac60ae",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 700,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-26T23:55:33Z",
+      "side": 1,
+      "message": "Can we actually get this in a different CL, and get it in before the next build? I think it solves some of the mysterious \"dot appears in the wrong place\" bugs.",
+      "range": {
+        "startLine": 689,
+        "startChar": 0,
+        "endLine": 700,
+        "endChar": 9
+      },
+      "revId": "7cc86248db2e72abe3dcbd1759cad171c708f291",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
