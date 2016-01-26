@@ -38,3 +38,7 @@ void nsWindowHideWindowButtons(void* ns_window) {
     [[window standardWindowButton:NSWindowMiniaturizeButton] setHidden:true];
     [[window standardWindowButton:NSWindowZoomButton] setHidden:true];
 }
+
+int numHeldMouseButtons() {
+    return (int) [NSEvent pressedMouseButtons];
+}
