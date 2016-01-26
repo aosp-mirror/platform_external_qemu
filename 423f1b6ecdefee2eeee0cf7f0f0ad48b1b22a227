@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "54c4e260_89a8299b",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-26T19:03:30Z",
+      "side": 1,
+      "message": "Yeah, I think if this works with just the timer, we should remove the other hack. EmulatorQtWindow is already complex as it is, no need to add to it :)",
+      "parentUuid": "74c9e678_1fca8f29",
+      "range": {
+        "startLine": 340,
+        "startChar": 16,
+        "endLine": 342,
+        "endChar": 51
+      },
+      "revId": "423f1b6ecdefee2eeee0cf7f0f0ad48b1b22a227",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4b8d2d6_5fc4031a",
         "filename": "android/skin/qt/emulator-qt-window.h",
         "patchSetId": 2
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "Sadly, this will still have to call a function in EmulatorQtWindow because inner classes are not allowed to register slots and signals. That\u0027s a refactor for another day, however.",
       "parentUuid": "d4b8d2d6_5fc4031a",
+      "range": {
+        "startLine": 398,
+        "startChar": 0,
+        "endLine": 398,
+        "endChar": 53
+      },
+      "revId": "423f1b6ecdefee2eeee0cf7f0f0ad48b1b22a227",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4b5d6da_40f8a2e1",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-26T19:03:30Z",
+      "side": 1,
+      "message": "My bad, didn\u0027t notice this was a member of EmulatorWindowContainer.",
+      "parentUuid": "f49a3677_980bfd40",
       "range": {
         "startLine": 398,
         "startChar": 0,
