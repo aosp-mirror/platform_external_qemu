@@ -260,6 +260,30 @@
       "revId": "423f1b6ecdefee2eeee0cf7f0f0ad48b1b22a227",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4afde8e_32e94069",
+        "filename": "android/skin/qt/mac-native-window.mm",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-26T21:59:22Z",
+      "side": 1,
+      "message": "I tried this and it didn\u0027t work - specifically, QApplication::moustButtons() returns the state for MouseButtonPress and MouseButtonRelease - these only have to do with press events inside of the window. If this had to do with press/release events of the resize handles, none of this would be necessary in the first place - we\u0027d just use those events.",
+      "parentUuid": "d4b8d2d6_cd0a29ac",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 43,
+        "endChar": 47
+      },
+      "revId": "423f1b6ecdefee2eeee0cf7f0f0ad48b1b22a227",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
