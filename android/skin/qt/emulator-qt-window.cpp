@@ -21,6 +21,8 @@
 #include <QIcon>
 #include <QInputDialog>
 #include <QLabel>
+#include <QMenu>
+#include <QMenuBar>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPixmap>
@@ -144,6 +146,25 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QSettings settings;
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
     setOnTop(onTop);
+
+#ifdef __APPLE__
+    // On OS X, Qt automatically generates an application menu with a "Quit"
+    // item. For whatever reason, the auto-generated "quit" does not work,
+    // or works intermittently.
+    // For that reason, we explicitly create a "Quit" action for Qt to use
+    // instead of the auto-generated one, and connect it to the QApplication's
+    // quit() slot.
+    // Note: the objects pointed to by quitMenu, quitAction and mainBar will remain
+    // for the entire lifetime of the application so we don't bother cleaning
+    // them up.
+    QMenu* quitMenu = new QMenu(0);
+    QAction* quitAction = new QAction(tr("Quit Emulator"), quitMenu);
+    QMenuBar* mainBar = new QMenuBar(0);
+    QObject::connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    quitMenu->addAction(quitAction);
+    mainBar->addMenu(quitMenu);
+    qt_mac_set_dock_menu(quitMenu);
+#endif
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr()
