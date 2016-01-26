@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4a43ebb_99713f24",
+        "filename": "android/emulation/android_pipe_pingpong_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-26T22:10:24Z",
+      "side": 1,
+      "message": "unique_ptr\u003c\u003e ?",
+      "range": {
+        "startLine": 98,
+        "startChar": 3,
+        "endLine": 98,
+        "endChar": 10
+      },
+      "revId": "bca39d7a37adcfd4562c949f1e557f94d76a5d6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4b8d2d6_c252f8e8",
+        "filename": "android/emulation/android_pipe_pingpong_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-26T22:10:24Z",
+      "side": 1,
+      "message": "std::iota()",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 106,
+        "endChar": 5
+      },
+      "revId": "bca39d7a37adcfd4562c949f1e557f94d76a5d6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
