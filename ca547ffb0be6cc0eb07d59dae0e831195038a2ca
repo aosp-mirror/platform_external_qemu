@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "94a57ac9_5f530bee",
+        "filename": "android/emulation/ConfigDirs.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-26T16:29:28Z",
+      "side": 1,
+      "message": "not sure if we want to assert here, this looks like a potential denial-of-service issue. Maybe fallback to ignoring the value and print a warning?",
+      "revId": "ca547ffb0be6cc0eb07d59dae0e831195038a2ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d49b728b_81a13a16",
+        "filename": "android/emulation/ConfigDirs.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-26T16:29:28Z",
+      "side": 1,
+      "message": "nit: s/runnign/running/",
+      "revId": "ca547ffb0be6cc0eb07d59dae0e831195038a2ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
