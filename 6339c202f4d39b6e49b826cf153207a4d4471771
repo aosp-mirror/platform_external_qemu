@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4bb5ef1_581f9d4a",
+        "filename": "android/utils/debug.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-26T16:34:58Z",
+      "side": 1,
+      "message": "nit: would prefer android_enable_verbose_logs() :)",
+      "revId": "6339c202f4d39b6e49b826cf153207a4d4471771",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
