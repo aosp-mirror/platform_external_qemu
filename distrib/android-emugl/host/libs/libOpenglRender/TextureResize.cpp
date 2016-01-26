@@ -25,6 +25,25 @@
 #define ERR(...)  fprintf(stderr, __VA_ARGS__)
 #define MAX_FACTOR_POWER 4
 
+#define RC_ERRCHECK
+#ifdef RC_ERRCHECK
+#define ERRCHECK() do { \
+    GLint gl_errcode = s_gles2.glGetError(); \
+    if (gl_errcode != GL_NO_ERROR) { \
+        fprintf(stderr, "textureresize: gles2error=0x%x\n", gl_errcode); \
+    } \
+} while(0) 
+#define LASTGLCALL_CHECK(...) do { \
+    fprintf(stderr, "textureresize: %s:%d lastcall: ", __FUNCTION__, __LINE__); \
+    fprintf(stderr, __VA_ARGS__); \
+    fprintf(stderr, "\n"); \
+    ERRCHECK(); \
+} while(0)
+#else
+#define LASTGLCALL_CHECK(...) 0
+#define ERRCHECK() 0
+#endif
+
 namespace {
 
 const char kCommonShaderSource[] =
@@ -131,9 +150,12 @@ void detachShaders(GLuint program) {
     GLuint shaders[2];
     GLsizei count;
     s_gles2.glGetAttachedShaders(program, 2, &count, shaders);
+    LASTGLCALL_CHECK("s_gles2.glGetAttachedShaders(program, 2, &count, shaders);");
     for (GLsizei i = 0; i < count; i++) {
         s_gles2.glDetachShader(program, shaders[i]);
+        LASTGLCALL_CHECK("s_gles2.glDetachShader(program, shaders[i]);");
         s_gles2.glDeleteShader(shaders[i]);
+        LASTGLCALL_CHECK("s_gles2.glDeleteShader(shaders[i]);");
     }
 }
 
@@ -141,10 +163,15 @@ GLuint createShader(GLenum type, const std::initializer_list<const char*>& sourc
     GLint success, infoLength;
 
     GLuint shader = s_gles2.glCreateShader(type);
+    LASTGLCALL_CHECK("GLuint shader = s_gles2.glCreateShader(type);");
     if (shader) {
         s_gles2.glShaderSource(shader, source.size(), source.begin(), nullptr);
+        LASTGLCALL_CHECK("s_gles2.glShaderSource(shader, source.size(), source.begin(), nullptr);");
         s_gles2.glCompileShader(shader);
+        LASTGLCALL_CHECK("s_gles2.glCompileShader(shader);");
         s_gles2.glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+        LASTGLCALL_CHECK("s_gles2.glGetShaderiv(shader, GL_COMPILE_STATUS, &success);");
+
         if (success == GL_FALSE) {
             s_gles2.glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLength);
             std::string infoLog(infoLength + 1, '\0');
@@ -178,10 +205,14 @@ void attachShaders(TextureResize::Framebuffer* fb, const char* factorDefine,
     }
 
     s_gles2.glAttachShader(fb->program, vShader);
+    LASTGLCALL_CHECK("s_gles2.glAttachShader(fb->program, vShader);");
     s_gles2.glAttachShader(fb->program, fShader);
+    LASTGLCALL_CHECK("s_gles2.glAttachShader(fb->program, fShader);");
     s_gles2.glLinkProgram(fb->program);
+    LASTGLCALL_CHECK("s_gles2.glLinkProgram(fb->program);");
 
     s_gles2.glUseProgram(fb->program);
+    LASTGLCALL_CHECK("s_gles2.glUseProgram(fb->program);");
     fb->aPosition = s_gles2.glGetAttribLocation(fb->program, "aPosition");
     fb->uTexture = s_gles2.glGetUniformLocation(fb->program, "uTexture");
 }
@@ -195,47 +226,72 @@ TextureResize::TextureResize(GLuint width, GLuint height) :
         mFBWidth({0,}),
         mFBHeight({0,}) {
     s_gles2.glGenTextures(1, &mFBWidth.texture);
+    LASTGLCALL_CHECK("s_gles2.glGenTextures(1, &mFBWidth.texture);");
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBWidth.texture);
+    LASTGLCALL_CHECK("s_gles2.glBindTexture(GL_TEXTURE_2D, mFBWidth.texture);");
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    LASTGLCALL_CHECK("s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);");
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    LASTGLCALL_CHECK("s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);");
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    LASTGLCALL_CHECK("s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);");
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    LASTGLCALL_CHECK("s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);");
 
     s_gles2.glGenTextures(1, &mFBHeight.texture);
+    LASTGLCALL_CHECK("s_gles2.glGenTextures(1, &mFBHeight.texture);");
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBHeight.texture);
+    LASTGLCALL_CHECK("s_gles2.glBindTexture(GL_TEXTURE_2D, mFBHeight.texture);");
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    LASTGLCALL_CHECK("s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);");
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    LASTGLCALL_CHECK("s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);");
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    LASTGLCALL_CHECK("s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);");
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    LASTGLCALL_CHECK("s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);");
 
     s_gles2.glGenFramebuffers(1, &mFBWidth.framebuffer);
+    LASTGLCALL_CHECK("s_gles2.glGenFramebuffers(1, &mFBWidth.framebuffer);");
     s_gles2.glGenFramebuffers(1, &mFBHeight.framebuffer);
+    LASTGLCALL_CHECK("s_gles2.glGenFramebuffers(1, &mFBHeight.framebuffer);");
 
     mFBWidth.program = s_gles2.glCreateProgram();
+    LASTGLCALL_CHECK("mFBWidth.program = s_gles2.glCreateProgram();");
     mFBHeight.program = s_gles2.glCreateProgram();
+    LASTGLCALL_CHECK("mFBHeight.program = s_gles2.glCreateProgram();");
 
     s_gles2.glGenBuffers(1, &mVertexBuffer);
+    LASTGLCALL_CHECK("s_gles2.glGenBuffers(1, &mVertexBuffer);");
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
+    LASTGLCALL_CHECK("s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);");
     s_gles2.glBufferData(GL_ARRAY_BUFFER, sizeof(kVertexData), kVertexData, GL_STATIC_DRAW);
+    LASTGLCALL_CHECK("s_gles2.glBufferData(GL_ARRAY_BUFFER, sizeof(kVertexData), kVertexData, GL_STATIC_DRAW);");
 }
 
 TextureResize::~TextureResize() {
     GLuint fb[2] = {mFBWidth.framebuffer, mFBHeight.framebuffer};
     s_gles2.glDeleteFramebuffers(2, fb);
+    LASTGLCALL_CHECK("s_gles2.glDeleteFramebuffers(2, fb);");
 
     GLuint tex[2] = {mFBWidth.texture, mFBHeight.texture};
     s_gles2.glDeleteTextures(2, tex);
+    LASTGLCALL_CHECK("s_gles2.glDeleteTextures(2, tex);");
 
     s_gles2.glDeleteProgram(mFBWidth.program);
+    LASTGLCALL_CHECK("s_gles2.glDeleteProgram(mFBWidth.program);");
     s_gles2.glDeleteProgram(mFBHeight.program);
+    LASTGLCALL_CHECK("s_gles2.glDeleteProgram(mFBHeight.program);");
 
     s_gles2.glDeleteBuffers(1, &mVertexBuffer);
+    LASTGLCALL_CHECK("s_gles2.glDeleteBuffers(1, &mVertexBuffer);");
 }
 
 GLuint TextureResize::update(GLuint texture) {
     // Store the viewport. The viewport is clobbered due to the framebuffers.
     GLint vport[4] = { 0, };
     s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
+    LASTGLCALL_CHECK("s_gles2.glGetIntegerv(GL_VIEWPORT, vport);");
 
     // Correctly deal with rotated screens.
     GLint tWidth = vport[2], tHeight = vport[3];
@@ -256,9 +312,11 @@ GLuint TextureResize::update(GLuint texture) {
     }
 
     s_gles2.glGetError(); // Clear any GL errors.
+    LASTGLCALL_CHECK("s_gles2.glGetError(); // Clear any GL errors.");
     setupFramebuffers(factor);
     resize(texture);
     s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]); // Restore the viewport.
+    LASTGLCALL_CHECK("s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]); // Restore the viewport.");
 
     // If there was an error while resizing, just use the unscaled texture.
     GLenum error = s_gles2.glGetError();
@@ -278,18 +336,22 @@ void TextureResize::setupFramebuffers(unsigned int factor) {
 
     // Update the framebuffer sizes to match the new factor.
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBWidth.texture);
-    s_gles2.glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGBA, mWidth / factor, mHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+    LASTGLCALL_CHECK("s_gles2.glBindTexture(GL_TEXTURE_2D, mFBWidth.texture);");
+    s_gles2.glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, mWidth / factor, mHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+    LASTGLCALL_CHECK("s_gles2.glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, mWidth / factor, mHeight, 0, GL_RGBA, GL_FLOAT, nullptr);");
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBWidth.framebuffer);
-    s_gles2.glFramebufferTexture2D(
-        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFBWidth.texture, 0);
+    LASTGLCALL_CHECK("s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBWidth.framebuffer);");
+    s_gles2.glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFBWidth.texture, 0);
+    LASTGLCALL_CHECK("s_gles2.glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFBWidth.texture, 0);");
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBHeight.texture);
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mWidth / factor, mHeight / factor, 0, GL_RGBA,
-        GL_UNSIGNED_BYTE, nullptr);
+    LASTGLCALL_CHECK("s_gles2.glBindTexture(GL_TEXTURE_2D, mFBHeight.texture);");
+    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mWidth / factor, mHeight / factor, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    LASTGLCALL_CHECK("s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mWidth / factor, mHeight / factor, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);");
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBHeight.framebuffer);
-    s_gles2.glFramebufferTexture2D(
-        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFBHeight.texture, 0);
+    LASTGLCALL_CHECK("s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBHeight.framebuffer);");
+    s_gles2.glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFBHeight.texture, 0);
+    LASTGLCALL_CHECK("s_gles2.glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFBHeight.texture, 0);");
 
     // Update the shaders to the new factor. First detach the old shaders...
     detachShaders(mFBWidth.program);
@@ -306,41 +368,68 @@ void TextureResize::setupFramebuffers(unsigned int factor) {
 
 void TextureResize::resize(GLuint texture) {
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
+    LASTGLCALL_CHECK("s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);");
     s_gles2.glActiveTexture(GL_TEXTURE0);
+    LASTGLCALL_CHECK("s_gles2.glActiveTexture(GL_TEXTURE0);");
 
     // First scale the horizontal dimension by rendering the input texture to a scaled framebuffer.
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBWidth.framebuffer);
+    LASTGLCALL_CHECK("s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBWidth.framebuffer);");
     s_gles2.glViewport(0, 0, mWidth / mFactor, mHeight);
+    LASTGLCALL_CHECK("s_gles2.glViewport(0, 0, mWidth / mFactor, mHeight);");
     s_gles2.glUseProgram(mFBWidth.program);
+    LASTGLCALL_CHECK("s_gles2.glUseProgram(mFBWidth.program);");
     s_gles2.glEnableVertexAttribArray(mFBWidth.aPosition);
+    LASTGLCALL_CHECK("s_gles2.glEnableVertexAttribArray(mFBWidth.aPosition);");
     s_gles2.glVertexAttribPointer(mFBWidth.aPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    LASTGLCALL_CHECK("s_gles2.glVertexAttribPointer(mFBWidth.aPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);");
     s_gles2.glBindTexture(GL_TEXTURE_2D, texture);
+    LASTGLCALL_CHECK("s_gles2.glBindTexture(GL_TEXTURE_2D, texture);");
 
     // Store the current texture filters and set to nearest for scaling.
     GLint mag_filter, min_filter;
     s_gles2.glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, &mag_filter);
+    LASTGLCALL_CHECK("s_gles2.glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, &mag_filter);");
     s_gles2.glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, &min_filter);
+    LASTGLCALL_CHECK("s_gles2.glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, &min_filter);");
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    LASTGLCALL_CHECK("s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);");
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    LASTGLCALL_CHECK("s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);");
     s_gles2.glUniform1i(mFBWidth.uTexture, 0);
+    LASTGLCALL_CHECK("s_gles2.glUniform1i(mFBWidth.uTexture, 0);");
     s_gles2.glDrawArrays(GL_TRIANGLES, 0, sizeof(kVertexData) / (2 * sizeof(float)));
+    LASTGLCALL_CHECK("s_gles2.glDrawArrays(GL_TRIANGLES, 0, sizeof(kVertexData) / (2 * sizeof(float)));");
 
     // Restore the previous texture filters.
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter);
+    LASTGLCALL_CHECK("s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter);");
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
+    LASTGLCALL_CHECK("s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);");
 
     // Secondly, scale the vertical dimension using the second framebuffer.
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBHeight.framebuffer);
+    LASTGLCALL_CHECK("s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBHeight.framebuffer);");
     s_gles2.glViewport(0, 0, mWidth / mFactor, mHeight / mFactor);
+    LASTGLCALL_CHECK("s_gles2.glViewport(0, 0, mWidth / mFactor, mHeight / mFactor);");
     s_gles2.glUseProgram(mFBHeight.program);
+    LASTGLCALL_CHECK("s_gles2.glUseProgram(mFBHeight.program);");
     s_gles2.glEnableVertexAttribArray(mFBHeight.aPosition);
+    LASTGLCALL_CHECK("s_gles2.glEnableVertexAttribArray(mFBHeight.aPosition);");
     s_gles2.glVertexAttribPointer(mFBHeight.aPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    LASTGLCALL_CHECK("s_gles2.glVertexAttribPointer(mFBHeight.aPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);");
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBWidth.texture);
+    LASTGLCALL_CHECK("s_gles2.glBindTexture(GL_TEXTURE_2D, mFBWidth.texture);");
     s_gles2.glUniform1i(mFBHeight.uTexture, 0);
+    LASTGLCALL_CHECK("s_gles2.glUniform1i(mFBHeight.uTexture, 0);");
     s_gles2.glDrawArrays(GL_TRIANGLES, 0, sizeof(kVertexData) / (2 * sizeof(float)));
+    LASTGLCALL_CHECK("s_gles2.glDrawArrays(GL_TRIANGLES, 0, sizeof(kVertexData) / (2 * sizeof(float)));");
 
     // Clear the bindings.
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
+    LASTGLCALL_CHECK("s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);");
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    LASTGLCALL_CHECK("s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);");
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
+    LASTGLCALL_CHECK("s_gles2.glBindTexture(GL_TEXTURE_2D, 0);");
 }

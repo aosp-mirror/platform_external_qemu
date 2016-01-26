@@ -22,6 +22,30 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#define RC_ERRCHECK
+#ifdef RC_ERRCHECK
+#define ERRCHECK() do { \
+    EGLint egl_errcode = s_egl.eglGetError(); \
+    if (egl_errcode != EGL_SUCCESS) { \
+        fprintf(stderr, "%s: ", __FUNCTION__); \
+        fprintf(stderr, "renderControl: eglerror=0x%x\n", egl_errcode); \
+    } \
+    GLint gl_errcode = s_gles2.glGetError(); \
+    if (gl_errcode != GL_NO_ERROR) { \
+        fprintf(stderr, "renderControl: gles2error=0x%x\n", gl_errcode); \
+    } \
+} while(0) 
+#define LASTGLCALL_CHECK(...) do { \
+    fprintf(stderr, "rendercontrol: %s:%d lastcall: ", __FUNCTION__, __LINE__); \
+    fprintf(stderr, __VA_ARGS__); \
+    fprintf(stderr, "\n"); \
+    ERRCHECK(); \
+} while(0)
+#else
+#define LASTGLCALL_CHECK(...) 0
+#define ERRCHECK() 0
+#endif
+
 static const GLint rendererVersion = 1;
 
 static GLint rcGetRendererVersion()
@@ -49,6 +73,7 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
 
     const char *str = s_egl.eglQueryString(fb->getDisplay(), name);
+    LASTGLCALL_CHECK("eglQueryString, name=0x%x", name);
     if (!str) {
         return 0;
     }
@@ -72,6 +97,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     const char *str = NULL;
     if (tInfo->currContext->isGL2()) {
         str = (const char *)s_gles2.glGetString(name);
+        LASTGLCALL_CHECK("glGetString, name=0x%x", name);
     }
     else {
         str = (const char *)s_gles1.glGetString(name);

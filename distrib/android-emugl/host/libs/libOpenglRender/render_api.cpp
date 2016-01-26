@@ -80,6 +80,7 @@ RENDER_APICALL int RENDER_APIENTRY initOpenGLRenderer(
         int width, int height, bool useSubWindow, char* addr, size_t addrLen,
         void* logger) {
     set_emugl_logger((logger_t)logger);
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     //
     // Fail if renderer is already initialized
     //
@@ -135,6 +136,7 @@ RENDER_APICALL int RENDER_APIENTRY initOpenGLRenderer(
     s_renderThread->start();
 
     GL_LOG("OpenGL renderer initialized successfully");
+    fprintf(stderr, "%s: success init\n", __FUNCTION__);
     return true;
 }
 
