@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "74c9e678_70bad0da",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-26T19:36:04Z",
+      "side": 1,
+      "message": "Sadly, it does not.\n\nThe specific problem is that we kick off the resize timer when we get a resize event (which is necessary). Then, when the resize timer finishes, it resizes the window, which kicks off another resize event, and there\u0027s a loop. I tried using a flag to \"ignore\" the next resize event, but even this doesn\u0027t work because both the timer AND the resize event are asynchronous.",
+      "parentUuid": "54c4e260_89a8299b",
+      "range": {
+        "startLine": 340,
+        "startChar": 16,
+        "endLine": 342,
+        "endChar": 51
+      },
+      "revId": "423f1b6ecdefee2eeee0cf7f0f0ad48b1b22a227",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4b8d2d6_5fc4031a",
         "filename": "android/skin/qt/emulator-qt-window.h",
         "patchSetId": 2
@@ -132,6 +156,30 @@
       "side": 1,
       "message": "My bad, didn\u0027t notice this was a member of EmulatorWindowContainer.",
       "parentUuid": "f49a3677_980bfd40",
+      "range": {
+        "startLine": 398,
+        "startChar": 0,
+        "endLine": 398,
+        "endChar": 53
+      },
+      "revId": "423f1b6ecdefee2eeee0cf7f0f0ad48b1b22a227",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4a43ebb_2462eabc",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-26T19:36:04Z",
+      "side": 1,
+      "message": "I\u0027m not sure if we can use QTimer::singleShot - the reason having a QTimer member works is because that way if there are multiple calls to start(500), they restart a single timer instead of kicking off another one.",
+      "parentUuid": "f4b5d6da_40f8a2e1",
       "range": {
         "startLine": 398,
         "startChar": 0,
