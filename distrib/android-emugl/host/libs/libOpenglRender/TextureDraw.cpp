@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "emugl/common/logging.h"
 #include "TextureDraw.h"
 
 #include "DispatchTables.h"
@@ -20,11 +21,36 @@
 #include <string.h>
 
 #include <stdio.h>
+
 #define ERR(...)  fprintf(stderr, __VA_ARGS__)
 
 // M_PI isn't defined in C++ (when strict ISO compliance is enabled)
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338327
+#endif
+
+#define RC_ERRCHECK
+#ifdef RC_ERRCHECK
+
+#define RC_LOG(...) do { \
+    emugl_cxt_logger(__VA_ARGS__); \
+} while(0)
+
+#define ERRCHECK() do { \
+    GLint gl_errcode = s_gles2.glGetError(); \
+    if (gl_errcode != GL_NO_ERROR) { \
+        RC_LOG("texturedraw: gles2error=0x%x\n", gl_errcode); \
+    } \
+} while(0) 
+#define LASTGLCALL_CHECK(...) do { \
+    RC_LOG("texturedraw: %s:%d lastcall: ", __FUNCTION__, __LINE__); \
+    RC_LOG(__VA_ARGS__); \
+    RC_LOG("\n"); \
+    ERRCHECK(); \
+} while(0)
+#else
+#define LASTGLCALL_CHECK(...) 0
+#define ERRCHECK() 0
 #endif
 
 namespace {
@@ -36,19 +62,24 @@ namespace {
 GLuint createShader(GLint shaderType, const char* shaderText) {
     // Create new shader handle and attach source.
     GLuint shader = s_gles2.glCreateShader(shaderType);
+    LASTGLCALL_CHECK("GLuint %d = s_gles2.glCreateShader(0x%x);", shader, shaderType);
     if (!shader) {
         return 0;
     }
     const GLchar* text = static_cast<const GLchar*>(shaderText);
     const GLint textLen = ::strlen(shaderText);
     s_gles2.glShaderSource(shader, 1, &text, &textLen);
+    LASTGLCALL_CHECK("glShaderSource(shader, 1, &text, &textLen)");
 
     // Compiler the shader.
     GLint success;
     s_gles2.glCompileShader(shader);
+    LASTGLCALL_CHECK("glCompileShader(shader);");
     s_gles2.glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    LASTGLCALL_CHECK("glGetShaderiv(shader, GL_COMPILE_STATUS, &success);");
     if (success == GL_FALSE) {
         s_gles2.glDeleteShader(shader);
+        LASTGLCALL_CHECK("glDeleteShader(shader);");
         return 0;
     }
 
@@ -116,16 +147,20 @@ TextureDraw::TextureDraw(EGLDisplay display) :
     mFragmentShader = createShader(GL_FRAGMENT_SHADER, kFragmentShaderSource);
 
     mProgram = s_gles2.glCreateProgram();
+    LASTGLCALL_CHECK("mProgram = glCreateProgram();");
     s_gles2.glAttachShader(mProgram, mVertexShader);
+    LASTGLCALL_CHECK("glAttachShader(mProgram, mVertexShader);");
     s_gles2.glAttachShader(mProgram, mFragmentShader);
+    LASTGLCALL_CHECK("glAttachShader(mProgram, mFragmentShader);");
 
     GLint success;
     s_gles2.glLinkProgram(mProgram);
+    LASTGLCALL_CHECK("glLinkProgram(mProgram);");
     s_gles2.glGetProgramiv(mProgram, GL_LINK_STATUS, &success);
+    LASTGLCALL_CHECK("glGetProgramiv(mProgram, GL_LINK_STATUS, &success);");
     if (success == GL_FALSE) {
         GLchar messages[256];
-        s_gles2.glGetProgramInfoLog(
-                mProgram, sizeof(messages), 0, &messages[0]);
+        s_gles2.glGetProgramInfoLog( mProgram, sizeof(messages), 0, &messages[0]);
         ERR("%s: Could not create/link program: %s\n", __FUNCTION__, messages);
         s_gles2.glDeleteProgram(mProgram);
         mProgram = 0;
@@ -133,17 +168,25 @@ TextureDraw::TextureDraw(EGLDisplay display) :
     }
 
     s_gles2.glUseProgram(mProgram);
+    LASTGLCALL_CHECK("glUseProgram(mProgram);");
 
     // Retrieve attribute/uniform locations.
     mPositionSlot = s_gles2.glGetAttribLocation(mProgram, "position");
+    LASTGLCALL_CHECK("mPositionSlot = glGetAttribLocation(mProgram, \"position\");");
     s_gles2.glEnableVertexAttribArray(mPositionSlot);
+    LASTGLCALL_CHECK("s_gles2.glEnableVertexAttribArray(mPositionSlot);");
 
     mInCoordSlot = s_gles2.glGetAttribLocation(mProgram, "inCoord");
+    LASTGLCALL_CHECK("mInCoordSlot = s_gles2.glGetAttribLocation(mProgram, \"inCoord\");");
     s_gles2.glEnableVertexAttribArray(mInCoordSlot);
+    LASTGLCALL_CHECK("s_gles2.glEnableVertexAttribArray(mInCoordSlot);");
 
     mRotationSlot = s_gles2.glGetUniformLocation(mProgram, "rotation");
+    LASTGLCALL_CHECK("mRotationSlot = s_gles2.glGetUniformLocation(mProgram, \"rotation\");");
     mTranslationSlot = s_gles2.glGetUniformLocation(mProgram, "translation");
+    LASTGLCALL_CHECK("mTranslationSlot = s_gles2.glGetUniformLocation(mProgram, \"translation\");");
     mTextureSlot = s_gles2.glGetUniformLocation(mProgram, "texture");
+    LASTGLCALL_CHECK("mTextureSlot = s_gles2.glGetUniformLocation(mProgram, \"texture\");");
 
 #if 0
     printf("SLOTS position=%d inCoord=%d texture=%d rotation=%d\n",
@@ -152,16 +195,19 @@ TextureDraw::TextureDraw(EGLDisplay display) :
 
     // Create vertex and index buffers.
     s_gles2.glGenBuffers(1, &mVertexBuffer);
+    LASTGLCALL_CHECK("glGenBuffers(1, &mVertexBuffer);");
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
+    LASTGLCALL_CHECK("glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);");
     s_gles2.glBufferData(
             GL_ARRAY_BUFFER, sizeof(kVertices), kVertices, GL_STATIC_DRAW);
+    LASTGLCALL_CHECK("glBufferData( GL_ARRAY_BUFFER, sizeof(kVertices), kVertices, GL_STATIC_DRAW);");
 
     s_gles2.glGenBuffers(1, &mIndexBuffer);
+    LASTGLCALL_CHECK("glGenBuffers(1, &mIndexBuffer);");
     s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
-    s_gles2.glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                         sizeof(kIndices),
-                         kIndices,
-                         GL_STATIC_DRAW);
+    LASTGLCALL_CHECK("glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);");
+    s_gles2.glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(kIndices), kIndices, GL_STATIC_DRAW);
+    LASTGLCALL_CHECK("s_gles2.glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(kIndices), kIndices, GL_STATIC_DRAW);");
 }
 
 bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
@@ -191,12 +237,14 @@ bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
     }
 
     s_gles2.glEnableVertexAttribArray(mPositionSlot);
+    LASTGLCALL_CHECK("s_gles2.glEnableVertexAttribArray(mPositionSlot);");
     s_gles2.glVertexAttribPointer(mPositionSlot,
                                   3,
                                   GL_FLOAT,
                                   GL_FALSE,
                                   sizeof(Vertex),
                                   0);
+    LASTGLCALL_CHECK("s_gles2.glVertexAttribPointer(mPositionSlot, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);");
     err = s_gles2.glGetError();
     if (err != GL_NO_ERROR) {
         ERR("%s: Could glVertexAttribPointer with mPositionSlot error=0x%x\n",
@@ -205,6 +253,7 @@ bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
 
     // Setup the |inCoord| attribute values.
     s_gles2.glEnableVertexAttribArray(mInCoordSlot);
+    LASTGLCALL_CHECK("s_gles2.glEnableVertexAttribArray(mInCoordSlot);");
     s_gles2.glVertexAttribPointer(mInCoordSlot,
                                   2,
                                   GL_FLOAT,
@@ -214,24 +263,32 @@ bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
                                         static_cast<uintptr_t>(
                                                 sizeof(float) * 3)));
 
+    LASTGLCALL_CHECK("s_gles2.glVertexAttribPointer(mInCoordSlot, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<GLvoid*>( static_cast<uintptr_t>( sizeof(float) * 3)));");
     // setup the |texture| uniform value.
     s_gles2.glActiveTexture(GL_TEXTURE0);
+    LASTGLCALL_CHECK("s_gles2.glActiveTexture(GL_TEXTURE0);");
     s_gles2.glBindTexture(GL_TEXTURE_2D, texture);
+    LASTGLCALL_CHECK("s_gles2.glBindTexture(GL_TEXTURE_2D, texture);");
     s_gles2.glUniform1i(mTextureSlot, 0);
+    LASTGLCALL_CHECK("s_gles2.glUniform1i(mTextureSlot, 0);");
 
     // setup the |rotation| uniform value.
     s_gles2.glUniform1f(mRotationSlot, rotation * M_PI / 180.);
+    LASTGLCALL_CHECK("s_gles2.glUniform1f(mRotationSlot, rotation * M_PI / 180.);");
     s_gles2.glUniform2f(mTranslationSlot, dx, dy);
+    LASTGLCALL_CHECK("s_gles2.glUniform2f(mTranslationSlot, dx, dy);");
 
 #if 1
     // Validate program, just to be sure.
     s_gles2.glValidateProgram(mProgram);
+    LASTGLCALL_CHECK("s_gles2.glValidateProgram(mProgram);");
     GLint validState = 0;
     s_gles2.glGetProgramiv(mProgram, GL_VALIDATE_STATUS, &validState);
+    LASTGLCALL_CHECK("s_gles2.glGetProgramiv(mProgram, GL_VALIDATE_STATUS, &validState);");
     if (validState == GL_FALSE) {
         GLchar messages[256];
-        s_gles2.glGetProgramInfoLog(
-                mProgram, sizeof(messages), 0, &messages[0]);
+        s_gles2.glGetProgramInfoLog( mProgram, sizeof(messages), 0, &messages[0]);
+        LASTGLCALL_CHECK("s_gles2.glGetProgramInfoLog( mProgram, sizeof(messages), 0, &messages[0]);");
         ERR("%s: Could not run program: %s\n", __FUNCTION__, messages);
         return false;
     }
@@ -259,12 +316,16 @@ bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
 
 TextureDraw::~TextureDraw() {
     s_gles2.glDeleteBuffers(1, &mIndexBuffer);
+    LASTGLCALL_CHECK("s_gles2.glDeleteBuffers(1, &mIndexBuffer);");
     s_gles2.glDeleteBuffers(1, &mVertexBuffer);
+    LASTGLCALL_CHECK("s_gles2.glDeleteBuffers(1, &mVertexBuffer);");
 
     if (mFragmentShader) {
         s_gles2.glDeleteShader(mFragmentShader);
+        LASTGLCALL_CHECK("s_gles2.glDeleteShader(mFragmentShader);");
     }
     if (mVertexShader) {
         s_gles2.glDeleteShader(mVertexShader);
+        LASTGLCALL_CHECK("s_gles2.glDeleteShader(mVertexShader);");
     }
 }

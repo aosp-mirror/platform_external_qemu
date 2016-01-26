@@ -14,6 +14,8 @@
 * limitations under the License.
 */
 
+#include "emugl/common/logging.h"
+
 #include "FrameBuffer.h"
 
 #include "DispatchTables.h"
@@ -27,6 +29,35 @@
 #include "emugl/common/logging.h"
 
 #include <stdio.h>
+
+#define RC_ERRCHECK
+#ifdef RC_ERRCHECK
+
+#define RC_LOG(...) do { \
+    emugl_cxt_logger(__VA_ARGS__); \
+} while(0)
+
+#define ERRCHECK() do { \
+    EGLint egl_errcode = s_egl.eglGetError(); \
+    if (egl_errcode != EGL_SUCCESS) { \
+        RC_LOG("%s: ", __FUNCTION__); \
+        RC_LOG("framebuffer: eglerror=0x%x\n", egl_errcode); \
+    } \
+    GLint gl_errcode = s_gles2.glGetError(); \
+    if (gl_errcode != GL_NO_ERROR) { \
+        RC_LOG("framebuffer: gles2error=0x%x\n", gl_errcode); \
+    } \
+} while(0) 
+#define LASTGLCALL_CHECK(...) do { \
+    RC_LOG("framebuffer: %s:%d lastcall: ", __FUNCTION__, __LINE__); \
+    RC_LOG(__VA_ARGS__); \
+    RC_LOG("\n"); \
+    ERRCHECK(); \
+} while(0)
+#else
+#define LASTGLCALL_CHECK(...) 0
+#define ERRCHECK() 0
+#endif
 
 namespace {
 
@@ -95,14 +126,14 @@ static char* getGLES1ExtensionString(EGLDisplay p_dpy)
 
     static const GLint configAttribs[] = {
         EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
-        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
         EGL_NONE
     };
 
     int n;
     if (!s_egl.eglChooseConfig(p_dpy, configAttribs,
                                &config, 1, &n) || n == 0) {
-        ERR("%s: Could not find GLES 1.x config!\n", __FUNCTION__);
+        ERR("%s: Could not find GLES 2.x config!\n", __FUNCTION__);
         return NULL;
     }
 
@@ -116,33 +147,33 @@ static char* getGLES1ExtensionString(EGLDisplay p_dpy)
 
     surface = s_egl.eglCreatePbufferSurface(p_dpy, config, pbufAttribs);
     if (surface == EGL_NO_SURFACE) {
-        ERR("%s: Could not create GLES 1.x Pbuffer!\n", __FUNCTION__);
+        ERR("%s: Could not create GLES 2.x Pbuffer!\n", __FUNCTION__);
         return NULL;
     }
 
-    static const GLint gles1ContextAttribs[] = {
-        EGL_CONTEXT_CLIENT_VERSION, 1,
+    static const GLint gles2ContextAttribs[] = {
+        EGL_CONTEXT_CLIENT_VERSION, 2,
         EGL_NONE
     };
 
     EGLContext ctx = s_egl.eglCreateContext(p_dpy, config,
                                             EGL_NO_CONTEXT,
-                                            gles1ContextAttribs);
+                                            gles2ContextAttribs);
     if (ctx == EGL_NO_CONTEXT) {
-        ERR("%s: Could not create GLES 1.x Context!\n", __FUNCTION__);
+        ERR("%s: Could not create GLES 2.x Context!\n", __FUNCTION__);
         s_egl.eglDestroySurface(p_dpy, surface);
         return NULL;
     }
 
     if (!s_egl.eglMakeCurrent(p_dpy, surface, surface, ctx)) {
-        ERR("%s: Could not make GLES 1.x context current!\n", __FUNCTION__);
+        ERR("%s: Could not make GLES 2.x context current!\n", __FUNCTION__);
         s_egl.eglDestroySurface(p_dpy, surface);
         s_egl.eglDestroyContext(p_dpy, ctx);
         return NULL;
     }
 
     // the string pointer may become invalid when the context is destroyed
-    const char* s = (const char*)s_gles1.glGetString(GL_EXTENSIONS);
+    const char* s = (const char*)s_gles2.glGetString(GL_EXTENSIONS);
     char* extString = strdup(s ? s : "");
 
     // It is rare but some drivers actually fail this...
@@ -165,6 +196,7 @@ void FrameBuffer::finalize(){
     m_windows.clear();
     m_contexts.clear();
     s_egl.eglMakeCurrent(m_eglDisplay, NULL, NULL, NULL);
+    LASTGLCALL_CHECK("eglMakeCurrentNULLNULLNULL");
     s_egl.eglDestroyContext(m_eglDisplay, m_eglContext);
     s_egl.eglDestroyContext(m_eglDisplay, m_pbufContext);
     s_egl.eglDestroySurface(m_eglDisplay, m_pbufSurface);
@@ -218,7 +250,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     gles1Extensions = getGLES1ExtensionString(fb->m_eglDisplay);
     if (!gles1Extensions) {
         // Could not create GLES2 context - drop GL2 capability
-        ERR("Failed to obtain GLES 1.x extensions string!\n");
+        ERR("Failed to obtain GLES 2.x extensions string!\n");
         delete fb;
         return false;
     }
@@ -390,11 +422,12 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     //
     // Fail initialization if no GLES configs exist
     //
-    if (nGLConfigs == 0) {
-        bind.release();
-        delete fb;
-        return false;
-    }
+    // if (nGLConfigs == 0) {
+    //     ERR("Failed: No GLESv1 configs exist!\n");
+    //     bind.release();
+    //     delete fb;
+    //     return false;
+    // }
 
     //
     // If no GLES2 configs exist - not GLES2 capability
@@ -535,6 +568,8 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                                         m_eglConfig,
                                                         m_subWin,
                                                         NULL);
+            LASTGLCALL_CHECK("eglCreateWindowSurface");
+
 
             if (m_eglSurface == EGL_NO_SURFACE) {
                 // NOTE: This can typically happen with software-only renderers like OSMesa.
@@ -577,6 +612,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             // update viewport and z rotation and draw
             // the last posted color buffer.
             s_gles2.glViewport(0, 0, fbw * dpr, fbh * dpr);
+            LASTGLCALL_CHECK("glViewport(0,0,%f,%f)", fbw * dpr, fbh * dpr);
             m_dpr = dpr;
             m_zRot = zRot;
             if (m_lastPostedColorBuffer) {
@@ -585,7 +621,9 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                 s_gles2.glClear(GL_COLOR_BUFFER_BIT |
                                 GL_DEPTH_BUFFER_BIT |
                                 GL_STENCIL_BUFFER_BIT);
+            LASTGLCALL_CHECK("glClear");
                 s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
+            LASTGLCALL_CHECK("eglSwapBuffers");
             }
         }
         unbind_locked();
@@ -1066,6 +1104,7 @@ bool FrameBuffer::unbind_locked()
 
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
 {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     if (needLock) {
         m_lock.lock();
     }
@@ -1073,6 +1112,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
 
     ColorBufferMap::iterator c( m_colorbuffers.find(p_colorbuffer) );
     if (c == m_colorbuffers.end()) {
+    fprintf(stderr, "%s: call. End: No colorbuffers\n", __FUNCTION__);
         goto EXIT;
     }
 
@@ -1082,12 +1122,14 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
         // bind the subwindow eglSurface
         if (!bindSubwin_locked()) {
             ERR("FrameBuffer::post(): eglMakeCurrent failed\n");
+    fprintf(stderr, "%s: call. End: cannot current the context\n", __FUNCTION__);
             goto EXIT;
         }
 
         // get the viewport
         GLint vp[4];
         s_gles2.glGetIntegerv(GL_VIEWPORT, vp);
+        LASTGLCALL_CHECK("glGetIntegerv");
 
         // divide by device pixel ratio because windowing coordinates ignore DPR,
         // but the framebuffer includes DPR
@@ -1108,6 +1150,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
         //
         if (m_zRot != 0.0f) {
             s_gles2.glClear(GL_COLOR_BUFFER_BIT);
+        LASTGLCALL_CHECK("glClear(GL_COLOR_BUFER_BIT)");
         }
         ret = (*c).second.cb->post(m_zRot, dx, dy);
         if (ret) {
@@ -1151,6 +1194,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
     }
 
 EXIT:
+    fprintf(stderr, "%s: call. at exit\n", __FUNCTION__);
     if (needLock) {
         m_lock.unlock();
     }
