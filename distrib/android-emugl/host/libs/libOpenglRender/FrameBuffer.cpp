@@ -99,7 +99,7 @@ static char* getGLES1ExtensionString(EGLDisplay p_dpy)
 
     int n;
     if (!s_egl.eglChooseConfig(p_dpy, configAttribs,
-                               &config, 1, &n) || n == 0) {
+                               &config, 2, &n) || n == 0) {
         ERR("%s: Could not find GLES 1.x config!\n", __FUNCTION__);
         return NULL;
     }
@@ -119,7 +119,7 @@ static char* getGLES1ExtensionString(EGLDisplay p_dpy)
     }
 
     static const GLint gles1ContextAttribs[] = {
-        EGL_CONTEXT_CLIENT_VERSION, 1,
+        EGL_CONTEXT_CLIENT_VERSION, 2,
         EGL_NONE
     };
 
@@ -140,7 +140,7 @@ static char* getGLES1ExtensionString(EGLDisplay p_dpy)
     }
 
     // the string pointer may become invalid when the context is destroyed
-    const char* s = (const char*)s_gles1.glGetString(GL_EXTENSIONS);
+    const char* s = (const char*)s_gles2.glGetString(GL_EXTENSIONS);
     char* extString = strdup(s ? s : "");
 
     s_egl.eglMakeCurrent(p_dpy, NULL, NULL, NULL);
