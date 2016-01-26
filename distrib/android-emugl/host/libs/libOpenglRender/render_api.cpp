@@ -138,6 +138,7 @@ RENDER_APICALL int RENDER_APIENTRY initOpenGLRenderer(
     s_renderThread->start();
 
     GL_LOG("OpenGL renderer initialized successfully");
+    fprintf(stderr, "%s: success init\n", __FUNCTION__);
     return true;
 }
 

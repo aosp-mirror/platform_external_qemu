@@ -824,14 +824,14 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 
     // helper macros
     fprintf(fp,
-            "#ifdef OPENGL_DEBUG_PRINTOUT\n"
+            "#if 1\n"
             "#  define DEBUG(...) do { if (emugl_cxt_logger) { emugl_cxt_logger(__VA_ARGS__); } } while(0)\n"
             "#else\n"
             "#  define DEBUG(...)  ((void)0)\n"
             "#endif\n\n");
 
     fprintf(fp,
-            "#ifdef CHECK_GLERROR\n"
+            "#if 1\n"
             "#  define SET_LASTCALL(name)  sprintf(lastCall, #name)\n"
             "#else\n"
             "#  define SET_LASTCALL(name)  ((void)0)\n"
@@ -848,7 +848,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 \tif (len < 8) return pos; \n\
 \tunsigned char *ptr = (unsigned char *)buf;\n\
 \tbool unknownOpcode = false;  \n\
-#ifdef CHECK_GL_ERROR \n\
+#if 1 \n\
 \tchar lastCall[256] = {0}; \n\
 #endif \n\
 \twhile ((len - pos >= 8) && !unknownOpcode) {   \n\
@@ -1175,7 +1175,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp, "\t\t\t\tunknownOpcode = true;\n");
     fprintf(fp, "\t\t} //switch\n");
     if (strstr(m_basename.c_str(), "gl")) {
-        fprintf(fp, "#ifdef CHECK_GL_ERROR\n");
+        fprintf(fp, "#if 1\n");
         fprintf(fp, "\tint err = lastCall[0] ? this->glGetError() : GL_NO_ERROR;\n");
         fprintf(fp, "\tif (err) fprintf(stderr, \"%s Error: 0x%%X in %%s\\n\", err, lastCall);\n", m_basename.c_str());
         fprintf(fp, "#endif\n");

@@ -13,6 +13,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+
+#include "emugl/common/logging.h"
+
 #include "RenderControl.h"
 
 #include "DispatchTables.h"
@@ -22,6 +25,33 @@
 #include "ChecksumCalculatorThreadInfo.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
+
+#define RC_ERRCHECK
+#ifdef RC_ERRCHECK
+#define RC_LOG(...) do { \
+    emugl_cxt_logger(__VA_ARGS__); \
+} while (0)
+#define ERRCHECK() do { \
+    EGLint egl_errcode = s_egl.eglGetError(); \
+    if (egl_errcode != EGL_SUCCESS) { \
+        RC_LOG("%s: ", __FUNCTION__); \
+        RC_LOG("renderControl: eglerror=0x%x\n", egl_errcode); \
+    } \
+    GLint gl_errcode = s_gles2.glGetError(); \
+    if (gl_errcode != GL_NO_ERROR) { \
+        RC_LOG("renderControl: gles2error=0x%x\n", gl_errcode); \
+    } \
+} while(0) 
+#define LASTGLCALL_CHECK(...) do { \
+    RC_LOG("rendercontrol: %s:%d lastcall: ", __FUNCTION__, __LINE__); \
+    RC_LOG(__VA_ARGS__); \
+    RC_LOG("\n"); \
+    ERRCHECK(); \
+} while(0)
+#else
+#define LASTGLCALL_CHECK(...) 0
+#define ERRCHECK() 0
+#endif
 
 static const GLint rendererVersion = 1;
 
@@ -50,6 +80,7 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
 
     const char *str = s_egl.eglQueryString(fb->getDisplay(), name);
+    LASTGLCALL_CHECK("eglQueryString, name=0x%x", name);
     if (!str) {
         return 0;
     }
