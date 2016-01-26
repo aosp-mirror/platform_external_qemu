@@ -128,6 +128,7 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
                 remove = 1;
             }
             if (!strcmp(arg2, "all")) {
+                base_enable_verbose_logs();
                 mask = ~0;
             }
             for (nn = 0; debug_tags[nn].name; nn++) {
@@ -263,9 +264,10 @@ parse_debug_tags( const char*  tags )
                 x += 1;
             }
 
-            if (!strcmp( "all", x ))
+            if (!strcmp( "all", x )) {
+                base_enable_verbose_logs();
                 mask = ~0;
-            else {
+            } else {
                 char  temp[32];
                 buffer_translate_char(temp, sizeof temp, x, '-', '_');
 
