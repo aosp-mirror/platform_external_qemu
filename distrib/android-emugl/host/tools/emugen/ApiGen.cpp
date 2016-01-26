@@ -767,7 +767,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 
     // helper macros
     fprintf(fp,
-            "#ifdef DEBUG_PRINTOUT\n"
+            "#if 1\n"
             "#  define DEBUG(...) fprintf(stderr, __VA_ARGS__)\n"
             "#else\n"
             "#  define DEBUG(...)  ((void)0)\n"
