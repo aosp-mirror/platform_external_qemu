@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d49b728b_41ab32f4",
+        "filename": "distrib/android-emugl/shared/emugl/common/shared_library.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-26T16:31:51Z",
+      "side": 1,
+      "message": "I still think this is not the right location for this function. Why not put it in libOpenGLESDispatch directly instead?",
+      "revId": "065b98544a414c4da83e8a49874603e8a66af0b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
