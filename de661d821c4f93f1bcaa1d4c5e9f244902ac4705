@@ -22,6 +22,30 @@
       "revId": "de661d821c4f93f1bcaa1d4c5e9f244902ac4705",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4b8d2d6_0d618110",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-26T19:05:58Z",
+      "side": 1,
+      "message": "old habits die hard :)",
+      "parentUuid": "f4b5d6da_83ee443d",
+      "range": {
+        "startLine": 354,
+        "startChar": 36,
+        "endLine": 354,
+        "endChar": 37
+      },
+      "revId": "de661d821c4f93f1bcaa1d4c5e9f244902ac4705",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
