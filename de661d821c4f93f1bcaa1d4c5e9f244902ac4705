@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f4b5d6da_83ee443d",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-26T17:43:45Z",
+      "side": 1,
+      "message": "nit: please either omit the parent (so it defaults to nullptr) or use nullptr explicitly",
+      "range": {
+        "startLine": 354,
+        "startChar": 36,
+        "endLine": 354,
+        "endChar": 37
+      },
+      "revId": "de661d821c4f93f1bcaa1d4c5e9f244902ac4705",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
