@@ -192,6 +192,8 @@ private slots:
 
     void slot_avdArchWarningMessageAccepted();
 
+    void slot_resizeDone();
+
     /*
      Here are conventional slots that perform interesting high-level functions in the emulator. These can be hooked up to signals
      from UI elements or called independently.
@@ -340,6 +342,9 @@ private:
                         e->type() == QEvent::Leave) {
                     mEventBuffer.clear();
                     mEmulatorWindow->doResize(this->size());
+
+                    // Kill the resize timer to avoid double resizes.
+                    mEmulatorWindow->mResizeTimer.stop();
                 }
 
 #endif
@@ -386,6 +391,12 @@ private:
             QScrollArea::resizeEvent(event);
             mEmulatorWindow->tool_window->dockMainWindow();
             mEmulatorWindow->simulateZoomedWindowResized(this->viewportSize());
+
+            // To solve some resizing edge cases on OSX, start a short timer that will attempt to
+            // trigger a resize in case the user's mouse has not entered the window again.
+#ifdef __APPLE__
+            mEmulatorWindow->mResizeTimer.start(500);
+#endif
         }
 
         QSize viewportSize() const
@@ -715,6 +726,8 @@ private:
 
     QMessageBox mAvdWarningBox;
     bool mFirstShowEvent;
+
+    QTimer mResizeTimer;
 };
 
 struct SkinSurface {
