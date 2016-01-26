@@ -390,6 +390,7 @@ LOCAL_SRC_FILES := \
   android/base/threads/ThreadStore_unittest.cpp \
   android/base/Uri_unittest.cpp \
   android/base/Version_unittest.cpp \
+  android/emulation/android_pipe_pingpong_unittest.cpp \
   android/emulation/android_pipe_zero_unittest.cpp \
   android/emulation/bufprint_config_dirs_unittest.cpp \
   android/emulation/ConfigDirs_unittest.cpp \
