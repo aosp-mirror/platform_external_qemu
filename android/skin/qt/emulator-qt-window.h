@@ -14,9 +14,11 @@
 
 #include <QtCore>
 #include <QApplication>
+#include <QCursor>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QFrame>
+#include <QImage>
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QMoveEvent>
@@ -457,6 +459,21 @@ private:
 #endif
 
             mRubberBand.hide();
+
+            // Load in higher-resolution images on higher resolution screens
+            if (this->devicePixelRatio() > 1.5) {
+                mCenterImage.load(":/multitouch/center_point_2x");
+                mCenterImage.setDevicePixelRatio(this->devicePixelRatio());
+
+                mTouchImage.load(":/multitouch/touch_point_2x");
+                mTouchImage.setDevicePixelRatio(this->devicePixelRatio());
+            } else {
+                mCenterImage.load(":/multitouch/center_point");
+                mTouchImage.load(":/multitouch/touch_point");
+            }
+
+            mCenterPointRadius = mCenterImage.width() / this->devicePixelRatio();
+            mTouchPointRadius = mTouchImage.width() / this->devicePixelRatio();
         }
 
         void focusOutEvent(QFocusEvent *event)
@@ -470,6 +487,7 @@ private:
         void hide()
         {
             QFrame::hide();
+            setMouseTracking(false);
             mMode = OverlayMode::Hidden;
             mContainer->setFocus();
             mContainer->activateWindow();
@@ -504,10 +522,10 @@ private:
                 mRubberBand.setGeometry(QRect(mRubberbandOrigin, event->pos()).normalized()
                                             .intersected(QRect(0, 0, width(), height())));
             } else if (mMode == OverlayMode::Multitouch) {
-                if (event->buttons() & Qt::LeftButton) {
-                    mPrimaryTouchPoint = event->pos();
-                    update();
+                mPrimaryTouchPoint = event->pos();
+                update();
 
+                if (event->buttons() & Qt::LeftButton) {
                     mEmulatorWindow->handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mPrimaryTouchPoint);
                     mEmulatorWindow->handleMouseEvent(kEventMouseMotion, kMouseButtonSecondaryTouch, getSecondaryTouchPoint());
                 } else if (event->buttons() & Qt::RightButton) {
@@ -605,18 +623,28 @@ private:
 
 
             QPainter painter(this);
+            painter.setRenderHint(QPainter::Antialiasing);
             QRect bg(QPoint(0, 0), this->size());
             painter.fillRect(bg, QColor(255,255,255,alpha));
 
             if (mMode == OverlayMode::Multitouch) {
-                painter.setOpacity(.6);
-                painter.setBrush(mRubberBand.palette().highlight());
-                painter.setPen(QPen(painter.brush(), 2));
-                painter.drawEllipse(mMultitouchCenter, 10, 10);
+                painter.translate(-mCenterPointRadius / 2, -mCenterPointRadius / 2);
+                painter.drawImage(mMultitouchCenter, mCenterImage);
+                painter.resetTransform();
 
-                if (mReleaseOnClose) {
-                    painter.drawEllipse(getSecondaryTouchPoint(), 20, 20);
-                    painter.drawEllipse(mPrimaryTouchPoint, 20, 20);
+                painter.translate(-mTouchPointRadius / 2, -mTouchPointRadius / 2);
+                painter.drawImage(mPrimaryTouchPoint, mTouchImage);
+                painter.drawImage(getSecondaryTouchPoint(), mTouchImage);
+                painter.resetTransform();
+
+                painter.setOpacity(.67);
+                painter.setPen(QPen(QColor("#00BEA4")));
+
+                QLineF lineToPrimary = QLineF(QPoint(), mPrimaryTouchPoint - mMultitouchCenter);
+                if (lineToPrimary.length() > mTouchPointRadius) {
+                    QPointF delta = (lineToPrimary.unitVector().p2() * (mTouchPointRadius / 2));
+                    painter.drawLine(QLineF(mMultitouchCenter + delta, mPrimaryTouchPoint - delta));
+                    painter.drawLine(QLineF(mMultitouchCenter - delta, getSecondaryTouchPoint() + delta));
                 }
             }
         }
@@ -630,11 +658,6 @@ private:
         {
             this->setFocus();
             this->activateWindow();
-
-            if (mMode == OverlayMode::Multitouch) {
-                mMultitouchCenter = QPoint(width() / 2, height() / 2);
-                mPrimaryTouchPoint = mMultitouchCenter;
-            }
         }
 
         void setFlashValue(double val)
@@ -671,6 +694,8 @@ private:
 
             mMode = OverlayMode::Multitouch;
             setCursor(Qt::ArrowCursor);
+            setMouseTracking(true);
+            mPrimaryTouchPoint = mapFromGlobal(QCursor::pos());
         }
 
         void showForZoom()
@@ -694,8 +719,12 @@ private:
         QPoint mRubberbandOrigin;
         QPixmap mCursor;
 
+        QImage mCenterImage;
+        QImage mTouchImage;
         QPoint mMultitouchCenter;
         QPoint mPrimaryTouchPoint;
+        int mCenterPointRadius;
+        int mTouchPointRadius;
         bool mReleaseOnClose;
 
         double mFlashValue;
