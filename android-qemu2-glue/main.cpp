@@ -882,6 +882,18 @@ extern "C" int main(int argc, char **argv) {
         reassign_string(&hw->hw_keyboard_charmap, charmap_name);
     }
 
+    // HACK FOR BUG: https://code.google.com/p/android/issues/detail?id=199427
+    // Booting will be severely slowed down, if not disabled outright, when
+    // 1. On Windows
+    // 2. Using an AVD resolution of >= 1080p (can vary across host setups)
+    // 3. -gpu mesa
+    // What happens is that Mesa will hog the CPU, while disallowing
+    // critical boot services from making progress, causing
+    // the services to give up and put the emulator in a reboot loop
+    // until it either fails to boot altogether or gets lucky and
+    // successfully boots.
+    // This workaround disables the boot animation under the above conditions,
+    // which frees up the CPU enough for the device to boot.
     bool win32_disable_bootanim_when_using_mesa = false;
 
     {
