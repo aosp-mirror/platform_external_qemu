@@ -182,4 +182,9 @@
  <qresource prefix="/cursor">
      <file alias="zoom_cursor">images/cursor/zoom_cursor.svg</file>
  </qresource>
+
+ <qresource prefix="/multitouch-green">
+     <file alias="touch_point">images/multitouch/touchpoint-green/bigpoint.png</file>
+     <file alias="center_point">images/multitouch/touchpoint-green/smallpoint.png</file>
+ </qresource>
 </RCC>
