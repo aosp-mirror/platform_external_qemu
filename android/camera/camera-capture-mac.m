@@ -94,6 +94,9 @@ _QTtoFOURCC(uint32_t qt_pix_format)
     /* Capture session. */
     QTCaptureSession*             capture_session;
     /* Camera capture device. */
+    /* NOTE: do NOT release capture_device */
+    /* Releasing t causes a crash on exit. */
+    /* The official Apple QTKit examples do not release QTCaptureDevice. */
     QTCaptureDevice*              capture_device;
     /* Input device registered with the capture session. */
     QTCaptureDeviceInput*         input_device;
@@ -159,7 +162,6 @@ _QTtoFOURCC(uint32_t qt_pix_format)
     }
     if ([capture_device isInUseByAnotherApplication]) {
         E("Default camera device is in use by another application.");
-        [capture_device release];
         capture_device = nil;
         [self release];
         return nil;
@@ -242,7 +244,6 @@ _QTtoFOURCC(uint32_t qt_pix_format)
         if ([capture_device isOpen]) {
             [capture_device close];
         }
-        [capture_device release];
         capture_device = nil;
     }
 
@@ -541,6 +542,7 @@ static const CameraFrameDim _emulate_dims[] =
     if (pix_formats == nil || [pix_formats count] == 0) {
         E("Unable to obtain pixel format for the default camera device.");
         [video_dev release];
+        video_dev = nil;
         return 0;
     }
     const uint32_t qt_pix_format = [[pix_formats objectAtIndex:0] formatType];
@@ -561,6 +563,7 @@ static const CameraFrameDim _emulate_dims[] =
         E("Pixel format '%.4s' reported by the camera device is unsupported",
           (const char*)&qt_pix_format);
         [video_dev release];
+        video_dev = nil;
         return 0;
     }
 
@@ -574,10 +577,12 @@ static const CameraFrameDim _emulate_dims[] =
         cis[0].display_name = ASTRDUP("webcam0");
         cis[0].in_use = 0;
         [video_dev release];
+        video_dev = nil;
         return 1;
     } else {
         E("Unable to allocate memory for camera information.");
         [video_dev release];
+        video_dev = nil;
         return 0;
     }
 }
