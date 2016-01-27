@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f4b5d6da_57c5c365",
+        "filename": "android/base/files/Stream_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-27T23:04:22Z",
+      "side": 1,
+      "message": "sizeof(*kData)\nsame for the rest",
+      "range": {
+        "startLine": 95,
+        "startChar": 43,
+        "endLine": 95,
+        "endChar": 44
+      },
+      "revId": "d007646070a73265b52653ed77d87ea590dab361",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7431e681_d919570c",
+        "filename": "android/base/files/Stream_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-27T23:04:22Z",
+      "side": 1,
+      "message": "if we also checked if stream sent exactly the expected number of bytes - we would\u0027ve found this at once",
+      "range": {
+        "startLine": 132,
+        "startChar": 3,
+        "endLine": 132,
+        "endChar": 5
+      },
+      "revId": "d007646070a73265b52653ed77d87ea590dab361",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
