@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "34c3ee5c_ea2b4852",
+        "filename": "android/camera/camera-capture-mac.m",
+        "patchSetId": 1
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-27T17:18:29Z",
+      "side": 0,
+      "message": "can you add a comment about why we\u0027re not releasing it somewhere near its declaration? CL comment is good, someone might \u0027fix\u0027 a \u0027leak\u0027 again, unless we explain in the code that it shouldn\u0027t be fixed",
+      "range": {
+        "startLine": 162,
+        "startChar": 9,
+        "endLine": 162,
+        "endChar": 23
+      },
+      "revId": "e9b19619751ae0a2520a7f032e6ed7b811fb05c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
