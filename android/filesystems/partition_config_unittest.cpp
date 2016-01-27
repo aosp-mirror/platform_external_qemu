@@ -47,7 +47,7 @@ static const char kYaffsFstabContent[] = "yaffs2";
 #define YAFFS_PATH_PREFIX "/YAFFS_FILE"
 
 static bool strStartsWith(const char* path, const char* prefix) {
-    return !memcmp(path, prefix, strlen(prefix));
+    return !strncmp(path, prefix, strlen(prefix));
 }
 
 // Base unittest version of PartitionConfigBackend interface.

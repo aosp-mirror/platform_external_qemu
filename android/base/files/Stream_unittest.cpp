@@ -92,7 +92,7 @@ TEST(Stream,putBe16) {
     uint8_t buffer[sizeof(kExpected)] = { 0, };
     MemoryStream stream(buffer, sizeof(buffer));
 
-    for (size_t n = 0; n < sizeof(kData); ++n) {
+    for (size_t n = 0; n < sizeof(kData) / sizeof(*kData); ++n) {
         stream.putBe16(kData[n]);
     }
     for (size_t n = 0; n < sizeof(kExpected); ++n) {
@@ -124,7 +124,7 @@ TEST(Stream,putBe32) {
     uint8_t buffer[sizeof(kExpected)] = { 0, };
     MemoryStream stream(buffer, sizeof(buffer));
 
-    for (size_t n = 0; n < sizeof(kData); ++n) {
+    for (size_t n = 0; n < sizeof(kData) / sizeof(*kData); ++n) {
         stream.putBe32(kData[n]);
     }
     for (size_t n = 0; n < sizeof(kExpected); ++n) {
@@ -156,7 +156,7 @@ TEST(Stream,putBe64) {
     uint8_t buffer[sizeof(kExpected)] = { 0, };
     MemoryStream stream(buffer, sizeof(buffer));
 
-    for (size_t n = 0; n < sizeof(kData); ++n) {
+    for (size_t n = 0; n < sizeof(kData) / sizeof(*kData); ++n) {
         stream.putBe64(kData[n]);
     }
     for (size_t n = 0; n < sizeof(kExpected); ++n) {

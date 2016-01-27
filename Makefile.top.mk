@@ -62,7 +62,7 @@ BUILD_TARGET_LDFLAGS32 :=
 BUILD_TARGET_LDFLAGS64 :=
 
 ifneq (,$(BUILD_SANITIZER))
-    BUILD_TARGET_CFLAGS += -fsanitize=$(BUILD_SANITIZER)
+    BUILD_TARGET_CFLAGS += -fsanitize=$(BUILD_SANITIZER) -g3
     ifeq ($(BUILD_SANITIZER),address)
         BUILD_TARGET_CFLAGS += -fno-omit-frame-pointer
         BUILD_TARGET_LDFLAGS += -lasan

@@ -91,7 +91,6 @@ bool Thread::wait(intptr_t *exitStatus) {
     if (pthread_join(mThread, NULL)) {
         return false;
     }
-    DCHECK(mFinished);
 
     if (exitStatus) {
         *exitStatus = mExitStatus;

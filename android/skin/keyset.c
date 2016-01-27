@@ -57,7 +57,7 @@ skin_key_command_from_str( const char*  str, int  len )
     for (nn = 0; nn < SKIN_KEY_COMMAND_MAX; nn++) {
         const char*  cmd = command_strings[nn];
 
-        if ( !memcmp( cmd, str, len ) && cmd[len] == 0 )
+        if ( !strncmp( cmd, str, len ) && cmd[len] == 0 )
             return (SkinKeyCommand) nn;
     }
     return SKIN_KEY_COMMAND_NONE;
