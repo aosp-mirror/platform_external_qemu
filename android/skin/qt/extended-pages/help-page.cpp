@@ -101,8 +101,24 @@ void HelpPage::initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand
         for (auto key_sequence_and_command = key_store->begin();
              key_sequence_and_command != key_store->end();
              ++key_sequence_and_command) {
+            QString key_combo;
+
+            // Unfortunately, QKeySequence doesn't handle modifier-only key sequences very well.
+            // In this case, "ungrab keyboard" is Ctrl+Alt (Cmd-Alt on Mac), and QKeySequence::toString
+            // sometimes produces strings with weird characters. To mitigate this problem, we simply
+            // hardcode the string for the "ungrab keyboard" key combo.
+            if (key_sequence_and_command.value() == QtUICommand::UNGRAB_KEYBOARD) {
+#ifdef Q_OS_MAC
+                key_combo = "\u2318\u2325"; // Cmd - Alt
+#else
+                key_combo = "Ctrl + Alt";
+#endif
+            } else {
+                key_combo  = key_sequence_and_command.key().toString(QKeySequence::NativeText);
+            }
+
             addShortcutsTableRow(table_widget,
-                                 key_sequence_and_command.key().toString(QKeySequence::NativeText),
+                                 key_combo,
                                  getQtUICommandDescription(key_sequence_and_command.value()));
         }
     }
