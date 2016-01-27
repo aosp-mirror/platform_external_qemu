@@ -231,6 +231,7 @@ GLES_DEFAULT=dgl
 # Parse options
 OPTION_PREBUILT_QEMU2=
 OPTION_DEBUG=no
+OPTION_SANITIZER=no
 OPTION_IGNORE_AUDIO=no
 OPTION_AOSP_PREBUILTS_DIR=
 OPTION_OUT_DIR=
@@ -285,6 +286,8 @@ for opt do
   --debug) OPTION_DEBUG=yes; OPTION_STRIP=no
   ;;
   --mingw) OPTION_MINGW=yes
+  ;;
+  --sanitizer=*) OPTION_SANITIZER=$optarg
   ;;
   --cc=*) OPTION_CC="$optarg"
   ;;
@@ -353,6 +356,7 @@ EOF
     echo "  --mingw                     Build Windows executable on Linux"
     echo "  --verbose                   Verbose configuration"
     echo "  --debug                     Build debug version of the emulator"
+    echo "  --sanitizer=[...]           Build with LLVM sanitizer (sanitizer=[address, thread])"
     echo "  --no-pcbios                 Disable copying of PC Bios files"
     echo "  --no-tests                  Don't run unit test suite"
     echo "  --prebuilt-qemu2            Don't build QEMU2 from sources, use prebuilts."
@@ -929,6 +933,9 @@ echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 
 if [ $OPTION_DEBUG = "yes" ] ; then
     echo "BUILD_DEBUG := true" >> $config_mk
+fi
+if [ $OPTION_SANITIZER != "no" ] ; then
+    echo "BUILD_SANITIZER := $OPTION_SANITIZER" >> $config_mk
 fi
 if [ "$OPTION_STRIP" = "yes" ]; then
     echo "BUILD_STRIP_BINARIES := true" >> $config_mk
