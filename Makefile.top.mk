@@ -61,6 +61,16 @@ BUILD_TARGET_LDFLAGS :=
 BUILD_TARGET_LDFLAGS32 :=
 BUILD_TARGET_LDFLAGS64 :=
 
+ifneq (,$(BUILD_SANITIZER))
+    BUILD_TARGET_CFLAGS += -fsanitize=$(BUILD_SANITIZER)
+    ifeq ($(BUILD_SANITIZER),address)
+        BUILD_TARGET_CFLAGS += -fno-omit-frame-pointer
+        BUILD_TARGET_LDFLAGS += -lasan
+    endif
+    ifeq ($(BUILD_SANITIZER),thread)
+        BUILD_TARGET_LDFLAGS += -ltsan
+    endif
+endif
 # Enable large-file support (i.e. make off_t a 64-bit value).
 # Fun fact: The mingw32 toolchain still uses 32-bit off_t values by default
 # even when generating Win64 binaries, so modify MY_CFLAGS instead of
