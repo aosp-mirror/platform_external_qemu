@@ -236,7 +236,7 @@ bool skin_key_pair_from_string(const char* str,
             const char*  prefix = mods[nn].prefix;
             int          len    = strlen(prefix);
 
-            if ( !memcmp(str, prefix, len) ) {
+            if ( !strncmp(str, prefix, len) ) {
                 str  += len;
                 match = 1;
                 mod  |= mods[nn].mod;
