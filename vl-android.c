@@ -3686,8 +3686,12 @@ int main(int argc, char **argv, char **envp)
     }
 
 #ifdef CONFIG_HAX
-    if (hax_enabled())
-        hax_sync_vcpus();
+    if (hax_enabled()) {
+        if (hax_sync_vcpus() < 0) {
+            fprintf(stderr, "Internal error: initial hax sync failed\n");
+            return 1;
+        }
+    }
 #endif
 
     /* just use the first displaystate for the moment */

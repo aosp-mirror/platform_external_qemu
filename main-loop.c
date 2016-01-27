@@ -313,8 +313,12 @@ void main_loop(void)
     int r;
 
 #ifdef CONFIG_HAX
-    if (hax_enabled())
-        hax_sync_vcpus();
+    if (hax_enabled()) {
+        if (hax_sync_vcpus() < 0) {
+            fprintf(stderr, "Internal error: hax sync failed\n");
+            return;
+        }
+    }
 #endif
 
     for (;;) {

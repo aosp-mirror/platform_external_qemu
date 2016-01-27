@@ -18,6 +18,8 @@
 
 #include <inttypes.h>
 #include "android/avd/util.h"
+#include "android/error-messages.h"
+#include "android/utils/debug.h"
 #include "hw/hw.h"
 #include "target-i386/hax-i386.h"
 
@@ -1156,8 +1158,8 @@ int hax_sync_vcpus(void)
         CPU_FOREACH(cpu) {
             int ret = hax_arch_set_registers(cpu);
             if (ret < 0) {
-                dprint("Failed to sync HAX vcpu context\n");
-                exit(1);
+                derror(kHaxVcpuSyncFailed);
+                return ret;
             }
         }
     }

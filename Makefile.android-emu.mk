@@ -84,6 +84,7 @@ LOCAL_SRC_FILES := \
     android/base/threads/ThreadStore.cpp \
     android/base/Uri.cpp \
     android/base/Version.cpp \
+    android/error-messages.cpp \
     android/utils/aconfig-file.c \
     android/utils/assert.c \
     android/utils/async.cpp \
