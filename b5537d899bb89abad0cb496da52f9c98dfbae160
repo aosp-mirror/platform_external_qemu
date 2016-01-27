@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "74c9e678_0c06e036",
+        "filename": "android/skin/qt/extended-pages/help-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-01-27T19:21:17Z",
+      "side": 1,
+      "message": "Is Q_OS_MAC the same as __APPLE__?\n\nI\u0027m not sure what our preferred symbols are for testing the platform.",
+      "revId": "b5537d899bb89abad0cb496da52f9c98dfbae160",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
