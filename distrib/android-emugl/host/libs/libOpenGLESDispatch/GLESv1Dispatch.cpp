@@ -22,6 +22,14 @@
 
 static emugl::SharedLibrary *s_gles1_lib = NULL;
 
+// An unimplemented function which prints out an error message.
+// To make it consistent with the guest, all GLES1 functions not supported by
+// the driver should be redirected to this function.
+
+static void gles1_unimplemented() {
+    fprintf(stderr, "Called unimplemented GLESv1 API\n");
+}
+
 //
 // This function is called only once during initialiation before
 // any thread has been created - hence it should NOT be thread safe.
@@ -61,8 +69,14 @@ bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
 //
 void *gles1_dispatch_get_proc_func(const char *name, void *userData)
 {
-    if (!s_gles1_lib) {
-        return NULL;
+    void* func = NULL;
+    if (s_gles1_lib) {
+        func = (void *)s_gles1_lib->findSymbol(name);
     }
-    return (void *)s_gles1_lib->findSymbol(name);
+    // To make it consistent with the guest, redirect any unsupported functions
+    // to gles1_unimplemented.
+    if (!func) {
+        func = (void *)gles1_unimplemented;
+    }
+    return func;
 }
