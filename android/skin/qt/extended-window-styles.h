@@ -71,7 +71,7 @@ enum ExtendedWindowPane {
 #define LIGHT_SCROLL_BKG_COLOR     "#f6f6f6"  // Background of scroll bar
 #define LIGHT_SCROLL_HANDLE_COLOR  "#d9d9d9"   // Handle of scroller
 #define LIGHT_TAB_BKG_COLOR        "#ffffff"  // Background of major tabs
-#define LIGHT_TAB_SELECTED_COLOR   "#fafafa"  // Background of the selected major tab
+#define LIGHT_TAB_SELECTED_COLOR   "#f5f5f5"  // Background of the selected major tab
 #define LIGHT_TABLE_BOTTOM_COLOR   "#e0e0e0"
 #define LIGHT_TEXT_COLOR           "#212121"  // Main page text
 #define LIGHT_TITLE_COLOR          "#757575"  // Main page titles
