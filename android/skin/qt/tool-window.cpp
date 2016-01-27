@@ -202,6 +202,23 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
     }
 }
 
+ToolWindow::~ToolWindow() {
+    // make sure we don't receive any signals while being destroyed
+    mInstallProcess.disconnect();
+    mInstallDialog.disconnect();
+    if (mInstallProcess.state() != QProcess::NotRunning) {
+        mInstallProcess.kill();
+    }
+    mInstallDialog.close();
+
+    mPushProcess.disconnect();
+    mPushDialog.disconnect();
+    if (mPushProcess.state() != QProcess::NotRunning) {
+        mPushProcess.kill();
+    }
+    mPushDialog.close();
+}
+
 void ToolWindow::hide()
 {
     QFrame::hide();
