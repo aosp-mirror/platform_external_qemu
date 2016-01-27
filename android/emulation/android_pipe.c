@@ -15,6 +15,7 @@
 #include "android/utils/panic.h"
 #include "android/utils/system.h"
 
+#include <assert.h>
 #include <string.h>
 
 #define  DEBUG 0
@@ -308,14 +309,6 @@ void android_pipe_wake_on(void* pipe_, unsigned wakes) {
  *****
  *****/
 
-// NOTE: This must be 'false' by default until QEMU2 is updated to call
-//       android_pipe_set_raw_adb_mode(true) explicitly.
-static bool s_use_qemud_adb_pipe = false;
-
-void android_pipe_set_raw_adb_mode(bool enabled) {
-    s_use_qemud_adb_pipe = !enabled;
-}
-
 /* These are used to handle the initial connection attempt, where the
  * client is going to write the name of the pipe service it wants to
  * connect to, followed by a terminating zero.
@@ -399,30 +392,51 @@ pipeConnector_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int n
         pipeName = pcon->buffer + 5;
         pipeArgs = strchr(pipeName, ':');
 
-        if (s_use_qemud_adb_pipe) {
-            // Qemu2 uses its own implementation of ADB connector, which talks
-            // through raw pipes; make sure the qemud:adb pipes don't go through
-            // qemud multiplexer
-            if (pipeArgs && pipeArgs - pipeName == 5
-                    && strncmp(pipeName, "qemud", 5) == 0
-                    && strncmp(pipeArgs + 1, "adb", 3) == 0) {
-                pipeArgs = strchr(pipeArgs + 1, ':');
+        const PipeService* svc = NULL;
+
+        // As a special case, if the service name is as:
+        //    qemud:<name>
+        //    qemud:<name>:args
+        //
+        // First look for a registered pipe service named "qemud:<name>"
+        // and if not found, fallback to "qemud" only.
+        //
+        // This is useful to support qemud services that are now served
+        // by a dedicated (and faster) pipe service, e.g. 'qemud:adb'
+        // as currently implemented by QEMU2 (and soon by QEMU1).
+        static const char kQemudPrefix[] = "qemud:";
+        const size_t kQemudPrefixSize = sizeof(kQemudPrefix) - 1U;
+
+        if (!strncmp(pipeName, kQemudPrefix, kQemudPrefixSize)) {
+            assert(pipeArgs == pipeName + kQemudPrefixSize - 1);
+            char* pipeArgs2 = strchr(pipeArgs + 1, ':');
+            if (pipeArgs2) {
+                *pipeArgs2 = '\0';
+            }
+            svc = android_pipe_service_find(pipeName);
+            if (svc) {
+                pipeArgs = pipeArgs2;
+            } else if (pipeArgs2) {
+                // Restore colon.
+                *pipeArgs2 = ':';
             }
         }
-
-        if (pipeArgs != NULL) {
+        if (pipeArgs) {
             *pipeArgs++ = '\0';
-            if (!*pipeArgs)
+            if (!pipeArgs) {
                 pipeArgs = NULL;
+            }
+        }
+        if (!svc) {
+            svc = android_pipe_service_find(pipeName);
         }
 
-        Pipe* pipe = pcon->pipe;
-        const PipeService* svc = android_pipe_service_find(pipeName);
         if (svc == NULL) {
             D("%s: Unknown server with name %s!", __FUNCTION__, pipeName);
             return PIPE_ERROR_INVAL;
         }
 
+        Pipe* pipe = pcon->pipe;
         void* peer = svc->funcs.init(pipe->hwpipe, svc->opaque, pipeArgs);
         if (peer == NULL) {
             D("%s: Initialization failed for pipe %s!", __FUNCTION__, pipeName);
