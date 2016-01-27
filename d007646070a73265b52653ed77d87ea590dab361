@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "34c3ee5c_acf24986",
+        "filename": "android/base/files/Stream_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-27T23:31:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f4b5d6da_57c5c365",
+      "range": {
+        "startLine": 95,
+        "startChar": 43,
+        "endLine": 95,
+        "endChar": 44
+      },
+      "revId": "d007646070a73265b52653ed77d87ea590dab361",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7431e681_d919570c",
         "filename": "android/base/files/Stream_unittest.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-01-27T23:04:22Z",
       "side": 1,
       "message": "if we also checked if stream sent exactly the expected number of bytes - we would\u0027ve found this at once",
+      "range": {
+        "startLine": 132,
+        "startChar": 3,
+        "endLine": 132,
+        "endChar": 5
+      },
+      "revId": "d007646070a73265b52653ed77d87ea590dab361",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14beeac6_50214d46",
+        "filename": "android/base/files/Stream_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-01-27T23:31:11Z",
+      "side": 1,
+      "message": "Agreed, but this seems hard to do without modifying the Stream class to return the number of bytes processed (instead of void), which seems like a big change. Yet, that would probably improve the usability...Will leave this for another time for now.",
+      "parentUuid": "7431e681_d919570c",
       "range": {
         "startLine": 132,
         "startChar": 3,
