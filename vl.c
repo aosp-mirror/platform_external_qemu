@@ -4777,7 +4777,7 @@ int run_qemu_main(int argc, const char **argv)
 
     if (hax_enabled()) {
         if (hax_sync_vcpus() < 0) {
-        fprintf(stderr, "Internal error: initial hax sync failed\n");
+            fprintf(stderr, "Internal error: initial hax sync failed\n");
             return 1;
         }
     }

@@ -31,6 +31,14 @@
 #include "qemu/main-loop.h"
 #include "hax-slot.h"
 
+#ifdef USE_ANDROID_EMU
+#include "android/error-messages.h"
+#include "android/utils/debug.h"
+#else
+static const char kHaxVcpuSyncFailed[] = "Failed to sync HAX vcpu context";
+#define derror(msg) do { fprintf(stderr, (msg)); } while (0)
+#endif
+
 /* #define DEBUG_HAX */
 
 #ifdef DEBUG_HAX
@@ -1402,8 +1410,8 @@ int hax_sync_vcpus(void)
 
             ret = hax_arch_set_registers(cpu->env_ptr);
             if (ret < 0) {
-                fprintf(stderr, "Failed to sync HAX vcpu context\n");
-                return -1;
+                derror(kHaxVcpuSyncFailed);
+                return ret;
             }
         }
     }
