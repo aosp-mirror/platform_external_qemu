@@ -52,6 +52,8 @@ class ToolWindow : public QFrame
 
 public:
     explicit ToolWindow(EmulatorQtWindow *emulatorWindow, QWidget *parent);
+    ~ToolWindow();
+
     void hide();
     void show();
     void dockMainWindow();
