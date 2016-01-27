@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4a43ebb_5a7a629b",
+        "filename": "android/emulation/testing/TestAndroidPipeDevice.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-27T18:27:11Z",
+      "side": 1,
+      "message": "I hope we never run any tests in parallel :)",
+      "range": {
+        "startLine": 103,
+        "startChar": 1,
+        "endLine": 103,
+        "endChar": 43
+      },
+      "revId": "fef5f0a48eb8f3c2a29ca7f2214198b4242d3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
