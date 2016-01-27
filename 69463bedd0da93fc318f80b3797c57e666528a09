@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "b4afde8e_950f530e",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/GLESv1Dispatch.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-01-27T17:35:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b4bb5ef1_bb98f35d",
+      "revId": "69463bedd0da93fc318f80b3797c57e666528a09",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d49b728b_84bee879",
         "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/GLESv1Dispatch.cpp",
         "patchSetId": 6
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "b4afde8e_b5237783",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/GLESv1Dispatch.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-01-27T17:35:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d49b728b_84bee879",
+      "revId": "69463bedd0da93fc318f80b3797c57e666528a09",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4c4527f_1cb59992",
         "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/GLESv2Dispatch.cpp",
         "patchSetId": 6
@@ -47,6 +83,24 @@
       "writtenOn": "2016-01-27T15:02:36Z",
       "side": 1,
       "message": "similar nit here :)",
+      "revId": "69463bedd0da93fc318f80b3797c57e666528a09",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "94b2daf4_e0d5333a",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/GLESv2Dispatch.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-01-27T17:35:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4c4527f_1cb59992",
       "revId": "69463bedd0da93fc318f80b3797c57e666528a09",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
