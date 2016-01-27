@@ -106,18 +106,25 @@ void android_display_init(DisplayState* ds, QFrameBuffer* qf)
 
 void sdl_display_init(DisplayState *ds, int full_screen, int  no_frame)
 {
-    EmulatorWindow*    emulator = emulator_window_get();
-    SkinDisplay*  disp =
-            skin_layout_get_display(emulator_window_get_layout(emulator));
-    int           width, height;
-    char          buf[128];
+    int width = 0;
+    int height = 0;
+    char buf[128] = { 0 };
 
-    if (disp->rotation & 1) {
-        width  = disp->rect.size.h;
-        height = disp->rect.size.w;
+    EmulatorWindow*    emulator = emulator_window_get();
+    SkinLayout* skin_layout = emulator_window_get_layout(emulator);
+    if(skin_layout == NULL) {
+        // running in no-window mode
+        return;
     } else {
-        width  = disp->rect.size.w;
-        height = disp->rect.size.h;
+        SkinDisplay*  disp = skin_layout_get_display(skin_layout);
+
+        if (disp->rotation & 1) {
+            width = disp->rect.size.h;
+            height = disp->rect.size.w;
+        } else {
+            width = disp->rect.size.w;
+            height = disp->rect.size.h;
+        }
     }
 
     snprintf(buf, sizeof buf, "width=%d,height=%d", width, height);
