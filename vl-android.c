@@ -1906,6 +1906,28 @@ static void android_teardown_metrics()
     androidMetrics_moduleFini();
 }
 
+// Save System boot parameters from the command line
+#define MAX_N_CMD_PROPS 16
+static const char* cmd_props[MAX_N_CMD_PROPS];
+static       int   n_cmd_props = 0;
+
+static void save_cmd_boot_property(const char* propStr) {
+    if (n_cmd_props >= MAX_N_CMD_PROPS) {
+        fprintf(stderr, "Too many command-line boot properties. "
+                        "This property is ignored: \"%s\"\n", propStr);
+        return;
+    }
+    cmd_props[n_cmd_props++] = propStr;
+}
+
+// Provide the saved System boot parameters from the command line
+static void process_cmd_boot_properties() {
+    int idx;
+    for(idx = 0; idx<n_cmd_props; idx++) {
+        boot_property_parse_option(cmd_props[idx]);
+    }
+}
+
 int main(int argc, char **argv, char **envp)
 {
     const char *gdbstub_dev = NULL;
@@ -2810,7 +2832,7 @@ int main(int argc, char **argv, char **envp)
                 break;
 
             case QEMU_OPTION_boot_property:
-                boot_property_parse_option((char*)optarg);
+                save_cmd_boot_property((char*)optarg);
                 break;
 
             case QEMU_OPTION_lcd_density:
@@ -3661,6 +3683,12 @@ int main(int argc, char **argv, char **envp)
         stralloc_reset(kernel_params);
         stralloc_reset(kernel_config);
     }
+
+    /* Send the command-line boot parameters now. The other
+     * parameters have already been processed, so these will
+     * take precendence.
+     */
+    process_cmd_boot_properties();
 
     CPU_FOREACH(cpu) {
         for (i = 0; i < nb_numa_nodes; i++) {
