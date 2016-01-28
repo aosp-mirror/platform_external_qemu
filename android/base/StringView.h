@@ -78,7 +78,11 @@ public:
     StringView(const std::string& str) :
         mString(str.c_str()), mSize(str.size()) {}
 
-    StringView(const char* str, size_t len) : mString(str ? str : ""), mSize(len) {}
+    StringView(const char* str, size_t len)
+        : mString(str ? str : ""), mSize(len) {}
+
+    StringView(const char* begin, const char* end)
+        : mString(begin ? begin : ""), mSize(begin ? end - begin : 0) {}
 
     const char* c_str() const { return mString; }
     const char* str() const { return mString; }
