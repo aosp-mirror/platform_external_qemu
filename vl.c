@@ -621,6 +621,38 @@ static QemuOptsList qemu_icount_opts = {
     },
 };
 
+#ifdef CONFIG_ANDROID
+// Save System boot parameters from the command line
+#define MAX_N_CMD_PROPS 16
+static const char* cmd_props[MAX_N_CMD_PROPS];
+static       int   n_cmd_props = 0;
+
+static void save_cmd_property(const char* propStr) {
+    if (n_cmd_props >= MAX_N_CMD_PROPS) {
+        fprintf(stderr, "Too many command-line boot properties. "
+                        "This property is ignored: \"%s\"\n", propStr);
+        return;
+    }
+    cmd_props[n_cmd_props++] = propStr;
+}
+
+// Provide the saved System boot parameters from the command line
+static void process_cmd_properties() {
+    int idx;
+    for(idx = 0; idx<n_cmd_props; idx++) {
+        // The string should be of the form
+        // "keyname=value"
+        const char* pkey = cmd_props[idx];
+        const char* peq = strchr(pkey, '=');
+        if (peq) {
+            // Pass ptr and length for both parts
+            boot_property_add2(pkey, (peq - pkey),
+                               peq+1, strlen(peq+1));
+        }
+    }
+}
+#endif  // CONFIG_ANDROID
+
 /**
  * Get machine options
  *
@@ -4054,6 +4086,9 @@ int run_qemu_main(int argc, const char **argv)
             case QEMU_OPTION_netfast:
                 android_op_netfast = 1;
                 break;
+            case QEMU_OPTION_boot_property:
+                save_cmd_property((char*)optarg);
+                break;
             case QEMU_OPTION_lcd_density:
                 lcd_density = strtol(optarg, (char **) &optarg, 10);
                 switch (lcd_density) {
@@ -4878,6 +4913,12 @@ int run_qemu_main(int argc, const char **argv)
     if (qemu_opts_foreach(qemu_find_opts("mon"), mon_init_func, NULL, 1) != 0) {
         return 1;
     }
+
+#ifdef CONFIG_ANDROID
+    // Parse the System boot parameters from the command line last,
+    // so they take precedence
+    process_cmd_properties();
+#endif  // CONFIG_ANDROID
 
     /* TODO: once all bus devices are qdevified, this should be done
      * when bus is created by qdev.c */
