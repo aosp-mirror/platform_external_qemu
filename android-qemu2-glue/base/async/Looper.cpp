@@ -56,7 +56,6 @@ public:
     QemuLooper() :
             Looper(),
             mQemuBh(NULL),
-            mFdWatches(),
             mPendingFdWatches(),
             mTimers() {
     }
@@ -96,13 +95,11 @@ public:
                         mWantedEvents(0U),
                         mPendingEvents(0U),
                         mLink() {
-            looper->addFdWatch(this);
         }
 
         virtual ~FdWatch() {
             clearPending();
             qemu_set_fd_handler(mFd, NULL, NULL, NULL);
-            asQemuLooper(mLooper)->delFdWatch(this);
         }
 
         virtual void addEvents(unsigned events) {
@@ -282,13 +279,6 @@ private:
         return reinterpret_cast<QemuLooper*>(looper);
     }
 
-    void addFdWatch(FdWatch* watch) {
-        mFdWatches.add(watch);
-    }
-
-    void delFdWatch(FdWatch* watch) {
-        mFdWatches.pick(watch);
-    }
 
     void addTimer(Timer* timer) {
         mTimers.add(timer);
@@ -335,8 +325,6 @@ private:
     }
 
     QEMUBH* mQemuBh;
-
-    FdWatchSet mFdWatches;
     FdWatchList mPendingFdWatches;
     TimerSet mTimers;
 };
