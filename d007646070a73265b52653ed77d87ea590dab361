@@ -93,6 +93,30 @@
       "revId": "d007646070a73265b52653ed77d87ea590dab361",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4c4527f_3fb72ff6",
+        "filename": "android/base/files/Stream_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-28T14:46:05Z",
+      "side": 1,
+      "message": "QEMU solves this by providing a method to its QEMUFile class that returns the total number of bytes transferred. We could add that to base::Stream without changing the signature of the put/get/read/write functions.",
+      "parentUuid": "14beeac6_50214d46",
+      "range": {
+        "startLine": 132,
+        "startChar": 3,
+        "endLine": 132,
+        "endChar": 5
+      },
+      "revId": "d007646070a73265b52653ed77d87ea590dab361",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
