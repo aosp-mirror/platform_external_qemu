@@ -462,7 +462,7 @@ static int coreaudio_run_out (HWVoiceOut *hw, int live)
     int decr;
     coreaudioVoice *core = CORE_OUT(hw);
 
-    if (coreaudio_voice_lock (core, "coreaudio_run_out")) {
+    if (conf.isAtexit || coreaudio_voice_lock (core, "coreaudio_run_out")) {
         return 0;
     }
 
@@ -608,7 +608,7 @@ static int coreaudio_run_in (HWVoiceIn *hw)
 
     coreaudioVoice *core = CORE_IN(hw);
 
-    if (coreaudio_voice_lock (core, "coreaudio_run_in")) {
+    if (conf.isAtexit || coreaudio_voice_lock (core, "coreaudio_run_in")) {
         return 0;
     }
     D("%s: core.decr=%d core.pos=%d\n", __FUNCTION__, core->decr, core->pos);
