@@ -517,5 +517,5 @@ void skin_ui_set_name(SkinUI* ui, const char* name) {
 }
 
 bool skin_ui_is_trackball_active(SkinUI* ui) {
-    return (ui->ui_params.enable_trackball && ui->show_trackball);
+    return (ui && ui->ui_params.enable_trackball && ui->show_trackball);
 }
