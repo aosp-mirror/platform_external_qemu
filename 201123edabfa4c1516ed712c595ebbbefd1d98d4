@@ -33,6 +33,24 @@
       "revId": "201123edabfa4c1516ed712c595ebbbefd1d98d4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7431e681_5c35357c",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-01-28T00:08:17Z",
+      "side": 1,
+      "message": "The better way to do this is\n\nif ((this-\u003edevicePixelRatio() - 2.0) \u003c std::numeric_limits\u003cdouble\u003e::epsilon)())",
+      "parentUuid": "14beeac6_cbacd0af",
+      "revId": "201123edabfa4c1516ed712c595ebbbefd1d98d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
