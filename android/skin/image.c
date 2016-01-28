@@ -620,9 +620,7 @@ skin_image_unref( SkinImage**  pimage )
 
     if (image) {
         if (image != _no_image && --image->ref_count == 0) {
-            if ((image->flags & SKIN_IMAGE_CLONE) != 0) {
-                skin_image_free(image);
-            }
+            skin_image_free(image);
         }
         *pimage = NULL;
     }
@@ -635,8 +633,9 @@ skin_image_rotate( SkinImage*  source, SkinRotation  rotation )
     SkinImageDesc  desc;
     SkinImage*     image;
 
-    if (source == _no_image || source->desc.rotation == rotation)
-        return source;
+    if (source == _no_image || source->desc.rotation == rotation) {
+        return skin_image_ref(source);
+    }
 
     desc          = source->desc;
     desc.rotation = rotation;
@@ -656,6 +655,7 @@ skin_image_clone_rotated( SkinImage* source, SkinRotation by ) {
     if (image == NULL)
         goto Fail;
 
+    image->ref_count = 1;
     image->desc  = source->desc;
     image->desc.rotation = SKIN_ROTATION_0;
     image->hash  = source->hash;
@@ -700,6 +700,7 @@ skin_image_clone( SkinImage*  source )
     if (image == NULL)
         goto Fail;
 
+    image->ref_count = 1;
     image->desc  = source->desc;
     image->hash  = source->hash;
     image->flags = SKIN_IMAGE_CLONE;
