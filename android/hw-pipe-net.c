@@ -599,18 +599,23 @@ openglesPipe_init( void* hwpipe, void* _looper, const char* args )
         return NULL;
     }
 
+    // for qemu1, _looper and looper_getForThread() is the same, i.e.,
+    // the looper of main_thread;
+    // for qemu2, _looper is the looper of main thread; however,
+    // looper_getForThread() belongs to vcpu
+    void* thread_looper = looper_getForThread();
     char server_addr[PATH_MAX];
     android_gles_server_path(server_addr, sizeof(server_addr));
 #ifndef _WIN32
     if (android_gles_fast_pipes) {
-        pipe = (NetPipe *)netPipe_initUnix(hwpipe, _looper, server_addr);
+        pipe = (NetPipe *)netPipe_initUnix(hwpipe, thread_looper, server_addr);
         D("Creating Unix OpenGLES pipe for GPU emulation: %s", server_addr);
     } else {
 #else /* _WIN32 */
     {
 #endif
         /* Connect through TCP as a fallback */
-        pipe = (NetPipe *)netPipe_initTcp(hwpipe, _looper, server_addr);
+        pipe = (NetPipe *)netPipe_initTcp(hwpipe, thread_looper, server_addr);
         D("Creating TCP OpenGLES pipe for GPU emulation!");
     }
     if (pipe != NULL) {
