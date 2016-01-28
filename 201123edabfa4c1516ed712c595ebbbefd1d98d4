@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "94b2daf4_54121da7",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-28T00:21:44Z",
+      "side": 1,
+      "message": "Good point, will change.",
+      "parentUuid": "d4b8d2d6_9be066ba",
+      "revId": "201123edabfa4c1516ed712c595ebbbefd1d98d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "14beeac6_cbacd0af",
         "filename": "android/skin/qt/emulator-qt-window.h",
         "patchSetId": 5
@@ -66,6 +84,42 @@
       "side": 1,
       "message": "I agree that is a good replacement for \"\u003d\u003d 2.0\".\n\nIn this case, though, I think we\u0027re not really interested in \"\u003d\u003d 2.0\" (i.e., \"is it Retina?\").\n\nI believe we want \"is it high resolution?\"",
       "parentUuid": "7431e681_5c35357c",
+      "revId": "201123edabfa4c1516ed712c595ebbbefd1d98d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54c4e260_b7d37b2d",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-28T00:21:44Z",
+      "side": 1,
+      "message": "Missing a fabs(), but will do this.",
+      "parentUuid": "7431e681_5c35357c",
+      "revId": "201123edabfa4c1516ed712c595ebbbefd1d98d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14beeac6_2bec64b1",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-28T00:21:44Z",
+      "side": 1,
+      "message": "Technically, this is looking at *just* retina, because Retina has DPR \u003d 2.0, and the loaded PNG is 2x the size. If there was a device with DPR \u003d 3.0, we would want an image 3 times the size to load. Chaoren claims this is just how things are done right now when dealing with Retina displays.",
+      "parentUuid": "f49a3677_0f617a10",
       "revId": "201123edabfa4c1516ed712c595ebbbefd1d98d4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
