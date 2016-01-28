@@ -307,7 +307,7 @@ prepare_build_for_host () {
         darwin-*)
             # Ensure we use the 10.8 SDK or else.
             OSX_VERSION=$(sw_vers -productVersion)
-            OSX_DEPLOYEMENT_TARGET=10.8
+            OSX_DEPLOYMENT_TARGET=10.8
             OSX_SDK_SUPPORTED="10.6 10.7 10.8 10.9"
             OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | \
                     grep --color=never macosx | sed -e "s/.*macosx10\.//g" | sort -n | \
@@ -376,8 +376,8 @@ prepare_build_for_host () {
 
             common_FLAGS="-target x86_64-apple-darwin12.0.0"
             var_append common_FLAGS " -isysroot $OSX_SDK_ROOT"
-            var_append common_FLAGS " -mmacosx-version-min=$OSX_DEPLOYEMENT_TARGET"
-            var_append common_FALGS " -DMACOSX_DEPLOYEMENT_TARGET=$OSX_DEPLOYEMENT_TARGET"
+            var_append common_FLAGS " -mmacosx-version-min=$OSX_DEPLOYMENT_TARGET"
+            var_append common_FLAGS " -DMACOSX_DEPLOYMENT_TARGET=$OSX_DEPLOYMENT_TARGET"
             EXTRA_CFLAGS="$common_FLAGS"
             EXTRA_CXXFLAGS="$common_FLAGS"
             if [ "$OPT_CXX11" ]; then
