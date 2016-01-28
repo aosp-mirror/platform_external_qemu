@@ -13,6 +13,8 @@
 
 #include "android/base/system/System.h"
 
+#include <iterator>
+
 #include <assert.h>
 #include <string.h>
 
@@ -81,6 +83,27 @@ bool PathUtils::isAbsolute(StringView path, HostType hostType) {
         return true;
     }
     return isDirSeparator(path[prefixSize - 1], HOST_WIN32);
+}
+
+// static
+StringView PathUtils::extension(const StringView path, HostType hostType) {
+    using riter = std::reverse_iterator<StringView::const_iterator>;
+
+    for (auto it = riter(path.end()), itEnd = riter(path.begin());
+         it != itEnd; ++it) {
+        if (*it == '.') {
+            // reverse iterator stores a base+1, so decrement it when returning
+            return StringView(std::prev(it.base()), path.end());
+        }
+        if (isDirSeparator(*it, hostType)) {
+            // no extension here - we've found the end of file name already
+            break;
+        }
+    }
+
+    // either there's no dot in the whole path, or we found directory separator
+    // first - anyway, there's no extension in this name
+    return StringView();
 }
 
 // static
