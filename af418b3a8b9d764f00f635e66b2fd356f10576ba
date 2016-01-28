@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "14beeac6_8b281874",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 464,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-01-28T00:47:03Z",
+      "side": 1,
+      "message": "Jim and I concluded this was the safest thing to do in terms of future proofing: it takes care of the two cases we *know* exist (1.0 and 2.0, see http://doc.qt.io/qt-5/qwindow.html#devicePixelRatio), and should work well with any other cases.",
+      "range": {
+        "startLine": 464,
+        "startChar": 12,
+        "endLine": 464,
+        "endChar": 49
+      },
+      "revId": "af418b3a8b9d764f00f635e66b2fd356f10576ba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
