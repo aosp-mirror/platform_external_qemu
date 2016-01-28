@@ -591,6 +591,10 @@ static void adisplay_update_surface(ADisplay* disp,
     int sz = disp->datasize.h > disp->datasize.w ? disp->datasize.h : disp->datasize.w;
     int dst_pitch = 4 * sz;
     uint8_t* dst_pixels = calloc(sz, dst_pitch);
+    if (dst_pixels == NULL) {
+        fprintf(stderr, "ERROR: %s:%d cannot allocate more memory.\n", __func__, __LINE__);
+        return;
+    }
 
     SkinRect dst_r = {
         .pos.x = x,
