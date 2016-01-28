@@ -50,8 +50,8 @@ void ParallelTaskBase::tryWaitTillJoined(void* opaqueThis,
         return;
     }
 
-    thisPtr->taskDoneImpl();
     thisPtr->isRunning = false;
+    thisPtr->taskDoneImpl();
 }
 
 }  // namespace internal

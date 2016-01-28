@@ -77,7 +77,7 @@ bool android_nand_limits_parse(const char* limits,
             next_item = comma + 1;
         }
 
-        if (!memcmp(item, "pid=", 4)) {
+        if (!strncmp(item, "pid=", 4)) {
             pid = strtol(item + 4, &end, 10);
             if (end != comma) {
                 derror("bad parameter, expecting pid=<number>, got '%s'", item);
@@ -87,7 +87,7 @@ bool android_nand_limits_parse(const char* limits,
                 derror("bad parameter: process identifier must be > 0");
                 return false;
             }
-        } else if (!memcmp(item, "signal=", 7)) {
+        } else if (!strncmp(item, "signal=", 7)) {
             signal = strtol(item + 7, &end, 10);
             if (end != comma) {
                 derror("bad parameter: expecting signal=<number>, got '%s'",
@@ -98,11 +98,11 @@ bool android_nand_limits_parse(const char* limits,
                 derror("bad parameter: signal number must be > 0");
                 return false;
             }
-        } else if (!memcmp(item, "reads=", 6)) {
+        } else if (!strncmp(item, "reads=", 6)) {
             if (!parse_nand_rw_limit(item + 6, next_item, &reads)) {
                 return false;
             }
-        } else if (!memcmp(item, "writes=", 7)) {
+        } else if (!strncmp(item, "writes=", 7)) {
             if (!parse_nand_rw_limit(item + 7, next_item, &writes)) {
                 return false;
             }

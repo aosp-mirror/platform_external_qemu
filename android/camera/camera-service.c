@@ -324,8 +324,8 @@ _camera_service_init(CameraServiceDesc* csd)
     csd->camera_count = 0;
 
     /* Lets see if HW config uses web cameras. */
-    if (memcmp(android_hw->hw_camera_back, "webcam", 6) &&
-        memcmp(android_hw->hw_camera_front, "webcam", 6)) {
+    if (strncmp(android_hw->hw_camera_back, "webcam", 6) &&
+        strncmp(android_hw->hw_camera_front, "webcam", 6)) {
         /* Web camera emulation is disabled. Skip enumeration of webcameras. */
         return;
     }
@@ -338,12 +338,12 @@ _camera_service_init(CameraServiceDesc* csd)
     }
 
     /* Set up back camera emulation. */
-    if (!memcmp(android_hw->hw_camera_back, "webcam", 6)) {
+    if (!strncmp(android_hw->hw_camera_back, "webcam", 6)) {
         _wecam_setup(csd, android_hw->hw_camera_back, "back", ci, connected_cnt);
     }
 
     /* Set up front camera emulation. */
-    if (!memcmp(android_hw->hw_camera_front, "webcam", 6)) {
+    if (!strncmp(android_hw->hw_camera_front, "webcam", 6)) {
         _wecam_setup(csd, android_hw->hw_camera_front, "front", ci, connected_cnt);
     }
 }
