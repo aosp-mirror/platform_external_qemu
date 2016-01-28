@@ -51,6 +51,24 @@
       "revId": "201123edabfa4c1516ed712c595ebbbefd1d98d4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f49a3677_0f617a10",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-01-28T00:17:44Z",
+      "side": 1,
+      "message": "I agree that is a good replacement for \"\u003d\u003d 2.0\".\n\nIn this case, though, I think we\u0027re not really interested in \"\u003d\u003d 2.0\" (i.e., \"is it Retina?\").\n\nI believe we want \"is it high resolution?\"",
+      "parentUuid": "7431e681_5c35357c",
+      "revId": "201123edabfa4c1516ed712c595ebbbefd1d98d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
