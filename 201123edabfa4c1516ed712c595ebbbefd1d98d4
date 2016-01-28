@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d4b8d2d6_9be066ba",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-01-28T00:05:41Z",
+      "side": 1,
+      "message": "Do we want this on all the time?\n\nI think it might be better to set this \u0027true\u0027 when the magic key is pressed and back to \u0027false\u0027 when it\u0027s released [paintEvent() and hide()?].",
+      "revId": "201123edabfa4c1516ed712c595ebbbefd1d98d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14beeac6_cbacd0af",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-01-28T00:05:41Z",
+      "side": 1,
+      "message": "I\u0027m wary of \u003d\u003d with floating point numbers. Might something like \"\u003e 1.5\" be better?",
+      "revId": "201123edabfa4c1516ed712c595ebbbefd1d98d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
