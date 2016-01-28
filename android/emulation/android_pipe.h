@@ -175,7 +175,10 @@ typedef struct AndroidPipeHwFuncs {
 
 } AndroidPipeHwFuncs;
 
-extern void android_pipe_set_hw_funcs(const AndroidPipeHwFuncs* hw_funcs);
+// Change the set of AndroidPipeHwFuncs corresponding to the hardware virtual
+// device, return the old value.
+extern const AndroidPipeHwFuncs* android_pipe_set_hw_funcs(
+        const AndroidPipeHwFuncs* hw_funcs);
 
 /* This tells the guest system that we want to close the pipe and that
  * further attempts to read or write to it will fail. This will not
@@ -202,9 +205,9 @@ extern void android_pipe_wake(void* hwpipe, unsigned flags);
 #define PIPE_WAKE_WRITE        (1 << 2)  /* pipe can now be written to */
 
 /* List of bitflags returned in status of CMD_POLL command */
-#define PIPE_POLL_IN   (1 << 0)
-#define PIPE_POLL_OUT  (1 << 1)
-#define PIPE_POLL_HUP  (1 << 2)
+#define PIPE_POLL_IN   (1 << 0)   /* means guest can read */
+#define PIPE_POLL_OUT  (1 << 1)   /* means guest can write */
+#define PIPE_POLL_HUP  (1 << 2)   /* means closed by host */
 
 // Called from the virtual hardware device only.
 // It is important to understand that the values returned by android_pipe_new()
@@ -274,5 +277,11 @@ extern void android_pipe_wake_on(void* pipe_, unsigned wakes);
 // code continues to compile and work as expected. The QEMU1 setup glue
 // should call this with a value of 'false' though.
 extern void android_pipe_set_raw_adb_mode(bool enabled);
+
+// The following functions are only used during unit-testing.
+
+// Reset the list of services registered through android_pipe_add_type().
+// Useful at the start and end of a unit-test.
+extern void android_pipe_reset_services(void);
 
 ANDROID_END_HEADER

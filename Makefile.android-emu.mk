@@ -393,11 +393,14 @@ LOCAL_SRC_FILES := \
   android/base/threads/ThreadStore_unittest.cpp \
   android/base/Uri_unittest.cpp \
   android/base/Version_unittest.cpp \
+  android/emulation/android_pipe_pingpong_unittest.cpp \
+  android/emulation/android_pipe_zero_unittest.cpp \
   android/emulation/bufprint_config_dirs_unittest.cpp \
   android/emulation/ConfigDirs_unittest.cpp \
   android/emulation/control/LineConsumer_unittest.cpp \
   android/emulation/CpuAccelerator_unittest.cpp \
   android/emulation/serial_line_unittest.cpp \
+  android/emulation/testing/TestAndroidPipeDevice.cpp \
   android/filesystems/ext4_utils_unittest.cpp \
   android/filesystems/fstab_parser_unittest.cpp \
   android/filesystems/partition_config_unittest.cpp \

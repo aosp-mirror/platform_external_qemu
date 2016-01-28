@@ -20,6 +20,7 @@
 #define  DEBUG 0
 
 #if DEBUG >= 1
+#include <stdio.h>
 #  define D(...)  fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
 #else
 #  define D(...)  (void)0
@@ -74,11 +75,21 @@ android_pipe_add_type(const char*               pipeName,
         APANIC("Pipe service name too long: '%s'", pipeName);
     }
 
+    DD("Adding new pipe service '%s' opaque=%p funcs=%p",
+       pipeName, pipeOpaque, pipeFuncs);
+
     list->services[count].name   = pipeName;
     list->services[count].opaque = pipeOpaque;
     list->services[count].funcs  = pipeFuncs[0];
 
     list->count++;
+}
+
+void android_pipe_reset_services(void) {
+    PipeServices* list = _pipeServices;
+    DD("Resetting list of pipe services");
+
+    list->count = 0;
 }
 
 static const PipeService*
@@ -98,8 +109,11 @@ android_pipe_service_find(const char* serviceName)
 
 static const AndroidPipeHwFuncs* sPipeHwFuncs = NULL;
 
-void android_pipe_set_hw_funcs(const AndroidPipeHwFuncs* hw_funcs) {
+const AndroidPipeHwFuncs* android_pipe_set_hw_funcs(
+        const AndroidPipeHwFuncs* hw_funcs) {
+    const AndroidPipeHwFuncs* result = sPipeHwFuncs;
     sPipeHwFuncs = hw_funcs;
+    return result;
 }
 
 void android_pipe_close(void* hwpipe) {

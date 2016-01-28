@@ -62,8 +62,8 @@ pingPongPipe_init( void* hwpipe, void* svcOpaque, const char* args )
 {
     PingPongPipe*  ppipe;
 
-    D("%s: hwpipe=%p", __FUNCTION__, hwpipe);
     ANEW0(ppipe);
+    D("%s: pipe=%p hwpipe=%p", __FUNCTION__, ppipe, hwpipe);
     pingPongPipe_init0(ppipe, hwpipe, svcOpaque);
     return ppipe;
 }
@@ -73,8 +73,8 @@ pingPongPipe_close( void* opaque )
 {
     PingPongPipe*  ppipe = opaque;
 
-    D("%s: hwpipe=%p (pos=%d count=%d size=%d)", __FUNCTION__,
-      ppipe->hwpipe, ppipe->pos, ppipe->count, ppipe->size);
+    D("%s: pipe=%p hwpipe=%p (pos=%d count=%d size=%d)", __FUNCTION__,
+      ppipe, ppipe->hwpipe, (int)ppipe->pos, (int)ppipe->count, (int)ppipe->size);
     free(ppipe->buffer);
     AFREE(ppipe);
 }
@@ -92,6 +92,7 @@ pingPongPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int nu
     for ( ; buff < buffEnd; buff++ )
         count += buff->size;
 
+    D("%s: pipe=%p count=%d bytes=%d", __FUNCTION__, pipe, numBuffers, count);
     /* Do we need to grow the pingpong buffer? */
     while (count > pipe->size - pipe->count) {
         size_t    newsize = pipe->size*2;
@@ -149,6 +150,19 @@ pingPongPipe_recvBuffers( void* opaque, AndroidPipeBuffer* buffers, int numBuffe
     PingPongPipe*  pipe = opaque;
     int  ret = 0;
 
+#if DEBUG
+    {
+        AndroidPipeBuffer* buff = buffers;
+        AndroidPipeBuffer* buffEnd = buff + numBuffers;
+        int count = 0;
+        while (buff < buffEnd) {
+            count += buff->size;
+            buff++;
+        }
+        D("%s: pipe=%p count=%d bytes=%d", __FUNCTION__, pipe, numBuffers, count);
+    }
+#endif
+
     while (numBuffers > 0) {
         int avail = pipe->count;
         if (avail <= 0) {
@@ -193,8 +207,9 @@ pingPongPipe_poll( void* opaque )
     PingPongPipe*  pipe = opaque;
     unsigned       ret = 0;
 
-    if (pipe->count < pipe->size)
-        ret |= PIPE_POLL_OUT;
+    // You can always write to the pipe, since the buffer will
+    // be dynamically resized.
+    ret |= PIPE_POLL_OUT;
 
     if (pipe->count > 0)
         ret |= PIPE_POLL_IN;
