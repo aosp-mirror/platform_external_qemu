@@ -554,6 +554,25 @@ static void adisplay_update_surface_pixels_32(ADisplay* disp,
     }
 }
 
+struct local_pixels_buffer_t {
+    uint8_t* pixels;
+    int size;
+};
+
+static struct local_pixels_buffer_t local_pixels_buffer = {.pixels = NULL, .size = 0};
+
+static uint8_t* local_calloc(int sz, int dst_pitch) {
+    if (local_pixels_buffer.pixels == NULL) {
+        local_pixels_buffer.pixels = calloc(sz,dst_pitch);
+        local_pixels_buffer.size = sz * dst_pitch;
+    } else if (local_pixels_buffer.size < sz * dst_pitch) {
+        local_pixels_buffer.size = 2 * sz * dst_pitch;
+        free(local_pixels_buffer.pixels);
+        local_pixels_buffer.pixels = calloc(1, local_pixels_buffer.size);
+    }
+    return local_pixels_buffer.pixels;
+}
+
 // Update the content of the display surface from the framebuffer content.
 // |disp| is the target ADisplay instance.
 // |rect| is the rectangle to update, in coordinates relative to the
@@ -590,7 +609,15 @@ static void adisplay_update_surface(ADisplay* disp,
     // content.
     int sz = disp->datasize.h > disp->datasize.w ? disp->datasize.h : disp->datasize.w;
     int dst_pitch = 4 * sz;
-    uint8_t* dst_pixels = calloc(sz, dst_pitch);
+    uint8_t* dst_pixels = local_calloc(sz, dst_pitch);
+    if (dst_pixels == NULL) {
+        derror("ERROR: %s:%d cannot allocate memory of %d byte.\n", __func__, __LINE__, sz * dst_pitch);
+        // crash it: copy-n-paste from 061dcd2137f1a654763ca4131cbfefcc495299c6
+        // Adding qemu2 console crash command
+        volatile int * ptr = NULL;
+        *ptr+=1;
+        return;
+    }
 
     SkinRect dst_r = {
         .pos.x = x,
@@ -622,7 +649,6 @@ static void adisplay_update_surface(ADisplay* disp,
 
     // Update the display surface content
     skin_surface_upload(disp->surface, &dst_r, dst_pixels, dst_pitch);
-    free(dst_pixels);
 
     // Done
 }
