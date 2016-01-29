@@ -46,7 +46,6 @@ typedef struct SkinWindowFuncs {
 extern SkinWindow*      skin_window_create( SkinLayout*  layout,
                                             int          x,
                                             int          y,
-                                            double       scale,
                                             int          no_display,
                                             const SkinWindowFuncs* win_funcs);
 

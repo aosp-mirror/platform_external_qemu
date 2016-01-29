@@ -42,9 +42,6 @@ typedef struct {
 EmulatorWindow*
 emulator_window_get(void);
 
-void
-android_emulator_set_window_scale(double  scale, int  is_dpi);
-
 /* Initializes EmulatorWindow structure instance. */
 int
 emulator_window_init(EmulatorWindow*   emulator,
