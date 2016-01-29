@@ -465,7 +465,16 @@ void EmulatorQtWindow::slot_clearInstance()
 #endif
 
     skin_winsys_save_window_pos();
+
+    // This is a workaround for b.android.com/198256
+    // Qemu1 QT GUI on OSX crashes on exit when QT releases NSWindow.
+    // Qemu2 builds do not show this crash behavior.
+    // Workaround leaks the EmulatorQtWindow instance, which was the undesired
+    // behavior prior to https://android-review.googlesource.com/#/c/199068/
+    // Root cause has not been identified
+#ifndef __APPLE__
     sInstance.get().reset();
+#endif
 }
 
 void EmulatorQtWindow::slot_createBitmap(SkinSurface *s, int w, int h, QSemaphore *semaphore) {
