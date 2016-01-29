@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7153b827_66980e8e",
+        "filename": "android/emulation/android_pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 393,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-29T09:08:56Z",
+      "side": 1,
+      "message": "Actually this is needed because the typical connection message is one of:\n\n  \u003cservice\u003e\n  \u003cservice\u003e:\u003carguments\u003e\n\n\u0027qemud:adb:\u003carguments\u003e\u0027 is a special case, by default, it corresponds to the \u0027qemud\u0027 pipe service, which will receive the \u0027adb:\u003carguments\u003e\u0027 parameters",
+      "parentUuid": "349a0eef_e52a2c23",
+      "range": {
+        "startLine": 393,
+        "startChar": 8,
+        "endLine": 393,
+        "endChar": 41
+      },
+      "revId": "4a80e2fdeeb78ea262bca4aa4b60d7b3318dbc95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "349a0eef_a5202445",
         "filename": "android/emulation/android_pipe.c",
         "patchSetId": 1
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "712ad87b_8eb2fb02",
+        "filename": "android/emulation/android_pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-29T09:08:56Z",
+      "side": 1,
+      "message": "Ooops, you\u0027re right. Will fix.",
+      "parentUuid": "349a0eef_c5253054",
+      "range": {
+        "startLine": 407,
+        "startChar": 12,
+        "endLine": 407,
+        "endChar": 41
+      },
+      "revId": "4a80e2fdeeb78ea262bca4aa4b60d7b3318dbc95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "548b02a3_0619e007",
         "filename": "android/emulation/android_pipe.c",
         "patchSetId": 1
@@ -82,6 +130,30 @@
       "writtenOn": "2016-01-29T07:49:42Z",
       "side": 1,
       "message": "a colon?",
+      "range": {
+        "startLine": 417,
+        "startChar": 27,
+        "endLine": 417,
+        "endChar": 33
+      },
+      "revId": "4a80e2fdeeb78ea262bca4aa4b60d7b3318dbc95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d139c4d1_b1ce4085",
+        "filename": "android/emulation/android_pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-01-29T09:08:56Z",
+      "side": 1,
+      "message": "oops again :) thanks",
+      "parentUuid": "548b02a3_0619e007",
       "range": {
         "startLine": 417,
         "startChar": 27,
