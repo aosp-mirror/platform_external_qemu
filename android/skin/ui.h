@@ -97,7 +97,8 @@ typedef struct SkinUIParams {
 SkinUI* skin_ui_create(struct SkinFile* layout_file,
                        const char* initial_orientation,
                        const SkinUIFuncs* ui_funcs,
-                       const SkinUIParams* params);
+                       const SkinUIParams* params,
+                       bool use_emugl_subwindow);
 
 void skin_ui_set_onion(SkinUI* ui,
                        struct SkinImage* onion,
