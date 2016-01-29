@@ -54,9 +54,9 @@
   <widget class="QPushButton" name="tel_startEndButton">
    <property name="geometry">
     <rect>
-     <x>190</x>
+     <x>188</x>
      <y>70</y>
-     <width>110</width>
+     <width>128</width>
      <height>36</height>
     </rect>
    </property>
@@ -70,9 +70,6 @@
    </property>
    <property name="toolTip">
     <string>Start call</string>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">text-align: right</string>
    </property>
    <property name="text">
     <string>CALL DEVICE</string>
@@ -129,9 +126,9 @@
   <widget class="QPushButton" name="sms_sendButton">
    <property name="geometry">
     <rect>
-     <x>180</x>
+     <x>176</x>
      <y>270</y>
-     <width>120</width>
+     <width>140</width>
      <height>36</height>
     </rect>
    </property>
@@ -142,9 +139,6 @@
      <weight>75</weight>
      <bold>true</bold>
     </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">text-align: right</string>
    </property>
    <property name="text">
     <string>SEND MESSAGE</string>
@@ -169,9 +163,9 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>70</x>
+     <x>64</x>
      <y>70</y>
-     <width>111</width>
+     <width>118</width>
      <height>36</height>
     </rect>
    </property>
@@ -208,6 +202,13 @@
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>tel_numberBox</tabstop>
+  <tabstop>tel_holdCallButton</tabstop>
+  <tabstop>tel_startEndButton</tabstop>
+  <tabstop>sms_messageBox</tabstop>
+  <tabstop>sms_sendButton</tabstop>
+ </tabstops>
  <resources>
   <include location="../resources.qrc"/>
  </resources>
