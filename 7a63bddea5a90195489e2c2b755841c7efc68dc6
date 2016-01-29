@@ -16,6 +16,24 @@
       "revId": "7a63bddea5a90195489e2c2b755841c7efc68dc6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14950abd_e155c204",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-01-29T17:40:24Z",
+      "side": 1,
+      "message": "Thank you for your suggestion. Since this would require changing the system image simultaneously, I checked their commit log and found that they actually put ES3 and ES2 together for a reason:\n\n    Add ES3 support to libGLESv2 and tracing tools\n    \n    Since ES3 is backwards compatible with ES2, a new wrapper isn\u0027t necessary, and the Khronos implementation guidelines recommend supporting both versions with the same library.\n    \n    Change-Id: If9bb02be60ce01cc5fe25d1f40c4e7f37244ebf6\n\nSo I think we should keep it as it is now?",
+      "parentUuid": "9143cc4f_6fc1115c",
+      "revId": "7a63bddea5a90195489e2c2b755841c7efc68dc6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
