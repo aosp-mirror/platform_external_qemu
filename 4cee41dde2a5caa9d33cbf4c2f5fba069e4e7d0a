@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "749006cb_278338f2",
+        "filename": "android/skin/window.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 573,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-01-29T17:18:49Z",
+      "side": 1,
+      "message": "this is accessed only be main-thread in a timer to update framebuffer;",
+      "parentUuid": "9489faaa_c591aeca",
+      "range": {
+        "startLine": 565,
+        "startChar": 4,
+        "endLine": 573,
+        "endChar": 38
+      },
+      "revId": "4cee41dde2a5caa9d33cbf4c2f5fba069e4e7d0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b486fe94_46fa0628",
         "filename": "android/skin/window.c",
         "patchSetId": 3
@@ -59,6 +83,30 @@
       "writtenOn": "2016-01-29T17:07:52Z",
       "side": 1,
       "message": "thanks Yurii:\n  what is the proper way to crash it ?",
+      "parentUuid": "b486fe94_46fa0628",
+      "range": {
+        "startLine": 614,
+        "startChar": 8,
+        "endLine": 614,
+        "endChar": 91
+      },
+      "revId": "4cee41dde2a5caa9d33cbf4c2f5fba069e4e7d0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b486fe94_465926dd",
+        "filename": "android/skin/window.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 614,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-01-29T17:18:49Z",
+      "side": 1,
+      "message": "Done",
       "parentUuid": "b486fe94_46fa0628",
       "range": {
         "startLine": 614,
