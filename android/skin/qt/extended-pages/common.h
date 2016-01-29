@@ -19,9 +19,6 @@
 void setButtonEnabled(QPushButton*  button, SettingsTheme theme, bool isEnabled);
 
 
-// Get the path to the folder where screenshots are saved.
-QString getScreenshotSaveDirectory();
-
 // Get the currently active UI theme.
 SettingsTheme getSelectedTheme();
 

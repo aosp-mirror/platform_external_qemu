@@ -25,7 +25,6 @@
 #include <QObject>
 #include <QPainter>
 #include <QPixmap>
-#include <QProcess>
 #include <QResizeEvent>
 #include <QRubberBand>
 #include <QScrollArea>
@@ -40,6 +39,7 @@
 #include "android/skin/event.h"
 #include "android/skin/surface.h"
 #include "android/skin/winsys.h"
+#include "android/skin/qt/ScreenCapturer.h"
 #include "android/skin/qt/tool-window.h"
 
 #if defined(__APPLE__)
@@ -201,9 +201,6 @@ private slots:
      from UI elements or called independently.
      */
 public slots:
-    void slot_screencapFinished(int exitStatus);
-    void slot_screencapPullFinished(int exitStatus);
-
     void activateWindow();
     void raise();
     void show();
@@ -232,6 +229,8 @@ private:
     QString getTmpImagePath();
     void setFrameOnTop(QFrame* frame, bool onTop);
 
+    void screenshotDone(android::qt::ScreenCapturer::Result result,
+                        const QString& errString);
 
     void             *batteryState;
 
@@ -749,8 +748,7 @@ private:
     QPoint mPrevMousePosition;
 
     QVariantAnimation mFlashAnimation;
-    QProcess mScreencapProcess;
-    QProcess mScreencapPullProcess;
+    std::unique_ptr<android::qt::ScreenCapturer> mScreenCapturer;
     MainLoopThread *mMainLoopThread;
 
     QMessageBox mAvdWarningBox;
