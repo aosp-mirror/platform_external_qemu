@@ -22,6 +22,30 @@
       "revId": "a07fbc331bef7ed4e45ea5ab3be8009358557787",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14950abd_4403e457",
+        "filename": "android/skin/file.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 933,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-29T19:41:01Z",
+      "side": 1,
+      "message": "skin_layout_create_rotated changes the pointer to the new segment of nodes.  This is just so we track to the end of that newly appended list before we add the next rotation nodes on.  Not sure it is necessary as I don\u0027t think the order matters.",
+      "parentUuid": "349a0eef_45b7603d",
+      "range": {
+        "startLine": 933,
+        "startChar": 20,
+        "endLine": 933,
+        "endChar": 33
+      },
+      "revId": "a07fbc331bef7ed4e45ea5ab3be8009358557787",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
