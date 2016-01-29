@@ -13,11 +13,7 @@
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/qt-settings.h"
 #include <QApplication>
-#include <QDir>
-#include <QFileInfo>
 #include <QSettings>
-#include <QStandardPaths>
-#include <QStringList>
 #include <QVariant>
 
 void setButtonEnabled(QPushButton*  button, SettingsTheme theme, bool isEnabled)
@@ -50,36 +46,6 @@ void setButtonEnabled(QPushButton*  button, SettingsTheme theme, bool isEnabled)
         QIcon icon(resName);
         button->setIcon(icon);
     }
-}
-
-QString getScreenshotSaveDirectory()
-{
-    QSettings settings;
-    QString savePath = settings.value(Ui::Settings::SAVE_PATH, "").toString();
-
-    // Check if this path is writable
-    QFileInfo fInfo(savePath);
-    if ( !fInfo.isDir() || !fInfo.isWritable() ) {
-
-        // Clear this, so we'll try the default instead
-        savePath = "";
-    }
-
-    if (savePath.isEmpty()) {
-
-        // We have no path. Try to determine the path to the desktop.
-        QStringList paths =
-                QStandardPaths::standardLocations(
-                    QStandardPaths::DesktopLocation);
-        if (paths.size() > 0) {
-            savePath = QDir::toNativeSeparators(paths[0]);
-
-            // Save this for future reference
-            settings.setValue(Ui::Settings::SAVE_PATH, savePath);
-        }
-    }
-
-    return savePath;
 }
 
 SettingsTheme getSelectedTheme() {

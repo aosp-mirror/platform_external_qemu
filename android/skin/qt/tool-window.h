@@ -35,7 +35,6 @@
 #include <QQueue>
 
 #define REMOTE_DOWNLOADS_DIR "/sdcard/Download"
-#define REMOTE_SCREENSHOT_FILE "/data/local/tmp/screen.png"
 
 namespace Ui {
     class ToolControls;
@@ -64,8 +63,6 @@ public:
     const UiEmuAgent* getUiEmuAgent() const { return uiEmuAgent; }
 
     QString getAdbFullPath(QStringList *args);
-    QString getScreenshotSaveDirectory();
-    QString getScreenshotSaveFile();
 
     void runAdbInstall(const QString &path);
     void runAdbPush(const QList<QUrl> &urls);
