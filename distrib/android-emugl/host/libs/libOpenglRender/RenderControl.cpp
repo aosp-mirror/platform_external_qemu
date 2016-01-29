@@ -167,7 +167,9 @@ static uint32_t rcCreateContext(uint32_t config,
         return 0;
     }
 
-    HandleType ret = fb->createRenderContext(config, share, glVersion == 2);
+    // To make it consistent with the guest, create GLES2 context when GL
+    // version==2 or 3
+    HandleType ret = fb->createRenderContext(config, share, glVersion == 2 || glVersion == 3);
     return ret;
 }
 
