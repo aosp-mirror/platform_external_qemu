@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2010 The Android Open Source Project
+/* Copyright (C) 2006-2016 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -41,9 +41,6 @@ typedef struct {
 /* Gets a pointer to a EmulatorWindow structure instance. */
 EmulatorWindow*
 emulator_window_get(void);
-
-void
-android_emulator_set_window_scale(double  scale, int  is_dpi);
 
 /* Initializes EmulatorWindow structure instance. */
 int
