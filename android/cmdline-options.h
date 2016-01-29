@@ -123,7 +123,6 @@ OPT_PARAM( onion, "<image>", "use overlay PNG image over screen" )
 OPT_PARAM( onion_alpha, "<%age>", "specify onion-skin translucency" )
 OPT_PARAM( onion_rotation, "0|1|2|3", "specify onion-skin rotation" )
 
-OPT_PARAM( scale, "<scale>", "scale emulator window" )
 OPT_PARAM( dpi_device, "<dpi>", "specify device's resolution in dpi (default "
             STRINGIFY(DEFAULT_DEVICE_DPI) ")" )
 

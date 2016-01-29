@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2015 The Android Open Source Project
+/* Copyright (C) 2006-2016 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -32,8 +32,6 @@
 
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
-
-static double get_default_scale( AndroidOptions*  opts );
 
 int qemu_net_disable = 0;
 
@@ -203,7 +201,6 @@ emulator_window_setup( EmulatorWindow*  emulator )
 
         .window_x = emulator->win_x,
         .window_y = emulator->win_y,
-        .window_scale = get_default_scale(emulator->opts),
 
         .keyboard_charmap = emulator->opts->charmap,
         .keyboard_raw_keys = emulator->opts->raw_keys != 0,
@@ -432,66 +429,6 @@ get_device_dpi( AndroidOptions*  opts )
     return  dpi_device;
 }
 
-static double
-get_default_scale( AndroidOptions*  opts )
-{
-    int     dpi_device  = get_device_dpi( opts );
-    int     dpi_monitor = -1;
-    double  scale       = 0.0;
-
-    /* possible values for the 'scale' option are
-     *   'auto'        : try to determine the scale automatically
-     *   '<number>dpi' : indicates the host monitor dpi, compute scale accordingly
-     *   '<fraction>'  : use direct scale coefficient
-     */
-
-    if (opts->scale) {
-        if (!strcmp(opts->scale, "auto"))
-        {
-            /* we need to get the host dpi resolution ? */
-            int   xdpi, ydpi;
-
-            if (skin_winsys_get_monitor_dpi(&xdpi, &ydpi) < 0) {
-                fprintf(stderr, "could not get monitor DPI resolution from system. please use -dpi-monitor to specify one\n" );
-                exit(1);
-            }
-            D( "system reported monitor resolutions: xdpi=%d ydpi=%d\n", xdpi, ydpi);
-            dpi_monitor = (xdpi + ydpi+1)/2;
-        }
-        else
-        {
-            char*   end;
-            scale = strtod( opts->scale, &end );
-
-            if (end && end[0] == 'd' && end[1] == 'p' && end[2] == 'i' && end[3] == 0) {
-                if ( scale < 20 || scale > 1000 ) {
-                    fprintf(stderr, "emulator: ignoring bad -scale argument '%s': %s\n", opts->scale,
-                            "host dpi number must be between 20 and 1000" );
-                    exit(1);
-                }
-                dpi_monitor = scale;
-                scale       = 0.0;
-            }
-            else if (end == NULL || *end != 0) {
-                fprintf(stderr, "emulator: ignoring bad -scale argument '%s': %s\n", opts->scale,
-                        "not a number or the 'auto' keyword" );
-                exit(1);
-            }
-            else if ( scale < 0.1 || scale > 3. ) {
-                fprintf(stderr, "emulator: ignoring bad -window-scale argument '%s': %s\n", opts->scale,
-                        "must be between 0.1 and 3.0" );
-                exit(1);
-            }
-        }
-    }
-
-    if (scale == 0.0 && dpi_monitor > 0)
-        scale = dpi_monitor*1.0/dpi_device;
-
-    return scale;
-}
-
-
 /* called periodically to poll for user input events */
 static void emulator_window_refresh(EmulatorWindow* emulator)
 {
@@ -506,23 +443,6 @@ static void emulator_window_refresh(EmulatorWindow* emulator)
             emulator->ui = NULL;
             qemu_system_shutdown_request();
         }
-    }
-}
-
-/*
- * android-qemu1-glue/console.c helper routines.
- */
-
-void
-android_emulator_set_window_scale(double  scale, int  is_dpi)
-{
-    EmulatorWindow*  emulator = qemulator;
-
-    if (is_dpi)
-        scale /= get_device_dpi( emulator->opts );
-
-    if (emulator->ui) {
-        skin_ui_set_scale(emulator->ui, scale);
     }
 }
 
