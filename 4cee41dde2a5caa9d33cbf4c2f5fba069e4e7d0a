@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9489faaa_c591aeca",
+        "filename": "android/skin/window.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 573,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-29T07:15:40Z",
+      "side": 1,
+      "message": "I hope this isn\u0027t ever called from multiple threads...",
+      "range": {
+        "startLine": 565,
+        "startChar": 4,
+        "endLine": 573,
+        "endChar": 38
+      },
+      "revId": "4cee41dde2a5caa9d33cbf4c2f5fba069e4e7d0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b486fe94_46fa0628",
+        "filename": "android/skin/window.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 614,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-29T07:15:40Z",
+      "side": 1,
+      "message": "1. derror()\n2. I\u0027d prefer us to crash here - otherwise we won\u0027t notice it again while it still is bugging the users\n3. Please also print a requested allocation size - it\u0027s a very different thing if we failed to allocate 1 mb or 1 gb",
+      "range": {
+        "startLine": 614,
+        "startChar": 8,
+        "endLine": 614,
+        "endChar": 91
+      },
+      "revId": "4cee41dde2a5caa9d33cbf4c2f5fba069e4e7d0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
