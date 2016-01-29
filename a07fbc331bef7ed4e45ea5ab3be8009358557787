@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "349a0eef_45b7603d",
+        "filename": "android/skin/file.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 933,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-01-29T07:37:53Z",
+      "side": 1,
+      "message": "do you need to reset it first?",
+      "range": {
+        "startLine": 933,
+        "startChar": 20,
+        "endLine": 933,
+        "endChar": 33
+      },
+      "revId": "a07fbc331bef7ed4e45ea5ab3be8009358557787",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
