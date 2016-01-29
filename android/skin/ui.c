@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2015 The Android Open Source Project
+/* Copyright (C) 2006-2016 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -96,7 +96,6 @@ SkinUI* skin_ui_create(SkinFile* layout_file, const char* initial_orientation,
     ui->window = skin_window_create(ui->layout,
                                     ui->ui_params.window_x,
                                     ui->ui_params.window_y,
-                                    ui->ui_params.window_scale,
                                     0,
                                     ui->ui_funcs->window_funcs);
     if (!ui->window) {
