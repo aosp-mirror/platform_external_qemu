@@ -111,7 +111,7 @@ void HelpPage::initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand
 #ifdef Q_OS_MAC
                 key_combo = "\u2318\u2325"; // Cmd - Alt
 #else
-                key_combo = "Ctrl + Alt";
+                key_combo = "Ctrl+Alt";
 #endif
             } else {
                 key_combo  = key_sequence_and_command.key().toString(QKeySequence::NativeText);
