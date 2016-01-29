@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2015 The Android Open Source Project
+/* Copyright (C) 2007-2016 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -52,8 +52,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-extern void android_emulator_set_window_scale(double, int);
 
 #define  DEBUG  1
 
@@ -2570,53 +2568,6 @@ static const CommandDefRec fingerprint_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
-/*****                           M A I N   C O M M A N D S                             ******/
-/*****                                                                                 ******/
-/********************************************************************************************/
-/********************************************************************************************/
-
-static int
-do_window_scale( ControlClient  client, char*  args )
-{
-    double  scale;
-    int     is_dpi = 0;
-    char*   end;
-
-    if (!args) {
-        control_write( client, "KO: argument missing, try 'window scale <scale>'\r\n" );
-        return -1;
-    }
-
-    scale = strtol( args, &end, 10 );
-    if (end > args && !memcmp( end, "dpi", 4 )) {
-        is_dpi = 1;
-    }
-    else {
-        scale = strtod( args, &end );
-        if (end == args || end[0]) {
-            control_write( client, "KO: argument <scale> must be a real number, or an integer followed by 'dpi'\r\n" );
-            return -1;
-        }
-    }
-
-    android_emulator_set_window_scale(scale, is_dpi);
-    return 0;
-}
-
-static const CommandDefRec  window_commands[] =
-{
-    { "scale", "change the window scale",
-    "'window scale <scale>' allows you to change the scale of the emulator window at runtime\r\n"
-    "<scale> must be either a real number between 0.1 and 3.0, or an integer followed by\r\n"
-    "the 'dpi' prefix (as in '120dpi')\r\n",
-    NULL, do_window_scale, NULL },
-
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
-
-/********************************************************************************************/
-/********************************************************************************************/
-/*****                                                                                 ******/
 /*****                           Q E M U   C O M M A N D S                             ******/
 /*****                                                                                 ******/
 /********************************************************************************************/
@@ -2714,10 +2665,6 @@ static const CommandDefRec   main_commands[] =
     { "avd", "control virtual device execution",
     "allows you to control (e.g. start/stop) the execution of the virtual device\r\n", NULL,
     NULL, vm_commands },
-
-    { "window", "manage emulator window",
-    "allows you to modify the emulator window\r\n", NULL,
-    NULL, window_commands },
 
     { "qemu", "QEMU-specific commands",
     "allows to connect to the QEMU virtual machine monitor\r\n", NULL,
