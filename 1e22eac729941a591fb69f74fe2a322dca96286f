@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5422228b_8e0fbf10",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-01-29T22:49:06Z",
+      "side": 1,
+      "message": "This is keeping us crashing.",
+      "range": {
+        "startLine": 247,
+        "startChar": 4,
+        "endLine": 247,
+        "endChar": 27
+      },
+      "revId": "1e22eac729941a591fb69f74fe2a322dca96286f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
