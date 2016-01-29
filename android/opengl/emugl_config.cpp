@@ -161,6 +161,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     System* system = System::get();
 
     if (!config->enabled) {
+        fprintf(stderr, "%s: config not enabled. get out\n", __FUNCTION__);
         // There is no real GPU emulation. As a special case, define
         // SDL_RENDER_DRIVER to 'software' to ensure that the
         // software SDL renderer is being used. This allows one
@@ -178,12 +179,14 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
         // backend directory.
         String dir = sBackendList->getLibDirPath(config->backend);
         if (dir.size()) {
-            D("Adding to the library search path: %s\n", newDirs.c_str());
+            D("Adding to the library search path: %s\n", dir.c_str());
+            fprintf(stderr, "%s: Adding to the library search path: %s\n", __FUNCTION__, dir.c_str());
             system->addLibrarySearchDir(dir);
         }
     }
 
     if (!strcmp(config->backend, "host")) {
+        fprintf(stderr, "%s: using host backend. Nothing to do!\n", __FUNCTION__);
         // Nothing more to do for the 'host' backend.
         return;
     }
@@ -199,14 +202,17 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     String lib;
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_EGL, &lib)) {
+        fprintf(stderr, "%s: set ANDROID_EGL_LIB to %s\n", __FUNCTION__, lib.c_str());
         system->envSet("ANDROID_EGL_LIB", lib);
     }
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_GLESv1, &lib)) {
+        fprintf(stderr, "%s: set ANDROID_GLESv1_LIB to %s\n", __FUNCTION__, lib.c_str());
         system->envSet("ANDROID_GLESv1_LIB", lib);
     }
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_GLESv2, &lib)) {
+        fprintf(stderr, "%s: set ANDROID_GLESv2_LIB to %s\n", __FUNCTION__, lib.c_str());
         system->envSet("ANDROID_GLESv2_LIB", lib);
     }
 

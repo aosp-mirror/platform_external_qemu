@@ -54,16 +54,19 @@ bool EmuglBackendList::contains(const char* name) const {
 }
 
 String EmuglBackendList::getLibDirPath(const char* name) {
-    return android::base::StringFormat(
+    String res = android::base::StringFormat(
             "%s/%s/gles_%s",
             mExecDir,
             mProgramBitness == 64 ? "lib64" : "lib",
             name);
+    fprintf(stderr, "%s: path=%s\n", __FUNCTION__, res.c_str());
+    return res;
 }
 
 bool EmuglBackendList::getBackendLibPath(const char* name,
                                          Library library,
                                          String* libPath) {
+    fprintf(stderr, "%s: enter\n", __FUNCTION__);
     static const char kLibPrefix[] = "lib";
 
 #ifdef _WIN32
@@ -94,6 +97,7 @@ bool EmuglBackendList::getBackendLibPath(const char* name,
             libraryName,
             kLibSuffix);
 
+    fprintf(stderr, "%s: search for backend lib path=%s\n", __FUNCTION__, path.c_str());
     if (!System::get()->pathIsFile(path)) {
         D("%s(name=%s lib=%s): File does not exist: %s\n",
           __FUNCTION__, name, libraryName, path.c_str());

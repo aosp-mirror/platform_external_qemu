@@ -421,6 +421,7 @@ int main(int argc, char** argv)
     }
     D("%s\n", config.status);
 
+    fprintf(stderr, "%s: set up us the emugl env\n", __FUNCTION__);
     emuglConfig_setupEnv(&config);
 
     /* Add <lib>/qt/ to the library search path. */

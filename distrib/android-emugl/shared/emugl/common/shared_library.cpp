@@ -120,8 +120,10 @@ SharedLibrary* SharedLibrary::open(const char* libraryName,
         path = static_cast<char*>(malloc(pathLen));
         snprintf(path, pathLen, "%s%s", libraryName, kDllExtension);
         libPath = path;
+        fprintf(stderr, "SharedLibrary::%s. not in cwd. trying to open path=%s\n", __FUNCTION__, libPath);
     }
 
+        fprintf(stderr, "SharedLibrary::%s. clear error. path=%s\n", __FUNCTION__, libPath);
     dlerror();  // clear error.
 
 #ifdef __APPLE__
@@ -133,6 +135,7 @@ SharedLibrary* SharedLibrary::open(const char* libraryName,
         lib = dlopen(libPath, RTLD_NOW);
     }
 #else
+    fprintf(stderr, "SharedLibrary::%s. actual dlopen call. path=%s\n", __FUNCTION__, libPath);
     void* lib = dlopen(libPath, RTLD_NOW);
 #endif
 
@@ -144,6 +147,7 @@ SharedLibrary* SharedLibrary::open(const char* libraryName,
         return new SharedLibrary(lib);
     }
 
+    fprintf(stderr, "SharedLibrary::%s. an error occurred!!!111\n", __FUNCTION__);
     snprintf(error, errorSize, "%s", dlerror());
     return NULL;
 }

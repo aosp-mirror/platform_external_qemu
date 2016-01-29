@@ -37,10 +37,13 @@ bool init_egl_dispatch()
 {
 
     const char *libName = getenv("ANDROID_EGL_LIB");
+    fprintf(stderr, "%s:egl: libName=%s\n", __FUNCTION__, libName);
     if (!libName) libName = DEFAULT_EGL_LIB;
+    fprintf(stderr, "%s:egl (after possible setting to DEFAULT_EGL_LIB): libName=%s\n", __FUNCTION__, libName);
 
     char error[256];
     emugl::SharedLibrary *lib = emugl::SharedLibrary::open(libName, error, sizeof(error));
+    fprintf(stderr, "%s: egl library=%s\n", __FUNCTION__, libName);
     if (!lib) {
         printf("Failed to open %s: [%s]\n", libName, error);
         return NULL;
