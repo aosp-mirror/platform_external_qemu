@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5422228b_eea593d1",
+        "filename": "android/console.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-01-29T23:59:01Z",
+      "side": 1,
+      "message": "I have learned that we are to include a current copyright\nnotice with new files, but we should not revise the date\nwhen we update or move an existing file.",
+      "revId": "cddae70fa7d7ff821124b713ed2eb0bdb6c288b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b486fe94_cfce293c",
+        "filename": "android/emulator-window.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-01-29T23:59:01Z",
+      "side": 1,
+      "message": "etc",
+      "revId": "cddae70fa7d7ff821124b713ed2eb0bdb6c288b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
