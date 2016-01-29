@@ -237,6 +237,7 @@ void EmulatorQtWindow::slot_startupTick() {
     mStartupDialog.setRange(0, 0); // Don't show % complete
     mStartupDialog.setCancelButton(0);   // No "cancel" button
     mStartupDialog.show();
+        mContainer.close();
 }
 
 void EmulatorQtWindow::slot_avdArchWarningMessageAccepted()
@@ -438,7 +439,7 @@ void EmulatorQtWindow::startThread(StartFunction f, int argc, char **argv)
 {
     if (!mMainLoopThread) {
         mMainLoopThread = new MainLoopThread(f, argc, argv);
-        QObject::connect(mMainLoopThread, &QThread::finished, &mContainer, &EmulatorWindowContainer::close);
+        //QObject::connect(mMainLoopThread, &QThread::finished, &mContainer, &EmulatorWindowContainer::close);
         mMainLoopThread->start();
     } else {
         D("mMainLoopThread already started");

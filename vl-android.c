@@ -1948,6 +1948,10 @@ int main(int argc, char **argv, char **envp)
     STRALLOC_DEFINE(kernel_config);
     int    dns_count = 0;
 
+
+    printf ("JOSH SLeep 5\n");
+    sleep(0);
+    return 0;
     if (!crashhandler_init()) {
         VERBOSE_PRINT(init, "Crash handling not initialized\n");
     }
@@ -2037,6 +2041,7 @@ int main(int argc, char **argv, char **envp)
     kvm_allowed = -1;
 #endif
 
+    //return 0;
     optind = 1;
     for(;;) {
         if (optind >= argc)
@@ -2853,6 +2858,7 @@ int main(int argc, char **argv, char **envp)
             }
         }
     }
+    //return 0;
 
     /* Initialize character map. */
     if (skin_charmap_setup(op_charmap_file)) {
@@ -2977,6 +2983,7 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
+    return 0;
     /* Init SD-Card stuff. For Android, it is always hda */
     /* If the -hda option was used, ignore the Android-provided one */
     if (hda_opts == NULL) {
@@ -3407,6 +3414,7 @@ int main(int argc, char **argv, char **envp)
     /* init block driver */
     bdrv_init();
 
+    return 0;
     /* we always create the cdrom drive, even if no disk is there */
 #if 0
     if (nb_drives_opt < MAX_DRIVES)
@@ -3714,7 +3722,7 @@ int main(int argc, char **argv, char **envp)
         show_vnc_port = 1;
 #endif
     }
-
+    return 0;
 
     switch (display_type) {
     case DT_NOGRAPHIC:
