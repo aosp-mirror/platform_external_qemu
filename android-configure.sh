@@ -930,6 +930,8 @@ echo "LIBPNG_PREBUILTS_DIR := $LIBPNG_PREBUILTS_DIR" >> $config_mk
 echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
 echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
 echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
+# libuuid is a part of e2fsprogs package
+echo "LIBUUID_PREBUILTS_DIR := $E2FSPROGS_PREBUILTS_DIR" >> $config_mk
 
 if [ $OPTION_DEBUG = "yes" ] ; then
     echo "BUILD_DEBUG := true" >> $config_mk

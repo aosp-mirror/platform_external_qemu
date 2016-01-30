@@ -142,9 +142,10 @@ build_package () {
                 builder_disable_verbose_install
                 ;;
         esac
-        builder_build_autotools_package \
+        builder_build_autotools_package_full_install \
             "$PKG_SRC_DIR" \
             "$PKG_BUILD_DIR" \
+            "install install-libs" \
             "$@"
 
         touch "$PKG_TIMESTAMP"
@@ -239,6 +240,17 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                         sbin/mkfs.ext4 \
                         sbin/resize2fs \
                         sbin/tune2fs \
+
+                # Copy the libuuid files on linux. Mac has its own libuuid.
+                case $SYSTEM in
+                    linux*)
+                        copy_directory_files \
+                            "$(builder_install_prefix)" \
+                            "$INSTALL_DIR/$SYSTEM" \
+                            include/uuid/uuid.h \
+                            lib/libuuid.a
+                    ;;
+                esac
                 ;;
         esac
 
