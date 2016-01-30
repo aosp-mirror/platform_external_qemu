@@ -549,6 +549,12 @@ emulator_window_get_layout(EmulatorWindow* emulator)
     if (emulator->ui) {
         return skin_ui_get_current_layout(emulator->ui);
     } else {
-        return emulator->layout_file->layouts;
+        if(emulator->opts->no_window) {
+            // in no-window mode there is no skin layout
+            return NULL;
+        } else {
+            return emulator->layout_file->layouts;
+        }
     }
+    return NULL;
 }
