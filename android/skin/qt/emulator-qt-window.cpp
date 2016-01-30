@@ -666,7 +666,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, 
         if (mNextIsZoom) {
             recenterFocusPoint();
         } else {
-            mContainer.setGeometry(*rect);
+            mContainer.resize(rect->size());
         }
         mNextIsZoom = false;
     }
