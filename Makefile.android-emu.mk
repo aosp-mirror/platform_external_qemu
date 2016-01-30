@@ -51,6 +51,7 @@ LOCAL_CFLAGS := $(EMULATOR_COMMON_CFLAGS)
 LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(ANDROID_EMU_INCLUDES) \
+    $(LIBUUID_INCLUDES) \
 
 LOCAL_SRC_FILES := \
     android/base/async/AsyncReader.cpp \
@@ -83,6 +84,7 @@ LOCAL_SRC_FILES := \
     android/base/threads/internal/ParallelTaskBase.cpp \
     android/base/threads/ThreadStore.cpp \
     android/base/Uri.cpp \
+    android/base/Uuid.cpp \
     android/base/Version.cpp \
     android/error-messages.cpp \
     android/utils/aconfig-file.c \
@@ -320,6 +322,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     android-emu \
     android-emu-base \
     $(LIBCURL_STATIC_LIBRARIES) \
+    $(LIBUUID_STATIC_LIBRARIES) \
     $(LIBXML2_STATIC_LIBRARIES) \
     $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
     emulator-libext4_utils \
@@ -331,6 +334,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
 
 ANDROID_EMU_LDLIBS := \
     $(LIBCURL_LDLIBS) \
+    $(LIBUUID_LDLIBS) \
     $(BREAKPAD_CLIENT_LDLIBS) \
 
 ifeq ($(BUILD_TARGET_OS),windows)
@@ -392,6 +396,7 @@ LOCAL_SRC_FILES := \
   android/base/threads/Thread_unittest.cpp \
   android/base/threads/ThreadStore_unittest.cpp \
   android/base/Uri_unittest.cpp \
+  android/base/Uuid_unittest.cpp \
   android/base/Version_unittest.cpp \
   android/emulation/android_pipe_pingpong_unittest.cpp \
   android/emulation/android_pipe_zero_unittest.cpp \
