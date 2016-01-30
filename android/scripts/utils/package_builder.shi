@@ -571,17 +571,19 @@ builder_disable_parallel_install () {
     _SHU_BUILDER_DISABLE_PARALLEL_INSTALL=true
 }
 
-# Build a given autotools based package
+# Build a given autotools based package and run customized install commands
 #
 # $1: Source directory.
 # $2: Build directory.
-# $3+: Additional configure options.
-builder_build_autotools_package () {
+# $3: Make commands, e.g. install
+# $4+: Additional configure options.
+builder_build_autotools_package_full_install () {
     local PKG_FULLNAME="$(basename "$1")"
     dump "$(builder_text) Building $PKG_FULLNAME"
 
     local PKG_SRC_DIR="$1"
     local PKG_BUILD_DIR="$2"
+    local INSTALL_COMMANDS="$3"
     local INSTALL_FLAGS
     if [ -z "$_SHU_BUILDER_DISABLE_PARALLEL_INSTALL" ]; then
         var_append INSTALL_FLAGS "-j$NUM_JOBS"
@@ -589,7 +591,7 @@ builder_build_autotools_package () {
     if [ -z "$_SHU_BUILDER_DISABLE_VERBOSE_INSTALL" ]; then
         var_append INSTALL_FLAGS "V=1";
     fi
-    shift; shift;
+    shift; shift; shift;
     (
         run mkdir -p "$PKG_BUILD_DIR" &&
         run cd "$PKG_BUILD_DIR" &&
@@ -603,7 +605,19 @@ builder_build_autotools_package () {
             $_SHU_BUILDER_CONFIGURE_FLAGS \
             "$@" &&
         run make -j$NUM_JOBS V=1 &&
-        run make install $INSTALL_FLAGS
+        run make $INSTALL_COMMANDS $INSTALL_FLAGS
     ) ||
     panic "Could not build and install $PKG_FULLNAME"
+}
+
+# Build with the default 'make install' command in the end
+#
+# $1: Source directory.
+# $2: Build directory.
+# $3+: Additional configure options.
+builder_build_autotools_package() {
+    local FIRST="$1"
+    local SECOND="$2"
+    shift; shift;
+    builder_build_autotools_package "$FIRST" "$SECOND" install "$@"
 }
