@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5422228b_3fd19725",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-01T19:14:54Z",
+      "side": 1,
+      "message": "I assume this is a case of \"this just shouldn\u0027t happen\"?",
+      "range": {
+        "startLine": 219,
+        "startChar": 13,
+        "endLine": 219,
+        "endChar": 31
+      },
+      "revId": "3cfb5e1f61beb7f34bda6e4181d8210d010f4a64",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f465d6c4_0445572d",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 772,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-01T19:14:54Z",
+      "side": 1,
+      "message": "waitForStarted() takes in a timeout argument that defaults to 30 seconds. Until this is replaced, why not lower that down to ~5 seconds, since these processes should never take too long to spin up?",
+      "range": {
+        "startLine": 772,
+        "startChar": 9,
+        "endLine": 772,
+        "endChar": 41
+      },
+      "revId": "3cfb5e1f61beb7f34bda6e4181d8210d010f4a64",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "749006cb_6585357a",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 813,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-01T19:14:54Z",
+      "side": 1,
+      "message": "IBID.",
+      "range": {
+        "startLine": 813,
+        "startChar": 13,
+        "endLine": 813,
+        "endChar": 49
+      },
+      "revId": "3cfb5e1f61beb7f34bda6e4181d8210d010f4a64",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
