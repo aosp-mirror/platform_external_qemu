@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2010 The Android Open Source Project
+/* Copyright (C) 2006-2016 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -67,7 +67,6 @@ typedef struct SkinUIParams {
     char window_name[64];
     int window_x;
     int window_y;
-    double window_scale;
 
     bool enable_touch;
     bool enable_dpad;
