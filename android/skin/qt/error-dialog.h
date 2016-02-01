@@ -12,5 +12,6 @@
 #pragma once
 
 #include <QString>
+#include <QWidget>
 
-void showErrorDialog(const QString& message, const QString& title);
+void showErrorDialog(const QString& message, const QString& title, QWidget* parent);

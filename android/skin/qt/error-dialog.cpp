@@ -12,9 +12,10 @@
 #include "android/skin/qt/error-dialog.h"
 #include <QErrorMessage>
 
-void showErrorDialog(const QString& message, const QString& title)
+void showErrorDialog(const QString& message, const QString& title, QWidget* parent)
 {
-    QErrorMessage *err = QErrorMessage::qtHandler();
+    QErrorMessage *err = new QErrorMessage(parent);
+    err->setAttribute(Qt::WA_DeleteOnClose);
     err->setModal(true);
     err->setWindowTitle(title);
     err->showMessage(message);

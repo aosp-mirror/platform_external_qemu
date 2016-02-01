@@ -251,7 +251,8 @@ void LocationPage::locationPlaybackStart()
         for (int col = 0; col < mUi->loc_pathTable->columnCount(); col++) {
             if (!validateCell(mUi->loc_pathTable, row, col)) {
                 showErrorDialog(tr("The table contains errors.<br>No locations were sent."),
-                                tr("GPS Playback"));
+                                tr("GPS Playback"),
+                                this);
                 mUi->loc_pathTable->scrollToItem(mUi->loc_pathTable->item(row, 0));
                 return;
             }
@@ -382,7 +383,7 @@ void LocationPage::finishGeoDataLoading(
         settings.setValue(Ui::Settings::LOCATION_PLAYBACK_FILE, file_name);
         populateTable(&mGpsFixesArray);
     } else if (!ignore_error) {
-        showErrorDialog(error_message, tr("Geo Data Parser"));
+        showErrorDialog(error_message, tr("Geo Data Parser"), this);
     }
     SettingsTheme theme = getSelectedTheme();
     setButtonEnabled(mUi->loc_GpxKmlButton, theme, true);

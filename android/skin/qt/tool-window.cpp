@@ -267,7 +267,8 @@ QString ToolWindow::findAndroidSdkRoot()
     if (sdkRoot.empty()) {
         showErrorDialog(tr("The ANDROID_SDK_ROOT environment variable must be "
                            "set to use this."),
-                        tr("Android SDK Root"));
+                        tr("Android SDK Root"),
+                        this);
         return QString::null;
     }
     return QString::fromUtf8(sdkRoot.c_str());
@@ -343,7 +344,8 @@ void ToolWindow::runAdbInstall(const QString &path)
     if (mInstallProcess.state() != QProcess::NotRunning) {
         showErrorDialog(tr("Another APK install is currently pending.<br/>"
                            "Try again after current APK installation completes."),
-                        tr("APK Installer"));
+                        tr("APK Installer"),
+                        this);
         return;
     }
 
@@ -746,7 +748,8 @@ void ToolWindow::slot_installFinished(int exitStatus)
 
     if (exitStatus) {
         showErrorDialog(tr("The APK failed to install: adb could not connect to the emulator."),
-                        tr("APK Installer"));
+                        tr("APK Installer"),
+                        this);
         return;
     }
 
@@ -759,7 +762,7 @@ void ToolWindow::slot_installFinished(int exitStatus)
 
     if (match.hasMatch()) {
         QString msg = tr("The APK failed to install. Error code: ") + match.captured(1);
-        showErrorDialog(msg, tr("APK Installer"));
+        showErrorDialog(msg, tr("APK Installer"), this);
     }
 }
 
@@ -778,7 +781,7 @@ void ToolWindow::slot_pushFinished(int exitStatus)
         QByteArray er = mPushProcess.readAllStandardError();
         er = er.replace('\n', "<br/>");
         QString msg = tr("Unable to copy files. Output:<br/><br/>") + QString(er);
-        showErrorDialog(msg, tr("File Copy"));
+        showErrorDialog(msg, tr("File Copy"), this);
     }
 
     if (mFilesToPush.isEmpty()) {

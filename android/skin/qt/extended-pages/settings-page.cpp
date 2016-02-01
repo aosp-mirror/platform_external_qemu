@@ -127,7 +127,7 @@ void SettingsPage::on_set_saveLocFolderButton_clicked()
     if ( !fInfo.isDir() || !fInfo.isWritable() ) {
         QString errStr = tr("The path is not writable:<br>")
                          + dirName;
-        showErrorDialog(errStr, tr("Save location"));
+        showErrorDialog(errStr, tr("Save location"), this);
         return;
     }
 

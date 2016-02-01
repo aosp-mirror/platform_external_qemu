@@ -54,7 +54,7 @@ void TelephonyPage::on_tel_startEndButton_clicked()
             tResp = mTelephonyAgent->telephonyCmd(Tel_Op_Init_Call,
                                                   cleanNumber.toStdString().c_str());
             if (tResp != Tel_Resp_OK) {
-                showErrorDialog(tr("The call failed."), tr("Telephony"));
+                showErrorDialog(tr("The call failed."), tr("Telephony"), this);
                 return;
             }
         }
@@ -97,7 +97,7 @@ void TelephonyPage::on_tel_startEndButton_clicked()
             {
                 // Don't show an error for Invalid Action: that
                 // just means that the AVD already hanged up.
-                showErrorDialog(tr("The end-call failed."), tr("Telephony"));
+                showErrorDialog(tr("The end-call failed."), tr("Telephony"), this);
                 return;
             }
         }
@@ -144,7 +144,7 @@ void TelephonyPage::on_tel_holdCallButton_clicked()
         tResp = mTelephonyAgent->telephonyCmd(tOp,
                                               cleanNumber.toStdString().c_str());
         if (tResp != Tel_Resp_OK) {
-            showErrorDialog(tr("The call hold failed."), tr("Telephony"));
+            showErrorDialog(tr("The call hold failed."), tr("Telephony"), this);
             return;
         }
     }
@@ -188,7 +188,7 @@ void TelephonyPage::on_sms_sendButton_clicked()
                      mUi->tel_numberBox->
                               currentText().length());
     if (retVal < 0  ||  sender.len <= 0) {
-        showErrorDialog(tr("The \"From\" number is invalid."), tr("SMS"));
+        showErrorDialog(tr("The \"From\" number is invalid."), tr("SMS"), this);
         return;
     }
 
@@ -204,12 +204,12 @@ void TelephonyPage::on_sms_sendButton_clicked()
                                            utf8Message,
                                            MAX_SMS_MSG_SIZE);
     if (nUtf8Chars == 0) {
-        showErrorDialog(tr("The message is empty.<br>Please enter a message."), tr("SMS"));
+        showErrorDialog(tr("The message is empty.<br>Please enter a message."), tr("SMS"), this);
         return;
     }
 
     if (nUtf8Chars < 0) {
-        showErrorDialog(tr("The message contains invalid characters."), tr("SMS"));
+        showErrorDialog(tr("The message contains invalid characters."), tr("SMS"), this);
         return;
     }
 
@@ -218,14 +218,15 @@ void TelephonyPage::on_sms_sendButton_clicked()
                                               &sender, NULL);
     if (pdus == NULL) {
         showErrorDialog(tr("The message contains invalid characters."),
-                                     tr("SMS"));
+                        tr("SMS"), this);
         return;
     }
 
     if (mTelephonyAgent && mTelephonyAgent->getModem) {
         AModem modem = mTelephonyAgent->getModem();
         if (modem == NULL) {
-            showErrorDialog(tr("Cannot send message, modem emulation not running."), tr("SMS"));
+            showErrorDialog(tr("Cannot send message, modem emulation not running."),
+                            tr("SMS"), this);
             return;
         }
 
