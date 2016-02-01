@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9462dabe_710898b3",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-01T20:33:47Z",
+      "side": 1,
+      "message": "I\u0027d move this comment above the ifndef, right now it seems like the |reset| is a hack.\n\nAlso, nit: trailing space below.",
+      "revId": "ef0e75ac6765c990f458f35b46ad85552c1a94d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
