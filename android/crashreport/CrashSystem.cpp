@@ -14,7 +14,9 @@
 
 #include "android/crashreport/CrashSystem.h"
 
+#include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
 #ifdef _WIN32
 #include "android/base/system/Win32UnicodeString.h"
@@ -47,9 +49,14 @@
 namespace android {
 namespace crashreport {
 
-namespace {
+using ::android::base::LazyInstance;
+using ::android::base::PathUtils;
+using ::android::base::RunOptions;
+using ::android::base::StringFormat;
+using ::android::base::StringVector;
+using ::android::base::System;
 
-using namespace android::base;
+namespace {
 
 const char kCrashURL_prod[] = "https://clients2.google.com/cr/report";
 const char kCrashURL_staging[] =
@@ -65,15 +72,16 @@ const char kCrashSubDir[] = "breakpad";
 
 class HostCrashSystem : public CrashSystem {
 public:
-    HostCrashSystem() : mCrashDir(), mCrashURL() {}
+    HostCrashSystem() = default;
 
-    virtual ~HostCrashSystem() {}
+    virtual ~HostCrashSystem() = default;
 
     virtual const std::string& getCrashDirectory() override {
         if (mCrashDir.empty()) {
-            mCrashDir.assign(::android::ConfigDirs::getUserDirectory().c_str());
-            mCrashDir += System::kDirSeparator;
-            mCrashDir += kCrashSubDir;
+            mCrashDir =
+                    PathUtils::join(::android::ConfigDirs::getUserDirectory(),
+                                    kCrashSubDir)
+                            .c_str();
         }
         return mCrashDir;
     }
@@ -114,38 +122,31 @@ CrashSystem* sCrashSystemForTesting = nullptr;
 
 }  // namespace
 
-int CrashSystem::spawnService(
-        const ::android::base::StringVector& commandLine) {
+int CrashSystem::spawnService(const StringVector& commandLine) {
     System::Pid pid;
-    auto success = ::android::base::System::get()->runCommand(
-            commandLine, RunOptions::Default, System::kInfinite, nullptr, &pid);
+    auto success = System::get()->runCommand(commandLine, RunOptions::Default,
+                                             System::kInfinite, nullptr, &pid);
     return success ? pid : -1;
 }
 
 const std::string& CrashSystem::getCaBundlePath() {
     if (mCaBundlePath.empty()) {
-        mCaBundlePath.assign(System::get()->getLauncherDirectory().c_str());
-        mCaBundlePath += System::kDirSeparator;
-        mCaBundlePath += "lib";
-        mCaBundlePath += System::kDirSeparator;
-        mCaBundlePath += "ca-bundle.pem";
+        mCaBundlePath = PathUtils::join(System::get()->getLauncherDirectory(),
+                                        "lib", "ca-bundle.pem")
+                                .c_str();
     }
     return mCaBundlePath;
 }
 
 const std::string& CrashSystem::getCrashServicePath() {
     if (mCrashServicePath.empty()) {
-        mCrashServicePath.assign(
-                ::android::base::System::get()->getLauncherDirectory().c_str());
-        mCrashServicePath += System::kDirSeparator;
-        mCrashServicePath += "emulator";
-        if (::android::base::System::kProgramBitness == 64) {
-            mCrashServicePath += "64";
-        }
-        mCrashServicePath += "-crash-service";
-#ifdef _WIN32
-        mCrashServicePath += ".exe";
-#endif
+        mCrashServicePath =
+                PathUtils::join(
+                        System::get()->getLauncherDirectory(),
+                        PathUtils::toExecutableName(StringFormat(
+                                "emulator%s-crash-service",
+                                System::kProgramBitness == 64 ? "64" : "")))
+                        .c_str();
     }
     return mCrashServicePath;
 }
@@ -186,9 +187,8 @@ const CrashSystem::CrashPipe& CrashSystem::getCrashPipe() {
 const StringVector CrashSystem::getCrashServiceCmdLine(
         const std::string& pipe,
         const std::string& proc) {
-    const StringVector cmdline = {
-        getCrashServicePath(), "-pipe", pipe, "-ppid", proc
-    };
+    const StringVector cmdline = {getCrashServicePath(), "-pipe", pipe, "-ppid",
+                                  proc};
     return cmdline;
 }
 
@@ -218,11 +218,8 @@ CrashSystem* CrashSystem::get() {
 
 // static
 bool CrashSystem::isDump(const std::string& path) {
-    static const char kDumpSuffix[] = ".dmp";
-    static const int kDumpSuffixSize = sizeof(kDumpSuffix) - 1;
-    return System::get()->pathIsFile(path) && path.size() > kDumpSuffixSize &&
-           (path.compare(path.size() - kDumpSuffixSize, kDumpSuffixSize,
-                         kDumpSuffix) == 0);
+    return PathUtils::extension(path) == ".dmp" &&
+           System::get()->pathIsFile(path);
 }
 
 // static
