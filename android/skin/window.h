@@ -43,12 +43,13 @@ typedef struct SkinWindowFuncs {
  *       window is too large, in which case the window will automatically
  *       be resized to fit the screen.
  */
-extern SkinWindow*      skin_window_create( SkinLayout*  layout,
-                                            int          x,
-                                            int          y,
-                                            double       scale,
-                                            int          no_display,
-                                            const SkinWindowFuncs* win_funcs);
+extern SkinWindow* skin_window_create(SkinLayout* layout,
+                                      int x,
+                                      int y,
+                                      double scale,
+                                      int no_display,
+                                      bool use_emugl_subwindow,
+                                      const SkinWindowFuncs* win_funcs);
 
 extern void             skin_window_enable_touch( SkinWindow*  window, int  enabled );
 extern void             skin_window_enable_trackball( SkinWindow*  window, int  enabled );

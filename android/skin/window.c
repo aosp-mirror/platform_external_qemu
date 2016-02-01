@@ -655,7 +655,8 @@ static void adisplay_update_surface(ADisplay* disp,
 
 static void adisplay_redraw(ADisplay* disp,
                             SkinRect* rect,
-                            SkinSurface* surface) {
+                            SkinSurface* surface,
+                            bool using_emugl_subwindow) {
     SkinRect  r;
 
     if (!skin_rect_intersect(&r, rect, &disp->rect)) {
@@ -663,19 +664,21 @@ static void adisplay_redraw(ADisplay* disp,
     }
 
 #if 0
-        fprintf(stderr, "--- display redraw r.pos(%d,%d) r.size(%d,%d) "
-                        "disp.pos(%d,%d) disp.size(%d,%d) datasize(%d,%d) rect.pos(%d,%d) rect.size(%d,%d)\n",
-                        r.pos.x - disp->rect.pos.x, r.pos.y - disp->rect.pos.y,
-                        r.size.w, r.size.h, disp->rect.pos.x, disp->rect.pos.y,
-                        disp->rect.size.w, disp->rect.size.h, disp->datasize.w, disp->datasize.h,
-                        rect->pos.x, rect->pos.y, rect->size.w, rect->size.h );
+    fprintf(stderr, "--- display redraw r.pos(%d,%d) r.size(%d,%d) "
+            "disp.pos(%d,%d) disp.size(%d,%d) datasize(%d,%d) rect.pos(%d,%d) rect.size(%d,%d)\n",
+            r.pos.x - disp->rect.pos.x, r.pos.y - disp->rect.pos.y,
+            r.size.w, r.size.h, disp->rect.pos.x, disp->rect.pos.y,
+            disp->rect.size.w, disp->rect.size.h, disp->datasize.w, disp->datasize.h,
+            rect->pos.x, rect->pos.y, rect->size.w, rect->size.h );
 #endif
 
     // Update the content of the display surface.
     SkinRect src_r = r;
     src_r.pos.x -= disp->rect.pos.x;
     src_r.pos.y -= disp->rect.pos.y;
-    adisplay_update_surface(disp, &src_r);
+    if (!using_emugl_subwindow) {
+        adisplay_update_surface(disp, &src_r);
+    }
 
     if (disp->brightness == LCD_BRIGHTNESS_OFF) {
         // Fill window surface with solid black.
@@ -1022,6 +1025,7 @@ struct SkinWindow {
     char          enabled;
     char          fullscreen;
     char          no_display;
+    bool use_emugl_subwindow;
 
     char          enable_touch;
     char          enable_trackball;
@@ -1323,14 +1327,13 @@ skin_window_redraw_opengles( SkinWindow* window )
 
 static int  skin_window_reset_internal (SkinWindow*, SkinLayout*);
 
-SkinWindow*
-skin_window_create(SkinLayout* slayout,
-                   int x,
-                   int y,
-                   double scale,
-                   int no_display,
-                   const SkinWindowFuncs* win_funcs)
-{
+SkinWindow* skin_window_create(SkinLayout* slayout,
+                               int x,
+                               int y,
+                               double scale,
+                               int no_display,
+                               bool use_emugl_subwindow,
+                               const SkinWindowFuncs* win_funcs) {
     SkinWindow*  window;
 
     /* If scale is <= 0, we want to check that the window's default size if
@@ -1368,6 +1371,7 @@ skin_window_create(SkinLayout* slayout,
     window->win_funcs    = win_funcs;
     window->scale = scale;
     window->no_display   = no_display;
+    window->use_emugl_subwindow = use_emugl_subwindow;
     window->surface = NULL;
 
     /* enable everything by default */
@@ -1820,7 +1824,8 @@ skin_window_redraw( SkinWindow*  window, SkinRect*  rect )
             ADisplay*  disp = layout->displays;
             ADisplay*  end  = disp + layout->num_displays;
             for (; disp < end; disp++) {
-                adisplay_redraw(disp, rect, window->surface);
+                adisplay_redraw(disp, rect, window->surface,
+                                window->use_emugl_subwindow);
             }
         }
 
@@ -2015,10 +2020,10 @@ skin_window_display( SkinWindow*  window )
 void
 skin_window_update_display( SkinWindow*  window, int  x, int  y, int  w, int  h )
 {
-    ADisplay*  disp = skin_window_display(window);
-
     if ( !window->surface )
         return;
+
+    ADisplay* disp = skin_window_display(window);
 
     if (disp != NULL) {
         SkinRect  r;
@@ -2031,7 +2036,7 @@ skin_window_update_display( SkinWindow*  window, int  x, int  y, int  w, int  h 
         r.pos.x += disp->origin.x;
         r.pos.y += disp->origin.y;
 
-        adisplay_redraw(disp, &r, window->surface);
+        adisplay_redraw(disp, &r, window->surface, window->use_emugl_subwindow);
     }
 }
 

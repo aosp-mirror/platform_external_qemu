@@ -238,10 +238,9 @@ emulator_window_setup( EmulatorWindow*  emulator )
         VERBOSE_PRINT(gles, "Using glReadPixels() for GPU display");
     }
 
-    emulator->ui = skin_ui_create(emulator->layout_file,
-                                  android_hw->hw_initialOrientation,
-                                  &my_ui_funcs,
-                                  &my_ui_params);
+    emulator->ui = skin_ui_create(
+            emulator->layout_file, android_hw->hw_initialOrientation,
+            &my_ui_funcs, &my_ui_params, s_use_emugl_subwindow);
     if (!emulator->ui) {
         return;
     }
