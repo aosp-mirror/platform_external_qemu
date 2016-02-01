@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "749006cb_85dde192",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-01T19:22:16Z",
+      "side": 1,
+      "message": "No.\nThe call to waitForStarted can actually timeout (default: 30 seconds). See my TODO comment below. Those calls will actually block for that amount of time, freezing the UI.\n\nThis is possible say, in a heavily loaded system where process creation takes too long.",
+      "parentUuid": "5422228b_3fd19725",
+      "range": {
+        "startLine": 219,
+        "startChar": 13,
+        "endLine": 219,
+        "endChar": 31
+      },
+      "revId": "3cfb5e1f61beb7f34bda6e4181d8210d010f4a64",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f465d6c4_0445572d",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "d468d2a0_9b3c6669",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 772,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-01T19:22:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f465d6c4_0445572d",
+      "range": {
+        "startLine": 772,
+        "startChar": 9,
+        "endLine": 772,
+        "endChar": 41
+      },
+      "revId": "3cfb5e1f61beb7f34bda6e4181d8210d010f4a64",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "749006cb_6585357a",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2016-02-01T19:14:54Z",
       "side": 1,
       "message": "IBID.",
+      "range": {
+        "startLine": 813,
+        "startChar": 13,
+        "endLine": 813,
+        "endChar": 49
+      },
+      "revId": "3cfb5e1f61beb7f34bda6e4181d8210d010f4a64",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f465d6c4_a44d8b4b",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 813,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-01T19:22:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "749006cb_6585357a",
       "range": {
         "startLine": 813,
         "startChar": 13,
