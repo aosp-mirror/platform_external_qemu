@@ -12,6 +12,7 @@
 #pragma once
 
 #include "ui_telephony-page.h"
+#include <QErrorMessage>
 #include <QValidator>
 #include <QWidget>
 #include <memory>
@@ -50,4 +51,5 @@ private:
     const QAndroidTelephonyAgent* mTelephonyAgent;
     CallActivity mCallActivity;
     QString mPhoneNumber;
+    QErrorMessage mErrorMessage;
 };

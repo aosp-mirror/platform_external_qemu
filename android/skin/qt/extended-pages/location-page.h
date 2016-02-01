@@ -12,6 +12,7 @@
 
 #include "ui_location-page.h"
 #include "android/gps/GpsFix.h"
+#include <QErrorMessage>
 #include <QTimer>
 #include <QThread>
 #include <QWidget>
@@ -85,6 +86,7 @@ private:
     bool mNowLoadingGeoData;
     bool mGeoDataLoadingStopRequested;
     int mRowToSend;
+    QErrorMessage mErrorMessage;
 };
 
 class GeoDataLoaderThread : public QThread {

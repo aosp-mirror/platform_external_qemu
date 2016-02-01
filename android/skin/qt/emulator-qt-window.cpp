@@ -85,7 +85,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
                           "We strongly recommend creating a new AVD."),
                        QMessageBox::Ok,
                        this),
-        mFirstShowEvent(true)
+        mFirstShowEvent(true),
+        mErrorMessage(this)
 {
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
@@ -153,6 +154,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
 
     mResizeTimer.setSingleShot(true);
     QObject::connect(&mResizeTimer, SIGNAL(timeout()), this, SLOT(slot_resizeDone()));
+
+    mErrorMessage.setModal(true);
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr()
@@ -229,7 +232,8 @@ void EmulatorQtWindow::slot_showProcessErrorDialog(
         default:
             msg = tr("Unexpected error occured while grabbing screenshot.");
     }
-    showErrorDialog(msg, tr("Screenshot"));
+    mErrorMessage.setWindowTitle(tr("Screenshot"));
+    mErrorMessage.showMessage(msg, Ui::Errors::SCREENSHOT_PROCESS_FAILED);
 }
 
 void EmulatorQtWindow::slot_startupTick() {
@@ -313,10 +317,11 @@ void EmulatorQtWindow::dropEvent(QDropEvent *event)
         // If any of the files is an APK, intent was ambiguous
         for (int i = 0; i < urls.length(); i++) {
             if (urls[i].path().endsWith(".apk")) {
-                showErrorDialog(tr("Drag-and-drop can either install a single APK"
-                                   " file or copy one or more non-APK files to the"
-                                   " Emulator SD card."),
-                                tr("Drag and Drop"));
+                mErrorMessage.setWindowTitle(tr("Drag and Drop"));
+                mErrorMessage.showMessage(tr("Drag-and-drop can either install a single APK"
+                                             " file or copy one or more non-APK files to the"
+                                             " Emulator SD card."),
+                                          Ui::Errors::DRAG_AND_DROP_AMBIGUOUS);
                 return;
             }
         }
@@ -498,10 +503,11 @@ void EmulatorQtWindow::slot_createBitmap(SkinSurface *s, int w, int h, QSemaphor
     s->bitmap = new QImage(w, h, QImage::Format_ARGB32);
     if (s->bitmap->isNull()) {
         // Failed to create image, warn user.
-        showErrorDialog(
+        mErrorMessage.setWindowTitle(tr("Skinning error"));
+        mErrorMessage.showMessage(
                 tr("Failed to allocate memory for the skin bitmap."
                    "Try configuring your AVD to not have a skin."),
-                tr("Error displaying skin"));
+                Ui::Errors::SKIN_ALLOCATION_FAILED);
     } else {
         s->bitmap->fill(0);
     }
@@ -781,7 +787,8 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
         QByteArray er = mScreencapProcess.readAllStandardError();
         er = er.replace('\n', "<br/>");
         QString msg = tr("The screenshot could not be captured. Output:<br/><br/>") + QString(er);
-        showErrorDialog(msg, tr("Screenshot"));
+        mErrorMessage.setWindowTitle(tr("Screenshot"));
+        mErrorMessage.showMessage(msg, Ui::Errors::SCREENSHOT_CAPTURE_FAILED);
     } else {
         // Pull the image from its remote location to the desired location
         QStringList args;
@@ -796,10 +803,11 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
 
         QString fileName = tool_window->getScreenshotSaveFile();
         if (fileName.isEmpty()) {
-            showErrorDialog(tr("The screenshot save location is invalid.<br/>"
-                               "Check the settings page and ensure the directory "
-                               "exists and is writeable."),
-                            tr("Screenshot"));
+            mErrorMessage.setWindowTitle(tr("Screenshot"));
+            mErrorMessage.showMessage(tr("The screenshot save location is invalid.<br/>"
+                                         "Check the settings page and ensure the directory "
+                                         "exists and is writeable."),
+                                         Ui::Errors::SCREENSHOT_INVALID_SAVE_LOCATION);
             return;
         }
 
@@ -823,7 +831,8 @@ void EmulatorQtWindow::slot_screencapPullFinished(int exitStatus)
         er = er.replace('\n', "<br/>");
         QString msg = tr("The screenshot could not be loaded from the device. Output:<br/><br/>")
                         + QString(er);
-        showErrorDialog(msg, tr("Screenshot"));
+        mErrorMessage.setWindowTitle(tr("Screenshot"));
+        mErrorMessage.showMessage(msg, Ui::Errors::SCREENSHOT_PULL_FAILED);
     }
 }
 
@@ -1027,9 +1036,10 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
             if (androidHwConfig_isScreenMultiTouch(android_hw)) {
                 mOverlay.showForMultitouch();
             } else {
-                showErrorDialog(tr("Your virtual device is not configured for "
-                                   "multi-touch input."),
-                                tr("Multi-touch"));
+                mErrorMessage.setWindowTitle(tr("Multi-touch"));
+                mErrorMessage.showMessage(tr("Your virtual device is not configured for "
+                                             "multi-touch input."),
+                                          Ui::Errors::MULTITOUCH_NOT_ENABLED);
             }
         } else if (type == kEventKeyUp) {
             mOverlay.hide();

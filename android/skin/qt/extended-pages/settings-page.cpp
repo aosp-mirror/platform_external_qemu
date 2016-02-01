@@ -10,7 +10,6 @@
 // GNU General Public License for more details.
 
 #include "android/skin/qt/extended-pages/settings-page.h"
-#include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include <QApplication>
@@ -28,7 +27,8 @@ static void setElidedText(QLineEdit* line_edit, const QString& text) {
 
 SettingsPage::SettingsPage(QWidget *parent) :
     QWidget(parent),
-    mUi(new Ui::SettingsPage())
+    mUi(new Ui::SettingsPage()),
+    mErrorMessage(this)
 {
     mUi->setupUi(this);
     mUi->set_saveLocBox->installEventFilter(this);
@@ -69,6 +69,9 @@ SettingsPage::SettingsPage(QWidget *parent) :
     bool onTopOnly = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
     mUi->set_onTop->setCheckState(onTopOnly ? Qt::Checked : Qt::Unchecked);
 #endif
+
+    mErrorMessage.setModal(true);
+    mErrorMessage.setWindowTitle(tr("Settings"));
 }
 
 bool SettingsPage::eventFilter (QObject* object, QEvent* event)
@@ -127,7 +130,7 @@ void SettingsPage::on_set_saveLocFolderButton_clicked()
     if ( !fInfo.isDir() || !fInfo.isWritable() ) {
         QString errStr = tr("The path is not writable:<br>")
                          + dirName;
-        showErrorDialog(errStr, tr("Save location"));
+        mErrorMessage.showMessage(errStr, Ui::Errors::SETTINGS_BAD_SAVE_LOCATION);
         return;
     }
 

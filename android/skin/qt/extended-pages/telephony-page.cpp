@@ -12,7 +12,6 @@
 #include "android/skin/qt/extended-pages/telephony-page.h"
 
 #include "android/emulation/control/telephony_agent.h"
-#include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/telephony/modem.h"
@@ -26,10 +25,13 @@ TelephonyPage::TelephonyPage(QWidget *parent) :
     QWidget(parent),
     mUi(new Ui::TelephonyPage()),
     mTelephonyAgent(nullptr),
-    mCallActivity(TelephonyPage::CallActivity::Inactive)
+    mCallActivity(TelephonyPage::CallActivity::Inactive),
+    mErrorMessage(this)
 {
     mUi->setupUi(this);
     mUi->tel_numberBox->setValidator(new PhoneNumberValidator());
+
+    mErrorMessage.setModal(true);
 }
 
 void TelephonyPage::on_tel_startEndButton_clicked()
@@ -54,7 +56,9 @@ void TelephonyPage::on_tel_startEndButton_clicked()
             tResp = mTelephonyAgent->telephonyCmd(Tel_Op_Init_Call,
                                                   cleanNumber.toStdString().c_str());
             if (tResp != Tel_Resp_OK) {
-                showErrorDialog(tr("The call failed."), tr("Telephony"));
+                mErrorMessage.setWindowTitle(tr("Telephony"));
+                mErrorMessage.showMessage(tr("The call failed."),
+                                          Ui::Errors::TELEPHONY_CALL_FAILED);
                 return;
             }
         }
@@ -97,7 +101,9 @@ void TelephonyPage::on_tel_startEndButton_clicked()
             {
                 // Don't show an error for Invalid Action: that
                 // just means that the AVD already hanged up.
-                showErrorDialog(tr("The end-call failed."), tr("Telephony"));
+                mErrorMessage.setWindowTitle(tr("Telephony"));
+                mErrorMessage.showMessage(tr("The end-call failed."),
+                                          Ui::Errors::TELEPHONY_END_CALL_FAILED);
                 return;
             }
         }
@@ -144,7 +150,9 @@ void TelephonyPage::on_tel_holdCallButton_clicked()
         tResp = mTelephonyAgent->telephonyCmd(tOp,
                                               cleanNumber.toStdString().c_str());
         if (tResp != Tel_Resp_OK) {
-            showErrorDialog(tr("The call hold failed."), tr("Telephony"));
+            mErrorMessage.setWindowTitle(tr("Telephony"));
+            mErrorMessage.showMessage(tr("The call hold failed."),
+                                      Ui::Errors::TELEPHONY_HOLD_CALL_FAILED);
             return;
         }
     }
@@ -188,7 +196,9 @@ void TelephonyPage::on_sms_sendButton_clicked()
                      mUi->tel_numberBox->
                               currentText().length());
     if (retVal < 0  ||  sender.len <= 0) {
-        showErrorDialog(tr("The \"From\" number is invalid."), tr("SMS"));
+        mErrorMessage.setWindowTitle(tr("SMS"));
+        mErrorMessage.showMessage(tr("The \"From\" number is invalid."),
+                                  Ui::Errors::SMS_FROM_INVALID);
         return;
     }
 
@@ -204,12 +214,16 @@ void TelephonyPage::on_sms_sendButton_clicked()
                                            utf8Message,
                                            MAX_SMS_MSG_SIZE);
     if (nUtf8Chars == 0) {
-        showErrorDialog(tr("The message is empty.<br>Please enter a message."), tr("SMS"));
+        mErrorMessage.setWindowTitle(tr("SMS"));
+        mErrorMessage.showMessage(tr("The message is empty.<br>Please enter a message."),
+                                  Ui::Errors::SMS_EMPTY_MESSAGE);
         return;
     }
 
     if (nUtf8Chars < 0) {
-        showErrorDialog(tr("The message contains invalid characters."), tr("SMS"));
+        mErrorMessage.setWindowTitle(tr("SMS"));
+        mErrorMessage.showMessage(tr("The message contains invalid characters."),
+                                  Ui::Errors::SMS_INVALID_CHAR);
         return;
     }
 
@@ -217,15 +231,18 @@ void TelephonyPage::on_sms_sendButton_clicked()
     SmsPDU *pdus = smspdu_create_deliver_utf8(utf8Message, nUtf8Chars,
                                               &sender, NULL);
     if (pdus == NULL) {
-        showErrorDialog(tr("The message contains invalid characters."),
-                                     tr("SMS"));
+        mErrorMessage.setWindowTitle(tr("SMS"));
+        mErrorMessage.showMessage(tr("The message contains invalid characters."),
+                                  Ui::Errors::SMS_INVALID_CHAR);
         return;
     }
 
     if (mTelephonyAgent && mTelephonyAgent->getModem) {
         AModem modem = mTelephonyAgent->getModem();
         if (modem == NULL) {
-            showErrorDialog(tr("Cannot send message, modem emulation not running."), tr("SMS"));
+            mErrorMessage.setWindowTitle(tr("SMS"));
+            mErrorMessage.showMessage(tr("Cannot send message, modem emulation not running."),
+                                      Ui::Errors::SMS_NO_MODEM);
             return;
         }
 
