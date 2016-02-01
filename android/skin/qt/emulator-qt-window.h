@@ -513,6 +513,8 @@ private:
         {
             if (event->key() == Qt::Key_Alt && mMode == OverlayMode::Multitouch) {
                 this->hide();
+            } else {
+                mEmulatorWindow->keyReleaseEvent(event);
             }
         }
 
