@@ -15,7 +15,6 @@
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
 #include "android/settings-agent.h"
-#include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include <QFileDialog>
@@ -26,7 +25,8 @@ LocationPage::LocationPage(QWidget *parent) :
     QWidget(parent),
     mUi(new Ui::LocationPage),
     mNowLoadingGeoData(false),
-    mGeoDataLoadingStopRequested(false)
+    mGeoDataLoadingStopRequested(false),
+    mErrorMessage(this)
 {
     mUi->setupUi(this);
     mNowPlaying = false;
@@ -56,6 +56,8 @@ LocationPage::LocationPage(QWidget *parent) :
             SLOT(startupGeoDataThreadFinished(QString, bool, QString)));
     mGeoDataLoader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
 
+    mErrorMessage.setModal(true);
+    mErrorMessage.setWindowTitle(tr("Location"));
 }
 
 LocationPage::~LocationPage() {
@@ -250,8 +252,8 @@ void LocationPage::locationPlaybackStart()
     for (int row = 0; row < mUi->loc_pathTable->rowCount(); row++) {
         for (int col = 0; col < mUi->loc_pathTable->columnCount(); col++) {
             if (!validateCell(mUi->loc_pathTable, row, col)) {
-                showErrorDialog(tr("The table contains errors.<br>No locations were sent."),
-                                tr("GPS Playback"));
+                mErrorMessage.showMessage(tr("The table contains errors.<br>No locations were sent."),
+                                          Ui::Errors::LOCATION_TABLE_ERROR);
                 mUi->loc_pathTable->scrollToItem(mUi->loc_pathTable->item(row, 0));
                 return;
             }
@@ -382,7 +384,7 @@ void LocationPage::finishGeoDataLoading(
         settings.setValue(Ui::Settings::LOCATION_PLAYBACK_FILE, file_name);
         populateTable(&mGpsFixesArray);
     } else if (!ignore_error) {
-        showErrorDialog(error_message, tr("Geo Data Parser"));
+        mErrorMessage.showMessage(error_message, Ui::Errors::LOCATION_BAD_FILE);
     }
     SettingsTheme theme = getSelectedTheme();
     setButtonEnabled(mUi->loc_GpxKmlButton, theme, true);

@@ -13,6 +13,7 @@
 
 #include "android/settings-agent.h"
 #include "ui_settings-page.h"
+#include <QErrorMessage>
 #include <QString>
 #include <QWidget>
 #include <memory>
@@ -41,4 +42,5 @@ private:
     bool eventFilter (QObject* object, QEvent* event) override;
 
     std::unique_ptr<Ui::SettingsPage> mUi;
+    QErrorMessage mErrorMessage;
 };

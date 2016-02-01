@@ -32,7 +32,6 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/editable-slider-widget.cpp \
     android/skin/qt/emulator-qt-window.cpp \
     android/skin/qt/emulator-qt-no-window.cpp \
-    android/skin/qt/error-dialog.cpp \
     android/skin/qt/gl-widget.cpp \
     android/skin/qt/extended-pages/common.cpp \
     android/skin/qt/extended-pages/battery-page.cpp \

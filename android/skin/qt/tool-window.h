@@ -117,6 +117,7 @@ private:
     QQueue<QUrl> mFilesToPush;
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
     bool mIsExtendedWindowActiveOnHide = false;
+    QErrorMessage mErrorMessage;
 
 private slots:
     void on_back_button_pressed();

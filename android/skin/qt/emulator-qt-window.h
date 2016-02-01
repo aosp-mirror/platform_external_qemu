@@ -761,6 +761,8 @@ private:
     bool mFirstShowEvent;
 
     QTimer mResizeTimer;
+
+    QErrorMessage mErrorMessage;
 };
 
 struct SkinSurface {
