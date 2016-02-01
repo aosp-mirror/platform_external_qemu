@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7153b827_c9ceb5df",
+        "filename": "android/opengles.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-01T23:15:33Z",
+      "side": 1,
+      "message": "damn, this is no longer used, I\u0027ll remove that.",
+      "revId": "77c15c171587446c6ac82915004ffee58424c87a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
