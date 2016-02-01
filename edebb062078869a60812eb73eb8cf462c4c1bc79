@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "317b00b0_f4bb7887",
+        "filename": "android/scripts/build-e2fsprogs.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-01T15:51:24Z",
+      "side": 1,
+      "message": "avoid bash-ism, and just use:\n\n  case $SYSTEM in\n    linux*)\n      copy_directory_files ....\n      ;;\n  esac",
+      "revId": "edebb062078869a60812eb73eb8cf462c4c1bc79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "317b00b0_b4b50096",
+        "filename": "distrib/libuuid.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-01T15:51:24Z",
+      "side": 1,
+      "message": "Do you mean that trying to compile the upstream libuuid on Darwin doesn\u0027t work, and thus we have to use the system version?",
+      "revId": "edebb062078869a60812eb73eb8cf462c4c1bc79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
