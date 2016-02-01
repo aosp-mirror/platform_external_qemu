@@ -16,6 +16,46 @@
       "revId": "4845904a9c89772edaed1c3303094733a59fae7e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14950abd_c43c4f11",
+        "filename": "android/crashreport/CrashSystem.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-01T22:49:52Z",
+      "side": 1,
+      "message": "Please clang-format. This line is \u003e 80 chars.",
+      "revId": "4845904a9c89772edaed1c3303094733a59fae7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "548b02a3_bafd9885",
+        "filename": "android/crashreport/CrashSystem.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-01T22:49:52Z",
+      "side": 1,
+      "message": "namespace not needed.",
+      "range": {
+        "startLine": 125,
+        "startChar": 13,
+        "endLine": 125,
+        "endChar": 29
+      },
+      "revId": "4845904a9c89772edaed1c3303094733a59fae7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
