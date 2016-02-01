@@ -92,6 +92,30 @@
       "revId": "d178cf66a25676d52373dbc6471a84465c0c0190",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9489faaa_f4465ea9",
+        "filename": "android/base/Uuid.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-01T18:25:23Z",
+      "side": 1,
+      "message": "Well, it\u0027s better to overalign than underalign. I thought Windows struct is aligned to 8 bytes, but it isn\u0027t",
+      "parentUuid": "9489faaa_d91ef3f1",
+      "range": {
+        "startLine": 77,
+        "startChar": 16,
+        "endLine": 77,
+        "endChar": 54
+      },
+      "revId": "d178cf66a25676d52373dbc6471a84465c0c0190",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
