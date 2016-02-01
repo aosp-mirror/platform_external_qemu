@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "712ad87b_b1b51aef",
+        "filename": "android/base/Uuid.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-01T16:08:40Z",
+      "side": 1,
+      "message": "nit: shouldn\u0027t this be:\n\n  class Uuid {\n  public:\n     ...\n  };\n\nDid you run git clang-format?",
+      "revId": "d178cf66a25676d52373dbc6471a84465c0c0190",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "317b00b0_d4875ccc",
+        "filename": "android/base/Uuid.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-01T16:08:40Z",
+      "side": 1,
+      "message": "Really? I thought that was the opposite",
+      "revId": "d178cf66a25676d52373dbc6471a84465c0c0190",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
