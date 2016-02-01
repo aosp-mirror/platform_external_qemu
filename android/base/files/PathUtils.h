@@ -58,7 +58,7 @@ public:
     static bool isDirSeparator(int ch, HostType hostType);
 
     // Return true if |ch| is a directory separator for the current platform.
-    static inline bool isDirSeparator(int ch) {
+    static bool isDirSeparator(int ch) {
         return isDirSeparator(ch, HOST_TYPE);
     }
 
@@ -66,12 +66,12 @@ public:
     static bool isPathSeparator(int ch, HostType hostType);
 
     // Return true if |ch| is a path separator for the current platform.
-    static inline bool isPathSeparator(int ch) {
+    static bool isPathSeparator(int ch) {
         return isPathSeparator(ch, HOST_TYPE);
     }
 
     // Return the directory separator character for a given |hostType|
-    static inline char getDirSeparator(HostType hostType) {
+    static char getDirSeparator(HostType hostType) {
         return (hostType == HOST_WIN32) ? '\\' : '/';
     }
 
@@ -80,7 +80,7 @@ public:
                                              HostType hostType);
 
     // Remove trailing separators from a |path| string for the current host.
-    static inline String removeTrailingDirSeparator(StringView path) {
+    static String removeTrailingDirSeparator(StringView path) {
         return removeTrailingDirSeparator(path, HOST_TYPE);
     }
 
@@ -105,7 +105,7 @@ public:
 
     // Return the root prefix for the current platform. See above for
     // documentation.
-    static inline size_t rootPrefixSize(StringView path) {
+    static size_t rootPrefixSize(StringView path) {
         return rootPrefixSize(path, HOST_TYPE);
     }
 
@@ -113,9 +113,17 @@ public:
     static bool isAbsolute(StringView path, HostType hostType);
 
     // Return true iff |path| is an absolute path for the current host.
-    static inline bool isAbsolute(StringView path) {
+    static bool isAbsolute(StringView path) {
         return isAbsolute(path, HOST_TYPE);
     }
+
+    // Return an extension part of the name/path (the part of the name after
+    // last dot, including the dot. E.g.:
+    //  "file.name" -> ".name"
+    //  "file" -> ""
+    //  "file." -> "."
+    //  "/full/path.png" -> ".png"
+    static StringView extension(StringView path, HostType hostType = HOST_TYPE);
 
     // Split |path| into a directory name and a file name. |dirName| and
     // |baseName| are optional pointers to strings that will receive the
@@ -138,7 +146,7 @@ public:
                       String* baseName);
 
     // A variant of split() for the current process' host type.
-    static inline bool split(StringView path,
+    static bool split(StringView path,
                              String* dirName,
                              String* baseName) {
         return split(path, HOST_TYPE, dirName, baseName);
@@ -152,8 +160,14 @@ public:
     static String join(StringView path1, StringView path2, HostType hostType);
 
     // A variant of join() for the current process' host type.
-    static inline String join(StringView path1, StringView path2) {
+    static String join(StringView path1, StringView path2) {
         return join(path1, path2, HOST_TYPE);
+    }
+
+    // A convenience function to join a bunch of paths at once
+    template <class... Paths>
+    static String join(StringView path1, StringView path2, Paths&&... paths) {
+        return join(path1, join(path2, std::forward<Paths>(paths)...));
     }
 
     // Decompose |path| into individual components. If |path| has a root
@@ -169,7 +183,7 @@ public:
 
     // Decompose |path| into individual components for the host platform.
     // See comments above for more details.
-    static inline StringVector decompose(StringView path) {
+    static StringVector decompose(StringView path) {
         return decompose(path, HOST_TYPE);
     }
 
@@ -185,7 +199,7 @@ public:
     // Recompose a path from individual components into a file path string
     // for the current host. |components| is a vector os strings.
     // Returns a new file path string.
-    static inline String recompose(const StringVector& components) {
+    static String recompose(const StringVector& components) {
         return recompose(components, HOST_TYPE);
     }
 

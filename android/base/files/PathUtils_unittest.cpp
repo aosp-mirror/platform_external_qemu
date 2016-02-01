@@ -472,5 +472,47 @@ TEST(PathUtils, toExecutableName) {
     }
 }
 
+TEST(PathUtils, extension) {
+    static const struct {
+        PathUtils::HostType host;
+        const char* input;
+        const char* expected;
+    } kData[] = {
+        { PathUtils::HOST_POSIX, "", "" },
+        { PathUtils::HOST_POSIX, "name.ext", ".ext" },
+        { PathUtils::HOST_POSIX, "name.", "." },
+        { PathUtils::HOST_POSIX, ".", "." },
+        { PathUtils::HOST_POSIX, "dir/path", "" },
+        { PathUtils::HOST_POSIX, "dir/path.ext", ".ext" },
+        { PathUtils::HOST_POSIX, "dir.ext/path", "" },
+        { PathUtils::HOST_POSIX, ".name", ".name" },
+
+        { PathUtils::HOST_WIN32, "", "" },
+        { PathUtils::HOST_WIN32, "name.ext", ".ext" },
+        { PathUtils::HOST_WIN32, "name.", "." },
+        { PathUtils::HOST_WIN32, ".", "." },
+        { PathUtils::HOST_WIN32, "dir\\path", "" },
+        { PathUtils::HOST_WIN32, "dir\\path.ext", ".ext" },
+        { PathUtils::HOST_WIN32, "dir/path.ext", ".ext" },
+        { PathUtils::HOST_WIN32, "dir\\path.ext", ".ext" },
+        { PathUtils::HOST_WIN32, "dir.bad//path", "" },
+        { PathUtils::HOST_WIN32, "dir.bad\\path", "" },
+        { PathUtils::HOST_WIN32, ".name", ".name" },
+        { PathUtils::HOST_WIN32, "c:\\path..ext", ".ext" },
+    };
+    for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
+        EXPECT_STREQ(
+            kData[n].expected,
+            PathUtils::extension(kData[n].input, kData[n].host).c_str());
+
+        // make sure the overload without host parameter works correctly too
+        if (kData[n].host == PathUtils::HOST_TYPE) {
+            EXPECT_STREQ(
+                PathUtils::extension(kData[n].input, kData[n].host).c_str(),
+                PathUtils::extension(kData[n].input).c_str());
+        }
+    }
+}
+
 }  // namespace android
 }  // namespace base
