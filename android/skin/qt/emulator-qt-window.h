@@ -196,6 +196,8 @@ private slots:
 
     void slot_resizeDone();
 
+    void slot_showProcessErrorDialog(QProcess::ProcessError exitStatus);
+
     /*
      Here are conventional slots that perform interesting high-level functions in the emulator. These can be hooked up to signals
      from UI elements or called independently.

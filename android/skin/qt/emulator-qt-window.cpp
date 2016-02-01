@@ -127,7 +127,13 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit, this, &EmulatorQtWindow::slot_clearInstance);
 
     QObject::connect(&mScreencapProcess, SIGNAL(finished(int)), this, SLOT(slot_screencapFinished(int)));
+    QObject::connect(&mScreencapPullProcess,
+                     SIGNAL(error(QProcess::ProcessError)), this,
+                     SLOT(slot_showProcessErrorDialog(QProcess::ProcessError)));
     QObject::connect(&mScreencapPullProcess, SIGNAL(finished(int)), this, SLOT(slot_screencapPullFinished(int)));
+    QObject::connect(&mScreencapPullProcess,
+                     SIGNAL(error(QProcess::ProcessError)), this,
+                     SLOT(slot_showProcessErrorDialog(QProcess::ProcessError)));
 
     QObject::connect(mContainer.horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_horizontalScrollChanged(int)));
     QObject::connect(mContainer.verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_verticalScrollChanged(int)));
@@ -204,6 +210,26 @@ void EmulatorQtWindow::showAvdArchWarning()
         mAvdWarningBox.setCheckBox(checkbox);
         mAvdWarningBox.show();
     }
+}
+
+void EmulatorQtWindow::slot_showProcessErrorDialog(
+        QProcess::ProcessError exitStatus) {
+    QString msg;
+    switch (exitStatus) {
+        case QProcess::Timedout:
+            // Our wait for process starting is best effort. If we timed out,
+            // meh.
+            return;
+        case QProcess::FailedToStart:
+            msg =
+                    tr("Failed to start process.<br/>"
+                       "Check settings to verify that your chosen SDK path "
+                       "is valid.");
+            break;
+        default:
+            msg = tr("Unexpected error occured while grabbing screenshot.");
+    }
+    showErrorDialog(msg, tr("Screenshot"));
 }
 
 void EmulatorQtWindow::slot_startupTick() {
@@ -740,9 +766,12 @@ void EmulatorQtWindow::screenshot()
     mOverlay.showAsFlash();
     mFlashAnimation.start();
 
-    // Keep track of this process
     mScreencapProcess.start(command, args);
-    mScreencapProcess.waitForStarted();
+    // TODO(pprabhu): It is a bad idea to call |waitForStarted| from the GUI
+    // thread, because it can freeze the UI till timeout.
+    if (!mScreencapProcess.waitForStarted(5000)) {
+        slot_showProcessErrorDialog(mScreencapProcess.error());
+    }
 }
 
 
@@ -754,7 +783,6 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
         QString msg = tr("The screenshot could not be captured. Output:<br/><br/>") + QString(er);
         showErrorDialog(msg, tr("Screenshot"));
     } else {
-
         // Pull the image from its remote location to the desired location
         QStringList args;
         QString command = tool_window->getAdbFullPath(&args);
@@ -777,9 +805,14 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
 
         args << fileName;
 
-        // Use a different process to avoid infinite looping when pulling the file
+        // Use a different process to avoid infinite looping when pulling the
+        // file.
         mScreencapPullProcess.start(command, args);
-        mScreencapPullProcess.waitForStarted();
+        // TODO(pprabhu): It is a bad idea to call |waitForStarted| from the GUI
+        // thread, because it can freeze the UI till timeout.
+        if (!mScreencapPullProcess.waitForStarted(5000)) {
+            slot_showProcessErrorDialog(mScreencapPullProcess.error());
+        }
     }
 }
 
