@@ -15,6 +15,7 @@
 void showErrorDialog(const QString& message, const QString& title)
 {
     QErrorMessage *err = QErrorMessage::qtHandler();
+    err->setModal(true);
     err->setWindowTitle(title);
     err->showMessage(message);
 }
