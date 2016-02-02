@@ -69,6 +69,54 @@
       "revId": "87ef75953767a3d685526732788224cefc79d315",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "711bb8b8_29c46994",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-02T20:37:26Z",
+      "side": 1,
+      "message": "Awesome, didn\u0027t know Qt 5.5 could handle lambdas",
+      "parentUuid": "11f7dc9a_4e6293bb",
+      "range": {
+        "startLine": 358,
+        "startChar": 96,
+        "endLine": 358,
+        "endChar": 101
+      },
+      "revId": "87ef75953767a3d685526732788224cefc79d315",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9124acf4_8d5925df",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-02T20:37:26Z",
+      "side": 1,
+      "message": "\u003e You want |requestClose| here.",
+      "parentUuid": "b121b0e4_eb1ecd3b",
+      "range": {
+        "startLine": 358,
+        "startChar": 96,
+        "endLine": 358,
+        "endChar": 101
+      },
+      "revId": "87ef75953767a3d685526732788224cefc79d315",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
