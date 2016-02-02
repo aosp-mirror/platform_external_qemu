@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b121b0e4_eb1ecd3b",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-02T19:35:09Z",
+      "side": 1,
+      "message": "You want |requestClose| here.",
+      "range": {
+        "startLine": 358,
+        "startChar": 96,
+        "endLine": 358,
+        "endChar": 101
+      },
+      "revId": "87ef75953767a3d685526732788224cefc79d315",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
