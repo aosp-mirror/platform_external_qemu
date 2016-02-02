@@ -40,6 +40,10 @@
 #include "net/slirp.h"
 #include "qemu-options.h"
 
+#ifdef USE_ANDROID_EMU
+#include "android/skin/winsys.h"
+#endif
+
 #ifdef CONFIG_LINUX
 #include <sys/prctl.h>
 #endif
@@ -60,7 +64,14 @@ void os_setup_early_signal_handling(void)
 
 static void termsig_handler(int signal, siginfo_t *info, void *c)
 {
+#ifdef USE_ANDROID_EMU
+    // In android, request closing the UI, instead of short-circuting down to
+    // qemu. This will eventually call qemu_system_shutdown_request via a skin
+    // event.
+    skin_winsys_quit_request();
+#else
     qemu_system_killed(info->si_signo, info->si_pid);
+#endif  // !USE_ANDROID_EMU
 }
 
 void os_setup_signal_handling(void)
@@ -278,7 +289,7 @@ void os_setup_post(void)
 
         close(fd);
 
-        do {        
+        do {
             len = write(daemon_pipe, &status, 1);
         } while (len < 0 && errno == EINTR);
         if (len != 1) {
