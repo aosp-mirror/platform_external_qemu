@@ -123,8 +123,20 @@ static QemuOpts* adb_server_config(void) {
         qemu_opt_set(socket_opts, "host", "localhost");
     }
 
+    int server_port = ADB_SERVER_PORT;
+    const gchar *server_port_str = g_getenv("ANDROID_ADB_SERVER_PORT");
+    if (server_port_str && strlen(server_port_str) != 0) {
+        server_port = (int) g_ascii_strtoll(server_port_str, NULL, 0);
+        if(server_port <= 0 || server_port > G_MAXUINT16) {
+            fprintf(stderr,
+                "%s: ANDROID_ADB_SERVER_PORT is invalid: got \"%s\", expected number in range (0;%d>, using default port\n",
+                __func__, server_port_str, G_MAXUINT16);
+            server_port = ADB_SERVER_PORT;
+        }
+    }
+
     if (!qemu_opt_get(socket_opts, "port")) {
-        qemu_opt_set_number(socket_opts, "port", ADB_SERVER_PORT);
+        qemu_opt_set_number(socket_opts, "port", server_port);
     }
 
     return socket_opts;
