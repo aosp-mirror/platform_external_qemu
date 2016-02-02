@@ -19,6 +19,7 @@
 #include "android/telephony/sms.h"
 #include <QSettings>
 #include <cctype>
+#include <QErrorMessage>
 
 #define MAX_SMS_MSG_SIZE 1024 // Arbitrary emulator limitation
 
@@ -32,6 +33,7 @@ TelephonyPage::TelephonyPage(QWidget *parent) :
     mUi->tel_numberBox->setValidator(new PhoneNumberValidator());
 }
 
+static QErrorMessage* err1 = nullptr;
 void TelephonyPage::on_tel_startEndButton_clicked()
 {
     QSettings settings;
@@ -54,7 +56,14 @@ void TelephonyPage::on_tel_startEndButton_clicked()
             tResp = mTelephonyAgent->telephonyCmd(Tel_Op_Init_Call,
                                                   cleanNumber.toStdString().c_str());
             if (tResp != Tel_Resp_OK) {
-                showErrorDialog(tr("The call failed."), tr("Telephony"));
+
+                if (!err1) {
+                    err1 = new QErrorMessage(this);
+                    err1->setModal(true);
+                    err1->setWindowTitle(tr("Telephony"));
+                }
+                err1->showMessage("[xkcd] The call failed");
+                //showErrorDialog(tr("The call failed."), tr("Telephony"));
                 return;
             }
         }
@@ -188,7 +197,13 @@ void TelephonyPage::on_sms_sendButton_clicked()
                      mUi->tel_numberBox->
                               currentText().length());
     if (retVal < 0  ||  sender.len <= 0) {
-        showErrorDialog(tr("The \"From\" number is invalid."), tr("SMS"));
+        if (!err1) {
+            err1 = new QErrorMessage(this);
+            err1->setModal(true);
+            err1->setWindowTitle(tr("Telephony"));
+        }
+        err1->showMessage("[xkcd] The from number is invalid");
+        //showErrorDialog(tr("The \"From\" number is invalid."), tr("SMS"));
         return;
     }
 
@@ -203,13 +218,20 @@ void TelephonyPage::on_sms_sendButton_clicked()
                                            theMessage.size(),
                                            utf8Message,
                                            MAX_SMS_MSG_SIZE);
+    if (!err1) {
+        err1 = new QErrorMessage(this);
+        err1->setModal(true);
+        err1->setWindowTitle(tr("Telephony"));
+    }
     if (nUtf8Chars == 0) {
-        showErrorDialog(tr("The message is empty.<br>Please enter a message."), tr("SMS"));
+        err1->showMessage("[xkcd] The message is empty");
+        //showErrorDialog(tr("The message is empty.<br>Please enter a message."), tr("SMS"));
         return;
     }
 
     if (nUtf8Chars < 0) {
-        showErrorDialog(tr("The message contains invalid characters."), tr("SMS"));
+        err1->showMessage("[xkcd] The message is invalid");
+        //showErrorDialog(tr("The message contains invalid characters."), tr("SMS"));
         return;
     }
 
