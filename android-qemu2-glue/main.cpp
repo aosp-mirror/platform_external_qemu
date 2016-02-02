@@ -17,7 +17,6 @@
 
 #include "android/avd/hw-config.h"
 #include "android/cmdline-option.h"
-#include "android/crashreport/crash-handler.h"
 #include "android/filesystems/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
 #include "android/globals.h"
@@ -26,6 +25,7 @@
 #include "android/main-common.h"
 #include "android/main-common-ui.h"
 #include "android/opengl/emugl_config.h"
+#include "android/process_setup.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
@@ -350,9 +350,7 @@ static void enter_qemu_main_loop(int argc, char **argv) {
 extern bool android_op_wipe_data;
 
 extern "C" int main(int argc, char **argv) {
-    if (!crashhandler_init()) {
-        VERBOSE_PRINT(init, "Crash handling not initialized\n");
-    }
+    process_early_setup();
 
     if (argc < 1) {
         fprintf(stderr, "Invalid invocation (no program path)\n");
@@ -1336,5 +1334,6 @@ extern "C" int main(int argc, char **argv) {
     ui_done();
     aconfig_node_free(skinConfig);
 
+    process_late_teardown();
     return 0;
 }

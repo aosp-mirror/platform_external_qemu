@@ -421,7 +421,6 @@ static void socket_cleanup(void)
 }
 #endif
 
-#if !defined(USE_ANDROID_EMU)
 int socket_init(void)
 {
 #ifdef _WIN32
@@ -438,7 +437,6 @@ int socket_init(void)
 #endif
     return 0;
 }
-#endif
 
 #if !GLIB_CHECK_VERSION(2, 31, 0)
 /* Ensure that glib is running in multi-threaded mode

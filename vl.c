@@ -108,7 +108,6 @@
 #include "config.h"
 
 #include "android/boot-properties.h"
-#include "android/curl-support.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/metrics/metrics_reporter.h"
 #include "android/metrics/studio-helper.h"
@@ -2868,17 +2867,6 @@ out:
 
 static int is_opengl_alive = 1;
 
-static void android_curl_setup(void)
-{
-    char cert_file[MAX_PATH];
-    char* p = cert_file;
-    char* end = cert_file + sizeof(cert_file);
-    p = bufprint_app_dir(p, end);
-    bufprint(p, end, "%c%s%c%s",
-             PATH_SEP_C, "lib", PATH_SEP_C, "ca-bundle.pem");
-    curl_init(cert_file);
-}
-
 static void android_check_for_updates()
 {
     char configPath[MAX_PATH];
@@ -2956,14 +2944,9 @@ static bool android_reporting_setup(void)
 static void android_reporting_teardown(void)
 {
     android_teardown_metrics();
-    curl_cleanup();
 }
 
 #else
-
-static void android_curl_setup(void)
-{
-}
 
 static bool android_reporting_setup(void)
 {
@@ -3017,10 +3000,6 @@ int run_qemu_main(int argc, const char **argv)
     uint64_t ram_slots = 0;
     FILE *vmstate_dump_file = NULL;
     Error *main_loop_err = NULL;
-
-    // libcurl initialization is thread-unsafe, so let's call it first
-    // to make sure no other thread could be doing the same
-    android_curl_setup();
 
     atexit(qemu_run_exit_notifiers);
     error_set_progname(argv[0]);
@@ -4556,7 +4535,12 @@ int run_qemu_main(int argc, const char **argv)
     }
 #endif
 
+#ifndef USE_ANDROID_EMU
+    // When using AndroidEmu, this "main" is no longer the entry point on the
+    // main thread. It is in fact called on a secondary thread, and socket
+    // initialization is long finished (See android-qemu2-glue/main.cpp).
     socket_init();
+#endif
 
     if (qemu_opts_foreach(qemu_find_opts("chardev"), chardev_init_func, NULL, 1) != 0)
         return 1;
