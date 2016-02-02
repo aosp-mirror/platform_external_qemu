@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "11e51cf3_3bfe7756",
+        "filename": "android/crashreport/crash-handler.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-02T17:08:44Z",
+      "side": 1,
+      "message": "why not just use crashhandler_die(const char* message, ...) with an implementation that uses va_list and vsnprintf() or even vasprintf()?\n\nThis would work with C and we can even use GCC attributes to indicate printf-like formatting and get valid compiler warnings at the call site.",
+      "revId": "713df2b2a882fec27772f8e1f8dcb249587bf69a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
