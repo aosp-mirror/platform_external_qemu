@@ -662,6 +662,5 @@ void ui_done(void)
 {
     user_config_done();
     emulator_window_done(emulator_window_get());
-    skin_winsys_quit_request();
     skin_winsys_destroy();
 }

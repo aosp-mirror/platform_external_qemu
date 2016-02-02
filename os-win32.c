@@ -32,6 +32,10 @@
 #include "sysemu/sysemu.h"
 #include "qemu-options.h"
 
+#ifdef CONFIG_ANDROID
+#include "android/skin/winsys.h"
+#endif
+
 /***********************************************************/
 /* Functions missing in mingw */
 
@@ -49,7 +53,19 @@ int setenv(const char *name, const char *value, int overwrite)
 
 static BOOL WINAPI qemu_ctrl_handler(DWORD type)
 {
+#ifdef CONFIG_ANDROID
+    // In android, request closing the UI, instead of short-circuting down to
+    // qemu. This will eventually call qemu_system_shutdown_request via a skin
+    // event.
+    skin_winsys_quit_request();
+    // Windows 7 kills application when the function returns.
+    // Sleep here to give QEMU a try for closing.
+    // Sleep period is 10000ms because Windows kills the program
+    // after 10 seconds anyway.
+    Sleep(10000);
+#else
     exit(STATUS_CONTROL_C_EXIT);
+#endif  // !CONFIG_ANDROID
     return TRUE;
 }
 
