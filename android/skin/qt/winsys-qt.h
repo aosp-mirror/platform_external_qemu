@@ -12,7 +12,11 @@
 
 #pragma once
 
+#include <memory>
+
 // Save the current window position for after the app exit.
 // This must be called in the aboutToQuit() signal handle for the
 // application window.
 extern void skin_winsys_save_window_pos();
+
+extern std::shared_ptr<void> skin_winsys_get_shared_ptr();
