@@ -12,7 +12,14 @@
 
 #pragma once
 
+#include <memory>
+
 // Save the current window position for after the app exit.
 // This must be called in the aboutToQuit() signal handle for the
 // application window.
 extern void skin_winsys_save_window_pos();
+
+// Returns a shared pointer to EmulatorQtWindow instance
+// Used for qemu1 workaround for unresolved crash: NSWindow release on OSX
+// Can remove after b.android.com/198256 is resolved.
+extern std::shared_ptr<void> skin_winsys_get_shared_ptr();

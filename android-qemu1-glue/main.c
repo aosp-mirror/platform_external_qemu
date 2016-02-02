@@ -63,6 +63,7 @@
 
 #include "android-qemu1-glue/display.h"
 #include "android-qemu1-glue/qemu-control-impl.h"
+#include "android-qemu1-glue/skin_qt.h"
 
 #include "android/snapshot.h"
 
@@ -1017,6 +1018,16 @@ int main(int argc, char **argv) {
     pthread_sigmask(SIG_SETMASK, &set, NULL);
 #endif
     ui_init(skinConfig, skinPath, opts, &uiEmuAgent);
+
+    // This is a workaround for b.android.com/198256
+    // Qemu1 QT GUI on OSX crashes on exit when QT releases NSWindow.
+    // Qemu2 builds do not show this crash behavior.
+    // Workaround leaks the EmulatorQtWindow instance, which was the undesired
+    // behavior prior to https://android-review.googlesource.com/#/c/199068/
+    // Root cause has not been identified
+#ifdef __APPLE__
+    skin_acquire_window_inst();
+#endif
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, n, args);
     skin_winsys_enter_main_loop(opts->no_window, argc, argv);
     ui_done();
