@@ -45,6 +45,30 @@
       "revId": "87ef75953767a3d685526732788224cefc79d315",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11f7dc9a_4e6293bb",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-02T19:48:50Z",
+      "side": 1,
+      "message": "actually, like this:\n\nauto win \u003d EmulatorQtWindow::getInstance();\nQObject::connect(quitAction, \u0026QAction::triggered, win, [win] { win-\u003erequestClose(); });",
+      "parentUuid": "5116b490_c84dcf4a",
+      "range": {
+        "startLine": 358,
+        "startChar": 96,
+        "endLine": 358,
+        "endChar": 101
+      },
+      "revId": "87ef75953767a3d685526732788224cefc79d315",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
