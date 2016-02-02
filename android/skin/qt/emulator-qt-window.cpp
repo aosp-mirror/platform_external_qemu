@@ -951,10 +951,11 @@ void EmulatorQtWindow::doResize(const QSize &size)
 
         // Make sure the new size is always a little bit smaller than the screen to prevent
         // keyboard shortcut scaling from making a window too large for the screen, which can
-        // result in the showing of the scroll bars.
+        // result in the showing of the scroll bars. In this case, just set the new size
+        // as large as possible without going off the screen.
         if (newSize.width() > .95 * screenDimensions.width() ||
             newSize.height() > .95 * screenDimensions.height()) {
-            return;
+            newSize.scale(screenDimensions.size() * .95, Qt::KeepAspectRatio);
         }
 
         double widthScale = (double) newSize.width() / (double) backing_surface->original_w;
