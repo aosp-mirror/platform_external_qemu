@@ -39,6 +39,10 @@
 #include "net/net.h"
 #include "qemu-options.h"
 
+#ifdef CONFIG_ANDROID
+#include "android/skin/winsys.h"
+#endif
+
 #ifdef CONFIG_LINUX
 #include <sys/prctl.h>
 #include <sys/syscall.h>
@@ -64,7 +68,14 @@ void os_setup_early_signal_handling(void)
 
 static void termsig_handler(int signal)
 {
+#ifdef CONFIG_ANDROID
+    // In android, request closing the UI, instead of short-circuting down to
+    // qemu. This will eventually call qemu_system_shutdown_request via a skin
+    // event.
+    skin_winsys_quit_request();
+#else
     qemu_system_shutdown_request();
+#endif  //!CONFIG_ANDROID
 }
 
 #ifndef CONFIG_ANDROID
