@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9124acf4_56c05a55",
+        "filename": "android/process_setup.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-02T23:37:15Z",
+      "side": 1,
+      "message": "typo",
+      "range": {
+        "startLine": 28,
+        "startChar": 7,
+        "endLine": 28,
+        "endChar": 18
+      },
+      "revId": "d383a17aeec95c65984689826bcee47656127f8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
