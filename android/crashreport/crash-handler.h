@@ -16,6 +16,12 @@
 
 #include "android/utils/compiler.h"
 
+#ifdef __cplusplus
+#include "android/base/StringFormat.h"
+#include <utility>
+#include <stdio.h>
+#endif
+
 ANDROID_BEGIN_HEADER
 
 // Enable crash reporting by starting crash service process, initializing and
@@ -30,4 +36,19 @@ ANDROID_BEGIN_HEADER
 //    Success on previous call
 bool crashhandler_init(void);
 
+// Abort the program execution immidiately; when showing a crash dialog, use
+// show |message| to the user instead of standard 'emulator have crashed'
+void crashhandler_die(const char* message);
+
 ANDROID_END_HEADER
+
+#ifdef __cplusplus
+// A variadic overload for a convenient message formatting
+template <class... Args>
+void crashhandler_die(const char* format, Args&&... args) {
+    char buffer[2048] = {};    // 2048 is enough for everyone ;)
+    snprintf(buffer, sizeof(buffer) - 1, format,
+             android::base::unpackFormatArg(std::forward<Args>(args))...);
+    crashhandler_die(buffer);
+}
+#endif

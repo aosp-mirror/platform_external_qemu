@@ -65,6 +65,8 @@ public:
         sys_prctl(PR_SET_PTRACER, pid, 0, 0, 0);
     }
 
+    void writeDump() override { mHandler->WriteMinidump(); }
+
 private:
     std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
 };

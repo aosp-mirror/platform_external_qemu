@@ -27,6 +27,11 @@ class CrashReporter {
 public:
     static const int kWaitExpireMS = 500;
     static const int kWaitIntervalMS = 20;
+
+    // Name of the file with the dump message passed from the emulator in
+    // a dump data exchange directory
+    static const char* const kDumpMessageFileName;
+
     CrashReporter();
 
     virtual ~CrashReporter();
@@ -47,12 +52,33 @@ public:
     // returns dump dir
     const std::string& getDumpDir() const;
 
+    // returns the directory for data exchange files. All files from this
+    // directory will go to the reporting server together with the crash dump.
+    const std::string& getDataExchangeDir() const;
+
     // Gets a handle to single instance of crash reporter
     static CrashReporter* get();
 
+    // The following two functions write a dump of current process state.
+    // Both pass the |message| to the dump writer, so it is sent together with
+    // the dump file
+    // GenerateDumpAndDie() also doesn't return - it terminates process in a
+    // fastest possible way. The process doesn't show/print any message to the
+    // user with the possible exception of "Segmentation fault".
+    void GenerateDump(const char* message);
+    void GenerateDumpAndDie(const char* message);
+
+private:
+    // Pass the |message| to the crash service process
+    void passDumpMessage(const char* message);
+
+    virtual void writeDump() = 0;
+
 private:
     DISALLOW_COPY_AND_ASSIGN(CrashReporter);
+
     const std::string mDumpDir;
+    const std::string mDataExchangeDir;
 };
 
 }  // crashreport
