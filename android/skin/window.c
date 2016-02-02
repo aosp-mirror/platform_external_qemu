@@ -12,6 +12,7 @@
 #include "android/skin/window.h"
 
 #include "android/config/config.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/skin/charmap.h"
 #include "android/skin/event.h"
 #include "android/skin/image.h"
@@ -611,12 +612,12 @@ static void adisplay_update_surface(ADisplay* disp,
     int dst_pitch = 4 * sz;
     uint8_t* dst_pixels = local_calloc(sz, dst_pitch);
     if (dst_pixels == NULL) {
-        derror("ERROR: %s:%d cannot allocate memory of %d byte.\n", __func__, __LINE__, sz * dst_pitch);
-        // crash it: copy-n-paste from 061dcd2137f1a654763ca4131cbfefcc495299c6
-        // Adding qemu2 console crash command
-        volatile int * ptr = NULL;
-        *ptr+=1;
-        return;
+        derror("ERROR: %s:%d cannot allocate memory of %d bytes.\n",
+               __func__, __LINE__, sz * dst_pitch);
+        crashhandler_die_format(
+                    "Display surface memory allocation failed "
+                    "(requested %d bytes)",
+                    sz * dst_pitch);
     }
 
     SkinRect dst_r = {
@@ -2046,7 +2047,11 @@ void skin_window_update_gpu_frame(SkinWindow* window,
     if (!disp->gpu_frame) {
         disp->gpu_frame = calloc(w * 4, h);
         if (!disp->gpu_frame) {
-            return;
+            derror("ERROR: %s:%d cannot allocate memory of %d bytes.\n",
+                   __func__, __LINE__, w * 4 * h);
+            crashhandler_die_format(
+                        "GPU frame memory allocation failed (requested %d bytes)",
+                        w * 4 * h);
         }
     }
     // Convert from GL_RGBA to 32-bit ARGB.
