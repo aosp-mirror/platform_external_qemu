@@ -172,8 +172,8 @@ Set default value of @var{driver}'s property @var{prop} to @var{value}, e.g.:
 qemu-system-i386 -global ide-drive.physical_block_size=4096 -drive file=file,if=ide,index=0,media=disk
 @end example
 
-In particular, you can use this to set driver properties for devices which are 
-created automatically by the machine model. To create a device which is not 
+In particular, you can use this to set driver properties for devices which are
+created automatically by the machine model. To create a device which is not
 created automatically and set properties on it, use -@option{device}.
 ETEXI
 
@@ -3412,6 +3412,14 @@ STEXI
 @item -netfast
 @findex -netfast
 Disable network shaping to make network as fast as possible
+ETEXI
+
+DEF("boot-property", HAS_ARG, QEMU_OPTION_boot_property, \
+    "-boot-property <name>=<value> set system property on boot\n", QEMU_ARCH_ALL)
+STEXI
+@item -boot-property
+@findex -boot-property
+Set system property on boot
 ETEXI
 
 DEF("lcd-density", HAS_ARG, QEMU_OPTION_lcd_density,
