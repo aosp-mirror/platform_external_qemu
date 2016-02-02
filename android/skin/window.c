@@ -1373,6 +1373,8 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     window->scale = (scale_w <= scale_h) ? scale_w : scale_h;
 
     if (skin_window_reset_internal(window, slayout) < 0) {
+        printf("[xkcd] %s Surely not!\n", __FUNCTION__);
+        fflush(stdout);
         skin_window_free(window);
         return NULL;
     }
@@ -1712,7 +1714,8 @@ skin_window_set_lcd_brightness( SkinWindow*  window, int  brightness )
 
 static void skin_window_run_opengles_free(void* p) {
     const SkinWindow* window = (const SkinWindow*)p;
-    window->win_funcs->opengles_free();
+    printf("[xkcd] opengles_free returned %d\n",
+           window->win_funcs->opengles_free());
 }
 
 static void
@@ -1724,7 +1727,10 @@ skin_window_free_opengles( SkinWindow* window )
 void
 skin_window_free( SkinWindow*  window )
 {
+    printf("[xkcd] %s\n", __FUNCTION__);
+    fflush(stdout);
     if (window) {
+        printf("[xkcd] About to free opengles\n");
         skin_window_free_opengles(window);
 
         skin_surface_unrefp(&window->surface);

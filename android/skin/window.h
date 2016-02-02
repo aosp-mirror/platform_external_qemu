@@ -16,6 +16,8 @@
 #include "android/skin/file.h"
 #include "android/skin/trackball.h"
 
+#include <stdbool.h>
+
 typedef struct SkinWindow  SkinWindow;
 
 typedef struct SkinWindowFuncs {
@@ -35,7 +37,7 @@ typedef struct SkinWindowFuncs {
     int (*opengles_hide)(void);
     void (*opengles_setTranslation)(float px, float py);
     void (*opengles_redraw)(void);
-    void (*opengles_free)(void);
+    int (*opengles_free)(void);
 } SkinWindowFuncs;
 
 /* Note: if scale is <= 0, we interpret this as 'auto-detect'.

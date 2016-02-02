@@ -368,7 +368,7 @@ extern void skin_winsys_run_ui_update(SkinGenericFunction f, void* data) {
     QSemaphore semaphore;
     EmulatorQtWindow* const window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
-        D("%s: Could not get window handle", __FUNCTION__);
+        printf("[xkcd] %s: Could not get window handle", __FUNCTION__);
         return;
     }
     window->runOnUiThread(&f, data, &semaphore);

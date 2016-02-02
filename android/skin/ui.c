@@ -99,6 +99,8 @@ SkinUI* skin_ui_create(SkinFile* layout_file,
             ui->layout, ui->ui_params.window_x, ui->ui_params.window_y,
             0, use_emugl_subwindow, ui->ui_funcs->window_funcs);
     if (!ui->window) {
+        printf("[xkcd] Surely not! %s\n", __FUNCTION__);
+        fflush(stdout);
         skin_ui_free(ui);
         return NULL;
     }
@@ -129,6 +131,8 @@ SkinUI* skin_ui_create(SkinFile* layout_file,
 }
 
 void skin_ui_free(SkinUI* ui) {
+    printf("[xkcd] %s\n", __FUNCTION__);
+    fflush(stdout);
     if (ui->window) {
         skin_window_free(ui->window);
         ui->window = NULL;

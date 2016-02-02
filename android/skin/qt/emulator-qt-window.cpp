@@ -276,6 +276,7 @@ void EmulatorQtWindow::slot_avdArchWarningMessageAccepted()
 
 void EmulatorQtWindow::closeEvent(QCloseEvent *event)
 {
+    printf("[xkcd] %s\n", __FUNCTION__);
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
         // run "adb shell stop" and call queueQuitEvent afterwards
         tool_window->runAdbShellStopAndQuit();

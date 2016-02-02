@@ -386,6 +386,8 @@ emulator_window_init(
 void
 emulator_window_done(EmulatorWindow* emulator)
 {
+    printf("[xkcd] %s\n", __FUNCTION__);
+    fflush(stdout);
     if (emulator->ui) {
         skin_ui_free(emulator->ui);
         emulator->ui = NULL;
@@ -439,6 +441,8 @@ static void emulator_window_refresh(EmulatorWindow* emulator)
     if (emulator->ui) {
         if (skin_ui_process_events(emulator->ui)) {
             // Quit program.
+            printf("[xkcd] Even processing loop %s\n", __FUNCTION__);
+            fflush(stdout);
             skin_ui_free(emulator->ui);
             emulator->ui = NULL;
             qemu_system_shutdown_request();

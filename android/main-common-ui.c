@@ -660,6 +660,7 @@ ui_init(AConfig*          skinConfig,
 
 void ui_done(void)
 {
+    printf("[xkcd] %s\n", __FUNCTION__);
     user_config_done();
     emulator_window_done(emulator_window_get());
     skin_winsys_destroy();
