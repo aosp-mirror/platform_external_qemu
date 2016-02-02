@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "71c9f878_19a2af6d",
+        "filename": "android-qemu1-glue/skin_qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-02-02T20:00:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b121b0e4_6850230d",
+      "range": {
+        "startLine": 19,
+        "startChar": 78,
+        "endLine": 19,
+        "endChar": 96
+      },
+      "revId": "12db70aafe1fffd58e6aff852fdbccb7a10d61a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "711bb8b8_06623aec",
         "filename": "android-qemu1-glue/skin_qt.h",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-02T16:45:13Z",
       "side": 1,
       "message": "ANDROID_BEGIN_HEADER?",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 6
+      },
+      "revId": "12db70aafe1fffd58e6aff852fdbccb7a10d61a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11f7dc9a_cea6832a",
+        "filename": "android-qemu1-glue/skin_qt.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-02-02T20:00:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "711bb8b8_06623aec",
       "range": {
         "startLine": 14,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "5116b490_08252754",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-02-02T20:00:01Z",
+      "side": 1,
+      "message": "got it.  fixed.",
+      "parentUuid": "5116b490_c5b5ba95",
+      "range": {
+        "startLine": 81,
+        "startChar": 11,
+        "endLine": 81,
+        "endChar": 22
+      },
+      "revId": "12db70aafe1fffd58e6aff852fdbccb7a10d61a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b121b0e4_68f3038e",
         "filename": "android/skin/qt/winsys-qt.h",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2016-02-02T16:45:13Z",
       "side": 1,
       "message": "a comment about why this function is here and when we can get rid of it?",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 6
+      },
+      "revId": "12db70aafe1fffd58e6aff852fdbccb7a10d61a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f127a8f2_ed9f011f",
+        "filename": "android/skin/qt/winsys-qt.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-02-02T20:00:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b121b0e4_68f3038e",
       "range": {
         "startLine": 22,
         "startChar": 0,
