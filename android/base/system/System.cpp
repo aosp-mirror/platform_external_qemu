@@ -728,6 +728,7 @@ public:
             // Timeout occured.
             if ((options & RunOptions::TerminateOnTimeout) != 0) {
                 kill(pid, SIGKILL);
+                waitpid(pid, nullptr, WNOHANG);
             }
             LOG(VERBOSE) << "Timed out with running command " << cmd;
             return false;
