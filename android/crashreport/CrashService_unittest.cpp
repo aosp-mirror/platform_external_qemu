@@ -27,7 +27,7 @@ using namespace android::crashreport;
 
 TEST(CrashService, get_set_dumpfile) {
     std::unique_ptr<CrashService> crash(
-            CrashService::makeCrashService("foo", "bar"));
+            CrashService::makeCrashService("foo", "bar", nullptr));
     std::string path("/test/foo/bar");
     crash->setDumpFile(path);
     EXPECT_STREQ(crash->getDumpFile().c_str(), path.c_str());
@@ -40,7 +40,7 @@ TEST(CrashService, validDumpFile) {
     testDir->makeSubFile("foo/bar.dmp");
     testDir->makeSubFile("foo/bar.dmp2");
     std::unique_ptr<CrashService> crash(
-            CrashService::makeCrashService("foo", "bar"));
+            CrashService::makeCrashService("foo", "bar", nullptr));
     std::string path;
 
     path = "foo/bar.dmp";
@@ -86,7 +86,7 @@ TEST(CrashService, invalidURLUpload) {
     TestCrashSystem crashsystem(crashdir.path(), "non-existent-domain-name-for-crash-reports.com");
     crashdir.makeSubFile("bar.dmp");
     std::unique_ptr<CrashService> crash(
-            CrashService::makeCrashService("foo", "bar"));
+            CrashService::makeCrashService("foo", "bar", nullptr));
     crash->setDumpFile(crashdir.makeSubPath("bar.dmp").c_str());
     EXPECT_FALSE(crash->uploadCrash());
 }
@@ -97,7 +97,7 @@ TEST(CrashService, startAttachWaitCrash) {
     TestTempDir crashdir("crashdir");
     TestCrashSystem crashsystem(crashdir.path(), "localhost");
     std::unique_ptr<CrashService> crash(
-            CrashService::makeCrashService("foo", "bar"));
+            CrashService::makeCrashService("foo", "bar", nullptr));
     CrashSystem::CrashPipe crashpipe = CrashSystem::get()->getCrashPipe();
     EXPECT_TRUE(crashpipe.isValid());
     crash->startCrashServer(crashpipe.mServer);
@@ -119,7 +119,7 @@ TEST(CrashService, startAttachWaitNoCrash) {
     TestTempDir crashdir("crashdir");
     TestCrashSystem crashsystem(crashdir.path(), "localhost");
     std::unique_ptr<CrashService> crash(
-            CrashService::makeCrashService("foo", "bar"));
+            CrashService::makeCrashService("foo", "bar", nullptr));
     CrashSystem::CrashPipe crashpipe = CrashSystem::get()->getCrashPipe();
     EXPECT_TRUE(crashpipe.isValid());
     crash->startCrashServer(crashpipe.mServer);
@@ -135,7 +135,7 @@ TEST(CrashService, startWaitNoAttach) {
     TestTempDir crashdir("crashdir");
     TestCrashSystem crashsystem(crashdir.path(), "localhost");
     std::unique_ptr<CrashService> crash(
-            CrashService::makeCrashService("foo", "bar"));
+            CrashService::makeCrashService("foo", "bar", nullptr));
     CrashSystem::CrashPipe crashpipe = CrashSystem::get()->getCrashPipe();
     EXPECT_TRUE(crashpipe.isValid());
     crash->startCrashServer(crashpipe.mServer);
@@ -151,7 +151,7 @@ TEST(CrashService, startAttachWaitTimeout) {
     TestTempDir crashdir("crashdir");
     TestCrashSystem crashsystem(crashdir.path(), "localhost");
     std::unique_ptr<CrashService> crash(
-            CrashService::makeCrashService("foo", "bar"));
+            CrashService::makeCrashService("foo", "bar", nullptr));
     CrashSystem::CrashPipe crashpipe = CrashSystem::get()->getCrashPipe();
     EXPECT_TRUE(crashpipe.isValid());
     crash->startCrashServer(crashpipe.mServer);

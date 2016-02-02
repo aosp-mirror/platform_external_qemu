@@ -18,8 +18,11 @@
 #include "QtConcurrent/qtconcurrentrun.h"
 
 static const char kMessageBoxTitle[] = "Android Emulator";
+static const char kMessageBoxMessageInternalError[] =
+        "<p>Android Emulator closed because of an internal error:</p>";
 static const char kMessageBoxMessage[] =
-        "<p>Android Emulator closed unexpectedly.</p>"
+        "<p>Android Emulator closed unexpectedly.</p>";
+static const char kMessageBoxMessageFooter[] =
         "<p>Do you want to send a crash report about the problem?</p>";
 static const char kMessageBoxMessageDetailHW[] =
         "An error report containing the information shown below, "
@@ -44,7 +47,7 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mSendButton = new QPushButton(tr("Send Report"));
     mDontSendButton = new QPushButton(tr("Don't Send"));
     mDetailsButton = new QPushButton(tr(""));
-    mLabelText = new QLabel(kMessageBoxMessage);
+    mLabelText = new QLabel(QString::fromStdString(constructDumpMessage()));
     mInfoText = new QLabel(kMessageBoxMessageDetailHW);
     mIcon = new QLabel();
     mCommentsText = new QTextEdit();
@@ -280,4 +283,16 @@ void ConfirmDialog::detailtoggle() {
     } else {
         hideDetails();
     }
+}
+
+std::string ConfirmDialog::constructDumpMessage() const {
+    std::string dumpMessage = mCrashService->getDumpMessage();
+    if (dumpMessage.empty()) {
+        dumpMessage = kMessageBoxMessage;
+    } else {
+        dumpMessage = std::string(kMessageBoxMessageInternalError) + "<p>" +
+                      dumpMessage + "</p>";
+    }
+    dumpMessage += kMessageBoxMessageFooter;
+    return dumpMessage;
 }

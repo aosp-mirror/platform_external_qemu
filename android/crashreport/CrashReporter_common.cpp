@@ -14,6 +14,8 @@
 
 #include "android/crashreport/CrashReporter.h"
 
+#include "android/crashreport/crash-handler.h"
+
 #include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
@@ -151,6 +153,17 @@ void crashhandler_die(const char* message) {
         I("Emulator: exiting becase of the internal error '%s'\n", message);
         _exit(1);
     }
+}
+
+void crashhandler_die_format(const char* format, ...) {
+    char message[2048] = {};
+    va_list args;
+
+    va_start(args, format);
+    vsnprintf(message, sizeof(message) - 1, format, args);
+    va_end(args);
+
+    crashhandler_die(message);
 }
 
 }  // extern "C"

@@ -70,5 +70,8 @@ public:
 public slots:
     void sendReport();
     void detailtoggle();
+
+private:
+    std::string constructDumpMessage() const;
 };
 

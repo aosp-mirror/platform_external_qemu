@@ -75,9 +75,9 @@ int main(int argc, char** argv) {
     // Parse args
     const char* service_arg = nullptr;
     const char* dump_file = nullptr;
-    int nn;
+    const char* data_dir = nullptr;
     int ppid = 0;
-    for (nn = 1; nn < argc; nn++) {
+    for (int nn = 1; nn < argc; nn++) {
         const char* opt = argv[nn];
         if (!strcmp(opt, "-pipe")) {
             if (nn + 1 < argc) {
@@ -94,17 +94,19 @@ int main(int argc, char** argv) {
                 nn++;
                 ppid = atoi(argv[nn]);
             }
+        } else if (!strcmp(opt, "-data-dir")) {
+            if (nn + 1 < argc) {
+                nn++;
+                data_dir = argv[nn];
+            }
         }
     }
 
-    std::unique_ptr<::android::crashreport::CrashService> crashservice(
-            ::android::crashreport::CrashService::makeCrashService(
-                    EMULATOR_VERSION_STRING, EMULATOR_BUILD_STRING));
-
+    auto crashservice = ::android::crashreport::CrashService::makeCrashService(
+            EMULATOR_VERSION_STRING, EMULATOR_BUILD_STRING, data_dir);
     if (dump_file &&
         ::android::crashreport::CrashSystem::get()->isDump(dump_file)) {
         crashservice->setDumpFile(dump_file);
-
     } else if (service_arg && ppid) {
         if (!crashservice->startCrashServer(service_arg)) {
             return 1;
@@ -126,6 +128,8 @@ int main(int argc, char** argv) {
         E("CrashPath '%s' is invalid\n", crashservice->getDumpFile().c_str());
         return 1;
     }
+
+    crashservice->collectDataFiles();
 
     QApplication app(argc, argv);
 

@@ -38,7 +38,10 @@ bool crashhandler_init(void);
 
 // Abort the program execution immidiately; when showing a crash dialog, use
 // show |message| to the user instead of standard 'emulator have crashed'
-void crashhandler_die(const char* message);
+void crashhandler_die(const char* message) __attribute__((noinline));
+
+// A variadic overload with C interface
+void crashhandler_die_format(const char* format, ...);
 
 ANDROID_END_HEADER
 

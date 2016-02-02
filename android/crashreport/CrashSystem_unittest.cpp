@@ -114,12 +114,19 @@ TEST_F(CrashSystemTest, getCrashServiceCmdLine) {
     std::string proc("procval");
     ::android::base::StringVector tmp1 =
             CrashSystem::get()->getCrashServiceCmdLine(pipe, proc);
-    EXPECT_EQ(tmp1.size(), 5);
+    EXPECT_EQ(tmp1.size(), 7);
     EXPECT_STREQ(tmp1[0].c_str(), getCrashServicePath().c_str());
     EXPECT_STREQ(tmp1[1].c_str(), "-pipe");
     EXPECT_STREQ(tmp1[2].c_str(), pipe.c_str());
     EXPECT_STREQ(tmp1[3].c_str(), "-ppid");
     EXPECT_STREQ(tmp1[4].c_str(), proc.c_str());
+    EXPECT_STREQ(tmp1[5].c_str(), "-data-dir");
+    // check that argument of -data-dir starts with temp directory name
+    const auto tempDir = System::get()->getTempDir();
+    EXPECT_TRUE(tmp1[6].size() > tempDir.size() + 2);
+    EXPECT_TRUE(tempDir.compare(tmp1[6].c_str(), tempDir.size()) == 0);
+    EXPECT_TRUE(PathUtils::isDirSeparator(tmp1[6][tempDir.size()]));
+    EXPECT_FALSE(PathUtils::isDirSeparator(tmp1[6][tempDir.size() + 1]));
 }
 
 TEST_F(CrashSystemTest, validatePaths_ValidPaths) {
