@@ -951,10 +951,12 @@ void EmulatorQtWindow::doResize(const QSize &size)
 
         // Make sure the new size is always a little bit smaller than the screen to prevent
         // keyboard shortcut scaling from making a window too large for the screen, which can
-        // result in the showing of the scroll bars.
+        // result in the showing of the scroll bars. In this case, just keep the size the same.
+        // This is particularly a problem on OSX where the Nav bar takes up a substantial
+        // portion of the screen.
         if (newSize.width() > .95 * screenDimensions.width() ||
             newSize.height() > .95 * screenDimensions.height()) {
-            return;
+            newSize = this->size();
         }
 
         double widthScale = (double) newSize.width() / (double) backing_surface->original_w;
