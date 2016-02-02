@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "31ea20c5_bc036157",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-02T19:44:36Z",
+      "side": 1,
+      "message": "Would it be a good idea to only create new directories, never reuse existing ones here? It\u0027s probably pretty unlikely but it seems better to be safe than sorry.\n\nThis would require an atomic operation that both checks and creates the directory to prevent the race condition that might happen in a two-step check and create operation.",
+      "revId": "713df2b2a882fec27772f8e1f8dcb249587bf69a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "51edd4c8_ad817dea",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-02T19:44:36Z",
+      "side": 1,
+      "message": "This might fail on Windows if the file path encoding does not match the current code page. We really should have some kind of File class to support platform independent file operations with UTF-8 paths. Maybe we could put a TODO here to indicate that once we have such a class this should change.",
+      "revId": "713df2b2a882fec27772f8e1f8dcb249587bf69a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11e51cf3_3bfe7756",
         "filename": "android/crashreport/crash-handler.h",
         "patchSetId": 1
