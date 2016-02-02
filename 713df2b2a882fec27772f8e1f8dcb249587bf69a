@@ -16,6 +16,24 @@
       "revId": "713df2b2a882fec27772f8e1f8dcb249587bf69a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31c3005d_f4b5f894",
+        "filename": "android/crashreport/crash-handler.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-02T17:10:49Z",
+      "side": 1,
+      "message": "Already added for the next iteration :)\nI also would like to have the variadic template version because it is able to handle string classes without .c_str() call",
+      "parentUuid": "11e51cf3_3bfe7756",
+      "revId": "713df2b2a882fec27772f8e1f8dcb249587bf69a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
