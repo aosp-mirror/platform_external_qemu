@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b121b0e4_0eed2f73",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 722,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-02T22:01:32Z",
+      "side": 1,
+      "message": "This won\u0027t work because this widget\u0027s parent is actually EmulatorQtWindow - if you\u0027re zoomed in, and then you press and release Ctrl (to send some input to the device while in zoom mode), the overlay will re-appear too big. Do this instead:\n\nQPoint parentPos \u003d mContainer-\u003epos();\nif (myPos !\u003d parentPos) {\n    move(parentPos);\n}",
+      "range": {
+        "startLine": 719,
+        "startChar": 11,
+        "endLine": 722,
+        "endChar": 13
+      },
+      "revId": "33761e8c95ef32df83280d2b93f06a37fc08d0b0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
