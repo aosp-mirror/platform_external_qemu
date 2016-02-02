@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f127a8f2_2df9196e",
+        "filename": "android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2052,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-02T19:42:58Z",
+      "side": 1,
+      "message": "please clang-format \u003e80 chars.",
+      "revId": "dc263eb4a8f08566c1fb8bb433820d9246440d30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
