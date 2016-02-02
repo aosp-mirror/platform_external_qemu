@@ -13,6 +13,9 @@
 // limitations under the License.
 
 #pragma once
+
+#include "android/base/StringView.h"
+
 #include "google_breakpad/processor/process_state.h"
 #include "google_breakpad/processor/basic_source_line_resolver.h"
 
@@ -79,9 +82,10 @@ public:
 
     // version and build args will be used to construct breakpad version
     // identifier
-    CrashService(const std::string& version, const std::string& build);
+    CrashService(const std::string& version,
+                 const std::string& build,
+                 const char* dataDir);
 
-    // Desctructor
     virtual ~CrashService();
 
     // Save a dumpfile path
@@ -120,7 +124,7 @@ public:
     bool collectSysInfo();
 
     // Utility function for reading a txt file into string
-    std::string readFile(const std::string& path);
+    static std::string readFile(android::base::StringView path);
 
     // Return string containing collectSysInfo result
     std::string getSysInfo();
@@ -137,9 +141,15 @@ public:
     // Get the crash report ID returned by the crash servers
     std::string getReportId() const;
 
+    // Returns the dump message passed by the emulator (or empty string if
+    // there's none)
+    const std::string& getDumpMessage() const;
+
     // Factory method
-    static CrashService* makeCrashService(const std::string& version,
-                                          const std::string& build);
+    static std::unique_ptr<CrashService> makeCrashService(
+            const std::string& version,
+            const std::string& build,
+            const char* dataDir);
 
     // Key value pair to be added to crash report
     void addReportValue(const std::string& key, const std::string& value);
@@ -149,6 +159,9 @@ public:
 
     // User comments to be added to crash report
     void addUserComments(const std::string& comments);
+
+    // Read the data files passed by the watched/dumped application
+    void collectDataFiles();
 
 protected:
     // Initialize serverstate
@@ -170,12 +183,15 @@ protected:
 
 private:
     CrashService();
+
     std::string mVersion;
     std::string mBuild;
     std::string mVersionId;
     std::string mDumpFile;
     std::string mReportId;
     std::string mComments;
+    std::string mDataDirectory;
+    std::string mDumpMessage;
     std::map<std::string, std::string> mReportValues;
     std::map<std::string, std::string> mReportFiles;
     google_breakpad::ProcessState mProcessState;
