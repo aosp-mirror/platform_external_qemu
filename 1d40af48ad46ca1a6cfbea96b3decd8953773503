@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "548b02a3_da7d04fc",
+        "filename": "android/skin/qt/error-dialog.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-02T00:36:18Z",
+      "side": 1,
+      "message": "please clang-format. This line is \u003e 80 chars.",
+      "revId": "1d40af48ad46ca1a6cfbea96b3decd8953773503",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
