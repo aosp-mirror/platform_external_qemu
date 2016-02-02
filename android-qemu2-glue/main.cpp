@@ -1097,6 +1097,29 @@ extern "C" int main(int argc, char **argv) {
         hw->kernel_parameters[0] = '\0';
     }
 
+    // Additional memory for -gpu guest software renderers (e.g., SwiftShader)
+    if (!strcmp(android_hw->hw_gpu_mode, "guest")) {
+        VERBOSE_PRINT(init, "Adjusting Contiguous Memory Allocation"
+                            "of %dx%d framebuffer for software renderer.",
+                            hw->hw_lcd_width, hw->hw_lcd_height);
+        // Set CMA (continguous memory allocation) to values that depend on
+        // the desired resolution.
+        // We will go with a conservative estimate that enables booting.
+        // The formula is to pick a power of 2
+        // that is just under 4 * bytes of a 32-bit RGBA frame buffer,
+        // with a maximum size of 256M.
+        // For example, Nexus 6 seems to require 32M (16M doesn't work)
+        // with its 2560x1440 resolution.
+        // This is because double buffering is used.
+        // We will assume double buffering in the calculation.
+        uint64_t bytes = hw->hw_lcd_width * hw->hw_lcd_height * 4;
+        uint64_t used_mb = (2 * bytes + 1024 * 1024 - 1) / (1024 * 1024);
+        char cma_target[22] = {}; // 16 (for number) + 6 more chars + \0
+        snprintf(cma_target, sizeof(cma_target), " cma=%" PRIu64 "M", used_mb);
+        VERBOSE_PRINT(init, "Target allocation size: %s\n", cma_target);
+        kernelCommandLine += cma_target;
+    }
+
 #ifdef TARGET_I386
     kernelCommandLine += " clocksource=pit";
 #endif
