@@ -16,9 +16,9 @@
   <widget class="QPushButton" name="finger_touchButton">
    <property name="geometry">
     <rect>
-     <x>180</x>
+     <x>188</x>
      <y>70</y>
-     <width>120</width>
+     <width>132</width>
      <height>36</height>
     </rect>
    </property>
@@ -29,9 +29,6 @@
      <weight>75</weight>
      <bold>true</bold>
     </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">text-align: right</string>
    </property>
    <property name="text">
     <string>TOUCH SENSOR</string>
@@ -88,6 +85,10 @@
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>finger_pickBox</tabstop>
+  <tabstop>finger_touchButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

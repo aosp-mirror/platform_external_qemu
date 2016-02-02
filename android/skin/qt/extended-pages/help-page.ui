@@ -76,7 +76,7 @@
        <string>Command</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeading|AlignVCenter</set>
+       <set>AlignLeft|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -84,7 +84,7 @@
        <string>Key</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeading|AlignVCenter</set>
+       <set>AlignLeft|AlignVCenter</set>
       </property>
      </column>
     </widget>
@@ -96,9 +96,9 @@
     <widget class="QPushButton" name="help_docs">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>4</x>
        <y>10</y>
-       <width>140</width>
+       <width>138</width>
        <height>36</height>
       </rect>
      </property>
@@ -109,9 +109,6 @@
        <weight>75</weight>
        <bold>true</bold>
       </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">text-align: left;</string>
      </property>
      <property name="text">
       <string>DOCUMENTATION</string>
@@ -126,9 +123,9 @@
     <widget class="QPushButton" name="help_fileBug">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>4</x>
        <y>50</y>
-       <width>90</width>
+       <width>104</width>
        <height>36</height>
       </rect>
      </property>
@@ -139,9 +136,6 @@
        <weight>75</weight>
        <bold>true</bold>
       </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">text-align: left;</string>
      </property>
      <property name="text">
       <string>FILE A BUG</string>
@@ -156,9 +150,9 @@
     <widget class="QPushButton" name="help_sendFeedback">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>4</x>
        <y>90</y>
-       <width>130</width>
+       <width>134</width>
        <height>36</height>
       </rect>
      </property>
@@ -169,9 +163,6 @@
        <weight>75</weight>
        <bold>true</bold>
       </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">text-align: left;</string>
      </property>
      <property name="text">
       <string>SEND FEEDBACK</string>
