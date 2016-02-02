@@ -12,6 +12,7 @@
 #include "android/skin/window.h"
 
 #include "android/config/config.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/skin/charmap.h"
 #include "android/skin/event.h"
 #include "android/skin/image.h"
@@ -561,12 +562,13 @@ struct local_pixels_buffer_t {
 
 static struct local_pixels_buffer_t local_pixels_buffer = {.pixels = NULL, .size = 0};
 
-static uint8_t* local_calloc(int sz, int dst_pitch) {
+static uint8_t* local_calloc(int size) {
     if (local_pixels_buffer.pixels == NULL) {
-        local_pixels_buffer.pixels = calloc(sz,dst_pitch);
-        local_pixels_buffer.size = sz * dst_pitch;
-    } else if (local_pixels_buffer.size < sz * dst_pitch) {
-        local_pixels_buffer.size = 2 * sz * dst_pitch;
+        local_pixels_buffer.pixels = calloc(1, size);
+        local_pixels_buffer.size = size;
+    } else if (local_pixels_buffer.size < size) {
+        local_pixels_buffer.size = size > 2 * local_pixels_buffer.size ?
+                                      size : 2 * local_pixels_buffer.size;
         free(local_pixels_buffer.pixels);
         local_pixels_buffer.pixels = calloc(1, local_pixels_buffer.size);
     }
@@ -609,14 +611,15 @@ static void adisplay_update_surface(ADisplay* disp,
     // content.
     int sz = disp->datasize.h > disp->datasize.w ? disp->datasize.h : disp->datasize.w;
     int dst_pitch = 4 * sz;
-    uint8_t* dst_pixels = local_calloc(sz, dst_pitch);
+    const int size = sz * dst_pitch;
+    uint8_t* dst_pixels = local_calloc(size);
     if (dst_pixels == NULL) {
-        derror("ERROR: %s:%d cannot allocate memory of %d byte.\n", __func__, __LINE__, sz * dst_pitch);
-        // crash it: copy-n-paste from 061dcd2137f1a654763ca4131cbfefcc495299c6
-        // Adding qemu2 console crash command
-        volatile int * ptr = NULL;
-        *ptr+=1;
-        return;
+        derror("ERROR: %s:%d cannot allocate memory of %d bytes.\n",
+               __func__, __LINE__, size);
+        crashhandler_die_format(
+                    "Display surface memory allocation failed "
+                    "(requested %d bytes)",
+                    size);
     }
 
     SkinRect dst_r = {
@@ -2044,9 +2047,14 @@ void skin_window_update_gpu_frame(SkinWindow* window,
     }
 
     if (!disp->gpu_frame) {
-        disp->gpu_frame = calloc(w * 4, h);
+        const int size = 4 * w * h;
+        disp->gpu_frame = calloc(1, size);
         if (!disp->gpu_frame) {
-            return;
+            derror("ERROR: %s:%d cannot allocate memory of %d bytes.\n",
+                   __func__, __LINE__, size);
+            crashhandler_die_format(
+                    "GPU frame memory allocation failed (requested %d bytes)",
+                    size);
         }
     }
     // Convert from GL_RGBA to 32-bit ARGB.
