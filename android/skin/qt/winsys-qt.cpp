@@ -14,6 +14,7 @@
 #include <pthread.h>
 #endif
 
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/qt/qt_path.h"
 #include "android/skin/rect.h"
@@ -45,6 +46,7 @@
 
 using android::base::System;
 using android::base::String;
+using android::base::LazyInstance;
 
 #define  DEBUG  1
 
@@ -55,6 +57,8 @@ using android::base::String;
 #else
 #define  D(...)   ((void)0)
 #endif
+
+static LazyInstance<EmulatorQtWindow::Ptr> sInstanceWindow = LAZY_INSTANCE_INIT;
 
 struct GlobalState {
     int argc;
@@ -75,6 +79,14 @@ static GlobalState* globalState() {
         .window_pos_y = 0,
     };
     return &sGlobalState;
+}
+
+extern void skin_winsys_acquire_instance() {
+    sInstanceWindow.get() = EmulatorQtWindow::getInstancePtr();
+}
+
+extern void skin_winsys_release_instance() {
+    sInstanceWindow.get().reset();
 }
 
 extern void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv) {

@@ -22,6 +22,12 @@
 extern "C" {
 #endif
 
+// Get a local pointer of the emulator gui window
+void skin_winsys_acquire_instance(void);
+
+// Release our local pointer of the emulator gui window
+void skin_winsys_release_instance(void);
+
 // Enable/Disable relative mouse mode. Used for trackball emulation.
 // This hides the cursor and grabs the input.
 void skin_winsys_set_relative_mouse_mode(bool enabled);
