@@ -1223,8 +1223,15 @@ static void socket_cleanup(void)
     WSACleanup();
 }
 
-int socket_init(void)
+// Sockets should be initialized only once per process. Simply enforce it.
+static bool socket_init_called = false;
+int android_socket_init(void)
 {
+    if (socket_init_called) {
+        return 0;
+    }
+    socket_init_called = true;
+
     WSADATA Data;
     int ret;
 
@@ -1239,7 +1246,7 @@ int socket_init(void)
 
 #else /* !_WIN32 */
 
-int socket_init(void)
+int android_socket_init(void)
 {
    return 0;   /* nothing to do on Unix */
 }

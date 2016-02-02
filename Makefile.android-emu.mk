@@ -265,6 +265,7 @@ LOCAL_SRC_FILES := \
     android/opengl/emugl_config.cpp \
     android/opengl/GpuFrameBridge.cpp \
     android/opengles.c \
+    android/process_setup.cpp \
     android/proxy/proxy_common.c \
     android/proxy/proxy_http.c \
     android/proxy/proxy_http_connector.c \

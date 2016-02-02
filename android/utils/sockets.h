@@ -146,7 +146,7 @@ ANDROID_BEGIN_HEADER
 /* initialize the socket sub-system. this must be called before
  * using any of the declarations below.
  */
-int  socket_init( void );
+int  android_socket_init( void );
 
 /* return the name of the current host */
 char*  host_name( void );
