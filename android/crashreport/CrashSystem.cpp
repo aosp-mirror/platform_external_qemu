@@ -22,6 +22,7 @@
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/system/Win32Utils.h"
 #endif
+#include "android/crashreport/CrashReporter.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
@@ -184,11 +185,15 @@ const CrashSystem::CrashPipe& CrashSystem::getCrashPipe() {
     return mCrashPipe;
 }
 
-const StringVector CrashSystem::getCrashServiceCmdLine(
-        const std::string& pipe,
-        const std::string& proc) {
-    const StringVector cmdline = {getCrashServicePath(), "-pipe", pipe, "-ppid",
-                                  proc};
+StringVector CrashSystem::getCrashServiceCmdLine(const std::string& pipe,
+                                                 const std::string& proc) {
+    const StringVector cmdline = {getCrashServicePath(),
+                                  "-pipe",
+                                  pipe,
+                                  "-ppid",
+                                  proc,
+                                  "-data-dir",
+                                  CrashReporter::get()->getDataExchangeDir()};
     return cmdline;
 }
 

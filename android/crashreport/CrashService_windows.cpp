@@ -12,20 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/String.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/system/System.h"
+#include "android/crashreport/CrashService_windows.h"
 
-#include "android/crashreport/CrashService.h"
+#include "android/base/String.h"
+#include "android/base/system/System.h"
 
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/crashreport/CrashSystem.h"
 #include "android/utils/debug.h"
-#include "client/windows/crash_generation/crash_generation_server.h"
 
 #include <sys/types.h>
 #include <unistd.h>
-#include <memory>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -38,37 +35,28 @@
 namespace android {
 
 using ::android::base::String;
-using ::android::base::PathUtils;
 using ::android::base::System;
 
 namespace crashreport {
 
-namespace {
+HostCrashService::~HostCrashService() {
+    stopCrashServer();
+    cleanupHWInfo();
+}
 
-class HostCrashService : public CrashService {
-public:
-    // Inherit CrashServer constructor
-    using CrashService::CrashService;
+void HostCrashService::OnClientConnect(
+        void* context,
+        const google_breakpad::ClientInfo* client_info) {
+    D("Client connected, pid = %d\n", client_info->pid());
+    static_cast<CrashService::ServerState*>(context)->connected += 1;
+}
 
-    virtual ~HostCrashService() {
-        stopCrashServer();
-        if (mClientProcess) {
-            CloseHandle(mClientProcess);
-        }
-        cleanupHWInfo();
-    }
-
-    static void OnClientConnect(
-            void* context,
-            const google_breakpad::ClientInfo* client_info) {
-        D("Client connected, pid = %d\n", client_info->pid());
-        static_cast<CrashService::ServerState*>(context)->connected += 1;
-    }
-
-    static void OnClientDumpRequest(
-            void* context,
-            const google_breakpad::ClientInfo* client_info,
-            const std::wstring* file_path) {
+void HostCrashService::OnClientDumpRequest(
+        void* context,
+        const google_breakpad::ClientInfo* client_info,
+        const std::wstring* file_path) {
+    if (static_cast<CrashService::DumpRequestContext*>(context)
+                ->file_path.empty()) {
         ::android::base::String file_path_string =
                 ::android::base::Win32UnicodeString::convertToUtf8(
                         file_path->c_str());
@@ -76,124 +64,110 @@ public:
         static_cast<CrashService::DumpRequestContext*>(context)
                 ->file_path.assign(file_path_string.c_str());
     }
+}
 
-    static void OnClientExit(void* context,
-                             const google_breakpad::ClientInfo* client_info) {
-        D("Client exiting\n");
-        CrashService::ServerState* serverstate =
-                static_cast<CrashService::ServerState*>(context);
-        if (serverstate->connected > 0) {
-            serverstate->connected -= 1;
-        }
-        if (serverstate->connected == 0) {
-            serverstate->waiting = false;
-        }
+void HostCrashService::OnClientExit(
+        void* context,
+        const google_breakpad::ClientInfo* client_info) {
+    D("Client exiting\n");
+    CrashService::ServerState* serverstate =
+            static_cast<CrashService::ServerState*>(context);
+    if (serverstate->connected > 0) {
+        serverstate->connected -= 1;
+    }
+    if (serverstate->connected == 0) {
+        serverstate->waiting = false;
+    }
+}
+
+bool HostCrashService::startCrashServer(const std::string& pipe) {
+    if (mCrashServer) {
+        return false;
     }
 
-    bool startCrashServer(const std::string& pipe) override {
-        if (mCrashServer) {
-            return false;
-        }
+    initCrashServer();
 
-        initCrashServer();
+    ::android::base::Win32UnicodeString pipe_unicode(pipe.c_str(),
+                                                     pipe.length());
+    ::std::wstring pipe_string(pipe_unicode.data());
+    ::android::base::Win32UnicodeString crashdir_unicode(
+            ::android::crashreport::CrashSystem::get()
+                    ->getCrashDirectory()
+                    .c_str());
+    std::wstring crashdir_wstr(crashdir_unicode.c_str());
 
-        ::android::base::Win32UnicodeString pipe_unicode(pipe.c_str(),
-                                                         pipe.length());
-        ::std::wstring pipe_string(pipe_unicode.data());
-        ::android::base::Win32UnicodeString crashdir_unicode(
-                ::android::crashreport::CrashSystem::get()
-                        ->getCrashDirectory()
-                        .c_str());
-        std::wstring crashdir_wstr(crashdir_unicode.c_str());
+    mCrashServer.reset(new ::google_breakpad::CrashGenerationServer(
+            pipe_string, nullptr, OnClientConnect, &mServerState,
+            OnClientDumpRequest, &mDumpRequestContext, OnClientExit,
+            &mServerState, nullptr, nullptr, true, &crashdir_wstr));
 
-        mCrashServer.reset(new ::google_breakpad::CrashGenerationServer(
-                pipe_string, nullptr, OnClientConnect, &mServerState,
-                OnClientDumpRequest, &mDumpRequestContext, OnClientExit,
-                &mServerState, nullptr, nullptr, true, &crashdir_wstr));
+    return mCrashServer->Start();
+}
 
-        return mCrashServer->Start();
+bool HostCrashService::stopCrashServer() {
+    if (mCrashServer) {
+        mCrashServer.reset();
+        return true;
+    } else {
+        return false;
     }
+}
 
-    bool stopCrashServer() override {
-        if (mCrashServer) {
-            mCrashServer.reset();
-            return true;
-        } else {
-            return false;
-        }
+bool HostCrashService::setClient(int clientpid) {
+    mClientProcess.reset(OpenProcess(SYNCHRONIZE, FALSE, clientpid));
+    return mClientProcess.get() != nullptr;
+}
+
+bool HostCrashService::isClientAlive() {
+    if (!mClientProcess) {
+        return false;
     }
-
-    bool setClient(int clientpid) override {
-        if (mClientProcess) {
-            CloseHandle(mClientProcess);
-        }
-        mClientProcess = OpenProcess(SYNCHRONIZE, FALSE, clientpid);
-        return mClientProcess != nullptr;
-    }
-
-    bool isClientAlive() override {
-        if (!mClientProcess) {
-            return false;
-        }
-        if (WaitForSingleObject(mClientProcess, 0) != WAIT_TIMEOUT) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    bool getHWInfo() override {
-        mHWTmpFilePath.clear();
-        System* sys = System::get();
-        String tmp_dir = sys->getTempDir();
-
-        char tmp_filename_buffer[CMD_BUF_SIZE] = {};
-        DWORD temp_file_ret =
-                GetTempFileName(tmp_dir.c_str(), "emu", 0, tmp_filename_buffer);
-
-        if (!temp_file_ret) {
-            E("Error: Can't create temporary file! error code=%d",
-              GetLastError());
-            return false;
-        }
-
-        String tmp_filename(tmp_filename_buffer);
-        String syscmd(HWINFO_CMD);
-        syscmd += tmp_filename;
-        system(syscmd.c_str());
-
-        mHWTmpFilePath = tmp_filename.c_str();
+    if (WaitForSingleObject(mClientProcess.get(), 0) != WAIT_TIMEOUT) {
+        return false;
+    } else {
         return true;
     }
+}
 
-    void cleanupHWInfo() {
-        if (mHWTmpFilePath.empty()) {
-            return;
-        }
+bool HostCrashService::getHWInfo() {
+    mHWTmpFilePath.clear();
+    System* sys = System::get();
+    String tmp_dir = sys->getTempDir();
 
-        DWORD del_ret = DeleteFile(mHWTmpFilePath.c_str());
+    char tmp_filename_buffer[CMD_BUF_SIZE] = {};
+    DWORD temp_file_ret =
+            GetTempFileName(tmp_dir.c_str(), "emu", 0, tmp_filename_buffer);
 
-        if (!del_ret) {
-            // wait 100 ms
-            Sleep(100);
-            del_ret = DeleteFile(mHWTmpFilePath.c_str());
-            if (!del_ret) {
-                E("Error: Failed to delete temp file at %s. error code = %lu",
-                  mHWTmpFilePath.c_str(), GetLastError());
-            }
-        }
+    if (!temp_file_ret) {
+        E("Error: Can't create temporary file! error code=%d", GetLastError());
+        return false;
     }
 
-private:
-    std::unique_ptr<::google_breakpad::CrashGenerationServer> mCrashServer;
-    HANDLE mClientProcess = nullptr;
-};
+    String tmp_filename(tmp_filename_buffer);
+    String syscmd(HWINFO_CMD);
+    syscmd += tmp_filename;
+    system(syscmd.c_str());
 
-}  // namespace anonymous
+    mHWTmpFilePath = tmp_filename.c_str();
+    return true;
+}
 
-CrashService* CrashService::makeCrashService(const std::string& version,
-                                             const std::string& build) {
-    return new HostCrashService(version, build);
+void HostCrashService::cleanupHWInfo() {
+    if (mHWTmpFilePath.empty()) {
+        return;
+    }
+
+    DWORD del_ret = DeleteFile(mHWTmpFilePath.c_str());
+
+    if (!del_ret) {
+        // wait 100 ms
+        Sleep(100);
+        del_ret = DeleteFile(mHWTmpFilePath.c_str());
+        if (!del_ret) {
+            E("Error: Failed to delete temp file at %s. error code = %lu",
+              mHWTmpFilePath.c_str(), GetLastError());
+        }
+    }
 }
 
 }  // namespace crashreport
