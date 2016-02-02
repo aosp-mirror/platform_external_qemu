@@ -1353,22 +1353,18 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     window->scroll_h = 0;
 
     SkinRect  monitor;
-    int       screen_w, screen_h;
     int       win_w = slayout->size.w;
     int       win_h = slayout->size.h;
     double    scale_w = 1.0;
     double    scale_h = 1.0;
 
-    /* To account for things like menu bars, window decorations etc..
-     * We only compute 85% of the real screen size. */
     skin_winsys_get_monitor_rect(&monitor);
-    screen_w = monitor.size.w * 0.85;
-    screen_h = monitor.size.h * 0.85;
 
-    if (screen_w < win_w && win_w > 1.)
-        scale_w = 1.0 * screen_w / win_w;
-    if (screen_h < win_h && win_h > 1.)
-        scale_h = 1.0 * screen_h / win_h;
+    // Make the default scale about 80% of the screen size.
+    if (monitor.size.w < win_w && win_w > 1.)
+        scale_w = 0.80 * monitor.size.w / win_w;
+    if (monitor.size.h < win_h && win_h > 1.)
+        scale_h = 0.80 * monitor.size.h / win_h;
 
     window->scale = (scale_w <= scale_h) ? scale_w : scale_h;
 
@@ -1380,12 +1376,9 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
 
     /* Check that the window is fully visible */
     if (!window->no_display && !skin_winsys_is_window_fully_visible()) {
-        SkinRect monitor;
         int win_x, win_y, win_w, win_h;
         int border_left, border_right, border_top, border_bottom;
         int new_x, new_y;
-
-        skin_winsys_get_monitor_rect(&monitor);
 
         skin_winsys_get_window_pos(&win_x, &win_y);
         skin_winsys_get_window_borders(&border_left, &border_right, &border_top, &border_bottom);
