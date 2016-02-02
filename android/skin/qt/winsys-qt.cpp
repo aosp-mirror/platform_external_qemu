@@ -341,6 +341,7 @@ extern void skin_winsys_start(bool no_window, bool raw_keys) {
     } else {
         g->app = new QApplication(g->argc, g->argv);
         g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
+        EmulatorQtWindow::create();
 #ifdef __APPLE__
         // On OS X, Qt automatically generates an application menu with a "Quit"
         // item. For whatever reason, the auto-generated "quit" does not work,
@@ -354,12 +355,14 @@ extern void skin_winsys_start(bool no_window, bool raw_keys) {
         QMenu* quitMenu = new QMenu(nullptr);
         QAction* quitAction = new QAction(g->app->tr("Quit Emulator"), quitMenu);
         QMenuBar* mainBar = new QMenuBar(nullptr);
-        QObject::connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+        auto emulator_win = EmulatorQtWindow::getInstance();
+        QObject::connect(
+            quitAction, &QAction::triggered,
+            emulator_win, [emulator_win] () {emulator_win->requestClose();});
         quitMenu->addAction(quitAction);
         mainBar->addMenu(quitMenu);
         qt_mac_set_dock_menu(quitMenu);
 #endif
-        EmulatorQtWindow::create();
     }
 }
 
