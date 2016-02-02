@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "711bb8b8_06623aec",
+        "filename": "android-qemu1-glue/skin_qt.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-02T16:45:13Z",
+      "side": 1,
+      "message": "ANDROID_BEGIN_HEADER?",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 6
+      },
+      "revId": "12db70aafe1fffd58e6aff852fdbccb7a10d61a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5116b490_c5b5ba95",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-02T16:45:13Z",
+      "side": 1,
+      "message": "this is not what you want.\nyou need std::static_pointer_cast\u003cvoid\u003e() here",
+      "range": {
+        "startLine": 81,
+        "startChar": 11,
+        "endLine": 81,
+        "endChar": 22
+      },
+      "revId": "12db70aafe1fffd58e6aff852fdbccb7a10d61a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b121b0e4_68f3038e",
+        "filename": "android/skin/qt/winsys-qt.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-02T16:45:13Z",
+      "side": 1,
+      "message": "a comment about why this function is here and when we can get rid of it?",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 6
+      },
+      "revId": "12db70aafe1fffd58e6aff852fdbccb7a10d61a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
