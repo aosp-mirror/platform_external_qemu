@@ -4,7 +4,6 @@
 LOCAL_PATH := $(call my-dir)
 
 commonSources := \
-        GLClientState.cpp \
         glUtils.cpp \
 
 host_commonSources := $(commonSources)
