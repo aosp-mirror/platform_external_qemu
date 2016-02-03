@@ -14,9 +14,10 @@
 * limitations under the License.
 */
 #include "glUtils.h"
-#include <string.h>
+
 #include "ErrorLog.h"
-#include <IOStream.h>
+
+#include <string.h>
 
 size_t glSizeof(GLenum type)
 {
@@ -346,25 +347,6 @@ void glUtilsPackPointerData(unsigned char *dst, unsigned char *src,
     }
 }
 
-void glUtilsWritePackPointerData(void* _stream, unsigned char *src,
-                                 int size, GLenum type, unsigned int stride,
-                                 unsigned int datalen)
-{
-    IOStream* stream = reinterpret_cast<IOStream*>(_stream);
-
-    unsigned int  vsize = size * glSizeof(type);
-    if (stride == 0) stride = vsize;
-
-    if (stride == vsize) {
-        stream->writeFully(src, datalen);
-    } else {
-        for (unsigned int i = 0; i < datalen; i += vsize) {
-            stream->writeFully(src, (size_t)vsize);
-            src += stride;
-        }
-    }
-}
-
 int glUtilsPixelBitSize(GLenum format, GLenum type)
 {
     int components = 0;
@@ -431,41 +413,4 @@ int glUtilsPixelBitSize(GLenum format, GLenum type)
     }
 
     return pixelsize;
-}
-
-// pack a list of strings into one.
-void glUtilsPackStrings(char *ptr,  char **strings,  GLint *length, GLsizei count)
-{
-    char *p = ptr;
-    *p = '\0';
-    for (int i = 0; i < count; i++) {
-        int l=0;
-        if (strings[i]!=NULL) {
-            if (length == NULL || length[i] < 0) {
-                l = strlen(strings[i]);
-                strcat(p, strings[i]);
-            } else {
-                l = length[i];
-                strncat(p, strings[i], l);
-            }
-        }
-        p += l;
-    }
-}
-
-// claculate the length of a list of strings
-int glUtilsCalcShaderSourceLen( char **strings,  GLint *length, GLsizei count)
-{
-    int len = 0;
-    for (int i = 0; i < count; i++) {
-        int l;
-        if (length == NULL || length[i] < 0) {
-            l = strings[i]!=NULL ? strlen(strings[i]) : 0;
-        } else {
-            l = length[i];
-        }
-        len += l;
-    }
-    return len;
-
 }
