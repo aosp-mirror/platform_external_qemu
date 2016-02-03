@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "71c9f878_ab8799cc",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T23:14:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "71c9f878_30adb8c4",
+      "range": {
+        "startLine": 46,
+        "startChar": 8,
+        "endLine": 46,
+        "endChar": 28
+      },
+      "revId": "7f7e1b1570d9465da4b28b704977d405317982f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b121b0e4_c2be467a",
         "filename": "android/crashreport/main-crash-service.cpp",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "711bb8b8_0d06d2ff",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T23:14:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b121b0e4_c2be467a",
+      "range": {
+        "startLine": 119,
+        "startChar": 0,
+        "endLine": 120,
+        "endChar": 1
+      },
+      "revId": "7f7e1b1570d9465da4b28b704977d405317982f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "711bb8b8_db90f771",
         "filename": "android/crashreport/main-crash-service.cpp",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2016-02-03T22:55:54Z",
       "side": 1,
       "message": "create in on stack please",
+      "range": {
+        "startLine": 154,
+        "startChar": 4,
+        "endLine": 154,
+        "endChar": 53
+      },
+      "revId": "7f7e1b1570d9465da4b28b704977d405317982f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31c3005d_0efedf7f",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T23:14:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "711bb8b8_db90f771",
       "range": {
         "startLine": 154,
         "startChar": 4,
