@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "711bb8b8_2d4bce64",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T23:14:38Z",
+      "side": 1,
+      "message": "Good point! Done.",
+      "parentUuid": "71c9f878_0b040d2d",
+      "range": {
+        "startLine": 75,
+        "startChar": 4,
+        "endLine": 75,
+        "endChar": 19
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9124acf4_093ec060",
         "filename": "android/crashreport/main-crash-service.cpp",
         "patchSetId": 4
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "b121b0e4_c28766cc",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T23:14:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9124acf4_093ec060",
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "711bb8b8_cdd4ba19",
         "filename": "android/crashreport/main-crash-service.cpp",
         "patchSetId": 4
@@ -53,6 +95,30 @@
       "writtenOn": "2016-02-03T22:19:38Z",
       "side": 1,
       "message": "Prefer this to be in a shared location between CrashHandler and crash service, so that they are changed together.",
+      "range": {
+        "startLine": 83,
+        "startChar": 15,
+        "endLine": 83,
+        "endChar": 22
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31fce07c_937e5b8b",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T23:14:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "711bb8b8_cdd4ba19",
       "range": {
         "startLine": 83,
         "startChar": 15,
@@ -93,6 +159,30 @@
       "writtenOn": "2016-02-03T22:19:38Z",
       "side": 1,
       "message": "unique_ptr?",
+      "range": {
+        "startLine": 154,
+        "startChar": 4,
+        "endLine": 154,
+        "endChar": 37
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5116b490_d139f7ca",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T23:14:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "31c3005d_43f7d0f2",
       "range": {
         "startLine": 154,
         "startChar": 4,
@@ -176,6 +266,54 @@
     },
     {
       "key": {
+        "uuid": "71c9f878_4b18c5c4",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T23:14:38Z",
+      "side": 1,
+      "message": "On the other hand, the user will not be able to put any useful information in the comments box.\n\nNot really sure what to do here, but right now this is the safest way. We require a bit more discussion.",
+      "parentUuid": "3115c084_1e68bd99",
+      "range": {
+        "startLine": 63,
+        "startChar": 43,
+        "endLine": 63,
+        "endChar": 97
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "71c9f878_cb84d5ca",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T23:14:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9124acf4_248c8b1d",
+      "range": {
+        "startLine": 63,
+        "startChar": 43,
+        "endLine": 63,
+        "endChar": 97
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9124acf4_69013c99",
         "filename": "android/crashreport/ui/ConfirmDialog.cpp",
         "patchSetId": 4
@@ -187,6 +325,30 @@
       "writtenOn": "2016-02-03T22:19:38Z",
       "side": 1,
       "message": "Initial value needs to be determined by stored settings.",
+      "range": {
+        "startLine": 64,
+        "startChar": 35,
+        "endLine": 64,
+        "endChar": 40
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11f7dc9a_4a2556ec",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T23:14:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9124acf4_69013c99",
       "range": {
         "startLine": 64,
         "startChar": 35,
@@ -222,6 +384,30 @@
     },
     {
       "key": {
+        "uuid": "5116b490_d1229790",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T23:14:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b121b0e4_a2bb5288",
+      "range": {
+        "startLine": 286,
+        "startChar": 8,
+        "endLine": 287,
+        "endChar": 12
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "31c3005d_036a382d",
         "filename": "android/crashreport/ui/ConfirmDialog.cpp",
         "patchSetId": 4
@@ -233,6 +419,30 @@
       "writtenOn": "2016-02-03T22:55:54Z",
       "side": 1,
       "message": "calculate the value and then set it in one line?",
+      "range": {
+        "startLine": 303,
+        "startChar": 0,
+        "endLine": 307,
+        "endChar": 5
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3115c084_deb7450b",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T23:14:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "31c3005d_036a382d",
       "range": {
         "startLine": 303,
         "startChar": 0,
@@ -280,6 +490,54 @@
       "side": 1,
       "message": "we need to make sure the function is called on all exit paths.\nSo we need to put it everywhere, just in case.",
       "parentUuid": "3115c084_9e9cadde",
+      "range": {
+        "startLine": 280,
+        "startChar": 4,
+        "endLine": 280,
+        "endChar": 25
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11f7dc9a_aa7e7ab7",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T23:14:38Z",
+      "side": 1,
+      "message": "slot_requestClose is not called if the close button is pressed, but it does call closeEvent.\n\nOverall, cmd+q and ctrl-c both call requestClose, but the X button does not.\n\n(OS X btw)",
+      "parentUuid": "3115c084_9e9cadde",
+      "range": {
+        "startLine": 280,
+        "startChar": 4,
+        "endLine": 280,
+        "endChar": 25
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31fce07c_13aa6bee",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T23:14:38Z",
+      "side": 1,
+      "message": "I\u0027m putting it in a separate CL\u0027s vl.c and in requestClose/closeEvent. We also run the risk of counting other crashes as exit crashes.",
+      "parentUuid": "31fce07c_1306ebff",
       "range": {
         "startLine": 280,
         "startChar": 4,
