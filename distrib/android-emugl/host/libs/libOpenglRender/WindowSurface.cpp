@@ -15,8 +15,8 @@
 */
 #include "WindowSurface.h"
 
+#include "ErrorLog.h"
 #include "FbConfig.h"
-#include "GLErrorLog.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
