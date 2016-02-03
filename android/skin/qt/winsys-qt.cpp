@@ -77,6 +77,10 @@ static GlobalState* globalState() {
     return &sGlobalState;
 }
 
+std::shared_ptr<void> skin_winsys_get_shared_ptr() {
+    return std::static_pointer_cast<void>(EmulatorQtWindow::getInstancePtr());
+}
+
 extern void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv) {
     D("Starting QT main loop\n");
 

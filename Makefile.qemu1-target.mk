@@ -67,6 +67,7 @@ LOCAL_SRC_FILES += \
     android-qemu1-glue/qemu-battery-agent-impl.c \
     android-qemu1-glue/qemu-user-event-agent-impl.c \
     android-qemu1-glue/qemu-vm-operations-impl.c \
+    android-qemu1-glue/skin_qt.cpp \
     arch_init.c \
     backends/msmouse.c \
     code-profile.c \
