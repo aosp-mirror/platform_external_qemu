@@ -857,13 +857,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
             /* Find the current cache partition file */
             opts->cache = avdInfo_getCachePath(avd);
             if (opts->cache == NULL) {
-                /* The file does not exists, we will force its creation
-                 * if we are not in the Android build system. Otherwise,
-                 * a temporary file will be used.
-                 */
-                if (!avdInfo_inAndroidBuild(avd)) {
-                    opts->cache = avdInfo_getDefaultCachePath(avd);
-                }
+                opts->cache = avdInfo_getDefaultCachePath(avd);
             }
             if (opts->cache) {
                 D("autoconfig: -cache %s", opts->cache);
