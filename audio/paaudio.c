@@ -814,6 +814,8 @@ static void *qpa_audio_init (void)
 
 #if 1  // CONFIG_ANDROID
     void* pa_lib = dlopen("libpulse.so", RTLD_NOW);
+    if (!pa_lib)
+        pa_lib = dlopen("libpulse.so.0", RTLD_NOW);
     if (!pa_lib) {
         goto fail;
     }
