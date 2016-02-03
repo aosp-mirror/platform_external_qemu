@@ -10,8 +10,10 @@
 ** GNU General Public License for more details.
 */
 
+#include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/CrashService.h"
 
+#include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QFontDatabase>
 #include <QGridLayout>
@@ -40,6 +42,7 @@ private:
     QPlainTextEdit* mDetailsText;
     QLabel* mProgressText;
     QProgressBar* mProgress;
+    QCheckBox* mExitCrashCheckBox;
 
     QLabel* mSuggestionText;
 
@@ -51,6 +54,8 @@ private:
     bool mDetailsHidden;
     bool mDidGetSysInfo;
     bool mDidUpdateDetails;
+    bool mIsExitCrash;
+    bool mQuietMode;
     void disableInput();
     void enableInput();
     void showProgressBar(const std::string& msg);
@@ -63,7 +68,9 @@ private:
 
 public:
     ConfirmDialog(QWidget* parent,
-                  android::crashreport::CrashService* crashservice);
+                  android::crashreport::CrashService* crashservice,
+                  bool isExitCrash,
+                  bool quietMode);
     bool didGetSysInfo() const;
 
     QString getUserComments();
