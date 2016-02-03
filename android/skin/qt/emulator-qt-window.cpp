@@ -36,11 +36,10 @@
 #include "android/cpu_accelerator.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulator-window.h"
-#include "android/globals.h"
+
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/winsys-qt.h"
 #include "android/ui-emu-agent.h"
@@ -1033,13 +1032,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
          event->key() == Qt::Key_Alt &&
          event->modifiers() == Qt::AltModifier) {
         if (type == kEventKeyDown) {
-            if (androidHwConfig_isScreenMultiTouch(android_hw)) {
-                mOverlay.showForMultitouch();
-            } else {
-                showErrorDialog(tr("Your virtual device is not configured for "
-                                   "multi-touch input."),
-                                tr("Multi-touch"));
-            }
+            mOverlay.showForMultitouch();
         } else if (type == kEventKeyUp) {
             mOverlay.hide();
         }

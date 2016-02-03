@@ -37,9 +37,11 @@
 #include <QVariantAnimation>
 #include <QWidget>
 
+#include "android/globals.h"
 #include "android/skin/event.h"
 #include "android/skin/surface.h"
 #include "android/skin/winsys.h"
+#include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/tool-window.h"
 
 #if defined(__APPLE__)
@@ -546,7 +548,11 @@ private:
                 mRubberBand.setGeometry(QRect(mRubberbandOrigin, QSize()));
                 mRubberBand.show();
             } else if (mMode == OverlayMode::Multitouch) {
-                if (event->button() == Qt::LeftButton) {
+                if (!androidHwConfig_isScreenMultiTouch(android_hw)) {
+                    showErrorDialog(tr("Your virtual device is not configured for "
+                                       "multi-touch input."),
+                                    tr("Multi-touch"));
+                } else if (event->button() == Qt::LeftButton) {
                     mPrimaryTouchPoint = event->pos();
                     mReleaseOnClose = true;
                     update();
