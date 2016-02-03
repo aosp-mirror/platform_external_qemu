@@ -13,6 +13,78 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <widget class="QGroupBox" name="set_crashReprotPrefTitle">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>230</y>
+     <width>211</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+   </property>
+   <property name="title">
+    <string>Send crash reports?</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Title</string>
+   </property>
+   <widget class="QRadioButton" name="set_crashReportPrefAsk">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>60</y>
+      <width>102</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Ask</string>
+    </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   </widget>
+   <widget class="QRadioButton" name="set_crashReportPrefAlways">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>20</y>
+      <width>102</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Always</string>
+    </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   </widget>
+   <widget class="QRadioButton" name="set_crashReportPrefNever">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>40</y>
+      <width>102</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Never</string>
+    </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   </widget>
+  </widget>
   <widget class="QCheckBox" name="set_onTop">
    <property name="geometry">
     <rect>
