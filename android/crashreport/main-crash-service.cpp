@@ -21,6 +21,7 @@
  *
  * Once confirmation is given, the crash dump is curl'd to google crash servers.
  */
+#include "android/skin/qt/qt-settings.h"
 #include "android/crashreport/CrashService.h"
 #include "android/crashreport/CrashSystem.h"
 #include "android/crashreport/ui/ConfirmDialog.h"
@@ -29,7 +30,9 @@
 #include "android/version.h"
 
 #include <QApplication>
+#include <QCoreApplication>
 #include <QProgressDialog>
+#include <QSettings>
 #include <QTimer>
 #include <QThread>
 #include <stdio.h>
@@ -42,12 +45,20 @@
 #define I(...) printf(__VA_ARGS__)
 
 static bool displayConfirmDialog(
-        android::crashreport::CrashService* crashservice) {
-    ConfirmDialog msgBox(nullptr, crashservice);
+        android::crashreport::CrashService* crashservice,
+        Ui::Settings::CRASHREPORT_PREFERENCE_VALUE reportPreference) {
+    ConfirmDialog msgBox(nullptr, crashservice, reportPreference);
 
-    msgBox.show();
-    int ret = msgBox.exec();
-    return ret == ConfirmDialog::Accepted;
+    if (reportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_ASK) {
+        msgBox.show();
+        int ret = msgBox.exec();
+        return ret == ConfirmDialog::Accepted;
+    } else if (reportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS) {
+        msgBox.sendReport();
+        return true;
+    } else if (reportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_NEVER) {
+        return false;
+    }
 }
 
 static void InitQt(int argc, char** argv) {
@@ -68,7 +79,6 @@ static void InitQt(int argc, char** argv) {
         D("Count not load font resource: \":/lib/fonts/Roboto-Medium");
     }
 }
-
 
 /* Main routine */
 int main(int argc, char** argv) {
@@ -131,11 +141,21 @@ int main(int argc, char** argv) {
 
     crashservice->collectDataFiles();
 
+    QCoreApplication::setOrganizationName(Ui::Settings::ORG_NAME);
+    QCoreApplication::setOrganizationDomain(Ui::Settings::ORG_DOMAIN);
+    QCoreApplication::setApplicationName(Ui::Settings::APP_NAME);
+
+    QSettings settings;
+    Ui::Settings::CRASHREPORT_PREFERENCE_VALUE reportPreference =
+        static_cast<Ui::Settings::CRASHREPORT_PREFERENCE_VALUE>(
+            settings.value(Ui::Settings::CRASHREPORT_PREFERENCE, 0).toInt());
+
     QApplication app(argc, argv);
 
     InitQt(argc, argv);
 
-    if (!displayConfirmDialog(crashservice.get())) {
+    if (!displayConfirmDialog(crashservice.get(),
+                              reportPreference)) {
         return 1;
     }
 
