@@ -43,6 +43,9 @@ void crashhandler_die(const char* message) __attribute__((noinline));
 // A variadic overload with C interface
 void crashhandler_die_format(const char* format, ...);
 
+// Append arbitrary data to the dump.
+void crashhandler_message(const char* msg);
+
 ANDROID_END_HEADER
 
 #ifdef __cplusplus

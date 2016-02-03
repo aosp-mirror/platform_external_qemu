@@ -166,4 +166,7 @@ void crashhandler_die_format(const char* format, ...) {
     crashhandler_die(message);
 }
 
+void crashhandler_message(const char* msg) {
+    CrashReporter::get()->passDumpMessage(msg);
+}
 }  // extern "C"

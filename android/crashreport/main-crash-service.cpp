@@ -69,6 +69,11 @@ static void InitQt(int argc, char** argv) {
     }
 }
 
+bool is_crash_on_exit(const std::string& msg) {
+    std::string pattern("CRASHONEXIT");
+    int lookfor = pattern.length();
+    return msg.substr(0,lookfor) == pattern;
+}
 
 /* Main routine */
 int main(int argc, char** argv) {
@@ -130,6 +135,10 @@ int main(int argc, char** argv) {
     }
 
     crashservice->collectDataFiles();
+
+    if (is_crash_on_exit(crashservice->getDumpMessage())) {
+        return 1;
+    }
 
     QApplication app(argc, argv);
 

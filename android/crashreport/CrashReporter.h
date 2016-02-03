@@ -68,10 +68,10 @@ public:
     void GenerateDump(const char* message);
     void GenerateDumpAndDie(const char* message);
 
-private:
     // Pass the |message| to the crash service process
     void passDumpMessage(const char* message);
 
+private:
     virtual void writeDump() = 0;
 
 private:
