@@ -45,6 +45,10 @@
 #include "android/skin/qt/winsys-qt.h"
 #include "android/ui-emu-agent.h"
 
+#if defined(_WIN32)
+#include "android/skin/qt/windows-native-window.h"
+#endif
+
 #define  DEBUG  1
 
 #if DEBUG
@@ -838,9 +842,9 @@ void EmulatorQtWindow::slot_screencapPullFinished(int exitStatus)
 
 void EmulatorQtWindow::slot_resizeDone()
 {
-    // This function should never actually be called on Linux/Windows, since the timer is never
+    // This function should never actually be called on Linux, since the timer is never
     // started on those systems.
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(_WIN32)
 
     // A hacky way of determining if the user is still holding down for a resize. This queries the
     // global event state to see if any mouse buttons are held down. If there are, then the user must

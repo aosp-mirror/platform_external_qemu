@@ -45,6 +45,7 @@
 #if defined(__APPLE__)
 #include "android/skin/qt/mac-native-window.h"
 #endif
+
 #include <memory>
 
 namespace Ui {
@@ -322,6 +323,9 @@ private:
                     if (mEventBuffer[i] == QEvent::NonClientAreaMouseButtonRelease) {
                         mEventBuffer.clear();
                         mEmulatorWindow->doResize(this->size());
+
+                        // Kill the resize timer to avoid double resizes.
+                        mEmulatorWindow->mResizeTimer.stop();
                         break;
                     }
                 }
@@ -396,9 +400,10 @@ private:
             mEmulatorWindow->tool_window->dockMainWindow();
             mEmulatorWindow->simulateZoomedWindowResized(this->viewportSize());
 
-            // To solve some resizing edge cases on OSX, start a short timer that will attempt to
-            // trigger a resize in case the user's mouse has not entered the window again.
-#ifdef __APPLE__
+            // To solve some resizing edge cases on OSX/Windows, start a short timer that will
+            // attempt to trigger a resize in case the user's mouse has not entered the window
+            // again.
+#if defined(__APPLE__) || defined(_WIN32)
             mEmulatorWindow->mResizeTimer.start(500);
 #endif
         }
