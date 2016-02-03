@@ -46,6 +46,30 @@
       "revId": "9a9c02f06f7c6aef8982b23eb4d54b4692165a45",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "71c9f878_4befe5db",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-03T22:23:22Z",
+      "side": 1,
+      "message": "I\u0027d just prefer us to never enter the multitouch mode if the AVD isn\u0027t enabled for it. That would be the least confusing and least noisy implementation",
+      "parentUuid": "3115c084_fe820172",
+      "range": {
+        "startLine": 551,
+        "startChar": 0,
+        "endLine": 554,
+        "endChar": 55
+      },
+      "revId": "9a9c02f06f7c6aef8982b23eb4d54b4692165a45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
