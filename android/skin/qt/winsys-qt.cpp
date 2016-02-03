@@ -228,6 +228,8 @@ extern bool skin_winsys_is_window_fully_visible()
     return value;
 }
 
+#include "android/crashreport/crash-handler.h"
+
 extern void skin_winsys_quit_request()
 {
     D(__FUNCTION__);

@@ -163,6 +163,10 @@ const std::string& CrashService::getDumpMessage() const {
     return mDumpMessage;
 }
 
+const std::string& CrashService::getCrashOnExitMessage() const {
+    return mCrashOnExitMessage;
+}
+
 void CrashService::addReportValue(const std::string& key,
                                   const std::string& value) {
     mReportValues[key] = value;
@@ -359,6 +363,10 @@ void CrashService::collectDataFiles() {
         if (name == CrashReporter::kDumpMessageFileName) {
             // remember the dump message to show it instead of the default one
             mDumpMessage = readFile(fullName);
+        }
+        if (name == CrashReporter::kCrashOnExitFileName) {
+            // remember the dump message to show it instead of the default one
+            mCrashOnExitMessage = readFile(fullName);
         }
     }
 }

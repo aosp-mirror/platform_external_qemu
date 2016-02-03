@@ -144,6 +144,7 @@ public:
     // Returns the dump message passed by the emulator (or empty string if
     // there's none)
     const std::string& getDumpMessage() const;
+    const std::string& getCrashOnExitMessage() const;
 
     // Factory method
     static std::unique_ptr<CrashService> makeCrashService(
@@ -192,6 +193,7 @@ private:
     std::string mComments;
     std::string mDataDirectory;
     std::string mDumpMessage;
+    std::string mCrashOnExitMessage;
     std::map<std::string, std::string> mReportValues;
     std::map<std::string, std::string> mReportFiles;
     google_breakpad::ProcessState mProcessState;
