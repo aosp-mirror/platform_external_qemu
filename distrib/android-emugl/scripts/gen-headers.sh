@@ -78,8 +78,11 @@ gen_funcargs_header () {
 ##  libOpenglRender headers.
 ##
 LIBRENDER_DIR=distrib/android-emugl/host/libs/libOpenglRender
-gen_functions_header "$LIBRENDER_DIR"/render_api.entries \
-        "$LIBRENDER_DIR"/render_api_functions.h "$GEN_ENTRIES"
+LIBRENDER_INCLUDE=distrib/android-emugl/host/include/OpenglRender
+gen_funcargs_header \
+        "$LIBRENDER_DIR"/render_api.entries \
+        "$LIBRENDER_INCLUDE"/render_api_functions.h \
+        "$GEN_ENTRIES"
 
 ##
 ## libOpenGLESDispatch headers.

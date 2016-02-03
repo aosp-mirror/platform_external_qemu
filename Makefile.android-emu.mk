@@ -162,16 +162,17 @@ $(call end-emulator-library)
 #        tests.
 #
 
-# Common CFLAGS for android-emu related sources.
-_ANDROID_EMU_INTERNAL_CFLAGS := \
+$(call start-emulator-library,android-emu)
+
+LOCAL_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
     $(LIBCURL_CFLAGS) \
     $(LIBXML2_CFLAGS) \
 
-# Common INCLUDES for android-emu related sources.
-_ANDROID_EMU_INTERNAL_INCLUDES := \
+LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(ANDROID_EMU_INCLUDES) \
+    $(EMUGL_INCLUDES) \
     $(BREAKPAD_CLIENT_INCLUDES) \
     $(LIBCURL_INCLUDES) \
     $(LIBJPEG_INCLUDES) \
@@ -179,13 +180,6 @@ _ANDROID_EMU_INTERNAL_INCLUDES := \
     $(LIBEXT4_UTILS_INCLUDES) \
     $(LIBPNG_INCLUDES) \
     $(ZLIB_INCLUDES) \
-
-
-$(call start-emulator-library,android-emu)
-
-LOCAL_CFLAGS := $(_ANDROID_EMU_INTERNAL_CFLAGS)
-
-LOCAL_C_INCLUDES := $(_ANDROID_EMU_INTERNAL_INCLUDES)
 
 LOCAL_SRC_FILES := \
     android/adb-qemud.c \

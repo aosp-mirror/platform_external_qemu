@@ -12,10 +12,9 @@
 
 #include "config-host.h"
 #include "android/opengles.h"
-#include <assert.h>
 
-/* Declared in "android/globals.h" */
-int  android_gles_fast_pipes = 1;
+#include "OpenglRender/render_api_functions.h"
+
 
 #include "android/globals.h"
 #include <android/utils/debug.h>
@@ -23,44 +22,7 @@ int  android_gles_fast_pipes = 1;
 #include <android/utils/bufprint.h>
 #include <android/utils/dll.h>
 
-// NOTE: The declarations below should be equivalent to those in
-// <libOpenglRender/render_api_platform_types.h>
-#ifdef _WIN32
-#include <windows.h>
-typedef HDC FBNativeDisplayType;
-typedef HWND FBNativeWindowType;
-#elif defined(__linux__)
-// Really a Window, which is defined as 32-bit unsigned long on all platforms
-// but we don't want to include the X11 headers here.
-typedef uint32_t FBNativeWindowType;
-#elif defined(__APPLE__)
-typedef void* FBNativeWindowType;
-#else
-#warning "unsupported platform"
-#endif
-
-// NOTE: The declarations below should be equivalent to those in
-// <libOpenglRender/render_api.h>
-
-/* list of constants to be passed to setStreamMode */
-#define STREAM_MODE_DEFAULT   0
-#define STREAM_MODE_TCP       1
-#define STREAM_MODE_UNIX      2
-#define STREAM_MODE_PIPE      3
-
-#define RENDERER_FUNCTIONS_LIST \
-  FUNCTION_(int, initLibrary, (void), ()) \
-  FUNCTION_(int, setStreamMode, (int mode), (mode)) \
-  FUNCTION_(int, initOpenGLRenderer, (int width, int height, bool useSubWindow, char* addr, size_t addrLen), (width, height, addr, addrLen)) \
-  FUNCTION_VOID_(getHardwareStrings, (const char** vendors, const char** renderer, const char** version), (vendors, renderer, version)) \
-  FUNCTION_VOID_(setPostCallback, (OnPostFunc onPost, void* onPostContext), (onPost, onPostContext)) \
-  FUNCTION_(bool, showOpenGLSubwindow, (FBNativeWindowType window, int wx, int wy, int ww, int wh, int fbw, int fbh, float dpr, float zRot), (window, wx, wy, ww, wh, fbw, fbh, dpr, zRot)) \
-  FUNCTION_(bool, destroyOpenGLSubwindow, (void), ()) \
-  FUNCTION_VOID_(setOpenGLDisplayRotation, (float zRot), (zRot)) \
-  FUNCTION_VOID_(setOpenGLDisplayTranslation, (float dx, float dy), (dx, dy)) \
-  FUNCTION_VOID_(repaintOpenGLDisplay, (void), ()) \
-  FUNCTION_(int, stopOpenGLRenderer, (void), ()) \
-
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -76,20 +38,18 @@ typedef void* FBNativeWindowType;
 #error Unknown UINTPTR_MAX
 #endif
 
-// Define the corresponding function pointers.
+/* Declared in "android/globals.h" */
+int  android_gles_fast_pipes = 1;
+
+// Define the Render API function pointers.
 #define FUNCTION_(ret, name, sig, params) \
         static ret (*name) sig = NULL;
-#define FUNCTION_VOID_(name, sig, params) \
-        static void (*name) sig = NULL;
-RENDERER_FUNCTIONS_LIST
+LIST_RENDER_API_FUNCTIONS(FUNCTION_)
 #undef FUNCTION_
-#undef FUNCTION_VOID_
 
 // Define a function that initializes the function pointers by looking up
 // the symbols from the shared library.
-static int
-initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib)
-{
+static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
     void*  symbol;
     char*  error;
 
@@ -102,14 +62,11 @@ initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib)
         free(error); \
         return -1; \
     }
-#define FUNCTION_VOID_(name, sig, params) FUNCTION_(void, name, sig, params)
-RENDERER_FUNCTIONS_LIST
-#undef FUNCTION_VOID_
+    LIST_RENDER_API_FUNCTIONS(FUNCTION_)
 #undef FUNCTION_
 
     return 0;
 }
-
 
 /* Defined in android/hw-pipe-net.c */
 extern int android_init_opengles_pipes(void);
@@ -158,12 +115,12 @@ android_initOpenglesEmulation(void)
     if (android_gles_fast_pipes) {
 #ifdef _WIN32
         /* XXX: NEED Win32 pipe implementation */
-        setStreamMode(STREAM_MODE_TCP);
+        setStreamMode(RENDER_API_STREAM_MODE_TCP);
 #else
-        setStreamMode(STREAM_MODE_UNIX);
+        setStreamMode(RENDER_API_STREAM_MODE_UNIX);
 #endif
     } else {
-        setStreamMode(STREAM_MODE_TCP);
+        setStreamMode(RENDER_API_STREAM_MODE_TCP);
     }
     return 0;
 
