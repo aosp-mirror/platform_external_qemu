@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "31c3005d_c353e0ec",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-03T21:34:46Z",
+      "side": 1,
+      "message": "why not msg.compare(0, sizeof(\"CrashOnExit\") - 1, \"CrashOnExit\") \u003d\u003d 0\n?\n(with a named const char[] variable for CrashOnExit)",
+      "range": {
+        "startLine": 75,
+        "startChar": 2,
+        "endLine": 77,
+        "endChar": 44
+      },
+      "revId": "b20f43c00fc417057d9c84bc9496ef9e5e7723a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11f7dc9a_5775ff61",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-03T21:34:46Z",
+      "side": 1,
+      "message": "QSettings? It\u0027s very easy to use:\n\nQSettings::QSettings(QObject * parent \u003d 0)\n\nConstructs a QSettings object for accessing settings of the application and organization set previously with a call to QCoreApplication::setOrganizationName(), QCoreApplication::setOrganizationDomain(), and QCoreApplication::setApplicationName().\n\nYou just need to configure the application once, and then any default-constructed QSettings object provides access to the user-specific configuration of the app",
+      "range": {
+        "startLine": 276,
+        "startChar": 8,
+        "endLine": 276,
+        "endChar": 56
+      },
+      "revId": "b20f43c00fc417057d9c84bc9496ef9e5e7723a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
