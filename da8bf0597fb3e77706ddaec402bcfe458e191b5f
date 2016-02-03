@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f127a8f2_59124fa5",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-03T18:42:40Z",
+      "side": 1,
+      "message": "This is a very specific message being passed to the crash service. I\u0027d much rather we had a separate function |notifyExiting| or some such thing, rather than exposing this function.",
+      "range": {
+        "startLine": 72,
+        "startChar": 9,
+        "endLine": 72,
+        "endChar": 24
+      },
+      "revId": "da8bf0597fb3e77706ddaec402bcfe458e191b5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
