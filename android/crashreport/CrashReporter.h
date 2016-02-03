@@ -67,12 +67,12 @@ public:
     // user with the possible exception of "Segmentation fault".
     void GenerateDump(const char* message);
     void GenerateDumpAndDie(const char* message);
+    void SetExitMode();
 
 private:
+    virtual void writeDump() = 0;
     // Pass the |message| to the crash service process
     void passDumpMessage(const char* message);
-
-    virtual void writeDump() = 0;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(CrashReporter);

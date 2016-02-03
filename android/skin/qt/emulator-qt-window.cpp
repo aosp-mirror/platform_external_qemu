@@ -33,6 +33,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/cpu_accelerator.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulator-window.h"
@@ -276,6 +277,7 @@ void EmulatorQtWindow::slot_avdArchWarningMessageAccepted()
 
 void EmulatorQtWindow::closeEvent(QCloseEvent *event)
 {
+    crashhandler_exitmode();
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
         // run "adb shell stop" and call queueQuitEvent afterwards
         tool_window->runAdbShellStopAndQuit();

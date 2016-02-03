@@ -30,6 +30,7 @@
 
 #include <QApplication>
 #include <QProgressDialog>
+#include <QSettings>
 #include <QTimer>
 #include <QThread>
 #include <stdio.h>
@@ -42,12 +43,21 @@
 #define I(...) printf(__VA_ARGS__)
 
 static bool displayConfirmDialog(
-        android::crashreport::CrashService* crashservice) {
-    ConfirmDialog msgBox(nullptr, crashservice);
+        QSettings* settings,
+        android::crashreport::CrashService* crashservice,
+        bool isExitCrash,
+        bool quietly) {
+    ConfirmDialog msgBox(nullptr, crashservice, settings, isExitCrash, quietly);
 
-    msgBox.show();
-    int ret = msgBox.exec();
-    return ret == ConfirmDialog::Accepted;
+    if (quietly) {
+        msgBox.sendReport();
+        return true;
+    } else {
+        msgBox.show();
+        int ret = msgBox.exec();
+        return ret == ConfirmDialog::Accepted;
+    }
+
 }
 
 static void InitQt(int argc, char** argv) {
@@ -69,6 +79,10 @@ static void InitQt(int argc, char** argv) {
     }
 }
 
+bool is_crash_on_exit(const std::string& msg) {
+    const char pattern[] = "Crash on exit";
+    return msg.compare(0, sizeof(pattern) - 1, pattern) == 0;
+}
 
 /* Main routine */
 int main(int argc, char** argv) {
@@ -102,6 +116,7 @@ int main(int argc, char** argv) {
         }
     }
 
+
     auto crashservice = ::android::crashreport::CrashService::makeCrashService(
             EMULATOR_VERSION_STRING, EMULATOR_BUILD_STRING, data_dir);
     if (dump_file &&
@@ -131,13 +146,29 @@ int main(int argc, char** argv) {
 
     crashservice->collectDataFiles();
 
+    bool isExitCrash = false;
+    if (is_crash_on_exit(crashservice->getDumpMessage())) {
+        isExitCrash = true;
+    }
+
+    QSettings* crashreporter_settings = new QSettings("Android Open Source Project",
+                                                      "Android Emulator Crash Reporter");
+    bool quietly = isExitCrash &&
+                   crashreporter_settings->value("set/processExitCrashesQuietly", 0).toInt();
+
     QApplication app(argc, argv);
 
     InitQt(argc, argv);
 
-    if (!displayConfirmDialog(crashservice.get())) {
+    if (!displayConfirmDialog(crashreporter_settings,
+                              crashservice.get(),
+                              isExitCrash,
+                              quietly)) {
+        delete crashreporter_settings;
         return 1;
     }
+
+    delete crashreporter_settings;
 
     return 0;
 }
