@@ -32,6 +32,15 @@ public:
     // a dump data exchange directory
     static const char* const kDumpMessageFileName;
 
+    // File to log crashes on exit
+    static const char* const kCrashOnExitFileName;
+
+    // Pattern to check for when detecting crashes on exit
+    static const char* const kCrashOnExitPattern;
+
+    // QSetting key that is saved when crash reporting automatically or not
+    static const char* const kProcessCrashesQuietlyKey;
+
     CrashReporter();
 
     virtual ~CrashReporter();
@@ -67,12 +76,12 @@ public:
     // user with the possible exception of "Segmentation fault".
     void GenerateDump(const char* message);
     void GenerateDumpAndDie(const char* message);
+    void SetExitMode(const char* message);
 
 private:
+    virtual void writeDump() = 0;
     // Pass the |message| to the crash service process
     void passDumpMessage(const char* message);
-
-    virtual void writeDump() = 0;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(CrashReporter);
