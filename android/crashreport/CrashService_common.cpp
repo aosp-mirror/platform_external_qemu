@@ -95,7 +95,8 @@ CrashService::CrashService(const std::string& version,
       mDumpFile(),
       mReportId(),
       mComments(),
-      mDataDirectory(dataDir ? dataDir : "") {
+      mDataDirectory(dataDir ? dataDir : ""),
+      mDidCrashOnExit(false) {
     mVersionId = version;
     mVersionId += "-";
     mVersionId += build;
@@ -161,6 +162,14 @@ std::string CrashService::getReportId() const {
 
 const std::string& CrashService::getDumpMessage() const {
     return mDumpMessage;
+}
+
+const std::string& CrashService::getCrashOnExitMessage() const {
+    return mCrashOnExitMessage;
+}
+
+bool CrashService::didCrashOnExit() const {
+    return mDidCrashOnExit;
 }
 
 void CrashService::addReportValue(const std::string& key,
@@ -359,6 +368,10 @@ void CrashService::collectDataFiles() {
         if (name == CrashReporter::kDumpMessageFileName) {
             // remember the dump message to show it instead of the default one
             mDumpMessage = readFile(fullName);
+        } else if (name == CrashReporter::kCrashOnExitFileName) {
+            // remember the dump message to show it instead of the default one
+            mCrashOnExitMessage = readFile(fullName);
+            mDidCrashOnExit = true;
         }
     }
 }

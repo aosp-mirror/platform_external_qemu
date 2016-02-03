@@ -36,6 +36,9 @@ private slots:
     void on_set_sdkPathBox_textEdited(const QString&);
     void on_set_sdkPathButton_clicked();
     void on_set_themeBox_currentIndexChanged(int index);
+    void on_set_crashReportPrefAsk_clicked();
+    void on_set_crashReportPrefAlways_clicked();
+    void on_set_crashReportPrefNever_clicked();
 
 private:
     bool eventFilter (QObject* object, QEvent* event) override;

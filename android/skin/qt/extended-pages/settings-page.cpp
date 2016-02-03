@@ -69,6 +69,28 @@ SettingsPage::SettingsPage(QWidget *parent) :
     bool onTopOnly = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
     mUi->set_onTop->setCheckState(onTopOnly ? Qt::Checked : Qt::Unchecked);
 #endif
+
+    Ui::Settings::CRASHREPORT_PREFERENCE_VALUE report_pref =
+        static_cast<Ui::Settings::CRASHREPORT_PREFERENCE_VALUE>(
+            settings.value(Ui::Settings::CRASHREPORT_PREFERENCE, 0).toInt());
+
+    mUi->set_crashReportPrefAsk->setAutoExclusive(true);
+    mUi->set_crashReportPrefAlways->setAutoExclusive(true);
+    mUi->set_crashReportPrefNever->setAutoExclusive(true);
+
+    switch (report_pref) {
+        case Ui::Settings::CRASHREPORT_PREFERENCE_ASK:
+            mUi->set_crashReportPrefAsk->setChecked(true);
+            break;
+        case Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS:
+            mUi->set_crashReportPrefAlways->setChecked(true);
+            break;
+        case Ui::Settings::CRASHREPORT_PREFERENCE_NEVER:
+            mUi->set_crashReportPrefNever->setChecked(true);
+            break;
+        default:
+            break;
+    }
 }
 
 bool SettingsPage::eventFilter (QObject* object, QEvent* event)
@@ -207,4 +229,24 @@ void SettingsPage::on_set_onTop_toggled(bool checked) {
     settings.setValue(Ui::Settings::ALWAYS_ON_TOP, checked);
 
     emit(onTopChanged(checked));
+}
+
+void set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_VALUE v) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::CRASHREPORT_PREFERENCE, v);
+}
+
+void SettingsPage::on_set_crashReportPrefAsk_clicked() {
+    QSettings settings;
+    set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_ASK);
+}
+
+void SettingsPage::on_set_crashReportPrefAlways_clicked() {
+    QSettings settings;
+    set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS);
+}
+
+void SettingsPage::on_set_crashReportPrefNever_clicked() {
+    QSettings settings;
+    set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_NEVER);
 }

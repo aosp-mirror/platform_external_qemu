@@ -14,6 +14,8 @@
 // restoring user settings associated with the Qt-based UI.
 #pragma once
 
+#include <QString>
+
 namespace Ui {
     namespace Settings {
 
@@ -32,6 +34,13 @@ namespace Ui {
         const QString SAVE_PATH("set/savePath");
         const QString SDK_PATH("set/sdkPath");
         const QString UI_THEME("set/theme");
+
+        const QString CRASHREPORT_PREFERENCE("set/crashReportPreference");
+        enum CRASHREPORT_PREFERENCE_VALUE {
+            CRASHREPORT_PREFERENCE_ASK = 0,
+            CRASHREPORT_PREFERENCE_ALWAYS = 1,
+            CRASHREPORT_PREFERENCE_NEVER = 2
+        };
 
         const QString LOCATION_LATITUDE("loc/latitude");
         const QString LOCATION_LONGITUDE("loc/longitude");

@@ -12,9 +12,10 @@
 
 #include "android/crashreport/ui/ConfirmDialog.h"
 
-#include <QScrollBar>
 #include <QEventLoop>
 #include <QFutureWatcher>
+#include <QScrollBar>
+#include <QSettings>
 #include "QtConcurrent/qtconcurrentrun.h"
 
 static const char kMessageBoxTitle[] = "Android Emulator";
@@ -38,12 +39,15 @@ extern "C" const unsigned char* android_emulator_icon_find(const char* name,
                                                            size_t* psize);
 
 ConfirmDialog::ConfirmDialog(QWidget* parent,
-                             android::crashreport::CrashService* crashservice)
+                             android::crashreport::CrashService* crashservice,
+                             Ui::Settings::CRASHREPORT_PREFERENCE_VALUE reportPreference)
     : QDialog(parent),
       mCrashService(crashservice),
+      mReportPreference(reportPreference),
       mDetailsHidden(true),
       mDidGetSysInfo(false),
       mDidUpdateDetails(false) {
+
     mSendButton = new QPushButton(tr("Send Report"));
     mDontSendButton = new QPushButton(tr("Don't Send"));
     mDetailsButton = new QPushButton(tr(""));
@@ -54,6 +58,11 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mDetailsText = new QPlainTextEdit();
     mProgressText = new QLabel(tr("Working..."));
     mProgress = new QProgressBar;
+    mSavePreference =
+        new QCheckBox(tr("Remember my choice for future crashes. "
+                         "(Can reset in the emulator settings menu)"));
+    mSavePreference->setChecked(true);
+    mSavePreference->show();
 
     mSuggestionText = new QLabel(tr("Suggestion(s) based on crash info:\n\n"));
     mSuggestionText->setTextInteractionFlags(Qt::TextSelectableByMouse);
@@ -112,7 +121,7 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
 
     setWindowIcon(icon);
     connect(mSendButton, SIGNAL(clicked()), this, SLOT(sendReport()));
-    connect(mDontSendButton, SIGNAL(clicked()), this, SLOT(reject()));
+    connect(mDontSendButton, SIGNAL(clicked()), this, SLOT(dontSendReport()));
     connect(mDetailsButton, SIGNAL(clicked()), this, SLOT(detailtoggle()));
 
     QVBoxLayout* commentLayout = new QVBoxLayout;
@@ -152,6 +161,8 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mainLayout->addWidget(mProgressText, 7, 0, 1, 3);
     mainLayout->addWidget(mProgress, 8, 0, 1, 3);
 
+    mainLayout->addWidget(mSavePreference, 9, 0, 1, 3);
+
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
     setLayout(mainLayout);
     setWindowTitle(tr(kMessageBoxTitle));
@@ -169,6 +180,7 @@ void ConfirmDialog::disableInput() {
     mDontSendButton->setEnabled(false);
     mDetailsButton->setEnabled(false);
     mCommentsText->setEnabled(false);
+    mSavePreference->setEnabled(false);
 }
 
 void ConfirmDialog::enableInput() {
@@ -176,6 +188,7 @@ void ConfirmDialog::enableInput() {
     mDontSendButton->setEnabled(true);
     mDetailsButton->setEnabled(true);
     mCommentsText->setEnabled(true);
+    mSavePreference->setEnabled(true);
 }
 
 void ConfirmDialog::getDetails() {
@@ -259,22 +272,41 @@ bool ConfirmDialog::uploadCrash() {
     eventloop.exec();
 
     hideProgressBar();
+
     return watcher.result();
 }
+
+static void savePref(bool checked, Ui::Settings::CRASHREPORT_PREFERENCE_VALUE v) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::CRASHREPORT_PREFERENCE,
+            checked ? v : Ui::Settings::CRASHREPORT_PREFERENCE_ASK);
+}
+
 void ConfirmDialog::sendReport() {
     getDetails();
     mCrashService->addUserComments(mCommentsText->toPlainText().toStdString());
-    if (uploadCrash()) {
+    bool upload_success = uploadCrash();
+
+    if (upload_success &&
+        (mReportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_ASK)) {
         QMessageBox msgbox(this);
         msgbox.setWindowTitle(tr("Crash Report Submitted"));
-        msgbox.setText(tr("Thank you for submitting a crash report."));
-        std::string msg = "ReportId: " + mCrashService->getReportId();
-        msgbox.setInformativeText(msg.c_str());
+        msgbox.setText(tr("<p>Thank you for submitting a crash report!</p>"
+                          "<p>If you would like to contact us for further information, "
+                          "use the following Crash Report ID:</p>"));
+        QString msg = QString::fromStdString(mCrashService->getReportId());
+        msgbox.setInformativeText(msg);
         msgbox.setTextInteractionFlags(Qt::TextSelectableByMouse);
         msgbox.exec();
     }
 
+    savePref(mSavePreference->isChecked(), Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS);
     accept();
+}
+
+void ConfirmDialog::dontSendReport() {
+    savePref(mSavePreference->isChecked(), Ui::Settings::CRASHREPORT_PREFERENCE_NEVER);
+    reject();
 }
 
 void ConfirmDialog::detailtoggle() {
