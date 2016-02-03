@@ -5,7 +5,6 @@ LOCAL_PATH := $(call my-dir)
 
 commonSources := \
         GLClientState.cpp \
-        GLSharedGroup.cpp \
         glUtils.cpp \
         SocketStream.cpp \
         TcpStream.cpp \
