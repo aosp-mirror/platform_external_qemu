@@ -10,6 +10,11 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/mac-native-window.mm
 endif
 
+ifeq (windows,$(BUILD_TARGET_OS))
+ANDROID_SKIN_SOURCES += \
+    android/skin/qt/windows-native-window.cpp
+endif
+
 ANDROID_SKIN_INCLUDES += $(EMUGL_INCLUDES)
 
 # gl-widget.cpp needs to call XInitThreads() directly to work around
