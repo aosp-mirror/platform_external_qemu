@@ -70,6 +70,30 @@
       "revId": "9a9c02f06f7c6aef8982b23eb4d54b4692165a45",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11f7dc9a_aadafa36",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-03T22:27:25Z",
+      "side": 1,
+      "message": "I agree with that, but users may not know that they have to configure their AVD at all (since a lot of common devices are multi-touch nowadays), and may just assume something is broken.\n\nIn fairness, multitouch is now the default setting (see android/hardware/hardware-properties.ini). So not showing anything may be the better option.",
+      "parentUuid": "71c9f878_4befe5db",
+      "range": {
+        "startLine": 551,
+        "startChar": 0,
+        "endLine": 554,
+        "endChar": 55
+      },
+      "revId": "9a9c02f06f7c6aef8982b23eb4d54b4692165a45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
