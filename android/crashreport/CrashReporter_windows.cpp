@@ -84,6 +84,8 @@ public:
 
     void setupChildCrashProcess(int pid) override {}
 
+    void writeDump() override { mHandler->WriteMinidump(); }
+
 private:
     std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
 };

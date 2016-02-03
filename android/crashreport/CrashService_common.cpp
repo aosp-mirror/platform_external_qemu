@@ -14,6 +14,19 @@
 
 #include "android/crashreport/CrashService.h"
 
+#include "android/crashreport/CrashReporter.h"
+
+#ifdef _WIN32
+#include "android/crashreport/CrashService_windows.h"
+#elif defined(__APPLE__)
+#include "android/crashreport/CrashService_darwin.h"
+#elif defined(__linux__)
+#include "android/crashreport/CrashService_linux.h"
+#else
+#error "Unsupported platform"
+#endif
+
+#include "android/base/files/PathUtils.h"
 #include "android/base/String.h"
 #include "android/base/system/System.h"
 #include "android/crashreport/CrashSystem.h"
@@ -44,6 +57,11 @@
 
 #define WAIT_INTERVAL_MS 100
 
+using android::base::PathUtils;
+using android::base::String;
+using android::base::StringView;
+using android::base::System;
+
 extern "C" const unsigned char* android_emulator_icon_find(const char* name,
                                                            size_t* psize);
 
@@ -66,7 +84,9 @@ static size_t WriteCallback(void* ptr, size_t size, size_t nmemb, void* userp) {
 namespace android {
 namespace crashreport {
 
-CrashService::CrashService(const std::string& version, const std::string& build)
+CrashService::CrashService(const std::string& version,
+                           const std::string& build,
+                           const char* dataDir)
     : mDumpRequestContext(),
       mServerState(),
       mVersion(version),
@@ -74,7 +94,8 @@ CrashService::CrashService(const std::string& version, const std::string& build)
       mVersionId(),
       mDumpFile(),
       mReportId(),
-      mComments() {
+      mComments(),
+      mDataDirectory(dataDir ? dataDir : "") {
     mVersionId = version;
     mVersionId += "-";
     mVersionId += build;
@@ -83,6 +104,17 @@ CrashService::CrashService(const std::string& version, const std::string& build)
 CrashService::~CrashService() {
     if (validDumpFile()) {
         remove(mDumpFile.c_str());
+    }
+    if (!mDataDirectory.empty()) {
+        const auto files = System::get()->scanDirEntries(mDataDirectory, true);
+        for (const String& file : files) {
+            remove(file.c_str());
+        }
+        if (remove(mDataDirectory.c_str()) < 0) {
+            // on Windows waiting a bit usually helps
+            System::sleepMs(16);
+            remove(mDataDirectory.c_str());
+        }
     }
 }
 
@@ -125,6 +157,10 @@ std::string CrashService::getReport() {
 
 std::string CrashService::getReportId() const {
     return mReportId;
+}
+
+const std::string& CrashService::getDumpMessage() const {
+    return mDumpMessage;
 }
 
 void CrashService::addReportValue(const std::string& key,
@@ -244,14 +280,21 @@ bool CrashService::collectSysInfo() {
     return getHWInfo();
 }
 
-std::string CrashService::readFile(const std::string& path) {
+std::unique_ptr<CrashService> CrashService::makeCrashService(
+        const std::string& version,
+        const std::string& build,
+        const char* dataDir) {
+    return std::unique_ptr<CrashService>(
+            new HostCrashService(version, build, dataDir));
+}
+
+std::string CrashService::readFile(StringView path) {
     std::ifstream is(path.c_str());
 
     if (!is) {
         std::string errmsg;
-        errmsg = "Error, Can't open file " + path + " for reading. Errno=" +
-                 std::to_string(errno);
-        errmsg += "\n";
+        errmsg = std::string("Error, Can't open file ") + path.c_str() +
+                 " for reading. Errno=" + std::to_string(errno) + "\n";
         return errmsg;
     }
 
@@ -286,7 +329,7 @@ int64_t CrashService::waitForDumpFile(int clientpid, int timeout) {
         if (timeout >= 0 && waitduration_ms >= timeout) {
             return -1;
         }
-        ::android::base::System::sleepMs(WAIT_INTERVAL_MS);
+        System::sleepMs(WAIT_INTERVAL_MS);
         waitduration_ms += WAIT_INTERVAL_MS;
     }
     if (!mDumpRequestContext.file_path.empty()) {
@@ -302,6 +345,22 @@ bool CrashService::setClient(int clientpid) {
     }
     mClientPID = clientpid;
     return true;
+}
+
+void CrashService::collectDataFiles() {
+    if (mDataDirectory.empty()) {
+        return;
+    }
+
+    const auto files = System::get()->scanDirEntries(mDataDirectory);
+    for (const String& name : files) {
+        const auto fullName = PathUtils::join(mDataDirectory, name);
+        addReportFile(name.c_str(), fullName.c_str());
+        if (name == CrashReporter::kDumpMessageFileName) {
+            // remember the dump message to show it instead of the default one
+            mDumpMessage = readFile(fullName);
+        }
+    }
 }
 
 // This is a list of all substrings that definitely belong to some graphics

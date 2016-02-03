@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "android/crashreport/CrashService_darwin.h"
+
 #include "android/base/String.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 
-#include "android/crashreport/CrashService.h"
-
 #include "android/crashreport/CrashSystem.h"
 #include "android/utils/debug.h"
-#include "client/mac/crash_generation/crash_generation_server.h"
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -33,7 +32,6 @@
 #define D(...) VERBOSE_PRINT(init, __VA_ARGS__)
 #define I(...) printf(__VA_ARGS__)
 
-#define CMD_BUF_SIZE 1024
 #define HWINFO_CMD "system_profiler -detailLevel mini"
 
 namespace android {
@@ -44,124 +42,110 @@ using ::android::base::System;
 
 namespace crashreport {
 
-namespace {
+HostCrashService::~HostCrashService() {
+    stopCrashServer();
+    cleanupHWInfo();
+}
 
-class HostCrashService : public CrashService {
-public:
-    // Inherit CrashServer constructor
-    using CrashService::CrashService;
-
-    virtual ~HostCrashService() {
-        stopCrashServer();
-        cleanupHWInfo();
-    }
-
-    static void OnClientDumpRequest(
-            void* context,
-            const google_breakpad::ClientInfo& client_info,
-            const std::string& file_path) {
+void HostCrashService::OnClientDumpRequest(
+        void* context,
+        const google_breakpad::ClientInfo& client_info,
+        const std::string& file_path) {
+    if (static_cast<CrashService::DumpRequestContext*>(context)
+                ->file_path.empty()) {
         D("Client Requesting dump %s\n", file_path.c_str());
         static_cast<CrashService::DumpRequestContext*>(context)->file_path =
                 file_path;
     }
+}
 
-    static void OnClientExit(void* context,
-                             const google_breakpad::ClientInfo& client_info) {
-        D("Client exiting\n");
-        CrashService::ServerState* serverstate =
-                static_cast<CrashService::ServerState*>(context);
-        if (serverstate->connected > 0) {
-            serverstate->connected -= 1;
-        }
-        if (serverstate->connected == 0) {
-            serverstate->waiting = false;
-        }
+void HostCrashService::OnClientExit(
+        void* context,
+        const google_breakpad::ClientInfo& client_info) {
+    D("Client exiting\n");
+    CrashService::ServerState* serverstate =
+            static_cast<CrashService::ServerState*>(context);
+    if (serverstate->connected > 0) {
+        serverstate->connected -= 1;
     }
-
-    bool startCrashServer(const std::string& pipe) override {
-        if (mCrashServer) {
-            return false;
-        }
-        initCrashServer();
-
-        mCrashServer.reset(new ::google_breakpad::CrashGenerationServer(
-                pipe.c_str(), nullptr, nullptr, &OnClientDumpRequest,
-                &mDumpRequestContext, &OnClientExit, &mServerState, true,
-                CrashSystem::get()->getCrashDirectory()));
-        if (!mCrashServer) {
-            return false;
-        }
-        return mCrashServer->Start();
+    if (serverstate->connected == 0) {
+        serverstate->waiting = false;
     }
+}
 
-    bool stopCrashServer() override {
-        if (mCrashServer) {
-            mCrashServer.reset();
-            return true;
-        } else {
-            return false;
-        }
+bool HostCrashService::startCrashServer(const std::string& pipe) {
+    if (mCrashServer) {
+        return false;
     }
+    initCrashServer();
 
-    bool isClientAlive() override {
-        if (!mClientPID) {
-            return false;
-        }
-        // waitpid added for child clients
-        waitpid(mClientPID, nullptr, WNOHANG);
-        // kill with 0 signal will return non 0 if process does not exist
-        if (kill(mClientPID, 0) != 0) {
-            return false;
-        } else {
-            return true;
-        }
+    mCrashServer.reset(new ::google_breakpad::CrashGenerationServer(
+            pipe.c_str(), nullptr, nullptr, &OnClientDumpRequest,
+            &mDumpRequestContext, &OnClientExit, &mServerState, true,
+            CrashSystem::get()->getCrashDirectory()));
+    if (!mCrashServer) {
+        return false;
     }
+    return mCrashServer->Start();
+}
 
-    bool getHWInfo() override {
-        mHWTmpFilePath.clear();
-        System* sys = System::get();
-        String tmp_dir = sys->getTempDir();
+bool HostCrashService::stopCrashServer() {
+    if (mCrashServer) {
+        mCrashServer.reset();
+        return true;
+    } else {
+        return false;
+    }
+}
 
-        String tmp_file_path_template = PathUtils::join(
-                tmp_dir, "android_emulator_crash_report_XXXXXX");
-
-        int tmpfd = mkstemp((char*)tmp_file_path_template.data());
-
-        if (tmpfd == -1) {
-            E("Error: Can't create temporary file! errno=%d", errno);
-            return false;
-        }
-
-        String syscmd(HWINFO_CMD);
-        syscmd += " > ";
-        syscmd += tmp_file_path_template;
-        system(syscmd.c_str());
-
-        mHWTmpFilePath = tmp_file_path_template.c_str();
+bool HostCrashService::isClientAlive() {
+    if (!mClientPID) {
+        return false;
+    }
+    // waitpid added for child clients
+    waitpid(mClientPID, nullptr, WNOHANG);
+    // kill with 0 signal will return non 0 if process does not exist
+    if (kill(mClientPID, 0) != 0) {
+        return false;
+    } else {
         return true;
     }
+}
 
-    void cleanupHWInfo() {
-        if (mHWTmpFilePath.empty()) {
-            return;
-        }
+bool HostCrashService::getHWInfo() {
+    mHWTmpFilePath.clear();
+    System* sys = System::get();
+    String tmp_dir = sys->getTempDir();
 
-        int rm_ret = remove(mHWTmpFilePath.c_str());
+    String tmp_file_path_template =
+            PathUtils::join(tmp_dir, "android_emulator_crash_report_XXXXXX");
 
-        if (rm_ret == -1) {
-            E("Failed to delete HW info at %s", mHWTmpFilePath.c_str());
-        }
+    int tmpfd = mkstemp((char*)tmp_file_path_template.data());
+
+    if (tmpfd == -1) {
+        E("Error: Can't create temporary file! errno=%d", errno);
+        return false;
     }
 
-private:
-    std::unique_ptr<::google_breakpad::CrashGenerationServer> mCrashServer;
-};
+    String syscmd(HWINFO_CMD);
+    syscmd += " > ";
+    syscmd += tmp_file_path_template;
+    system(syscmd.c_str());
 
-}  // namespace anonymous
+    mHWTmpFilePath = tmp_file_path_template.c_str();
+    return true;
+}
 
-CrashService* CrashService::makeCrashService(const std::string& version,
-                                             const std::string& build) {
-    return new HostCrashService(version, build);
+void HostCrashService::cleanupHWInfo() {
+    if (mHWTmpFilePath.empty()) {
+        return;
+    }
+
+    int rm_ret = remove(mHWTmpFilePath.c_str());
+
+    if (rm_ret == -1) {
+        E("Failed to delete HW info at %s", mHWTmpFilePath.c_str());
+    }
 }
 
 }  // namespace crashreport

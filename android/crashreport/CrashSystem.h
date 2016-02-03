@@ -83,7 +83,7 @@ public:
     // Return crash command line to execute crash service in StringVector
     // format
     // Takes a pipe identfier and a current proc identifier
-    virtual const ::android::base::StringVector getCrashServiceCmdLine(
+    virtual ::android::base::StringVector getCrashServiceCmdLine(
             const std::string& pipe,
             const std::string& proc);
 
