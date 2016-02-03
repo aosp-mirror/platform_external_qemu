@@ -38,7 +38,9 @@ extern "C" const unsigned char* android_emulator_icon_find(const char* name,
                                                            size_t* psize);
 
 ConfirmDialog::ConfirmDialog(QWidget* parent,
-                             android::crashreport::CrashService* crashservice)
+                             android::crashreport::CrashService* crashservice,
+                             bool isExitCrash,
+                             bool quietMode)
     : QDialog(parent),
       mCrashService(crashservice),
       mDetailsHidden(true),
@@ -54,6 +56,14 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mDetailsText = new QPlainTextEdit();
     mProgressText = new QLabel(tr("Working..."));
     mProgress = new QProgressBar;
+    mExitCrashCheckBox = new QCheckBox(tr("Send reports for crashes on exit automatically in the future."));
+    mExitCrashCheckBox->setChecked(false);
+
+    if (isExitCrash) {
+        mExitCrashCheckBox->show();
+    } else {
+        mExitCrashCheckBox->hide();
+    }
 
     mSuggestionText = new QLabel(tr("Suggestion(s) based on crash info:\n\n"));
     mSuggestionText->setTextInteractionFlags(Qt::TextSelectableByMouse);
@@ -151,6 +161,8 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
 
     mainLayout->addWidget(mProgressText, 7, 0, 1, 3);
     mainLayout->addWidget(mProgress, 8, 0, 1, 3);
+
+    mainLayout->addWidget(mExitCrashCheckBox, 9, 0, 1, 3);
 
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
     setLayout(mainLayout);
@@ -259,6 +271,11 @@ bool ConfirmDialog::uploadCrash() {
     eventloop.exec();
 
     hideProgressBar();
+
+    if (mExitCrashCheckBox->isChecked()) {
+        // TODO: Somehow save a config file or something
+    }
+
     return watcher.result();
 }
 void ConfirmDialog::sendReport() {

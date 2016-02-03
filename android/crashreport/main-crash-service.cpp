@@ -42,8 +42,10 @@
 #define I(...) printf(__VA_ARGS__)
 
 static bool displayConfirmDialog(
-        android::crashreport::CrashService* crashservice) {
-    ConfirmDialog msgBox(nullptr, crashservice);
+        android::crashreport::CrashService* crashservice,
+        bool isExitCrash,
+        bool quietly) {
+    ConfirmDialog msgBox(nullptr, crashservice, isExitCrash, quietly);
 
     msgBox.show();
     int ret = msgBox.exec();
@@ -69,6 +71,11 @@ static void InitQt(int argc, char** argv) {
     }
 }
 
+bool is_crash_on_exit(const std::string& msg) {
+    std::string pattern("CrashOnExit");
+    int lookfor = pattern.length();
+    return msg.substr(0,lookfor) == pattern;
+}
 
 /* Main routine */
 int main(int argc, char** argv) {
@@ -131,11 +138,19 @@ int main(int argc, char** argv) {
 
     crashservice->collectDataFiles();
 
+    bool isExitCrash = false;
+    if (is_crash_on_exit(crashservice->getDumpMessage())) {
+        isExitCrash = true;
+    }
+
+    // TODO: Read from config file
+    bool quietly = false;
+
     QApplication app(argc, argv);
 
     InitQt(argc, argv);
 
-    if (!displayConfirmDialog(crashservice.get())) {
+    if (!displayConfirmDialog(crashservice.get(), isExitCrash, quietly)) {
         return 1;
     }
 

@@ -71,6 +71,10 @@ void CrashReporter::GenerateDump(const char* message) {
     writeDump();
 }
 
+void CrashReporter::SetExitMode() {
+    passDumpMessage("CrashOnExit");
+}
+
 void CrashReporter::GenerateDumpAndDie(const char* message) {
     passDumpMessage(message);
     // this is the most cross-platform way of crashing
@@ -166,4 +170,7 @@ void crashhandler_die_format(const char* format, ...) {
     crashhandler_die(message);
 }
 
+void crashhandler_exitmode() {
+    CrashReporter::get()->SetExitMode();
+}
 }  // extern "C"
