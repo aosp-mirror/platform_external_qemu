@@ -12,6 +12,7 @@
 
 #include "android/crashreport/CrashService.h"
 
+#include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QFontDatabase>
 #include <QGridLayout>
@@ -21,6 +22,7 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QProgressBar>
+#include <QSettings>
 #include <QTextEdit>
 
 // QT Component that displays the send crash dump confirmation
@@ -40,6 +42,7 @@ private:
     QPlainTextEdit* mDetailsText;
     QLabel* mProgressText;
     QProgressBar* mProgress;
+    QCheckBox* mExitCrashCheckBox;
 
     QLabel* mSuggestionText;
 
@@ -47,10 +50,13 @@ private:
     QDialogButtonBox* mDetailsButtonBox;
 
     android::crashreport::CrashService* mCrashService;
+    QSettings* mSettings;
 
     bool mDetailsHidden;
     bool mDidGetSysInfo;
     bool mDidUpdateDetails;
+    bool mIsExitCrash;
+    bool mQuietMode;
     void disableInput();
     void enableInput();
     void showProgressBar(const std::string& msg);
@@ -63,7 +69,10 @@ private:
 
 public:
     ConfirmDialog(QWidget* parent,
-                  android::crashreport::CrashService* crashservice);
+                  android::crashreport::CrashService* crashservice,
+                  QSettings* settings,
+                  bool isExitCrash,
+                  bool quietMode);
     bool didGetSysInfo() const;
 
     QString getUserComments();
