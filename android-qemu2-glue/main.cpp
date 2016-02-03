@@ -1104,14 +1104,7 @@ extern "C" int main(int argc, char **argv) {
                             hw->hw_lcd_width, hw->hw_lcd_height);
         // Set CMA (continguous memory allocation) to values that depend on
         // the desired resolution.
-        // We will go with a conservative estimate that enables booting.
-        // The formula is to pick a power of 2
-        // that is just under 4 * bytes of a 32-bit RGBA frame buffer,
-        // with a maximum size of 256M.
-        // For example, Nexus 6 seems to require 32M (16M doesn't work)
-        // with its 2560x1440 resolution.
-        // This is because double buffering is used.
-        // We will assume double buffering in the calculation.
+        // We will assume a double buffered 32-bit framebuffer in the calculation.
         uint64_t bytes = hw->hw_lcd_width * hw->hw_lcd_height * 4;
         uint64_t used_mb = (2 * bytes + 1024 * 1024 - 1) / (1024 * 1024);
         char cma_target[22] = {}; // 16 (for number) + 6 more chars + \0
