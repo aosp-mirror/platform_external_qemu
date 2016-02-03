@@ -1,0 +1,176 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9124acf4_093ec060",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-03T22:19:38Z",
+      "side": 1,
+      "message": "nit:extra line.",
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "711bb8b8_cdd4ba19",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-03T22:19:38Z",
+      "side": 1,
+      "message": "Prefer this to be in a shared location between CrashHandler and crash service, so that they are changed together.",
+      "range": {
+        "startLine": 83,
+        "startChar": 15,
+        "endLine": 83,
+        "endChar": 22
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b121b0e4_e2038a24",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-03T22:19:38Z",
+      "side": 1,
+      "message": "nit:extra line.",
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31c3005d_43f7d0f2",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-03T22:19:38Z",
+      "side": 1,
+      "message": "unique_ptr?",
+      "range": {
+        "startLine": 154,
+        "startChar": 4,
+        "endLine": 154,
+        "endChar": 37
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3115c084_1e68bd99",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-03T22:19:38Z",
+      "side": 1,
+      "message": "I somewhat disagree with the behavior here.\nUsers don\u0027t care at all about exit vs early crashes.\n\nWe should give them the option of \"always send crash reports in the future\", rather than \"...on exit\".",
+      "range": {
+        "startLine": 63,
+        "startChar": 43,
+        "endLine": 63,
+        "endChar": 97
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9124acf4_69013c99",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-03T22:19:38Z",
+      "side": 1,
+      "message": "Initial value needs to be determined by stored settings.",
+      "range": {
+        "startLine": 64,
+        "startChar": 35,
+        "endLine": 64,
+        "endChar": 40
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b121b0e4_a2bb5288",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-03T22:19:38Z",
+      "side": 1,
+      "message": "These two steps should be pulled out of the if condition so that they are not duplicated.",
+      "range": {
+        "startLine": 286,
+        "startChar": 8,
+        "endLine": 287,
+        "endChar": 12
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3115c084_9e9cadde",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-03T22:19:38Z",
+      "side": 1,
+      "message": "This should be in slot_requestClose.\n\nA \"container\" object has already been closed by the time we get here.",
+      "range": {
+        "startLine": 280,
+        "startChar": 4,
+        "endLine": 280,
+        "endChar": 25
+      },
+      "revId": "8767efd7c623ee8b531ce5eea893d03d1b191926",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
