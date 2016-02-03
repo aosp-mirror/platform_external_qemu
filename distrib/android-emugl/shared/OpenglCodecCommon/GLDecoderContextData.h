@@ -15,8 +15,6 @@
 */
 #pragma once
 
-#include "codec_defs.h"
-
 #include <vector>
 #include <string>
 
@@ -49,7 +47,7 @@ public:
     } PointerDataLocation;
 
     // Default constructor.
-    GLDecoderContextData(int numLocations = CODEC_MAX_VERTEX_ATTRIBUTES)
+    GLDecoderContextData(int numLocations = kMaxVertexAttributes)
             : mPointerData(),
               mNumLocations(static_cast<unsigned>(numLocations)) {
         mPointerData.resize(mNumLocations);
@@ -77,6 +75,8 @@ public:
     }
 
 private:
+    static const int kMaxVertexAttributes = 64;
+
     std::vector<std::string> mPointerData;
     unsigned mNumLocations = 0;
 };
