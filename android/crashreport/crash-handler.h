@@ -43,6 +43,9 @@ void crashhandler_die(const char* message) __attribute__((noinline));
 // A variadic overload with C interface
 void crashhandler_die_format(const char* format, ...);
 
+// Track crashes on exit.
+void crashhandler_exitmode(const char* message);
+
 ANDROID_END_HEADER
 
 #ifdef __cplusplus

@@ -21,6 +21,7 @@
  *
  * Once confirmation is given, the crash dump is curl'd to google crash servers.
  */
+#include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/CrashService.h"
 #include "android/crashreport/CrashSystem.h"
 #include "android/crashreport/ui/ConfirmDialog.h"
@@ -29,7 +30,9 @@
 #include "android/version.h"
 
 #include <QApplication>
+#include <QCoreApplication>
 #include <QProgressDialog>
+#include <QSettings>
 #include <QTimer>
 #include <QThread>
 #include <stdio.h>
@@ -42,12 +45,22 @@
 #define I(...) printf(__VA_ARGS__)
 
 static bool displayConfirmDialog(
-        android::crashreport::CrashService* crashservice) {
-    ConfirmDialog msgBox(nullptr, crashservice);
+        android::crashreport::CrashService* crashservice,
+        bool isExitCrash,
+        bool quietly) {
+    ConfirmDialog msgBox(nullptr, crashservice, isExitCrash, quietly);
 
-    msgBox.show();
-    int ret = msgBox.exec();
-    return ret == ConfirmDialog::Accepted;
+    const char* setting_key = ::android::crashreport::CrashReporter::kProcessCrashesQuietlyKey;
+    QSettings settings;
+
+    if (quietly && settings.contains(setting_key)) {
+        msgBox.sendReport();
+        return true;
+    } else {
+        msgBox.show();
+        int ret = msgBox.exec();
+        return ret == ConfirmDialog::Accepted;
+    }
 }
 
 static void InitQt(int argc, char** argv) {
@@ -69,6 +82,11 @@ static void InitQt(int argc, char** argv) {
     }
 }
 
+bool is_crash_on_exit(const std::string& msg) {
+    const char* str = ::android::crashreport::CrashReporter::kCrashOnExitPattern;
+    unsigned int sz = strlen(str);
+    return msg.compare(0, sz, str) == 0;
+}
 
 /* Main routine */
 int main(int argc, char** argv) {
@@ -131,11 +149,30 @@ int main(int argc, char** argv) {
 
     crashservice->collectDataFiles();
 
+    bool isExitCrash = crashservice->didCrashOnExit();
+
+    QCoreApplication::setOrganizationName("Android Open Source Project");
+    QCoreApplication::setApplicationName("Android Emulator Crash Reporter");
+    QSettings settings;
+
+    bool quietly = false;
+   
+    const char* setting_key = ::android::crashreport::CrashReporter::kProcessCrashesQuietlyKey;
+
+    if (settings.contains(setting_key)) {
+        quietly = settings.value(setting_key).toInt();
+    } else {
+        // Check the box by default :)
+        quietly = true;
+    }
+
     QApplication app(argc, argv);
 
     InitQt(argc, argv);
 
-    if (!displayConfirmDialog(crashservice.get())) {
+    if (!displayConfirmDialog(crashservice.get(),
+                              isExitCrash,
+                              quietly)) {
         return 1;
     }
 

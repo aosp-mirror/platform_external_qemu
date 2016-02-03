@@ -12,9 +12,10 @@
 
 #include "android/crashreport/ui/ConfirmDialog.h"
 
-#include <QScrollBar>
 #include <QEventLoop>
 #include <QFutureWatcher>
+#include <QScrollBar>
+#include <QSettings>
 #include "QtConcurrent/qtconcurrentrun.h"
 
 static const char kMessageBoxTitle[] = "Android Emulator";
@@ -38,12 +39,16 @@ extern "C" const unsigned char* android_emulator_icon_find(const char* name,
                                                            size_t* psize);
 
 ConfirmDialog::ConfirmDialog(QWidget* parent,
-                             android::crashreport::CrashService* crashservice)
+                             android::crashreport::CrashService* crashservice,
+                             bool isExitCrash,
+                             bool quietMode)
     : QDialog(parent),
       mCrashService(crashservice),
       mDetailsHidden(true),
       mDidGetSysInfo(false),
-      mDidUpdateDetails(false) {
+      mDidUpdateDetails(false),
+      mIsExitCrash(isExitCrash),
+      mQuietMode(quietMode) {
     mSendButton = new QPushButton(tr("Send Report"));
     mDontSendButton = new QPushButton(tr("Don't Send"));
     mDetailsButton = new QPushButton(tr(""));
@@ -54,6 +59,9 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mDetailsText = new QPlainTextEdit();
     mProgressText = new QLabel(tr("Working..."));
     mProgress = new QProgressBar;
+    mExitCrashCheckBox = new QCheckBox(tr("Send future crash reports automatically"));
+    mExitCrashCheckBox->setChecked(mQuietMode);
+    mExitCrashCheckBox->show();
 
     mSuggestionText = new QLabel(tr("Suggestion(s) based on crash info:\n\n"));
     mSuggestionText->setTextInteractionFlags(Qt::TextSelectableByMouse);
@@ -152,6 +160,8 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mainLayout->addWidget(mProgressText, 7, 0, 1, 3);
     mainLayout->addWidget(mProgress, 8, 0, 1, 3);
 
+    mainLayout->addWidget(mExitCrashCheckBox, 9, 0, 1, 3);
+
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
     setLayout(mainLayout);
     setWindowTitle(tr(kMessageBoxTitle));
@@ -169,6 +179,7 @@ void ConfirmDialog::disableInput() {
     mDontSendButton->setEnabled(false);
     mDetailsButton->setEnabled(false);
     mCommentsText->setEnabled(false);
+    mExitCrashCheckBox->setEnabled(false);
 }
 
 void ConfirmDialog::enableInput() {
@@ -176,6 +187,7 @@ void ConfirmDialog::enableInput() {
     mDontSendButton->setEnabled(true);
     mDetailsButton->setEnabled(true);
     mCommentsText->setEnabled(true);
+    mExitCrashCheckBox->setEnabled(true);
 }
 
 void ConfirmDialog::getDetails() {
@@ -259,12 +271,17 @@ bool ConfirmDialog::uploadCrash() {
     eventloop.exec();
 
     hideProgressBar();
+
+
     return watcher.result();
 }
+
 void ConfirmDialog::sendReport() {
     getDetails();
     mCrashService->addUserComments(mCommentsText->toPlainText().toStdString());
-    if (uploadCrash()) {
+    bool upload_success = uploadCrash();
+
+    if (!mQuietMode && upload_success) {
         QMessageBox msgbox(this);
         msgbox.setWindowTitle(tr("Crash Report Submitted"));
         msgbox.setText(tr("Thank you for submitting a crash report."));
@@ -273,6 +290,10 @@ void ConfirmDialog::sendReport() {
         msgbox.setTextInteractionFlags(Qt::TextSelectableByMouse);
         msgbox.exec();
     }
+
+    QSettings settings;
+    const char* setting_key = ::android::crashreport::CrashReporter::kProcessCrashesQuietlyKey;
+    settings.setValue(setting_key, mExitCrashCheckBox->isChecked());
 
     accept();
 }
