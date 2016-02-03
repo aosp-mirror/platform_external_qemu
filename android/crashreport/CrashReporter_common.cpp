@@ -39,6 +39,14 @@ namespace crashreport {
 
 const char* const CrashReporter::kDumpMessageFileName =
         "internal-error-msg.txt";
+const char* const CrashReporter::kCrashOnExitFileName =
+        "crash-on-exit.txt";
+
+const char* const CrashReporter::kCrashOnExitPattern =
+        "Crash on exit";
+
+const char* const CrashReporter::kProcessCrashesQuietlyKey =
+        "set/processCrashesQuietly";
 
 CrashReporter::CrashReporter()
     : mDumpDir(System::get()->getTempDir().c_str()),
@@ -69,6 +77,13 @@ const std::string& CrashReporter::getDataExchangeDir() const {
 void CrashReporter::GenerateDump(const char* message) {
     passDumpMessage(message);
     writeDump();
+}
+
+void CrashReporter::SetExitMode(const char* msg) {
+    std::ofstream out(
+            PathUtils::join(mDataExchangeDir, kCrashOnExitFileName).c_str(),
+            std::ios_base::out | std::ios_base::ate);
+    out << msg << '\n';
 }
 
 void CrashReporter::GenerateDumpAndDie(const char* message) {
@@ -166,4 +181,7 @@ void crashhandler_die_format(const char* format, ...) {
     crashhandler_die(message);
 }
 
+void crashhandler_exitmode(const char* message) {
+    CrashReporter::get()->SetExitMode(message);
+}
 }  // extern "C"
