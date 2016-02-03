@@ -18,7 +18,6 @@
 
 #include "gles1_dec.h"
 
-#include "FixedBuffer.h"
 #include "GLDecoderContextData.h"
 #include "emugl/common/shared_library.h"
 
