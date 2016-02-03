@@ -541,8 +541,17 @@ void EmulatorQtWindow::slot_getScreenDimensions(QRect *out_rect, QSemaphore *sem
     QRect rect = ((QApplication*)QApplication::instance())->desktop()->screenGeometry();
     out_rect->setX(rect.x());
     out_rect->setY(rect.y());
-    out_rect->setWidth(rect.width());
-    out_rect->setHeight(rect.height());
+
+    // Always report slightly smaller-than-actual dimensions to prevent odd resizing behavior,
+    // which can happen if things like the OSX dock are not taken into account. The difference
+    // below is specifically to take into account the OSX dock.
+    out_rect->setWidth(rect.width() * .95);
+#ifdef __APPLE__
+    out_rect->setHeight(rect.height() * .85);
+#else // _WIN32 || __linux__
+    out_rect->setHeight(rect.height() * .95);
+#endif
+
     if (semaphore != NULL) semaphore->release();
 }
 
@@ -952,9 +961,9 @@ void EmulatorQtWindow::doResize(const QSize &size)
         // Make sure the new size is always a little bit smaller than the screen to prevent
         // keyboard shortcut scaling from making a window too large for the screen, which can
         // result in the showing of the scroll bars.
-        if (newSize.width() > .95 * screenDimensions.width() ||
-            newSize.height() > .95 * screenDimensions.height()) {
-            return;
+        if (newSize.width() > screenDimensions.width() ||
+            newSize.height() > screenDimensions.height()) {
+            newSize.scale(screenDimensions.size(), Qt::KeepAspectRatio);
         }
 
         double widthScale = (double) newSize.width() / (double) backing_surface->original_w;
