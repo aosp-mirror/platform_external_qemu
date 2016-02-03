@@ -50,6 +50,7 @@
 #include "android/android.h"
 #include "android/camera/camera-service.h"
 #include "android/console.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/filesystems/partition_config.h"
 #include "android/globals.h"
@@ -3850,6 +3851,9 @@ int main(int argc, char **argv, char **envp)
     android_check_for_updates();
 
     main_loop();
+#ifdef CONFIG_ANDROID
+    crashhandler_exitmode("after main_loop");
+#endif
     quit_timers();
     net_cleanup();
     android_wear_agent_stop();
