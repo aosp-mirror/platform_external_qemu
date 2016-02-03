@@ -50,8 +50,6 @@
 #include "android/android.h"
 #include "android/camera/camera-service.h"
 #include "android/console.h"
-#include "android/crashreport/crash-handler.h"
-#include "android/curl-support.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/filesystems/partition_config.h"
 #include "android/globals.h"
@@ -1970,25 +1968,9 @@ int main(int argc, char **argv, char **envp)
     STRALLOC_DEFINE(kernel_config);
     int    dns_count = 0;
 
-    if (!crashhandler_init()) {
-        VERBOSE_PRINT(init, "Crash handling not initialized\n");
-    }
-
-    // libcurl initialization is thread-unsafe, so let's call it first
-    // to make sure no other thread could be doing the same
-    curl_init(qemu_find_file_with_subdir(find_datadir(argv[0]),
-                                         "lib/",
-                                         "ca-bundle.pem"));
-
     /* Ensure Looper implementation for this thread is based on the QEMU
      * main loop. */
     qemu_looper_setForThread();
-
-    /* Initialize sockets before anything else, so we can properly report
-     * initialization failures back to the UI. */
-#ifdef _WIN32
-    socket_init();
-#endif
 
     init_clocks();
 
@@ -3887,6 +3869,4 @@ android_emulation_teardown(void)
 {
     skin_charmap_done();
     android_teardown_metrics();
-
-    curl_cleanup();
 }

@@ -40,6 +40,7 @@
 #include "android/config/config.h"
 
 #include "android/kernel/kernel_utils.h"
+#include "android/process_setup.h"
 #include "android/skin/charmap.h"
 #include "android/user-config.h"
 
@@ -48,11 +49,11 @@
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
 #include "android/utils/ini.h"
+#include "android/utils/iolooper.h"
 #include "android/utils/lineinput.h"
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
 #include "android/utils/tempfile.h"
-#include "android/utils/sockets.h"
 
 #include "android/main-common.h"
 #include "android/main-common-ui.h"
@@ -69,7 +70,6 @@
 
 #include "android/framebuffer.h"
 #include "android/opengl/emugl_config.h"
-#include "android/utils/iolooper.h"
 
 #include "android/skin/winsys.h"
 #include "android/version.h"
@@ -197,6 +197,8 @@ int main(int argc, char **argv) {
     /* net.shared_net_ip boot property value. */
     char boot_prop_ip[64] = {};
 
+    process_early_setup();
+
     args[0] = argv[0];
 
     if ( android_parse_options( &argc, &argv, opts ) < 0 ) {
@@ -205,10 +207,6 @@ int main(int argc, char **argv) {
 
     // we know it's qemu1, and don't care what user wanted to trick us into
     opts->ranchu = 0;
-
-#ifdef _WIN32
-    socket_init();
-#endif
 
     while (argc-- > 1) {
         opt = (++argv)[0];
@@ -1032,5 +1030,6 @@ int main(int argc, char **argv) {
     skin_winsys_enter_main_loop(opts->no_window, argc, argv);
     ui_done();
 
+    process_late_teardown();
     return 0;
 }
