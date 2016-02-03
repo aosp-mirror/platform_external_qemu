@@ -22,6 +22,30 @@
       "revId": "9a9c02f06f7c6aef8982b23eb4d54b4692165a45",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3115c084_fe820172",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-03T22:21:06Z",
+      "side": 1,
+      "message": "Wow that was fast.\n\nYes it would. The alternative would be to silently just do single-touch input? Even though we\u0027re talking about removing the \"Do not show this message again\" from a many of our error messages, this is one of the few cases where it should stay.",
+      "parentUuid": "71c9f878_cbd13527",
+      "range": {
+        "startLine": 551,
+        "startChar": 0,
+        "endLine": 554,
+        "endChar": 55
+      },
+      "revId": "9a9c02f06f7c6aef8982b23eb4d54b4692165a45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
