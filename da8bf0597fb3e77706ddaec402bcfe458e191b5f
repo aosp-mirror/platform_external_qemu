@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "31c3005d_083b3770",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-03T18:55:08Z",
+      "side": 1,
+      "message": "Second that. I\u0027d prefer to have a separate function with a different semantic, e.g. \u0027SetExitingMode()\u0027, which just notifies the crash service that emulator\u0027s exiting. If we detect a crash after this function call, we treat it as a crash on exit and do whatever we need.\nThis way it\u0027s more incapsulated, so we can easily change the implementation later.\nNow I\u0027d suggest to create a separate file in the data exchange directory which would also contain some data about the exiting process, e.g. timestamp, how user initiated exit etc",
+      "parentUuid": "f127a8f2_59124fa5",
+      "range": {
+        "startLine": 72,
+        "startChar": 9,
+        "endLine": 72,
+        "endChar": 24
+      },
+      "revId": "da8bf0597fb3e77706ddaec402bcfe458e191b5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "711bb8b8_40cb722c",
         "filename": "android/crashreport/main-crash-service.cpp",
         "patchSetId": 1
