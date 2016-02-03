@@ -359,10 +359,18 @@ extern void skin_winsys_start(bool no_window, bool raw_keys) {
         QMenu* quitMenu = new QMenu(nullptr);
         QAction* quitAction = new QAction(g->app->tr("Quit Emulator"), quitMenu);
         QMenuBar* mainBar = new QMenuBar(nullptr);
-        auto emulator_win = EmulatorQtWindow::getInstance();
-        QObject::connect(
-            quitAction, &QAction::triggered,
-            emulator_win, [emulator_win] () {emulator_win->requestClose();});
+
+        // make sure we never try to call into a dangling pointer, and also
+        // that we don't hold it alive just because of a signal connection
+        const auto winPtr = EmulatorQtWindow::getInstancePtr();
+        const auto winWeakPtr = std::weak_ptr<EmulatorQtWindow>(winPtr);
+        QObject::connect(quitAction, &QAction::triggered,
+            [winWeakPtr] {
+                if (const auto win = winWeakPtr.lock()) {
+                    win->requestClose();
+                }
+            }
+        );
         quitMenu->addAction(quitAction);
         mainBar->addMenu(quitMenu);
         qt_mac_set_dock_menu(quitMenu);
