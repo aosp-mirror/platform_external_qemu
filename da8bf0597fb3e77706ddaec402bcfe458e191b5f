@@ -49,6 +49,54 @@
     },
     {
       "key": {
+        "uuid": "31c3005d_08b897f9",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T19:24:49Z",
+      "side": 1,
+      "message": "Done. RE: extra info; put it in a bug. https://code.google.com/p/android/issues/detail?id\u003d200227",
+      "parentUuid": "31c3005d_083b3770",
+      "range": {
+        "startLine": 72,
+        "startChar": 9,
+        "endLine": 72,
+        "endChar": 24
+      },
+      "revId": "da8bf0597fb3e77706ddaec402bcfe458e191b5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11f7dc9a_94292578",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T19:24:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f127a8f2_59124fa5",
+      "range": {
+        "startLine": 72,
+        "startChar": 9,
+        "endLine": 72,
+        "endChar": 24
+      },
+      "revId": "da8bf0597fb3e77706ddaec402bcfe458e191b5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "711bb8b8_40cb722c",
         "filename": "android/crashreport/main-crash-service.cpp",
         "patchSetId": 1
@@ -60,6 +108,30 @@
       "writtenOn": "2016-02-03T18:45:19Z",
       "side": 1,
       "message": "who writes the \"CRASHONEXIT\" message",
+      "range": {
+        "startLine": 139,
+        "startChar": 25,
+        "endLine": 139,
+        "endChar": 55
+      },
+      "revId": "da8bf0597fb3e77706ddaec402bcfe458e191b5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "71c9f878_f0cee085",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-03T19:24:49Z",
+      "side": 1,
+      "message": "Will be in a separate CL, but the plan is to put them in the vl-{android}.c\u0027s after the main loop exits.",
+      "parentUuid": "711bb8b8_40cb722c",
       "range": {
         "startLine": 139,
         "startChar": 25,
