@@ -16,11 +16,24 @@
  */
 #include "android-qemu2-glue/display.h"
 
-#include "android/utils/system.h"
+#include "android/emulator-window.h"
 
 extern "C" {
-    #include "android/emulator-window.h"
     #include "ui/console.h"
+}
+
+namespace {
+
+struct DCLExtra : public DisplayChangeListener {
+    DCLExtra() { memset(this, 0, sizeof(*this)); }
+
+    QFrameBuffer* fb;
+};
+
+}
+
+static DCLExtra* asDcl(DisplayChangeListener* dcl) {
+    return static_cast<DCLExtra*>(dcl);
 }
 
 /*
@@ -36,9 +49,7 @@ DisplayState <--> QFrameBuffer <--> QEmulator/SDL
 /* this is called periodically by the GUI timer to check for updates
  * and poll user events. Use vga_hw_update().
  */
-static void
-android_display_producer_check(void *opaque)
-{
+static void android_display_producer_check(void* opaque) {
     /* core: call vga_hw_update(). this will eventually
      * lead to calls to android_display_update()
      */
@@ -46,26 +57,16 @@ android_display_producer_check(void *opaque)
     graphic_hw_update(NULL);
 }
 
-static void
-android_display_producer_invalidate(void *opaque)
-{
+static void android_display_producer_invalidate(void* opaque) {
     (void)opaque;
     graphic_hw_invalidate(NULL);
 }
 
-
-namespace {
-    struct DCLExtra : public DisplayChangeListener {
-        DCLExtra() {
-            memset(this, 0, sizeof(*this));
-        }
-
-        QFrameBuffer* fb;
-    };
-}
-
-static DCLExtra* asDcl(DisplayChangeListener* dcl) {
-    return static_cast<DCLExtra*>(dcl);
+static void android_display_producer_detach(void* opaque) {
+    // the framebuffer is being deleted, clean it up in the DCL as well
+    if (const auto dcl = static_cast<DCLExtra*>(opaque)) {
+        dcl->fb = nullptr;
+    }
 }
 
 /* QFrameBuffer client callbacks */
@@ -73,31 +74,32 @@ static DCLExtra* asDcl(DisplayChangeListener* dcl) {
 /* this is called from dpy_update() each time a hardware framebuffer
  * rectangular update was detected. Send this to the QFrameBuffer.
  */
-static void
-android_display_update(DisplayChangeListener* dcl, int x, int y, int w, int h)
-{
-    QFrameBuffer* qfbuff = asDcl(dcl)->fb;
-    qframebuffer_update(qfbuff, x, y, w, h);
+static void android_display_update(DisplayChangeListener* dcl,
+                                   int x,
+                                   int y,
+                                   int w,
+                                   int h) {
+    if (QFrameBuffer* qfbuff = asDcl(dcl)->fb) {
+        qframebuffer_update(qfbuff, x, y, w, h);
+    }
 }
 
-static void
-android_display_switch(DisplayChangeListener* dcl,
-                       struct DisplaySurface* new_surface_unused)
-{
-    QFrameBuffer* qfbuff = asDcl(dcl)->fb;
-    qframebuffer_rotate(qfbuff, 0);
+static void android_display_switch(DisplayChangeListener* dcl,
+                                   DisplaySurface* new_surface_unused) {
+    if (QFrameBuffer* qfbuff = asDcl(dcl)->fb) {
+        qframebuffer_rotate(qfbuff, 0);
+    }
 }
 
-static void
-android_display_refresh(DisplayChangeListener* dcl)
-{
-    QFrameBuffer* qfbuff = asDcl(dcl)->fb;
-    qframebuffer_poll(qfbuff);
+static void android_display_refresh(DisplayChangeListener* dcl) {
+    if (QFrameBuffer* qfbuff = asDcl(dcl)->fb) {
+        qframebuffer_poll(qfbuff);
+    }
 }
 
 static QemuConsole* find_graphic_console() {
     // find the first graphic console (Android emulator has only one usually)
-    for (int i = 0; ; i++) {
+    for (int i = 0;; i++) {
         QemuConsole* const c = qemu_console_lookup_by_index(i);
         if (!c) {
             break;
@@ -112,31 +114,29 @@ static QemuConsole* find_graphic_console() {
 
 static DisplayChangeListenerOps dclOps = {};
 
-bool android_display_init(DisplayState* ds, QFrameBuffer* qf)
-{
+bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
     QemuConsole* const con = find_graphic_console();
     if (!con) {
         return false;
     }
 
-    qframebuffer_set_producer(qf, ds,
+    const auto dcl = new DCLExtra();
+
+    qframebuffer_set_producer(qf, dcl,
                               android_display_producer_check,
                               android_display_producer_invalidate,
-                              NULL); // detach
-
+                              android_display_producer_detach);
 
     /* Replace the display surface with one with the right dimensions */
     pixman_format_code_t format =
             qemu_default_pixman_format(qf->bits_per_pixel, true);
 
-    auto surface =
-            qemu_create_displaysurface_from(
-                qf->width, qf->height, format, qf->pitch, (uint8_t*)qf->pixels);
+    auto surface = qemu_create_displaysurface_from(
+            qf->width, qf->height, format, qf->pitch, (uint8_t*)qf->pixels);
 
     dpy_gfx_replace_surface(con, surface);
 
     /* Register a change listener for it */
-    auto dcl = new DCLExtra();
     dcl->fb = qf;
 
     dclOps.dpy_name = "qemu2-glue";
@@ -149,30 +149,16 @@ bool android_display_init(DisplayState* ds, QFrameBuffer* qf)
     return true;
 }
 
-extern "C"
-bool sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
-{
-    int width = 0;
-    int height = 0;
-    char buf[128] = {0};
+extern "C" bool sdl_display_init(DisplayState* ds,
+                                 int full_screen,
+                                 int no_frame) {
+    (void)full_screen;
+    (void)no_frame;
 
-    EmulatorWindow* emulator = emulator_window_get();
-
-    SkinLayout* skin_layout = emulator_window_get_layout(emulator);
-    if (skin_layout == NULL) {
-        // running in no-window mode
+    EmulatorWindow* const emulator = emulator_window_get();
+    if (emulator->opts->no_window) {
         return true;
     }
 
-    SkinDisplay* disp = skin_layout_get_display(skin_layout);
-    if (disp->rotation & 1) {
-        width = disp->rect.size.h;
-        height = disp->rect.size.w;
-    } else {
-        width = disp->rect.size.w;
-        height = disp->rect.size.h;
-    }
-
-    snprintf(buf, sizeof buf, "width=%d,height=%d", width, height);
     return android_display_init(ds, qframebuffer_fifo_get());
 }
