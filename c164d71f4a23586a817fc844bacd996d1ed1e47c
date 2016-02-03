@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "71c9f878_8b249def",
+        "filename": "android/skin/qt/extended-pages/cellular-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-03T22:50:23Z",
+      "side": 1,
+      "message": "If we\u0027re going to introduce avd-specific settings, perhaps functions like:\n\nvoid saveAvdSetting(const QString \u0026setting, const QVariant \u0026value)\nQVariant getAvdSetting(const QString \u0026setting)\n\nThat way we at least have a standard function for saving/getting avd-specific settings. They could go in namespace Ui::Settings",
+      "range": {
+        "startLine": 66,
+        "startChar": 4,
+        "endLine": 70,
+        "endChar": 49
+      },
+      "revId": "c164d71f4a23586a817fc844bacd996d1ed1e47c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
