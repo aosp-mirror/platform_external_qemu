@@ -122,6 +122,17 @@ public:
         return String();
     }
 
+    virtual std::vector<std::string> envGetAll() const override {
+        std::vector<std::string> res;
+        for (size_t i = 0; i < mEnvPairs.size(); i += 2) {
+            const String& name = mEnvPairs[i];
+            const String& val = mEnvPairs[i + 1];
+            res.push_back(std::string(name.c_str(), name.size())
+                          + '=' + val.c_str());
+        }
+        return res;
+    }
+
     virtual void envSet(StringView varname, StringView varvalue) {
         // First, find if the name is in the array.
         int index = -1;
