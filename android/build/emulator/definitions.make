@@ -70,6 +70,12 @@ local-executable-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LO
 # Location of final (potentially stripped) shared libraries.
 local-shared-library-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR),lib$(BUILD_TARGET_SUFFIX))/$(1)$(call local-build-var,DLLEXT)
 
+# Location of final symbol file based on final executable/shared library path
+local-symbol-install-path = $(subst $(BUILD_OBJS_DIR),$(_BUILD_SYMBOLS_DIR),$(1)).sym
+
+# Location of final external debug file based on final executable/shared library path
+local-ext-debug-install-path = $(subst $(BUILD_OBJS_DIR),$(_BUILD_EXT_DEBUG_DIR),$(1)).$(if $(findstring darwin, $(BUILD_TARGET_OS)),dSYM,debug)
+
 ldlibs_start_whole := -Wl,--whole-archive
 ldlibs_end_whole := -Wl,--no-whole-archive
 ldlibs_force_load := -Wl,-force_load,
@@ -232,16 +238,27 @@ define transform-generated-source
 $(hide) $(PRIVATE_CUSTOM_TOOL)
 endef
 
-define install-stripped-binary
+# Installs a binary to a new destination
+# If required, will strip the binary
+# If required, will install a debuglink
+define install-binary
 _SRC := $(1)
 _SRC1 := $$(notdir $$(_SRC))
 _DST := $(2)
+_DEPS := $$(_SRC)
 _BUILD_EXECUTABLES += $$(_DST)
+_EXT_DEBUG  := $$(call local-ext-debug-install-path,$$(_DST))
+
+ifeq (true,$$(BUILD_GENERATE_SYMBOLS))
+_DEPS += $$(_EXT_DEBUG)
+endif
+
 $$(_DST): PRIVATE_DST := $$(_DST)
 $$(_DST): PRIVATE_SRC := $$(_SRC)
 $$(_DST): PRIVATE_OBJCOPY := $$(BUILD_TARGET_OBJCOPY)
+$$(_DST): PRIVATE_EXT_DEBUG := $$(_EXT_DEBUG)
 $$(_DST): PRIVATE_OBJCOPY_FLAGS := $(3)
-$$(_DST): $$(_SRC)
+$$(_DST): $$(_DEPS)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Install: $$(PRIVATE_DST)"
 ifeq (true,$$(BUILD_STRIP_BINARIES))
@@ -253,67 +270,60 @@ endif  # BUILD_TARGET_OS != darwin
 else  # BUILD_STRIP_BINARIES != true
 	$(hide) cp -f $$(PRIVATE_SRC) $$(PRIVATE_DST)
 endif # BUILD_STRIP_BINARIES != true
+ifeq (true,$$(BUILD_GENERATE_SYMBOLS))
+ifneq (darwin,$$(BUILD_TARGET_OS))
+	$(hide)  cd $$(dir $$(PRIVATE_EXT_DEBUG)) && $$(abspath $$(PRIVATE_OBJCOPY)) --add-gnu-debuglink=$$(notdir $$(PRIVATE_EXT_DEBUG)) $$(abspath $$(PRIVATE_DST))
+endif # BUILD_TARGET_OS == darwin
+endif # BUILD_GENERATE_SYMBOLS
 endef
 
-# Install an existing symbol file into the symbols directory
-#
-define install-symbol
-_INTERMEDIATE_SYMBOL := $(1)
-ifeq (,$$(wildcard $$(_INTERMEDIATE_SYMBOL)))
-$$(error Can not call install-symbol with missing file $$(_INTERMEDIATE_SYMBOL))
+# Builds, then installs external debug information
+define build-install-ext-debug
+_INTERMEDIATE_MODULE := $(1)
+_MODULE := $(2)
+_EXT_DEBUG  := $$(call local-ext-debug-install-path,$$(_MODULE))
+_BUILD_EXT_DEBUG += $$(_EXT_DEBUG)
+$$(_EXT_DEBUG): PRIVATE_EXT_DEBUG := $$(_EXT_DEBUG)
+$$(_EXT_DEBUG): PRIVATE_INTERMEDIATE_MODULE := $$(_INTERMEDIATE_MODULE)
+$$(_EXT_DEBUG): PRIVATE_OBJCOPY := $$(BUILD_TARGET_OBJCOPY)
+$$(_EXT_DEBUG): $$(_INTERMEDIATE_MODULE)
+	@echo "Build external debug: $$(PRIVATE_EXT_DEBUG)"
+	@mkdir -p $$(dir $$(PRIVATE_EXT_DEBUG))
+ifeq (darwin,$(BUILD_TARGET_OS))
+	$(hide) dsymutil --out=$$(PRIVATE_EXT_DEBUG) $$(PRIVATE_INTERMEDIATE_MODULE)
+else
+	$(hide) $$(PRIVATE_OBJCOPY) --only-keep-debug $$(PRIVATE_INTERMEDIATE_MODULE) $$(PRIVATE_EXT_DEBUG)
 endif
-$$(eval _SYMB_HEADER := $$(shell head -n1 $$(_INTERMEDIATE_SYMBOL)))
-$$(eval _SYMB_CODE := $$(word 4,$$(_SYMB_HEADER)))
-$$(eval _SYMB_NAME := $$(word 5,$$(_SYMB_HEADER)))
-$$(eval _SYMB_DEST := $(_BUILD_SYMBOLS_DIR)/$$(_SYMB_NAME)/$$(_SYMB_CODE))
-_BUILD_SYMBOLS += $$(_SYMB_DEST)
-$$(_SYMB_DEST): PRIVATE_INTERMEDIATE_SYMBOL := $$(_INTERMEDIATE_SYMBOL)
-$$(_SYMB_DEST): PRIVATE_SYMBOL_DEST := $$(_SYMB_DEST)
-$$(_SYMB_DEST): $$(_INTERMEDIATE_SYMBOL)
-	@echo "Install Symbol: $$(PRIVATE_SYMBOL_DEST)"
-	@mkdir -p $$(PRIVATE_SYMBOL_DEST)
-	$(hide) cp $$(PRIVATE_INTERMEDIATE_SYMBOL) $$(PRIVATE_SYMBOL_DEST)
 endef
 
 # Builds, then installs a symbol from a module target
-#
 define build-install-symbol
-_MODULE := $(1)
-_INTERMEDIATE_SYMBOL := $$(_MODULE).sym
-_INTERMEDIATE_SYMBOL_DEP := $$(_MODULE)
-_BUILD_INTERMEDIATE_SYMBOLS += $$(_INTERMEDIATE_SYMBOL)
+_INTERMEDIATE_MODULE := $(1)
+_MODULE := $(2)
+_SYMBOL := $$(call local-symbol-install-path,$$(_MODULE))
+_SYMBOL_DEP := $$(_INTERMEDIATE_MODULE)
+_BUILD_SYMBOLS += $$(_SYMBOL)
 
 ifeq (darwin,$(BUILD_TARGET_OS))
-_INTERMEDIATE_DSYM  := $$(_MODULE).dsym
-_INTERMEDIATE_SYMBOL_DEP += $$(_INTERMEDIATE_DSYM)
-$$(_INTERMEDIATE_DSYM): PRIVATE_INTERMEDIATE_DSYM := $$(_INTERMEDIATE_DSYM)
-$$(_INTERMEDIATE_DSYM): PRIVATE_MODULE := $$(_MODULE)
-$$(_INTERMEDIATE_DSYM): $$(_MODULE)
-	@echo "Build dsym: $$(PRIVATE_INTERMEDIATE_DSYM)"
-	$(hide) dsymutil --out=$$(PRIVATE_INTERMEDIATE_DSYM) $$(PRIVATE_MODULE)
+_DSYM := $$(call local-ext-debug-install-path,$$(_MODULE))
+_SYMBOL_DEP += $$(_DSYM)
 endif
 
-$$(_INTERMEDIATE_SYMBOL): PRIVATE_INTERMEDIATE_DSYM := $$(_INTERMEDIATE_DSYM)
-$$(_INTERMEDIATE_SYMBOL): PRIVATE_DUMPSYMS := $$(BUILD_TARGET_DUMPSYMS)
-$$(_INTERMEDIATE_SYMBOL): PRIVATE_MODULE := $$(_MODULE)
+$$(_SYMBOL): PRIVATE_DSYM := $$(_DSYM)
+$$(_SYMBOL): PRIVATE_DUMPSYMS := $$(BUILD_TARGET_DUMPSYMS)
+$$(_SYMBOL): PRIVATE_MODULE := $$(_INTERMEDIATE_MODULE)
 ifeq (darwin,$(BUILD_TARGET_OS))
-$$(_INTERMEDIATE_SYMBOL): PRIVATE_MODULE_DSYM := $$(_INTERMEDIATE_DSYM)
+$$(_SYMBOL): PRIVATE_MODULE_DSYM := $$(_DSYM)
 endif
-$$(_INTERMEDIATE_SYMBOL): PRIVATE_INTERMEDIATE_SYMBOL := $$(_INTERMEDIATE_SYMBOL)
-$$(_INTERMEDIATE_SYMBOL): $$(_INTERMEDIATE_SYMBOL_DEP)
-	@echo "Build Symbol: $$(PRIVATE_INTERMEDIATE_SYMBOL)"
-	@mkdir -p $$(dir $$(PRIVATE_INTERMEDIATE_SYMBOL))
+$$(_SYMBOL): PRIVATE_SYMBOL := $$(_SYMBOL)
+$$(_SYMBOL): $$(_SYMBOL_DEP)
+	@echo "Build Symbol: $$(PRIVATE_SYMBOL)"
+	@mkdir -p $$(dir $$(PRIVATE_SYMBOL))
 ifeq (darwin,$(BUILD_TARGET_OS))
-	$$(PRIVATE_DUMPSYMS) -g $$(PRIVATE_INTERMEDIATE_DSYM) $$(PRIVATE_MODULE) > $$(PRIVATE_INTERMEDIATE_SYMBOL)
+	$$(PRIVATE_DUMPSYMS) -g $$(PRIVATE_DSYM) $$(PRIVATE_MODULE) > $$(PRIVATE_SYMBOL)
 else
-	$(hide) $$(PRIVATE_DUMPSYMS) $$(PRIVATE_MODULE) > $$(PRIVATE_INTERMEDIATE_SYMBOL)
+	$(hide) $$(PRIVATE_DUMPSYMS) $$(PRIVATE_MODULE) > $$(PRIVATE_SYMBOL)
 endif
-	@SYMB_CODE=`head -n1 $$(PRIVATE_INTERMEDIATE_SYMBOL) | cut -d" " -f4` && \
-	SYMB_NAME=`head -n1 $$(PRIVATE_INTERMEDIATE_SYMBOL) | cut -d" " -f5` && \
-	SYMB_DEST=$(_BUILD_SYMBOLS_DIR)/$$$$SYMB_NAME/$$$$SYMB_CODE && \
-	mkdir -p $$$$SYMB_DEST && \
-	echo "Install Symbol: $$$$SYMB_DEST\$$(notdir $$(PRIVATE_INTERMEDIATE_SYMBOL))" && \
-	cp $$(PRIVATE_INTERMEDIATE_SYMBOL) $$$$SYMB_DEST
 endef
 
 
