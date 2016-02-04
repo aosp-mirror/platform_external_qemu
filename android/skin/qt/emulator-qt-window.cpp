@@ -704,6 +704,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, 
         // If this was the result of a zoom, don't change the overall window size, and adjust the
         // scroll bars to reflect the desired focus point.
         if (mNextIsZoom) {
+            mResizeTimer.stop();
             recenterFocusPoint();
         } else {
             mContainer.resize(rect->size());
