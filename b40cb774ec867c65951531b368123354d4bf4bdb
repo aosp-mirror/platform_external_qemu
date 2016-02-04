@@ -22,6 +22,29 @@
       "revId": "b40cb774ec867c65951531b368123354d4bf4bdb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5116b490_e43a6f6a",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T00:32:50Z",
+      "side": 1,
+      "message": "what about instead of this, change the checkbox to be \"Remember my choice and never show the dialog again\"?\nIf the user doesn\u0027t like to send reports, he wouldn\u0027t like to see any crash dialogs too. Vince always prefers this.",
+      "range": {
+        "startLine": 62,
+        "startChar": 42,
+        "endLine": 62,
+        "endChar": 83
+      },
+      "revId": "b40cb774ec867c65951531b368123354d4bf4bdb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
