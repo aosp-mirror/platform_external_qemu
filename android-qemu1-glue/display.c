@@ -49,6 +49,16 @@ android_display_producer_invalidate(void *opaque)
     vga_hw_invalidate();
 }
 
+static void
+android_display_producer_detach(void* opaque)
+{
+    DisplayState* ds = (DisplayState*)opaque;
+    if (ds) {
+        // clean the framebuffer pointer on shutdown
+        ds->opaque = NULL;
+    }
+}
+
 /* QFrameBuffer client callbacks */
 
 /* this is called from dpy_update() each time a hardware framebuffer
@@ -58,21 +68,27 @@ static void
 android_display_update(DisplayState *ds, int x, int y, int w, int h)
 {
     QFrameBuffer* qfbuff = ds->opaque;
-    qframebuffer_update(qfbuff, x, y, w, h);
+    if (qfbuff) {
+        qframebuffer_update(qfbuff, x, y, w, h);
+    }
 }
 
 static void
 android_display_resize(DisplayState *ds)
 {
     QFrameBuffer* qfbuff = ds->opaque;
-    qframebuffer_rotate(qfbuff, 0);
+    if (qfbuff) {
+        qframebuffer_rotate(qfbuff, 0);
+    }
 }
 
 static void
 android_display_refresh(DisplayState *ds)
 {
     QFrameBuffer* qfbuff = ds->opaque;
-    qframebuffer_poll(qfbuff);
+    if (qfbuff) {
+        qframebuffer_poll(qfbuff);
+    }
 }
 
 
@@ -83,7 +99,7 @@ void android_display_init(DisplayState* ds, QFrameBuffer* qf)
     qframebuffer_set_producer(qf, ds,
                               android_display_producer_check,
                               android_display_producer_invalidate,
-                              NULL); // detach
+                              android_display_producer_detach);
 
     /* Replace the display surface with one with the right dimensions */
     qemu_free_displaysurface(ds);
