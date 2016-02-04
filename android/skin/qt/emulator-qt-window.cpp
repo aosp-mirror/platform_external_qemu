@@ -11,15 +11,11 @@
  */
 
 #include <QtCore>
-#include <QAbstractSlider>
 #include <QCheckBox>
 #include <QCursor>
 #include <QDesktopWidget>
 #include <QFileDialog>
-#include <QGraphicsView>
-#include <QGraphicsScene>
 #include <QIcon>
-#include <QInputDialog>
 #include <QLabel>
 #include <QMouseEvent>
 #include <QPainter>
@@ -27,6 +23,7 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QScreen>
+#include <QScrollBar>
 #include <QSemaphore>
 #include <QWindow>
 
@@ -46,8 +43,8 @@
 #include "android/skin/qt/winsys-qt.h"
 #include "android/ui-emu-agent.h"
 
-#if defined(_WIN32)
-#include "android/skin/qt/windows-native-window.h"
+#if defined(__APPLE__)
+#include "android/skin/qt/mac-native-window.h"
 #endif
 
 #define  DEBUG  1
@@ -102,10 +99,10 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     mStartupTimer.setInterval(500); // Half a second
     mStartupTimer.start();
 
-    backing_surface = NULL;
-    batteryState    = NULL;
+    mBackingSurface = NULL;
+    mBatteryState = NULL;
 
-    tool_window = new ToolWindow(this, &mContainer);
+    mToolWindow = new ToolWindow(this, &mContainer);
 
     this->setAcceptDrops(true);
 
@@ -144,20 +141,12 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(mContainer.verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_verticalScrollChanged(int)));
     QObject::connect(mContainer.horizontalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(slot_scrollRangeChanged(int,int)));
     QObject::connect(mContainer.verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(slot_scrollRangeChanged(int,int)));
-    QObject::connect(tool_window, SIGNAL(skinUIEvent(SkinEvent*)), this, SLOT(slot_queueEvent(SkinEvent*)));
-
-    mFlashAnimation.setStartValue(250);
-    mFlashAnimation.setEndValue(0);
-    mFlashAnimation.setEasingCurve(QEasingCurve::Linear);
-    QObject::connect(&mFlashAnimation, SIGNAL(finished()), this, SLOT(slot_animationFinished()));
-    QObject::connect(&mFlashAnimation, SIGNAL(valueChanged(QVariant)), this, SLOT(slot_animationValueChanged(QVariant)));
+    QObject::connect(mToolWindow, SIGNAL(skinUIEvent(SkinEvent*)), this,
+                     SLOT(slot_queueEvent(SkinEvent*)));
 
     QSettings settings;
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
     setOnTop(onTop);
-
-    mResizeTimer.setSingleShot(true);
-    QObject::connect(&mResizeTimer, SIGNAL(timeout()), this, SLOT(slot_resizeDone()));
 
     initErrorDialog(this);
 }
@@ -174,9 +163,9 @@ EmulatorQtWindow* EmulatorQtWindow::getInstance()
 
 EmulatorQtWindow::~EmulatorQtWindow()
 {
-    if (tool_window) {
-        delete tool_window;
-        tool_window = NULL;
+    if (mToolWindow) {
+        delete mToolWindow;
+        mToolWindow = NULL;
     }
 
     delete mMainLoopThread;
@@ -286,7 +275,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent *event)
     crashhandler_exitmode(__FUNCTION__);
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
         // run "adb shell stop" and call queueQuitEvent afterwards
-        tool_window->runAdbShellStopAndQuit();
+        mToolWindow->runAdbShellStopAndQuit();
         event->ignore();
     } else {
         event->accept();
@@ -314,7 +303,7 @@ void EmulatorQtWindow::dropEvent(QDropEvent *event)
     QString url = urls[0].toLocalFile();
 
     if (url.endsWith(".apk") && urls.length() == 1) {
-        tool_window->runAdbInstall(url);
+        mToolWindow->runAdbInstall(url);
         return;
     } else {
 
@@ -328,7 +317,7 @@ void EmulatorQtWindow::dropEvent(QDropEvent *event)
                 return;
             }
         }
-        tool_window->runAdbPush(urls);
+        mToolWindow->runAdbPush(urls);
     }
 }
 
@@ -396,13 +385,12 @@ void EmulatorQtWindow::paintEvent(QPaintEvent *)
 
     // Ensure we actually have a valid bitmap before attempting to
     // rescale
-    if (backing_surface && !backing_surface->bitmap->isNull()) {
-        QRect r(0, 0, backing_surface->w, backing_surface->h);
+    if (mBackingSurface && !mBackingSurface->bitmap->isNull()) {
+        QRect r(0, 0, mBackingSurface->w, mBackingSurface->h);
         // Rescale with smooth transformation to avoid aliasing
-        QImage scaled_bitmap =
-                backing_surface->bitmap->scaled(r.size() * devicePixelRatio(),
-                                                Qt::KeepAspectRatio,
-                                                Qt::SmoothTransformation);
+        QImage scaled_bitmap = mBackingSurface->bitmap->scaled(
+                r.size() * devicePixelRatio(), Qt::KeepAspectRatio,
+                Qt::SmoothTransformation);
         if (!scaled_bitmap.isNull()) {
             scaled_bitmap.setDevicePixelRatio(devicePixelRatio());
             painter.drawImage(r, scaled_bitmap);
@@ -422,15 +410,15 @@ void EmulatorQtWindow::activateWindow()
 void EmulatorQtWindow::raise()
 {
     mContainer.raise();
-    tool_window->raise();
+    mToolWindow->raise();
 }
 
 void EmulatorQtWindow::show()
 {
     mContainer.show();
     QFrame::show();
-    tool_window->show();
-    tool_window->dockMainWindow();
+    mToolWindow->show();
+    mToolWindow->dockMainWindow();
 
     QObject::connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen *)), this, SLOT(slot_screenChanged(QScreen *)));
 }
@@ -446,11 +434,11 @@ void EmulatorQtWindow::setOnTop(bool onTop)
     const bool oldVisible = mContainer.isVisible();
 
     setFrameOnTop(&mContainer, onTop);
-    setFrameOnTop(tool_window, onTop);
+    setFrameOnTop(mToolWindow, onTop);
 
     if (oldVisible) {
         mContainer.show();
-        tool_window->show();
+        mToolWindow->show();
     }
 #endif
 }
@@ -485,7 +473,8 @@ void EmulatorQtWindow::startThread(StartFunction f, int argc, char **argv)
                     "qemu-main-loop-args.txt", arguments);
 
         mMainLoopThread = new MainLoopThread(f, argc, argv);
-        QObject::connect(mMainLoopThread, &QThread::finished, &mContainer, &EmulatorWindowContainer::close);
+        QObject::connect(mMainLoopThread, &QThread::finished, &mContainer,
+                         &EmulatorContainer::close);
         mMainLoopThread->start();
     } else {
         D("mMainLoopThread already started");
@@ -505,9 +494,9 @@ void EmulatorQtWindow::slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoin
 void EmulatorQtWindow::slot_clearInstance()
 {
 #ifndef __APPLE__
-    if (tool_window) {
-        delete tool_window;
-        tool_window = NULL;
+    if (mToolWindow) {
+        delete mToolWindow;
+        mToolWindow = NULL;
     }
 #endif
 
@@ -613,11 +602,11 @@ void EmulatorQtWindow::slot_isWindowFullyVisible(bool *out_value, QSemaphore *se
 
 void EmulatorQtWindow::slot_pollEvent(SkinEvent *event, bool *hasEvent, QSemaphore *semaphore)
 {
-    if (event_queue.isEmpty()) {
+    if (mSkinEventQueue.isEmpty()) {
         *hasEvent = false;
     } else {
         *hasEvent = true;
-        SkinEvent *newEvent = event_queue.dequeue();
+        SkinEvent* newEvent = mSkinEventQueue.dequeue();
         memcpy(event, newEvent, sizeof(SkinEvent));
         delete newEvent;
     }
@@ -626,16 +615,16 @@ void EmulatorQtWindow::slot_pollEvent(SkinEvent *event, bool *hasEvent, QSemapho
 
 void EmulatorQtWindow::slot_queueEvent(SkinEvent *event, QSemaphore *semaphore)
 {
-    const bool firstEvent = event_queue.isEmpty();
+    const bool firstEvent = mSkinEventQueue.isEmpty();
 
     // For the following two events, only the "last" example of said event matters, so ensure
     // that there is only one of them in the queue at a time.
     bool replaced = false;
     if (event->type == kEventScrollBarChanged || event->type == kEventZoomedWindowResized) {
-        for (int i = 0; i < event_queue.size(); i++) {
-            if (event_queue.at(i)->type == event->type) {
-                SkinEvent *toDelete = event_queue.at(i);
-                event_queue.replace(i, event);
+        for (int i = 0; i < mSkinEventQueue.size(); i++) {
+            if (mSkinEventQueue.at(i)->type == event->type) {
+                SkinEvent* toDelete = mSkinEventQueue.at(i);
+                mSkinEventQueue.replace(i, event);
                 delete toDelete;
                 replaced = true;
                 break;
@@ -643,9 +632,10 @@ void EmulatorQtWindow::slot_queueEvent(SkinEvent *event, QSemaphore *semaphore)
         }
     }
 
-    if (!replaced) event_queue.enqueue(event);
+    if (!replaced)
+        mSkinEventQueue.enqueue(event);
 
-    const auto uiAgent = tool_window->getUiEmuAgent();
+    const auto uiAgent = mToolWindow->getUiEmuAgent();
     if (firstEvent && uiAgent && uiAgent->userEvents
             && uiAgent->userEvents->onNewUserEvent) {
         // we know that as soon as emulator starts processing user events
@@ -659,8 +649,8 @@ void EmulatorQtWindow::slot_queueEvent(SkinEvent *event, QSemaphore *semaphore)
 
 void EmulatorQtWindow::slot_releaseBitmap(SkinSurface *s, QSemaphore *semaphore)
 {
-    if (backing_surface == s) {
-        backing_surface = NULL;
+    if (mBackingSurface == s) {
+        mBackingSurface = NULL;
     }
     delete s->bitmap;
     if (semaphore != NULL) semaphore->release();
@@ -675,10 +665,10 @@ void EmulatorQtWindow::slot_requestClose(QSemaphore *semaphore)
 
 void EmulatorQtWindow::slot_requestUpdate(const QRect *rect, QSemaphore *semaphore)
 {
-    QRect r(rect->x()  *backing_surface->w / backing_surface->original_w,
-            rect->y()  *backing_surface->h / backing_surface->original_h,
-            rect->width()  *backing_surface->w / backing_surface->original_w,
-            rect->height()  *backing_surface->h / backing_surface->original_h);
+    QRect r(rect->x() * mBackingSurface->w / mBackingSurface->original_w,
+            rect->y() * mBackingSurface->h / mBackingSurface->original_h,
+            rect->width() * mBackingSurface->w / mBackingSurface->original_w,
+            rect->height() * mBackingSurface->h / mBackingSurface->original_h);
     update(r);
     if (semaphore != NULL) semaphore->release();
 }
@@ -711,7 +701,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, 
     mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-    backing_surface = surface;
+    mBackingSurface = surface;
     if (is_fullscreen) {
         showFullScreen();
     } else {
@@ -721,7 +711,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, 
         // If this was the result of a zoom, don't change the overall window size, and adjust the
         // scroll bars to reflect the desired focus point.
         if (mNextIsZoom) {
-            mResizeTimer.stop();
+            mContainer.stopResizeTimer();
             recenterFocusPoint();
         } else {
             mContainer.resize(rect->size());
@@ -763,17 +753,6 @@ void EmulatorQtWindow::slot_scrollRangeChanged(int min, int max)
                              mContainer.verticalScrollBar()->value());
 }
 
-void EmulatorQtWindow::slot_animationFinished()
-{
-    mOverlay.hideForFlash();
-}
-
-void EmulatorQtWindow::slot_animationValueChanged(const QVariant &value)
-{
-    mOverlay.setFlashValue(value.toDouble() / mFlashAnimation.startValue().toDouble());
-    mOverlay.repaint();
-}
-
 void EmulatorQtWindow::screenshot()
 {
     if (mScreencapProcess.state() != QProcess::NotRunning) {
@@ -782,7 +761,7 @@ void EmulatorQtWindow::screenshot()
     }
 
     QStringList args;
-    QString command = tool_window->getAdbFullPath(&args);
+    QString command = mToolWindow->getAdbFullPath(&args);
     if (command.isNull()) {
         return;
     }
@@ -796,7 +775,6 @@ void EmulatorQtWindow::screenshot()
     // Display the flash animation immediately as feedback - if it fails, an error dialog will
     // indicate as such.
     mOverlay.showAsFlash();
-    mFlashAnimation.start();
 
     mScreencapProcess.start(command, args);
     // TODO(pprabhu): It is a bad idea to call |waitForStarted| from the GUI
@@ -817,7 +795,7 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
     } else {
         // Pull the image from its remote location to the desired location
         QStringList args;
-        QString command = tool_window->getAdbFullPath(&args);
+        QString command = mToolWindow->getAdbFullPath(&args);
         if (command.isNull()) {
             return;
         }
@@ -826,7 +804,7 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
         args << "pull";                 // Pulling a file
         args << REMOTE_SCREENSHOT_FILE; // Which file to pull
 
-        QString fileName = tool_window->getScreenshotSaveFile();
+        QString fileName = mToolWindow->getScreenshotSaveFile();
         if (fileName.isEmpty()) {
             showErrorDialog(tr("The screenshot save location is invalid.<br/>"
                                "Check the settings page and ensure the directory "
@@ -857,23 +835,6 @@ void EmulatorQtWindow::slot_screencapPullFinished(int exitStatus)
                         + QString(er);
         showErrorDialog(msg, tr("Screenshot"));
     }
-}
-
-void EmulatorQtWindow::slot_resizeDone()
-{
-    // This function should never actually be called on Linux, since the timer is never
-    // started on those systems.
-#if defined(__APPLE__) || defined(_WIN32)
-
-    // A hacky way of determining if the user is still holding down for a resize. This queries the
-    // global event state to see if any mouse buttons are held down. If there are, then the user must
-    // not be done resizing yet.
-    if (numHeldMouseButtons() == 0) {
-        doResize(mContainer.size());
-    } else {
-        mResizeTimer.start(500);
-    }
-#endif
 }
 
 // Convert a Qt::Key_XXX code into the corresponding Linux keycode value.
@@ -974,8 +935,8 @@ SkinEvent *EmulatorQtWindow::createSkinEvent(SkinEventType type)
 
 void EmulatorQtWindow::doResize(const QSize &size)
 {
-    if (backing_surface) {
-        QSize newSize(backing_surface->original_w, backing_surface->original_h);
+    if (mBackingSurface) {
+        QSize newSize(mBackingSurface->original_w, mBackingSurface->original_h);
         newSize.scale(size, Qt::KeepAspectRatio);
 
         QRect screenDimensions;
@@ -989,8 +950,10 @@ void EmulatorQtWindow::doResize(const QSize &size)
             newSize.scale(screenDimensions.size(), Qt::KeepAspectRatio);
         }
 
-        double widthScale = (double) newSize.width() / (double) backing_surface->original_w;
-        double heightScale = (double) newSize.height() / (double) backing_surface->original_h;
+        double widthScale =
+                (double)newSize.width() / (double)mBackingSurface->original_w;
+        double heightScale =
+                (double)newSize.height() / (double)mBackingSurface->original_h;
 
         simulateSetScale(MIN(widthScale, heightScale));
     }
@@ -1062,8 +1025,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
         }
     }
 
-    if (grab ||
-         !tool_window->handleQtKeyEvent(event)) {
+    if (grab || !mToolWindow->handleQtKeyEvent(event)) {
         forwardKeyEventToEmulator(type, event);
     }
 }
@@ -1164,9 +1126,12 @@ void EmulatorQtWindow::slot_runOnUiThread(SkinGenericFunction* f, void* data, QS
     if (semaphore) semaphore->release();
 }
 
-bool EmulatorQtWindow::isInZoomMode()
-{
+bool EmulatorQtWindow::isInZoomMode() const {
     return mInZoomMode;
+}
+
+ToolWindow* EmulatorQtWindow::toolWindow() const {
+    return mToolWindow;
 }
 
 void EmulatorQtWindow::toggleZoomMode()
@@ -1225,7 +1190,8 @@ void EmulatorQtWindow::zoomIn(const QPoint &focus, const QPoint &viewportFocus)
     // The below scale = x creates a skin equivalent to calling "window scale x" through the
     // emulator console. At scale = 1, the device should be at a 1:1 pixel mapping with the
     // monitor. We allow going to twice this size.
-    double scale = ((double) size().width() / (double) backing_surface->original_w);
+    double scale =
+            ((double)size().width() / (double)mBackingSurface->original_w);
     double maxZoom = mZoomFactor * 2.0 / scale;
 
     if (scale < 2) {
@@ -1258,7 +1224,8 @@ void EmulatorQtWindow::zoomTo(const QPoint &focus, const QSize &rectSize)
     // The below scale = x creates a skin equivalent to calling "window scale x" through the
     // emulator console. At scale = 1, the device should be at a 1:1 pixel mapping with the
     // monitor. We allow going to twice this size.
-    double scale = ((double) size().width() / (double) backing_surface->original_w);
+    double scale =
+            ((double)size().width() / (double)mBackingSurface->original_w);
 
     // Calculate the "ideal" zoom factor, which would perfectly frame this rectangle, and the
     // "maximum" zoom factor, which makes scale = 1, and pick the smaller one.
