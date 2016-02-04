@@ -41,6 +41,7 @@ namespace Ui {
             CRASHREPORT_PREFERENCE_ALWAYS = 1,
             CRASHREPORT_PREFERENCE_NEVER = 2
         };
+        const QString CRASHREPORT_SAVEPREFERENCE_CHECKED("set/crashReportSavePreferenceChecked");
 
         const QString LOCATION_LATITUDE("loc/latitude");
         const QString LOCATION_LONGITUDE("loc/longitude");
