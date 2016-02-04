@@ -121,7 +121,7 @@ void Win32UnicodeString::append(const wchar_t* str, size_t len) {
     // storage with larger capacity values and exponential increments.
     size_t oldSize = size();
     resize(oldSize + len);
-    memmove(mStr + oldSize, str, len);
+    memmove(mStr + oldSize, str, len * sizeof(wchar_t));
 }
 
 void Win32UnicodeString::append(const Win32UnicodeString& other) {
