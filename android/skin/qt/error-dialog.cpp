@@ -10,12 +10,28 @@
 // GNU General Public License for more details.
 
 #include "android/skin/qt/error-dialog.h"
-#include <QErrorMessage>
+
+#include <QMessageBox>
+
+static QMessageBox* sErrorDialog = nullptr;
+
+void initErrorDialog(QWidget *parent)
+{
+    // This dialog will be deleted when the parent is deleted, which occurs
+    // when the emulator closes.
+
+    if (!sErrorDialog) {
+        sErrorDialog = new QMessageBox(QMessageBox::Warning, "", "",
+                                       QMessageBox::Ok, parent);
+        sErrorDialog->setModal(true);
+    }
+}
 
 void showErrorDialog(const QString& message, const QString& title)
 {
-    QErrorMessage *err = QErrorMessage::qtHandler();
-    err->setModal(true);
-    err->setWindowTitle(title);
-    err->showMessage(message);
+    if (sErrorDialog) {
+        sErrorDialog->setText(message);
+        sErrorDialog->setWindowTitle(title);
+        sErrorDialog->show();
+    }
 }
