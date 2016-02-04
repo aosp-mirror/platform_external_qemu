@@ -31,6 +31,7 @@
 #define I(...) printf(__VA_ARGS__)
 
 using android::base::PathUtils;
+using android::base::StringView;
 using android::base::System;
 using android::base::Uuid;
 
@@ -85,14 +86,24 @@ void CrashReporter::GenerateDumpAndDie(const char* message) {
 }
 
 void CrashReporter::passDumpMessage(const char* message) {
+    attachData(kDumpMessageFileName, message);
+}
+
+void CrashReporter::attachData(StringView name, StringView data) {
+    if (name.empty()) {
+        name = "additional_data";
+    }
+
     // Open the communication file in append mode to make sure we won't
-    // overwrite any existing message (if several threads are crashing at once)
+    // overwrite any existing message (e.g. if several threads are writing at
+    // once)
     // TODO: create a Unicode-aware file class for Windows - it will definitely
     // fail there if the data exchange directory name has some extended chars
     std::ofstream out(
-            PathUtils::join(mDataExchangeDir, kDumpMessageFileName).c_str(),
+            PathUtils::join(mDataExchangeDir, name).c_str(),
             std::ios_base::out | std::ios_base::ate);
-    out << (message ? message : "(none)") << '\n';
+    out.write(data.data(), data.size());
+    out << '\n';
 }
 
 }  // namespace crashreport
@@ -164,6 +175,12 @@ void crashhandler_die_format(const char* format, ...) {
     va_end(args);
 
     crashhandler_die(message);
+}
+
+void crashhandler_add_data(const char* name, const char* data) {
+    if (const auto reporter = CrashReporter::get()) {
+        reporter->attachData(name, data);
+    }
 }
 
 }  // extern "C"
