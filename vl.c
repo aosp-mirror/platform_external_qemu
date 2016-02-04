@@ -108,6 +108,7 @@
 #include "config.h"
 
 #include "android/boot-properties.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/metrics/metrics_reporter.h"
 #include "android/metrics/studio-helper.h"
@@ -4955,6 +4956,9 @@ int run_qemu_main(int argc, const char **argv)
     }
 
     main_loop();
+#ifdef USE_ANDROID_EMU
+    crashhandler_exitmode("after main_loop");
+#endif
     bdrv_close_all();
     pause_all_vcpus();
     res_free();
