@@ -26,7 +26,7 @@ public:
     virtual void init(GlLibrary* glLib);
     GLESv2Context();
     virtual ~GLESv2Context();
-    void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
+    bool setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
     int  getMaxCombinedTexUnits();
     int  getMaxTexUnits();
 
