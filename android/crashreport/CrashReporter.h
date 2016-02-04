@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/crashreport/CrashSystem.h"
+#include "android/base/StringView.h"
 
 namespace android {
 namespace crashreport {
@@ -58,6 +59,11 @@ public:
 
     // Gets a handle to single instance of crash reporter
     static CrashReporter* get();
+
+    // Pass some data to the crash reporter, so in case of a crash it's uploaded
+    // with the dump
+    void attachData(android::base::StringView name,
+                    android::base::StringView data);
 
     // The following two functions write a dump of current process state.
     // Both pass the |message| to the dump writer, so it is sent together with
