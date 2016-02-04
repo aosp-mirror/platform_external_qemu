@@ -11,15 +11,11 @@
  */
 
 #include <QtCore>
-#include <QAbstractSlider>
 #include <QCheckBox>
 #include <QCursor>
 #include <QDesktopWidget>
 #include <QFileDialog>
-#include <QGraphicsView>
-#include <QGraphicsScene>
 #include <QIcon>
-#include <QInputDialog>
 #include <QLabel>
 #include <QMouseEvent>
 #include <QPainter>
@@ -27,6 +23,7 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QScreen>
+#include <QScrollBar>
 #include <QSemaphore>
 #include <QWindow>
 
@@ -44,8 +41,8 @@
 #include "android/skin/qt/winsys-qt.h"
 #include "android/ui-emu-agent.h"
 
-#if defined(_WIN32)
-#include "android/skin/qt/windows-native-window.h"
+#if defined(__APPLE__)
+#include "android/skin/qt/mac-native-window.h"
 #endif
 
 #define  DEBUG  1
@@ -153,9 +150,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QSettings settings;
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
     setOnTop(onTop);
-
-    mResizeTimer.setSingleShot(true);
-    QObject::connect(&mResizeTimer, SIGNAL(timeout()), this, SLOT(slot_resizeDone()));
 
     initErrorDialog(this);
 }
@@ -469,7 +463,7 @@ void EmulatorQtWindow::startThread(StartFunction f, int argc, char **argv)
 {
     if (!mMainLoopThread) {
         mMainLoopThread = new MainLoopThread(f, argc, argv);
-        QObject::connect(mMainLoopThread, &QThread::finished, &mContainer, &EmulatorWindowContainer::close);
+        QObject::connect(mMainLoopThread, &QThread::finished, &mContainer, &EmulatorContainer::close);
         mMainLoopThread->start();
     } else {
         D("mMainLoopThread already started");
@@ -841,23 +835,6 @@ void EmulatorQtWindow::slot_screencapPullFinished(int exitStatus)
     }
 }
 
-void EmulatorQtWindow::slot_resizeDone()
-{
-    // This function should never actually be called on Linux, since the timer is never
-    // started on those systems.
-#if defined(__APPLE__) || defined(_WIN32)
-
-    // A hacky way of determining if the user is still holding down for a resize. This queries the
-    // global event state to see if any mouse buttons are held down. If there are, then the user must
-    // not be done resizing yet.
-    if (numHeldMouseButtons() == 0) {
-        doResize(mContainer.size());
-    } else {
-        mResizeTimer.start(500);
-    }
-#endif
-}
-
 // Convert a Qt::Key_XXX code into the corresponding Linux keycode value.
 // On failure, return -1.
 static int convertKeyCode(int sym)
@@ -1146,9 +1123,14 @@ void EmulatorQtWindow::slot_runOnUiThread(SkinGenericFunction* f, void* data, QS
     if (semaphore) semaphore->release();
 }
 
-bool EmulatorQtWindow::isInZoomMode()
+bool EmulatorQtWindow::isInZoomMode() const
 {
     return mInZoomMode;
+}
+
+ToolWindow* EmulatorQtWindow::toolWindow() const
+{
+    return tool_window;
 }
 
 void EmulatorQtWindow::toggleZoomMode()

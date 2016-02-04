@@ -28,12 +28,7 @@
 #include <QProcess>
 #include <QResizeEvent>
 #include <QRubberBand>
-#include <QScrollArea>
-#include <QScrollBar>
 #include <QSettings>
-#include <QStyle>
-#include <QStyleFactory>
-#include <QTimer>
 #include <QVariantAnimation>
 #include <QWidget>
 
@@ -41,12 +36,9 @@
 #include "android/skin/event.h"
 #include "android/skin/surface.h"
 #include "android/skin/winsys.h"
+#include "android/skin/qt/emulator-container.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/tool-window.h"
-
-#if defined(__APPLE__)
-#include "android/skin/qt/mac-native-window.h"
-#endif
 
 #include <memory>
 
@@ -140,7 +132,10 @@ signals:
     void runOnUiThread(SkinGenericFunction* f, void* data, QSemaphore* semaphore = NULL);
 
 public:
-    bool isInZoomMode();
+    bool isInZoomMode() const;
+    ToolWindow* toolWindow() const;
+
+    void doResize(const QSize &size);
     void panHorizontal(bool left);
     void panVertical(bool up);
     void recenterFocusPoint();
@@ -197,8 +192,6 @@ private slots:
 
     void slot_avdArchWarningMessageAccepted();
 
-    void slot_resizeDone();
-
     void slot_showProcessErrorDialog(QProcess::ProcessError exitStatus);
 
     /*
@@ -227,7 +220,6 @@ private:
     void showAvdArchWarning();
 
     bool mouseInside();
-    void doResize(const QSize &size);
     SkinMouseButtonType getSkinMouseButton(QMouseEvent *event) const;
 
     SkinEvent *createSkinEvent(SkinEventType type);
@@ -247,204 +239,10 @@ private:
     QQueue<SkinEvent*> event_queue;
     ToolWindow *tool_window;
 
-    // Class contained by EmulatorQtWindow so it has access to private members
-    class EmulatorWindowContainer : public QScrollArea
-    {
-    public:
-        explicit EmulatorWindowContainer(EmulatorQtWindow *window)
-            : QScrollArea(), mEmulatorWindow(window)
-        {
-            setFrameShape(QFrame::NoFrame);
-            setWidget(window);
-
-            // The following hints prevent the minimize/maximize/close buttons from appearing.
-            setWindowFlags(Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::Window);
-
-#ifdef __APPLE__
-            // Digging into the Qt source code reveals that if the above flags are set on OSX, the
-            // created window will be given a style mask that removes the resize handles from the
-            // window. The hint below is the specific customization flag that ensures the window
-            // will have resize handles. So, we add the button for now, then immediately disable
-            // it when the window is first shown.
-            setWindowFlags(this->windowFlags() | Qt::WindowMaximizeButtonHint);
-
-            // On OS X the native scrollbars disappear when not in use which
-            // makes the zoomed-in emulator window look unscrollable. Also, due
-            // to the semi-transparent nature of the scrollbar, it will
-            // interfere with the main GL window, causing all kinds of ugly
-            // effects.
-            QStyle *style = QStyleFactory::create("Fusion");
-            if (style) {
-                this->verticalScrollBar()->setStyle(style);
-                this->horizontalScrollBar()->setStyle(style);
-                QObject::connect(this, &QObject::destroyed, [style]{ delete style; });
-            }
-#endif  // __APPLE__
-        }
-
-        ~EmulatorWindowContainer() {
-            // This object is owned directly by |window|.  Avoid circular
-            // destructor calls by explicitly unsetting the widget.
-            takeWidget();
-        }
-
-        bool event(QEvent *e)
-        {
-            // Ignore MetaCall and UpdateRequest events, and don't snap in zoom mode.
-            if (mEmulatorWindow->mInZoomMode ||
-                e->type() == QEvent::MetaCall ||
-                e->type() == QEvent::UpdateRequest) {
-                return QScrollArea::event(e);
-            }
-
-            // Add to the event buffer, but keep it a reasonable size - a few events, such as repaint,
-            // can occur in between resizes but before the release happens
-            mEventBuffer.push_back(e->type());
-            if (mEventBuffer.size() > 8) {
-                mEventBuffer.removeFirst();
-            }
-
-            // Scan to see if a resize event happened recently
-            bool foundResize = false;
-            int i = 0;
-            for (; i < mEventBuffer.size(); i++) {
-                if (mEventBuffer[i] == QEvent::Resize) {
-                    foundResize = true;
-                    i++;
-                    break;
-                }
-            }
-
-            // Determining resize-over is OS specific
-            // Do so by scanning the remainder of the event buffer for specific combinations
-            if (foundResize) {
-
-#ifdef _WIN32
-
-                for (; i < mEventBuffer.size() - 1; i++) {
-                    if (mEventBuffer[i] == QEvent::NonClientAreaMouseButtonRelease) {
-                        mEventBuffer.clear();
-                        mEmulatorWindow->doResize(this->size());
-
-                        // Kill the resize timer to avoid double resizes.
-                        mEmulatorWindow->mResizeTimer.stop();
-                        break;
-                    }
-                }
-
-#elif __linux__
-
-                for (; i < mEventBuffer.size() - 3; i++) {
-                    if (mEventBuffer[i] == QEvent::WindowActivate &&
-                            mEventBuffer[i+1] == QEvent::ActivationChange &&
-                            mEventBuffer[i+2] == QEvent::FocusIn &&
-                            mEventBuffer[i+3] == QEvent::InputMethodQuery) {
-                        mEventBuffer.clear();
-                        mEmulatorWindow->doResize(this->size());
-                        break;
-                    }
-                }
-
-#elif __APPLE__
-
-                if (e->type() == QEvent::NonClientAreaMouseMove ||
-                        e->type() == QEvent::Enter ||
-                        e->type() == QEvent::Leave) {
-                    mEventBuffer.clear();
-                    mEmulatorWindow->doResize(this->size());
-
-                    // Kill the resize timer to avoid double resizes.
-                    mEmulatorWindow->mResizeTimer.stop();
-                }
-
-#endif
-
-            }
-
-            return QScrollArea::event(e);
-        }
-
-        void closeEvent(QCloseEvent *event)
-        {
-            mEmulatorWindow->closeEvent(event);
-        }
-
-        void focusInEvent(QFocusEvent *event)
-        {
-            mEmulatorWindow->tool_window->raise();
-        }
-
-        void hideEvent(QHideEvent *event)
-        {
-            mEmulatorWindow->tool_window->hide();
-        }
-
-        void keyPressEvent(QKeyEvent *event)
-        {
-            mEmulatorWindow->keyPressEvent(event);
-        }
-
-        void keyReleaseEvent(QKeyEvent *event)
-        {
-            mEmulatorWindow->keyReleaseEvent(event);
-        }
-
-        void moveEvent(QMoveEvent *event)
-        {
-            QScrollArea::moveEvent(event);
-            mEmulatorWindow->simulateWindowMoved(event->pos());
-            mEmulatorWindow->tool_window->dockMainWindow();
-        }
-
-        void resizeEvent(QResizeEvent *event)
-        {
-            QScrollArea::resizeEvent(event);
-            mEmulatorWindow->tool_window->dockMainWindow();
-            mEmulatorWindow->simulateZoomedWindowResized(this->viewportSize());
-
-            // To solve some resizing edge cases on OSX/Windows, start a short timer that will
-            // attempt to trigger a resize in case the user's mouse has not entered the window
-            // again.
-#if defined(__APPLE__) || defined(_WIN32)
-            mEmulatorWindow->mResizeTimer.start(500);
-#endif
-        }
-
-        QSize viewportSize() const
-        {
-            QSize output = this->size();
-
-            QScrollBar *vertical = this->verticalScrollBar();
-            output.setWidth(output.width() - (vertical->isVisible() ? vertical->width() : 0));
-
-            QScrollBar *horizontal = this->horizontalScrollBar();
-            output.setHeight(output.height() - (horizontal->isVisible() ? horizontal->height() : 0));
-
-            return output;
-        }
-
-        void showEvent(QShowEvent *event)
-        {
-            // Disable to maximize button on OSX. See the comment in the constructor for an
-            // explanation of why this is necessary.
-#ifdef __APPLE__
-            WId wid;
-            mEmulatorWindow->slot_getWindowId(&wid);
-            nsWindowHideWindowButtons((void *) wid);
-#endif
-
-            mEmulatorWindow->tool_window->show();
-        }
-
-    private:
-        EmulatorQtWindow *mEmulatorWindow;
-        QList<QEvent::Type> mEventBuffer;
-    }; // EmulatorWindowContainer
-
     class EmulatorWindowZoomOverlay : public QFrame
     {
     public:
-        explicit EmulatorWindowZoomOverlay(EmulatorQtWindow *window, EmulatorWindowContainer *container)
+        explicit EmulatorWindowZoomOverlay(EmulatorQtWindow *window, EmulatorContainer *container)
             : QFrame(container),
               mEmulatorWindow(window),
               mContainer(container),
@@ -729,7 +527,7 @@ private:
         }
 
         EmulatorQtWindow *mEmulatorWindow;
-        EmulatorWindowContainer *mContainer;
+        EmulatorContainer *mContainer;
         QRubberBand mRubberBand;
         QPoint mRubberbandOrigin;
         QPixmap mCursor;
@@ -752,7 +550,7 @@ private:
         } mMode;
     };
 
-    EmulatorWindowContainer mContainer;
+    EmulatorContainer mContainer;
     EmulatorWindowZoomOverlay mOverlay;
     QPointF mFocus;
     QPoint mViewportFocus;
@@ -770,8 +568,6 @@ private:
 
     QMessageBox mAvdWarningBox;
     bool mFirstShowEvent;
-
-    QTimer mResizeTimer;
 };
 
 struct SkinSurface {
