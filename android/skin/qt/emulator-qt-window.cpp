@@ -156,6 +156,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
 
     mResizeTimer.setSingleShot(true);
     QObject::connect(&mResizeTimer, SIGNAL(timeout()), this, SLOT(slot_resizeDone()));
+
+    initErrorDialog(this);
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr()
