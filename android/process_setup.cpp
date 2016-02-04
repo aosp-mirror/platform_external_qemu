@@ -16,7 +16,10 @@
 #include "android/base/system/System.h"
 #include "android/curl-support.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/crashreport/CrashReporter.h"
 #include "android/utils/sockets.h"
+
+#include <string>
 
 using android::base::PathUtils;
 using android::base::String;
@@ -24,16 +27,30 @@ using android::base::System;
 
 // The order of initialization here can be very finicky. Handle with care, and
 // leave hints about any ordering constraints via comments.
-void process_early_setup() {
-    // Initializae sockets first so curl/crash processor can use sockets.
+void process_early_setup(int argc, char** argv) {
+    // Initialize sockets first so curl/crash processor can use sockets.
     // Does not create any threads.
-#ifdef _WIN32
     android_socket_init();
-#endif
 
     // Catch crashes in everything.
     // This promises to not launch any threads...
-    if (!crashhandler_init()) {
+    if (crashhandler_init()) {
+        std::string arguments = "===== Command-line arguments =====\n";
+        for (int i = 0; i < argc; ++i) {
+            arguments += argv[i];
+            arguments += '\n';
+        }
+
+        arguments += "\n===== Environment =====\n";
+        const auto allEnv = System::get()->envGetAll();
+        for (const std::string& env : allEnv) {
+            arguments += env;
+            arguments += '\n';
+        }
+
+        android::crashreport::CrashReporter::get()->attachData(
+                    "command-line-and-environment.txt", arguments);
+    } else {
         LOG(VERBOSE) << "Crash handling not initialized";
     }
 
