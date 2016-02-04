@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "11e51cf3_1ef9a96d",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-04T11:31:10Z",
+      "side": 1,
+      "message": "nit: ordering :)",
+      "revId": "583b3e17cf534e1e740087a21888ce47c473140f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f1cc087f_e51c7056",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-04T11:31:10Z",
+      "side": 1,
+      "message": "nit: Can you explain the purpose of |name| here?",
+      "revId": "583b3e17cf534e1e740087a21888ce47c473140f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d1cf0471_c43690da",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-04T11:31:10Z",
+      "side": 1,
+      "message": "ah, this probably needs to be documented, just to avoid surprises.",
+      "revId": "583b3e17cf534e1e740087a21888ce47c473140f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
