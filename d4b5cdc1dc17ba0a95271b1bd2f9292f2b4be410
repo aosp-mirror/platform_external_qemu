@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f1b5e8da_7d62b3bb",
+        "filename": "android/skin/qt/ScreenCapturer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-04T13:27:48Z",
+      "side": 1,
+      "message": "May I suggest you move all the capture logic that doesn\u0027t directly depend on Qt into AndroidEmu? I like the idea of separating the logic and UI for testability purposes.",
+      "revId": "d4b5cdc1dc17ba0a95271b1bd2f9292f2b4be410",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b1d6100b_232f347e",
+        "filename": "android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-04T13:27:48Z",
+      "side": 1,
+      "message": "nit: please remove comment line.",
+      "revId": "d4b5cdc1dc17ba0a95271b1bd2f9292f2b4be410",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
