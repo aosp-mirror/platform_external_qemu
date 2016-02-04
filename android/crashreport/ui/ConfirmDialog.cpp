@@ -61,7 +61,10 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mSavePreference =
         new QCheckBox(tr("Remember my choice for future crashes. "
                          "(Can reset in the emulator settings menu)"));
-    mSavePreference->setChecked(true);
+    QSettings settings;
+    bool save_preference_checked =
+        settings.value(Ui::Settings::CRASHREPORT_SAVEPREFERENCE_CHECKED, 1).toInt();
+    mSavePreference->setChecked(save_preference_checked);
     mSavePreference->show();
 
     mSuggestionText = new QLabel(tr("Suggestion(s) based on crash info:\n\n"));
@@ -153,15 +156,16 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
 
     mainLayout->addWidget(mComment, 4, 0, 1, 3);
 
-    mainLayout->addWidget(mDetailsButtonBox, 5, 0, Qt::AlignLeft);
-    mainLayout->addWidget(mYesNoButtonBox, 5, 1, 1, 2);
+    mainLayout->addWidget(mSavePreference, 5, 0, 1, 3);
 
-    mainLayout->addWidget(mExtension, 6, 0, 1, 3);
+    mainLayout->addWidget(mDetailsButtonBox, 6, 0, Qt::AlignLeft);
+    mainLayout->addWidget(mYesNoButtonBox, 6, 1, 1, 2);
 
-    mainLayout->addWidget(mProgressText, 7, 0, 1, 3);
-    mainLayout->addWidget(mProgress, 8, 0, 1, 3);
+    mainLayout->addWidget(mExtension, 7, 0, 1, 3);
 
-    mainLayout->addWidget(mSavePreference, 9, 0, 1, 3);
+    mainLayout->addWidget(mProgressText, 8, 0, 1, 3);
+    mainLayout->addWidget(mProgress, 9, 0, 1, 3);
+
 
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
     setLayout(mainLayout);
@@ -280,6 +284,8 @@ static void savePref(bool checked, Ui::Settings::CRASHREPORT_PREFERENCE_VALUE v)
     QSettings settings;
     settings.setValue(Ui::Settings::CRASHREPORT_PREFERENCE,
             checked ? v : Ui::Settings::CRASHREPORT_PREFERENCE_ASK);
+    settings.setValue(Ui::Settings::CRASHREPORT_SAVEPREFERENCE_CHECKED,
+                      checked);
 }
 
 void ConfirmDialog::sendReport() {

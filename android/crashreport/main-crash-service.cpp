@@ -59,6 +59,7 @@ static bool displayConfirmDialog(
     } else if (reportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_NEVER) {
         return false;
     }
+    return false;
 }
 
 static void InitQt(int argc, char** argv) {
