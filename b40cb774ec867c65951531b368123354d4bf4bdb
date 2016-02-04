@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d19b848b_21eb8e9b",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-04T00:34:32Z",
+      "side": 1,
+      "message": "Right now, there\u0027s no way. I\u0027ve been debugging it by using other keys as I go along. It shouldn\u0027t be too hard to surface this setting. I\u0027ll look into it.",
+      "parentUuid": "d19b848b_415a127a",
+      "range": {
+        "startLine": 162,
+        "startChar": 4,
+        "endLine": 163,
+        "endChar": 54
+      },
+      "revId": "b40cb774ec867c65951531b368123354d4bf4bdb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5116b490_e43a6f6a",
         "filename": "android/crashreport/ui/ConfirmDialog.cpp",
         "patchSetId": 9
