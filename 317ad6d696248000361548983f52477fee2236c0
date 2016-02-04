@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "11f7dc9a_4ac43695",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-04T00:08:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3115c084_3998338d",
+      "range": {
+        "startLine": 83,
+        "startChar": 11,
+        "endLine": 83,
+        "endChar": 30
+      },
+      "revId": "317ad6d696248000361548983f52477fee2236c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b121b0e4_c2892651",
         "filename": "android/crashreport/ui/ConfirmDialog.cpp",
         "patchSetId": 5
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "31fce07c_d6dd7133",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-04T00:08:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b121b0e4_c2892651",
+      "range": {
+        "startLine": 295,
+        "startChar": 22,
+        "endLine": 295,
+        "endChar": 49
+      },
+      "revId": "317ad6d696248000361548983f52477fee2236c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b121b0e4_a26fd23e",
         "filename": "android/skin/qt/winsys-qt.cpp",
         "patchSetId": 5
@@ -59,6 +107,30 @@
       "writtenOn": "2016-02-03T23:30:08Z",
       "side": 1,
       "message": "really? :)",
+      "range": {
+        "startLine": 231,
+        "startChar": 0,
+        "endLine": 231,
+        "endChar": 46
+      },
+      "revId": "317ad6d696248000361548983f52477fee2236c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31c3005d_8e83cfc1",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-04T00:08:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b121b0e4_a26fd23e",
       "range": {
         "startLine": 231,
         "startChar": 0,
