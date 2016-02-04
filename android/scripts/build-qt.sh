@@ -65,7 +65,7 @@ QT_SRC_PACKAGE=$QT_SRC_NAME.tar.xz
 QT_SRC_URL=http://download.qt.io/archive/qt/5.5/5.5.0/single/$QT_SRC_PACKAGE
 QT_SRC_PACKAGE_SHA1=4409ef12d1017a9b5e6733ea27596a6ca637a88c
 
-QT_SRC_PATCH_TARBALL=${QT_SRC_NAME}-patches.tar.xz
+QT_SRC_PATCH_FOLDER=${QT_SRC_NAME}-patches
 
 if [ -z "$OPT_DOWNLOAD" -a ! -f "$ARCHIVE_DIR/$QT_SRC_PACKAGE" ]; then
     if [ -z "$OPT_DOWNLOAD" ]; then
@@ -246,9 +246,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             unpack_archive "$ARCHIVE_DIR/$QT_SRC_PACKAGE" "$BUILD_SRC_DIR" ||
                 panic "Failed to unpack source package: $QT_SRC_PACKAGE"
 
-            PATCHES_TARBALL=$(program_directory)/../dependencies/$QT_SRC_PATCH_TARBALL
-            unpack_archive "$PATCHES_TARBALL" "$BUILD_SRC_DIR" ||
-                panic "Failed to unpack Qt source patch tarball: $PATCHES_TARBALL"
+            PATCHES_FOLDER="$(program_directory)/../dependencies/$QT_SRC_PATCH_FOLDER"
+            cp -R "$PATCHES_FOLDER" "$BUILD_SRC_DIR" ||
+                panic "Failed to copy Qt patches: $PATCHES_FOLDER"
 
             PATCHES_DIR=$BUILD_SRC_DIR/${QT_SRC_NAME}-patches
             if [ ! -d "$PATCHES_DIR" ]; then
