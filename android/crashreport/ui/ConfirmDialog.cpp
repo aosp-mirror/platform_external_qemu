@@ -61,7 +61,7 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mSavePreference =
         new QCheckBox(tr("Remember my choice for future crashes. "
                          "(Can reset in the emulator settings menu)"));
-    mSavePreference->setChecked(true);
+    mSavePreference->setChecked(false);
     mSavePreference->show();
 
     mSuggestionText = new QLabel(tr("Suggestion(s) based on crash info:\n\n"));
