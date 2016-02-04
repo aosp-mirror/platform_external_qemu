@@ -160,6 +160,29 @@
       "revId": "7a4e9e4eb933118b04e14374c68bcc03598851e2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3115c084_cb3946cb",
+        "filename": "vl-android.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 3857,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T06:58:45Z",
+      "side": 1,
+      "message": "please add the same thing to qemu2\u0027s vl.c",
+      "range": {
+        "startLine": 3855,
+        "startChar": 4,
+        "endLine": 3857,
+        "endChar": 18
+      },
+      "revId": "7a4e9e4eb933118b04e14374c68bcc03598851e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
