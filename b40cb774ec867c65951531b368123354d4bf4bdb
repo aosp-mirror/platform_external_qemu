@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d19b848b_415a127a",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-02-04T00:26:25Z",
+      "side": 1,
+      "message": "How does the user disable the auto send or check that status of this setting?\n\nDoes this need to be surfaced in our emulator settings pane?",
+      "range": {
+        "startLine": 162,
+        "startChar": 4,
+        "endLine": 163,
+        "endChar": 54
+      },
+      "revId": "b40cb774ec867c65951531b368123354d4bf4bdb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
