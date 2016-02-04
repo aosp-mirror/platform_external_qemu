@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "d19b848b_848a6843",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-04T15:42:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11f7dc9a_68c13a5c",
+      "range": {
+        "startLine": 149,
+        "startChar": 4,
+        "endLine": 149,
+        "endChar": 46
+      },
+      "revId": "7a4e9e4eb933118b04e14374c68bcc03598851e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "71c9f878_a055f3fd",
         "filename": "android/crashreport/ui/ConfirmDialog.cpp",
         "patchSetId": 12
@@ -59,6 +83,30 @@
       "writtenOn": "2016-02-04T06:57:48Z",
       "side": 1,
       "message": "why?",
+      "range": {
+        "startLine": 273,
+        "startChar": 0,
+        "endLine": 273,
+        "endChar": 0
+      },
+      "revId": "7a4e9e4eb933118b04e14374c68bcc03598851e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31c3005d_09dfb958",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-04T15:42:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "71c9f878_a055f3fd",
       "range": {
         "startLine": 273,
         "startChar": 0,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "b121b0e4_92a2d9b9",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-04T15:42:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5116b490_073ead60",
+      "range": {
+        "startLine": 288,
+        "startChar": 8,
+        "endLine": 288,
+        "endChar": 19
+      },
+      "revId": "7a4e9e4eb933118b04e14374c68bcc03598851e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5116b490_e73a716a",
         "filename": "android/crashreport/ui/ConfirmDialog.cpp",
         "patchSetId": 12
@@ -105,6 +177,30 @@
       "writtenOn": "2016-02-04T06:57:48Z",
       "side": 1,
       "message": "helper function?",
+      "range": {
+        "startLine": 294,
+        "startChar": 0,
+        "endLine": 298,
+        "endChar": 54
+      },
+      "revId": "7a4e9e4eb933118b04e14374c68bcc03598851e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31c3005d_499b7199",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-04T15:42:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5116b490_e73a716a",
       "range": {
         "startLine": 294,
         "startChar": 0,
@@ -163,6 +259,30 @@
     },
     {
       "key": {
+        "uuid": "d19b848b_a4a44cd6",
+        "filename": "android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-04T15:42:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d19b848b_2406fca6",
+      "range": {
+        "startLine": 235,
+        "startChar": 3,
+        "endLine": 235,
+        "endChar": 22
+      },
+      "revId": "7a4e9e4eb933118b04e14374c68bcc03598851e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3115c084_cb3946cb",
         "filename": "vl-android.c",
         "patchSetId": 12
@@ -174,6 +294,30 @@
       "writtenOn": "2016-02-04T06:58:45Z",
       "side": 1,
       "message": "please add the same thing to qemu2\u0027s vl.c",
+      "range": {
+        "startLine": 3855,
+        "startChar": 4,
+        "endLine": 3857,
+        "endChar": 18
+      },
+      "revId": "7a4e9e4eb933118b04e14374c68bcc03598851e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d19b848b_07eadacc",
+        "filename": "vl-android.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 3857,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-04T15:42:00Z",
+      "side": 1,
+      "message": "CL is up for qemu2",
+      "parentUuid": "3115c084_cb3946cb",
       "range": {
         "startLine": 3855,
         "startChar": 4,
