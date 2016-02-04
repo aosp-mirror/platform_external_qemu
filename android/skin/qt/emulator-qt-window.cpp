@@ -34,6 +34,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/crashreport/CrashReporter.h"
 #include "android/cpu_accelerator.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulator-window.h"
@@ -474,6 +475,15 @@ void EmulatorQtWindow::showMinimized()
 void EmulatorQtWindow::startThread(StartFunction f, int argc, char **argv)
 {
     if (!mMainLoopThread) {
+        // pass the QEMU main thread's arguments into the crash handler
+        std::string arguments = "===== QEMU main loop arguments =====\n";
+        for (int i = 0; i < argc; ++i) {
+            arguments += argv[i];
+            arguments += '\n';
+        }
+        android::crashreport::CrashReporter::get()->attachData(
+                    "qemu-main-loop-args.txt", arguments);
+
         mMainLoopThread = new MainLoopThread(f, argc, argv);
         QObject::connect(mMainLoopThread, &QThread::finished, &mContainer, &EmulatorWindowContainer::close);
         mMainLoopThread->start();
