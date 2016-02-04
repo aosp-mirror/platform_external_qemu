@@ -21,6 +21,7 @@
 #include "GLESpointer.h"
 #include "objectNameManager.h"
 #include "emugl/common/mutex.h"
+#include "PointerValidate.h"
 #include <string>
 
 typedef std::map<GLenum,GLESpointer*>  ArraysMap;
@@ -140,7 +141,7 @@ public:
     void  enableArr(GLenum arr,bool enable);
     const GLvoid* setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize = false);
     virtual const GLESpointer* getPointer(GLenum arrType);
-    virtual void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) = 0;
+    virtual bool setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) = 0;
     void bindBuffer(GLenum target,GLuint buffer);
     void unbindBuffer(GLuint buffer);
     bool isBuffer(GLuint buffer);
@@ -181,6 +182,8 @@ public:
     virtual bool glGetFloatv(GLenum pname, GLfloat *params);
     virtual bool glGetFixedv(GLenum pname, GLfixed *params);
 
+    bool validatePointer(const void* ptr) { return m_pointerValidate.isValid(ptr); }
+
 protected:
     static void buildStrings(const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
     virtual bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) = 0;
@@ -216,6 +219,8 @@ private:
     static std::string    s_glVendor;
     static std::string    s_glRenderer;
     static std::string    s_glVersion;
+
+    PointerValidate       m_pointerValidate;
 };
 
 #endif

@@ -262,6 +262,13 @@ const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsi
         m_map[arrType]->setBuffer(size,type,stride,vbo,bufferName,offset,normalize);
         return  static_cast<const unsigned char*>(vbo->getData()) +  offset;
     }
+    // If we are setting a pointer, make sure it is a valid pointer
+    // Notice that if we use vbo, its data doesn't have to be valid at this
+    // point...
+    if (!validatePointer(data)) {
+        setGLerror(GL_INVALID_VALUE);
+        return nullptr;
+    }
     m_map[arrType]->setArray(size,type,stride,data,normalize);
     return data;
 }

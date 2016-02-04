@@ -644,7 +644,7 @@ GL_APICALL void  GL_APIENTRY glDrawArrays(GLenum mode, GLint first, GLsizei coun
     ctx->drawValidate();
 
     GLESConversionArrays tmpArrs;
-    ctx->setupArraysPointers(tmpArrs,first,count,0,NULL,true);
+    SET_ERROR_IF(!ctx->setupArraysPointers(tmpArrs, first, count, 0, NULL, true), GL_INVALID_OPERATION)
 
     ctx->validateAtt0PreDraw(count);
 
@@ -677,13 +677,14 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
         const unsigned char* buf = static_cast<unsigned char *>(ctx->getBindedBuffer(GL_ELEMENT_ARRAY_BUFFER));
         indices = buf + SafeUIntFromPointer(elementsIndices);
     }
+    SET_ERROR_IF(!ctx->validatePointer(indices), GL_INVALID_OPERATION)
 
     GLESConversionArrays tmpArrs;
-    ctx->setupArraysPointers(tmpArrs,0,count,type,indices,false);
+    SET_ERROR_IF(!ctx->setupArraysPointers(tmpArrs,0,count,type,indices,false), GL_INVALID_OPERATION)
 
     int maxIndex = ctx->findMaxIndex(count, type, indices);
     ctx->validateAtt0PreDraw(maxIndex);
-    
+
     //See glDrawArrays
     if (mode==GL_POINTS) {
         ctx->dispatcher().glEnable(GL_POINT_SPRITE);

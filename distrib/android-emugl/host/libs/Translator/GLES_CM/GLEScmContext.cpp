@@ -103,7 +103,7 @@ void GLEScmContext::setupArrayPointerHelper(GLESConversionArrays& cArrs,GLint fi
         }
 }
 
-void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) {
+bool GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) {
     ArraysMap::iterator it;
     m_pointsIndex = -1;
 
@@ -114,6 +114,7 @@ void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
         GLESpointer* p = (*it).second;
         if(!isArrEnabled(array_id)) continue;
         if(array_id == GL_TEXTURE_COORD_ARRAY) continue; //handling textures later
+        if (!validatePointer(p->getData())) return false;
         setupArrayPointerHelper(cArrs,first,count,type,indices,direct,array_id,p);
     }
 
@@ -133,11 +134,14 @@ void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
         GLenum array_id   = GL_TEXTURE_COORD_ARRAY;
         GLESpointer* p = m_map[array_id];
         if(!isArrEnabled(array_id)) continue;
+        if (!validatePointer(p->getData())) return false;
         setupArrayPointerHelper(cArrs,first,count,type,indices,direct,array_id,p);
     }
 
     setClientActiveTexture(activeTexture);
     s_glDispatch.glClientActiveTexture(activeTexture);
+
+    return true;
 }
 
 void  GLEScmContext::drawPointsData(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices_in,bool isElemsDraw) {
