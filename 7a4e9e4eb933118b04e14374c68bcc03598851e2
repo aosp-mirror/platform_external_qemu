@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3115c084_ab6dead8",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T06:57:48Z",
+      "side": 1,
+      "message": "nit: sort, please",
+      "range": {
+        "startLine": 24,
+        "startChar": 9,
+        "endLine": 24,
+        "endChar": 40
+      },
+      "revId": "7a4e9e4eb933118b04e14374c68bcc03598851e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11f7dc9a_68c13a5c",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T06:57:48Z",
+      "side": 1,
+      "message": "auto",
+      "range": {
+        "startLine": 149,
+        "startChar": 4,
+        "endLine": 149,
+        "endChar": 46
+      },
+      "revId": "7a4e9e4eb933118b04e14374c68bcc03598851e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "71c9f878_a055f3fd",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T06:57:48Z",
+      "side": 1,
+      "message": "why?",
+      "range": {
+        "startLine": 273,
+        "startChar": 0,
+        "endLine": 273,
+        "endChar": 0
+      },
+      "revId": "7a4e9e4eb933118b04e14374c68bcc03598851e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5116b490_073ead60",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T06:57:48Z",
+      "side": 1,
+      "message": "while you\u0027re here...\nQString msg \u003d tr(\"ReportId:\") + ...",
+      "range": {
+        "startLine": 288,
+        "startChar": 8,
+        "endLine": 288,
+        "endChar": 19
+      },
+      "revId": "7a4e9e4eb933118b04e14374c68bcc03598851e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5116b490_e73a716a",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T06:57:48Z",
+      "side": 1,
+      "message": "helper function?",
+      "range": {
+        "startLine": 294,
+        "startChar": 0,
+        "endLine": 298,
+        "endChar": 54
+      },
+      "revId": "7a4e9e4eb933118b04e14374c68bcc03598851e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31c3005d_49f7f1f2",
+        "filename": "android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T06:57:48Z",
+      "side": 1,
+      "message": "auto",
+      "range": {
+        "startLine": 73,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 46
+      },
+      "revId": "7a4e9e4eb933118b04e14374c68bcc03598851e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d19b848b_2406fca6",
+        "filename": "android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T06:57:48Z",
+      "side": 1,
+      "message": "please don\u0027t",
+      "range": {
+        "startLine": 235,
+        "startChar": 3,
+        "endLine": 235,
+        "endChar": 22
+      },
+      "revId": "7a4e9e4eb933118b04e14374c68bcc03598851e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
