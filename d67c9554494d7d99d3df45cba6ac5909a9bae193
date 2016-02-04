@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f127a8f2_d1061369",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/PointerValidate.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T06:44:55Z",
+      "side": 1,
+      "message": "we might also want to check the pointer alignment later",
+      "range": {
+        "startLine": 42,
+        "startChar": 22,
+        "endLine": 42,
+        "endChar": 29
+      },
+      "revId": "d67c9554494d7d99d3df45cba6ac5909a9bae193",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3115c084_6b5c922f",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/PointerValidate.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T06:44:55Z",
+      "side": 1,
+      "message": "when we start passing the pointer size, we might also want to read more bytes here to check if it\u0027s readable enough",
+      "range": {
+        "startLine": 49,
+        "startChar": 31,
+        "endLine": 49,
+        "endChar": 33
+      },
+      "revId": "d67c9554494d7d99d3df45cba6ac5909a9bae193",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5116b490_672fa132",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/GLEScontext.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T06:44:55Z",
+      "side": 1,
+      "message": "const?",
+      "range": {
+        "startLine": 185,
+        "startChar": 41,
+        "endLine": 185,
+        "endChar": 42
+      },
+      "revId": "d67c9554494d7d99d3df45cba6ac5909a9bae193",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3115c084_cb7026b1",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/PointerValidate.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T06:44:55Z",
+      "side": 1,
+      "message": "pragma once, please",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 25
+      },
+      "revId": "d67c9554494d7d99d3df45cba6ac5909a9bae193",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31fce07c_89a0eec3",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/PointerValidate.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T06:44:55Z",
+      "side": 1,
+      "message": "should the function be const?\nalso, is this class thread-safe and is it possible that two threads try writing into it together?",
+      "range": {
+        "startLine": 24,
+        "startChar": 32,
+        "endLine": 24,
+        "endChar": 34
+      },
+      "revId": "d67c9554494d7d99d3df45cba6ac5909a9bae193",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
