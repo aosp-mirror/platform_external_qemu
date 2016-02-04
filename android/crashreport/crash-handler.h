@@ -43,6 +43,10 @@ void crashhandler_die(const char* message) __attribute__((noinline));
 // A variadic overload with C interface
 void crashhandler_die_format(const char* format, ...);
 
+// Append a string to the crash report. One is free to free both of the
+// parameters after the call - function doesn't take ownership of them.
+void crashhandler_add_string(const char* name, const char* string);
+
 // Track crashes on exit.
 void crashhandler_exitmode(const char* message);
 
