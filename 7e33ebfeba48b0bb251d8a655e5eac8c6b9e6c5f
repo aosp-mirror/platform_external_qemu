@@ -45,6 +45,30 @@
       "revId": "7e33ebfeba48b0bb251d8a655e5eac8c6b9e6c5f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31fce07c_e25c27d0",
+        "filename": "android/scripts/build-qt.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-04T22:50:55Z",
+      "side": 1,
+      "message": "It\u0027s copying the entire folder (like clicking a folder in explorer and dragging it to new location :))",
+      "parentUuid": "d1c4647f_3fb96f90",
+      "range": {
+        "startLine": 250,
+        "startChar": 20,
+        "endLine": 250,
+        "endChar": 34
+      },
+      "revId": "7e33ebfeba48b0bb251d8a655e5eac8c6b9e6c5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
