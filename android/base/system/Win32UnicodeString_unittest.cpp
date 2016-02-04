@@ -94,5 +94,52 @@ TEST(Win32UnicodeString, convertToUtf8) {
     }
 }
 
+TEST(Win32UnicodeString, appending) {
+    static const struct {
+        const wchar_t* first;
+        const wchar_t* second;
+        const wchar_t* result;
+    } kData[] = {
+        {L"foo", L"bar", L"foobar"},
+        {L"", L"bar", L"bar"},
+        {L"foo", L"", L"foo"},
+        {L"foobar", L" with ice cream", L"foobar with ice cream"},
+    };
+
+    for (const auto& data : kData) {
+        {
+            // Test appending Win32UnicodeString
+            Win32UnicodeString first(data.first);
+            Win32UnicodeString second(data.second);
+
+            first.append(second);
+            EXPECT_EQ(wcslen(data.result), first.size());
+            EXPECT_STREQ(data.result, first.c_str());
+        }
+        {
+            // Test appending wchar_t*
+            Win32UnicodeString str(data.first);
+            str.append(data.second);
+            EXPECT_EQ(wcslen(data.result), str.size());
+            EXPECT_STREQ(data.result, str.c_str());
+        }
+        {
+            // Test appending wchar_t* with length
+            Win32UnicodeString str(data.first);
+            str.append(data.second, wcslen(data.second));
+            EXPECT_EQ(wcslen(data.result), str.size());
+            EXPECT_STREQ(data.result, str.c_str());
+        }
+        if (wcslen(data.second) > 0) {
+            // Test appending with fewer characters
+            Win32UnicodeString str(data.first);
+            str.append(data.second, wcslen(data.second) - 1);
+            EXPECT_EQ(wcslen(data.result) - 1, str.size());
+            std::wstring choppedResult(data.result, wcslen(data.result) - 1);
+            EXPECT_STREQ(choppedResult.c_str(), str.c_str());
+        }
+    }
+}
+
 }  // namespace base
 }  // namespace android
