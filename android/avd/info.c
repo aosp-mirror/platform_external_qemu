@@ -1152,7 +1152,17 @@ avdInfo_initHwConfig( AvdInfo*  i, AndroidHwConfig*  hw )
     // for api <= 10, there is no multi-touch support
     // and GUI won't respond as a result;
     // force it to be "touch"
-    if (i->apiLevel <= 10) {
+    // for api <= 21, the kernel is not updated to
+    // support multi-touch yet; so just force touch
+    // bug: https://code.google.com/p/android/issues/detail?id=199289
+    //
+    // TODO: once system images for api 21 and api 19
+    // are updated to support multitouch, revert this
+    // change
+    // tracking bug to revert this change:
+    // https://code.google.com/p/android/issues/detail?id=200332
+    //
+    if (i->apiLevel <= 21) {
         hw->hw_screen = ASTRDUP("touch");
     }
 
