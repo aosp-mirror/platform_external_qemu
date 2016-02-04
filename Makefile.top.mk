@@ -237,11 +237,4 @@ BUILD_TARGET_SUFFIX := 64
 include $(LOCAL_PATH)/Makefile.common.mk
 endif
 
-##
-##   BUILD_PREBUILT_SYMBOLS
-##
-ifeq (true,$(BUILD_GENERATE_SYMBOLS))
-$(foreach prebuilt_symbol,$(BUILD_PREBUILT_SYMBOLS),$(eval $(call install-symbol,\
-    $(prebuilt_symbol))))
-endif
 ## VOILA!!
