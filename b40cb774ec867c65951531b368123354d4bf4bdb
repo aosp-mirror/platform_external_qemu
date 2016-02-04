@@ -2,6 +2,98 @@
   "comments": [
     {
       "key": {
+        "uuid": "f127a8f2_3f777bdd",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-04T00:49:02Z",
+      "side": 1,
+      "message": "check that |out| is valid.\nWe don\u0027t want to crash here ;)",
+      "range": {
+        "startLine": 86,
+        "startChar": 4,
+        "endLine": 86,
+        "endChar": 7
+      },
+      "revId": "b40cb774ec867c65951531b368123354d4bf4bdb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f127a8f2_5f76afdd",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-04T00:49:02Z",
+      "side": 1,
+      "message": "nit: clang-format please.\nThis line is \u003e 80 chars",
+      "range": {
+        "startLine": 86,
+        "startChar": 61,
+        "endLine": 86,
+        "endChar": 80
+      },
+      "revId": "b40cb774ec867c65951531b368123354d4bf4bdb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31c3005d_ae888b94",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-04T00:49:02Z",
+      "side": 1,
+      "message": "Do these determine where the settings are stored?\nIf so, we should have some constants for these names, with a clear comment that changing these values would result in us losing the crash reporter settings on the users\u0027 system.",
+      "range": {
+        "startLine": 154,
+        "startChar": 42,
+        "endLine": 154,
+        "endChar": 71
+      },
+      "revId": "b40cb774ec867c65951531b368123354d4bf4bdb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b121b0e4_7dc1fba9",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-04T00:49:02Z",
+      "side": 1,
+      "message": "nit: whitespace error.",
+      "range": {
+        "startLine": 159,
+        "startChar": 0,
+        "endLine": 159,
+        "endChar": 3
+      },
+      "revId": "b40cb774ec867c65951531b368123354d4bf4bdb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d19b848b_415a127a",
         "filename": "android/crashreport/main-crash-service.cpp",
         "patchSetId": 9
@@ -42,6 +134,53 @@
         "startChar": 4,
         "endLine": 163,
         "endChar": 54
+      },
+      "revId": "b40cb774ec867c65951531b368123354d4bf4bdb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f127a8f2_bf6a4bee",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-04T00:49:02Z",
+      "side": 1,
+      "message": "Yeah, vharron@ had also recommended adding this to the settings page so that users can take away this permission whenever they want.",
+      "parentUuid": "d19b848b_21eb8e9b",
+      "range": {
+        "startLine": 162,
+        "startChar": 4,
+        "endLine": 163,
+        "endChar": 54
+      },
+      "revId": "b40cb774ec867c65951531b368123354d4bf4bdb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b121b0e4_bdba5324",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-04T00:49:02Z",
+      "side": 1,
+      "message": "Ahem.. start with quietly \u003d true, and skip the else clause? :)",
+      "range": {
+        "startLine": 166,
+        "startChar": 7,
+        "endLine": 166,
+        "endChar": 23
       },
       "revId": "b40cb774ec867c65951531b368123354d4bf4bdb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
