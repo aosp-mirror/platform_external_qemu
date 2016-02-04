@@ -61,7 +61,10 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mSavePreference =
         new QCheckBox(tr("Remember my choice for future crashes. "
                          "(Can reset in the emulator settings menu)"));
-    mSavePreference->setChecked(true);
+    QSettings settings;
+    bool save_preference_checked =
+        settings.value(Ui::Settings::CRASHREPORT_SAVEPREFERENCE_CHECKED, 1).toInt();
+    mSavePreference->setChecked(save_preference_checked);
     mSavePreference->show();
 
     mSuggestionText = new QLabel(tr("Suggestion(s) based on crash info:\n\n"));
@@ -280,6 +283,8 @@ static void savePref(bool checked, Ui::Settings::CRASHREPORT_PREFERENCE_VALUE v)
     QSettings settings;
     settings.setValue(Ui::Settings::CRASHREPORT_PREFERENCE,
             checked ? v : Ui::Settings::CRASHREPORT_PREFERENCE_ASK);
+    settings.setValue(Ui::Settings::CRASHREPORT_SAVEPREFERENCE_CHECKED,
+                      checked);
 }
 
 void ConfirmDialog::sendReport() {
