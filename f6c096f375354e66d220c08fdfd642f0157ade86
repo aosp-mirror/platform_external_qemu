@@ -16,6 +16,24 @@
       "revId": "f6c096f375354e66d220c08fdfd642f0157ade86",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f127a8f2_c70c915a",
+        "filename": "android/skin/qt/qt-settings.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-04T22:25:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d1c4647f_1fcc6b8b",
+      "revId": "f6c096f375354e66d220c08fdfd642f0157ade86",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
