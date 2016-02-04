@@ -569,7 +569,8 @@ GL_API void GL_APIENTRY  glDrawArrays( GLenum mode, GLint first, GLsizei count) 
     if(!ctx->isArrEnabled(GL_VERTEX_ARRAY)) return;
 
     GLESConversionArrays tmpArrs;
-    ctx->setupArraysPointers(tmpArrs,first,count,0,NULL,true);
+    SET_ERROR_IF(!ctx->setupArraysPointers(tmpArrs, first, count, 0, NULL, true), GL_INVALID_OPERATION)
+
     if(mode == GL_POINTS && ctx->isArrEnabled(GL_POINT_SIZE_ARRAY_OES)){
         ctx->drawPointsArrs(tmpArrs,first,count);
     }
@@ -593,8 +594,9 @@ GL_API void GL_APIENTRY  glDrawElements( GLenum mode, GLsizei count, GLenum type
         const unsigned char* buf = static_cast<unsigned char *>(ctx->getBindedBuffer(GL_ELEMENT_ARRAY_BUFFER));
         indices = buf + SafeUIntFromPointer(elementsIndices);
     }
+    SET_ERROR_IF(!ctx->validatePointer(indices), GL_INVALID_OPERATION)
 
-    ctx->setupArraysPointers(tmpArrs,0,count,type,indices,false);
+    SET_ERROR_IF(!ctx->setupArraysPointers(tmpArrs,0,count,type,indices,false), GL_INVALID_OPERATION)
     if(mode == GL_POINTS && ctx->isArrEnabled(GL_POINT_SIZE_ARRAY_OES)){
         ctx->drawPointsElems(tmpArrs,count,type,indices);
     }
