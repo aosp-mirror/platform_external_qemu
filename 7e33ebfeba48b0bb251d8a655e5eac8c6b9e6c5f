@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f127a8f2_475d412d",
+        "filename": "android/scripts/build-qt.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T22:47:13Z",
+      "side": 1,
+      "message": "Windows guy\u0027s here!",
+      "range": {
+        "startLine": 249,
+        "startChar": 20,
+        "endLine": 249,
+        "endChar": 26
+      },
+      "revId": "7e33ebfeba48b0bb251d8a655e5eac8c6b9e6c5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d1c4647f_3fb96f90",
+        "filename": "android/scripts/build-qt.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T22:47:13Z",
+      "side": 1,
+      "message": "do we need to copy the directory or its contents? I\u0027m not very good with cp syntax, so I want to confirm",
+      "range": {
+        "startLine": 250,
+        "startChar": 20,
+        "endLine": 250,
+        "endChar": 34
+      },
+      "revId": "7e33ebfeba48b0bb251d8a655e5eac8c6b9e6c5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
