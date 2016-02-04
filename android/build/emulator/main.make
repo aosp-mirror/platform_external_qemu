@@ -32,6 +32,7 @@ _BUILD_CORE_DIR  := android/build
 _BUILD_CONFIG_MAKE := $(BUILD_OBJS_DIR)/build/config.make
 _BUILD_CONFIG_HOST_H := $(BUILD_OBJS_DIR)/build/config-host.h
 _BUILD_SYMBOLS_DIR := $(BUILD_OBJS_DIR)/build/symbols
+_BUILD_EXT_DEBUG_DIR := $(BUILD_OBJS_DIR)/build/ext_debug
 
 ifeq ($(wildcard $(_BUILD_CONFIG_MAKE)),)
     $(error "The configuration file '$(_BUILD_CONFIG_MAKE)' doesn't exist, please run the 'android-configure.sh' script")
@@ -51,11 +52,11 @@ PREBUILT_STATIC_LIBRARY   := $(_BUILD_CORE_DIR)/emulator/prebuilt_static_library
 
 _BUILD_DEPENDENCY_DIRS :=
 
-all: libraries executables symbols
+all: libraries executables extdebug symbols
 _BUILD_EXECUTABLES :=
 _BUILD_SYMBOLS :=
-_BUILD_LIBRARIES   :=
-_BUILD_INTERMEDIATE_SYMBOLS :=
+_BUILD_LIBRARIES :=
+_BUILD_EXT_DEBUG :=
 
 clean: clean-intermediates
 
@@ -66,7 +67,8 @@ include Makefile.top.mk
 
 libraries: $(_BUILD_LIBRARIES)
 executables: $(_BUILD_EXECUTABLES)
-symbols: $(_BUILD_INTERMEDIATE_SYMBOLS) $(_BUILD_SYMBOLS)
+symbols: $(_BUILD_SYMBOLS)
+extdebug: $(_BUILD_EXT_DEBUG)
 
 clean-intermediates:
 	rm -rf $(BUILD_OBJS_DIR)/intermediates $(_BUILD_EXECUTABLES) \
