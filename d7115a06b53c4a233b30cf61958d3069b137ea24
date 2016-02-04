@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1110bc94_e643a045",
+        "filename": "android/process_setup.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-04T11:34:38Z",
+      "side": 1,
+      "message": "mmm, it would be maybe better if base::System provided a method to return the list of environment variables as a StringVector instead, to keep the code as testable as possible in the future.",
+      "revId": "d7115a06b53c4a233b30cf61958d3069b137ea24",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
