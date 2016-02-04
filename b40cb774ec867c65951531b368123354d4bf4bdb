@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5116b490_e4b70f0b",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-04T00:55:08Z",
+      "side": 1,
+      "message": "don\u0027t worry, if it didn\u0027t open, it just ignores all write requests",
+      "parentUuid": "f127a8f2_3f777bdd",
+      "range": {
+        "startLine": 86,
+        "startChar": 4,
+        "endLine": 86,
+        "endChar": 7
+      },
+      "revId": "b40cb774ec867c65951531b368123354d4bf4bdb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f127a8f2_5f76afdd",
         "filename": "android/crashreport/main-crash-service.cpp",
         "patchSetId": 9
