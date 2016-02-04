@@ -56,6 +56,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+// This variable is a pointer to a zero-terminated array of all environment
+// variables in the current process.
+// Posix requires this to be declared as extern at the point of use
+extern "C" char** environ;
+
 namespace android {
 namespace base {
 
@@ -398,6 +403,14 @@ public:
         const char* value = getenv(varname.c_str());
         return value && value[0] != '\0';
 #endif
+    }
+
+    virtual std::vector<std::string> envGetAll() const override {
+        std::vector<std::string> res;
+        for (auto env = environ; env && *env; ++env) {
+            res.push_back(*env);
+        }
+        return res;
     }
 
     virtual bool isRemoteSession(String* sessionType) const {
