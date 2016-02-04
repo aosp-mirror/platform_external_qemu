@@ -474,6 +474,15 @@ void EmulatorQtWindow::showMinimized()
 void EmulatorQtWindow::startThread(StartFunction f, int argc, char **argv)
 {
     if (!mMainLoopThread) {
+        // pass the QEMU main thread's arguments into the crash handler
+        std::string arguments = "===== QEMU main loop arguments =====\n";
+        for (int i = 0; i < argc; ++i) {
+            arguments += argv[i];
+            arguments += '\n';
+        }
+        android::crashreport::CrashReporter::get()->attachData(
+                    "qemu-main-loop-args.txt", arguments);
+
         mMainLoopThread = new MainLoopThread(f, argc, argv);
         QObject::connect(mMainLoopThread, &QThread::finished, &mContainer, &EmulatorWindowContainer::close);
         mMainLoopThread->start();
