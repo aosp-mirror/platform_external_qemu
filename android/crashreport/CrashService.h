@@ -144,6 +144,10 @@ public:
     // Returns the dump message passed by the emulator (or empty string if
     // there's none)
     const std::string& getDumpMessage() const;
+    const std::string& getCrashOnExitMessage() const;
+
+    // Tells us whether or not this crash was an exit crash.
+    bool didCrashOnExit() const;
 
     // Factory method
     static std::unique_ptr<CrashService> makeCrashService(
@@ -192,11 +196,14 @@ private:
     std::string mComments;
     std::string mDataDirectory;
     std::string mDumpMessage;
+    std::string mCrashOnExitMessage;
     std::map<std::string, std::string> mReportValues;
     std::map<std::string, std::string> mReportFiles;
     google_breakpad::ProcessState mProcessState;
     google_breakpad::BasicSourceLineResolver mLineResolver;
     std::unique_ptr<google_breakpad::Minidump> mMinidump;
+
+    bool mDidCrashOnExit;
 };
 
 }  // namespace crashreport
