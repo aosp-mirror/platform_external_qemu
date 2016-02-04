@@ -400,8 +400,12 @@ void EmulatorQtWindow::paintEvent(QPaintEvent *)
                 backing_surface->bitmap->scaled(r.size() * devicePixelRatio(),
                                                 Qt::KeepAspectRatio,
                                                 Qt::SmoothTransformation);
-        scaled_bitmap.setDevicePixelRatio(devicePixelRatio());
-        painter.drawImage(r, scaled_bitmap);
+        if (!scaled_bitmap.isNull()) {
+            scaled_bitmap.setDevicePixelRatio(devicePixelRatio());
+            painter.drawImage(r, scaled_bitmap);
+        } else {
+            qWarning("Failed to scale the skin bitmap");
+        }
     } else {
         D("Painting emulator window, but no backing bitmap");
     }
