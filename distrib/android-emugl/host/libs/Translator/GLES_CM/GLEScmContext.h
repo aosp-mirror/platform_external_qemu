@@ -40,7 +40,7 @@ public:
     void  setClientActiveTexture(GLenum tex);
     GLenum  getActiveTexture() { return GL_TEXTURE0 + m_activeTexture;};
     GLenum  getClientActiveTexture() { return GL_TEXTURE0 + m_clientActiveTexture;};
-    void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
+    bool setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
     void drawPointsArrs(GLESConversionArrays& arrs,GLint first,GLsizei count);
     void drawPointsElems(GLESConversionArrays& arrs,GLsizei count,GLenum type,const GLvoid* indices);
     virtual const GLESpointer* getPointer(GLenum arrType);
