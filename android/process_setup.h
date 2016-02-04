@@ -18,7 +18,7 @@ ANDROID_BEGIN_HEADER
 // Let's start off our process in style.
 // - This initialization needs to happen before any threads are launched;
 // - After this initialization, any crashes will be reported (if enabled).
-void process_early_setup();
+void process_early_setup(int argc, char** argv);
 
 void process_late_teardown();
 
