@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d19b848b_07753a62",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/PointerValidate.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-02-04T18:12:01Z",
+      "side": 1,
+      "message": "Yes, thank you for your reminder! I should keep a TODO-list for the next CLs...",
+      "parentUuid": "f127a8f2_d1061369",
+      "range": {
+        "startLine": 42,
+        "startChar": 22,
+        "endLine": 42,
+        "endChar": 29
+      },
+      "revId": "d67c9554494d7d99d3df45cba6ac5909a9bae193",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3115c084_6b5c922f",
         "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/PointerValidate.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-04T06:44:55Z",
       "side": 1,
       "message": "when we start passing the pointer size, we might also want to read more bytes here to check if it\u0027s readable enough",
+      "range": {
+        "startLine": 49,
+        "startChar": 31,
+        "endLine": 49,
+        "endChar": 33
+      },
+      "revId": "d67c9554494d7d99d3df45cba6ac5909a9bae193",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f127a8f2_31edef73",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/PointerValidate.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-02-04T18:12:01Z",
+      "side": 1,
+      "message": "Good thought! I was also thinking about try checking the whole buffer but there are 2 concerns. (1) The buffer could be large, which would have a high overhead to write the whole buffer to the pipe. (2) I tried passing small buffer to GL and ask it to read large data from it, it did not crash GL. (But it comes with broken triangles.) I think if it doesn\u0027t actually crash GL then we should not stop it. (Or it might stop our user\u0027s legacy buggy GL code.) Let me do more test about it.",
+      "parentUuid": "3115c084_6b5c922f",
       "range": {
         "startLine": 49,
         "startChar": 31,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "31fce07c_4c8c54b4",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/GLEScontext.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-02-04T18:12:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5116b490_672fa132",
+      "range": {
+        "startLine": 185,
+        "startChar": 41,
+        "endLine": 185,
+        "endChar": 42
+      },
+      "revId": "d67c9554494d7d99d3df45cba6ac5909a9bae193",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3115c084_cb7026b1",
         "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/PointerValidate.h",
         "patchSetId": 2
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "d19b848b_07c77ac2",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/PointerValidate.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-02-04T18:12:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3115c084_cb7026b1",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 25
+      },
+      "revId": "d67c9554494d7d99d3df45cba6ac5909a9bae193",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "31fce07c_89a0eec3",
         "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/PointerValidate.h",
         "patchSetId": 2
@@ -105,6 +201,30 @@
       "writtenOn": "2016-02-04T06:44:55Z",
       "side": 1,
       "message": "should the function be const?\nalso, is this class thread-safe and is it possible that two threads try writing into it together?",
+      "range": {
+        "startLine": 24,
+        "startChar": 32,
+        "endLine": 24,
+        "endChar": 34
+      },
+      "revId": "d67c9554494d7d99d3df45cba6ac5909a9bae193",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "711bb8b8_c68777cc",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/PointerValidate.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-02-04T18:12:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "31fce07c_89a0eec3",
       "range": {
         "startLine": 24,
         "startChar": 32,
