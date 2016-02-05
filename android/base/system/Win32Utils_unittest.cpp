@@ -12,8 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Define WINVER and _WIN32_WINNT to 0x0600 which matches Windows Vista.
+// This is to get GetThreadUILanguage(). This is ok since this unit-test
+// will only run on recent versions of Windows or under Wine on Linux.
+#undef WINVER
+#define WINVER 0x0600
 #define _WIN32_WINNT 0x0600
-#include <windows.h>
+
+#include <winnls.h>
 
 #include "android/base/system/Win32Utils.h"
 #include "gtest/gtest.h"
