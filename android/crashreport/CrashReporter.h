@@ -76,7 +76,9 @@ public:
     // user with the possible exception of "Segmentation fault".
     void GenerateDump(const char* message);
     void GenerateDumpAndDie(const char* message);
+
     void SetExitMode(const char* message);
+    bool isInExitMode() const;
 
 private:
     virtual void writeDump() = 0;
@@ -88,6 +90,7 @@ private:
 
     const std::string mDumpDir;
     const std::string mDataExchangeDir;
+    bool mIsInExitMode = false;
 };
 
 }  // crashreport

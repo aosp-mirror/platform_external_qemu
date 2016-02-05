@@ -71,13 +71,15 @@ enum class RunOptions {
 // Interface class to the underlying operating system.
 class System {
 public:
-    typedef int64_t Duration;
+    typedef int64_t  Duration;
+    typedef uint64_t WallDuration;
 
-    // Information about user and system times for some process,
+    // Information about user, system and wall clock times for some process,
     // in milliseconds
     struct Times {
         Duration userMs;
         Duration systemMs;
+        WallDuration wallClockMs;
     };
 
     enum { RunFailed = -1 };

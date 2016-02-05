@@ -14,6 +14,8 @@
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/IniFile.h"
 #include "android/base/StringFormat.h"
+#include "android/base/system/System.h"
+#include "android/crashreport/CrashReporter.h"
 #include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/internal/metrics_reporter_internal.h"
 #include "android/metrics/IniFileAutoFlusher.h"
@@ -36,6 +38,8 @@
 #include <memory>
 #define mwarning(fmt, ...) \
     dwarning("%s:%d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+
+using android::base::System;
 
 /* The number of metrics files to batch together when uploading metrics.
  * Tune this so that we get enough reports as well as each report consists of a
@@ -200,8 +204,14 @@ ABool androidMetrics_tick() {
     }
 
     ++metrics.tick;
-    metrics.user_time = get_user_time_ms();
-    metrics.system_time = get_system_time_ms();
+
+    const auto times = System::get()->getProcessTimes();
+    metrics.user_time = times.userMs;
+    metrics.system_time = times.systemMs;
+    metrics.wallclock_time = times.wallClockMs;
+
+    metrics.exit_started =
+            android::crashreport::CrashReporter::get()->isInExitMode();
 
     success = androidMetrics_write(&metrics);
     androidMetrics_fini(&metrics);
@@ -413,10 +423,21 @@ void androidMetrics_injectUploader(
 ABool androidMetrics_uploadMetrics(const AndroidMetrics* metrics) {
     VERBOSE_PRINT(metrics, "metrics: Uploading a report with status '%s', "
                            "num failures '%d' "
-                           "(version '%s', sys/user times '%ld/%ld').",
+                           "(version '%s', sys/user/wall times '%ld/%ld/%ld').",
                   metrics->is_dirty ? "crash" : "clean",
                   metrics->num_failed_reports,
-                  metrics->emulator_version, metrics->system_time, metrics->user_time);
+                  metrics->emulator_version, metrics->system_time,
+                  metrics->user_time, metrics->wallclock_time);
 
     return androidMetrics_uploadMetricsToolbar(metrics);
+}
+
+bool androidMetrics_update() {
+    VERBOSE_PRINT(metrics, "metrics: requested metrics update");
+
+    if (metrics_timer) {
+        loopTimer_startRelative(metrics_timer, 0);
+    }
+
+    return true;
 }

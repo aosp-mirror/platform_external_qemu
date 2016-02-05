@@ -20,6 +20,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/Uuid.h"
+#include "android/metrics/metrics_reporter.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 
@@ -80,10 +81,18 @@ void CrashReporter::GenerateDump(const char* message) {
 }
 
 void CrashReporter::SetExitMode(const char* msg) {
+    mIsInExitMode = true;
+
+    androidMetrics_update();
+
     std::ofstream out(
             PathUtils::join(mDataExchangeDir, kCrashOnExitFileName).c_str(),
             std::ios_base::out | std::ios_base::ate);
     out << msg << '\n';
+}
+
+bool CrashReporter::isInExitMode() const {
+    return mIsInExitMode;
 }
 
 void CrashReporter::GenerateDumpAndDie(const char* message) {

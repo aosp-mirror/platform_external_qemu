@@ -16,6 +16,8 @@
 #include "android/utils/compiler.h"
 #include "android/utils/system.h"
 
+#include <stdbool.h>
+
 ANDROID_BEGIN_HEADER
 
 /*
@@ -131,6 +133,9 @@ extern ABool androidMetrics_read(AndroidMetrics* androidMetrics);
  * Returns: 1 if successful (no need to report / reported successfully), else 0.
  */
 extern ABool androidMetrics_tryReportAll(void);
+
+// Update the metrics ASAP instead of replying on the next scheduled timer tick
+extern bool androidMetrics_update(void);
 
 #undef METRICS_INT
 #undef METRICS_STRING
