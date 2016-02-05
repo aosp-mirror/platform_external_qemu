@@ -38,6 +38,7 @@
 #include "math.h"
 
 #include "android/config/config.h"
+#include "android/crashreport/crash-handler.h"
 
 #include "android/kernel/kernel_utils.h"
 #include "android/process_setup.h"
@@ -954,6 +955,8 @@ int main(int argc, char **argv) {
         }
         args[n++] = "-android-hw";
         args[n++] = strdup(coreHwIniPath);
+
+        crashhandler_copy_attachment("avd_info.txt", coreHwIniPath);
 
         /* In verbose mode, dump the file's content */
         if (VERBOSE_CHECK(init)) {

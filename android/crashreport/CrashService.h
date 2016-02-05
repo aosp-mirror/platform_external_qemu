@@ -129,9 +129,6 @@ public:
     // Return string containing collectSysInfo result
     std::string getSysInfo();
 
-    // Uploads system-specific hardware information.
-    virtual bool getHWInfo() = 0;
-
     // Uploads the saved dumpfile to server defined by CrashSystem
     bool uploadCrash();
 
@@ -164,12 +161,14 @@ public:
     // User comments to be added to crash report
     void addUserComments(const std::string& comments);
 
-    // Read the data files passed by the watched/dumped application
-    void collectDataFiles();
+    // Read the dump message passed by the watched/dumped application
+    void retrieveDumpMessage();
 
 protected:
     // Initialize serverstate
     void initCrashServer();
+
+    const std::string& getDataDirectory() const;
 
     // Platform specific set instance client
     // Returns false if invalid pid
@@ -179,14 +178,24 @@ protected:
     // Returns false if client not set or not running
     virtual bool isClientAlive() = 0;
 
+    // Uploads system-specific hardware information.
+    virtual bool getHWInfo() = 0;
+
+    // Uploads system-specific memory information.
+    virtual bool getMemInfo() = 0;
+
     DumpRequestContext mDumpRequestContext;
     ServerState mServerState;
 
     int mClientPID = 0;
-    std::string mHWTmpFilePath;
 
+    static const char* const kHwInfoName;
+    static const char* const kMemInfoName;
 private:
     CrashService();
+
+    // Read the data files passed by the watched/dumped application
+    void collectDataFiles();
 
     std::string mVersion;
     std::string mBuild;

@@ -41,11 +41,12 @@ public:
 
     virtual bool isClientAlive() override;
 
+protected:
     virtual bool getHWInfo() override;
-
-    void cleanupHWInfo();
+    virtual bool getMemInfo() override;
 
 private:
+
     std::unique_ptr<::google_breakpad::CrashGenerationServer> mCrashServer;
 };
 

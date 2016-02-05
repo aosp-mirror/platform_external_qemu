@@ -31,6 +31,7 @@
 #define I(...) printf(__VA_ARGS__)
 
 using android::base::PathUtils;
+using android::base::String;
 using android::base::StringView;
 using android::base::System;
 using android::base::Uuid;
@@ -205,4 +206,20 @@ void crashhandler_exitmode(const char* message) {
     CrashReporter::get()->SetExitMode(message);
 }
 
+bool crashhandler_copy_attachment(const char* destination, const char* source) {
+    const std::string& path = CrashReporter::get()->getDataExchangeDir();
+    if (path.empty()) {
+        E("Could not determine crash dump directory");
+        return false;
+    }
+    String dest = PathUtils::join(path, destination);
+    if (path_copy_file(dest.c_str(), source) != 0) {
+        E("Could not copy file '%s' to '%s': %s", source, dest.c_str(),
+          strerror(errno));
+        return false;
+    }
+    return true;
+}
+
 }  // extern "C"
+

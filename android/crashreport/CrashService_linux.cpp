@@ -22,6 +22,7 @@
 
 #include "android/crashreport/CrashSystem.h"
 #include "android/utils/debug.h"
+#include "android/utils/path.h"
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -45,7 +46,6 @@ namespace crashreport {
 
 HostCrashService::~HostCrashService() {
     stopCrashServer();
-    cleanupHWInfo();
 }
 
 void HostCrashService::OnClientDumpRequest(
@@ -113,37 +113,30 @@ bool HostCrashService::isClientAlive() {
 }
 
 bool HostCrashService::getHWInfo() {
-    mHWTmpFilePath.clear();
-    System* sys = System::get();
-    String tmp_dir = sys->getTempDir();
-
-    String tmp_file_path_template =
-            PathUtils::join(tmp_dir, "android_emulator_crash_report_XXXXXX");
-
-    int tmpfd = mkstemp((char*)tmp_file_path_template.data());
-
-    if (tmpfd == -1) {
-        E("Error: Can't create temporary file! errno=%d", errno);
+    std::string data_directory = getDataDirectory();
+    if (data_directory.empty()) {
+        E("Unable to get data directory for crash report attachments");
         return false;
     }
+    String file_path = PathUtils::join(data_directory, kHwInfoName);
 
     String syscmd(HWINFO_CMD);
     syscmd += " > ";
-    syscmd += tmp_file_path_template;
-    system(syscmd.c_str());
+    syscmd += file_path;
+    fprintf(stderr, "Running '%s' to get hardware info", syscmd.c_str());
+    int status = system(syscmd.c_str());
 
-    mHWTmpFilePath = tmp_file_path_template.c_str();
+    if (status != 0) {
+        E("Unable to get hardware info for crash report");
+        return false;
+    }
     return true;
 }
 
-void HostCrashService::cleanupHWInfo() {
-    if (mHWTmpFilePath.empty()) {
-        return;
-    }
-    int rm_ret = remove(mHWTmpFilePath.c_str());
-    if (rm_ret == -1) {
-        E("Failed to delete HW info at %s", mHWTmpFilePath.c_str());
-    }
+bool HostCrashService::getMemInfo() {
+    // /proc/meminfo contains all the details we need so just upload that
+    String file_path = PathUtils::join(getDataDirectory(), kMemInfoName);
+    return path_copy_file(file_path.c_str(), "/proc/meminfo") == 0;
 }
 
 }  // namespace crashreport

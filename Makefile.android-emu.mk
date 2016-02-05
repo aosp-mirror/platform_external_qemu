@@ -335,6 +335,8 @@ ANDROID_EMU_LDLIBS := \
 ifeq ($(BUILD_TARGET_OS),windows)
 # For capCreateCaptureWindow used in camera-capture-windows.cpp
 ANDROID_EMU_LDLIBS += -lvfw32
+# For GetPerformanceInfo in CrashService_windows.cpp
+ANDROID_EMU_LDLIBS += -lpsapi
 endif
 
 ###############################################################################

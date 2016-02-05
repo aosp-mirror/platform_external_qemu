@@ -49,6 +49,7 @@
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
+#include <strings.h>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -83,6 +84,9 @@ static size_t WriteCallback(void* ptr, size_t size, size_t nmemb, void* userp) {
 
 namespace android {
 namespace crashreport {
+
+const char* const CrashService::kHwInfoName = "hw_info.txt";
+const char* const CrashService::kMemInfoName = "mem_info.txt";
 
 CrashService::CrashService(const std::string& version,
                            const std::string& build,
@@ -206,7 +210,6 @@ bool CrashService::uploadCrash() {
     addReportValue(kNameKey, kName);
     addReportValue(kVersionKey, mVersionId);
     addReportFile("upload_file_minidump", mDumpFile);
-    addReportFile("hw_info", mHWTmpFilePath);
 
     for (auto const& x : mReportValues) {
         curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, x.first.c_str(),
@@ -286,7 +289,17 @@ bool CrashService::processCrash() {
 }
 
 bool CrashService::collectSysInfo() {
-    return getHWInfo();
+    // As long as one of these succeed we consider it a success, it's better to
+    // upload a partial report if we have something.
+    bool success = getHWInfo();
+    success |= getMemInfo();
+
+    // Now that we have all the system information as well as any data the
+    // emulator placed in the data directory we can collect the files and add
+    // them to the list of files in the report.
+    collectDataFiles();
+
+    return success;
 }
 
 std::unique_ptr<CrashService> CrashService::makeCrashService(
@@ -313,12 +326,33 @@ std::string CrashService::readFile(StringView path) {
 }
 
 std::string CrashService::getSysInfo() {
-    return readFile(mHWTmpFilePath);
+    const auto files = System::get()->scanDirEntries(mDataDirectory, true);
+    std::string info;
+    for (const String& file : files) {
+        // By convention we only show files that end with .txt, other files
+        // may have binary content that will not display in a readable way.
+        if (strcasecmp(PathUtils::extension(file).c_str(), ".txt") == 0) {
+            // Prepend each piece with the name of the file as a separator
+            String basename;
+            if (PathUtils::split(file, nullptr, &basename)) {
+                info += "---- ";
+                info += basename.c_str();
+                info += " ----\n";
+            }
+            info += readFile(file);
+            info += "\n";
+        }
+    }
+    return info;
 }
 
 void CrashService::initCrashServer() {
     mServerState.waiting = true;
     mServerState.connected = 0;
+}
+
+const std::string& CrashService::getDataDirectory() const {
+    return mDataDirectory;
 }
 
 int64_t CrashService::waitForDumpFile(int clientpid, int timeout) {
@@ -354,6 +388,15 @@ bool CrashService::setClient(int clientpid) {
     }
     mClientPID = clientpid;
     return true;
+}
+
+void CrashService::retrieveDumpMessage() {
+    String path = PathUtils::join(mDataDirectory,
+                                  CrashReporter::kDumpMessageFileName);
+    if (System::get()->pathIsFile(path)) {
+        // remember the dump message to show it instead of the default one
+        mDumpMessage = readFile(path);
+    }
 }
 
 void CrashService::collectDataFiles() {
