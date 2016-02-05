@@ -17,6 +17,7 @@
 
 #include "android/avd/hw-config.h"
 #include "android/cmdline-option.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/filesystems/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
 #include "android/globals.h"
@@ -1279,6 +1280,8 @@ extern "C" int main(int argc, char **argv) {
         }
         args[n++] = "-android-hw";
         args[n++] = strdup(coreHwIniPath);
+
+        crashhandler_copy_attachment("avd_info.txt", coreHwIniPath);
 
         /* In verbose mode, dump the file's content */
         if (VERBOSE_CHECK(init)) {
