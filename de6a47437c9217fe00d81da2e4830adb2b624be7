@@ -16,6 +16,24 @@
       "revId": "de6a47437c9217fe00d81da2e4830adb2b624be7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d137046a_e1458651",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/glUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-05T16:31:51Z",
+      "side": 1,
+      "message": "Actually they are used by the auto-generated decoder sources, so we still need them :)",
+      "parentUuid": "31c3005d_94ed9943",
+      "revId": "de6a47437c9217fe00d81da2e4830adb2b624be7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
