@@ -474,8 +474,8 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
     case QtUICommand::ENTER_ZOOM:
         if (down) {
             emulator_window->toggleZoomMode();
-            toolsUi->zoom_button->setDown(emulator_window->isInZoomMode());
         }
+        toolsUi->zoom_button->setDown(emulator_window->isInZoomMode());
         break;
     case QtUICommand::ZOOM_IN:
         if (down) {
