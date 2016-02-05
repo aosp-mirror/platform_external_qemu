@@ -34,6 +34,24 @@
       "revId": "3cec6a3163e221596d236cf3241afe8b29ec98ff",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f127a8f2_452a59bc",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-05T17:12:01Z",
+      "side": 1,
+      "message": "I agree with Prathmesh here: STL is currently used just everywhere, and the plan is to get rid of the own reimplementations of its features - unless we know it\u0027s broken in the STL\nPreviously libstdc++ was buggy and half-empty - that was a really good reason to avoid it. Now it\u0027s almost like avoiding any C/C++ runtime provided by the system",
+      "parentUuid": "31cf80a1_d4837c2b",
+      "revId": "3cec6a3163e221596d236cf3241afe8b29ec98ff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
