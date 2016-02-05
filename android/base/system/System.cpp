@@ -47,6 +47,7 @@
 #include <sys/times.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
 #endif
 #include <assert.h>
 #include <stdlib.h>
@@ -57,6 +58,18 @@
 
 namespace android {
 namespace base {
+
+static System::WallDuration getTickCountMs() {
+#ifdef _WIN32
+    return ::GetTickCount();
+#else
+    timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+#endif
+}
+
+static const System::WallDuration startTimeMs = getTickCountMs();
 
 namespace {
 
@@ -464,6 +477,7 @@ public:
         res.systemMs = (times.tms_stime * 1000ll) / ticksPerSec;
         res.userMs = (times.tms_utime * 1000ll) / ticksPerSec;
 #endif
+        res.wallClockMs = getTickCountMs() - startTimeMs;
 
         return res;
     }
