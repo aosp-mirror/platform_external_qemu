@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b18c5088_b02d7882",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-05T16:46:45Z",
+      "side": 1,
+      "message": "technically, android::base:: shouldn\u0027t depend on libstdc++ (it was actually created partly to avoid linking problems related to it), but let\u0027s allow this one :)",
+      "revId": "3cec6a3163e221596d236cf3241afe8b29ec98ff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
