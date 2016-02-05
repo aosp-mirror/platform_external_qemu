@@ -16,6 +16,24 @@
       "revId": "3cec6a3163e221596d236cf3241afe8b29ec98ff",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31cf80a1_d4837c2b",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-05T16:49:28Z",
+      "side": 1,
+      "message": "I think we\u0027re surely moving away from that world.\nWe\u0027re using c++11 features all over the codebase at this point, and I\u0027m thinking of android::base:: as utilities on-top-of what the standard provides (or replacements where we\u0027re really unhappy).\n\nBut unless there is a really good reason to have our own implementation of something that\u0027s already in the standard, we should simply use the standard, imo.",
+      "parentUuid": "b18c5088_b02d7882",
+      "revId": "3cec6a3163e221596d236cf3241afe8b29ec98ff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
