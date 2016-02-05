@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "31c3005d_94ed9943",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/glUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-05T15:25:16Z",
+      "side": 1,
+      "message": "AFAIK, it seems these functions are all on the guest, including glSizeof, and so deleting glUtils.cpp/h completely wouldn\u0027t break anything (or would it)?",
+      "revId": "de6a47437c9217fe00d81da2e4830adb2b624be7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
