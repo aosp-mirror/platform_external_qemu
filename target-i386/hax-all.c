@@ -387,6 +387,17 @@ int hax_vm_destroy(struct hax_vm *vm)
     return 0;
 }
 
+int hax_get_max_ram(uint64_t* max_ram) {
+    struct hax_capabilityinfo cap;
+
+    int result = hax_capability(&hax_global, &cap);
+    if (result != 0) {
+        return result;
+    }
+    *max_ram = cap.mem_quota;
+    return 0;
+}
+
 int hax_set_ramsize(uint64_t ramsize)
 {
     struct hax_state *hax = &hax_global;

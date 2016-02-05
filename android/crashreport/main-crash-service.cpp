@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    crashservice->collectDataFiles();
+    crashservice->retrieveDumpMessage();
 
     QCoreApplication::setOrganizationName(Ui::Settings::ORG_NAME);
     QCoreApplication::setOrganizationDomain(Ui::Settings::ORG_DOMAIN);
