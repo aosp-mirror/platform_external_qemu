@@ -21,11 +21,22 @@
 #include "android/crashreport/CrashSystem.h"
 #include "android/utils/debug.h"
 
+#include <mach/vm_statistics.h>
+#include <mach/mach_types.h>
+#include <mach/mach_init.h>
+#include <mach/mach_host.h>
+#include <sys/mount.h>
+#include <sys/param.h>
+#include <sys/sysctl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
+#include <fstream>
 #include <memory>
 #include <sstream>
+
+#include <stdint.h>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -44,7 +55,6 @@ namespace crashreport {
 
 HostCrashService::~HostCrashService() {
     stopCrashServer();
-    cleanupHWInfo();
 }
 
 void HostCrashService::OnClientDumpRequest(
@@ -113,40 +123,108 @@ bool HostCrashService::isClientAlive() {
 }
 
 bool HostCrashService::getHWInfo() {
-    mHWTmpFilePath.clear();
-    System* sys = System::get();
-    String tmp_dir = sys->getTempDir();
-
-    String tmp_file_path_template =
-            PathUtils::join(tmp_dir, "android_emulator_crash_report_XXXXXX");
-
-    int tmpfd = mkstemp((char*)tmp_file_path_template.data());
-
-    if (tmpfd == -1) {
-        E("Error: Can't create temporary file! errno=%d", errno);
-        return false;
-    }
+    String file_path = PathUtils::join(getDataDirectory(), kHwInfoName);
 
     String syscmd(HWINFO_CMD);
     syscmd += " > ";
-    syscmd += tmp_file_path_template;
-    system(syscmd.c_str());
+    syscmd += file_path;
+    int status = system(syscmd.c_str());
 
-    mHWTmpFilePath = tmp_file_path_template.c_str();
+    if (status != 0) {
+        E("Unable to get hardware info");
+        return false;
+    }
     return true;
 }
 
-void HostCrashService::cleanupHWInfo() {
-    if (mHWTmpFilePath.empty()) {
-        return;
-    }
-
-    int rm_ret = remove(mHWTmpFilePath.c_str());
-
-    if (rm_ret == -1) {
-        E("Failed to delete HW info at %s", mHWTmpFilePath.c_str());
-    }
+// Convenience function to convert a value to a value in kilobytes
+template<typename T>
+static T toKB(T value) {
+    return value / 1024;
 }
+
+bool HostCrashService::getMemInfo() {
+    const std::string& data_directory = getDataDirectory();
+    if (data_directory.empty()) {
+        E("Unable to get data directory for crash report attachments");
+        return false;
+    }
+    String file_path = PathUtils::join(data_directory, kMemInfoName);
+    // Open this file early so we can print any errors into it, we might not
+    // be able to get all data but whatever we can get is interesting and
+    // knowing what failed could also be useful
+    std::ofstream fout(file_path.c_str());
+    if (!fout) {
+        E("Unable to open '%s' file for writing", file_path.c_str());
+        return false;
+    }
+
+    // Get total physical memory from the sysctl value "hw.memsize"
+    uint64_t physicalMem = 0;
+    size_t size = sizeof(physicalMem);
+    if (sysctlbyname("hw.memsize", &physicalMem, &size, nullptr, 0) != 0) {
+        E("Unable to get memory size");
+        fout << "ERROR: Unable to get memory size: " << strerror(errno) << "\n";
+    }
+
+    // Determine page size, we're going to need it for VM stats
+    mach_port_t machPort = mach_host_self();
+    vm_size_t pageSize = 0;
+    vm_statistics64_data_t vmStats;
+    mach_msg_type_number_t count = sizeof(vmStats) / sizeof(integer_t);
+    kern_return_t result = host_page_size(machPort, &pageSize);
+    if (result != KERN_SUCCESS) {
+        E("Unable to get page size");
+        fout << "ERROR: Unable to get page size: " << result << "\n";
+    }
+
+    // Get host statistics which includes information about used/free mem
+    result = host_statistics64(machPort, HOST_VM_INFO,
+                               reinterpret_cast<host_info64_t>(&vmStats),
+                               &count);
+    if (result != KERN_SUCCESS) {
+        E("Unable to get host statistics");
+        fout << "ERROR: Unable to get host statistics: " << result << "\n";
+    }
+    uint64_t freeMem = vmStats.free_count * pageSize;
+    uint64_t activeMem = vmStats.active_count * pageSize;
+    uint64_t inactiveMem = vmStats.inactive_count * pageSize;
+    uint64_t wiredMem = vmStats.wire_count * pageSize;
+
+    // The largest possible swap is determined by the amount of space
+    // available on the root filesystem. The Darwin swap can grow to
+    // consume all that space.
+    struct statfs stats;
+    if (statfs("/", &stats) != 0) {
+        E("Unale to stat root filesystem");
+        fout << "ERROR: Unable to stat root filesystem: " << strerror(errno)
+             << "\n";
+    }
+    uint64_t maxSwap = stats.f_bsize * stats.f_bfree;
+
+    // Get swap details using the sysctl value "vm.swapusage". Note that
+    // the total swap returned here is the current size of the swap file.
+    // The swap file can grow as needed up to the root filesystem space
+    xsw_usage vmUsage = {0};
+    size = sizeof(vmUsage);
+    if (sysctlbyname("vm.swapusage", &vmUsage, &size, nullptr, 0) != 0) {
+        E("Unable to get swap usage");
+        fout << "ERROR: Unable to get swap usage: " << strerror(errno) << "\n";
+    }
+
+    fout << "Physical memory: " << toKB(physicalMem) << " kB\n"
+         << "Free memory: " << toKB(freeMem) << " kB\n"
+         << "Active memory: " << toKB(activeMem) << " kB\n"
+         << "Inactive memory: " << toKB(inactiveMem) << " kB\n"
+         << "Wired memory: " << toKB(wiredMem) << " kB\n"
+         << "Maximum possible swap: " << toKB(maxSwap) << " kB\n"
+         << "Total swap: " << toKB(vmUsage.xsu_total) << " kB\n"
+         << "Available swap: " << toKB(vmUsage.xsu_avail) << " kB\n"
+         << "Used swap: " << toKB(vmUsage.xsu_used) << " kB\n";
+
+    return fout.good();
+}
+
 
 }  // namespace crashreport
 }  // namespace android

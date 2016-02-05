@@ -3529,6 +3529,12 @@ int main(int argc, char **argv, char **envp)
         } else {
             fprintf(stdout, "HAXM is working and emulator runs in fast virt mode\n");
         }
+        uint64_t hax_max_ram = 0;
+        if (hax_get_max_ram(&hax_max_ram) == 0) {
+            char str[32] = {0};
+            snprintf(str, sizeof(str) - 1, "%"PRIu64, hax_max_ram);
+            crashhandler_add_string("hax_max_ram.txt", str);
+        }
     }
 #endif
 
