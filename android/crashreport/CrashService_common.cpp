@@ -206,7 +206,6 @@ bool CrashService::uploadCrash() {
     addReportValue(kNameKey, kName);
     addReportValue(kVersionKey, mVersionId);
     addReportFile("upload_file_minidump", mDumpFile);
-    addReportFile("hw_info", mHWTmpFilePath);
 
     for (auto const& x : mReportValues) {
         curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, x.first.c_str(),
@@ -286,7 +285,17 @@ bool CrashService::processCrash() {
 }
 
 bool CrashService::collectSysInfo() {
-    return getHWInfo();
+    // As long as one of these succeed we consider it a success, it's better to
+    // upload a partial report if we have something.
+    bool success = getHWInfo();
+    success |= getMemInfo();
+
+    // Now that we have all the system information as well as any data the
+    // emulator placed in the data directory we can collect the files and add
+    // them to the list of files in the report.
+    collectDataFiles();
+
+    return success;
 }
 
 std::unique_ptr<CrashService> CrashService::makeCrashService(
@@ -313,12 +322,21 @@ std::string CrashService::readFile(StringView path) {
 }
 
 std::string CrashService::getSysInfo() {
-    return readFile(mHWTmpFilePath);
+    const auto files = System::get()->scanDirEntries(mDataDirectory, true);
+    std::string info;
+    for (const String& file : files) {
+        info += readFile(file);
+    }
+    return info;
 }
 
 void CrashService::initCrashServer() {
     mServerState.waiting = true;
     mServerState.connected = 0;
+}
+
+const std::string& CrashService::getDataDirectory() const {
+    return mDataDirectory;
 }
 
 int64_t CrashService::waitForDumpFile(int clientpid, int timeout) {
@@ -354,6 +372,15 @@ bool CrashService::setClient(int clientpid) {
     }
     mClientPID = clientpid;
     return true;
+}
+
+void CrashService::retrieveDumpMessage() {
+    String path = PathUtils::join(mDataDirectory,
+                                  CrashReporter::kDumpMessageFileName);
+    if (System::get()->pathIsFile(path)) {
+        // remember the dump message to show it instead of the default one
+        mDumpMessage = readFile(path);
+    }
 }
 
 void CrashService::collectDataFiles() {
