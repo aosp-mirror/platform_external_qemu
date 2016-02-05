@@ -31,6 +31,7 @@
 #define I(...) printf(__VA_ARGS__)
 
 using android::base::PathUtils;
+using android::base::String;
 using android::base::System;
 using android::base::Uuid;
 
@@ -184,4 +185,45 @@ void crashhandler_die_format(const char* format, ...) {
 void crashhandler_exitmode(const char* message) {
     CrashReporter::get()->SetExitMode(message);
 }
+
+int crashhandler_copy_attachment(const char* destination, const char* source) {
+    const std::string& path = CrashReporter::get()->getDataExchangeDir();
+    if (path.empty()) {
+        E("Could not determine crash dump directory");
+        return 0;
+    }
+    String dest = PathUtils::join(path, destination);
+    if (path_copy_file(dest.c_str(), source) != 0) {
+        E("Could not copy hardware ini file to %s: %s", dest.c_str(),
+          strerror(errno));
+        return 0;
+    }
+    return 1;
+}
+
+int crashhandler_write_attachment(const char* destination,
+                                  const char* data,
+                                  unsigned int size) {
+    const std::string& path = CrashReporter::get()->getDataExchangeDir();
+    if (path.empty()) {
+        E("Could not determine crash dump directory");
+        return 0;
+    }
+    String dest = PathUtils::join(path, destination);
+    // TODO: Replace with a platform independent way of handling UTF-8 paths
+    std::ofstream fout(dest.c_str(), std::ios::binary);
+    if (!fout.good()) {
+        E("Could not open '%s' to write crash report attachment", dest.c_str());
+        return 0;
+    }
+
+    fout.write(data, size);
+    if (!fout.good()) {
+        E("Could not write crash report attachment to '%s'", dest.c_str());
+        return 0;
+    }
+    return 1;
+}
+
 }  // extern "C"
+
