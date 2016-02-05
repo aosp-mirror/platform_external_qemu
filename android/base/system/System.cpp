@@ -34,6 +34,8 @@
 
 #ifdef __APPLE__
 #import <Carbon/Carbon.h>
+#include <mach/clock.h>
+#include <mach/mach.h>
 #endif  // __APPLE__
 
 #include <array>
@@ -67,10 +69,18 @@ namespace base {
 static System::WallDuration getTickCountMs() {
 #ifdef _WIN32
     return ::GetTickCount();
-#else
+#elif defined __linux__
     timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+#else // MAC
+    clock_serv_t clockServ;
+    mach_timespec_t mts;
+    host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &clockServ);
+    clock_get_time(clockServ, &mts);
+    mach_port_deallocate(mach_task_self(), clockServ);
+
+    return mts.tv_sec * 1000 + mts.tv_nsec / 1000000;
 #endif
 }
 
