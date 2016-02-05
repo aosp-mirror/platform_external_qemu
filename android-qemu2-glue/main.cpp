@@ -350,7 +350,7 @@ static void enter_qemu_main_loop(int argc, char **argv) {
 extern bool android_op_wipe_data;
 
 extern "C" int main(int argc, char **argv) {
-    process_early_setup();
+    process_early_setup(argc, argv);
 
     if (argc < 1) {
         fprintf(stderr, "Invalid invocation (no program path)\n");
