@@ -34,6 +34,24 @@
       "revId": "93d67c7a443b3f381c9228d049d7f8a4623fd91c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "312b001a_b49a60e2",
+        "filename": "android/crashreport/crash-handler.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-05T17:25:11Z",
+      "side": 1,
+      "message": "That still leaves the issue with the function having a slightly unclear name and documentation though. Even if it\u0027s rarely used a better name will improve code readability in the few places it is used. Or if we just update documentation it will at least be one step less for someone using when trying to figure out if it only takes strings or not.\n\nThe method in CrashReporter takes a StringView and while that can be used to send any arbitrary data it really communicates that the method expects a string. I just want us to have as little ambiguity as possible when looking at our code.",
+      "parentUuid": "71c9f878_e77e1db9",
+      "revId": "93d67c7a443b3f381c9228d049d7f8a4623fd91c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
