@@ -74,6 +74,7 @@ _QTtoFOURCC(uint32_t qt_pix_format)
       return V4L2_PIX_FMT_UYVY;
 
     case kCVPixelFormatType_420YpCbCr8Planar:
+    case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
       return V4L2_PIX_FMT_YVU420;
 
     case 'yuvs':  // kCVPixelFormatType_422YpCbCr8_yuvs - undeclared?
