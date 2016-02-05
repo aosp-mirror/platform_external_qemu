@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7131f881_d65cc433",
+        "filename": "android/crashreport/crash-handler.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-05T17:10:07Z",
+      "side": 1,
+      "message": "I think it would be a good idea if the comment for this function mentioned that the data being added is a null-terminated string. In the future we might want to attach some binary data so perhaps this function should be called crashhandler_add_string. The method in the CrashReporter class should probably be updated as well in that case.",
+      "revId": "93d67c7a443b3f381c9228d049d7f8a4623fd91c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
