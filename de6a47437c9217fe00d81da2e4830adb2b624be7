@@ -34,6 +34,24 @@
       "revId": "de6a47437c9217fe00d81da2e4830adb2b624be7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5116b490_d653a4ec",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/glUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-05T16:34:49Z",
+      "side": 1,
+      "message": "Ah, I see. Got it!",
+      "parentUuid": "d137046a_e1458651",
+      "revId": "de6a47437c9217fe00d81da2e4830adb2b624be7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
