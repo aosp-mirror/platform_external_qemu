@@ -49,7 +49,7 @@ TEST_F(MetricsReporterToolbarTest, defaultMetrics) {
             "as=androidsdk_emu_crash&version=unknown&os=unknown"
             "&id=00000000-0000-0000-0000-000000000000"
             "&guest_arch=unknown&exf=1&opengl_alive=0&system_time=0"
-            "&user_time=0&adb_liveness=0";
+            "&user_time=0&adb_liveness=0&wall_time=0&exit_started=0";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -68,7 +68,7 @@ TEST_F(MetricsReporterToolbarTest, cleanRun) {
             "as=androidsdk_emu_crash&version=standalone&os=lynx"
             "&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&exf=0&opengl_alive=1&system_time=1170&user_time=220"
-            "&adb_liveness=0";
+            "&adb_liveness=0&wall_time=10&exit_started=1";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -80,8 +80,10 @@ TEST_F(MetricsReporterToolbarTest, cleanRun) {
     metrics.tick = 1;
     metrics.system_time = 1170;
     metrics.user_time = 220;
+    metrics.wallclock_time = 10;
     metrics.is_dirty = 0;
     metrics.num_failed_reports = 7;
+    metrics.exit_started = 1;
 
     EXPECT_EQ(kExpectedLen,
               formatToolbarGetUrl(&formatted_url, mToolbarUrl, &metrics));
@@ -98,7 +100,7 @@ TEST_F(MetricsReporterToolbarTest, dirtyRun) {
             "as=androidsdk_emu_crash&version=standalone&os=lynx"
             "&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&exf=1&opengl_alive=1&system_time=1080&user_time=180"
-            "&adb_liveness=0";
+            "&adb_liveness=0&wall_time=101&exit_started=0";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -110,8 +112,10 @@ TEST_F(MetricsReporterToolbarTest, dirtyRun) {
     metrics.tick = 1;
     metrics.system_time = 1080;
     metrics.user_time = 180;
+    metrics.wallclock_time = 101;
     metrics.is_dirty = 1;
     metrics.num_failed_reports = 9;
+    metrics.exit_started = 0;
 
     ASSERT_EQ(kExpectedLen,
               formatToolbarGetUrl(&formatted_url, mToolbarUrl, &metrics));
@@ -128,7 +132,7 @@ TEST_F(MetricsReporterToolbarTest, openGLErrorRun) {
             "as=androidsdk_emu_crash&version=standalone&os=lynx"
             "&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&exf=1&opengl_alive=0&system_time=1080&user_time=180"
-            "&adb_liveness=0";
+            "&adb_liveness=0&wall_time=0&exit_started=0";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -158,7 +162,7 @@ TEST_F(MetricsReporterToolbarTest, gpuStrings) {
             "&version=standalone&os=lynx&id="
             "00000000-0000-0000-0000-000000000000&guest_arch=x86_64&exf"
             "=0&opengl_alive=1&system_time=1170&user_time=220"
-            "&adb_liveness=0"
+            "&adb_liveness=0&wall_time=0&exit_started=0"
             "&ggl_vendor=Some_Vendor&ggl_renderer=&ggl_version=1%20.%200";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
