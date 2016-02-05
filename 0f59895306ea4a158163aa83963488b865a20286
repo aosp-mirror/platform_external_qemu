@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1126fc4f_73bce080",
+        "filename": "android/process_setup.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-05T16:34:43Z",
+      "side": 1,
+      "message": "quick question, argv[0] typically contains the full path of the executable, which generally contains the user\u0027s name or login. This may be considered as PII in certain contexts. Maybe we could only use the program\u0027s basename instead to avoid this?",
+      "revId": "0f59895306ea4a158163aa83963488b865a20286",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
