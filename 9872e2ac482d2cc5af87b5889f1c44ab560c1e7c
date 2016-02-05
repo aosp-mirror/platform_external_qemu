@@ -1,0 +1,197 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "918f4c7c_2fccc98b",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_CM/GLEScmImp.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-05T10:30:53Z",
+      "side": 1,
+      "message": "honest question: why are you including this header? It doesn\u0027t seem you\u0027re using any declaration from it.\n\nIf you need GL constant definitions, prefer directly including the corresponding header you need.",
+      "revId": "9872e2ac482d2cc5af87b5889f1c44ab560c1e7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11f8bcd1_e31232a7",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-05T10:30:53Z",
+      "side": 1,
+      "message": "same here.",
+      "revId": "9872e2ac482d2cc5af87b5889f1c44ab560c1e7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "51feb4bd_a51e7e9e",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-05T10:30:53Z",
+      "side": 1,
+      "message": "nit: format spaces around binary operators.",
+      "revId": "9872e2ac482d2cc5af87b5889f1c44ab560c1e7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d137046a_81d27a29",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/PointerValidate.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-05T10:30:53Z",
+      "side": 1,
+      "message": "use TEMP_FAILURE_RETRY() if you don\u0027t want nasty surprises at runtime :-/",
+      "revId": "9872e2ac482d2cc5af87b5889f1c44ab560c1e7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b18c5088_70d2b02c",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/PointerValidate.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-05T10:30:53Z",
+      "side": 1,
+      "message": "same here.",
+      "revId": "9872e2ac482d2cc5af87b5889f1c44ab560c1e7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "51feb4bd_a5bafed6",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/PointerValidate.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-05T10:30:53Z",
+      "side": 1,
+      "message": "nit: coding style: spaces around binary operators, i.e.\n\n  for (unsigned int i \u003d 0; i \u003c size; i +\u003d m_pageSize) { ... }",
+      "revId": "9872e2ac482d2cc5af87b5889f1c44ab560c1e7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f1340868_62de5630",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/PointerValidate.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-05T10:30:53Z",
+      "side": 1,
+      "message": "same here.",
+      "range": {
+        "startLine": 63,
+        "startChar": 40,
+        "endLine": 63,
+        "endChar": 41
+      },
+      "revId": "9872e2ac482d2cc5af87b5889f1c44ab560c1e7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7176584c_ee29dfc7",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/PointerValidate.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-05T10:30:53Z",
+      "side": 1,
+      "message": "for performance reason, it might be better to only do this when we know that |buffer + size - 1| is not in the last page that was tested in the previous loop.",
+      "revId": "9872e2ac482d2cc5af87b5889f1c44ab560c1e7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "918f4c7c_2fb3690a",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/PointerValidate.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-05T10:30:53Z",
+      "side": 1,
+      "message": "and here.",
+      "revId": "9872e2ac482d2cc5af87b5889f1c44ab560c1e7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1126fc4f_f3c55068",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/PointerValidate.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-05T10:30:53Z",
+      "side": 1,
+      "message": "This needs more documentation, i.e. real purpose (i.e. what is meant by \"valid pointer\" exactly) and usage example, and a one-line comment for each method.",
+      "revId": "9872e2ac482d2cc5af87b5889f1c44ab560c1e7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "918f4c7c_6fd2d12c",
+        "filename": "distrib/android-emugl/host/libs/Translator/include/GLcommon/PointerValidate.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-05T10:30:53Z",
+      "side": 1,
+      "message": "nit: The class name is a bit awkward, since \"Validate\" is a word, what about PointerChecker or PointerValidator instead?",
+      "revId": "9872e2ac482d2cc5af87b5889f1c44ab560c1e7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
