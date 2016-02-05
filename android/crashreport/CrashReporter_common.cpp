@@ -15,7 +15,6 @@
 #include "android/crashreport/CrashReporter.h"
 
 #include "android/crashreport/crash-handler.h"
-
 #include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
@@ -32,6 +31,7 @@
 #define I(...) printf(__VA_ARGS__)
 
 using android::base::PathUtils;
+using android::base::StringView;
 using android::base::System;
 using android::base::Uuid;
 
@@ -80,21 +80,6 @@ void CrashReporter::GenerateDump(const char* message) {
     writeDump();
 }
 
-void CrashReporter::SetExitMode(const char* msg) {
-    mIsInExitMode = true;
-
-    androidMetrics_update();
-
-    std::ofstream out(
-            PathUtils::join(mDataExchangeDir, kCrashOnExitFileName).c_str(),
-            std::ios_base::out | std::ios_base::ate);
-    out << msg << '\n';
-}
-
-bool CrashReporter::isInExitMode() const {
-    return mIsInExitMode;
-}
-
 void CrashReporter::GenerateDumpAndDie(const char* message) {
     passDumpMessage(message);
     // this is the most cross-platform way of crashing
@@ -108,15 +93,35 @@ void CrashReporter::GenerateDumpAndDie(const char* message) {
     *ptr = 1313;  // die
 }
 
+void CrashReporter::SetExitMode(const char* msg) {
+    mIsInExitMode = true;
+    androidMetrics_update();
+    attachData(kCrashOnExitFileName, msg);
+}
+
+bool CrashReporter::isInExitMode() const {
+    return mIsInExitMode;
+}
+
 void CrashReporter::passDumpMessage(const char* message) {
+    attachData(kDumpMessageFileName, message);
+}
+
+void CrashReporter::attachData(StringView name, StringView data) {
+    if (name.empty()) {
+        name = "additional_data";
+    }
+
     // Open the communication file in append mode to make sure we won't
-    // overwrite any existing message (if several threads are crashing at once)
+    // overwrite any existing message (e.g. if several threads are writing at
+    // once)
     // TODO: create a Unicode-aware file class for Windows - it will definitely
-    // fail there if the data exchange directory name has some extended chars
+    // fail here if the data exchange directory name has some extended chars
     std::ofstream out(
-            PathUtils::join(mDataExchangeDir, kDumpMessageFileName).c_str(),
+            PathUtils::join(mDataExchangeDir, name).c_str(),
             std::ios_base::out | std::ios_base::ate);
-    out << (message ? message : "(none)") << '\n';
+    out.write(data.data(), data.size());
+    out << '\n';
 }
 
 }  // namespace crashreport
@@ -190,7 +195,14 @@ void crashhandler_die_format(const char* format, ...) {
     crashhandler_die(message);
 }
 
+void crashhandler_add_string(const char* name, const char* string) {
+    if (const auto reporter = CrashReporter::get()) {
+        reporter->attachData(name, string);
+    }
+}
+
 void crashhandler_exitmode(const char* message) {
     CrashReporter::get()->SetExitMode(message);
 }
+
 }  // extern "C"

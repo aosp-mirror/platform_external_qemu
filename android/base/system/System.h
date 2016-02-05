@@ -20,6 +20,9 @@
 #include "android/base/String.h"
 #include "android/base/containers/StringVector.h"
 
+#include <string>
+#include <vector>
+
 #include <limits.h>
 #include <stdint.h>
 #include <time.h>
@@ -172,6 +175,10 @@ public:
 
     // Returns true if environment variable |varname| is set and non-empty.
     virtual bool envTest(StringView varname) const = 0;
+
+    // Returns all environment variables from the current process in a
+    // "name=value" form
+    virtual std::vector<std::string> envGetAll() const = 0;
 
     // Prepend a new directory to the system's library search path. This
     // only alters an environment variable like PATH or LD_LIBRARY_PATH,

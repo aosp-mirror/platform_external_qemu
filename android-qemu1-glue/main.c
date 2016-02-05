@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
     /* net.shared_net_ip boot property value. */
     char boot_prop_ip[64] = {};
 
-    process_early_setup();
+    process_early_setup(argc, argv);
 
     args[0] = argv[0];
 

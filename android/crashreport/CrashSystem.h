@@ -15,8 +15,7 @@
 #pragma once
 
 #include "android/base/Compiler.h"
-#include "android/base/String.h"
-#include "android/base/misc/StringUtils.h"
+#include "android/base/containers/StringVector.h"
 
 #include <string>
 
