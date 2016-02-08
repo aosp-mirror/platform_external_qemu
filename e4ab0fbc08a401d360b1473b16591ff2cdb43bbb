@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7179f872_bce20953",
+        "filename": "android/base/threads/Thread_pthread.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-08T18:30:45Z",
+      "side": 0,
+      "message": "Again, let\u0027s not change the behavior unless there\u0027s actual need -- the expectation so far is that you can call |wait| any number of times and retrieve the same exit status.\n\nIf you want to change this, please change it for both Thread_pthread.cpp and Thread_win32.cpp.\nAlso, please make sure no one depends on this behavior / is updated.",
+      "range": {
+        "startLine": 76,
+        "startChar": 4,
+        "endLine": 85,
+        "endChar": 7
+      },
+      "revId": "e4ab0fbc08a401d360b1473b16591ff2cdb43bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "91890cab_e578720a",
+        "filename": "android/base/threads/Thread_pthread.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-08T18:30:45Z",
+      "side": 1,
+      "message": "The stated semantics of Thread is that it\u0027s one time use only. The header clearly states that ::start() returns false if the thread has already been started/terminated.\n\nI remember that I had to fix a related bug earlier. Let\u0027s not change this behavior unless there\u0027s a clear use case, as other code on top may be using this expectation.",
+      "range": {
+        "startLine": 65,
+        "startChar": 8,
+        "endLine": 65,
+        "endChar": 25
+      },
+      "revId": "1549f280d5de30da7bcea973c603a054c5f4e0db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b1861095_a62e727e",
+        "filename": "android/base/threads/internal/ParallelTaskBase.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-08T18:30:45Z",
+      "side": 1,
+      "message": "This will block till the thread finishes. The point of |tryWaitTillJoined| is that it does a non-blocking wait, and they re-schedules itself to try again later.\n\nThis is running on the \"main\" thread, we don\u0027t want to block here.",
+      "range": {
+        "startLine": 53,
+        "startChar": 4,
+        "endLine": 53,
+        "endChar": 43
+      },
+      "revId": "1549f280d5de30da7bcea973c603a054c5f4e0db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
