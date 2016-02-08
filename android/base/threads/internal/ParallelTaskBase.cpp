@@ -50,6 +50,7 @@ void ParallelTaskBase::tryWaitTillJoined(void* opaqueThis,
         return;
     }
 
+    thisPtr->mManagedThread->wait(nullptr);
     thisPtr->isRunning = false;
     thisPtr->taskDoneImpl();
 }

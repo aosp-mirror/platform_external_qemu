@@ -62,10 +62,7 @@ bool Thread::start() {
     mStarted = true;
     if (pthread_create(&mThread, NULL, thread_main, this)) {
         ret = false;
-        // We _do not_ need to guard this access to |mFinished| because we're
-        // sure that the launched thread failed, so there can't be parallel
-        // access.
-        mFinished = true;
+        mStarted = false;
     }
     return ret;
 }
@@ -73,16 +70,6 @@ bool Thread::start() {
 bool Thread::wait(intptr_t *exitStatus) {
     if (!mStarted) {
         return false;
-    }
-    {
-        ScopedLocker locker(&mLock);
-        if (mFinished) {
-            // Thread already stopped.
-            if (exitStatus) {
-                *exitStatus = mExitStatus;
-            }
-            return true;
-        }
     }
 
     // NOTE: Do not hold the lock when waiting for the thread to ensure
