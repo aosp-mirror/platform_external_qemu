@@ -519,6 +519,16 @@ static void hax_handle_interrupt(CPUState * cpu, int mask)
     }
 }
 
+int hax_get_max_ram(uint64_t *max_ram) {
+    struct hax_capabilityinfo cap;
+    int result = hax_capability(&hax_global, &cap);
+    if (result != 0) {
+        return result;
+    }
+    *max_ram = cap.mem_quota;
+    return 0;
+}
+
 int hax_pre_init(uint64_t ram_size)
 {
     struct hax_state *hax = NULL;

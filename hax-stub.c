@@ -36,3 +36,7 @@ int hax_ug_platform(void)
 {
     return 0;
 }
+
+int hax_get_max_ram(uint64_t *max_ram) {
+    return 0;
+}
