@@ -102,6 +102,19 @@ make_unix_path(char *path, size_t  pathlen, int port_number)
     // Now, initialize it properly
     snprintf(path, pathlen, "%s/qemu-gles-%d", tmp, port_number);
 
+    // If the emulator is killed, it can leave the socket file behind.
+    // Since the filename has PID in it, we can be sure that this socket
+    // is not supposed to be here and delete it, to prevent EADDRINUSE
+    // later in bind()
+    if (::access(path, F_OK) == 0) {
+        ret = ::remove(path);
+        if (ret < 0) {
+            ERR("Failed to remove stale socket file at %s: %s\n", path, strerror(errno));
+        } else {
+            DBG("Stale socket file at %s was removed.\n", path);
+        }
+    }
+
     return 0;
 }
 
