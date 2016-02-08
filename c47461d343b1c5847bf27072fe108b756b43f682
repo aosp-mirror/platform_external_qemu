@@ -1,0 +1,159 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "91890cab_68b6f7fa",
+        "filename": "android/skin/qt/extended-pages/common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-08T18:33:25Z",
+      "side": 1,
+      "message": "There are tons of strings for getting sylesheet values - maybe expose common ones as constants somewhere to avoid future refactoring issues?",
+      "range": {
+        "startLine": 33,
+        "startChar": 43,
+        "endLine": 33,
+        "endChar": 49
+      },
+      "revId": "c47461d343b1c5847bf27072fe108b756b43f682",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9162ecbe_5d6d6b44",
+        "filename": "android/skin/qt/extended-pages/dpad-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-08T18:33:25Z",
+      "side": 1,
+      "message": "Nit: trailing whitespace",
+      "range": {
+        "startLine": 126,
+        "startChar": 70,
+        "endLine": 126,
+        "endChar": 71
+      },
+      "revId": "c47461d343b1c5847bf27072fe108b756b43f682",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9162ecbe_00a70ccb",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-08T18:33:25Z",
+      "side": 1,
+      "message": "Nit: s/tab/spaces",
+      "revId": "c47461d343b1c5847bf27072fe108b756b43f682",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5174f47a_9b8b939c",
+        "filename": "android/skin/qt/styles/fonts_stylesheet_template.css",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-08T18:33:25Z",
+      "side": 1,
+      "message": "Nit: s/tabs/spaces",
+      "range": {
+        "startLine": 3,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 31
+      },
+      "revId": "c47461d343b1c5847bf27072fe108b756b43f682",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7179f872_fcec8146",
+        "filename": "android/skin/qt/styles/stylesheet_template.css",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-08T18:33:25Z",
+      "side": 1,
+      "message": "Nit: whitespace (more below)",
+      "range": {
+        "startLine": 9,
+        "startChar": 23,
+        "endLine": 9,
+        "endChar": 24
+      },
+      "revId": "c47461d343b1c5847bf27072fe108b756b43f682",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "518b14a3_7165001e",
+        "filename": "android/skin/qt/stylesheet.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-08T18:33:25Z",
+      "side": 1,
+      "message": "Nit: whitespace (more below)",
+      "range": {
+        "startLine": 261,
+        "startChar": 0,
+        "endLine": 261,
+        "endChar": 4
+      },
+      "revId": "c47461d343b1c5847bf27072fe108b756b43f682",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b15ff0f8_615a8c7a",
+        "filename": "android/skin/qt/stylesheet.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-08T18:33:25Z",
+      "side": 1,
+      "message": "Nit: new file, should be 2016",
+      "range": {
+        "startLine": 1,
+        "startChar": 16,
+        "endLine": 1,
+        "endChar": 20
+      },
+      "revId": "c47461d343b1c5847bf27072fe108b756b43f682",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

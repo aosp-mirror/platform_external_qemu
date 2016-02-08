@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "11951cbd_645aa07a",
+        "filename": "android/skin/qt/resources.qrc",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-08T18:33:25Z",
+      "side": 0,
+      "message": "I assume this disappeared because you were this file directly in QtCreator?\n\nThere are some comments in this file that we may not want to lose as well.",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 3
+      },
+      "revId": "87323ca3d47a33293704d048480dce336b82c2b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
