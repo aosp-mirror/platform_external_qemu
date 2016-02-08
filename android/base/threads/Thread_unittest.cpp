@@ -188,11 +188,17 @@ TEST(ThreadTest, tryWait) {
     EXPECT_FALSE(thread.tryWait(&result));
     thread.unblock();
 
+    // This has the potential to hang forever in case of a bug in the
+    // Thread under test. So, fail after a reaonsably long attempt.
+    static const unsigned kMaxWaitTimeMs = 5000;  // 5 seconds.
+    static const unsigned kSleepTimeMs = 10;
+    static const unsigned kMaxNumChecks = kMaxWaitTimeMs / kSleepTimeMs;
+    unsigned numIters = 0;
     result = 0;
-    EXPECT_TRUE(thread.wait(&result));
-    EXPECT_EQ(42, result);
-    result = 0;
-    EXPECT_TRUE(thread.tryWait(&result));
+    while(numIters < kMaxNumChecks && !thread.tryWait(&result)) {
+        System::get()->sleepMs(kSleepTimeMs);
+    }
+    EXPECT_LT(numIters, kMaxNumChecks);
     EXPECT_EQ(42, result);
 }
 
