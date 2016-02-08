@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9d6200ed_e9f2958b",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-08T18:10:43Z",
+      "side": 1,
+      "message": "Oops, looks like I missed that during refactoring. Good catch, thanks.",
+      "parentUuid": "11951cbd_0101ce99",
+      "range": {
+        "startLine": 217,
+        "startChar": 25,
+        "endLine": 217,
+        "endChar": 39
+      },
+      "revId": "2f9c8c03feba04d5eeb534674945d8a3567f82c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5174f47a_3b6effd3",
         "filename": "android/crashreport/CrashService_common.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-08T17:42:12Z",
       "side": 1,
       "message": "are we sure? This directory may contain virtually anything, from the dump message to some file with flags",
+      "range": {
+        "startLine": 325,
+        "startChar": 53,
+        "endLine": 325,
+        "endChar": 67
+      },
+      "revId": "2f9c8c03feba04d5eeb534674945d8a3567f82c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3dfcb42a_01d24c20",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-08T18:10:43Z",
+      "side": 1,
+      "message": "That\u0027s a good point. I\u0027ll add a flag to the addReportFile method that mentions if this is a text file or not. Then we can look at that set of files and only pick files that have been explicitly added and that can be displayed to the user.",
+      "parentUuid": "5174f47a_3b6effd3",
       "range": {
         "startLine": 325,
         "startChar": 53,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "3dfcb42a_e1ce407a",
+        "filename": "android/crashreport/CrashService_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-08T18:10:43Z",
+      "side": 1,
+      "message": "Good idea, will do.",
+      "parentUuid": "f165e8c4_a012dea5",
+      "range": {
+        "startLine": 328,
+        "startChar": 8,
+        "endLine": 328,
+        "endChar": 31
+      },
+      "revId": "2f9c8c03feba04d5eeb534674945d8a3567f82c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11951cbd_01d38e59",
         "filename": "android/crashreport/CrashService_darwin.cpp",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2016-02-08T17:42:12Z",
       "side": 1,
       "message": "stdint is a C header, so it should go last - after all the C++ ones",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 19
+      },
+      "revId": "2f9c8c03feba04d5eeb534674945d8a3567f82c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bde8a466_65c36056",
+        "filename": "android/crashreport/CrashService_darwin.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-08T18:10:43Z",
+      "side": 1,
+      "message": "Well, it\u0027s also a C++ header but I guess then it would be \u003ccstdint\u003e so that\u0027s a fair point. I looked at docs/ANDROID-CODING-STYLE.TXT and couldn\u0027t find any details about this, is there another document where this style is mentioned?",
+      "parentUuid": "11951cbd_01d38e59",
       "range": {
         "startLine": 37,
         "startChar": 0,
@@ -278,6 +374,30 @@
     },
     {
       "key": {
+        "uuid": "3dfcb42a_c1cb4468",
+        "filename": "android/crashreport/CrashService_windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-08T18:10:43Z",
+      "side": 1,
+      "message": "Nice, I never though of using array initialization that way.",
+      "parentUuid": "9162ecbe_7db22f4e",
+      "range": {
+        "startLine": 173,
+        "startChar": 3,
+        "endLine": 173,
+        "endChar": 23
+      },
+      "revId": "2f9c8c03feba04d5eeb534674945d8a3567f82c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "719018cb_07555cfb",
         "filename": "android/crashreport/CrashService_windows.cpp",
         "patchSetId": 2
@@ -301,6 +421,30 @@
     },
     {
       "key": {
+        "uuid": "dd00f8f1_5b296320",
+        "filename": "android/crashreport/CrashService_windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-08T18:10:43Z",
+      "side": 1,
+      "message": "I was actually looking at that and decided not to add that information since a lot of it seemed like it would be duplicate information. But now that I look at it again there does seem to be some useful stuff in there, I\u0027ll add it.",
+      "parentUuid": "719018cb_07555cfb",
+      "range": {
+        "startLine": 175,
+        "startChar": 9,
+        "endLine": 175,
+        "endChar": 29
+      },
+      "revId": "2f9c8c03feba04d5eeb534674945d8a3567f82c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5174f47a_9b455353",
         "filename": "android/crashreport/crash-handler.h",
         "patchSetId": 2
@@ -312,6 +456,30 @@
       "writtenOn": "2016-02-08T17:42:12Z",
       "side": 1,
       "message": "why not \"bool\"?",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 3
+      },
+      "revId": "2f9c8c03feba04d5eeb534674945d8a3567f82c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd05bcfe_1f6187de",
+        "filename": "android/crashreport/crash-handler.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-08T18:10:43Z",
+      "side": 1,
+      "message": "I guess I\u0027m worried that on some platforms the size of a C++ bool isn\u0027t going to line up with the size of whatever bool is typedeffed to in C. I guess since we have crashhandler_init return a bool it\u0027s not an issue in the compilers we currently use, but judging by a few search results it seems like it might be an issue with VC++ for example. Even if we\u0027ll never change compilers I think we should stick with well defined behavior that won\u0027t cause any surprises in the future. If using bool here is well defined I would be happy to change it though.",
+      "parentUuid": "5174f47a_9b455353",
       "range": {
         "startLine": 57,
         "startChar": 0,
