@@ -83,7 +83,6 @@ private:
     template <class Action>
     void uiAgentAction(Action a) const;
 
-    // Use this function only if SDK_PATH is not available in QSettings
     QString findAndroidSdkRoot();
 
     // Helper method, calls handleUICommand with

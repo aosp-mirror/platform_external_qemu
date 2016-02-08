@@ -94,14 +94,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
     // Get the latest user selections from the
     // user-config code.
     QSettings settings;
-    QString sdkPath = settings.value(Ui::Settings::SDK_PATH, "").toString();
-    if ( sdkPath.isEmpty() ) {
-        // Initialize the path
-        sdkPath = findAndroidSdkRoot();
-        // Whatever it is, save it
-        settings.setValue(Ui::Settings::SDK_PATH, sdkPath);
-    }
-
     SettingsTheme theme = (SettingsTheme)settings.
                             value(Ui::Settings::UI_THEME, 0).toInt();
     if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
@@ -265,9 +257,10 @@ QString ToolWindow::findAndroidSdkRoot()
 {
     auto sdkRoot = android::ConfigDirs::getSdkRootDirectory();
     if (sdkRoot.empty()) {
-        showErrorDialog(tr("The ANDROID_SDK_ROOT environment variable must be "
-                           "set to use this."),
-                        tr("Android SDK Root"));
+        showErrorDialog(tr("Could not find the platform-tools directory. Check to ensure "
+                           "the emulator binary is in an Android SDK tools/directory or set "
+                           "the ANDROID_SDK_ROOT environment variable to a valid directory."),
+                        tr("Android SDK"));
         return QString::null;
     }
     return QString::fromUtf8(sdkRoot.c_str());
@@ -277,7 +270,7 @@ QString ToolWindow::getAdbFullPath(QStringList *args)
 {
     // Find adb first
     QSettings settings;
-    QString sdkRoot = settings.value(Ui::Settings::SDK_PATH, "").toString();
+    QString sdkRoot = findAndroidSdkRoot();
     if (sdkRoot.isNull()) {
         return QString::null;
     }

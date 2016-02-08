@@ -18,6 +18,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QSettings>
+#include <QStandardPaths>
 
 // Helper function to set the contents of a QLineEdit.
 static void setElidedText(QLineEdit* line_edit, const QString& text) {
@@ -32,7 +33,6 @@ SettingsPage::SettingsPage(QWidget *parent) :
 {
     mUi->setupUi(this);
     mUi->set_saveLocBox->installEventFilter(this);
-    mUi->set_sdkPathBox->installEventFilter(this);
 
     QString savePath =
         QDir::toNativeSeparators(getScreenshotSaveDirectory());
@@ -43,13 +43,8 @@ SettingsPage::SettingsPage(QWidget *parent) :
         setElidedText(mUi->set_saveLocBox, savePath);
     }
 
-    // SDK path
-    QSettings settings;
-    QString sdkPath = settings.value(Ui::Settings::SDK_PATH, "").toString();
-    sdkPath = QDir::toNativeSeparators(sdkPath);
-    setElidedText(mUi->set_sdkPathBox, sdkPath);
-
     // Dark/Light theme
+    QSettings settings;
     SettingsTheme theme =
         static_cast<SettingsTheme>(settings.value(Ui::Settings::UI_THEME, 0).toInt());
     if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
@@ -97,19 +92,12 @@ bool SettingsPage::eventFilter (QObject* object, QEvent* event)
 {
     QSettings settings;
     QString savePath = settings.value(Ui::Settings::SAVE_PATH, "").toString();
-    QString sdkPath = settings.value(Ui::Settings::SDK_PATH, "").toString();
 
     if (object == mUi->set_saveLocBox) {
         if (event->type() == QEvent::FocusIn) {
             mUi->set_saveLocBox->setText(savePath);
         } else if (event->type() == QEvent::FocusOut) {
             setElidedText(mUi->set_saveLocBox, savePath);
-        }
-    } else if (object == mUi->set_sdkPathBox) {
-        if (event->type() == QEvent::FocusIn) {
-            mUi->set_sdkPathBox->setText(sdkPath);
-        } else if (event->type() == QEvent::FocusOut) {
-            setElidedText(mUi->set_sdkPathBox, sdkPath);
         }
     }
     return false;
@@ -137,7 +125,7 @@ void SettingsPage::on_set_saveLocFolderButton_clicked()
     QString dirName = QFileDialog::getExistingDirectory(
         this,
         tr("Save location"),
-        settings.value(Ui::Settings::SDK_PATH, "").toString(),
+        QStandardPaths::displayName(QStandardPaths::DesktopLocation),
         QFileDialog::ShowDirsOnly);
 
     if ( dirName.isEmpty() ) return; // Operation was canceled
@@ -158,65 +146,10 @@ void SettingsPage::on_set_saveLocFolderButton_clicked()
     setElidedText(mUi->set_saveLocBox, dirName);
 }
 
-void SettingsPage::on_set_sdkPathButton_clicked()
-{
-    QSettings settings;
-    QString dirName = settings.value(Ui::Settings::SDK_PATH, "").toString();
-
-    // Repeat this dialog until the user is successful or cancels
-    bool pathIsGood = false;
-    do {
-        dirName = QFileDialog::getExistingDirectory(
-                                  this,
-                                  tr("Android SDK location"),
-                                  dirName,
-                                  QFileDialog::ShowDirsOnly);
-
-        if ( dirName.isEmpty() ) {
-            break; // Operation was canceled
-        }
-
-        // We got a path. If it does not have an SDK, don't allow it.
-        // (We simply test for the existence of "platforms/"; see
-        // validateSdkPath() in //tools/adt/idea/android/src/com/
-        // android/tools/idea/sdk/SdkPaths.java)
-        QString platformsName = dirName + "/platforms";
-        QFileInfo platformsInfo(platformsName);
-        pathIsGood = platformsInfo.exists() && platformsInfo.isDir();
-
-        if (pathIsGood) {
-            // Save this selection
-            settings.setValue(Ui::Settings::SDK_PATH, dirName);
-
-            dirName = QDir::toNativeSeparators(dirName);
-            setElidedText(mUi->set_sdkPathBox, dirName);
-        } else {
-            // The path is not good. Force the user to cancel or try again.
-            QString errStr = tr("This path does not point to "
-                                "an SDK installation<br><br>")
-                             + QDir::toNativeSeparators(dirName);
-            QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Select Android SDK path"));
-            msgBox.setText(errStr);
-            msgBox.setInformativeText(tr("Do you want try again or cancel?"));
-            msgBox.setStandardButtons(QMessageBox::Retry | QMessageBox::Cancel);
-            msgBox.setDefaultButton(QMessageBox::Cancel);
-            int selection = msgBox.exec();
-            if (selection == QMessageBox::Cancel) break;
-        }
-    } while ( !pathIsGood );
-}
-
 void SettingsPage::on_set_saveLocBox_textEdited(const QString&) {
     QSettings settings;
     mUi->set_saveLocBox->setText(
         settings.value(Ui::Settings::SAVE_PATH, "").toString());
-}
-
-void SettingsPage::on_set_sdkPathBox_textEdited(const QString&) {
-    QSettings settings;
-    mUi->set_sdkPathBox->setText(
-        settings.value(Ui::Settings::SDK_PATH, "").toString());
 }
 
 void SettingsPage::on_set_allowKeyboardGrab_toggled(bool checked) {

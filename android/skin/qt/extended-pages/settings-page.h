@@ -33,8 +33,6 @@ private slots:
     void on_set_onTop_toggled(bool checked);
     void on_set_saveLocBox_textEdited(const QString&);
     void on_set_saveLocFolderButton_clicked();
-    void on_set_sdkPathBox_textEdited(const QString&);
-    void on_set_sdkPathButton_clicked();
     void on_set_themeBox_currentIndexChanged(int index);
     void on_set_crashReportPrefAsk_clicked();
     void on_set_crashReportPrefAlways_clicked();
