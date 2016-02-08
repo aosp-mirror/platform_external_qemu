@@ -1,0 +1,10 @@
+QGroupBox { font-weight: regular; font-size: %%FONT_MEDIUM%%; }
+QComboBox, QLineEdit, QPlainTextEdit, QPushButton, QRadioButton {
+    font-weight: regular;
+    font-size: %%FONT_LARGE%%;
+}
+*[ColorGroup="Tool"] {
+    font-weight: bold;
+    font-size: %%FONT_MEDIUM%%;
+}
+
