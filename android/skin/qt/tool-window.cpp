@@ -30,6 +30,7 @@
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/extended-window-styles.h"
+#include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/tool-window.h"
@@ -110,12 +111,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
     }
 
     switchAllIconsForTheme(theme);
-
-    if (theme == SETTINGS_THEME_DARK) {
-        this->setStyleSheet(QT_STYLE(DARK));
-    } else {
-        this->setStyleSheet(QT_STYLE(LIGHT));
-    }
+    this->setStyleSheet(Ui::stylesheetForTheme(theme));
 
     QString default_shortcuts =
         "Ctrl+Alt+L SHOW_PANE_LOCATION\n"
