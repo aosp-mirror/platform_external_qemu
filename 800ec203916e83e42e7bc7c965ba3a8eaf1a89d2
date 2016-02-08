@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5d5c0836_07d396d6",
+        "filename": "android/skin/qt/emulator-container.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-08T20:17:56Z",
+      "side": 1,
+      "message": "Is there a reason for using this specific number? if so, add a comment",
+      "range": {
+        "startLine": 84,
+        "startChar": 30,
+        "endLine": 84,
+        "endChar": 31
+      },
+      "revId": "800ec203916e83e42e7bc7c965ba3a8eaf1a89d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d59cc44_a8c13bf9",
+        "filename": "android/skin/qt/emulator-container.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-08T20:17:56Z",
+      "side": 1,
+      "message": "Please add \"override\" specifier to overridden virtual functions, here and in other places (see http://en.cppreference.com/w/cpp/language/override)",
+      "range": {
+        "startLine": 31,
+        "startChar": 3,
+        "endLine": 31,
+        "endChar": 40
+      },
+      "revId": "800ec203916e83e42e7bc7c965ba3a8eaf1a89d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd9c782c_fbf7ef39",
+        "filename": "android/skin/qt/emulator-overlay.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-08T20:17:56Z",
+      "side": 1,
+      "message": "nit: line length",
+      "range": {
+        "startLine": 298,
+        "startChar": 83,
+        "endLine": 299,
+        "endChar": 117
+      },
+      "revId": "800ec203916e83e42e7bc7c965ba3a8eaf1a89d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
