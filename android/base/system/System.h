@@ -89,14 +89,6 @@ public:
 
     using RunOptions = android::base::RunOptions;
 
-#ifdef _WIN32
-    using Pid = DWORD;
-    using ProcessExitCode = DWORD;
-#else
-    using Pid = pid_t;
-    using ProcessExitCode = int;
-#endif
-
 public:
     // Call this function to get the instance
     static System* get();
@@ -269,6 +261,34 @@ public:
     // Execute commands.
     // /////////////////////////////////////////////////////////////////////////
 
+    class CommandResult {
+    public:
+#ifdef _WIN32
+        using Pid = DWORD;
+        using ProcessExitCode = DWORD;
+#else
+        using Pid = pid_t;
+        using ProcessExitCode = int;
+#endif
+
+        bool runCommandSucceeded() const {
+            return mRunCommandSuccess;
+        }
+
+        operator bool() const {
+            return runCommandSucceeded();
+        }
+
+        Pid childPid() const;
+        ProcessExitCode exitCode() const;
+
+        std::istream childStdout();
+        std::istream childStderr();
+    private:
+        const System::RunOptions mRunOptions;
+        bool mRunCommandSuccess = false;
+    }
+
     // Run a shell command.
     // Args:
     //     commandLine: Set of command to run + its arguments
@@ -285,11 +305,10 @@ public:
     // command finished with "success" exit status, just that we succeeded in
     // running it, cf |outExitCode|.
     static const System::Duration kInfinite = 0;
-    virtual bool runCommand(const StringVector& commandLine,
-                            RunOptions options = RunOptions::Default,
-                            System::Duration timeoutMs = kInfinite,
-                            System::ProcessExitCode* outExitCode = nullptr,
-                            System::Pid* outChildPid = nullptr) = 0;
+    virtual CommandResult runCommand(
+            const StringVector& commandLine,
+            RunOptions options = RunOptions::Default,
+            System::Duration timeoutMs = kInfinite);
 
 protected:
     static System* setForTesting(System* system);
