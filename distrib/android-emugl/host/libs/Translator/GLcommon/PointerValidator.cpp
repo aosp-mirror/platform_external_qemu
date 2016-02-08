@@ -14,16 +14,35 @@
 * limitations under the License.
 */
 
-#include <GLcommon/PointerValidator.h>
+#include "GLcommon/PointerValidator.h"
+
+#include "android/base/EintrWrapper.h"
 #include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
 
-#ifdef __linux__
+#ifdef _WIN32
+#include <fcntl.h>
+#include <windows.h>
+#endif
 
 PointerValidator::PointerValidator() {
+    int pipeReturnCode = -1;
+
+#ifdef _WIN32
+    SYSTEM_INFO si;
+    GetSystemInfo(&si);
+    m_pageSize = si.dwPageSize;
+    // The pipe has buffer size 1, because we only write and read one byte each time
+    pipeReturnCode = _pipe(m_pipeFd, 1, _O_BINARY);
+
+#else // !_WIN32
     m_pageSize = getpagesize();
-    if (pipe(m_pipeFd) < 0) {
+    pipeReturnCode = pipe(m_pipeFd);
+
+#endif // !_WIN32
+
+    if (pipeReturnCode < 0) {
         // create pipe failed
         m_pipeFd[0] = 0;
         m_pipeFd[1] = 0;
@@ -48,10 +67,10 @@ bool PointerValidator::isValid(const void* ptr) const {
     }
 
     // write returns -1 when pointer is invalid
-    if (TEMP_FAILURE_RETRY(write(m_pipeFd[1], ptr, 1)) > 0) {
+    if (HANDLE_EINTR(write(m_pipeFd[1], ptr, 1)) > 0) {
         char readBuf;
         // read it back, to avoid filling up the pipe
-        TEMP_FAILURE_RETRY(read(m_pipeFd[0], &readBuf, 1));
+        HANDLE_EINTR(read(m_pipeFd[0], &readBuf, 1));
         return true;
     } else {
         return false;
@@ -80,19 +99,3 @@ bool PointerValidator::isValid(const void* buffer, size_t size) const {
 
     return true;
 }
-
-#else  // __linux__
-// win and mac not yet implemented
-PointerValidator::PointerValidator() {}
-
-PointerValidator::~PointerValidator() {}
-
-bool PointerValidator::isValid(const void* ptr) const {
-    return true;
-}
-
-bool PointerValidator::isValid(const void* buffer, size_t size) const {
-    return true;
-}
-
-#endif  // __linux__
