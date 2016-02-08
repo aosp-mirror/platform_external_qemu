@@ -14,7 +14,7 @@
 #include "android/emulation/control/user_event_agent.h"
 #include "android/settings-agent.h"
 #include "android/skin/keycode.h"
-#include "android/skin/qt/extended-window-styles.h"
+#include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/qt-settings.h"
 #include <QBitmap>
 #include <QSettings>
@@ -98,9 +98,7 @@ void DPadPage::dpad_setPressed(QPushButton* button)
 
     QString iconName = button->property("themeIconNamePressed").toString();
     if ( !iconName.isNull() ) {
-        QString resName = ":/";
-        resName += (theme == SETTINGS_THEME_DARK) ?
-                        DARK_PATH : LIGHT_PATH;
+        QString resName = Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR];
         resName += "/";
         resName += iconName;
         button->setIcon(QIcon(resName));
@@ -116,8 +114,7 @@ void DPadPage::dpad_setReleased(QPushButton* button)
     QString iconName = button->property("themeIconName").toString();
     if ( !iconName.isNull() ) {
         QString resName = ":/";
-        resName += (theme == SETTINGS_THEME_DARK) ?
-                        DARK_PATH : LIGHT_PATH;
+        resName += Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR];
         resName += "/";
         resName += iconName;
         button->setIcon(QIcon(resName));
@@ -126,7 +123,7 @@ void DPadPage::dpad_setReleased(QPushButton* button)
     button->clearFocus();
 }
 
-void DPadPage::setUserEventsAgent(const QAndroidUserEventAgent* agent) 
+void DPadPage::setUserEventsAgent(const QAndroidUserEventAgent* agent)
 {
     mUserEventsAgent = agent;
 }

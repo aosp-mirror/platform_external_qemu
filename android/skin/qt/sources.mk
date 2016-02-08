@@ -52,6 +52,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-window.cpp \
     android/skin/qt/QtLooper.cpp \
     android/skin/qt/qt-ui-commands.cpp \
+    android/skin/qt/stylesheet.cpp \
     android/skin/qt/tool-window.cpp \
 
 ANDROID_SKIN_QT_MOC_SRC_FILES := \

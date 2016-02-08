@@ -17,6 +17,7 @@
 #include "android/skin/keyset.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
 
 #include "ui_extended.h"
@@ -119,11 +120,9 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
     // Make all the tab buttons the same except for the one whose
     // pane is on top.
     QString colorStyle("text-align: left; color:");
-    colorStyle += (theme == SETTINGS_THEME_DARK) ?
-                      DARK_MAJOR_TAB_COLOR : LIGHT_MAJOR_TAB_COLOR;
+    colorStyle += Ui::stylesheetValues(theme)[Ui::MAJOR_TAB_COLOR_VAR];
     colorStyle += "; background-color:";
-    colorStyle += (theme == SETTINGS_THEME_DARK) ?
-                      DARK_TAB_BKG_COLOR : LIGHT_TAB_BKG_COLOR;
+    colorStyle += Ui::stylesheetValues(theme)[Ui::TAB_BKG_COLOR_VAR];
 
     mExtendedUi->batteryButton    ->setStyleSheet(colorStyle);
     mExtendedUi->cellularButton   ->setStyleSheet(colorStyle);
@@ -136,11 +135,9 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
     mExtendedUi->telephoneButton  ->setStyleSheet(colorStyle);
 
     QString activeStyle("text-align: left; color:");
-    activeStyle += (theme == SETTINGS_THEME_DARK) ?
-                      DARK_MAJOR_TAB_COLOR : LIGHT_MAJOR_TAB_COLOR;
+    activeStyle += Ui::stylesheetValues(theme)[Ui::MAJOR_TAB_COLOR_VAR];
     activeStyle += "; background-color:";
-    activeStyle += (theme == SETTINGS_THEME_DARK) ?
-                      DARK_TAB_SELECTED_COLOR : LIGHT_TAB_SELECTED_COLOR;
+    activeStyle += Ui::stylesheetValues(theme)[Ui::TAB_SELECTED_COLOR_VAR];
     thisButton->setStyleSheet(activeStyle);
 
     mExtendedUi->batteryButton    ->setAutoFillBackground(true);
@@ -177,20 +174,11 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme)
         // Failed: use 1.0
         densityFactor = 1.0;
     }
-    QString styleString = (densityFactor > 1.5) ? QT_FONTS(HI) : QT_FONTS(LO);
-
+    QString styleString = Ui::fontStylesheet(densityFactor > 1.5);
 
     // The second part is based on the theme
     // Set the style for this theme
-    switch (theme) {
-        case SETTINGS_THEME_DARK:
-            styleString += QT_STYLE(DARK);
-            break;
-        case SETTINGS_THEME_LIGHT:
-        default:
-            styleString += QT_STYLE(LIGHT);
-            break;
-    }
+    styleString += Ui::stylesheetForTheme(theme);
 
     // Apply this style to the extended window (this),
     // and to the main tool-bar.
