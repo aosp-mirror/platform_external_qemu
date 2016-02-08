@@ -1,0 +1,101 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d44b487_7e8571c7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-08T22:18:00Z",
+      "side": 1,
+      "message": "Missing [ui] (helps sort through CL\u0027s a lot easier!)",
+      "revId": "656baabf07d1fe80126ea43607ca6e5e96c9427c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd30a413_6244b623",
+        "filename": "android/skin/qt/resources.qrc",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-08T22:18:00Z",
+      "side": 1,
+      "message": "Nit: whitespace",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 8
+      },
+      "revId": "656baabf07d1fe80126ea43607ca6e5e96c9427c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d3ff0e9_ddbe4b86",
+        "filename": "android/skin/qt/styles/fonts_stylesheet_template.css",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-08T22:18:00Z",
+      "side": 1,
+      "message": "Copyright header?",
+      "revId": "656baabf07d1fe80126ea43607ca6e5e96c9427c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd48f8a2_fbc18ff8",
+        "filename": "android/skin/qt/styles/stylesheet_template.css",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-08T22:18:00Z",
+      "side": 1,
+      "message": "Copyright header?",
+      "revId": "656baabf07d1fe80126ea43607ca6e5e96c9427c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fda85c5d_470c108f",
+        "filename": "android/skin/qt/stylesheet.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-08T22:18:00Z",
+      "side": 1,
+      "message": "Should use the above *_VAR values in these.",
+      "range": {
+        "startLine": 77,
+        "startChar": 5,
+        "endLine": 77,
+        "endChar": 11
+      },
+      "revId": "656baabf07d1fe80126ea43607ca6e5e96c9427c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
