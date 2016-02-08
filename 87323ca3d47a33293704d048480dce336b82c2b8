@@ -22,6 +22,30 @@
       "revId": "87323ca3d47a33293704d048480dce336b82c2b8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3d983433_7e9c3188",
+        "filename": "android/skin/qt/resources.qrc",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-08T19:21:26Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "11951cbd_645aa07a",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 3
+      },
+      "revId": "87323ca3d47a33293704d048480dce336b82c2b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
