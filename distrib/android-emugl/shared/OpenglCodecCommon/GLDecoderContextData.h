@@ -13,16 +13,21 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef _GL_DECODER_CONTEXT_DATA_H_
-#define _GL_DECODER_CONTEXT_DATA_H_
+#pragma once
+
+#include <vector>
+#include <string>
 
 #include <assert.h>
 #include <string.h>
-#include "FixedBuffer.h"
-#include "codec_defs.h"
 
+// Convenient class used to hold the common context data shared
+// by both the GLESv1 and GLESv2 decoders. This corresponds to
+// vertex attribute buffers.
 class  GLDecoderContextData {
 public:
+    // List of supported vertex attribute indices, as they appear in
+    // a glVertexAttribPointer() call.
     typedef enum  {
         VERTEX_LOCATION = 0,
         NORMAL_LOCATION = 1,
@@ -41,29 +46,37 @@ public:
         LAST_LOCATION = 14
     } PointerDataLocation;
 
-    GLDecoderContextData(int nLocations = CODEC_MAX_VERTEX_ATTRIBUTES) :
-        m_nLocations(nLocations)
-    {
-        m_pointerData = new FixedBuffer[m_nLocations];
+    // Default constructor.
+    GLDecoderContextData(int numLocations = kMaxVertexAttributes)
+            : mPointerData(),
+              mNumLocations(static_cast<unsigned>(numLocations)) {
+        mPointerData.resize(mNumLocations);
     }
 
-    ~GLDecoderContextData() {
-        delete [] m_pointerData;
-    }
-
+    // Store |len| bytes from |data| into the buffer associated with
+    // vertex attribute index |loc|.
     void storePointerData(unsigned int loc, void *data, size_t len) {
+        if (loc < mNumLocations) {
+            std::string& ptrData = mPointerData[loc];
+            ptrData.assign(reinterpret_cast<char*>(data), len);
+        } else {
+            // User error, don't do anything here
+        }
+    }
 
-        assert(loc < (unsigned)m_nLocations);
-        m_pointerData[loc].alloc(len);
-        memcpy(m_pointerData[loc].ptr(), data, len);
+    // Return pointer to data associated with vertex attribute index |loc|
+    void* pointerData(unsigned int loc) const {
+        if (loc < mNumLocations) {
+            return const_cast<char*>(mPointerData[loc].c_str());
+        } else {
+            // User error. Return nullptr.
+            return nullptr;
+        }
     }
-    void *pointerData(unsigned int loc) {
-        assert(loc < (unsigned)m_nLocations);
-        return m_pointerData[loc].ptr();
-    }
+
 private:
-    FixedBuffer *m_pointerData;
-    int m_nLocations;
-};
+    static const int kMaxVertexAttributes = 64;
 
-#endif
+    std::vector<std::string> mPointerData;
+    unsigned mNumLocations = 0;
+};

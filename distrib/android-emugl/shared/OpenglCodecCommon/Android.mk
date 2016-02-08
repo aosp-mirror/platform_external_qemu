@@ -4,24 +4,11 @@
 LOCAL_PATH := $(call my-dir)
 
 commonSources := \
-        GLClientState.cpp \
-        GLSharedGroup.cpp \
         glUtils.cpp \
-        SocketStream.cpp \
-        TcpStream.cpp \
-        TimeUtils.cpp
 
 host_commonSources := $(commonSources)
 
 host_commonLdLibs := $(CXX_STD_LIB)
-
-ifeq ($(BUILD_TARGET_OS),windows)
-    host_commonSources += Win32PipeStream.cpp
-    host_commonLdLibs += -lws2_32 -lpsapi
-else
-    host_commonSources += UnixStream.cpp
-endif
-
 
 ### OpenglCodecCommon  host ##############################################
 $(call emugl-begin-host-static-library,libOpenglCodecCommon)
