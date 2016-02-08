@@ -262,6 +262,13 @@ const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsi
         m_map[arrType]->setBuffer(size,type,stride,vbo,bufferName,offset,normalize);
         return  static_cast<const unsigned char*>(vbo->getData()) +  offset;
     }
+    // If we are setting a pointer, make sure it is a valid pointer
+    // Notice that if we use vbo, its data doesn't have to be valid at this
+    // point...
+    if (!validatePointer(data)) {
+        setGLerror(GL_INVALID_VALUE);
+        return nullptr;
+    }
     m_map[arrType]->setArray(size,type,stride,data,normalize);
     return data;
 }
@@ -272,6 +279,33 @@ void GLEScontext::enableArr(GLenum arr,bool enable) {
 
 bool GLEScontext::isArrEnabled(GLenum arr) {
     return m_map[arr]->isEnable();
+}
+
+bool GLEScontext::validateArrayPointer(GLint first, GLsizei count, const GLESpointer* p) const {
+    GLenum type = p->getType();
+    unsigned int bytes = 0;
+    switch (type) {
+        case GL_BYTE:
+        case GL_UNSIGNED_BYTE:
+            bytes = 1;
+            break;
+        case GL_SHORT:
+        case GL_UNSIGNED_SHORT:
+        case GL_HALF_FLOAT:
+            bytes = 2;
+            break;
+        case GL_FLOAT:
+        case GL_FIXED:
+            bytes = 4;
+            break;
+        default:
+            ERR("**** ERROR unknown type 0x%x (%s,%d)\n", type, __FUNCTION__,__LINE__);
+            return true;
+    }
+    int attribSize = p->getSize();
+    int stride = p->getStride() ? p->getStride() : bytes * attribSize;
+    const void* data = (const char*)p->getData() + (first*stride);
+    return validateBuffer(data, count*stride);
 }
 
 const GLESpointer* GLEScontext::getPointer(GLenum arrType) {
