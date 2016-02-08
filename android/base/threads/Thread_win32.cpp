@@ -75,19 +75,9 @@ bool Thread::wait(intptr_t* exitStatus) {
     if (!mStarted) {
         return false;
     }
-    {
-        ScopedLocker locker(&mLock);
-        if (mFinished) {
-            // Thread already stopped.
-            if (exitStatus) {
-                *exitStatus = mExitStatus;
-            }
-            return true;
-        }
-    }
 
-    // NOTE: Do not hold lock during wait to aloow thread_main to
-    // properly update mIsRunning and mExitStatus on thread exit.
+    // NOTE: Do not hold lock during wait to allow thread_main to
+    // properly update mIsRunning and mFinished on thread exit.
     if (WaitForSingleObject(mThread, INFINITE) == WAIT_FAILED) {
         return false;
     }
