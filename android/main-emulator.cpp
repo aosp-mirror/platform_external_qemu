@@ -74,7 +74,7 @@ static char* getQemuExecutablePath(const char* programPath,
                                    const char* avdArch,
                                    int wantedBitness);
 
-static void updateLibrarySearchPath(int wantedBitness);
+static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs);
 
 static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                                              const char* avdArch,
@@ -128,6 +128,7 @@ int main(int argc, char** argv)
     const char* engine = NULL;
     bool force_32bit = false;
     bool no_window = false;
+    bool useSystemLibs = false;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -137,6 +138,16 @@ int main(int argc, char** argv)
     if (debug != NULL && *debug && *debug != '0') {
         android_verbose = 1;
     }
+
+#ifdef __linux__
+    /* Define ANDROID_EMULATOR_USE_SYSTEM_LIBS to 1 in your environment if you
+     * want the effect of -use-system-libs to be permanent.
+     */
+    const char* system_libs = getenv("ANDROID_EMULATOR_USE_SYSTEM_LIBS");
+    if (system_libs && system_libs[0] && system_libs[0] != '0') {
+        useSystemLibs = true;
+    }
+#endif  // __linux__
 
     /* Parse command-line and look for
      * 1) an avd name either in the form or '-avd <name>' or '@<name>'
@@ -206,6 +217,13 @@ int main(int argc, char** argv)
             no_window = true;
             continue;
         }
+
+#ifdef __linux__
+        if (!strcmp(opt, "-use-system-libs")) {
+            useSystemLibs = true;
+            continue;
+        }
+#endif  // __linux__
 
         if (!strcmp(opt,"-list-avds")) {
             AvdScanner* scanner = avdScanner_new(NULL);
@@ -400,7 +418,7 @@ int main(int argc, char** argv)
     /* Setup library paths so that bundled standard shared libraries are picked
      * up by the re-exec'ed emulator
      */
-    updateLibrarySearchPath(wantedBitness);
+    updateLibrarySearchPath(wantedBitness, useSystemLibs);
 
     /* We need to find the location of the GLES emulation shared libraries
      * and modify either LD_LIBRARY_PATH or PATH accordingly
@@ -614,7 +632,7 @@ static char* getQemuExecutablePath(const char* progDir,
     return strdup(fullPath);
 }
 
-static void updateLibrarySearchPath(int wantedBitness) {
+static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs) {
     const char* libSubDir = (wantedBitness == 64) ? "lib64" : "lib";
     char fullPath[PATH_MAX];
     char* tail = fullPath;
@@ -622,7 +640,6 @@ static void updateLibrarySearchPath(int wantedBitness) {
     char* launcherDir = get_launcher_directory();
     tail = bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s", launcherDir,
                     libSubDir);
-    free(launcherDir);
 
     if (tail >= fullPath + sizeof(fullPath)) {
         APANIC("Custom library path too long (clipped) [%s]. "
@@ -632,6 +649,27 @@ static void updateLibrarySearchPath(int wantedBitness) {
 
     D("Adding library search path: '%s'\n", fullPath);
     add_library_search_dir(fullPath);
+
+#ifdef __linux__
+    if (!useSystemLibs) {
+        // Use bundled libstdc++
+        tail = bufprint(fullPath, fullPath + sizeof(fullPath),
+                        "%s/%s/libstdc++", launcherDir, libSubDir);
+
+        if (tail >= fullPath + sizeof(fullPath)) {
+            APANIC("Custom library path too long (clipped) [%s]. "
+                "Can not use bundled libraries. ",
+                fullPath);
+        }
+
+        D("Adding library search path: '%s'\n", fullPath);
+        add_library_search_dir(fullPath);
+    }
+#else  // !__linux__
+    (void)useSystemLibs;
+#endif  // !__linux__
+
+    free(launcherDir);
 }
 
 // Verify and AVD's system image directory to see if it supports ranchu.
