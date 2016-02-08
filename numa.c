@@ -37,6 +37,10 @@
 #include "qmp-commands.h"
 #include "hw/mem/pc-dimm.h"
 
+#ifdef USE_ANDROID_EMU
+#include "android/error-messages.h"
+#endif  // USE_ANDROID_EMU
+
 QemuOptsList qemu_numa_opts = {
     .name = "numa",
     .implied_opt_name = "type",
@@ -271,7 +275,15 @@ static void allocate_system_memory_nonnuma(MemoryRegion *mr, Object *owner,
         exit(1);
 #endif
     } else {
+#ifdef USE_ANDROID_EMU
+        memory_region_init_ram(mr, owner, name, ram_size,
+                               &android_init_error_with_message);
+        if (android_init_error_occurred()) {
+            return;
+        }
+#else  // !USE_ANDROID_EMU
         memory_region_init_ram(mr, owner, name, ram_size, &error_abort);
+#endif  // USE_ANDROID_EMU
     }
     vmstate_register_ram_global(mr);
 }

@@ -18,6 +18,7 @@
 #include "android/avd/hw-config.h"
 #include "android/cmdline-option.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/error-messages.h"
 #include "android/filesystems/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
 #include "android/globals.h"
@@ -340,6 +341,10 @@ static void enter_qemu_main_loop(int argc, char **argv) {
     D("Starting QEMU main loop");
     run_qemu_main(argc, (const char**)argv);
     D("Done with QEMU main loop");
+
+    if (android_init_error_occurred()) {
+        skin_winsys_error_dialog(android_init_error_get_message(), "Error");
+    }
 }
 
 #if defined(_WIN32)

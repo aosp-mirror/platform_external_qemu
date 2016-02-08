@@ -108,6 +108,7 @@
 #include "config.h"
 
 #include "android/boot-properties.h"
+#include "android/error-messages.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/metrics/metrics_reporter.h"
@@ -4805,6 +4806,12 @@ int run_qemu_main(int argc, const char **argv)
     current_machine->cpu_model = cpu_model;
 
     machine_class->init(current_machine);
+#ifdef USE_ANDROID_EMU
+    if (android_init_error_occurred()) {
+        // Something went wrong when initializing the virtual machine
+        return 1;
+    }
+#endif
 
     if (!realtime_init()) {
         return 1;

@@ -63,6 +63,7 @@
 
 #ifdef USE_ANDROID_EMU
 #include "android/android.h"
+#include "android/error-messages.h"
 #else
 #include "android-console.h"
 #endif
@@ -285,6 +286,11 @@ static void pc_init1(MachineState *machine,
                                 below_4g_mem_size,
                                 guest_info);
     }
+#ifdef USE_ANDROID_EMU
+    if (android_init_error_occurred()) {
+        return;
+    }
+#endif  // USE_ANDROID_EMU
 
     gsi_state = g_malloc0(sizeof(*gsi_state));
     if (kvm_irqchip_in_kernel()) {

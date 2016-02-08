@@ -63,6 +63,10 @@
 #include "qapi/visitor.h"
 #include "qapi-visit.h"
 
+#ifdef USE_ANDROID_EMU
+#include "android/error-messages.h"
+#endif  // USE_ANDROID_EMU
+
 /* debug PC/ISA interrupts */
 //#define DEBUG_IRQ
 
@@ -1208,6 +1212,11 @@ FWCfgState *pc_memory_init(MachineState *machine,
     ram = g_malloc(sizeof(*ram));
     memory_region_allocate_system_memory(ram, NULL, "pc.ram",
                                          machine->ram_size);
+#ifdef USE_ANDROID_EMU
+    if (android_init_error_occurred()) {
+        return NULL;
+    }
+#endif  // USE_ANDROID_EMU
     *ram_memory = ram;
     ram_below_4g = g_malloc(sizeof(*ram_below_4g));
     memory_region_init_alias(ram_below_4g, NULL, "ram-below-4g", ram,
