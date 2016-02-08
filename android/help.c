@@ -1578,6 +1578,23 @@ help_force_32bit(stralloc_t* out)
     );
 }
 
+static void
+help_use_system_libs(stralloc_t* out)
+{
+    PRINTF(
+    "  Use -use-system-libs to use the system's libraries for libstdc++ and Qt\n"
+    "  instead of the ones that come bundled with the emulator. This should only\n"
+    "  be used if the emulator doesn't normally start on your system for some reason\n"
+    "  (e.g. some Linux Radeon GL driver libraries require a more recent libstdc++.so).\n"
+    "  You will need to have the Qt5 libraries installed on your system.\n"
+    "\n"
+    "  NOTE: There is no guarantee that using this flag makes the emulator runnable\n"
+    "  it's a work-around for potential confusing system library issues, that should\n"
+    "  only affect a small amount of users.\n\n"
+    "\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

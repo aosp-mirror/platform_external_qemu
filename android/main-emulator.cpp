@@ -74,7 +74,7 @@ static char* getQemuExecutablePath(const char* programPath,
                                    const char* avdArch,
                                    int wantedBitness);
 
-static void updateLibrarySearchPath(int wantedBitness);
+static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs);
 
 static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                                              const char* avdArch,
@@ -128,6 +128,7 @@ int main(int argc, char** argv)
     const char* engine = NULL;
     bool force_32bit = false;
     bool no_window = false;
+    bool useSystemLibs = false;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -204,6 +205,11 @@ int main(int argc, char** argv)
 
         if (!strcmp(opt,"-no-window")) {
             no_window = true;
+            continue;
+        }
+
+        if (!strcmp(opt, "-use-system-libs")) {
+            useSystemLibs = true;
             continue;
         }
 
@@ -400,7 +406,7 @@ int main(int argc, char** argv)
     /* Setup library paths so that bundled standard shared libraries are picked
      * up by the re-exec'ed emulator
      */
-    updateLibrarySearchPath(wantedBitness);
+    updateLibrarySearchPath(wantedBitness, useSystemLibs);
 
     /* We need to find the location of the GLES emulation shared libraries
      * and modify either LD_LIBRARY_PATH or PATH accordingly
@@ -614,7 +620,7 @@ static char* getQemuExecutablePath(const char* progDir,
     return strdup(fullPath);
 }
 
-static void updateLibrarySearchPath(int wantedBitness) {
+static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs) {
     const char* libSubDir = (wantedBitness == 64) ? "lib64" : "lib";
     char fullPath[PATH_MAX];
     char* tail = fullPath;
@@ -622,7 +628,6 @@ static void updateLibrarySearchPath(int wantedBitness) {
     char* launcherDir = get_launcher_directory();
     tail = bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s", launcherDir,
                     libSubDir);
-    free(launcherDir);
 
     if (tail >= fullPath + sizeof(fullPath)) {
         APANIC("Custom library path too long (clipped) [%s]. "
@@ -632,6 +637,23 @@ static void updateLibrarySearchPath(int wantedBitness) {
 
     D("Adding library search path: '%s'\n", fullPath);
     add_library_search_dir(fullPath);
+
+    if (!useSystemLibs) {
+        // Use bundled libstdc++
+        tail = bufprint(fullPath, fullPath + sizeof(fullPath),
+                        "%s/%s/libstdc++", launcherDir, libSubDir);
+
+        if (tail >= fullPath + sizeof(fullPath)) {
+            APANIC("Custom library path too long (clipped) [%s]. "
+                "Can not use bundled libraries. ",
+                fullPath);
+        }
+
+        D("Adding library search path: '%s'\n", fullPath);
+        add_library_search_dir(fullPath);
+    }
+
+    free(launcherDir);
 }
 
 // Verify and AVD's system image directory to see if it supports ranchu.

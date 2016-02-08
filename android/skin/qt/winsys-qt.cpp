@@ -84,11 +84,13 @@ std::shared_ptr<void> skin_winsys_get_shared_ptr() {
 extern void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv) {
     D("Starting QT main loop\n");
 
+#if 0
     // Make Qt look at the libraries within this installation
     String qtPath = androidQtGetLibraryDir();
     QStringList pathList(qtPath.c_str());
     QCoreApplication::setLibraryPaths(pathList);
     D("Qt lib path: %s\n", qtPath.c_str());
+#endif
 
     if (!no_window) {
         // Give Qt the fonts from our resource file
@@ -333,6 +335,16 @@ extern void skin_winsys_spawn_thread(bool no_window,
 
 extern void skin_winsys_start(bool no_window, bool raw_keys) {
     GlobalState* g = globalState();
+
+#if 1  // DEBUG
+    std::vector<std::string> env = System::get()->envGetAll();
+    D("================ ENVIRONMENT ============================");
+    for (const auto& str : env) {
+        D("%s", str.c_str());
+    }
+    D("---------------------------------------------------------");
+#endif
+
 #ifdef Q_OS_LINUX
     // This call is required to make doing OpenGL stuff on the UI
     // thread safe. The AA_X11InitThreads flag in Qt does not actually
