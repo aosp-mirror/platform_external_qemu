@@ -83,9 +83,6 @@ private:
     template <class Action>
     void uiAgentAction(Action a) const;
 
-    // Use this function only if SDK_PATH is not available in QSettings
-    QString findAndroidSdkRoot();
-
     // Helper method, calls handleUICommand with
     // down equal to true and down equal to false.
     void handleUICommand(QtUICommand cmd) {
@@ -117,6 +114,7 @@ private:
     QQueue<QUrl> mFilesToPush;
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
     bool mIsExtendedWindowActiveOnHide = false;
+    QString mDetectedAdbPath;
 
 private slots:
     void on_back_button_pressed();

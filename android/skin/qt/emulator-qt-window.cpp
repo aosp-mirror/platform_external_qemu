@@ -132,7 +132,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit, this, &EmulatorQtWindow::slot_clearInstance);
 
     QObject::connect(&mScreencapProcess, SIGNAL(finished(int)), this, SLOT(slot_screencapFinished(int)));
-    QObject::connect(&mScreencapPullProcess,
+    QObject::connect(&mScreencapProcess,
                      SIGNAL(error(QProcess::ProcessError)), this,
                      SLOT(slot_showProcessErrorDialog(QProcess::ProcessError)));
     QObject::connect(&mScreencapPullProcess, SIGNAL(finished(int)), this, SLOT(slot_screencapPullFinished(int)));
@@ -230,7 +230,7 @@ void EmulatorQtWindow::slot_showProcessErrorDialog(
         case QProcess::FailedToStart:
             msg =
                     tr("Failed to start process.<br/>"
-                       "Check settings to verify that your chosen SDK path "
+                       "Check settings to verify that your chosen ADB path "
                        "is valid.");
             break;
         default:

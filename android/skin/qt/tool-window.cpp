@@ -91,17 +91,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
     QObject::connect(&mPushDialog, SIGNAL(canceled()), this, SLOT(slot_pushCanceled()));
     QObject::connect(&mPushProcess, SIGNAL(finished(int)), this, SLOT(slot_pushFinished(int)));
 
-    // Get the latest user selections from the
-    // user-config code.
+    // Get the latest user selections from the user-config code.
     QSettings settings;
-    QString sdkPath = settings.value(Ui::Settings::SDK_PATH, "").toString();
-    if ( sdkPath.isEmpty() ) {
-        // Initialize the path
-        sdkPath = findAndroidSdkRoot();
-        // Whatever it is, save it
-        settings.setValue(Ui::Settings::SDK_PATH, sdkPath);
-    }
-
     SettingsTheme theme = (SettingsTheme)settings.
                             value(Ui::Settings::UI_THEME, 0).toInt();
     if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
@@ -200,6 +191,15 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
             assert(0);
         }
     }
+
+    auto sdkRootDirectory = android::ConfigDirs::getSdkRootDirectory();
+    if (!sdkRootDirectory.empty()) {
+        mDetectedAdbPath = QString(
+                PathUtils::join(sdkRootDirectory, "platform-tools", "adb")
+                        .c_str());
+    } else {
+        mDetectedAdbPath = QString::null;
+    }
 }
 
 ToolWindow::~ToolWindow() {
@@ -260,38 +260,31 @@ void ToolWindow::show()
         }
     }
 }
-
-QString ToolWindow::findAndroidSdkRoot()
-{
-    auto sdkRoot = android::ConfigDirs::getSdkRootDirectory();
-    if (sdkRoot.empty()) {
-        showErrorDialog(tr("The ANDROID_SDK_ROOT environment variable must be "
-                           "set to use this."),
-                        tr("Android SDK Root"));
-        return QString::null;
-    }
-    return QString::fromUtf8(sdkRoot.c_str());
-}
-
-QString ToolWindow::getAdbFullPath(QStringList *args)
-{
-    // Find adb first
+QString ToolWindow::getAdbFullPath(QStringList* args) {
+    QString adbPath = QString::null;
     QSettings settings;
-    QString sdkRoot = settings.value(Ui::Settings::SDK_PATH, "").toString();
-    if (sdkRoot.isNull()) {
+
+    if (settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
+        if (!mDetectedAdbPath.isNull()) {
+            adbPath = mDetectedAdbPath;
+        } else {
+            showErrorDialog(tr("Could not automatically find ADB.<br>"
+                               "Please use the settings page to manually set "
+                               "an ADB path."),
+                            tr("ADB"));
+        }
+    } else {
+        adbPath = settings.value(Ui::Settings::ADB_PATH, "").toString();
+    }
+
+    if (adbPath.isNull()) {
         return QString::null;
     }
 
-    StringVector adbVector;
-    adbVector.push_back(String(sdkRoot.toStdString().data()));
-    adbVector.push_back(String("platform-tools"));
-    adbVector.push_back(String("adb"));
-    String adbPath = PathUtils::recompose(adbVector);
-
-    // TODO: is this safe cross-platform?
+    // Enqueue arguments for adb to ensure it finds the right emulator.
     *args << "-s";
     *args << "emulator-" + QString::number(android_base_port);
-    return adbPath.c_str();
+    return adbPath;
 }
 
 QString ToolWindow::getScreenshotSaveDirectory()

@@ -10,6 +10,8 @@
 // GNU General Public License for more details.
 
 #include "android/skin/qt/extended-pages/settings-page.h"
+
+#include "android/base/files/PathUtils.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
@@ -32,7 +34,7 @@ SettingsPage::SettingsPage(QWidget *parent) :
 {
     mUi->setupUi(this);
     mUi->set_saveLocBox->installEventFilter(this);
-    mUi->set_sdkPathBox->installEventFilter(this);
+    mUi->set_adbPathBox->installEventFilter(this);
 
     QString savePath =
         QDir::toNativeSeparators(getScreenshotSaveDirectory());
@@ -43,11 +45,17 @@ SettingsPage::SettingsPage(QWidget *parent) :
         setElidedText(mUi->set_saveLocBox, savePath);
     }
 
-    // SDK path
+    // ADB path
     QSettings settings;
-    QString sdkPath = settings.value(Ui::Settings::SDK_PATH, "").toString();
-    sdkPath = QDir::toNativeSeparators(sdkPath);
-    setElidedText(mUi->set_sdkPathBox, sdkPath);
+
+    bool autoFindAdb =
+            settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool();
+    mUi->set_autoFindAdb->setChecked(autoFindAdb);
+    on_set_autoFindAdb_toggled(autoFindAdb);
+
+    QString adbPath = settings.value(Ui::Settings::ADB_PATH, "").toString();
+    adbPath = QDir::toNativeSeparators(adbPath);
+    setElidedText(mUi->set_adbPathBox, adbPath);
 
     // Dark/Light theme
     SettingsTheme theme =
@@ -97,7 +105,7 @@ bool SettingsPage::eventFilter (QObject* object, QEvent* event)
 {
     QSettings settings;
     QString savePath = settings.value(Ui::Settings::SAVE_PATH, "").toString();
-    QString sdkPath = settings.value(Ui::Settings::SDK_PATH, "").toString();
+    QString adbPath = settings.value(Ui::Settings::ADB_PATH, "").toString();
 
     if (object == mUi->set_saveLocBox) {
         if (event->type() == QEvent::FocusIn) {
@@ -105,11 +113,11 @@ bool SettingsPage::eventFilter (QObject* object, QEvent* event)
         } else if (event->type() == QEvent::FocusOut) {
             setElidedText(mUi->set_saveLocBox, savePath);
         }
-    } else if (object == mUi->set_sdkPathBox) {
+    } else if (object == mUi->set_adbPathBox) {
         if (event->type() == QEvent::FocusIn) {
-            mUi->set_sdkPathBox->setText(sdkPath);
+            mUi->set_adbPathBox->setText(adbPath);
         } else if (event->type() == QEvent::FocusOut) {
-            setElidedText(mUi->set_sdkPathBox, sdkPath);
+            setElidedText(mUi->set_adbPathBox, adbPath);
         }
     }
     return false;
@@ -135,10 +143,9 @@ void SettingsPage::on_set_saveLocFolderButton_clicked()
     QSettings settings;
 
     QString dirName = QFileDialog::getExistingDirectory(
-        this,
-        tr("Save location"),
-        settings.value(Ui::Settings::SDK_PATH, "").toString(),
-        QFileDialog::ShowDirsOnly);
+            this, tr("Save location"),
+            settings.value(Ui::Settings::SAVE_PATH, "").toString(),
+            QFileDialog::ShowDirsOnly);
 
     if ( dirName.isEmpty() ) return; // Operation was canceled
 
@@ -158,45 +165,42 @@ void SettingsPage::on_set_saveLocFolderButton_clicked()
     setElidedText(mUi->set_saveLocBox, dirName);
 }
 
-void SettingsPage::on_set_sdkPathButton_clicked()
-{
+void SettingsPage::on_set_adbPathButton_clicked() {
     QSettings settings;
-    QString dirName = settings.value(Ui::Settings::SDK_PATH, "").toString();
+    QString adbPath = settings.value(Ui::Settings::ADB_PATH, "").toString();
 
     // Repeat this dialog until the user is successful or cancels
     bool pathIsGood = false;
     do {
-        dirName = QFileDialog::getExistingDirectory(
-                                  this,
-                                  tr("Android SDK location"),
-                                  dirName,
-                                  QFileDialog::ShowDirsOnly);
+        adbPath = QFileDialog::getOpenFileName(this, tr("Backup ADB path"),
+                                               adbPath);
 
-        if ( dirName.isEmpty() ) {
+        if (adbPath.isEmpty()) {
             break; // Operation was canceled
         }
 
-        // We got a path. If it does not have an SDK, don't allow it.
-        // (We simply test for the existence of "platforms/"; see
-        // validateSdkPath() in //tools/adt/idea/android/src/com/
-        // android/tools/idea/sdk/SdkPaths.java)
-        QString platformsName = dirName + "/platforms";
-        QFileInfo platformsInfo(platformsName);
-        pathIsGood = platformsInfo.exists() && platformsInfo.isDir();
+        // We got a path. Make sure that the file both exists and is
+        // executable.
+        QFileInfo fileInfo(adbPath);
+        pathIsGood = fileInfo.exists() && fileInfo.isExecutable() &&
+                     fileInfo.fileName() ==
+                             QString(android::base::PathUtils::toExecutableName(
+                                             "adb")
+                                             .c_str());
 
         if (pathIsGood) {
             // Save this selection
-            settings.setValue(Ui::Settings::SDK_PATH, dirName);
+            settings.setValue(Ui::Settings::ADB_PATH, adbPath);
 
-            dirName = QDir::toNativeSeparators(dirName);
-            setElidedText(mUi->set_sdkPathBox, dirName);
+            adbPath = QDir::toNativeSeparators(adbPath);
+            setElidedText(mUi->set_adbPathBox, adbPath);
         } else {
             // The path is not good. Force the user to cancel or try again.
             QString errStr = tr("This path does not point to "
-                                "an SDK installation<br><br>")
-                             + QDir::toNativeSeparators(dirName);
+                                "an ADB executable.<br><br>") +
+                             QDir::toNativeSeparators(adbPath);
             QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Select Android SDK path"));
+            msgBox.setWindowTitle(tr("Select backup ADB path"));
             msgBox.setText(errStr);
             msgBox.setInformativeText(tr("Do you want try again or cancel?"));
             msgBox.setStandardButtons(QMessageBox::Retry | QMessageBox::Cancel);
@@ -213,10 +217,10 @@ void SettingsPage::on_set_saveLocBox_textEdited(const QString&) {
         settings.value(Ui::Settings::SAVE_PATH, "").toString());
 }
 
-void SettingsPage::on_set_sdkPathBox_textEdited(const QString&) {
+void SettingsPage::on_set_adbPathBox_textEdited(const QString&) {
     QSettings settings;
-    mUi->set_sdkPathBox->setText(
-        settings.value(Ui::Settings::SDK_PATH, "").toString());
+    mUi->set_adbPathBox->setText(
+            settings.value(Ui::Settings::ADB_PATH, "").toString());
 }
 
 void SettingsPage::on_set_allowKeyboardGrab_toggled(bool checked) {
@@ -229,6 +233,14 @@ void SettingsPage::on_set_onTop_toggled(bool checked) {
     settings.setValue(Ui::Settings::ALWAYS_ON_TOP, checked);
 
     emit(onTopChanged(checked));
+}
+
+void SettingsPage::on_set_autoFindAdb_toggled(bool checked) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::AUTO_FIND_ADB, checked);
+
+    mUi->set_adbPathBox->setHidden(checked);
+    mUi->set_adbPathButton->setHidden(checked);
 }
 
 void set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_VALUE v) {
