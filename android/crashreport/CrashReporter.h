@@ -33,6 +33,9 @@ public:
     // a dump data exchange directory
     static const char* const kDumpMessageFileName;
 
+    // File with the process memory information
+    static const char* const kProcessMemoryInfoFileName;
+
     // File to log crashes on exit
     static const char* const kCrashOnExitFileName;
 

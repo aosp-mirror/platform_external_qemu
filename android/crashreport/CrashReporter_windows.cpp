@@ -20,7 +20,11 @@
 #include "android/utils/debug.h"
 #include "client/windows/handler/exception_handler.h"
 
+#include <psapi.h>
+
 #include <memory>
+
+#include <inttypes.h>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -54,7 +58,8 @@ public:
         // crashPipe arg is copied locally during ExceptionHandler's construction
         // of CrashGenerationClient.
         mHandler.reset(new google_breakpad::ExceptionHandler(
-                dumpDir_wstr, nullptr, nullptr, nullptr,
+                dumpDir_wstr, &HostCrashReporter::exceptionFilterCallback,
+                nullptr, nullptr,
                 google_breakpad::ExceptionHandler::HANDLER_ALL, MiniDumpNormal,
                 crashPipe.c_str(), nullptr));
         return mHandler != nullptr;
@@ -86,12 +91,54 @@ public:
 
     void writeDump() override { mHandler->WriteMinidump(); }
 
+    static bool exceptionFilterCallback(void* context,
+                                        EXCEPTION_POINTERS*,
+                                        MDRawAssertionInfo*);
+
 private:
     std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
 };
 
 ::android::base::LazyInstance<HostCrashReporter> sCrashReporter =
         LAZY_INSTANCE_INIT;
+
+bool HostCrashReporter::exceptionFilterCallback(void*,
+                                                EXCEPTION_POINTERS*,
+                                                MDRawAssertionInfo*) {
+    // collect the memory usage at the time of the crash
+    PROCESS_MEMORY_COUNTERS_EX memCounters = {sizeof(memCounters)};
+    if (::GetProcessMemoryInfo(::GetCurrentProcess(),
+                reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memCounters),
+                sizeof(memCounters))) {
+        char buf[1024] = {};
+        snprintf(buf, sizeof(buf) - 1,
+            "PageFaultCount: %u\n"
+            "PeakWorkingSetSize: %" PRIuPTR "kB\n"
+            "WorkingSetSize: %" PRIuPTR "kB\n"
+            "QuotaPeakPagedPoolUsage: %" PRIuPTR "kB\n"
+            "QuotaPagedPoolUsage: %" PRIuPTR "kB\n"
+            "QuotaPeakNonPagedPoolUsage: %" PRIuPTR "kB\n"
+            "QuotaNonPagedPoolUsage: %" PRIuPTR "kB\n"
+            "PagefileUsage (commit): %" PRIuPTR "kB\n"
+            "PeakPagefileUsage: %" PRIuPTR "kB\n",
+            memCounters.PageFaultCount,
+            memCounters.PeakWorkingSetSize / 1024,
+            memCounters.WorkingSetSize / 1024,
+            memCounters.QuotaPeakPagedPoolUsage / 1024,
+            memCounters.QuotaPagedPoolUsage / 1024,
+            memCounters.QuotaPeakNonPagedPoolUsage / 1024,
+            memCounters.QuotaNonPagedPoolUsage / 1024,
+            (memCounters.PagefileUsage
+                ? memCounters.PagefileUsage
+                : memCounters.PrivateUsage) / 1024,
+            memCounters.PeakPagefileUsage / 1024);
+
+        CrashReporter::get()->attachData(
+                    CrashReporter::kProcessMemoryInfoFileName, buf);
+    }
+
+    return true;
+}
 
 }  // namespace anonymous
 
