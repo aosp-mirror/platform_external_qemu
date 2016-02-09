@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1dc45060_5514ec85",
+        "filename": "android/base/system/Win32UnicodeString.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-09T10:48:02Z",
+      "side": 1,
+      "message": "nit: Use comment to augment clarity, as in:\n\n  #else  // _WIN32\n\n  ...\n\n  #endif  // _WIN32",
+      "revId": "c22aacae5c3fb7655bf71ed40caa6eca720486ff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7dd62c0e_a046da98",
+        "filename": "android/base/system/Win32Utils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-09T10:48:02Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "c22aacae5c3fb7655bf71ed40caa6eca720486ff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
