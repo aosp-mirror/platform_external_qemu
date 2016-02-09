@@ -22,7 +22,7 @@ class Thread;
 }  // namespace emugl
 
 class RenderWindowChannel;
-class RenderWindowMessage;
+struct RenderWindowMessage;
 
 // Helper class used to manage the sub-window that displays the emulated GPU
 // output. To use it, do the following:
