@@ -22,6 +22,30 @@
       "revId": "c895d910c2994b4d51930adf6fabe0116c68fb03",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3d44b487_c1ab04e6",
+        "filename": "android/skin/qt/stylesheet.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-09T19:11:25Z",
+      "side": 1,
+      "message": "Changed the constants to \"const char*\", made non-constants static.",
+      "parentUuid": "dda3987e_e61e6044",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 32
+      },
+      "revId": "c895d910c2994b4d51930adf6fabe0116c68fb03",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
