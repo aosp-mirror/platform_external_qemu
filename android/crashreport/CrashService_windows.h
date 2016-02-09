@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "android/base/system/Win32Utils.h"
 #include "android/crashreport/CrashService.h"
 
 #include "client/windows/crash_generation/crash_generation_server.h"
@@ -58,14 +59,8 @@ protected:
     virtual bool getMemInfo() override;
 
 private:
-    // A small handy struct for an automatic HANDLE management
-    struct HandleCloser {
-        void operator()(HANDLE h) const { ::CloseHandle(h); }
-    };
-    using ScopedHandle = std::unique_ptr<void, HandleCloser>;
-
     std::unique_ptr<::google_breakpad::CrashGenerationServer> mCrashServer;
-    ScopedHandle mClientProcess;
+    android::base::Win32Utils::ScopedHandle mClientProcess;
 };
 
 }  // namespace crashreport
