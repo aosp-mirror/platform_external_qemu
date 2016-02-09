@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5d3de8ec_02ab2c4e",
+        "filename": "android/crashreport/CrashService_windows.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-09T01:15:15Z",
+      "side": 1,
+      "message": "Oops, good catch, thanks.",
+      "parentUuid": "bd30a413_487b939d",
+      "range": {
+        "startLine": 186,
+        "startChar": 48,
+        "endLine": 186,
+        "endChar": 63
+      },
+      "revId": "d79fa67ddb76fda7eaccb5c6eae64c84aa11e36d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fd4dbcaf_c2c4a6b4",
         "filename": "android/crashreport/crash-handler.h",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-09T01:07:01Z",
       "side": 1,
       "message": "this really is just the default for functions returning bool",
+      "range": {
+        "startLine": 56,
+        "startChar": 18,
+        "endLine": 56,
+        "endChar": 59
+      },
+      "revId": "d79fa67ddb76fda7eaccb5c6eae64c84aa11e36d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd48f8a2_01284ec7",
+        "filename": "android/crashreport/crash-handler.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-09T01:15:15Z",
+      "side": 1,
+      "message": "Yeah I went back and forth on that one a couple of times actually. But with a deciding vote I\u0027ll remove it.",
+      "parentUuid": "fd4dbcaf_c2c4a6b4",
       "range": {
         "startLine": 56,
         "startChar": 18,
