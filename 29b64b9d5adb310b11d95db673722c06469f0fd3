@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dda3987e_260d5818",
+        "filename": "android/skin/qt/resources.qrc",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-09T01:19:46Z",
+      "side": 0,
+      "message": "just curious if it works with this removed at all",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 33
+      },
+      "revId": "29b64b9d5adb310b11d95db673722c06469f0fd3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
