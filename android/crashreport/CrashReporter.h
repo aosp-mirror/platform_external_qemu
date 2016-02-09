@@ -78,8 +78,10 @@ public:
     //          implementation uploads the data in a file named |name|
     //          if |name| is empty the file gets some default generic name
     // |data| - a string of data to upload with the crash report
+    // |replace| - replace all the data with the same name instead of appending
     void attachData(android::base::StringView name,
-                    android::base::StringView data);
+                    android::base::StringView data,
+                    bool replace = false);
 
     // Pass some file to the crash reporter to upload it with the dump
     bool attachFile(android::base::StringView sourceFullName,

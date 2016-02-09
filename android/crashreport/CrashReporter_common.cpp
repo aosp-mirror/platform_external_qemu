@@ -142,7 +142,7 @@ static void formatDataFileName(char (&buffer)[N], StringView baseName) {
              (baseName.empty() ? "additional_data.txt" : baseName.c_str()));
 }
 
-void CrashReporter::attachData(StringView name, StringView data) {
+void CrashReporter::attachData(StringView name, StringView data, bool replace) {
     char fullName[PATH_MAX + 1];
     formatDataFileName(fullName, name);
 
@@ -153,11 +153,13 @@ void CrashReporter::attachData(StringView name, StringView data) {
     // well, here we do a little of allocation - but just because of the API
     android::base::Win32UnicodeString wideStr(fullName);
     int fd = _wopen(wideStr.c_str(),
-                    _O_WRONLY | _O_CREAT | _O_APPEND | _O_NOINHERIT | _O_TEXT,
+                    _O_WRONLY | _O_CREAT | _O_NOINHERIT | _O_TEXT
+                    | (replace ? _O_TRUNC : _O_APPEND),
                     _S_IREAD | _S_IWRITE);
 #else
     int fd = HANDLE_EINTR(open(fullName,
-                  O_WRONLY | O_CREAT | O_APPEND | O_CLOEXEC, 0644));
+                  O_WRONLY | O_CREAT | O_CLOEXEC
+                  | (replace ? O_TRUNC : O_APPEND), 0644));
 #endif
     if (fd < 0) {
         W("Failed to open a temp file '%s' for writing", fullName);
