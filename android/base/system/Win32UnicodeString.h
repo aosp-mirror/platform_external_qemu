@@ -15,8 +15,8 @@
 #pragma once
 
 #ifndef _WIN32
-#error "This header should only be included when building Windows binaries!"
-#endif
+// this file is just empty on non-Win32
+#else  // _WIN32
 
 #include "android/base/Compiler.h"
 #include "android/base/String.h"
@@ -111,3 +111,5 @@ private:
 
 }  // namespace base
 }  // namespace android
+
+#endif  // _WIN32
