@@ -592,6 +592,9 @@ ui_init(AConfig*          skinConfig,
     signal(SIGQUIT, SIG_DFL);
 #endif
 
+    skin_winsys_input_recording(opts->input_record, opts->input_replay,
+                                opts->replay_delay);
+
     skin_winsys_start(opts->no_window, opts->raw_keys);
 
     if (opts->no_window) {
