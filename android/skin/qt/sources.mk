@@ -33,6 +33,8 @@ ANDROID_SKIN_STATIC_LIBRARIES += \
     libemugl_common
 
 ANDROID_SKIN_SOURCES += \
+    android/skin/qt/input-event-recorder.cpp  \
+    android/skin/qt/input-event-serializer.cpp \
     android/skin/qt/angle-input-widget.cpp \
     android/skin/qt/editable-slider-widget.cpp \
     android/skin/qt/emulator-qt-window.cpp \
@@ -55,6 +57,8 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/tool-window.cpp \
 
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
+    android/skin/qt/input-event-recorder.h \
+    android/skin/qt/input-event-serializer.h \
     android/skin/qt/angle-input-widget.h \
     android/skin/qt/editable-slider-widget.h \
     android/skin/qt/gl-widget.h \
