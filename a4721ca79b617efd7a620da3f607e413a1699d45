@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bd83441c_3e1121a7",
+        "filename": "android/help.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1623,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-09T23:06:17Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 1623,
+        "startChar": 7,
+        "endLine": 1623,
+        "endChar": 8
+      },
+      "revId": "a4721ca79b617efd7a620da3f607e413a1699d45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5da7a8bf_e311bae2",
+        "filename": "android/skin/qt/input-event-recorder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-09T23:06:17Z",
+      "side": 1,
+      "message": "could you please be overly cautious here and contact the legals? just in case",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 39
+      },
+      "revId": "a4721ca79b617efd7a620da3f607e413a1699d45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
