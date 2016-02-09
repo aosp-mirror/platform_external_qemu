@@ -48,9 +48,9 @@
     <property name="text">
      <string>Ask</string>
     </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
    </widget>
    <widget class="QRadioButton" name="set_crashReportPrefAlways">
     <property name="geometry">
@@ -64,9 +64,9 @@
     <property name="text">
      <string>Always</string>
     </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
    </widget>
    <widget class="QRadioButton" name="set_crashReportPrefNever">
     <property name="geometry">
@@ -80,9 +80,9 @@
     <property name="text">
      <string>Never</string>
     </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
    </widget>
   </widget>
   <widget class="QCheckBox" name="set_onTop">
@@ -107,14 +107,14 @@
     <string>Toggle</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="set_sdkPathBox">
+  <widget class="QLineEdit" name="set_adbPathBox">
    <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>112</y>
+     <y>184</y>
      <width>240</width>
      <height>31</height>
     </rect>
@@ -204,11 +204,11 @@
     <string notr="true">folder</string>
    </property>
   </widget>
-  <widget class="QGroupBox" name="sdkPathTitle">
+  <widget class="QGroupBox" name="adbPathTitle">
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>94</y>
+     <y>168</y>
      <width>211</width>
      <height>21</height>
     </rect>
@@ -222,7 +222,7 @@
     <string notr="true">border: 0px;</string>
    </property>
    <property name="title">
-    <string>Android SDK path</string>
+    <string>Custom ADB path</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>Title</string>
@@ -245,6 +245,28 @@
    </property>
    <property name="checked">
     <bool>false</bool>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Toggle</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="set_autoFindAdb">
+   <property name="geometry">
+    <rect>
+     <x>324</x>
+     <y>112</y>
+     <width>211</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>Toggle</string>
@@ -327,11 +349,11 @@
     </property>
    </item>
   </widget>
-  <widget class="QPushButton" name="set_sdkPathButton">
+  <widget class="QPushButton" name="set_adbPathButton">
    <property name="geometry">
     <rect>
      <x>572</x>
-     <y>112</y>
+     <y>186</y>
      <width>32</width>
      <height>32</height>
     </rect>
@@ -356,7 +378,7 @@
     <string notr="true">folder</string>
    </property>
   </widget>
-  <widget class="QGroupBox" name="themeTitle_2">
+  <widget class="QGroupBox" name="mouseFocusTitle">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -375,6 +397,30 @@
    </property>
    <property name="title">
     <string>Grab screen focus with mouse</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Title</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="autoFindAdbTitle">
+   <property name="geometry">
+    <rect>
+     <x>324</x>
+     <y>94</y>
+     <width>251</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+   </property>
+   <property name="title">
+    <string>Automatically find ADB (recommended)</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>Title</string>
