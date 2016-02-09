@@ -11,9 +11,9 @@
 
 #pragma once
 
-#if !defined(_WIN32) && !defined(_WIN64)
-#error "Only compile this file when targetting Windows!"
-#endif
+#ifndef _WIN32
+// nothing here
+#else  // _WIN32
 
 #include "android/base/Compiler.h"
 
@@ -23,19 +23,17 @@
 namespace android {
 namespace base {
 
-// Helper class used to wrap a Win32 HANDLE that will be closed when
+// Helper class used to wrap a Win32  file HANDLE that will be closed when
 // the instance is destroyed, unless the release() method was called
 // before that.
-class ScopedHandle {
+class ScopedFileHandle {
 public:
-    // Default destructor is used to wrap an invalid handle value.
-    ScopedHandle() : handle_(INVALID_HANDLE_VALUE) {}
-
     // Constructor takes ownership of |handle|.
-    explicit ScopedHandle(HANDLE handle) : handle_(handle) {}
+    explicit ScopedFileHandle(HANDLE handle = INVALID_HANDLE_VALUE)
+        : handle_(handle) {}
 
     // Destructor calls close() method.
-    ~ScopedHandle() { close(); }
+    ~ScopedFileHandle() { close(); }
 
     // Returns true iff the wrapped HANDLE value is valid.
     bool valid() const { return handle_ != INVALID_HANDLE_VALUE; }
@@ -58,18 +56,20 @@ public:
         }
     }
 
-    // Swap the content of two ScopedHandle instances.
-    void swap(ScopedHandle* other) {
+    // Swap the content of two ScopedFileHandle instances.
+    void swap(ScopedFileHandle* other) {
         HANDLE handle = handle_;
         handle_ = other->handle_;
         other->handle_ = handle;
     }
 
 private:
-    DISALLOW_COPY_AND_ASSIGN(ScopedHandle);
+    DISALLOW_COPY_AND_ASSIGN(ScopedFileHandle);
 
     HANDLE handle_;
 };
 
 }  // namespace base
 }  // namespace android
+
+#endif  // _WIN32

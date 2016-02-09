@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/files/ScopedHandle.h"
+#include "android/base/files/ScopedFileHandle.h"
 
 #include <gtest/gtest.h>
 
@@ -33,19 +33,19 @@ HANDLE OpenNull() {
 
 }  // namespace
 
-TEST(ScopedHandle, DefaultConstructor) {
-    ScopedHandle h;
+TEST(ScopedFileHandle, DefaultConstructor) {
+    ScopedFileHandle h;
     EXPECT_FALSE(h.valid());
     EXPECT_EQ(INVALID_HANDLE_VALUE, h.get());
 }
 
-TEST(ScopedHandle, Constructor) {
-    ScopedHandle h(OpenNull());
+TEST(ScopedFileHandle, Constructor) {
+    ScopedFileHandle h(OpenNull());
     EXPECT_TRUE(h.valid());
 }
 
-TEST(ScopedHandle, Release) {
-    ScopedHandle h(OpenNull());
+TEST(ScopedFileHandle, Release) {
+    ScopedFileHandle h(OpenNull());
     EXPECT_TRUE(h.valid());
     HANDLE handle = h.release();
     EXPECT_FALSE(h.valid());
@@ -53,16 +53,16 @@ TEST(ScopedHandle, Release) {
     ::CloseHandle(handle);
 }
 
-TEST(ScopedHandle, Close) {
-    ScopedHandle h(OpenNull());
+TEST(ScopedFileHandle, Close) {
+    ScopedFileHandle h(OpenNull());
     EXPECT_TRUE(h.valid());
     h.close();
     EXPECT_FALSE(h.valid());
 }
 
-TEST(ScopedHandle, Swap) {
-    ScopedHandle h1;
-    ScopedHandle h2(OpenNull());
+TEST(ScopedFileHandle, Swap) {
+    ScopedFileHandle h1;
+    ScopedFileHandle h2(OpenNull());
     EXPECT_FALSE(h1.valid());
     EXPECT_TRUE(h2.valid());
     HANDLE handle = h2.get();
