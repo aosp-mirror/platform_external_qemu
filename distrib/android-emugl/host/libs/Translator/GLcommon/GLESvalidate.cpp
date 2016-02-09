@@ -108,8 +108,7 @@ bool GLESvalidate::drawMode(GLenum mode) {
 
 bool GLESvalidate::drawType(GLenum mode) {
     return  mode == GL_UNSIGNED_BYTE ||
-            mode == GL_UNSIGNED_SHORT ||
-            mode == GL_UNSIGNED_INT;
+            mode == GL_UNSIGNED_SHORT;
 }
 
 bool GLESvalidate::textureTarget(GLenum target) {
