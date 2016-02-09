@@ -50,6 +50,8 @@ namespace crashreport {
 
 const char* const CrashReporter::kDumpMessageFileName =
         "internal-error-msg.txt";
+const char* const CrashReporter::kProcessMemoryInfoFileName =
+        "process-memory-info.txt";
 const char* const CrashReporter::kCrashOnExitFileName =
         "crash-on-exit.txt";
 
