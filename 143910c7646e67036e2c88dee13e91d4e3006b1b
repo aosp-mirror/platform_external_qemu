@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7da46cba_3386b206",
+        "filename": "android/skin/qt/stylesheet.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-09T17:38:42Z",
+      "side": 1,
+      "message": "double-checked locking?\nif (!flag) {\n    lock;\n    if (!flag) {\n        init\n        set flag\n    }\n    unlock\n}",
+      "range": {
+        "startLine": 279,
+        "startChar": 0,
+        "endLine": 280,
+        "endChar": 50
+      },
+      "revId": "143910c7646e67036e2c88dee13e91d4e3006b1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
