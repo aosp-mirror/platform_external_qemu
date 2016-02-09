@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bd83441c_4aeff3d5",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-09T02:56:36Z",
+      "side": 1,
+      "message": "666 seems like very liberal permissions, this should be fine as 644 or even 600, right?",
+      "revId": "4dfab4a70500eb290d90d52694699c6429325bb1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
