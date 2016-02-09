@@ -21,7 +21,6 @@
 #include "android/base/StringFormat.h"
 
 #ifdef _WIN32
-#include "android/base/files/ScopedHandle.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/system/Win32Utils.h"
 #endif
@@ -610,7 +609,7 @@ public:
 
         CloseHandle(pinfo.hThread);
         // make sure we close the process handle on exit
-        const ScopedHandle process(pinfo.hProcess);
+        const android::base::Win32Utils::ScopedHandle process(pinfo.hProcess);
 
         if (outChildPid) {
             *outChildPid = pinfo.dwProcessId;

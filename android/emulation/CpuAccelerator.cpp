@@ -37,7 +37,7 @@
 #include "target-i386/hax-interface.h"
 
 #ifdef _WIN32
-#include "android/base/files/ScopedHandle.h"
+#include "android/base/files/ScopedFileHandle.h"
 #include "android/windows_installer.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/files/PathUtils.h"
@@ -364,7 +364,7 @@ AndroidCpuAcceleration ProbeHaxCpu(String* status) {
 
 #if defined(_WIN32)
 
-using base::ScopedHandle;
+using base::ScopedFileHandle;
 using namespace android;
 
 // Windows IOCTL code to extract HAX kernel module version.
@@ -401,13 +401,13 @@ AndroidCpuAcceleration ProbeHAX(String* status) {
     }
 
     // 1) Try to find the HAX kernel module.
-    ScopedHandle hax(CreateFile("\\\\.\\HAX",
-                                GENERIC_READ | GENERIC_WRITE,
-                                0,
-                                NULL,
-                                CREATE_ALWAYS,
-                                FILE_ATTRIBUTE_NORMAL,
-                                NULL));
+    ScopedFileHandle hax(CreateFile("\\\\.\\HAX",
+                                    GENERIC_READ | GENERIC_WRITE,
+                                    0,
+                                    NULL,
+                                    CREATE_ALWAYS,
+                                    FILE_ATTRIBUTE_NORMAL,
+                                    NULL));
     if (!hax.valid()) {
         DWORD err = GetLastError();
         if (err == ERROR_FILE_NOT_FOUND) {

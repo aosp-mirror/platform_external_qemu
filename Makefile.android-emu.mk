@@ -444,7 +444,7 @@ LOCAL_SRC_FILES := \
 
 ifeq (windows,$(BUILD_TARGET_OS))
 LOCAL_SRC_FILES += \
-  android/base/files/ScopedHandle_unittest.cpp \
+  android/base/files/ScopedFileHandle_unittest.cpp \
   android/base/files/ScopedRegKey_unittest.cpp \
   android/base/system/Win32UnicodeString_unittest.cpp \
   android/base/system/Win32Utils_unittest.cpp \
