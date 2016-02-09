@@ -1503,7 +1503,7 @@ static const CommandDefRec  gsm_in_commands[] =
     "the 'waiting' state by default, until the system answers/holds/closes it\r\n", NULL
     do_gsm_in_create, NULL },
 
-    { "hold", "change the state of an oubtound call to 'held'",
+    { "hold", "change the state of an outbound call to 'held'",
     "change the state of an outbound call to 'held'. this is only possible\r\n"
     "if the call in the 'waiting' or 'active' state\r\n", NULL,
     do_gsm_out_hold, NULL },
@@ -1544,7 +1544,7 @@ static const CommandDefRec  gsm_commands[] =
     "the remote phone as busy. only possible if the call is 'waiting'.\r\n", NULL,
     do_gsm_busy, NULL },
 
-    { "hold", "change the state of an oubtound call to 'held'",
+    { "hold", "change the state of an outbound call to 'held'",
     "'gsm hold <remoteNumber>' change the state of a call to 'held'. this is only possible\r\n"
     "if the call in the 'waiting' or 'active' state\r\n", NULL,
     do_gsm_hold, NULL },
