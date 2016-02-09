@@ -111,6 +111,10 @@ OPT_FLAG ( no_jni, "disable JNI checks in the Dalvik runtime" )
 OPT_FLAG ( nojni, "same as -no-jni" )
 OPT_PARAM( logcat, "<tags>", "enable logcat output with given tags" )
 
+#ifdef __linux__
+OPT_FLAG ( use_system_libs, "Use system libstdc++ instead of bundled one" )
+#endif  // __linux__
+
 OPT_FLAG ( no_audio, "disable audio support" )
 OPT_FLAG ( noaudio,  "same as -no-audio" )
 OPT_PARAM( audio,    "<backend>", "use specific audio backend" )
