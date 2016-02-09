@@ -22,6 +22,30 @@
       "revId": "143910c7646e67036e2c88dee13e91d4e3006b1b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ddbd58cb_53d5e430",
+        "filename": "android/skin/qt/stylesheet.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-09T19:11:25Z",
+      "side": 1,
+      "message": "This function isn\u0027t called often (once per settings change) so it won\u0027t have any visible effect on performance. But I\u0027ll do it anyway :)",
+      "parentUuid": "7da46cba_3386b206",
+      "range": {
+        "startLine": 279,
+        "startChar": 0,
+        "endLine": 280,
+        "endChar": 50
+      },
+      "revId": "143910c7646e67036e2c88dee13e91d4e3006b1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
