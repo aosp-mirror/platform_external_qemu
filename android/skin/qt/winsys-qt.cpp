@@ -72,7 +72,7 @@ static GlobalState* globalState() {
         .app = NULL,
         .window_pos_saved = false,
         .window_pos_x = 0,
-        .window_pos_y = 0,
+        .window_pos_y = 0
     };
     return &sGlobalState;
 }
@@ -327,7 +327,36 @@ extern void skin_winsys_spawn_thread(bool no_window,
             D("%s: Could not get window handle", __FUNCTION__);
             return;
         }
+
         window->startThread(f, argc, argv);
+    }
+}
+
+extern void skin_winsys_input_recording(const char* opt_input_record,
+                                        const char* opt_input_replay,
+                                        const char* opt_replay_delay) {
+    if (opt_input_record == NULL && opt_input_replay == NULL)
+        return;
+
+    QInputEventRecorder::create();
+    QInputEventRecorder *rec = QInputEventRecorder::getInstance();
+    if(rec == NULL) {
+        D("Failed to get Input Event Recorder handle");
+        return;
+    }
+
+    if(!rec->setPaths(opt_input_record, opt_input_replay)) {
+        D("Failed to initialize Input Event Recorder paths");
+        return;
+    }
+
+    // TODO: move this check in QInputEventRecorder
+    int replay_delay = 0;
+    if (0 != sscanf(opt_replay_delay, "%d", &replay_delay)) {
+        rec->setDelay(replay_delay);
+    } else {
+        D("Invalid input replay delay value \"%s\"", opt_replay_delay);
+        return;
     }
 }
 
