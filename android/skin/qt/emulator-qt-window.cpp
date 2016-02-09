@@ -92,6 +92,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
                        this),
         mFirstShowEvent(true)
 {
+    setObjectName(QString("MainEmulatorWindow"));
+
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
     // pop-up to let the user know we're still
@@ -489,6 +491,14 @@ void EmulatorQtWindow::startThread(StartFunction f, int argc, char **argv)
         mMainLoopThread->start();
     } else {
         D("mMainLoopThread already started");
+    }
+
+    QInputEventRecorder *rec = QInputEventRecorder::getInstance();
+    if(rec != NULL) {
+        QObject::connect(mMainLoopThread, SIGNAL(finished()), rec, SLOT(recordStop()));
+        QObject::connect(mMainLoopThread, SIGNAL(finished()), rec, SLOT(replayStop()));
+        rec->addWidget(this);
+        rec->modeAuto();
     }
 }
 

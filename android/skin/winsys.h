@@ -55,6 +55,11 @@ void skin_winsys_set_window_title(const char* title);
 // Return true iff the main window is fully visible
 bool skin_winsys_is_window_fully_visible(void);
 
+// Initialize main window input event recording and replay (with optional delay)
+void skin_winsys_input_recording(const char* opt_input_record,
+                                 const char* opt_input_replay,
+                                 const char* replay_delay);
+
 // Start main window support. |no_window| must be true to indicate that
 // no window needs to be shown, but that the GUI backend still needs to be
 // initialized.

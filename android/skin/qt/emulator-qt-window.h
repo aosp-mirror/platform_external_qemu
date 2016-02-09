@@ -42,6 +42,7 @@
 #include "android/skin/surface.h"
 #include "android/skin/winsys.h"
 #include "android/skin/qt/error-dialog.h"
+#include "android/skin/qt/input-event-recorder.h"
 #include "android/skin/qt/tool-window.h"
 
 #if defined(__APPLE__)
@@ -71,6 +72,8 @@ private:
 class EmulatorQtWindow final : public QFrame
 {
     Q_OBJECT
+
+    friend class EmulatorQtInputEventRecorder;
 
 public:
     using Ptr = std::shared_ptr<EmulatorQtWindow>;
@@ -280,6 +283,8 @@ private:
                 QObject::connect(this, &QObject::destroyed, [style]{ delete style; });
             }
 #endif  // __APPLE__
+
+            setObjectName(QString("EmuWinContainer"));
         }
 
         ~EmulatorWindowContainer() {
@@ -443,6 +448,8 @@ private:
 
     class EmulatorWindowZoomOverlay : public QFrame
     {
+        friend class EmulatorQtInputEventRecorder;  // TODO: still necessary?
+
     public:
         explicit EmulatorWindowZoomOverlay(EmulatorQtWindow *window, EmulatorWindowContainer *container)
             : QFrame(container),
@@ -483,6 +490,7 @@ private:
 
             mCenterPointRadius = mCenterImage.width() / this->devicePixelRatio();
             mTouchPointRadius = mTouchImage.width() / this->devicePixelRatio();
+            setObjectName(QString("EmuWinZoomer"));
         }
 
         void focusOutEvent(QFocusEvent *event)
