@@ -14,14 +14,14 @@
 
 #pragma once
 
+#ifndef _WIN32
+// nothing's here for Posix
+#else  // _WIN32
+
 #include <windows.h>
 
 #include "android/base/String.h"
 #include "android/base/StringView.h"
-
-#ifndef _WIN32
-#error "Only include this file when compiling for Windows!"
-#endif
 
 namespace android {
 namespace base {
@@ -57,3 +57,5 @@ static String getErrorString(DWORD error_code);
 
 }  // namespace base
 }  // namespace android
+
+#endif  // _WIN32
