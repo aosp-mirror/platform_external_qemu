@@ -42,6 +42,30 @@
     },
     {
       "key": {
+        "uuid": "1d3ff0e9_806458b1",
+        "filename": "android/skin/qt/resources.qrc",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-09T01:13:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bd30a413_6244b623",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 8
+      },
+      "revId": "656baabf07d1fe80126ea43607ca6e5e96c9427c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1d3ff0e9_ddbe4b86",
         "filename": "android/skin/qt/styles/fonts_stylesheet_template.css",
         "patchSetId": 2
@@ -53,6 +77,24 @@
       "writtenOn": "2016-02-08T22:18:00Z",
       "side": 1,
       "message": "Copyright header?",
+      "revId": "656baabf07d1fe80126ea43607ca6e5e96c9427c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd30a413_688ad7d9",
+        "filename": "android/skin/qt/styles/fonts_stylesheet_template.css",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-09T01:13:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1d3ff0e9_ddbe4b86",
       "revId": "656baabf07d1fe80126ea43607ca6e5e96c9427c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -76,6 +118,24 @@
     },
     {
       "key": {
+        "uuid": "fda85c5d_0db719b8",
+        "filename": "android/skin/qt/styles/stylesheet_template.css",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-09T01:13:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dd48f8a2_fbc18ff8",
+      "revId": "656baabf07d1fe80126ea43607ca6e5e96c9427c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fda85c5d_470c108f",
         "filename": "android/skin/qt/stylesheet.cpp",
         "patchSetId": 2
@@ -87,6 +147,30 @@
       "writtenOn": "2016-02-08T22:18:00Z",
       "side": 1,
       "message": "Should use the above *_VAR values in these.",
+      "range": {
+        "startLine": 77,
+        "startChar": 5,
+        "endLine": 77,
+        "endChar": 11
+      },
+      "revId": "656baabf07d1fe80126ea43607ca6e5e96c9427c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d33e01f_c7de7255",
+        "filename": "android/skin/qt/stylesheet.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-09T01:13:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fda85c5d_470c108f",
       "range": {
         "startLine": 77,
         "startChar": 5,
