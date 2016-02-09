@@ -42,9 +42,9 @@ public:
 
     bool isClientAlive() override;
 
+protected:
     bool getHWInfo() override;
-
-    void cleanupHWInfo();
+    bool getMemInfo() override;
 
 private:
     std::unique_ptr<::google_breakpad::CrashGenerationServer> mCrashServer;

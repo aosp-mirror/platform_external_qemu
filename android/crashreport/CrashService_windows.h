@@ -53,9 +53,9 @@ public:
 
     virtual bool isClientAlive() override;
 
+protected:
     virtual bool getHWInfo() override;
-
-    void cleanupHWInfo();
+    virtual bool getMemInfo() override;
 
 private:
     // A small handy struct for an automatic HANDLE management

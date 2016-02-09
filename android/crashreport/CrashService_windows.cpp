@@ -15,14 +15,18 @@
 #include "android/crashreport/CrashService_windows.h"
 
 #include "android/base/String.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/crashreport/CrashSystem.h"
 #include "android/utils/debug.h"
 
+#include <fstream>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include <psapi.h>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -30,18 +34,19 @@
 #define I(...) printf(__VA_ARGS__)
 
 #define CMD_BUF_SIZE 1024
-#define HWINFO_CMD "dxdiag /dontskip /whql:off /64bit /t"
+#define HWINFO_CMD L"dxdiag /dontskip /whql:off /64bit /t"
 
 namespace android {
 
+using ::android::base::PathUtils;
 using ::android::base::String;
 using ::android::base::System;
+using ::android::base::Win32UnicodeString;
 
 namespace crashreport {
 
 HostCrashService::~HostCrashService() {
     stopCrashServer();
-    cleanupHWInfo();
 }
 
 void HostCrashService::OnClientConnect(
@@ -58,7 +63,7 @@ void HostCrashService::OnClientDumpRequest(
     if (static_cast<CrashService::DumpRequestContext*>(context)
                 ->file_path.empty()) {
         ::android::base::String file_path_string =
-                ::android::base::Win32UnicodeString::convertToUtf8(
+                Win32UnicodeString::convertToUtf8(
                         file_path->c_str());
         D("Client Requesting dump %s\n", file_path_string.c_str());
         static_cast<CrashService::DumpRequestContext*>(context)
@@ -87,10 +92,9 @@ bool HostCrashService::startCrashServer(const std::string& pipe) {
 
     initCrashServer();
 
-    ::android::base::Win32UnicodeString pipe_unicode(pipe.c_str(),
-                                                     pipe.length());
+    Win32UnicodeString pipe_unicode(pipe.c_str(), pipe.length());
     ::std::wstring pipe_string(pipe_unicode.data());
-    ::android::base::Win32UnicodeString crashdir_unicode(
+    Win32UnicodeString crashdir_unicode(
             ::android::crashreport::CrashSystem::get()
                     ->getCrashDirectory()
                     .c_str());
@@ -130,44 +134,80 @@ bool HostCrashService::isClientAlive() {
 }
 
 bool HostCrashService::getHWInfo() {
-    mHWTmpFilePath.clear();
-    System* sys = System::get();
-    String tmp_dir = sys->getTempDir();
-
-    char tmp_filename_buffer[CMD_BUF_SIZE] = {};
-    DWORD temp_file_ret =
-            GetTempFileName(tmp_dir.c_str(), "emu", 0, tmp_filename_buffer);
-
-    if (!temp_file_ret) {
-        E("Error: Can't create temporary file! error code=%d", GetLastError());
+    const std::string& dataDirectory = getDataDirectory();
+    if (dataDirectory.empty()) {
+        E("Unable to get data directory for crash report attachments");
         return false;
     }
+    String utf8Path = PathUtils::join(dataDirectory, kHwInfoName);
+    Win32UnicodeString file_path(utf8Path);
 
-    String tmp_filename(tmp_filename_buffer);
-    String syscmd(HWINFO_CMD);
-    syscmd += tmp_filename;
-    system(syscmd.c_str());
-
-    mHWTmpFilePath = tmp_filename.c_str();
+    Win32UnicodeString syscmd(HWINFO_CMD);
+    syscmd.append(file_path);
+    int result = _wsystem(syscmd.c_str());
+    if (result != 0) {
+        E("Unable to get hardware info: %d", errno);
+        return false;
+    }
     return true;
 }
 
-void HostCrashService::cleanupHWInfo() {
-    if (mHWTmpFilePath.empty()) {
-        return;
+// Convenience function to convert a value to a value in kilobytes
+template<typename T>
+static T toKB(T value) {
+    return value / 1024;
+}
+
+bool HostCrashService::getMemInfo() {
+    const std::string& data_directory = getDataDirectory();
+    if (data_directory.empty()) {
+        E("Unable to get data directory for crash report attachments");
+        return false;
+    }
+    String path = PathUtils::join(data_directory, kMemInfoName);
+    // TODO: Replace ofstream when we have a good way of handling UTF-8 paths
+    std::ofstream fout(path.c_str());
+    if (!fout) {
+        E("Unable to open '%s' to write crash report attachment", path.c_str());
+        return false;
     }
 
-    DWORD del_ret = DeleteFile(mHWTmpFilePath.c_str());
-
-    if (!del_ret) {
-        // wait 100 ms
-        Sleep(100);
-        del_ret = DeleteFile(mHWTmpFilePath.c_str());
-        if (!del_ret) {
-            E("Error: Failed to delete temp file at %s. error code = %lu",
-              mHWTmpFilePath.c_str(), GetLastError());
-        }
+    MEMORYSTATUSEX mem;
+    mem.dwLength  = sizeof(mem);
+    if (!GlobalMemoryStatusEx(&mem)) {
+        DWORD error = GetLastError();
+        E("Failed to get global memory status: %lu", error);
+        fout << "ERROR: Failed to get global memory status: " << error << "\n";
+        return false;
     }
+
+    PERFORMANCE_INFORMATION pi = { sizeof(pi) };
+    if (!GetPerformanceInfo(&pi, sizeof(pi))) {
+        DWORD error = GetLastError();
+        E("Failed to get performance info: %lu", error);
+        fout << "ERROR: Failed to get performance info: " << error << "\n";
+        return false;
+    }
+
+    size_t pageSize = pi.PageSize;
+    fout << "Total physical memory: " << toKB(mem.ullTotalPhys) << " kB\n"
+         << "Avail physical memory: " << toKB(mem.ullAvailPhys) << " kB\n"
+         << "Total page file: " << toKB(mem.ullTotalPageFile) << " kB\n"
+         << "Avail page file: " << toKB(mem.ullAvailPageFile) << " kB\n"
+         << "Total virtual: " << toKB(mem.ullTotalVirtual) << " kB\n"
+         << "Avail virtual: " << toKB(mem.ullAvailVirtual) << " kB\n"
+         << "Commit total: " << toKB(pi.CommitTotal * pageSize) << " kB\n"
+         << "Commit limit: " << toKB(pi.CommitLimit * pageSize) << " kB\n"
+         << "Commit peak: " << toKB(pi.CommitPeak * pageSize) << " kB\n"
+         << "System cache: " << toKB(pi.SystemCache * pageSize) << " kB\n"
+         << "Kernel total: " << toKB(pi.KernelTotal * pageSize) << " kB\n"
+         << "Kernel paged: " << toKB(pi.KernelPaged * pageSize) << " kB\n"
+         << "Kernel nonpaged: " << toKB(pi.KernelNonpaged * pageSize) << " kB\n"
+         << "Handle count: " << pi.HandleCount << "\n"
+         << "Process count: " << pi.ProcessCount << "\n"
+         << "Thread count: " << pi.ThreadCount << "\n";
+
+    return fout.good();
 }
 
 }  // namespace crashreport

@@ -50,6 +50,12 @@ void crashhandler_add_string(const char* name, const char* string);
 // Track crashes on exit.
 void crashhandler_exitmode(const char* message);
 
+// Copy the filename indicated by |source| to a file called |destination| in the
+// crash report attachment directory. If this instance of the emulator crashes
+// the destination file will be attached to the crash report with the name
+// |destination|.
+bool crashhandler_copy_attachment(const char* destination, const char* source);
+
 ANDROID_END_HEADER
 
 #ifdef __cplusplus
