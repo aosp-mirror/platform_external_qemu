@@ -19,7 +19,12 @@
 #include "android/utils/debug.h"
 #include "client/mac/handler/exception_handler.h"
 
+#include <mach/mach.h>
+
 #include <memory>
+
+#include <inttypes.h>
+#include <stdint.h>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -43,7 +48,8 @@ public:
         }
 
         mHandler.reset(new google_breakpad::ExceptionHandler(
-                getDumpDir(), nullptr, nullptr,
+                getDumpDir(), &HostCrashReporter::exceptionFilterCallback,
+                nullptr,  // no minidump callback
                 nullptr,  // no callback context
                 true,     // install signal handlers
                 crashpipe.mClient.c_str()));
@@ -71,12 +77,59 @@ public:
 
     void writeDump() override { mHandler->WriteMinidump(); }
 
+   static bool exceptionFilterCallback(void* context);
+
 private:
     std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
 };
 
 ::android::base::LazyInstance<HostCrashReporter> sCrashReporter =
         LAZY_INSTANCE_INIT;
+
+bool HostCrashReporter::exceptionFilterCallback(void* context) {
+    (void)context;
+
+    // collect the memory usage at the time of the crash
+    rusage usage;
+    if (getrusage(RUSAGE_SELF, &usage) == 0) {
+        char buf[1024] = {};
+        snprintf(buf, sizeof(buf) - 1,
+                "==== Process memory usage ====\n"
+                "max resident set size = %" PRIu64 " kB\n"
+                "integral shared text memory size = %" PRIu64 " kB\n"
+                "integral unshared data size = %" PRIu64 " kB\n"
+                "integral unshared stack size = %" PRIu64 " kB\n"
+                "page reclaims = %" PRIu64 " kB\n"
+                "page faults = %" PRIu64 " kB\n"
+                "swaps = %" PRIu64 " kB\n"
+                "block input operations = %" PRIu64 " kB\n"
+                "block output operations = %" PRIu64 " kB\n"
+                "messages sent = %" PRIu64 " kB\n"
+                "messages received = %" PRIu64 " kB\n"
+                "signals received = %" PRIu64 " kB\n"
+                "voluntary context switches = %" PRIu64 " kB\n"
+                "involuntary context switches = %" PRIu64 " kB\n",
+                 uint64_t(usage.ru_maxrss / 1024),
+                 uint64_t(usage.ru_ixrss / 1024),
+                 uint64_t(usage.ru_idrss / 1024),
+                 uint64_t(usage.ru_isrss / 1024),
+                 uint64_t(usage.ru_minflt / 1024),
+                 uint64_t(usage.ru_majflt / 1024),
+                 uint64_t(usage.ru_nswap / 1024),
+                 uint64_t(usage.ru_inblock / 1024),
+                 uint64_t(usage.ru_oublock / 1024),
+                 uint64_t(usage.ru_msgsnd / 1024),
+                 uint64_t(usage.ru_msgrcv / 1024),
+                 uint64_t(usage.ru_nsignals / 1024),
+                 uint64_t(usage.ru_nvcsw / 1024),
+                 uint64_t(usage.ru_nivcsw / 1024));
+
+        CrashReporter::get()->attachData(
+                    CrashReporter::kProcessMemoryInfoFileName, buf);
+    }
+
+    return true;    // proceed with handling the crash
+}
 
 }  // namespace anonymous
 
