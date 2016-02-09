@@ -18,12 +18,21 @@
 #include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
+#include "android/base/system/Win32UnicodeString.h"
 #include "android/base/Uuid.h"
 #include "android/metrics/metrics_reporter.h"
 #include "android/utils/debug.h"
+#include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
 
 #include <fstream>
+
+#include <fcntl.h>
+#include <sys/stat.h>
+
+#ifdef _WIN32
+#include <io.h>
+#endif
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -109,20 +118,36 @@ void CrashReporter::passDumpMessage(const char* message) {
 }
 
 void CrashReporter::attachData(StringView name, StringView data) {
-    if (name.empty()) {
-        name = "additional_data";
-    }
+    // don't do any dynamic allocation here - it might be called during dump
+    // writing, e.g. because of OOM exception
+    char fullName[PATH_MAX + 1] = {};
+    snprintf(fullName, sizeof(fullName) - 1,
+             "%s%c%s",
+             getDataExchangeDir().c_str(), System::kDirSeparator,
+             (name.empty() ? "additional_data.txt" : name.c_str()));
 
     // Open the communication file in append mode to make sure we won't
     // overwrite any existing message (e.g. if several threads are writing at
     // once)
-    // TODO: create a Unicode-aware file class for Windows - it will definitely
-    // fail here if the data exchange directory name has some extended chars
-    std::ofstream out(
-            PathUtils::join(mDataExchangeDir, name).c_str(),
-            std::ios_base::out | std::ios_base::ate);
-    out.write(data.data(), data.size());
-    out << '\n';
+#ifdef _WIN32
+    // well, here we do a little of allocation - but just because of the API
+    android::base::Win32UnicodeString wideStr(fullName);
+    int fd = _wopen(wideStr.c_str(),
+                    _O_WRONLY | _O_CREAT | _O_APPEND | _O_NOINHERIT | _O_TEXT,
+                    _S_IREAD | _S_IWRITE);
+#else
+    int fd = HANDLE_EINTR(open(fullName,
+                  O_WRONLY | O_CREAT | O_APPEND | O_CLOEXEC, 0644));
+#endif
+    if (fd < 0) {
+        W("Failed to open a temp file '%s' for writing", fullName);
+        return;
+    }
+
+    HANDLE_EINTR(write(fd, data.data(), data.size()));
+    HANDLE_EINTR(write(fd, "\n", 1));
+
+    close(fd);
 }
 
 }  // namespace crashreport
