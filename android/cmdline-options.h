@@ -125,6 +125,7 @@ OPT_PARAM( onion_rotation, "0|1|2|3", "specify onion-skin rotation" )
 
 OPT_PARAM( dpi_device, "<dpi>", "specify device's resolution in dpi (default "
             STRINGIFY(DEFAULT_DEVICE_DPI) ")" )
+OPT_PARAM( scale, "<scale>", "scale emulator window (deprecated)" )
 
 OPT_PARAM( http_proxy, "<proxy>", "make TCP connections through a HTTP/HTTPS proxy" )
 OPT_PARAM( timezone, "<timezone>", "use this timezone instead of the host's default" )
