@@ -29,10 +29,11 @@ const QString SHOW_AVD_ARCH_WARNING("showAvdArchWarning");
 //       associated with "settings-page", not because
 //       we're in "namespace Settings".
 
-const QString ALLOW_KEYBOARD_GRAB("set/allow_keyboard_grab");
+const QString ADB_PATH("set/adbPath");
+const QString ALLOW_KEYBOARD_GRAB("set/allowKeyboardGrab");
+const QString AUTO_FIND_ADB("set/autoFindAdb");
 const QString ALWAYS_ON_TOP("set/alwaysOnTop");
 const QString SAVE_PATH("set/savePath");
-const QString SDK_PATH("set/sdkPath");
 const QString UI_THEME("set/theme");
 
 const QString CRASHREPORT_PREFERENCE("set/crashReportPreference");
