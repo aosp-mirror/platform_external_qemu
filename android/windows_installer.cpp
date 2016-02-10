@@ -15,7 +15,6 @@
 #include <string>
 
 #include "android/base/files/ScopedRegKey.h"
-#include "android/base/String.h"
 #include "android/base/StringFormat.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/system/Win32Utils.h"
@@ -23,7 +22,6 @@
 
 namespace android {
 
-using base::String;
 using base::StringAppendFormat;
 using base::ScopedRegKey;
 using base::Win32UnicodeString;
@@ -55,7 +53,7 @@ int32_t WindowsInstaller::getVersion(const char* productDisplayName) {
     LONG result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, registry_path, 0, samDesired,
                                &hkey);
     if (result != ERROR_SUCCESS) {
-        String error_string = Win32Utils::getErrorString(result);
+        std::string error_string = Win32Utils::getErrorString(result);
         printf("RegOpenKeyEx failed %li %s\n", result, error_string.c_str());
         return kUnknown;
     }
@@ -65,7 +63,7 @@ int32_t WindowsInstaller::getVersion(const char* productDisplayName) {
                               &cSubKeys, nullptr, nullptr, nullptr, nullptr,
                               nullptr, nullptr, nullptr);
     if (result != ERROR_SUCCESS) {
-        String error_string = Win32Utils::getErrorString(result);
+        std::string error_string = Win32Utils::getErrorString(result);
         printf("RegQueryInfoKeyW failed %li %s\n", result,
                error_string.c_str());
         return kUnknown;
@@ -79,7 +77,7 @@ int32_t WindowsInstaller::getVersion(const char* productDisplayName) {
                                &product_guid_len, nullptr, nullptr, nullptr,
                                nullptr);
         if (result != ERROR_SUCCESS) {
-            String error_string = Win32Utils::getErrorString(result);
+            std::string error_string = Win32Utils::getErrorString(result);
             printf("RegEnumKeyExA failed %li %s\n", result,
                    error_string.c_str());
             continue;
@@ -105,7 +103,7 @@ int32_t WindowsInstaller::getVersion(const char* productDisplayName) {
                               displayNameKey, RRF_RT_REG_SZ | dwGetValueFlags,
                               nullptr, nullptr, &display_name_size);
         if (result != ERROR_SUCCESS && ERROR_MORE_DATA != result) {
-            String error_string = Win32Utils::getErrorString(result);
+            std::string error_string = Win32Utils::getErrorString(result);
             printf("RegGetValueW failed %li %s\n", result,
                    error_string.c_str());
             continue;
@@ -118,13 +116,13 @@ int32_t WindowsInstaller::getVersion(const char* productDisplayName) {
                               nullptr, display_name16.data(),
                               &display_name_size);
         if (result != ERROR_SUCCESS) {
-            String error_string = Win32Utils::getErrorString(result);
+            std::string error_string = Win32Utils::getErrorString(result);
             printf("RegGetValueW failed %li %s\n", result,
                    error_string.c_str());
             continue;
         }
 
-        String display_name8 = display_name16.toString();
+        std::string display_name8 = display_name16.toString();
         if (0 == strcmp(display_name8.c_str(), productDisplayName)) {
             // We've found the entry for productDisplayName
             DWORD version;

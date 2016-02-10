@@ -13,6 +13,8 @@
 
 #include <stddef.h>
 
+#include <string>
+
 namespace android {
 namespace base {
 
@@ -193,6 +195,9 @@ public:
     // will be empty after the call. Useful when one needs to return the
     // zero-terminated string to C functions.
     char* release();
+
+    // Convert String instance to std::string when needed.
+    operator std::string() const { return std::string(mStr, mSize); }
 
 protected:
     friend class StringVector;
