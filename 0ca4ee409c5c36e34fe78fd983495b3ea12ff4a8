@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3d8e7442_f40170e7",
+        "filename": "android/skin/qt/stylesheet.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-10T02:24:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ddc9d89d_d9373336",
+      "range": {
+        "startLine": 279,
+        "startChar": 33,
+        "endLine": 279,
+        "endChar": 45
+      },
+      "revId": "0ca4ee409c5c36e34fe78fd983495b3ea12ff4a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ddc9d89d_b93c771b",
         "filename": "android/skin/qt/stylesheet.cpp",
         "patchSetId": 7
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "fd977c52_75b73a4e",
+        "filename": "android/skin/qt/stylesheet.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-10T02:24:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ddc9d89d_b93c771b",
+      "range": {
+        "startLine": 281,
+        "startChar": 37,
+        "endLine": 281,
+        "endChar": 49
+      },
+      "revId": "0ca4ee409c5c36e34fe78fd983495b3ea12ff4a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9dc4c07e_3c7f3db5",
         "filename": "android/skin/qt/stylesheet.cpp",
         "patchSetId": 7
@@ -59,6 +107,30 @@
       "writtenOn": "2016-02-10T00:40:04Z",
       "side": 1,
       "message": "set the flag after initialization",
+      "range": {
+        "startLine": 284,
+        "startChar": 12,
+        "endLine": 284,
+        "endChar": 13
+      },
+      "revId": "0ca4ee409c5c36e34fe78fd983495b3ea12ff4a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d89b03a_a18c0664",
+        "filename": "android/skin/qt/stylesheet.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-10T02:24:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9dc4c07e_3c7f3db5",
       "range": {
         "startLine": 284,
         "startChar": 12,
