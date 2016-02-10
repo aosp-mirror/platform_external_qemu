@@ -140,6 +140,30 @@
       "revId": "2e2b4f9eb6acd527899df9aee68fb8ccd359b298",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd83441c_99c7870e",
+        "filename": "android/skin/qt/emulator-container.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-10T00:58:29Z",
+      "side": 1,
+      "message": "it can\u0027t be. when I do \"git clang-format --style\u003dfile\" it does it right. What\u0027s your command?\n\nDo you have any other .clang-format files nearby?",
+      "parentUuid": "ddbd58cb_73a820b4",
+      "range": {
+        "startLine": 28,
+        "startChar": 48,
+        "endLine": 28,
+        "endChar": 49
+      },
+      "revId": "2e2b4f9eb6acd527899df9aee68fb8ccd359b298",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
