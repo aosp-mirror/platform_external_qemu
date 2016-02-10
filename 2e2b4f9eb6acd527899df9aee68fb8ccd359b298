@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "bd9a6476_958e66ea",
+        "filename": "android/skin/qt/emulator-container.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-10T00:46:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "31fce07c_e74f19bb",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 40
+      },
+      "revId": "2e2b4f9eb6acd527899df9aee68fb8ccd359b298",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "71c9f878_332f7f7e",
         "filename": "android/skin/qt/emulator-container.h",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "1d89b03a_f0c89e6d",
+        "filename": "android/skin/qt/emulator-container.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-10T00:46:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "71c9f878_332f7f7e",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 3
+      },
+      "revId": "2e2b4f9eb6acd527899df9aee68fb8ccd359b298",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5116b490_e289bf50",
         "filename": "android/skin/qt/emulator-container.h",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2016-02-08T23:47:59Z",
       "side": 1,
       "message": "please run git clang-format on your CL. It\u0027s very easy to get things a little wrong when you\u0027re doing massive changes",
+      "range": {
+        "startLine": 28,
+        "startChar": 48,
+        "endLine": 28,
+        "endChar": 49
+      },
+      "revId": "2e2b4f9eb6acd527899df9aee68fb8ccd359b298",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ddbd58cb_73a820b4",
+        "filename": "android/skin/qt/emulator-container.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-10T00:46:44Z",
+      "side": 1,
+      "message": "git clang-format (using android/.clang-format as the style) actually ruins a lot of the formatting (including this case, where it moves the * next to window, not EmulatorQtWindow). Am I missing something...?",
+      "parentUuid": "5116b490_e289bf50",
       "range": {
         "startLine": 28,
         "startChar": 48,
