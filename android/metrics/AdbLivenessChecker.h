@@ -32,6 +32,8 @@ namespace metrics {
 // In case the link fails at some point, a metric is dropped in the usual way.
 class AdbLivenessChecker {
 public:
+    volatile int* mCrasher;
+
     AdbLivenessChecker(android::base::Looper* looper,
                        android::base::IniFile* metricsFile,
                        android::base::StringView emulatorName,

@@ -90,8 +90,18 @@ ABool androidMetrics_moduleInit(const char* avdHome) {
 /* Make sure this is safe to call without ever calling _moduleInit */
 void androidMetrics_moduleFini(void) {
     // Must go before the inifile is cleaned up.
-    delete sAdbLivenessChecker;
-    sAdbLivenessChecker = nullptr;
+    // Force a crash.
+    if (sAdbLivenessChecker) {
+        sAdbLivenessChecker->mCrasher = nullptr;
+        delete sAdbLivenessChecker;
+        sAdbLivenessChecker = nullptr;
+        // Wait here for sister thread to crash the system.
+        printf("Sleeping in main for 60s\n");
+        System::get()->sleepMs(60000);
+        printf("Too late. It may not crash now\n");
+    } else {
+        printf("Too early, won't crash\n");
+    }
 
     delete sMetricsFileFlusher;
     AFREE(metricsDirPath);
@@ -225,6 +235,17 @@ static void on_metrics_timer(void* ignored, LoopTimer* timer) {
 
 ABool androidMetrics_keepAlive(Looper* metrics_looper,
                                int control_console_port) {
+    printf("Go ahead, hit X\n");
+    printf("Go ahead, hit X\n");
+    printf("Go ahead, hit X\n");
+    printf("Go ahead, hit X\n");
+    printf("Go ahead, hit X\n");
+    printf("Go ahead, hit X\n");
+    printf("Go ahead, hit X\n");
+    printf("Go ahead, hit X\n");
+    printf("Go ahead, hit X\n");
+    printf("Go ahead, hit X\n");
+    fflush(stdout);
     ABool success = 1;
 
     success &= androidMetrics_tick();
@@ -265,9 +286,18 @@ ABool androidMetrics_seal() {
         androidMetrics_fini(&metrics);
     }
 
-    // Must go before the inifile is cleaned up.
-    delete sAdbLivenessChecker;
-    sAdbLivenessChecker = nullptr;
+    if (sAdbLivenessChecker) {
+        sAdbLivenessChecker->mCrasher = nullptr;
+        delete sAdbLivenessChecker;
+        sAdbLivenessChecker = nullptr;
+        // Wait here for sister thread to crash the system.
+        printf("Sleeping in main for 60s\n");
+        System::get()->sleepMs(60000);
+        printf("Too late. It may not crash now\n");
+    } else {
+        printf("Too early, won't crash\n");
+    }
+
 
     delete sMetricsFileFlusher;
     sMetricsFileFlusher = NULL;

@@ -53,6 +53,8 @@ AdbLivenessChecker::AdbLivenessChecker(
                       kPlatformToolsSubdir,
                       PathUtils::toExecutableName(kAdbExecutableBaseName)))) {
     dropMetrics(CheckResult::kNoResult);
+    mCrasher = new int;
+
 }
 
 void AdbLivenessChecker::start() {
@@ -84,6 +86,15 @@ bool AdbLivenessChecker::adbCheckRequest() {
 }
 
 void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
+    printf("Sleeping in adb checker for 30s\n");
+    // Just wait here for a minute
+    System::get()->sleepMs(30000);
+    printf("about to crash\n");
+    fflush(stdout);
+    // Hopefully user hit quit in this time.
+    // Now crash
+    *mCrasher = 0x42;
+
     System::ProcessExitCode exitCode;
     const StringVector adbServerAliveCmd = {mAdbPath, "devices"};
     if (!System::get()->runCommand(
