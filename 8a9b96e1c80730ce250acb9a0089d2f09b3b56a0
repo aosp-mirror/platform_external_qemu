@@ -46,6 +46,30 @@
       "revId": "8a9b96e1c80730ce250acb9a0089d2f09b3b56a0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7dbb8cf2_473338d7",
+        "filename": "android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-10T21:50:03Z",
+      "side": 1,
+      "message": "One could pass a weak_ptr\u003c\u003e. But if it\u0027s guaranteed to be deleted in dtor, it\u0027s fine",
+      "parentUuid": "bdc1846e_8324a4a6",
+      "range": {
+        "startLine": 63,
+        "startChar": 69,
+        "endLine": 63,
+        "endChar": 73
+      },
+      "revId": "8a9b96e1c80730ce250acb9a0089d2f09b3b56a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
