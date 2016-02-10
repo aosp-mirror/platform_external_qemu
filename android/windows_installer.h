@@ -18,11 +18,7 @@
 
 #include <stdint.h>
 
-#include "android/base/String.h"
-
 namespace android {
-
-using base::String;
 
 class WindowsInstaller
 {

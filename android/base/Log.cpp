@@ -190,13 +190,6 @@ LogStream& LogStream::operator<<(unsigned long long v) {
     return *this;
 }
 
-LogStream& LogStream::operator<<(const std::string& v) {
-    if (!v.empty()) {
-        append(v.c_str(), v.size());
-    }
-    return *this;
-}
-
 LogStream& LogStream::operator<<(android::base::StringView v) {
     if (!v.empty()) {
         append(v.c_str(), v.size());

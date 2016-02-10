@@ -717,7 +717,7 @@ public:
 
         int pid = fork();
         if (pid < 0) {
-            LOG(VERBOSE) << "Failed to fork for command " << cmd;
+            LOG(VERBOSE) << "Failed to fork for command " << cmd.c_str();
             return false;
         }
         if (pid != 0) {
@@ -751,7 +751,7 @@ public:
                 pid_t waitPid = HANDLE_EINTR(waitpid(pid, &exitCode, WNOHANG));
                 if (waitPid < 0) {
                     auto local_errno = errno;
-                    LOG(VERBOSE) << "Error running command " << cmd
+                    LOG(VERBOSE) << "Error running command " << cmd.c_str()
                                  << ". waitpid failed with |"
                                  << strerror(local_errno) << "|";
                     return false;
@@ -773,7 +773,7 @@ public:
                 kill(pid, SIGKILL);
                 waitpid(pid, nullptr, WNOHANG);
             }
-            LOG(VERBOSE) << "Timed out with running command " << cmd;
+            LOG(VERBOSE) << "Timed out with running command " << cmd.c_str();
             return false;
         }
 
