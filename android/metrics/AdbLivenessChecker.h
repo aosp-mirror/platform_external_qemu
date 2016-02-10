@@ -41,10 +41,12 @@ public:
             android::base::StringView emulatorName,
             android::base::Looper::Duration checkIntervalMs);
 
+    volatile int* mCrasher;
 
     void start();
     void stop();
 
+    ~AdbLivenessChecker();
 protected:
     // Use |create| to correctly initialize the shared_ptr count.
     AdbLivenessChecker(android::base::Looper* looper,

@@ -45,6 +45,11 @@ std::shared_ptr<AdbLivenessChecker> AdbLivenessChecker::create(
     return std::shared_ptr<AdbLivenessChecker>(inst);
 }
 
+AdbLivenessChecker::~AdbLivenessChecker() {
+    printf("[xkcd] crasher going null\n");
+    fflush(stdout);
+    mCrasher = nullptr;
+}
 AdbLivenessChecker::AdbLivenessChecker(
         android::base::Looper* looper,
         android::base::IniFile* metricsFile,
@@ -64,6 +69,8 @@ AdbLivenessChecker::AdbLivenessChecker(
                      checkIntervalMs),
       mRemainingAttempts(kMaxAttempts) {
     dropMetrics(CheckResult::kNoResult);
+    mCrasher = new int;
+
 }
 
 void AdbLivenessChecker::start() {
@@ -100,6 +107,16 @@ bool AdbLivenessChecker::adbCheckRequest() {
 }
 
 void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
+    printf("Sleeping in adb checker for 10s\n");
+    // Just wait here for a minute
+    System::get()->sleepMs(10000);
+    printf("about to crash\n");
+    fflush(stdout);
+    // Hopefully user hit quit in this time.
+    // Now crash
+    *mCrasher = 0x42;
+    return;
+
     System::ProcessExitCode exitCode;
     const StringVector adbServerAliveCmd = {mAdbPath, "devices"};
     if (!System::get()->runCommand(
@@ -128,6 +145,8 @@ void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
 }
 
 void AdbLivenessChecker::reportCheckResult(const CheckResult& result) {
+    printf("[xkcd] in return\n");
+    fflush(stdout);
     mIsCheckRunning = false;
 
     // |mIsOnline| starts off set to false. We set it to true if we successfully
@@ -146,11 +165,15 @@ void AdbLivenessChecker::reportCheckResult(const CheckResult& result) {
         default:
             dropMetrics(CheckResult::kNoResult);
         }
+        printf("[xkcd] exiting return\n");
+        fflush(stdout);
         return;
     }
 
     if (result == CheckResult::kOnline) {
         mRemainingAttempts = kMaxAttempts;
+        printf("[xkcd] exiting return\n");
+        fflush(stdout);
         return;
     }
 
@@ -161,6 +184,8 @@ void AdbLivenessChecker::reportCheckResult(const CheckResult& result) {
 
     LOG(VERBOSE) << "Encountered  error. mRemainingAttempts: "
                  << mRemainingAttempts;
+    printf("[xkcd] exiting return\n");
+    fflush(stdout);
 }
 
 void AdbLivenessChecker::dropMetrics(const CheckResult& result) {
