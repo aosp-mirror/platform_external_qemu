@@ -36,6 +36,8 @@
 #include <QThread>
 #include <QWidget>
 
+#include <string>
+
 #ifdef Q_OS_LINUX
 // This include needs to be after all the Qt includes
 // because it defines macros/types that conflict with
@@ -44,7 +46,6 @@
 #endif
 
 using android::base::System;
-using android::base::String;
 
 #define  DEBUG  1
 
@@ -85,7 +86,7 @@ extern void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv) {
     D("Starting QT main loop\n");
 
     // Make Qt look at the libraries within this installation
-    String qtPath = androidQtGetLibraryDir();
+    std::string qtPath = androidQtGetLibraryDir();
     QStringList pathList(qtPath.c_str());
     QCoreApplication::setLibraryPaths(pathList);
     D("Qt lib path: %s\n", qtPath.c_str());
