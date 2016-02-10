@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-// Some free functions for manipulating Strings as URIs. Wherever possible,
+// Some free functions for manipulating strings as URIs. Wherever possible,
 // these functions take const references to StringView to avoid unnecessary
 // copies.
 

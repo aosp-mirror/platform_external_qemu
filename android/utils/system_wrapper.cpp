@@ -16,6 +16,8 @@
  */
 #include "android/base/system/System.h"
 
+#include "android/base/misc/StringUtils.h"
+
 // This is a very thin wrapper around C++ implementations of some functions
 // NOTE: cpp headers need to go before this so that inttypes.h doesn't pollute
 // types.
@@ -42,5 +44,6 @@ void add_library_search_dir(const char* dirPath) {
 }
 
 char* get_host_os_type() {
-    return android::base::toString(System::get()->getOsType()).release();
+    return android::base::strDup(
+            android::base::toString(System::get()->getOsType()));
 }

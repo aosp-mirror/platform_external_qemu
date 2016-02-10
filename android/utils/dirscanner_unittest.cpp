@@ -15,7 +15,6 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/testing/TestTempDir.h"
-#include "android/base/String.h"
 
 #include <gtest/gtest.h>
 
@@ -25,12 +24,11 @@
 #define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
 
 using android::base::TestTempDir;
-using android::base::String;
 using android::base::StringVector;
 using android::base::PathUtils;
 
-static void make_subfile(const String& dir, const char* file) {
-    String path = dir;
+static void make_subfile(const std::string& dir, const char* file) {
+    std::string path = dir;
     path.append("/");
     path.append(file);
     int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0755);
@@ -71,7 +69,7 @@ TEST(DirScanner, scanNormal) {
         if (!entry) {
             break;
         }
-        entries.append(String(entry));
+        entries.push_back(std::string(entry));
     }
     dirScanner_free(scanner);
 
@@ -110,7 +108,7 @@ TEST(DirScanner, scanFull) {
         if (!entry) {
             break;
         }
-        entries.append(String(entry));
+        entries.push_back(std::string(entry));
     }
     dirScanner_free(scanner);
 
@@ -121,9 +119,9 @@ TEST(DirScanner, scanFull) {
 
     EXPECT_EQ(kCount, entries.size());
     for (size_t n = 0; n < kCount; ++n) {
-        String expected =
+        std::string expected =
                 android::base::PathUtils::addTrailingDirSeparator(
-                        String(myDir.path()));
+                        std::string(myDir.path()));
         expected += kExpected[n];
         EXPECT_STREQ(expected.c_str(), entries[n].c_str()) << "#" << n;
     }
