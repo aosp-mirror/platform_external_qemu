@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d8e7442_94758c9e",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_CM/GLEScmContext.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1084468
+      },
+      "writtenOn": "2016-02-10T01:58:39Z",
+      "side": 1,
+      "message": "type \u003d\u003d",
+      "range": {
+        "startLine": 190,
+        "startChar": 16,
+        "endLine": 190,
+        "endChar": 33
+      },
+      "revId": "4fa2c5e9b5cf356fa1a3c3672d73009ade2290b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
