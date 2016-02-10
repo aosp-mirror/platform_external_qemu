@@ -15,10 +15,47 @@
 #include "android/base/misc/StringUtils.h"
 
 #include "android/base/memory/QSort.h"
+
 #include <stdlib.h>
+#include <string.h>
+
+#ifdef _WIN32
+const void* memmem(const void* haystack, size_t haystackLen,
+                   const void* needle, size_t needleLen) {
+    if (needleLen == 0 ) {
+        return haystack;
+    }
+
+    if (haystackLen < needleLen) {
+        return NULL;
+    }
+
+    const char* haystackPos = (const char*)haystack;
+    const char* haystackEnd = haystackPos + (haystackLen - needleLen) + 1;
+    for (; haystackPos < haystackEnd; haystackPos++) {
+        if (0==memcmp(haystackPos, needle, needleLen)) {
+            return haystackPos;
+        }
+    }
+    return NULL;
+}
+#endif  // _WIN32
 
 namespace android {
 namespace base {
+
+char* strDup(StringView view) {
+    // Same as strdup(str.c_str()) but avoids a strlen() call.
+    char* ret = static_cast<char*>(malloc(view.size() + 1u));
+    ::memcpy(ret, view.c_str(), view.size());
+    ret[view.size()] = '\0';
+    return ret;
+}
+
+bool strContains(StringView haystack, const char* needle) {
+    return ::memmem(haystack.c_str(), haystack.size(),
+                    needle, ::strlen(needle)) != nullptr;
+}
 
 struct StringQSortTraits {
     static int compare(const String* a, const String* b) {
