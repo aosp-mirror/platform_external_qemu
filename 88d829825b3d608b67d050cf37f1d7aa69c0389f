@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ddc9d89d_07e546f5",
+        "filename": "android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-10T18:33:58Z",
+      "side": 1,
+      "message": "I\u0027m not familiar with why this code is necessary.\n\njameskaye@ or grigoryj@ - comments?",
+      "parentUuid": "3d8e7442_543de415",
+      "range": {
+        "startLine": 114,
+        "startChar": 0,
+        "endLine": 119,
+        "endChar": 9
+      },
+      "revId": "88d829825b3d608b67d050cf37f1d7aa69c0389f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7da46cba_84ee36a7",
         "filename": "android/skin/qt/extended-pages/settings-page.cpp",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-10T00:55:59Z",
       "side": 1,
       "message": "PathUtils::toExecutableName()",
+      "range": {
+        "startLine": 186,
+        "startChar": 68,
+        "endLine": 186,
+        "endChar": 71
+      },
+      "revId": "88d829825b3d608b67d050cf37f1d7aa69c0389f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fdce9ca2_a88f8317",
+        "filename": "android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-10T18:33:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7da46cba_84ee36a7",
       "range": {
         "startLine": 186,
         "startChar": 68,
@@ -106,6 +154,30 @@
     },
     {
       "key": {
+        "uuid": "3dacb4b4_a70b28bc",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-10T18:33:58Z",
+      "side": 1,
+      "message": "I really should go dig through the convenience functions in android::base - there\u0027s always a new one I learn about.",
+      "parentUuid": "dd92b865_5af18948",
+      "range": {
+        "startLine": 261,
+        "startChar": 34,
+        "endLine": 261,
+        "endChar": 35
+      },
+      "revId": "88d829825b3d608b67d050cf37f1d7aa69c0389f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fdc21c56_63dbec97",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 3
@@ -117,6 +189,30 @@
       "writtenOn": "2016-02-10T00:55:59Z",
       "side": 1,
       "message": "should we cache it, or every single time we will be going through this?",
+      "range": {
+        "startLine": 259,
+        "startChar": 0,
+        "endLine": 271,
+        "endChar": 9
+      },
+      "revId": "88d829825b3d608b67d050cf37f1d7aa69c0389f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bdc1846e_40cfa2cd",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-10T18:33:58Z",
+      "side": 1,
+      "message": "Made it a member - technically, the path to adb *could* change during runtime (if someone somehow had their SDK directory messed up before running the emulator but fixed it while running the emulator), but I don\u0027t think we should worry about that case.",
+      "parentUuid": "fdc21c56_63dbec97",
       "range": {
         "startLine": 259,
         "startChar": 0,
