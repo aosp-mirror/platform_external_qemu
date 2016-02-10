@@ -154,7 +154,7 @@ const TargetInfo kTarget = {
 #elif defined(TARGET_MIPS)
     "mips",
     "mipsel",
-    "24Kf",
+    "74Kf",
     "ttyGF",
     "virtio-blk-device",
     "virtio-net-device",
