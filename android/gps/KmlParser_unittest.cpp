@@ -16,23 +16,22 @@
 #include <gtest/gtest.h>
 
 using android::base::TestTempDir;
-using std::string;
 
 namespace android_gps {
 
 TEST(KmlParser, ParseNonexistentFile) {
     GpsFixArray locations;
-    string error;
+    std::string error;
     ASSERT_FALSE(KmlParser::parseFile("", &locations, &error));
     ASSERT_EQ(0, locations.size());
-    EXPECT_EQ(string("KML document not parsed successfully."), error);
+    EXPECT_EQ(std::string("KML document not parsed successfully."), error);
 }
 
 TEST(KmlParser, ParseEmptyFile) {
     {
         TestTempDir myDir("parse_location_tests");
         ASSERT_TRUE(myDir.path()); // NULL if error during creation.
-        android::base::String path = myDir.makeSubPath("test.kml");
+        std::string path = myDir.makeSubPath("test.kml");
 
         std::ofstream myfile;
         myfile.open(path.c_str());
@@ -42,7 +41,7 @@ TEST(KmlParser, ParseEmptyFile) {
         myfile.close();
 
         GpsFixArray locations;
-        string error;
+        std::string error;
         ASSERT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
         EXPECT_EQ(0, locations.size());
         EXPECT_EQ("", error);
@@ -53,7 +52,7 @@ TEST(KmlParser, ParseValidFile) {
     {
         TestTempDir myDir("parse_location_tests");
         ASSERT_TRUE(myDir.path()); // NULL if error during creation.
-        android::base::String path = myDir.makeSubPath("test.kml");
+        std::string path = myDir.makeSubPath("test.kml");
 
         std::ofstream myfile;
         myfile.open(path.c_str());
@@ -70,7 +69,7 @@ TEST(KmlParser, ParseValidFile) {
         myfile.close();
 
         GpsFixArray locations;
-        string error;
+        std::string error;
         ASSERT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
         EXPECT_EQ(1, locations.size());
         EXPECT_EQ("", error);
@@ -81,7 +80,7 @@ TEST(KmlParser, ParseValidComplexFile) {
     {
         TestTempDir myDir("parse_location_tests");
         ASSERT_TRUE(myDir.path()); // NULL if error during creation.
-        android::base::String path = myDir.makeSubPath("test.kml");
+        std::string path = myDir.makeSubPath("test.kml");
 
         std::ofstream myfile;
         myfile.open(path.c_str());
@@ -139,7 +138,7 @@ TEST(KmlParser, ParseValidComplexFile) {
         myfile.close();
 
         GpsFixArray locations;
-        string error;
+        std::string error;
         ASSERT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
         EXPECT_EQ("", error);
         EXPECT_EQ(3, locations.size());

@@ -25,7 +25,6 @@ namespace metrics {
 
 using android::base::PathUtils;
 using android::base::StringVector;
-using android::base::String;
 using android::base::System;
 using android::ConfigDirs;
 using std::shared_ptr;
@@ -51,15 +50,15 @@ AdbLivenessChecker::AdbLivenessChecker(
         shared_ptr<android::base::IniFile> metricsFile,
         android::base::StringView emulatorName,
         android::base::Looper::Duration checkIntervalMs)
-    : mLooper(looper),
-      mMetricsFile(metricsFile),
-      mEmulatorName(emulatorName),
-      mCheckIntervalMs(checkIntervalMs),
-      mAdbPath(PathUtils::join(
+    : mAdbPath(PathUtils::join(
               ConfigDirs::getSdkRootDirectory(),
               PathUtils::join(
                       kPlatformToolsSubdir,
                       PathUtils::toExecutableName(kAdbExecutableBaseName)))),
+      mLooper(looper),
+      mMetricsFile(metricsFile),
+      mEmulatorName(emulatorName.c_str()),
+      mCheckIntervalMs(checkIntervalMs),
       // We use raw pointer to |this| instead of a shared_ptr to avoid cicrular
       // ownership. mRecurrentTask promises to cancel any outstanding tasks when
       // it's destructed.

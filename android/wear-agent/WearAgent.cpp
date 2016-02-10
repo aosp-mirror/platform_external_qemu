@@ -18,7 +18,6 @@
 #include "android/base/containers/StringVector.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/sockets/SocketUtils.h"
-#include "android/base/String.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/system/System.h"
@@ -387,7 +386,7 @@ void WearAgentImpl::parseAdbDevices(char* buf, StringVector* devices) {
     char* prev = NULL;
     while (pch) {
         if (!strcmp("device", pch) && prev) {
-            devices->push_back(String(prev));
+            devices->push_back(std::string(prev));
         }
         prev = pch;
         pch = strtok(NULL, kDelimiters);

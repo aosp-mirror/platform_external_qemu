@@ -14,7 +14,6 @@
 #include "android/base/Log.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/sockets/ScopedSocket.h"
-#include "android/base/String.h"
 #include "android/wear-agent/PairUpWearPhone.h"
 #include "android/wear-agent/testing/WearAgentTestUtils.h"
 

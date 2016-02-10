@@ -16,13 +16,12 @@
 #include <gtest/gtest.h>
 
 using android::base::TestTempDir;
-using std::string;
 
 namespace android_gps {
 
 TEST(GpxParser, ParseFileNotFound) {
     GpsFixArray locations;
-    string error;
+    std::string error;
     bool isOk = GpxParser::parseFile("i_dont_exist.gpx", &locations, &error);
     EXPECT_FALSE(isOk);
 }
@@ -35,7 +34,7 @@ TEST(GpxParser, ParseFileEmpty) {
 
     TestTempDir myDir("parse_location_tests");
     ASSERT_TRUE(myDir.path()); // NULL if error during creation.
-    android::base::String path = myDir.makeSubPath("test.gpx");
+    std::string path = myDir.makeSubPath("test.gpx");
 
     std::ofstream myfile;
     myfile.open(path.c_str());
@@ -43,7 +42,7 @@ TEST(GpxParser, ParseFileEmpty) {
     myfile.close();
 
     GpsFixArray locations;
-    string error;
+    std::string error;
     bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
     EXPECT_TRUE(isOk);
     EXPECT_EQ(0, locations.size());
@@ -63,7 +62,7 @@ TEST(GpxParser, ParseFileEmptyRteTrk) {
 
     TestTempDir myDir("parse_location_tests");
     ASSERT_TRUE(myDir.path()); // NULL if error during creation.
-    android::base::String path = myDir.makeSubPath("test.gpx");
+    std::string path = myDir.makeSubPath("test.gpx");
 
     std::ofstream myfile;
     myfile.open(path.c_str());
@@ -71,7 +70,7 @@ TEST(GpxParser, ParseFileEmptyRteTrk) {
     myfile.close();
 
     GpsFixArray locations;
-    string error;
+    std::string error;
     bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
     EXPECT_TRUE(isOk);
     EXPECT_EQ(0, locations.size());
@@ -117,7 +116,7 @@ TEST(GpxParser, ParseFileValid) {
 
     TestTempDir myDir("parse_location_tests");
     ASSERT_TRUE(myDir.path()); // NULL if error during creation.
-    android::base::String path = myDir.makeSubPath("test.gpx");
+    std::string path = myDir.makeSubPath("test.gpx");
 
     std::ofstream myfile;
     myfile.open(path.c_str());
@@ -125,7 +124,7 @@ TEST(GpxParser, ParseFileValid) {
     myfile.close();
 
     GpsFixArray locations;
-    string error;
+    std::string error;
     bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
     EXPECT_TRUE(isOk);
     EXPECT_EQ(8, locations.size());
@@ -159,7 +158,7 @@ TEST(GpxParser, ParseFileNullAttribute) {
     myfile.close();
 
     GpsFixArray locations;
-    string error;
+    std::string error;
 
     bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
 
