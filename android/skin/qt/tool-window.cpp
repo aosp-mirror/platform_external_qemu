@@ -48,14 +48,18 @@ extern "C" void setUiEmuAgent(const UiEmuAgent *agentPtr) {
     }
 }
 
-ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
+ToolWindow::ToolWindow(
+    EmulatorQtWindow* window,
+    QWidget* parent,
+    ToolWindow::UIEventRecorderPtr event_recorder)
     : QFrame(parent),
       emulator_window(window),
       extendedWindow(NULL),
       uiEmuAgent(NULL),
       toolsUi(new Ui::ToolControls),
       mPushDialog(this),
-      mInstallDialog(this) {
+      mInstallDialog(this),
+      mUIEventRecorder(event_recorder) {
     Q_INIT_RESOURCE(resources);
     twInstance = this;
 
@@ -682,6 +686,9 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
 
     extendedWindow = new ExtendedWindow(emulator_window, this, uiEmuAgent,
                                         &mShortcutKeyStore);
+    if (auto recorder_ptr = mUIEventRecorder.lock()) {
+        recorder_ptr->startRecording(extendedWindow);
+    }
     extendedWindow->show();
     extendedWindow->showPane(pane);
     extendedWindow->raise();
