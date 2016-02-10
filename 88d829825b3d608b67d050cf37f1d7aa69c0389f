@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5da7a8bf_097c1dbd",
+        "filename": "android/skin/qt/qt-settings.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-10T00:48:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fdc21c56_a375049e",
+      "revId": "88d829825b3d608b67d050cf37f1d7aa69c0389f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bd9a6476_c6c4c20b",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2016-02-10T00:41:37Z",
       "side": 1,
       "message": "There\u0027s a \u0027settings\u0027 just before the \u0027if\u0027",
+      "revId": "88d829825b3d608b67d050cf37f1d7aa69c0389f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd83441c_1906373f",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-10T00:48:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bd9a6476_c6c4c20b",
       "revId": "88d829825b3d608b67d050cf37f1d7aa69c0389f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
