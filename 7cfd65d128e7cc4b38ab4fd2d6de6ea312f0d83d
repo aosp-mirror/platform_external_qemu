@@ -22,6 +22,30 @@
       "revId": "7cfd65d128e7cc4b38ab4fd2d6de6ea312f0d83d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd92b865_da465948",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-10T00:46:44Z",
+      "side": 1,
+      "message": "Changing it to that makes the emulator segfault on exit... Will look into that a bit.",
+      "parentUuid": "dda3987e_a3bcdafe",
+      "range": {
+        "startLine": 165,
+        "startChar": 0,
+        "endLine": 168,
+        "endChar": 5
+      },
+      "revId": "7cfd65d128e7cc4b38ab4fd2d6de6ea312f0d83d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
