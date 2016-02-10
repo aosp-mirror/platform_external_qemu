@@ -43,6 +43,18 @@ void StringAppendFormatWithArgs(String* string,
                                 const char* format,
                                 va_list args);
 
+// Appends a formatted string at the end of an existing string.
+// |string| is the target string instance, |format| the format string,
+// followed by any formatting parameters. This is more efficient than
+// appending the result of StringFormat(format,...) to |*string| directly.
+void StringAppendFormatRaw(std::string* string, const char* format, ...);
+
+// A variant of StringAppendFormat() that takes a va_list to list
+// formatting parameters.
+void StringAppendFormatWithArgs(std::string* string,
+                                const char* format,
+                                va_list args);
+
 // unpackFormatArg() is a set of overloaded functions needed to unpack
 // an argument of the formatting list to a POD value which can be passed
 // into the sprintf()-like C function
@@ -71,6 +83,14 @@ String StringFormat(const char* format, Args&&... args)
 template <class... Args>
 void StringAppendFormat(String* string, const char* format, Args&&... args)
 {
+    StringAppendFormatRaw(string, format,
+                          unpackFormatArg(std::forward<Args>(args))...);
+}
+
+template <class... Args>
+void StringAppendFormat(std::string* string,
+                        const char* format,
+                        Args&&... args) {
     StringAppendFormatRaw(string, format,
                           unpackFormatArg(std::forward<Args>(args))...);
 }

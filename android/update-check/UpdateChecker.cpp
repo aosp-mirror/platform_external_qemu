@@ -13,7 +13,6 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
-#include "android/base/String.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Async.h"
@@ -27,13 +26,13 @@
 #include "android/utils/misc.h"
 #include "android/version.h"
 
-#include <errno.h>
-#include <string.h>
-#include <time.h>
-
 #include <fstream>
 #include <new>
 #include <string>
+
+#include <errno.h>
+#include <string.h>
+#include <time.h>
 
 static const char kDataFileName[] = ".emu-update-last-check";
 // TODO: kVersionUrl should not be fixed; XY in repository-XY.xml
@@ -51,7 +50,6 @@ R"(Your emulator is out of date, please update by launching Android Studio:
 )";
 
 using android::base::ScopedCPtr;
-using android::base::String;
 using android::base::StringView;
 using android::base::System;
 using android::base::Uri;
@@ -89,7 +87,7 @@ class DataLoader final : public IDataLoader {
 public:
     virtual std::string load(const char* version) override {
         std::string xml;
-        String url = kVersionUrl;
+        std::string url = kVersionUrl;
         if (version) {
             const ScopedCPtr<char> id(
                     android_studio_get_installation_id());
@@ -153,7 +151,7 @@ public:
     }
 
 private:
-    android::base::String mDataFileName;
+    std::string mDataFileName;
     FileLock* mFileLock;
 };
 

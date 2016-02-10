@@ -14,10 +14,12 @@
 
 #include "android/filesystems/ext4_resize.h"
 
-#include "android/base/String.h"
 #include "android/base/system/System.h"
 #include "android/utils/path.h"
 
+#include <string>
+
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -33,7 +35,6 @@ using android::base::Win32Utils;
 #endif
 
 using android::base::RunOptions;
-using android::base::String;
 using android::base::System;
 
 static unsigned convertBytesToMB(uint64_t size) {
@@ -70,7 +71,7 @@ int resizeExt4Partition(const char* partitionPath, int64_t newByteSize) {
     }
 
     // format common arguments once
-    String executable = System::get()->findBundledExecutable("resize2fs");
+    std::string executable = System::get()->findBundledExecutable("resize2fs");
     if (executable.empty()) {
         fprintf(stderr, "ERROR: couldn't get path to resize2fs binary\n");
         return -1;

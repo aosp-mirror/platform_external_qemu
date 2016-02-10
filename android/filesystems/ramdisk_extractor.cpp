@@ -13,7 +13,6 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/Log.h"
-#include "android/base/String.h"
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -270,7 +269,7 @@ bool android_extractRamdiskFile(const char* ramdiskPath,
         } else {
             // Read the name and compare it.
             nameSize -= 1U;
-            android::base::String entryName;
+            std::string entryName;
             entryName.resize(nameSize);
             if (!input.doRead(&entryName[0], nameSize)) {
                 D("Could not read ramdisk file entry name!");

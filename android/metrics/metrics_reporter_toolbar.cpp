@@ -15,7 +15,7 @@
 #include "android/metrics/metrics_reporter_toolbar.h"
 #include "android/metrics/internal/metrics_reporter_toolbar_internal.h"
 
-#include "android/base/String.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/base/Uri.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/curl-support.h"
@@ -23,6 +23,8 @@
 #include "android/utils/compiler.h"
 #include "android/utils/debug.h"
 #include "android/utils/uri.h"
+
+#include <string>
 
 #include <assert.h>
 #include <stdio.h>
@@ -32,11 +34,10 @@
     dwarning("%s:%d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
 using android::base::ScopedCPtr;
-using android::base::String;
 using android::base::Uri;
 
 static const int kUrlLengthLimit = 8000;
-static void url_limit_append(String* dst, const String& src) {
+static void url_limit_append(std::string* dst, const std::string& src) {
     if (dst->size() + src.size() > kUrlLengthLimit) {
         return;
     }
@@ -44,22 +45,22 @@ static void url_limit_append(String* dst, const String& src) {
 }
 
 template <class Val>
-static void urlAddKeyVal(String* dst,
+static void urlAddKeyVal(std::string* dst,
                          const char* format,
                          const char* key,
                          const Val& val) {
     url_limit_append(dst, Uri::FormatEncodeArguments(format, key, val));
 }
 
-static void url_addstrval(String* dst, const char* key, const char* val) {
+static void url_addstrval(std::string* dst, const char* key, const char* val) {
     urlAddKeyVal(dst, "&%s=%s", key, val);
 }
 
-static void url_addintval(String* dst, const char* key, int val) {
+static void url_addintval(std::string* dst, const char* key, int val) {
     urlAddKeyVal(dst, "&%s=%d", key, val);
 }
 
-static void url_addi64val(String* dst, const char* key, uint64_t val) {
+static void url_addi64val(std::string* dst, const char* key, uint64_t val) {
     urlAddKeyVal(dst, "&%s=%" PRId64, key, val);
 }
 
@@ -104,7 +105,7 @@ int formatToolbarGetUrl(char** ptr,
     assert(ptr != NULL);
     assert(*ptr == NULL);
 
-    String fullUrl = url;
+    std::string fullUrl = url;
 
     android::base::ScopedCPtr<char> client_id(
             android_studio_get_installation_id());
@@ -142,7 +143,7 @@ int formatToolbarGetUrl(char** ptr,
     URL_GPU_FORMAT(&fullUrl, gpu3);
 
     const int result = fullUrl.size();
-    *ptr = fullUrl.release();
+    *ptr = android::base::strDup(fullUrl);
     return result;
 }
 

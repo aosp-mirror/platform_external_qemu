@@ -16,6 +16,8 @@
 
 #include <gtest/gtest.h>
 
+#include <string>
+
 namespace android {
 namespace update_check {
 
@@ -182,7 +184,7 @@ TEST(UpdateChecker, getVersion) {
     // Get the version as a string
     Version returnedVersion = test.mVersionExtractor->getCurrentVersion();
 
-    EXPECT_TRUE( returnedVersion.toString().equals("4.5.6") );
+    EXPECT_EQ("4.5.6", returnedVersion.toString());
 }
 
 TEST(UpdateChecker, asyncWorker) {

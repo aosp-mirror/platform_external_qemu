@@ -11,14 +11,11 @@
 
 #pragma once
 
-#include "android/base/String.h"
 #include "android/cpu_accelerator.h"
 #include <string>
 #include <stdlib.h>
 
 namespace android {
-
-using ::android::base::String;
 
 #ifdef __APPLE__
 

@@ -11,15 +11,13 @@
 
 #pragma once
 
-#include "android/base/String.h"
 #include "android/cpu_accelerator.h"
+
 #include <string>
 #include <utility>
 #include <stdlib.h>
 
 namespace android {
-
-using ::android::base::String;
 
 // The list of CPU emulation acceleration technologies supported by the
 // Android emulator.
@@ -49,7 +47,7 @@ CpuAccelerator  GetCurrentCpuAccelerator();
 // acceleration on this machine. If GetCurrentCpuAccelerator() returns
 // CPU_ACCELERATOR_NONE this will contain a small explanation why
 // the accelerator cannot be used.
-String GetCurrentCpuAcceleratorStatus();
+std::string GetCurrentCpuAcceleratorStatus();
 
 // Return an status code describing the state of the current CPU
 // acceleration on this machine. If GetCurrentCpuAccelerator() returns

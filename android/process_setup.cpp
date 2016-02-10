@@ -23,7 +23,6 @@
 #include <string>
 
 using android::base::PathUtils;
-using android::base::String;
 using android::base::System;
 
 // The order of initialization here can be very finicky. Handle with care, and
@@ -59,8 +58,9 @@ void process_early_setup(int argc, char** argv) {
 
     // libcurl initialization is thread-unsafe, so let's call it first
     // to make sure no other thread could be doing the same
-    String launcherDir = System::get()->getLauncherDirectory();
-    String caBundleFile = PathUtils::join(launcherDir, "lib", "ca-bundle.pem");
+    std::string launcherDir = System::get()->getLauncherDirectory();
+    std::string caBundleFile =
+            PathUtils::join(launcherDir, "lib", "ca-bundle.pem");
     if (!System::get()->pathCanRead(caBundleFile)) {
         LOG(VERBOSE) << "Can not read ca-bundle. Curl init skipped.";
     } else {

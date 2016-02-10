@@ -18,11 +18,12 @@
 #include "android/base/async/RecurrentTask.h"
 #include "android/base/Compiler.h"
 #include "android/base/files/IniFile.h"
-#include "android/base/String.h"
 #include "android/base/StringView.h"
+#include "android/base/threads/ParallelTask.h"
 
 #include <functional>
 #include <memory>
+#include <string>
 
 namespace android {
 namespace metrics {
@@ -51,6 +52,7 @@ protected:
                        android::base::StringView emulatorName,
                        android::base::Looper::Duration checkIntervalMs);
 
+protected:
     enum class CheckResult {
         kNoResult = 0,
         kFailureNoAdb = 1,
@@ -58,6 +60,8 @@ protected:
         kFailureAdbServerDead = 3,
         kFailureEmulatorDead = 4
     };
+    using AdbCheckTask =
+            android::base::ParallelTask<AdbLivenessChecker::CheckResult>;
 
     // Called by the RecurrentTask.
     bool adbCheckRequest();
@@ -68,12 +72,13 @@ protected:
 
     void dropMetrics(const CheckResult& result);
 private:
+    const std::string mAdbPath;
     android::base::Looper* const mLooper;
     std::shared_ptr<android::base::IniFile> mMetricsFile;
-    const android::base::String mEmulatorName;
+    const std::string mEmulatorName;
     const android::base::Looper::Duration mCheckIntervalMs;
-    const android::base::String mAdbPath;
     android::base::RecurrentTask mRecurrentTask;
+    std::unique_ptr<AdbCheckTask> mCheckTask;
     int mRemainingAttempts;
     bool mIsOnline = false;
     bool mIsCheckRunning = false;
