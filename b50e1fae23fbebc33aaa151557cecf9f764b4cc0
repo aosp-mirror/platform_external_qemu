@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9d1200d7_6c8f53e8",
+        "filename": "android/base/containers/CircularBuffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-10T23:57:29Z",
+      "side": 1,
+      "message": "it\u0027s a very suboptimal queue as opposed to the one backed by a std::vector\u003c\u003e\nI\u0027m curious if we need lots of performance here",
+      "range": {
+        "startLine": 14,
+        "startChar": 10,
+        "endLine": 14,
+        "endChar": 15
+      },
+      "revId": "b50e1fae23fbebc33aaa151557cecf9f764b4cc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ddaf464_6eaceffe",
+        "filename": "android/base/containers/CircularBuffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-10T23:57:29Z",
+      "side": 1,
+      "message": "size_t ? assert if \u003e 0",
+      "range": {
+        "startLine": 33,
+        "startChar": 28,
+        "endLine": 33,
+        "endChar": 31
+      },
+      "revId": "b50e1fae23fbebc33aaa151557cecf9f764b4cc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ddaf464_aeb1b75b",
+        "filename": "android/base/containers/CircularBuffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-10T23:57:29Z",
+      "side": 1,
+      "message": "size_t ?",
+      "range": {
+        "startLine": 94,
+        "startChar": 4,
+        "endLine": 94,
+        "endChar": 7
+      },
+      "revId": "b50e1fae23fbebc33aaa151557cecf9f764b4cc0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
