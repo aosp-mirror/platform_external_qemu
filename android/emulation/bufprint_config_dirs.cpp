@@ -14,7 +14,6 @@
 
 #include "android/emulation/bufprint_config_dirs.h"
 
-#include "android/base/String.h"
 #include "android/base/system/System.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/utils/bufprint.h"
@@ -24,7 +23,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-using android::base::String;
 using android::base::System;
 using android::ConfigDirs;
 
@@ -32,7 +30,7 @@ using android::ConfigDirs;
 // android::base::System to make them mockable during unit-testing.
 
 char* bufprint_app_dir(char* buff, char* end) {
-    String appDir = System::get()->getLauncherDirectory();
+    std::string appDir = System::get()->getLauncherDirectory();
     return bufprint(buff, end, "%s", appDir.c_str());
 }
 

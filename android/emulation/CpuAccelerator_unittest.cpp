@@ -12,9 +12,11 @@
 #include "android/emulation/CpuAccelerator.h"
 #include "android/emulation/internal/CpuAccelerator.h"
 
-#include <stdio.h>
-
 #include <gtest/gtest.h>
+
+#include <string>
+
+#include <stdio.h>
 
 namespace android {
 
@@ -34,14 +36,14 @@ public:
 private:
     CpuAccelerator saved_accel_;
     AndroidCpuAcceleration saved_status_code_;
-    String saved_status_;
+    std::string saved_status_;
 };
 
 // Not really a test, but a simple way to print the current accelerator
 // value for simple verification.
 TEST_F(CpuAcceleratorTest, Default) {
     CpuAccelerator accel = GetCurrentCpuAccelerator();
-    String status = GetCurrentCpuAcceleratorStatus();
+    std::string status = GetCurrentCpuAcceleratorStatus();
 
     switch (accel) {
     case CPU_ACCELERATOR_NONE:

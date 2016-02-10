@@ -63,7 +63,6 @@
 
 namespace android {
 
-using base::String;
 using base::StringAppendFormat;
 using base::ScopedFd;
 
@@ -98,7 +97,7 @@ GlobalState gGlobals = {false,
 // Return true iff KVM is installed and usable on this machine.
 // |*status| will be set to a small status string explaining the
 // status of KVM on success or failure.
-AndroidCpuAcceleration ProbeKVM(String* status) {
+AndroidCpuAcceleration ProbeKVM(std::string* status) {
     // Check that /dev/kvm exists.
     if (::access("/dev/kvm", F_OK)) {
         // /dev/kvm does not exist
@@ -299,7 +298,7 @@ struct HaxModuleVersion {
  * Otherwise returns some other AndroidCpuAcceleration status and sets
  * |status| to a user-understandable error string
  */
-AndroidCpuAcceleration ProbeHaxCpu(String* status) {
+AndroidCpuAcceleration ProbeHaxCpu(std::string* status) {
     char vendor_id[16];
     android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
 
@@ -377,7 +376,7 @@ using namespace android;
 // The minimum API version supported by the Android emulator.
 #define HAX_MIN_VERSION  1
 
-AndroidCpuAcceleration ProbeHAX(String* status) {
+AndroidCpuAcceleration ProbeHAX(std::string* status) {
     status->clear();
 
     AndroidCpuAcceleration cpu = ProbeHaxCpu(status);
@@ -504,7 +503,7 @@ AndroidCpuAcceleration ProbeHAX(String* status) {
 // The minimum API version supported by the Android emulator.
 #define HAX_MIN_VERSION  1
 
-AndroidCpuAcceleration ProbeHAX(String* status) {
+AndroidCpuAcceleration ProbeHAX(std::string* status) {
     AndroidCpuAcceleration cpu = ProbeHaxCpu(status);
     if (cpu != ANDROID_CPU_ACCELERATION_READY)
         return cpu;
@@ -610,7 +609,7 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         return g->accel;
     }
 
-    String status;
+    std::string status;
 #if HAVE_KVM
     AndroidCpuAcceleration status_code = ProbeKVM(&status);
     if (status_code == ANDROID_CPU_ACCELERATION_READY) {
@@ -633,7 +632,7 @@ CpuAccelerator GetCurrentCpuAccelerator() {
     return g->accel;
 }
 
-String GetCurrentCpuAcceleratorStatus() {
+std::string GetCurrentCpuAcceleratorStatus() {
     GlobalState *g = &gGlobals;
 
     if (!g->probed && !g->testing) {
@@ -641,7 +640,7 @@ String GetCurrentCpuAcceleratorStatus() {
         GetCurrentCpuAccelerator();
     }
 
-    return String(g->status);
+    return std::string(g->status);
 }
 
 AndroidCpuAcceleration GetCurrentCpuAcceleratorStatusCode() {
@@ -700,7 +699,6 @@ std::pair<AndroidHyperVStatus, std::string> GetHyperVStatus() {
         }
     }
 
-    using android::base::String;
     using android::base::Win32UnicodeString;
     using android::base::PathUtils;
 
@@ -726,7 +724,7 @@ std::pair<AndroidHyperVStatus, std::string> GetHyperVStatus() {
     }
 
 #ifdef __x86_64__
-    const String sysPath = PathUtils::join(winPath.toString(), "System32");
+    const std::string sysPath = PathUtils::join(winPath.toString(), "System32");
 #else
     // For the 32-bit application everything's a little bit more complicated:
     // the main Hyper-V executable is 64-bit on 64-bit OS; but we're running
@@ -735,7 +733,7 @@ std::pair<AndroidHyperVStatus, std::string> GetHyperVStatus() {
     // directory. So we need to select the proper one here.
     // First, try a symlink which only exists on 64-bit Windows and leads to
     // the native, 64-bit directory
-    String sysPath = PathUtils::join(winPath.toString(), "Sysnative");
+    std::string sysPath = PathUtils::join(winPath.toString(), "Sysnative");
 
     // check only if path exists: path_is_dir() would fail as it's not a
     // directory but a symlink
@@ -745,7 +743,7 @@ std::pair<AndroidHyperVStatus, std::string> GetHyperVStatus() {
         sysPath = PathUtils::join(winPath.toString(), "System32");
     }
 #endif
-    const String hyperVExe = PathUtils::join(sysPath, "vmms.exe");
+    const std::string hyperVExe = PathUtils::join(sysPath, "vmms.exe");
 
     if (path_is_regular(hyperVExe.c_str())) {
         // hyper-v is installed but not running
