@@ -60,7 +60,14 @@
 // This variable is a pointer to a zero-terminated array of all environment
 // variables in the current process.
 // Posix requires this to be declared as extern at the point of use
+// NOTE: Apple developer manual states that this variable isn't available for
+// the shared libraries, and one has to use the _NSGetEnviron() function instead
+#ifdef __APPLE__
+#include <crt_externs.h>
+#define environ (*_NSGetEnviron())
+#else
 extern "C" char** environ;
+#endif
 
 namespace android {
 namespace base {
