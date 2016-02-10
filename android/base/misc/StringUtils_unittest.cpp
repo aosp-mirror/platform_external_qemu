@@ -21,6 +21,43 @@ namespace base {
 
 namespace {
 
+TEST(StringUtils, strDupWithStringView) {
+    StringView view("Hello World");
+    char* s = strDup(view);
+    EXPECT_TRUE(s);
+    EXPECT_STREQ(view.c_str(), s);
+    EXPECT_NE(view.c_str(), s);
+    free(s);
+}
+
+TEST(StringUtils, strDupWithStdString) {
+    std::string str("Hello World");
+    char* s = strDup(str);
+    EXPECT_TRUE(s);
+    EXPECT_STREQ(str.c_str(), s);
+    EXPECT_NE(str.c_str(), s);
+    free(s);
+}
+
+TEST(StringUtils, strContainsWithStringView) {
+    StringView haystack("This is a long string to search for stuff");
+    EXPECT_FALSE(strContains(haystack, "needle"));
+    EXPECT_FALSE(strContains(haystack, "stuffy"));
+    EXPECT_TRUE(strContains(haystack, "stuf"));
+    EXPECT_TRUE(strContains(haystack, "stuff"));
+    EXPECT_FALSE(strContains(haystack, "This is a short phrase"));
+    EXPECT_TRUE(strContains(haystack, "a long string"));
+}
+
+TEST(StringUtils, strContainsWithStdString) {
+    std::string haystack("This is a long string to search for stuff");
+    EXPECT_FALSE(strContains(haystack, "needle"));
+    EXPECT_FALSE(strContains(haystack, "stuffy"));
+    EXPECT_TRUE(strContains(haystack, "stuff"));
+    EXPECT_FALSE(strContains(haystack, "This is a short phrase"));
+    EXPECT_TRUE(strContains(haystack, "a long string"));
+}
+
 // Tiny random string generator
 struct StringGenerator {
     StringGenerator() : mSeed(123) {}
