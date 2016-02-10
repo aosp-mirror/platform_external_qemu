@@ -698,7 +698,7 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
     GLESConversionArrays tmpArrs;
     SET_ERROR_IF(!ctx->setupArraysPointers(tmpArrs,0,count,type,indices,false), GL_INVALID_OPERATION)
 
-    int maxIndex = ctx->findMaxIndex(count, type, indices);
+    unsigned int maxIndex = ctx->findMaxIndex(count, type, indices);
     ctx->validateAtt0PreDraw(maxIndex);
     
     //See glDrawArrays

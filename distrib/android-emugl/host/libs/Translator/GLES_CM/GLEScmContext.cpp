@@ -106,7 +106,7 @@ void GLEScmContext::setupArrayPointerHelper(GLESConversionArrays& cArrs,GLint fi
 bool GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) {
     ArraysMap::iterator it;
     m_pointsIndex = -1;
-    int elementCount = indices ? findMaxIndex(count,type,indices) + 1 : count;
+    unsigned int elementCount = indices ? findMaxIndex(count,type,indices) + 1 : count;
 
     //going over all clients arrays Pointers
     for ( it=m_map.begin() ; it != m_map.end(); it++ ) {
@@ -165,7 +165,18 @@ void  GLEScmContext::drawPointsData(GLESConversionArrays& cArrs,GLint first,GLsi
 
 
     if(isElemsDraw) {
-        int tSize = type == GL_UNSIGNED_SHORT ? 2 : 1;
+        int tSize = 0;
+        switch (type) {
+            case GL_UNSIGNED_BYTE:
+                tSize = 1;
+                break;
+            case GL_UNSIGNED_SHORT:
+                tSize = 2;
+                break;
+            case GL_UNSIGNED_INT:
+                tSize = 4;
+                break;
+        };
 
         int i = 0;
         while(i<count)
@@ -174,7 +185,9 @@ void  GLEScmContext::drawPointsData(GLESConversionArrays& cArrs,GLint first,GLsi
             int sCount = 1;
 
 #define INDEX \
-                (type == GL_UNSIGNED_SHORT ? \
+                (type == GL_UNSIGNED_INT ? \
+                static_cast<const GLuint*>(indices_in)[i]: \
+                type == GL_UNSIGNED_SHORT ? \
                 static_cast<const GLushort*>(indices_in)[i]: \
                 static_cast<const GLubyte*>(indices_in)[i])
 

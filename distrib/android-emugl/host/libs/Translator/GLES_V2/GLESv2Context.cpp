@@ -89,7 +89,7 @@ void GLESv2Context::validateAtt0PostDraw(void)
 
 bool GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) {
     ArraysMap::iterator it;
-    int elementCount = indices ? findMaxIndex(count,type,indices) + 1 : count;
+    unsigned int elementCount = indices ? findMaxIndex(count,type,indices) + 1 : count;
 
     //going over all clients arrays Pointers
     for ( it=m_map.begin() ; it != m_map.end(); it++ ) {
@@ -158,9 +158,9 @@ void GLESv2Context::initExtensionString() {
     if (s_glSupport.GL_OES_STANDARD_DERIVATIVES)
         *s_glExtensions+="GL_OES_standard_derivatives ";
     if (s_glSupport.GL_OES_TEXTURE_NPOT)
-        *s_glExtensions+="GL_OES_texture_npot";
+        *s_glExtensions+="GL_OES_texture_npot ";
     if (s_glSupport.GL_OES_RGB8_RGBA8) {
-        *s_glExtensions+=" GL_OES_rgb8_rgba8";
+        *s_glExtensions+="GL_OES_rgb8_rgba8 ";
     }
 }
 
