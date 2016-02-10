@@ -45,6 +45,30 @@
       "revId": "a4721ca79b617efd7a620da3f607e413a1699d45",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ddbd58cb_b9c2976b",
+        "filename": "android/skin/qt/input-event-recorder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-02-10T00:21:15Z",
+      "side": 1,
+      "message": "Sure. In the end this is a temp hack and none of this code will be used, but I thought it was appropriate to include this notice in this draft. Until then, I will -2 to avoid creating any problem by accidental merging.",
+      "parentUuid": "5da7a8bf_e311bae2",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 39
+      },
+      "revId": "a4721ca79b617efd7a620da3f607e413a1699d45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
