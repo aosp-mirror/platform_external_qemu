@@ -129,6 +129,9 @@ public:
         return *this;
     }
 
+    // Convert to std::string when needed.
+    operator std::string() const { return std::string(mString, mSize); }
+
 private:
     const char* mString;
     size_t mSize;
