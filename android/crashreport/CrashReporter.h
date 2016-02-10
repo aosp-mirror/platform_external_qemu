@@ -81,6 +81,10 @@ public:
     void attachData(android::base::StringView name,
                     android::base::StringView data);
 
+    // Pass some file to the crash reporter to upload it with the dump
+    bool attachFile(android::base::StringView sourceFullName,
+                    android::base::StringView destBaseName);
+
     // The following two functions write a dump of current process state.
     // Both pass the |message| to the dump writer, so it is sent together with
     // the dump file

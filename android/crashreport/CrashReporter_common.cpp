@@ -126,14 +126,25 @@ void CrashReporter::passDumpMessage(const char* message) {
     attachData(kDumpMessageFileName, message);
 }
 
-void CrashReporter::attachData(StringView name, StringView data) {
+// Construct the full name of a file to put the data for the crash reporter
+// Don't allocate!
+template <size_t N>
+static void formatDataFileName(char (&buffer)[N], StringView baseName) {
+    static_assert(N >= PATH_MAX, "Too small buffer for a path");
+
     // don't do any dynamic allocation here - it might be called during dump
     // writing, e.g. because of OOM exception
-    char fullName[PATH_MAX + 1] = {};
-    snprintf(fullName, sizeof(fullName) - 1,
+    memset(&buffer[0], 0, N);
+    snprintf(buffer, N - 1,
              "%s%c%s",
-             getDataExchangeDir().c_str(), System::kDirSeparator,
-             (name.empty() ? "additional_data.txt" : name.c_str()));
+             CrashReporter::get()->getDataExchangeDir().c_str(),
+             System::kDirSeparator,
+             (baseName.empty() ? "additional_data.txt" : baseName.c_str()));
+}
+
+void CrashReporter::attachData(StringView name, StringView data) {
+    char fullName[PATH_MAX + 1];
+    formatDataFileName(fullName, name);
 
     // Open the communication file in append mode to make sure we won't
     // overwrite any existing message (e.g. if several threads are writing at
@@ -157,6 +168,14 @@ void CrashReporter::attachData(StringView name, StringView data) {
     HANDLE_EINTR(write(fd, "\n", 1));
 
     close(fd);
+}
+
+bool CrashReporter::attachFile(StringView sourceFullName,
+                               StringView destBaseName) {
+    char fullName[PATH_MAX + 1];
+    formatDataFileName(fullName, destBaseName);
+
+    return path_copy_file(fullName, sourceFullName) >= 0;
 }
 
 }  // namespace crashreport
@@ -231,9 +250,7 @@ void crashhandler_die_format(const char* format, ...) {
 }
 
 void crashhandler_add_string(const char* name, const char* string) {
-    if (const auto reporter = CrashReporter::get()) {
-        reporter->attachData(name, string);
-    }
+    CrashReporter::get()->attachData(name, string);
 }
 
 void crashhandler_exitmode(const char* message) {
@@ -241,18 +258,7 @@ void crashhandler_exitmode(const char* message) {
 }
 
 bool crashhandler_copy_attachment(const char* destination, const char* source) {
-    const std::string& path = CrashReporter::get()->getDataExchangeDir();
-    if (path.empty()) {
-        E("Could not determine crash dump directory");
-        return false;
-    }
-    String dest = PathUtils::join(path, destination);
-    if (path_copy_file(dest.c_str(), source) != 0) {
-        E("Could not copy file '%s' to '%s': %s", source, dest.c_str(),
-          strerror(errno));
-        return false;
-    }
-    return true;
+    return CrashReporter::get()->attachFile(source, destination);
 }
 
 }  // extern "C"
