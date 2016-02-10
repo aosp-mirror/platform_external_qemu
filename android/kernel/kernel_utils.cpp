@@ -11,6 +11,7 @@
 
 #include "android/base/containers/PodVector.h"
 #include "android/base/Log.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/kernel/kernel_utils.h"
 #include "android/kernel/kernel_utils_testing.h"
 #include "android/uncompress.h"
@@ -40,32 +41,6 @@ const size_t kLinuxVersionStringPrefixLen =
         sizeof(kLinuxVersionStringPrefix) - 1U;
 
 }  // namespace
-
-#ifdef _WIN32
-// TODO: (vharron) move somewhere more generally useful?
-// Returns a pointer to the first occurrence of |needle| in |haystack|, or a 
-// NULL pointer if |needle| is not part of |haystack|.
-const void* memmem(const void* haystack, size_t haystackLen,
-                   const void* needle, size_t needleLen) {
-    if (needleLen == 0 ) {
-        return haystack;
-    }
-
-    if (haystackLen < needleLen) {
-        return NULL;
-    }
-
-    const char* haystackPos = (const char*)haystack;
-    const char* haystackEnd = haystackPos + (haystackLen - needleLen);
-    for (; haystackPos < haystackEnd; haystackPos++) {
-        if (0==memcmp(haystackPos, needle, needleLen)) {
-            return haystackPos;
-        }
-    }
-    return NULL;
-}
-#endif
-
 
 bool android_parseLinuxVersionString(const char* versionString,
                                      KernelVersion* kernelVersion) {
