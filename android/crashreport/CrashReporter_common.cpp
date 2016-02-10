@@ -91,6 +91,8 @@ void CrashReporter::GenerateDump(const char* message) {
 }
 
 void CrashReporter::GenerateDumpAndDie(const char* message) {
+    SetExitMode(__func__);
+
     passDumpMessage(message);
     // this is the most cross-platform way of crashing
     // any other I know about has its flows:
@@ -105,7 +107,12 @@ void CrashReporter::GenerateDumpAndDie(const char* message) {
 
 void CrashReporter::SetExitMode(const char* msg) {
     mIsInExitMode = true;
-    androidMetrics_update();
+    // This is a temporary patch fix for an issue with too many crashes on exit
+    // Clear the dirty flag on the metrics as soon as we started exiting, not
+    // in the last moment
+    // TODO: after exit crashes are fixed, change back _seal() to _update()
+    // Bug=http://b.android.com/200665
+    androidMetrics_seal();
     attachData(kCrashOnExitFileName, msg);
 }
 
