@@ -12,11 +12,13 @@
 
 #pragma once
 
+#include "android/base/containers/CircularBuffer.h"
 #include "android/skin/event.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/qt/shortcut-key-store.h"
+#include "android/skin/qt/ui-event-recorder.h"
 #include "android/utils/compiler.h"
 
 #include <QDir>
@@ -34,6 +36,8 @@
 #include <QFrame>
 #include <QQueue>
 
+#include <memory>
+
 #define REMOTE_DOWNLOADS_DIR "/sdcard/Download"
 #define REMOTE_SCREENSHOT_FILE "/data/local/tmp/screen.png"
 
@@ -49,9 +53,13 @@ typedef void(EmulatorQtWindow::*EmulatorQtWindowSlot)();
 class ToolWindow : public QFrame
 {
     Q_OBJECT
-
+    using UIEventRecorderPtr =
+        std::weak_ptr<UIEventRecorder<android::base::CircularBuffer>>;
 public:
-    explicit ToolWindow(EmulatorQtWindow *emulatorWindow, QWidget *parent);
+    ToolWindow(
+            EmulatorQtWindow *emulatorWindow,
+            QWidget *parent,
+            UIEventRecorderPtr event_recorder);
     ~ToolWindow();
 
     void hide();
@@ -114,6 +122,7 @@ private:
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
     bool mIsExtendedWindowActiveOnHide = false;
     QString mDetectedAdbPath;
+    std::weak_ptr<UIEventRecorder<android::base::CircularBuffer>> mUIEventRecorder;
 
 private slots:
     void on_back_button_pressed();

@@ -27,6 +27,7 @@
 #include <QResizeEvent>
 #include <QWidget>
 
+#include "android/base/containers/CircularBuffer.h"
 #include "android/globals.h"
 #include "android/skin/event.h"
 #include "android/skin/surface.h"
@@ -35,6 +36,7 @@
 #include "android/skin/qt/emulator-overlay.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/skin/qt/ui-event-recorder.h"
 
 #include <memory>
 
@@ -255,6 +257,10 @@ private:
 
     QMessageBox mAvdWarningBox;
     bool mFirstShowEvent;
+
+    EventCapturer mEventCapturer;
+    std::shared_ptr<UIEventRecorder<android::base::CircularBuffer>>
+        mEventLogger;
 };
 
 struct SkinSurface {
