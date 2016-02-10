@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/extended-window-styles.h"
+#include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/qt-settings.h"
 #include <QApplication>
 #include <QDir>
@@ -30,7 +30,7 @@ void setButtonEnabled(QPushButton*  button, SettingsTheme theme, bool isEnabled)
 
     // Get the resource name based on the light/dark theme
     QString resName = ":/";
-    resName += (theme == SETTINGS_THEME_DARK) ? DARK_PATH : LIGHT_PATH;
+    resName += Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR];
     resName += "/";
 
     if (!isEnabled  &&  !disabledPropStr.isNull()) {
@@ -102,8 +102,7 @@ void switchAllIconsForTheme(SettingsTheme theme)
 
 
 QIcon getIconForCurrentTheme(const QString& icon_name) {
-    QString iconType =
-        getSelectedTheme() == SETTINGS_THEME_LIGHT ? LIGHT_PATH : DARK_PATH;
+    QString iconType = Ui::stylesheetValues(getSelectedTheme())[Ui::THEME_PATH_VAR];
     return QIcon(":/" + iconType + "/" + icon_name);
 }
 

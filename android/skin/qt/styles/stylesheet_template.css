@@ -1,0 +1,148 @@
+/* Copyright (C) 2015 The Android Open Source Project
+
+  This software is licensed under the terms of the GNU General Public
+  License version 2, as published by the Free Software Foundation, and
+  may be copied, distributed, and modified under those terms.
+ 
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+ */
+
+*[ColorGroup="MajorTab"] {
+    color: %%MAJOR_TAB_COLOR%%;
+    padding: 0px 0px 0px 16px;
+}
+*[ColorGroup="MajorTabTitle"] {
+    color: %%MAJOR_TITLE_COLOR%%;
+    background-color: %%TAB_BKG_COLOR%%
+}
+*[ColorGroup="Title"] {
+    color: %%TITLE_COLOR%%;
+}
+*::disabled[ColorGroup="Tool"] { color: %%DISABLED_TOOL_COLOR%%}
+*[ColorGroup="Tool"] { color: %%TOOL_COLOR%%}
+*[class="EditableValue"]  { color: %%TEXT_COLOR%% }
+*[ColorGroup="SliderLabel"]  { color: %%DIVIDER_COLOR%% }
+*[ColorGroup="SmsBox"] { border: 1px solid %%BOX_COLOR%% }
+*[ColorGroup="HorizDivider"] {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0  %%LARGE_DIVIDER_COLOR%%, stop: 1 %%TAB_SELECTED_COLOR%%);
+    border: 0px;
+}
+*[ColorGroup="GradientDivider"] {
+    background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 %%LARGE_DIVIDER_COLOR%%, stop: 1 %%BKG_COLOR%%);
+    border: 0px;
+}
+*{
+    color: %%TEXT_COLOR%%;
+    background-color: %%BKG_COLOR%%;
+}
+QGroupBox::title { margin-top: 4px; margin-left: 0px }
+QPlainTextEdit:disabled, QTextEdit:disabled, QLineEdit:disabled { border: 0px }
+QPlainTextEdit, QTextEdit, QLineEdit {
+    border-top: 0px;
+    border-bottom: 1px solid %%EDIT_COLOR%%;
+}
+QCheckBox::indicator:checked[ColorGroup="Toggle"] {
+    image: url(:/%%PATH%%/toggle_on);
+    width: 36px; height: 24px;
+}
+QCheckBox::indicator:unchecked[ColorGroup="Toggle"] {
+    image: url(:/%%PATH%%/toggle_off);
+    width: 36px; height: 24px;
+}
+QCheckBox::indicator:checked {
+    image: url(:/%%PATH%%/check_yes)
+}
+QCheckBox::indicator:unchecked {
+    image: url(:/%%PATH%%/check_no)
+}
+QRadioButton::indicator:unchecked {
+    image: url(:/%%PATH%%/radio_off);
+    width: 24; height:24;
+}
+QRadioButton::indicator:checked {
+    image: url(:/%%PATH%%/radio_on);
+    width: 24; height: 24;
+}
+QSlider::groove {border: 1px ;height: 2px;}
+QSlider::handle {
+    background: solid %%TOOL_COLOR%%;
+    border: 1px solid %%TOOL_COLOR%%;
+    width: 12px;
+    margin: -6px 0;
+    border-radius: 7px;
+}
+QSlider::sub-page:horizontal {
+    background: %%TOOL_COLOR%%;
+    border-radius: 1px;
+}
+QSlider::add-page:horizontal {
+    background: %%BOX_COLOR%%;
+    border-radius: 1px;
+}
+QTableWidget {
+    gridline-color: %%TAB_BKG_COLOR%%;
+    background: %%TAB_BKG_COLOR%%;
+    border: 0px;
+}
+QTableView::item {
+    padding-left: 16;
+    padding-right: 16;
+    color: %%TEXT_COLOR%%;
+    border: 0;
+    border-bottom: 1 solid %%TABLE_BOTTOM_COLOR%%;
+}
+QTableView::item:focus{}
+QHeaderView::section {
+    color: %%TITLE_COLOR%%;
+    background: %%TAB_BKG_COLOR%%;
+    border: 0px; padding: 16;
+    border-bottom: 1 solid %%DIVIDER_COLOR%%;
+}
+QScrollBar::vertical {
+    background: %%SCROLL_BKG_COLOR%%;
+    width: 8px;
+    margin 21px 0 21 px 0;
+}
+QScrollBar::handle:vertical {
+    background: %%SCROLL_HANDLE_COLOR%%;
+    min-height: 25px;
+}
+QScrollBar::add-line:vertical { border: none; background: none }
+QScrollBar::sub-line:vertical { border: none; background: none }
+QComboBox {
+    border-top: 0px;
+    border-bottom: 1px solid %%BOX_COLOR%%;
+    selection-background-color: %%TAB_BKG_COLOR%%;
+}
+QComboBox::drop-down { border-left-style: solid; }
+QComboBox::down-arrow {
+    image:url(:/%%PATH%%/drop_down);
+    border: none;
+    width: 24px;
+    height: 24px;
+}
+QListView { min-height: 4em }
+QTabWidget::pane {border: none;}
+QTabWidget::tab-bar {left: 0px;}
+QTabBar::tab {
+    background: %%BKG_COLOR%%;
+    padding-bottom:8px;
+    text-align: left;
+    margin-left: 8
+}
+QTabBar::tab:selected {
+    color: %%TEXT_COLOR%%;
+    border-bottom: 2px solid %%TOOL_COLOR%%;
+}
+QTabBar::tab:!selected{
+    color: %%TITLE_COLOR%%;
+    border-bottom: 2px solid %%BKG_COLOR%%;
+}
+QTabBar::tab:disabled {
+    color: transparent;
+    border-bottom: 2px solid transparent
+}
+
