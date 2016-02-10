@@ -12,7 +12,6 @@
 #include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
-#include "android/base/String.h"
 #include "android/base/StringFormat.h"
 
 #include "android/android.h"
@@ -175,11 +174,11 @@ const TargetInfo kTarget = {
 #endif
 };
 
-static String getNthParentDir(const char* path, size_t n) {
+static std::string getNthParentDir(const char* path, size_t n) {
     StringVector dir = PathUtils::decompose(path);
     PathUtils::simplifyComponents(&dir);
     if (dir.size() < n + 1U) {
-        return String("");
+        return std::string("");
     }
     dir.resize(dir.size() - n);
     return PathUtils::recompose(dir);
@@ -201,11 +200,11 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
 
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     /* for x86, 'if=none' is necessary for virtio blk*/
-    String driveParam("if=none,");
+    std::string driveParam("if=none,");
 #else
-    String driveParam;
+    std::string driveParam;
 #endif
-    String deviceParam;
+    std::string deviceParam;
 
     switch (type) {
         case IMAGE_TYPE_SYSTEM:
@@ -1091,7 +1090,7 @@ extern "C" int main(int argc, char **argv) {
 
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     // SMP Support.
-    String ncores;
+    std::string ncores;
     if (hw->hw_cpu_ncore > 1) {
         args[n++] = "-smp";
         ncores = StringFormat("cores=%ld", hw->hw_cpu_ncore);
@@ -1115,13 +1114,13 @@ extern "C" int main(int argc, char **argv) {
 
     // Memory size
     args[n++] = "-m";
-    String memorySize = StringFormat("%ld", hw->hw_ramSize);
+    std::string memorySize = StringFormat("%ld", hw->hw_ramSize);
     args[n++] = memorySize.c_str();
 
     // Command-line
     args[n++] = "-append";
 
-    String kernelCommandLine = "qemu=1";
+    std::string kernelCommandLine = "qemu=1";
 
     // Append these kernel parameters here to avoid having to modify QEMU code
     if (hw->kernel_parameters && hw->kernel_parameters[0] != '\0') {
@@ -1168,7 +1167,7 @@ extern "C" int main(int argc, char **argv) {
     }
 
     if (opts->logcat) {
-        String logcat = StringFormat(" androidboot.logcat=%s", opts->logcat);
+        std::string logcat = StringFormat(" androidboot.logcat=%s", opts->logcat);
         // Replace whitespace with comma starting at the second character
         // since the first one in the format string above is a whitespace
         std::replace(&logcat[1], &logcat[logcat.size()], ' ', ',');
@@ -1222,7 +1221,7 @@ extern "C" int main(int argc, char **argv) {
     args[n++] = kernelCommandLine.c_str();
 
     // Support for changing default lcd-density
-    String lcd_density;
+    std::string lcd_density;
     if (hw->hw_lcd_density) {
         args[n++] = "-lcd-density";
         lcd_density = StringFormat("%d", hw->hw_lcd_density);
@@ -1252,7 +1251,7 @@ extern "C" int main(int argc, char **argv) {
     args[n++] = "-netdev";
     args[n++] = "user,id=mynet";
     args[n++] = "-device";
-    String netDevice =
+    std::string netDevice =
             StringFormat("%s,netdev=mynet", kTarget.networkDeviceType);
     args[n++] = netDevice.c_str();
     args[n++] = "-show-cursor";
@@ -1267,7 +1266,7 @@ extern "C" int main(int argc, char **argv) {
 
     // Data directory (for keymaps and PC Bios).
     args[n++] = "-L";
-    String dataDir = getNthParentDir(args[0], 3U);
+    std::string dataDir = getNthParentDir(args[0], 3U);
     if (dataDir.empty()) {
         dataDir = "lib/pc-bios";
     } else {
