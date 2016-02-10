@@ -19,7 +19,12 @@
 #include "android/utils/debug.h"
 #include "client/mac/handler/exception_handler.h"
 
+#include <mach/mach.h>
+
 #include <memory>
+
+#include <inttypes.h>
+#include <stdint.h>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -43,7 +48,8 @@ public:
         }
 
         mHandler.reset(new google_breakpad::ExceptionHandler(
-                getDumpDir(), nullptr, nullptr,
+                getDumpDir(), &HostCrashReporter::exceptionFilterCallback,
+                nullptr,  // no minidump callback
                 nullptr,  // no callback context
                 true,     // install signal handlers
                 crashpipe.mClient.c_str()));
@@ -71,12 +77,47 @@ public:
 
     void writeDump() override { mHandler->WriteMinidump(); }
 
+   static bool exceptionFilterCallback(void* context);
+
 private:
     std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
 };
 
 ::android::base::LazyInstance<HostCrashReporter> sCrashReporter =
         LAZY_INSTANCE_INIT;
+
+bool HostCrashReporter::exceptionFilterCallback(void*) {
+    rusage usage = {};
+    getrusage(RUSAGE_SELF, &usage);
+
+    mach_task_basic_info info = {};
+    mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
+    task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
+            reinterpret_cast<task_info_t>(&info), &infoCount);
+
+    char buf[1024] = {};
+    snprintf(buf, sizeof(buf) - 1,
+            "==== Process memory usage ====\n"
+            "max resident size = %" PRIu64 " kB\n"
+            "virtual size = %" PRIu64 " kB\n"
+            "resident size = %" PRIu64 " kB\n"
+            "messages sent = %" PRIu64 "\n"
+            "messages received = %" PRIu64 "\n"
+            "voluntary context switches = %" PRIu64 "\n"
+            "involuntary context switches = %" PRIu64 "\n",
+             uint64_t(info.resident_size_max / 1024),
+             uint64_t(info.virtual_size / 1024),
+             uint64_t(info.resident_size / 1024),
+             uint64_t(usage.ru_msgsnd),
+             uint64_t(usage.ru_msgrcv),
+             uint64_t(usage.ru_nvcsw),
+             uint64_t(usage.ru_nivcsw));
+
+    CrashReporter::get()->attachData(
+                CrashReporter::kProcessMemoryInfoFileName, buf);
+
+    return true;    // proceed with handling the crash
+}
 
 }  // namespace anonymous
 

@@ -15,6 +15,7 @@
 #include "android/crashreport/CrashReporter.h"
 
 #include "android/base/memory/LazyInstance.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/utils/debug.h"
 #include "client/linux/handler/exception_handler.h"
 
@@ -48,7 +49,8 @@ public:
         }
 
         mHandler.reset(new google_breakpad::ExceptionHandler(
-                google_breakpad::MinidumpDescriptor(getDumpDir()), nullptr,
+                google_breakpad::MinidumpDescriptor(getDumpDir()),
+                &HostCrashReporter::exceptionFilterCallback,
                 nullptr, nullptr, true, std::stoi(crashpipe.mClient)));
 
         return mHandler != nullptr;
@@ -67,12 +69,22 @@ public:
 
     void writeDump() override { mHandler->WriteMinidump(); }
 
+    static bool exceptionFilterCallback(void* context);
+
 private:
     std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
 };
 
 ::android::base::LazyInstance<HostCrashReporter> sCrashReporter =
         LAZY_INSTANCE_INIT;
+
+bool HostCrashReporter::exceptionFilterCallback(void*) {
+    // collect the memory usage at the time of the crash
+    crashhandler_copy_attachment(
+                CrashReporter::kProcessMemoryInfoFileName, "/proc/self/status");
+
+    return true;
+}
 
 }  // namespace anonymous
 
