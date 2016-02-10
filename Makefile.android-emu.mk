@@ -358,6 +358,7 @@ LOCAL_LDLIBS += \
 LOCAL_SRC_FILES := \
   android/avd/util_unittest.cpp \
   android/base/async/RecurrentTask_unittest.cpp \
+  android/base/containers/CircularBuffer_unittest.cpp \
   android/base/containers/HashUtils_unittest.cpp \
   android/base/containers/PodVector_unittest.cpp \
   android/base/containers/PointerSet_unittest.cpp \
