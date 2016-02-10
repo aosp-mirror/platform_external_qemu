@@ -15,9 +15,13 @@
 #include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/String.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
 
+#include <string>
+
 using android::base::PathUtils;
+using android::base::strDup;
 using android::base::String;
 using android::base::StringVector;
 using android::base::System;
@@ -55,13 +59,13 @@ char* path_get_absolute(const char* path) {
         return ASTRDUP(path);
     }
 
-    String currentDir = System::get()->getCurrentDirectory();
+    std::string currentDir = System::get()->getCurrentDirectory();
     StringVector currentItems = PathUtils::decompose(currentDir.c_str());
     StringVector pathItems = PathUtils::decompose(path);
     for (const auto& item : pathItems) {
         currentItems.push_back(item);
     }
-    return PathUtils::recompose(currentItems).release();
+    return strDup(PathUtils::recompose(currentItems));
 }
 
 int path_split(const char* path, char** dirname, char** basename) {
@@ -70,10 +74,10 @@ int path_split(const char* path, char** dirname, char** basename) {
         return -1;
     }
     if (dirname) {
-        *dirname = dir.release();
+        *dirname = strDup(dir);
     }
     if (basename) {
-        *basename = file.release();
+        *basename = strDup(file);
     }
     return 0;
 }
@@ -83,7 +87,7 @@ char* path_dirname(const char* path) {
     if (!PathUtils::split(path, &dir, nullptr)) {
         return nullptr;
     }
-    return dir.release();
+    return strDup(dir);
 }
 
 char* path_basename(const char* path) {
@@ -91,5 +95,5 @@ char* path_basename(const char* path) {
     if (!PathUtils::split(path, nullptr, &file)) {
         return nullptr;
     }
-    return file.release();
+    return strDup(file);
 }
