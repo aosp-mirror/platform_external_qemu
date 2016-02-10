@@ -11,13 +11,12 @@
 
 #include "android/utils/win32_cmdline_quote.h"
 
+#include "android/base/misc/StringUtils.h"
 #include "android/base/system/Win32Utils.h"
-#include "android/base/String.h"
 
 #include "android/utils/system.h"
 
 char* win32_cmdline_quote(const char* param) {
-    android::base::String result =
-            android::base::Win32Utils::quoteCommandLine(param);
-    return result.release();
+    std::string result = android::base::Win32Utils::quoteCommandLine(param);
+    return android::base::strDup(result);
 }

@@ -9,20 +9,22 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-// Some free functions for manipulating Strings as URIs. Wherever possible,
+// Some free functions for manipulating strings as URIs. Wherever possible,
 // these functions take const references to StringView to avoid unnecessary
 // copies.
 
 #include "android/utils/uri.h"
 
+#include "android/base/misc/StringUtils.h"
 #include "android/base/Uri.h"
 
 using android::base::Uri;
+using android::base::strDup;
 
 char* uri_encode(const char* uri) {
-    return Uri::Encode(uri).release();
+    return strDup(Uri::Encode(uri));
 }
 
 char* uri_decode(const char* uri) {
-    return Uri::Decode(uri).release();
+    return strDup(Uri::Decode(uri));
 }
