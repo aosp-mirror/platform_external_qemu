@@ -37,6 +37,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/editable-slider-widget.cpp \
     android/skin/qt/emulator-qt-window.cpp \
     android/skin/qt/emulator-qt-no-window.cpp \
+    android/skin/qt/event-capturer.cpp \
     android/skin/qt/error-dialog.cpp \
     android/skin/qt/gl-widget.cpp \
     android/skin/qt/extended-pages/common.cpp \
@@ -61,6 +62,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/gl-widget.h \
     android/skin/qt/emulator-qt-window.h \
     android/skin/qt/emulator-qt-no-window.h \
+    android/skin/qt/event-capturer.h \
     android/skin/qt/extended-pages/battery-page.h \
     android/skin/qt/extended-pages/cellular-page.h \
     android/skin/qt/extended-pages/dpad-page.h \
