@@ -11,17 +11,17 @@
 
 #pragma once
 
-#include "android/base/String.h"
+#include <string>
 
 // Return the path to the emulator's Qt library directory,
 // which holds Qt's shared libraries. This path is typically
 // added to the system library search path and passed to
 // QCoreApplication::setLibraryPaths().
 // |bitness| - target program bittness, 32/64 or 0 for autodetection
-android::base::String androidQtGetLibraryDir(int bitness = 0);
+std::string androidQtGetLibraryDir(int bitness = 0);
 
 // Return the path to the emulator's Qt plugins directory,
 // which holds Qt's plugins. It should be added to the
 // QT_QPA_PLATFORM_PLUGIN_PATH environment variable.
 // |bitness| - target program bittness, 32/64 or 0 for autodetection
-android::base::String androidQtGetPluginsDir(int bitness = 0);
+std::string androidQtGetPluginsDir(int bitness = 0);
