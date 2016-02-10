@@ -696,7 +696,11 @@ extern "C" int main(int argc, char **argv) {
     /* If we have a valid snapshot storage path */
 
     if (opts->snapstorage) {
+        dwarning("QEMU2 does not support snapshots - option will be ignored.");
 
+        // QEMU2 does not support some of the flags below, and the emulator will
+        // fail to start if they are passed in, so for now, ignore them.
+#ifdef QEMU2_SNAPSHOT_SUPPORT
         hw->disk_snapStorage_path = ASTRDUP(opts->snapstorage);
 
         /* -no-snapshot is equivalent to using both -no-snapshot-load
@@ -737,6 +741,7 @@ extern "C" int main(int argc, char **argv) {
         if (opts->no_snapshot_update_time) {
             args[n++] = "-snapshot-no-time-update";
         }
+#endif
     }
 
     if (!opts->logcat || opts->logcat[0] == 0) {
@@ -831,8 +836,14 @@ extern "C" int main(int argc, char **argv) {
     }
 
     if (opts->ports) {
+        dwarning("QEMU2 does not support the \"-ports\" flag - option will be ignored.");
+
+        // QEMU2 does not support this flag and the emulator will fail to start
+        // if it is passed in, so for now, ignore it.
+#ifdef QEMU2_ANDROID_PORTS_SUPPORT
         args[n++] = "-android-ports";
         args[n++] = opts->ports;
+#endif
     }
 
     android_base_port = ANDROID_CONSOLE_BASEPORT;
