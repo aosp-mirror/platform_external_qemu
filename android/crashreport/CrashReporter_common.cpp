@@ -178,6 +178,13 @@ bool CrashReporter::attachFile(StringView sourceFullName,
     return path_copy_file(fullName, sourceFullName.c_str()) >= 0;
 }
 
+bool CrashReporter::onCrash() {
+    if (CrashReporter::get()->mUICrashCallback) {
+        CrashReporter::get()->mUICrashCallback();
+    }
+    return CrashReporter::get()->onCrashPlatformSpecific();
+}
+
 }  // namespace crashreport
 }  // namespace android
 
