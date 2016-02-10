@@ -37,6 +37,8 @@
 #include <QThread>
 #include <QWidget>
 
+#include <string>
+
 #ifdef Q_OS_LINUX
 // This include needs to be after all the Qt includes
 // because it defines macros/types that conflict with
@@ -50,7 +52,6 @@
 #endif
 
 using android::base::System;
-using android::base::String;
 #ifdef _WIN32
 using android::base::Win32UnicodeString;
 #endif
@@ -342,8 +343,8 @@ void skin_winsys_setup_library_paths() {
     // What's even more interesting is that adding the plugin path here is not
     // enough in itself. It also has to be set through the environment variable
     // or extended unicode characters won't work
-    String qtLibPath = androidQtGetLibraryDir();
-    String qtPluginsPath = androidQtGetPluginsDir();
+    std::string qtLibPath = androidQtGetLibraryDir();
+    std::string qtPluginsPath = androidQtGetPluginsDir();
     QStringList pathList;
     pathList.append(QString::fromUtf8(qtLibPath.c_str()));
     pathList.append(QString::fromUtf8(qtPluginsPath.c_str()));
@@ -457,12 +458,12 @@ int qMain(int argc, char** argv) {
 
     // Store converted strings and pointers to those strings, the pointers are
     // what will become the argv for qt_main
-    std::vector<String> arguments(numArgs);
+    std::vector<std::string> arguments(numArgs);
     std::vector<char*> argumentPointers(numArgs);
 
     for (int i = 0; i < numArgs; ++i) {
         arguments[i] = Win32UnicodeString::convertToUtf8(wideArgv[i]);
-        argumentPointers[i] = reinterpret_cast<char*>(arguments[i].data());
+        argumentPointers[i] = reinterpret_cast<char*>(&arguments[i][0]);
     }
 
     return qt_main(numArgs, &argumentPointers[0]);

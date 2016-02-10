@@ -36,6 +36,7 @@
 #include "android/skin/qt/tool-window.h"
 #include "ui_tools.h"
 
+#include <string>
 #include <cassert>
 
 using namespace android::base;
