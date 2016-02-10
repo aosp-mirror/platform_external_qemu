@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "3d8e7442_543de415",
+        "filename": "android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-10T00:55:59Z",
+      "side": 1,
+      "message": "this should just be a part of some subclass of Qt edit control",
+      "range": {
+        "startLine": 114,
+        "startChar": 0,
+        "endLine": 119,
+        "endChar": 9
+      },
+      "revId": "88d829825b3d608b67d050cf37f1d7aa69c0389f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7da46cba_84ee36a7",
+        "filename": "android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-10T00:55:59Z",
+      "side": 1,
+      "message": "PathUtils::toExecutableName()",
+      "range": {
+        "startLine": 186,
+        "startChar": 68,
+        "endLine": 186,
+        "endChar": 71
+      },
+      "revId": "88d829825b3d608b67d050cf37f1d7aa69c0389f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fdc21c56_a375049e",
         "filename": "android/skin/qt/qt-settings.h",
         "patchSetId": 3
@@ -31,6 +77,52 @@
       "side": 1,
       "message": "Done",
       "parentUuid": "fdc21c56_a375049e",
+      "revId": "88d829825b3d608b67d050cf37f1d7aa69c0389f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd92b865_5af18948",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-10T00:55:59Z",
+      "side": 1,
+      "message": "\u003d { sdkRootDirectory, \"platform-tools\", \"adb\" };\nOr, even better, PathUtils::join(a, \"b\", \"c\");",
+      "range": {
+        "startLine": 261,
+        "startChar": 34,
+        "endLine": 261,
+        "endChar": 35
+      },
+      "revId": "88d829825b3d608b67d050cf37f1d7aa69c0389f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fdc21c56_63dbec97",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-10T00:55:59Z",
+      "side": 1,
+      "message": "should we cache it, or every single time we will be going through this?",
+      "range": {
+        "startLine": 259,
+        "startChar": 0,
+        "endLine": 271,
+        "endChar": 9
+      },
       "revId": "88d829825b3d608b67d050cf37f1d7aa69c0389f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
