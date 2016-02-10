@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7d09ccae_48fd9f82",
+        "filename": "android/skin/qt/event-capture.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-10T22:22:28Z",
+      "side": 1,
+      "message": "is |count| more efficient than |find|?",
+      "range": {
+        "startLine": 91,
+        "startChar": 38,
+        "endLine": 91,
+        "endChar": 43
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd0fc4b0_aab76ffd",
+        "filename": "android/skin/qt/event-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-10T22:22:28Z",
+      "side": 1,
+      "message": "nit: we\u0027ve been using internal in other places.",
+      "range": {
+        "startLine": 20,
+        "startChar": 10,
+        "endLine": 20,
+        "endChar": 16
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bde6e426_b2b7e0fd",
+        "filename": "android/skin/qt/event-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-10T22:22:28Z",
+      "side": 1,
+      "message": "Please use DISALLOW_COPY_AND_ASSIGN instead.",
+      "range": {
+        "startLine": 30,
+        "startChar": 4,
+        "endLine": 30,
+        "endChar": 61
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bde6e426_b205a061",
+        "filename": "android/skin/qt/event-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-10T22:22:28Z",
+      "side": 1,
+      "message": "nit: Prefer EventCapturer (our class names are usually Noun/Adjective based)",
+      "range": {
+        "startLine": 51,
+        "startChar": 6,
+        "endLine": 51,
+        "endChar": 18
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9de920fd_91417c85",
+        "filename": "android/skin/qt/event-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-10T22:22:28Z",
+      "side": 1,
+      "message": "Why?\n\nWhat use case do you forsee that justifies this complexity?\n\nThe subscribers could simply be required to call |unsubscribe| to stop receiving events. In addition, this solves the problem of the subscribe being able to test if EventCapturer is gone away (by checking that the token is valid). Do you see that use case somewhere?",
+      "range": {
+        "startLine": 87,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 60
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fde3fc1c_0c4e97b0",
+        "filename": "android/skin/qt/event-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-10T22:22:28Z",
+      "side": 1,
+      "message": "I have a slight preference to an enum class for the top level windows here instead of an object.\n\nThat way, subscribers are insulated from having to search for the top level window objects.\n\nIt does mean that you can\u0027t subscribe to a lower level QObject than a top level window. I would like that defintion of  EventCapturer, I think.",
+      "range": {
+        "startLine": 91,
+        "startChar": 12,
+        "endLine": 91,
+        "endChar": 26
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d09ccae_c81e2fa8",
+        "filename": "android/skin/qt/qt-std-hash.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-10T22:22:28Z",
+      "side": 1,
+      "message": "According to http://doc.qt.io/qt-5/qevent.html#Type-enum\n\nYou need / can get away with 16 bit in types. Perhaps explicitly use fixed width?",
+      "range": {
+        "startLine": 22,
+        "startChar": 20,
+        "endLine": 22,
+        "endChar": 23
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
