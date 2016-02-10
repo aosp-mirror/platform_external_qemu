@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7dbb8cf2_e7e92cd3",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-10T20:44:56Z",
+      "side": 0,
+      "message": "All these checks for the pointer are redundant (always true),\nworse, if we\u0027ve built without crashhandling, all the crashhandler_* functions should not try to use the CrashHandler at all, since it\u0027s not initialized.\n\nThat needs to be fixed.",
+      "range": {
+        "startLine": 234,
+        "startChar": 8,
+        "endLine": 234,
+        "endChar": 50
+      },
+      "revId": "79d8c76160bdc7dba807013a217ea5729be5f6e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
