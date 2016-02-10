@@ -11,11 +11,12 @@
 
 #include "android/qt/qt_path.h"
 
-#include "android/base/String.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
 #include <gtest/gtest.h>
+
+#include <string>
 
 using namespace android::base;
 
@@ -51,12 +52,13 @@ TEST(androidQtGetLibraryDir, Qt64) {
 TEST(androidQtGetLibraryDir, DetectBittness) {
 #if _WIN32
     const char basePath[]   = "\\foo";
-    const String resultPath =
-            String("\\foo\\").append(System::kLibSubDir).append("\\qt\\lib");
+    const std::string resultPath = std::string("\\foo\\")
+                                           .append(System::kLibSubDir)
+                                           .append("\\qt\\lib");
 #else
     const char basePath[]  = "/foo";
-    const String resultPath =
-            String("/foo/").append(System::kLibSubDir).append("/qt/lib");
+    const std::string resultPath =
+            std::string("/foo/").append(System::kLibSubDir).append("/qt/lib");
 #endif
 
     TestSystem testSys(basePath, System::kProgramBitness);
@@ -95,12 +97,14 @@ TEST(androidQtGetPluginsDir, Qt64) {
 TEST(androidQtGetPluginsDir, DetectBitness) {
 #if _WIN32
     const char basePath[] = "\\foo";
-    const String resultPath =
-            String("\\foo\\").append(System::kLibSubDir).append("\\qt\\plugins");
+    const std::string resultPath = std::string("\\foo\\")
+                                           .append(System::kLibSubDir)
+                                           .append("\\qt\\plugins");
 #else
     const char basePath[]  = "/foo";
-    const String resultPath =
-            String("/foo/").append(System::kLibSubDir).append("/qt/plugins");
+    const std::string resultPath = std::string("/foo/")
+                                           .append(System::kLibSubDir)
+                                           .append("/qt/plugins");
 #endif
 
     TestSystem testSys(basePath, System::kProgramBitness);
