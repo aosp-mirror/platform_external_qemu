@@ -15,13 +15,15 @@
 #include "android/metrics/metrics_reporter_toolbar.h"
 #include "android/metrics/internal/metrics_reporter_toolbar_internal.h"
 
-#include "android/base/String.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/base/Uri.h"
 #include "android/curl-support.h"
 #include "android/metrics/studio-helper.h"
 #include "android/utils/compiler.h"
 #include "android/utils/debug.h"
 #include "android/utils/uri.h"
+
+#include <string>
 
 #include <assert.h>
 #include <stdio.h>
@@ -33,7 +35,6 @@
 int formatToolbarGetUrl(char** ptr,
                         const char* url,
                         const AndroidMetrics* metrics) {
-    using android::base::String;
     using android::base::Uri;
 
     // This is of the form: androidsdk_<product_name>_<event_name>
@@ -59,7 +60,7 @@ int formatToolbarGetUrl(char** ptr,
     assert(ptr != NULL);
     assert(*ptr == NULL);
 
-    String fullUrl = url;
+    std::string fullUrl = url;
 
     char* client_id = android_studio_get_installation_id();
     fullUrl += Uri::FormatEncodeArguments(
@@ -85,7 +86,7 @@ int formatToolbarGetUrl(char** ptr,
     }
 
     const int result = fullUrl.size();
-    *ptr = fullUrl.release();
+    *ptr = android::base::strDup(fullUrl);
     return result;
 }
 

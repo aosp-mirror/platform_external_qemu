@@ -12,12 +12,12 @@
 #pragma once
 
 #include "android/base/Compiler.h"
+#include "android/base/containers/StringVector.h"
 
 namespace android {
 
 namespace base {
 class Looper;
-class StringVector;
 }  // namespace base
 
 namespace wear {

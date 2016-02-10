@@ -16,7 +16,6 @@
 #include <fstream>
 #include <cstdlib>
 
-#include "android/base/String.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/testing/TestTempDir.h"
 
@@ -24,7 +23,6 @@ namespace {
 
 using android::base::TestTempDir;
 using android::base::ScopedPtr;
-using android::base::String;
 using std::ofstream;
 
 class MetricsReporterTest : public testing::Test {
@@ -118,7 +116,7 @@ TEST_F(MetricsReporterTest, simpleWriteRead) {
 
 TEST_F(MetricsReporterTest, seal) {
     const char* new_arch = "is_known_test";
-    String stashed_path;
+    std::string stashed_path;
     AndroidMetrics metrics;
 
     androidMetrics_init(&metrics);

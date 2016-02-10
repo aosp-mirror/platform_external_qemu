@@ -16,23 +16,23 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
 
 #include <assert.h>
 
 namespace android {
 
-using ::android::base::String;
 using ::android::base::PathUtils;
 using ::android::base::ScopedCPtr;
 using ::android::base::System;
 
 // static
-String ConfigDirs::getUserDirectory() {
+std::string ConfigDirs::getUserDirectory() {
     // Name of the Android configuration directory under $HOME.
     static const char kAndroidSubDir[] = ".android";
     System* system = System::get();
-    String home = system->envGet("ANDROID_EMULATOR_HOME");
+    std::string home = system->envGet("ANDROID_EMULATOR_HOME");
     if (home.size()) {
         return home;
     }
@@ -51,20 +51,20 @@ String ConfigDirs::getUserDirectory() {
 }
 
 // static
-String ConfigDirs::getAvdRootDirectory() {
+std::string ConfigDirs::getAvdRootDirectory() {
     static const char kAvdSubDir[] = "avd";
     System* system = System::get();
-    String home = system->envGet("ANDROID_AVD_HOME");
+    std::string home = system->envGet("ANDROID_AVD_HOME");
     if (home.size()) {
         return home;
     }
-    String result = PathUtils::join(getUserDirectory(), kAvdSubDir);
+    std::string result = PathUtils::join(getUserDirectory(), kAvdSubDir);
     return result;
 }
 
 // static
-String ConfigDirs::getSdkRootDirectory() {
-    String sdkRoot;
+std::string ConfigDirs::getSdkRootDirectory() {
+    std::string sdkRoot;
     auto system = System::get();
 
     sdkRoot = system->envGet("ANDROID_SDK_ROOT");
@@ -72,9 +72,10 @@ String ConfigDirs::getSdkRootDirectory() {
         // Unquote a possibly "quoted" path.
         if (sdkRoot[0] == '"') {
             assert(sdkRoot[sdkRoot.size() - 1] == '"');
-            // String does not support assigning a part of the string to itself.
+            // std::string does not support assigning a part of the string to
+            // itself.
             auto copySize = sdkRoot.size() - 2;
-            ScopedCPtr<char> buf(sdkRoot.release());
+            ScopedCPtr<char> buf(android::base::strDup(sdkRoot));
             sdkRoot.assign(buf.get() + 1, copySize);
         }
         if (system->pathIsDir(sdkRoot) && system->pathCanRead(sdkRoot)) {
@@ -90,7 +91,7 @@ String ConfigDirs::getSdkRootDirectory() {
     if (system->pathIsDir(sdkRoot) && system->pathCanRead(sdkRoot)) {
         return sdkRoot;
     }
-    return String();
+    return std::string();
 }
 
 }  // namespace android
