@@ -175,7 +175,7 @@ bool CrashReporter::attachFile(StringView sourceFullName,
     char fullName[PATH_MAX + 1];
     formatDataFileName(fullName, destBaseName);
 
-    return path_copy_file(fullName, sourceFullName) >= 0;
+    return path_copy_file(fullName.c_str(), sourceFullName.c_str()) >= 0;
 }
 
 }  // namespace crashreport
