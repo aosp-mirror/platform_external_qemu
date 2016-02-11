@@ -14,7 +14,6 @@
 
 #include "android/crashreport/CrashService_windows.h"
 
-#include "android/base/String.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 
@@ -23,6 +22,8 @@
 #include "android/utils/debug.h"
 
 #include <fstream>
+#include <string>
+
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -39,7 +40,6 @@
 namespace android {
 
 using ::android::base::PathUtils;
-using ::android::base::String;
 using ::android::base::System;
 using ::android::base::Win32UnicodeString;
 
@@ -62,7 +62,7 @@ void HostCrashService::OnClientDumpRequest(
         const std::wstring* file_path) {
     if (static_cast<CrashService::DumpRequestContext*>(context)
                 ->file_path.empty()) {
-        ::android::base::String file_path_string =
+        ::std::string file_path_string =
                 Win32UnicodeString::convertToUtf8(
                         file_path->c_str());
         D("Client Requesting dump %s\n", file_path_string.c_str());
@@ -139,7 +139,7 @@ bool HostCrashService::getHWInfo() {
         E("Unable to get data directory for crash report attachments");
         return false;
     }
-    String utf8Path = PathUtils::join(dataDirectory, kHwInfoName);
+    std::string utf8Path = PathUtils::join(dataDirectory, kHwInfoName);
     Win32UnicodeString file_path(utf8Path);
 
     Win32UnicodeString syscmd(HWINFO_CMD);
@@ -164,7 +164,7 @@ bool HostCrashService::getMemInfo() {
         E("Unable to get data directory for crash report attachments");
         return false;
     }
-    String path = PathUtils::join(data_directory, kMemInfoName);
+    std::string path = PathUtils::join(data_directory, kMemInfoName);
     // TODO: Replace ofstream when we have a good way of handling UTF-8 paths
     std::ofstream fout(path.c_str());
     if (!fout) {
