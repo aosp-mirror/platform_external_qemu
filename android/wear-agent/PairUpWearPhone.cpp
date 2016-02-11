@@ -19,9 +19,9 @@
 #include "android/base/containers/StringVector.h"
 #include "android/base/Log.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/base/sockets/SocketErrors.h"
 #include "android/base/sockets/SocketUtils.h"
-#include "android/base/String.h"
 #include "android/utils/debug.h"
 
 #include <assert.h>
@@ -114,7 +114,7 @@ private:
     FdWatch mConsoleWatch;
 
     // device categories
-    String mDeviceInProbing;
+    std::string mDeviceInProbing;
     StrQueue mUnprobedDevices;
     StrQueue mWearDevices;
     StrQueue mPhoneDevices;
@@ -126,7 +126,7 @@ private:
     AsyncWriter mAsyncWriter;
     char* mReadBuffer;
     char* mWriteBuffer;
-    String mReply;
+    std::string mReply;
 
     // whenever device list changes, call the following
     void updateDevices(const StringVector& devices);
@@ -296,7 +296,7 @@ void PairUpWearPhoneImpl::readEmulatorConsoleSocket() {
     if (size > 0) {
         mReply.append(mReadBuffer, size);
         DPRINT("read console message: %s\n", mReply.c_str());
-        if (mReply.contains("OK")) {
+        if (strContains(mReply, "OK")) {
             DPRINT("received mesg from console:\n%s\n", mReply.c_str());
             snprintf(mWriteBuffer, WRITE_BUFFER_SIZE, "redir add tcp:5601:5601\nquit\n");
             DPRINT("sending query to console:\n%s", mWriteBuffer);
@@ -326,7 +326,7 @@ void PairUpWearPhoneImpl::writeEmulatorConsoleSocket() {
 // -------------------------------   Other helper methods
 bool PairUpWearPhoneImpl::checkForWearDevice() {
     const bool isWearDevice =
-            mReply.contains("clockwork") &&
+            strContains(mReply, "clockwork") &&
             !strncmp(mDeviceInProbing.c_str(), "emulator-", 9);
 
     if (isWearDevice) {
@@ -338,14 +338,15 @@ bool PairUpWearPhoneImpl::checkForWearDevice() {
 }
 
 bool PairUpWearPhoneImpl::checkForCompatiblePhone() {
-    const bool isCompatiblePhone = mReply.contains(kWearableAppName);
+    const bool isCompatiblePhone = strContains(mReply, kWearableAppName);
 
     if (isCompatiblePhone) {
         DPRINT("found compatible phone %s\n\n", mDeviceInProbing.c_str());
         mPhoneDevices.push_back(mDeviceInProbing);
     } else {
-        const bool shouldTryAgainLater = mReply.contains("Error:") &&
-            mReply.contains("Is the system running?");
+        const bool shouldTryAgainLater =
+                strContains(mReply, "Error:") &&
+                strContains(mReply, "Is the system running?");
 
         if (shouldTryAgainLater) mUnprobedDevices.push_back(mDeviceInProbing);
     }
@@ -567,7 +568,7 @@ void PairUpWearPhoneImpl::startConnectWearAndPhone() {
         return;
     }
 
-    String phone = mPhoneDevices[0];
+    std::string phone = mPhoneDevices[0];
     mPhoneDevices.pop();
     const char emu[] = "emulator-";
     const int sz = sizeof(emu) - 1;
