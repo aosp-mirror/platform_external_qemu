@@ -110,12 +110,12 @@ bool Version::operator!=(const Version& other) const {
     return !(*this == other);
 }
 
-String Version::toString() const {
+std::string Version::toString() const {
     if (!isValid()) {
-        return String("invalid");
+        return std::string("invalid");
     }
 
-    const String res = StringFormat("%u.%u.%u", mMajor, mMinor, mMicro);
+    const std::string res = StringFormat("%u.%u.%u", mMajor, mMinor, mMicro);
     return res;
 }
 

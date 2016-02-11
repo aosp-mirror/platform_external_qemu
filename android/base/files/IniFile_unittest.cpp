@@ -12,7 +12,6 @@
 #include "android/base/files/IniFile.h"
 
 #include "android/base/testing/TestTempDir.h"
-#include "android/base/String.h"
 
 #include <gtest/gtest.h>
 

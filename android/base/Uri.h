@@ -9,14 +9,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-// Some free functions for manipulating Strings as URIs. Wherever possible,
+// Some free functions for manipulating strings as URIs. Wherever possible,
 // these functions take const references to StringView to avoid unnecessary
 // copies.
 
-#include "android/base/String.h"
 #include "android/base/StringView.h"
 #include "android/base/StringFormat.h"
 
+#include <string>
 #include <type_traits>
 #include <utility>
 
@@ -27,18 +27,18 @@ class Uri {
 public:
     // |Encode| is aggressive -- it will always encode a reserved character,
     // disregarding a possibly included URL scheme.
-    static String Encode(StringView uri);
+    static std::string Encode(StringView uri);
 
     // |Decode| is aggressive. It will decode every occurance of %XX in a single
     // pass -- even for unreserved characters.
     // Returns empty string on error.
-    static String Decode(StringView uri);
+    static std::string Decode(StringView uri);
 
     // Set of functions for arguments encoding
     struct FormatHelper {
         // Anything which can potentially have encodable character goes here and
         // is encoded into a const char*
-        static String encodeArg(StringView str);
+        static std::string encodeArg(StringView str);
 
         // Forward the rest as-is (non-StringView types)
         template <class T>
@@ -64,7 +64,8 @@ public:
     // A small convenience method to encode all arguments when formatting the
     // string, but don't touch the |format| string itself
     template <class... Args>
-    static String FormatEncodeArguments(const char* format, Args&&... args) {
+    static std::string FormatEncodeArguments(const char* format,
+                                             Args&&... args) {
         return android::base::StringFormat(
                     format,
                     FormatHelper::encodeArg(std::forward<Args>(args))...);
