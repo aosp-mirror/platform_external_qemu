@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9d9da072_745bc6fe",
+        "filename": "android/base/system/Win32UnicodeString.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-11T10:09:49Z",
+      "side": 1,
+      "message": "I think this comment is too ambiguous and needs to be a lot more specific about what happens here. I.e.:\n\n  - if |outLen| is 0, this returns the number of bytes\n    needed to store the UTF-8 encoding of the string into\n    a buffer. This count doesn\u0027t _not_ include a terminating\n    zero byte, unless there is a zero wchar_t at the end of\n    the input string (see below).\n\n  - if |len| is \u003c 0, this indicates that the input string\n    is zero-terminated. Which implies that a terminating\n    zero will also be part of the resulting UTF-8 string.\n\n    if |len| is \u003e 0, the output buffer will not include a\n    terminating zero.\n\n    if |len| is 0, the function returns 0 and doesn\u0027t\n    touch |outStr| or use |outLen|. \n\n  - if |outLen| is \u003e 0, this is the size of the buffer at\n    |outStr|, which must be large enough for the function\n    to succeed. If |outLen| is too small, the function fails\n    by returning 0 and the content of |outStr| is either\n    untouched or unspecified [1]. On success, the function\n    returns the number of bytes written to the buffer.\n\n\n[1] Because it\u0027s hard to tell from the function spec whether that\u0027s the case, e.g.: https://msdn.microsoft.com/en-us/library/windows/desktop/dd374130(v\u003dvs.85).aspx says:\n\n\"\"\"ERROR_INSUFFICIENT_BUFFER. A supplied buffer size was not large enough, or it was incorrectly set to NULL\"\"\"\n\nas well as:\n\n\"\"\"If cbMultiByte is less than cchWideChar, this function writes the number of characters specified by cbMultiByte to the buffer indicated by lpMultiByteStr\"\"\"\n\nwhich seem to indicate that the buffer may be touched even in case of failure :-/\n\nFrankly I think this interface is confusing and error-prone, and should not be exported by this class, i.e. keep it as an internal implementation detail.",
+      "revId": "2e162290f22d499a23c5e43e6ebcef7221bb4a2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
