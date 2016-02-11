@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/String.h"
 #include "android/base/StringFormat.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/system/Win32Utils.h"
@@ -21,53 +20,53 @@ namespace android {
 namespace base {
 
 // static
-String Win32Utils::quoteCommandLine(StringView commandLine) {
-  // If |commandLine| doesn't contain any problematic character, just return
-  // it as-is.
-  size_t n = strcspn(commandLine.c_str(), " \t\v\n\"");
-  if (commandLine[n] == '\0') {
-      return commandLine;
-  }
+std::string Win32Utils::quoteCommandLine(StringView commandLine) {
+    // If |commandLine| doesn't contain any problematic character, just return
+    // it as-is.
+    size_t n = strcspn(commandLine.c_str(), " \t\v\n\"");
+    if (commandLine[n] == '\0') {
+        return commandLine;
+    }
 
-  // Otherwise, we need to quote some of the characters.
-  String out("\"");
+    // Otherwise, we need to quote some of the characters.
+    std::string out("\"");
 
-  n = 0;
-  while (commandLine[n]) {
-      size_t num_backslashes = 0;
-      while (commandLine[n] == '\\') {
-          n++;
-          num_backslashes++;
-      }
+    n = 0;
+    while (commandLine[n]) {
+        size_t num_backslashes = 0;
+        while (commandLine[n] == '\\') {
+            n++;
+            num_backslashes++;
+        }
 
-      if (!commandLine[n]) {
-          // End of string, if there are backslashes, double them.
-          for (; num_backslashes > 0; num_backslashes--)
-              out += "\\\\";
-          break;
-      }
+        if (!commandLine[n]) {
+            // End of string, if there are backslashes, double them.
+            for (; num_backslashes > 0; num_backslashes--)
+                out += "\\\\";
+            break;
+        }
 
-      if (commandLine[n] == '"') {
-          // Escape all backslashes as well as the quote that follows them.
-          for (; num_backslashes > 0; num_backslashes--)
-              out += "\\\\";
-          out += "\\\"";
-      } else {
-          for (; num_backslashes > 0; num_backslashes--)
-              out += '\\';
-          out += commandLine[n];
-      }
-      n++;
-  }
+        if (commandLine[n] == '"') {
+            // Escape all backslashes as well as the quote that follows them.
+            for (; num_backslashes > 0; num_backslashes--)
+                out += "\\\\";
+            out += "\\\"";
+        } else {
+            for (; num_backslashes > 0; num_backslashes--)
+                out += '\\';
+            out += commandLine[n];
+        }
+        n++;
+    }
 
-  // Add final quote.
-  out += '"';
-  return out;
+    // Add final quote.
+    out += '"';
+    return out;
 }
 
 // static
-String Win32Utils::getErrorString(DWORD error_code) {
-    String result;
+std::string Win32Utils::getErrorString(DWORD error_code) {
+    std::string result;
 
     LPWSTR error_string = nullptr;
 
