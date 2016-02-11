@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fde3fc1c_324ac826",
+        "filename": "android/skin/qt/event-capture.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-11T05:29:18Z",
+      "side": 1,
+      "message": "No, but it\u0027s more convenient to write :)",
+      "parentUuid": "7d09ccae_48fd9f82",
+      "range": {
+        "startLine": 91,
+        "startChar": 38,
+        "endLine": 91,
+        "endChar": 43
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bd0fc4b0_aab76ffd",
         "filename": "android/skin/qt/event-capture.h",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-10T22:22:28Z",
       "side": 1,
       "message": "nit: we\u0027ve been using internal in other places.",
+      "range": {
+        "startLine": 20,
+        "startChar": 10,
+        "endLine": 20,
+        "endChar": 16
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5df328ea_b5e8e89d",
+        "filename": "android/skin/qt/event-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-11T05:29:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bd0fc4b0_aab76ffd",
       "range": {
         "startLine": 20,
         "startChar": 10,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "9d1200d7_d2601aaf",
+        "filename": "android/skin/qt/event-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-11T05:29:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bde6e426_b2b7e0fd",
+      "range": {
+        "startLine": 30,
+        "startChar": 4,
+        "endLine": 30,
+        "endChar": 61
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bde6e426_b205a061",
         "filename": "android/skin/qt/event-capture.h",
         "patchSetId": 3
@@ -82,6 +154,30 @@
       "writtenOn": "2016-02-10T22:22:28Z",
       "side": 1,
       "message": "nit: Prefer EventCapturer (our class names are usually Noun/Adjective based)",
+      "range": {
+        "startLine": 51,
+        "startChar": 6,
+        "endLine": 51,
+        "endChar": 18
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1dd53033_36fabe8c",
+        "filename": "android/skin/qt/event-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-11T05:29:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bde6e426_b205a061",
       "range": {
         "startLine": 51,
         "startChar": 6,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "fde3fc1c_95f5e636",
+        "filename": "android/skin/qt/event-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-11T05:29:18Z",
+      "side": 1,
+      "message": "1) This simplifies the subscriber\u0027s job. Instead of worrying about calling unsub, all it has to do is hold on to the token. It will unsubscribe automatically when the subscriber is destroyed.  It\u0027s managing subscriptions using the RAII idiom.\n\n2) Also, this hides EventCapture\u0027s implementation details from the subscribers (avoids exposing the iterator to the internal list)\n\nSee UIEventRecorder for an example of how this works.",
+      "parentUuid": "9de920fd_91417c85",
+      "range": {
+        "startLine": 87,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 60
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fde3fc1c_0c4e97b0",
         "filename": "android/skin/qt/event-capture.h",
         "patchSetId": 3
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "fde3fc1c_75227a8c",
+        "filename": "android/skin/qt/event-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-11T05:29:18Z",
+      "side": 1,
+      "message": "Unfortunately, top-level windows can pop in and out of existence (i.e. a new instance of ExtendedWindow is constructed every time it\u0027s shown, and it\u0027s destroyed when it\u0027s closed). This makes your proposed method problematic. A possible solution is to emit a signal when certain top-level windows are created, and tie that signal to subscribers\u0027 slot.",
+      "parentUuid": "fde3fc1c_0c4e97b0",
+      "range": {
+        "startLine": 91,
+        "startChar": 12,
+        "endLine": 91,
+        "endChar": 26
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7d09ccae_c81e2fa8",
         "filename": "android/skin/qt/qt-std-hash.h",
         "patchSetId": 3
@@ -151,6 +295,30 @@
       "writtenOn": "2016-02-10T22:22:28Z",
       "side": 1,
       "message": "According to http://doc.qt.io/qt-5/qevent.html#Type-enum\n\nYou need / can get away with 16 bit in types. Perhaps explicitly use fixed width?",
+      "range": {
+        "startLine": 22,
+        "startChar": 20,
+        "endLine": 22,
+        "endChar": 23
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1dd53033_93a744e3",
+        "filename": "android/skin/qt/qt-std-hash.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-11T05:29:18Z",
+      "side": 1,
+      "message": "The doc doesn\u0027t explicitly state that all values are always guaranteed to fit into the range of a 16-bit integer (theoretically they can easily add new ones, beyond that range), so I\u0027d rather not make that assumption.",
+      "parentUuid": "7d09ccae_c81e2fa8",
       "range": {
         "startLine": 22,
         "startChar": 20,
