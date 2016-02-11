@@ -19,10 +19,10 @@ namespace base {
 
 TEST(Version, NumberCtor) {
     Version v1(1,1,1);
-    EXPECT_EQ(String("1.1.1"), v1.toString());
+    EXPECT_EQ(std::string("1.1.1"), v1.toString());
 
     Version v2(1,1,0);
-    EXPECT_EQ(String("1.1.0"), v2.toString());
+    EXPECT_EQ(std::string("1.1.0"), v2.toString());
 }
 
 TEST(Version, Compare) {
@@ -71,13 +71,13 @@ TEST(Version, StringCtor) {
 
 TEST(Version, ToString) {
     Version v1(1,1,1);
-    EXPECT_EQ(String("1.1.1"), v1.toString());
+    EXPECT_EQ(std::string("1.1.1"), v1.toString());
 
     Version v2(0, 0, 1);
-    EXPECT_EQ(String("0.0.1"), v2.toString());
+    EXPECT_EQ(std::string("0.0.1"), v2.toString());
 
     Version v3(1,0,0);
-    EXPECT_EQ(String("1.0.0"), v3.toString());
+    EXPECT_EQ(std::string("1.0.0"), v3.toString());
 }
 
 }  // namespace base

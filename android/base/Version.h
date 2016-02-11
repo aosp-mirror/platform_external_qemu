@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/String.h"
+#include <string>
 
 namespace android {
 namespace base {
@@ -31,7 +31,7 @@ public:
     bool operator==(const Version& other) const;
     bool operator!=(const Version& other) const;
 
-    String toString() const;
+    std::string toString() const;
 
     static Version Invalid();
 

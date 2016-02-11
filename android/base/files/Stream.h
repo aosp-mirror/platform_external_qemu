@@ -11,7 +11,9 @@
 
 #pragma once
 
-#include "android/base/String.h"
+#include "android/base/StringView.h"
+
+#include <string>
 
 #include <inttypes.h>
 #include <sys/types.h>
@@ -72,7 +74,7 @@ public:
     float getFloat();
 
     // Write a string |str| into the stream. Ignore errors.
-    void putString(const String& str);
+    void putString(StringView str);
 
     // Write a 0-terminated C string |str| into the stream. Ignore error.
     void putString(const char* str);
@@ -81,10 +83,10 @@ public:
     // Ignore errors.
     virtual void putString(const char* str, size_t strlen);
 
-    // Read a string from the stream. Return a new String instance,
+    // Read a string from the stream. Return a new string instance,
     // which will be empty on error. Note that this can only be used
     // to read strings that were written with putString().
-    virtual String getString();
+    virtual std::string getString();
 };
 
 }  // namespace base
