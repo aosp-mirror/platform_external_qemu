@@ -34,6 +34,24 @@
       "revId": "2e162290f22d499a23c5e43e6ebcef7221bb4a2f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5da5e8c5_a518caba",
+        "filename": "android/base/system/Win32UnicodeString.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-11T17:18:00Z",
+      "side": 1,
+      "message": "Returning the conversion into a string or wstring seems good enough for me, do you really need to be able to write into an arbitrary buffer?",
+      "parentUuid": "5df328ea_18fa4963",
+      "revId": "2e162290f22d499a23c5e43e6ebcef7221bb4a2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
