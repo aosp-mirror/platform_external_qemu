@@ -18,6 +18,8 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -76,7 +78,7 @@ TEST(DirScanner, scanNormal) {
     // There is no guarantee on the order of files returned by
     // the file system, so sort them here to ensure consistent
     // comparisons.
-    ::android::base::sortStringVector(&entries);
+    std::sort(entries.begin(), entries.end());
 
     EXPECT_EQ(kCount, entries.size());
     for (size_t n = 0; n < kCount; ++n) {
@@ -115,7 +117,7 @@ TEST(DirScanner, scanFull) {
     // There is no guarantee on the order of files returned by
     // the file system, so sort them here to ensure consistent
     // comparisons.
-    ::android::base::sortStringVector(&entries);
+    std::sort(entries.begin(), entries.end());
 
     EXPECT_EQ(kCount, entries.size());
     for (size_t n = 0; n < kCount; ++n) {

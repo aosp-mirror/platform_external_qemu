@@ -61,7 +61,6 @@ LOCAL_SRC_FILES := \
     android/base/containers/PodVector.cpp \
     android/base/containers/PointerSet.cpp \
     android/base/containers/HashUtils.cpp \
-    android/base/containers/StringVector.cpp \
     android/base/files/PathUtils.cpp \
     android/base/files/StdioStream.cpp \
     android/base/files/Stream.cpp \
@@ -369,7 +368,6 @@ LOCAL_SRC_FILES := \
   android/base/containers/PodVector_unittest.cpp \
   android/base/containers/PointerSet_unittest.cpp \
   android/base/containers/ScopedPointerSet_unittest.cpp \
-  android/base/containers/StringVector_unittest.cpp \
   android/base/containers/TailQueueList_unittest.cpp \
   android/base/EintrWrapper_unittest.cpp \
   android/base/files/IniFile_unittest.cpp \
