@@ -28,7 +28,6 @@
 namespace android {
 namespace opengl {
 
-using android::base::String;
 using android::base::StringVector;
 using android::base::System;
 
@@ -53,7 +52,7 @@ bool EmuglBackendList::contains(const char* name) const {
     return false;
 }
 
-String EmuglBackendList::getLibDirPath(const char* name) {
+std::string EmuglBackendList::getLibDirPath(const char* name) {
     return android::base::StringFormat(
             "%s/%s/gles_%s",
             mExecDir,
@@ -63,7 +62,7 @@ String EmuglBackendList::getLibDirPath(const char* name) {
 
 bool EmuglBackendList::getBackendLibPath(const char* name,
                                          Library library,
-                                         String* libPath) {
+                                         std::string* libPath) {
     static const char kLibPrefix[] = "lib";
 
 #ifdef _WIN32
@@ -87,7 +86,7 @@ bool EmuglBackendList::getBackendLibPath(const char* name,
         return false;
     }
 
-    String path = android::base::StringFormat(
+    std::string path = android::base::StringFormat(
             "%s/%s%s%s",
             getLibDirPath(name),
             kLibPrefix,

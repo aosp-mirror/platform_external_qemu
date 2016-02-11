@@ -28,7 +28,7 @@ namespace base {
 #  define LIB_NAME(x)  "lib" x ".so"
 #endif
 
-static String makeLibSubPath(const char* name) {
+static std::string makeLibSubPath(const char* name) {
     return StringFormat("%s/%s/%s",
                         System::get()->getLauncherDirectory().c_str(),
                         System::kLibSubDir, name);
