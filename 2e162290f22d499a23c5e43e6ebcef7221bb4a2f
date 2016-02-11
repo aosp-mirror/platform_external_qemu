@@ -16,6 +16,24 @@
       "revId": "2e162290f22d499a23c5e43e6ebcef7221bb4a2f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5df328ea_18fa4963",
+        "filename": "android/base/system/Win32UnicodeString.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-11T17:04:11Z",
+      "side": 1,
+      "message": "I agree that the interface is just horrible. The issue here is that we really need a public function to convert encodings into a buffer.\nAlso, I tried to simplify the function as much as I could - so if it fails because of insufficient buffer, it returns its required length.\n\nLet me try rethinking the interface a little bit",
+      "parentUuid": "9d9da072_745bc6fe",
+      "revId": "2e162290f22d499a23c5e43e6ebcef7221bb4a2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
