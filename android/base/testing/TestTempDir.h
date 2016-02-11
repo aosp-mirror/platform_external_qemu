@@ -16,7 +16,6 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/Log.h"
-#include "android/base/String.h"
 #include "android/base/StringFormat.h"
 #include "android/utils/file_io.h"
 
@@ -52,7 +51,7 @@ public:
     // Create new instance. This also tries to create a new temporary
     // directory. |debugPrefix| is an optional name prefix and can be NULL.
     TestTempDir(const char* debugName) {
-        String temp_dir = getTempPath();
+        std::string temp_dir = getTempPath();
         if (debugName) {
             temp_dir += debugName;
             temp_dir += ".";
@@ -67,9 +66,9 @@ public:
     // be created for some reason.
     const char* path() const { return mPath.size() ? mPath.c_str() : NULL; }
 
-    // Return the path as a String. It will be empty if the directory could
+    // Return the path as a string. It will be empty if the directory could
     // not be created for some reason.
-    const String& pathString() const { return mPath; }
+    const std::string& pathString() const { return mPath; }
 
     // Destroy instance, and removes the temporary directory and all files
     // inside it.
@@ -80,13 +79,13 @@ public:
     }
 
     // Create the path of a directory entry under the temporary directory.
-    String makeSubPath(const char* subpath) {
+    std::string makeSubPath(const char* subpath) {
         return StringFormat("%s/%s", mPath, subpath);
     }
 
     // Create an empty directory under the temporary directory.
     bool makeSubDir(const char* subdir) {
-        String path = makeSubPath(subdir);
+        std::string path = makeSubPath(subdir);
 #ifdef _WIN32
         if (mkdir(path.c_str()) < 0) {
             PLOG(ERROR) << "Can't create " << path.c_str() << ": ";
@@ -103,7 +102,7 @@ public:
 
     // Create an empty file under the temporary directory.
     bool makeSubFile(const char* file) {
-        String path = makeSubPath(file);
+        std::string path = makeSubPath(file);
         int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0744);
         if (fd < 0) {
             PLOG(ERROR) << "Can't create " << path.c_str() << ": ";
@@ -116,7 +115,7 @@ public:
 private:
     DISALLOW_COPY_AND_ASSIGN(TestTempDir);
 
-    void DeleteRecursive(const String& path) {
+    void DeleteRecursive(const std::string& path) {
         // First remove any files in the dir
         DIR* dir = opendir(path.c_str());
         if (!dir) {
@@ -128,7 +127,7 @@ private:
             if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) {
                 continue;
             }
-            String entry_path = StringFormat("%s/%s", path, entry->d_name);
+            std::string entry_path = StringFormat("%s/%s", path, entry->d_name);
             struct stat stats;
             android_lstat(entry_path.c_str(), &stats);
             if (S_ISDIR(stats.st_mode)) {
@@ -142,8 +141,8 @@ private:
     }
 
 #ifdef _WIN32
-    String getTempPath() {
-        String result;
+    std::string getTempPath() {
+        std::string result;
         DWORD len = GetTempPath(0, NULL);
         if (!len) {
             LOG(FATAL) << "Can't find temporary path!";
@@ -198,8 +197,8 @@ private:
         return NULL;
     }
 #else  // !_WIN32
-    String getTempPath() {
-        String result;
+    std::string getTempPath() {
+        std::string result;
         // Only check TMPDIR if we're not root.
         if (getuid() != 0 && getgid() != 0) {
             const char* tmpdir = ::getenv("TMPDIR");
@@ -229,7 +228,7 @@ private:
     }
 #endif  // !_WIN32
 
-    String mPath;
+    std::string mPath;
 };
 
 }  // namespace base
