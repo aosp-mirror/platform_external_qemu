@@ -14,7 +14,6 @@
 
 #pragma once
 
-#include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
@@ -193,15 +192,16 @@ public:
         return pathCanExecInternal(toTempRoot(path));
     }
 
-    virtual StringVector scanDirEntries(StringView dirPath,
-                                        bool fullPath = false) const {
+    virtual std::vector<std::string> scanDirEntries(
+            StringView dirPath,
+            bool fullPath = false) const {
         if (!mTempDir) {
             // Nothing to return for now.
             LOG(ERROR) << "No temp root yet!";
-            return StringVector();
+            return std::vector<std::string>();
         }
         std::string newPath = toTempRoot(dirPath);
-        StringVector result = scanDirInternal(newPath);
+        std::vector<std::string> result = scanDirInternal(newPath);
         if (fullPath) {
             std::string prefix = PathUtils::addTrailingDirSeparator(
                     std::string(dirPath));
@@ -252,7 +252,7 @@ public:
     // receive the parameters of a runCommand() call. Register it
     // with setShellCommand().
     typedef bool(ShellCommand)(void* opaque,
-                               const StringVector& commandLine,
+                               const std::vector<std::string>& commandLine,
                                System::Duration timeoutMs,
                                System::ProcessExitCode* outExitCode,
                                System::Pid* outChildPid);
@@ -264,7 +264,7 @@ public:
         mShellOpaque = shellOpaque;
     }
 
-    bool runCommand(const StringVector& commandLine,
+    bool runCommand(const std::vector<std::string>& commandLine,
                     RunOptions options,
                     System::Duration timeoutMs,
                     System::ProcessExitCode* outExitCode,
@@ -319,7 +319,7 @@ private:
     std::string mRemoteSessionType;
     mutable TestTempDir* mTempDir;
     mutable std::string mTempRootPrefix;
-    StringVector mEnvPairs;
+    std::vector<std::string> mEnvPairs;
     System* mPrevSystem;
     Times mTimes;
     ShellCommand* mShellFunc;

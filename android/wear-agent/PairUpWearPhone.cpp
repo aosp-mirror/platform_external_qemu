@@ -16,7 +16,6 @@
 #include "android/base/async/AsyncStatus.h"
 #include "android/base/async/AsyncWriter.h"
 #include "android/base/async/Looper.h"
-#include "android/base/containers/StringVector.h"
 #include "android/base/Log.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/StringUtils.h"
@@ -42,7 +41,7 @@ typedef ScopedPtr<Looper::Timer> Timer;
 class PairUpWearPhoneImpl {
 public:
     PairUpWearPhoneImpl(Looper* looper,
-                        const StringVector& devices,
+                        const std::vector<std::string>& devices,
                         int adbHostPort);
 
     ~PairUpWearPhoneImpl();
@@ -57,7 +56,7 @@ public:
     void cleanUp();
 
 private:
-    typedef StringVector StrQueue;
+    typedef std::vector<std::string> StrQueue;
     enum CommunicationState {
 
          PAIRUP_ERROR = 0,
@@ -129,7 +128,7 @@ private:
     std::string mReply;
 
     // whenever device list changes, call the following
-    void updateDevices(const StringVector& devices);
+    void updateDevices(const std::vector<std::string>& devices);
     void startProbeNextDevice();
 
     // socket connection methods
@@ -465,24 +464,24 @@ bool PairUpWearPhoneImpl::completeReadAllDataFromAdb() {
     return true;
 }
 
-PairUpWearPhoneImpl::PairUpWearPhoneImpl(Looper* looper,
-                                         const StringVector& devices,
-                                         int adbHostPort) :
-        mLooper(looper),
-        mAdbHostPort(adbHostPort),
-        mAdbWatch(),
-        mConsolePort(-1),
-        mConsoleWatch(),
-        mUnprobedDevices(),
-        mWearDevices(),
-        mPhoneDevices(),
-        mState(PAIRUP_ERROR),
-        mAsyncReader(),
-        mAsyncWriter(),
-        mReadBuffer(static_cast<char*>(calloc(READ_BUFFER_SIZE,1))),
-        mWriteBuffer(static_cast<char*>(calloc(WRITE_BUFFER_SIZE,1))),
-        mReply() {
-
+PairUpWearPhoneImpl::PairUpWearPhoneImpl(
+        Looper* looper,
+        const std::vector<std::string>& devices,
+        int adbHostPort)
+    : mLooper(looper),
+      mAdbHostPort(adbHostPort),
+      mAdbWatch(),
+      mConsolePort(-1),
+      mConsoleWatch(),
+      mUnprobedDevices(),
+      mWearDevices(),
+      mPhoneDevices(),
+      mState(PAIRUP_ERROR),
+      mAsyncReader(),
+      mAsyncWriter(),
+      mReadBuffer(static_cast<char*>(calloc(READ_BUFFER_SIZE, 1))),
+      mWriteBuffer(static_cast<char*>(calloc(WRITE_BUFFER_SIZE, 1))),
+      mReply() {
     updateDevices(devices);
 
     if (isDone()) {
@@ -544,14 +543,15 @@ bool PairUpWearPhoneImpl::isDone() const {
     return (PAIRUP_ERROR == mState || PAIRUP_SUCCESS == mState);
 }
 
-void PairUpWearPhoneImpl::updateDevices(const StringVector& devices) {
+void PairUpWearPhoneImpl::updateDevices(
+        const std::vector<std::string>& devices) {
     if (devices.size() < 2) {
         DPRINT("Error: There are less than two devices, cannot proceed.\n");
         mState = PAIRUP_ERROR;
         return;
     }
     DPRINT("start pairing up wear to phone\n");
-    StringVector deviceQueue;
+    std::vector<std::string> deviceQueue;
     for (size_t i = 0; i < devices.size(); ++i) {
         deviceQueue.push_back(devices[i]);
     }
@@ -637,11 +637,10 @@ bool PairUpWearPhoneImpl::openConnection(int port,
 // ------------------------------------------------------------------
 
 PairUpWearPhone::PairUpWearPhone(Looper* looper,
-                                 const StringVector& devices,
-                                 int adbHostPort) :
-    mPairUpWearPhoneImpl (new PairUpWearPhoneImpl(looper,
-                                                  devices,
-                                                  adbHostPort)) {
+                                 const std::vector<std::string>& devices,
+                                 int adbHostPort)
+    : mPairUpWearPhoneImpl(
+              new PairUpWearPhoneImpl(looper, devices, adbHostPort)) {
     //VERBOSE_ENABLE(adb);
 }
 

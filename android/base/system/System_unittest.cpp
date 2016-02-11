@@ -156,7 +156,8 @@ TEST(System, scandDirEntries) {
         make_subfile(myDir.path(), kInput[n]);
     }
 
-    StringVector entries = System::get()->scanDirEntries(myDir.path());
+    std::vector<std::string> entries =
+            System::get()->scanDirEntries(myDir.path());
 
     EXPECT_EQ(kCount, entries.size());
     for (size_t n = 0; n < kCount; ++n) {
@@ -291,7 +292,8 @@ TEST(System, scanDirEntriesWithFullPaths) {
         make_subfile(myDir.path(), kInput[n]);
     }
 
-    StringVector entries = System::get()->scanDirEntries(myDir.path(), true);
+    std::vector<std::string> entries =
+            System::get()->scanDirEntries(myDir.path(), true);
 
     EXPECT_EQ(kCount, entries.size());
     for (size_t n = 0; n < kCount; ++n) {
@@ -330,7 +332,7 @@ TEST(System, findBundledExecutable) {
     TestTempDir* testDir = testSys.getTempRoot();
     ASSERT_TRUE(testDir->makeSubDir("foo"));
 
-    StringVector pathList;
+    std::vector<std::string> pathList;
     pathList.push_back(std::string("foo"));
     pathList.push_back(std::string(System::kBinSubDir));
     ASSERT_TRUE(testDir->makeSubDir(PathUtils::recompose(pathList).c_str()));
@@ -365,10 +367,10 @@ TEST(System, getUnixTime) {
 
 TEST(System, runCommandTrue) {
 #ifndef _WIN32
-    StringVector cmd = {"ls"};
+    std::vector<std::string> cmd = {"ls"};
 #else
     // 'dir' is a builtin command, so all you need is a sane cmd.exe
-    StringVector cmd = {"cmd.exe", "/C", "dir"};
+    std::vector<std::string> cmd = {"cmd.exe", "/C", "dir"};
 #endif
 
     EXPECT_TRUE(System::get()->runCommand(cmd));
@@ -384,12 +386,13 @@ TEST(System, runCommandTrue) {
 
 TEST(System, runCommandTimeout) {
 #ifndef _WIN32
-    StringVector cmd = {"sleep", "0.5"};
+    std::vector<std::string> cmd = {"sleep", "0.5"};
 #else
     // 2 Attempts give us a delay of 1 second.
     // 'ping' is not listed as an internal cmd.exe command, but seems to be that
     // way on recent windows boxes and wine. Safe to assume?
-    StringVector cmd = {"cmd.exe", "/C", "ping", "-n", "2", "127.0.0.1"};
+    std::vector<std::string> cmd = {"cmd.exe", "/C", "ping",
+                                    "-n",      "2",  "127.0.0.1"};
 #endif
 
     EXPECT_FALSE(

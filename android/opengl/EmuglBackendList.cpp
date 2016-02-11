@@ -28,7 +28,6 @@
 namespace android {
 namespace opengl {
 
-using android::base::StringVector;
 using android::base::System;
 
 EmuglBackendList::EmuglBackendList(const char* execDir,

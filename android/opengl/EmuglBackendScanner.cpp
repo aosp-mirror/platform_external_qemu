@@ -20,18 +20,18 @@
 
 #include <algorithm>
 #include <string>
+#include <vector>
 
 namespace android {
 namespace opengl {
 
 using android::base::StringFormat;
-using android::base::StringVector;
 using android::base::System;
 
 // static
-StringVector EmuglBackendScanner::scanDir(const char* execDir,
-                                          int programBitness) {
-    StringVector names;
+std::vector<std::string> EmuglBackendScanner::scanDir(const char* execDir,
+                                                      int programBitness) {
+    std::vector<std::string> names;
 
     if (!execDir || !System::get()->pathExists(execDir)) {
         LOG(ERROR) << "Invalid executable directory: " << execDir;
@@ -43,7 +43,7 @@ StringVector EmuglBackendScanner::scanDir(const char* execDir,
     const char* subdir = (programBitness == 64) ? "lib64" : "lib";
     std::string subDir = StringFormat("%s/%s/", execDir, subdir);
 
-    StringVector entries = System::get()->scanDirEntries(subDir);
+    std::vector<std::string> entries = System::get()->scanDirEntries(subDir);
 
     static const char kBackendPrefix[] = "gles_";
     const size_t kBackendPrefixSize = sizeof(kBackendPrefix) - 1U;

@@ -28,7 +28,6 @@
 #include "android/avd/scanner.h"
 #include "android/avd/util.h"
 #include "android/base/files/PathUtils.h"
-#include "android/base/containers/StringVector.h"
 #include "android/base/system/System.h"
 #include "android/opengl/emugl_config.h"
 #include "android/qt/qt_setup.h"
