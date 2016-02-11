@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dde478f9_7e2f0d85",
+        "filename": "android/base/system/Win32Utils.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-11T11:18:51Z",
+      "side": 1,
+      "message": "Interesting, I didn\u0027t notice this. I don\u0027t think it\u0027s a good idea to use a simple std::unique_ptr\u003c\u003e here because Win32 handle values are notoriously difficult to work with and check correctly for correctness. See [1] for an example.\n\nFor example, whether 0 is an acceptable handle value seems to depend on the context / the Win32 API being called.\n\nChromium use a rather complex class to implement that [2], should we do the same if we provide something like that as a generic facility (as opposed to being used only in one source file)\n\n[1] https://blogs.msdn.microsoft.com/oldnewthing/20040302-00/?p\u003d40443/\n\n[2] https://code.google.com/p/chromium/codesearch#chromium/src/base/win/scoped_handle.h",
+      "revId": "439ed27fa5517a7bdbfdf193be51cc38497892e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
