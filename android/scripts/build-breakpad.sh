@@ -189,7 +189,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 bin/dump_syms_macho$(builder_host_ext) \
                 bin/sym_upload$(builder_host_ext) \
                 bin/minidump_stackwalk$(builder_host_ext) \
-                bin/minidump_upload$(builder_host_ext)
+                bin/minidump_upload$(builder_host_ext) \
+                bin/core2md$(builder_host_ext) \
+                bin/minidump-2-core$(builder_host_ext) \
 
     ) || panic "[$SYSTEM] Could not build breakpad!"
 
