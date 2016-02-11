@@ -49,7 +49,7 @@ TEST(Win32UnicodeString, Constructors) {
         EXPECT_EQ(wcslen(kData[n].utf16), str2.size());
         EXPECT_STREQ(kData[n].utf16, str2.c_str());
 
-        String baseStr(kData[n].utf8);
+        std::string baseStr(kData[n].utf8);
         Win32UnicodeString str3(baseStr);
         EXPECT_EQ(wcslen(kData[n].utf16), str3.size());
         EXPECT_STREQ(kData[n].utf16, str3.c_str());
@@ -83,12 +83,12 @@ TEST(Win32UnicodeString, convertToUtf8) {
     const size_t kDataSize = ARRAY_SIZE(kData);
 
     for (size_t n = 0; n < kDataSize; ++n) {
-        String str1 = Win32UnicodeString::convertToUtf8(kData[n].utf16);
+        std::string str1 = Win32UnicodeString::convertToUtf8(kData[n].utf16);
         EXPECT_EQ(strlen(kData[n].utf8), str1.size());
         EXPECT_STREQ(kData[n].utf8, str1.c_str());
 
-        String str2 = Win32UnicodeString::convertToUtf8(kData[n].utf16,
-                                                        wcslen(kData[n].utf16));
+        std::string str2 = Win32UnicodeString::convertToUtf8(
+                kData[n].utf16, wcslen(kData[n].utf16));
         EXPECT_EQ(strlen(kData[n].utf8), str2.size());
         EXPECT_STREQ(kData[n].utf8, str2.c_str());
 
