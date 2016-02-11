@@ -193,6 +193,14 @@ emulator_window_setup( EmulatorWindow*  emulator )
         return;
     }
 
+    if (emulator->opts->scale) {
+        dwarning("The -scale flag is obsolete and will be ignored.");
+    }
+
+    if (emulator->opts->dpi_device) {
+        dwarning("The -dpi-device flag is obsolete and will be ignored.");
+    }
+
     SkinUIParams my_ui_params = {
         .enable_touch = !androidHwConfig_isScreenNoTouch(android_hw),
         .enable_dpad = android_hw->hw_dPad != 0,
@@ -407,26 +415,6 @@ emulator_window_get_first_framebuffer(EmulatorWindow* emulator)
         }
     SKIN_FILE_LOOP_END_PARTS
     return NULL;
-}
-
-/*
- * Helper routines
- */
-
-static int
-get_device_dpi( AndroidOptions*  opts )
-{
-    int dpi_device = android_hw->hw_lcd_density;
-
-    if (opts->dpi_device != NULL) {
-        char*  end;
-        dpi_device = strtol( opts->dpi_device, &end, 0 );
-        if (end == NULL || *end != 0 || dpi_device <= 0) {
-            fprintf(stderr, "argument for -dpi-device must be a positive integer. Aborting\n" );
-            exit(1);
-        }
-    }
-    return  dpi_device;
 }
 
 /* called periodically to poll for user input events */

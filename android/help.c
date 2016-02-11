@@ -969,15 +969,7 @@ static void
 help_dpi_device(stralloc_t*  out)
 {
     PRINTF(
-    "  use '-dpi-device <dpi>' to specify the screen resolution of the emulated\n"
-    "  device. <dpi> must be an integer between 72 and 1000. the default is taken\n"
-    "  from the skin, if available, or uses the contant value %d (an average of\n"
-    "  several prototypes used during Android development).\n\n", DEFAULT_DEVICE_DPI );
-
-    PRINTF(
-    "  the device resolution can also used to rescale the emulator window with\n"
-    "  the '-scale' option (see -help-scale)\n\n"
-    );
+    "  the '-dpi-device <dpi>' option is obsolete as of Emulator 2.0 and will be ignored\n\n" );
 }
 
 static void
@@ -995,30 +987,7 @@ static void
 help_scale(stralloc_t*  out)
 {
     PRINTF(
-    "  the '-scale <scale>' option is used to scale the emulator window to\n"
-    "  something that better fits the physical dimensions of a real device. this\n"
-    "  can be *very* useful to check that your UI isn't too small to be usable\n"
-    "  on a real device.\n\n"
-
-    "  there are three supported formats for <scale>:\n\n"
-
-    "  * if <scale> is a real number (between 0.1 and 3.0) it is used as a\n"
-    "    scaling factor for the emulator's window.\n\n"
-
-    "  * if <scale> is an integer followed by the suffix 'dpi' (e.g. '110dpi'),\n"
-    "    then it is interpreted as the resolution of your monitor screen. this\n"
-    "    will be divided by the emulated device's resolution to get an absolute\n"
-    "    scale. (see -help-dpi-device for details).\n\n"
-
-    "  * finally, if <scale> is the keyword 'auto', the emulator tries to guess\n"
-    "    your monitor's resolution and automatically adjusts its window\n"
-    "    accordingly\n\n"
-
-    "    NOTE: this process is *very* unreliable, depending on your OS, video\n"
-    "          driver issues and other random system parameters\n\n"
-
-    "  the emulator's scale can be changed anytime at runtime through the control\n"
-    "  console. see the help for the 'window scale' command for details\n\n" );
+    "  the '-scale <scale>' option is obsolete as of Emulator 2.0 and will be ignored\n\n" );
 }
 
 static void
