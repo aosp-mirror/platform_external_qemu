@@ -87,7 +87,7 @@ public:
     void reset(const char* str, size_t len);
 
     // Reset content from UTF-8 text at |str|.
-    void reset(const String& str);
+    void reset(StringView str);
 
     // Resize array.
     void resize(size_t newSize);
@@ -100,9 +100,48 @@ public:
     // Release the Unicode string array to the caller.
     wchar_t* release();
 
-    // Static methods that directly convert a Unicode string to UTF-8 text.
-    static String convertToUtf8(const wchar_t* str);
-    static String convertToUtf8(const wchar_t* str, size_t len);
+    // Directly convert a Unicode string to UTF-8 text and back.
+    // |len| - input length. if set to -1, means the input is null-terminated
+    static String convertToUtf8(const wchar_t* str, int len = -1);
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Be careful when crossing this line. The following functions work with
+    // raw buffers of static length, and are much harder to use correctly.
+    // You've been warned
+    ////////////////////////////////////////////////////////////////////////////
+
+    // Calculate the needed buffer size (in characters) to convert the |str|
+    // parameter either to or from UTF8
+    // |len| - size of the input. -1 means it is 0-terminated
+    // Return value is either the size of the buffer needed to convert the whole
+    // input of size |len|, or, if |len| is -1, the size needed to convert a
+    // zero-terminated string, including the terminator character, or negative -
+    // if the size can't be calculated
+    static int calcUtf8BufferLength(const wchar_t* str, int len = -1);
+    static int calcUtf16BufferLength(const char* str, int len = -1);
+
+    // The following two functions convert |str| into the output buffer, instead
+    // of dynamically allocated class object.
+    // |str| - source string to convert, must be not null
+    // |len| - length of the source string, in chars; must be positive or -1.
+    //  -1 means 'the input is zero-terminated'. In that case output has to
+    //  be large enough to hold a zero character as well.
+    // |outStr| - the output buffer, must be not null
+    // |outLen| - the output buffer length, in chars; must be large enough to
+    //  hold the converted string. One can calculate the required length using
+    //  one of the getUtf<*>BufferLength() functions
+    //
+    // Returns a number of bytes written into the |outBuf|, or -1 on failure
+    //
+    // Note: you can't get the reason of the failure from this function call:
+    //  it could be bad input parameter (e.g. null buffer), too short output,
+    //  bad characters in the input string, even OS failure. So make sure
+    //  you do the call to getUtf<*>BufferLength() and all parameters are
+    //  correct - if you need to know the exact reason and not just "can't" one.
+    static int convertToUtf8(char* outStr, int outLen,
+                              const wchar_t* str, int len = -1);
+    static int convertFromUtf8(wchar_t* outStr, int outLen,
+                                const char* str, int len = -1);
 
 private:
     wchar_t* mStr;
