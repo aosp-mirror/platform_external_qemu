@@ -49,6 +49,23 @@
     },
     {
       "key": {
+        "uuid": "fde3fc1c_a6a79ae2",
+        "filename": "android/skin/qt/event-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-11T21:31:18Z",
+      "side": 1,
+      "message": "rename these files to event-capturer.h/cpp?",
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bd0fc4b0_aab76ffd",
         "filename": "android/skin/qt/event-capture.h",
         "patchSetId": 3
@@ -320,6 +337,30 @@
       "side": 1,
       "message": "I don\u0027t think it\u0027s possible to get notified when an instance of a widget gets created. It\u0027s possible to emit a signal when the widget is shown, but there is no way to tie that signal to a slot at a time when the would-be emitter of the signal hasn\u0027t materialized yet. It\u0027s also possible for the *creator* of the widget to emit a signal immediately after creating the said widget, however this isn\u0027t very different from just calling into EventCapturer. If you know of other ways to get notified when an instance of a widget is created, I\u0027d be happy to use them.",
       "parentUuid": "3ddaf464_97bccee2",
+      "range": {
+        "startLine": 91,
+        "startChar": 12,
+        "endLine": 91,
+        "endChar": 26
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ddaf464_b7b10a5c",
+        "filename": "android/skin/qt/event-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-11T21:31:18Z",
+      "side": 1,
+      "message": "Talked offline. I think we still want to insulate the *subscribers* from the details of when/where windows are created.\n\nI can see the creator of a window sending a signal that EventCapturer acts on. But the subscribers need not bother with these details.",
+      "parentUuid": "7d09ccae_226de2cf",
       "range": {
         "startLine": 91,
         "startChar": 12,
