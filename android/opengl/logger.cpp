@@ -10,7 +10,6 @@
 // GNU General Public License for more details.
 
 #include "android/base/files/PathUtils.h"
-#include "android/base/String.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/opengl/logger.h"
 
@@ -20,7 +19,6 @@
 #include <string>
 
 using android::base::PathUtils;
-using android::base::String;
 using android::crashreport::CrashReporter;
 
 // The purpose of the OpenGL logger is to log
@@ -47,8 +45,7 @@ OpenGLLogger::OpenGLLogger() {
     const std::string& data_dir =
         CrashReporter::get()->getDataExchangeDir();
     mFileName = std::string(
-                    PathUtils::join(String(data_dir),
-                    "opengl_log.txt").c_str());
+                    PathUtils::join(data_dir, "opengl_log.txt").c_str());
     mFileHandle.open(mFileName, std::ios::app);
 }
 

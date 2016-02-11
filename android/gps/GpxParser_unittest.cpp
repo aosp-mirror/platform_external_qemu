@@ -151,7 +151,7 @@ TEST(GpxParser, ParseFileNullAttribute) {
 
     TestTempDir myDir("parse_location_tests");
     ASSERT_TRUE(myDir.path()); // NULL if error during creation.
-    android::base::String path = myDir.makeSubPath("test.gpx");
+    std::string path = myDir.makeSubPath("test.gpx");
 
     std::ofstream myfile(path.c_str());
     myfile << text;
