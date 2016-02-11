@@ -42,8 +42,6 @@ ANDROID_BEGIN_HEADER
  * of the OS handles much much longer paths
  */
 #ifdef _WIN32
-#  undef   MAX_PATH
-#  define  MAX_PATH    1024
 #  undef   PATH_MAX
 #  define  PATH_MAX    MAX_PATH
 #else
