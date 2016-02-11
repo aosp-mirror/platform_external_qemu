@@ -10,7 +10,6 @@
 // GNU General Public License for more details.
 
 #include "android/base/async/Looper.h"
-#include "android/base/containers/StringVector.h"
 #include "android/base/Log.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/sockets/ScopedSocket.h"
@@ -40,7 +39,8 @@ using namespace ::android::wear::testing;
 // fork() to run the pairing agent in a child process.
 #ifndef _WIN32
 
-static void runPairUp(const StringVector& deviceList, int adbHostPort) {
+static void runPairUp(const std::vector<std::string>& deviceList,
+                      int adbHostPort) {
     Looper* looper = Looper::create();
     {
         PairUpWearPhone pairUp(looper, deviceList, adbHostPort);
@@ -76,7 +76,7 @@ static bool testWrapper(bool usbPhone) {
     }
     const char kWearDevice[] = "emulator-6558";
 
-    StringVector deviceList;
+    std::vector<std::string> deviceList;
     deviceList.push_back(kWearDevice);
     deviceList.push_back(phoneDevice);
     int childpid = fork();

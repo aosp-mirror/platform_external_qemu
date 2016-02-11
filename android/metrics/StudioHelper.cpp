@@ -161,7 +161,7 @@ std::string StudioHelper::pathToStudioXML(const std::string& studioPath,
         return std::string();
 
     // build /path/to/.AndroidStudio/subpath/to/file.xml
-    StringVector vpath;
+    std::vector<std::string> vpath;
     vpath.push_back(studioPath);
 #ifndef __APPLE__
     vpath.push_back(std::string(kAndroidStudioDirInfix));
@@ -180,7 +180,7 @@ std::string StudioHelper::pathToStudioUUIDWindows() {
     std::string retval;
     if (!appDataPath.empty()) {
         // build /path/to/APPDATA/subpath/to/StudioUUID file
-        StringVector vpath;
+        std::vector<std::string> vpath;
         vpath.push_back(appDataPath);
         vpath.push_back(std::string(kAndroidStudioUuidDir));
         vpath.push_back(std::string(kAndroidStudioUuid));

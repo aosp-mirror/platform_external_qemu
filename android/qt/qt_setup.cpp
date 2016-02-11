@@ -13,7 +13,6 @@
 
 #include "android/base/system/System.h"
 #include "android/base/StringFormat.h"
-#include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
 #include "android/qt/qt_path.h"
