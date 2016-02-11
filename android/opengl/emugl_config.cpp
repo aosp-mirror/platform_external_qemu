@@ -101,7 +101,7 @@ bool emuglConfig_init(EmuglConfig* config,
     if (!strcmp(gpu_mode, "auto") && !gpu_option) {
         // The default will be 'host' unless NX or Chrome Remote Desktop
         // is detected, or |no_window| is true.
-        String sessionType;
+        std::string sessionType;
         if (System::get()->isRemoteSession(&sessionType)) {
             D("%s: %s session detected\n", __FUNCTION__, sessionType.c_str());
             if (!sBackendList->contains("mesa")) {
