@@ -11,7 +11,6 @@
 
 #include "android/opengl/EmuglBackendList.h"
 
-#include "android/base/containers/StringVector.h"
 #include "android/base/StringFormat.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
@@ -24,7 +23,6 @@ namespace opengl {
 #define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
 
 using android::base::StringFormat;
-using android::base::StringVector;
 using android::base::System;
 using android::base::TestTempDir;
 using android::base::TestSystem;
@@ -62,7 +60,7 @@ TEST(EmuglBackendList, init) {
     };
     const size_t kExpectedLen = ARRAYLEN(kExpected);
 
-    const StringVector& names = list.names();
+    const std::vector<std::string>& names = list.names();
     EXPECT_EQ(static_cast<int>(kExpectedLen), names.size());
     for (size_t n = 0; n < kExpectedLen; ++n) {
         EXPECT_STREQ(kExpected[n], names[n].c_str()) << "#" << n;
@@ -106,7 +104,7 @@ TEST(EmuglBackendList, getBackendLibPath) {
     }
 
     EmuglBackendList list("foo", System::kProgramBitness);
-    const StringVector& names = list.names();
+    const std::vector<std::string>& names = list.names();
 
     EXPECT_EQ(1U, names.size());
     EXPECT_STREQ("bar", names[0].c_str());

@@ -15,9 +15,9 @@
 #pragma once
 
 #include "android/base/Compiler.h"
-#include "android/base/containers/StringVector.h"
 
 #include <string>
+#include <vector>
 
 namespace android {
 namespace crashreport {
@@ -79,10 +79,10 @@ public:
     // Returns pipe struct for crash reporting
     virtual const CrashPipe& getCrashPipe();
 
-    // Return crash command line to execute crash service in StringVector
-    // format
+    // Return crash command line to execute crash service in
+    // std::vector<std::string> format.
     // Takes a pipe identfier and a current proc identifier
-    virtual ::android::base::StringVector getCrashServiceCmdLine(
+    virtual std::vector<std::string> getCrashServiceCmdLine(
             const std::string& pipe,
             const std::string& proc);
 
@@ -97,7 +97,7 @@ public:
     // Takes path to crash dump as argument
     static bool isDump(const std::string& str);
 
-    static int spawnService(const ::android::base::StringVector& commandLine);
+    static int spawnService(const std::vector<std::string>& commandLine);
 
 protected:
     static CrashSystem* setForTesting(CrashSystem* crashsystem);

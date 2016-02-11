@@ -12,7 +12,9 @@
 #pragma once
 
 #include "android/base/Compiler.h"
-#include "android/base/containers/StringVector.h"
+
+#include <string>
+#include <vector>
 
 namespace android {
 
@@ -41,7 +43,7 @@ class PairUpWearPhone {
 public:
     // "devices" is a list of serial-ids, could contain both emulators and real devices.
     PairUpWearPhone(::android::base::Looper* looper,
-                    const ::android::base::StringVector& devices,
+                    const std::vector<std::string>& devices,
                     int adbHostPort);
 
     ~PairUpWearPhone();

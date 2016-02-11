@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 #include <string>
+#include <vector>
 #include <inttypes.h>
 
 using namespace android::base;
@@ -76,8 +77,8 @@ static std::string getTestCrasher() {
     return path;
 }
 
-static StringVector getTestCrasherCmdLine(std::string pipe) {
-    const StringVector cmdline = { getTestCrasher(), "-pipe", pipe };
+static std::vector<std::string> getTestCrasherCmdLine(std::string pipe) {
+    const std::vector<std::string> cmdline = {getTestCrasher(), "-pipe", pipe};
     return cmdline;
 }
 
@@ -102,7 +103,7 @@ TEST(CrashService, startAttachWaitCrash) {
     CrashSystem::CrashPipe crashpipe = CrashSystem::get()->getCrashPipe();
     EXPECT_TRUE(crashpipe.isValid());
     crash->startCrashServer(crashpipe.mServer);
-    StringVector cmdline = getTestCrasherCmdLine(crashpipe.mClient);
+    std::vector<std::string> cmdline = getTestCrasherCmdLine(crashpipe.mClient);
 
     int pid = CrashSystem::spawnService(cmdline);
     EXPECT_GT(pid, 0);
@@ -124,7 +125,7 @@ TEST(CrashService, startAttachWaitNoCrash) {
     CrashSystem::CrashPipe crashpipe = CrashSystem::get()->getCrashPipe();
     EXPECT_TRUE(crashpipe.isValid());
     crash->startCrashServer(crashpipe.mServer);
-    StringVector cmdline = getTestCrasherCmdLine(crashpipe.mClient);
+    std::vector<std::string> cmdline = getTestCrasherCmdLine(crashpipe.mClient);
     cmdline.push_back(StringView("-nocrash"));
     int pid = CrashSystem::spawnService(cmdline);
     EXPECT_GT(pid, 0);
@@ -140,7 +141,7 @@ TEST(CrashService, startWaitNoAttach) {
     CrashSystem::CrashPipe crashpipe = CrashSystem::get()->getCrashPipe();
     EXPECT_TRUE(crashpipe.isValid());
     crash->startCrashServer(crashpipe.mServer);
-    StringVector cmdline = getTestCrasherCmdLine(crashpipe.mClient);
+    std::vector<std::string> cmdline = getTestCrasherCmdLine(crashpipe.mClient);
     cmdline.push_back(StringView("-noattach"));
     int pid = CrashSystem::spawnService(cmdline);
     EXPECT_GT(pid, 0);
@@ -156,7 +157,7 @@ TEST(CrashService, startAttachWaitTimeout) {
     CrashSystem::CrashPipe crashpipe = CrashSystem::get()->getCrashPipe();
     EXPECT_TRUE(crashpipe.isValid());
     crash->startCrashServer(crashpipe.mServer);
-    StringVector cmdline = getTestCrasherCmdLine(crashpipe.mClient);
+    std::vector<std::string> cmdline = getTestCrasherCmdLine(crashpipe.mClient);
     cmdline.push_back(StringView("-delay_ms"));
     cmdline.push_back(StringView("100"));
     int pid = CrashSystem::spawnService(cmdline);

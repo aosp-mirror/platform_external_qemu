@@ -193,9 +193,7 @@ public:
 #ifdef _WIN32
             launcherName += ".exe";
 #endif
-            StringVector pathList;
-            pathList.push_back(programDir);
-            pathList.push_back(launcherName);
+            std::vector<std::string> pathList = {programDir, launcherName};
             std::string launcherPath = PathUtils::recompose(pathList);
 
             if (pathIsFile(launcherPath)) {
@@ -206,7 +204,7 @@ public:
             // we are probably executing a qemu2 binary, which live in
             // <launcher-dir>/qemu/<os>-<arch>/
             // look for the launcher in grandparent directory
-            StringVector programDirVector =
+            std::vector<std::string> programDirVector =
                     PathUtils::decompose(programDir);
             if (programDirVector.size() >= 2) {
                 programDirVector.resize(programDirVector.size() - 2);
@@ -363,9 +361,10 @@ public:
 #endif
     }
 
-    virtual StringVector scanDirEntries(StringView dirPath,
-                                        bool fullPath = false) const {
-        StringVector result = scanDirInternal(dirPath);
+    virtual std::vector<std::string> scanDirEntries(
+            StringView dirPath,
+            bool fullPath = false) const {
+        std::vector<std::string> result = scanDirInternal(dirPath);
         if (fullPath) {
             // Pre-pend |dirPath| to each entry.
             std::string prefix = PathUtils::addTrailingDirSeparator(dirPath);
@@ -516,7 +515,7 @@ public:
         return time(NULL);
     }
 
-    bool runCommand(const StringVector& commandLine,
+    bool runCommand(const std::vector<std::string>& commandLine,
                     RunOptions options,
                     System::Duration timeoutMs,
                     System::ProcessExitCode* outExitCode,
@@ -527,7 +526,7 @@ public:
         }
 
 #ifdef _WIN32
-        StringVector commandLineCopy = commandLine;
+        std::vector<std::string> commandLineCopy = commandLine;
         STARTUPINFOW startup = {};
         startup.cb = sizeof(startup);
         if ((options & RunOptions::ShowOutput) == 0) {
@@ -695,7 +694,7 @@ public:
     }
 
 #ifndef _WIN32
-    bool runCommandPosix(const StringVector& commandLine,
+    bool runCommandPosix(const std::vector<std::string>& commandLine,
                          RunOptions options,
                          System::Duration timeoutMs,
                          System::ProcessExitCode* outExitCode,
@@ -898,8 +897,8 @@ System* System::setForTesting(System* system) {
 }
 
 // static
-StringVector System::scanDirInternal(StringView dirPath) {
-    StringVector result;
+std::vector<std::string> System::scanDirInternal(StringView dirPath) {
+    std::vector<std::string> result;
 
     if (dirPath.empty()) {
         return result;
@@ -1019,7 +1018,8 @@ std::string System::findBundledExecutable(StringView programName) {
     const std::string executableName = PathUtils::toExecutableName(programName);
 
     // first, try the root launcher directory
-    StringVector pathList = { system->getLauncherDirectory(), executableName };
+    std::vector<std::string> pathList = {system->getLauncherDirectory(),
+                                         executableName};
     std::string executablePath = PathUtils::recompose(pathList);
     if (system->pathIsFile(executablePath)) {
         return executablePath;

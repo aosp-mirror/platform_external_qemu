@@ -11,7 +11,6 @@
 
 #include "android/utils/dirscanner.h"
 
-#include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/testing/TestTempDir.h"
@@ -26,7 +25,6 @@
 #define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
 
 using android::base::TestTempDir;
-using android::base::StringVector;
 using android::base::PathUtils;
 
 static void make_subfile(const std::string& dir, const char* file) {
@@ -65,7 +63,7 @@ TEST(DirScanner, scanNormal) {
     EXPECT_TRUE(scanner);
     EXPECT_EQ(kCount, dirScanner_numEntries(scanner));
 
-    StringVector entries;
+    std::vector<std::string> entries;
     for (;;) {
         const char* entry = dirScanner_next(scanner);
         if (!entry) {
@@ -104,7 +102,7 @@ TEST(DirScanner, scanFull) {
     EXPECT_TRUE(scanner);
     EXPECT_EQ(kCount, dirScanner_numEntries(scanner));
 
-    StringVector entries;
+    std::vector<std::string> entries;
     for (;;) {
         const char* entry = dirScanner_nextFull(scanner);
         if (!entry) {
