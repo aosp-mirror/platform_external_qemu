@@ -57,18 +57,5 @@ bool strContains(StringView haystack, const char* needle) {
                     needle, ::strlen(needle)) != nullptr;
 }
 
-struct StringQSortTraits {
-    static int compare(const String* a, const String* b) {
-        return ::strcmp(a->c_str(), b->c_str());
-    }
-    static void swap(String* a, String* b) {
-        a->swap(b);
-    }
-};
-
-void sortStringArray(String* strings, size_t count) {
-    QSort<String, StringQSortTraits>::sort(strings, count);
-}
-
 }  // namespace base
 }  // namespace android

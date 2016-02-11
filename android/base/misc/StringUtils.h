@@ -14,8 +14,6 @@
 
 #pragma once
 
-#include "android/base/containers/StringVector.h"
-#include "android/base/String.h"
 #include "android/base/StringView.h"
 
 #include <stddef.h>
@@ -38,15 +36,6 @@ char* strDup(StringView str);
 
 // Returns true iff |haystack| contains |needle|.
 bool strContains(StringView haystack, const char* needle);
-
-// Sort an array of String instances.
-void sortStringArray(String* strings, size_t n);
-
-// Sort a StringVector instance normally. Required because Minw64 qsort()
-// does not work with 3 items!!
-inline void sortStringVector(StringVector* strings) {
-    sortStringArray(&(*strings)[0], strings->size());
-}
 
 }  // namespace base
 }  // namespace android

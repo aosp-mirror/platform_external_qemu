@@ -505,7 +505,7 @@ void PairUpWearPhoneImpl::startProbeNextDevice() {
     }
 
     mDeviceInProbing = mUnprobedDevices[0];
-    mUnprobedDevices.pop();
+    mUnprobedDevices.erase(mUnprobedDevices.begin());
 
     if (startWriteCommandToAdb(TRANSFER, mDeviceInProbing.c_str())) {
         mState = TO_GET_PRODUCT_NAME_INIT_XFER;
@@ -555,7 +555,7 @@ void PairUpWearPhoneImpl::updateDevices(const StringVector& devices) {
     for (size_t i = 0; i < devices.size(); ++i) {
         deviceQueue.push_back(devices[i]);
     }
-    mUnprobedDevices.swap(&deviceQueue);
+    mUnprobedDevices.swap(deviceQueue);
     startProbeNextDevice();
 }
 
@@ -569,7 +569,7 @@ void PairUpWearPhoneImpl::startConnectWearAndPhone() {
     }
 
     std::string phone = mPhoneDevices[0];
-    mPhoneDevices.pop();
+    mPhoneDevices.erase(mPhoneDevices.begin());
     const char emu[] = "emulator-";
     const int sz = sizeof(emu) - 1;
     if (strncmp(emu, phone.c_str(), sz) != 0) {

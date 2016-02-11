@@ -18,6 +18,7 @@
 
 #include "android/base/EnumFlags.h"
 #include "android/base/containers/StringVector.h"
+#include "android/base/StringView.h"
 
 #include <string>
 #include <vector>

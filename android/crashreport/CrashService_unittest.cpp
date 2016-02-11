@@ -125,7 +125,7 @@ TEST(CrashService, startAttachWaitNoCrash) {
     EXPECT_TRUE(crashpipe.isValid());
     crash->startCrashServer(crashpipe.mServer);
     StringVector cmdline = getTestCrasherCmdLine(crashpipe.mClient);
-    cmdline.append(StringView("-nocrash"));
+    cmdline.push_back(StringView("-nocrash"));
     int pid = CrashSystem::spawnService(cmdline);
     EXPECT_GT(pid, 0);
     int64_t waitduration = crash->waitForDumpFile(pid, 10000);
@@ -141,7 +141,7 @@ TEST(CrashService, startWaitNoAttach) {
     EXPECT_TRUE(crashpipe.isValid());
     crash->startCrashServer(crashpipe.mServer);
     StringVector cmdline = getTestCrasherCmdLine(crashpipe.mClient);
-    cmdline.append(StringView("-noattach"));
+    cmdline.push_back(StringView("-noattach"));
     int pid = CrashSystem::spawnService(cmdline);
     EXPECT_GT(pid, 0);
     int64_t waitduration = crash->waitForDumpFile(pid, 1);
@@ -157,8 +157,8 @@ TEST(CrashService, startAttachWaitTimeout) {
     EXPECT_TRUE(crashpipe.isValid());
     crash->startCrashServer(crashpipe.mServer);
     StringVector cmdline = getTestCrasherCmdLine(crashpipe.mClient);
-    cmdline.append(StringView("-delay_ms"));
-    cmdline.append(StringView("100"));
+    cmdline.push_back(StringView("-delay_ms"));
+    cmdline.push_back(StringView("100"));
     int pid = CrashSystem::spawnService(cmdline);
     EXPECT_GT(pid, 0);
     int64_t waitduration = crash->waitForDumpFile(pid, 1);

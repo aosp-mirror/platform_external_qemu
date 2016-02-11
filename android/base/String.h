@@ -207,7 +207,7 @@ public:
     operator std::string() const { return std::string(mStr, mSize); }
 
 protected:
-    friend class StringVector;
+    //friend class StringVector;
 
     // Internal helper routine to be used when |count| strings objects
     // have been moved or copied from |fromStrings| to |toStrings|.

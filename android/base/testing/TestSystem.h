@@ -144,8 +144,8 @@ public:
         if (varvalue.empty()) {
             // Remove definition, if any.
             if (index >= 0) {
-                mEnvPairs.remove(index);
-                mEnvPairs.remove(index);
+                mEnvPairs.erase(mEnvPairs.begin() + index,
+                                mEnvPairs.begin() + index + 2);
             }
         } else {
             if (index >= 0) {
@@ -153,8 +153,8 @@ public:
                 mEnvPairs[index + 1] = varvalue;
             } else {
                 // Addition.
-                mEnvPairs.append(varname);
-                mEnvPairs.append(varvalue);
+                mEnvPairs.push_back(varname);
+                mEnvPairs.push_back(varvalue);
             }
         }
     }
