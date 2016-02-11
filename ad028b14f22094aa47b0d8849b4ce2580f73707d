@@ -16,6 +16,24 @@
       "revId": "ad028b14f22094aa47b0d8849b4ce2580f73707d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5df328ea_78c6f583",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/PointerValidator.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-02-11T20:04:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7df0ecdc_e4848236",
+      "revId": "ad028b14f22094aa47b0d8849b4ce2580f73707d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
