@@ -26,9 +26,10 @@ const char* const PathUtils::kExeNameSuffixes[kHostTypeCount] = { "", ".exe" };
 const char* const PathUtils::kExeNameSuffix =
         PathUtils::kExeNameSuffixes[PathUtils::HOST_TYPE];
 
-String PathUtils::toExecutableName(StringView baseName,
-                                   HostType hostType) {
-    return String(baseName).append(kExeNameSuffixes[hostType]);
+std::string PathUtils::toExecutableName(StringView baseName,
+                                        HostType hostType) {
+    return static_cast<std::string>(baseName).append(
+            kExeNameSuffixes[hostType]);
 }
 
 // static
@@ -107,9 +108,9 @@ StringView PathUtils::extension(const StringView path, HostType hostType) {
 }
 
 // static
-String PathUtils::removeTrailingDirSeparator(StringView path,
-                                             HostType hostType) {
-    String result = path;
+std::string PathUtils::removeTrailingDirSeparator(StringView path,
+                                                  HostType hostType) {
+    std::string result = path;
     size_t pathLen = result.size();
     // NOTE: Don't remove initial path separator for absolute paths.
     while (pathLen > 1U && isDirSeparator(result[pathLen - 1U], hostType)) {
@@ -120,9 +121,9 @@ String PathUtils::removeTrailingDirSeparator(StringView path,
 }
 
 // static
-String PathUtils::addTrailingDirSeparator(StringView path,
-                                          HostType hostType) {
-    String result = path;
+std::string PathUtils::addTrailingDirSeparator(StringView path,
+                                               HostType hostType) {
+    std::string result = path;
     if (result.size() > 0 && !isDirSeparator(result[result.size() - 1U])) {
         result += getDirSeparator(hostType);
     }
@@ -132,8 +133,8 @@ String PathUtils::addTrailingDirSeparator(StringView path,
 // static
 bool PathUtils::split(StringView path,
                       HostType hostType,
-                      String* dirName,
-                      String* baseName) {
+                      std::string* dirName,
+                      std::string* baseName) {
     if (path.empty()) {
         return false;
     }
@@ -177,9 +178,9 @@ bool PathUtils::split(StringView path,
 }
 
 // static
-String PathUtils::join(StringView path1,
-                       StringView path2,
-                       HostType hostType) {
+std::string PathUtils::join(StringView path1,
+                            StringView path2,
+                            HostType hostType) {
     if (path1.empty()) {
         return path2;
     }
@@ -190,7 +191,7 @@ String PathUtils::join(StringView path1,
         return path2;
     }
     size_t prefixLen = rootPrefixSize(path1, hostType);
-    String result(path1);
+    std::string result(path1);
     size_t end = result.size();
     if (end > prefixLen && !isDirSeparator(result[end - 1U], hostType)) {
         result += getDirSeparator(hostType);
@@ -208,7 +209,7 @@ StringVector PathUtils::decompose(StringView path, HostType hostType) {
     size_t prefixLen = rootPrefixSize(path, hostType);
     auto it = path.begin();
     if (prefixLen) {
-        result.push_back(String(it, prefixLen));
+        result.push_back(std::string(it, prefixLen));
         it += prefixLen;
     }
     for (;;) {
@@ -216,7 +217,7 @@ StringVector PathUtils::decompose(StringView path, HostType hostType) {
         while (*p && !isDirSeparator(*p, hostType))
             p++;
         if (p > it) {
-            result.push_back(String(it, p - it));
+            result.push_back(std::string(it, p - it));
         }
         if (!*p) {
             break;
@@ -227,10 +228,10 @@ StringVector PathUtils::decompose(StringView path, HostType hostType) {
 }
 
 // static
-String PathUtils::recompose(const StringVector& components,
-                            HostType hostType) {
+std::string PathUtils::recompose(const StringVector& components,
+                                 HostType hostType) {
     const char dirSeparator = getDirSeparator(hostType);
-    String result;
+    std::string result;
     size_t capacity = 0;
     // To reduce memory allocations, compute capacity before doing the
     // real append.
@@ -244,7 +245,7 @@ String PathUtils::recompose(const StringVector& components,
 
     bool addSeparator = false;
     for (size_t n = 0; n < components.size(); ++n) {
-        const String& component = components[n];
+        const std::string& component = components[n];
         if (addSeparator)
             result += dirSeparator;
         addSeparator = true;

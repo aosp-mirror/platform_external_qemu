@@ -27,7 +27,6 @@
 #endif
 
 #include "android/base/files/PathUtils.h"
-#include "android/base/String.h"
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
 #include "android/crashreport/CrashSystem.h"
@@ -60,7 +59,6 @@
 #define WAIT_INTERVAL_MS 100
 
 using android::base::PathUtils;
-using android::base::String;
 using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
@@ -114,7 +112,7 @@ CrashService::~CrashService() {
     }
     if (!mDataDirectory.empty()) {
         const auto files = System::get()->scanDirEntries(mDataDirectory, true);
-        for (const String& file : files) {
+        for (const std::string& file : files) {
             remove(file.c_str());
         }
         if (remove(mDataDirectory.c_str()) < 0) {
@@ -330,12 +328,12 @@ std::string CrashService::readFile(StringView path) {
 std::string CrashService::getSysInfo() {
     const auto files = System::get()->scanDirEntries(mDataDirectory, true);
     std::string info;
-    for (const String& file : files) {
+    for (const std::string& file : files) {
         // By convention we only show files that end with .txt, other files
         // may have binary content that will not display in a readable way.
         if (strcasecmp(PathUtils::extension(file).c_str(), ".txt") == 0) {
             // Prepend each piece with the name of the file as a separator
-            String basename;
+            std::string basename;
             if (PathUtils::split(file, nullptr, &basename)) {
                 info += "---- ";
                 info += basename.c_str();
@@ -406,7 +404,7 @@ void CrashService::collectProcessList()
 }
 
 void CrashService::retrieveDumpMessage() {
-    String path = PathUtils::join(mDataDirectory,
+    std::string path = PathUtils::join(mDataDirectory,
                                   CrashReporter::kDumpMessageFileName);
     if (System::get()->pathIsFile(path)) {
         // remember the dump message to show it instead of the default one
@@ -420,7 +418,7 @@ void CrashService::collectDataFiles() {
     }
 
     const auto files = System::get()->scanDirEntries(mDataDirectory);
-    for (const String& name : files) {
+    for (const std::string& name : files) {
         const auto fullName = PathUtils::join(mDataDirectory, name);
         addReportFile(name.c_str(), fullName.c_str());
         if (name == CrashReporter::kDumpMessageFileName) {
