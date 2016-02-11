@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>230</y>
+     <y>168</y>
      <width>211</width>
      <height>101</height>
     </rect>
@@ -40,7 +40,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>60</y>
+      <y>68</y>
       <width>102</width>
       <height>20</height>
      </rect>
@@ -72,7 +72,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>40</y>
+      <y>44</y>
       <width>102</width>
       <height>20</height>
      </rect>
@@ -89,7 +89,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>186</y>
+     <y>306</y>
      <width>211</width>
      <height>24</height>
     </rect>
@@ -252,7 +252,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>168</y>
+     <y>288</y>
      <width>211</width>
      <height>21</height>
     </rect>
@@ -403,6 +403,18 @@
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>set_themeBox</tabstop>
+  <tabstop>set_allowKeyboardGrab</tabstop>
+  <tabstop>set_crashReportPrefAlways</tabstop>
+  <tabstop>set_crashReportPrefNever</tabstop>
+  <tabstop>set_crashReportPrefAsk</tabstop>
+  <tabstop>set_onTop</tabstop>
+  <tabstop>set_saveLocBox</tabstop>
+  <tabstop>set_saveLocFolderButton</tabstop>
+  <tabstop>set_sdkPathBox</tabstop>
+  <tabstop>set_sdkPathButton</tabstop>
+ </tabstops>
  <resources>
   <include location="../resources.qrc"/>
  </resources>
