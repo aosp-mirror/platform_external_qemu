@@ -18,6 +18,7 @@
 
 #include "android/utils/path.h"
 
+#include <algorithm>
 #include <string>
 
 namespace android {
@@ -63,7 +64,7 @@ StringVector EmuglBackendScanner::scanDir(const char* execDir,
     }
 
     // Need to sort the backends in consistent order.
-    android::base::sortStringVector(&names);
+    std::sort(names.begin(), names.end());
 
     return names;
 }

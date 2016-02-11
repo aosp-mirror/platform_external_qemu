@@ -37,6 +37,7 @@
 #include <mach/mach.h>
 #endif  // __APPLE__
 
+#include <algorithm>
 #include <array>
 #include <chrono>
 
@@ -552,10 +553,10 @@ public:
             // This executes a command with arguments passed and redirects
             // stdout to nul, stderr is attached to stdout (so it also
             // goes to nul)
-            commandLineCopy.prepend("/C");
-            commandLineCopy.prepend(comspec);
-            commandLineCopy.append(">nul");
-            commandLineCopy.append("2>&1");
+            commandLineCopy.insert(commandLineCopy.begin(), "/C");
+            commandLineCopy.insert(commandLineCopy.begin(), comspec);
+            commandLineCopy.push_back(">nul");
+            commandLineCopy.push_back("2>&1");
         }
 
         PROCESS_INFORMATION pinfo = {};
@@ -934,7 +935,7 @@ StringVector System::scanDirInternal(StringView dirPath) {
         ::closedir(dir);
     }
 #endif  // !_WIN32
-    sortStringVector(&result);
+    std::sort(result.begin(), result.end());
     return result;
 }
 
