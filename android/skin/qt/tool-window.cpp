@@ -455,6 +455,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         if (down) {
             showOrRaiseExtendedWindow(PANE_IDX_HELP);
         }
+        break;
     case QtUICommand::TAKE_SCREENSHOT:
         if (down) {
             emulator_window->screenshot();
