@@ -38,6 +38,9 @@ public:
     // Constructor from a StringView.
     String(const StringView& other);
 
+    // Constructor from a std::string
+    String(const std::string& other);
+
     // Constructor from a sized C string.
     String(const char* str, size_t len);
 
@@ -93,6 +96,10 @@ public:
 
     String& operator=(const StringView& other) {
         return this->assign(other);
+    }
+
+    String& operator=(const std::string& other) {
+        return this->assign(other.c_str(), other.size());
     }
 
     String& operator=(char ch) {
