@@ -17,7 +17,6 @@
 #include "android/base/Compiler.h"
 
 #include "android/base/EnumFlags.h"
-#include "android/base/String.h"
 #include "android/base/containers/StringVector.h"
 
 #include <string>
@@ -48,7 +47,7 @@ enum class OsType {
     Linux
 };
 
-String toString(OsType osType);
+std::string toString(OsType osType);
 
 enum class RunOptions {
     None = 0,
@@ -162,11 +161,11 @@ public:
     // /////////////////////////////////////////////////////////////////////////
 
     // Retrieve the value of a given environment variable.
-    // Equivalent to getenv() but returns a String instance.
+    // Equivalent to getenv() but returns a std::string instance.
     // If the variable is not defined, return an empty string.
     // NOTE: On Windows, this uses _wgetenv() and returns the corresponding
     // UTF-8 text string.
-    virtual String envGet(StringView varname) const = 0;
+    virtual std::string envGet(StringView varname) const = 0;
 
     // Set the value of a given environment variable.
     // If |varvalue| is NULL or empty, this unsets the variable.
@@ -221,30 +220,30 @@ public:
     // kBinSubDir of getLauncherDirectory(). The name should not include the
     // executable extension (.exe) on Windows.
     // Return an empty string if the file doesn't exist.
-    static String findBundledExecutable(StringView programName);
+    static std::string findBundledExecutable(StringView programName);
 
     // Return the path of the current program's directory.
-    virtual const String& getProgramDirectory() const = 0;
+    virtual const std::string& getProgramDirectory() const = 0;
 
     // Return the path of the emulator launcher's directory.
-    virtual const String& getLauncherDirectory() const = 0;
+    virtual const std::string& getLauncherDirectory() const = 0;
 
     // Return the path to user's home directory (as defined in the
     // underlying platform) or an empty string if it can't be found
-    virtual const String& getHomeDirectory() const = 0;
+    virtual const std::string& getHomeDirectory() const = 0;
 
     // Return the path to user's App Data directory (only applies
     // in Microsoft Windows) or an empty string if it can't be found
-    virtual const String& getAppDataDirectory() const = 0;
+    virtual const std::string& getAppDataDirectory() const = 0;
 
     // Return the current directory path. Because this can change at
-    // runtime, this returns a new String instance, not a const-reference
+    // runtime, this returns a new std::string instance, not a const-reference
     // to a constant one held by the object. Return an empty string if there is
     // a problem with the system when getting the current directory.
-    virtual String getCurrentDirectory() const = 0;
+    virtual std::string getCurrentDirectory() const = 0;
 
     // Return the path of a temporary directory appropriate for the system.
-    virtual String getTempDir() const = 0;
+    virtual std::string getTempDir() const = 0;
 
     // /////////////////////////////////////////////////////////////////////////
     // Time related functions.
@@ -254,7 +253,7 @@ public:
     // like Nomachine's NX, Chrome Remote Desktop or Windows Terminal Services.
     // On success, return true and sets |*sessionType| to the detected
     // session type. Otherwise, just return false.
-    virtual bool isRemoteSession(String* sessionType) const = 0;
+    virtual bool isRemoteSession(std::string* sessionType) const = 0;
 
     // Returns Times structure for the current process
     virtual Times getProcessTimes() const = 0;
