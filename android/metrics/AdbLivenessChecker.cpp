@@ -24,7 +24,6 @@ namespace android {
 namespace metrics {
 
 using android::base::PathUtils;
-using android::base::StringVector;
 using android::base::System;
 using android::ConfigDirs;
 using std::shared_ptr;
@@ -104,7 +103,7 @@ bool AdbLivenessChecker::adbCheckRequest() {
 
 void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
     System::ProcessExitCode exitCode;
-    const StringVector adbServerAliveCmd = {mAdbPath, "devices"};
+    const std::vector<std::string> adbServerAliveCmd = {mAdbPath, "devices"};
     if (!System::get()->runCommand(
                 adbServerAliveCmd,
                 System::RunOptions::WaitForCompletion |
@@ -115,8 +114,8 @@ void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
         return;
     }
 
-    const StringVector emulatorAliveCmd = {mAdbPath, "-s", mEmulatorName,
-        "shell", "exit"};
+    const std::vector<std::string> emulatorAliveCmd = {
+            mAdbPath, "-s", mEmulatorName, "shell", "exit"};
     if (!System::get()->runCommand(
                 emulatorAliveCmd,
                 System::RunOptions::WaitForCompletion |

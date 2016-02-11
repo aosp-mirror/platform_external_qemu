@@ -11,17 +11,14 @@
 
 #pragma once
 
-#include "android/base/containers/StringVector.h"
-
 #include <string>
+#include <vector>
 
 namespace android {
 namespace opengl {
 
 class EmuglBackendList {
 public:
-    typedef android::base::StringVector StringVector;
-
     // Parse the content of |execDir|/<lib>/ for Emugl backends.
     // |programBitness| can be 0 (autodetect), 32 or 64, and determines
     // the value of <lib> which will be 'lib' for 32-bit systems,
@@ -32,7 +29,7 @@ public:
     const std::string& defaultName() const { return mDefaultName; }
 
     // Return the list of installed Emugl backends.
-    const StringVector& names() const { return mNames; }
+    const std::vector<std::string>& names() const { return mNames; }
 
     // Returns true if |name| is part of names().
     bool contains(const char* name) const;
@@ -59,7 +56,7 @@ public:
 
 private:
     std::string mDefaultName;
-    StringVector mNames;
+    std::vector<std::string> mNames;
     int mProgramBitness;
     std::string mExecDir;
 };

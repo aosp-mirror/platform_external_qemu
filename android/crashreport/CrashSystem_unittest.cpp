@@ -112,7 +112,7 @@ TEST_F(CrashSystemTest, getCrashServicePath) {
 TEST_F(CrashSystemTest, getCrashServiceCmdLine) {
     std::string pipe("pipeval");
     std::string proc("procval");
-    ::android::base::StringVector tmp1 =
+    std::vector<std::string> tmp1 =
             CrashSystem::get()->getCrashServiceCmdLine(pipe, proc);
     EXPECT_EQ(tmp1.size(), 7);
     EXPECT_STREQ(tmp1[0].c_str(), getCrashServicePath().c_str());

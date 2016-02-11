@@ -54,7 +54,6 @@ using ::android::base::LazyInstance;
 using ::android::base::PathUtils;
 using ::android::base::RunOptions;
 using ::android::base::StringFormat;
-using ::android::base::StringVector;
 using ::android::base::System;
 
 namespace {
@@ -123,7 +122,7 @@ CrashSystem* sCrashSystemForTesting = nullptr;
 
 }  // namespace
 
-int CrashSystem::spawnService(const StringVector& commandLine) {
+int CrashSystem::spawnService(const std::vector<std::string>& commandLine) {
     System::Pid pid;
     auto success = System::get()->runCommand(commandLine, RunOptions::Default,
                                              System::kInfinite, nullptr, &pid);
@@ -185,15 +184,17 @@ const CrashSystem::CrashPipe& CrashSystem::getCrashPipe() {
     return mCrashPipe;
 }
 
-StringVector CrashSystem::getCrashServiceCmdLine(const std::string& pipe,
-                                                 const std::string& proc) {
-    const StringVector cmdline = {getCrashServicePath(),
-                                  "-pipe",
-                                  pipe,
-                                  "-ppid",
-                                  proc,
-                                  "-data-dir",
-                                  CrashReporter::get()->getDataExchangeDir()};
+std::vector<std::string> CrashSystem::getCrashServiceCmdLine(
+        const std::string& pipe,
+        const std::string& proc) {
+    const std::vector<std::string> cmdline = {
+            getCrashServicePath(),
+            "-pipe",
+            pipe,
+            "-ppid",
+            proc,
+            "-data-dir",
+            CrashReporter::get()->getDataExchangeDir()};
     return cmdline;
 }
 

@@ -11,7 +11,8 @@
 
 #pragma once
 
-#include "android/base/containers/StringVector.h"
+#include <string>
+#include <vector>
 
 namespace android {
 namespace opengl {
@@ -24,9 +25,8 @@ public:
 // strings, which will be empty on error.
 // If |programBitness| is 0, the this will use the current program
 // bitness, otherwise the value must be either 32 or 64.
-static ::android::base::StringVector scanDir(const char* execDir,
-                                             int programBitness = 0);
-
+    static std::vector<std::string> scanDir(const char* execDir,
+                                            int programBitness = 0);
 };
 
 }  // namespace opengl

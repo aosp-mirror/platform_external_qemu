@@ -15,9 +15,7 @@
 #pragma once
 
 #include "android/base/Compiler.h"
-
 #include "android/base/EnumFlags.h"
-#include "android/base/containers/StringVector.h"
 #include "android/base/StringView.h"
 
 #include <string>
@@ -214,8 +212,9 @@ public:
     // Scan directory |dirPath| for entries, and return them as a sorted
     // vector or entries. If |fullPath| is true, then each item of the
     // result vector contains a full path.
-    virtual StringVector scanDirEntries(StringView dirPath,
-                                        bool fullPath = false) const = 0;
+    virtual std::vector<std::string> scanDirEntries(
+            StringView dirPath,
+            bool fullPath = false) const = 0;
 
     // Find a bundled executable named |programName|, it must appear in the
     // kBinSubDir of getLauncherDirectory(). The name should not include the
@@ -285,7 +284,7 @@ public:
     // command finished with "success" exit status, just that we succeeded in
     // running it, cf |outExitCode|.
     static const System::Duration kInfinite = 0;
-    virtual bool runCommand(const StringVector& commandLine,
+    virtual bool runCommand(const std::vector<std::string>& commandLine,
                             RunOptions options = RunOptions::Default,
                             System::Duration timeoutMs = kInfinite,
                             System::ProcessExitCode* outExitCode = nullptr,
@@ -297,7 +296,7 @@ protected:
     // Internal implementation of scanDirEntries() that can be used by
     // mock implementation using a fake file system rooted into a temporary
     // directory or something like that. Always returns short paths.
-    static StringVector scanDirInternal(StringView dirPath);
+    static std::vector<std::string> scanDirInternal(StringView dirPath);
 
     static bool pathExistsInternal(StringView path);
     static bool pathIsFileInternal(StringView path);

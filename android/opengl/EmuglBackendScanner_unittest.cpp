@@ -18,11 +18,11 @@
 #include <gtest/gtest.h>
 
 #include <string>
+#include <vector>
 
 #include <fcntl.h>
 #include <unistd.h>
 
-using android::base::StringVector;
 using android::base::System;
 using android::base::TestSystem;
 using android::base::TestTempDir;
@@ -57,7 +57,7 @@ namespace opengl {
 TEST(EmuglBackendScanner, noLibDir) {
     TestTempDir myDir("emugl_backend_scanner");
     // Don't create any files
-    StringVector names = EmuglBackendScanner::scanDir(myDir.path());
+    std::vector<std::string> names = EmuglBackendScanner::scanDir(myDir.path());
     EXPECT_TRUE(names.empty());
 }
 
@@ -70,7 +70,7 @@ TEST(EmuglBackendScanner, noBackends) {
     make_dir(libDir);
 
     // Don't create any files
-    StringVector names = EmuglBackendScanner::scanDir(myDir.path());
+    std::vector<std::string> names = EmuglBackendScanner::scanDir(myDir.path());
     EXPECT_TRUE(names.empty());
 }
 
@@ -106,7 +106,7 @@ TEST(EmuglBackendScanner, listBackends) {
     make_subdir(libDir, "gles_sixth");
 
     // Now check the scanner
-    StringVector names = EmuglBackendScanner::scanDir("foo");
+    std::vector<std::string> names = EmuglBackendScanner::scanDir("foo");
     ASSERT_EQ(3U, names.size());
     EXPECT_STREQ("fifth", names[0].c_str());
     EXPECT_STREQ("second", names[1].c_str());
@@ -128,7 +128,7 @@ TEST(EmuglBackendScanner, listBackendsWithProgramBitness) {
     myDir->makeSubDir("foo/lib64/gles_fifth");
     myDir->makeSubDir("foo/lib64/gles_sixth");
 
-    StringVector names = EmuglBackendScanner::scanDir("foo", 32);
+    std::vector<std::string> names = EmuglBackendScanner::scanDir("foo", 32);
     ASSERT_EQ(3U, names.size());
     EXPECT_STREQ("first", names[0].c_str());
     EXPECT_STREQ("second", names[1].c_str());
