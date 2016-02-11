@@ -18,11 +18,12 @@
 // nothing's here for Posix
 #else  // _WIN32
 
-#include "android/base/String.h"
 #include "android/base/StringView.h"
 
 #include <memory>
 #include <windows.h>
+
+#include <string>
 
 namespace android {
 namespace base {
@@ -47,17 +48,18 @@ public:
 // "Everyone quotes arguments the wrong way".
 //
 // |commandLine| is an input string, that may contain spaces, quotes or
-// backslashes. The function returns a new String that contains a version
-// of |commandLine| that can be decoded properly by CommandLineToArgv().
-static String quoteCommandLine(StringView commandLine);
+    // backslashes. The function returns a new string that contains a version
+    // of |commandLine| that can be decoded properly by CommandLineToArgv().
+    static std::string quoteCommandLine(StringView commandLine);
 
-// Creates a UTF-8 encoded error message string from a Windows System Error
-// Code.  String returned depends on current language id.  See FormatMessage.
-static String getErrorString(DWORD error_code);
+    // Creates a UTF-8 encoded error message string from a Windows System Error
+    // Code.  String returned depends on current language id.  See
+    // FormatMessage.
+    static std::string getErrorString(DWORD error_code);
 
-// A small handy struct for an automatic HANDLE management
-struct HandleCloser {
-    void operator()(HANDLE h) const { ::CloseHandle(h); }
+    // A small handy struct for an automatic HANDLE management
+    struct HandleCloser {
+        void operator()(HANDLE h) const { ::CloseHandle(h); }
 };
 using ScopedHandle = std::unique_ptr<void, HandleCloser>;
 
