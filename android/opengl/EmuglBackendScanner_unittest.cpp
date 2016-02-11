@@ -11,23 +11,23 @@
 
 #include "android/opengl/EmuglBackendScanner.h"
 
-#include "android/base/String.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
 #include <gtest/gtest.h>
 
+#include <string>
+
 #include <fcntl.h>
 #include <unistd.h>
 
-using android::base::String;
 using android::base::StringVector;
 using android::base::System;
 using android::base::TestSystem;
 using android::base::TestTempDir;
 
-static void make_dir(const String& path) {
+static void make_dir(const std::string& path) {
 #ifdef _WIN32
     EXPECT_EQ(0, ::mkdir(path.c_str()));
 #else
@@ -35,15 +35,15 @@ static void make_dir(const String& path) {
 #endif
 }
 
-static void make_subdir(const String& path, const char* subdir) {
-    String dir = path;
+static void make_subdir(const std::string& path, const char* subdir) {
+    std::string dir = path;
     dir.append("/");
     dir.append(subdir);
     make_dir(dir);
 }
 
-static void make_subfile(const String& dir, const char* file) {
-    String path = dir;
+static void make_subfile(const std::string& dir, const char* file) {
+    std::string path = dir;
     path.append("/");
     path.append(file);
     int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0755);
@@ -64,7 +64,7 @@ TEST(EmuglBackendScanner, noLibDir) {
 TEST(EmuglBackendScanner, noBackends) {
     TestTempDir myDir("emugl_backend_scanner");
     // Create lib directory.
-    String libDir(myDir.path());
+    std::string libDir(myDir.path());
     libDir += "/";
     libDir += System::kLibSubDir;
     make_dir(libDir);
@@ -79,7 +79,7 @@ TEST(EmuglBackendScanner, listBackends) {
     TestTempDir* myDir = testSys.getTempRoot();
 
     // Create lib directory.
-    String libDir(myDir->path());
+    std::string libDir(myDir->path());
     libDir += "/foo/";
     make_dir(libDir);
     libDir += System::kLibSubDir;
