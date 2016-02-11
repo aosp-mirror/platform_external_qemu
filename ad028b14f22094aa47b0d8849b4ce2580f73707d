@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7df0ecdc_e4848236",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/PointerValidator.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-11T18:32:04Z",
+      "side": 1,
+      "message": "How about using HANDLE_EINTR instead of TEMP_FAILURE_RETRY? There\u0027s already a cross-platform HANDLE_EINTR somewhere in the codebase.",
+      "revId": "ad028b14f22094aa47b0d8849b4ce2580f73707d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
