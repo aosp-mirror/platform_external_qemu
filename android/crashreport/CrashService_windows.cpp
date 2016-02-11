@@ -15,7 +15,6 @@
 #include "android/crashreport/CrashService_windows.h"
 
 #include "android/base/files/PathUtils.h"
-#include "android/base/String.h"
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
 

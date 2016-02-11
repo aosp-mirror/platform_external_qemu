@@ -24,7 +24,6 @@
 #include <string.h>
 
 using android::base::RunOptions;
-using android::base::String;
 using android::base::System;
 #ifdef _WIN32
 using android::base::Win32UnicodeString;
