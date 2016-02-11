@@ -12,7 +12,6 @@
 #include "android/base/files/PathUtils.h"
 
 #include "android/base/containers/StringVector.h"
-#include "android/base/String.h"
 
 #include <gtest/gtest.h>
 
@@ -104,8 +103,8 @@ TEST(PathUtils, removeTrailingDirSeparator) {
     };
 
     for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
-        String path;
-        String input = kData[n].path;
+        std::string path;
+        std::string input = kData[n].path;
         path = PathUtils::removeTrailingDirSeparator(input, kHostPosix);
         EXPECT_STREQ(kData[n].expected[kHostPosix], path.c_str())
                 << "Testing '" << input.c_str() << "'";
@@ -211,7 +210,7 @@ TEST(PathUtils, split) {
             {"C:/foo", {{true, "C:/", "foo"}, {true, "C:/", "foo"}}},
     };
     for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
-        String dirname, basename;
+        std::string dirname, basename;
 
         EXPECT_EQ(kData[n].expected[kHostPosix].result,
                   PathUtils::split(kData[n].path, kHostPosix, &dirname,
@@ -264,7 +263,7 @@ TEST(PathUtils, join) {
                  {"C:/", "foo", {"C:/foo", "C:/foo"}},
                  {"C:\\", "foo", {"C:\\/foo", "C:\\foo"}}};
     for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
-        String path =
+        std::string path =
                 PathUtils::join(kData[n].path1, kData[n].path2, kHostPosix);
         EXPECT_STREQ(kData[n].expected[kHostPosix], path.c_str())
                 << "When testing posix [" << kData[n].path1 << ", "
@@ -395,10 +394,9 @@ TEST(PathUtils, recompose) {
 
 // Convert a vector of strings |components| into a file path, using
 // |separator| as the directory separator.
-static String componentsToPath(
-        const ComponentList& components,
-        char separator) {
-    String result;
+static std::string componentsToPath(const ComponentList& components,
+                                    char separator) {
+    std::string result;
     for (size_t n = 0; components[n]; ++n) {
         if (n)
             result += separator;
@@ -407,10 +405,9 @@ static String componentsToPath(
     return result;
 }
 
-static String stringVectorToPath(
-        const StringVector& input,
-        char separator) {
-    String result;
+static std::string stringVectorToPath(const StringVector& input,
+                                      char separator) {
+    std::string result;
     for (size_t n = 0; n < input.size(); ++n) {
         if (n)
             result += separator;
@@ -438,11 +435,11 @@ TEST(PathUtils, simplifyComponents) {
     };
     for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
         const ComponentList& input = kData[n].input;
-        String inputPath = componentsToPath(input, '!');
-        String expectedPath = componentsToPath(kData[n].expected, '!');
+        std::string inputPath = componentsToPath(input, '!');
+        std::string expectedPath = componentsToPath(kData[n].expected, '!');
         StringVector components = componentListToVector(input);
         PathUtils::simplifyComponents(&components);
-        String path = stringVectorToPath(components, '!');
+        std::string path = stringVectorToPath(components, '!');
 
         EXPECT_STREQ(expectedPath.c_str(), path.c_str())
             << "When simplifying " << inputPath.c_str();

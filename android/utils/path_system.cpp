@@ -14,7 +14,6 @@
 
 #include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
-#include "android/base/String.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
 
@@ -22,7 +21,6 @@
 
 using android::base::PathUtils;
 using android::base::strDup;
-using android::base::String;
 using android::base::StringVector;
 using android::base::System;
 
@@ -69,7 +67,7 @@ char* path_get_absolute(const char* path) {
 }
 
 int path_split(const char* path, char** dirname, char** basename) {
-    String dir, file;
+    std::string dir, file;
     if (!PathUtils::split(path, &dir, &file)) {
         return -1;
     }
@@ -83,7 +81,7 @@ int path_split(const char* path, char** dirname, char** basename) {
 }
 
 char* path_dirname(const char* path) {
-    String dir;
+    std::string dir;
     if (!PathUtils::split(path, &dir, nullptr)) {
         return nullptr;
     }
@@ -91,7 +89,7 @@ char* path_dirname(const char* path) {
 }
 
 char* path_basename(const char* path) {
-    String file;
+    std::string file;
     if (!PathUtils::split(path, nullptr, &file)) {
         return nullptr;
     }
