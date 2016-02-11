@@ -308,6 +308,30 @@
     },
     {
       "key": {
+        "uuid": "7d09ccae_226de2cf",
+        "filename": "android/skin/qt/event-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-11T20:44:37Z",
+      "side": 1,
+      "message": "I don\u0027t think it\u0027s possible to get notified when an instance of a widget gets created. It\u0027s possible to emit a signal when the widget is shown, but there is no way to tie that signal to a slot at a time when the would-be emitter of the signal hasn\u0027t materialized yet. It\u0027s also possible for the *creator* of the widget to emit a signal immediately after creating the said widget, however this isn\u0027t very different from just calling into EventCapturer. If you know of other ways to get notified when an instance of a widget is created, I\u0027d be happy to use them.",
+      "parentUuid": "3ddaf464_97bccee2",
+      "range": {
+        "startLine": 91,
+        "startChar": 12,
+        "endLine": 91,
+        "endChar": 26
+      },
+      "revId": "250f315fe7cac92d64ca9b3de8c51b6645c51ca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7d09ccae_c81e2fa8",
         "filename": "android/skin/qt/qt-std-hash.h",
         "patchSetId": 3
