@@ -17,12 +17,12 @@
 #include "android/base/system/System.h"
 #include "android/base/Log.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/threads/ParallelTask.h"
 #include "android/emulation/ConfigDirs.h"
 
 namespace android {
 namespace metrics {
 
-using android::base::ParallelTask;
 using android::base::PathUtils;
 using android::base::StringVector;
 using android::base::String;
@@ -34,6 +34,17 @@ static const char kAdbLivenessKey[] = "adb_liveness";
 static const int kMaxAttempts = 3;
 static const char kPlatformToolsSubdir[] = "platform-tools";
 
+// static
+std::shared_ptr<AdbLivenessChecker> AdbLivenessChecker::create(
+        android::base::Looper* looper,
+        android::base::IniFile* metricsFile,
+        android::base::StringView emulatorName,
+        android::base::Looper::Duration checkIntervalMs) {
+    auto inst = new AdbLivenessChecker(looper, metricsFile, emulatorName,
+                                       checkIntervalMs);
+    return std::shared_ptr<AdbLivenessChecker>(inst);
+}
+
 AdbLivenessChecker::AdbLivenessChecker(
         android::base::Looper* looper,
         android::base::IniFile* metricsFile,
@@ -43,15 +54,18 @@ AdbLivenessChecker::AdbLivenessChecker(
       mMetricsFile(metricsFile),
       mEmulatorName(emulatorName),
       mCheckIntervalMs(checkIntervalMs),
-      mRecurrentTask(looper,
-                     std::bind(&AdbLivenessChecker::adbCheckRequest, this),
-                     checkIntervalMs),
-      mRemainingAttempts(kMaxAttempts),
       mAdbPath(PathUtils::join(
               ConfigDirs::getSdkRootDirectory(),
               PathUtils::join(
                       kPlatformToolsSubdir,
-                      PathUtils::toExecutableName(kAdbExecutableBaseName)))) {
+                      PathUtils::toExecutableName(kAdbExecutableBaseName)))),
+      // We use raw pointer to |this| instead of a shared_ptr to avoid cicrular
+      // ownership. mRecurrentTask promises to cancel any outstanding tasks when
+      // it's destructed.
+      mRecurrentTask(looper,
+                     std::bind(&AdbLivenessChecker::adbCheckRequest, this),
+                     checkIntervalMs),
+      mRemainingAttempts(kMaxAttempts) {
     dropMetrics(CheckResult::kNoResult);
 }
 
@@ -69,17 +83,22 @@ bool AdbLivenessChecker::adbCheckRequest() {
         return false;
     }
 
-    if (!mCheckTask || !mCheckTask->inFlight()) {
-        auto taskFunction = [this] (CheckResult* outResult) {
-            this->runCheckBlocking(outResult);
-        };
-        auto taskDoneFunction = [this] (const CheckResult& result) {
-            this->reportCheckResult(result);
-        };
-        mCheckTask.reset(
-                new AdbCheckTask(mLooper, taskFunction, taskDoneFunction));
-        mCheckTask->start();
+    if (mIsCheckRunning) {
+        return true;
     }
+    mIsCheckRunning = true;
+
+    // NOTE: Capture a shared_ptr to |this| to guarantee object lifetime while
+    // the parallel task is running.
+    auto shared_this = shared_from_this();
+    auto taskFunction = [shared_this](CheckResult* outResult) {
+        shared_this->runCheckBlocking(outResult);
+    };
+    auto taskDoneFunction = [shared_this](const CheckResult& result) {
+        shared_this->reportCheckResult(result);
+    };
+    android::base::runParallelTask<CheckResult>(mLooper, taskFunction,
+                                                taskDoneFunction);
     return true;
 }
 
@@ -112,6 +131,8 @@ void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
 }
 
 void AdbLivenessChecker::reportCheckResult(const CheckResult& result) {
+    mIsCheckRunning = false;
+
     // |mIsOnline| starts off set to false. We set it to true if we successfully
     // talk to the emulator at least once. This allows us to distinguish the
     // cases where adb is missing or emulator doesn't boot at all from cases

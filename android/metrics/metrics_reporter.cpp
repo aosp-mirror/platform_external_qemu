@@ -53,7 +53,10 @@ using android::base::System;
 static char* metricsDirPath;
 static char* metricsFilePath;
 static android::metrics::IniFileAutoFlusher* sMetricsFileFlusher;
-static android::metrics::AdbLivenessChecker* sAdbLivenessChecker;
+// It's generally bad to have global smart pointers. But we are careful to
+// reset it explicitly when exiting.
+std::shared_ptr<android::metrics::AdbLivenessChecker> sAdbLivenessChecker(
+        nullptr);
 
 static const char metricsRelativeDir[] = "metrics";
 static const char metricsFilePrefix[] = "metrics";
@@ -90,8 +93,7 @@ ABool androidMetrics_moduleInit(const char* avdHome) {
 /* Make sure this is safe to call without ever calling _moduleInit */
 void androidMetrics_moduleFini(void) {
     // Must go before the inifile is cleaned up.
-    delete sAdbLivenessChecker;
-    sAdbLivenessChecker = nullptr;
+    sAdbLivenessChecker.reset();
 
     delete sMetricsFileFlusher;
     AFREE(metricsDirPath);
@@ -235,7 +237,7 @@ ABool androidMetrics_keepAlive(Looper* metrics_looper,
 
     auto emulatorName = android::base::StringFormat(
             "emulator-%d", control_console_port);
-    sAdbLivenessChecker = new android::metrics::AdbLivenessChecker(
+    sAdbLivenessChecker = android::metrics::AdbLivenessChecker::create(
             android::base::ThreadLooper::get(), sMetricsFileFlusher->iniFile(),
             emulatorName, 20 * 1000);
     sAdbLivenessChecker->start();
@@ -266,8 +268,7 @@ ABool androidMetrics_seal() {
     }
 
     // Must go before the inifile is cleaned up.
-    delete sAdbLivenessChecker;
-    sAdbLivenessChecker = nullptr;
+    sAdbLivenessChecker.reset();
 
     delete sMetricsFileFlusher;
     sMetricsFileFlusher = NULL;
