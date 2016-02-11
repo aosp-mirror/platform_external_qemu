@@ -405,7 +405,7 @@ void CrashService::collectProcessList()
 
 void CrashService::retrieveDumpMessage() {
     std::string path = PathUtils::join(mDataDirectory,
-                                  CrashReporter::kDumpMessageFileName);
+                                       CrashReporter::kDumpMessageFileName);
     if (System::get()->pathIsFile(path)) {
         // remember the dump message to show it instead of the default one
         mDumpMessage = readFile(path);

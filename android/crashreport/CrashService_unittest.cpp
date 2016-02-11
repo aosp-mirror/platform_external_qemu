@@ -19,8 +19,9 @@
 #include "android/base/testing/TestTempDir.h"
 
 #include <gtest/gtest.h>
-#include <inttypes.h>
 #include <memory>
+#include <string>
+#include <inttypes.h>
 
 using namespace android::base;
 using namespace android::crashreport;

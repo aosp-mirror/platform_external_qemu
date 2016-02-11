@@ -42,7 +42,6 @@
 #define I(...) printf(__VA_ARGS__)
 
 using android::base::PathUtils;
-using android::base::String;
 using android::base::StringView;
 using android::base::System;
 using android::base::Uuid;

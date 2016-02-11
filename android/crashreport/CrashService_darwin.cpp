@@ -14,7 +14,6 @@
 
 #include "android/crashreport/CrashService_darwin.h"
 
-#include "android/base/String.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 
@@ -47,7 +46,6 @@
 
 namespace android {
 
-using ::android::base::String;
 using ::android::base::PathUtils;
 using ::android::base::System;
 
@@ -123,9 +121,9 @@ bool HostCrashService::isClientAlive() {
 }
 
 bool HostCrashService::getHWInfo() {
-    String file_path = PathUtils::join(getDataDirectory(), kHwInfoName);
+    std::string file_path = PathUtils::join(getDataDirectory(), kHwInfoName);
 
-    String syscmd(HWINFO_CMD);
+    std::string syscmd(HWINFO_CMD);
     syscmd += " > ";
     syscmd += file_path;
     int status = system(syscmd.c_str());
@@ -149,7 +147,7 @@ bool HostCrashService::getMemInfo() {
         E("Unable to get data directory for crash report attachments");
         return false;
     }
-    String file_path = PathUtils::join(data_directory, kMemInfoName);
+    std::string file_path = PathUtils::join(data_directory, kMemInfoName);
     // Open this file early so we can print any errors into it, we might not
     // be able to get all data but whatever we can get is interesting and
     // knowing what failed could also be useful
