@@ -740,6 +740,9 @@ BusState *qbus_create(const char *typename, DeviceState *parent, const char *nam
     BusState *bus;
 
     bus = BUS(object_new(typename));
+    if (!bus) {
+        hw_error("Can't create bus.");
+    }
     qbus_realize(bus, parent, name);
 
     return bus;
