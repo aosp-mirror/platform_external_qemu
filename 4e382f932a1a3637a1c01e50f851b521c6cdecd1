@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fde3fc1c_b53c621b",
+        "filename": "android/base/containers/CircularBuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-02-11T03:36:29Z",
+      "side": 1,
+      "message": "It appears to me that, at the beginning (when front\u003dback\u003d0) these two will keep moving together and cause operator[] to misbehave wrt what I would expect. Am I missing something? Try something size 4 buffer, 3 x push, then print items in the buffer using operator[]. Perhaps we need more unit tests.",
+      "range": {
+        "startLine": 113,
+        "startChar": 7,
+        "endLine": 113,
+        "endChar": 36
+      },
+      "revId": "4e382f932a1a3637a1c01e50f851b521c6cdecd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
