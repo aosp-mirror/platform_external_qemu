@@ -22,6 +22,30 @@
       "revId": "4e382f932a1a3637a1c01e50f851b521c6cdecd1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fde3fc1c_75f39a91",
+        "filename": "android/base/containers/CircularBuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-11T04:09:43Z",
+      "side": 1,
+      "message": "Damn, good catch, I added that if() without thinking and my test just coincidentally happened to work.\n\nFixed and added another test to cover that case.",
+      "parentUuid": "fde3fc1c_b53c621b",
+      "range": {
+        "startLine": 113,
+        "startChar": 7,
+        "endLine": 113,
+        "endChar": 36
+      },
+      "revId": "4e382f932a1a3637a1c01e50f851b521c6cdecd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
