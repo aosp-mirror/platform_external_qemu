@@ -11,10 +11,10 @@
 
 #pragma once
 
-#include "android/base/containers/StringVector.h"
 #include "android/base/StringView.h"
 
 #include <string>
+#include <vector>
 
 namespace android {
 namespace base {
@@ -183,11 +183,12 @@ public:
     // each one being a path component (prefix or subdirectory or file
     // name). Directory separators do not appear in components, except
     // for the root prefix, if any.
-    static StringVector decompose(StringView path, HostType hostType);
+    static std::vector<std::string> decompose(StringView path,
+                                              HostType hostType);
 
     // Decompose |path| into individual components for the host platform.
     // See comments above for more details.
-    static StringVector decompose(StringView path) {
+    static std::vector<std::string> decompose(StringView path) {
         return decompose(path, HOST_TYPE);
     }
 
@@ -197,13 +198,13 @@ public:
     // first component is a root prefix, it will be kept as is, i.e.:
     //   [ 'C:', 'foo' ] -> 'C:foo' on Win32, but not Posix where it will
     // be 'C:/foo'.
-    static std::string recompose(const StringVector& components,
+    static std::string recompose(const std::vector<std::string>& components,
                                  HostType hostType);
 
     // Recompose a path from individual components into a file path string
     // for the current host. |components| is a vector os strings.
     // Returns a new file path string.
-    static std::string recompose(const StringVector& components) {
+    static std::string recompose(const std::vector<std::string>& components) {
         return recompose(components, HOST_TYPE);
     }
 
@@ -211,7 +212,7 @@ public:
     // by removing instances of '.' and '..' when that makes sense.
     // Note that it is not possible to simplify initial instances of
     // '..', i.e. "foo/../../bar" -> "../bar"
-    static void simplifyComponents(StringVector* components);
+    static void simplifyComponents(std::vector<std::string>* components);
 };
 
 // Useful shortcuts to avoid too much typing.

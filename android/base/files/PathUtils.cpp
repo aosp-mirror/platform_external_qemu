@@ -201,8 +201,9 @@ std::string PathUtils::join(StringView path1,
 }
 
 // static
-StringVector PathUtils::decompose(StringView path, HostType hostType) {
-    StringVector result;
+std::vector<std::string> PathUtils::decompose(StringView path,
+                                              HostType hostType) {
+    std::vector<std::string> result;
     if (path.empty())
         return result;
 
@@ -228,7 +229,7 @@ StringVector PathUtils::decompose(StringView path, HostType hostType) {
 }
 
 // static
-std::string PathUtils::recompose(const StringVector& components,
+std::string PathUtils::recompose(const std::vector<std::string>& components,
                                  HostType hostType) {
     const char dirSeparator = getDirSeparator(hostType);
     std::string result;
@@ -261,11 +262,10 @@ std::string PathUtils::recompose(const StringVector& components,
 }
 
 // static
-void PathUtils::simplifyComponents(StringVector* components) {
-    StringVector stack;
-    for (StringVector::const_iterator it = components->begin();
-            it != components->end();
-            ++it) {
+void PathUtils::simplifyComponents(std::vector<std::string>* components) {
+    std::vector<std::string> stack;
+    for (std::vector<std::string>::const_iterator it = components->begin();
+         it != components->end(); ++it) {
         if (*it == ".") {
             // Ignore any instance of '.' from the list.
             continue;

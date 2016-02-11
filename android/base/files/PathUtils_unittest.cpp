@@ -11,8 +11,6 @@
 
 #include "android/base/files/PathUtils.h"
 
-#include "android/base/containers/StringVector.h"
-
 #include <gtest/gtest.h>
 
 #define ARRAY_SIZE(x)  (sizeof(x)/sizeof(x[0]))
@@ -286,7 +284,7 @@ static const int kMaxComponents = 10;
 typedef const char* ComponentList[kMaxComponents];
 
 static void checkComponents(const ComponentList& expected,
-                            const StringVector& components,
+                            const std::vector<std::string>& components,
                             const char* hostType,
                             const char* path) {
     size_t m;
@@ -354,9 +352,9 @@ TEST(PathUtils, decompose) {
     }
 }
 
-static StringVector componentListToVector(
+static std::vector<std::string> componentListToVector(
         const ComponentList& input) {
-    StringVector result;
+    std::vector<std::string> result;
     for (size_t i = 0; input[i]; ++i)
         result.push_back(input[i]);
     return result;
@@ -381,7 +379,8 @@ TEST(PathUtils, recompose) {
         { { "\\foo\\bar", "lib", NULL }, { "\\foo\\bar/lib", "\\foo\\bar\\lib" } },
     };
     for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
-        StringVector components = componentListToVector(kData[n].input);
+        std::vector<std::string> components =
+                componentListToVector(kData[n].input);
         EXPECT_STREQ(kData[n].path[kHostPosix],
                      PathUtils::recompose(components, kHostPosix).c_str());
         EXPECT_STREQ(kData[n].path[kHostWin32],
@@ -405,7 +404,7 @@ static std::string componentsToPath(const ComponentList& components,
     return result;
 }
 
-static std::string stringVectorToPath(const StringVector& input,
+static std::string stringVectorToPath(const std::vector<std::string>& input,
                                       char separator) {
     std::string result;
     for (size_t n = 0; n < input.size(); ++n) {
@@ -437,7 +436,7 @@ TEST(PathUtils, simplifyComponents) {
         const ComponentList& input = kData[n].input;
         std::string inputPath = componentsToPath(input, '!');
         std::string expectedPath = componentsToPath(kData[n].expected, '!');
-        StringVector components = componentListToVector(input);
+        std::vector<std::string> components = componentListToVector(input);
         PathUtils::simplifyComponents(&components);
         std::string path = stringVectorToPath(components, '!');
 
