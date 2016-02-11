@@ -595,7 +595,8 @@ public:
         String args = executableRef;
         for (size_t i = 1; i < commandLineCopy.size(); ++i) {
             args += ' ';
-            args += android::base::Win32Utils::quoteCommandLine(commandLineCopy[i]);
+            args += StringView(android::base::Win32Utils::quoteCommandLine(
+                    commandLineCopy[i]));
         }
 
         Win32UnicodeString commandUnicode(executableRef);
