@@ -287,7 +287,7 @@ void PathUtils::simplifyComponents(StringVector* components) {
     if (stack.empty())
         stack.push_back(".");
 
-    components->swap(&stack);
+    components->swap(stack);
 }
 
 }  // namespace base
