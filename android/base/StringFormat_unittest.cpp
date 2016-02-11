@@ -13,55 +13,46 @@
 
 #include <gtest/gtest.h>
 
-#include "android/base/String.h"
-
 namespace android {
 namespace base {
 
 TEST(StringFormat, EmptyString) {
-    String s = StringFormat("");
+    std::string s = StringFormat("");
     EXPECT_TRUE(s.empty());
     EXPECT_STREQ("", s.c_str());
 }
 
 TEST(StringFormat, SimpleString) {
-    String s = StringFormat("foobar");
+    std::string s = StringFormat("foobar");
     EXPECT_STREQ("foobar", s.c_str());
 }
 
 TEST(StringFormat, SimpleDecimal) {
-    String s = StringFormat("Pi is about %d.%d\n", 3, 1415);
+    std::string s = StringFormat("Pi is about %d.%d\n", 3, 1415);
     EXPECT_STREQ("Pi is about 3.1415\n", s.c_str());
 }
 
 TEST(StringFormat, VeryLongString) {
     static const char kPiece[] = "A hospital bed is a parked taxi with the meter running - Groucho Marx. ";
     const size_t kPieceLen = sizeof(kPiece) - 1U;
-    String s = StringFormat("%s%s%s%s%s%s%s",
-                            kPiece,
-                            kPiece,
-                            kPiece,
-                            kPiece,
-                            kPiece,
-                            kPiece,
-                            kPiece
-                           );
+    std::string s = StringFormat("%s%s%s%s%s%s%s", kPiece, kPiece, kPiece,
+                                 kPiece, kPiece, kPiece, kPiece);
     EXPECT_EQ(7U * kPieceLen, s.size());
     for (size_t n = 0; n < 7U; ++n) {
-        String s2 = String(s.c_str() + n * kPieceLen, kPieceLen);
+        std::string s2 = std::string(s.c_str() + n * kPieceLen, kPieceLen);
         EXPECT_STREQ(kPiece, s2.c_str()) << "Index #" << n;
     }
 }
 
 TEST(StringAppendFormat, EmptyString) {
-    String s = "foo";
+    std::string s = "foo";
     StringAppendFormat(&s, "");
     EXPECT_EQ(3U, s.size());
     EXPECT_STREQ("foo", s.c_str());
 }
 
 TEST(StringAppendFormat, SimpleString) {
-    String s = "foo";
+    std::string s = "foo";
     StringAppendFormat(&s, "bar");
     EXPECT_EQ(6U, s.size());
     EXPECT_STREQ("foobar", s.c_str());
@@ -71,14 +62,14 @@ TEST(StringAppendFormat, VeryLongString) {
     static const char kPiece[] = "A hospital bed is a parked taxi with the meter running - Groucho Marx. ";
     const size_t kPieceLen = sizeof(kPiece) - 1U;
     const size_t kCount = 12;
-    String s;
+    std::string s;
     for (size_t n = 0; n < kCount; ++n) {
         StringAppendFormat(&s, "%s", kPiece);
     }
 
     EXPECT_EQ(kCount * kPieceLen, s.size());
     for (size_t n = 0; n < kCount; ++n) {
-        String s2 = String(s.c_str() + n * kPieceLen, kPieceLen);
+        std::string s2 = std::string(s.c_str() + n * kPieceLen, kPieceLen);
         EXPECT_STREQ(kPiece, s2.c_str()) << "Index #" << n;
     }
 }
