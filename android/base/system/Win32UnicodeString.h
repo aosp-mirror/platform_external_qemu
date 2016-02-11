@@ -87,7 +87,7 @@ public:
     void reset(const char* str, size_t len);
 
     // Reset content from UTF-8 text at |str|.
-    void reset(const String& str);
+    void reset(StringView str);
 
     // Resize array.
     void resize(size_t newSize);
@@ -100,9 +100,18 @@ public:
     // Release the Unicode string array to the caller.
     wchar_t* release();
 
-    // Static methods that directly convert a Unicode string to UTF-8 text.
-    static String convertToUtf8(const wchar_t* str);
-    static String convertToUtf8(const wchar_t* str, size_t len);
+    // Static methods that directly convert a Unicode string to UTF-8 text
+    // and back.
+    // |len| - input length. if set to -1, means the input is null-terminated
+    static String convertToUtf8(const wchar_t* str, int len = -1);
+
+    // The following two functions return a size of the buffer required to
+    // convert the input string, including the null-terminator; if the |outLen|
+    // was enough, it contains the converted string. Otherwise it's untouched
+    static int convertToUtf8(char* outStr, int outLen,
+                             const wchar_t* str, int len = -1);
+    static int convertFromUtf8(wchar_t* outStr, int outLen,
+                               const char* str, int len = -1);
 
 private:
     wchar_t* mStr;
