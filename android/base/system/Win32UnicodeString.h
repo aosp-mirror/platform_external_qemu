@@ -19,8 +19,9 @@
 #else  // _WIN32
 
 #include "android/base/Compiler.h"
-#include "android/base/String.h"
 #include "android/base/StringView.h"
+
+#include <string>
 
 #include <wchar.h>
 
@@ -45,7 +46,7 @@ public:
     // content is undefined.
     Win32UnicodeString(const char* str, size_t len);
 
-    // Initialize a new instance from an existing String instance |str|.
+    // Initialize a new instance from an existing string instance |str|.
     explicit Win32UnicodeString(StringView str);
 
     // Initialize by reserving enough room for a string of |size| UTF-16
@@ -77,8 +78,8 @@ public:
     // Unicode characters in it.
     size_t size() const { return mSize; }
 
-    // Convert to a String instance holding the corresponding UTF-8 text.
-    String toString() const;
+    // Convert to a string instance holding the corresponding UTF-8 text.
+    std::string toString() const;
 
     // Return n-th character from string.
     wchar_t operator[](size_t index) const { return mStr[index]; }
@@ -102,7 +103,7 @@ public:
 
     // Directly convert a Unicode string to UTF-8 text and back.
     // |len| - input length. if set to -1, means the input is null-terminated
-    static String convertToUtf8(const wchar_t* str, int len = -1);
+    static std::string convertToUtf8(const wchar_t* str, int len = -1);
 
     ////////////////////////////////////////////////////////////////////////////
     // Be careful when crossing this line. The following functions work with

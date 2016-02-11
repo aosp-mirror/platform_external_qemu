@@ -99,7 +99,7 @@ float Stream::getFloat() {
     return u.f;
 }
 
-void Stream::putString(const String& str) {
+void Stream::putString(StringView str) {
     putString(str.c_str(), str.size());
 }
 
@@ -116,8 +116,8 @@ void Stream::putString(const char* str, size_t len) {
     this->write(str, len);
 }
 
-String Stream::getString() {
-    String result;
+std::string Stream::getString() {
+    std::string result;
     size_t len = this->getBe32();
     result.resize(len);
     if (this->read(&result[0], len) != static_cast<ssize_t>(len)) {
