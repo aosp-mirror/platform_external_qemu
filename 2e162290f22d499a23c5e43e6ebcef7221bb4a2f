@@ -52,6 +52,24 @@
       "revId": "2e162290f22d499a23c5e43e6ebcef7221bb4a2f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1dd53033_c1ff324e",
+        "filename": "android/base/system/Win32UnicodeString.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-11T17:22:23Z",
+      "side": 1,
+      "message": "I need this function during the crash handling - right before writing a dump. There\u0027s a filter function in Breakpad, and I\u0027m capturing the process memory usage there. It means I need to construct the output file name and write into it. On Windows.\nIf it was an out of memory - no allocation is safe",
+      "parentUuid": "5da5e8c5_a518caba",
+      "revId": "2e162290f22d499a23c5e43e6ebcef7221bb4a2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
