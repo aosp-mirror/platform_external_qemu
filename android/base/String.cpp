@@ -71,6 +71,9 @@ String::String(const StringView& other) : mStr(mStorage), mSize(0) {
     assign(other);
 }
 
+String::String(const std::string& other) : mStr(mStorage), mSize(0) {
+    assign(other.c_str(), other.size());
+}
 
 String::String(size_t count, char fill) : mStr(mStorage), mSize(0) {
     this->assign(count, fill);
