@@ -12,7 +12,6 @@
 #include "android/opengl/EmuglBackendList.h"
 
 #include "android/base/containers/StringVector.h"
-#include "android/base/String.h"
 #include "android/base/StringFormat.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
@@ -24,14 +23,13 @@ namespace opengl {
 
 #define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
 
-using android::base::String;
 using android::base::StringFormat;
 using android::base::StringVector;
 using android::base::System;
 using android::base::TestTempDir;
 using android::base::TestSystem;
 
-static String makeLibSubPath(const char* name) {
+static std::string makeLibSubPath(const char* name) {
     return StringFormat("foo/%s/%s", System::kLibSubDir, name);
 }
 
@@ -102,7 +100,7 @@ TEST(EmuglBackendList, getBackendLibPath) {
     const size_t kDataLen = ARRAYLEN(kData);
 
     for (size_t n = 0; n < kDataLen; ++n) {
-        String file = "gles_bar/";
+        std::string file = "gles_bar/";
         file += kData[n].libName;
         makeLibSubFile(myDir, file.c_str());
     }
@@ -114,10 +112,10 @@ TEST(EmuglBackendList, getBackendLibPath) {
     EXPECT_STREQ("bar", names[0].c_str());
 
     for (size_t n = 0; n < kDataLen; ++n) {
-        String expected = StringFormat("foo/%s/gles_bar/%s",
-                                       System::kLibSubDir,
-                                       kData[n].libName);
-        String libdir;
+        std::string expected = StringFormat("foo/%s/gles_bar/%s",
+                                            System::kLibSubDir,
+                                            kData[n].libName);
+        std::string libdir;
         EXPECT_TRUE(list.getBackendLibPath("bar", kData[n].library, &libdir));
         EXPECT_TRUE(list.contains("bar"));
         EXPECT_FALSE(list.contains("foo"));
