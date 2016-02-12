@@ -25,6 +25,7 @@
 #include <QScreen>
 #include <QScrollBar>
 #include <QSemaphore>
+#include <QSettings>
 #include <QWindow>
 
 #include "android/base/files/PathUtils.h"
@@ -147,6 +148,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QSettings settings;
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
     setOnTop(onTop);
+
+    setAllowKeyboardInputGrab(
+            settings.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool());
 
     initErrorDialog(this);
 }
@@ -360,8 +364,7 @@ void EmulatorQtWindow::mouseMoveEvent(QMouseEvent *event)
 
 void EmulatorQtWindow::mousePressEvent(QMouseEvent *event)
 {
-    QSettings settings;
-    if (settings.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool()) {
+    if (mAllowKeyboardInputGrab) {
         mGrabKeyboardInput = true;
     }
     handleMouseEvent(kEventMouseButtonDown,
@@ -999,10 +1002,9 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
         mGrabKeyboardInput = false;
     }
 
-    QSettings settings;
     bool grab =
         mGrabKeyboardInput &&
-        settings.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool() &&
+        mAllowKeyboardInputGrab &&
         mouseInside();
 
     if (!grab && mInZoomMode) {
@@ -1120,6 +1122,9 @@ void EmulatorQtWindow::simulateZoomedWindowResized(const QSize &size)
     mOverlay.resize(size);
 }
 
+void EmulatorQtWindow::setAllowKeyboardInputGrab(bool value) {
+    mAllowKeyboardInputGrab = value;
+}
 
 void EmulatorQtWindow::slot_runOnUiThread(SkinGenericFunction* f, void* data, QSemaphore* semaphore) {
     (*f)(data);
