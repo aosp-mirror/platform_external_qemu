@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "android/skin/event.h"
+
 #include <QtCore>
 #include <QFrame>
 #include <QObject>
@@ -38,7 +40,6 @@ public:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void paintEvent(QPaintEvent* e) override;
-    void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent* event) override;
 
     void hideForFlash();
@@ -56,7 +57,9 @@ private slots:
     void slot_animationValueChanged(const QVariant& value);
 
 private:
-    QPoint getSecondaryTouchPoint() const;
+    void genereateTouchEvents(QMouseEvent* event);
+    QPoint getSecondaryPinchPoint() const;
+    QPoint getSecondarySwipePoint() const;
     void updateMultitouchCenter(const QPoint& pos);
 
     EmulatorQtWindow* mEmulatorWindow;
