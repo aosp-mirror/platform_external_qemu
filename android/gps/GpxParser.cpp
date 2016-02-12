@@ -18,6 +18,15 @@
 
 using std::string;
 
+// format an error message
+template <class... Args>
+static string formatError(const char* format, Args&&... args) {
+    char buf[100] = {};
+    snprintf(buf, sizeof(buf) - 1, format, std::forward<Args>(args)...);
+    return buf;
+}
+
+
 void GpxParserInternal::cleanupXmlDoc(xmlDoc *doc)
 {
     xmlFreeDoc(doc);
@@ -34,27 +43,23 @@ bool GpxParserInternal::parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *resu
 
     // Check for and get the latitude attribute
     attr = xmlHasProp(ptNode, (const xmlChar *) "lat");
-    if (attr == NULL) {
-        char buf[100];
-        sprintf(buf, "Point missing a latitude on line %d.", ptNode->line);
-        *error = string(buf);
+    if (!attr || !(tmpStr = xmlGetProp(ptNode, (const xmlChar *) "lat"))) {
+        *error = formatError("Point missing a latitude on line %d.",
+                             ptNode->line);
         return false; // Return error since a point *must* have a latitude
     } else {
-        tmpStr = xmlGetProp(ptNode, (const xmlChar *) "lat");
-        latitude = string((const char *) tmpStr);
+        latitude = reinterpret_cast<const char*>(tmpStr);
         xmlFree(tmpStr); // Caller-freed
     }
 
     // Check for and get the longitude attribute
     attr = xmlHasProp(ptNode, (const xmlChar *) "lon");
-    if (attr == NULL) {
-        char buf[100];
-        sprintf(buf, "Point missing a longitude on line %d.", ptNode->line);
-        *error = string(buf);
+    if (!attr || !(tmpStr = xmlGetProp(ptNode, (const xmlChar *) "lon"))) {
+        *error = formatError("Point missing a longitude on line %d.",
+                             ptNode->line);
         return false; // Return error since a point *must* have a longitude
     } else {
-        tmpStr = xmlGetProp(ptNode, (const xmlChar *) "lon");
-        longitude = string((const char *) tmpStr);
+        longitude = reinterpret_cast<const char*>(tmpStr);
         xmlFree(tmpStr); // Caller-freed
     }
 
@@ -66,55 +71,53 @@ bool GpxParserInternal::parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *resu
     // Note that none are actually required according to the GPX format.
     int childCount = 0;
     for (xmlNode *field = ptNode->children; field; field = field->next) {
-        tmpStr = NULL;
+        tmpStr = nullptr;
 
         if ( !strcmp((const char *) field->name, "time") ) {
-            tmpStr = xmlNodeListGetString(doc, field->children, 1);
+            if ((tmpStr = xmlNodeListGetString(doc, field->children, 1))) {
+                // Convert to a number
+                struct tm time;
+                int results = sscanf((const char *)tmpStr,
+                                     "%u-%u-%uT%u:%u:%u",
+                                     &time.tm_year, &time.tm_mon, &time.tm_mday,
+                                     &time.tm_hour, &time.tm_min, &time.tm_sec);
+                if (results != 6) {
+                    *error = formatError(
+                                 "Improperly formatted time on line %d.<br/>"
+                                 "Times must be in ISO format.", ptNode->line);
+                    return false;
+                }
 
-            // Convert to a number
-            struct tm time;
-            int results = sscanf((const char *)tmpStr,
-                                 "%u-%u-%uT%u:%u:%u",
-                                 &time.tm_year, &time.tm_mon, &time.tm_mday,
-                                 &time.tm_hour, &time.tm_min, &time.tm_sec);
-            if (results != 6) {
-                char buf[100];
-                sprintf(buf,
-                        "Improperly formatted time on line %d.<br/>Times must be in ISO format.",
-                        ptNode->line);
-                *error = string(buf);
-                return false;
+                // Correct according to the struct tm specification
+                time.tm_year -= 1900; // Years since 1900
+                time.tm_mon -= 1; // Months since January, 0-11
+
+                result->time = mktime(&time);
+
+                xmlFree(tmpStr); // Caller-freed
+                childCount++;
             }
-
-            // Correct according to the struct tm specification
-            time.tm_year -= 1900; // Years since 1900
-            time.tm_mon -= 1; // Months since January, 0-11
-
-            result->time = mktime(&time);
-
-            xmlFree(tmpStr); // Caller-freed
-            childCount++;
         }
-
         else if ( !strcmp((const char *) field->name, "ele") ) {
-            tmpStr = xmlNodeListGetString(doc, field->children, 1);
-            result->elevation = string((const char *) tmpStr);
-            xmlFree(tmpStr); // Caller-freed
-            childCount++;
+            if ((tmpStr = xmlNodeListGetString(doc, field->children, 1))) {
+                result->elevation = reinterpret_cast<const char*>(tmpStr);
+                xmlFree(tmpStr); // Caller-freed
+                childCount++;
+            }
         }
-
         else if ( !strcmp((const char *) field->name, "name") ) {
-            tmpStr = xmlNodeListGetString(doc, field->children, 1);
-            result->name = string((const char *) tmpStr);
-            xmlFree(tmpStr); // Caller-freed
-            childCount++;
+            if ((tmpStr = xmlNodeListGetString(doc, field->children, 1))) {
+                result->name = reinterpret_cast<const char*>(tmpStr);
+                xmlFree(tmpStr); // Caller-freed
+                childCount++;
+            }
         }
-
         else if ( !strcmp((const char *) field->name, "desc") ) {
-            tmpStr = xmlNodeListGetString(doc, field->children, 1);
-            result->description = string((const char *) tmpStr);
-            xmlFree(tmpStr); // Caller-freed
-            childCount++;
+            if ((tmpStr = xmlNodeListGetString(doc, field->children, 1))) {
+                result->description = reinterpret_cast<const char*>(tmpStr);
+                xmlFree(tmpStr); // Caller-freed
+                childCount++;
+            }
         }
 
         // We only care about 4 potential child fields, so quit after finding those
@@ -194,8 +197,8 @@ bool GpxParserInternal::parse(xmlDoc *doc, GpsFixArray *fixes, string *error)
 
 bool GpxParser::parseFile(const char *filePath, GpsFixArray *fixes, string *error)
 {
-    xmlDocPtr doc = xmlReadFile(filePath, NULL, 0);
-    if (doc == NULL) {
+    xmlDocPtr doc = xmlReadFile(filePath, nullptr, 0);
+    if (doc == nullptr) {
         GpxParserInternal::cleanupXmlDoc(doc);
         *error = "GPX document not parsed successfully.";
         return false;
