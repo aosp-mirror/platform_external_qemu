@@ -13,9 +13,36 @@
 
 #include "android/utils/compiler.h"
 
+#include <stdbool.h>
+
 ANDROID_BEGIN_HEADER
 
-// Error message to explan why haxm's vcpu sync failed
+// Set an error code and message for an error that occurred during
+// initialization. The function will make a copy of the string in
+// |error_message|. If |error_message| is NULL then the string kUnknownInitError
+// will be used instead.
+void android_init_error_set(int error_code, const char* error_message);
+
+// Indicate if an init error occurred or not
+bool android_init_error_occurred(void);
+
+// Get the error code set by android_set_init_error
+int android_init_error_get_error_code(void);
+
+// Get the error message set by android_set_init_error. If
+// android_init_error_set has never been called this will return NULL.
+const char* android_init_error_get_message(void);
+
+
+/*** Error message ***/
+
+// Error message to explain why haxm's vcpu sync failed
 extern const char* const kHaxVcpuSyncFailed;
+
+// Error message indicating that some unknown error occurred during startup
+extern const char* const kUnknownInitError;
+
+// Format string for an error message indicating not enough RAM for QEMU guest
+extern const char* const kNotEnoughMemForGuestError;
 
 ANDROID_END_HEADER
