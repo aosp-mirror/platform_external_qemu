@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1da7f0d2_77c270a7",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-12T17:59:37Z",
+      "side": 0,
+      "message": "nope, please\nIt has to be here",
+      "range": {
+        "startLine": 96,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 26
+      },
+      "revId": "ab0b075117f3e41b0dd12f3d4d72b34cdbf22e12",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
