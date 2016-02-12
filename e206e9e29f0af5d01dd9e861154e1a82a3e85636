@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fde3fc1c_c7917dce",
+        "filename": "android/shaper.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-02-12T21:40:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1dd0d03a_29a3750d",
+      "revId": "e206e9e29f0af5d01dd9e861154e1a82a3e85636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bde6e426_7c1f0641",
         "filename": "slirp-android/tcp_output.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2016-02-12T01:53:12Z",
       "side": 1,
       "message": "nit: 80 chars.",
+      "revId": "e206e9e29f0af5d01dd9e861154e1a82a3e85636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9de920fd_a9a1a86f",
+        "filename": "slirp-android/tcp_output.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-02-12T21:40:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bde6e426_7c1f0641",
       "revId": "e206e9e29f0af5d01dd9e861154e1a82a3e85636",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
