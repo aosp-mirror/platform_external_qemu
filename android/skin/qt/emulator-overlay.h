@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "android/skin/event.h"
+
 #include <QtCore>
 #include <QFrame>
 #include <QObject>
@@ -56,7 +58,8 @@ private slots:
     void slot_animationValueChanged(const QVariant& value);
 
 private:
-    QPoint getSecondaryTouchPoint() const;
+    void generateMouseEvents(SkinEventType type, Qt::MouseButtons buttons);
+    QPoint getSecondaryPinchPoint() const;
     void updateMultitouchCenter(const QPoint& pos);
 
     EmulatorQtWindow* mEmulatorWindow;
