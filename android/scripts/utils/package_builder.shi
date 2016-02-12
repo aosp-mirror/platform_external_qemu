@@ -619,5 +619,5 @@ builder_build_autotools_package() {
     local FIRST="$1"
     local SECOND="$2"
     shift; shift;
-    builder_build_autotools_package "$FIRST" "$SECOND" install "$@"
+    builder_build_autotools_package_full_install "$FIRST" "$SECOND" install "$@"
 }

@@ -32,6 +32,6 @@ void showErrorDialog(const QString& message, const QString& title)
     if (sErrorDialog) {
         sErrorDialog->setText(message);
         sErrorDialog->setWindowTitle(title);
-        sErrorDialog->show();
+        sErrorDialog->exec();
     }
 }

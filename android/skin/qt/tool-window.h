@@ -64,7 +64,6 @@ public:
     const UiEmuAgent* getUiEmuAgent() const { return uiEmuAgent; }
 
     QString getAdbFullPath(QStringList *args);
-    QString getScreenshotSaveDirectory();
     QString getScreenshotSaveFile();
 
     void runAdbInstall(const QString &path);
