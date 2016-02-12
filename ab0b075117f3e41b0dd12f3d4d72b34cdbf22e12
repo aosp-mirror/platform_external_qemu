@@ -22,6 +22,30 @@
       "revId": "ab0b075117f3e41b0dd12f3d4d72b34cdbf22e12",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fdce9ca2_312517ef",
+        "filename": "android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-12T18:04:02Z",
+      "side": 0,
+      "message": "Isn\u0027t a dump and die different from a exit crash? Do you just want to track \"GenerateDumpAndDie\" as a message, or is there something else to it?",
+      "parentUuid": "1da7f0d2_77c270a7",
+      "range": {
+        "startLine": 96,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 26
+      },
+      "revId": "ab0b075117f3e41b0dd12f3d4d72b34cdbf22e12",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
