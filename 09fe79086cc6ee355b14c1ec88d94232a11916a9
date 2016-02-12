@@ -895,6 +895,24 @@
     },
     {
       "key": {
+        "uuid": "3ddaf464_a8f3e7c0",
+        "filename": "android/base/system/SystemResult.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-12T19:19:19Z",
+      "side": 1,
+      "message": "I\u0027m going to disagree here\nenum class already requires one to always prefix the constant with enum name. Type::Errno is more than enough for me personally, I don\u0027t think k improves anything here\nDo it how you think is better",
+      "parentUuid": "9dc4c07e_0edf97f6",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7daf0c90_2106543f",
         "filename": "android/base/system/SystemResult.h",
         "patchSetId": 1
