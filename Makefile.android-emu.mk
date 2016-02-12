@@ -249,6 +249,7 @@ LOCAL_SRC_FILES := \
     android/main-common.c \
     android/metrics/AdbLivenessChecker.cpp \
     android/metrics/IniFileAutoFlusher.cpp \
+    android/metrics/MetricsUploader.cpp \
     android/metrics/metrics_reporter.cpp \
     android/metrics/metrics_reporter_toolbar.cpp \
     android/metrics/StudioHelper.cpp \

@@ -20,6 +20,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/testing/TestTempDir.h"
 
+#if 0
 namespace {
 
 using android::base::TestTempDir;
@@ -185,3 +186,4 @@ TEST_F(MetricsReporterTest, reportAllPartialFailure) {
 }
 
 }  // namespace
+#endif
