@@ -35,3 +35,12 @@ void showErrorDialog(const QString& message, const QString& title)
         sErrorDialog->show();
     }
 }
+
+void showBlockingErrorDialog(const QString& message, const QString& title)
+{
+    if (sErrorDialog) {
+        sErrorDialog->setText(message);
+        sErrorDialog->setWindowTitle(title);
+        sErrorDialog->exec();
+    }
+}

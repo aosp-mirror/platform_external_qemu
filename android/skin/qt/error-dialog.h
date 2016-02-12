@@ -17,3 +17,7 @@
 void initErrorDialog(QWidget *parent);
 
 void showErrorDialog(const QString& message, const QString& title);
+
+// Show an error dialog that blocks the current thread and doesn't return
+// until the user clicks OK
+void showBlockingErrorDialog(const QString& message, const QString& title);
