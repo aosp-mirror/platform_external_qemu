@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fde3fc1c_76171d68",
+        "filename": "android/crashreport/main-crash-service.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-12T02:14:41Z",
+      "side": 1,
+      "message": "please skip it only if it\u0027s not an internal error crash - if there\u0027s a dump message, we still need to show the dialog",
+      "range": {
+        "startLine": 52,
+        "startChar": 22,
+        "endLine": 52,
+        "endChar": 36
+      },
+      "revId": "12370e838a47893b4c61bed7ebffe44ccd1dd577",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
