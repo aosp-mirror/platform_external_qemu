@@ -67,9 +67,14 @@ tcp_output(struct tcpcb *tp)
 	unsigned optlen, hdrlen;
 	int idle, sendalot;
 
-	if (tp == NULL) crashhandler_die("QEMU-2 tcp_output() invoked with tp==NULL");
+	if (tp == NULL) {
+		crashhandler_die("QEMU-2 tcp_output() invoked with tp==NULL");
+	}
 	so = tp->t_socket;
-	if (so == NULL) crashhandler_die("QEMU-2 tcp_output() invoked with tp->t_socket==NULL");
+	if (so == NULL) {
+		crashhandler_die("QEMU-2 tcp_output() invoked "
+		                 "with tp->t_socket==NULL");
+	}
 
 	DEBUG_CALL("tcp_output");
 	DEBUG_ARG("tp = %lx", (long )tp);
