@@ -20,6 +20,8 @@
 #include "android/base/StringFormat.h"
 #include <utility>
 #include <stdio.h>
+#else
+#include <stdbool.h>
 #endif
 
 ANDROID_BEGIN_HEADER
