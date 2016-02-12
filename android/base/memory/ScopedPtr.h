@@ -13,6 +13,8 @@
 
 #include "android/base/Compiler.h"
 
+#include <utility>
+
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -58,11 +60,23 @@ public:
     // Default constructor.
     ScopedPtr() : mPtr(nullptr) {}
 
+    // Move constructor
+    ScopedPtr(ScopedPtr&& other) : mPtr(nullptr) {
+        std::swap(mPtr, other.mPtr);
+    }
+
     // Normal constructor, takes ownership of |ptr|.
     explicit ScopedPtr(T* ptr) : mPtr(ptr) {}
 
     // Destructor will call reset() automatically.
     ~ScopedPtr() { reset(); }
+
+    // Move assignment
+    ScopedPtr& operator=(ScopedPtr&& other) {
+        reset();
+        std::swap(mPtr, other.mPtr);
+        return *this;
+    }
 
     // Release the pointer object from the instance and return it.
     // Caller should assume ownership of the object.

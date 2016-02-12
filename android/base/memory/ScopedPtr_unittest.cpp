@@ -113,5 +113,20 @@ TEST(ScopedCPtrTest, ArrayAccess) {
     EXPECT_STREQ("hello world", str.get());
 }
 
+TEST(ScopedCPtrTest, Movable) {
+    ScopedCPtr<char> str(strdup("Hello Pointer"));
+    const char* rawPointer = str.get();
+    ScopedCPtr<char> other(std::move(str));
+
+    EXPECT_EQ(nullptr, str.get());
+    EXPECT_EQ(rawPointer, other.get());
+    EXPECT_STREQ("Hello Pointer", other.get());
+
+    str = std::move(other);
+    EXPECT_EQ(nullptr, other.get());
+    EXPECT_EQ(rawPointer, str.get());
+    EXPECT_STREQ("Hello Pointer", str.get());
+}
+
 }  // namespace base
 }  // namespace android
