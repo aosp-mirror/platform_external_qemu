@@ -62,10 +62,12 @@ LOCAL_SRC_FILES := \
     android/base/containers/PointerSet.cpp \
     android/base/containers/HashUtils.cpp \
     android/base/containers/StringVector.cpp \
+    android/base/files/FilePath_$(BUILD_TARGET_OS).cpp \
+    android/base/files/HostFileSystem.cpp \
+    android/base/files/IniFile.cpp \
     android/base/files/PathUtils.cpp \
     android/base/files/StdioStream.cpp \
     android/base/files/Stream.cpp \
-    android/base/files/IniFile.cpp \
     android/base/misc/HttpUtils.cpp \
     android/base/misc/StringUtils.cpp \
     android/base/misc/Utf8Utils.cpp \
@@ -79,6 +81,7 @@ LOCAL_SRC_FILES := \
     android/base/Log.cpp \
     android/base/memory/LazyInstance.cpp \
     android/base/system/System.cpp \
+    android/base/system/SystemResult.cpp \
     android/base/threads/Async.cpp \
     android/base/threads/FunctorThread.cpp \
     android/base/threads/internal/ParallelTaskBase.cpp \
@@ -365,6 +368,7 @@ LOCAL_SRC_FILES := \
   android/base/containers/StringVector_unittest.cpp \
   android/base/containers/TailQueueList_unittest.cpp \
   android/base/EintrWrapper_unittest.cpp \
+  android/base/files/HostFileSystem_unittest.cpp \
   android/base/files/IniFile_unittest.cpp \
   android/base/files/PathUtils_unittest.cpp \
   android/base/files/ScopedFd_unittest.cpp \
