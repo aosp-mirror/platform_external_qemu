@@ -72,6 +72,11 @@ void skin_winsys_set_window_icon(const unsigned char* icon_data,
 // Stop main window and quit program. Must be called from inside event loop.
 void skin_winsys_quit_request(void);
 
+// Stop main window and quit program. This request is performed on the UI thread
+// and blocks the calling thread. Note that it only blocks until the request
+// has been made, not until the program exits.
+void skin_winsys_quit_request_on_ui_thread(void);
+
 // Kill the skin-related objects
 void skin_winsys_destroy(void);
 
@@ -91,6 +96,9 @@ void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv);
 //   as Qt requires any UI interaction to come from there.
 typedef void (*SkinGenericFunction)(void* data);
 void skin_winsys_run_ui_update(SkinGenericFunction f, void* data);
+
+// Show a blocking error dialog running on the UI thread.
+void skin_winsys_error_dialog(const char* message, const char* title);
 
 #ifdef __cplusplus
 }

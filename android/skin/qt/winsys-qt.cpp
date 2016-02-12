@@ -239,6 +239,15 @@ extern void skin_winsys_quit_request()
     window->requestClose();
 }
 
+extern void skin_winsys_quit_request_on_ui_thread() {
+    // Wrap the quit request in a lambda that takes a void* parameter so it
+    // matches the necessary function signature
+    auto requestClose = [](void*) {
+        skin_winsys_quit_request();
+    };
+    skin_winsys_run_ui_update(requestClose, nullptr);
+}
+
 void skin_winsys_destroy() {
     D(__FUNCTION__);
 
@@ -388,6 +397,26 @@ extern void skin_winsys_run_ui_update(SkinGenericFunction f, void* data) {
     }
     window->runOnUiThread(&f, data, &semaphore);
     semaphore.acquire();
+}
+
+extern void skin_winsys_error_dialog(const char* message, const char* title) {
+    // Lambdas can only be converted to function pointers if they don't capture
+    // So instead we use the void parameter to pass our parameters in a struct
+    struct Params {
+        const char* Message;
+        const char* Title;
+    } params = {message, title};
+
+    // Then create a non-capturing lambda that takes those parameters, unpacks
+    // them, and shows the error dialog
+    auto showDialog = [](void* data) {
+        auto params = static_cast<Params*>(data);
+        showErrorDialog(params->Message, params->Title);
+    };
+
+    // Make sure we show the dialog on the UI thread or it will crash
+    skin_winsys_run_ui_update(showDialog, &params);
+
 }
 
 #ifdef _WIN32
