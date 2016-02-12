@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7df0ecdc_7a2b86c7",
+        "filename": "android/skin/qt/extended-pages/settings-page.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-12T20:09:12Z",
+      "side": 1,
+      "message": "this one too, please :)",
+      "range": {
+        "startLine": 41,
+        "startChar": 60,
+        "endLine": 41,
+        "endChar": 79
+      },
+      "revId": "c8f22d0de1b61a3fa794dc851b66da0472c51997",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
