@@ -38,7 +38,6 @@ public:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void paintEvent(QPaintEvent* e) override;
-    void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent* event) override;
 
     void hideForFlash();
@@ -52,12 +51,21 @@ public slots:
     void hide();
 
 private slots:
-    void slot_animationFinished();
+    void slot_flashAnimationFinished();
+    void slot_flashAnimationValueChanged(const QVariant& value);
+
     void slot_animationValueChanged(const QVariant& value);
 
 private:
-    QPoint getSecondaryTouchPoint() const;
+    void generateTouchEvents(QMouseEvent* event);
     void updateMultitouchCenter(const QPoint& pos);
+    void updateTouchPoints(QMouseEvent* event);
+
+    QPoint primaryPinchPoint() const;
+    QPoint secondaryPinchPoint() const;
+
+    QPoint primarySwipePoint() const;
+    QPoint secondaryTouchPoint() const;
 
     EmulatorQtWindow* mEmulatorWindow;
     EmulatorContainer* mContainer;
@@ -72,9 +80,16 @@ private:
     QImage mTouchImage;
     QPoint mMultitouchCenter;
     QPoint mPrimaryTouchPoint;
+    QPoint mSecondaryTouchPoint;
     int mCenterPointRadius;
     int mTouchPointRadius;
+    bool mIsSwipeGesture;
     bool mReleaseOnClose;
+
+    // Multitouch animation values
+    QVariantAnimation mTouchPointAnimation;
+    QPoint mLastMousePos;
+    double mLerpValue;
 
     // Screenshot-flash related members
     QVariantAnimation mFlashAnimation;
