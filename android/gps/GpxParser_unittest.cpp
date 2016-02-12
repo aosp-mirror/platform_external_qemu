@@ -140,4 +140,35 @@ TEST(GpxParser, ParseFileValid) {
     EXPECT_EQ("Trkpt 2-2", locations[7].name);
 }
 
+
+TEST(GpxParser, ParseFileNullAttribute) {
+    char text[] =
+            "<?xml version=\"1.0\"?>"
+            "<gpx>"
+                "<wpt lon=\"\" lat=\"\">"
+                    "<name/>"
+                "</wpt>"
+            "</gpx>";
+
+    TestTempDir myDir("parse_location_tests");
+    ASSERT_TRUE(myDir.path()); // NULL if error during creation.
+    android::base::String path = myDir.makeSubPath("test.gpx");
+
+    std::ofstream myfile(path.c_str());
+    myfile << text;
+    myfile.close();
+
+    GpsFixArray locations;
+    string error;
+
+    bool isOk = GpxParser::parseFile(path.c_str(), &locations, &error);
+
+    // This test only checks if GpxParser doesn't crash on null attributes
+    // So if we're here it's already Ok - these tests aren't that relevant.
+    EXPECT_TRUE(isOk);
+    EXPECT_EQ(1, locations.size());
+    EXPECT_STREQ("", locations[0].name.c_str());
+    EXPECT_TRUE(error.empty());
+}
+
 }
