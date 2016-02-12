@@ -413,6 +413,27 @@ extern void skin_winsys_run_ui_update(SkinGenericFunction f, void* data) {
     semaphore.acquire();
 }
 
+extern void skin_winsys_error_dialog(const char* message, const char* title) {
+    // Lambdas can only be converted to function pointers if they don't capture
+    // So instead we use the void parameter to pass our parameters in a struct
+    struct Params {
+        const char* Message;
+        const char* Title;
+    } params = {message, title};
+
+    // Then create a non-capturing lambda that takes those parameters, unpacks
+    // them, and shows the error dialog
+    auto showDialog = [](void* data) {
+        auto params = static_cast<Params*>(data);
+        showErrorDialog(params->Message, params->Title);
+    };
+
+    // Make sure we show the dialog on the UI thread or it will crash. This is
+    // a blocking call so referencing params and its contents from another
+    // thread is safe.
+    skin_winsys_run_ui_update(showDialog, &params);
+}
+
 #ifdef _WIN32
 extern "C" int qt_main(int, char**);
 
