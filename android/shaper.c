@@ -11,6 +11,7 @@
 */
 #include "android/shaper.h"
 
+#include "android/crashreport/crash-handler.h"
 #include "android/utils/looper.h"
 
 #include <stdint.h>
@@ -139,6 +140,10 @@ netshaper_expires(void* opaque, LoopTimer* unused)
 {
     NetShaper shaper = (NetShaper)opaque;
     QueuedPacket  packet;
+
+    if (opaque == NULL) {
+        crashhandler_die("netshaper_expires() with opaque==NULL");
+    }
 
     while ((packet = shaper->packets) != NULL) {
        Duration now = looper_nowWithClock(looper_getForThread(), SHAPER_CLOCK);
@@ -595,4 +600,3 @@ netdelay_destroy( NetDelay  delay )
         free( delay );
     }
 }
-
