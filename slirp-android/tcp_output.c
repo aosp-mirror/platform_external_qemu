@@ -81,13 +81,13 @@ tcp_output(struct tcpcb *tp)
 	DEBUG_ARG("tp = %lx", (long )tp);
 
 	if (tp == NULL) {
-            crashhandler_die("QEMU-1 tcp_output() invoked with tp==NULL");
-        }
+		crashhandler_die("QEMU-1 tcp_output() invoked with tp==NULL");
+	}
 	so = tp->t_socket;
 	if (so == NULL) {
-            crashhandler_die("QEMU-1 tcp_output() invoked "
-                             "with tp->t_socket==NULL");
-        }
+		crashhandler_die("QEMU-1 tcp_output() invoked "
+		                 "with tp->t_socket==NULL");
+	}
 	/*
 	 * Determine length of data that should be transmitted,
 	 * and flags that will be used.

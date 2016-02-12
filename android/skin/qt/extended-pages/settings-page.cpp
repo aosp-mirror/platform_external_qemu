@@ -65,6 +65,9 @@ SettingsPage::SettingsPage(QWidget *parent) :
     }
     mUi->set_themeBox->setCurrentIndex(static_cast<int>(theme));
 
+    connect(mUi->set_allowKeyboardGrab, SIGNAL(toggled(bool)),
+            this, SIGNAL(onAllowKeyboardGrabChanged(bool)));
+
     mUi->set_allowKeyboardGrab->setChecked(
             settings.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool());
 
@@ -101,19 +104,25 @@ SettingsPage::SettingsPage(QWidget *parent) :
     }
 }
 
-bool SettingsPage::eventFilter (QObject* object, QEvent* event)
+bool SettingsPage::eventFilter(QObject* object, QEvent* event)
 {
+    if (event->type() != QEvent::FocusIn && event->type() != QEvent::FocusOut) {
+        return false;
+    }
+
     QSettings settings;
-    QString savePath = settings.value(Ui::Settings::SAVE_PATH, "").toString();
-    QString adbPath = settings.value(Ui::Settings::ADB_PATH, "").toString();
 
     if (object == mUi->set_saveLocBox) {
+        QString savePath = settings.value(Ui::Settings::SAVE_PATH, "").toString();
+
         if (event->type() == QEvent::FocusIn) {
             mUi->set_saveLocBox->setText(savePath);
         } else if (event->type() == QEvent::FocusOut) {
             setElidedText(mUi->set_saveLocBox, savePath);
         }
     } else if (object == mUi->set_adbPathBox) {
+        QString adbPath = settings.value(Ui::Settings::ADB_PATH, "").toString();
+
         if (event->type() == QEvent::FocusIn) {
             mUi->set_adbPathBox->setText(adbPath);
         } else if (event->type() == QEvent::FocusOut) {
@@ -243,22 +252,19 @@ void SettingsPage::on_set_autoFindAdb_toggled(bool checked) {
     mUi->set_adbPathButton->setHidden(checked);
 }
 
-void set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_VALUE v) {
+static void set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_VALUE v) {
     QSettings settings;
     settings.setValue(Ui::Settings::CRASHREPORT_PREFERENCE, v);
 }
 
 void SettingsPage::on_set_crashReportPrefAsk_clicked() {
-    QSettings settings;
     set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_ASK);
 }
 
 void SettingsPage::on_set_crashReportPrefAlways_clicked() {
-    QSettings settings;
     set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS);
 }
 
 void SettingsPage::on_set_crashReportPrefNever_clicked() {
-    QSettings settings;
     set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_NEVER);
 }
