@@ -85,19 +85,18 @@ SettingsPage::SettingsPage(QWidget *parent) :
         static_cast<Ui::Settings::CRASHREPORT_PREFERENCE_VALUE>(
             settings.value(Ui::Settings::CRASHREPORT_PREFERENCE, 0).toInt());
 
-    mUi->set_crashReportPrefAsk->setAutoExclusive(true);
-    mUi->set_crashReportPrefAlways->setAutoExclusive(true);
-    mUi->set_crashReportPrefNever->setAutoExclusive(true);
-
     switch (report_pref) {
         case Ui::Settings::CRASHREPORT_PREFERENCE_ASK:
-            mUi->set_crashReportPrefAsk->setChecked(true);
+            mUi->set_crashReportPrefComboBox->setCurrentIndex(
+                    Ui::Settings::CRASHREPORT_COMBOBOX_ASK);
             break;
         case Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS:
-            mUi->set_crashReportPrefAlways->setChecked(true);
+            mUi->set_crashReportPrefComboBox->setCurrentIndex(
+                    Ui::Settings::CRASHREPORT_COMBOBOX_ALWAYS);
             break;
         case Ui::Settings::CRASHREPORT_PREFERENCE_NEVER:
-            mUi->set_crashReportPrefNever->setChecked(true);
+            mUi->set_crashReportPrefComboBox->setCurrentIndex(
+                    Ui::Settings::CRASHREPORT_COMBOBOX_NEVER);
             break;
         default:
             break;
@@ -257,14 +256,12 @@ static void set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_VALUE v) {
     settings.setValue(Ui::Settings::CRASHREPORT_PREFERENCE, v);
 }
 
-void SettingsPage::on_set_crashReportPrefAsk_clicked() {
-    set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_ASK);
-}
-
-void SettingsPage::on_set_crashReportPrefAlways_clicked() {
-    set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS);
-}
-
-void SettingsPage::on_set_crashReportPrefNever_clicked() {
-    set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_NEVER);
+void SettingsPage::on_set_crashReportPrefComboBox_currentIndexChanged(int index) {
+    if (index == Ui::Settings::CRASHREPORT_COMBOBOX_ALWAYS) {
+        set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS);
+    } else if (index == Ui::Settings::CRASHREPORT_COMBOBOX_NEVER) {
+        set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_NEVER);
+    } else if (index == Ui::Settings::CRASHREPORT_COMBOBOX_ASK) {
+        set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_ASK);
+    }
 }
