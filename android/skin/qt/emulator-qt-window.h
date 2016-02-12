@@ -25,7 +25,6 @@
 #include <QPainter>
 #include <QProcess>
 #include <QResizeEvent>
-#include <QSettings>
 #include <QWidget>
 
 #include "android/globals.h"
@@ -203,10 +202,12 @@ public slots:
 
     void activateWindow();
     void raise();
+    void setAllowKeyboardInputGrab(bool value);
     void show();
     void showMinimized();
 
     void slot_screenChanged(QScreen* screen);
+
 private:
 
     // When the main window appears, close the "Starting..."
@@ -243,6 +244,7 @@ private:
     double mZoomFactor;
     bool mInZoomMode;
     bool mNextIsZoom;
+    bool mAllowKeyboardInputGrab = false;
     bool mGrabKeyboardInput;
     bool mMouseInside;
     QPoint mPrevMousePosition;

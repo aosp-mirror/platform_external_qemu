@@ -25,6 +25,7 @@ public:
     explicit SettingsPage(QWidget *parent = 0);
 
 signals:
+    void onAllowKeyboardGrabChanged(bool value);
     void onTopChanged(bool isOnTop);
     void themeChanged(SettingsTheme new_theme);
 
