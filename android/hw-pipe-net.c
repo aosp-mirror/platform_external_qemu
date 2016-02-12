@@ -89,9 +89,11 @@ netPipe_free( NetPipe*  pipe )
     int  fd;
 
     /* Close the socket */
-    fd = loopIo_fd(pipe->io);
-    loopIo_free(pipe->io);
-    socket_close(fd);
+    if (pipe->io) {
+        fd = loopIo_fd(pipe->io);
+        loopIo_free(pipe->io);
+        socket_close(fd);
+    }
 
     /* Release the pipe object */
     AFREE(pipe);
