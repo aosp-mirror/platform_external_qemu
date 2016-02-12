@@ -1,0 +1,463 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dde478f9_e16f02c8",
+        "filename": "android/base/files/FilePath.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "please avoid using android::base::String since I\u0027m trying to get rid of it.",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1dc45060_1e06113f",
+        "filename": "android/base/files/FilePath.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "Sorry, but I really don\u0027t like that, a \u0027join\u0027 method would be much more explicit in my opinion.",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7dd62c0e_a6c432b3",
+        "filename": "android/base/files/FilePath.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "nit: Please rename this as getPlatformString(), we don\u0027t want encourage client code to actually use that.",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dde478f9_21300ae7",
+        "filename": "android/base/files/FilePath.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "nit: same here. Call this getPlatformCStr() if you prefer.",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1dc45060_3e0bcd47",
+        "filename": "android/base/files/FilePath.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "nit: getPlatformStringSize()",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7daf0c90_e1c1bcf8",
+        "filename": "android/base/files/FilePath.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "nit: Please return a std::string, otherwise that works :)",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1dc45060_5e00891f",
+        "filename": "android/base/files/FilePath.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "You will probably need an isAbsolute() method.",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d9da072_f76a5827",
+        "filename": "android/base/files/FilePath.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "nit: Probably don\u0027t make this inline.",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fde93cd0_220c8a8e",
+        "filename": "android/base/files/FilePath_darwin.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "An alternative would be to create FilePath_posix.cpp and compile it for both Darwin and Linux.",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7daf0c90_01bf9083",
+        "filename": "android/base/files/FilePath_linux.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "nit: Add a \u0027// static\u0027 comment before the line, as in:\n\n  // stastic\n  FilePath::CharType FilePath::kSeparators[] \u003d \"/\";",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d9da072_1a970166",
+        "filename": "android/base/files/FilePath_linux.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "nit: Probably fits on a line, please use \u0027git clang-format\u0027",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1dc45060_9e19419f",
+        "filename": "android/base/files/FilePath_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "nit: Add \u0027// static\u0027 here too.",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1dc45060_3eb2edc7",
+        "filename": "android/base/files/FileSystem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "nit: Use k prefix for constants: kModeRead, kModeWrite, ...",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dde478f9_812f1e84",
+        "filename": "android/base/files/FileSystem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5da5e8c5_25ccbad6",
+        "filename": "android/base/files/FileSystem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "nit: Please document this properly, i.e. that it returns by default a host-specific instance, except during unit-testing where it\u0027s possible to inject a mock version instead.",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fde93cd0_a2ffba7c",
+        "filename": "android/base/files/FileSystem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "closeFile / readFile / writeFile / seekFile should be methods of an abstract FileHandle class instead. The FileSystem class itself should only be used to create FileHandle instances (opening / creating files), and performing tests (like System::pathIsDir() but taking const references to FilePath instances instead).",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bdb504dc_00022aeb",
+        "filename": "android/base/files/HostFileSystem.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "nit: Make these two variables above static.",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7daf0c90_615ccc27",
+        "filename": "android/base/files/HostFileSystem.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "nit: return sHostFileSystem.get();",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5da5e8c5_e5bc9235",
+        "filename": "android/base/files/HostFileSystem.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "please handle EINTR, see android/base/EintrWrapper.h",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5da5e8c5_05b8963f",
+        "filename": "android/base/files/HostFileSystem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "This looks like an implementation detail that should be part of an anonymous namespace within FileSystem.cpp, this also applies to HostFileSystem.cpp",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dde478f9_612a1277",
+        "filename": "android/base/files/HostFileSystem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "these two methods should be static",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7daf0c90_410b4846",
+        "filename": "android/base/memory/ScopedPtr.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "nice improvement, may I ask you to move this to its own patch?",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fde93cd0_82bd5ee0",
+        "filename": "android/base/system/SystemResult.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "I\u0027m working on removing android::base::String entirely, can I ask you to use std::string instead here?",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7daf0c90_a1f2648a",
+        "filename": "android/base/system/SystemResult.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "Please add documentation explaining what this class is, and how to use it. This applies to subtypes Type and ResultT if you want to make them public (see below).\n\nAny specific reason why this is called SystemResult instead of SystemError?",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5da5e8c5_857ee63f",
+        "filename": "android/base/system/SystemResult.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "nit: Prefix constants enum values with \u0027k\u0027 as in:\n\n  kErrno,\n  kWinSystemCode,\n  kWinHResult,",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7daf0c90_2106543f",
+        "filename": "android/base/system/SystemResult.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "Do you really want to make Type and ResultT public? It looks like only the fromXXX() functions should deal with creation og a SystemResult instance instead.",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1ddb703a_23ad6e67",
+        "filename": "android/base/system/SystemResult.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-12T16:26:50Z",
+      "side": 1,
+      "message": "what\u0027s the purpose of this constant, since you don\u0027t have comparison operators, and success() can be called to check for this.",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
