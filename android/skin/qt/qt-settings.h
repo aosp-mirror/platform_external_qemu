@@ -43,6 +43,9 @@ enum CRASHREPORT_PREFERENCE_VALUE {
     CRASHREPORT_PREFERENCE_NEVER = 2
 };
 const QString CRASHREPORT_SAVEPREFERENCE_CHECKED("set/crashReportSavePreferenceChecked");
+const int CRASHREPORT_COMBOBOX_ALWAYS = 0;
+const int CRASHREPORT_COMBOBOX_NEVER = 1;
+const int CRASHREPORT_COMBOBOX_ASK = 2;
 
 const QString LOCATION_LATITUDE("loc/latitude");
 const QString LOCATION_LONGITUDE("loc/longitude");
