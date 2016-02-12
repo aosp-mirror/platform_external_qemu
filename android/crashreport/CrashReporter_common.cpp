@@ -143,16 +143,19 @@ static void formatDataFileName(char (&buffer)[N], StringView baseName) {
 }
 
 void CrashReporter::attachData(StringView name, StringView data, bool replace) {
-    char fullName[PATH_MAX + 1];
+    const int bufferLength = PATH_MAX + 1;
+    char fullName[bufferLength];
     formatDataFileName(fullName, name);
 
     // Open the communication file in append mode to make sure we won't
     // overwrite any existing message (e.g. if several threads are writing at
     // once)
 #ifdef _WIN32
-    // well, here we do a little of allocation - but just because of the API
-    android::base::Win32UnicodeString wideStr(fullName);
-    int fd = _wopen(wideStr.c_str(),
+    wchar_t wideFullPath[bufferLength] = {};
+    android::base::Win32UnicodeString::convertFromUtf8(wideFullPath,
+                                                       bufferLength,
+                                                       fullName);
+    int fd = _wopen(wideFullPath,
                     _O_WRONLY | _O_CREAT | _O_NOINHERIT | _O_TEXT
                     | (replace ? _O_TRUNC : _O_APPEND),
                     _S_IREAD | _S_IWRITE);

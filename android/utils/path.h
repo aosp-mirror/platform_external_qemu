@@ -16,6 +16,10 @@
 #include <android/utils/system.h>
 #include <stdint.h>  /* for uint64_t */
 
+#ifndef _WIN32
+#include <limits.h>
+#endif
+
 ANDROID_BEGIN_HEADER
 
 /** MISC FILE AND DIRECTORY HANDLING
@@ -37,17 +41,26 @@ ANDROID_BEGIN_HEADER
 #  define  PATH_SEP_C '/'
 #endif
 
-/* get MAX_PATH, note that PATH_MAX is set to 260 on Windows for
- * stupid backwards-compatibility reason, though any 32-bit version
- * of the OS handles much much longer paths
+/* Here we used to have a macro redefining MAX_PATH to be 1024 on Windows.
+ * That's incorrect as if one wants to go beyond the Windows SDK MAX_PATH, he
+ * has to format paths in a very special way - which isn't followed anywhere
+ * in our codebase.
+ * So let's just use what we got from windows.h here (260 if it's not in yet)
  */
 #ifdef _WIN32
-#  undef   MAX_PATH
-#  define  MAX_PATH    1024
-#  undef   PATH_MAX
+#  ifndef MAX_PATH
+     // we haven't included <windows.h> yet and we can't here - it might break
+     // some hardcore C code
+#    define MAX_PATH 260
+#  endif
+
+#  ifdef PATH_MAX
+#    undef   PATH_MAX
+#  endif
+
 #  define  PATH_MAX    MAX_PATH
+
 #else
-#  include <limits.h>
 #  define  MAX_PATH    PATH_MAX
 #endif
 
