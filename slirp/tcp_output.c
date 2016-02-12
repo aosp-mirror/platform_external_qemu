@@ -38,6 +38,8 @@
  * terms and conditions of the copyright.
  */
 
+#include "android/crashreport/crash-handler.h"
+
 #include <slirp.h>
 
 static const u_char  tcp_outflags[TCP_NSTATES] = {
@@ -56,7 +58,7 @@ static const u_char  tcp_outflags[TCP_NSTATES] = {
 int
 tcp_output(struct tcpcb *tp)
 {
-	register struct socket *so = tp->t_socket;
+	register struct socket *so;
 	register long len, win;
 	int off, flags, error;
 	register struct mbuf *m;
@@ -64,6 +66,10 @@ tcp_output(struct tcpcb *tp)
 	u_char opt[MAX_TCPOPTLEN];
 	unsigned optlen, hdrlen;
 	int idle, sendalot;
+
+	if (tp == NULL) crashhandler_die("QEMU-2 tcp_output() invoked with tp==NULL");
+	so = tp->t_socket;
+	if (so == NULL) crashhandler_die("QEMU-2 tcp_output() invoked with tp->t_socket==NULL");
 
 	DEBUG_CALL("tcp_output");
 	DEBUG_ARG("tp = %lx", (long )tp);
