@@ -28,6 +28,8 @@ namespace base {
 template <class T, class A = std::allocator<T>>
 class CircularBuffer {
 public:
+    using value_type = T;
+
     // Create a new circular buffer with the given |capacity|.
     explicit CircularBuffer(int capacity) :
         mBuf(capacity), mSize(0), mFrontIdx(0), mBackIdx(0) {

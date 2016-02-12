@@ -12,6 +12,7 @@
 
 #include "android/skin/qt/event-subscriber.h"
 #include <QEvent>
+#include <QEnterEvent>
 #include <QCloseEvent>
 #include <QHideEvent>
 #include <QFocusEvent>
@@ -21,25 +22,34 @@
 #include <type_traits>
 #include <unordered_map>
 
+struct EventRecord {
+    std::unique_ptr<QEvent> event;
+    std::string target_name;
+};
+
 // This class intercepts various UI events via EventCapturer
 // and stores their serialized representations in a container.
 template <template<class T, class A = std::allocator<T>> class EventContainer>
 class UIEventRecorder : public EventSubscriber {
 public:
+    using ContainerType = EventContainer<EventRecord>;
+
     explicit UIEventRecorder(EventCapturer* ecap) : EventSubscriber(ecap) {}
 
     // Lets the client specialize their own container instance.
     template <typename U>
     explicit UIEventRecorder(
+            EventCapturer* ecap,
             U&& container,
             typename std::enable_if<
-                std::is_convertible<U, EventContainer<std::unique_ptr<QEvent>>>::value,
+                std::is_convertible<U, ContainerType>::value,
                 int>::type dummy = 0) :
-        mContainer(std::forward(container)) {}
+        EventSubscriber(ecap),
+        mContainer(std::forward<U>(container)) {}
 
     // Get a const reference to the underelying container with serialized
     // events.
-    const EventContainer<QString>& container() const {
+    const ContainerType& container() const {
         return mContainer;
     }
 
@@ -51,25 +61,31 @@ private:
     }
  
     void processEvent(const QObject* target, const QEvent* event) override {
-        mContainer.push_back(cloneEvent(e));
+        EventRecord record {
+            cloneEvent(event),
+            target->objectName().toStdString()
+        };
+        mContainer.push_back(std::move(record));
     }
 
     std::unique_ptr<QEvent> cloneEvent(const QEvent* e) {
         switch(e->type()) {
         case QEvent::Close:
-            return std::unique_ptr<QEvent>(new QCloseEvent(*dynamic_cast<QCloseEvent>(e));
+            return std::unique_ptr<QEvent>(new QCloseEvent(*dynamic_cast<const QCloseEvent*>(e)));
         case QEvent::Enter:
+            return std::unique_ptr<QEvent>(new QEnterEvent(*dynamic_cast<const QEnterEvent*>(e)));
         case QEvent::Leave:
+            return std::unique_ptr<QEvent>(new QEvent(*e));
         case QEvent::MouseButtonPress:
         case QEvent::MouseButtonRelease:
-            return std::unique_ptr<QEvent>(new QMouseEvent(*dynamic_cast<QMouseEvent>(e));
+            return std::unique_ptr<QEvent>(new QMouseEvent(*dynamic_cast<const QMouseEvent*>(e)));
         case QEvent::FocusIn:
         case QEvent::FocusOut:
-            return std::unique_ptr<QEvent>(new QFocusEvent(*dynamic_cast<QFocusEvent>(e));
+            return std::unique_ptr<QEvent>(new QFocusEvent(*dynamic_cast<const QFocusEvent*>(e)));
         case QEvent::Hide:
-            return std::unique_ptr<QEvent>(new QHideEvent(*dynamic_cast<QHideEvent>(e));
+            return std::unique_ptr<QEvent>(new QHideEvent(*dynamic_cast<const QHideEvent*>(e)));
         case QEvent::Resize:
-            return std::unique_ptr<QEvent>(new QResizeEvent(*dynamic_cast<QResizeEvent>(e));
+            return std::unique_ptr<QEvent>(new QResizeEvent(*dynamic_cast<const QResizeEvent*>(e)));
         default:
             // This is a safety measure. If we got here, it means
             // that this method was not updated to match the supoported
@@ -79,7 +95,7 @@ private:
     }
 
 private:
-    EventContainer<std::unique_ptr<QEvent>> mContainer;
+    ContainerType mContainer;
     static EventCapturer::EventTypeSet mEventTypes;
 };
 

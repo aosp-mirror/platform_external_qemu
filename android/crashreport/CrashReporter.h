@@ -17,6 +17,8 @@
 #include "android/base/StringView.h"
 #include "android/crashreport/CrashSystem.h"
 
+#include <functional>
+
 namespace android {
 namespace crashreport {
 
@@ -97,7 +99,14 @@ public:
     void SetExitMode(const char* message);
     bool isInExitMode() const;
 
+    void setUICrashCallback(const std::function<void()>& cb) {
+        mUICrashCallback = cb;
+    }
+
+    bool onCrash();
+
 private:
+    virtual bool onCrashPlatformSpecific() = 0;
     virtual void writeDump() = 0;
     // Pass the |message| to the crash service process
     void passDumpMessage(const char* message);
@@ -105,6 +114,7 @@ private:
 private:
     DISALLOW_COPY_AND_ASSIGN(CrashReporter);
 
+    std::function<void()> mUICrashCallback;
     const std::string mDumpDir;
     const std::string mDataExchangeDir;
     bool mIsInExitMode = false;

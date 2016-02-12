@@ -56,28 +56,25 @@ EventCapturer::SubscriberToken EventCapturer::subscribeToEvents(
 
     // Add an entry with information needed for subscriber book-keeping.
     mSubscribers.emplace_back();
-    auto subscriber_it = std::next(mSubscribers.end(), -1);
-    subscriber_it->event_types = event_types;
-    subscriber_it->objects = std::move(objects);
-    subscriber_it->callback = callback;
+    auto subscriber = std::prev(mSubscribers.end());
+    subscriber->event_types = event_types;
+    subscriber->objects = std::move(objects);
+    subscriber->callback = callback;
 
     // Create a new token that calls |unsub| upon destruction.
     SubscriberToken token(new internal::SubscriberTokenImpl(
-                [this, subscriber_it]() { this->unsub(subscriber_it); }));
+                [this, subscriber]() { this->unsub(subscriber); }));
     
     // Ensure that this instance can invalidate the token.
-    subscriber_it->token = token.get();
+    subscriber->token = token.get();
 
     // Give the token to the subscriber.
     return token;
 }
 
-void EventCapturer::unsub(std::vector<SubscriberInfo>::iterator it) {
+void EventCapturer::unsub(std::list<SubscriberInfo>::iterator it) {
     // Remove associated subscriber info.
-    // Order of subscribers isn't relevant so we can do this
-    // "fast remove" trick.
-    std::swap(*it, mSubscribers.back());
-    mSubscribers.pop_back();
+    mSubscribers.erase(it);
 }
 
 bool EventCapturer::eventFilter(QObject* target, QEvent* event) {

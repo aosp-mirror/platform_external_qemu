@@ -13,14 +13,16 @@
 EventSubscriber::EventSubscriber(EventCapturer* ecap) : mEventCapturer(ecap) {}
 
 void EventSubscriber::startRecording(QObject* target) {
-    mTokens[target] = mEventCapturer->subscribeToEvents(
-            target,
-            [this](const QObject* o){ return this->objectPredicate(o); },
-            eventTypes(),
-            [this](const QObject* target, const QEvent* event) {
-                this->processEvent(target, event);
-            });
-    connect(target, SIGNAL(destroy()), this, SLOT(stopRecording()));
+    if (mEventCapturer) {
+        mTokens[target] = mEventCapturer->subscribeToEvents(
+                target,
+                [this](const QObject* o){ return this->objectPredicate(o); },
+                eventTypes(),
+                [this](const QObject* target, const QEvent* event) {
+                    this->processEvent(target, event);
+                });
+        connect(target, SIGNAL(destroyed()), this, SLOT(stopRecording()));
+    }
 }
 
 void EventSubscriber::stopRecording(QObject* target) {

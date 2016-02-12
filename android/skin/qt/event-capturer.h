@@ -14,7 +14,7 @@
 #include "android/skin/qt/qt-std-hash.h"
 #include <QEvent>
 #include <QObject>
-#include <vector>
+#include <list>
 #include <memory>
 #include <unordered_set>
 
@@ -98,13 +98,13 @@ public:
 
 private:
     // Unsubscribes the subscriber corresponding to the given iterator.
-    void unsub(std::vector<SubscriberInfo>::iterator it);
+    void unsub(std::list<SubscriberInfo>::iterator it);
 
     // Intercepts the events from monitored objects.
     bool eventFilter(QObject* target, QEvent* event) override;
 
     // Information about all the subscribers.
-    std::vector<SubscriberInfo> mSubscribers;
+    std::list<SubscriberInfo> mSubscribers;
 
     DISALLOW_COPY_AND_ASSIGN(EventCapturer);
 };
