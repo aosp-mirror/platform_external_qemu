@@ -68,6 +68,21 @@ int hax_set_ram(uint64_t start_pa, uint32_t size, uint64_t host_va, int flags)
     return 0;
 }
 
+int hax_get_max_ram(uint64_t *max_ram) {
+    int fd = hax_mod_open();
+    if (fd < 0) {
+        return -1;
+    }
+    struct hax_capabilityinfo cap;
+    int result = ioctl(fd, HAX_IOCTL_CAPABILITY, &cap);
+    close(fd);
+    if (result == -1) {
+        return -1;
+    }
+    *max_ram = cap.mem_quota;
+    return 0;
+}
+
 int hax_capability(struct hax_state *hax, struct hax_capabilityinfo *cap)
 {
     int ret;

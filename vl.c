@@ -4555,6 +4555,21 @@ int run_qemu_main(int argc, const char **argv)
         fprintf(stderr, "Could not acquire pid file: %s\n", strerror(errno));
         return 1;
     }
+#ifdef USE_ANDROID_EMU
+    uint64_t hax_max_ram = 0;
+    if (hax_get_max_ram(&hax_max_ram) == 0 && hax_max_ram > 0) {
+        char str[32] = {0};
+        snprintf(str, sizeof(str) - 1, "%"PRIu64, hax_max_ram);
+        crashhandler_add_string("hax_max_ram.txt", str);
+        if (ram_size > hax_max_ram) {
+            const int requested_meg = ram_size / (1024 * 1024);
+            const int actual_meg = hax_max_ram / (1024 * 1024);
+            fprintf(stderr, "Warning: requested ram_size %dM too big, reduced to %dM\n",
+                    requested_meg, actual_meg);
+            ram_size = hax_max_ram;
+        }
+    }
+#endif
 
     /* store value for the future use */
     qemu_opt_set_number(qemu_find_opts_singleton("memory"), "size", ram_size);
@@ -4579,14 +4594,6 @@ int run_qemu_main(int argc, const char **argv)
 
     configure_accelerator(current_machine);
 
-#ifdef USE_ANDROID_EMU
-    uint64_t hax_max_ram = 0;
-    if (hax_get_max_ram(&hax_max_ram) == 0) {
-        char str[32] = {0};
-        snprintf(str, sizeof(str) - 1, "%"PRIu64, hax_max_ram);
-        crashhandler_add_string("hax_max_ram.txt", str);
-    }
-#endif
 
     if (qtest_chrdev) {
         Error *local_err = NULL;

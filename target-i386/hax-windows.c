@@ -50,6 +50,25 @@ static int hax_open_device(hax_fd * fd)
     return 0;
 }
 
+int hax_get_max_ram(uint64_t *max_ram) {
+    DWORD dSize = 0;
+    struct hax_capabilityinfo cap;
+    hax_fd fd = hax_mod_open();
+    if (fd == NULL) {
+        return -1;
+    }
+    int result = DeviceIoControl(fd, HAX_IOCTL_CAPABILITY, NULL, 0, &cap,
+                          sizeof(cap), &dSize, (LPOVERLAPPED) NULL);
+    CloseHandle(fd);
+
+    if (!result) {
+        return -2;
+    }
+    *max_ram = cap.mem_quota;
+
+    return 0;
+}
+
 /* hax_fd hax_mod_open */
  hax_fd hax_mod_open(void)
 {

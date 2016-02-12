@@ -29,6 +29,7 @@ void hax_disable(int disable);
 int hax_ug_platform(void);
 int hax_pre_init(uint64_t ram_size);
 int hax_sync_vcpus(void);
+/* get the max haxm ram even before haxm library is initialized */
 int hax_get_max_ram(uint64_t *max_ram);
 
 #ifdef CONFIG_HAX
