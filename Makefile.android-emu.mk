@@ -249,8 +249,8 @@ LOCAL_SRC_FILES := \
     android/main-common.c \
     android/metrics/AdbLivenessChecker.cpp \
     android/metrics/IniFileAutoFlusher.cpp \
+    android/metrics/MetricsUploader.cpp \
     android/metrics/metrics_reporter.cpp \
-    android/metrics/metrics_reporter_toolbar.cpp \
     android/metrics/StudioHelper.cpp \
     android/multitouch-port.c \
     android/multitouch-screen.c \
@@ -414,8 +414,6 @@ LOCAL_SRC_FILES := \
   android/gps/internal/KmlParserInternal_unittest.cpp \
   android/gps/KmlParser_unittest.cpp \
   android/kernel/kernel_utils_unittest.cpp \
-  android/metrics/metrics_reporter_unittest.cpp \
-  android/metrics/metrics_reporter_toolbar_unittest.cpp \
   android/metrics/StudioHelper_unittest.cpp \
   android/opengl/EmuglBackendList_unittest.cpp \
   android/opengl/EmuglBackendScanner_unittest.cpp \
