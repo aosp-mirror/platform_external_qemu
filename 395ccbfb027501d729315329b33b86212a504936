@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1dd53033_af0c081c",
+        "filename": "android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-12T19:58:28Z",
+      "side": 1,
+      "message": "tr() ? I\u0027d also prefer to check current index over the text",
+      "range": {
+        "startLine": 260,
+        "startChar": 16,
+        "endLine": 260,
+        "endChar": 24
+      },
+      "revId": "395ccbfb027501d729315329b33b86212a504936",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
