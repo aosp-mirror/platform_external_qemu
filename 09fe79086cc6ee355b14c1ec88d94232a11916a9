@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "7dbb8cf2_7215d8cd",
+        "filename": "android/base/files/FilePath.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-12T19:16:55Z",
+      "side": 1,
+      "message": "std:: classes use the / operator to join paths\n\nfs::path \u003d \"/\";\npath /\u003d \"usr\";\npath \u003d path / bar / wibble / \"ntdll.dll\"",
+      "parentUuid": "3dacb4b4_85214197",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7dd62c0e_a6c432b3",
         "filename": "android/base/files/FilePath.h",
         "patchSetId": 1
@@ -451,6 +469,24 @@
       "side": 1,
       "message": "Oops, totally forgot about that. Will do.",
       "parentUuid": "1dc45060_3eb2edc7",
+      "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7df0ecdc_57289bc8",
+        "filename": "android/base/files/FileSystem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-12T19:16:55Z",
+      "side": 1,
+      "message": "or, use enum class here without the k prefix\nenum class OpenMode { read, write, ... };\n\nlater:\n\nOpenMode mode \u003d OpenMode::read;",
+      "parentUuid": "1dd53033_99f19efa",
       "revId": "09fe79086cc6ee355b14c1ec88d94232a11916a9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
