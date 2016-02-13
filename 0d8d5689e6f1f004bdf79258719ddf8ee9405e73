@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d4834fd_92c5ec06",
+        "filename": "android/gps/GpxParser_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-02-13T00:21:10Z",
+      "side": 1,
+      "message": "Shouldn\u0027t parseFile( ) return false for null attributes?\n\n(And if \u0027isOk\u0027 is false, the rest of the output probably\nshould be considered invalid, with no EXPECTed values.)",
+      "revId": "0d8d5689e6f1f004bdf79258719ddf8ee9405e73",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
