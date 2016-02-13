@@ -10,9 +10,12 @@
 ** GNU General Public License for more details.
 */
 
-#include "android/utils/eintr_wrapper.h"
 #include "android/utils/filelock.h"
+
+#include "android/utils/eintr_wrapper.h"
+#include "android/utils/lock.h"
 #include "android/utils/path.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -70,6 +73,14 @@
  **
  **/
 
+
+/* Thread safety:
+ *     _all_filelocks_tl: Hold this when accessing |_all_filelocks|.
+ *                        This is locked at exit, so hold this for very, *very*
+ *                        short.
+ */
+static CLock* _all_filelocks_tl;
+
 struct FileLock
 {
   const char*  file;
@@ -82,10 +93,14 @@ struct FileLock
 /* used to cleanup all locks at emulator exit */
 static FileLock*   _all_filelocks;
 
-
 #define  LOCK_NAME   ".lock"
 #define  TEMP_NAME   ".tmp-XXXXXX"
 #define  WIN_PIDFILE_NAME  "pid"
+
+void
+filelock_init() {
+    _all_filelocks_tl = android_lock_new();
+}
 
 /* returns 0 on success, -1 on failure */
 static int
@@ -399,8 +414,13 @@ filelock_atexit( void )
 {
   FileLock*  lock;
 
-  for (lock = _all_filelocks; lock != NULL; lock = lock->next)
+  android_lock_acquire(_all_filelocks_tl);
+  for (lock = _all_filelocks; lock != NULL; lock = lock->next) {
      filelock_release( lock );
+  }
+  android_lock_release(_all_filelocks_tl);
+
+  android_lock_free(_all_filelocks_tl);
 }
 
 /* create a file lock */
@@ -439,8 +459,10 @@ filelock_create( const char*  file )
         return NULL;
     }
 
+    android_lock_acquire(_all_filelocks_tl);
     lock->next     = _all_filelocks;
     _all_filelocks = lock;
+    android_lock_release(_all_filelocks_tl);
 
     if (lock->next == NULL)
         atexit( filelock_atexit );

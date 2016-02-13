@@ -21,6 +21,10 @@ ANDROID_BEGIN_HEADER
  ** a FileLock is useful to prevent several emulator instances from using the same
  ** writable file (e.g. the userdata.img disk images).
  **
+ ** Initialize the module by calling |filelock_init| from a single thread. Once
+ ** initialized, this module is thread safe to use, but two threads can not
+ ** safely lock the same path concurrently.
+ **
  ** create a FileLock object with filelock_create(), the function will return
  ** NULL only if the corresponding path is already locked by another emulator
  ** or if the path is read-only.
@@ -33,6 +37,8 @@ ANDROID_BEGIN_HEADER
  ** all file locks are automatically released when the program exits.
  ** It is safe to delete the originally locked file while the lock is held.
  **/
+
+extern void filelock_init();
 
 typedef struct FileLock  FileLock;
 
