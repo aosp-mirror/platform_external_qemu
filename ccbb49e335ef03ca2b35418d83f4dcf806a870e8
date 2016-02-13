@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5dbec8e3_5978b652",
+        "filename": "android/utils/lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-13T08:30:05Z",
+      "side": 1,
+      "message": "android_lock_{acquire/release}? just \u0027lock\u0027 looks strange (to me)\n\nlock the whole android? :)",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 37
+      },
+      "revId": "ccbb49e335ef03ca2b35418d83f4dcf806a870e8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
