@@ -565,7 +565,8 @@ static char* getClassicEmulatorPath(const char* progDir,
                                            emulatorSuffix,
                                            wantedBitness);
     if (!result) {
-        APANIC("Missing emulator engine program for '%s' CPU.\n", avdArch);
+        APANIC("Missing emulator engine program for '%s' CPU on %d-bit host."
+                "It may be deprecated or obsolete.\n", avdArch, *wantedBitness);
     }
     D("return result: %s\n", result);
     return result;

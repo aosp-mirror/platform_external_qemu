@@ -112,8 +112,10 @@ endif  # BUILD_TARGET_OS == windows
 
 # We want to build all variants of the emulator binaries. This makes
 # it easier to catch target-specific regressions during emulator development.
-EMULATOR_TARGET_ARCH := arm
-include $(LOCAL_PATH)/Makefile.qemu1-target.mk
+ifeq ($(BUILD_TARGET_BITS),64)
+    EMULATOR_TARGET_ARCH := arm
+    include $(LOCAL_PATH)/Makefile.qemu1-target.mk
+endif
 
 # Note: the same binary handles x86 and x86_64
 EMULATOR_TARGET_ARCH := x86
