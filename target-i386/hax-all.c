@@ -451,7 +451,7 @@ static void hax_log_sync(MemoryListener * listener,
         ((int128_get64(section->size) / TARGET_PAGE_SIZE) + HOST_LONG_BITS -
          1) / HOST_LONG_BITS;
     unsigned long bitmap[len];
-    int i, j;
+    unsigned int i, j;
 
     for (i = 0; i < len; i++) {
         bitmap[i] = 1;
@@ -459,7 +459,8 @@ static void hax_log_sync(MemoryListener * listener,
         do {
             j = ffsl(c) - 1;
             c &= ~(1ul << j);
-            memory_region_set_dirty(mr, (i * HOST_LONG_BITS + j) *
+
+            memory_region_set_dirty(mr, ((uint64_t)i * HOST_LONG_BITS + j) *
                                     TARGET_PAGE_SIZE, TARGET_PAGE_SIZE);
         }
         while (c != 0);
