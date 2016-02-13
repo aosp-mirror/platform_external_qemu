@@ -22,6 +22,30 @@
       "revId": "ccbb49e335ef03ca2b35418d83f4dcf806a870e8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9dc4c07e_45020ded",
+        "filename": "android/utils/lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-13T18:19:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5dbec8e3_5978b652",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 37
+      },
+      "revId": "ccbb49e335ef03ca2b35418d83f4dcf806a870e8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
