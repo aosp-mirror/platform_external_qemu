@@ -110,6 +110,7 @@ LOCAL_SRC_FILES := \
     android/utils/intmap.c \
     android/utils/ipaddr.cpp \
     android/utils/lineinput.c \
+    android/utils/lock.cpp \
     android/utils/looper.cpp \
     android/utils/mapfile.c \
     android/utils/misc.c \
