@@ -16,6 +16,24 @@
       "revId": "0d8d5689e6f1f004bdf79258719ddf8ee9405e73",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1da7f0d2_f260ceae",
+        "filename": "android/gps/GpxParser_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-13T00:29:54Z",
+      "side": 1,
+      "message": "It states that those attributes are non-mandatory. Also, null attribute comes from \u003cname/\u003e syntax, while \u003cname\u003e\u003c/name\u003e gives us an empty string instead of null (libxml2, you know)\nI thing it should be the same, and we are ok with \"\u003cname\u003e\u003c/name\u003e\" syntax",
+      "parentUuid": "3d4834fd_92c5ec06",
+      "revId": "0d8d5689e6f1f004bdf79258719ddf8ee9405e73",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
