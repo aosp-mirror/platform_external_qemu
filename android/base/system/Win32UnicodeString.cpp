@@ -145,18 +145,29 @@ wchar_t* Win32UnicodeString::release() {
     return result;
 }
 
-// static
-String Win32UnicodeString::convertToUtf8(const wchar_t* str, int len) {
-    String result;
-    const int utf8Len = calcUtf8BufferLength(str, len);
+template<typename StringType>
+static StringType convertToUtf8Impl(const wchar_t* str, int len) {
+    StringType result;
+    const int utf8Len = Win32UnicodeString::calcUtf8BufferLength(str, len);
     if (utf8Len > 0) {
         result.resize(static_cast<size_t>(utf8Len));
-        convertToUtf8(&result[0], utf8Len, str, len);
+        Win32UnicodeString::convertToUtf8(&result[0], utf8Len, str, len);
         if (len == -1) {
             result.resize(utf8Len - 1);  // get rid of the null-terminator
         }
     }
     return result;
+}
+
+// static
+String Win32UnicodeString::convertToUtf8(const wchar_t* str, int len) {
+    return convertToUtf8Impl<String>(str, len);
+}
+
+// static
+std::string Win32UnicodeString::convertToUtf8StdString(const wchar_t* str,
+                                                       int len) {
+    return convertToUtf8Impl<std::string>(str, len);
 }
 
 // returns the return value of a Win32UnicodeString public conversion function

@@ -62,6 +62,7 @@ LOCAL_SRC_FILES := \
     android/base/containers/PointerSet.cpp \
     android/base/containers/HashUtils.cpp \
     android/base/containers/StringVector.cpp \
+    android/base/files/FilePath_common.cpp \
     android/base/files/PathUtils.cpp \
     android/base/files/StdioStream.cpp \
     android/base/files/Stream.cpp \
@@ -135,6 +136,7 @@ LOCAL_SRC_FILES := \
 
 ifeq ($(BUILD_TARGET_OS),windows)
 LOCAL_SRC_FILES += \
+    android/base/files/FilePath_windows.cpp \
     android/base/synchronization/ConditionVariable_win32.cpp \
     android/base/threads/Thread_win32.cpp \
     android/base/system/Win32Utils.cpp \
@@ -143,6 +145,7 @@ LOCAL_SRC_FILES += \
 
 else
 LOCAL_SRC_FILES += \
+    android/base/files/FilePath_posix.cpp \
     android/base/threads/Thread_pthread.cpp \
 
 endif
@@ -365,6 +368,7 @@ LOCAL_SRC_FILES := \
   android/base/containers/StringVector_unittest.cpp \
   android/base/containers/TailQueueList_unittest.cpp \
   android/base/EintrWrapper_unittest.cpp \
+  android/base/files/FilePath_unittest.cpp \
   android/base/files/IniFile_unittest.cpp \
   android/base/files/PathUtils_unittest.cpp \
   android/base/files/ScopedFd_unittest.cpp \

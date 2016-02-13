@@ -104,6 +104,8 @@ public:
     // |len| - input length. if set to -1, means the input is null-terminated
     static String convertToUtf8(const wchar_t* str, int len = -1);
 
+    static std::string convertToUtf8StdString(const wchar_t* str, int len = -1);
+
     ////////////////////////////////////////////////////////////////////////////
     // Be careful when crossing this line. The following functions work with
     // raw buffers of static length, and are much harder to use correctly.
