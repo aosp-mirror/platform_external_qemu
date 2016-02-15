@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9d9da072_fa6cfdd5",
+        "filename": "android/base/system/Win32UnicodeString.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-15T08:41:40Z",
+      "side": 1,
+      "message": "nit: calcUtf\u003c*\u003eBufferLength() here :)",
+      "revId": "3f26697c7efa6c3a5147b0123dbc5636cd1c1baf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
