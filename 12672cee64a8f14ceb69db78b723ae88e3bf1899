@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ddc9d89d_a6a1eb6f",
+        "filename": "android/base/misc/StringUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-15T18:03:05Z",
+      "side": 1,
+      "message": "Just for conveniency: Could you point me to the CL that makes use of this function?",
+      "range": {
+        "startLine": 40,
+        "startChar": 5,
+        "endLine": 40,
+        "endChar": 16
+      },
+      "revId": "12672cee64a8f14ceb69db78b723ae88e3bf1899",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
