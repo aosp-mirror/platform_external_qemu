@@ -79,30 +79,6 @@ sdk {
         }
     }
 
-    // 32 bit binaries are linux only
-    linux {
-        item("$buildDefaultEmulator.output/emulator-arm") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-        item("$buildDefaultEmulator.output/emulator-mips") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-        item("$buildDefaultEmulator.output/bin") {
-            into 'bin'
-            builtBy buildDefaultEmulator
-        }
-        item("$buildDefaultEmulator.output/emulator-x86") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-        item("$buildDefaultEmulator.output/emulator-crash-service") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-    }
-
     windows {
         item('android/avd/hardware-properties.ini') {
             into 'lib'
