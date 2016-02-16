@@ -375,6 +375,25 @@ ask on the public mailing list for information.
     other third-party C++ libraries (e.g. 'android::base', 'android::testing',
     etc)
 
+  - C++ constants like unscoped enum values and static character arrays
+    should be named using a 'k' prefix followed by CamelCase, as in:
+
+       enum Mode {
+          kRead = 1 << 0,
+          kWrite = 1 << 1,
+          kReadWrite = kRead | kWrite;
+       };
+
+       static char kString[] = "Hello World";
+
+    Note that scoped enums (a.k.a. 'enum classes') don't need the k Prefix
+    but should still use CamelCasing as in:
+
+       enum class Mode {
+           Read = 1 << 0,                    // Mode::Read
+           Write = 1 << 1,                   // Mode::Write
+           ReadWrite = Read | Write          // Mode::ReadWrite
+       };
 
 3. Comments:
 
@@ -635,9 +654,35 @@ V. C++11 and beyond
 
 8. Strongly-typed enums
 
-  Prefer "enum class" over the old unscoped enums.
-  Note: for flags enum class is very inconvenient, one may fall back
-  to the old enumerations.
+  Prefer scoped enums, a.k.a. "enum classes", over the old unscoped enums.
+  I.e.:
+
+     [YES]
+     enum class Mode {
+         Read = 1 << 0,
+         Write = 1 << 1,
+         ReadWrite = (1 << 0) | (1 << 1),
+     };
+
+     [NO]
+     enum Mode {
+         kRead = 1 << 0,
+         kWrite = 1 << 1,
+         kReadWrite = kRead | kWrite,
+     };
+
+  Note: Scoped enums have one drawback: they do not support bitwise operations
+        which are typically handy for dealing with bitflags. There is
+        fortunately one solution for this, which is to include
+        "android/base/EnumFlags.h" in your source file, and add the
+        following flag if you're not in the android::base namespace:
+
+           #include "android/base/EnumFlags.h"
+
+           ...
+
+           using ::android::base::EnumFlags
+
 
 9. static_assert
 
