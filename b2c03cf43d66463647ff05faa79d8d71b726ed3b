@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "3d76744b_3db2bb12",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-16T23:20:34Z",
+      "side": 1,
+      "message": "I slightly prefer weak_ptr.\nThat keeps ownership obvious (where there really is intended ownership in one of the objects)",
+      "parentUuid": "9d85a05b_77f06883",
+      "range": {
+        "startLine": 110,
+        "startChar": 51,
+        "endLine": 110,
+        "endChar": 70
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bd82644f_98ee5dd8",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 20
