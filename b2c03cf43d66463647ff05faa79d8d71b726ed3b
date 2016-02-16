@@ -1,0 +1,596 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dd7ab832_b46006dc",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "could you please introduce a type alias for it?",
+      "range": {
+        "startLine": 104,
+        "startChar": 33,
+        "endLine": 104,
+        "endChar": 56
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd2a1c13_3ae6392c",
+        "filename": "android/crashreport/CrashReporter_darwin.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "I was actually going to pass a crash reporter this pointer as a void* context to the callback, but this works too",
+      "range": {
+        "startLine": 92,
+        "startChar": 11,
+        "endLine": 92,
+        "endChar": 31
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d85a05b_77f06883",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "it\u0027s very dangerous to pass a pointed object like that. Take this^W^W a copy of the shared_ptr or a weak_ptr is much safer",
+      "range": {
+        "startLine": 110,
+        "startChar": 51,
+        "endLine": 110,
+        "endChar": 70
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d85a05b_1756bc32",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "I\u0027m curious if {} works here",
+      "range": {
+        "startLine": 191,
+        "startChar": 8,
+        "endLine": 191,
+        "endChar": 31
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d85a05b_578f64e7",
+        "filename": "android/skin/qt/event-capturer.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "what about thread safety?",
+      "range": {
+        "startLine": 17,
+        "startChar": 4,
+        "endLine": 18,
+        "endChar": 29
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd7f7c1f_0911bea6",
+        "filename": "android/skin/qt/event-capturer.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "please add one more tab for proper indentation",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 46
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd7ab832_d4ca7293",
+        "filename": "android/skin/qt/event-capturer.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "this isn\u0027t a shared pointer here. Is that ok?",
+      "range": {
+        "startLine": 66,
+        "startChar": 39,
+        "endLine": 66,
+        "endChar": 43
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd255844_d6fcc2d6",
+        "filename": "android/skin/qt/event-capturer.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "this thing is optional if there are no arguments",
+      "range": {
+        "startLine": 66,
+        "startChar": 34,
+        "endLine": 66,
+        "endChar": 36
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd2a1c13_7dc58b03",
+        "filename": "android/skin/qt/event-capturer.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "the lifetimes are really scary here - you\u0027ve a unique_ptr with a raw pointer stored, some lambdas which capture this, destructors conditionally calling into functions. Is it possible to describe the object lifetimes in some comment?",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 17
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d8c6c87_f9120b3b",
+        "filename": "android/skin/qt/event-capturer.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "some alias could really help here",
+      "range": {
+        "startLine": 75,
+        "startChar": 26,
+        "endLine": 75,
+        "endChar": 61
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d85a05b_b7f57036",
+        "filename": "android/skin/qt/event-capturer.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "count() is much less efficient than find(), especially in a hash set",
+      "range": {
+        "startLine": 86,
+        "startChar": 31,
+        "endLine": 86,
+        "endChar": 37
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d8c6c87_19fa6f8c",
+        "filename": "android/skin/qt/event-capturer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "disable copy and assign?\nalso, it looks like the move has to be disabled as well",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 2
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d71b053_93388488",
+        "filename": "android/skin/qt/event-capturer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "can this be moved into the .cpp?",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 1
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd255844_b6dfc681",
+        "filename": "android/skin/qt/event-capturer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "\u003d default;",
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd82644f_f5bc5235",
+        "filename": "android/skin/qt/event-capturer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "unsubscribe()\nwhy do we need to shorten anything?",
+      "range": {
+        "startLine": 101,
+        "startChar": 9,
+        "endLine": 101,
+        "endChar": 14
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd82644f_954f0609",
+        "filename": "android/skin/qt/event-capturer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "please mention that the container has to keep all iterators valid on any operation - that\u0027s why you chose a list\u003c\u003e",
+      "range": {
+        "startLine": 106,
+        "startChar": 4,
+        "endLine": 106,
+        "endChar": 45
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5d8fa87c_bed225d0",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "what about:\n1. have a type alias for this so it\u0027s not that scary inside a function declaration\n2. moving it from return type to a second argument:\n\nvoid foo(bar bar, enable_if_convertible\u003cbar, baz\u003e* \u003d nullptr)",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 22
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd7ab832_5f8f7be7",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "does range for work here?",
+      "range": {
+        "startLine": 31,
+        "startChar": 5,
+        "endLine": 31,
+        "endChar": 45
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd7ab832_ff4d076a",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "assert() for the dynamic casts? or replace those with static_casts if we\u0027re so sure?",
+      "range": {
+        "startLine": 38,
+        "startChar": 29,
+        "endLine": 38,
+        "endChar": 40
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d71b053_b689eee5",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "it looks like this part doesn\u0027t really depend on a template argument, so it might be a separate function in a cpp.",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 49
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3d76744b_82a90af0",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "having a type if here could help - we would see which event we need to add next here, e.g. if it appears often enough before crashes",
+      "range": {
+        "startLine": 69,
+        "startChar": 12,
+        "endLine": 69,
+        "endChar": 49
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d8c6c87_797b7b51",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "\u0027\\n\u0027 ?\nendl flushes the stream, and it\u0027s not needed here",
+      "range": {
+        "startLine": 71,
+        "startChar": 15,
+        "endLine": 71,
+        "endChar": 24
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd82644f_384e51b1",
+        "filename": "android/skin/qt/event-subscriber.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "if (auto target \u003d ...) {\n\n}",
+      "range": {
+        "startLine": 34,
+        "startChar": 4,
+        "endLine": 34,
+        "endChar": 17
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5d8fa87c_3e963502",
+        "filename": "android/skin/qt/event-subscriber.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "stopRecordingForEmitter() ?",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 25
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd7f7c1f_2ce368ee",
+        "filename": "android/skin/qt/qt-std-hash.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "why so many includes?",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 19
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd255844_9913db9e",
+        "filename": "android/skin/qt/ui-event-recorder.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T23:09:40Z",
+      "side": 1,
+      "message": "no namespace? for an EventRecord struct? that\u0027s bold\n\nI mean, there\u0027s quite a high chance of having a struct with the same name in some 3rd party library. and in general, it\u0027s a good style to always use some namespace for all your code",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 48
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
