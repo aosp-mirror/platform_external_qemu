@@ -71,6 +71,29 @@
     },
     {
       "key": {
+        "uuid": "bd82644f_98ee5dd8",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-16T23:19:07Z",
+      "side": 1,
+      "message": "Why not add a generic addCrashCallback method to the CrashReporter, that appends to a list of callbacks? There is nothing UI specific to this facility. It could be useful elsewhere...",
+      "range": {
+        "startLine": 170,
+        "startChar": 48,
+        "endLine": 170,
+        "endChar": 66
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9d85a05b_1756bc32",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 20
@@ -87,6 +110,29 @@
         "startChar": 8,
         "endLine": 191,
         "endChar": 31
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd7ab832_3fbf0f84",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-16T23:19:07Z",
+      "side": 1,
+      "message": "why remove it?\nLet\u0027s say there\u0027s a but leading to the EmulatorQtWindow being deleted before the ToolWindow, then it might be useful to continue dumping this in a late crash?\n\nDo you think it\u0027ll avoid confusion in most crash-on-exit cases, where the UI events are irrelevant?",
+      "range": {
+        "startLine": 190,
+        "startChar": 4,
+        "endLine": 191,
+        "endChar": 33
       },
       "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -232,6 +278,29 @@
     },
     {
       "key": {
+        "uuid": "dd7ab832_9f3e43a2",
+        "filename": "android/skin/qt/event-capturer.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-16T23:19:07Z",
+      "side": 1,
+      "message": "I\u0027m a little uncomfortable with this usage.\n\nstd::list doesn\u0027t invalidate other iterators when you erase an element, but this isn\u0027t true of other list-like types (std::vector).\n\nI think this is a potential subtle pitfall if someone tries to replace list --\u003e vector.\n\n(I\u0027d be satisfied by a unit-test that tests this particular behavior)",
+      "range": {
+        "startLine": 77,
+        "startChar": 17,
+        "endLine": 77,
+        "endChar": 22
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9d85a05b_b7f57036",
         "filename": "android/skin/qt/event-capturer.cpp",
         "patchSetId": 20
@@ -248,6 +317,86 @@
         "startChar": 31,
         "endLine": 86,
         "endChar": 37
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5d8fa87c_9ecde132",
+        "filename": "android/skin/qt/event-capturer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-16T23:19:07Z",
+      "side": 1,
+      "message": "nit: newline before installed headers.",
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd255844_39e087de",
+        "filename": "android/skin/qt/event-capturer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-16T23:19:07Z",
+      "side": 1,
+      "message": "nit: newline before standard library / crt headers",
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd7ab832_7f8cb7f1",
+        "filename": "android/skin/qt/event-capturer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-16T23:19:07Z",
+      "side": 1,
+      "message": "Why not DISALLOW_COPY_AND_ASSIGN?",
+      "range": {
+        "startLine": 35,
+        "startChar": 4,
+        "endLine": 35,
+        "endChar": 72
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d8c6c87_9963bfa8",
+        "filename": "android/skin/qt/event-capturer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-16T23:19:07Z",
+      "side": 1,
+      "message": "Could just set mCb to nullptr and check that.",
+      "range": {
+        "startLine": 40,
+        "startChar": 8,
+        "endLine": 40,
+        "endChar": 23
       },
       "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -294,6 +443,29 @@
         "startChar": 0,
         "endLine": 47,
         "endChar": 1
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d71b053_1699e232",
+        "filename": "android/skin/qt/event-capturer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-16T23:19:07Z",
+      "side": 1,
+      "message": "nit: No need to keep this separate from other exported types above?",
+      "range": {
+        "startLine": 76,
+        "startChar": 4,
+        "endLine": 76,
+        "endChar": 9
       },
       "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -582,6 +754,30 @@
       "writtenOn": "2016-02-16T23:09:40Z",
       "side": 1,
       "message": "no namespace? for an EventRecord struct? that\u0027s bold\n\nI mean, there\u0027s quite a high chance of having a struct with the same name in some 3rd party library. and in general, it\u0027s a good style to always use some namespace for all your code",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 48
+      },
+      "revId": "b2c03cf43d66463647ff05faa79d8d71b726ed3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3d76744b_c27e32f2",
+        "filename": "android/skin/qt/ui-event-recorder.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-16T23:19:07Z",
+      "side": 1,
+      "message": "A lot of UI code doesn\u0027t have namespaces right now :(\n\nI think we should start using android::qt (I might have done that somewhere already)",
+      "parentUuid": "dd255844_9913db9e",
       "range": {
         "startLine": 24,
         "startChar": 0,
