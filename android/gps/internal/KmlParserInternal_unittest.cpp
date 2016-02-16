@@ -72,7 +72,6 @@ TEST(KmlParserInternal, ParseEmptyCoordinates) {
     ASSERT_NE(cur, (void *) NULL);
 
     GpsFixArray locations;
-    EXPECT_EQ(0, locations.size());
     EXPECT_FALSE(KmlParserInternal::parseCoordinates(cur, &locations));
     EXPECT_EQ(0, locations.size());
 
@@ -93,7 +92,6 @@ TEST(KmlParserInternal, ParseNoCoordinatesEmptyPoint) {
     ASSERT_NE(cur, (void *) NULL);
 
     GpsFixArray locations;
-    EXPECT_EQ(0, locations.size());
     EXPECT_FALSE(KmlParserInternal::parseCoordinates(cur, &locations));
     EXPECT_EQ(0, locations.size());
 
@@ -115,9 +113,8 @@ TEST(KmlParserInternal, ParseOneCoordinate) {
     ASSERT_NE(cur, (void *) NULL);
 
     GpsFixArray locations;
-    EXPECT_EQ(0, locations.size());
     EXPECT_TRUE(KmlParserInternal::parseCoordinates(cur, &locations));
-    EXPECT_EQ(1, locations.size());
+    ASSERT_EQ(1, locations.size());
 
     EXPECT_EQ("-122.0822035425683", locations[0].longitude);
     EXPECT_EQ("37.42228990140251", locations[0].latitude);
@@ -144,9 +141,8 @@ TEST(KmlParserInternal, ParseMultCoordinates) {
     ASSERT_NE(cur, (void *) NULL);
 
     GpsFixArray locations;
-    EXPECT_EQ(0, locations.size());
     EXPECT_TRUE(KmlParserInternal::parseCoordinates(cur, &locations));
-    EXPECT_EQ(3, locations.size());
+    ASSERT_EQ(3, locations.size());
 
     EXPECT_EQ("-122.0822035425683", locations[0].longitude);
     EXPECT_EQ("37.42228990140251", locations[0].latitude);
@@ -179,7 +175,6 @@ TEST(KmlParserInternal, ParseBadCoordinates) {
     ASSERT_NE(cur, (void *) NULL);
 
     GpsFixArray locations;
-    EXPECT_EQ(0, locations.size());
     EXPECT_FALSE(KmlParserInternal::parseCoordinates(cur, &locations));
 
     // checking that previous malformatted coordinates don't affect later ones
@@ -206,10 +201,9 @@ TEST(KmlParserInternal, ParseLocationNormal) {
 
     GpsFixArray locations;
     string error;
-    EXPECT_EQ(0, locations.size());
     EXPECT_TRUE(KmlParserInternal::traverseSubtree(cur, &locations, &error));
     EXPECT_EQ("", error);
-    EXPECT_EQ(1, locations.size());
+    ASSERT_EQ(1, locations.size());
 
     for (unsigned i = 0; i < locations.size(); ++i) {
         EXPECT_EQ("Simple placemark", locations[i].name);
@@ -238,10 +232,9 @@ TEST(KmlParserInternal, ParseLocationNormalMissingOptionalFields) {
 
     GpsFixArray locations;
     string error;
-    EXPECT_EQ(0, locations.size());
     EXPECT_TRUE(KmlParserInternal::traverseSubtree(cur, &locations, &error));
     EXPECT_EQ("", error);
-    EXPECT_EQ(1, locations.size());
+    ASSERT_EQ(1, locations.size());
 
     for (unsigned i = 0; i < locations.size(); ++i) {
         EXPECT_EQ("", locations[i].name);
@@ -269,7 +262,6 @@ TEST(KmlParserInternal, ParseLocationMissingRequiredFields) {
 
     GpsFixArray locations;
     string error;
-    EXPECT_EQ(0, locations.size());
     EXPECT_FALSE(KmlParserInternal::traverseSubtree(cur, &locations, &error));
     EXPECT_EQ("Location found with missing or malformed coordinates", error);
     EXPECT_EQ(0, locations.size());
@@ -296,10 +288,9 @@ TEST(KmlParserInternal, ParseLocationNameOnlyFirst) {
 
     GpsFixArray locations;
     string error;
-    EXPECT_EQ(0, locations.size());
     EXPECT_TRUE(KmlParserInternal::traverseSubtree(cur, &locations, &error));
     EXPECT_EQ("", error);
-    EXPECT_EQ(2, locations.size());
+    ASSERT_EQ(2, locations.size());
 
     EXPECT_EQ("Simple placemark", locations[0].name);
     EXPECT_EQ("Attached to the ground.", locations[0].description);
@@ -348,10 +339,9 @@ TEST(KmlParserInternal, ParseMultipleLocations) {
 
     GpsFixArray locations;
     string error;
-    EXPECT_EQ(0, locations.size());
     EXPECT_TRUE(KmlParserInternal::traverseSubtree(cur, &locations, &error));
     EXPECT_EQ("", error);
-    EXPECT_EQ(4, locations.size());
+    ASSERT_EQ(4, locations.size());
 
     for (unsigned i = 0; i < locations.size(); ++i) {
         if (i != 2) {
@@ -379,7 +369,6 @@ TEST(KmlParserInternal, TraverseEmptyDoc) {
 
     GpsFixArray locations;
     string error;
-    EXPECT_EQ(0, locations.size());
     EXPECT_TRUE(KmlParserInternal::traverseSubtree(cur, &locations, &error));
     EXPECT_EQ("", error);
     EXPECT_EQ(0, locations.size());
@@ -400,7 +389,6 @@ TEST(KmlParserInternal, TraverseDocNoPlacemarks) {
 
     GpsFixArray locations;
     string error;
-    EXPECT_EQ(0, locations.size());
     EXPECT_TRUE(KmlParserInternal::traverseSubtree(cur, &locations, &error));
     EXPECT_EQ("", error);
     EXPECT_EQ(0, locations.size());
@@ -441,16 +429,41 @@ TEST(KmlParserInternal, TraverseNestedDoc) {
 
     GpsFixArray locations;
     string error;
-    EXPECT_EQ(0, locations.size());
     EXPECT_TRUE(KmlParserInternal::traverseSubtree(cur, &locations, &error));
     EXPECT_EQ("", error);
-    EXPECT_EQ(1, locations.size());
+    ASSERT_EQ(1, locations.size());
 
     EXPECT_EQ("Simple placemark", locations[0].name);
     EXPECT_EQ("Attached to the ground.", locations[0].description);
     EXPECT_EQ("-122.0822035425683", locations[0].longitude);
     EXPECT_EQ("37.42228990140251", locations[0].latitude);
     EXPECT_EQ("0", locations[0].elevation);
+
+    xmlFreeDoc(doc);
+    xmlCleanupParser();
+}
+
+TEST(KmlParserInternal, ParsePlacemarkNullNameNoCrash) {
+    const char* str =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<kml xmlns=\"http://earth.google.com/kml/2.x\">"
+            "<name/>"
+            "<description/>"
+            "<Point>"
+            "<coordinates>-122.0822035425683,37.42228990140251,0</coordinates>"
+            "</Point>"
+            "</kml>";
+    xmlDoc* doc = xmlReadDoc((const xmlChar*)str, NULL, NULL, 0);
+    xmlNode* cur = xmlDocGetRootElement(doc);
+    ASSERT_NE(nullptr, cur);
+    ASSERT_NE(nullptr, cur->xmlChildrenNode);
+
+    GpsFixArray locations;
+    EXPECT_TRUE(KmlParserInternal::parsePlacemark(cur->xmlChildrenNode,
+                                                  &locations));
+    ASSERT_EQ(1, locations.size());
+    EXPECT_STREQ("", locations.front().name.c_str());
+    EXPECT_STREQ("", locations.front().description.c_str());
 
     xmlFreeDoc(doc);
     xmlCleanupParser();
