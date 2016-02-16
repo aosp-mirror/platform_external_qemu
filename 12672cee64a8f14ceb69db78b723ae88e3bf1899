@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "fd2a1c13_b43d8077",
+        "filename": "android/base/misc/StringUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T16:34:01Z",
+      "side": 1,
+      "message": "you could use std::search() for this",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 5
+      },
+      "revId": "12672cee64a8f14ceb69db78b723ae88e3bf1899",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ddc9d89d_a6a1eb6f",
         "filename": "android/base/misc/StringUtils.h",
         "patchSetId": 1
@@ -18,6 +41,29 @@
         "startChar": 5,
         "endLine": 40,
         "endChar": 16
+      },
+      "revId": "12672cee64a8f14ceb69db78b723ae88e3bf1899",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d8c6c87_70c2b0a7",
+        "filename": "android/base/misc/StringUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T16:34:01Z",
+      "side": 1,
+      "message": "StringView as well?",
+      "range": {
+        "startLine": 40,
+        "startChar": 38,
+        "endLine": 40,
+        "endChar": 56
       },
       "revId": "12672cee64a8f14ceb69db78b723ae88e3bf1899",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
