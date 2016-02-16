@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fd7f7c1f_93f07b84",
+        "filename": "Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T19:42:46Z",
+      "side": 1,
+      "message": "please update the comment",
+      "range": {
+        "startLine": 5,
+        "startChar": 69,
+        "endLine": 6,
+        "endChar": 70
+      },
+      "revId": "2d143d31c983afee5e0b8ee3a936e6ff9b1268d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
