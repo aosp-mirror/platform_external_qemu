@@ -22,6 +22,30 @@
       "revId": "7445787472198212ae760210c31a97ad7309a959",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d9da072_e0c1acf8",
+        "filename": "android/base/StringView.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-02-16T17:04:00Z",
+      "side": 1,
+      "message": "Implicit to minimize changes in existing client code.",
+      "parentUuid": "5d8fa87c_1299ea32",
+      "range": {
+        "startLine": 133,
+        "startChar": 4,
+        "endLine": 133,
+        "endChar": 12
+      },
+      "revId": "7445787472198212ae760210c31a97ad7309a959",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
