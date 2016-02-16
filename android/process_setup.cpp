@@ -17,6 +17,7 @@
 #include "android/curl-support.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/crashreport/CrashReporter.h"
+#include "android/utils/filelock.h"
 #include "android/utils/sockets.h"
 
 #include <string>
@@ -31,6 +32,8 @@ void process_early_setup(int argc, char** argv) {
     // Initialize sockets first so curl/crash processor can use sockets.
     // Does not create any threads.
     android_socket_init();
+
+    filelock_init();
 
     // Catch crashes in everything.
     // This promises to not launch any threads...
