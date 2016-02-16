@@ -52,6 +52,14 @@ void curl_cleanup() {
 }
 
 void* curl_easy_default_init(char** error) {
+    // |curl_easy_init| will try to initialize libcurl globally if it isn't
+    // already initialized. This behaviour is dangerous in multi-threaded
+    // environment.
+    if (!initCount) {
+        *error = strdup("libcurl is not initialized. Bailing.");
+        return NULL;
+    }
+
     CURL* curl = curl_easy_init();
     CURLcode curlRes;
 
