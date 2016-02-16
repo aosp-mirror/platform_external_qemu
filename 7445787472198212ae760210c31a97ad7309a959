@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5d8fa87c_1299ea32",
+        "filename": "android/base/StringView.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-16T16:45:26Z",
+      "side": 1,
+      "message": "do we want it to be implicit or explicit? Just asking",
+      "range": {
+        "startLine": 133,
+        "startChar": 4,
+        "endLine": 133,
+        "endChar": 12
+      },
+      "revId": "7445787472198212ae760210c31a97ad7309a959",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
