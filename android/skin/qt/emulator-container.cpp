@@ -179,10 +179,8 @@ void EmulatorContainer::resizeEvent(QResizeEvent* event) {
     mEmulatorWindow->simulateZoomedWindowResized(this->viewportSize());
 
 // To solve some resizing edge cases on OSX/Windows, start a short timer that
-// will
-// attempt to trigger a resize in case the user's mouse has not entered the
-// window
-// again.
+// will attempt to trigger a resize in case the user's mouse has not entered
+// the window again.
 #if defined(__APPLE__) || defined(_WIN32)
     mResizeTimer.start(500);
 #endif
@@ -220,9 +218,12 @@ QSize EmulatorContainer::viewportSize() const {
 
 void EmulatorContainer::slot_resizeDone() {
 // This function should never actually be called on Linux, since the timer is
-// never
-// started on those systems.
+// never started on those systems.
 #if defined(__APPLE__) || defined(_WIN32)
+
+    if (mEmulatorWindow->isInZoomMode()) {
+        return;
+    }
 
     // A hacky way of determining if the user is still holding down for a
     // resize.
