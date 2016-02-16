@@ -13,6 +13,9 @@
 #include "android/gps/KmlParser.h"
 #include "android/gps/internal/KmlParserInternal.h"
 
+#include <string>
+#include <utility>
+
 #include <string.h>
 #include <unistd.h>
 
@@ -57,7 +60,6 @@ bool KmlParserInternal::parseCoordinates(xmlNode * current, GpsFixArray * fixes)
     char* split = strtok_r(coordinates, " \t\n\v\r\f", &saveptr);
     #endif
     while (split != NULL) {
-
         string triple = string(split);
         size_t first = triple.find(",");
         size_t second = triple.find(",", first + 1);
@@ -83,16 +85,19 @@ bool KmlParserInternal::parseCoordinates(xmlNode * current, GpsFixArray * fixes)
 }
 
 bool KmlParserInternal::parsePlacemark(xmlNode * current, GpsFixArray * fixes) {
-    string description = "";
-    string name = "";
-    size_t ind = -1;
+    string description;
+    string name;
+    size_t ind = string::npos;
 
     // not worried about case-sensitivity since .kml files
     // are expected to be machine-generated
     for (; current != NULL; current = current->next) {
-        if (!strcmp((const char *) current->name, "description")) {
-            description = reinterpret_cast<const char*>(current->xmlChildrenNode->content);
-        } else if (!strcmp((const char *) current->name, "name")) {
+        const bool hasContent =
+                current->xmlChildrenNode && current->xmlChildrenNode->content;
+
+        if (hasContent && !strcmp((const char*)current->name, "description")) {
+            description = (const char*)current->xmlChildrenNode->content;
+        } else if (hasContent && !strcmp((const char*)current->name, "name")) {
             name = (const char *) current->xmlChildrenNode->content;
         } else if (!strcmp((const char *) current->name, "Point") ||
                 !strcmp((const char *) current->name, "LineString") ||
@@ -104,18 +109,22 @@ bool KmlParserInternal::parsePlacemark(xmlNode * current, GpsFixArray * fixes) {
         }
     }
 
-    // only assign name and description to the first of the
-    // points to avoid needless repitition
-    if (ind != string::npos && ind < fixes->size()) {
-        (*fixes)[ind].description = description;
-        (*fixes)[ind].name = name;
+    if (ind == string::npos || ind >= fixes->size()) {
+        return false;
     }
 
-    return ind != string::npos && ind < fixes->size();
+    // only assign name and description to the first of the
+    // points to avoid needless repetition
+    (*fixes)[ind].description = std::move(description);
+    (*fixes)[ind].name = std::move(name);
+
+    return true;
 }
 
 // Placemarks (aka locations) can be nested arbitrarily deep
-bool KmlParserInternal::traverseSubtree(xmlNode * current, GpsFixArray * fixes, string * error) {
+bool KmlParserInternal::traverseSubtree(xmlNode* current,
+                                        GpsFixArray* fixes,
+                                        string* error) {
     for (; current; current = current->next) {
         if (current->name != NULL &&
                 !strcmp((const char *) current->name, "Placemark")) {
@@ -133,7 +142,7 @@ bool KmlParserInternal::traverseSubtree(xmlNode * current, GpsFixArray * fixes, 
             }
         }
     }
-    *error = "";
+    error->clear();
     return true;
 }
 
@@ -156,10 +165,10 @@ bool KmlParser::parseFile(const char * filePath, GpsFixArray * fixes, string * e
         xmlCleanupParser();
         return false;
     }
-    bool wellFormed = KmlParserInternal::traverseSubtree(cur, fixes, error);
+    bool isWellFormed = KmlParserInternal::traverseSubtree(cur, fixes, error);
 
     xmlFreeDoc(doc);
     xmlCleanupParser();
 
-    return wellFormed;
+    return isWellFormed;
 }
