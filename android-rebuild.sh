@@ -115,9 +115,9 @@ elif [ "$HOST_OS" = "Darwin" ]; then
     TARGET_OS=darwin
 else
     EXPECTED_32BIT_FILE_TYPE="ELF 32-bit LSB +executable, Intel 80386"
-    EXPECTED_64BIT_FILE_TYPE="ELF 32-bit LSB +executable, x86-64"
-    EXPECTED_EMULATOR_BITNESS=32
-    EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
+    EXPECTED_64BIT_FILE_TYPE="ELF 64-bit LSB +executable, x86-64"
+    EXPECTED_EMULATOR_BITNESS=64
+    EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
     TARGET_OS=linux
 fi
 
@@ -160,8 +160,8 @@ if [ "$MINGW" ]; then
 fi
 
 if [ "$HOST_OS" = "Linux" ]; then
-    # Linux 32-bit binaries are deprecated but not removed yet!
-    RUN_32BIT_TESTS=true
+    # Linux 32-bit binaries are obsolete.
+    RUN_32BIT_TESTS=
 fi
 
 # Return the minimum OS X version that a Darwin binary targets.
