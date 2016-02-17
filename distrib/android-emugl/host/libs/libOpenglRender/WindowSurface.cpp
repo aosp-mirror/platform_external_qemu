@@ -38,7 +38,9 @@ WindowSurface::WindowSurface(EGLDisplay display,
         mDisplay(display) {}
 
 WindowSurface::~WindowSurface() {
-    s_egl.eglDestroySurface(mDisplay, mSurface);
+    if (mSurface) {
+        s_egl.eglDestroySurface(mDisplay, mSurface);
+    }
 }
 
 WindowSurface *WindowSurface::create(EGLDisplay display,
