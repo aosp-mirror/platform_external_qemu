@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1deff033_438f7ae7",
+        "filename": "android/scripts/build-qt.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-17T21:29:17Z",
+      "side": 1,
+      "message": "perhaps log the sdk version being used, so that we know from the build logs what SDK we built against?\n\nEspecially useful when trying to repro problems with buildserver builds.",
+      "revId": "fb8c16ec6b8c2979df0edb07b54206a42b1cdc27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
