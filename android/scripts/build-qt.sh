@@ -334,9 +334,16 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 var_append LDFLAGS "-Xlinker --build-id"
                 ;;
             darwin*)
+                # '-sdk macosx' without the version forces the use of the latest
+                # one installed on the build machine. To make sure one knows
+                # the verion used, let's dump all sdks
+                echo "The list of the installed OS X SDKs:"
+                xcodebuild -showsdks | grep macosx
+                echo "(using the latest version for the Qt build)"
+
                 var_append EXTRA_CONFIGURE_FLAGS \
                     -no-framework \
-                    -sdk macosx10.9
+                    -sdk macosx
                 var_append CFLAGS -mmacosx-version-min=10.8
                 var_append CXXFLAGS -mmacosx-version-min=10.8
                 var_append LDFLAGS -mmacosx-version-min=10.8
