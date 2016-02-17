@@ -335,8 +335,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 ;;
             darwin*)
                 var_append EXTRA_CONFIGURE_FLAGS \
-                    -no-framework \
-                    -sdk macosx10.9
+                    -no-framework
                 var_append CFLAGS -mmacosx-version-min=10.8
                 var_append CXXFLAGS -mmacosx-version-min=10.8
                 var_append LDFLAGS -mmacosx-version-min=10.8
