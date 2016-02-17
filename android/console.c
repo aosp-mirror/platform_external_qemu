@@ -2310,7 +2310,7 @@ static const CommandDefRec  geo_commands[] =
     { "nmea", "send a GPS NMEA sentence",
     "'geo nema <sentence>' sends an NMEA 0183 sentence to the emulated device, as\r\n"
     "if it came from an emulated GPS modem. <sentence> must begin with '$GP'. Only\r\n"
-    "'$GPGGA' and '$GPRCM' sentences are supported at the moment.\r\n",
+    "'$GPGGA' and '$GPRMC' sentences are supported at the moment.\r\n",
     NULL, do_geo_nmea, NULL },
 
     { "fix", "send a simple GPS fix",
