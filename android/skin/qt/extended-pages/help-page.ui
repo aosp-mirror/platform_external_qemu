@@ -98,7 +98,7 @@
       <rect>
        <x>4</x>
        <y>10</y>
-       <width>138</width>
+       <width>145</width>
        <height>36</height>
       </rect>
      </property>
@@ -109,6 +109,9 @@
        <weight>75</weight>
        <bold>true</bold>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">Text-align:left; padding:3px;</string>
      </property>
      <property name="text">
       <string>DOCUMENTATION</string>
@@ -125,7 +128,7 @@
       <rect>
        <x>4</x>
        <y>50</y>
-       <width>104</width>
+       <width>145</width>
        <height>36</height>
       </rect>
      </property>
@@ -136,6 +139,9 @@
        <weight>75</weight>
        <bold>true</bold>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">Text-align:left; padding:3px;</string>
      </property>
      <property name="text">
       <string>FILE A BUG</string>
@@ -152,7 +158,7 @@
       <rect>
        <x>4</x>
        <y>90</y>
-       <width>134</width>
+       <width>145</width>
        <height>36</height>
       </rect>
      </property>
@@ -163,6 +169,9 @@
        <weight>75</weight>
        <bold>true</bold>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">Text-align:left; padding:3px;</string>
      </property>
      <property name="text">
       <string>SEND FEEDBACK</string>
