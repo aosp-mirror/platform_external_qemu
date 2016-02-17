@@ -22,6 +22,30 @@
       "revId": "38e74ce6965847b01a032823780a48067d90daa6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd7ab832_f72f6b85",
+        "filename": "android/gps.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-02-17T19:09:33Z",
+      "side": 1,
+      "message": "There was a bug that prevented the altitude from being parsed at all.\nWith that fixed, I verified that the field created by \"%.1f\" is parsed correctly.",
+      "parentUuid": "dd7ab832_97d6270a",
+      "range": {
+        "startLine": 114,
+        "startChar": 36,
+        "endLine": 114,
+        "endChar": 39
+      },
+      "revId": "38e74ce6965847b01a032823780a48067d90daa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
