@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fd2a1c13_ceb0a727",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-17T18:48:58Z",
+      "side": 1,
+      "message": "Please refer to the in-flight patch: https://bugreports.qt.io/secure/attachment/53511/QTBUG-48275.patch\n\nsince there are multiple patches on that bug already.",
+      "revId": "66b65ffe4657881a9252be618fb7495279a603a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3d76744b_6b187609",
+        "filename": "android/dependencies/qt-everywhere-opensource-src-5.5.0-patches/0005-Fix-screen-dtor-null-pointer-dereference.patch",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-17T18:48:58Z",
+      "side": 1,
+      "message": "nit: whitespace error.",
+      "revId": "66b65ffe4657881a9252be618fb7495279a603a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
