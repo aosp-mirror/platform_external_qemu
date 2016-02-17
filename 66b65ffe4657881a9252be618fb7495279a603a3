@@ -69,6 +69,24 @@
       "revId": "66b65ffe4657881a9252be618fb7495279a603a3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5d8fa87c_6c25f2ed",
+        "filename": "android/dependencies/qt-everywhere-opensource-src-5.5.0-patches/0005-Fix-screen-dtor-null-pointer-dereference.patch",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-17T20:32:02Z",
+      "side": 1,
+      "message": "No, actually, that\u0027s part of the original file\u0027s context.\n\nNo way we can remove that :/",
+      "parentUuid": "dd7ab832_8afd9e85",
+      "revId": "66b65ffe4657881a9252be618fb7495279a603a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
