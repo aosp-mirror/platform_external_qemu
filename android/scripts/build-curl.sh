@@ -322,7 +322,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
        dump "$(builder_text) Building libcurl"
 
         build_package curl \
-            --disable-debug \
+            --enable-debug \
             --enable-optimize \
             --disable-warnings \
             --disable-werror \
