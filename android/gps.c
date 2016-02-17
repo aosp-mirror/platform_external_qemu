@@ -110,8 +110,8 @@ android_gps_send_location(double latitude, double longitude,
     // Bogus fix quality (1), satellite count, and bogus dilution
     stralloc_add_format( msgStr, ",1,6,");
 
-    // Altitude (to 1 significant digit!) + bogus diff
-    stralloc_add_format( msgStr, ",%.1g,M,0.,M", metersElevation );
+    // Altitude (to 0.1 meter precision) + bogus diff
+    stralloc_add_format( msgStr, ",%.1f,M,0.,M", metersElevation );
 
     // Bogus rest and checksum
     stralloc_add_str( msgStr, ",,,*47" );
