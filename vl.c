@@ -4094,6 +4094,11 @@ int run_qemu_main(int argc, const char **argv)
             case QEMU_OPTION_dns_server:
                 android_op_dns_server = (char*)optarg;
                 break;
+
+            case QEMU_OPTION_list_webcam:
+              android_list_web_cameras();
+              return 0;
+
 #ifdef USE_ANDROID_EMU
             case QEMU_OPTION_http_proxy:
                 op_http_proxy = (char*)optarg;

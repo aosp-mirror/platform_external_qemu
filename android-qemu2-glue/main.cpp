@@ -941,8 +941,6 @@ extern "C" int main(int argc, char **argv) {
         exit(1);
     }
 
-// TODO: imement camera support
-#if 0
     /* Deal with camera emulation */
     if (opts->webcam_list) {
         /* List connected webcameras */
@@ -974,7 +972,6 @@ extern "C" int main(int argc, char **argv) {
         }
         hw->hw_camera_front = ASTRDUP(opts->camera_front);
     }
-#endif
 
     hw->avd_name = ASTRDUP(avdInfo_getName(avd));
 
