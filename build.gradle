@@ -21,7 +21,6 @@ task buildWindowsEmulator(type: BuildEmulator) {
 }
 
 sdk {
-
     common(mac, linux) {
         item('android/avd/hardware-properties.ini') {
             into 'lib'
@@ -43,6 +42,11 @@ sdk {
             into 'qemu'
             builtBy buildDefaultEmulator
         }
+        item("$buildDefaultEmulator.output/build/debug_info/qemu") {
+            into 'qemu'
+            builtBy buildDefaultEmulator
+            debug true
+        }
         item("$buildDefaultEmulator.output/lib") {
             into 'lib'
             builtBy buildDefaultEmulator
@@ -50,6 +54,11 @@ sdk {
         item("$buildDefaultEmulator.output/lib64") {
             into 'lib64'
             builtBy buildDefaultEmulator
+        }
+        item("$buildDefaultEmulator.output/build/debug_info/lib64") {
+            into 'lib64'
+            builtBy buildDefaultEmulator
+            debug true
         }
         item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/bios.bin") {
             into 'lib/pc-bios'
@@ -98,13 +107,28 @@ sdk {
             into 'qemu'
             builtBy buildWindowsEmulator
         }
+        item("$buildWindowsEmulator.output/build/debug_info/qemu") {
+            into 'qemu'
+            builtBy buildWindowsEmulator
+            debug true
+        }
         item("$buildWindowsEmulator.output/lib") {
             into 'lib'
             builtBy buildWindowsEmulator
         }
+        item("$buildWindowsEmulator.output/build/debug_info/lib") {
+            into 'lib'
+            builtBy buildWindowsEmulator
+            debug true
+        }
         item("$buildWindowsEmulator.output/lib64") {
             into 'lib64'
             builtBy buildWindowsEmulator
+        }
+        item("$buildWindowsEmulator.output/build/debug_info/lib64") {
+            into 'lib64'
+            builtBy buildWindowsEmulator
+            debug true
         }
         item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/bios.bin") {
             into 'lib/pc-bios'
@@ -148,3 +172,59 @@ XAV(2014-06-17): DISABLE win64 exe until it's ready
     }
 }
 
+import com.android.tools.internal.sdk.base.PlatformConfig
+import com.android.tools.internal.sdk.base.ToolItem
+import com.google.common.collect.Lists
+// Duplicate 'emulator' executables for debug info paths
+for (PlatformConfig platform : sdk.getPlatforms()) {
+    def itemlist = Lists.newArrayList()
+    for (ToolItem toolitem: platform.getItems()) {
+        if (toolitem.getDebug() || !toolitem.getExecutable()) {
+            continue
+        }
+        def prop = toolitem.properties
+        def itemPath = prop.itemPath
+        if (itemPath instanceof String || itemPath instanceof GString) {
+            def debugItemPath = itemPath
+            def path = debugItemPath.split("/")
+            def s = path[path.size()-1]
+            if (!s.contains("emulator")) {
+                continue
+            }
+            if (platform.getName().equals("win")) {
+                debugItemPath = debugItemPath.replaceFirst("$buildWindowsEmulator.output",
+                                "$buildWindowsEmulator.output/build/debug_info")
+            } else {
+                debugItemPath = debugItemPath.replaceFirst("$buildDefaultEmulator.output",
+                                "$buildDefaultEmulator.output/build/debug_info")
+            }
+            if (debugItemPath.equals(itemPath)) {
+                continue
+            }
+            if (platform.getName().equals("mac")) {
+                debugItemPath += ".dSYM"
+                if (!prop.destinationPath) {
+                    path = debugItemPath.split("/")
+                    prop.destinationPath = path[path.size()-1]
+                }
+
+            }
+            prop.debug=true;
+            prop.remove('itemPath')
+            prop.remove('class')
+            def propcopy = {
+                prop.each { k, v ->
+                    delegate."$k"=v
+                }
+                return debugItemPath
+            }
+            def debugitem = new ToolItem(propcopy)
+            propcopy.delegate = debugitem
+            itemlist.add(debugitem)
+        }
+
+    }
+    for (ToolItem debugitem: itemlist) {
+        platform.getItems().add(debugitem)
+    }
+}
