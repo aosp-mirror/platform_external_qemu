@@ -21,7 +21,6 @@ task buildWindowsEmulator(type: BuildEmulator) {
 }
 
 sdk {
-
     common(mac, linux) {
         item('android/avd/hardware-properties.ini') {
             into 'lib'
@@ -148,3 +147,45 @@ XAV(2014-06-17): DISABLE win64 exe until it's ready
     }
 }
 
+import com.android.tools.internal.sdk.base.PlatformConfig
+import com.android.tools.internal.sdk.base.ToolItem
+import com.google.common.collect.Lists
+for (PlatformConfig platform : sdk.getPlatforms()) {
+    def itemlist = Lists.newArrayList()
+    for (ToolItem toolitem: platform.getItems()) {
+        def prop = toolitem.properties
+        def itemPath = prop.itemPath
+        if (itemPath instanceof String || itemPath instanceof GString) {
+            def debugItemPath = itemPath
+            if (platform.getName().equals("win")) {
+                debugItemPath = debugItemPath.replaceFirst("$buildWindowsEmulator.output",
+                                "$buildWindowsEmulator.output/build/debug_info")
+            } else {
+                debugItemPath = debugItemPath.replaceFirst("$buildDefaultEmulator.output",
+                                "$buildDefaultEmulator.output/build/debug_info")
+            }
+            if (platform.getName().equals("mac") && new File(debugItemPath).isFile()) {
+                debugItemPath += ".dSYM"
+            }
+            if (debugItemPath.equals(itemPath) || ! new File(debugItemPath).exists()) {
+                continue
+            }
+            prop.debug=true;
+            prop.remove('itemPath')
+            prop.remove('class')
+            def propcopy = {
+                prop.each { k, v ->
+                    delegate."$k"=v
+                }
+                return debugItemPath
+            }
+            def debugitem = new ToolItem(propcopy)
+            propcopy.delegate = debugitem
+            itemlist.add(debugitem)
+        }
+
+    }
+    for (ToolItem debugitem: itemlist) {
+        platform.getItems().add(debugitem)
+    }
+}
