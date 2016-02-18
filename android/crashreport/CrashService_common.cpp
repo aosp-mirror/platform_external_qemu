@@ -506,11 +506,10 @@ UserSuggestions::UserSuggestions(google_breakpad::ProcessState* process_state) {
             std::transform(file.begin(), file.end(), file.begin(), ::tolower);
 
             // Should the user update their graphics drivers?
-            // Only allow if the driver appears at the top of the stack
             if (containsGfxPattern(file)) {
                 suggestions.insert(Suggestion::UpdateGfxDrivers);
+                break;
             }
-            break;
         }
     }
 }
