@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5d8968a7_02bd4cdd",
+        "filename": "android/base/TypeUtils.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-18T00:40:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dd7ab832_54619d79",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 1
+      },
+      "revId": "c5155c2d53279804c418c0e820d71e3c9e853886",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9d85a05b_a061a411",
         "filename": "android/skin/qt/event-capturer.cpp",
         "patchSetId": 21
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-17T18:22:35Z",
       "side": 1,
       "message": "(obj) ?",
+      "range": {
+        "startLine": 38,
+        "startChar": 12,
+        "endLine": 38,
+        "endChar": 27
+      },
+      "revId": "c5155c2d53279804c418c0e820d71e3c9e853886",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd993cfa_1cacd5fd",
+        "filename": "android/skin/qt/event-capturer.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-18T00:40:55Z",
+      "side": 1,
+      "message": "Good catch!",
+      "parentUuid": "9d85a05b_a061a411",
       "range": {
         "startLine": 38,
         "startChar": 12,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "dd9478c3_fbd9ef6e",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-18T00:40:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1d71b053_27cf06cf",
+      "revId": "c5155c2d53279804c418c0e820d71e3c9e853886",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dd7ab832_94ee2515",
         "filename": "android/skin/qt/event-serializer.h",
         "patchSetId": 21
@@ -76,6 +142,30 @@
       "writtenOn": "2016-02-17T18:22:35Z",
       "side": 1,
       "message": "*event? it\u0027s never checked for null",
+      "range": {
+        "startLine": 43,
+        "startChar": 36,
+        "endLine": 43,
+        "endChar": 47
+      },
+      "revId": "c5155c2d53279804c418c0e820d71e3c9e853886",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd6504c6_daa265d4",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-18T00:40:55Z",
+      "side": 1,
+      "message": "It shouldn\u0027t be, but added a check",
+      "parentUuid": "dd7ab832_94ee2515",
       "range": {
         "startLine": 43,
         "startChar": 36,
@@ -111,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "5d8968a7_e2eea8d8",
+        "filename": "android/skin/qt/event-subscriber.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-18T00:40:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9d85a05b_e096cc67",
+      "range": {
+        "startLine": 23,
+        "startChar": 21,
+        "endLine": 23,
+        "endChar": 28
+      },
+      "revId": "c5155c2d53279804c418c0e820d71e3c9e853886",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fd2a1c13_ce666727",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 21
@@ -122,6 +236,30 @@
       "writtenOn": "2016-02-17T18:22:35Z",
       "side": 1,
       "message": "you need to always check the result\nif (auto recorder \u003d \u003c\u003e.lock()) {\n   ...\n}",
+      "range": {
+        "startLine": 689,
+        "startChar": 21,
+        "endLine": 689,
+        "endChar": 27
+      },
+      "revId": "c5155c2d53279804c418c0e820d71e3c9e853886",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd6504c6_ba84d135",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 689,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-18T00:40:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fd2a1c13_ce666727",
       "range": {
         "startLine": 689,
         "startChar": 21,
@@ -157,6 +295,30 @@
     },
     {
       "key": {
+        "uuid": "5d8968a7_a20bc076",
+        "filename": "android/skin/qt/tool-window.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-18T00:40:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5d8fa87c_3b64028b",
+      "range": {
+        "startLine": 61,
+        "startChar": 12,
+        "endLine": 61,
+        "endChar": 72
+      },
+      "revId": "c5155c2d53279804c418c0e820d71e3c9e853886",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bd82644f_06ec4a70",
         "filename": "android/skin/qt/ui-event-recorder.h",
         "patchSetId": 21
@@ -180,6 +342,30 @@
     },
     {
       "key": {
+        "uuid": "bd7c2458_22c5eead",
+        "filename": "android/skin/qt/ui-event-recorder.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-18T00:40:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bd82644f_06ec4a70",
+      "range": {
+        "startLine": 49,
+        "startChar": 67,
+        "endLine": 49,
+        "endChar": 72
+      },
+      "revId": "c5155c2d53279804c418c0e820d71e3c9e853886",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9d85a05b_00b2f0c7",
         "filename": "android/skin/qt/ui-event-recorder.h",
         "patchSetId": 21
@@ -191,6 +377,30 @@
       "writtenOn": "2016-02-17T18:22:35Z",
       "side": 1,
       "message": "could you please (1) create a helper function for this line and (2) replace dynamic_cast\u003c\u003e with a static_cast\u003c\u003e as it isn\u0027t checked anyway",
+      "range": {
+        "startLine": 77,
+        "startChar": 19,
+        "endLine": 77,
+        "endChar": 96
+      },
+      "revId": "c5155c2d53279804c418c0e820d71e3c9e853886",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d8b70a4_23ab2ea1",
+        "filename": "android/skin/qt/ui-event-recorder.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-18T00:40:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9d85a05b_00b2f0c7",
       "range": {
         "startLine": 77,
         "startChar": 19,
