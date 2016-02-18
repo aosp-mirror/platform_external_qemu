@@ -32,7 +32,8 @@ ExtendedWindow::ExtendedWindow(
     QFrame(nullptr),
     mEmulatorWindow(eW),
     mToolWindow(tW),
-    mExtendedUi(new Ui::ExtendedControls)
+    mExtendedUi(new Ui::ExtendedControls),
+    mSizeTweaker(this)
 {
     Q_INIT_RESOURCE(resources);
 

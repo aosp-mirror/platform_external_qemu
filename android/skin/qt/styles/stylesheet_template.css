@@ -37,6 +37,7 @@
 *{
     color: %%TEXT_COLOR%%;
     background-color: %%BKG_COLOR%%;
+    font-family: sans;
 }
 QGroupBox::title { margin-top: 4px; margin-left: 0px }
 QPlainTextEdit:disabled, QTextEdit:disabled, QLineEdit:disabled { border: 0px }
@@ -46,11 +47,11 @@ QPlainTextEdit, QTextEdit, QLineEdit {
 }
 QCheckBox::indicator:checked[ColorGroup="Toggle"] {
     image: url(:/%%PATH%%/toggle_on);
-    width: 36px; height: 24px;
+    width: 36; height: 24;
 }
 QCheckBox::indicator:unchecked[ColorGroup="Toggle"] {
     image: url(:/%%PATH%%/toggle_off);
-    width: 36px; height: 24px;
+    width: 36; height: 24;
 }
 QCheckBox::indicator:checked {
     image: url(:/%%PATH%%/check_yes)
@@ -60,7 +61,7 @@ QCheckBox::indicator:unchecked {
 }
 QRadioButton::indicator:unchecked {
     image: url(:/%%PATH%%/radio_off);
-    width: 24; height:24;
+    width: 24; height: 24;
 }
 QRadioButton::indicator:checked {
     image: url(:/%%PATH%%/radio_on);
@@ -100,6 +101,7 @@ QHeaderView::section {
     background: %%TAB_BKG_COLOR%%;
     border: 0px; padding: 16;
     border-bottom: 1 solid %%DIVIDER_COLOR%%;
+    font-size: 
 }
 QScrollBar::vertical {
     background: %%SCROLL_BKG_COLOR%%;
@@ -121,8 +123,8 @@ QComboBox::drop-down { border-left-style: solid; }
 QComboBox::down-arrow {
     image:url(:/%%PATH%%/drop_down);
     border: none;
-    width: 24px;
-    height: 24px;
+    width: 24;
+    height: 24;
 }
 QListView { min-height: 4em }
 QTabWidget::pane {border: none;}
@@ -145,4 +147,3 @@ QTabBar::tab:disabled {
     color: transparent;
     border-bottom: 2px solid transparent
 }
-
