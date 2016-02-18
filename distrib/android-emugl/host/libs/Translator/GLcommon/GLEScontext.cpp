@@ -484,7 +484,7 @@ unsigned int GLEScontext::findMaxIndex(GLsizei count,GLenum type,const GLvoid* i
 
 void GLEScontext::convertIndirect(GLESConversionArrays& cArrs,GLsizei count,GLenum indices_type,const GLvoid* indices,GLenum array_id,GLESpointer* p) {
     GLenum type    = p->getType();
-    int maxElements = findMaxIndex(count,type,indices) + 1;
+    int maxElements = findMaxIndex(count,indices_type,indices) + 1;
 
     int attribSize = p->getSize();
     int size = attribSize * maxElements;
