@@ -10,13 +10,15 @@
   GNU General Public License for more details.
  */
 
-QGroupBox { font-weight: regular; font-size: %%FONT_MEDIUM%%; }
+QGroupBox { font-weight: regular; font-size: 8pt; }
 QComboBox, QLineEdit, QPlainTextEdit, QPushButton, QRadioButton {
     font-weight: regular;
-    font-size: %%FONT_LARGE%%;
+    font-size: 10pt;
 }
 *[ColorGroup="Tool"] {
     font-weight: bold;
-    font-size: %%FONT_MEDIUM%%;
+    font-size: 8pt;
 }
-
+* {
+    font-size: 8pt;
+}
