@@ -55,7 +55,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
       uiEmuAgent(NULL),
       toolsUi(new Ui::ToolControls),
       mPushDialog(this),
-      mInstallDialog(this) {
+      mInstallDialog(this),
+      mSizeTweaker(this) {
     Q_INIT_RESOURCE(resources);
     twInstance = this;
 

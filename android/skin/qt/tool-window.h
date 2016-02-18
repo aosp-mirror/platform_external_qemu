@@ -14,6 +14,7 @@
 
 #include "android/skin/event.h"
 #include "android/skin/qt/extended-window-styles.h"
+#include "android/skin/qt/size-tweaker.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/qt/shortcut-key-store.h"
@@ -114,6 +115,7 @@ private:
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
     bool mIsExtendedWindowActiveOnHide = false;
     QString mDetectedAdbPath;
+    SizeTweaker mSizeTweaker;
 
 private slots:
     void on_back_button_pressed();

@@ -52,6 +52,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/telephony-page.cpp \
     android/skin/qt/extended-pages/virtual-sensors-page.cpp \
     android/skin/qt/extended-window.cpp \
+    android/skin/qt/size-tweaker.cpp \
     android/skin/qt/QtLooper.cpp \
     android/skin/qt/qt-ui-commands.cpp \
     android/skin/qt/stylesheet.cpp \
@@ -75,6 +76,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-pages/telephony-page.h \
     android/skin/qt/extended-pages/virtual-sensors-page.h \
     android/skin/qt/extended-window.h \
+    android/skin/qt/size-tweaker.h \
     android/skin/qt/QtTimerImpl.h \
     android/skin/qt/tool-window.h \
 

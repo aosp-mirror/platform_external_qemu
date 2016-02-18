@@ -300,6 +300,9 @@
    <property name="columnCount">
     <number>6</number>
    </property>
+   <attribute name="horizontalHeaderCascadingSectionResizes">
+    <bool>true</bool>
+   </attribute>
    <attribute name="horizontalHeaderStretchLastSection">
     <bool>true</bool>
    </attribute>
@@ -319,7 +322,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignRight|AlignVCenter</set>
+     <set>AlignTrailing|AlignVCenter</set>
     </property>
    </column>
    <column>
@@ -334,7 +337,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignRight|AlignVCenter</set>
+     <set>AlignTrailing|AlignVCenter</set>
     </property>
    </column>
    <column>
@@ -349,7 +352,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignRight|AlignVCenter</set>
+     <set>AlignTrailing|AlignVCenter</set>
     </property>
    </column>
    <column>
@@ -364,7 +367,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignRight|AlignVCenter</set>
+     <set>AlignTrailing|AlignVCenter</set>
     </property>
    </column>
    <column>
@@ -379,7 +382,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignRight|AlignVCenter</set>
+     <set>AlignTrailing|AlignVCenter</set>
     </property>
    </column>
    <column>
@@ -394,7 +397,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignRight|AlignVCenter</set>
+     <set>AlignTrailing|AlignVCenter</set>
     </property>
    </column>
   </widget>
