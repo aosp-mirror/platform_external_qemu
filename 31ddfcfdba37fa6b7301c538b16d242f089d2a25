@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fd993cfa_5ffd6f59",
+        "filename": "android/skin/qt/ui-event-recorder.h",
+        "patchSetId": 22
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-18T01:22:52Z",
+      "side": 1,
+      "message": "copy-pased",
+      "range": {
+        "startLine": 103,
+        "startChar": 64,
+        "endLine": 103,
+        "endChar": 76
+      },
+      "revId": "31ddfcfdba37fa6b7301c538b16d242f089d2a25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
