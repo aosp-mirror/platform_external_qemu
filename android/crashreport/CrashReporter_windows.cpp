@@ -92,20 +92,28 @@ public:
 
     void writeDump() override { mHandler->WriteMinidump(); }
 
-    static bool exceptionFilterCallback(void* context,
-                                        EXCEPTION_POINTERS*,
-                                        MDRawAssertionInfo*);
-
 private:
+    static bool exceptionFilterCallback(
+        void*,
+        EXCEPTION_POINTERS*,
+        MDRawAssertionInfo*);
+
+    bool onCrashPlatformSpecific() override;
+
     std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
 };
 
 ::android::base::LazyInstance<HostCrashReporter> sCrashReporter =
         LAZY_INSTANCE_INIT;
 
-bool HostCrashReporter::exceptionFilterCallback(void*,
-                                                EXCEPTION_POINTERS*,
-                                                MDRawAssertionInfo*) {
+bool HostCrashReporter::exceptionFilterCallback(
+    void*,
+    EXCEPTION_POINTERS*,
+    MDRawAssertionInfo*) {
+    return CrashReporter::get()->onCrash();
+}
+
+bool HostCrashReporter::onCrashPlatformSpecific() {
     // collect the memory usage at the time of the crash
     PROCESS_MEMORY_COUNTERS_EX memCounters = {sizeof(memCounters)};
     if (::GetProcessMemoryInfo(::GetCurrentProcess(),

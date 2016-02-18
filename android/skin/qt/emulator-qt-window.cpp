@@ -40,6 +40,7 @@
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/event-serializer.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/winsys-qt.h"
 #include "android/ui-emu-agent.h"
@@ -88,7 +89,10 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
                           "We strongly recommend creating a new AVD."),
                        QMessageBox::Ok,
                        this),
-        mFirstShowEvent(true)
+        mFirstShowEvent(true),
+        mEventLogger(new UIEventRecorder<android::base::CircularBuffer>(
+            &mEventCapturer,
+            android::base::CircularBuffer<EventRecord>(1000)))
 {
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
@@ -103,7 +107,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     mBackingSurface = NULL;
     mBatteryState = NULL;
 
-    mToolWindow = new ToolWindow(this, &mContainer);
+    mToolWindow = new ToolWindow(this, &mContainer, mEventLogger);
 
     this->setAcceptDrops(true);
 
@@ -153,6 +157,22 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
             settings.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool());
 
     initErrorDialog(this);
+    setObjectName("MainWindow");
+    mEventLogger->startRecording(this);
+    mEventLogger->startRecording(mToolWindow);
+
+    // The crash reporter will dump the last 1000 UI events.
+    // mEventLogger is a shared pointer, capturing its copy
+    // inside a lambda ensures that it lives on as long as
+    // CrashReporter needs it, even if EmulatorQtWindow is
+    // destroyed.
+    auto event_logger = mEventLogger;
+    android::crashreport::CrashReporter::get()->setCrashCallback(
+        [event_logger]() {
+            android::crashreport::CrashReporter::get()
+                ->attachData("recent-ui-actions.txt",
+                             serializeEvents(event_logger->container()));
+        });
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr()

@@ -72,6 +72,8 @@ public:
     static bool exceptionFilterCallback(void* context);
 
 private:
+    bool onCrashPlatformSpecific() override;
+
     std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
 };
 
@@ -79,6 +81,10 @@ private:
         LAZY_INSTANCE_INIT;
 
 bool HostCrashReporter::exceptionFilterCallback(void*) {
+    return CrashReporter::get()->onCrash();
+}
+
+bool HostCrashReporter::onCrashPlatformSpecific() {
     // collect the memory usage at the time of the crash
     crashhandler_copy_attachment(
                 CrashReporter::kProcessMemoryInfoFileName, "/proc/self/status");

@@ -83,6 +83,7 @@ ExtendedWindow::ExtendedWindow(
 
     move(mEmulatorWindow->geometry().right() + 40,
          mEmulatorWindow->geometry().top()   + 40 );
+    setObjectName("ExtendedControls");
 }
 
 void ExtendedWindow::showPane(ExtendedWindowPane pane) {
