@@ -20,6 +20,7 @@
 #include "android/settings-agent.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/shortcut-key-store.h"
+#include "android/skin/qt/size-tweaker.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/ui-emu-agent.h"
@@ -84,5 +85,6 @@ private:
     const ShortcutKeyStore<QtUICommand>* mQtUIShortcuts;
     Ui::ExtendedControls *mExtendedUi;
     bool mFirstShowEvent = true;
+    SizeTweaker mSizeTweaker;
 };
 
