@@ -21,8 +21,11 @@ task buildWindowsEmulator(type: BuildEmulator) {
 }
 
 sdk {
-
     common(mac, linux) {
+        item("$buildDefaultEmulator.output/build/debug_info") {
+            debug true
+            builtBy buildDefaultEmulator
+        }
         item('android/avd/hardware-properties.ini') {
             into 'lib'
             notice null
@@ -80,6 +83,11 @@ sdk {
     }
 
     windows {
+        item("$buildDefaultEmulator.output/build/debug") {
+            debug true
+            builtBy buildWindowsEmulator
+        }
+
         item('android/avd/hardware-properties.ini') {
             into 'lib'
             notice null
