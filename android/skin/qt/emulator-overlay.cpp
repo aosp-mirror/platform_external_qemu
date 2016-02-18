@@ -24,7 +24,9 @@ EmulatorOverlay::EmulatorOverlay(EmulatorQtWindow* window,
       mCursor(":/cursor/zoom_cursor"),
       mMultitouchCenter(-1, -1),
       mPrimaryTouchPoint(-1, -1),
+      mSecondaryTouchPoint(-1, -1),
       mReleaseOnClose(false),
+      mLerpValue(1),
       mFlashValue(0),
       mMode(OverlayMode::Hidden) {
     setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
@@ -62,9 +64,15 @@ EmulatorOverlay::EmulatorOverlay(EmulatorQtWindow* window,
     mFlashAnimation.setEndValue(0);
     mFlashAnimation.setEasingCurve(QEasingCurve::Linear);
     QObject::connect(&mFlashAnimation, SIGNAL(finished()), this,
-                     SLOT(slot_animationFinished()));
+                     SLOT(slot_flashAnimationFinished()));
     QObject::connect(&mFlashAnimation, SIGNAL(valueChanged(QVariant)), this,
-                     SLOT(slot_animationValueChanged(QVariant)));
+                     SLOT(slot_flashAnimationValueChanged(QVariant)));
+
+    mTouchPointAnimation.setStartValue(0);
+    mTouchPointAnimation.setEndValue(250);
+    mTouchPointAnimation.setEasingCurve(QEasingCurve::OutQuint);
+    QObject::connect(&mTouchPointAnimation, SIGNAL(valueChanged(QVariant)),
+                     this, SLOT(slot_animationValueChanged(QVariant)));
 }
 
 EmulatorOverlay::~EmulatorOverlay() {}
@@ -99,18 +107,10 @@ void EmulatorOverlay::mouseMoveEvent(QMouseEvent* event) {
                         .normalized()
                         .intersected(QRect(0, 0, width(), height())));
     } else if (mMode == OverlayMode::Multitouch) {
-        mPrimaryTouchPoint = event->pos();
+        mLastMousePos = event->pos();
+        updateTouchPoints(event);
         update();
-
-        if (event->buttons() & Qt::LeftButton) {
-            mEmulatorWindow->handleMouseEvent(
-                    kEventMouseMotion, kMouseButtonLeft, mPrimaryTouchPoint);
-            mEmulatorWindow->handleMouseEvent(kEventMouseMotion,
-                                              kMouseButtonSecondaryTouch,
-                                              getSecondaryTouchPoint());
-        } else if (event->buttons() & Qt::RightButton) {
-            updateMultitouchCenter(event->pos());
-        }
+        generateTouchEvents(event);
     }
 }
 
@@ -124,19 +124,9 @@ void EmulatorOverlay::mousePressEvent(QMouseEvent* event) {
             showErrorDialog(tr("Your virtual device is not configured for "
                                "multi-touch input."),
                             tr("Multi-touch"));
-        } else if (event->button() == Qt::LeftButton) {
-            mPrimaryTouchPoint = event->pos();
+        } else {
             mReleaseOnClose = true;
-            update();
-
-            mEmulatorWindow->handleMouseEvent(kEventMouseButtonDown,
-                                              kMouseButtonLeft,
-                                              mPrimaryTouchPoint);
-            mEmulatorWindow->handleMouseEvent(kEventMouseButtonDown,
-                                              kMouseButtonSecondaryTouch,
-                                              getSecondaryTouchPoint());
-        } else if (event->button() == Qt::RightButton) {
-            updateMultitouchCenter(event->pos());
+            generateTouchEvents(event);
         }
     }
 }
@@ -182,16 +172,7 @@ void EmulatorOverlay::mouseReleaseEvent(QMouseEvent* event) {
         }
         mRubberBand.hide();
     } else if (mMode == OverlayMode::Multitouch) {
-        if (event->button() == Qt::LeftButton) {
-            mPrimaryTouchPoint = event->pos();
-            mReleaseOnClose = false;
-            mEmulatorWindow->handleMouseEvent(
-                    kEventMouseButtonUp, kMouseButtonLeft, mPrimaryTouchPoint);
-            mEmulatorWindow->handleMouseEvent(kEventMouseButtonUp,
-                                              kMouseButtonSecondaryTouch,
-                                              getSecondaryTouchPoint());
-            update();
-        }
+        generateTouchEvents(event);
     }
 }
 
@@ -223,33 +204,41 @@ void EmulatorOverlay::paintEvent(QPaintEvent* e) {
     painter.fillRect(bg, QColor(255, 255, 255, alpha));
 
     if (mMode == OverlayMode::Multitouch) {
+        double lerpValue = mIsSwipeGesture ? 1.0 - mLerpValue : mLerpValue;
+        QPoint primaryPoint = lerpValue * primaryPinchPoint() +
+                              (1.0 - lerpValue) * primarySwipePoint();
+        QPoint secondaryPoint = lerpValue * secondaryPinchPoint() +
+                                (1.0 - lerpValue) * secondaryTouchPoint();
+
+        painter.translate(-mTouchPointRadius / 2, -mTouchPointRadius / 2);
+        painter.drawImage(primaryPoint, mTouchImage);
+        painter.drawImage(secondaryPoint, mTouchImage);
+        painter.resetTransform();
+
+        painter.setOpacity(lerpValue);
         painter.translate(-mCenterPointRadius / 2, -mCenterPointRadius / 2);
         painter.drawImage(mMultitouchCenter, mCenterImage);
         painter.resetTransform();
 
-        painter.translate(-mTouchPointRadius / 2, -mTouchPointRadius / 2);
-        painter.drawImage(mPrimaryTouchPoint, mTouchImage);
-        painter.drawImage(getSecondaryTouchPoint(), mTouchImage);
-        painter.resetTransform();
-
-        painter.setOpacity(.67);
+        painter.setOpacity(.67 * lerpValue);
         painter.setPen(QPen(QColor("#00BEA4")));
 
-        QLineF lineToPrimary =
-                QLineF(QPoint(), mPrimaryTouchPoint - mMultitouchCenter);
-        if (lineToPrimary.length() > mTouchPointRadius) {
+        QLineF lineToOne = QLineF(QPoint(), primaryPoint - mMultitouchCenter);
+        if (lineToOne.length() > mTouchPointRadius) {
             QPointF delta =
-                    (lineToPrimary.unitVector().p2() * (mTouchPointRadius / 2));
-            painter.drawLine(QLineF(mMultitouchCenter + delta,
-                                    mPrimaryTouchPoint - delta));
-            painter.drawLine(QLineF(mMultitouchCenter - delta,
-                                    getSecondaryTouchPoint() + delta));
+                    (lineToOne.unitVector().p2() * (mTouchPointRadius / 2));
+            painter.drawLine(
+                    QLineF(mMultitouchCenter + delta, primaryPoint - delta));
+        }
+
+        QLineF lineToTwo = QLineF(QPoint(), secondaryPoint - mMultitouchCenter);
+        if (lineToTwo.length() > mTouchPointRadius) {
+            QPointF delta =
+                    (lineToTwo.unitVector().p2() * (mTouchPointRadius / 2));
+            painter.drawLine(
+                    QLineF(mMultitouchCenter + delta, secondaryPoint - delta));
         }
     }
-}
-
-void EmulatorOverlay::resizeEvent(QResizeEvent* event) {
-    mMultitouchCenter = QPoint(width() / 2, height() / 2);
 }
 
 void EmulatorOverlay::showEvent(QShowEvent* event) {
@@ -275,21 +264,27 @@ void EmulatorOverlay::showForMultitouch() {
     if (mMode != OverlayMode::Hidden)
         return;
 
+    QPoint mousePosition = mapFromGlobal(QCursor::pos());
+    if (!QRect(QPoint(), size()).contains(mousePosition))
+        return;
+
     // Show and render the frame once before the mode is changed.
     // This ensures that the first frame of the overlay that is rendered *does
-    // not* show
-    // the center point, as this has adverse effects on OSX (it seems to corrupt
-    // the alpha
-    // portion of the color buffer, leaving the original location of the point
-    // with a
-    // different alpha, resulting in a shadow).
+    // not* show the center point, as this has adverse effects on OSX (it seems
+    // to corrupt the alpha portion of the color buffer, leaving the original
+    // location of the point with a different alpha, resulting in a shadow).
     show();
     update();
 
     mMode = OverlayMode::Multitouch;
     setCursor(Qt::ArrowCursor);
     setMouseTracking(true);
-    mPrimaryTouchPoint = mapFromGlobal(QCursor::pos());
+
+    mPrimaryTouchPoint = mousePosition;
+    mSecondaryTouchPoint = mousePosition;
+    mLastMousePos = mousePosition;
+    mIsSwipeGesture = false;
+    updateMultitouchCenter(mousePosition);
 }
 
 void EmulatorOverlay::showForZoom() {
@@ -314,22 +309,55 @@ void EmulatorOverlay::hide() {
 
         mEmulatorWindow->handleMouseEvent(kEventMouseButtonUp,
                                           kMouseButtonSecondaryTouch,
-                                          getSecondaryTouchPoint());
+                                          mSecondaryTouchPoint);
         mReleaseOnClose = false;
     }
 }
 
-void EmulatorOverlay::slot_animationFinished() {
+void EmulatorOverlay::slot_flashAnimationFinished() {
     hideForFlash();
 }
 
-void EmulatorOverlay::slot_animationValueChanged(const QVariant& value) {
+void EmulatorOverlay::slot_flashAnimationValueChanged(const QVariant& value) {
     mFlashValue = value.toDouble() / mFlashAnimation.startValue().toDouble();
     repaint();
 }
 
-QPoint EmulatorOverlay::getSecondaryTouchPoint() const {
-    return mPrimaryTouchPoint + 2 * (mMultitouchCenter - mPrimaryTouchPoint);
+void EmulatorOverlay::slot_animationValueChanged(const QVariant& value) {
+    mLerpValue = value.toDouble() / mTouchPointAnimation.endValue().toDouble();
+    repaint();
+}
+
+void EmulatorOverlay::generateTouchEvents(QMouseEvent* event) {
+    SkinEventType eventType = (SkinEventType)0;
+
+    if (event->type() == QMouseEvent::MouseButtonPress) {
+        if (event->button() == Qt::RightButton) {
+            mLerpValue = 0.0;
+            mIsSwipeGesture = true;
+            mTouchPointAnimation.start();
+            updateTouchPoints(event);
+        }
+        eventType = kEventMouseButtonDown;
+    } else if (event->type() == QMouseEvent::MouseButtonRelease) {
+        if (event->button() == Qt::RightButton) {
+            mLerpValue = 0.0;
+            mIsSwipeGesture = false;
+            mMultitouchCenter = event->pos();
+            mTouchPointAnimation.start();
+            updateTouchPoints(event);
+        }
+        eventType = kEventMouseButtonUp;
+    } else if (event->type() == QMouseEvent::MouseMove) {
+        eventType = kEventMouseMotion;
+    }
+
+    if (eventType) {
+        mEmulatorWindow->handleMouseEvent(eventType, kMouseButtonLeft,
+                                          mPrimaryTouchPoint);
+        mEmulatorWindow->handleMouseEvent(eventType, kMouseButtonSecondaryTouch,
+                                          mSecondaryTouchPoint);
+    }
 }
 
 void EmulatorOverlay::updateMultitouchCenter(const QPoint& pos) {
@@ -337,4 +365,30 @@ void EmulatorOverlay::updateMultitouchCenter(const QPoint& pos) {
         mMultitouchCenter = pos;
         update();
     }
+}
+
+void EmulatorOverlay::updateTouchPoints(QMouseEvent* event) {
+    if (!mIsSwipeGesture) {
+        mPrimaryTouchPoint = primaryPinchPoint();
+        mSecondaryTouchPoint = secondaryPinchPoint();
+    } else {
+        mPrimaryTouchPoint = primarySwipePoint();
+        mSecondaryTouchPoint = secondaryTouchPoint();
+    }
+}
+
+QPoint EmulatorOverlay::primaryPinchPoint() const {
+    return mLastMousePos;
+}
+
+QPoint EmulatorOverlay::secondaryPinchPoint() const {
+    return mLastMousePos + 2 * (mMultitouchCenter - mLastMousePos);
+}
+
+QPoint EmulatorOverlay::primarySwipePoint() const {
+    return mLastMousePos + QPoint(width() * .1, 0);
+}
+
+QPoint EmulatorOverlay::secondaryTouchPoint() const {
+    return mLastMousePos - QPoint(width() * .1, 0);
 }
