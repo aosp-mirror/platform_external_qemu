@@ -123,7 +123,6 @@ private:
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
     bool mIsExtendedWindowActiveOnHide = false;
     QString mDetectedAdbPath;
-    std::weak_ptr<UIEventRecorder<android::base::CircularBuffer>> mUIEventRecorder;
     SizeTweaker mSizeTweaker;
 
 private slots:
