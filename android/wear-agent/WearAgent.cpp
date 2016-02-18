@@ -118,6 +118,8 @@ private:
     bool expectMsg() const { return MESSAGE == mExpectReplayType; }
     static bool isValidHexNumber(const char* str, const int sz);
     static void parseAdbDevices(char* buf, StringVector* devices);
+
+    DISALLOW_COPY_ASSIGN_AND_MOVE(WearAgentImpl);
 };
 
 // This callback is called whenever an I/O event happens on the socket
