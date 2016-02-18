@@ -92,8 +92,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         mFirstShowEvent(true),
         mEventLogger(new UIEventRecorder<android::base::CircularBuffer>(
             &mEventCapturer,
-            android::base::CircularBuffer<EventRecord>(1000)))
-{
+            android::base::CircularBuffer<EventRecord>(1000))) {
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
     // pop-up to let the user know we're still
