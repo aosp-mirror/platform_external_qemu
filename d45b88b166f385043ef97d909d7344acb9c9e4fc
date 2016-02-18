@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c23655de_9bb0f70a",
+        "filename": "android/base/threads/Thread_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-18T23:32:03Z",
+      "side": 1,
+      "message": "Do we really want to do this?\n\nThere are two problems with this:\n- Nothing\u0027s necessarily told the thread that the Thread object is being deleted, so it may not end at all.\n  - I agree that it\u0027s a programming error if that happens, but this will end up being a flakily failing assert, which will also manifest as a flaky delay in the emulator quitting (for instance).\n- The posix impl needs to also be updated to match this expectation.",
+      "range": {
+        "startLine": 52,
+        "startChar": 8,
+        "endLine": 52,
+        "endChar": 64
+      },
+      "revId": "d45b88b166f385043ef97d909d7344acb9c9e4fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2d2d5e6_d2452490",
+        "filename": "android/base/threads/Thread_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-18T23:32:03Z",
+      "side": 1,
+      "message": "mStarted should not be reset.\n\nThis object is one time use only. (the header say so, the linux impl is not safe to use multiple times either, and I\u0027d rather not change this right now), so if you try starting, but fail, you\u0027re done.",
+      "range": {
+        "startLine": 69,
+        "startChar": 8,
+        "endLine": 69,
+        "endChar": 16
+      },
+      "revId": "d45b88b166f385043ef97d909d7344acb9c9e4fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
