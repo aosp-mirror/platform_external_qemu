@@ -99,13 +99,13 @@ QHash<QString, QString> darkValues {
 };
 
 QHash<QString, QString> hiDensityValues {
-    {"FONT_MEDIUM", "12px"},
-    {"FONT_LARGE", "14px"},
+    {"FONT_MEDIUM", "8pt"},
+    {"FONT_LARGE", "10pt"},
 };
 
 QHash<QString, QString> loDensityValues {
-    {"FONT_MEDIUM", "10px"},
-    {"FONT_LARGE", "12px"},
+    {"FONT_MEDIUM", "8pt"},
+    {"FONT_LARGE", "10pt"},
 };
 
 // Encapsulates parsing a stylesheet template and generating a stylesheet
