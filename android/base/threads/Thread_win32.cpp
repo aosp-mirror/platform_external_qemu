@@ -17,6 +17,8 @@
 #include "android/base/Log.h"
 #include "android/base/threads/ThreadStore.h"
 
+#include <assert.h>
+
 namespace android {
 namespace base {
 
@@ -46,7 +48,8 @@ Thread::Thread(ThreadFlags flags) :
 }
 
 Thread::~Thread() {
-    if(mThread != INVALID_HANDLE_VALUE) {
+    if (mThread) {
+        assert(WaitForSingleObject(mThread, 0) != WAIT_TIMEOUT);
         CloseHandle(mThread);
     }
     DeleteCriticalSection(&mLock);
@@ -62,10 +65,9 @@ bool Thread::start() {
     mStarted = true;
     mThread = CreateThread(NULL, 0, &Thread::thread_main, this, 0, &mThreadId);
     if (!mThread) {
+        // don't reset mStarted here: we're artifically limiting the user's
+        // ability to retry the failed starts here.
         ret = false;
-        // We _do not_ need to guard this access to |mFinished| because we're
-        // sure that the launched thread failed, so there can't be parallel
-        // access.
         mFinished = false;
     }
     return ret;
@@ -108,13 +110,11 @@ bool Thread::tryWait(intptr_t* exitStatus) {
 
 // static
 DWORD WINAPI Thread::thread_main(void *arg) {
-    intptr_t ret;
-
     {
         // no need to call maskAllSignals() here: we know
         // that on Windows it's a noop
         Thread* self = reinterpret_cast<Thread*>(arg);
-        ret = self->main();
+        auto ret = self->main();
 
         EnterCriticalSection(&self->mLock);
         self->mFinished = true;
@@ -129,7 +129,7 @@ DWORD WINAPI Thread::thread_main(void *arg) {
     ::android::base::ThreadStoreBase::OnThreadExit();
 
     // This return value is ignored.
-    return static_cast<DWORD>(NULL);
+    return 0;
 }
 
 // static

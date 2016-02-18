@@ -99,7 +99,7 @@ private:
 #ifdef _WIN32
     static DWORD WINAPI thread_main(void* arg);
 
-    HANDLE mThread = INVALID_HANDLE_VALUE;
+    HANDLE mThread = nullptr;
     DWORD mThreadId = 0;
     CRITICAL_SECTION mLock;
 #else // !WIN32

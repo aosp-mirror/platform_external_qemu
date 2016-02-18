@@ -17,6 +17,7 @@
 #include "android/base/Log.h"
 #include "android/base/threads/ThreadStore.h"
 
+#include <assert.h>
 #include <signal.h>
 #include <stdio.h>
 
@@ -50,6 +51,7 @@ Thread::Thread(ThreadFlags flags) :
 }
 
 Thread::~Thread() {
+    assert(!mStarted || mFinished);
     pthread_mutex_destroy(&mLock);
 }
 
