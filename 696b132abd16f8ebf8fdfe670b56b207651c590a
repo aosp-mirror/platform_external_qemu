@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2b0b90b_7b6b7f5f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-02-19T23:22:59Z",
+      "side": 1,
+      "message": "in general, don\u0027t put link into internal gerrit in aosp gerrit :)",
+      "revId": "696b132abd16f8ebf8fdfe670b56b207651c590a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
