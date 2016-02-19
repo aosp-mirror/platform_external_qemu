@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "62b849a7_10cf2a2a",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-19T21:58:23Z",
+      "side": 1,
+      "message": "the comment about mac has to go here, not into the header",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 16
+      },
+      "revId": "541b136343a2eb074af44919c37be7ca8dd13028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_1af91d6d",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-19T21:58:23Z",
+      "side": 1,
+      "message": "on mac we\u0027ll get a bunch of warnings about unused functions :(",
+      "range": {
+        "startLine": 66,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 6
+      },
+      "revId": "541b136343a2eb074af44919c37be7ca8dd13028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_b8b2395e",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-19T21:58:23Z",
+      "side": 1,
+      "message": "I\u0027d prefer some hardcoded epsilon here, as this one is just a smallest increment to 1.0 - which isn\u0027t really relevant to what you\u0027re checking",
+      "range": {
+        "startLine": 125,
+        "startChar": 8,
+        "endLine": 125,
+        "endChar": 72
+      },
+      "revId": "541b136343a2eb074af44919c37be7ca8dd13028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2981592_a2f43e3a",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-19T21:58:23Z",
+      "side": 1,
+      "message": "\u003e\u003eThe qobject_cast() function behaves similarly to the standard C++ dynamic_cast(), with the advantages that it doesn\u0027t require RTTI support and it works across dynamic library boundaries.",
+      "range": {
+        "startLine": 143,
+        "startChar": 12,
+        "endLine": 143,
+        "endChar": 24
+      },
+      "revId": "541b136343a2eb074af44919c37be7ca8dd13028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_786b815f",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-19T21:58:23Z",
+      "side": 1,
+      "message": "is there any way to tell qt \"i\u0027m going to do a bunch of moves, please don\u0027t redraw until I\u0027m done\"?",
+      "range": {
+        "startLine": 159,
+        "startChar": 11,
+        "endLine": 159,
+        "endChar": 15
+      },
+      "revId": "541b136343a2eb074af44919c37be7ca8dd13028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_38650989",
+        "filename": "android/skin/qt/styles/fonts_stylesheet_template.css",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-19T21:58:23Z",
+      "side": 1,
+      "message": "can we change the substitution values instead?",
+      "range": {
+        "startLine": 13,
+        "startChar": 45,
+        "endLine": 13,
+        "endChar": 48
+      },
+      "revId": "541b136343a2eb074af44919c37be7ca8dd13028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
