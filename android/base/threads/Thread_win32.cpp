@@ -49,7 +49,7 @@ Thread::Thread(ThreadFlags flags) :
 
 Thread::~Thread() {
     if (mThread) {
-        assert(WaitForSingleObject(mThread, 0) != WAIT_TIMEOUT);
+        assert(!mStarted || mFinished);
         CloseHandle(mThread);
     }
     DeleteCriticalSection(&mLock);
