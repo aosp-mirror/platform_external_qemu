@@ -22,6 +22,30 @@
       "revId": "c9bebffbf0afa9cc3b28913a02d2b8ea4132f14b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22aad153_859f62d6",
+        "filename": "android/metrics/metrics_reporter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-19T00:17:40Z",
+      "side": 1,
+      "message": "it is a noop in release, and it\u0027s just about stating the assumptions. Currently, if androidMetrics_getMetricsFilePath() returns not null, file flusher is also not null. I want it to break at the very moment when someone changes that and tries to test it",
+      "parentUuid": "a2d5e1d0_31d4b0bd",
+      "range": {
+        "startLine": 245,
+        "startChar": 4,
+        "endLine": 245,
+        "endChar": 32
+      },
+      "revId": "c9bebffbf0afa9cc3b28913a02d2b8ea4132f14b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
