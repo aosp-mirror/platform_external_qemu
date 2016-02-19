@@ -337,6 +337,9 @@ static void goldfish_fb_update_display(void *opaque)
         }
 
         ymin = 0;
+        // with -gpu on, the following check and return will save 2%
+        // CPU time on OSX; saving on other platforms may differ.
+        if (android_display_use_host_gpu) return;
         framebuffer_update_display(ds, address_space, s->fb_base,
                                    src_width, src_height,
                                    src_width * source_bytes_per_pixel,
