@@ -36,6 +36,9 @@
 #endif
 
 #include <memory>
+
+#include <assert.h>
+
 #define mwarning(fmt, ...) \
     dwarning("%s:%d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
@@ -197,25 +200,23 @@ ABool androidMetrics_write(const AndroidMetrics* androidMetrics) {
 
 // Not static, exposed to tests ONLY.
 ABool androidMetrics_tick() {
-    int success;
+    bool success = false;
     AndroidMetrics metrics;
 
     androidMetrics_init(&metrics);
-    if (!androidMetrics_read(&metrics)) {
-        return 0;
+    if (androidMetrics_read(&metrics)) {
+        ++metrics.tick;
+
+        const auto times = System::get()->getProcessTimes();
+        metrics.user_time = times.userMs;
+        metrics.system_time = times.systemMs;
+        metrics.wallclock_time = times.wallClockMs;
+
+        metrics.exit_started =
+                android::crashreport::CrashReporter::get()->isInExitMode();
+
+        success = androidMetrics_write(&metrics);
     }
-
-    ++metrics.tick;
-
-    const auto times = System::get()->getProcessTimes();
-    metrics.user_time = times.userMs;
-    metrics.system_time = times.systemMs;
-    metrics.wallclock_time = times.wallClockMs;
-
-    metrics.exit_started =
-            android::crashreport::CrashReporter::get()->isInExitMode();
-
-    success = androidMetrics_write(&metrics);
     androidMetrics_fini(&metrics);
     return success;
 }
@@ -227,6 +228,10 @@ static void on_metrics_timer(void* ignored, LoopTimer* timer) {
 
 ABool androidMetrics_keepAlive(Looper* metrics_looper,
                                int control_console_port) {
+    if (!androidMetrics_getMetricsFilePath()) {
+        return false;
+    }
+
     ABool success = 1;
 
     success &= androidMetrics_tick();
@@ -234,6 +239,10 @@ ABool androidMetrics_keepAlive(Looper* metrics_looper,
     // Initialize a timer for recurring metrics update
     metrics_timer = loopTimer_new(metrics_looper, &on_metrics_timer, NULL);
     loopTimer_startRelative(metrics_timer, metrics_timer_timeout_ms);
+
+    // Make sure we've got the metrics file before creating an object the sole
+    // purpose of which writing some metrics there
+    assert(sMetricsFileFlusher);
 
     auto emulatorName = android::base::StringFormat(
             "emulator-%d", control_console_port);
@@ -264,8 +273,8 @@ ABool androidMetrics_seal() {
     if (success) {
         metrics.is_dirty = 0;
         success = androidMetrics_write(&metrics);
-        androidMetrics_fini(&metrics);
     }
+    androidMetrics_fini(&metrics);
 
     // Must go before the inifile is cleaned up.
     sAdbLivenessChecker.reset();
@@ -381,8 +390,8 @@ ABool androidMetrics_tryReportAll() {
                 if (metrics.tick > 0) {
                     upload_success = uploader_function(&metrics);
                 }
-                androidMetrics_fini(&metrics);
             }
+            androidMetrics_fini(&metrics);
             success &= upload_success;
             if (upload_success) {
                 ++num_uploads;
@@ -405,8 +414,8 @@ ABool androidMetrics_tryReportAll() {
         if (androidMetrics_read(&metrics)) {
             metrics.num_failed_reports = num_reports - num_uploads;
             androidMetrics_write(&metrics);
-            androidMetrics_fini(&metrics);
         }
+        androidMetrics_fini(&metrics);
     }
     VERBOSE_PRINT(init, "metrics: Processed %d reports.", num_reports);
     VERBOSE_PRINT(init, "metrics: Uploaded %d reports successfully.",
