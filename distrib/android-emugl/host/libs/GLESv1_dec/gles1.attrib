@@ -76,7 +76,7 @@ glBufferData
 #void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, GLvoid *data)
 glBufferSubData
 	dir data in
-	len data size
+	len data size nullAllowed
 
 #void glClipPlanex(GLenum plane, GLfixed *eqn)
 glClipPlanex
@@ -96,7 +96,7 @@ glCompressedTexImage2D
 
 #void glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, GLvoid *data)
 glCompressedTexSubImage2D
-	len data imageSize
+	len data imageSize nullAllowed
 
 #void glDeleteBuffers(GLsizei n, GLuint *buffers)
 glDeleteBuffers
@@ -254,7 +254,7 @@ glTexParameterxv
 #void glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *pixels)
 glTexSubImage2D
 	len pixels glesv1_enc::pixelDataSize(self, width, height, format, type, 0)
-        var_flag pixels isLarge
+        var_flag pixels nullAllowed isLarge
 
 #void glVertexPointer(GLint size, GLenum type, GLsizei stride, GLvoid *pointer)
 # we treat the pointer as an offset to a VBO
