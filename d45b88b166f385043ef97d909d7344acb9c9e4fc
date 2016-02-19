@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "82b53dae_088aa708",
+        "filename": "android/base/threads/Thread_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-19T00:14:13Z",
+      "side": 1,
+      "message": "1. if thread isn\u0027t done at this point, we delete the critical section and the thread dies painful death trying to lock it.\nassert() is a function to state expectations, this is exactly the place to do it.\nIt isn\u0027t a delay - it\u0027s just a very quick check if the thread is running\n2. this CL is for the win32 thread, posix to go next",
+      "parentUuid": "c23655de_9bb0f70a",
+      "range": {
+        "startLine": 52,
+        "startChar": 8,
+        "endLine": 52,
+        "endChar": 64
+      },
+      "revId": "d45b88b166f385043ef97d909d7344acb9c9e4fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2d2d5e6_d2452490",
         "filename": "android/base/threads/Thread_win32.cpp",
         "patchSetId": 1
@@ -59,6 +83,30 @@
       "writtenOn": "2016-02-18T23:32:03Z",
       "side": 1,
       "message": "mStarted should not be reset.\n\nThis object is one time use only. (the header say so, the linux impl is not safe to use multiple times either, and I\u0027d rather not change this right now), so if you try starting, but fail, you\u0027re done.",
+      "range": {
+        "startLine": 69,
+        "startChar": 8,
+        "endLine": 69,
+        "endChar": 16
+      },
+      "revId": "d45b88b166f385043ef97d909d7344acb9c9e4fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82b53dae_c8732ff0",
+        "filename": "android/base/threads/Thread_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-19T00:14:13Z",
+      "side": 1,
+      "message": "ok :(\nhorrible class interface",
+      "parentUuid": "c2d2d5e6_d2452490",
       "range": {
         "startLine": 69,
         "startChar": 8,
