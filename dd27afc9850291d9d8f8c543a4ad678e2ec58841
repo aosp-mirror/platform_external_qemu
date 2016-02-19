@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "82b53dae_e87073e5",
+        "filename": "android/wear-agent/WearAgent.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-19T00:14:59Z",
+      "side": 1,
+      "message": "Explicitly disable move as well (use DISALLOW_COPY_ASSIGN_AND_MOVE)",
+      "range": {
+        "startLine": 122,
+        "startChar": 4,
+        "endLine": 122,
+        "endChar": 44
+      },
+      "revId": "dd27afc9850291d9d8f8c543a4ad678e2ec58841",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
