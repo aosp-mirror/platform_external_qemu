@@ -37,7 +37,9 @@ bool  GLESbuffer::setBuffer(GLuint size,GLuint usage,const GLvoid* data) {
 
 bool  GLESbuffer::setSubBuffer(GLint offset,GLuint size,const GLvoid* data) {
     if(offset + size > m_size) return false;
-    memcpy(m_data+offset,data,size);
+    if (data) {
+        memcpy(m_data+offset,data,size);
+    }
     m_conversionManager.addRange(Range(offset,size));
     m_conversionManager.merge();
     return true;

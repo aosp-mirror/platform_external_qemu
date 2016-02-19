@@ -447,6 +447,7 @@ GL_API void GL_APIENTRY  glColorPointer( GLint size, GLenum type, GLsizei stride
 GL_API void GL_APIENTRY  glCompressedTexImage2D( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data) {
     GET_CTX_CM()
     SET_ERROR_IF(!GLEScmValidate::textureTargetEx(target),GL_INVALID_ENUM);
+    SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
     doCompressedTexImage2D(ctx, target, level, internalformat,
                                 width, height, border,
@@ -457,6 +458,7 @@ GL_API void GL_APIENTRY  glCompressedTexSubImage2D( GLenum target, GLint level, 
     GET_CTX_CM()
     SET_ERROR_IF(!(GLEScmValidate::texCompImgFrmt(format) && GLEScmValidate::textureTargetEx(target)),GL_INVALID_ENUM);
     SET_ERROR_IF(level < 0 || level > log2(ctx->getMaxTexSize()),GL_INVALID_VALUE)
+    SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
     GLenum uncompressedFrmt;
     unsigned char* uncompressed = uncompressTexture(format,uncompressedFrmt,width,height,imageSize,data,level);
@@ -1636,6 +1638,7 @@ GL_API void GL_APIENTRY  glTexSubImage2D( GLenum target, GLint level, GLint xoff
                    GLEScmValidate::pixelFrmt(ctx,format)&&
                    GLEScmValidate::pixelType(ctx,type)),GL_INVALID_ENUM);
     SET_ERROR_IF(!GLEScmValidate::pixelOp(format,type),GL_INVALID_OPERATION);
+    SET_ERROR_IF(!pixels,GL_INVALID_OPERATION);
 
     ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
 
