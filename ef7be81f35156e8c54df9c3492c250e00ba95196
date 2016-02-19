@@ -16,6 +16,24 @@
       "revId": "ef7be81f35156e8c54df9c3492c250e00ba95196",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2c4017e_3cc3bd03",
+        "filename": "android/base/threads/Thread_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-19T23:44:11Z",
+      "side": 0,
+      "message": "I\u0027m sorry, I wanted it to catch a crash, but was too strict and caused one instead",
+      "parentUuid": "c2c1f56d_a019debe",
+      "revId": "ef7be81f35156e8c54df9c3492c250e00ba95196",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
