@@ -248,10 +248,13 @@ _QTtoFOURCC(uint32_t qt_pix_format)
         capture_device = nil;
     }
 
-    /* Release current framebuffer. */
-    if (current_frame != nil) {
-       CVBufferRelease(current_frame);
-       current_frame = nil;
+    @synchronized (self)
+    {
+        /* Release current framebuffer. */
+        if (current_frame != nil) {
+            CVBufferRelease(current_frame);
+            current_frame = nil;
+        }
     }
 }
 
