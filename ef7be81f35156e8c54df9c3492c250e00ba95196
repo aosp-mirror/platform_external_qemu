@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c2c1f56d_a019debe",
+        "filename": "android/base/threads/Thread_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-02-19T23:37:36Z",
+      "side": 0,
+      "message": "oh, that is the reason I got the \"WaitForSingleObject(mThread, 0) !\u003d WAIT_TIMEOUT\" message :)",
+      "revId": "ef7be81f35156e8c54df9c3492c250e00ba95196",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
