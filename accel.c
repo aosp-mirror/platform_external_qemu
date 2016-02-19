@@ -121,7 +121,7 @@ int configure_accelerator(MachineState *ms)
         if (!init_failed) {
             fprintf(stderr, "No accelerator found!\n");
         }
-        exit(1);
+        return 1;
     }
 
     if (init_failed) {
