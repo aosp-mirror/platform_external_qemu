@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2d5e1d0_31d4b0bd",
+        "filename": "android/metrics/metrics_reporter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-19T00:09:10Z",
+      "side": 1,
+      "message": "Wouldn\u0027t this be a no-op in the release build? Is that ok? If not, maybe  just return false if there\u0027s no metrics file?",
+      "range": {
+        "startLine": 245,
+        "startChar": 4,
+        "endLine": 245,
+        "endChar": 32
+      },
+      "revId": "c9bebffbf0afa9cc3b28913a02d2b8ea4132f14b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
