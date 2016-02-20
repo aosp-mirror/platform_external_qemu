@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c2981592_8846fb99",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-20T02:36:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62b849a7_10cf2a2a",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 16
+      },
+      "revId": "541b136343a2eb074af44919c37be7ca8dd13028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2c1f56d_1af91d6d",
         "filename": "android/skin/qt/size-tweaker.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-19T21:58:23Z",
       "side": 1,
       "message": "on mac we\u0027ll get a bunch of warnings about unused functions :(",
+      "range": {
+        "startLine": 66,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 6
+      },
+      "revId": "541b136343a2eb074af44919c37be7ca8dd13028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2981592_6843b78b",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-20T02:36:58Z",
+      "side": 1,
+      "message": "Wrapped with #ifndef",
+      "parentUuid": "c2c1f56d_1af91d6d",
       "range": {
         "startLine": 66,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "22d0113b_6943ad8b",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-20T02:36:58Z",
+      "side": 1,
+      "message": "I opted for using qFuzzyCompare instead. Comparing floating point numbers is no joke :)",
+      "parentUuid": "82bb7df1_b8b2395e",
+      "range": {
+        "startLine": 125,
+        "startChar": 8,
+        "endLine": 125,
+        "endChar": 72
+      },
+      "revId": "541b136343a2eb074af44919c37be7ca8dd13028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2981592_a2f43e3a",
         "filename": "android/skin/qt/size-tweaker.cpp",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2016-02-19T21:58:23Z",
       "side": 1,
       "message": "\u003e\u003eThe qobject_cast() function behaves similarly to the standard C++ dynamic_cast(), with the advantages that it doesn\u0027t require RTTI support and it works across dynamic library boundaries.",
+      "range": {
+        "startLine": 143,
+        "startChar": 12,
+        "endLine": 143,
+        "endChar": 24
+      },
+      "revId": "541b136343a2eb074af44919c37be7ca8dd13028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62a5a9c6_053416c3",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-20T02:36:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c2981592_a2f43e3a",
       "range": {
         "startLine": 143,
         "startChar": 12,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "e2b0b90b_1ec0e9f2",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-20T02:36:58Z",
+      "side": 1,
+      "message": "No, and I don\u0027t think we need to. I don\u0027t think any actual redrawing happens until a paintEvent is delivered (i.e. the call to \"move\" doesn\u0027t actually redraw anything, buts \"schedules\" it to be redrawn). I might be wrong about this, but my assertion is supported by the fact that when the widget is rescaled (for example, when dragging between two monitors of different density), I see no flicker, and everything is resized at once.",
+      "parentUuid": "82bb7df1_786b815f",
+      "range": {
+        "startLine": 159,
+        "startChar": 11,
+        "endLine": 159,
+        "endChar": 15
+      },
+      "revId": "541b136343a2eb074af44919c37be7ca8dd13028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "82bb7df1_38650989",
         "filename": "android/skin/qt/styles/fonts_stylesheet_template.css",
         "patchSetId": 2
@@ -128,6 +248,30 @@
       "writtenOn": "2016-02-19T21:58:23Z",
       "side": 1,
       "message": "can we change the substitution values instead?",
+      "range": {
+        "startLine": 13,
+        "startChar": 45,
+        "endLine": 13,
+        "endChar": 48
+      },
+      "revId": "541b136343a2eb074af44919c37be7ca8dd13028",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02e4ed24_8cd3a7d6",
+        "filename": "android/skin/qt/styles/fonts_stylesheet_template.css",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-20T02:36:58Z",
+      "side": 1,
+      "message": "That was my intention but I forgot :)\nAnyway, I think we shouldn\u0027t need to specify different font sizes for different screen densities. There should be one value, given in points. \nI\u0027ll do that change after im done with this stuff though.",
+      "parentUuid": "82bb7df1_38650989",
       "range": {
         "startLine": 13,
         "startChar": 45,
