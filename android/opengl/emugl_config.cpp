@@ -18,9 +18,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+
 #include <string.h>
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG
 #define D(...)  printf(__VA_ARGS__)
@@ -29,6 +31,7 @@
 #endif
 
 
+using android::base::RunOptions;
 using android::base::String;
 using android::base::StringFormat;
 using android::base::StringVector;
@@ -50,6 +53,86 @@ static bool stringVectorContains(const StringVector& list,
             return true;
         }
     }
+    return false;
+}
+
+bool hostGPUBlacklisted() {
+    fprintf(stderr, "test if gpu is blacklisted\n");
+#ifdef _WIN32
+    auto& sys = *System::get();
+    auto exitCode = sys.runCommand({"wmic", "/OUTPUT:gpuinfo.txt", "path", "Win32_VideoController", "get", "/value"}, RunOptions::WaitForCompletion | RunOptions::ShowOutput);
+    FILE* fh = fopen("gpuinfo.txt", "r");
+    if (!fh) {
+        D("%s: cannot open gpuinfo.txt. defaulting to not blacklisted.\n", __FUNCTION__);
+        return false;
+    }
+
+    int fseek_ret;
+    fseek_ret = fseek(fh, 0, SEEK_END);
+    if (fseek_ret == -1) {
+        D("%s: invalid gpuinfo.txt file. defaulting to not blacklisted.", __FUNCTION__);
+        fclose(fh);
+        return false;
+    }
+
+    uint64_t fsize = ftell(fh); // This is never big.
+    fseek_ret = fseek(fh, 0, SEEK_SET); // Rewind the fh
+    if (fseek_ret == -1) {
+        D("%s: failed to fseek to beginning of file. defaulting to not blacklisted.\n", __FUNCTION__);
+        fclose(fh);
+        return false;
+    } else {
+        fprintf(stderr, "fsize=%llu\n", fsize);
+    }
+
+    char* res = new char[fsize];
+    uint64_t read_bytes = fread(res, fsize, 1, fh);
+    if (!read_bytes) {
+        D("%s: error reading file %s\n", __FUNCTION__, "gpuinfo.txt");
+        fclose(fh);
+        return false;
+    }
+
+    fclose(fh);
+
+    wchar_t* gpuinfo = (wchar_t*)res;
+    wchar_t* test = L"Hello World";
+    if (wcsstr(test, L"Hello")) { D("%s: hello works\n", __FUNCTION__); }
+    if (wcsstr(test, L"World")) { D("%s: world works\n", __FUNCTION__); }
+
+    wchar_t* p = gpuinfo;
+    wchar_t* line_end_pos;
+    wchar_t* equals_pos;
+    wchar_t* val_pos;
+#define FIELD_LEN 2048
+    wchar_t curr_key[FIELD_LEN] = {};
+    wchar_t curr_val[FIELD_LEN] = {};
+
+    line_end_pos = wcsstr(p, L"\r\n");
+    int num_lines = 0;
+    while (line_end_pos) {
+        equals_pos = wcsstr(p, L"=");
+        if (equals_pos && equals_pos < line_end_pos) {
+            int key_strlen = equals_pos - p;
+            wcsncpy(curr_key, p, key_strlen + 1);
+            curr_key[key_strlen] = L'\0';
+
+            val_pos = equals_pos + 1;
+            int val_strlen = line_end_pos - val_pos;
+            wcsncpy(curr_val, val_pos, val_strlen + 1);
+            curr_val[val_strlen] = L'\0';
+
+            wprintf(L"KEY=[%ls] VAL=[%ls]\n", curr_key, curr_val);
+        }
+
+        num_lines++;
+        p = line_end_pos;
+        p += 2;
+        D("%s: num_lines=%d\n", __FUNCTION__, num_lines);
+        line_end_pos = wcsstr(p, L"\r\n");
+    }
+    return true;
+#endif
     return false;
 }
 
@@ -98,9 +181,11 @@ bool emuglConfig_init(EmuglConfig* config,
     // the best mode depending on the environment. Its purpose is to
     // enable 'mesa' mode automatically when NX or Chrome Remote Desktop
     // is detected.
-    if (!strcmp(gpu_mode, "auto") && !gpu_option) {
-        // The default will be 'host' unless NX or Chrome Remote Desktop
-        // is detected, or |no_window| is true.
+    if (!strcmp(gpu_mode, "auto") || !strcmp(gpu_option, "auto")) {
+        // The default will be 'host' unless:
+        // 1. NX or Chrome Remote Desktop is detected, or |no_window| is true.
+        // 2. Failing #1, the user's host GPU is on the blacklist.
+        
         String sessionType;
         if (System::get()->isRemoteSession(&sessionType)) {
             D("%s: %s session detected\n", __FUNCTION__, sessionType.c_str());
@@ -126,6 +211,8 @@ bool emuglConfig_init(EmuglConfig* config,
                         "GPU emulation is disabled (-no-window without Mesa)");
                 return true;
             }
+        } else if (hostGPUBlacklisted()) {
+            D("%s: GPU ON BLACKLIST\n", __FUNCTION__);
         } else {
             D("%s: 'host' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "host";
@@ -178,7 +265,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
         // backend directory.
         String dir = sBackendList->getLibDirPath(config->backend);
         if (dir.size()) {
-            D("Adding to the library search path: %s\n", newDirs.c_str());
+            D("Adding to the library search path: %s\n", dir.c_str());
             system->addLibrarySearchDir(dir);
         }
     }
