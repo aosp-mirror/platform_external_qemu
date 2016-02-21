@@ -25,6 +25,10 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <iostream>
+#include <fstream>
+#include <streambuf>
+
 #include "android/avd/scanner.h"
 #include "android/avd/util.h"
 #include "android/base/files/PathUtils.h"
@@ -79,6 +83,8 @@ static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs);
 static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                                              const char* avdArch,
                                              const char* androidOut);
+
+static bool checkForGoogleAPIs(const char* avdName);
 
 #ifdef _WIN32
 static const char kExeExtension[] = ".exe";
@@ -431,9 +437,22 @@ int main(int argc, char** argv)
         gpuEnabled = (gpuMode != NULL);
     }
 
+    // Detect if this is google API's
+   
+    bool google_apis = checkForGoogleAPIs(avdName);
+    if (google_apis) {
+        fprintf(stderr, "Google API's system image detected\n");
+    }
+
+    bool blacklisted = false;
+    if (!strcmp(gpuMode, "auto") || (gpu && !strcmp(gpu, "auto"))) {
+        blacklisted = isHostGpuBlacklisted();
+    }
+
     EmuglConfig config;
     if (!emuglConfig_init(
-                &config, gpuEnabled, gpuMode, gpu, wantedBitness, no_window)) {
+                &config, gpuEnabled, gpuMode, gpu, wantedBitness, no_window,
+                blacklisted, google_apis)) {
         fprintf(stderr, "ERROR: %s\n", config.status);
         exit(1);
     }
@@ -710,4 +729,36 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
 
     AFREE(kernel_file);
     return result;
+}
+
+static bool checkForGoogleAPIs(const char* avdName) {
+    char* buildprop_file = NULL;
+    char* sdkRootPath = path_getSdkRoot();
+    char* systemImagePath = path_getAvdSystemPath(avdName, sdkRootPath);
+
+    asprintf(&buildprop_file, "%s/%s", systemImagePath, "build.prop");
+
+    std::ifstream file(buildprop_file);
+    std::string temp;
+    while (std::getline(file, temp)) {
+        size_t keypos = temp.find("ro.product.name");
+        if (keypos != std::string::npos) {
+            keypos = temp.find("=");
+            if (keypos == std::string::npos) {
+                // build.prop key without =, crazy!
+                continue;
+            }
+            std::string val = temp.substr(keypos + 1, temp.length() + 1);
+            if ((val.find("sdk_google") != std::string::npos) ||
+                (val.find("google_sdk") != std::string::npos)) {
+                file.close();
+                return true;
+            } else {
+                file.close();
+                return false;
+            }
+        }
+    }
+    file.close();
+    return false;
 }
