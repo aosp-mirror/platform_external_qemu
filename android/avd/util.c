@@ -192,6 +192,20 @@ propertyFile_getApiLevel(const FileData* data) {
     return level;
 }
 
+bool
+propertyFile_isGoogleApis(const FileData* data) {
+    char* prop = propertyFile_getValue(
+                    (const char*)data->data,
+                    data->size,
+                    "ro.product.name");
+    if (!prop) { return false; }
+    if (strstr(prop, "sdk_google") ||
+        strstr(prop, "google_sdk")) {
+        return true;
+    }
+    return false;
+}
+
 int
 propertyFile_getAdbdCommunicationMode(const FileData* data) {
     // adb sporadically hangs when using a pipe to communicate with qemud, so
