@@ -261,6 +261,7 @@ LOCAL_SRC_FILES := \
     android/opengl/EmuglBackendScanner.cpp \
     android/opengl/emugl_config.cpp \
     android/opengl/GpuFrameBridge.cpp \
+    android/opengl/gpuinfo.cpp \
     android/opengles.c \
     android/process_setup.cpp \
     android/proxy/proxy_common.c \
