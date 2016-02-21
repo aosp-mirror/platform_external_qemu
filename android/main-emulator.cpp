@@ -80,6 +80,8 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                                              const char* avdArch,
                                              const char* androidOut);
 
+static bool checkForGoogleAPIs(const char* avdName);
+
 #ifdef _WIN32
 static const char kExeExtension[] = ".exe";
 #else
@@ -431,9 +433,22 @@ int main(int argc, char** argv)
         gpuEnabled = (gpuMode != NULL);
     }
 
+    // Detect if this is google API's
+   
+    bool google_apis = checkForGoogleAPIs(avdName);
+    if (google_apis) {
+        fprintf(stderr, "Google API's system image detected\n");
+    }
+
+    bool blacklisted = false;
+    if (!strcmp(gpuMode, "auto") || (gpu && !strcmp(gpu, "auto"))) {
+        blacklisted = isHostGpuBlacklisted();
+    }
+
     EmuglConfig config;
     if (!emuglConfig_init(
-                &config, gpuEnabled, gpuMode, gpu, wantedBitness, no_window)) {
+                &config, gpuEnabled, gpuMode, gpu, wantedBitness, no_window,
+                blacklisted, google_apis)) {
         fprintf(stderr, "ERROR: %s\n", config.status);
         exit(1);
     }
@@ -711,3 +726,59 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
     AFREE(kernel_file);
     return result;
 }
+
+static bool checkForGoogleAPIs(const char* avdName) {
+    char* buildprop_file = NULL;
+    char* sdkRootPath = path_getSdkRoot();
+    char* systemImagePath = path_getAvdSystemPath(avdName, sdkRootPath);
+
+    asprintf(&buildprop_file, "%s/%s", systemImagePath, "build.prop");
+
+    FILE* fh = fopen(buildprop_file, "r");
+    if (!fh) {
+#ifdef _WIN32
+        // try again
+        Sleep(500);
+        fh = fopen(buildprop_file, "r");
+#endif
+        if (!fh) {
+            return NULL;
+        }
+    }
+
+    int fseek_ret;
+    fseek_ret = fseek(fh, 0, SEEK_END);
+    if (fseek_ret == -1) {
+        fclose(fh);
+        return NULL;
+    }
+
+    uint64_t fsize = ftell(fh);
+    fseek_ret = fseek(fh, 0, SEEK_SET);
+    if (fseek_ret == -1) {
+        fclose(fh);
+        return NULL;
+    }
+
+    char* contents = new char[fsize];
+    uint64_t read_bytes = fread(contents, fsize, 1, fh);
+    if (!read_bytes) {
+        fclose(fh);
+        return NULL;
+    }
+    fclose(fh);
+
+
+
+    AFREE(systemImagePath);
+    AFREE(sdkRootPath);
+
+    bool res = false;
+    if (strstr(contents, "sdk_google")) {
+        res = true;
+    }
+
+    free(contents);
+    return res;
+}
+
