@@ -10,12 +10,15 @@
 // GNU General Public License for more details.
 
 #include "android/opengl/emugl_config.h"
+#include "android/opengl/gpuinfo.h"
 
 #include "android/base/String.h"
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
 #include "android/opengl/EmuglBackendList.h"
 
+#include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,7 +31,7 @@
 #define D(...)  ((void)0)
 #endif
 
-
+using android::base::RunOptions;
 using android::base::String;
 using android::base::StringFormat;
 using android::base::StringVector;
@@ -53,12 +56,27 @@ static bool stringVectorContains(const StringVector& list,
     return false;
 }
 
+bool hostGPUBlacklisted() {
+
+    char* contents = load_gpu_info();
+    
+    if (!contents) { return false; }
+
+    // Parse file contents.
+    GpuInfoList gpulist;
+    gpuinfo_init(&gpulist);
+
+    parse_gpu_info_list(contents, &gpulist);
+    return gpuinfo_query_blacklist(&gpulist);
+}
+
 bool emuglConfig_init(EmuglConfig* config,
                       bool gpu_enabled,
                       const char* gpu_mode,
                       const char* gpu_option,
                       int bitness,
-                      bool no_window) {
+                      bool no_window,
+                      bool blacklisted) {
     // zero all fields first.
     memset(config, 0, sizeof(*config));
 
@@ -98,9 +116,11 @@ bool emuglConfig_init(EmuglConfig* config,
     // the best mode depending on the environment. Its purpose is to
     // enable 'mesa' mode automatically when NX or Chrome Remote Desktop
     // is detected.
-    if (!strcmp(gpu_mode, "auto") && !gpu_option) {
-        // The default will be 'host' unless NX or Chrome Remote Desktop
-        // is detected, or |no_window| is true.
+    if (!strcmp(gpu_mode, "auto")) {
+        // The default will be 'host' unless:
+        // 1. NX or Chrome Remote Desktop is detected, or |no_window| is true.
+        // 2. Failing #1, the user's host GPU is on the blacklist.
+        
         String sessionType;
         if (System::get()->isRemoteSession(&sessionType)) {
             D("%s: %s session detected\n", __FUNCTION__, sessionType.c_str());
@@ -113,13 +133,15 @@ bool emuglConfig_init(EmuglConfig* config,
             }
             D("%s: 'mesa' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "mesa";
-        } else if (no_window) {
+        } else if (no_window || blacklisted) {
             if (stringVectorContains(sBackendList->names(), "mesa")) {
-                D("%s: Headless (-no-window) mode, using Mesa backend\n",
+                D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
+                  ", using Mesa backend\n",
                   __FUNCTION__);
                 gpu_mode = "mesa";
             } else {
-                D("%s: Headless (-no-window) mode without Mesa, forcing '-gpu off'\n",
+                D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
+                  " without Mesa, forcing '-gpu off'\n",
                   __FUNCTION__);
                 config->enabled = false;
                 snprintf(config->status, sizeof(config->status),
@@ -151,7 +173,7 @@ bool emuglConfig_init(EmuglConfig* config,
         }
     }
     config->enabled = true;
-    snprintf(config->backend, sizeof(config->backend), gpu_mode);
+    snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
     snprintf(config->status, sizeof(config->status),
              "GPU emulation enabled using '%s' mode", gpu_mode);
     return true;
@@ -178,7 +200,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
         // backend directory.
         String dir = sBackendList->getLibDirPath(config->backend);
         if (dir.size()) {
-            D("Adding to the library search path: %s\n", newDirs.c_str());
+            D("Adding to the library search path: %s\n", dir.c_str());
             system->addLibrarySearchDir(dir);
         }
     }
