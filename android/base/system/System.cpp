@@ -570,6 +570,8 @@ public:
         } else {
             // try searching %PATH% and current directory for the binary
             const Win32UnicodeString name(commandLineCopy[0]);
+            fprintf(stderr, "%s: commandLineCopy[0]=%s\n", __FUNCTION__, commandLineCopy[0].c_str());
+
             const Win32UnicodeString extension(PathUtils::kExeNameSuffix);
             Win32UnicodeString buffer(MAX_PATH);
 
@@ -596,6 +598,7 @@ public:
         for (size_t i = 1; i < commandLineCopy.size(); ++i) {
             args += ' ';
             args += android::base::Win32Utils::quoteCommandLine(commandLineCopy[i]);
+            fprintf(stderr, "%s: args[i]=%s\n", __FUNCTION__, commandLineCopy[i].c_str());
         }
 
         Win32UnicodeString commandUnicode(executableRef);
