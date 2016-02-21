@@ -261,6 +261,7 @@ LOCAL_SRC_FILES := \
     android/opengl/EmuglBackendScanner.cpp \
     android/opengl/emugl_config.cpp \
     android/opengl/GpuFrameBridge.cpp \
+    android/opengl/gpuinfo.cpp \
     android/opengles.c \
     android/process_setup.cpp \
     android/proxy/proxy_common.c \
@@ -425,6 +426,7 @@ LOCAL_SRC_FILES := \
   android/opengl/EmuglBackendScanner_unittest.cpp \
   android/opengl/emugl_config_unittest.cpp \
   android/opengl/GpuFrameBridge_unittest.cpp \
+  android/opengl/gpuinfo_unittest.cpp \
   android/qt/qt_path_unittest.cpp \
   android/qt/qt_setup_unittest.cpp \
   android/telephony/gsm_unittest.cpp \
