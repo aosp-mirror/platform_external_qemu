@@ -431,9 +431,17 @@ int main(int argc, char** argv)
         gpuEnabled = (gpuMode != NULL);
     }
 
+    bool blacklisted = false;
+    if (!strcmp(gpuMode, "auto") || (gpu && !strcmp(gpu, "auto"))) {
+        blacklisted = hostGPUBlacklisted();
+    }
+
+    blacklisted = true;
+
     EmuglConfig config;
     if (!emuglConfig_init(
-                &config, gpuEnabled, gpuMode, gpu, wantedBitness, no_window)) {
+                &config, gpuEnabled, gpuMode, gpu, wantedBitness, no_window,
+                blacklisted)) {
         fprintf(stderr, "ERROR: %s\n", config.status);
         exit(1);
     }

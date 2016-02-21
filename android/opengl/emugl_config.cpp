@@ -14,13 +14,16 @@
 #include "android/base/String.h"
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
+#include "android/base/Uuid.h"
 #include "android/opengl/EmuglBackendList.h"
 
+#include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG
 #define D(...)  printf(__VA_ARGS__)
@@ -29,10 +32,12 @@
 #endif
 
 
+using android::base::RunOptions;
 using android::base::String;
 using android::base::StringFormat;
 using android::base::StringVector;
 using android::base::System;
+using android::base::Uuid;
 using android::opengl::EmuglBackendList;
 
 static EmuglBackendList* sBackendList = NULL;
@@ -53,12 +58,448 @@ static bool stringVectorContains(const StringVector& list,
     return false;
 }
 
+struct GpuInfo {
+    char* make;
+    char* model;
+    char* device_id;
+    char* revision_id;
+    char* version;
+    bool current_gpu;
+    char** dlls;
+    int num_dlls;
+};
+
+struct GpuInfoList {
+    GpuInfo** infos;
+    int count;
+};
+
+#define FIELD_LEN 2048
+#define MAX_GPUS 12
+
+#ifdef _WIN32
+static void gpuinfo_init(GpuInfoList* gpulist) {
+    gpulist->infos = new GpuInfo*[MAX_GPUS];
+    memset(gpulist->infos, 0, MAX_GPUS);
+    gpulist->count = 0;
+}
+
+static void gpuinfo_add_gpu(GpuInfoList* gpulist) {
+    gpulist->count++;
+    assert(gpulist->count <= MAX_GPUS);
+
+    GpuInfo** gpuinfos = gpulist->infos;
+    int curr_gpu = gpulist->count - 1;
+
+    gpuinfos[curr_gpu] = (GpuInfo*)malloc(sizeof(GpuInfo));
+    gpuinfos[curr_gpu]->make = (char*)malloc(FIELD_LEN);
+    gpuinfos[curr_gpu]->model = (char*)malloc(FIELD_LEN);
+    gpuinfos[curr_gpu]->device_id = (char*)malloc(FIELD_LEN);
+    gpuinfos[curr_gpu]->revision_id = (char*)malloc(FIELD_LEN);
+    gpuinfos[curr_gpu]->version = (char*)malloc(FIELD_LEN);
+    gpuinfos[curr_gpu]->current_gpu = false;
+    gpuinfos[curr_gpu]->dlls = NULL;
+    gpuinfos[curr_gpu]->num_dlls = 0;
+
+    memset(gpuinfos[curr_gpu]->make, 0, FIELD_LEN);
+    memset(gpuinfos[curr_gpu]->model, 0, FIELD_LEN);
+    memset(gpuinfos[curr_gpu]->device_id, 0, FIELD_LEN);
+    memset(gpuinfos[curr_gpu]->revision_id, 0, FIELD_LEN);
+    memset(gpuinfos[curr_gpu]->version, 0, FIELD_LEN);
+}
+
+static void gpuinfo_extract_val(wchar_t* val_str, int howmuch, wchar_t* out) {
+    wcsncpy(out, val_str, howmuch + 1);
+    out[howmuch] = L'\0';
+}
+
+static void gpuinfo_extract_val_bytes(wchar_t* val_str, int len, char* out) {
+    wcstombs(out, val_str, len + 1);
+    out[len] = '\0';
+}
+
+static char* gpuinfo_get_make(GpuInfoList* gpulist) {
+    GpuInfo** gpuinfos = gpulist->infos;
+    int curr_gpu = gpulist->count - 1;
+    return gpuinfos[curr_gpu]->make;
+}
+
+static void gpuinfo_set_make(GpuInfoList* gpulist, wchar_t* val_str, int len) {
+    GpuInfo** gpuinfos = gpulist->infos;
+    int curr_gpu = gpulist->count - 1;
+    gpuinfo_extract_val_bytes(val_str, len, gpuinfos[curr_gpu]->make);
+}
+
+static void gpuinfo_set_model(GpuInfoList* gpulist, wchar_t* val_str, int len) {
+    GpuInfo** gpuinfos = gpulist->infos;
+    int curr_gpu = gpulist->count - 1;
+    gpuinfo_extract_val_bytes(val_str, len, gpuinfos[curr_gpu]->model);
+}
+
+static void gpuinfo_set_version(GpuInfoList* gpulist, wchar_t* val_str, int len) {
+    GpuInfo** gpuinfos = gpulist->infos;
+    int curr_gpu = gpulist->count - 1;
+    gpuinfo_extract_val_bytes(val_str, len, gpuinfos[curr_gpu]->version);
+}
+
+static void gpuinfo_init_dlls(GpuInfoList* gpulist) {
+    GpuInfo** gpuinfos = gpulist->infos;
+    int curr_gpu = gpulist->count - 1;
+    gpuinfos[curr_gpu]->dlls = (char**)malloc(sizeof(char*) * FIELD_LEN);
+    memset(gpuinfos[curr_gpu]->dlls, 0, FIELD_LEN);
+}
+
+static void gpuinfo_add_dll(GpuInfoList* gpulist, wchar_t* dll_str, int len) {
+    GpuInfo** gpuinfos = gpulist->infos;
+    int curr_gpu = gpulist->count - 1;
+
+    gpuinfos[curr_gpu]->num_dlls++;
+    int dll_index = gpuinfos[curr_gpu]->num_dlls - 1;
+    gpuinfos[curr_gpu]->dlls[dll_index] = (char*)malloc(len + 1);
+    gpuinfo_extract_val_bytes(dll_str, len, gpuinfos[curr_gpu]->dlls[dll_index]);
+}
+
+static void gpuinfo_add_dll(GpuInfoList* gpulist, wchar_t* dll_str) {
+    gpuinfo_add_dll(gpulist, dll_str, wcslen(dll_str));
+}
+
+static void gpuinfo_dump(GpuInfoList* gpulist) {
+    GpuInfo** gpuinfos = gpulist->infos;
+    fprintf(stderr, "-=GPU INFO=-\n");
+    for (int i = 0; i < gpulist->count; i++) {
+        fprintf(stderr, "GPU #%d {\n", i);
+        fprintf(stderr, "\tMake:[%s]\n", gpuinfos[i]->make);
+        fprintf(stderr, "\tModel:[%s]\n", gpuinfos[i]->model);
+        fprintf(stderr, "\tDevice ID:[%s]\n", gpuinfos[i]->device_id);
+        fprintf(stderr, "\tRevision ID:[%s]\n", gpuinfos[i]->revision_id);
+        fprintf(stderr, "\tVersion:[%s]\n", gpuinfos[i]->version);
+        fprintf(stderr, "\tActive?:[%d]\n", gpuinfos[i]->current_gpu);
+        fprintf(stderr, "\tDLLS:\n");
+        for (int j = 0; j < gpuinfos[i]->num_dlls; j++) {
+            fprintf(stderr, "\t\t[%s]\n", gpuinfos[i]->dlls[j]);
+        }
+        fprintf(stderr, "}\n");
+    }
+}
+
+#endif
+
+bool hostGPUBlacklisted() {
+    fprintf(stderr, "test if gpu is blacklisted\n");
+    fprintf(stderr, "get a temp file going\n");
+    auto& sys = *System::get();
+
+    std::string tmp_dir(sys.getTempDir().c_str());
+    fprintf(stderr, "tmp dir=%s\n", tmp_dir.c_str());
+    fprintf(stderr, "tmp dir strlen=%d\n", strlen(tmp_dir.c_str()));
+
+    // Get temporary file path
+#ifndef _WIN32 // Link error when using Uuid here for some reason
+    // PathUtils::join and Uuid:: are just no good
+    std::string sep("");
+    if (tmp_dir.back() != '/') {
+        sep += "/";
+    }
+    std::string temp_filename_pattern = "gpuinfo_XXXXXX";
+    std::string temp_file_path_template =
+        (tmp_dir + sep + temp_filename_pattern);
+
+    int tmpfd = mkstemp((char*)temp_file_path_template.data());
+
+    if (tmpfd == -1) {
+        fprintf(stderr, "Error: Can't create temporary file!"
+                        "errno=%d\n", errno);
+        return false;
+    }
+
+    const char* temp_file_path = temp_file_path_template.c_str();
+
+#else
+    char tmp_filename_buffer[FIELD_LEN] = {};
+    DWORD temp_file_ret =
+            GetTempFileName(tmp_dir.c_str(), "gpu", 0, tmp_filename_buffer);
+
+    if (!temp_file_ret) {
+        D("%s: Error: can't create temporary file!"
+          "error code=%d\n", __FUNCTION__, GetLastError());
+        return false;
+    }
+
+    const char* temp_file_path = tmp_filename_buffer;
+
+#endif
+
+    fprintf(stderr, "tmp path=%s\n",
+            temp_file_path);
+
+#ifdef __APPLE__
+    char command[FIELD_LEN] = {};
+    snprintf(command, sizeof(command),
+            "system_profiler SPDisplaysDataType > %s",
+            temp_file_path_template.c_str());
+    fprintf(stderr, "command=%s\n", command);
+    fprintf(stderr, "Hi! I'm on Apple!\n");
+    fprintf(stderr, "cmd... .. errno=%d\n", errno);
+    system(command);
+
+    // Read the file.
+    
+    fprintf(stderr, "fopen .. errno=%d\n", errno);
+    FILE* fh = fopen(temp_file_path_template.c_str(), "r");
+    if (!fh) {
+        fprintf(stderr, "fopen fail. errno=%d\n", errno);
+        D("%s: cannot fopen gpu info file."
+          "default to not blacklisted.\n", __FUNCTION__);
+        return false;
+    }
+
+    int fseek_ret;
+    fseek_ret = fseek(fh, 0, SEEK_END);
+    if (fseek_ret == -1) {
+        fclose(fh);
+        D("%s: cannot fseek gpu info file."
+          "default to not blacklisted.\n", __FUNCTION__);
+        return false;
+    }
+
+    uint64_t fsize = ftell(fh);
+    fseek_ret = fseek(fh, 0, SEEK_SET);
+    if (fseek_ret == -1) {
+        fclose(fh);
+        D("%s: cannot rewind gpu info file."
+          "default to not blacklisted.\n", __FUNCTION__);
+        return false;
+    } else {
+        fprintf(stderr, "file size = %" PRIu64 "bytes\n", fsize);
+    }
+
+    char* contents = new char[fsize];
+    uint64_t read_bytes = fread(contents, fsize, 1, fh);
+    if (!read_bytes) {
+        fprintf(stderr, "cannot fread() the file handle. fail.\n");
+        fclose(fh);
+        return 1;
+    }
+    fclose(fh);
+
+
+    // Parse file contents.
+
+    char* p = contents;
+    char* line_loc = strstr(p, "\n");
+    char* kvsep_loc;
+    char key[FIELD_LEN] = {};
+    char val[FIELD_LEN] = {};
+
+    GpuInfo** gpuinfos = new GpuInfo*[MAX_GPUS];
+    memset(gpuinfos, 0, 12);
+
+    int curr_gpu = 0;
+    int num_lines = 0;
+
+    // OS X
+    while (line_loc) {
+        kvsep_loc = strstr(p, ": ");
+        if (kvsep_loc && kvsep_loc < line_loc) {
+            int key_strlen = kvsep_loc - p;
+            strncpy(key, p, key_strlen + 1);
+            key[key_strlen] = '\0';
+
+            int val_strlen = line_loc - (kvsep_loc + 2);
+            strncpy(val, kvsep_loc + 2, val_strlen + 1);
+            val[val_strlen] = '\0';
+
+            fprintf(stderr, "key=[%s] val=[%s]\n", key, val);
+
+            if (strstr(key, "Chipset Model")) {
+                fprintf(stderr, "NEW GPU FOUND (GPU #%d)\n", curr_gpu);
+                if (gpuinfos[curr_gpu] != NULL) {
+                    curr_gpu++;
+                }
+                if (curr_gpu > MAX_GPUS - 1) {
+                    // We currently only support detecting systems
+                    // with <= MAX_GPUS GPU's.
+                    curr_gpu--;
+                    break;
+                }
+                gpuinfos[curr_gpu] = (GpuInfo*)malloc(sizeof(GpuInfo));
+                gpuinfos[curr_gpu]->make = (char*)malloc(FIELD_LEN);
+                gpuinfos[curr_gpu]->model = (char*)malloc(FIELD_LEN);
+                gpuinfos[curr_gpu]->device_id = (char*)malloc(FIELD_LEN);
+                gpuinfos[curr_gpu]->revision_id = (char*)malloc(FIELD_LEN);
+                gpuinfos[curr_gpu]->version = (char*)malloc(FIELD_LEN);
+                gpuinfos[curr_gpu]->current_gpu = false;
+                gpuinfos[curr_gpu]->dlls = NULL;
+                gpuinfos[curr_gpu]->num_dlls = 0;
+
+                memset(gpuinfos[curr_gpu]->make, 0, FIELD_LEN);
+                memset(gpuinfos[curr_gpu]->model, 0, FIELD_LEN);
+                memset(gpuinfos[curr_gpu]->device_id, 0, FIELD_LEN);
+                memset(gpuinfos[curr_gpu]->revision_id, 0, FIELD_LEN);
+                memset(gpuinfos[curr_gpu]->version, 0, FIELD_LEN);
+
+                fprintf(stderr, "(found model)\n");
+                strncpy(gpuinfos[curr_gpu]->model, val, val_strlen + 1);
+            } else if (strstr(key, "Vendor")) {
+                fprintf(stderr, "(found make)\n");
+                strncpy(gpuinfos[curr_gpu]->make, val, val_strlen + 1);
+            } else if (strstr(key, "Device ID")) {
+                fprintf(stderr, "(found deviceid)\n");
+                strncpy(gpuinfos[curr_gpu]->device_id, val, val_strlen + 1);
+            } else if (strstr(key, "Revision ID")) {
+                strncpy(gpuinfos[curr_gpu]->revision_id, val, val_strlen + 1);
+            } else if (strstr(key, "Display Type")) {
+                fprintf(stderr, "(found that this is the gpu rendering the things)\n");
+                gpuinfos[curr_gpu]->current_gpu = true;
+            } else {
+                fprintf(stderr, "(ignore)\n");
+            }
+        }
+        num_lines++;
+        fprintf(stderr, "num_lines=%d\n", num_lines);
+        p = line_loc + 1;
+        line_loc = strstr(p, "\n");
+    }
+#endif
+
+#ifdef _WIN32
+    char temp_path_arg[FIELD_LEN] = {};
+    snprintf(temp_path_arg, sizeof(temp_path_arg),
+            "/OUTPUT:%s", temp_file_path);
+    sys.runCommand({"wmic", temp_path_arg, "path", "Win32_VideoController", "get", "/value"}, RunOptions::WaitForCompletion);
+    FILE* fh = fopen(temp_file_path, "r");
+    if (!fh) {
+        // try again
+        Sleep(500);
+        fh = fopen(temp_file_path, "r");
+        if (!fh) {
+            D("%s: cannot open gpuinfo.txt. defaulting to not blacklisted.\n", __FUNCTION__);
+            return false;
+        }
+    }
+
+    int fseek_ret;
+    fseek_ret = fseek(fh, 0, SEEK_END);
+    if (fseek_ret == -1) {
+        D("%s: invalid gpuinfo.txt file. defaulting to not blacklisted.", __FUNCTION__);
+        fclose(fh);
+        return false;
+    }
+
+    uint64_t fsize = ftell(fh); // This is never big.
+    fseek_ret = fseek(fh, 0, SEEK_SET); // Rewind the fh
+    if (fseek_ret == -1) {
+        D("%s: failed to fseek to beginning of file. defaulting to not blacklisted.\n", __FUNCTION__);
+        fclose(fh);
+        return false;
+    }
+
+    char* res = new char[fsize];
+    uint64_t read_bytes = fread(res, fsize, 1, fh);
+    if (!read_bytes) {
+        D("%s: error reading file %s\n", __FUNCTION__, "gpuinfo.txt");
+        fclose(fh);
+        return false;
+    }
+
+    fclose(fh);
+
+    wchar_t* gpuinfo = (wchar_t*)res;
+    wchar_t* test = L"Hello World";
+    if (wcsstr(test, L"Hello")) { D("%s: hello works\n", __FUNCTION__); }
+    if (wcsstr(test, L"World")) { D("%s: world works\n", __FUNCTION__); }
+
+    wchar_t* p = gpuinfo;
+    wchar_t* line_end_pos;
+    wchar_t* equals_pos;
+    wchar_t* val_pos;
+    wchar_t key[FIELD_LEN] = {};
+    wchar_t val[FIELD_LEN] = {};
+
+    GpuInfoList gpulist;
+    gpuinfo_init(&gpulist);
+
+    line_end_pos = wcsstr(p, L"\r\n");
+    int num_lines = 0;
+    // WINDOWS
+    while (line_end_pos) {
+        equals_pos = wcsstr(p, L"=");
+        if (equals_pos && equals_pos < line_end_pos) {
+            int key_strlen = equals_pos - p;
+            wcsncpy(key, p, key_strlen + 1);
+            key[key_strlen] = L'\0';
+
+            val_pos = equals_pos + 1;
+            int val_strlen = line_end_pos - val_pos;
+            wcsncpy(val, val_pos, val_strlen + 1);
+            val[val_strlen] = L'\0';
+
+            if (wcsstr(key, L"AdapterCompatibility")) {
+                gpuinfo_add_gpu(&gpulist);
+                gpuinfo_set_make(&gpulist, val, val_strlen);
+            } else if (wcsstr(key, L"Caption")) {
+                gpuinfo_set_model(&gpulist, val, val_strlen);
+            } else if (wcsstr(key, L"DriverVersion")) {
+                gpuinfo_set_version(&gpulist, val, val_strlen);
+            } else if (wcsstr(key, L"InstalledDisplayDrivers")) {
+                if (val_strlen == 0) {
+                    continue;
+                }
+                gpuinfo_init_dlls(&gpulist);
+
+                wchar_t* v_p = val;
+                wchar_t* val_end = v_p + val_strlen;
+                wchar_t* dll_sep_loc = wcsstr(v_p, L",");
+                wchar_t* dll_pos = v_p;
+                wchar_t* dll_end = dll_sep_loc ? dll_sep_loc : val_end;
+                wchar_t curr_dll[FIELD_LEN] = {};
+                int curr_dll_len = dll_end - dll_pos;
+
+                gpuinfo_add_dll(&gpulist, dll_pos, curr_dll_len);
+
+                while (dll_sep_loc) {
+
+                    v_p = dll_sep_loc + 1;
+                    dll_sep_loc = wcsstr(v_p, L",");
+                    dll_pos = v_p;
+
+                    dll_end = dll_sep_loc ? dll_sep_loc : val_end;
+                    curr_dll_len = dll_end - dll_pos;
+
+                    gpuinfo_add_dll(&gpulist, dll_pos, curr_dll_len);
+                }
+
+                char* curr_make = gpuinfo_get_make(&gpulist);
+                if (strstr(curr_make, "NVIDIA")) {
+                    gpuinfo_add_dll(&gpulist, L"nvoglv32.dll");
+                    gpuinfo_add_dll(&gpulist, L"nvoglv64.dll");
+                } else if (strstr(curr_make, "Advanced Micro Devices, Inc.")) {
+                    gpuinfo_add_dll(&gpulist, L"atioglxx.dll");
+                    gpuinfo_add_dll(&gpulist, L"atig6txx.dll");
+                }
+            }
+        }
+
+        num_lines++;
+        p = line_end_pos + 2;
+        line_end_pos = wcsstr(p, L"\r\n");
+    }
+
+#endif
+    gpuinfo_dump(&gpulist);
+
+    return false;
+}
+
 bool emuglConfig_init(EmuglConfig* config,
                       bool gpu_enabled,
                       const char* gpu_mode,
                       const char* gpu_option,
                       int bitness,
-                      bool no_window) {
+                      bool no_window,
+                      bool blacklisted) {
+    fprintf(stderr, "%s: gpu_mode=%s gpu_option=%s\n",
+            __FUNCTION__, gpu_mode, gpu_option);
     // zero all fields first.
     memset(config, 0, sizeof(*config));
 
@@ -98,9 +539,11 @@ bool emuglConfig_init(EmuglConfig* config,
     // the best mode depending on the environment. Its purpose is to
     // enable 'mesa' mode automatically when NX or Chrome Remote Desktop
     // is detected.
-    if (!strcmp(gpu_mode, "auto") && !gpu_option) {
-        // The default will be 'host' unless NX or Chrome Remote Desktop
-        // is detected, or |no_window| is true.
+    if (!strcmp(gpu_mode, "auto")) {
+        // The default will be 'host' unless:
+        // 1. NX or Chrome Remote Desktop is detected, or |no_window| is true.
+        // 2. Failing #1, the user's host GPU is on the blacklist.
+        
         String sessionType;
         if (System::get()->isRemoteSession(&sessionType)) {
             D("%s: %s session detected\n", __FUNCTION__, sessionType.c_str());
@@ -113,13 +556,15 @@ bool emuglConfig_init(EmuglConfig* config,
             }
             D("%s: 'mesa' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "mesa";
-        } else if (no_window) {
+        } else if (no_window || blacklisted) {
             if (stringVectorContains(sBackendList->names(), "mesa")) {
-                D("%s: Headless (-no-window) mode, using Mesa backend\n",
+                D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
+                  ", using Mesa backend\n",
                   __FUNCTION__);
                 gpu_mode = "mesa";
             } else {
-                D("%s: Headless (-no-window) mode without Mesa, forcing '-gpu off'\n",
+                D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
+                  " without Mesa, forcing '-gpu off'\n",
                   __FUNCTION__);
                 config->enabled = false;
                 snprintf(config->status, sizeof(config->status),
@@ -151,7 +596,7 @@ bool emuglConfig_init(EmuglConfig* config,
         }
     }
     config->enabled = true;
-    snprintf(config->backend, sizeof(config->backend), gpu_mode);
+    snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
     snprintf(config->status, sizeof(config->status),
              "GPU emulation enabled using '%s' mode", gpu_mode);
     return true;
@@ -178,7 +623,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
         // backend directory.
         String dir = sBackendList->getLibDirPath(config->backend);
         if (dir.size()) {
-            D("Adding to the library search path: %s\n", newDirs.c_str());
+            D("Adding to the library search path: %s\n", dir.c_str());
             system->addLibrarySearchDir(dir);
         }
     }
