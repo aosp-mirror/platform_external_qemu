@@ -117,6 +117,7 @@ struct AvdInfo {
 
     /* for both */
     int       apiLevel;
+    bool      isGoogleApis;
     char*     skinName;     /* skin name */
     char*     skinDirPath;  /* skin directory */
     char*     coreHardwareIniPath;  /* core hardware.ini path */
@@ -546,6 +547,10 @@ NOT_A_NUMBER:
     goto EXIT;
 }
 
+bool
+avdInfo_isGoogleApis(AvdInfo* i) {
+    return i->isGoogleApis;
+}
 
 int
 avdInfo_getApiLevel(AvdInfo* i) {
@@ -742,6 +747,7 @@ _avdInfo_extractBuildProperties(AvdInfo* i) {
             i->apiLevel);
         }
     }
+    i->isGoogleApis = propertyFile_isGoogleApis(i->buildProperties);
 }
 
 
