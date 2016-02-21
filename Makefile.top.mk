@@ -182,7 +182,7 @@ endef
 #
 QEMU_SYSTEM_LDLIBS := -lm
 ifeq ($(BUILD_TARGET_OS),windows)
-  QEMU_SYSTEM_LDLIBS += -mwindows -mconsole
+  QEMU_SYSTEM_LDLIBS += -mwindows -mconsole -lpsapi
 endif
 
 ifeq ($(BUILD_TARGET_OS),freebsd)
