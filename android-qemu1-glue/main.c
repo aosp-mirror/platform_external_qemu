@@ -781,15 +781,24 @@ int main(int argc, char **argv) {
     {
         EmuglConfig config;
 
+        bool blacklisted = false;
+        if (!strcmp(hw->hw_gpu_mode, "auto") ||
+            (opts->gpu && !strcmp(opts->gpu, "auto"))) {
+            blacklisted = isHostGpuBlacklisted();
+        }
+
         if (!emuglConfig_init(&config,
                               hw->hw_gpu_enabled,
                               hw->hw_gpu_mode,
                               opts->gpu,
                               0,
-                              opts->no_window)) {
+                              opts->no_window,
+                              blacklisted,
+                              avdInfo_isGoogleApis(avd))) {
             derror("%s", config.status);
             return 1;
         }
+
         hw->hw_gpu_enabled = config.enabled;
         if (use_software_gpu_and_screen_too_large(hw)) {
             derror("GPU emulation is disabled.\n"
