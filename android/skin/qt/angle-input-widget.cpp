@@ -116,7 +116,7 @@ void AngleInputWidget::setMinValue(double value) {
 void AngleInputWidget::setMaxValue(double value) {
    if (value < mMinValue) {
        return;
-   } 
+   }
    mMaxValue = value;
    mDecimalDegreeValidator.setTop(mMaxValue);
    mIntegerDegreeValidator.setTop(qFloor(mMaxValue));
@@ -124,6 +124,21 @@ void AngleInputWidget::setMaxValue(double value) {
        mDecimalValue = mMaxValue;
    }
 }
+
+void AngleInputWidget::forceUpdate() {
+#ifdef Q_OS_MAC
+    // This is only necessary on Mac
+    switch (mCurrentInputMode) {
+    case InputMode::Decimal:
+        updateValueFromDecimalInput();
+        break;
+    case InputMode::Sexagesimal:
+        updateValueFromSexagesimalInput();
+        break;
+    }
+#endif
+}
+
 
 const int MINUTES_IN_DEGREE = 60;
 const int SECONDS_IN_MINUTE = 60;
@@ -200,7 +215,7 @@ void AngleInputWidget::updateValueFromSexagesimalInput() {
     int degrees = mDegreesValueEditor.text().toInt();
     int minutes = mMinutesValueEditor.text().toInt();
     double seconds = mSecondsValueEditor.text().toDouble();
-    
+
     // Again, there's a tweak to handle the case when the abs
     // value of a negative angle is between 0 and 1 degrees,
     // i.e. 0 deg 30 min 25 sec. "-" sign is always in the "degrees"

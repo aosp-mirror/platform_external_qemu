@@ -72,6 +72,11 @@ public:
     // Get the current maximum value allowed by the widget.
     double maxValue() const { return mMaxValue; }
 
+    // On Mac, the Latitude and Longitude input values do not
+    // update until their widget loses focus. This function
+    // forces an update.
+    void forceUpdate();
+
 public slots:
     // Sets the widget's current input mode to either decimal or sexagesimal.
     void setInputMode(InputMode);
