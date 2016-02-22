@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "62a5a9c6_d3acb4d1",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-22T18:33:53Z",
+      "side": 1,
+      "message": "Most widgets with no explicit size constraints have their max[Width/Size] property set to QWIDGETSIZE_MAX, that\u0027s why it happens in almost every case.",
+      "parentUuid": "22d0113b_2ff81590",
+      "revId": "e5641fd00710d2635e7a286f9b6ffc19c0da1c85",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "22d0113b_e413643f",
         "filename": "android/skin/qt/size-tweaker.cpp",
         "patchSetId": 3
