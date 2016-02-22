@@ -45,6 +45,30 @@
       "revId": "e7a0c639e10d82e3602db422e26a0d98a27186d1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2def959_d1d944f8",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-22T18:33:53Z",
+      "side": 1,
+      "message": "Because font size typically reflects the heights of glyphs",
+      "parentUuid": "82bb7df1_8dc97124",
+      "range": {
+        "startLine": 92,
+        "startChar": 61,
+        "endLine": 92,
+        "endChar": 62
+      },
+      "revId": "e7a0c639e10d82e3602db422e26a0d98a27186d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
