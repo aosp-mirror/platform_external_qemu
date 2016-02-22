@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c2c1f56d_5429a4ca",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-02-22T07:12:03Z",
+      "side": 1,
+      "message": "nit: looks like the osx and windows have very similar while block, consider\nrefactoring it to a function, if applicable.",
+      "revId": "a897d018fe42b7812c51082c9d3f5143eec6be1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_742ca8dc",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-02-22T07:12:03Z",
+      "side": 1,
+      "message": "nit: I see people using strlcpy and think it is cool if applicable :)",
+      "revId": "a897d018fe42b7812c51082c9d3f5143eec6be1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
