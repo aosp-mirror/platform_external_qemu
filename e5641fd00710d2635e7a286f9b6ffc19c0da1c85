@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "02e4ed24_5571bee6",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-22T17:51:34Z",
+      "side": 1,
+      "message": "Yes. Attempting to set this value to something greater than QWIDGETSIZE_MAX causes Qt to print a warning. This can actually cause a significant lag when showing, for example, the extended controls window.",
+      "parentUuid": "62be89e4_2bb1310e",
+      "revId": "e5641fd00710d2635e7a286f9b6ffc19c0da1c85",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "22d0113b_e413643f",
         "filename": "android/skin/qt/size-tweaker.cpp",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2016-02-22T16:55:12Z",
       "side": 1,
       "message": "Shouldn\u0027t this use \u0027new_max_width\u0027 rather than re-calculate?\n(Same for height, below.)",
+      "revId": "e5641fd00710d2635e7a286f9b6ffc19c0da1c85",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_2f0139e8",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-22T17:51:34Z",
+      "side": 1,
+      "message": "Good catch, forgot to change it",
+      "parentUuid": "22d0113b_e413643f",
       "revId": "e5641fd00710d2635e7a286f9b6ffc19c0da1c85",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "02e4ed24_b5622214",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-22T17:51:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c2981592_4bfc6d5d",
+      "revId": "e5641fd00710d2635e7a286f9b6ffc19c0da1c85",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62be89e4_1dbeb3f5",
         "filename": "android/skin/qt/stylesheet.cpp",
         "patchSetId": 3
@@ -64,6 +118,30 @@
       "writtenOn": "2016-02-20T23:31:03Z",
       "side": 1,
       "message": "8pt\n?",
+      "range": {
+        "startLine": 102,
+        "startChar": 20,
+        "endLine": 102,
+        "endChar": 22
+      },
+      "revId": "e5641fd00710d2635e7a286f9b6ffc19c0da1c85",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2981592_6b3971d6",
+        "filename": "android/skin/qt/stylesheet.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-22T17:51:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62be89e4_1dbeb3f5",
       "range": {
         "startLine": 102,
         "startChar": 20,
