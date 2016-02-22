@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "62be89e4_6b204982",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-22T18:17:18Z",
+      "side": 1,
+      "message": "Got it! Will do this after the basic path is complete.",
+      "parentUuid": "c2c1f56d_5429a4ca",
+      "revId": "a897d018fe42b7812c51082c9d3f5143eec6be1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2c1f56d_742ca8dc",
         "filename": "android/opengl/emugl_config.cpp",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2016-02-22T07:12:03Z",
       "side": 1,
       "message": "nit: I see people using strlcpy and think it is cool if applicable :)",
+      "revId": "a897d018fe42b7812c51082c9d3f5143eec6be1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_21014ae8",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-22T18:17:18Z",
+      "side": 1,
+      "message": "Hmm, can\u0027t seem to find strlcpy (undefined symbol), but switched to strncpy for now.",
+      "parentUuid": "c2c1f56d_742ca8dc",
       "revId": "a897d018fe42b7812c51082c9d3f5143eec6be1a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
