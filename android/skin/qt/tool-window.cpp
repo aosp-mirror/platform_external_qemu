@@ -176,6 +176,14 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
     } else {
         mDetectedAdbPath = QString::null;
     }
+
+#ifndef Q_OS_MAC
+    // Swap minimize and close buttons on non-apple OSes
+    int tmp_x = toolsUi->close_button->x();
+    toolsUi->close_button->move(toolsUi->minimize_button->x(),
+                                toolsUi->close_button->y());
+    toolsUi->minimize_button->move(tmp_x, toolsUi->minimize_button->y());
+#endif
 }
 
 ToolWindow::~ToolWindow() {
