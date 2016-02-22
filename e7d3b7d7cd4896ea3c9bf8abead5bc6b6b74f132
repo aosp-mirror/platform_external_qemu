@@ -16,6 +16,24 @@
       "revId": "e7d3b7d7cd4896ea3c9bf8abead5bc6b6b74f132",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a29b218c_9675fa0e",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/GLESbuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-02-22T18:45:33Z",
+      "side": 1,
+      "message": "sorry, I should actually undo this change. Because of the encoder\u0027s code, the only case where data\u003d\u003dnull is when size\u003d0.",
+      "parentUuid": "c2c1f56d_c123b13f",
+      "revId": "e7d3b7d7cd4896ea3c9bf8abead5bc6b6b74f132",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
