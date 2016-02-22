@@ -48,8 +48,8 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
       mDidGetSysInfo(false),
       mDidUpdateDetails(false) {
 
-    mSendButton = new QPushButton(tr("Send Report"));
-    mDontSendButton = new QPushButton(tr("Don't Send"));
+    mSendButton = new QPushButton(tr("Send report"));
+    mDontSendButton = new QPushButton(tr("Don't send"));
     mDetailsButton = new QPushButton(tr(""));
     mLabelText = new QLabel(QString::fromStdString(constructDumpMessage()));
     mInfoText = new QLabel(kMessageBoxMessageDetailHW);
