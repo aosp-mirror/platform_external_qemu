@@ -46,6 +46,30 @@
       "revId": "53b69fd8396bc47539f74268169c98f35a367350",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_62aaa74a",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-02-22T19:44:26Z",
+      "side": 1,
+      "message": "I ran some tests.\nIf a field is bad, the existing code sends the prior valid value, but the bad value remains on the UI.\nWith the change, the UI is reverted to the valid value, matching what is sent.\nWe could make this change apply to all platforms.\nBut I think I prefer disabling Send if a value is not valid.\nAlso, we don\u0027t range-check the Altitude. I think we should determine reasonable limits for this field.",
+      "parentUuid": "c2981592_96d85c39",
+      "range": {
+        "startLine": 128,
+        "startChar": 1,
+        "endLine": 129,
+        "endChar": 43
+      },
+      "revId": "53b69fd8396bc47539f74268169c98f35a367350",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
