@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c2c1f56d_c123b13f",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/GLESbuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-02-22T18:27:58Z",
+      "side": 1,
+      "message": "nit: if there is no data, should we better just return ?",
+      "revId": "e7d3b7d7cd4896ea3c9bf8abead5bc6b6b74f132",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
