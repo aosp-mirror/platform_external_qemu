@@ -50,12 +50,12 @@ LocationPage::LocationPage(QWidget *parent) :
             settings.value(Ui::Settings::LOCATION_PLAYBACK_SPEED, 0).toInt());
     QString location_data_file =
         settings.value(Ui::Settings::LOCATION_PLAYBACK_FILE, "").toString();
+    mUi->loc_pathTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     mGeoDataLoader = GeoDataLoaderThread::newInstance(
             this,
             SLOT(geoDataThreadStarted()),
             SLOT(startupGeoDataThreadFinished(QString, bool, QString)));
     mGeoDataLoader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
-
 }
 
 LocationPage::~LocationPage() {

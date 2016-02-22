@@ -59,7 +59,8 @@ ToolWindow::ToolWindow(
       toolsUi(new Ui::ToolControls),
       mPushDialog(this),
       mInstallDialog(this),
-      mUIEventRecorder(event_recorder) {
+      mUIEventRecorder(event_recorder),
+      mSizeTweaker(this) {
     Q_INIT_RESOURCE(resources);
     twInstance = this;
 
