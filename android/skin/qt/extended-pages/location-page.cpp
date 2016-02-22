@@ -124,6 +124,10 @@ void LocationPage::on_loc_sendPointButton_clicked() {
     if (mLocationAgent == nullptr || mLocationAgent->gpsCmd == nullptr) {
         return;
     }
+
+    mUi->loc_latitudeInput->forceUpdate();
+    mUi->loc_longitudeInput->forceUpdate();
+
     timeval timeVal = {};
     gettimeofday(&timeVal, nullptr);
     mLocationAgent->gpsCmd(mUi->loc_latitudeInput->value(),

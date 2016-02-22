@@ -72,6 +72,13 @@ public:
     // Get the current maximum value allowed by the widget.
     double maxValue() const { return mMaxValue; }
 
+    // This function reads the latest Lat/Lon input from the user.
+    // If a number is valid, it is used. If it is invalid, the
+    // previous valid number is re-displayed.
+    // This way, the user sees the Lat/Lon that is actually sent
+    // to the AVD.
+    void forceUpdate();
+
 public slots:
     // Sets the widget's current input mode to either decimal or sexagesimal.
     void setInputMode(InputMode);
