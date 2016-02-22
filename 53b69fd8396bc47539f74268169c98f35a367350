@@ -22,6 +22,30 @@
       "revId": "53b69fd8396bc47539f74268169c98f35a367350",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2981592_96d85c39",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-22T19:31:17Z",
+      "side": 1,
+      "message": "Hmm, I would expect that we disable the \u0027send\u0027 button if the current value is not valid. Especially if we don\u0027t even highlight it as invalid. Otherwise one might think he\u0027s sending one thing and actually send completely another one; then he would spend hours trying to debug his app - why does it behave badly, find out that emulator sends wrong thing and start hating Google in general. :)",
+      "parentUuid": "62be89e4_c6b86cf0",
+      "range": {
+        "startLine": 128,
+        "startChar": 1,
+        "endLine": 129,
+        "endChar": 43
+      },
+      "revId": "53b69fd8396bc47539f74268169c98f35a367350",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
