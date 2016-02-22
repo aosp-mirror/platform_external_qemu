@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c2981592_eb38e1b8",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-22T18:08:19Z",
+      "side": 1,
+      "message": "and if it\u0027s greater, should we just set it to max instead of ignoring?",
+      "range": {
+        "startLine": 79,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 5
+      },
+      "revId": "e7a0c639e10d82e3602db422e26a0d98a27186d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_8dc97124",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-22T18:08:19Z",
+      "side": 1,
+      "message": "why y? not x, not average but y?",
+      "range": {
+        "startLine": 92,
+        "startChar": 61,
+        "endLine": 92,
+        "endChar": 62
+      },
+      "revId": "e7a0c639e10d82e3602db422e26a0d98a27186d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
