@@ -915,19 +915,43 @@ extern "C" int main(int argc, char **argv) {
     {
         EmuglConfig emuglConfig;
 
-#ifdef _WIN32
-        if (opts->gpu && !strcmp(opts->gpu, "mesa")) {
-            win32_disable_bootanim_when_using_mesa = true;
-            fprintf(stderr, "Starting AVD without boot animation.\n");
+        bool blacklisted = false;
+        bool on_blacklist = false;
+
+        // If the user has specified a renderer
+        // that is neither "auto" nor "host",
+        // don't check the blacklist.
+        if (!((!opts->gpu &&
+               strcmp(hw->hw_gpu_mode, "auto") &&
+               strcmp(hw->hw_gpu_mode, "host")) ||
+              (opts->gpu && strcmp(opts->gpu, "auto") &&
+               strcmp(opts->gpu, "host") &&
+               strcmp(opts->gpu, "on")))) {
+            on_blacklist = isHostGpuBlacklisted();
         }
-#endif
+
+        if ((!opts->gpu && !strcmp(hw->hw_gpu_mode, "auto")) ||
+            (opts->gpu && !strcmp(opts->gpu, "auto"))) {
+            blacklisted = on_blacklist;
+        }
+
+        int api_level = avdInfo_getApiLevel(avd);
+        char* api_arch = avdInfo_getTargetAbi(avd);
+        bool isGoogle = avdInfo_isGoogleApis(avd);
+
+        bool has_guest_renderer = isGoogle &&
+                                  (api_level >= 23) &&
+                                  (!strcmp(api_arch, "x86") ||
+                                   !strcmp(api_arch, "x86_64"));
 
         if (!emuglConfig_init(&emuglConfig,
                               hw->hw_gpu_enabled,
                               hw->hw_gpu_mode,
                               opts->gpu,
                               0,
-                              opts->no_window)) {
+                              opts->no_window,
+                              blacklisted,
+                              has_guest_renderer)) {
             derror("%s", emuglConfig.status);
             exit(1);
         }
@@ -936,6 +960,14 @@ extern "C" int main(int argc, char **argv) {
             reassign_string(&hw->hw_gpu_mode, emuglConfig.backend);
         }
         D("%s", emuglConfig.status);
+
+#ifdef _WIN32
+        if ((opts->gpu && !strcmp(opts->gpu, "mesa")) ||
+            (hw->hw_gpu_mode && !strcmp(hw->hw_gpu_mode, "mesa"))) {
+            win32_disable_bootanim_when_using_mesa = true;
+            fprintf(stderr, "Starting AVD without boot animation.\n");
+        }
+#endif
     }
 
     /* Quit emulator on condition that both, gpu and snapstorage are on. This is
