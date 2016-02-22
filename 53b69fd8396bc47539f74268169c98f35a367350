@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "62be89e4_c6b86cf0",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-22T19:15:24Z",
+      "side": 1,
+      "message": "Please make sure that forceUpdate() doesn\u0027t make the widget send invalid values.\n\nI.e. try entering a valid value, lose focus, then enter an invalid value and verify that the invalid value doesn\u0027t change anything.",
+      "range": {
+        "startLine": 128,
+        "startChar": 1,
+        "endLine": 129,
+        "endChar": 43
+      },
+      "revId": "53b69fd8396bc47539f74268169c98f35a367350",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
