@@ -58,6 +58,7 @@ static char* metricsFilePath;
 static android::metrics::IniFileAutoFlusher* sMetricsFileFlusher;
 // It's generally bad to have global smart pointers. But we are careful to
 // reset it explicitly when exiting.
+std::shared_ptr<android::base::IniFile> sMetricsIniFile;
 std::shared_ptr<android::metrics::AdbLivenessChecker> sAdbLivenessChecker(
         nullptr);
 
@@ -95,9 +96,8 @@ ABool androidMetrics_moduleInit(const char* avdHome) {
 
 /* Make sure this is safe to call without ever calling _moduleInit */
 void androidMetrics_moduleFini(void) {
-    // Must go before the inifile is cleaned up.
     sAdbLivenessChecker.reset();
-
+    sMetricsIniFile.reset();
     delete sMetricsFileFlusher;
     AFREE(metricsDirPath);
     AFREE(metricsFilePath);
@@ -149,9 +149,8 @@ const char* androidMetrics_getMetricsFilePath() {
     metricsFilePath = ASTRDUP(path);
     sMetricsFileFlusher = new android::metrics::IniFileAutoFlusher(
             android::base::ThreadLooper::get());
-    auto iniFile = std::unique_ptr<android::base::IniFile>(
-            new android::base::IniFile(metricsFilePath));
-    sMetricsFileFlusher->start(std::move(iniFile));
+    sMetricsIniFile = std::make_shared<android::base::IniFile>(metricsFilePath);
+    sMetricsFileFlusher->start(sMetricsIniFile);
     return metricsFilePath;
 }
 
@@ -185,7 +184,7 @@ ABool androidMetrics_write(const AndroidMetrics* androidMetrics) {
         return 0;
     }
 
-    auto ini = sMetricsFileFlusher->iniFile();
+    auto ini = sMetricsIniFile;
     const AndroidMetrics* am = androidMetrics;
 /* Use magic macros to write all fields to the ini file. */
 #undef METRICS_INT
@@ -242,13 +241,13 @@ ABool androidMetrics_keepAlive(Looper* metrics_looper,
 
     // Make sure we've got the metrics file before creating an object the sole
     // purpose of which writing some metrics there
-    assert(sMetricsFileFlusher);
+    assert(sMetricsIniFile);
 
     auto emulatorName = android::base::StringFormat(
             "emulator-%d", control_console_port);
     sAdbLivenessChecker = android::metrics::AdbLivenessChecker::create(
-            android::base::ThreadLooper::get(), sMetricsFileFlusher->iniFile(),
-            emulatorName, 20 * 1000);
+            android::base::ThreadLooper::get(), sMetricsIniFile, emulatorName,
+            20 * 1000);
     sAdbLivenessChecker->start();
 
     return success;
@@ -276,9 +275,8 @@ ABool androidMetrics_seal() {
     }
     androidMetrics_fini(&metrics);
 
-    // Must go before the inifile is cleaned up.
     sAdbLivenessChecker.reset();
-
+    sMetricsIniFile.reset();
     delete sMetricsFileFlusher;
     sMetricsFileFlusher = NULL;
     AFREE(metricsFilePath);
@@ -321,7 +319,7 @@ ABool androidMetrics_read(AndroidMetrics* androidMetrics) {
         return 0;
     }
 
-    auto ini = sMetricsFileFlusher->iniFile();
+    auto ini = sMetricsIniFile;
     AndroidMetrics* am = androidMetrics;
 /* Use magic macros to write all fields to the ini file. */
 #undef METRICS_INT

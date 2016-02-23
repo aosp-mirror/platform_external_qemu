@@ -28,6 +28,7 @@ using android::base::StringVector;
 using android::base::String;
 using android::base::System;
 using android::ConfigDirs;
+using std::shared_ptr;
 
 static const char kAdbExecutableBaseName[] = "adb";
 static const char kAdbLivenessKey[] = "adb_liveness";
@@ -37,7 +38,7 @@ static const char kPlatformToolsSubdir[] = "platform-tools";
 // static
 std::shared_ptr<AdbLivenessChecker> AdbLivenessChecker::create(
         android::base::Looper* looper,
-        android::base::IniFile* metricsFile,
+        shared_ptr<android::base::IniFile> metricsFile,
         android::base::StringView emulatorName,
         android::base::Looper::Duration checkIntervalMs) {
     auto inst = new AdbLivenessChecker(looper, metricsFile, emulatorName,
@@ -47,7 +48,7 @@ std::shared_ptr<AdbLivenessChecker> AdbLivenessChecker::create(
 
 AdbLivenessChecker::AdbLivenessChecker(
         android::base::Looper* looper,
-        android::base::IniFile* metricsFile,
+        shared_ptr<android::base::IniFile> metricsFile,
         android::base::StringView emulatorName,
         android::base::Looper::Duration checkIntervalMs)
     : mLooper(looper),
