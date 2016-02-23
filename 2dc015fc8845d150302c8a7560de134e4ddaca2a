@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "02e4ed24_81012855",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-02-23T02:00:24Z",
+      "side": 1,
+      "message": "What about API-23+ and (x86|x86_64) check?",
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_2887e993",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 730,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-02-23T02:00:24Z",
+      "side": 1,
+      "message": "I think you should probably add a utility function to external/qemu/android/avd/util.c and read a specific property.\n\nAlso, you need to check for sdk_google or google_sdk (older images)",
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a29b218c_9e162cdb",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-02-23T02:00:24Z",
+      "side": 1,
+      "message": "Where is this used?",
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
