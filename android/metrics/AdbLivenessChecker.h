@@ -37,7 +37,7 @@ public:
     // Objects of this type are managed via shared_ptr.
     static std::shared_ptr<AdbLivenessChecker> create(
             android::base::Looper* looper,
-            android::base::IniFile* metricsFile,
+            std::shared_ptr<android::base::IniFile> metricsFile,
             android::base::StringView emulatorName,
             android::base::Looper::Duration checkIntervalMs);
 
@@ -47,7 +47,7 @@ public:
 protected:
     // Use |create| to correctly initialize the shared_ptr count.
     AdbLivenessChecker(android::base::Looper* looper,
-                       android::base::IniFile* metricsFile,
+                       std::shared_ptr<android::base::IniFile> metricsFile,
                        android::base::StringView emulatorName,
                        android::base::Looper::Duration checkIntervalMs);
 
@@ -69,7 +69,7 @@ protected:
     void dropMetrics(const CheckResult& result);
 private:
     android::base::Looper* const mLooper;
-    android::base::IniFile* const mMetricsFile;
+    std::shared_ptr<android::base::IniFile> mMetricsFile;
     const android::base::String mEmulatorName;
     const android::base::Looper::Duration mCheckIntervalMs;
     const android::base::String mAdbPath;
