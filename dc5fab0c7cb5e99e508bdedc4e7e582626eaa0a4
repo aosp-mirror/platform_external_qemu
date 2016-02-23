@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c2c1f56d_e6d9239f",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-02-23T01:01:06Z",
+      "side": 1,
+      "message": "nit: space",
+      "revId": "dc5fab0c7cb5e99e508bdedc4e7e582626eaa0a4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_2f9db1dc",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-02-23T01:01:06Z",
+      "side": 1,
+      "message": "nit: space",
+      "revId": "dc5fab0c7cb5e99e508bdedc4e7e582626eaa0a4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a29b218c_5e2664fd",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-02-23T01:01:06Z",
+      "side": 1,
+      "message": "Software selection if blacklisted:\nbool hasSwiftShader \u003d (API-23+ \u0026\u0026 GoogleAPIs \u0026\u0026 (x86||x86_64));\n\nhasSwiftShader -\u003e GPU: guest\n!hasSwiftShader \u0026\u0026 (Linux||Windows) -\u003e GPU: mesa\n!hasSwiftShader \u0026\u0026 Mac -\u003e GPU: disabled",
+      "revId": "dc5fab0c7cb5e99e508bdedc4e7e582626eaa0a4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
