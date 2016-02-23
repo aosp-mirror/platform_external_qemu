@@ -23,6 +23,7 @@
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
 #include "android/utils/eintr_wrapper.h"
+#include "android/utils/file_io.h"
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -498,7 +499,7 @@ _camera_device_open(LinuxCameraDevice* cd)
 {
     struct stat st;
 
-    if (stat(cd->device_name, &st)) {
+    if (android_stat(cd->device_name, &st)) {
         return -1;
     }
 

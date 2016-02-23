@@ -90,7 +90,7 @@
 #include "qemu/timer.h"
 #include "qemu/queue.h"
 #include "android/snapshot.h"
-
+#include "android/utils/file_io.h"
 
 #define SELF_ANNOUNCE_ROUNDS 5
 
@@ -363,7 +363,7 @@ QEMUFile *qemu_popen_cmd(const char *command, const char *mode)
         return NULL;
     }
 
-    stdio_file = popen(command, mode);
+    stdio_file = android_popen(command, mode);
     if (stdio_file == NULL) {
         return NULL;
     }
