@@ -378,7 +378,6 @@ void events_dev_init(uint32_t base, qemu_irq irq)
      *
      * The KEY_CAMERA button isn't very useful if there is no camera.
      *
-     * BTN_MOUSE is sent when the trackball is pressed
      * BTN_TOUCH is sent when the touchscreen is pressed
      */
     events_set_bit (s, EV_SYN, EV_KEY );
@@ -406,9 +405,6 @@ void events_dev_init(uint32_t base, qemu_irq irq)
         events_set_bit(s, EV_KEY, KEY_CENTER);
     }
 
-    if (config->hw_trackBall) {
-        events_set_bit(s, EV_KEY, BTN_MOUSE);
-    }
     if (androidHwConfig_isScreenTouch(config)) {
         events_set_bit(s, EV_KEY, BTN_TOUCH);
     }
@@ -449,12 +445,15 @@ void events_dev_init(uint32_t base, qemu_irq irq)
 
     /* configure EV_REL array
      *
-     * EV_REL events are sent when the trackball is moved
+     * EV_REL events are sent when the trackball is moved (if one is present),
+     * as well as for mouse wheel scroll events
+     * BTN_MOUSE indicates that the events device will also serve as a mouse
+     * device, and is sent when the trackball is pressed
      */
-    if (config->hw_trackBall) {
-        events_set_bit (s, EV_SYN, EV_REL );
-        events_set_bits(s, EV_REL, REL_X, REL_Y);
-    }
+    events_set_bit (s, EV_SYN, EV_REL );
+    events_set_bit (s, EV_KEY, BTN_MOUSE);
+    events_set_bits(s, EV_REL, REL_X, REL_Y);
+    events_set_bit (s, EV_REL, REL_WHEEL);
 
     /* configure EV_ABS array.
      *

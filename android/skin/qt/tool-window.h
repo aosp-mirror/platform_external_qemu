@@ -80,6 +80,7 @@ public:
     void runAdbShellStopAndQuit();
 
     bool handleQtKeyEvent(QKeyEvent* event);
+    void sendGenericUserEvent(int type, int code, int value);
 
 signals:
     void skinUIEvent(SkinEvent* event);

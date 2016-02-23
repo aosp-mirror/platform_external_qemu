@@ -572,6 +572,10 @@ bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
     return h;
 }
 
+void ToolWindow::sendGenericUserEvent(int type, int code, int value) {
+    uiEmuAgent->userEvents->sendGenericEvent(type, code, value);
+}
+
 void ToolWindow::dockMainWindow()
 {
     move(parentWidget()->geometry().right() + 10, parentWidget()->geometry().top());

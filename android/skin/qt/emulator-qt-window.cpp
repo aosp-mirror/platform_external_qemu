@@ -424,6 +424,15 @@ void EmulatorQtWindow::paintEvent(QPaintEvent *)
     }
 }
 
+void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
+//    mToolWindow->sendGenericUserEvent(2, 0, 1);
+//    mToolWindow->sendGenericUserEvent(2, 1, 1);
+    mToolWindow->sendGenericUserEvent(2,
+                                      event->orientation() == Qt::Vertical ? 0x08 : 0x09,
+                                      event->delta() > 0 ? 1 : -1);
+    mToolWindow->sendGenericUserEvent(0,0,0);
+}
+
 void EmulatorQtWindow::activateWindow()
 {
     mContainer.activateWindow();
