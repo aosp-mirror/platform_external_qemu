@@ -628,6 +628,30 @@
       "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62be89e4_cf1998be",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-23T21:42:07Z",
+      "side": 1,
+      "message": "With the change I landed for supporting non-English characters this will actually be taken care of automatically so it\u0027s safe to use them. I\u0027m not actually sure if it\u0027s a good idea to build upon that reliance though, at some point we should probably create an fstream alternative in android::base. But in the meantime if you want to use fstream because it makes life easier it\u0027s safe. At least as long as your paths are UTF-8 encoded, which should be true everywhere.",
+      "parentUuid": "22d0113b_6dfbb08f",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 63
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
