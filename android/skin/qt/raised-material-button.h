@@ -21,13 +21,25 @@ public:
     explicit RaisedMaterialButton(QWidget* parent = 0) :
         QPushButton(parent),
         mShadowEffect(new QGraphicsDropShadowEffect()) {
-        mShadowEffect->setBlurRadius(5.0);
+        mShadowEffect->setBlurRadius(8.0);
         mShadowEffect->setOffset(1.0, 1.0);
+        mShadowEffect->setColor(QColor(25, 25, 25));
         setGraphicsEffect(mShadowEffect);
+        connect(this, SIGNAL(pressed()), this, SLOT(onPressed()));
+        connect(this, SIGNAL(released()), this, SLOT(onReleased()));
     }
 
     QGraphicsDropShadowEffect* shadowEffect() { return mShadowEffect; }
     const QGraphicsDropShadowEffect* shadowEffect() const { return mShadowEffect; }
+
+private slots:
+    void onPressed() {
+        mShadowEffect->setBlurRadius(5.0);
+    }
+
+    void onReleased() {
+        mShadowEffect->setBlurRadius(8.0);
+    }
 
 private:
     QGraphicsDropShadowEffect* mShadowEffect;
