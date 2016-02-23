@@ -186,6 +186,30 @@
     },
     {
       "key": {
+        "uuid": "e2def959_aad87a69",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T22:09:03Z",
+      "side": 1,
+      "message": "Can\u0027t use cmd \u003e out.txt with it.",
+      "parentUuid": "e2b0b90b_35be20f6",
+      "range": {
+        "startLine": 207,
+        "startChar": 0,
+        "endLine": 222,
+        "endChar": 20
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62a5a9c6_5c766c67",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 23
