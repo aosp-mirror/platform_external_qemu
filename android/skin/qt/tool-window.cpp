@@ -124,21 +124,12 @@ ToolWindow::ToolWindow(
 #endif
         "Ctrl+S     TAKE_SCREENSHOT\n"
         "Ctrl+Z     ENTER_ZOOM\n"
-#ifdef __APPLE__
-        "Ctrl+Num+Up        ZOOM_IN\n"
-        "Ctrl+Num+Down      ZOOM_OUT\n"
-        "Ctrl+Shift+Num+Up    PAN_UP\n"
-        "Ctrl+Shift+Num+Down  PAN_DOWN\n"
-        "Ctrl+Shift+Num+Left  PAN_LEFT\n"
-        "Ctrl+Shift+Num+Right PAN_RIGHT\n"
-#else
         "Ctrl+Up    ZOOM_IN\n"
         "Ctrl+Down  ZOOM_OUT\n"
         "Ctrl+Shift+Up    PAN_UP\n"
         "Ctrl+Shift+Down  PAN_DOWN\n"
         "Ctrl+Shift+Left  PAN_LEFT\n"
         "Ctrl+Shift+Right PAN_RIGHT\n"
-#endif
         "Ctrl+G     GRAB_KEYBOARD\n"
         "Ctrl+=     VOLUME_UP\n"
         "Ctrl+-     VOLUME_DOWN\n"
@@ -151,13 +142,8 @@ ToolWindow::ToolWindow(
 #endif
         "Ctrl+O     OVERVIEW\n"
         "Ctrl+Backspace BACK\n"
-#ifdef __APPLE__
-        "Ctrl+Num+Left ROTATE_LEFT\n"
-        "Ctrl+Num+Right ROTATE_RIGHT\n";
-#else
         "Ctrl+Left ROTATE_LEFT\n"
         "Ctrl+Right ROTATE_RIGHT\n";
-#endif
 
     QTextStream stream(&default_shortcuts);
     mShortcutKeyStore.populateFromTextStream(stream, parseQtUICommand);
@@ -560,7 +546,10 @@ void ToolWindow::uiAgentAction(Action a) const {
 }
 
 bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
-    QKeySequence event_key_sequence(event->key() + event->modifiers());
+    // We don't care about the keypad modifier for anything, and it gets added
+    // to the arrow keys of OSX by default, so remove it.
+    QKeySequence event_key_sequence(event->key() +
+                                    (event->modifiers() & ~Qt::KeypadModifier));
     bool down = event->type() == QEvent::KeyPress;
     bool h = mShortcutKeyStore.handle(event_key_sequence,
                                     [this, down](QtUICommand cmd) {
