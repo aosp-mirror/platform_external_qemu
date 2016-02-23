@@ -41,6 +41,10 @@
 #include "sysemu/sysemu.h"
 #include "hw/misc/vfio.h"
 
+#ifdef USE_ANDROID_EMU
+#include "android/utils/file_io.h"
+#endif
+
 /* #define DEBUG_VFIO */
 #ifdef DEBUG_VFIO
 #define DPRINTF(fmt, ...) \
