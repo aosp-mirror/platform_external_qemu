@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "22d0113b_014d2d68",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 573,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T17:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62be89e4_c00baf72",
+      "range": {
+        "startLine": 573,
+        "startChar": 6,
+        "endLine": 573,
+        "endChar": 101
+      },
+      "revId": "818212c8b5ca8ccdc979ce59bcc57ee953bf472a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62be89e4_60fbc38f",
         "filename": "android/opengl/emugl_config.h",
         "patchSetId": 17
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-23T00:40:52Z",
       "side": 1,
       "message": "isHostGpuBlacklisted() ?\n\notherwise it sounds like a statement - \"remember somewhere that host gpu is blacklisted\"",
+      "range": {
+        "startLine": 37,
+        "startChar": 5,
+        "endLine": 37,
+        "endChar": 23
+      },
+      "revId": "818212c8b5ca8ccdc979ce59bcc57ee953bf472a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02e4ed24_a65b1afd",
+        "filename": "android/opengl/emugl_config.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T17:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62be89e4_60fbc38f",
       "range": {
         "startLine": 37,
         "startChar": 5,
