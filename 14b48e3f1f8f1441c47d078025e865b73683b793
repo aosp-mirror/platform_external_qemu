@@ -233,6 +233,30 @@
     },
     {
       "key": {
+        "uuid": "62be89e4_8f8ba0d9",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T22:10:43Z",
+      "side": 1,
+      "message": "Hmm, I think I can try treating the file as char* first and seeing what happens. Otherwise it\u0027s a nightmare to use whenever UTF-16 is involved.",
+      "parentUuid": "62a5a9c6_5c766c67",
+      "range": {
+        "startLine": 243,
+        "startChar": 0,
+        "endLine": 262,
+        "endChar": 20
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2c1f56d_4f857cf8",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 23
