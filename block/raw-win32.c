@@ -25,6 +25,8 @@
 #include "qemu/timer.h"
 #include "block/block_int.h"
 #include "qemu/module.h"
+#include "android/utils/win32_unicode.h"
+
 #include <windows.h>
 #include <winioctl.h>
 
@@ -92,9 +94,15 @@ static int raw_open(BlockDriverState *bs, const char *filename, int flags)
         overlapped |= FILE_FLAG_NO_BUFFERING | FILE_FLAG_WRITE_THROUGH;
     else if (!(flags & BDRV_O_CACHE_WB))
         overlapped |= FILE_FLAG_WRITE_THROUGH;
-    s->hfile = CreateFile(filename, access_flags,
-                          FILE_SHARE_READ, NULL,
-                          OPEN_EXISTING, overlapped, NULL);
+
+    wchar_t* wide_filename = win32_utf8_to_utf16_str(filename);
+    if (wide_filename == NULL) {
+        return -EINVAL;
+    }
+    s->hfile = CreateFileW(wide_filename, access_flags,
+                           FILE_SHARE_READ, NULL,
+                           OPEN_EXISTING, overlapped, NULL);
+    free(wide_filename);
     if (s->hfile == INVALID_HANDLE_VALUE) {
         int err = GetLastError();
 

@@ -1498,24 +1498,7 @@ static bool select_vgahw (const char *p)
 /* Look for support files in the same directory as the executable.  */
 static char *find_datadir(const char *argv0)
 {
-    char *p;
-    char buf[MAX_PATH];
-    DWORD len;
-
-    len = GetModuleFileName(NULL, buf, sizeof(buf) - 1);
-    if (len == 0) {
-        return NULL;
-    }
-
-    buf[len] = 0;
-    p = buf + len - 1;
-    while (p != buf && *p != '\\')
-        p--;
-    *p = 0;
-    if (access(buf, R_OK) == 0) {
-        return g_strdup(buf);
-    }
-    return NULL;
+    return os_find_datadir(argv0);
 }
 #else /* !_WIN32 */
 

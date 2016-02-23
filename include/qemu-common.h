@@ -103,9 +103,10 @@ int qemu_ftruncate64(int, int64_t);
 # define ftruncate qemu_ftruncate64
 #endif
 
+char *realpath_with_length(const char *path, char *resolved_path, int length);
 static inline char *realpath(const char *path, char *resolved_path)
 {
-    _fullpath(resolved_path, path, _MAX_PATH);
+    realpath_with_length(path, resolved_path, _MAX_PATH);
     return resolved_path;
 }
 #endif /* _WIN32 */
