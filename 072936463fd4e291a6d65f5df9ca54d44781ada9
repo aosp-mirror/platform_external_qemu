@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "82bb7df1_a98e62e8",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T02:28:27Z",
+      "side": 1,
+      "message": "can we just use wide char versions of environment functions?",
+      "range": {
+        "startLine": 341,
+        "startChar": 28,
+        "endLine": 341,
+        "endChar": 79
+      },
+      "revId": "072936463fd4e291a6d65f5df9ca54d44781ada9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a29b218c_9e7cec47",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T02:28:27Z",
+      "side": 1,
+      "message": "there\u0027s a static method convertToUtf8() which would not allocate an extra copy of wide char string",
+      "range": {
+        "startLine": 443,
+        "startChar": 8,
+        "endLine": 443,
+        "endChar": 26
+      },
+      "revId": "072936463fd4e291a6d65f5df9ca54d44781ada9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2def959_25e5e21f",
+        "filename": "android/utils/exec.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T02:28:27Z",
+      "side": 1,
+      "message": "no #ifdef is needed here",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 13
+      },
+      "revId": "072936463fd4e291a6d65f5df9ca54d44781ada9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22d0113b_b40b5973",
+        "filename": "android/utils/file_io.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T02:28:27Z",
+      "side": 1,
+      "message": "nit: please use nullptr instead of NULL in all C++ files",
+      "range": {
+        "startLine": 125,
+        "startChar": 25,
+        "endLine": 125,
+        "endChar": 29
+      },
+      "revId": "072936463fd4e291a6d65f5df9ca54d44781ada9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02e4ed24_21df141f",
+        "filename": "android/utils/path.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T02:28:27Z",
+      "side": 1,
+      "message": "why do you need this?",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 17
+      },
+      "revId": "072936463fd4e291a6d65f5df9ca54d44781ada9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a29b218c_3e816027",
+        "filename": "android/utils/win32_unicode.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T02:28:27Z",
+      "side": 1,
+      "message": "please use the static method",
+      "range": {
+        "startLine": 21,
+        "startChar": 3,
+        "endLine": 21,
+        "endChar": 32
+      },
+      "revId": "072936463fd4e291a6d65f5df9ca54d44781ada9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_8b7eefb4",
+        "filename": "os-win32.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T02:28:27Z",
+      "side": 1,
+      "message": "why -1? function returns this very value if the buffer was too small",
+      "range": {
+        "startLine": 86,
+        "startChar": 52,
+        "endLine": 86,
+        "endChar": 56
+      },
+      "revId": "072936463fd4e291a6d65f5df9ca54d44781ada9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
