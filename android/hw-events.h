@@ -483,7 +483,8 @@ typedef enum {
 
 #define  EVENT_REL_LIST \
     REL_CODE(X,  0x00)  \
-    REL_CODE(Y,  0x01)
+    REL_CODE(Y,  0x01)  \
+    REL_CODE(WHEEL, 0x08)
 
 #define  REL_CODE(n,v)  GLUE(REL_,n) = v,
 typedef enum {

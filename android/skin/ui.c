@@ -416,6 +416,13 @@ bool skin_ui_process_events(SkinUI* ui) {
                ev.u.mouse.button);
             skin_window_process_event(ui->window, &ev);
             break;
+        case kEventMouseWheeled:
+            DE("EVENT: kEventMouseWheeled x=%d y=%d xrel=%d yrel=%d "
+               "button=%d\n",
+               ev.u.mouse.x, ev.u.mouse.y, ev.u.mouse.xrel, ev.u.mouse.yrel,
+               ev.u.mouse.button);
+            skin_window_process_event(ui->window, &ev);
+            break;
         case kEventLayoutNext:
             DE("EVENT: kEventLayoutNext\n");
             if (VERBOSE_CHECK(rotation)) {

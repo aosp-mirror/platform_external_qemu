@@ -1929,6 +1929,19 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
             }
         }
         break;
+    case kEventMouseWheeled:
+        mx = ev->u.mouse.x;
+        my = ev->u.mouse.y;
+        skin_window_map_to_scale(window, &mx, &my);
+        skin_window_find_finger(window, finger, mx, my);
+        if (finger->inside) {
+            int is_vertical = ev->u.mouse.button == kMouseButtonVerticalWheel;
+            window->win_funcs->wheel_event(
+                    finger->pos.x, finger->pos.y, is_vertical,
+                    is_vertical ? ev->u.mouse.yrel : ev->u.mouse.xrel);
+        }
+        finger_state_reset(finger);
+        break;
 
     case kEventScreenChanged:
         // Re-setup the OpenGL ES subwindow with a potentially different

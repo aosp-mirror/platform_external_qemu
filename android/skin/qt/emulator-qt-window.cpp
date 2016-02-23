@@ -258,6 +258,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     // CrashReporter needs it, even if EmulatorQtWindow is
     // destroyed.
     auto event_logger = mEventLogger;
+// <<<<<<< d169ef4f8e8c72a5d3dbc748f8ff6fa1b509fe8f
     android::crashreport::CrashReporter::get()->addCrashCallback(
             [event_logger]() {
                 android::crashreport::CrashReporter::get()->attachData(
@@ -279,11 +280,14 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
             am->user_actions = user_actions->count();
         }
     });
-
-    mWheelScrollTimer.setInterval(100);
-    mWheelScrollTimer.setSingleShot(true);
-    connect(&mWheelScrollTimer, SIGNAL(timeout()), this,
-            SLOT(wheelScrollTimeout()));
+// =======
+    // android::crashreport::CrashReporter::get()->setCrashCallback(
+    //     [event_logger]() {
+    //         android::crashreport::CrashReporter::get()
+    //             ->attachData("recent-ui-actions.txt",
+    //                          serializeEvents(event_logger->container()));
+    //     });
+// >>>>>>> [WIP] Pass scroll events to the virtual device.
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr() {
@@ -554,7 +558,25 @@ void EmulatorQtWindow::paintEvent(QPaintEvent*) {
     }
 }
 
-void EmulatorQtWindow::raise() {
+void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
+    SkinEvent* skin_event = createSkinEvent(kEventMouseWheeled);
+
+    skin_event->u.mouse.x = event->x();
+    skin_event->u.mouse.y = event->y();
+
+    skin_event->u.mouse.button = event->orientation() == Qt::Vertical
+                                         ? kMouseButtonVerticalWheel
+                                         : kMouseButtonHorizontalWheel;
+
+    int delta = event->delta() > 0 ? 1 : -1;
+    skin_event->u.mouse.xrel = delta;
+    skin_event->u.mouse.yrel = delta;
+
+    queueSkinEvent(skin_event);
+}
+
+void EmulatorQtWindow::raise()
+{
     mContainer.raise();
     mToolWindow->raise();
 }
@@ -1635,22 +1657,8 @@ bool EmulatorQtWindow::mouseInside() {
     QPoint widget_cursor_coords = mapFromGlobal(QCursor::pos());
     return widget_cursor_coords.x() >= 0 &&
            widget_cursor_coords.x() < width() &&
-           widget_cursor_coords.y() >= 0 && widget_cursor_coords.y() < height();
-}
-
-void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
-    if (!mWheelScrollTimer.isActive()) {
-        handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft, event->pos());
-        mWheelScrollPos = event->pos();
-    }
-
-    mWheelScrollTimer.start();
-    mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
-    handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos);
-}
-
-void EmulatorQtWindow::wheelScrollTimeout() {
-    handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, mWheelScrollPos);
+           widget_cursor_coords.y() >= 0 &&
+           widget_cursor_coords.y() < height();
 }
 
 void EmulatorQtWindow::checkAdbVersionAndWarn() {

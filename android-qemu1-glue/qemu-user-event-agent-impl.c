@@ -39,6 +39,11 @@ static void user_event_key(unsigned code, bool down) {
     kbd_put_keycode((code & 0x3ff) | (down ? 0x400 : 0));
 }
 
+static void user_event_wheel(int x, int y, int isVertical, int delta) {
+  printf("QEMU1 wheel event %d %d %d %d\n", x, y, isVertical, delta);
+  fflush(stdout);
+}
+
 static void user_event_generic(int type, int code, int value) {
     if (eventDeviceHandle) {
         events_put_generic(eventDeviceHandle, type, code, value);
@@ -50,6 +55,7 @@ const static QAndroidUserEventAgent sQAndroidUserEventAgent = {
         .sendKeyCode = kbd_put_keycode,
         .sendKeyCodes = user_event_keycodes,
         .sendMouseEvent = kbd_mouse_event,
+        .sendWheelEvent = user_event_wheel,
         .sendGenericEvent = user_event_generic};
 const QAndroidUserEventAgent* const gQAndroidUserEventAgent =
         &sQAndroidUserEventAgent;

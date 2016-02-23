@@ -28,6 +28,7 @@ typedef enum {
     kEventMouseButtonDown,
     kEventMouseButtonUp,
     kEventMouseMotion,
+    kEventMouseWheeled,
     kEventQuit,
     kEventScrollBarChanged,
     kEventSetScale,
@@ -41,7 +42,9 @@ typedef enum {
 typedef enum {
     kMouseButtonLeft,
     kMouseButtonSecondaryTouch,
-    kMouseButtonRight
+    kMouseButtonRight,
+    kMouseButtonVerticalWheel,
+    kMouseButtonHorizontalWheel,
 } SkinMouseButtonType;
 
 typedef struct {

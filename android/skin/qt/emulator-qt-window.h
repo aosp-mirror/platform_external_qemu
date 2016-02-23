@@ -287,7 +287,6 @@ public slots:
     void setForwardShortcutsToDevice(int index);
     void show();
     void showMinimized();
-    void wheelScrollTimeout();
 
     void slot_screenChanged();
 
@@ -367,8 +366,6 @@ private:
     QProgressDialog mInstallDialog;
     QProgressDialog mPushDialog;
 
-    QTimer mWheelScrollTimer;
-    QPoint mWheelScrollPos;
     bool mStartedAdbStopProcess;
 };
 

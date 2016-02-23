@@ -450,10 +450,13 @@ void events_dev_init(uint32_t base, qemu_irq irq)
 
     /* configure EV_REL array
      *
-     * EV_REL events are sent when the trackball is moved
+     * EV_REL events are sent when the trackball is moved (if one is present),
+     * as well as for mouse wheel scroll events
      */
+    events_set_bit (s, EV_SYN, EV_REL );
+    events_set_bit (s, EV_REL, REL_WHEEL);
+
     if (config->hw_trackBall) {
-        events_set_bit (s, EV_SYN, EV_REL );
         events_set_bits(s, EV_REL, REL_X, REL_Y);
     }
 
