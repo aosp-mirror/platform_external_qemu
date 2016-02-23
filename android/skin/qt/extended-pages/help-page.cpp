@@ -20,7 +20,7 @@
 #include <QUrl>
 
 const QString DOCS_URL =
-    "http://developer.android.com/tools/help/emulator.html";
+    "http://developer.android.com/r/studio-ui/emulator.html";
 const QString FILE_BUG_URL =
     "https://code.google.com/p/android/issues/entry?template=Android%20Emulator%20Bug";
 const QString SEND_FEEDBACK_URL =
