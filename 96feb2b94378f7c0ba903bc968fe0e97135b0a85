@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2b0b90b_707156e7",
+        "filename": "android/skin/qt/qt-ui-commands.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-02-23T22:46:33Z",
+      "side": 1,
+      "message": "\"Show finger\"? Is that polite?",
+      "revId": "96feb2b94378f7c0ba903bc968fe0e97135b0a85",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
