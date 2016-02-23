@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c29ad577_db457f3e",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-23T03:02:45Z",
+      "side": 1,
+      "message": "We already do that and I verified that it\u0027s setting the env variable with the correct encoding but it\u0027s still not enough. I monitored the emulator using procmon and it only worked when I did both. This seems to be an issue with Qt as far as I can tell. When I get some time I\u0027ll see if I can create a small program that reproduces the issue and file a bug report to them.",
+      "parentUuid": "82bb7df1_a98e62e8",
+      "range": {
+        "startLine": 341,
+        "startChar": 28,
+        "endLine": 341,
+        "endChar": 79
+      },
+      "revId": "072936463fd4e291a6d65f5df9ca54d44781ada9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a29b218c_9e7cec47",
         "filename": "android/skin/qt/winsys-qt.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-23T02:28:27Z",
       "side": 1,
       "message": "there\u0027s a static method convertToUtf8() which would not allocate an extra copy of wide char string",
+      "range": {
+        "startLine": 443,
+        "startChar": 8,
+        "endLine": 443,
+        "endChar": 26
+      },
+      "revId": "072936463fd4e291a6d65f5df9ca54d44781ada9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a29de171_bac35571",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-23T03:02:45Z",
+      "side": 1,
+      "message": "Good point, will change.",
+      "parentUuid": "a29b218c_9e7cec47",
       "range": {
         "startLine": 443,
         "startChar": 8,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "e2927965_548402cd",
+        "filename": "android/utils/exec.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-23T03:02:45Z",
+      "side": 1,
+      "message": "Oops, will remove.",
+      "parentUuid": "e2def959_25e5e21f",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 13
+      },
+      "revId": "072936463fd4e291a6d65f5df9ca54d44781ada9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "22d0113b_b40b5973",
         "filename": "android/utils/file_io.cpp",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2016-02-23T02:28:27Z",
       "side": 1,
       "message": "nit: please use nullptr instead of NULL in all C++ files",
+      "range": {
+        "startLine": 125,
+        "startChar": 25,
+        "endLine": 125,
+        "endChar": 29
+      },
+      "revId": "072936463fd4e291a6d65f5df9ca54d44781ada9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02714d1c_4d5d5121",
+        "filename": "android/utils/file_io.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-23T03:02:45Z",
+      "side": 1,
+      "message": "Thanks for catching that, this was a C file when I first wrote it and I missed that change.",
+      "parentUuid": "22d0113b_b40b5973",
       "range": {
         "startLine": 125,
         "startChar": 25,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "c29ad577_5b2b4f78",
+        "filename": "android/utils/path.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-23T03:02:45Z",
+      "side": 1,
+      "message": "Good question, looks like the only place I use that in this change is with a fully qualified name anyway. I\u0027ll keep this and remove the qualification below in path_get_size",
+      "parentUuid": "02e4ed24_21df141f",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 17
+      },
+      "revId": "072936463fd4e291a6d65f5df9ca54d44781ada9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a29b218c_3e816027",
         "filename": "android/utils/win32_unicode.cpp",
         "patchSetId": 1
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "02714d1c_6d620de6",
+        "filename": "android/utils/win32_unicode.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-23T03:02:45Z",
+      "side": 1,
+      "message": "Will do",
+      "parentUuid": "a29b218c_3e816027",
+      "range": {
+        "startLine": 21,
+        "startChar": 3,
+        "endLine": 21,
+        "endChar": 32
+      },
+      "revId": "072936463fd4e291a6d65f5df9ca54d44781ada9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2c1f56d_8b7eefb4",
         "filename": "os-win32.c",
         "patchSetId": 1
@@ -151,6 +295,30 @@
       "writtenOn": "2016-02-23T02:28:27Z",
       "side": 1,
       "message": "why -1? function returns this very value if the buffer was too small",
+      "range": {
+        "startLine": 86,
+        "startChar": 52,
+        "endLine": 86,
+        "endChar": 56
+      },
+      "revId": "072936463fd4e291a6d65f5df9ca54d44781ada9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a29de171_3a9da593",
+        "filename": "os-win32.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-23T03:02:45Z",
+      "side": 1,
+      "message": "I think that was just carried over from the old code. Now that I look at I realize that this would never trigger the len \u003e\u003d MAX_PATH check and based on the documentation this code as well as the old one could potentially return truncated paths instead of failing if the data doesn\u0027t fit in the buffer. Good catch, I\u0027ll fix it.",
+      "parentUuid": "c2c1f56d_8b7eefb4",
       "range": {
         "startLine": 86,
         "startChar": 52,
