@@ -13,11 +13,11 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QPushButton" name="finger_touchButton">
+  <widget class="RaisedMaterialButton" name="finger_touchButton">
    <property name="geometry">
     <rect>
-     <x>188</x>
-     <y>70</y>
+     <x>168</x>
+     <y>80</y>
      <width>132</width>
      <height>36</height>
     </rect>
@@ -85,6 +85,13 @@
    </property>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RaisedMaterialButton</class>
+   <extends>QPushButton</extends>
+   <header>android/skin/qt/raised-material-button.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>finger_pickBox</tabstop>
   <tabstop>finger_touchButton</tabstop>

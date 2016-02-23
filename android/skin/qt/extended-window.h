@@ -26,6 +26,7 @@
 #include "android/ui-emu-agent.h"
 #include "android/utils/path.h"
 
+#include <QButtonGroup>
 #include <QFile>
 #include <QFrame>
 #include <QPushButton>
@@ -87,5 +88,6 @@ private:
     Ui::ExtendedControls* mExtendedUi;
     bool mFirstShowEvent = true;
     SizeTweaker mSizeTweaker;
+    QButtonGroup mSidebarButtons;
 };
 

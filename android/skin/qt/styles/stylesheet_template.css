@@ -58,6 +58,38 @@ QCheckBox::indicator:checked {
 QCheckBox::indicator:unchecked {
     image: url(:/%%PATH%%/check_no)
 }
+RaisedMaterialButton {
+    border-radius: 2px;
+    color: %%TOOL_COLOR%%;
+}
+RaisedMaterialButton:pressed {
+    background: %%TAB_DARKENED_COLOR%%;
+}
+QPushButton:pressed[ToolWindowButton=true], QPushButton:checked[ToolWindowButton=true] {
+    border: none;
+    background: %%TAB_DARKENED_COLOR%%;
+    border-radius: 4px;
+}
+QPushButton[ColorGroup="MajorTab"] {
+    border: none;
+    text-align: left;
+    color: %%MAJOR_TAB_COLOR%%;
+    background: %%TAB_BKG_COLOR%%;
+}
+QPushButton[ColorGroup="MajorTabTitle"] {
+    border: none;
+    text-align: left;
+    color: %%MAJOR_TAB_COLOR%%;
+    background: %%TAB_BKG_COLOR%%;
+}
+QPushButton:pressed[ColorGroup="MajorTab"] {
+    border: none;
+    background: %%TAB_DARKENED_COLOR%%;
+}
+QPushButton:checked[ColorGroup="MajorTab"] {
+    border: none;
+    background: %%TAB_SELECTED_COLOR%%;
+}
 QRadioButton::indicator:unchecked {
     image: url(:/%%PATH%%/radio_off);
     width: 24; height: 24;
