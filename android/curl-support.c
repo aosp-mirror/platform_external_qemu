@@ -47,7 +47,9 @@ void curl_cleanup() {
     } else if (--initCount == 0) {
         free(cached_ca_info);
         cached_ca_info = NULL;
-        curl_global_cleanup();
+        // We know we're leaking memory by not calling curl_global_cleanup.
+        // We can not guarantee that no threads exist when the program exits
+        // (e.g. android::base::async has unknown lifetime).
     }
 }
 
