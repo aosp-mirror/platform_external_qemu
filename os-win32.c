@@ -34,6 +34,7 @@
 
 #ifdef CONFIG_ANDROID
 #include "android/skin/winsys.h"
+#include "android/utils/win32_unicode.h"
 #endif
 
 /***********************************************************/
@@ -81,12 +82,17 @@ char *os_find_datadir(const char *argv0)
     char buf[MAX_PATH];
     DWORD len;
 
-    len = GetModuleFileName(NULL, buf, sizeof(buf) - 1);
-    if (len == 0) {
+    wchar_t wideBuf[MAX_PATH];
+    len = GetModuleFileNameW(NULL, wideBuf, MAX_PATH);
+    if (len <= 0 || len >= MAX_PATH) {
         return NULL;
     }
+    int written = win32_utf16_to_utf8_buf(wideBuf, buf, sizeof(buf));
+    if (written < 0) {
+        return NULL;
+    }
+    len = written;
 
-    buf[len] = 0;
     p = buf + len - 1;
     while (p != buf && *p != '\\')
         p--;

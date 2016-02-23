@@ -18,6 +18,7 @@
 #include "android/base/Log.h"
 #include "android/base/String.h"
 #include "android/base/StringFormat.h"
+#include "android/utils/file_io.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -129,7 +130,7 @@ private:
             }
             String entry_path = StringFormat("%s/%s", path, entry->d_name);
             struct stat stats;
-            lstat(entry_path.c_str(), &stats);
+            android_lstat(entry_path.c_str(), &stats);
             if (S_ISDIR(stats.st_mode)) {
                 DeleteRecursive(entry_path);
             } else {
@@ -162,17 +163,13 @@ private:
         return result;
     }
 
-    int lstat(const char* path, struct stat* st) {
-        return stat(path, st);
-    }
-
     char* mkdtemp(char* path) {
         char* sep = ::strrchr(path, '/');
         if (sep) {
             struct stat st;
             int ret;
             *sep = '\0';  // temporarily zero-terminate the dirname.
-            ret = ::stat(path, &st);
+            ret = android_stat(path, &st);
             *sep = '/';   // restore full path.
             if (ret < 0) {
                 return NULL;
@@ -219,7 +216,7 @@ private:
         }
         // Check that it exists and is a directory.
         struct stat st;
-        int ret = ::stat(result.c_str(), &st);
+        int ret = android_stat(result.c_str(), &st);
         if (ret < 0 || !S_ISDIR(st.st_mode)) {
             LOG(FATAL) << "Can't find temporary path: ["
                     << result.c_str() << "]";

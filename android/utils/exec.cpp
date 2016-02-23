@@ -11,12 +11,33 @@
 
 #include "android/utils/exec.h"
 
+#include "android/base/system/Win32UnicodeString.h"
+
 #include <unistd.h>
 
 #ifdef _WIN32
+#include <vector>
+#endif
+
+#ifdef _WIN32
+
+using android::base::Win32UnicodeString;
 
 int safe_execv(const char* path, char* const* argv) {
-   const int res = _spawnv(_P_WAIT, path, (const char* const*)argv);
+   std::vector<Win32UnicodeString> arguments;
+   for (size_t i = 0; argv[i] != nullptr; ++i) {
+      arguments.push_back(Win32UnicodeString(argv[i]));
+   }
+   // Do this in two steps since the pointers might change because of push_back
+   // in the loop above.
+   std::vector<const wchar_t*> argumentPointers;
+   for (const auto& arg : arguments) {
+      argumentPointers.push_back(arg.c_str());
+   }
+   argumentPointers.push_back(nullptr);
+
+   Win32UnicodeString program(path);
+   const int res = _wspawnv(_P_WAIT, program.c_str(), &argumentPointers[0]);
    if (res == -1) {
        return -1;
    }

@@ -14,10 +14,13 @@
 
 #include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/String.h"
 #include "android/base/system/System.h"
+#include "android/base/system/Win32UnicodeString.h"
 
 using android::base::PathUtils;
+using android::base::ScopedCPtr;
 using android::base::String;
 using android::base::StringVector;
 using android::base::System;
@@ -93,3 +96,35 @@ char* path_basename(const char* path) {
     }
     return file.release();
 }
+
+#ifdef _WIN32
+using android::base::Win32UnicodeString;
+
+extern "C"
+char* realpath_with_length(const char* path,
+                           char* resolved_path,
+                           size_t max_length) {
+    Win32UnicodeString widePath(path);
+    // Let the call allocate memory for us, then we can check against max_length
+    ScopedCPtr<wchar_t> result(_wfullpath(nullptr, widePath.c_str(), 0));
+    if (result.get() == nullptr) {
+        return nullptr;
+    }
+    auto utf8Path = Win32UnicodeString::convertToUtf8(result.get());
+    if (resolved_path == nullptr) {
+        // Passing in a null pointer is valid and should lead to allocation
+        // without checking the length argument
+        return strdup(utf8Path.c_str());
+    }
+
+    if (utf8Path.size() + 1 >= max_length) {
+        // This mimics the behavior of _wfullpath where if the buffer is not
+        // sufficiently large to hold the string plus a null terminator the call
+        // will fail and return nullptr
+        return nullptr;
+    }
+    strcpy(resolved_path, utf8Path.c_str());
+    return resolved_path;
+}
+#endif  // _WIN32
+
