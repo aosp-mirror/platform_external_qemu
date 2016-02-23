@@ -27,8 +27,8 @@ namespace metrics {
 // - Routinely when a timer expires.
 // - When this object is destructed.
 //
-// Additionally, this object takes ownership of the underlying |iniFile|. This
-// way, upon destruction, it can flush the file and delete the object together.
+// Any changes made to the IniFile after this object is destroyed are, of
+// course, not persisted to disk automatically.
 //
 // Currently, it is not possible to release / reset the |iniFile| being
 // monitored.
@@ -43,11 +43,7 @@ public:
     // Returns true if we were successfully able to flush the file once, and set
     // up future flushes.
     // Will return false if called multiple times.
-    bool start(std::unique_ptr<android::base::IniFile> iniFile);
-
-    // Accessor, in case you don't want to keep a separate reference to the
-    // underlying |iniFile| around.
-    android::base::IniFile* iniFile() { return mIniFile.get(); }
+    bool start(std::shared_ptr<android::base::IniFile> iniFile);
 
 protected:
     static android::base::Looper::Duration kWriteCallbackTimeoutMs;
@@ -58,7 +54,7 @@ protected:
 private:
     android::base::Looper* mLooper;
     std::unique_ptr<android::base::Looper::Timer> mTimer;
-    std::unique_ptr<android::base::IniFile> mIniFile;
+    std::shared_ptr<android::base::IniFile> mIniFile;
 
     DISALLOW_COPY_AND_ASSIGN(IniFileAutoFlusher);
 };

@@ -18,19 +18,19 @@ namespace metrics {
 
 using android::base::IniFile;
 using android::base::Looper;
-using std::unique_ptr;
+using std::shared_ptr;
 
 // static
 // Every minute.
 Looper::Duration IniFileAutoFlusher::kWriteCallbackTimeoutMs = 60 * 1000;
 
-bool IniFileAutoFlusher::start(unique_ptr<IniFile> iniFile) {
+bool IniFileAutoFlusher::start(shared_ptr<IniFile> iniFile) {
     if (mIniFile.get()) {
         LOG(WARNING) << "Switching the monitored |iniFile| is "
                      << "currently not supported.";
         return false;
     }
-    mIniFile.reset(iniFile.release());
+    mIniFile = iniFile;
 
     // Be cynical, flush regardless of changes.
     if (!mIniFile->write()) {
@@ -65,8 +65,6 @@ IniFileAutoFlusher::~IniFileAutoFlusher() {
                          << mIniFile->getBackingFile()
                          << "\" failed. Your data may be incomplete!";
         }
-        // Explicitly kill the object right here to ensure no further updates.
-        mIniFile.reset();
     }
 }
 
