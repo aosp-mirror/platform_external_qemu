@@ -580,6 +580,30 @@
       "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22d0113b_6dfbb08f",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T20:33:19Z",
+      "side": 1,
+      "message": "Ok, just an update---the thing is converted to C++ STL now except for the initial file parsing which still uses fopen and strncpy. That is because it seems (after some searching) that fstream + UTF-16 is a complete nightmare, while just assuming your characters are wchar_t* seems to work fine.",
+      "parentUuid": "02e4ed24_13fc6bd2",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 63
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
