@@ -53,9 +53,9 @@ class ExtendedWindow : public QFrame
 
 public:
     ExtendedWindow(
-        EmulatorQtWindow *eW,
-        ToolWindow *tW,
-        const UiEmuAgent *agentPtr,
+        EmulatorQtWindow* eW,
+        ToolWindow* tW,
+        const UiEmuAgent* agentPtr,
         const ShortcutKeyStore<QtUICommand>* shortcuts);
 
     void showPane(ExtendedWindowPane pane);
@@ -75,15 +75,16 @@ private slots:
     void on_telephoneButton_clicked();
     
 private:
-    void closeEvent(QCloseEvent *ce) override;
+    void closeEvent(QCloseEvent* ce) override;
+    void keyPressEvent(QKeyEvent* e) override;
     void adjustTabs(ExtendedWindowPane thisIndex);
     void showEvent(QShowEvent* e) override;
 
-    EmulatorQtWindow *mEmulatorWindow;
-    ToolWindow *mToolWindow;
+    EmulatorQtWindow* mEmulatorWindow;
+    ToolWindow* mToolWindow;
     std::map<ExtendedWindowPane, QPushButton*> mPaneButtonMap;
     const ShortcutKeyStore<QtUICommand>* mQtUIShortcuts;
-    Ui::ExtendedControls *mExtendedUi;
+    Ui::ExtendedControls* mExtendedUi;
     bool mFirstShowEvent = true;
     SizeTweaker mSizeTweaker;
 };
