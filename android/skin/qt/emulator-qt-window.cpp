@@ -465,6 +465,23 @@ void EmulatorQtWindow::paintEvent(QPaintEvent *)
     }
 }
 
+void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
+    SkinEvent* skin_event = createSkinEvent(kEventMouseWheeled);
+
+    skin_event->u.mouse.x = event->x();
+    skin_event->u.mouse.y = event->y();
+
+    skin_event->u.mouse.button = event->orientation() == Qt::Vertical
+                                         ? kMouseButtonVerticalWheel
+                                         : kMouseButtonHorizontalWheel;
+
+    int delta = event->delta() > 0 ? 1 : -1;
+    skin_event->u.mouse.xrel = delta;
+    skin_event->u.mouse.yrel = delta;
+
+    queueSkinEvent(skin_event);
+}
+
 void EmulatorQtWindow::raise()
 {
     mContainer.raise();
