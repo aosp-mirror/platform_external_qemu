@@ -1,0 +1,349 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "62be89e4_cf8e381b",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:07:10Z",
+      "side": 1,
+      "message": "static",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 1
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_73439039",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:07:10Z",
+      "side": 1,
+      "message": "we\u0027ve got Win32UnicodeString class for exactly this",
+      "range": {
+        "startLine": 30,
+        "startChar": 3,
+        "endLine": 30,
+        "endChar": 42
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2981592_0c7f9888",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:07:10Z",
+      "side": 1,
+      "message": "nit: please run git clang-format on all modified files",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 4
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22d0113b_4dcb54c0",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:07:10Z",
+      "side": 1,
+      "message": ":)",
+      "range": {
+        "startLine": 136,
+        "startChar": 0,
+        "endLine": 136,
+        "endChar": 30
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_75c4a879",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:07:10Z",
+      "side": 1,
+      "message": "std::string has a comparison operator",
+      "range": {
+        "startLine": 151,
+        "startChar": 27,
+        "endLine": 151,
+        "endChar": 65
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22d0113b_2d57f8a6",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:07:10Z",
+      "side": 1,
+      "message": "if (tmp_dir.back() !\u003d \u0027/\u0027) { tmp_dir +\u003d \u0027/\u0027; }\n?\nso you don\u0027t need the sep variable at all",
+      "range": {
+        "startLine": 175,
+        "startChar": 0,
+        "endLine": 177,
+        "endChar": 5
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_90aaa299",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:07:10Z",
+      "side": 1,
+      "message": "this should be a separate static function",
+      "range": {
+        "startLine": 172,
+        "startChar": 0,
+        "endLine": 201,
+        "endChar": 53
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_35be20f6",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:07:10Z",
+      "side": 1,
+      "message": "why can\u0027t we execute the very same command using System::runCommand?",
+      "range": {
+        "startLine": 207,
+        "startChar": 0,
+        "endLine": 222,
+        "endChar": 20
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62a5a9c6_5c766c67",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:07:10Z",
+      "side": 1,
+      "message": "please read the file using std::ifstream. It\u0027s very simple:\n\nstd::ifstream inFile(name);\nif (!inFile) {\n   inFile.open(name);\n   if (!inFile) {\n       return nullptr;\n   }\n}\n\nstd::stringstream strStream;\nstrStream \u003c\u003c inFile.rdbuf();\nstd::string str \u003d strStream.str();",
+      "range": {
+        "startLine": 243,
+        "startChar": 0,
+        "endLine": 262,
+        "endChar": 20
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_4f857cf8",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:07:10Z",
+      "side": 1,
+      "message": "this has to be a separate function",
+      "range": {
+        "startLine": 230,
+        "startChar": 0,
+        "endLine": 264,
+        "endChar": 15
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02e4ed24_699d022e",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:07:10Z",
+      "side": 1,
+      "message": "just FYI: there\u0027s a std::regex class which allows you to split a string with a regular expression, instead of manual parsing",
+      "range": {
+        "startLine": 307,
+        "startChar": 0,
+        "endLine": 308,
+        "endChar": 24
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_4f121cae",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:07:10Z",
+      "side": 1,
+      "message": "you can always use Win32UnicodeString to convert the wchar_t* string back to char* Utf8-encoded string and then just work with Utf8. This simplified the rest of the code A LOT, including all the conversions etc",
+      "range": {
+        "startLine": 386,
+        "startChar": 4,
+        "endLine": 386,
+        "endChar": 42
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_d57a5cfe",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:07:10Z",
+      "side": 1,
+      "message": "just FYI: in Windows (and often in Mac) paths are case-insensitive (thanks God!), so it\u0027s better to do case-insensitive comparisons",
+      "range": {
+        "startLine": 443,
+        "startChar": 0,
+        "endLine": 447,
+        "endChar": 63
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2981592_cc5650fe",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:07:10Z",
+      "side": 1,
+      "message": "if you open a file in text mode in Windows, ifstream.read()/fread() would convert all \\r\\n pairs to be a single \\n character. And by default all files open in text mode",
+      "range": {
+        "startLine": 454,
+        "startChar": 34,
+        "endLine": 454,
+        "endChar": 39
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22d0113b_ed6460b2",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:07:10Z",
+      "side": 1,
+      "message": "please use constants and using instead.",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 6
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
