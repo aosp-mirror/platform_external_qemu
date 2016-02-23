@@ -187,6 +187,30 @@
     },
     {
       "key": {
+        "uuid": "02e4ed24_69f7423d",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a29b218c_4fc0ecf3",
+      "range": {
+        "startLine": 58,
+        "startChar": 21,
+        "endLine": 58,
+        "endChar": 29
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62be89e4_f911caa8",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 21
@@ -198,6 +222,30 @@
       "writtenOn": "2016-02-23T18:32:34Z",
       "side": 1,
       "message": "Wrong delete operator, should be \"delete[] infos\"",
+      "range": {
+        "startLine": 66,
+        "startChar": 4,
+        "endLine": 66,
+        "endChar": 17
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2981592_0c879893",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62be89e4_f911caa8",
       "range": {
         "startLine": 66,
         "startChar": 4,
@@ -233,6 +281,30 @@
     },
     {
       "key": {
+        "uuid": "a29b218c_78125778",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62a5a9c6_5e79c454",
+      "range": {
+        "startLine": 205,
+        "startChar": 32,
+        "endLine": 205,
+        "endChar": 33
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "82bb7df1_6d54d329",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 21
@@ -244,6 +316,30 @@
       "writtenOn": "2016-02-23T18:32:34Z",
       "side": 1,
       "message": "nit: tabs",
+      "range": {
+        "startLine": 210,
+        "startChar": 0,
+        "endLine": 210,
+        "endChar": 4
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_b3892853",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "82bb7df1_6d54d329",
       "range": {
         "startLine": 210,
         "startChar": 0,
@@ -279,6 +375,30 @@
     },
     {
       "key": {
+        "uuid": "02e4ed24_291a5a4e",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "22d0113b_37106bdd",
+      "range": {
+        "startLine": 211,
+        "startChar": 27,
+        "endLine": 211,
+        "endChar": 31
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a29b218c_0f5c24c5",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 21
@@ -290,6 +410,30 @@
       "writtenOn": "2016-02-23T18:32:34Z",
       "side": 1,
       "message": "const int BlacklistSize \u003d sizeof(sGpuBlackList)/sizeof(BlacklistEntry)",
+      "range": {
+        "startLine": 233,
+        "startChar": 0,
+        "endLine": 233,
+        "endChar": 25
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2981592_ec6474b2",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a29b218c_0f5c24c5",
       "range": {
         "startLine": 233,
         "startChar": 0,
@@ -325,6 +469,30 @@
     },
     {
       "key": {
+        "uuid": "e2def959_8d5dd851",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "windows. the delay has been decreased to .1s.",
+      "parentUuid": "c2c1f56d_1c36a7e4",
+      "range": {
+        "startLine": 332,
+        "startChar": 0,
+        "endLine": 332,
+        "endChar": 19
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "82bb7df1_0d01d724",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 21
@@ -336,6 +504,30 @@
       "writtenOn": "2016-02-23T18:32:34Z",
       "side": 1,
       "message": "nit: tabs",
+      "range": {
+        "startLine": 339,
+        "startChar": 0,
+        "endLine": 339,
+        "endChar": 4
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22d0113b_e8068e6c",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "82bb7df1_0d01d724",
       "range": {
         "startLine": 339,
         "startChar": 0,
@@ -382,6 +574,30 @@
       "writtenOn": "2016-02-23T18:32:34Z",
       "side": 1,
       "message": "Either uncomment or remove",
+      "range": {
+        "startLine": 457,
+        "startChar": 8,
+        "endLine": 458,
+        "endChar": 51
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_936f4438",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62a5a9c6_3e496007",
       "range": {
         "startLine": 457,
         "startChar": 8,
@@ -476,6 +692,30 @@
       "writtenOn": "2016-02-23T18:32:34Z",
       "side": 1,
       "message": "Please use a std::vector",
+      "range": {
+        "startLine": 52,
+        "startChar": 4,
+        "endLine": 52,
+        "endChar": 20
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a29b218c_78493706",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e2b0b90b_eab7b71e",
       "range": {
         "startLine": 52,
         "startChar": 4,
