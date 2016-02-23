@@ -13,15 +13,16 @@
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/memory/ScopedPtr.h"
 
-#ifdef _WIN32
-#include <direct.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
+#ifdef _WIN32
+#include <direct.h>
 #include <windows.h>
 
 using android::base::Win32UnicodeString;
