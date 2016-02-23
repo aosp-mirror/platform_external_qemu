@@ -33,8 +33,7 @@ ExtendedWindow::ExtendedWindow(
     mEmulatorWindow(eW),
     mToolWindow(tW),
     mExtendedUi(new Ui::ExtendedControls),
-    mSizeTweaker(this)
-{
+    mSizeTweaker(this) {
     Q_INIT_RESOURCE(resources);
 
     // "Tool" type windows live in another layer on top of everything in OSX, which is undesirable
@@ -91,8 +90,7 @@ void ExtendedWindow::showPane(ExtendedWindowPane pane) {
     adjustTabs(pane);
 }
 
-void ExtendedWindow::closeEvent(QCloseEvent *ce)
-{
+void ExtendedWindow::closeEvent(QCloseEvent *ce) {
     if (mExtendedUi->location_page->isLoadingGeoData()) {
         mExtendedUi->location_page->requestStopLoadingGeoData();
         connect(mExtendedUi->location_page, SIGNAL(geoDataLoadingFinished()), this, SLOT(close()));
@@ -101,6 +99,10 @@ void ExtendedWindow::closeEvent(QCloseEvent *ce)
         mToolWindow->extendedIsClosing();
         ce->accept();
     }
+}
+
+void ExtendedWindow::keyPressEvent(QKeyEvent* e) {
+    mToolWindow->handleQtKeyEvent(e);
 }
 
 // Tab buttons. Each raises its stacked pane to the top.
@@ -113,8 +115,7 @@ void ExtendedWindow::on_locationButton_clicked()    { adjustTabs(PANE_IDX_LOCATI
 void ExtendedWindow::on_settingsButton_clicked()    { adjustTabs(PANE_IDX_SETTINGS); }
 void ExtendedWindow::on_telephoneButton_clicked()   { adjustTabs(PANE_IDX_TELEPHONE); }
 
-void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
-{
+void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     auto it = mPaneButtonMap.find(thisIndex);
     if (it == mPaneButtonMap.end()) {
         return;
@@ -160,13 +161,11 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex)
     mExtendedUi->stackedWidget->setCurrentIndex(static_cast<int>(thisIndex));
 }
 
-void ExtendedWindow::switchOnTop(bool isOnTop)
-{
+void ExtendedWindow::switchOnTop(bool isOnTop) {
     mEmulatorWindow->setOnTop(isOnTop);
 }
 
-void ExtendedWindow::switchToTheme(SettingsTheme theme)
-{
+void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     // Switch to the icon images that are appropriate for this theme.
     switchAllIconsForTheme(theme);
 
