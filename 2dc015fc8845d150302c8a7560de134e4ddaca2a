@@ -441,6 +441,30 @@
     },
     {
       "key": {
+        "uuid": "e2b0b90b_f561d8b2",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-23T20:38:53Z",
+      "side": 1,
+      "message": "Sorry, I meant to write this comment in struct GpuInfo, not BlacklistEntry",
+      "parentUuid": "a29b218c_727b98c6",
+      "range": {
+        "startLine": 25,
+        "startChar": 4,
+        "endLine": 25,
+        "endChar": 21
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e2b0b90b_eab7b71e",
         "filename": "android/opengl/gpuinfo.h",
         "patchSetId": 21
