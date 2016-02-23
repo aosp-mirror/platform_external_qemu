@@ -77,6 +77,30 @@
     },
     {
       "key": {
+        "uuid": "82bb7df1_f05676fd",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 737,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-02-23T20:04:15Z",
+      "side": 1,
+      "message": "I\u0027m not bought into ifstream.  I\u0027ll bow to group pressure though.",
+      "parentUuid": "c2c1f56d_4bac5769",
+      "range": {
+        "startLine": 737,
+        "startChar": 15,
+        "endLine": 737,
+        "endChar": 20
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e2def959_2026f0fc",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 21
@@ -381,6 +405,30 @@
       "writtenOn": "2016-02-23T18:32:34Z",
       "side": 1,
       "message": "Please use std::string here.",
+      "range": {
+        "startLine": 25,
+        "startChar": 4,
+        "endLine": 25,
+        "endChar": 21
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a29b218c_727b98c6",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-02-23T20:04:15Z",
+      "side": 1,
+      "message": "Not sure that\u0027s really necessary for a static const table",
+      "parentUuid": "a29b218c_efac60d1",
       "range": {
         "startLine": 25,
         "startChar": 4,
