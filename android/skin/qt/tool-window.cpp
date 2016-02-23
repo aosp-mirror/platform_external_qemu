@@ -110,13 +110,14 @@ ToolWindow::ToolWindow(
     this->setStyleSheet(Ui::stylesheetForTheme(theme));
 
     QString default_shortcuts =
-        "Ctrl+Alt+L SHOW_PANE_LOCATION\n"
-        "Ctrl+Alt+C SHOW_PANE_CELLULAR\n"
-        "Ctrl+Alt+B SHOW_PANE_BATTERY\n"
-        "Ctrl+Alt+P SHOW_PANE_PHONE\n"
-        "Ctrl+Alt+V SHOW_PANE_VIRTSENSORS\n"
-        "Ctrl+Alt+D SHOW_PANE_DPAD\n"
-        "Ctrl+Alt+S SHOW_PANE_SETTINGS\n"
+        "Ctrl+Shift+L SHOW_PANE_LOCATION\n"
+        "Ctrl+Shift+C SHOW_PANE_CELLULAR\n"
+        "Ctrl+Shift+B SHOW_PANE_BATTERY\n"
+        "Ctrl+Shift+P SHOW_PANE_PHONE\n"
+        "Ctrl+Shift+V SHOW_PANE_VIRTSENSORS\n"
+        "Ctrl+Shift+F SHOW_PANE_FINGER\n"
+        "Ctrl+Shift+D SHOW_PANE_DPAD\n"
+        "Ctrl+Shift+S SHOW_PANE_SETTINGS\n"
 #ifdef __APPLE__
         "Ctrl+/     SHOW_PANE_HELP\n"
 #else
@@ -124,21 +125,12 @@ ToolWindow::ToolWindow(
 #endif
         "Ctrl+S     TAKE_SCREENSHOT\n"
         "Ctrl+Z     ENTER_ZOOM\n"
-#ifdef __APPLE__
-        "Ctrl+Num+Up        ZOOM_IN\n"
-        "Ctrl+Num+Down      ZOOM_OUT\n"
-        "Ctrl+Shift+Num+Up    PAN_UP\n"
-        "Ctrl+Shift+Num+Down  PAN_DOWN\n"
-        "Ctrl+Shift+Num+Left  PAN_LEFT\n"
-        "Ctrl+Shift+Num+Right PAN_RIGHT\n"
-#else
         "Ctrl+Up    ZOOM_IN\n"
         "Ctrl+Down  ZOOM_OUT\n"
         "Ctrl+Shift+Up    PAN_UP\n"
         "Ctrl+Shift+Down  PAN_DOWN\n"
         "Ctrl+Shift+Left  PAN_LEFT\n"
         "Ctrl+Shift+Right PAN_RIGHT\n"
-#endif
         "Ctrl+G     GRAB_KEYBOARD\n"
         "Ctrl+=     VOLUME_UP\n"
         "Ctrl+-     VOLUME_DOWN\n"
@@ -151,13 +143,8 @@ ToolWindow::ToolWindow(
 #endif
         "Ctrl+O     OVERVIEW\n"
         "Ctrl+Backspace BACK\n"
-#ifdef __APPLE__
-        "Ctrl+Num+Left ROTATE_LEFT\n"
-        "Ctrl+Num+Right ROTATE_RIGHT\n";
-#else
         "Ctrl+Left ROTATE_LEFT\n"
         "Ctrl+Right ROTATE_RIGHT\n";
-#endif
 
     QTextStream stream(&default_shortcuts);
     mShortcutKeyStore.populateFromTextStream(stream, parseQtUICommand);
@@ -429,6 +416,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
             showOrRaiseExtendedWindow(PANE_IDX_DPAD);
         }
         break;
+    case QtUICommand::SHOW_PANE_FINGER:
+        if (down) {
+            showOrRaiseExtendedWindow(PANE_IDX_FINGER);
+        }
+        break;
     case QtUICommand::SHOW_PANE_SETTINGS:
         if (down) {
             showOrRaiseExtendedWindow(PANE_IDX_SETTINGS);
@@ -560,7 +552,10 @@ void ToolWindow::uiAgentAction(Action a) const {
 }
 
 bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
-    QKeySequence event_key_sequence(event->key() + event->modifiers());
+    // We don't care about the keypad modifier for anything, and it gets added
+    // to the arrow keys of OSX by default, so remove it.
+    QKeySequence event_key_sequence(event->key() +
+                                    (event->modifiers() & ~Qt::KeypadModifier));
     bool down = event->type() == QEvent::KeyPress;
     bool h = mShortcutKeyStore.handle(event_key_sequence,
                                     [this, down](QtUICommand cmd) {
