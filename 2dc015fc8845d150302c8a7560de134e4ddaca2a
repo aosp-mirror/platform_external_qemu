@@ -163,6 +163,259 @@
     },
     {
       "key": {
+        "uuid": "62be89e4_f911caa8",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-23T18:32:34Z",
+      "side": 1,
+      "message": "Wrong delete operator, should be \"delete[] infos\"",
+      "range": {
+        "startLine": 66,
+        "startChar": 4,
+        "endLine": 66,
+        "endChar": 17
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62a5a9c6_5e79c454",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-23T18:32:34Z",
+      "side": 1,
+      "message": "nit: trailing space",
+      "range": {
+        "startLine": 205,
+        "startChar": 32,
+        "endLine": 205,
+        "endChar": 33
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_6d54d329",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-23T18:32:34Z",
+      "side": 1,
+      "message": "nit: tabs",
+      "range": {
+        "startLine": 210,
+        "startChar": 0,
+        "endLine": 210,
+        "endChar": 4
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22d0113b_37106bdd",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-23T18:32:34Z",
+      "side": 1,
+      "message": "use nullptr instead of NULL",
+      "range": {
+        "startLine": 211,
+        "startChar": 27,
+        "endLine": 211,
+        "endChar": 31
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a29b218c_0f5c24c5",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-23T18:32:34Z",
+      "side": 1,
+      "message": "const int BlacklistSize \u003d sizeof(sGpuBlackList)/sizeof(BlacklistEntry)",
+      "range": {
+        "startLine": 233,
+        "startChar": 0,
+        "endLine": 233,
+        "endChar": 25
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_1c36a7e4",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-23T18:32:34Z",
+      "side": 1,
+      "message": "Why is this? Is there a chance that the command won\u0027t be finished by the time code gets here? Is there no way to execute the command synchronously?",
+      "range": {
+        "startLine": 332,
+        "startChar": 0,
+        "endLine": 332,
+        "endChar": 19
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_0d01d724",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-23T18:32:34Z",
+      "side": 1,
+      "message": "nit: tabs",
+      "range": {
+        "startLine": 339,
+        "startChar": 0,
+        "endLine": 339,
+        "endChar": 4
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_8d15e760",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-23T18:32:34Z",
+      "side": 1,
+      "message": "Can you break out platform-specific parts into separate functions? I.e. \"parse_gpu_info_osx\". It will make the code much easier to follow.",
+      "range": {
+        "startLine": 405,
+        "startChar": 0,
+        "endLine": 405,
+        "endChar": 16
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62a5a9c6_3e496007",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-23T18:32:34Z",
+      "side": 1,
+      "message": "Either uncomment or remove",
+      "range": {
+        "startLine": 457,
+        "startChar": 8,
+        "endLine": 458,
+        "endChar": 51
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a29b218c_efac60d1",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-23T18:32:34Z",
+      "side": 1,
+      "message": "Please use std::string here.",
+      "range": {
+        "startLine": 25,
+        "startChar": 4,
+        "endLine": 25,
+        "endChar": 21
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_eab7b71e",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-23T18:32:34Z",
+      "side": 1,
+      "message": "Please use a std::vector",
+      "range": {
+        "startLine": 52,
+        "startChar": 4,
+        "endLine": 52,
+        "endChar": 20
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "22d0113b_94a05d6c",
         "filename": "android/opengl/gpuinfo.h",
         "patchSetId": 21
