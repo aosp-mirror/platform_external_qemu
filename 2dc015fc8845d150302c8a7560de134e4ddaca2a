@@ -255,6 +255,30 @@
       "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02e4ed24_13fc6bd2",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T18:23:54Z",
+      "side": 1,
+      "message": "Oops :)",
+      "parentUuid": "62a5a9c6_fed9b8f7",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 63
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
