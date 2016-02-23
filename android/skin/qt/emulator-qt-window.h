@@ -218,7 +218,6 @@ public slots:
     void setForwardShortcutsToDevice(int index);
     void show();
     void showMinimized();
-    void wheelScrollTimeout();
 
     void slot_screenChanged();
 
@@ -291,9 +290,6 @@ private:
     android::emulation::FilePusher::Ptr mFilePusher;
     android::emulation::FilePusher::SubscriptionToken mFilePusherSubscription;
     QProgressDialog mPushDialog;
-
-    QTimer mWheelScrollTimer;
-    QPoint mWheelScrollPos;
 };
 
 struct SkinSurface {
