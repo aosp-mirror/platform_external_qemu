@@ -44,6 +44,13 @@ QPlainTextEdit, QTextEdit, QLineEdit {
     border-top: 0px;
     border-bottom: 1px solid %%EDIT_COLOR%%;
 }
+QLineEdit:focus {
+    border-bottom: 2px solid %%TOOL_COLOR%%;
+}
+QPlainTextEdit {
+    background: %%TAB_BKG_COLOR%%;
+    border: 1px solid %%EDIT_COLOR%%;
+}
 QCheckBox::indicator:checked[ColorGroup="Toggle"] {
     image: url(:/%%PATH%%/toggle_on);
     width: 36; height: 24;
@@ -57,6 +64,34 @@ QCheckBox::indicator:checked {
 }
 QCheckBox::indicator:unchecked {
     image: url(:/%%PATH%%/check_no)
+}
+QPushButton:pressed[ToolWindowButton=true], QPushButton:checked[ToolWindowButton=true] {
+    border: none;
+    background: %%TAB_DARKENED_COLOR%%;
+    border-radius: 4px;
+}
+QPushButton[ColorGroup="MajorTab"] {
+    border: none;
+    text-align: left;
+    color: %%MAJOR_TAB_COLOR%%;
+    background: %%TAB_BKG_COLOR%%;
+}
+QPushButton[ColorGroup="MajorTabTitle"] {
+    border: none;
+    text-align: left;
+    color: %%MAJOR_TAB_COLOR%%;
+    background: %%TAB_BKG_COLOR%%;
+}
+QPushButton:pressed[ColorGroup="MajorTab"] {
+    border: none;
+    background: %%TAB_DARKENED_COLOR%%;
+}
+QPushButton:checked[ColorGroup="MajorTab"] {
+    border: none;
+    background: %%TAB_SELECTED_COLOR%%;
+}
+QPushButton:pressed[ColorGroup="Tool"] {
+    border: none;
 }
 QRadioButton::indicator:unchecked {
     image: url(:/%%PATH%%/radio_off);
@@ -85,7 +120,7 @@ QSlider::add-page:horizontal {
 QTableWidget {
     gridline-color: %%TAB_BKG_COLOR%%;
     background: %%TAB_BKG_COLOR%%;
-    border: 0px;
+    border: 1px solid %%EDIT_COLOR%%;
 }
 QTableView::item {
     padding-left: 16;
@@ -144,4 +179,11 @@ QTabBar::tab:!selected{
 QTabBar::tab:disabled {
     color: transparent;
     border-bottom: 2px solid transparent
+}
+RaisedMaterialButton {
+    border-radius: 2px;
+    color: %%TOOL_COLOR%%;
+}
+RaisedMaterialButton:pressed {
+    background: %%TAB_DARKENED_COLOR%%;
 }

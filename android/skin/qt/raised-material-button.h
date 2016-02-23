@@ -22,12 +22,24 @@ public:
         QPushButton(parent),
         mShadowEffect(new QGraphicsDropShadowEffect()) {
         mShadowEffect->setBlurRadius(5.0);
-        mShadowEffect->setOffset(1.0, 1.0);
+        mShadowEffect->setOffset(0.5, 0.5);
+        mShadowEffect->setColor(QColor(25, 25, 25));
         setGraphicsEffect(mShadowEffect);
+        connect(this, SIGNAL(pressed()), this, SLOT(onPressed()));
+        connect(this, SIGNAL(released()), this, SLOT(onReleased()));
     }
 
     QGraphicsDropShadowEffect* shadowEffect() { return mShadowEffect; }
     const QGraphicsDropShadowEffect* shadowEffect() const { return mShadowEffect; }
+
+private slots:
+    void onPressed() {
+        mShadowEffect->setBlurRadius(4.2);
+    }
+
+    void onReleased() {
+        mShadowEffect->setBlurRadius(5.0);
+    }
 
 private:
     QGraphicsDropShadowEffect* mShadowEffect;
