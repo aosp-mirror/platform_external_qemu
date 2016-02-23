@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2def959_25a4c212",
+        "filename": "android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T01:21:06Z",
+      "side": 1,
+      "message": "IMO weak_ptr is enough here. If it\u0027s destroyed - there\u0027s no sense in writing anything",
+      "range": {
+        "startLine": 41,
+        "startChar": 8,
+        "endLine": 41,
+        "endChar": 18
+      },
+      "revId": "333f9af4875290c5f736068291972d64e6ddd858",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62be89e4_60a7431a",
+        "filename": "android/metrics/metrics_reporter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T01:21:06Z",
+      "side": 1,
+      "message": "why do we need to store it? You can always get it back from the flusher\nAnyway, now it actually becomes more and more clear that metrics reporting has to be a class, with its own state (like ini file object, auto flusher, liveness checker etc, and all interface functions has to call into that object. Let\u0027s leave it for the 2.1+",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 56
+      },
+      "revId": "333f9af4875290c5f736068291972d64e6ddd858",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
