@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c2981592_8c896853",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62be89e4_cf8e381b",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 1
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "82bb7df1_73439039",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 23
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-23T22:07:10Z",
       "side": 1,
       "message": "we\u0027ve got Win32UnicodeString class for exactly this",
+      "range": {
+        "startLine": 30,
+        "startChar": 3,
+        "endLine": 30,
+        "endChar": 42
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_526883c4",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "82bb7df1_73439039",
       "range": {
         "startLine": 30,
         "startChar": 3,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "c2c1f56d_325d0f22",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "22d0113b_4dcb54c0",
+      "range": {
+        "startLine": 136,
+        "startChar": 0,
+        "endLine": 136,
+        "endChar": 30
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e2b0b90b_75c4a879",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 23
@@ -105,6 +177,30 @@
       "writtenOn": "2016-02-23T22:07:10Z",
       "side": 1,
       "message": "std::string has a comparison operator",
+      "range": {
+        "startLine": 151,
+        "startChar": 27,
+        "endLine": 151,
+        "endChar": 65
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62be89e4_8a5a6e56",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e2b0b90b_75c4a879",
       "range": {
         "startLine": 151,
         "startChar": 27,
@@ -353,6 +449,30 @@
     },
     {
       "key": {
+        "uuid": "c2981592_bfbd70de",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e2def959_6da74cd3",
+      "range": {
+        "startLine": 243,
+        "startChar": 0,
+        "endLine": 262,
+        "endChar": 20
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2c1f56d_4f857cf8",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 23
@@ -364,6 +484,30 @@
       "writtenOn": "2016-02-23T22:07:10Z",
       "side": 1,
       "message": "this has to be a separate function",
+      "range": {
+        "startLine": 230,
+        "startChar": 0,
+        "endLine": 264,
+        "endChar": 15
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2def959_48a7de80",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c2c1f56d_4f857cf8",
       "range": {
         "startLine": 230,
         "startChar": 0,
@@ -399,6 +543,30 @@
     },
     {
       "key": {
+        "uuid": "62a5a9c6_b728f362",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Ack; will look at it later",
+      "parentUuid": "02e4ed24_699d022e",
+      "range": {
+        "startLine": 307,
+        "startChar": 0,
+        "endLine": 308,
+        "endChar": 24
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2c1f56d_4f121cae",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 23
@@ -410,6 +578,30 @@
       "writtenOn": "2016-02-23T22:07:10Z",
       "side": 1,
       "message": "you can always use Win32UnicodeString to convert the wchar_t* string back to char* Utf8-encoded string and then just work with Utf8. This simplified the rest of the code A LOT, including all the conversions etc",
+      "range": {
+        "startLine": 386,
+        "startChar": 4,
+        "endLine": 386,
+        "endChar": 42
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2def959_08daf6eb",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c2c1f56d_4f121cae",
       "range": {
         "startLine": 386,
         "startChar": 4,
@@ -445,6 +637,30 @@
     },
     {
       "key": {
+        "uuid": "c2981592_7fd00818",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "e2b0b90b_d57a5cfe",
+      "range": {
+        "startLine": 443,
+        "startChar": 0,
+        "endLine": 447,
+        "endChar": 63
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2981592_cc5650fe",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 23
@@ -456,6 +672,30 @@
       "writtenOn": "2016-02-23T22:07:10Z",
       "side": 1,
       "message": "if you open a file in text mode in Windows, ifstream.read()/fread() would convert all \\r\\n pairs to be a single \\n character. And by default all files open in text mode",
+      "range": {
+        "startLine": 454,
+        "startChar": 34,
+        "endLine": 454,
+        "endChar": 39
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02e4ed24_0c0d6c89",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:42:12Z",
+      "side": 1,
+      "message": "Done (opening explicitly in binary mode)",
+      "parentUuid": "c2981592_cc5650fe",
       "range": {
         "startLine": 454,
         "startChar": 34,
