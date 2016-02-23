@@ -122,6 +122,29 @@
     },
     {
       "key": {
+        "uuid": "a29b218c_4fc0ecf3",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T17:45:00Z",
+      "side": 1,
+      "message": "this size is wrong, it has to be multiplied by size of a pointer.\nPlease don\u0027t fix it, just replace the whole pointer machinery with std::vector",
+      "range": {
+        "startLine": 58,
+        "startChar": 21,
+        "endLine": 58,
+        "endChar": 29
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "22d0113b_94a05d6c",
         "filename": "android/opengl/gpuinfo.h",
         "patchSetId": 21
@@ -180,6 +203,30 @@
       "writtenOn": "2016-02-23T17:44:36Z",
       "side": 1,
       "message": "Also, I will refactor for readability---but my 2c:\n\nI don\u0027t really find anything about the C++ style any easier or less bug-prone, and it contains more hidden behavior (constructors/destructors); at least in C there\u0027s really only one abstraction to learn, however difficult it is to work with.",
+      "parentUuid": "62a5a9c6_be057031",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 63
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62a5a9c6_fed9b8f7",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T17:45:00Z",
+      "side": 1,
+      "message": "added a comment",
       "parentUuid": "62a5a9c6_be057031",
       "range": {
         "startLine": 57,
