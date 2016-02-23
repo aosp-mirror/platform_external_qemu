@@ -32,6 +32,7 @@
 #include "android/base/StringFormat.h"
 #include "android/cpu_accelerator.h"
 #include "android/utils/file_data.h"
+#include "android/utils/file_io.h"
 #include "android/utils/path.h"
 #include "android/utils/x86_cpuid.h"
 #include "target-i386/hax-interface.h"
@@ -238,7 +239,7 @@ int32_t cpuAcceleratorGetHaxVersion(const char* kext_dir[],
 
     for (size_t i = 0; i < kext_dir_count; i++) {
         struct stat s;
-        int err = stat(kext_dir[i], &s);
+        int err = android_stat(kext_dir[i], &s);
         if (err < 0 || !S_ISDIR(s.st_mode)) {
             // dir not found
             continue;

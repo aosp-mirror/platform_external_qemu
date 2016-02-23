@@ -15,6 +15,7 @@
 #endif
 
 #include "android/base/system/System.h"
+#include "android/base/system/Win32UnicodeString.h"
 #include "android/qt/qt_path.h"
 #include "android/skin/rect.h"
 #include "android/skin/resource.h"
@@ -43,8 +44,16 @@
 #include <X11/Xlib.h>
 #endif
 
+#ifdef _WIN32
+#include <windows.h>
+#include <shellapi.h>
+#endif
+
 using android::base::System;
 using android::base::String;
+#ifdef _WIN32
+using android::base::Win32UnicodeString;
+#endif
 
 #define  DEBUG  1
 
@@ -83,12 +92,6 @@ std::shared_ptr<void> skin_winsys_get_shared_ptr() {
 
 extern void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv) {
     D("Starting QT main loop\n");
-
-    // Make Qt look at the libraries within this installation
-    String qtPath = androidQtGetLibraryDir();
-    QStringList pathList(qtPath.c_str());
-    QCoreApplication::setLibraryPaths(pathList);
-    D("Qt lib path: %s\n", qtPath.c_str());
 
     if (!no_window) {
         // Give Qt the fonts from our resource file
@@ -331,6 +334,24 @@ extern void skin_winsys_spawn_thread(bool no_window,
     }
 }
 
+void skin_winsys_setup_library_paths() {
+    // Make Qt look at the libraries within this installation
+    // Despite the fact that we added the plugins directory to the environment
+    // we have to add it here as well to support extended unicode characters
+    // in the library path. Without adding the plugin path here that won't work.
+    // What's even more interesting is that adding the plugin path here is not
+    // enough in itself. It also has to be set through the environment variable
+    // or extended unicode characters won't work
+    String qtLibPath = androidQtGetLibraryDir();
+    String qtPluginsPath = androidQtGetPluginsDir();
+    QStringList pathList;
+    pathList.append(QString::fromUtf8(qtLibPath.c_str()));
+    pathList.append(QString::fromUtf8(qtPluginsPath.c_str()));
+    QApplication::setLibraryPaths(pathList);
+    D("Qt lib path: %s\n", qtLibPath.c_str());
+    D("Qt plugin path: %s\n", qtPluginsPath.c_str());
+}
+
 extern void skin_winsys_start(bool no_window, bool raw_keys) {
     GlobalState* g = globalState();
 #ifdef Q_OS_LINUX
@@ -339,6 +360,8 @@ extern void skin_winsys_start(bool no_window, bool raw_keys) {
     // work (confirmed by grepping through Qt code).
     XInitThreads();
 #endif
+    skin_winsys_setup_library_paths();
+
     if (no_window) {
         g->app = new QCoreApplication(g->argc, g->argv);
         EmulatorQtNoWindow::create();
@@ -394,6 +417,33 @@ extern void skin_winsys_run_ui_update(SkinGenericFunction f, void* data) {
 extern "C" int qt_main(int, char**);
 
 int qMain(int argc, char** argv) {
-    return qt_main(argc, argv);
+    // The arguments coming in here are encoded in whatever local code page
+    // Windows is configured with but we need them to be UTF-8 encoded. So we
+    // use GetCommandLineW and CommandLineToArgvW to get a UTF-16 encoded argv
+    // which we then convert to UTF-8.
+    //
+    // According to the Qt documentation Qt itself doesn't really care about
+    // these as it also uses GetCommandLineW on Windows so this shouldn't cause
+    // problems for Qt. But the emulator uses argv[0] to determine the path of
+    // the emulator executable so we need that to be encoded correctly.
+    int numArgs = 0;
+    wchar_t** wideArgv = CommandLineToArgvW(GetCommandLineW(), &numArgs);
+    if (wideArgv == nullptr) {
+        // If this fails we can at least give it a try with the local code page
+        // As long as there are only ANSI characters in the arguments this works
+        return qt_main(argc, argv);
+    }
+
+    // Store converted strings and pointers to those strings, the pointers are
+    // what will become the argv for qt_main
+    std::vector<String> arguments(numArgs);
+    std::vector<char*> argumentPointers(numArgs);
+
+    for (int i = 0; i < numArgs; ++i) {
+        arguments[i] = Win32UnicodeString::convertToUtf8(wideArgv[i]);
+        argumentPointers[i] = reinterpret_cast<char*>(arguments[i].data());
+    }
+
+    return qt_main(numArgs, &argumentPointers[0]);
 }
 #endif  // _WIN32

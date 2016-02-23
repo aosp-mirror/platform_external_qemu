@@ -11,7 +11,10 @@
 */
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
+#include "android/utils/file_io.h"
 #include "android/utils/path.h"
+
+#include "android/base/system/Win32UnicodeString.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -37,6 +40,10 @@
 #endif
 
 #define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
+
+#ifdef _WIN32
+using android::base::Win32UnicodeString;
+#endif  // _WIN32
 
 /** PATH HANDLING ROUTINES
  **
@@ -91,7 +98,7 @@ path_parent( const char*  path, int  levels )
     Next:
         end = base - 1;
     }
-    result = malloc( end-path+1 );
+    result = reinterpret_cast<char*>(malloc( end-path+1 ));
     if (result != NULL) {
         memcpy( result, path, end-path );
         result[end-path] = 0;
@@ -107,12 +114,7 @@ path_parent( const char*  path, int  levels )
 APosixStatus
 path_mkdir( const char*  path, int  mode )
 {
-#ifdef _WIN32
-    (void)mode;
-    return mkdir(path);
-#else
-    return HANDLE_EINTR(mkdir(path, mode));
-#endif
+    return HANDLE_EINTR(android_mkdir(path, mode));
 }
 
 static APosixStatus
@@ -196,8 +198,9 @@ path_get_size( const char*  path, uint64_t  *psize )
     /* avoid _stat64 which is only defined in MSVCRT.DLL, not CRTDLL.DLL */
     /* do not use OpenFile() because it has strange search behaviour that could */
     /* result in getting the size of a different file */
+    Win32UnicodeString utf16Path(path);
     LARGE_INTEGER  size;
-    HANDLE  file = CreateFile( /* lpFilename */        path,
+    HANDLE  file = CreateFileW(/* lpFilename */        utf16Path.c_str(),
                                /* dwDesiredAccess */   GENERIC_READ,
                                /* dwSharedMode */     FILE_SHARE_READ|FILE_SHARE_WRITE,
                                /* lpSecurityAttributes */  NULL,
@@ -242,11 +245,11 @@ APosixStatus
 path_empty_file( const char*  path )
 {
 #ifdef _WIN32
-    int  fd = _creat( path, S_IWRITE );
+    int fd = android_creat(path, S_IWRITE);
 #else
     /* on Unix, only allow the owner to read/write, since the file *
      * may contain some personal data we don't want to see exposed */
-    int  fd = creat(path, S_IRUSR | S_IWUSR);
+    int fd = creat(path, S_IRUSR | S_IWUSR);
 #endif
     if (fd >= 0) {
         close(fd);
@@ -261,20 +264,19 @@ path_copy_file( const char*  dest, const char*  source )
     int  fd, fs, result = -1;
 
     /* if the destination doesn't exist, create it */
-    if ( access(source, F_OK)  < 0 ||
-         path_empty_file(dest) < 0) {
+    if (android_access(source, F_OK) < 0 || path_empty_file(dest) < 0) {
         return -1;
     }
 
-    if ( access(source, R_OK) < 0 ) {
+    if (android_access(source, R_OK) < 0) {
         D("%s: source file is un-readable: %s\n",
           __FUNCTION__, source);
         return -1;
     }
 
 #ifdef _WIN32
-    fd = _open(dest, _O_RDWR | _O_BINARY);
-    fs = _open(source, _O_RDONLY |  _O_BINARY);
+    fd = android_open(dest, _O_RDWR | _O_BINARY);
+    fs = android_open(source, _O_RDONLY |  _O_BINARY);
 #else
     fd = creat(dest, S_IRUSR | S_IWUSR);
     fs = open(source, S_IREAD);
@@ -310,20 +312,19 @@ path_copy_file( const char*  dest, const char*  source )
 APosixStatus
 path_delete_file( const char*  path )
 {
+    int ret = android_unlink(path);
 #ifdef _WIN32
-    int  ret = _unlink( path );
     if (ret == -1 && errno == EACCES) {
         /* a first call to _unlink will fail if the file is set read-only */
         /* we can however try to change its mode first and call unlink    */
         /* again...                                                       */
-        ret = _chmod( path, _S_IREAD | _S_IWRITE );
-        if (ret == 0)
-            ret = _unlink( path );
+        ret = android_chmod(path, _S_IREAD | _S_IWRITE);
+        if (ret == 0) {
+            ret = android_unlink(path);
+        }
     }
-    return ret;
-#else
-    return  unlink(path);
 #endif
+    return ret;
 }
 
 
@@ -339,7 +340,7 @@ path_load_file(const char *fn, size_t  *pSize)
 
     data   = NULL;
 
-    fd = open(fn, O_BINARY | O_RDONLY);
+    fd = android_open(fn, O_BINARY | O_RDONLY);
     if(fd < 0) return NULL;
 
     do {
@@ -445,7 +446,7 @@ path_escape_path(const char* src)
     if (!src) return NULL;
 
     // Allocate for the maximum output size, including terminator
-    char *retStr = malloc(2 * strlen(src) + 1);
+    char *retStr = reinterpret_cast<char*>(malloc(2 * strlen(src) + 1));
     if (retStr == 0) return 0;
 
     char *dst = retStr;

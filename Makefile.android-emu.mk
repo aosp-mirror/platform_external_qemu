@@ -102,6 +102,7 @@ LOCAL_SRC_FILES := \
     android/utils/exec.cpp \
     android/utils/filelock.c \
     android/utils/file_data.c \
+    android/utils/file_io.cpp \
     android/utils/format.cpp \
     android/utils/host_bitness.cpp \
     android/utils/http_utils.cpp \
@@ -115,7 +116,7 @@ LOCAL_SRC_FILES := \
     android/utils/mapfile.c \
     android/utils/misc.c \
     android/utils/panic.c \
-    android/utils/path.c \
+    android/utils/path.cpp \
     android/utils/path_system.cpp \
     android/utils/property_file.c \
     android/utils/reflist.c \
@@ -141,6 +142,7 @@ LOCAL_SRC_FILES += \
     android/base/system/Win32Utils.cpp \
     android/base/system/Win32UnicodeString.cpp \
     android/utils/win32_cmdline_quote.cpp \
+    android/utils/win32_unicode.cpp \
 
 else
 LOCAL_SRC_FILES += \
