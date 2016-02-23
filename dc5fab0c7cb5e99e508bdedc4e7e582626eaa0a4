@@ -50,6 +50,24 @@
       "revId": "dc5fab0c7cb5e99e508bdedc4e7e582626eaa0a4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_a9d30225",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T17:38:34Z",
+      "side": 1,
+      "message": "Bo is working on a patch in the guest that does this exact thing. I\u0027ll change it unconditionally -gpu guest when that lands.",
+      "parentUuid": "a29b218c_5e2664fd",
+      "revId": "dc5fab0c7cb5e99e508bdedc4e7e582626eaa0a4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
