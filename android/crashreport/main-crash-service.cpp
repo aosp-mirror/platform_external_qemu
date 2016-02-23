@@ -46,8 +46,10 @@
 
 static bool displayConfirmDialog(
         android::crashreport::CrashService* crashservice,
-        Ui::Settings::CRASHREPORT_PREFERENCE_VALUE reportPreference) {
-    ConfirmDialog msgBox(nullptr, crashservice, reportPreference);
+        Ui::Settings::CRASHREPORT_PREFERENCE_VALUE reportPreference,
+        const char* data_dir) {
+
+    ConfirmDialog msgBox(nullptr, crashservice, reportPreference, data_dir);
 
     if (crashservice->getDumpMessage().empty() &&
         crashservice->didCrashOnExit() &&
@@ -162,7 +164,8 @@ int main(int argc, char** argv) {
     InitQt(argc, argv);
 
     if (!displayConfirmDialog(crashservice.get(),
-                              reportPreference)) {
+                              reportPreference,
+                              data_dir)          ) {
         return 1;
     }
 

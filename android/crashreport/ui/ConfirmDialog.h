@@ -44,6 +44,7 @@ private:
     QLabel* mProgressText;
     QProgressBar* mProgress;
     QCheckBox* mSavePreference;
+    QCheckBox* mSoftwareGPU;
 
     QLabel* mSuggestionText;
 
@@ -58,6 +59,8 @@ private:
     bool mDidUpdateDetails;
     bool mIsExitCrash;
     bool mQuietMode;
+    const char* mReportingDir;  // Directory containing the temporary files
+
     void disableInput();
     void enableInput();
     void showProgressBar(const std::string& msg);
@@ -67,11 +70,13 @@ private:
     void addSuggestion(const QString& str);
     void hideDetails(void);
     void showDetails(void);
+    void setSwGpu(void);
 
 public:
     ConfirmDialog(QWidget* parent,
                   android::crashreport::CrashService* crashservice,
-                  Ui::Settings::CRASHREPORT_PREFERENCE_VALUE reportPreference);
+                  Ui::Settings::CRASHREPORT_PREFERENCE_VALUE reportPreference,
+                  const char* reportingDir);
     bool didGetSysInfo() const;
 
     QString getUserComments();
@@ -83,4 +88,3 @@ public slots:
 private:
     std::string constructDumpMessage() const;
 };
-
