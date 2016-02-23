@@ -30,6 +30,21 @@
 
 ANDROID_BEGIN_HEADER
 
+/* Some commonly-used file names */
+
+/* The name of the .ini file that contains the complete hardware
+ * properties for the AVD. This file is specific to the AVD and
+ * is in the AVD's directory. This will be used to launch the
+ * corresponding core from the UI.
+ */
+#define CORE_HARDWARE_INI "hardware-qemu.ini"
+
+/* The file where the crash reporter holds a copy of
+ * the hardware properties. This file is in a temporary
+ * directory set up by the crash reporter.
+ */
+#define CRASH_AVD_HARDWARE_INFO "avd_info.txt"
+
 /** in vl.c */
 
 /* emulated network up/down speeds, expressed in bits/seconds */

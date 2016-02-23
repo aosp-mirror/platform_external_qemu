@@ -11,6 +11,7 @@
 */
 #include "android/avd/info.h"
 
+#include "android/android.h"
 #include "android/avd/util.h"
 #include "android/avd/keys.h"
 #include "android/emulation/bufprint_config_dirs.h"
@@ -69,12 +70,6 @@ AvdInfo*        android_avdInfo;
  * Individual image disk search patch can be over-riden on the command-line
  * with one of the usual options.
  */
-
-/* the name of the .ini file that will contain the complete hardware
- * properties for the AVD. This will be used to launch the corresponding
- * core from the UI.
- */
-#define  CORE_HARDWARE_INI   "hardware-qemu.ini"
 
 /* certain disk image files are mounted read/write by the emulator
  * to ensure that several emulators referencing the same files
