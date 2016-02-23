@@ -210,6 +210,30 @@
     },
     {
       "key": {
+        "uuid": "22d0113b_4d6c7442",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:21:11Z",
+      "side": 1,
+      "message": "got it, we don\u0027t support redirection in posix implementation",
+      "parentUuid": "e2def959_aad87a69",
+      "range": {
+        "startLine": 207,
+        "startChar": 0,
+        "endLine": 222,
+        "endChar": 20
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62a5a9c6_5c766c67",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 23
@@ -269,6 +293,54 @@
       "side": 1,
       "message": "Result: ifstream just gives me a bunch of characters with extra spaces and we cannot even cast the resulting string.c_str() to wchar_t*.",
       "parentUuid": "62be89e4_8f8ba0d9",
+      "range": {
+        "startLine": 243,
+        "startChar": 0,
+        "endLine": 262,
+        "endChar": 20
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2def959_6da74cd3",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:21:11Z",
+      "side": 1,
+      "message": "file is always a set of bytes. later you can treat it as whatever\nbtw, when casting char* to wchar_t*, don\u0027t forget that null-terminator in wchar_t* has to be the whole wchar_t. in char* string null-terminator is a single char, which isn\u0027t enough\nso will need to append several 0 chars to the resulting string before doing anything to it",
+      "parentUuid": "62be89e4_8f8ba0d9",
+      "range": {
+        "startLine": 243,
+        "startChar": 0,
+        "endLine": 262,
+        "endChar": 20
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22d0113b_2896c669",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-23T22:21:11Z",
+      "side": 1,
+      "message": "could you please show the code?",
+      "parentUuid": "82bb7df1_f355609a",
       "range": {
         "startLine": 243,
         "startChar": 0,
