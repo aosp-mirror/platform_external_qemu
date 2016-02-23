@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c2981592_b77fdaec",
+        "filename": "android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-23T18:33:34Z",
+      "side": 1,
+      "message": "I thought about that at first.\nI don\u0027t have a strong feeling about it.",
+      "parentUuid": "e2def959_25a4c212",
+      "range": {
+        "startLine": 41,
+        "startChar": 8,
+        "endLine": 41,
+        "endChar": 18
+      },
+      "revId": "333f9af4875290c5f736068291972d64e6ddd858",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62be89e4_60a7431a",
         "filename": "android/metrics/metrics_reporter.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-23T01:21:06Z",
       "side": 1,
       "message": "why do we need to store it? You can always get it back from the flusher\nAnyway, now it actually becomes more and more clear that metrics reporting has to be a class, with its own state (like ini file object, auto flusher, liveness checker etc, and all interface functions has to call into that object. Let\u0027s leave it for the 2.1+",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 56
+      },
+      "revId": "333f9af4875290c5f736068291972d64e6ddd858",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22d0113b_f206816c",
+        "filename": "android/metrics/metrics_reporter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-23T18:33:34Z",
+      "side": 1,
+      "message": "That\u0027s what https://android-review.googlesource.com/#/c/202576 was taking the next step towards -- tear out even more common stuff.\n\nThe next CL would essentially replace this clunky C file with an object.\n\nThe reason I have the metrics file here is because ownership is no longer with file flusher, so I don\u0027t want to get it from the flusher (I even removed the function to get it, in this CL).",
+      "parentUuid": "62be89e4_60a7431a",
       "range": {
         "startLine": 61,
         "startChar": 0,
