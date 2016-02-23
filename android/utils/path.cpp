@@ -411,7 +411,7 @@ path_search_exec( const char* filename )
     p = sysPath;
 
     while (*p) {
-        char* p2 = strchr(p, DIR_SEP);
+        const char* p2 = strchr(p, DIR_SEP);
         int   len;
         if (p2 == NULL) {
             len = strlen(p);
