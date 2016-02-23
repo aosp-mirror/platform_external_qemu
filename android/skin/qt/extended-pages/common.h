@@ -25,8 +25,8 @@ QString getScreenshotSaveDirectory();
 // Get the currently active UI theme.
 SettingsTheme getSelectedTheme();
 
-// Changes icons on all push buttons to fit the given theme.
-void switchAllIconsForTheme(SettingsTheme theme);
+// Adjusts all push buttons to fit the given theme (i.e. changing icons)
+void adjustAllButtonsForTheme(SettingsTheme theme);
 
 // Obtains the given icon for the current theme.
 QIcon getIconForCurrentTheme(const QString& icon_name);

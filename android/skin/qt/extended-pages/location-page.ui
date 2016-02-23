@@ -75,10 +75,10 @@
     </property>
    </item>
   </widget>
-  <widget class="QPushButton" name="loc_sendPointButton">
+  <widget class="RaisedMaterialButton" name="loc_sendPointButton">
    <property name="geometry">
     <rect>
-     <x>554</x>
+     <x>538</x>
      <y>220</y>
      <width>66</width>
      <height>36</height>
@@ -118,10 +118,10 @@
     <string>Title</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="loc_playStopButton">
+  <widget class="RaisedMaterialButton" name="loc_playStopButton">
    <property name="geometry">
     <rect>
-     <x>6</x>
+     <x>20</x>
      <y>550</y>
      <width>36</width>
      <height>36</height>
@@ -149,6 +149,9 @@
    <property name="themeIconName_disabled" stdset="0">
     <string>play_arrow_disabled</string>
    </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Tool</string>
+   </property>
   </widget>
   <widget class="QLabel" name="label_13">
    <property name="geometry">
@@ -166,14 +169,20 @@
     <string>Title</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="loc_GpxKmlButton">
+  <widget class="RaisedMaterialButton" name="loc_GpxKmlButton">
    <property name="geometry">
     <rect>
-     <x>496</x>
+     <x>480</x>
      <y>550</y>
      <width>124</width>
      <height>36</height>
     </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
    </property>
    <property name="font">
     <font>
@@ -470,6 +479,11 @@
    <extends>QWidget</extends>
    <header>android/skin/qt/angle-input-widget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RaisedMaterialButton</class>
+   <extends>QPushButton</extends>
+   <header>android/skin/qt/raised-material-button.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
