@@ -257,6 +257,30 @@
     },
     {
       "key": {
+        "uuid": "82bb7df1_f355609a",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T22:18:31Z",
+      "side": 1,
+      "message": "Result: ifstream just gives me a bunch of characters with extra spaces and we cannot even cast the resulting string.c_str() to wchar_t*.",
+      "parentUuid": "62be89e4_8f8ba0d9",
+      "range": {
+        "startLine": 243,
+        "startChar": 0,
+        "endLine": 262,
+        "endChar": 20
+      },
+      "revId": "14b48e3f1f8f1441c47d078025e865b73683b793",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2c1f56d_4f857cf8",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 23
