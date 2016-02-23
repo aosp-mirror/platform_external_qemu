@@ -101,6 +101,30 @@
     },
     {
       "key": {
+        "uuid": "c2981592_3f4de0b2",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 737,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:46:03Z",
+      "side": 1,
+      "message": "Done (using ifstream)",
+      "parentUuid": "82bb7df1_f05676fd",
+      "range": {
+        "startLine": 737,
+        "startChar": 15,
+        "endLine": 737,
+        "endChar": 20
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e2def959_2026f0fc",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 21
@@ -124,6 +148,30 @@
     },
     {
       "key": {
+        "uuid": "e2b0b90b_b0691e89",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 741,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:46:03Z",
+      "side": 1,
+      "message": "Done (not using fopen)",
+      "parentUuid": "e2def959_2026f0fc",
+      "range": {
+        "startLine": 741,
+        "startChar": 14,
+        "endLine": 741,
+        "endChar": 17
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62be89e4_236395ed",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 21
@@ -135,6 +183,30 @@
       "writtenOn": "2016-02-23T02:43:51Z",
       "side": 1,
       "message": "contents -\u003e std::vector\u003cchar\u003e; otherwise it\u0027s too easy to leak (e.g. in this code path)",
+      "range": {
+        "startLine": 766,
+        "startChar": 0,
+        "endLine": 766,
+        "endChar": 19
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22d0113b_88aa7ae0",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 766,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T23:46:03Z",
+      "side": 1,
+      "message": "Done (line-by-line style, fstream)",
+      "parentUuid": "62be89e4_236395ed",
       "range": {
         "startLine": 766,
         "startChar": 0,
