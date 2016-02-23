@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/raised-material-button.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/qt-settings.h"
 #include <QApplication>
@@ -87,15 +88,26 @@ SettingsTheme getSelectedTheme() {
     return (SettingsTheme)settings.value(Ui::Settings::UI_THEME, SETTINGS_THEME_LIGHT).toInt();
 }
 
-void switchAllIconsForTheme(SettingsTheme theme)
+void adjustAllButtonsForTheme(SettingsTheme theme)
 {
     // Switch to the icon images that are appropriate for this theme.
     // Examine every widget.
     QWidgetList wList = QApplication::allWidgets();
-    for (int idx = 0; idx < wList.size(); idx++) {
-        QPushButton *pB = dynamic_cast<QPushButton*>(wList[idx]);
-        if (pB && !pB->icon().isNull()) {
-            setButtonEnabled(pB, theme, pB->isEnabled());
+    for (QWidget* w : wList) {
+        if (QPushButton *pB = qobject_cast<QPushButton*>(w)) {
+            if (!pB->icon().isNull()) {
+                setButtonEnabled(pB, theme, pB->isEnabled());
+            }
+
+            // Adjust shadow color for material buttons depending on theme.
+            if (RaisedMaterialButton* material_btn =
+                    qobject_cast<RaisedMaterialButton*>(pB)) {
+                material_btn
+                    ->shadowEffect()
+                    ->setColor(theme == SETTINGS_THEME_LIGHT ?
+                                   QColor(200, 200, 200) :
+                                   QColor(25, 25, 25));
+            }
         }
     }
 }

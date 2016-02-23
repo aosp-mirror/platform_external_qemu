@@ -297,6 +297,9 @@ font-family: &quot;Roboto&quot;</string>
      <height>20</height>
     </size>
    </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -343,6 +346,9 @@ font-family: &quot;Roboto&quot;</string>
      <height>20</height>
     </size>
    </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -386,6 +392,9 @@ font-family: &quot;Roboto&quot;</string>
      <width>20</width>
      <height>20</height>
     </size>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -431,6 +440,9 @@ font-family: &quot;Roboto&quot;</string>
      <height>20</height>
     </size>
    </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -474,6 +486,9 @@ font-family: &quot;Roboto&quot;</string>
      <width>20</width>
      <height>20</height>
     </size>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -519,6 +534,9 @@ font-family: &quot;Roboto&quot;</string>
      <height>20</height>
     </size>
    </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="flat">
     <bool>true</bool>
    </property>
@@ -558,7 +576,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>266</y>
+     <y>268</y>
      <width>194</width>
      <height>42</height>
     </rect>
@@ -587,6 +605,9 @@ font-family: &quot;Roboto&quot;</string>
      <width>20</width>
      <height>20</height>
     </size>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -636,7 +657,7 @@ font-family: &quot;Roboto&quot;</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>308</y>
+     <y>310</y>
      <width>194</width>
      <height>42</height>
     </rect>
@@ -665,6 +686,9 @@ font-family: &quot;Roboto&quot;</string>
      <width>20</width>
      <height>20</height>
     </size>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
    </property>
    <property name="flat">
     <bool>true</bool>

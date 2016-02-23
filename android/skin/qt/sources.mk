@@ -76,6 +76,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-pages/telephony-page.h \
     android/skin/qt/extended-pages/virtual-sensors-page.h \
     android/skin/qt/extended-window.h \
+    android/skin/qt/raised-material-button.h \
     android/skin/qt/size-tweaker.h \
     android/skin/qt/QtTimerImpl.h \
     android/skin/qt/tool-window.h \
