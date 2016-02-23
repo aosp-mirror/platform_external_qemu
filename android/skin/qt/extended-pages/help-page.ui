@@ -76,7 +76,7 @@
        <string>Command</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeft|AlignVCenter</set>
+       <set>AlignLeading|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -84,7 +84,7 @@
        <string>Key</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeft|AlignVCenter</set>
+       <set>AlignLeading|AlignVCenter</set>
       </property>
      </column>
     </widget>
@@ -93,7 +93,7 @@
     <attribute name="title">
      <string>Emulator help</string>
     </attribute>
-    <widget class="QPushButton" name="help_docs">
+    <widget class="RaisedMaterialButton" name="help_docs">
      <property name="geometry">
       <rect>
        <x>4</x>
@@ -123,11 +123,11 @@
       <string notr="true">Tool</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="help_fileBug">
+    <widget class="RaisedMaterialButton" name="help_fileBug">
      <property name="geometry">
       <rect>
        <x>4</x>
-       <y>50</y>
+       <y>60</y>
        <width>145</width>
        <height>36</height>
       </rect>
@@ -153,11 +153,11 @@
       <string notr="true">Tool</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="help_sendFeedback">
+    <widget class="RaisedMaterialButton" name="help_sendFeedback">
      <property name="geometry">
       <rect>
        <x>4</x>
-       <y>90</y>
+       <y>110</y>
        <width>145</width>
        <height>36</height>
       </rect>
@@ -441,6 +441,13 @@
    </widget>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RaisedMaterialButton</class>
+   <extends>QPushButton</extends>
+   <header>android/skin/qt/raised-material-button.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

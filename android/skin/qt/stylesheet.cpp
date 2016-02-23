@@ -71,6 +71,7 @@ QHash<QString, QString> lightValues {
     {"SCROLL_HANDLE_COLOR",  "#d9d9d9"},  // Handle of scroller
     {TAB_BKG_COLOR_VAR,      "#ffffff"},  // Background of major tabs
     {TAB_SELECTED_COLOR_VAR, "#f5f5f5"},  // Background of the selected major tab
+    {"TAB_DARKENED_COLOR",   "#e6e6e6"},
     {"TABLE_BOTTOM_COLOR",   "#e0e0e0"},
     {"TEXT_COLOR",           "#212121"},  // Main page text
     {"TITLE_COLOR",          "#757575"},  // Main page titles
@@ -91,6 +92,7 @@ QHash<QString, QString> darkValues {
     {"SCROLL_HANDLE_COLOR",   "#1d272c"},
     {TAB_BKG_COLOR_VAR,       "#394249"},
     {TAB_SELECTED_COLOR_VAR,  "#313c42"},
+    {"TAB_DARKENED_COLOR",    "#20292e"},
     {"TABLE_BOTTOM_COLOR",    "#1d272c"},
     {"TEXT_COLOR",            "#eeeeee"},
     {"TITLE_COLOR",           "#bec1c3"},
