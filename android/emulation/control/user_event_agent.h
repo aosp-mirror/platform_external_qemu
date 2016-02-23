@@ -32,6 +32,9 @@ typedef struct QAndroidUserEventAgent {
     // Mouse event.
     void (*sendMouseEvent)(int dx, int dy, int dz, int buttonsState);
 
+    // Wheel event.
+    void (*sendWheelEvent)(int x, int y, int isVertical, int delta);
+
     // Send generic input events.
     void (*sendGenericEvent)(int type, int code, int value);
 
