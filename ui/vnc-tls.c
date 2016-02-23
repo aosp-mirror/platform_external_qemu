@@ -27,6 +27,9 @@
 #include "qemu-x509.h"
 #include "vnc.h"
 #include "qemu/sockets.h"
+#ifdef USE_ANDROID_EMU
+#include "android/utils/file_io.h"
+#endif  // USE_ANDROID_EMU
 
 #if defined(_VNC_DEBUG) && _VNC_DEBUG >= 2
 /* Very verbose, so only enabled for _VNC_DEBUG >= 2 */
@@ -451,7 +454,11 @@ static int vnc_set_x509_credential(VncDisplay *vd,
     strcat(*cred, filename);
 
     VNC_DEBUG("Check %s\n", *cred);
+#ifdef USE_ANDROID_EMU
+    if (android_stat(*cred, &sb) < 0) {
+#else  // !USE_ANDROID_EMU
     if (stat(*cred, &sb) < 0) {
+#endif  // USE_ANDROID_EMU
         g_free(*cred);
         *cred = NULL;
         if (ignoreMissing && errno == ENOENT)

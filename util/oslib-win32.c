@@ -38,6 +38,10 @@
 #include "trace.h"
 #include "qemu/sockets.h"
 
+#ifdef USE_ANDROID_EMU
+#include "android/utils/win32_unicode.h"
+#endif  // USE_ANDROID_EMU
+
 /* this must come after including "trace.h" */
 #include <shlobj.h>
 
@@ -227,10 +231,23 @@ void qemu_init_exec_dir(const char *argv0)
     char buf[MAX_PATH];
     DWORD len;
 
+#ifdef USE_ANDROID_EMU
+    wchar_t wideBuf[MAX_PATH];
+    len = GetModuleFileNameW(NULL, wideBuf, MAX_PATH);
+    if (len == 0 || len >= MAX_PATH) {
+        return;
+    }
+    int written = win32_utf16_to_utf8_buf(wideBuf, buf, sizeof(buf));
+    if (written < 0) {
+        return;
+    }
+    len = written;
+#else
     len = GetModuleFileName(NULL, buf, sizeof(buf) - 1);
     if (len == 0) {
         return;
     }
+#endif
 
     buf[len] = 0;
     p = buf + len - 1;

@@ -4174,7 +4174,11 @@ static int vfio_initfn(PCIDevice *pdev)
              "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/",
              vdev->host.domain, vdev->host.bus, vdev->host.slot,
              vdev->host.function);
+#ifdef USE_ANDROID_EMU
+    if (android_stat(path, &st) < 0) {
+#else  // !USE_ANDROID_EMU
     if (stat(path, &st) < 0) {
+#endif  // USE_ANDROID_EMU
         error_report("vfio: error: no such host device: %s", path);
         return -errno;
     }

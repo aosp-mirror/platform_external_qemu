@@ -30,6 +30,9 @@
 #include "migration/migration.h"
 #include "qapi/qmp/qint.h"
 #include "qapi/qmp/qbool.h"
+#ifdef USE_ANDROID_EMU
+#include "android/utils/file_io.h"
+#endif  // USE_ANDROID_EMU
 
 #ifndef S_IWGRP
 #define S_IWGRP 0
@@ -731,7 +734,11 @@ static int read_directory(BDRVVVFATState* s, int mapping_index)
 	buffer = g_malloc(length);
 	snprintf(buffer,length,"%s/%s",dirname,entry->d_name);
 
+#ifdef USE_ANDROID_EMU
+	if(android_stat(buffer,&st)<0) {
+#else  // !USE_ANDROID_EMU
 	if(stat(buffer,&st)<0) {
+#endif  // USE_ANDROID_EMU
             g_free(buffer);
             continue;
 	}

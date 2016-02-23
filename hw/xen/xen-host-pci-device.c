@@ -203,7 +203,11 @@ static bool xen_host_pci_dev_is_virtfn(XenHostPCIDevice *d)
     if (xen_host_pci_sysfs_path(d, "physfn", path, sizeof (path))) {
         return false;
     }
+#ifdef USE_ANDROID_EMU
+    return !android_stat(path, &buf);
+#else  // !USE_ANDROID_EMU
     return !stat(path, &buf);
+#endif  // USE_ANDROID_EMU
 }
 
 static int xen_host_pci_config_open(XenHostPCIDevice *d)

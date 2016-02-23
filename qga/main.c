@@ -42,6 +42,9 @@
 #define CONFIG_FSFREEZE
 #endif
 #endif
+#ifdef USE_ANDROID_EMU
+#include "android/utils/file_io.h"
+#endif
 
 #ifndef _WIN32
 #define QGA_VIRTIO_PATH_DEFAULT "/dev/virtio-ports/org.qemu.guest_agent.0"
@@ -829,7 +832,11 @@ static gboolean read_persistent_state(GAPersistentState *pstate,
 
     g_assert(pstate);
 
+#ifdef USE_ANDROID_EMU
+    if (android_stat(path, &st) == -1) {
+#else  // !USE_ANDROID_EMU
     if (stat(path, &st) == -1) {
+#endif  // USE_ANDROID_EMU
         /* it's okay if state file doesn't exist, but any other error
          * indicates a permissions issue or some other misconfiguration
          * that we likely won't be able to recover from.
@@ -1087,7 +1094,11 @@ int main(int argc, char **argv)
      * uneeded unfreeze than to risk hanging on start-up
      */
     struct stat st;
+#ifdef USE_ANDROID_EMU
+    if (android_stat(s->state_filepath_isfrozen, &st) == -1) {
+#else  // !USE_ANDROID_EMU
     if (stat(s->state_filepath_isfrozen, &st) == -1) {
+#endif  // USE_ANDROID_EMU
         /* it's okay if the file doesn't exist, but if we can't access for
          * some other reason, such as permissions, there's a configuration
          * that needs to be addressed. so just bail now before we get into

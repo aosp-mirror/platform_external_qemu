@@ -25,6 +25,10 @@
 #include "block/coroutine.h"
 #include "migration/qemu-file.h"
 
+#ifdef USE_ANDROID_EMU
+#include "android/utils/file_io.h"
+#endif  // USE_ANDROID_EMU
+
 typedef struct QEMUFileStdio {
     FILE *stdio_file;
     QEMUFile *file;
@@ -138,7 +142,11 @@ QEMUFile *qemu_popen_cmd(const char *command, const char *mode)
         return NULL;
     }
 
+#ifdef USE_ANDROID_EMU
+    stdio_file = android_popen(command, mode);
+#else  // !USE_ANDROID_EMU
     stdio_file = popen(command, mode);
+#endif  // USE_ANDROID_EMU
     if (stdio_file == NULL) {
         return NULL;
     }

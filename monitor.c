@@ -76,6 +76,9 @@
 #include "block/qapi.h"
 #include "qapi/qmp-event.h"
 #include "qapi-event.h"
+#ifdef USE_ANDROID_EMU
+#include "android/utils/file_io.h"
+#endif  // USE_ANDROID_EMU
 
 /* for pic/irq_info */
 #if defined(TARGET_SPARC)
@@ -4326,7 +4329,7 @@ static void file_completion(Monitor *mon, const char *input)
             /* stat the file to find out if it's a directory.
              * In that case add a slash to speed up typing long paths
              */
-            if (stat(file, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+            if (android_stat(file, &sb) == 0 && S_ISDIR(sb.st_mode)) {
                 pstrcat(file, sizeof(file), "/");
             }
             readline_add_completion(mon->rs, file);
