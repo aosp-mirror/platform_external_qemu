@@ -676,6 +676,30 @@
       "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2981592_4c6ec0cc",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-23T21:59:21Z",
+      "side": 1,
+      "message": "Thanks Bjoern! Will use android_fopen.",
+      "parentUuid": "62be89e4_8f2cc0dd",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 63
+      },
+      "revId": "2dc015fc8845d150302c8a7560de134e4ddaca2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
