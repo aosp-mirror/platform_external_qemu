@@ -937,21 +937,24 @@ SkinEvent *EmulatorQtWindow::createSkinEvent(SkinEventType type)
     return skin_event;
 }
 
-void EmulatorQtWindow::doResize(const QSize &size)
-{
+void EmulatorQtWindow::doResize(const QSize& size, bool isKbdShortcut) {
     if (mBackingSurface) {
         QSize newSize(mBackingSurface->original_w, mBackingSurface->original_h);
         newSize.scale(size, Qt::KeepAspectRatio);
 
-        QRect screenDimensions;
-        slot_getScreenDimensions(&screenDimensions);
+        // Make sure the new size is always a little bit smaller than the
+        // screen to prevent keyboard shortcut scaling from making a window
+        // too large for the screen, which can result in the showing of the
+        // scroll bars. This is not an issue when resizing by dragging the
+        // corner because the OS will prevent too large a window.
+        if (isKbdShortcut) {
+            QRect screenDimensions;
+            slot_getScreenDimensions(&screenDimensions);
 
-        // Make sure the new size is always a little bit smaller than the screen to prevent
-        // keyboard shortcut scaling from making a window too large for the screen, which can
-        // result in the showing of the scroll bars.
-        if (newSize.width() > screenDimensions.width() ||
-            newSize.height() > screenDimensions.height()) {
-            newSize.scale(screenDimensions.size(), Qt::KeepAspectRatio);
+            if (newSize.width() > screenDimensions.width() ||
+                newSize.height() > screenDimensions.height()) {
+                newSize.scale(screenDimensions.size(), Qt::KeepAspectRatio);
+            }
         }
 
         double widthScale =
@@ -1178,12 +1181,12 @@ void EmulatorQtWindow::saveZoomPoints(const QPoint &focus, const QPoint &viewpor
 
 void EmulatorQtWindow::scaleDown()
 {
-    doResize(mContainer.size() / 1.1);
+    doResize(mContainer.size() / 1.1, true);
 }
 
 void EmulatorQtWindow::scaleUp()
 {
-    doResize(mContainer.size() * 1.1);
+    doResize(mContainer.size() * 1.1, true);
 }
 
 void EmulatorQtWindow::zoomIn()
