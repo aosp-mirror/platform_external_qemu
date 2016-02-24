@@ -22,6 +22,30 @@
       "revId": "a937e6b7ab76b2e953e9cfd80d5bf83b6dd9a8ed",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22d0113b_4380c4ea",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 37
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-24T02:39:48Z",
+      "side": 1,
+      "message": "That was more for debugging purposes. I\u0027ll remove it.",
+      "parentUuid": "a29b218c_fe1e4ff5",
+      "range": {
+        "startLine": 106,
+        "startChar": 3,
+        "endLine": 106,
+        "endChar": 20
+      },
+      "revId": "a937e6b7ab76b2e953e9cfd80d5bf83b6dd9a8ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
