@@ -20,7 +20,8 @@ ANDROID_BEGIN_HEADER
 
 // CURL library wrapper. This is used to perform the following:
 //
-// - Initialization and deinitialization of the library.
+// - Initialization and deinitialization of the library, in a multi-threaded
+//   context.
 // - Download data from a given URL, passing optional POST data to the server.
 //
 // It is important to avoid exposing <curl/curl.h> to client code, as this
@@ -59,6 +60,8 @@ typedef size_t (*CurlWriteCallback)(char* ptr,
 // the |callback_func| function, which will receive |callback_userdata| as
 // its fourth parameter.
 //
+// This function can block forever.
+//
 // On failure, return false and sets |*error| to a heap-allocated error message
 // string that must be free()-ed by the caller. On success, return true and
 // do not touch |*error|.
@@ -74,6 +77,8 @@ extern bool curl_download(const char* url,
 // HTTP response of 404 (file not found) is allowed, as this is used by the
 // Google Tools Toolbar API by design. On faillure, return false and sets
 // |*error|. On success, return true.
+//
+// This function can block forever.
 extern bool curl_download_null(const char* url,
                                const char* post_fields,
                                bool allow_404,
