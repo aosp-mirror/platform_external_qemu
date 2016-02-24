@@ -16,6 +16,7 @@
 
 #include "android/base/TypeUtils.h"
 #include "android/skin/qt/ui-event-recorder.h"
+#include "android/utils/debug.h"
 
 #include <QEvent>
 #include <QMetaEnum>
@@ -29,20 +30,86 @@ void serializeEventToStream(std::ostream&, const QEvent*);
 template <class ContainerType>
 std::string serializeEvents(
         const ContainerType& container,
-        enable_if_convertible<
-            typename ContainerType::value_type,
-            EventRecord> = nullptr) {
+        enable_if_convertible<typename ContainerType::value_type, EventRecord> =
+                nullptr) {
     static int event_enum_index =
         QEvent::staticMetaObject.indexOfEnumerator("Type");
     std::ostringstream str;
     for (int i = 0; i < container.size(); ++i) {
         const auto& event = container[i].event;
         if (event) {
-            str << container[i].target_name << " "
-                << QEvent::staticMetaObject.enumerator(event_enum_index).valueToKey(event->type()) << " ";
+            str << container[i].target_name << ":"
+                << QEvent::staticMetaObject.enumerator(event_enum_index)
+                            .valueToKey(event->type())
+                << ":" << container[i].dt << ":";
             serializeEventToStream(str, event.get());
         }
     }
     return str.str();
 }
 
+std::unique_ptr<QEvent> deserializeEventFromStream(std::istream& iss,
+                                                   int event_type);
+
+bool endOfEventStream(std::istream& recordstream);
+
+template <class ContainerType>
+void deserializeEvents(std::istringstream& recordstream,
+                       ContainerType& container,
+                       enable_if_convertible<typename ContainerType::value_type,
+                                             EventRecord> = nullptr) {
+    while (true) {
+        std::string target_name;
+        std::getline(recordstream, target_name, ':');
+        if (target_name.empty()) {
+            if (endOfEventStream(recordstream)) {
+                break;
+            }
+            // malformatted line, missing info to deserialize
+            continue;
+        }
+
+        std::string str_event_type;
+        std::getline(recordstream, str_event_type, ':');
+        if (str_event_type.empty()) {
+            if (endOfEventStream(recordstream)) {
+                break;
+            }
+            // malformatted line, missing info to deserialize
+            continue;
+        }
+        int event_enum_index =
+                QEvent::staticMetaObject.indexOfEnumerator("Type");
+        int event_type = QEvent::staticMetaObject.enumerator(event_enum_index)
+                                 .keyToValue(str_event_type.c_str());
+
+        std::string str_dt;
+        std::getline(recordstream, str_dt, ':');
+        if (str_dt.empty()) {
+            if (endOfEventStream(recordstream)) {
+                break;
+            }
+            // malformatted line, missing info to deserialize
+            continue;
+        }
+        int dt = 0;
+        try {
+            dt = stoi(str_dt);
+        } catch (...) {
+            // The only reason why stoi can fail is an improperly formatted
+            // event record in file; continue to the next line, if possible
+            derror("Corrupt input-replay event record");
+            if (endOfEventStream(recordstream)) {
+                break;
+            }
+            continue;
+        }
+
+        EventRecord record{deserializeEventFromStream(recordstream, event_type),
+                           target_name, dt};
+
+        // skip unsupported events (deserializer returned null)
+        if (record.event != nullptr)
+            container.push_back(std::move(record));
+    }
+}
