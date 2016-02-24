@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "22d0113b_c8a632e8",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-24T01:10:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62a5a9c6_7765cb87",
+      "range": {
+        "startLine": 129,
+        "startChar": 4,
+        "endLine": 129,
+        "endChar": 7
+      },
+      "revId": "01ecd7061b273cd32ef049cbe790774616a21026",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2c1f56d_e5a0ef6c",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 26
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-24T00:02:54Z",
       "side": 1,
       "message": "instead of separate open() call, just pass the parameters to class constructor",
+      "range": {
+        "startLine": 217,
+        "startChar": 20,
+        "endLine": 217,
+        "endChar": 21
+      },
+      "revId": "01ecd7061b273cd32ef049cbe790774616a21026",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2def959_68961a75",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-24T01:10:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c2c1f56d_e5a0ef6c",
       "range": {
         "startLine": 217,
         "startChar": 20,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "62be89e4_6a795a55",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-24T01:10:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e2b0b90b_30cbcec1",
+      "range": {
+        "startLine": 244,
+        "startChar": 39,
+        "endLine": 244,
+        "endChar": 48
+      },
+      "revId": "01ecd7061b273cd32ef049cbe790774616a21026",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62be89e4_0a141e26",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 26
@@ -82,6 +154,30 @@
       "writtenOn": "2016-02-24T00:02:54Z",
       "side": 1,
       "message": "please don\u0027t do this. return a string, a vector\u003cchar\u003e, etc. Just don\u0027t return a new-allocated memory",
+      "range": {
+        "startLine": 243,
+        "startChar": 3,
+        "endLine": 245,
+        "endChar": 29
+      },
+      "revId": "01ecd7061b273cd32ef049cbe790774616a21026",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_f962e114",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 26
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-24T01:10:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62be89e4_0a141e26",
       "range": {
         "startLine": 243,
         "startChar": 3,
