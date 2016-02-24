@@ -22,6 +22,30 @@
       "revId": "91794ae571dd02b4afb9e42d7e485c17074c3f88",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_64b4fbfe",
+        "filename": "android/skin/qt/qt-ui-commands.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-24T00:54:01Z",
+      "side": 1,
+      "message": "Specifically, the dots will be aligned horizontally from each other (meaning it\u0027s only *really* useful for vertical swipes). I asked easonj@ for what specifically to put here, but it can\u0027t be too long, since it\u0027s displayed in a pretty small area.",
+      "parentUuid": "c2c1f56d_685dd6f2",
+      "range": {
+        "startLine": 94,
+        "startChar": 21,
+        "endLine": 94,
+        "endChar": 29
+      },
+      "revId": "91794ae571dd02b4afb9e42d7e485c17074c3f88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
