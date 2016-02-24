@@ -167,6 +167,7 @@ EmulatorQtWindow* EmulatorQtWindow::getInstance()
 
 EmulatorQtWindow::~EmulatorQtWindow()
 {
+    deleteErrorDialog();
     if (mToolWindow) {
         delete mToolWindow;
         mToolWindow = NULL;
