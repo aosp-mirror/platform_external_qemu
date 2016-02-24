@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2def959_6362b882",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-24T21:52:37Z",
+      "side": 1,
+      "message": "nit: remove commented code",
+      "range": {
+        "startLine": 164,
+        "startChar": 0,
+        "endLine": 164,
+        "endChar": 18
+      },
+      "revId": "9659088997928863d3cf7f34a449aa465a7c245a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_fabd402f",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-24T21:52:37Z",
+      "side": 1,
+      "message": "technically, different widgets don\u0027t necessarily have distinct names (unless they are siblings). I.e. there can be a button named \"button1\" in window 1 and a button with the same name in window 2. I suggest using the \"full path\" of the widget (i.e. concatenate all parents names with \"/\").",
+      "range": {
+        "startLine": 173,
+        "startChar": 60,
+        "endLine": 173,
+        "endChar": 64
+      },
+      "revId": "9659088997928863d3cf7f34a449aa465a7c245a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_7ac130a1",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-24T21:52:37Z",
+      "side": 1,
+      "message": "auto ret \u003d mFollowed.insert(...",
+      "range": {
+        "startLine": 172,
+        "startChar": 4,
+        "endLine": 173,
+        "endChar": 7
+      },
+      "revId": "9659088997928863d3cf7f34a449aa465a7c245a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2def959_4357bca5",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-24T21:52:37Z",
+      "side": 1,
+      "message": "It is not clear to me how the mFollowed map will be populated when the event trace is loaded from a file. Do you expect to always be tracking the same set of widgets and the calls to follow() are hardcoded? Btw you don\u0027t need to keep track of pointers to widgets for playback purposes. The top-level widgets can be found via QApplication::topLevelWidgets and the widgets below that can be found with QObject::findChildren",
+      "range": {
+        "startLine": 174,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 4
+      },
+      "revId": "9659088997928863d3cf7f34a449aa465a7c245a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_0506433c",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-24T21:52:37Z",
+      "side": 1,
+      "message": "I think those ifs are an indicator that this class has two orthogonal functionalities and should be split :)",
+      "range": {
+        "startLine": 192,
+        "startChar": 4,
+        "endLine": 192,
+        "endChar": 6
+      },
+      "revId": "9659088997928863d3cf7f34a449aa465a7c245a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a29b218c_2eada0cb",
+        "filename": "android/skin/qt/ui-event-record-player.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-24T21:52:37Z",
+      "side": 1,
+      "message": "I would separate the \"record\" functionality from the \"replay\" functionality. Smaller units are easier to understand and test.",
+      "range": {
+        "startLine": 22,
+        "startChar": 6,
+        "endLine": 22,
+        "endChar": 25
+      },
+      "revId": "9659088997928863d3cf7f34a449aa465a7c245a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
