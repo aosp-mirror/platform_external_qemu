@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "62a5a9c6_12e32dc4",
+        "filename": "android/skin/qt/raised-material-button.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-24T00:24:06Z",
+      "side": 1,
+      "message": "Is it not possible to just call this on our current buttons? Or is this class just intended to simplify the process?",
+      "range": {
+        "startLine": 26,
+        "startChar": 8,
+        "endLine": 26,
+        "endChar": 41
+      },
+      "revId": "1948dee0cf02a32e53447cd194961c541e05321d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62a5a9c6_b25da151",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-24T00:24:06Z",
+      "side": 1,
+      "message": "Nit: tab",
+      "revId": "1948dee0cf02a32e53447cd194961c541e05321d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
