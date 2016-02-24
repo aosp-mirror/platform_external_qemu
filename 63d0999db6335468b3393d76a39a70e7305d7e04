@@ -22,6 +22,30 @@
       "revId": "63d0999db6335468b3393d76a39a70e7305d7e04",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62a5a9c6_e51920be",
+        "filename": "android/error-messages_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-24T23:36:11Z",
+      "side": 1,
+      "message": "Even without this test case this code cannot be tested in parallel since it modifies global state that other test functions rely on. I think if we do parallelize things in the future it would probably have to be one test suite as a batch instead of a single test case.\nI\u0027ll admit I\u0027m not a big fan of this though so I\u0027ll switch to have the function but not make it visible in the header.",
+      "parentUuid": "c2c1f56d_7015b481",
+      "range": {
+        "startLine": 34,
+        "startChar": 24,
+        "endLine": 34,
+        "endChar": 39
+      },
+      "revId": "63d0999db6335468b3393d76a39a70e7305d7e04",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
