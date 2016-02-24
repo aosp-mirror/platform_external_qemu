@@ -106,7 +106,7 @@ ToolWindow::ToolWindow(
         settings.setValue(Ui::Settings::UI_THEME, 0);
     }
 
-    switchAllIconsForTheme(theme);
+    adjustAllButtonsForTheme(theme);
     this->setStyleSheet(Ui::stylesheetForTheme(theme));
 
     QString default_shortcuts =
