@@ -37,6 +37,7 @@
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/skin/qt/ui-event-recorder.h"
+#include "android/skin/qt/ui-event-record-player.h"
 
 #include <memory>
 
@@ -163,6 +164,10 @@ public:
     void zoomReset();
     void zoomTo(const QPoint &focus, const QSize &rectSize);
 
+    bool initUIEventRecordPlayer(const char* opt_record_path,
+                                 const char* opt_replay_path,
+                                 const char* opt_start_delay);
+
 private slots:
     void slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore = NULL);
     void slot_clearInstance();
@@ -267,6 +272,7 @@ private:
     EventCapturer mEventCapturer;
     std::shared_ptr<UIEventRecorder<android::base::CircularBuffer>>
         mEventLogger;
+    UIEventRecordPlayer mRecordPlayer;
 };
 
 struct SkinSurface {
