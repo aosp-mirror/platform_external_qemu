@@ -627,6 +627,14 @@ ui_init(AConfig*          skinConfig,
                     "### Error: could not find emulator icon resource: %s\n",
                     kIconFile);
         }
+
+        // Start input event recording/replay
+        if (opts->input_record || opts->input_replay) {
+            D("initializing UI event recording/replaying");
+            skin_winsys_ui_event_record_replay(opts->input_record,
+                                               opts->input_replay,
+                                               opts->replay_delay);
+        }
     }
 
     user_config_get_window_pos(&win_x, &win_y);
