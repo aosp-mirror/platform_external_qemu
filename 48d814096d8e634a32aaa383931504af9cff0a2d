@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2b0b90b_4776a167",
+        "filename": "android/error-messages.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-24T19:03:40Z",
+      "side": 1,
+      "message": "Why not just provide \n\n  void android_init_set_error(int error_code, const char* error_message);\n\nThe function can internally copy the message. Easier for the user.\nAlong with\n\n  android_init_get_error_code() \n  android_init_get_error_message();",
+      "range": {
+        "startLine": 23,
+        "startChar": 3,
+        "endLine": 24,
+        "endChar": 37
+      },
+      "revId": "48d814096d8e634a32aaa383931504af9cff0a2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2981592_bd28d862",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-24T19:03:40Z",
+      "side": 1,
+      "message": "The use case you\u0027re trying to solve is to show the error stashed in android/error-messages.h\n\nI\u0027d go so far as to add another function there --\n\n  bool android_init_check_error();\n\nThis function,\n  * Checks if any error occured (accessing the internal variables that I recommended to be hidden)\n  * Shows the blocking modal dialogue to the user.\n  * returns true if any error occured.\n\n\nThen use of this functionality becomes simple.\n\nSomewhere deep in the init code, if an error occurs, we need to add:\n\n   android_init_set_error(errcode, kConstErrorMsg);\n\n\nAnd in the main function we do error checking by:\n\n  do_deep_init();\n  if (android_init_check_error()) {\n    return -1;  \n  }\n\n... and such.\nwdyt?",
+      "range": {
+        "startLine": 416,
+        "startChar": 12,
+        "endLine": 416,
+        "endChar": 36
+      },
+      "revId": "48d814096d8e634a32aaa383931504af9cff0a2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22d0113b_6693ce83",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-24T19:03:40Z",
+      "side": 1,
+      "message": "This pushes the Params struct to another thread.\nWhat if |message| and |title| disappear while the UI thread is accessing them? (This thread decides to die, since it\u0027s an error).\n\niiuc, this call is blocking, and so the current thread will not progress?\nIf that\u0027s the case, please add a comment to the effect here.",
+      "range": {
+        "startLine": 432,
+        "startChar": 4,
+        "endLine": 432,
+        "endChar": 51
+      },
+      "revId": "48d814096d8e634a32aaa383931504af9cff0a2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
