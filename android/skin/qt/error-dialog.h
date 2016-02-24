@@ -17,3 +17,5 @@
 void initErrorDialog(QWidget *parent);
 
 void showErrorDialog(const QString& message, const QString& title);
+
+void deleteErrorDialog();
