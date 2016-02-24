@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "e2def959_26d5de63",
+        "filename": "android/error-messages.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-24T22:52:14Z",
+      "side": 1,
+      "message": "After looking at the use in qemu-android, I wonder if we should not have this function as part of the API. Since this is an init error, and we act on the error in distinct places (return from a bunch of functions to exit cleanly, and show the error dialog from one place), we shouldn\u0027t allow clearing the error at all.\n\nI don\u0027t forsee any case where you want to clear it. Not having the function may prevent someone using it by mistake (it\u0027s hard to understand when it\u0027s OK to clear the error, but just glancing through the code).\n\nSoft suggestion, no round trip needed.",
+      "range": {
+        "startLine": 31,
+        "startChar": 5,
+        "endLine": 31,
+        "endChar": 29
+      },
+      "revId": "f362e9a4fbf0f8bd4f3cde17fedc6944712a9f11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a29b218c_b1ceb5ce",
         "filename": "android/error-messages_unittest.cpp",
         "patchSetId": 4
