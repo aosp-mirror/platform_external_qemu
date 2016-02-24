@@ -958,20 +958,9 @@ SkinEvent *EmulatorQtWindow::createSkinEvent(SkinEventType type)
 
 void EmulatorQtWindow::doResize(const QSize &size)
 {
-    if (mBackingSurface) {
+    if (mBackingSurface && !mContainer.isResizeTimerActive()) {
         QSize newSize(mBackingSurface->original_w, mBackingSurface->original_h);
         newSize.scale(size, Qt::KeepAspectRatio);
-
-        QRect screenDimensions;
-        slot_getScreenDimensions(&screenDimensions);
-
-        // Make sure the new size is always a little bit smaller than the screen to prevent
-        // keyboard shortcut scaling from making a window too large for the screen, which can
-        // result in the showing of the scroll bars.
-        if (newSize.width() > screenDimensions.width() ||
-            newSize.height() > screenDimensions.height()) {
-            newSize.scale(screenDimensions.size(), Qt::KeepAspectRatio);
-        }
 
         double widthScale =
                 (double)newSize.width() / (double)mBackingSurface->original_w;

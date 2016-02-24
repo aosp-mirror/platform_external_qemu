@@ -36,6 +36,7 @@ public:
     void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent* event) override;
 
+    bool isResizeTimerActive() const;
     void stopResizeTimer();
     QSize viewportSize() const;
 

@@ -109,10 +109,10 @@ bool EmulatorContainer::event(QEvent* e) {
         for (; i < mEventBuffer.size() - 1; i++) {
             if (mEventBuffer[i] == QEvent::NonClientAreaMouseButtonRelease) {
                 mEventBuffer.clear();
-                mEmulatorWindow->doResize(this->size());
 
                 // Kill the resize timer to avoid double resizes.
                 stopResizeTimer();
+                mEmulatorWindow->doResize(this->size());
                 break;
             }
         }
@@ -135,10 +135,10 @@ bool EmulatorContainer::event(QEvent* e) {
         if (e->type() == QEvent::NonClientAreaMouseMove ||
             e->type() == QEvent::Enter || e->type() == QEvent::Leave) {
             mEventBuffer.clear();
-            mEmulatorWindow->doResize(this->size());
 
             // Kill the resize timer to avoid double resizes.
             stopResizeTimer();
+            mEmulatorWindow->doResize(this->size());
         }
 
 #endif
@@ -182,7 +182,7 @@ void EmulatorContainer::resizeEvent(QResizeEvent* event) {
 // will attempt to trigger a resize in case the user's mouse has not entered
 // the window again.
 #if defined(__APPLE__) || defined(_WIN32)
-    mResizeTimer.start(500);
+    mResizeTimer.start(300);
 #endif
 }
 
@@ -196,6 +196,10 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
 #endif
 
     mEmulatorWindow->toolWindow()->show();
+}
+
+bool EmulatorContainer::isResizeTimerActive() const {
+    return mResizeTimer.isActive();
 }
 
 void EmulatorContainer::stopResizeTimer() {
