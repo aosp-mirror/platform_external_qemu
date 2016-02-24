@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c2c1f56d_685dd6f2",
+        "filename": "android/skin/qt/qt-ui-commands.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-24T00:52:31Z",
+      "side": 1,
+      "message": "only vertical?",
+      "range": {
+        "startLine": 94,
+        "startChar": 21,
+        "endLine": 94,
+        "endChar": 29
+      },
+      "revId": "91794ae571dd02b4afb9e42d7e485c17074c3f88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
