@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "02e4ed24_de6143e1",
+        "filename": "android/error-messages.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-24T22:40:51Z",
+      "side": 1,
+      "message": "nit: Shouldn\u0027t you only return nullptr if |!init_error_occured|?",
+      "range": {
+        "startLine": 45,
+        "startChar": 8,
+        "endLine": 45,
+        "endChar": 34
+      },
+      "revId": "f362e9a4fbf0f8bd4f3cde17fedc6944712a9f11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a29b218c_b1ceb5ce",
+        "filename": "android/error-messages_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-24T22:40:51Z",
+      "side": 1,
+      "message": "why? This is surprising.",
+      "range": {
+        "startLine": 27,
+        "startChar": 6,
+        "endLine": 27,
+        "endChar": 21
+      },
+      "revId": "f362e9a4fbf0f8bd4f3cde17fedc6944712a9f11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_9a751c0f",
+        "filename": "android/error-messages_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-24T22:40:51Z",
+      "side": 1,
+      "message": "nit: I\u0027d drop this case.",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 1
+      },
+      "revId": "f362e9a4fbf0f8bd4f3cde17fedc6944712a9f11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
