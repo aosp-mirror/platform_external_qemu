@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a29b218c_51876992",
+        "filename": "android/skin/qt/extended-pages/common.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-24T22:34:54Z",
+      "side": 1,
+      "message": "should we have these colors somewhere near the theme definition?",
+      "range": {
+        "startLine": 108,
+        "startChar": 34,
+        "endLine": 109,
+        "endChar": 53
+      },
+      "revId": "1833240097f60552b7a689e0c6fcaa00a4eefeba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
