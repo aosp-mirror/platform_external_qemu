@@ -1299,10 +1299,28 @@ help_no_boot_anim(stralloc_t*  out)
     );
 }
 
+static void help_input_record(stralloc_t* out) {
+    PRINTF("  use '-input-record <file>' to record input events to the android\n"
+           "  emulator and save them to <file> on exit. You can replay these\n"
+           "  events to automate common interactions with the emulator GUI.\n"
+           "  Event timestamps have mSec accuracy\n\n");
+}
 
-static void
-help_gps(stralloc_t*  out)
-{
+static void help_input_replay(stralloc_t* out) {
+    PRINTF("  use '-input-replay <file>' to replay a saved stream of input \n"
+           "  events to the android emulator from a <file>. Event replay starts\n"
+           "  immediately, or <number> mSec after the emulator starts if the \n"
+           "  -replay-delay <number> parameter is also used\n\n");
+}
+
+static void help_replay_delay(stralloc_t* out) {
+    PRINTF("  use '-replay-delay <number>' to add a <number> mSec delay\n"
+           "  before starting the replay of a stream of input events to\n"
+           "  the android emulator GUI. Must be used in conjuction with\n"
+           "  the -input-replay <file> parameter.\n\n");
+}
+
+static void help_gps(stralloc_t* out) {
     PRINTF(
     "  use '-gps <device>' to emulate an NMEA-compatible GPS unit connected to\n"
     "  an external character device or socket. the format of <device> is the same\n"
