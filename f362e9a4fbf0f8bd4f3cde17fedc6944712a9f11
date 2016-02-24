@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a29b218c_4ce90cd0",
+        "filename": "android/error-messages.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-24T23:10:16Z",
+      "side": 1,
+      "message": "Yeah I think that\u0027s probably a good idea now that I think about it. In that case I would also like to have kUnknownInitError returned if the user passes in an empty string. The scenario I\u0027m thinking about is when you have code like this:\nandroid_init_error_set(13, getErrorStr());\nand getErrorStr() returns an empty string or null. In those cases the error dialog we show would have no text at all and that would be hard to debug and pretty useless to the user. I was thinking that in the null case a default message might be good but now that I think about it it should probably be there for empty strings as well.",
+      "parentUuid": "02e4ed24_de6143e1",
+      "range": {
+        "startLine": 45,
+        "startChar": 8,
+        "endLine": 45,
+        "endChar": 34
+      },
+      "revId": "f362e9a4fbf0f8bd4f3cde17fedc6944712a9f11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e2def959_26d5de63",
         "filename": "android/error-messages.h",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-24T22:52:14Z",
       "side": 1,
       "message": "After looking at the use in qemu-android, I wonder if we should not have this function as part of the API. Since this is an init error, and we act on the error in distinct places (return from a bunch of functions to exit cleanly, and show the error dialog from one place), we shouldn\u0027t allow clearing the error at all.\n\nI don\u0027t forsee any case where you want to clear it. Not having the function may prevent someone using it by mistake (it\u0027s hard to understand when it\u0027s OK to clear the error, but just glancing through the code).\n\nSoft suggestion, no round trip needed.",
+      "range": {
+        "startLine": 31,
+        "startChar": 5,
+        "endLine": 31,
+        "endChar": 29
+      },
+      "revId": "f362e9a4fbf0f8bd4f3cde17fedc6944712a9f11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22d0113b_f208b809",
+        "filename": "android/error-messages.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-24T23:10:16Z",
+      "side": 1,
+      "message": "Yeah I debated a lot whether I should have this or not. Initially I didn\u0027t have one but that caused unit tests to be a little trickier because all of a sudden there was a dependency on the order of the tests since only the very first test can test for the case where an error has never been set. An alternative would be to not have the function name in the header, just in the cpp-file and then the unit test file could just declare the function and use it anyway.\n\nNot sure I really like that though, in that case I think I might prefer having the required order for tests.",
+      "parentUuid": "e2def959_26d5de63",
       "range": {
         "startLine": 31,
         "startChar": 5,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "e2b0b90b_1d32264a",
+        "filename": "android/error-messages_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-24T23:10:16Z",
+      "side": 1,
+      "message": "Since internally the string is stored in an std::string there is no way to determine if a null pointer was passed to the set function or an empty string. One approach would be to store a flag that keeps track of this but it seems a little overkill. Another approach might be to treat an empty string the same way as a null string and instead store the default message. Or just store the empty string I guess but the way the code is written right now that would be a very boring error message. I think I\u0027d rather have the default message in that case. Which actually reminds me that I forgot to write a test for that.",
+      "parentUuid": "a29b218c_b1ceb5ce",
+      "range": {
+        "startLine": 27,
+        "startChar": 6,
+        "endLine": 27,
+        "endChar": 21
+      },
+      "revId": "f362e9a4fbf0f8bd4f3cde17fedc6944712a9f11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e2b0b90b_9a751c0f",
         "filename": "android/error-messages_unittest.cpp",
         "patchSetId": 4
@@ -82,6 +154,30 @@
       "writtenOn": "2016-02-24T22:40:51Z",
       "side": 1,
       "message": "nit: I\u0027d drop this case.",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 1
+      },
+      "revId": "f362e9a4fbf0f8bd4f3cde17fedc6944712a9f11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_dd3b9e21",
+        "filename": "android/error-messages_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-24T23:10:16Z",
+      "side": 1,
+      "message": "Yeah it doesn\u0027t really add much I guess, I just like having basic constructible tests so that if a test breaks that only does the most basic thing it\u0027s very clear that what\u0027s broken is the construction.",
+      "parentUuid": "e2b0b90b_9a751c0f",
       "range": {
         "startLine": 33,
         "startChar": 0,
