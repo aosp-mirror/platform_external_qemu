@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "c2981592_fd51c007",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-24T18:43:46Z",
+      "side": 1,
+      "message": "Good point, the parsers are unit testable now! Unit tests incoming.",
+      "parentUuid": "62a5a9c6_34205ce5",
+      "range": {
+        "startLine": 337,
+        "startChar": 3,
+        "endLine": 337,
+        "endChar": 34
+      },
+      "revId": "65919a1b280ac4f32d9f71ae6219c472310f2d78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "02e4ed24_9d2f44d2",
         "filename": "android/opengl/gpuinfo.h",
         "patchSetId": 40
