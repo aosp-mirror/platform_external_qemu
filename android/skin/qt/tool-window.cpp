@@ -149,6 +149,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
     mShortcutKeyStore.add(
             QKeySequence(Qt::Key_Alt | Qt::AltModifier | Qt::ControlModifier),
             QtUICommand::UNGRAB_KEYBOARD);
+    // Same thing goes for multitouch.
+    mShortcutKeyStore.add(QKeySequence(Qt::Key_Alt | Qt::AltModifier),
+                          QtUICommand::SHOW_MULTITOUCH);
 
     // Update tool tips on all push buttons.
     const QList<QPushButton*> childButtons =
@@ -528,6 +531,9 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         // really need an element in the QtUICommand enum. This
         // enum element exists solely for the purpose of displaying
         // it in the list of keyboard shortcuts in the Help page.
+    case QtUICommand::SHOW_MULTITOUCH:
+    // Like the above, multitouch only has an enum element so it
+    // automatically appears in the help page.
     default:;
     }
 }

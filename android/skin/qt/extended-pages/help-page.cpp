@@ -107,11 +107,19 @@ void HelpPage::initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand
             // In this case, "ungrab keyboard" is Ctrl+Alt (Cmd-Alt on Mac), and QKeySequence::toString
             // sometimes produces strings with weird characters. To mitigate this problem, we simply
             // hardcode the string for the "ungrab keyboard" key combo.
+            // The same goes for "show multitouch", which is just Alt
             if (key_sequence_and_command.value() == QtUICommand::UNGRAB_KEYBOARD) {
 #ifdef Q_OS_MAC
                 key_combo = "\u2318\u2325"; // Cmd - Alt
 #else
                 key_combo = "Ctrl+Alt";
+#endif
+            } else if (key_sequence_and_command.value() ==
+                       QtUICommand::SHOW_MULTITOUCH) {
+#ifdef Q_OS_MAC
+                key_combo = "\u2325";  // Alt
+#else
+                key_combo = "Alt";
 #endif
             } else {
                 key_combo  = key_sequence_and_command.key().toString(QKeySequence::NativeText);
