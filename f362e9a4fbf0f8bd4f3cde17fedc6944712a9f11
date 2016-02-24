@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "62be89e4_dda4a9d1",
+        "filename": "android/error-messages.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-24T23:29:04Z",
+      "side": 1,
+      "message": "+2.",
+      "parentUuid": "a29b218c_4ce90cd0",
+      "range": {
+        "startLine": 45,
+        "startChar": 8,
+        "endLine": 45,
+        "endChar": 34
+      },
+      "revId": "f362e9a4fbf0f8bd4f3cde17fedc6944712a9f11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e2def959_26d5de63",
         "filename": "android/error-messages.h",
         "patchSetId": 4
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "Yeah I debated a lot whether I should have this or not. Initially I didn\u0027t have one but that caused unit tests to be a little trickier because all of a sudden there was a dependency on the order of the tests since only the very first test can test for the case where an error has never been set. An alternative would be to not have the function name in the header, just in the cpp-file and then the unit test file could just declare the function and use it anyway.\n\nNot sure I really like that though, in that case I think I might prefer having the required order for tests.",
       "parentUuid": "e2def959_26d5de63",
+      "range": {
+        "startLine": 31,
+        "startChar": 5,
+        "endLine": 31,
+        "endChar": 29
+      },
+      "revId": "f362e9a4fbf0f8bd4f3cde17fedc6944712a9f11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_f0e2e4e8",
+        "filename": "android/error-messages.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-24T23:29:04Z",
+      "side": 1,
+      "message": "The usual \"C\" way of doing this would be to add another header error-messages-internal.h that declares it, and then unit-tests use it.\nI think that\u0027s too heavy handed.\n\nThere\u0027s already a bunch of code that goes the extern declaration way. I\u0027d personally be OK with that being used for unittests for C modules (I\u0027d strongly -2 real code using it though).\n\nSo your pick between those two.",
+      "parentUuid": "22d0113b_f208b809",
       "range": {
         "startLine": 31,
         "startChar": 5,
