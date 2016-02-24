@@ -401,6 +401,21 @@ extern void skin_winsys_start(bool no_window, bool raw_keys) {
     }
 }
 
+extern void skin_winsys_ui_event_record_replay(const char* opt_record_path,
+                                               const char* opt_replay_path,
+                                               const char* opt_start_delay) {
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
+    if (!window) {
+        D("Failed to get emulator window handle; "
+          "UI event recording will be disabled");
+        return;
+    }
+    if (!window->initUIEventRecordPlayer(opt_record_path, opt_replay_path,
+                                         opt_start_delay)) {
+        D("Failed to start UI event record/replay");
+    }
+}
+
 extern void skin_winsys_run_ui_update(SkinGenericFunction f, void* data) {
     D(__FUNCTION__);
     QSemaphore semaphore;

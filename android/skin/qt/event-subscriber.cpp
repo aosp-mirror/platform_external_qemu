@@ -34,4 +34,3 @@ void EventSubscriber::stopRecordingForEmitter() {
         stopRecording(target);
     }
 }
-

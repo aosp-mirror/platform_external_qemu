@@ -60,6 +60,15 @@ bool skin_winsys_is_window_fully_visible(void);
 // initialized.
 void skin_winsys_start(bool no_window, bool raw_keys);
 
+// Enable UI event recording to file (with optional start delay)
+void skin_winsys_ui_event_record(const char* opt_record_path,
+                                 const char* opt_start_delay);
+
+// Enable UI event recording/replaying to/from file (with optional start delay)
+void skin_winsys_ui_event_record_replay(const char* opt_record_path,
+                                        const char* opt_replay_path,
+                                        const char* opt_start_delay);
+
 // Set the main window's icon.
 // |icon_data| is the start of the icon in PNG format.
 // |icon_data_size| is its size in bytes.
