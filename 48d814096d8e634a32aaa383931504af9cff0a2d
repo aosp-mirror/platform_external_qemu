@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "02e4ed24_de8ee31a",
+        "filename": "android/error-messages.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-24T22:17:14Z",
+      "side": 1,
+      "message": "That\u0027s a good idea, done.",
+      "parentUuid": "e2b0b90b_4776a167",
+      "range": {
+        "startLine": 23,
+        "startChar": 3,
+        "endLine": 24,
+        "endChar": 37
+      },
+      "revId": "48d814096d8e634a32aaa383931504af9cff0a2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2981592_bd28d862",
         "filename": "android/skin/qt/winsys-qt.cpp",
         "patchSetId": 3
@@ -72,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "02e4ed24_1e6eab01",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-24T22:17:14Z",
+      "side": 1,
+      "message": "I like the idea of making checking for error conditions easier but I really think we should keep that separate from UI code that shows error messages. I like to follow the principle of least surprise here, if I call a function to check if an error condition occurred I don\u0027t expect side effects such as an error dialog to show up.\n\nI cleaned things up so that the code now looks similar to what it would with your suggested changes, the only additional piece of code is a line to show the error dialog. Let me know what you think.",
+      "parentUuid": "62a5a9c6_941de847",
+      "range": {
+        "startLine": 416,
+        "startChar": 12,
+        "endLine": 416,
+        "endChar": 36
+      },
+      "revId": "48d814096d8e634a32aaa383931504af9cff0a2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "22d0113b_6693ce83",
         "filename": "android/skin/qt/winsys-qt.cpp",
         "patchSetId": 3
@@ -83,6 +131,30 @@
       "writtenOn": "2016-02-24T19:03:40Z",
       "side": 1,
       "message": "This pushes the Params struct to another thread.\nWhat if |message| and |title| disappear while the UI thread is accessing them? (This thread decides to die, since it\u0027s an error).\n\niiuc, this call is blocking, and so the current thread will not progress?\nIf that\u0027s the case, please add a comment to the effect here.",
+      "range": {
+        "startLine": 432,
+        "startChar": 4,
+        "endLine": 432,
+        "endChar": 51
+      },
+      "revId": "48d814096d8e634a32aaa383931504af9cff0a2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2981592_f8054ea9",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-02-24T22:17:14Z",
+      "side": 1,
+      "message": "I added a comment about the call being blocking so using those pointers from the other thread should be safe.",
+      "parentUuid": "22d0113b_6693ce83",
       "range": {
         "startLine": 432,
         "startChar": 4,
