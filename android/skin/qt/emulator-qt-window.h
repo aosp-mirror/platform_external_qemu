@@ -134,7 +134,7 @@ public:
     bool isInZoomMode() const;
     ToolWindow* toolWindow() const;
 
-    void doResize(const QSize& size);
+    void doResize(const QSize& size, bool isKbdShortcut = false);
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPoint& pos);
