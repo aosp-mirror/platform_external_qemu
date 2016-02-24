@@ -27,29 +27,38 @@ void serializeEventToStream(std::ostream& str, const QEvent* event) {
         {
             const QEnterEvent* enter_event = dynamic_cast<const QEnterEvent*>(event);
             assert(enter_event);
-            str << enter_event->localPos().x() << " " << enter_event->localPos().y() << " "
-                << enter_event->windowPos().x() << " " << enter_event->windowPos().y() << " "
-                << enter_event->screenPos().x() << " " << enter_event->screenPos().y() << " ";
+            str << enter_event->localPos().x()  << ":"
+                << enter_event->localPos().y()  << ":"
+                << enter_event->windowPos().x() << ":"
+                << enter_event->windowPos().y() << ":"
+                << enter_event->screenPos().x() << ":"
+                << enter_event->screenPos().y() << ":";
             break;
         }
-    case QEvent::MouseButtonPress:
-    case QEvent::MouseButtonRelease:
-        {
+        case QEvent::MouseButtonDblClick:
+        case QEvent::MouseButtonPress:
+        case QEvent::MouseButtonRelease:
+        case QEvent::MouseMove: {
             const QMouseEvent* mouse_event = dynamic_cast<const QMouseEvent*>(event);
             assert(mouse_event);
-            str << mouse_event->localPos().x() << " " << mouse_event->localPos().y() << " "
-                << mouse_event->windowPos().x() << " " << mouse_event->windowPos().y() << " "
-                << mouse_event->screenPos().x() << " " << mouse_event->screenPos().y() << " "
-                << mouse_event->buttons() << " "
-                << mouse_event->modifiers() << " ";
+            str << mouse_event->localPos().x() << ":"
+                << mouse_event->localPos().y() << ":"
+                << mouse_event->windowPos().x() << ":"
+                << mouse_event->windowPos().y() << ":"
+                << mouse_event->screenPos().x() << ":"
+                << mouse_event->screenPos().y() << ":" << mouse_event->button()
+                << ":" << mouse_event->buttons() << ":"
+                << mouse_event->modifiers() << ":";
             break;
         }
     case QEvent::Resize:
         {
             const QResizeEvent* resize_event = dynamic_cast<const QResizeEvent*>(event);
             assert(resize_event);
-            str << resize_event->size().width() << " " << resize_event->size().height() << " "
-                << resize_event->oldSize().width() << " " << resize_event->oldSize().height() << " ";
+            str << resize_event->size().width()     << ":"
+                << resize_event->size().height()    << ":"
+                << resize_event->oldSize().width()  << ":"
+                << resize_event->oldSize().height() << ":";
             break;
         }
     case QEvent::Close:
@@ -62,4 +71,163 @@ void serializeEventToStream(std::ostream& str, const QEvent* event) {
         str << "<unsupported by serializer>";
     }
     str << "\n";
+}
+
+bool endOfEventStream(std::istream& recordstream) {
+    std::string discard_line;
+    std::getline(recordstream, discard_line);
+    // malformatted line, missing info to deserialize
+    if (discard_line.empty()) {
+        return true;
+    }
+
+    return false;
+}
+
+inline std::istream& operator>>(std::istream& in, Qt::MouseButton& button) {
+    unsigned int val = 0;
+    if (!(in >> val))
+        return in;
+    button = static_cast<Qt::MouseButton>(val);
+    return in;
+}
+
+inline std::istream& operator>>(std::istream& in, Qt::MouseButtons& buttons) {
+    unsigned int val = 0;
+    if (!(in >> val))
+        return in;
+    buttons = static_cast<Qt::MouseButtons>(val);
+    return in;
+}
+
+inline std::istream& operator>>(std::istream& in,
+                                Qt::KeyboardModifiers& flags) {
+    unsigned int val = 0;
+    if (!(in >> val))
+        return in;
+    flags = static_cast<Qt::KeyboardModifiers>(val);
+    return in;
+}
+
+std::unique_ptr<QEvent> deserializeEventFromStream(std::istream& iss,
+                                                   int event_type) {
+    std::string tmp;
+    QEvent::Type et = static_cast<QEvent::Type>(event_type);
+    switch (et) {
+        case QEvent::Enter: {
+            char delim[2];
+            qreal coord[2];
+
+            QPointF localPos;
+            iss >> coord[0] >> delim[0] >> coord[1] >> delim[1];
+            if (!iss || delim[0] != ':' || delim[1] != ':') {
+                break;
+            }
+            localPos.setX(coord[0]);
+            localPos.setY(coord[1]);
+
+            QPointF windowPos;
+            iss >> coord[0] >> delim[0] >> coord[1] >> delim[1];
+            if (!iss || delim[0] != ':' || delim[1] != ':') {
+                break;
+            }
+            windowPos.setX(coord[0]);
+            windowPos.setY(coord[1]);
+
+            QPointF screenPos;
+            iss >> coord[0] >> delim[0] >> coord[1] >> delim[1];
+            if (!iss || delim[0] != ':' || delim[1] != ':') {
+                break;
+            }
+            screenPos.setX(coord[0]);
+            screenPos.setY(coord[1]);
+            iss.ignore(1, '\n');
+
+            return std::unique_ptr<QEvent>(
+                    new QEnterEvent(localPos, windowPos, screenPos));
+        }
+        case QEvent::MouseButtonDblClick:
+        case QEvent::MouseButtonPress:
+        case QEvent::MouseButtonRelease:
+        case QEvent::MouseMove: {
+            char delim[3];
+            qreal coord[2];
+
+            QPointF localPos;
+            iss >> coord[0] >> delim[0] >> coord[1] >> delim[1];
+            if (!iss || delim[0] != ':' || delim[1] != ':') {
+                break;
+            }
+            localPos.setX(coord[0]);
+            localPos.setY(coord[1]);
+
+            QPointF windowPos;
+            iss >> coord[0] >> delim[0] >> coord[1] >> delim[1];
+            if (!iss || delim[0] != ':' || delim[1] != ':') {
+                break;
+            }
+            windowPos.setX(coord[0]);
+            windowPos.setY(coord[1]);
+
+            QPointF screenPos;
+            iss >> coord[0] >> delim[0] >> coord[1] >> delim[1];
+            if (!iss || delim[0] != ':' || delim[1] != ':') {
+                break;
+            }
+            screenPos.setX(coord[0]);
+            screenPos.setY(coord[1]);
+
+            Qt::MouseButton button;
+            Qt::MouseButtons flags;
+            Qt::KeyboardModifiers modifiers;
+            iss >> button >> delim[0] >> flags >> delim[1] >> modifiers >>
+                    delim[2];
+            if (!iss || delim[0] != ':' || delim[1] != ':' || delim[2] != ':') {
+                break;
+            }
+            iss.ignore(1, '\n');
+
+            return std::unique_ptr<QEvent>(
+                    new QMouseEvent(et, localPos, windowPos, screenPos, button,
+                                    flags, modifiers));
+        }
+        case QEvent::Resize: {
+            char delim[2];
+            int dim[2];
+
+            QSize size;
+            iss >> dim[0] >> delim[0] >> dim[1] >> delim[1];
+            if (!iss || delim[0] != ':' || delim[1] != ':') {
+                break;
+            }
+            size.setWidth(dim[0]);
+            size.setHeight(dim[1]);
+
+            QSize oldSize;
+            iss >> dim[0] >> delim[0] >> dim[1] >> delim[1];
+            if (!iss || delim[0] != ':' || delim[1] != ':') {
+                break;
+            }
+            oldSize.setWidth(dim[0]);
+            oldSize.setHeight(dim[1]);
+            iss.ignore(1, '\n');
+
+            return std::unique_ptr<QEvent>(new QResizeEvent(size, oldSize));
+        }
+        case QEvent::Close:
+        case QEvent::Leave: {
+            iss.ignore(1, '\n');
+            return std::unique_ptr<QEvent>(new QEvent(QEvent::Leave));
+        }
+        case QEvent::FocusIn:
+        case QEvent::FocusOut:
+        case QEvent::Hide:
+            break;
+        default:
+            fprintf(stderr, "<unsupported by deserializer>");
+    }
+
+    // ignore rest of line
+    std::getline(iss, tmp);
+    return std::unique_ptr<QEvent>(nullptr);
 }
