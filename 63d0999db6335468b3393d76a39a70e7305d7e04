@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c2c1f56d_7015b481",
+        "filename": "android/error-messages_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-24T23:29:04Z",
+      "side": 1,
+      "message": "Hmm.\nI actually like this least of the three options you had.\n\nWe\u0027re _very far_ from being able to run unittests in parallel, but I\u0027d rather not enforce an order.\n\nI think the path of least resistance is just extern function declaration in the unittest.",
+      "range": {
+        "startLine": 34,
+        "startChar": 24,
+        "endLine": 34,
+        "endChar": 39
+      },
+      "revId": "63d0999db6335468b3393d76a39a70e7305d7e04",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
