@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "02e4ed24_8c8cbc62",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 32
+      },
+      "lineNbr": 770,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-24T01:21:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c2c1f56d_439b1390",
+      "range": {
+        "startLine": 769,
+        "startChar": 4,
+        "endLine": 770,
+        "endChar": 42
+      },
+      "revId": "14a82050b8f568f39da013c997cdd3169588ff6e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62be89e4_c5d3b9d5",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 32
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-24T01:17:56Z",
       "side": 1,
       "message": "please make it const size_t instead\nbtw, we name constants in this way: kFieldLen",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 22
+      },
+      "revId": "14a82050b8f568f39da013c997cdd3169588ff6e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_04e3f7c3",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 32
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-24T01:21:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62be89e4_c5d3b9d5",
       "range": {
         "startLine": 32,
         "startChar": 0,
