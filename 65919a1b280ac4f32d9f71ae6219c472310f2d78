@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a29b218c_786372ec",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-24T18:21:01Z",
+      "side": 1,
+      "message": "please mark all \u0027for debugging\u0027 places with some comment, so it\u0027s easier for you to clean all those up",
+      "range": {
+        "startLine": 111,
+        "startChar": 0,
+        "endLine": 111,
+        "endChar": 20
+      },
+      "revId": "65919a1b280ac4f32d9f71ae6219c472310f2d78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62a5a9c6_34205ce5",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-24T18:21:01Z",
+      "side": 1,
+      "message": "short comment about the data format would really help. Not mentioning the unit tests for the parser",
+      "range": {
+        "startLine": 337,
+        "startChar": 3,
+        "endLine": 337,
+        "endChar": 34
+      },
+      "revId": "65919a1b280ac4f32d9f71ae6219c472310f2d78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02e4ed24_9d2f44d2",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 40
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-24T18:21:01Z",
+      "side": 1,
+      "message": "could you please put some comments here to explain what this all is about, how it works and how one should use it?",
+      "revId": "65919a1b280ac4f32d9f71ae6219c472310f2d78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
