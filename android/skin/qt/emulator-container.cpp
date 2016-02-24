@@ -31,6 +31,8 @@
 
 EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
     : QScrollArea(), mEmulatorWindow(window) {
+    setObjectName("AndroidEmulatorContainer");
+
     setFrameShape(QFrame::NoFrame);
     setWidget(window);
 
