@@ -37,6 +37,7 @@ void nsWindowHideWindowButtons(void* ns_window) {
     [[window standardWindowButton:NSWindowCloseButton] setHidden:true];
     [[window standardWindowButton:NSWindowMiniaturizeButton] setHidden:true];
     [[window standardWindowButton:NSWindowZoomButton] setHidden:true];
+    [window setCollectionBehavior:NSWindowCollectionBehaviorFullScreenAuxiliary];
 }
 
 int numHeldMouseButtons() {
