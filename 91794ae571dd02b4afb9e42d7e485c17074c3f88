@@ -46,6 +46,30 @@
       "revId": "91794ae571dd02b4afb9e42d7e485c17074c3f88",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02e4ed24_421c5b58",
+        "filename": "android/skin/qt/qt-ui-commands.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-02-24T16:30:53Z",
+      "side": 1,
+      "message": "Yes, it\u0027s really just for vertical swipes. We opted for simplicity over completeness.",
+      "parentUuid": "e2b0b90b_64b4fbfe",
+      "range": {
+        "startLine": 94,
+        "startChar": 21,
+        "endLine": 94,
+        "endChar": 29
+      },
+      "revId": "91794ae571dd02b4afb9e42d7e485c17074c3f88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
