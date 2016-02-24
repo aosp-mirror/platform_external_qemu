@@ -1032,6 +1032,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
             if (type == kEventKeyDown) {
                 mOverlay.hide();
             } else if (type == kEventKeyUp) {
+                raise();
                 mOverlay.showForZoom();
             }
         }
@@ -1041,6 +1042,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
          event->key() == Qt::Key_Alt &&
          event->modifiers() == Qt::AltModifier) {
         if (type == kEventKeyDown) {
+            raise();
             mOverlay.showForMultitouch();
         } else if (type == kEventKeyUp) {
             mOverlay.hide();
