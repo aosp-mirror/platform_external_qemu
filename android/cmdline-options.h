@@ -140,6 +140,16 @@ OPT_FLAG ( no_boot_anim, "disable animation for faster boot" )
 OPT_FLAG( no_window, "disable graphical window display" )
 OPT_FLAG( version, "display emulator version number" )
 
+OPT_PARAM( input_record,
+           "<file>",
+           "record main emulator window input events to <file>")
+OPT_PARAM( input_replay,
+           "<file>",
+           "replay main emulator window input events from <file>")
+OPT_PARAM(replay_delay,
+          "<number>",
+          "delay the emulator input event replay start by <number> mSec")
+
 OPT_PARAM( report_console, "<socket>", "report console port to remote socket" )
 OPT_PARAM( gps, "<device>", "redirect NMEA GPS to character device" )
 OPT_PARAM( keyset, "<name>", "specify keyset file name" )

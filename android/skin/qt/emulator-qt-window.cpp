@@ -116,7 +116,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mEventLogger(new UIEventRecorder<android::base::CircularBuffer>(
               &mEventCapturer,
               android::base::CircularBuffer<EventRecord>(1000))),
-      mInstallDialog(this) {
+      mInstallDialog(this),
+      mRecordPlayer(nullptr) {
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
     // pop-up to let the user know we're still
@@ -186,11 +187,12 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     // destroyed.
     auto event_logger = mEventLogger;
     android::crashreport::CrashReporter::get()->setCrashCallback(
-        [event_logger]() {
-            android::crashreport::CrashReporter::get()
-                ->attachData("recent-ui-actions.txt",
-                             serializeEvents(event_logger->container()));
-        });
+            [event_logger]() {
+                std::stringstream ss;
+                serializeEvents(ss, event_logger->container());
+                android::crashreport::CrashReporter::get()->attachData(
+                        "recent-ui-actions.txt", ss.str());
+            });
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr()
@@ -285,6 +287,7 @@ void EmulatorQtWindow::slot_startupTick() {
     // window still hasn't appeared.
     // Show a pop-up that lets the user know we are working.
 
+    mStartupDialog.setObjectName("StartupDialogue");
     mStartupDialog.setWindowTitle(tr("Android Emulator"));
     // Hide close/minimize/maximize buttons
     mStartupDialog.setWindowFlags(Qt::Dialog |
@@ -338,6 +341,9 @@ void EmulatorQtWindow::closeEvent(QCloseEvent *event)
         // run "adb shell stop" and call queueQuitEvent afterwards
         mToolWindow->runAdbShellStopAndQuit();
         event->ignore();
+        if (mRecordPlayer) {
+            mRecordPlayer->stop();
+        }
     } else {
         event->accept();
     }
@@ -1427,4 +1433,35 @@ bool EmulatorQtWindow::mouseInside() {
            widget_cursor_coords.x() < width() &&
            widget_cursor_coords.y() >= 0 &&
            widget_cursor_coords.y() < height();
+}
+
+bool EmulatorQtWindow::initUIEventRecordPlayer(const char* opt_record_path,
+                                               const char* opt_replay_path,
+                                               const char* opt_start_delay) {
+    if (opt_record_path != nullptr) {
+        if (opt_replay_path != nullptr) {
+            derror("UI event recording and replaying cannot be "
+                   "processed simultaneously");
+            return false;
+        }
+        mRecordPlayer.reset(new EventRecorder(&mEventCapturer));
+        mRecordPlayer->setRecordsFile(opt_record_path);
+    }
+    if (opt_replay_path != nullptr) {
+        EventPlayer* ep = new EventPlayer();
+        if (opt_start_delay != nullptr &&
+            !ep->setReplayStartDelayMilliSec(opt_start_delay)) {
+            // invalid replay start delay value
+            delete ep;
+            return false;
+        }
+        mRecordPlayer.reset(ep);
+        mRecordPlayer->setRecordsFile(opt_replay_path);
+    }
+
+    mRecordPlayer->follow(this);
+    mRecordPlayer->follow(toolWindow());
+    mRecordPlayer->start();
+
+    return true;
 }
