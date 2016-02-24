@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a29b218c_fe1e4ff5",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 37
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-24T01:46:46Z",
+      "side": 1,
+      "message": "why do we dump it here?",
+      "range": {
+        "startLine": 106,
+        "startChar": 3,
+        "endLine": 106,
+        "endChar": 20
+      },
+      "revId": "a937e6b7ab76b2e953e9cfd80d5bf83b6dd9a8ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
