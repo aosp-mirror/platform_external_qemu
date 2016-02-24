@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a29b218c_636ce842",
+        "filename": "android/skin/qt/raised-material-button.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-24T00:47:07Z",
+      "side": 1,
+      "message": "It\u0027s possible, but it\u0027s too much code repetition I think. I\u0027d rather have this class and then bulk-promote all the push buttons in the window to RaisedMaterialButton, it\u0027s way easier.",
+      "parentUuid": "62a5a9c6_12e32dc4",
+      "range": {
+        "startLine": 26,
+        "startChar": 8,
+        "endLine": 26,
+        "endChar": 41
+      },
+      "revId": "1948dee0cf02a32e53447cd194961c541e05321d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62a5a9c6_b25da151",
         "filename": "android/skin/qt/sources.mk",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2016-02-24T00:24:06Z",
       "side": 1,
       "message": "Nit: tab",
+      "revId": "1948dee0cf02a32e53447cd194961c541e05321d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_88c02af5",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-24T00:47:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62a5a9c6_b25da151",
       "revId": "1948dee0cf02a32e53447cd194961c541e05321d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
