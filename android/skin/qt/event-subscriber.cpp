@@ -14,6 +14,13 @@ EventSubscriber::EventSubscriber(EventCapturer* ecap) : mEventCapturer(ecap) {}
 
 void EventSubscriber::startRecording(QObject* target) {
     if (mEventCapturer) {
+        std::unordered_map<QObject*,
+                           EventCapturer::SubscriberToken>::const_iterator got =
+                mTokens.find(target);
+        if (got == mTokens.end()) {
+            // target's events already being captured
+            return;
+        }
         mTokens[target] = mEventCapturer->subscribeToEvents(
                 target,
                 [this](const QObject* o){ return this->objectPredicate(o); },

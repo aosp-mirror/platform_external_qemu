@@ -71,28 +71,30 @@ void EmulatorQtWindow::create()
     sInstance.get() = Ptr(new EmulatorQtWindow());
 }
 
-EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
-        QFrame(parent),
-        mStartupDialog(this),
-        mContainer(this),
-        mOverlay(this, &mContainer),
-        mZoomFactor(1.0),
-        mInZoomMode(false),
-        mNextIsZoom(false),
-        mGrabKeyboardInput(false),
-        mMouseInside(false),
-        mPrevMousePosition(0, 0),
-        mMainLoopThread(nullptr),
-        mAvdWarningBox(QMessageBox::Information,
-                       tr("Recommended AVD"),
-                       tr("Running an x86 based Android Virtual Device (AVD) is 10x faster.<br/>"
-                          "We strongly recommend creating a new AVD."),
-                       QMessageBox::Ok,
-                       this),
-        mFirstShowEvent(true),
-        mEventLogger(new UIEventRecorder<android::base::CircularBuffer>(
-            &mEventCapturer,
-            android::base::CircularBuffer<EventRecord>(1000))) {
+EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
+    : QFrame(parent),
+      mStartupDialog(this),
+      mContainer(this),
+      mOverlay(this, &mContainer),
+      mZoomFactor(1.0),
+      mInZoomMode(false),
+      mNextIsZoom(false),
+      mGrabKeyboardInput(false),
+      mMouseInside(false),
+      mPrevMousePosition(0, 0),
+      mMainLoopThread(nullptr),
+      mAvdWarningBox(QMessageBox::Information,
+                     tr("Recommended AVD"),
+                     tr("Running an x86 based Android Virtual Device (AVD) is "
+                        "10x faster.<br/>"
+                        "We strongly recommend creating a new AVD."),
+                     QMessageBox::Ok,
+                     this),
+      mFirstShowEvent(true),
+      mEventLogger(new UIEventRecorder<android::base::CircularBuffer>(
+              &mEventCapturer,
+              android::base::CircularBuffer<EventRecord>(1000))),
+      mRecordPlayer(&mEventCapturer) {
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
     // pop-up to let the user know we're still
@@ -191,6 +193,7 @@ EmulatorQtWindow::~EmulatorQtWindow()
         delete mToolWindow;
         mToolWindow = NULL;
     }
+    mRecordPlayer.unfollow(this);
 
     delete mMainLoopThread;
 }
@@ -257,6 +260,7 @@ void EmulatorQtWindow::slot_startupTick() {
     // window still hasn't appeared.
     // Show a pop-up that lets the user know we are working.
 
+    mStartupDialog.setObjectName("StartupDialogue");
     mStartupDialog.setWindowTitle(tr("Android Emulator"));
     // Hide close/minimize/maximize buttons
     mStartupDialog.setWindowFlags(Qt::Dialog |
@@ -304,6 +308,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent *event)
     } else {
         event->accept();
     }
+    mRecordPlayer.stop();
 }
 
 void EmulatorQtWindow::queueQuitEvent()
@@ -1290,4 +1295,18 @@ bool EmulatorQtWindow::mouseInside() {
            widget_cursor_coords.x() < width() &&
            widget_cursor_coords.y() >= 0 &&
            widget_cursor_coords.y() < height();
+}
+
+bool EmulatorQtWindow::initUIEventRecordPlayer(const char* opt_record_path,
+                                               const char* opt_replay_path,
+                                               const char* opt_start_delay) {
+    if (!mRecordPlayer.init(opt_record_path, opt_replay_path,
+                            opt_start_delay)) {
+        derror("Failed to initialize UI event record player");
+        return false;
+    }
+    mRecordPlayer.follow(this);
+    mRecordPlayer.start();
+
+    return true;
 }
