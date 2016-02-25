@@ -22,6 +22,30 @@
       "revId": "aabfc4d0e7e16bdcf2fa08451552db2a2bbf1694",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62be89e4_9ddbd163",
+        "filename": "android/openssl-support.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-25T00:47:29Z",
+      "side": 1,
+      "message": "We\u0027re not setting a separate get_thread_id function (like we\u0027re setting the locking function). openssl documentation says the default function is safe on all platform where errno is safe (and it\u0027s safe on win32).\n\nI\u0027d first added our custom threadid function, but then dropped it, since we\u0027re covered (you wouldn\u0027t be on FreBSD)\n\nI\u0027ll just drop this comment, as it\u0027s only adding confusion.",
+      "parentUuid": "c2c1f56d_0b9e492b",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 8
+      },
+      "revId": "aabfc4d0e7e16bdcf2fa08451552db2a2bbf1694",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
