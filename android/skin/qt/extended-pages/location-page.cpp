@@ -18,6 +18,7 @@
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
+
 #include <QFileDialog>
 #include <QSettings>
 #include <unistd.h>

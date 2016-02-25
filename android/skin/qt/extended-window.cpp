@@ -33,7 +33,9 @@ ExtendedWindow::ExtendedWindow(
     mEmulatorWindow(eW),
     mToolWindow(tW),
     mExtendedUi(new Ui::ExtendedControls),
-    mSizeTweaker(this) {
+    mSizeTweaker(this),
+    mSidebarButtons(this)
+{
     Q_INIT_RESOURCE(resources);
 
     // "Tool" type windows live in another layer on top of everything in OSX, which is undesirable
@@ -83,6 +85,15 @@ ExtendedWindow::ExtendedWindow(
 
     move(mEmulatorWindow->geometry().right() + 40,
          mEmulatorWindow->geometry().top()   + 40 );
+
+    mSidebarButtons.addButton(mExtendedUi->locationButton);
+    mSidebarButtons.addButton(mExtendedUi->cellularButton);
+    mSidebarButtons.addButton(mExtendedUi->batteryButton);
+    mSidebarButtons.addButton(mExtendedUi->telephoneButton);
+    mSidebarButtons.addButton(mExtendedUi->dpadButton);
+    mSidebarButtons.addButton(mExtendedUi->fingerButton);
+    mSidebarButtons.addButton(mExtendedUi->settingsButton);
+    mSidebarButtons.addButton(mExtendedUi->helpButton);
 }
 
 void ExtendedWindow::showPane(ExtendedWindowPane pane) {
@@ -121,42 +132,6 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
         return;
     }
     QPushButton* thisButton = it->second;
-    SettingsTheme theme = getSelectedTheme();
-
-    // Make all the tab buttons the same except for the one whose
-    // pane is on top.
-    QString colorStyle("text-align: left; color:");
-    colorStyle += Ui::stylesheetValues(theme)[Ui::MAJOR_TAB_COLOR_VAR];
-    colorStyle += "; background-color:";
-    colorStyle += Ui::stylesheetValues(theme)[Ui::TAB_BKG_COLOR_VAR];
-
-    mExtendedUi->batteryButton    ->setStyleSheet(colorStyle);
-    mExtendedUi->cellularButton   ->setStyleSheet(colorStyle);
-    mExtendedUi->dpadButton       ->setStyleSheet(colorStyle);
-    mExtendedUi->fingerButton     ->setStyleSheet(colorStyle);
-    mExtendedUi->helpButton       ->setStyleSheet(colorStyle);
-    mExtendedUi->locationButton   ->setStyleSheet(colorStyle);
-    mExtendedUi->settingsButton   ->setStyleSheet(colorStyle);
-    // Omit "spacer buttons" -- The main style sheet handles them
-    mExtendedUi->telephoneButton  ->setStyleSheet(colorStyle);
-
-    QString activeStyle("text-align: left; color:");
-    activeStyle += Ui::stylesheetValues(theme)[Ui::MAJOR_TAB_COLOR_VAR];
-    activeStyle += "; background-color:";
-    activeStyle += Ui::stylesheetValues(theme)[Ui::TAB_SELECTED_COLOR_VAR];
-    thisButton->setStyleSheet(activeStyle);
-
-    mExtendedUi->batteryButton    ->setAutoFillBackground(true);
-    mExtendedUi->cellularButton   ->setAutoFillBackground(true);
-    mExtendedUi->dpadButton       ->setAutoFillBackground(true);
-    mExtendedUi->fingerButton     ->setAutoFillBackground(true);
-    mExtendedUi->helpButton       ->setAutoFillBackground(true);
-    mExtendedUi->locationButton   ->setAutoFillBackground(true);
-    mExtendedUi->settingsButton   ->setAutoFillBackground(true);
-    mExtendedUi->spacer1Button    ->setAutoFillBackground(true);
-    mExtendedUi->spacer2Button    ->setAutoFillBackground(true);
-    mExtendedUi->telephoneButton  ->setAutoFillBackground(true);
-
     thisButton->clearFocus(); // It looks better when not highlighted
     mExtendedUi->stackedWidget->setCurrentIndex(static_cast<int>(thisIndex));
 }
@@ -167,7 +142,7 @@ void ExtendedWindow::switchOnTop(bool isOnTop) {
 
 void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     // Switch to the icon images that are appropriate for this theme.
-    switchAllIconsForTheme(theme);
+    adjustAllButtonsForTheme(theme);
 
     // Set the Qt style.
 

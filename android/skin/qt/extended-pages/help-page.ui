@@ -22,8 +22,11 @@
      <height>550</height>
     </rect>
    </property>
+   <property name="cursor">
+    <cursorShape>ArrowCursor</cursorShape>
+   </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="tab_3">
     <attribute name="title">
@@ -76,7 +79,7 @@
        <string>Command</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeft|AlignVCenter</set>
+       <set>AlignLeading|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -84,7 +87,7 @@
        <string>Key</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeft|AlignVCenter</set>
+       <set>AlignLeading|AlignVCenter</set>
       </property>
      </column>
     </widget>
@@ -110,6 +113,9 @@
        <bold>true</bold>
       </font>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="styleSheet">
       <string notr="true">Text-align:left; padding:3px;</string>
      </property>
@@ -120,14 +126,14 @@
       <bool>true</bool>
      </property>
      <property name="ColorGroup" stdset="0">
-      <string notr="true">Tool</string>
+      <string>Tool</string>
      </property>
     </widget>
     <widget class="QPushButton" name="help_fileBug">
      <property name="geometry">
       <rect>
        <x>4</x>
-       <y>50</y>
+       <y>60</y>
        <width>145</width>
        <height>36</height>
       </rect>
@@ -139,6 +145,9 @@
        <weight>75</weight>
        <bold>true</bold>
       </font>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="styleSheet">
       <string notr="true">Text-align:left; padding:3px;</string>
@@ -150,14 +159,14 @@
       <bool>true</bool>
      </property>
      <property name="ColorGroup" stdset="0">
-      <string notr="true">Tool</string>
+      <string>Tool</string>
      </property>
     </widget>
     <widget class="QPushButton" name="help_sendFeedback">
      <property name="geometry">
       <rect>
        <x>4</x>
-       <y>90</y>
+       <y>110</y>
        <width>145</width>
        <height>36</height>
       </rect>
@@ -170,6 +179,9 @@
        <bold>true</bold>
       </font>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="styleSheet">
       <string notr="true">Text-align:left; padding:3px;</string>
      </property>
@@ -180,7 +192,7 @@
       <bool>true</bool>
      </property>
      <property name="ColorGroup" stdset="0">
-      <string notr="true">Tool</string>
+      <string>Tool</string>
      </property>
     </widget>
    </widget>
