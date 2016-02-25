@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c2c1f56d_2a7fbdb3",
+        "filename": "android/skin/qt/extended-pages/dpad-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-25T21:15:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "22d0113b_0f91c6cd",
+      "range": {
+        "startLine": 31,
+        "startChar": 6,
+        "endLine": 31,
+        "endChar": 13
+      },
+      "revId": "f1b8fd125bb55f684d72be606ec455cb7ccc7534",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a29b218c_0623dc9f",
         "filename": "android/skin/qt/extended-pages/dpad-page.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-25T19:23:28Z",
       "side": 1,
       "message": "bool converts to int exactly in this way",
+      "range": {
+        "startLine": 74,
+        "startChar": 44,
+        "endLine": 74,
+        "endChar": 51
+      },
+      "revId": "f1b8fd125bb55f684d72be606ec455cb7ccc7534",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a29b218c_2cf35f93",
+        "filename": "android/skin/qt/extended-pages/dpad-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-25T21:15:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a29b218c_0623dc9f",
       "range": {
         "startLine": 74,
         "startChar": 44,
