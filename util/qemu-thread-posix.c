@@ -27,10 +27,14 @@
 #include "qemu/thread.h"
 #include "qemu/atomic.h"
 
+#include "android/crashreport/crash-handler.h"
+
 static void error_exit(int err, const char *msg)
 {
     fprintf(stderr, "qemu: %s: %s\n", msg, strerror(err));
-    abort();
+    crashhandler_die_format(
+                "Internal error in %s: %s (%d)",
+                msg, strerror(err), err);
 }
 
 void qemu_mutex_init(QemuMutex *mutex)
