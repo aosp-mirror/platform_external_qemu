@@ -15,6 +15,7 @@
 #include "android/base/String.h"
 #include "android/base/StringFormat.h"
 
+#include "android/android.h"
 #include "android/avd/hw-config.h"
 #include "android/cmdline-option.h"
 #include "android/crashreport/crash-handler.h"
@@ -1294,7 +1295,7 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = "-android-hw";
         args[n++] = strdup(coreHwIniPath);
 
-        crashhandler_copy_attachment("avd_info.txt", coreHwIniPath);
+        crashhandler_copy_attachment(CRASH_AVD_HARDWARE_INFO, coreHwIniPath);
 
         /* In verbose mode, dump the file's content */
         if (VERBOSE_CHECK(init)) {
