@@ -211,8 +211,10 @@ LOCAL_SRC_FILES := \
     android/emulation/android_pipe.c \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
+    android/emulation/android_pipe_twitter.cpp \
     android/emulation/android_pipe_zero.c \
     android/emulation/android_qemud.cpp \
+    android/emulation/android_twitter.cpp \
     android/emulation/bufprint_config_dirs.cpp \
     android/emulation/ConfigDirs.cpp \
     android/emulation/control/LineConsumer.cpp \

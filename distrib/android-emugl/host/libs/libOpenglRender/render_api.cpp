@@ -35,6 +35,8 @@
 
 #include <string.h>
 
+AndroidTwitterMsgFn twitter_msg;
+
 GLESv2Dispatch s_gles2;
 GLESv1Dispatch s_gles1;
 static RenderServer* s_renderThread = NULL;
@@ -45,8 +47,9 @@ static RenderWindow* s_renderWindow = NULL;
 static IOStream *createRenderThread(int p_stream_buffer_size,
                                     unsigned int clientFlags);
 
-RENDER_APICALL int RENDER_APIENTRY initLibrary(void)
-{
+RENDER_APICALL int RENDER_APIENTRY
+initLibrary(AndroidTwitterMsgFn twitter_msg_fn) {
+    twitter_msg = twitter_msg_fn;
     //
     // Load EGL Plugin
     //
