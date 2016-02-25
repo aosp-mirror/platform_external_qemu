@@ -11,6 +11,7 @@
 
 #include "android/curl-support.h"
 
+#include "android/openssl-support.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 
@@ -29,6 +30,9 @@ bool curl_init(const char* ca_info) {
         if (res != CURLE_OK) {
             dwarning("CURL: global init failed with code %d (%s)", res,
                      curl_easy_strerror(res));
+            return false;
+        }
+        if (!android_openssl_init()) {
             return false;
         }
     }
@@ -51,6 +55,8 @@ void curl_cleanup() {
         // We know we're leaking memory by not calling curl_global_cleanup.
         // We can not guarantee that no threads exist when the program exits
         // (e.g. android::base::async has unknown lifetime).
+        //
+        // Ditto for android_openssl_finish.
     }
 }
 
