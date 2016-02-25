@@ -431,11 +431,12 @@ void androidMetrics_injectUploader(
 ABool androidMetrics_uploadMetrics(const AndroidMetrics* metrics) {
     VERBOSE_PRINT(metrics, "metrics: Uploading a report with status '%s', "
                            "num failures '%d' "
-                           "(version '%s', sys/user/wall times '%ld/%ld/%ld').",
+                           "(version '%s/%s', sys/user/wall times '%ld/%ld/%ld').",
                   metrics->is_dirty ? "crash" : "clean",
                   metrics->num_failed_reports,
-                  metrics->emulator_version, metrics->system_time,
-                  metrics->user_time, metrics->wallclock_time);
+                  metrics->emulator_version, metrics->core_version,
+                  metrics->system_time, metrics->user_time,
+                  metrics->wallclock_time);
 
     return androidMetrics_uploadMetricsToolbar(metrics);
 }

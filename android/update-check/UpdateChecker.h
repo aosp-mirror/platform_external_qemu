@@ -77,7 +77,7 @@ class UpdateChecker {
 public:
     // |configPath| is the path to the emulator configuration directory
     // where the checker can store its records about last check time
-    // |coreVersion| is a core-specific application version (e.g. 25.0.0.1/2)
+    // |coreVersion| is the application's core version (e.g. qemu2 2.2.0)
     //      'nullptr' means 'don't send any emulator-specific information in the
     //      request, just check the version
     explicit UpdateChecker(const char* configPath,

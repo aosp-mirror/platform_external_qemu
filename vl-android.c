@@ -437,6 +437,8 @@ const char* savevm_on_exit = NULL;
 #define  QEMU_EXIT(exit_code) return exit_code
 #endif  // CONFIG_ANDROID
 
+#define QEMU_CORE_VERSION "qemu1 " QEMU_VERSION
+
 /***********************************************************/
 /* x86 ISA bus support */
 
@@ -1855,6 +1857,7 @@ static void android_init_metrics(int opengl_alive)
 
     androidMetrics_init(&metrics);
     ANDROID_METRICS_STRASSIGN(metrics.emulator_version, EMULATOR_VERSION_STRING);
+    ANDROID_METRICS_STRASSIGN(metrics.core_version, QEMU_CORE_VERSION);
     ANDROID_METRICS_STRASSIGN(metrics.host_os_type, get_host_os_type());
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, android_hw->hw_cpu_arch);
     metrics.guest_gpu_enabled = android_hw->hw_gpu_enabled;
@@ -3854,7 +3857,7 @@ int main(int argc, char **argv, char **envp)
 void android_check_for_updates() {
     char configPath[PATH_MAX];
     bufprint_config_path(configPath, configPath + sizeof(configPath));
-    android_checkForUpdates(configPath, EMULATOR_VERSION_STRING);
+    android_checkForUpdates(configPath, QEMU_CORE_VERSION);
 }
 
 void
