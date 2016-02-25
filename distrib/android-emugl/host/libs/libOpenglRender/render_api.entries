@@ -15,17 +15,23 @@
 %typedef void (*OnPostFn)(void* context, int width, int height, int ydir,
 %                         int format, int type, unsigned char* pixels);
 %
+%typedef int (*AndroidTwitterMsgFn)(const char* format, ...);
+%extern AndroidTwitterMsgFn twitter_msg;
+%#define LOG_TWEET(...) (twitter_msg == NULL ? 0 : (*twitter_msg)(__VA_ARGS__))
+%
 
-# Initialize the library and tries to load the corresponding EGL/GLES
-# translation libraries. Must be called before anything else to ensure that
-# everything works. Returns 0 on success, error code otherwise.
-# If it returns an error, you cannot use the library at all.
-int initLibrary(void);
+# initLibrary - Initialize the library and try to load the corresponding
+#               EGL/GLES translation libraries.
+#
+# twitter_msg_fn is a callback print function that, if initialized
+# to AndroidEmu's android_twitter_msg, makes it possible
+# to log timestamped timestamped messages in the cross-system
+# (host/guest) log, directly from EmuGL
+int initLibrary(AndroidTwitterMsgFn twitter_msg_fn);
 
 # Change the stream mode. This must be called before initOpenGLRenderer()
 # |mode| is one of STREAM_DEFAULT, STREAM_UNIX, STREAM_TCP or STREAM_PIPE.
 int setStreamMode(int mode);
-
 
 # initOpenGLRenderer - initialize the OpenGL renderer process.
 #
