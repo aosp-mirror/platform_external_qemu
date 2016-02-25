@@ -11,6 +11,7 @@
 */
 #include "android/avd/info.h"
 #include "android/avd/util.h"
+#include "android/emulation/android_twitter.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/kernel/kernel_utils.h"
 #include "android/utils/bufprint.h"
@@ -1006,6 +1007,15 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
     }
 
     D("Physical RAM size: %dMB\n", hw->hw_ramSize);
+
+    // timstamped logging
+    if(opts->twitter != NULL) {
+        if(android_twitter_init(opts->twitter) != 0) {
+            D("Timestapped logging at %s could not be initialized", opts->twitter);
+            exit(2);
+        }
+        D("Timestapped logging successfully initialized at %s", opts->twitter);
+    }
 }
 
 bool handleCpuAcceleration(AndroidOptions* opts, AvdInfo* avd,
