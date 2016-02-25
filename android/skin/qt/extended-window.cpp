@@ -97,6 +97,10 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->fingerButton);
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
+
+    for (QWidget* w : findChildren<QWidget*>()) {
+        w->setAttribute(Qt::WA_MacShowFocusRect, false);
+    }
 }
 
 void ExtendedWindow::showPane(ExtendedWindowPane pane) {
@@ -135,6 +139,7 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
         return;
     }
     QPushButton* thisButton = it->second;
+    thisButton->toggle();
     thisButton->clearFocus(); // It looks better when not highlighted
     mExtendedUi->stackedWidget->setCurrentIndex(static_cast<int>(thisIndex));
 }
