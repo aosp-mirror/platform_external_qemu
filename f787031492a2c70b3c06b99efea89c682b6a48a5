@@ -121,6 +121,30 @@
     },
     {
       "key": {
+        "uuid": "e2b0b90b_dd7a7efe",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 785,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-25T01:19:41Z",
+      "side": 1,
+      "message": "And the few second runtimes are the outliers. I think it\u0027s because I\u0027m not dumping the entire WMIC information, just the stuff about the video drivers.",
+      "parentUuid": "82bb7df1_76c013f4",
+      "range": {
+        "startLine": 785,
+        "startChar": 7,
+        "endLine": 785,
+        "endChar": 51
+      },
+      "revId": "f787031492a2c70b3c06b99efea89c682b6a48a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a29b218c_e7c47bb4",
         "filename": "android/opengl/gpuinfo.h",
         "patchSetId": 47
