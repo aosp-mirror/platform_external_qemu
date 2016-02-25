@@ -70,13 +70,22 @@ void* curl_easy_default_init(char** error) {
         *error = strdup("Failed to initialize libcurl");
         return NULL;
     }
+
+    curlRes = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+    if (curlRes != CURLE_OK) {
+        asprintf(error, "Could not disable signals: %s",
+                 curl_easy_strerror(curlRes));
+        curl_easy_cleanup(curl);
+        return NULL;
+    }
+
     if (cached_ca_info != NULL) {
         curlRes = curl_easy_setopt(curl, CURLOPT_CAINFO, cached_ca_info);
         if (curlRes != CURLE_OK) {
             asprintf(error, "Could not set CURLOPT_CAINFO: %s",
                      curl_easy_strerror(curlRes));
             curl_easy_cleanup(curl);
-            curl = NULL;
+            return NULL;
         }
     }
     return curl;
@@ -91,6 +100,10 @@ static size_t null_write_callback(char* ptr,
     return size * nmemb;
 }
 
+// This function can block forever. We do not set any timeout for
+// curl_easy_perform. Since we disable signals, the DNS lookup timeout is ignore
+// by libcurl.
+// TODO: build using c-ares, and set timeout for curl_easy_perform.
 static bool curl_download_internal(const char* url,
                                    const char* post_fields,
                                    CurlWriteCallback callback_func,
