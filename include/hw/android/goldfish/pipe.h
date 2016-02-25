@@ -78,9 +78,10 @@ struct access_params_64 {
     uint32_t flags;
 };
 
-// Register 'zero' pipe service.
+// Register pipe services.
 extern void android_pipe_add_type_zero(void);
 extern void android_pipe_add_type_pingpong(void);
 extern void android_pipe_add_type_throttle(void);
+extern void android_pipe_add_type_twitter(void);
 
 #endif /* _HW_GOLDFISH_PIPE_H */

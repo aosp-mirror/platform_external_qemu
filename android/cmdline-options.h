@@ -110,6 +110,7 @@ OPT_FLAG ( shell, "enable root shell on current terminal" )
 OPT_FLAG ( no_jni, "disable JNI checks in the Dalvik runtime" )
 OPT_FLAG ( nojni, "same as -no-jni" )
 OPT_PARAM( logcat, "<tags>", "enable logcat output with given tags" )
+OPT_PARAM(twitter, "<file>", "enable host/guest timestamped logs to <file>")
 
 #ifdef __linux__
 OPT_FLAG ( use_system_libs, "Use system libstdc++ instead of bundled one" )
