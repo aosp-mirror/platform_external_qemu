@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c2c1f56d_cbf731e9",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 785,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-25T01:06:27Z",
+      "side": 1,
+      "message": "Vince explicitly wanted this feature---if the user is running a GPU known to be faulty but set -gpu host or something, we still want to detect if the GPU is on the list.",
+      "parentUuid": "c2c1f56d_4b6a017d",
+      "range": {
+        "startLine": 785,
+        "startChar": 7,
+        "endLine": 785,
+        "endChar": 51
+      },
+      "revId": "f787031492a2c70b3c06b99efea89c682b6a48a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a29b218c_e7c47bb4",
         "filename": "android/opengl/gpuinfo.h",
         "patchSetId": 47
