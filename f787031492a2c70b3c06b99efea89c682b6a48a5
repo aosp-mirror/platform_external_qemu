@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "22d0113b_fda1a9d1",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 47
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-25T01:08:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a29b218c_e7c47bb4",
+      "range": {
+        "startLine": 27,
+        "startChar": 3,
+        "endLine": 27,
+        "endChar": 16
+      },
+      "revId": "f787031492a2c70b3c06b99efea89c682b6a48a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "82bb7df1_3685fbf9",
         "filename": "android/opengl/gpuinfo.h",
         "patchSetId": 47
@@ -83,6 +107,30 @@
       "writtenOn": "2016-02-25T01:01:55Z",
       "side": 1,
       "message": "same thing, please don\u0027t capitalize the function name",
+      "range": {
+        "startLine": 32,
+        "startChar": 3,
+        "endLine": 32,
+        "endChar": 28
+      },
+      "revId": "f787031492a2c70b3c06b99efea89c682b6a48a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02e4ed24_246838c4",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 47
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-25T01:08:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "82bb7df1_3685fbf9",
       "range": {
         "startLine": 32,
         "startChar": 3,
@@ -118,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "62a5a9c6_e0610ee1",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 47
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-25T01:08:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e2b0b90b_fdce5aa4",
+      "range": {
+        "startLine": 35,
+        "startChar": 3,
+        "endLine": 35,
+        "endChar": 11
+      },
+      "revId": "f787031492a2c70b3c06b99efea89c682b6a48a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "82bb7df1_168af708",
         "filename": "android/opengl/gpuinfo.h",
         "patchSetId": 47
@@ -129,6 +201,30 @@
       "writtenOn": "2016-02-25T01:01:55Z",
       "side": 1,
       "message": "nit: unreilable",
+      "range": {
+        "startLine": 36,
+        "startChar": 19,
+        "endLine": 36,
+        "endChar": 29
+      },
+      "revId": "f787031492a2c70b3c06b99efea89c682b6a48a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_76f9336c",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 47
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-25T01:08:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "82bb7df1_168af708",
       "range": {
         "startLine": 36,
         "startChar": 19,
@@ -164,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "62a5a9c6_807122b1",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 47
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-25T01:08:42Z",
+      "side": 1,
+      "message": "This was removed and never redefined. It\u0027s taken out. Thanks for catching this!",
+      "parentUuid": "a29b218c_672e2b44",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 40
+      },
+      "revId": "f787031492a2c70b3c06b99efea89c682b6a48a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62be89e4_78b48bfe",
         "filename": "android/opengl/gpuinfo.h",
         "patchSetId": 47
@@ -175,6 +295,30 @@
       "writtenOn": "2016-02-25T01:01:55Z",
       "side": 1,
       "message": "we usually mark the parameters like this: |list|",
+      "range": {
+        "startLine": 90,
+        "startChar": 17,
+        "endLine": 90,
+        "endChar": 21
+      },
+      "revId": "f787031492a2c70b3c06b99efea89c682b6a48a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_fdd3dc23",
+        "filename": "android/opengl/gpuinfo.h",
+        "patchSetId": 47
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-25T01:08:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62be89e4_78b48bfe",
       "range": {
         "startLine": 90,
         "startChar": 17,
