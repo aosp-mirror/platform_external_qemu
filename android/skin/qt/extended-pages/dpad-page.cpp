@@ -16,7 +16,12 @@
 #include "android/skin/keycode.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/size-tweaker.h"
+
+#include <QApplication>
 #include <QBitmap>
+#include <QDesktopWidget>
+#include <QScreen>
 #include <QSettings>
 
 DPadPage::DPadPage(QWidget *parent) :
@@ -41,24 +46,15 @@ DPadPage::DPadPage(QWidget *parent) :
 
     for (const auto& button_info : buttons) {
         QPushButton* button = button_info.button;
-        const QString icon_name = button->property("themeIconName").toString();
-        if (!icon_name.isNull()) {
-            // Mask the button to only its non-transparent pixels
-            // (Note we care only about the shape of the button
-            //  here, so :/dark/ and :/light/ are equivalent.)
-            //
-            // Caution: This requires that the button icon be displayed
-            //          at its natural size.
-            const QPixmap mask_pixmap(":/dark/" + icon_name);
-            button->setMask(mask_pixmap.mask());
-            button->setStyleSheet("border: none;");
-        }
         const SkinKeyCode key_code = button_info.key_code;
         connect(button, &QPushButton::pressed,
                 [button, key_code, this]() { toggleButtonPressed(button, key_code, true); });
         connect(button, &QPushButton::released,
                 [button, key_code, this]() { toggleButtonPressed(button, key_code, false); });
     }
+
+    remaskButtons();
+    installEventFilter(this);
 }
 
 void DPadPage::setUserEventsAgent(const QAndroidUserEventAgent* agent)
@@ -87,3 +83,39 @@ void DPadPage::toggleButtonPressed(
     }
 }
 
+void DPadPage::remaskButtons() {
+    for (QPushButton* button : findChildren<QPushButton*>()) {
+        const QString icon_name = button->property("themeIconName").toString();
+        if (!icon_name.isNull()) {
+            // Mask the button to only its non-transparent pixels
+            // (Note we care only about the shape of the button
+            //  here, so :/dark/ and :/light/ are equivalent.)
+            //
+            // Caution: This requires that the button icon be displayed
+            //          at its natural size.
+            const QPixmap mask_pixmap(":/light/" + icon_name);
+
+            // HACK: On windows/linux, on normal-density screens,
+            // and on OS X with retina display,
+            // the mask will end up being too big for the button, so it needs
+            // to be scaled down.
+            double mask_scale = 0.5;
+#ifndef Q_OS_MAC
+            QScreen *scr = QApplication::screens().at(QApplication::desktop()->screenNumber(this));
+            double dpr = scr->logicalDotsPerInch() / SizeTweaker::BaselineDpi;
+            mask_scale *= dpr;
+#endif
+            button->setMask(mask_pixmap.mask().scaled(mask_pixmap.size() * mask_scale));
+            button->setStyleSheet("border: none;");
+        }
+    }
+}
+
+bool DPadPage::eventFilter(QObject* o, QEvent* event) {
+    if (event->type() == QEvent::ScreenChangeInternal) {
+        // When moved across screens, masks on buttons need to
+        // be adjusted according to screen density.
+        remaskButtons();
+    }
+    return QWidget::eventFilter(o, event);
+}
