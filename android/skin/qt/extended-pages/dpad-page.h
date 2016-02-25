@@ -32,6 +32,9 @@ private:
                              const SkinKeyCode key_code,
                              const bool pressed);
 private:
+    void remaskButtons();
+    bool eventFilter(QObject*, QEvent*) override;
+
     std::unique_ptr<Ui::DPadPage> mUi;
     const QAndroidUserEventAgent* mUserEventsAgent;
 };
