@@ -16,9 +16,9 @@
   <widget class="QPushButton" name="dpad_downButton">
    <property name="geometry">
     <rect>
-     <x>243</x>
-     <y>225</y>
-     <width>141</width>
+     <x>240</x>
+     <y>207</y>
+     <width>142</width>
      <height>100</height>
     </rect>
    </property>
@@ -48,10 +48,10 @@
   <widget class="QPushButton" name="dpad_leftButton">
    <property name="geometry">
     <rect>
-     <x>212</x>
-     <y>153</y>
-     <width>100</width>
-     <height>141</height>
+     <x>206</x>
+     <y>131</y>
+     <width>99</width>
+     <height>142</height>
     </rect>
    </property>
    <property name="text">
@@ -80,7 +80,7 @@
   <widget class="QPushButton" name="dpad_forwardButton">
    <property name="geometry">
     <rect>
-     <x>366</x>
+     <x>380</x>
      <y>360</y>
      <width>50</width>
      <height>50</height>
@@ -112,7 +112,7 @@
   <widget class="QPushButton" name="dpad_playButton">
    <property name="geometry">
     <rect>
-     <x>288</x>
+     <x>286</x>
      <y>360</y>
      <width>50</width>
      <height>50</height>
@@ -144,9 +144,9 @@
   <widget class="QPushButton" name="dpad_upButton">
    <property name="geometry">
     <rect>
-     <x>243</x>
-     <y>122</y>
-     <width>141</width>
+     <x>240</x>
+     <y>96</y>
+     <width>142</width>
      <height>100</height>
     </rect>
    </property>
@@ -177,9 +177,9 @@
    <property name="geometry">
     <rect>
      <x>315</x>
-     <y>153</y>
+     <y>131</y>
      <width>100</width>
-     <height>141</height>
+     <height>142</height>
     </rect>
    </property>
    <property name="text">
@@ -208,7 +208,7 @@
   <widget class="QPushButton" name="dpad_backButton">
    <property name="geometry">
     <rect>
-     <x>210</x>
+     <x>190</x>
      <y>360</y>
      <width>50</width>
      <height>50</height>
@@ -240,10 +240,10 @@
   <widget class="QPushButton" name="dpad_selectButton">
    <property name="geometry">
     <rect>
-     <x>270</x>
-     <y>181</y>
-     <width>85</width>
-     <height>85</height>
+     <x>268</x>
+     <y>160</y>
+     <width>86</width>
+     <height>86</height>
     </rect>
    </property>
    <property name="text">

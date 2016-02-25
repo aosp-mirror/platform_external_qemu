@@ -22,6 +22,9 @@
 class SizeTweaker : public QObject {
 Q_OBJECT
 public:
+    // The UI looks good at 96 DPI.
+    static const qreal BaselineDpi;
+
     // Creates a new SizeTweaker that will adjust the appearance
     // of |widget| based on DPI, as it gets shown/moved between
     // displays.
@@ -36,9 +39,6 @@ private:
     void adjustSizesAndPositions();
 
 private:
-    // The UI looks good at 96 DPI.
-    static const qreal BaselineDpi;
-
     // Widget to operate on.
     QPointer<QWidget> mSubject;
 
