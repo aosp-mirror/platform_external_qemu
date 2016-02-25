@@ -18,6 +18,7 @@
 
 #if defined(CONFIG_ANDROID) && defined(USE_ANDROID_EMU)
 #include "android-qemu2-glue/looper-qemu.h"
+#include "android/crashreport/crash-handler.h"
 #endif
 
 static bool name_threads;
@@ -37,8 +38,14 @@ static void error_exit(int err, const char *msg)
     FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
                   NULL, err, 0, (LPTSTR)&pstr, 2, NULL);
     fprintf(stderr, "qemu: %s: %s\n", msg, pstr);
+#ifdef USE_ANDROID_EMU
+    crashhandler_die_format(
+                "Internal error in %s: %s (%d)",
+                msg, pstr, err);
+#else
     LocalFree(pstr);
     abort();
+#endif
 }
 
 void qemu_mutex_init(QemuMutex *mutex)
