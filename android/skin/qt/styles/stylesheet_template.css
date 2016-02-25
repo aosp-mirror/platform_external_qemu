@@ -44,6 +44,16 @@ QPlainTextEdit, QTextEdit, QLineEdit {
     border-top: 0px;
     border-bottom: 1px solid %%EDIT_COLOR%%;
 }
+QPlainTextEdit:disabled {
+    background: transparent
+}
+QLineEdit:focus {
+    border-bottom: 2px solid %%TOOL_COLOR%%;
+}
+QPlainTextEdit {
+    background: %%TAB_BKG_COLOR%%;
+    border: 1px solid %%EDIT_COLOR%%;
+}
 QCheckBox::indicator:checked[ColorGroup="Toggle"] {
     image: url(:/%%PATH%%/toggle_on);
     width: 36; height: 24;
