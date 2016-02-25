@@ -408,6 +408,7 @@ LOCAL_SRC_FILES := \
   android/emulation/CpuAccelerator_unittest.cpp \
   android/emulation/serial_line_unittest.cpp \
   android/emulation/testing/TestAndroidPipeDevice.cpp \
+  android/error-messages_unittest.cpp \
   android/filesystems/ext4_utils_unittest.cpp \
   android/filesystems/fstab_parser_unittest.cpp \
   android/filesystems/partition_config_unittest.cpp \
