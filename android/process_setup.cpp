@@ -17,9 +17,9 @@
 #include "android/curl-support.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/crashreport/CrashReporter.h"
+#include "android/emulation/android_twitter.h"
 #include "android/utils/filelock.h"
 #include "android/utils/sockets.h"
-
 #include <string>
 
 using android::base::PathUtils;
@@ -69,5 +69,6 @@ void process_early_setup(int argc, char** argv) {
 }
 
 void process_late_teardown() {
+    android_twitter_fini();
     curl_cleanup();
 }

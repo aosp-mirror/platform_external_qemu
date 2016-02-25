@@ -20,8 +20,14 @@ typedef void (*OnPostFn)(void* context, int width, int height, int ydir,
                          int format, int type, unsigned char* pixels);
 typedef void (*emugl_crash_func_t)(const char* format, ...);
 
+
+typedef int (*AndroidTwitterMsgFn)(const char* format, ...);
+extern AndroidTwitterMsgFn twitter_msg;
+#define TWITTER_IS_INIT() (twitter_msg == NULL ? 0 : 1)
+#define LOG_TWEET(...) (twitter_msg == NULL ? 0 : (*twitter_msg)(__VA_ARGS__))
+
 #define LIST_RENDER_API_FUNCTIONS(X) \
-  X(int, initLibrary, (), ()) \
+  X(int, initLibrary, (AndroidTwitterMsgFn twitter_msg_fn), (twitter_msg_fn)) \
   X(int, setStreamMode, (int mode), (mode)) \
   X(int, initOpenGLRenderer, (int width, int height, bool useSubWindow, char* addr, size_t addrLen, emugl_logger_struct logfuncs, emugl_crash_func_t crashfunc), (width, height, useSubWindow, addr, addrLen, logfuncs, crashfunc)) \
   X(void, getHardwareStrings, (const char** vendor, const char** renderer, const char** version), (vendor, renderer, version)) \
@@ -32,6 +38,5 @@ typedef void (*emugl_crash_func_t)(const char* format, ...);
   X(void, setOpenGLDisplayTranslation, (float px, float py), (px, py)) \
   X(void, repaintOpenGLDisplay, (), ()) \
   X(int, stopOpenGLRenderer, (), ()) \
-
 
 #endif  // RENDER_API_FUNCTIONS_H

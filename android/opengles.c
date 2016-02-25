@@ -17,6 +17,7 @@
 #include "OpenglRender/render_api_functions.h"
 
 #include "android/crashreport/crash-handler.h"
+#include "android/emulation/android_twitter.h"
 #include "android/globals.h"
 #include <android/utils/debug.h>
 #include <android/utils/path.h>
@@ -102,7 +103,11 @@ android_initOpenglesEmulation(void)
         goto BAD_EXIT;
     }
 
-    if (!initLibrary()) {
+    AndroidTwitterMsgFn twitter_msg_fn = NULL;
+    if (android_twitter_is_init()) {
+        twitter_msg_fn = android_twitter_msg;
+    }
+    if (!initLibrary(twitter_msg_fn)) {
         derror("OpenGLES initialization failed!");
         goto BAD_EXIT;
     }

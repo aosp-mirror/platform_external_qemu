@@ -14,6 +14,7 @@
 #include "android/avd/info.h"
 #include "android/avd/util.h"
 #include "android/cpu_accelerator.h"
+#include "android/emulation/android_twitter.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/globals.h"
 #include "android/kernel/kernel_utils.h"
@@ -1038,6 +1039,16 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     }
     else {
         D("Physical RAM size: %dMB\n", hw->hw_ramSize);
+    }
+
+    // cross-vm timstamped logging
+    if (opts->twitter != NULL) {
+        if (android_twitter_init(opts->twitter) != 0) {
+            D("Timestapped logging at %s could not be initialized",
+              opts->twitter);
+            exit(2);
+        }
+        D("Timestapped logging successfully initialized at %s", opts->twitter);
     }
 
     int minVmHeapSize =
