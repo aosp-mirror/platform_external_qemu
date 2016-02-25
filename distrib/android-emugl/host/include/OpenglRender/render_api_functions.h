@@ -19,18 +19,31 @@
 typedef void (*OnPostFn)(void* context, int width, int height, int ydir,
                          int format, int type, unsigned char* pixels);
 
-#define LIST_RENDER_API_FUNCTIONS(X) \
-  X(int, initLibrary, (), ()) \
-  X(int, setStreamMode, (int mode), (mode)) \
-  X(int, initOpenGLRenderer, (int width, int height, bool useSubWindow, char* addr, size_t addrLen), (width, height, useSubWindow, addr, addrLen)) \
-  X(void, getHardwareStrings, (const char** vendor, const char** renderer, const char** version), (vendor, renderer, version)) \
-  X(void, setPostCallback, (OnPostFn onPost, void* onPostContext), (onPost, onPostContext)) \
-  X(bool, showOpenGLSubwindow, (FBNativeWindowType window, int wx, int wy, int ww, int wh, int fbw, int fbh, float dpr, float zRot), (window, wx, wy, ww, wh, fbw, fbh, dpr, zRot)) \
-  X(bool, destroyOpenGLSubwindow, (), ()) \
-  X(void, setOpenGLDisplayRotation, (float zRot), (zRot)) \
-  X(void, setOpenGLDisplayTranslation, (float px, float py), (px, py)) \
-  X(void, repaintOpenGLDisplay, (), ()) \
-  X(int, stopOpenGLRenderer, (), ()) \
+typedef int (*AndroidTwitterMsgFn)(const char* format, ...);
+extern AndroidTwitterMsgFn twitter_msg;
+#define TWITTER_IS_INIT() (twitter_msg == NULL ? 0 : 1)
+#define LOG_TWEET(...) (twitter_msg == NULL ? 0 : (*twitter_msg)(__VA_ARGS__))
 
+#define LIST_RENDER_API_FUNCTIONS(X)                                          \
+    X(int, initLibrary, (AndroidTwitterMsgFn twitter_msg_fn),                 \
+      (twitter_msg_fn))                                                       \
+    X(int, setStreamMode, (int mode), (mode))                                 \
+    X(int, initOpenGLRenderer,                                                \
+      (int width, int height, bool useSubWindow, char* addr, size_t addrLen), \
+      (width, height, useSubWindow, addr, addrLen))                           \
+    X(void, getHardwareStrings,                                               \
+      (const char** vendor, const char** renderer, const char** version),     \
+      (vendor, renderer, version))                                            \
+    X(void, setPostCallback, (OnPostFn onPost, void* onPostContext),          \
+      (onPost, onPostContext))                                                \
+    X(bool, showOpenGLSubwindow,                                              \
+      (FBNativeWindowType window, int wx, int wy, int ww, int wh, int fbw,    \
+       int fbh, float dpr, float zRot),                                       \
+      (window, wx, wy, ww, wh, fbw, fbh, dpr, zRot))                          \
+    X(bool, destroyOpenGLSubwindow, (), ())                                   \
+    X(void, setOpenGLDisplayRotation, (float zRot), (zRot))                   \
+    X(void, setOpenGLDisplayTranslation, (float px, float py), (px, py))      \
+    X(void, repaintOpenGLDisplay, (), ())                                     \
+    X(int, stopOpenGLRenderer, (), ())
 
 #endif  // RENDER_API_FUNCTIONS_H

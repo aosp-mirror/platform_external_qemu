@@ -1078,6 +1078,18 @@ help_logcat(stralloc_t*  out)
 }
 
 static void
+help_twitter(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-twitter <file>' to enable timestamped event logging to <file>.\n"
+    "  This tool is experimental and for emulator-development only. \n"
+    "  It enables a near-ordered stream of timestamped messages from \n"
+    "  both the host and the guest system to be saved in <file> \n"
+    "  for performance/other debugging purposes.\n\n"
+    );
+}
+
+static void
 help_no_audio(stralloc_t*  out)
 {
     PRINTF(

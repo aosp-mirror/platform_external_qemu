@@ -1102,6 +1102,45 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLock)
         ret = true;
     }
 
+    if (TWITTER_IS_INIT()) {
+        GLint readFormat;
+        GLint readType;
+
+        s_gles2.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
+        s_gles2.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
+
+        unsigned char pixel[4] = {0};
+        (*c).second.cb->readPixels(0, 0, 1, 1, (GLenum)readFormat,
+                                   (GLenum)readType, (void*)pixel);
+
+        int r = (int)pixel[0];
+        int g = (int)pixel[1];
+        int b = (int)pixel[2];
+        // alpha does not carry any important information:
+        // int a = (int)pixel[3];
+
+        int x = (((b >> 5) & 0x7) << 8) | r;
+        int y = (((b >> 2) & 0x7) << 8) | g;
+        int c = b & 0x3;
+        const char* action = "?";
+        switch (c) {
+            case 0:
+                action = "down";
+                break;
+            case 1:
+                action = "up";
+                break;
+            case 2:
+                action = "move";
+                break;
+            default:
+                action = "other";
+        }
+
+        LOG_TWEET("EVENT: %-16s X: %-16llu Y: %-16llu Action: %-16s",
+                  "HostGPURendered", x, y, action);
+    }
+
     //
     // output FPS statistics
     //
