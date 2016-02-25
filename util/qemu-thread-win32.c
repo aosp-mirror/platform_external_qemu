@@ -16,6 +16,8 @@
 #include <assert.h>
 #include <limits.h>
 
+#include "android/crashreport/crash-handler.h"
+
 static void error_exit(int err, const char *msg)
 {
     char *pstr;
@@ -23,8 +25,9 @@ static void error_exit(int err, const char *msg)
     FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
                   NULL, err, 0, (LPTSTR)&pstr, 2, NULL);
     fprintf(stderr, "qemu: %s: %s\n", msg, pstr);
-    LocalFree(pstr);
-    abort();
+    crashhandler_die_format(
+                "Internal error in %s: %s (%d)",
+                msg, pstr, err);
 }
 
 void qemu_mutex_init(QemuMutex *mutex)
