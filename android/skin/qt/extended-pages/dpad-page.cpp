@@ -16,7 +16,11 @@
 #include "android/skin/keycode.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/qt-settings.h"
+
+#include <QApplication>
 #include <QBitmap>
+#include <QDesktopWidget>
+#include <QScreen>
 #include <QSettings>
 
 DPadPage::DPadPage(QWidget *parent) :
@@ -49,8 +53,14 @@ DPadPage::DPadPage(QWidget *parent) :
             //
             // Caution: This requires that the button icon be displayed
             //          at its natural size.
-            const QPixmap mask_pixmap(":/dark/" + icon_name);
-            button->setMask(mask_pixmap.mask());
+            const QPixmap mask_pixmap(":/light/" + icon_name);
+            double mask_scale = 1.0;
+#ifndef Q_OS_MAC
+            QScreen *scr = QApplication::screens().at(QApplication::desktop()->screenNumber(this));
+            double dpr = scr->logicalDotsPerInch() / 96.0;
+            mask_scale = 0.5 * dpr;
+#endif
+            button->setMask(mask_pixmap.mask().scaled(mask_pixmap.size() * mask_scale));
             button->setStyleSheet("border: none;");
         }
         const SkinKeyCode key_code = button_info.key_code;
