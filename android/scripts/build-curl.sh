@@ -387,6 +387,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
        copy_directory \
                "$(builder_install_prefix)/include/curl" \
                "$INSTALL_DIR/$SYSTEM/include/curl"
+       copy_directory \
+               "$(builder_install_prefix)/include/openssl" \
+               "${INSTALL_DIR}/${SYSTEM}/include/openssl"
 
         # Copy the curl executable; this is not necessary
         # but serves as a validation point
