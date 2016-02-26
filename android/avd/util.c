@@ -340,6 +340,16 @@ path_getAvdGpuMode(const char* avdName)
     return gpuMode;
 }
 
+char*
+path_getAvdGpuBlacklisted(const char* avdName)
+{
+    char* avdPath = _getAvdContentPath(avdName);
+    char* gpuBlacklisted = NULL;
+    gpuBlacklisted = _getAvdConfigValue(avdPath, "hw.gpu.blacklisted", "no");
+    AFREE(avdPath);
+    return gpuBlacklisted;
+}
+
 const char*
 emulator_getBackendSuffix(const char* targetArch)
 {

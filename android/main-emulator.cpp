@@ -462,6 +462,11 @@ int main(int argc, char** argv)
          on_blacklist = isHostGpuBlacklisted();
     }
 
+    // This is for testing purposes only.
+    const char* testGpuBlacklist = NULL;
+    testGpuBlacklist = path_getAvdGpuBlacklisted(avdName);
+    on_blacklist = !strcmp(testGpuBlacklist, "yes");
+
     if ((!gpu && gpuMode && !strcmp(gpuMode, "auto")) ||
         (gpu && !strcmp(gpu, "auto"))) {
         if (on_blacklist) {
