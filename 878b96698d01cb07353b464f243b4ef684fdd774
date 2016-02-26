@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c2981592_25da62ec",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 798,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-26T22:39:45Z",
+      "side": 1,
+      "message": "const?",
+      "range": {
+        "startLine": 798,
+        "startChar": 13,
+        "endLine": 798,
+        "endChar": 27
+      },
+      "revId": "878b96698d01cb07353b464f243b4ef684fdd774",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
