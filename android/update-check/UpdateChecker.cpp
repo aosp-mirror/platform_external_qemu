@@ -25,6 +25,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
 #include "android/utils/misc.h"
+#include "android/version.h"
 
 #include <errno.h>
 #include <string.h>
@@ -93,8 +94,10 @@ public:
             const ScopedCPtr<char> id(
                     android_studio_get_installation_id());
             url += Uri::FormatEncodeArguments(
-                    "?tool=emulator&uid=%s&os=%s&version=%s", id.get(),
-                    toString(System::get()->getOsType()), version);
+                       "?tool=emulator&uid=%s&os=%s"
+                       "&version=" EMULATOR_VERSION_STRING "&coreVersion=%s",
+                       id.get(), toString(System::get()->getOsType()),
+                       version);
         }
         char* error = nullptr;
         if (!curl_download(url.c_str(), nullptr, &curlWriteCallback, &xml, &error)) {
