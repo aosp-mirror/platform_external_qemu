@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEBUG 1
+#define DEBUG 0
 
 #if DEBUG
 #define D(...)  printf(__VA_ARGS__)
