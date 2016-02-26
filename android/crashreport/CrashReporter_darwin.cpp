@@ -92,7 +92,8 @@ bool HostCrashReporter::exceptionFilterCallback(void*) {
     return CrashReporter::get()->onCrash();
 }
 
-bool HostCrashReporter::onCrashPlatformSpecific() {
+static void attachMemoryInfo()
+{
     rusage usage = {};
     getrusage(RUSAGE_SELF, &usage);
 
@@ -121,6 +122,11 @@ bool HostCrashReporter::onCrashPlatformSpecific() {
 
     CrashReporter::get()->attachData(
                 CrashReporter::kProcessMemoryInfoFileName, buf);
+}
+
+bool HostCrashReporter::onCrashPlatformSpecific() {
+    attachMemoryInfo();
+    CrashReporter::attachProcessListPosix();
 
     return true;    // proceed with handling the crash
 }

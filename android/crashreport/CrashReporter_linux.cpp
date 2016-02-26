@@ -89,6 +89,8 @@ bool HostCrashReporter::onCrashPlatformSpecific() {
     crashhandler_copy_attachment(
                 CrashReporter::kProcessMemoryInfoFileName, "/proc/self/status");
 
+    CrashReporter::attachProcessListPosix();
+
     return true;
 }
 
