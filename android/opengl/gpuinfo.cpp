@@ -9,6 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/opengl/gpuinfo.h"
@@ -33,6 +34,13 @@ static const size_t kFieldLen = 2048;
 
 static const size_t NOTFOUND = std::string::npos;
 
+::android::base::LazyInstance<GpuInfoList> sGpuInfoList =
+        LAZY_INSTANCE_INIT;
+
+GpuInfoList* GpuInfoList::get() {
+    return sGpuInfoList.ptr();
+}
+
 void GpuInfo::addDll(std::string dll_str) {
     dlls.push_back(dll_str);
 }
@@ -44,23 +52,31 @@ GpuInfo& GpuInfoList::currGpu() {
     return infos.back();
 }
 
-void GpuInfoList::dump() {
-    fprintf(stderr, "-=GPU INFO=-\n");
+std::string GpuInfoList::dump() {
+    std::stringstream ss;
     for (unsigned int i = 0; i < infos.size(); i++) {
-        fprintf(stderr, "GPU #%d {\n", i);
-        fprintf(stderr, "\tMake:[%s]\n", infos[i].make.c_str());
-        fprintf(stderr, "\tModel:[%s]\n", infos[i].model.c_str());
-        fprintf(stderr, "\tDevice ID:[%s]\n", infos[i].device_id.c_str());
-        fprintf(stderr, "\tRevision ID:[%s]\n", infos[i].revision_id.c_str());
-        fprintf(stderr, "\tVersion:[%s]\n", infos[i].version.c_str());
-        fprintf(stderr, "\tRenderer:[%s]\n", infos[i].renderer.c_str());
-        fprintf(stderr, "\tActive?:[%d]\n", infos[i].current_gpu);
-        fprintf(stderr, "\tDLLS:\n");
-        for (unsigned int j = 0; j < infos[i].dlls.size(); j++) {
-            fprintf(stderr, "\t\t[%s]\n", infos[i].dlls[j].c_str());
+        ss << "GPU #" << i + 1 << std::endl;
+
+        if (!infos[i].make.empty()) {
+            ss << "  Make: " << infos[i].make << std::endl;
         }
-        fprintf(stderr, "}\n");
+        if (!infos[i].model.empty()) {
+            ss << "  Model: " << infos[i].model << std::endl;
+        }
+        if (!infos[i].device_id.empty()) {
+            ss << "  Device ID: " << infos[i].device_id << std::endl;
+        }
+        if (!infos[i].revision_id.empty()) {
+            ss << "  Revision ID: " << infos[i].revision_id << std::endl;
+        }
+        if (!infos[i].version.empty()) {
+            ss << "  Driver version: " << infos[i].version << std::endl;
+        }
+        if (!infos[i].renderer.empty()) {
+            ss << "  Renderer: " << infos[i].renderer << std::endl;
+        }
     }
+    return ss.str();
 }
 
 // Actual blacklist starts here.
@@ -423,7 +439,7 @@ void parse_gpu_info_list(const std::string& contents, GpuInfoList* gpulist) {
 }
 
 bool parse_and_query_blacklist(const std::string& contents) {
-    GpuInfoList gpulist;
-    parse_gpu_info_list(contents, &gpulist);
-    return gpuinfo_query_blacklist(&gpulist, sGpuBlacklist, sBlacklistSize);
+    GpuInfoList* gpulist = GpuInfoList::get();
+    parse_gpu_info_list(contents, gpulist);
+    return gpuinfo_query_blacklist(gpulist, sGpuBlacklist, sBlacklistSize);
 }
