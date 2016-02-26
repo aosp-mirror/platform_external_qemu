@@ -143,6 +143,16 @@ const char*  avdInfo_getName( const AvdInfo*  i );
  */
 int    avdInfo_getApiLevel( const AvdInfo*  i );
 
+/* Return the "dessert name" associated with the
+ * API level
+ */
+const char* avdInfo_getApiDessertName(int apiLevel);
+
+/* Return the full version name associated with the
+ * API level
+ */
+void avdInfo_getFullApiName(int apiLevel, char* nameStr, int strLen);
+
 /* Returns true if the AVD is on Google APIs. */
 bool   avdInfo_isGoogleApis( const AvdInfo*  i );
 

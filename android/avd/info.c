@@ -563,6 +563,51 @@ avdInfo_getApiLevel(const AvdInfo* i) {
     return i->apiLevel;
 }
 
+const char*
+avdInfo_getApiDessertName(int apiLevel) {
+    // This information was taken from the SDK Manager:
+    // Appearances & Behavior > System Settings > Android SDK > SDK Platforms
+    if (apiLevel == 10) return "Gingerbread";        // 10
+    if (apiLevel <= 13) return "";                   // No names for 0..9, 11..13
+    if (apiLevel <= 15) return "Ice Cream Sandwich"; // 14..15
+    if (apiLevel <= 18) return "Jelly Bean";         // 16..18
+    if (apiLevel <= 20) return "KitKat";             // 19..20
+    if (apiLevel <= 22) return "Lollipop";           // 21..22
+    if (apiLevel <= 23) return "Marshmallow";        // 23
+
+    if (apiLevel <= 24) return "N";                  // 24
+
+    return "";
+}
+
+void
+avdInfo_getFullApiName(int apiLevel, char* nameStr, int strLen) {
+    // This information was taken from the SDK Manager:
+    // Appearances & Behavior > System Settings > Android SDK > SDK Platforms
+    switch (apiLevel) {
+        case 10: strncpy(nameStr, "2.3.3 (Gingerbread) - API 10 (Rev 2)",        strLen); break;
+        case 14: strncpy(nameStr, "4.0 (Ice Cream Sandwich) - API 14 (Rev 4)",   strLen); break;
+        case 15: strncpy(nameStr, "4.0.3 (Ice Cream Sandwich) - API 15 (Rev 5)", strLen); break;
+        case 16: strncpy(nameStr, "4.1 (Jelly Bean) - API 16 (Rev 5)",           strLen); break;
+        case 17: strncpy(nameStr, "4.2 (Jelly Bean) - API 17 (Rev 3)",           strLen); break;
+        case 18: strncpy(nameStr, "4.3 (Jelly Bean) - API 18 (Rev 3)",           strLen); break;
+        case 19: strncpy(nameStr, "4.4 (KitKat) - API 19 (Rev 4)",               strLen); break;
+        case 20: strncpy(nameStr, "4.4 (KitKat Wear) - API 20 (Rev 2)",          strLen); break;
+        case 21: strncpy(nameStr, "5.0 (Lollipop) - API 21 (Rev 2)",             strLen); break;
+        case 22: strncpy(nameStr, "5.1 (Lollipop) - API 22 (Rev 2)",             strLen); break;
+        case 23: strncpy(nameStr, "6.0 (Marshmallow) - API 23 (Rev 1)",          strLen); break;
+
+        case 24: strncpy(nameStr, "N preview - API 24",                          strLen); break;
+
+        default:
+            if (apiLevel < 0 || apiLevel > 99) {
+                strncpy(nameStr, "Unknown API version", strLen);
+            } else {
+                snprintf(nameStr, strLen, "API %d", apiLevel);
+            }
+    }
+}
+
 /* Look for a named file inside the AVD's content directory.
  * Returns NULL if it doesn't exist, or a strdup() copy otherwise.
  */
