@@ -22,6 +22,30 @@
       "revId": "d25fe3f27a886c99159d840950ac2dfcc4d169cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02e4ed24_79c01ef4",
+        "filename": "android/skin/file.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 881,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-02-26T22:15:19Z",
+      "side": 1,
+      "message": "By convention, \"portrait\" is the very first layout (from which the others are generated).",
+      "parentUuid": "e27a7932_3f262ffd",
+      "range": {
+        "startLine": 881,
+        "startChar": 7,
+        "endLine": 881,
+        "endChar": 59
+      },
+      "revId": "d25fe3f27a886c99159d840950ac2dfcc4d169cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
