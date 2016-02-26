@@ -35,6 +35,8 @@ typedef struct {
 // Check whether or not the host GPU is blacklisted. If so, fall back
 // to software rendering.
 bool isHostGpuBlacklisted();
+// If we actually switched to software, call this.
+void setGpuBlacklistStatus(bool switchedSoftware);
 
 // Initialize an EmuglConfig instance based on the AVD's hardware properties
 // and the command-line -gpu option, if any.

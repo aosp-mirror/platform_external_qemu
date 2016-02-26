@@ -9,6 +9,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/base/compiler.h"
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,7 +55,7 @@ struct BlacklistEntry {
 // about the system's GPU.s
 class GpuInfo {
 public:
-    GpuInfo() { current_gpu = false; }
+    GpuInfo() : current_gpu(false) { }
 
     bool current_gpu;
 
@@ -71,12 +73,15 @@ public:
 
 class GpuInfoList {
 public:
-    GpuInfoList() {}
+    GpuInfoList() : blacklist_status(false) { }
     void addGpu();
     GpuInfo& currGpu();
-    void dump();
+    std::string dump();
 
+    static GpuInfoList* get(); // For the global GpuInfoList
     std::vector<GpuInfo> infos;
+    bool blacklist_status;
+    DISALLOW_COPY_ASSIGN_AND_MOVE(GpuInfoList);
 };
 
 // Below are helper functions that can be useful in various

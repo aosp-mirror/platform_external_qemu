@@ -799,6 +799,7 @@ int main(int argc, char **argv) {
         if ((!opts->gpu && !strcmp(hw->hw_gpu_mode, "auto")) ||
             (opts->gpu && !strcmp(opts->gpu, "auto"))) {
             blacklisted = on_blacklist;
+            setGpuBlacklistStatus(blacklisted);
         }
 
         int api_level = avdInfo_getApiLevel(avd);

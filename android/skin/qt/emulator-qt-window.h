@@ -194,6 +194,7 @@ private slots:
     void slot_startupTick();
 
     void slot_avdArchWarningMessageAccepted();
+    void slot_gpuWarningMessageAccepted();
 
     void slot_showProcessErrorDialog(QProcess::ProcessError exitStatus);
 
@@ -223,6 +224,7 @@ private:
     }
 
     void showAvdArchWarning();
+    void showGpuWarning();
 
     bool mouseInside();
     SkinMouseButtonType getSkinMouseButton(QMouseEvent *event) const;
@@ -259,6 +261,7 @@ private:
     MainLoopThread *mMainLoopThread;
 
     QMessageBox mAvdWarningBox;
+    QMessageBox mGpuWarningBox;
     bool mFirstShowEvent;
 
     EventCapturer mEventCapturer;

@@ -62,6 +62,11 @@ bool isHostGpuBlacklisted() {
     return parse_and_query_blacklist(gpu_info_string);
 }
 
+void setGpuBlacklistStatus(bool switchedSoftware) {
+    GpuInfoList::get()->blacklist_status =
+        switchedSoftware;
+}
+
 bool emuglConfig_init(EmuglConfig* config,
                       bool gpu_enabled,
                       const char* gpu_mode,

@@ -24,6 +24,7 @@ const QString ORG_DOMAIN("android.com");
 const QString APP_NAME("Emulator");
 
 const QString SHOW_AVD_ARCH_WARNING("showAvdArchWarning");
+const QString SHOW_GPU_WARNING("showGpuWarning");
 
 // Note: The "set/" here is because these settings are
 //       associated with "settings-page", not because

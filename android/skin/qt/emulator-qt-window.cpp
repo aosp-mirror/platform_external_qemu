@@ -36,6 +36,7 @@
 #include "android/cpu_accelerator.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulator-window.h"
+#include "android/opengl/gpuinfo.h"
 
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
@@ -87,6 +88,17 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
                        tr("Recommended AVD"),
                        tr("Running an x86 based Android Virtual Device (AVD) is 10x faster.<br/>"
                           "We strongly recommend creating a new AVD."),
+                       QMessageBox::Ok,
+                       this),
+        mGpuWarningBox(QMessageBox::Information,
+                       tr("GPU Driver Issue"),
+                       tr("Your GPU driver information:\n\n") +
+                       (GpuInfoList::get()->blacklist_status ?
+                           QString::fromStdString(GpuInfoList::get()->dump()) : "") +
+                       tr("\nSome users have experienced emulator stability issues"
+                          " with this driver version.  As a result, we're selecting"
+                          " a software renderer.  Please check with your"
+                          " manufacturer to see if there is an updated driver available."),
                        QMessageBox::Ok,
                        this),
         mFirstShowEvent(true),
@@ -232,6 +244,25 @@ void EmulatorQtWindow::showAvdArchWarning()
     }
 }
 
+void EmulatorQtWindow::showGpuWarning()
+{
+    if (!GpuInfoList::get()->blacklist_status) {
+        return;
+    }
+
+    QSettings settings;
+    if (settings.value(Ui::Settings::SHOW_GPU_WARNING, true).toBool()) {
+        QObject::connect(&mGpuWarningBox, SIGNAL(buttonClicked(QAbstractButton*)),
+                         this, SLOT(slot_gpuWarningMessageAccepted()));
+
+        QCheckBox *checkbox = new QCheckBox(tr("Never show this again."));
+        checkbox->setCheckState(Qt::Unchecked);
+        mGpuWarningBox.setWindowModality(Qt::NonModal);
+        mGpuWarningBox.setCheckBox(checkbox);
+        mGpuWarningBox.show();
+    }
+}
+
 void EmulatorQtWindow::slot_showProcessErrorDialog(
         QProcess::ProcessError exitStatus) {
     QString msg;
@@ -291,6 +322,15 @@ void EmulatorQtWindow::slot_avdArchWarningMessageAccepted()
     if (checkbox->checkState() == Qt::Checked) {
         QSettings settings;
         settings.setValue(Ui::Settings::SHOW_AVD_ARCH_WARNING, false);
+    }
+}
+
+void EmulatorQtWindow::slot_gpuWarningMessageAccepted()
+{
+    QCheckBox *checkbox = mGpuWarningBox.checkBox();
+    if (checkbox->checkState() == Qt::Checked) {
+        QSettings settings;
+        settings.setValue(Ui::Settings::SHOW_GPU_WARNING, false);
     }
 }
 
@@ -749,6 +789,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, 
     // properly initialized yet.
     if (mFirstShowEvent) {
         showAvdArchWarning();
+        showGpuWarning();
     }
     mFirstShowEvent = false;
 
