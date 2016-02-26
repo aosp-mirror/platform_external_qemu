@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4276e54b_519696c6",
+        "filename": "android/skin/qt/extended-pages/dpad-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-26T01:48:42Z",
+      "side": 1,
+      "message": "nit: could you please use the constant from size tweaker?",
+      "range": {
+        "startLine": 104,
+        "startChar": 53,
+        "endLine": 104,
+        "endChar": 57
+      },
+      "revId": "1b4b89c6d731b46bcf0b4699c43aad833311ed10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
