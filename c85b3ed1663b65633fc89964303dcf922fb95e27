@@ -237,6 +237,30 @@
     },
     {
       "key": {
+        "uuid": "c2c1f56d_90cf0fa1",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-26T23:07:38Z",
+      "side": 1,
+      "message": "then remove the second .flush() call please.",
+      "parentUuid": "e2b0b90b_30be242c",
+      "range": {
+        "startLine": 64,
+        "startChar": 22,
+        "endLine": 64,
+        "endChar": 31
+      },
+      "revId": "c85b3ed1663b65633fc89964303dcf922fb95e27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4276e54b_f7d9b2f7",
         "filename": "android/opengl/logger.cpp",
         "patchSetId": 5
