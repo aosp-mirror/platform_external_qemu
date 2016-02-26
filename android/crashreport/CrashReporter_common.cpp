@@ -93,8 +93,7 @@ void CrashReporter::GenerateDump(const char* message) {
 }
 
 void CrashReporter::GenerateDumpAndDie(const char* message) {
-    SetExitMode(__func__);
-
+    androidMetrics_seal();
     passDumpMessage(message);
     // this is the most cross-platform way of crashing
     // any other I know about has its flows:
