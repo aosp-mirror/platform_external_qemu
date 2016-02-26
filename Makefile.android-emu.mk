@@ -262,6 +262,7 @@ LOCAL_SRC_FILES := \
     android/opengl/emugl_config.cpp \
     android/opengl/GpuFrameBridge.cpp \
     android/opengl/gpuinfo.cpp \
+    android/opengl/logger.cpp \
     android/opengles.c \
     android/openssl-support.cpp \
     android/process_setup.cpp \
