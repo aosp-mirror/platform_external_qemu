@@ -24,6 +24,8 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include "emugl/common/logging.h"
+
 #include <stdio.h>
 
 namespace {
@@ -188,15 +190,18 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
         return false;
     }
 
+    GL_LOG("call eglInitialize\n");
     if (!s_egl.eglInitialize(fb->m_eglDisplay,
                              &fb->m_caps.eglMajor,
                              &fb->m_caps.eglMinor)) {
         ERR("Failed to eglInitialize\n");
+        GL_LOG("Failed to eglInitialize\n");
         delete fb;
         return false;
     }
 
     DBG("egl: %d %d\n", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
+    GL_LOG("egl: %d %d\n", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
     s_egl.eglBindAPI(EGL_OPENGL_ES_API);
 
     //
