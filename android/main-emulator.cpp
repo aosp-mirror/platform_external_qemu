@@ -477,6 +477,7 @@ int main(int argc, char** argv)
                     "Switching to software rendering.\n");
         }
         blacklisted = on_blacklist;
+        setGpuBlacklistStatus(blacklisted);
     } else if (on_blacklist &&
                ((!gpu && gpuMode && !strcmp(gpuMode, "host"))  ||
                 (gpu && !strcmp(gpu, "host")) ||
