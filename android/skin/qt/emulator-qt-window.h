@@ -133,8 +133,11 @@ signals:
 public:
     bool isInZoomMode() const;
     ToolWindow* toolWindow() const;
+    QSize containerSize() const;
 
-    void doResize(const QSize& size, bool isKbdShortcut = false);
+    void doResize(const QSize& size,
+                  bool isKbdShortcut = false,
+                  bool flipDimensions = false);
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPoint& pos);

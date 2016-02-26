@@ -530,6 +530,16 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
             if (emulator_window->isInZoomMode()) {
                 toolsUi->zoom_button->click();
             }
+
+            // Rotating the emulator preserves size, but this can be a problem
+            // if, for example, a very-wide emulator in landscape is rotated to
+            // portrait. To avoid this situation (which makes the scroll bars
+            // appear), force a resize to the new size.
+            QSize containerSize = emulator_window->containerSize();
+            emulator_window->doResize(
+                    QSize(containerSize.height(), containerSize.width()), true,
+                    true);
+
             SkinEvent* skin_event = new SkinEvent();
             skin_event->type =
                 cmd == QtUICommand::ROTATE_RIGHT ?
