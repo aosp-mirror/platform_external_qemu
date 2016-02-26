@@ -105,6 +105,82 @@ static const BlacklistEntry sGpuBlacklist[] = {
 
         {"NVIDIA (0x10de)", nullptr, "0x0393", nullptr, nullptr,
          nullptr},  // NVIDIA GeForce 7300 GT (Mac)
+
+        // End Chromium blacklist. Begin emulator blacklist:
+        // bug 201256 {
+        // Intel 945GM on Linux
+        {"8086", nullptr, "27a0", nullptr, nullptr, nullptr},
+        {"8086", nullptr, "27a6", nullptr, nullptr, nullptr},
+        {"8086", nullptr, "27ae", nullptr, nullptr, nullptr},
+        // } bug 201256
+
+        // bug 201131 {
+        // Intel HD 4/5xxxx on Windows
+        {"Intel Corporation", "Intel(R) HD Graphics 5500",
+         nullptr, nullptr, "10.18.15.4268", nullptr},
+        // Intel Iris 540 on Windows
+        {"Intel Corporation", "Intel(R) Iris(TM) Graphics 540",
+         nullptr, nullptr, "20.19.15.4326", nullptr},
+        // Intel HD Graphics 4600 on Windows
+        {"Intel Corporation", "Intel(R) HD Graphics 4600",
+         nullptr, nullptr, "20.19.15.4300", nullptr},
+        {"Intel Corporation", "Intel(R) HD Graphics 4600",
+         nullptr, nullptr, "10.18.15.4279", nullptr},
+        {"Intel Corporation", "Intel(R) HD Graphics 4600",
+         nullptr, nullptr, "10.18.15.4248", nullptr},
+        // Intel HD Graphics 5300 on Windows
+        {"Intel Corporation", "Intel(R) HD Graphics 5300",
+         nullptr, nullptr, "10.18.15.4256", nullptr},
+        // Intel HD Graphics 530 on Windows
+        {"Intel Corporation", "Intel(R) HD Graphics 530",
+         nullptr, nullptr, "20.19.15.4331", nullptr},
+        // } bug 201131
+
+        // bug 199191 {
+        // Intel HD Graphics 4000 on Windows
+        {"Intel Corporation", "Intel(R) HD Graphics 4000",
+         nullptr, nullptr, "8.951.9.1000", nullptr},
+        {"Intel Corporation", "Intel(R) HD Graphics 4000",
+         nullptr, nullptr, "10.18.10.4303", nullptr},
+        {"Intel Corporation", "Intel(R) HD Graphics 4000",
+         nullptr, nullptr, "10.18.10.3308", nullptr},
+        {"Intel Corporation", "Intel(R) HD Graphics 4000",
+         nullptr, nullptr, "10.18.10.3412", nullptr},
+        {"Intel Corporation", "Intel(R) HD Graphics 4000",
+         nullptr, nullptr, "10.18.10.4176", nullptr},
+        // Intel HD Graphics 4600 on Windows
+        {"Intel Corporation", "Intel(R) HD Graphics 4600",
+         nullptr, nullptr, "10.18.10.3412", nullptr},
+        {"Intel Corporation", "Intel(R) HD Graphics 4600",
+         nullptr, nullptr, "10.18.10.3574", nullptr},
+        // Intel HD Graphics 5500 on Windows
+        {"Intel Corporation", "Intel(R) HD Graphics 5500",
+         nullptr, nullptr, "10.18.14.4280", nullptr},
+        // driver installation issues?
+        {"Advanced Micro Devices, Inc.", "Intel(R) HD Graphics 4000",
+         nullptr, nullptr, "8.951.9.1000", nullptr},
+        // Intel HD Graphics Family
+        {"Intel Corporation", "Intel(R) HD Graphics Family",
+         nullptr, nullptr, "10.18.14.4332", nullptr},
+        {"Intel Corporation", "Intel(R) HD Graphics Family",
+         nullptr, nullptr, "15.300.1025.1001", nullptr},
+        // Intel HD Graphics 3000
+        {"Intel Corporation", "Intel(R) HD Graphics 3000",
+         nullptr, nullptr, "9.17.10.3517", nullptr},
+        // AMD Radeon R7 200
+        {"Advanced Micro Devices, Inc.", "AND Radeon R7 200 Series",
+         nullptr, nullptr, "15.301.1201.0", nullptr},
+        // AMD Mobility Radeon HD 5000 Series
+        {"Advanced Micro Devices, Inc.", "AMD Mobility Radeon HD 5000 Series",
+         nullptr, nullptr, "15.201.1151.1008", nullptr},
+        // Radeon X1950 Series (Microsoft Corporation - WDDM)
+        {"ATI Technologies Inc."
+         "Radeon X1950 Series (Microsoft Corporation - WDDM)",
+         nullptr, nullptr, "8.56.1.16", nullptr},
+        // NVIDIA GeForce GTX 460
+        {"NVIDIA", "NVIDIA GeForce GTX 460", nullptr, nullptr,
+         "8.17.13.142", nullptr},
+        // } bug 199191
 };
 
 static const int sBlacklistSize =
