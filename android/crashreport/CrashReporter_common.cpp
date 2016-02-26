@@ -28,6 +28,8 @@
 #include <fstream>
 
 #include <fcntl.h>
+#include <inttypes.h>
+#include <stdint.h>
 #include <sys/stat.h>
 
 #ifdef _WIN32
@@ -182,10 +184,29 @@ bool CrashReporter::attachFile(StringView sourceFullName,
     return path_copy_file(fullName, sourceFullName.c_str()) >= 0;
 }
 
+static void attachUptime() {
+    const uint64_t wallClockTime = System::get()->getProcessTimes().wallClockMs;
+
+    // format the time into a string buffer (no allocations, we've just crashed)
+    // and put it both into the file and into the file name. This way
+    // it's much easier to see the time in the crash report window
+    char timeStr[32] = {};
+    snprintf(timeStr, sizeof(timeStr) - 1, "%" PRIu64 "ms", wallClockTime);
+
+    char fileName[sizeof(timeStr) + 16] = {};
+    snprintf(fileName, sizeof(fileName) - 1, "uptime-%s.txt", timeStr);
+
+    CrashReporter::get()->attachData(fileName, timeStr);
+}
+
 bool CrashReporter::onCrash() {
+    // store the uptime first - as Breakpad doesn't do it sometimes
+    attachUptime();
+
     if (CrashReporter::get()->mCrashCallback) {
         CrashReporter::get()->mCrashCallback();
     }
+
     return CrashReporter::get()->onCrashPlatformSpecific();
 }
 
