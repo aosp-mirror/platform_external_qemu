@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>240</x>
-     <y>207</y>
+     <y>206</y>
      <width>142</width>
      <height>100</height>
     </rect>
@@ -48,9 +48,9 @@
   <widget class="QPushButton" name="dpad_leftButton">
    <property name="geometry">
     <rect>
-     <x>206</x>
-     <y>131</y>
-     <width>99</width>
+     <x>209</x>
+     <y>132</y>
+     <width>100</width>
      <height>142</height>
     </rect>
    </property>
@@ -145,7 +145,7 @@
    <property name="geometry">
     <rect>
      <x>240</x>
-     <y>96</y>
+     <y>100</y>
      <width>142</width>
      <height>100</height>
     </rect>
@@ -176,8 +176,8 @@
   <widget class="QPushButton" name="dpad_rightButton">
    <property name="geometry">
     <rect>
-     <x>315</x>
-     <y>131</y>
+     <x>313</x>
+     <y>132</y>
      <width>100</width>
      <height>142</height>
     </rect>
@@ -208,7 +208,7 @@
   <widget class="QPushButton" name="dpad_backButton">
    <property name="geometry">
     <rect>
-     <x>190</x>
+     <x>192</x>
      <y>360</y>
      <width>50</width>
      <height>50</height>
