@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "628f697d_15c31403",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglDisplay.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-26T01:44:59Z",
+      "side": 1,
+      "message": "please make a common function and call it twice.",
+      "range": {
+        "startLine": 136,
+        "startChar": 0,
+        "endLine": 190,
+        "endChar": 1
+      },
+      "revId": "51110ad1d0f1f18f805a312cbbfcc9bc630f4639",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
