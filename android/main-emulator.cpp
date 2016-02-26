@@ -791,5 +791,11 @@ static bool checkForGoogleAPIs(const char* avdName) {
 
 static int getApiLevel(const char* avdName) {
     std::string api_level = get_key_val(avdName, "ro.build.version.sdk");
-    return std::stoi(api_level);
+    // for api 10 arm system images, there is no "ro.build.version.sdk"
+    // so, return -1;
+    if (api_level.empty()) {
+        return -1;
+    } else {
+        return std::stoi(api_level);
+    }
 }
