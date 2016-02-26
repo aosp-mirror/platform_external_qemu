@@ -79,6 +79,8 @@ private:
         LAZY_INSTANCE_INIT;
 
 bool HostCrashReporter::exceptionFilterCallback(void*) {
+    attachUptime();
+
     // collect the memory usage at the time of the crash
     crashhandler_copy_attachment(
                 CrashReporter::kProcessMemoryInfoFileName, "/proc/self/status");
