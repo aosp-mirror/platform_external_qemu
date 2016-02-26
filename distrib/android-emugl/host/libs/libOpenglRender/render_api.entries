@@ -44,7 +44,7 @@ int setStreamMode(int mode);
 #
 # This function is *NOT* thread safe and should be called first
 # to initialize the renderer after initLibrary().
-int initOpenGLRenderer(int width, int height, bool useSubWindow, char* addr, size_t addrLen);
+int initOpenGLRenderer(int width, int height, bool useSubWindow, char* addr, size_t addrLen, void* logger);
 
 # getHardwareStrings - describe the GPU hardware and driver.
 # The underlying GL's vendor/renderer/version strings are returned to the

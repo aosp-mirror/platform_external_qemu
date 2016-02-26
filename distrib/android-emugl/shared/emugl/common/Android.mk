@@ -8,6 +8,7 @@ LOCAL_PATH := $(call my-dir)
 commonSources := \
         id_to_object_map.cpp \
         lazy_instance.cpp \
+        logging.cpp \
         message_channel.cpp \
         pod_vector.cpp \
         shared_library.cpp \
