@@ -48,6 +48,7 @@ int formatToolbarGetUrl(char** ptr,
     // These keys are the same as AndroidStudio already uses.
     static const char client_id_key[] = "id";
     static const char version_key[] = "version";
+    static const char core_version_key[] = "core_version";
     static const char num_crashes_key[] = "exf";
     static const char opengl_alive_key[] = "opengl_alive";
     // Matches the key used by the update ping.
@@ -63,11 +64,12 @@ int formatToolbarGetUrl(char** ptr,
 
     char* client_id = android_studio_get_installation_id();
     fullUrl += Uri::FormatEncodeArguments(
-            "?as=%s&%s=%s&%s=%s&%s=%s&%s=%s"
+            "?as=%s&%s=%s&%s=%s&%s=%s&%s=%s&%s=%s"
             "&%s=%d&%s=%d&%s=%" PRId64 "&%s=%" PRId64 "&%s=%d"
             "&%s=%" PRId64
             "&%s=%d",
-            product_name, version_key, metrics->emulator_version, host_os_key,
+            product_name, version_key, metrics->emulator_version,
+            core_version_key, metrics->core_version, host_os_key,
             metrics->host_os_type, client_id_key, client_id, guest_arch_key,
             metrics->guest_arch, num_crashes_key, metrics->is_dirty ? 1 : 0,
             opengl_alive_key, metrics->opengl_alive, system_time_key,
