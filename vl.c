@@ -148,7 +148,7 @@
 #include "android/opengles.h"
 #include "android/version.h"
 
-#define QEMU2_EMULATOR_VERSION_STRING EMULATOR_VERSION_STRING "/2"
+#define QEMU_CORE_VERSION "qemu2 " QEMU_VERSION
 
 int android_display_width  = 640;
 int android_display_height = 480;
@@ -2873,7 +2873,7 @@ static void android_check_for_updates()
 {
     char configPath[MAX_PATH];
     bufprint_config_path(configPath, configPath + sizeof(configPath));
-    android_checkForUpdates(configPath, QEMU2_EMULATOR_VERSION_STRING);
+    android_checkForUpdates(configPath, QEMU_CORE_VERSION);
 }
 
 static void android_init_metrics()
@@ -2893,9 +2893,11 @@ static void android_init_metrics()
     }
 
     androidMetrics_init(&metrics);
-    // mark the qemu2-based emulator with special suffix
     ANDROID_METRICS_STRASSIGN(metrics.emulator_version,
-                              QEMU2_EMULATOR_VERSION_STRING);
+                              EMULATOR_VERSION_STRING);
+    ANDROID_METRICS_STRASSIGN(metrics.core_version,
+                              QEMU_CORE_VERSION);
+
     ANDROID_METRICS_STRASSIGN(metrics.host_os_type, get_host_os_type());
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, android_hw->hw_cpu_arch);
     metrics.guest_gpu_enabled = android_hw->hw_gpu_enabled;
