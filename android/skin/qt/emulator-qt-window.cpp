@@ -937,9 +937,16 @@ SkinEvent *EmulatorQtWindow::createSkinEvent(SkinEventType type)
     return skin_event;
 }
 
-void EmulatorQtWindow::doResize(const QSize& size, bool isKbdShortcut) {
+void EmulatorQtWindow::doResize(const QSize& size,
+                                bool isKbdShortcut,
+                                bool flipDimensions) {
     if (mBackingSurface) {
-        QSize newSize(mBackingSurface->original_w, mBackingSurface->original_h);
+        int originalWidth = flipDimensions ? mBackingSurface->original_h
+                                           : mBackingSurface->original_w;
+        int originalHeight = flipDimensions ? mBackingSurface->original_w
+                                            : mBackingSurface->original_h;
+
+        QSize newSize(originalWidth, originalHeight);
         newSize.scale(size, Qt::KeepAspectRatio);
 
         // Make sure the new size is always a little bit smaller than the
@@ -957,10 +964,8 @@ void EmulatorQtWindow::doResize(const QSize& size, bool isKbdShortcut) {
             }
         }
 
-        double widthScale =
-                (double)newSize.width() / (double)mBackingSurface->original_w;
-        double heightScale =
-                (double)newSize.height() / (double)mBackingSurface->original_h;
+        double widthScale = (double)newSize.width() / (double)originalWidth;
+        double heightScale = (double)newSize.height() / (double)originalHeight;
 
         simulateSetScale(MIN(widthScale, heightScale));
     }
@@ -1143,6 +1148,10 @@ bool EmulatorQtWindow::isInZoomMode() const {
 
 ToolWindow* EmulatorQtWindow::toolWindow() const {
     return mToolWindow;
+}
+
+QSize EmulatorQtWindow::containerSize() const {
+    return mContainer.size();
 }
 
 void EmulatorQtWindow::toggleZoomMode()
