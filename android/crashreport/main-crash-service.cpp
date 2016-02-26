@@ -49,6 +49,12 @@ static bool displayConfirmDialog(
         Ui::Settings::CRASHREPORT_PREFERENCE_VALUE reportPreference) {
     ConfirmDialog msgBox(nullptr, crashservice, reportPreference);
 
+    if (crashservice->getDumpMessage().empty() &&
+        crashservice->didCrashOnExit() &&
+        reportPreference != Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS) {
+        return false;
+    }
+
     if (reportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_ASK) {
         msgBox.show();
         int ret = msgBox.exec();
