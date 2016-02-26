@@ -143,6 +143,9 @@ const char*  avdInfo_getName( AvdInfo*  i );
  */
 int    avdInfo_getApiLevel( AvdInfo*  i );
 
+/* Returns true if the AVD is on Google APIs. */
+bool   avdInfo_isGoogleApis( AvdInfo*  i );
+
 /* Returns the path to various images corresponding to a given AVD.
  * NULL if the image cannot be found. Returned strings must be freed
  * by the caller.
