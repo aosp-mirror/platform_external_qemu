@@ -86,7 +86,8 @@ private:
 ::android::base::LazyInstance<HostCrashReporter> sCrashReporter =
         LAZY_INSTANCE_INIT;
 
-bool HostCrashReporter::exceptionFilterCallback(void*) {
+static void attachMemoryInfo()
+{
     rusage usage = {};
     getrusage(RUSAGE_SELF, &usage);
 
@@ -116,6 +117,11 @@ bool HostCrashReporter::exceptionFilterCallback(void*) {
 
     CrashReporter::get()->attachData(
                 CrashReporter::kProcessMemoryInfoFileName, buf);
+}
+
+bool HostCrashReporter::exceptionFilterCallback(void*) {
+    attachMemoryInfo();
+    CrashReporter::attachProcessListPosix();
 
     return true;    // proceed with handling the crash
 }

@@ -56,7 +56,8 @@ const char* const CrashReporter::kProcessMemoryInfoFileName =
         "process-memory-info.txt";
 const char* const CrashReporter::kCrashOnExitFileName =
         "crash-on-exit.txt";
-
+const char* const CrashReporter::kProcessListFileName =
+        "system-process-list.txt";
 const char* const CrashReporter::kCrashOnExitPattern =
         "Crash on exit";
 
@@ -208,6 +209,20 @@ bool CrashReporter::onCrash() {
     }
 
     return CrashReporter::get()->onCrashPlatformSpecific();
+}
+
+void CrashReporter::attachProcessListPosix()
+{
+    char command[MAX_PATH + 128] = {};
+    snprintf(command, sizeof(command) - 1,
+             "ps x -A -F -w >%s/%s",
+             CrashReporter::get()->getDataExchangeDir().c_str(),
+             CrashReporter::kProcessListFileName);
+
+    if (system(command) != 0) {
+        CrashReporter::get()->attachData(CrashReporter::kProcessListFileName,
+                                         "Failed to get a process list");
+    }
 }
 
 }  // namespace crashreport

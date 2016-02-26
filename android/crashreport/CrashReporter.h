@@ -39,6 +39,9 @@ public:
     // File to log crashes on exit
     static const char* const kCrashOnExitFileName;
 
+    // File to log the process list
+    static const char* const kProcessListFileName;
+
     // Pattern to check for when detecting crashes on exit
     static const char* const kCrashOnExitPattern;
 
@@ -98,6 +101,9 @@ public:
 
     void SetExitMode(const char* message);
     bool isInExitMode() const;
+
+protected:
+    static void attachProcessListPosix();
 
 private:
     virtual void writeDump() = 0;
