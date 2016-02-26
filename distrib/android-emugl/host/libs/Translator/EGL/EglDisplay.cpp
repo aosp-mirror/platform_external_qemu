@@ -77,13 +77,18 @@ static bool compareEglConfigsPtrs(EglConfig* first,EglConfig* second) {
     return *first < *second ;
 }
 
-void EglDisplay::addMissingConfigs(void)
-{
+void EglDisplay::addSimplePixelFormat(int red_size,
+                                      int green_size,
+                                      int blue_size,
+                                      int alpha_size) {
     m_configs.sort(compareEglConfigsPtrs);
 
     EGLConfig match;
 
-    EglConfig dummy(5, 6, 5, 0,  // RGB_565
+    EglConfig dummy(red_size,
+                    green_size,
+                    blue_size,
+                    alpha_size,  // RGB_565
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
                     16, // Depth
@@ -128,9 +133,18 @@ void EglDisplay::addMissingConfigs(void)
             max_config_id = id;
     }
 
-    EglConfig* newConfig = new EglConfig(*config,max_config_id+1,5,6,5,0);
+    EglConfig* newConfig = new EglConfig(*config,max_config_id+1,
+                                         red_size, green_size, blue_size,
+                                         alpha_size);
 
     m_configs.push_back(newConfig);
+}
+
+void EglDisplay::addMissingConfigs() {
+    addSimplePixelFormat(5, 6, 5, 0); // RGB_565
+    addSimplePixelFormat(8, 8, 8, 0); // RGB_888
+    // (Host GPUs that are newer may not list RGB_888
+    // out of the box.)
 }
 
 void EglDisplay::initConfigurations(int renderableType) {
