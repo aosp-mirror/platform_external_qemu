@@ -930,6 +930,11 @@ extern "C" int main(int argc, char **argv) {
             on_blacklist = isHostGpuBlacklisted();
         }
 
+        // For testing purposes only.
+        if (hw->hw_gpu_blacklisted) {
+            on_blacklist = !strcmp(hw->hw_gpu_blacklisted, "yes");
+        }
+
         if ((!opts->gpu && !strcmp(hw->hw_gpu_mode, "auto")) ||
             (opts->gpu && !strcmp(opts->gpu, "auto"))) {
             blacklisted = on_blacklist;
