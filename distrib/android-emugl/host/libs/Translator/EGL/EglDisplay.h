@@ -93,6 +93,8 @@ private:
 
    int doChooseConfigs(const EglConfig& dummy,EGLConfig* configs,int config_size) const;
    void addMissingConfigs(void);
+   void addRGB565(void);
+   void addRGB888(void);
    void initConfigurations(int renderableType);
 
    EGLNativeDisplayType    m_dpy;

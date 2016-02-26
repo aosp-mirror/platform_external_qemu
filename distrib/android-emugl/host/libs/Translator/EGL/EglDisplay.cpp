@@ -77,7 +77,7 @@ static bool compareEglConfigsPtrs(EglConfig* first,EglConfig* second) {
     return *first < *second ;
 }
 
-void EglDisplay::addMissingConfigs(void)
+void EglDisplay::addRGB565(void)
 {
     m_configs.sort(compareEglConfigsPtrs);
 
@@ -131,6 +131,67 @@ void EglDisplay::addMissingConfigs(void)
     EglConfig* newConfig = new EglConfig(*config,max_config_id+1,5,6,5,0);
 
     m_configs.push_back(newConfig);
+}
+
+void EglDisplay::addRGB888(void)
+{
+    m_configs.sort(compareEglConfigsPtrs);
+
+    EGLConfig match;
+
+    EglConfig dummy(8, 8, 8, 0,  // RGB_888
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    16, // Depth
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    EGL_DONT_CARE,
+                    NULL);
+
+    if(!doChooseConfigs(dummy, &match, 1))
+    {
+        return;
+    }
+
+    const EglConfig* config = (EglConfig*)match;
+
+    int bSize;
+    config->getConfAttrib(EGL_BUFFER_SIZE,&bSize);
+
+    if(bSize == 16)
+    {
+        return;
+    }
+
+    int max_config_id = 0;
+
+    for(ConfigsList::iterator it = m_configs.begin(); it != m_configs.end() ;it++) {
+        EGLint id;
+        (*it)->getConfAttrib(EGL_CONFIG_ID, &id);
+        if(id > max_config_id)
+            max_config_id = id;
+    }
+
+    EglConfig* newConfig = new EglConfig(*config,max_config_id+1,8,8,8,0);
+
+    m_configs.push_back(newConfig);
+}
+
+void EglDisplay::addMissingConfigs() {
+    addRGB565();
+    addRGB888();
 }
 
 void EglDisplay::initConfigurations(int renderableType) {
