@@ -1913,28 +1913,6 @@ static void process_cmd_boot_properties() {
     }
 }
 
-// Save System boot parameters from the command line
-#define MAX_N_CMD_PROPS 16
-static const char* cmd_props[MAX_N_CMD_PROPS];
-static       int   n_cmd_props = 0;
-
-static void save_cmd_boot_property(const char* propStr) {
-    if (n_cmd_props >= MAX_N_CMD_PROPS) {
-        fprintf(stderr, "Too many command-line boot properties. "
-                        "This property is ignored: \"%s\"\n", propStr);
-        return;
-    }
-    cmd_props[n_cmd_props++] = propStr;
-}
-
-// Provide the saved System boot parameters from the command line
-static void process_cmd_boot_properties() {
-    int idx;
-    for(idx = 0; idx<n_cmd_props; idx++) {
-        boot_property_parse_option(cmd_props[idx]);
-    }
-}
-
 int main(int argc, char **argv, char **envp)
 {
     const char *gdbstub_dev = NULL;

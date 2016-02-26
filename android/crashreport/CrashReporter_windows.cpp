@@ -163,7 +163,7 @@ static void attachProcessList() {
 bool HostCrashReporter::exceptionFilterCallback(void*,
                                                 EXCEPTION_POINTERS*,
                                                 MDRawAssertionInfo*) {
-    // collect the memory usage at the time of the crash
+    attachUptime();
     attachMemoryInfo();
     attachProcessList();
 

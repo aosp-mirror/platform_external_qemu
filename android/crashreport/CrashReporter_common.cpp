@@ -185,7 +185,7 @@ bool CrashReporter::attachFile(StringView sourceFullName,
     return path_copy_file(fullName, sourceFullName.c_str()) >= 0;
 }
 
-static void attachUptime() {
+void CrashReporter::attachUptime() {
     const uint64_t wallClockTime = System::get()->getProcessTimes().wallClockMs;
 
     // format the time into a string buffer (no allocations, we've just crashed)
@@ -198,17 +198,6 @@ static void attachUptime() {
     snprintf(fileName, sizeof(fileName) - 1, "uptime-%s.txt", timeStr);
 
     CrashReporter::get()->attachData(fileName, timeStr);
-}
-
-bool CrashReporter::onCrash() {
-    // store the uptime first - as Breakpad doesn't do it sometimes
-    attachUptime();
-
-    if (CrashReporter::get()->mCrashCallback) {
-        CrashReporter::get()->mCrashCallback();
-    }
-
-    return CrashReporter::get()->onCrashPlatformSpecific();
 }
 
 void CrashReporter::attachProcessListPosix()

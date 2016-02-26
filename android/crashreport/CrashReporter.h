@@ -103,6 +103,7 @@ public:
     bool isInExitMode() const;
 
 protected:
+    static void attachUptime();
     static void attachProcessListPosix();
 
 private:
