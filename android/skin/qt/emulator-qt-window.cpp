@@ -33,6 +33,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/crashreport/CrashReporter.h"
+#include "android/emulation/android_twitter.h"
 #include "android/cpu_accelerator.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulator-window.h"
@@ -1043,6 +1044,21 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type, SkinMouseButtonType 
     skin_event->u.mouse.xrel = pos.x() - mPrevMousePosition.x();
     skin_event->u.mouse.yrel = pos.y() - mPrevMousePosition.y();
     mPrevMousePosition = pos;
+
+    if (android_twitter_is_init()) {
+        long x = (long)skin_event->u.mouse.x;
+        long y = (long)skin_event->u.mouse.y;
+        const char* action = NULL;
+        if (type == kEventMouseButtonDown) {
+            action = "down";
+        } else if (type == kEventMouseMotion) {
+            action = "move";
+        } else {
+            action = "up";
+        }
+        android_twitter_msg("EVENT: %-16s X: %-16llu Y: %-16llu Action: %-16s (%s)",
+                            "HostMouseEvent", x, y, action, __FUNCTION__);
+    }
 
     queueEvent(skin_event);
 }
