@@ -46,6 +46,30 @@
       "revId": "d25fe3f27a886c99159d840950ac2dfcc4d169cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_13d45235",
+        "filename": "android/skin/file.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 881,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-26T23:19:53Z",
+      "side": 1,
+      "message": "could you please explain it in a comment? That portrait is already set as a name for the default layout, so we don\u0027t need it here",
+      "parentUuid": "02e4ed24_79c01ef4",
+      "range": {
+        "startLine": 881,
+        "startChar": 7,
+        "endLine": 881,
+        "endChar": 59
+      },
+      "revId": "d25fe3f27a886c99159d840950ac2dfcc4d169cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
