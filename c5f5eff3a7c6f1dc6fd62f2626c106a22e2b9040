@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4276e54b_a25c4626",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-26T20:30:34Z",
+      "side": 1,
+      "message": "this blacklist feels kind of wide. I see a lot of common graphics cards, with quite normal driver versions. It might be that we\u0027re just banning the drivers because of our user\u0027s bad application - and we might also just ban most popular gpus\nWhat about collecting metrics about the gpu/os/gpu driver/... combination first?",
+      "revId": "c5f5eff3a7c6f1dc6fd62f2626c106a22e2b9040",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
