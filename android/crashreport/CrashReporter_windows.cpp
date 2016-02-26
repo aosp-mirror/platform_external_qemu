@@ -113,8 +113,8 @@ bool HostCrashReporter::exceptionFilterCallback(
     return CrashReporter::get()->onCrash();
 }
 
-bool HostCrashReporter::onCrashPlatformSpecific() {
-    // collect the memory usage at the time of the crash
+static void attachMemoryInfo()
+{
     PROCESS_MEMORY_COUNTERS_EX memCounters = {sizeof(memCounters)};
     if (::GetProcessMemoryInfo(::GetCurrentProcess(),
                 reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memCounters),
@@ -145,6 +145,34 @@ bool HostCrashReporter::onCrashPlatformSpecific() {
         CrashReporter::get()->attachData(
                     CrashReporter::kProcessMemoryInfoFileName, buf);
     }
+}
+
+static void attachProcessList() {
+    char command[MAX_PATH + 128] = {};
+    snprintf(command, sizeof(command) - 1,
+             "tasklist /V >%s\\%s",
+             CrashReporter::get()->getDataExchangeDir().c_str(),
+             CrashReporter::kProcessListFileName);
+
+    if (system(command) != 0) {
+        // try to call the "query process *" command, which used to exist
+        // before the taskkill
+        snprintf(command, sizeof(command) - 1,
+                 "query process * >%s\\%s",
+                 CrashReporter::get()->getDataExchangeDir().c_str(),
+                 CrashReporter::kProcessListFileName);
+        if (system(command) != 0) {
+            CrashReporter::get()->attachData(
+                        CrashReporter::kProcessListFileName,
+                        "Failed to get a process list");
+        }
+    }
+}
+
+bool HostCrashReporter::onCrashPlatformSpecific() {
+    // collect the memory usage at the time of the crash
+    attachMemoryInfo();
+    attachProcessList();
 
     return true;
 }
