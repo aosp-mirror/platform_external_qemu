@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c26bb568_b0bd80de",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-26T20:11:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62be89e4_611bb3b9",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 19
+      },
+      "revId": "c85b3ed1663b65633fc89964303dcf922fb95e27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62be89e4_213c9b18",
         "filename": "android/opengl/logger.cpp",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-26T18:27:22Z",
       "side": 1,
       "message": "please add DISABLE_COPY_ASSIGN_AND_MOVE from android/base/Compiler.h",
+      "range": {
+        "startLine": 44,
+        "startChar": 29,
+        "endLine": 44,
+        "endChar": 30
+      },
+      "revId": "c85b3ed1663b65633fc89964303dcf922fb95e27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e27a7932_d1b28431",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-26T20:11:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62be89e4_213c9b18",
       "range": {
         "startLine": 44,
         "startChar": 29,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "02e4ed24_7e26c4fd",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-26T20:11:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4276e54b_57a0c66a",
+      "range": {
+        "startLine": 48,
+        "startChar": 4,
+        "endLine": 48,
+        "endChar": 15
+      },
+      "revId": "c85b3ed1663b65633fc89964303dcf922fb95e27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "02e4ed24_1b63521b",
         "filename": "android/opengl/logger.cpp",
         "patchSetId": 5
@@ -82,6 +154,30 @@
       "writtenOn": "2016-02-26T18:27:22Z",
       "side": 1,
       "message": "you don\u0027t need to wrap this one into a String",
+      "range": {
+        "startLine": 52,
+        "startChar": 20,
+        "endLine": 52,
+        "endChar": 26
+      },
+      "revId": "c85b3ed1663b65633fc89964303dcf922fb95e27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4276e54b_02851af9",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-26T20:11:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "02e4ed24_1b63521b",
       "range": {
         "startLine": 52,
         "startChar": 20,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "e2b0b90b_30be242c",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-26T20:11:35Z",
+      "side": 1,
+      "message": "I believe we\u0027d want to preserve accuracy in this case. I\u0027ll leave it to endl.\n\nRight now, it is only used to track initialization, and is called on the order of \u003c 50 times. We should definitely not flush if we ever use this for anything remotely fine-grained.",
+      "parentUuid": "e2b0b90b_1007a86a",
+      "range": {
+        "startLine": 64,
+        "startChar": 22,
+        "endLine": 64,
+        "endChar": 31
+      },
+      "revId": "c85b3ed1663b65633fc89964303dcf922fb95e27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4276e54b_f7d9b2f7",
         "filename": "android/opengl/logger.cpp",
         "patchSetId": 5
@@ -128,6 +248,30 @@
       "writtenOn": "2016-02-26T18:27:22Z",
       "side": 1,
       "message": "you don\u0027t need this, and the whole dtor could be removed - compiler-generated is enough",
+      "range": {
+        "startLine": 70,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 5
+      },
+      "revId": "c85b3ed1663b65633fc89964303dcf922fb95e27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_10b32865",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-26T20:11:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4276e54b_f7d9b2f7",
       "range": {
         "startLine": 70,
         "startChar": 0,
@@ -157,6 +301,24 @@
     },
     {
       "key": {
+        "uuid": "e27a7932_7172b026",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-26T20:11:35Z",
+      "side": 1,
+      "message": "Sorry, forgot to clean it up.",
+      "parentUuid": "82bb7df1_7e98e2a3",
+      "revId": "c85b3ed1663b65633fc89964303dcf922fb95e27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e2b0b90b_b0feb47d",
         "filename": "android/opengles.c",
         "patchSetId": 5
@@ -180,6 +342,30 @@
     },
     {
       "key": {
+        "uuid": "c2c1f56d_15a8919f",
+        "filename": "android/opengles.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-26T20:11:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e2b0b90b_b0feb47d",
+      "range": {
+        "startLine": 137,
+        "startChar": 0,
+        "endLine": 144,
+        "endChar": 1
+      },
+      "revId": "c85b3ed1663b65633fc89964303dcf922fb95e27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "02e4ed24_bb5afe55",
         "filename": "distrib/android-emugl/shared/emugl/common/logging.cpp",
         "patchSetId": 5
@@ -191,6 +377,30 @@
       "writtenOn": "2016-02-26T18:27:22Z",
       "side": 1,
       "message": "please have a default function here which does nothing, and set emugl_logger to that by default and if |f| is null",
+      "range": {
+        "startLine": 21,
+        "startChar": 4,
+        "endLine": 21,
+        "endChar": 21
+      },
+      "revId": "c85b3ed1663b65633fc89964303dcf922fb95e27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4276e54b_a2e766cc",
+        "filename": "distrib/android-emugl/shared/emugl/common/logging.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-26T20:11:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "02e4ed24_bb5afe55",
       "range": {
         "startLine": 21,
         "startChar": 4,
