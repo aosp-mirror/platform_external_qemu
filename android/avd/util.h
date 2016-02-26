@@ -52,6 +52,11 @@ char* path_getAvdSystemPath(const char* avdName,
  */
 char* path_getAvdGpuMode(const char* avdName);
 
+/* Return the value of hw.gpu.blacklisted for a given AVD.
+ * Caller must free() returned string.
+ */
+char* path_getAvdGpuBlacklisted(const char* avdName);
+
 typedef enum {
     RESULT_INVALID   = -1, // key was found but value contained invalid data
     RESULT_FOUND     =  0, // key was found and value parsed correctly
