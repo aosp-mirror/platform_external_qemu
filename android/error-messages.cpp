@@ -62,14 +62,14 @@ const char* android_init_error_get_message(void) {
 }
 
 const char* const kHaxVcpuSyncFailed =
-        "Unfortunately, VirtualBox 4.3.30+ does not allow multiple hypervisors "
-        "to co-exist.  In order for VirtualBox and the Android Emulator to "
-        "co-exist, VirtualBox must change back to shared use.  Please ask "
-        "VirtualBox to consider this change here: "
-        "https://www.virtualbox.org/ticket/14294";
+        "Unfortunately, there's an incompatibility between HAXM hypervisor and "
+        "VirtualBox 4.3.30+ which doesn't allow multiple hypervisors "
+        "to co-exist.  It is being actively worked on; you can find out more "
+        "about the issue at http://b.android.com/197915 (Android) and "
+        "https://www.virtualbox.org/ticket/14294 (VirtualBox)";
 
 const char* const kUnknownInitError =
-        "An unkown error occured when starting Android Emulator. Please "
+        "An unknown error occured when starting Android Emulator. Please "
         "consider filing a bug report describing what happened";
 
 const char* const kNotEnoughMemForGuestError =
