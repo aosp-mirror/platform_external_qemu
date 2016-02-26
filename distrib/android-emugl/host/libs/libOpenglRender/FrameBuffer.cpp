@@ -143,7 +143,12 @@ static char* getGLES1ExtensionString(EGLDisplay p_dpy)
     const char* s = (const char*)s_gles1.glGetString(GL_EXTENSIONS);
     char* extString = strdup(s ? s : "");
 
-    s_egl.eglMakeCurrent(p_dpy, NULL, NULL, NULL);
+    // It is rare but some drivers actually fail this...
+    if (!s_egl.eglMakeCurrent(p_dpy, NULL, NULL, NULL)) {
+        ERR("%s: Could not unbind context. Please try updating graphics card driver!\n", __FUNCTION__);
+        free(extString);
+        return NULL;
+    }
     s_egl.eglDestroyContext(p_dpy, ctx);
     s_egl.eglDestroySurface(p_dpy, surface);
 
