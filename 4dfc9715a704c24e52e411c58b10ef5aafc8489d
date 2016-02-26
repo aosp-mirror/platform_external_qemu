@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "02e4ed24_bb39ded8",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1091,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-02-26T18:56:54Z",
+      "side": 1,
+      "message": "Is this OK if (!mInZoomMode \u0026\u0026 mNextIsZoom)?\n\nWouldn\u0027t we want to discard the event (like with the old code)?",
+      "revId": "4dfc9715a704c24e52e411c58b10ef5aafc8489d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
