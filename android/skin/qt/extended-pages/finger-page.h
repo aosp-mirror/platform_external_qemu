@@ -31,4 +31,6 @@ private slots:
 private:
     std::unique_ptr<Ui::FingerPage> mUi;
     const QAndroidFingerAgent* mFingerAgent;
+
+    QString apiDessert(int apiLevel);
 };
