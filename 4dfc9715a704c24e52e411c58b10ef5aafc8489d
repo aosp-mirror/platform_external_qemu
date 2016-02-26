@@ -16,6 +16,24 @@
       "revId": "4dfc9715a704c24e52e411c58b10ef5aafc8489d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_115797fb",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1091,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-02-26T19:19:23Z",
+      "side": 1,
+      "message": "Meaning this line should just be if (mNextIsZoom)? Nope.\n\nExiting zoom mode essentially calls this function, and the scale event *must* be the last one on the queue, otherwise problems happen.\n\nSo we only want to skip this event if we\u0027re in zoom mode and there\u0027s one currently queued. Technically, (!mInZoomMode \u0026\u0026 mNextIsZoom) should be impossible, but isn\u0027t because everything is async between this and the skinning code.",
+      "parentUuid": "02e4ed24_bb39ded8",
+      "revId": "4dfc9715a704c24e52e411c58b10ef5aafc8489d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
