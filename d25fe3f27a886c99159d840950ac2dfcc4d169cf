@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e27a7932_3f262ffd",
+        "filename": "android/skin/file.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 881,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-26T22:12:35Z",
+      "side": 1,
+      "message": "where\u0027s the \"portrait\"?",
+      "range": {
+        "startLine": 881,
+        "startChar": 7,
+        "endLine": 881,
+        "endChar": 59
+      },
+      "revId": "d25fe3f27a886c99159d840950ac2dfcc4d169cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
