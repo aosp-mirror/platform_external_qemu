@@ -33,6 +33,7 @@
 #include "android/avd/util.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/containers/StringVector.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/opengl/emugl_config.h"
 #include "android/qt/qt_setup.h"
@@ -45,6 +46,7 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/win32_cmdline_quote.h"
 
+using android::base::ScopedCPtr;
 using android::base::System;
 using android::base::RunOptions;
 
@@ -460,6 +462,12 @@ int main(int argc, char** argv)
                  strcmp(gpu, "host") &&
                  strcmp(gpu, "on")))) {
          on_blacklist = isHostGpuBlacklisted();
+    }
+
+    // This is for testing purposes only.
+    android::base::ScopedCPtr<const char> testGpuBlacklist(path_getAvdGpuBlacklisted(avdName));
+    if (testGpuBlacklist.get()) {
+        on_blacklist = !strcmp(testGpuBlacklist.get(), "yes");
     }
 
     if ((!gpu && gpuMode && !strcmp(gpuMode, "auto")) ||
