@@ -11,6 +11,7 @@
 */
 
 #include "config-host.h"
+#include "android/opengl/logger.h"
 #include "android/opengles.h"
 
 #include "OpenglRender/render_api_functions.h"
@@ -37,6 +38,8 @@
 #else
 #error Unknown UINTPTR_MAX
 #endif
+
+#define EMUGL_LOG_FMTARG_WIDTH 2048
 
 /* Declared in "android/globals.h" */
 int  android_gles_fast_pipes = 1;
@@ -131,6 +134,15 @@ BAD_EXIT:
     return -1;
 }
 
+void log_func(const char* fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    char buf[EMUGL_LOG_FMTARG_WIDTH] = {};
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+    fprintf(stderr, "log=%s\n", buf);
+    va_end(ap);
+}
+
 int
 android_startOpenglesRenderer(int width, int height)
 {
@@ -143,11 +155,13 @@ android_startOpenglesRenderer(int width, int height)
         return 0;
     }
 
+    android_init_opengl_logger();
     if (!initOpenGLRenderer(width,
                             height,
                             rendererUsesSubWindow,
                             rendererAddress,
-                            sizeof(rendererAddress))) {
+                            sizeof(rendererAddress),
+                            android_opengl_logger_write)) {
         D("Can't start OpenGLES renderer?");
         return -1;
     }
@@ -236,6 +250,7 @@ void
 android_stopOpenglesRenderer(void)
 {
     if (rendererStarted) {
+        android_stop_opengl_logger();
         stopOpenGLRenderer();
         rendererStarted = 0;
     }
