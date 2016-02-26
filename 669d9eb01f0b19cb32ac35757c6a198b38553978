@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "62be89e4_3e815b27",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 50
+      },
+      "lineNbr": 811,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-26T01:49:07Z",
+      "side": 1,
+      "message": "please test the simple conditions first. int/bool comparisons are so much faster than strcmp",
+      "range": {
+        "startLine": 808,
+        "startChar": 33,
+        "endLine": 811,
+        "endChar": 43
+      },
+      "revId": "669d9eb01f0b19cb32ac35757c6a198b38553978",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a29b218c_e61358ea",
+        "filename": "android/avd/util.c",
+        "patchSetId": 50
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-26T01:49:07Z",
+      "side": 1,
+      "message": "please don\u0027t forget to free it",
+      "range": {
+        "startLine": 197,
+        "startChar": 10,
+        "endLine": 197,
+        "endChar": 14
+      },
+      "revId": "669d9eb01f0b19cb32ac35757c6a198b38553978",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02e4ed24_ed3b3321",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 50
+      },
+      "lineNbr": 783,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-26T01:49:07Z",
+      "side": 1,
+      "message": "just std::string(). This constructor is way more inefficient",
+      "range": {
+        "startLine": 783,
+        "startChar": 23,
+        "endLine": 783,
+        "endChar": 25
+      },
+      "revId": "669d9eb01f0b19cb32ac35757c6a198b38553978",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
