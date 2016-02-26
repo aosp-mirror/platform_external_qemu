@@ -714,10 +714,10 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, 
 
         // If this was the result of a zoom, don't change the overall window size, and adjust the
         // scroll bars to reflect the desired focus point.
-        if (mNextIsZoom) {
+        if (mInZoomMode && mNextIsZoom) {
             mContainer.stopResizeTimer();
             recenterFocusPoint();
-        } else {
+        } else if (!mNextIsZoom) {
             mContainer.resize(rect->size());
         }
         mNextIsZoom = false;
@@ -1069,7 +1069,7 @@ void EmulatorQtWindow::simulateScrollBarChanged(int x, int y)
 void EmulatorQtWindow::simulateSetScale(double scale)
 {
     // Avoid zoom and scale events clobbering each other if the user rapidly changes zoom levels
-    if (mNextIsZoom) {
+    if (mInZoomMode && mNextIsZoom) {
         return;
     }
 
@@ -1160,7 +1160,6 @@ void EmulatorQtWindow::toggleZoomMode()
 
     // Exiting zoom mode snaps back to aspect ratio
     if (!mInZoomMode) {
-        mContainer.setCursor(QCursor(Qt::ArrowCursor));
         doResize(mContainer.size());
         mOverlay.hide();
     } else {
