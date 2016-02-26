@@ -1468,7 +1468,7 @@ help_gpu(stralloc_t* out)
     "  Note that OpenGLES 2.0 is _not_ supported by it.\n\n"
 
     "  The 'auto' mode is the default. In this mode, the hw.gpu.enabled setting\n"
-    "  in the AVD's hardware-qemu.ini file will determine whether GPU emulation\n"
+    "  in the AVD's " CORE_HARDWARE_INI " file will determine whether GPU emulation\n"
     "  is enabled.\n\n"
 
     "  Even if hardware GPU emulation is enabled, if the host-side OpenGL ES\n"

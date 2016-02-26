@@ -12,6 +12,13 @@
 
 #include "android/crashreport/ui/ConfirmDialog.h"
 
+#include "android/android.h"
+#include "android/base/files/IniFile.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/String.h"
+#include "android/crashreport/CrashReporter.h"
+#include "android/globals.h"
+
 #include <QEventLoop>
 #include <QFutureWatcher>
 #include <QScrollBar>
@@ -38,15 +45,23 @@ static const char kIconFile[] = "emulator_icon_128.png";
 extern "C" const unsigned char* android_emulator_icon_find(const char* name,
                                                            size_t* psize);
 
+using android::base::IniFile;
+using android::base::PathUtils;
+using android::base::String;
+using android::base::StringView;
+using android::crashreport::CrashService;
+
 ConfirmDialog::ConfirmDialog(QWidget* parent,
-                             android::crashreport::CrashService* crashservice,
-                             Ui::Settings::CRASHREPORT_PREFERENCE_VALUE reportPreference)
+                             CrashService* crashservice,
+                             Ui::Settings::CRASHREPORT_PREFERENCE_VALUE reportPreference,
+                             const char* reportingDir)
     : QDialog(parent),
       mCrashService(crashservice),
       mReportPreference(reportPreference),
       mDetailsHidden(true),
       mDidGetSysInfo(false),
-      mDidUpdateDetails(false) {
+      mDidUpdateDetails(false),
+      mReportingDir(reportingDir) {
 
     mSendButton = new QPushButton(tr("Send report"));
     mDontSendButton = new QPushButton(tr("Don't send"));
@@ -60,7 +75,11 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mProgress = new QProgressBar;
     mSavePreference =
         new QCheckBox(tr("Automatically send future crash reports "
-                         "(Re-configure in emulator settings menu)"));
+                         "(Re-configure in Emulator settings menu)"));
+    mSoftwareGPU = new QCheckBox(tr("Use software rendering for this device"));
+    mSoftwareGPU->setChecked(false);
+    mSoftwareGPU->show();
+
     QSettings settings;
     bool save_preference_checked =
         settings.value(Ui::Settings::CRASHREPORT_SAVEPREFERENCE_CHECKED, 1).toInt();
@@ -97,21 +116,23 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
 
     crashservice->processCrash();
     auto suggestions = crashservice->getSuggestions().suggestions;
+    bool haveGfxFailure = false;
     if (!suggestions.empty()) {
         if (suggestions.find(
                     android::crashreport::Suggestion::UpdateGfxDrivers) !=
             suggestions.end()) {
-#ifdef __APPLE__
-            addSuggestion("This crash appears to be in your computer's graphics driver. Please check your\n"
-                          "manufacturer's website for updated graphics drivers.\n\n"
-                          "If problems persist, try using software rendering: uncheck \"Use Host GPU\"\n"
-                          "in your AVD configuration.");
-#else
-            addSuggestion("This crash appears to be in your computer's graphics driver. Please check your\n"
-                          "manufacturer's website for updated graphics drivers.\n\n"
-                          "If problems persist, try using software rendering: add \"-gpu mesa\" to\n"
-                          "the emulator command line, or uncheck \"Use Host GPU\" in your AVD configuration.");
-#endif
+            haveGfxFailure = true;
+            addSuggestion(tr("It appears that your computer's OpenGL graphics "
+                             "driver crashed. This was\n"
+                             "probably caused by a bug in the driver or by a "
+                             "bug in your app's OpenGL code.\n\n"
+                             "You should check your manufacturer's website for "
+                             "an updated graphics driver.\n\n"
+                             "You can also tell the Emulator to use software "
+                             "rendering for this device. This\n"
+                             "could avoid driver problems and make it easier "
+                             "to debug the OpenGL code in\n"
+                             "your app."));
         }
         mSuggestionText->show();
     } else {
@@ -145,26 +166,41 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     QFrame* hLineFrame = new QFrame();
     hLineFrame->setFrameShape(QFrame::HLine);
 
-    mainLayout->addWidget(mIcon, 0, 0);
-    mainLayout->addWidget(mLabelText, 0, 1, 1, 2);
+    int row = 0;
+    mainLayout->addWidget(mIcon, row, 0);
+    mainLayout->addWidget(mLabelText, row, 1, 1, 2);
 
-    mainLayout->addWidget(mSuggestionText, 1, 0, 1, 3);
+    row++;
+    mainLayout->addWidget(mSuggestionText, row, 0, 1, 3);
 
-    mainLayout->addWidget(hLineFrame, 2, 0, 1, 3);
+    if (haveGfxFailure) {
+        row++;
+        mainLayout->addWidget(mSoftwareGPU, row, 0, 1, 3);
+    }
 
-    mainLayout->addWidget(mInfoText, 3, 0, 1, 3);
+    row++;
+    mainLayout->addWidget(hLineFrame, row, 0, 1, 3);
 
-    mainLayout->addWidget(mComment, 4, 0, 1, 3);
+    row++;
+    mainLayout->addWidget(mInfoText, row, 0, 1, 3);
 
-    mainLayout->addWidget(mSavePreference, 5, 0, 1, 3);
+    row++;
+    mainLayout->addWidget(mComment, row, 0, 1, 3);
 
-    mainLayout->addWidget(mDetailsButtonBox, 6, 0, Qt::AlignLeft);
-    mainLayout->addWidget(mYesNoButtonBox, 6, 1, 1, 2);
+    row++;
+    mainLayout->addWidget(mSavePreference, row, 0, 1, 3);
 
-    mainLayout->addWidget(mExtension, 7, 0, 1, 3);
+    row++;
+    mainLayout->addWidget(mDetailsButtonBox, row, 0, Qt::AlignLeft);
+    mainLayout->addWidget(mYesNoButtonBox, row, 1, 1, 2);
 
-    mainLayout->addWidget(mProgressText, 8, 0, 1, 3);
-    mainLayout->addWidget(mProgress, 9, 0, 1, 3);
+    row++;
+    mainLayout->addWidget(mExtension, row, 0, 1, 3);
+
+    row++;
+    mainLayout->addWidget(mProgressText, row, 0, 1, 3);
+    row++;
+    mainLayout->addWidget(mProgress, row, 0, 1, 3);
 
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
     setLayout(mainLayout);
@@ -305,12 +341,54 @@ void ConfirmDialog::sendReport() {
         msgbox.exec();
     }
 
+    setSwGpu();
+
     savePref(mSavePreference->isChecked(), Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS);
     accept();
 }
 
 void ConfirmDialog::dontSendReport() {
+    setSwGpu();
     reject();
+}
+
+// If the user requests a switch to software GPU, modify
+// hardware-qemu.ini to have "hw.gpu.mode=guest"
+void ConfirmDialog::setSwGpu() {
+    if ( mSoftwareGPU->isChecked() &&
+         mReportingDir                )
+    {
+        // The user wants the switch and we have the
+        // path to the avd_info.txt file
+        std::string avdInfoPath =
+                PathUtils::join(mReportingDir, CRASH_AVD_HARDWARE_INFO).c_str();
+
+        IniFile iniF(avdInfoPath);
+        iniF.read();
+
+        // Get the path to hardware-qemu.ini
+        std::string diskPartDir = iniF.getString("disk.dataPartition.path", "");
+        if ( !diskPartDir.empty() ) {
+            // Keep the path; discard the file name
+            String outputDir;
+            String unused;
+            bool isOK = PathUtils::split(diskPartDir, &outputDir, &unused);
+            if (isOK) {
+                std::string hwQemuPath = PathUtils::
+                        join(outputDir, CORE_HARDWARE_INI).c_str();
+                // We have the path to hardware-qemu.ini
+                // Read that
+                IniFile hwQemuIniF(hwQemuPath);
+                hwQemuIniF.read();
+
+                // Set hw.gpu.mode=guest
+                hwQemuIniF.setString("hw.gpu.mode", "guest");
+
+                // Write the modified configuration back
+                hwQemuIniF.write();
+            }
+        }
+    }
 }
 
 void ConfirmDialog::detailtoggle() {
