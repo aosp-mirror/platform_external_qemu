@@ -22,6 +22,30 @@
       "revId": "2091ab7bb7ab0b72690cd1ed91511af9a76f9c37",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_d6013854",
+        "filename": "distrib/android-emugl/shared/emugl/common/logging.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-26T23:48:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c2c1f56d_421c0aaf",
+      "range": {
+        "startLine": 19,
+        "startChar": 8,
+        "endLine": 19,
+        "endChar": 22
+      },
+      "revId": "2091ab7bb7ab0b72690cd1ed91511af9a76f9c37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
