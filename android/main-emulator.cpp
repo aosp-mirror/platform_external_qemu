@@ -454,7 +454,7 @@ int main(int argc, char** argv)
     // If the user has specified a renderer
     // that is neither "auto" nor "host",
     // don't check the blacklist.
-    if (!((!gpu && strcmp(gpuMode, "auto") &&
+    if (!((!gpu && gpuMode && strcmp(gpuMode, "auto") &&
                     strcmp(gpuMode, "host")) ||
                 (gpu && strcmp(gpu, "auto") &&
                  strcmp(gpu, "host") &&
@@ -462,7 +462,7 @@ int main(int argc, char** argv)
          on_blacklist = isHostGpuBlacklisted();
     }
 
-    if ((!gpu && !strcmp(gpuMode, "auto")) ||
+    if ((!gpu && gpuMode && !strcmp(gpuMode, "auto")) ||
         (gpu && !strcmp(gpu, "auto"))) {
         if (on_blacklist) {
             fprintf(stderr, "Your GPU drivers may have a bug. "
@@ -470,7 +470,7 @@ int main(int argc, char** argv)
         }
         blacklisted = on_blacklist;
     } else if (on_blacklist &&
-               ((!gpu && !strcmp(gpuMode, "host"))  ||
+               ((!gpu && gpuMode && !strcmp(gpuMode, "host"))  ||
                 (gpu && !strcmp(gpu, "host")) ||
                 (gpu && !strcmp(gpu, "on")))) {
         fprintf(stderr, "Your GPU drivers may have a bug. "
