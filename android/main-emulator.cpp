@@ -25,6 +25,10 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <iostream>
+#include <fstream>
+#include <streambuf>
+
 #include "android/avd/scanner.h"
 #include "android/avd/util.h"
 #include "android/base/files/PathUtils.h"
@@ -79,6 +83,9 @@ static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs);
 static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                                              const char* avdArch,
                                              const char* androidOut);
+
+static bool checkForGoogleAPIs(const char* avdName);
+static int getApiLevel(const char* avdName);
 
 #ifdef _WIN32
 static const char kExeExtension[] = ".exe";
@@ -431,9 +438,50 @@ int main(int argc, char** argv)
         gpuEnabled = (gpuMode != NULL);
     }
 
+    // Detect if this is google API's
+   
+    bool google_apis = checkForGoogleAPIs(avdName);
+    int api_level = getApiLevel(avdName);
+
+    bool has_guest_renderer = (!strcmp(avdArch, "x86") ||
+                               !strcmp(avdArch, "x86_64")) &&
+                               (api_level >= 23) &&
+                               google_apis;
+
+    bool blacklisted = false;
+    bool on_blacklist = false;
+
+    // If the user has specified a renderer
+    // that is neither "auto" nor "host",
+    // don't check the blacklist.
+    if (!((!gpu && strcmp(gpuMode, "auto") &&
+                    strcmp(gpuMode, "host")) ||
+                (gpu && strcmp(gpu, "auto") &&
+                 strcmp(gpu, "host") &&
+                 strcmp(gpu, "on")))) {
+         on_blacklist = isHostGpuBlacklisted();
+    }
+
+    if ((!gpu && !strcmp(gpuMode, "auto")) ||
+        (gpu && !strcmp(gpu, "auto"))) {
+        if (on_blacklist) {
+            fprintf(stderr, "Your GPU drivers may have a bug. "
+                    "Switching to software rendering.\n");
+        }
+        blacklisted = on_blacklist;
+    } else if (on_blacklist &&
+               ((!gpu && !strcmp(gpuMode, "host"))  ||
+                (gpu && !strcmp(gpu, "host")) ||
+                (gpu && !strcmp(gpu, "on")))) {
+        fprintf(stderr, "Your GPU drivers may have a bug. "
+                        "If you experience graphical issues, "
+                        "please consider switching to software rendering.\n");
+    }
+
     EmuglConfig config;
     if (!emuglConfig_init(
-                &config, gpuEnabled, gpuMode, gpu, wantedBitness, no_window)) {
+                &config, gpuEnabled, gpuMode, gpu, wantedBitness, no_window,
+                blacklisted, has_guest_renderer)) {
         fprintf(stderr, "ERROR: %s\n", config.status);
         exit(1);
     }
@@ -710,4 +758,38 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
 
     AFREE(kernel_file);
     return result;
+}
+
+static std::string get_key_val(const char* avdName, const char* key) {
+    char* sdkRootPath = path_getSdkRoot();
+    char* systemImagePath = path_getAvdSystemPath(avdName, sdkRootPath);
+
+    std::string buildprop_file = std::string(systemImagePath) + "/build.prop";
+
+    std::ifstream file(buildprop_file);
+    std::string temp;
+    while (std::getline(file, temp)) {
+        size_t keypos = temp.find(key);
+        if (keypos != std::string::npos) {
+            keypos = temp.find("=");
+            if (keypos == std::string::npos) {
+                // build.prop key without =, crazy!
+                continue;
+            }
+            std::string val = temp.substr(keypos + 1, temp.length() + 1);
+            return val;
+        }
+    }
+    return std::string();
+}
+
+static bool checkForGoogleAPIs(const char* avdName) {
+    std::string api_type = get_key_val(avdName, "ro.product.name");
+    return (api_type.find("sdk_google") != std::string::npos) ||
+           (api_type.find("google_sdk") != std::string::npos);
+}
+
+static int getApiLevel(const char* avdName) {
+    std::string api_level = get_key_val(avdName, "ro.build.version.sdk");
+    return std::stoi(api_level);
 }
