@@ -11,6 +11,7 @@
 
 #include "android/metrics/metrics_reporter.h"
 #include "android/metrics/internal/metrics_reporter_internal.h"
+#include "android/opengl/emugl_config.h"
 
 #include <gtest/gtest.h>
 #include <fstream>
@@ -182,6 +183,17 @@ TEST_F(MetricsReporterTest, reportAllPartialFailure) {
     ASSERT_FALSE(androidMetrics_tryReportAll());
     ASSERT_EQ(3, this->upload_calls_count_);
     ASSERT_EQ(0, this->upload_success_count_);
+}
+
+TEST_F(MetricsReporterTest, populateGpuProps) {
+    AndroidMetrics metrics;
+    androidMetrics_init(&metrics);
+
+
+    
+
+    ASSERT_TRUE(androidMetrics_write(&metrics));
+    androidMetrics_fini(&metrics);
 }
 
 }  // namespace
