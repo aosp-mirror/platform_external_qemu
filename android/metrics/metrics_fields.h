@@ -29,9 +29,6 @@ METRICS_STRING(core_version, "core_version", "unknown")
 METRICS_STRING(host_os_type, "host_os_type", "unknown")
 METRICS_STRING(guest_arch, "guest_arch", "unknown")
 METRICS_INT(guest_gpu_enabled, "guest_gpu_enabled", -99)
-METRICS_STRING(guest_gl_vendor, "guest_gl_vendor", "NotApplicable")
-METRICS_STRING(guest_gl_renderer, "guest_gl_renderer", "NotApplicable")
-METRICS_STRING(guest_gl_version, "guest_gl_version", "NotApplicable")
 METRICS_INT(tick, "tick", 0)
 METRICS_DURATION(system_time, "system_time", 0)
 METRICS_DURATION(user_time, "user_time", 0)
@@ -41,3 +38,22 @@ METRICS_INT(opengl_alive, "opengl_alive", 0)
 METRICS_INT(num_failed_reports, "num_failed_reports", 0)
 METRICS_INT(adb_liveness, "adb_liveness", 0)
 METRICS_INT(exit_started, "exit_started", 0)
+
+// Guest GPU OpenGL strings
+METRICS_STRING(guest_gl_vendor, "guest_gl_vendor", "NotApplicable")
+METRICS_STRING(guest_gl_renderer, "guest_gl_renderer", "NotApplicable")
+METRICS_STRING(guest_gl_version, "guest_gl_version", "NotApplicable")
+
+// Host GPU properties (support 4 GPUs max)
+#define DEFGPUMETRICS(prefix) \
+    METRICS_STRING(prefix##_make, #prefix "_make", "unknown") \
+    METRICS_STRING(prefix##_model, #prefix "_model", "unknown") \
+    METRICS_STRING(prefix##_device_id, #prefix "_device_id", "unknown") \
+    METRICS_STRING(prefix##_revision_id, #prefix "_revision_id", "unknown") \
+    METRICS_STRING(prefix##_version, #prefix "_version", "unknown") \
+    METRICS_STRING(prefix##_renderer, #prefix "_renderer", "unknown")
+
+DEFGPUMETRICS(gpu0)
+DEFGPUMETRICS(gpu1)
+DEFGPUMETRICS(gpu2)
+DEFGPUMETRICS(gpu3)
