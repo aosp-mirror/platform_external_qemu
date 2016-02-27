@@ -33,6 +33,8 @@
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
+#include "emugl/common/logging.h"
+
 #include <string.h>
 
 GLESv2Dispatch s_gles2;
@@ -75,7 +77,9 @@ RENDER_APICALL int RENDER_APIENTRY initLibrary(void)
 }
 
 RENDER_APICALL int RENDER_APIENTRY initOpenGLRenderer(
-        int width, int height, bool useSubWindow, char* addr, size_t addrLen) {
+        int width, int height, bool useSubWindow, char* addr, size_t addrLen,
+        void (*logger)(const char* fmt, ...)) {
+    set_emugl_logger(logger);
     //
     // Fail if renderer is already initialized
     //
@@ -112,6 +116,7 @@ RENDER_APICALL int RENDER_APIENTRY initOpenGLRenderer(
     s_renderWindow = new RenderWindow(width, height, kUseThread, useSubWindow);
     if (!s_renderWindow) {
         ERR("Could not create rendering window class");
+        GL_LOG("Could not create rendering window class");
         return false;
     }
     if (!s_renderWindow->isValid()) {
@@ -129,6 +134,7 @@ RENDER_APICALL int RENDER_APIENTRY initOpenGLRenderer(
 
     s_renderThread->start();
 
+    GL_LOG("OpenGL renderer initialized successfully");
     return true;
 }
 

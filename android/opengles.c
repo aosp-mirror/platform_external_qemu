@@ -11,6 +11,7 @@
 */
 
 #include "config-host.h"
+#include "android/opengl/logger.h"
 #include "android/opengles.h"
 
 #include "OpenglRender/render_api_functions.h"
@@ -143,11 +144,13 @@ android_startOpenglesRenderer(int width, int height)
         return 0;
     }
 
+    android_init_opengl_logger();
     if (!initOpenGLRenderer(width,
                             height,
                             rendererUsesSubWindow,
                             rendererAddress,
-                            sizeof(rendererAddress))) {
+                            sizeof(rendererAddress),
+                            android_opengl_logger_write)) {
         D("Can't start OpenGLES renderer?");
         return -1;
     }
@@ -236,6 +239,7 @@ void
 android_stopOpenglesRenderer(void)
 {
     if (rendererStarted) {
+        android_stop_opengl_logger();
         stopOpenGLRenderer();
         rendererStarted = 0;
     }

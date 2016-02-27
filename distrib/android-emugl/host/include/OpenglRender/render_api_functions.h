@@ -22,7 +22,7 @@ typedef void (*OnPostFn)(void* context, int width, int height, int ydir,
 #define LIST_RENDER_API_FUNCTIONS(X) \
   X(int, initLibrary, (), ()) \
   X(int, setStreamMode, (int mode), (mode)) \
-  X(int, initOpenGLRenderer, (int width, int height, bool useSubWindow, char* addr, size_t addrLen), (width, height, useSubWindow, addr, addrLen)) \
+  X(int, initOpenGLRenderer, (int width, int height, bool useSubWindow, char* addr, size_t addrLen, void (*logger)(const char* fmt, ...)), (width, height, useSubWindow, addr, addrLen, logger)) \
   X(void, getHardwareStrings, (const char** vendor, const char** renderer, const char** version), (vendor, renderer, version)) \
   X(void, setPostCallback, (OnPostFn onPost, void* onPostContext), (onPost, onPostContext)) \
   X(bool, showOpenGLSubwindow, (FBNativeWindowType window, int wx, int wy, int ww, int wh, int fbw, int fbh, float dpr, float zRot), (window, wx, wy, ww, wh, fbw, fbh, dpr, zRot)) \

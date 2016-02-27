@@ -14,6 +14,7 @@
 
 #include "RenderWindow.h"
 
+#include "emugl/common/logging.h"
 #include "emugl/common/message_channel.h"
 #include "emugl/common/mutex.h"
 #include "emugl/common/thread.h"
@@ -117,6 +118,8 @@ struct RenderWindowMessage {
         switch (msg.cmd) {
             case CMD_INITIALIZE:
                 D("CMD_INITIALIZE w=%d h=%d\n", msg.init.width, msg.init.height);
+                GL_LOG("RenderWindow: CMD_INITIALIZE w=%d h=%d",
+                       msg.init.width, msg.init.height);
                 result = FrameBuffer::initialize(msg.init.width,
                                                  msg.init.height,
                                                  msg.init.useSubWindow);

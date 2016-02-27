@@ -24,6 +24,8 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include "emugl/common/logging.h"
+
 #include <stdio.h>
 
 namespace {
@@ -165,6 +167,7 @@ void FrameBuffer::finalize(){
 
 bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
 {
+    GL_LOG("FrameBuffer::initialize");
     if (s_theFrameBuffer != NULL) {
         return true;
     }
@@ -188,15 +191,18 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
         return false;
     }
 
+    GL_LOG("call eglInitialize");
     if (!s_egl.eglInitialize(fb->m_eglDisplay,
                              &fb->m_caps.eglMajor,
                              &fb->m_caps.eglMinor)) {
         ERR("Failed to eglInitialize\n");
+        GL_LOG("Failed to eglInitialize");
         delete fb;
         return false;
     }
 
     DBG("egl: %d %d\n", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
+    GL_LOG("egl: %d %d", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
     s_egl.eglBindAPI(EGL_OPENGL_ES_API);
 
     //
@@ -239,6 +245,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
         EGL_NONE
     };
 
+    GL_LOG("attempting to create egl context");
     fb->m_eglContext = s_egl.eglCreateContext(fb->m_eglDisplay,
                                               fb->m_eglConfig,
                                               EGL_NO_CONTEXT,
@@ -250,6 +257,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
         return false;
     }
 
+    GL_LOG("attempting to create egl pbuffer context");
     //
     // Create another context which shares with the eglContext to be used
     // when we bind the pbuffer. That prevent switching drawable binding
@@ -269,6 +277,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
         return false;
     }
 
+    GL_LOG("context creation successful");
     //
     // create a 1x1 pbuffer surface which will be used for binding
     // the FB context.
@@ -290,6 +299,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
         return false;
     }
 
+    GL_LOG("attempting to make context current");
     // Make the context current
     ScopedBind bind(fb);
     if (!bind.isValid()) {
@@ -298,6 +308,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
         delete fb;
         return false;
     }
+    GL_LOG("context-current successful");
 
     //
     // Initilize framebuffer capabilities
@@ -343,6 +354,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
         return false;
     }
 
+    GL_LOG("host system has enough extensions");
     //
     // Initialize set of configs
     //
@@ -389,6 +401,8 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
         return false;
     }
 
+    GL_LOG("There are sufficient EGLconfigs available");
+
     //
     // Cache the GL strings so we don't have to think about threading or
     // current-context when asked for them.
@@ -412,6 +426,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     // Keep the singleton framebuffer pointer
     //
     s_theFrameBuffer = fb;
+    GL_LOG("basic EGL initialization successful");
     return true;
 }
 
