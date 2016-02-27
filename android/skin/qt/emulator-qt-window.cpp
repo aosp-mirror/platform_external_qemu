@@ -251,6 +251,7 @@ void EmulatorQtWindow::showGpuWarning()
     }
 
     QSettings settings;
+        settings.setValue(Ui::Settings::SHOW_GPU_WARNING, true);
     if (settings.value(Ui::Settings::SHOW_GPU_WARNING, true).toBool()) {
         QObject::connect(&mGpuWarningBox, SIGNAL(buttonClicked(QAbstractButton*)),
                          this, SLOT(slot_gpuWarningMessageAccepted()));
