@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "c2c1f56d_c85efb4b",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-27T01:53:17Z",
+      "side": 1,
+      "message": "Apparently it\u0027s 2083...Thinking of a solution ATM. Either not sending so much stuff about the GPU, or trying to be incremental.",
+      "parentUuid": "82bb7df1_e568dd62",
+      "range": {
+        "startLine": 73,
+        "startChar": 20,
+        "endLine": 73,
+        "endChar": 41
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2c1f56d_684c8fb6",
         "filename": "android/metrics/metrics_reporter_toolbar_unittest.cpp",
         "patchSetId": 1
@@ -174,6 +198,30 @@
       "writtenOn": "2016-02-27T01:49:20Z",
       "side": 1,
       "message": "part of the debugging code?",
+      "range": {
+        "startLine": 254,
+        "startChar": 3,
+        "endLine": 254,
+        "endChar": 9
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_0864f31e",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-27T01:53:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62be89e4_f339d4d7",
       "range": {
         "startLine": 254,
         "startChar": 3,
