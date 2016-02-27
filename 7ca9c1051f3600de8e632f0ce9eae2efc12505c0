@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e27a7932_b4ed61dd",
+        "filename": "android/metrics/metrics_fields.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-27T05:51:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c26bb568_3ebe41f6",
+      "range": {
+        "startLine": 46,
+        "startChar": 14,
+        "endLine": 46,
+        "endChar": 15
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "82bb7df1_e568dd62",
         "filename": "android/metrics/metrics_reporter_toolbar.cpp",
         "patchSetId": 1
@@ -168,6 +192,30 @@
     },
     {
       "key": {
+        "uuid": "82bb7df1_408ad709",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-27T05:51:30Z",
+      "side": 1,
+      "message": "It seemed simple enough to break up the key/values into individual string appends, each of which quits if the URL is \u003e\u003d 2000 chars. IMO it makes it more readable as well.",
+      "parentUuid": "c2c1f56d_68112f71",
+      "range": {
+        "startLine": 73,
+        "startChar": 20,
+        "endLine": 73,
+        "endChar": 41
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2c1f56d_684c8fb6",
         "filename": "android/metrics/metrics_reporter_toolbar_unittest.cpp",
         "patchSetId": 1
@@ -179,6 +227,30 @@
       "writtenOn": "2016-02-27T01:49:20Z",
       "side": 1,
       "message": "any new test that actually sets the host gpu fields? to make sure those are always reported",
+      "range": {
+        "startLine": 201,
+        "startChar": 3,
+        "endLine": 201,
+        "endChar": 70
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e27a7932_14e9d5d0",
+        "filename": "android/metrics/metrics_reporter_toolbar_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-27T05:51:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c2c1f56d_684c8fb6",
       "range": {
         "startLine": 201,
         "startChar": 3,
@@ -214,6 +286,30 @@
     },
     {
       "key": {
+        "uuid": "02594de9_247b92c7",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-27T05:51:30Z",
+      "side": 1,
+      "message": "Went with strdup instead (Done)",
+      "parentUuid": "82bb7df1_8557e1a4",
+      "range": {
+        "startLine": 75,
+        "startChar": 3,
+        "endLine": 80,
+        "endChar": 26
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2c1f56d_0816338f",
         "filename": "android/opengl/emugl_config.cpp",
         "patchSetId": 1
@@ -225,6 +321,30 @@
       "writtenOn": "2016-02-27T01:49:20Z",
       "side": 1,
       "message": "what about just strduping the strings?",
+      "range": {
+        "startLine": 87,
+        "startChar": 5,
+        "endLine": 87,
+        "endChar": 37
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02e4ed24_af7cf846",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-27T05:51:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c2c1f56d_0816338f",
       "range": {
         "startLine": 87,
         "startChar": 5,
@@ -260,6 +380,30 @@
     },
     {
       "key": {
+        "uuid": "62be89e4_d3ced0cf",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-27T05:51:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e27a7932_80d58401",
+      "range": {
+        "startLine": 103,
+        "startChar": 4,
+        "endLine": 103,
+        "endChar": 8
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e27a7932_e00c888f",
         "filename": "android/opengl/emugl_config.h",
         "patchSetId": 1
@@ -271,6 +415,30 @@
       "writtenOn": "2016-02-27T01:49:20Z",
       "side": 1,
       "message": "const char* ?",
+      "range": {
+        "startLine": 42,
+        "startChar": 3,
+        "endLine": 47,
+        "endChar": 20
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4276e54b_03019c9d",
+        "filename": "android/opengl/emugl_config.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-27T05:51:30Z",
+      "side": 1,
+      "message": "With strdup(), it seems like we cannot free() them if const.",
+      "parentUuid": "e27a7932_e00c888f",
       "range": {
         "startLine": 42,
         "startChar": 3,
