@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "e2b0b90b_569888a3",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-27T01:56:11Z",
+      "side": 1,
+      "message": "we could have a separate message specifically for the gpu info (and uid, of course). Just send two messages instead of one here, and change the androidsdk_emu_crash to something more meaningful, like androidsdk_emu_host_gpu\nThis would also allow us to send multiple gpus information in a simpler way\nPrathmesh may actually know if we have any support of arrays in the url parameters",
+      "parentUuid": "c2c1f56d_c85efb4b",
+      "range": {
+        "startLine": 73,
+        "startChar": 20,
+        "endLine": 73,
+        "endChar": 41
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2c1f56d_684c8fb6",
         "filename": "android/metrics/metrics_reporter_toolbar_unittest.cpp",
         "patchSetId": 1
