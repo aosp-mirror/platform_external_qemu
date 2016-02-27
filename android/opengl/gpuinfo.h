@@ -76,7 +76,8 @@ public:
     GpuInfoList() : blacklist_status(false) { }
     void addGpu();
     GpuInfo& currGpu();
-    std::string dump();
+    std::string dump() const;
+    void clear();
 
     static GpuInfoList* get(); // For the global GpuInfoList
     std::vector<GpuInfo> infos;

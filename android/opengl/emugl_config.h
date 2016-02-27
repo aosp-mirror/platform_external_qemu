@@ -38,6 +38,25 @@ bool isHostGpuBlacklisted();
 // If we actually switched to software, call this.
 void setGpuBlacklistStatus(bool switchedSoftware);
 
+typedef struct {
+    char* make;
+    char* model;
+    char* device_id;
+    char* revision_id;
+    char* version;
+    char* renderer;
+} emugl_host_gpu_props;
+
+typedef struct {
+    int num_gpus;
+    emugl_host_gpu_props* props;
+} emugl_host_gpu_prop_list;
+
+// Get a description of host GPU properties.
+// Need to free after use.
+emugl_host_gpu_prop_list emuglConfig_get_host_gpu_props();
+void free_emugl_host_gpu_props(emugl_host_gpu_prop_list props);
+
 // Initialize an EmuglConfig instance based on the AVD's hardware properties
 // and the command-line -gpu option, if any.
 //
