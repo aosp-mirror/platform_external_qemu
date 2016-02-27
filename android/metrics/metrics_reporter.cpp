@@ -450,3 +450,32 @@ bool androidMetrics_update() {
 
     return true;
 }
+
+#define METRICS_ASSIGN_GPU_PROPS(metrics, i, plist) do { \
+    ANDROID_METRICS_STRASSIGN(metrics->gpu##i##_make, \
+                              plist->props[i].make); \
+    ANDROID_METRICS_STRASSIGN(metrics->gpu##i##_model, \
+                              plist->props[i].model); \
+    ANDROID_METRICS_STRASSIGN(metrics->gpu##i##_device_id, \
+                              plist->props[i].device_id); \
+    ANDROID_METRICS_STRASSIGN(metrics->gpu##i##_revision_id, \
+                              plist->props[i].revision_id); \
+    ANDROID_METRICS_STRASSIGN(metrics->gpu##i##_version, \
+                              plist->props[i].version); \
+    ANDROID_METRICS_STRASSIGN(metrics->gpu##i##_renderer, \
+                              plist->props[i].renderer); \
+} while(0);
+
+#define METRICS_GPUREPORT(metrics, i, plist) do { \
+    if (i < plist->num_gpus) { \
+        METRICS_ASSIGN_GPU_PROPS(metrics, i, plist) \
+    } \
+} while(0);
+
+void androidMetrics_populateGpuProps(AndroidMetrics* metrics,
+                                     emugl_host_gpu_prop_list* plist) {
+    METRICS_GPUREPORT(metrics, 0, plist);
+    METRICS_GPUREPORT(metrics, 1, plist);
+    METRICS_GPUREPORT(metrics, 2, plist);
+    METRICS_GPUREPORT(metrics, 3, plist);
+}
