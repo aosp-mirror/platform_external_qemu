@@ -67,6 +67,51 @@ void setGpuBlacklistStatus(bool switchedSoftware) {
         switchedSoftware;
 }
 
+// Get a description of host GPU properties.
+// Need to free after use.
+emugl_host_gpu_props* emuglConfig_get_host_gpu_props() {
+    GpuInfoList* gpulist = GpuInfoList::get();
+    emugl_host_gpu_props* res =
+        (emugl_host_gpu_props*)malloc(sizeof(emugl_host_gpu_props));
+    res->num_gpus = gpulist->infos.size();
+
+    res->makes = (char**)(malloc(res->num_gpus * sizeof(char*)));
+    res->models = (char**)(malloc(res->num_gpus * sizeof(char*)));
+    res->device_ids = (char**)(malloc(res->num_gpus * sizeof(char*)));
+    res->revision_ids = (char**)(malloc(res->num_gpus * sizeof(char*)));
+    res->versions = (char**)(malloc(res->num_gpus * sizeof(char*)));
+    res->renderers = (char**)(malloc(res->num_gpus * sizeof(char*)));
+
+    const std::vector<GpuInfo>& infos = gpulist->infos;
+    for (int i = 0; i < res->num_gpus; i++) {
+        res->makes[i] = strdup(infos[i].make.c_str());
+        res->models[i] = strdup(infos[i].model.c_str());
+        res->device_ids[i] = strdup(infos[i].device_id.c_str());
+        res->revision_ids[i] = strdup(infos[i].revision_id.c_str());
+        res->versions[i] = strdup(infos[i].version.c_str());
+        res->renderers[i] = strdup(infos[i].renderer.c_str());
+    }
+    return res;
+}
+
+void free_emugl_host_gpu_props(emugl_host_gpu_props* props) {
+    for (int i = 0; i < props->num_gpus; i++) {
+        free(props->makes[i]);
+        free(props->models[i]);
+        free(props->device_ids[i]);
+        free(props->revision_ids[i]);
+        free(props->versions[i]);
+        free(props->renderers[i]);
+    }
+    free(props->makes);
+    free(props->models);
+    free(props->device_ids);
+    free(props->revision_ids);
+    free(props->versions);
+    free(props->renderers);
+    free(props);
+}
+
 bool emuglConfig_init(EmuglConfig* config,
                       bool gpu_enabled,
                       const char* gpu_mode,
