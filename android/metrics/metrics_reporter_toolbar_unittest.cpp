@@ -49,7 +49,31 @@ TEST_F(MetricsReporterToolbarTest, defaultMetrics) {
             "as=androidsdk_emu_crash&version=unknown&core_version=unknown"
             "&os=unknown&id=00000000-0000-0000-0000-000000000000"
             "&guest_arch=unknown&exf=1&opengl_alive=0&system_time=0"
-            "&user_time=0&adb_liveness=0&wall_time=0&exit_started=0";
+            "&user_time=0&adb_liveness=0&wall_time=0&exit_started=0"
+            "&gpu0_make=unknown"
+            "&gpu0_model=unknown"
+            "&gpu0_device_id=unknown"
+            "&gpu0_revision_id=unknown"
+            "&gpu0_version=unknown"
+            "&gpu0_renderer=unknown"
+            "&gpu1_make=unknown"
+            "&gpu1_model=unknown"
+            "&gpu1_device_id=unknown"
+            "&gpu1_revision_id=unknown"
+            "&gpu1_version=unknown"
+            "&gpu1_renderer=unknown"
+            "&gpu2_make=unknown"
+            "&gpu2_model=unknown"
+            "&gpu2_device_id=unknown"
+            "&gpu2_revision_id=unknown"
+            "&gpu2_version=unknown"
+            "&gpu2_renderer=unknown"
+            "&gpu3_make=unknown"
+            "&gpu3_model=unknown"
+            "&gpu3_device_id=unknown"
+            "&gpu3_revision_id=unknown"
+            "&gpu3_version=unknown"
+            "&gpu3_renderer=unknown";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -68,7 +92,31 @@ TEST_F(MetricsReporterToolbarTest, cleanRun) {
             "as=androidsdk_emu_crash&version=standalone&core_version=qemu15"
             "&os=lynx&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&exf=0&opengl_alive=1&system_time=1170&user_time=220"
-            "&adb_liveness=0&wall_time=10&exit_started=1";
+            "&adb_liveness=0&wall_time=10&exit_started=1"
+            "&gpu0_make=unknown"
+            "&gpu0_model=unknown"
+            "&gpu0_device_id=unknown"
+            "&gpu0_revision_id=unknown"
+            "&gpu0_version=unknown"
+            "&gpu0_renderer=unknown"
+            "&gpu1_make=unknown"
+            "&gpu1_model=unknown"
+            "&gpu1_device_id=unknown"
+            "&gpu1_revision_id=unknown"
+            "&gpu1_version=unknown"
+            "&gpu1_renderer=unknown"
+            "&gpu2_make=unknown"
+            "&gpu2_model=unknown"
+            "&gpu2_device_id=unknown"
+            "&gpu2_revision_id=unknown"
+            "&gpu2_version=unknown"
+            "&gpu2_renderer=unknown"
+            "&gpu3_make=unknown"
+            "&gpu3_model=unknown"
+            "&gpu3_device_id=unknown"
+            "&gpu3_revision_id=unknown"
+            "&gpu3_version=unknown"
+            "&gpu3_renderer=unknown";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -101,7 +149,31 @@ TEST_F(MetricsReporterToolbarTest, dirtyRun) {
             "as=androidsdk_emu_crash&version=standalone&core_version=unknown"
             "&os=lynx&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&exf=1&opengl_alive=1&system_time=1080&user_time=180"
-            "&adb_liveness=0&wall_time=101&exit_started=0";
+            "&adb_liveness=0&wall_time=101&exit_started=0"
+            "&gpu0_make=unknown"
+            "&gpu0_model=unknown"
+            "&gpu0_device_id=unknown"
+            "&gpu0_revision_id=unknown"
+            "&gpu0_version=unknown"
+            "&gpu0_renderer=unknown"
+            "&gpu1_make=unknown"
+            "&gpu1_model=unknown"
+            "&gpu1_device_id=unknown"
+            "&gpu1_revision_id=unknown"
+            "&gpu1_version=unknown"
+            "&gpu1_renderer=unknown"
+            "&gpu2_make=unknown"
+            "&gpu2_model=unknown"
+            "&gpu2_device_id=unknown"
+            "&gpu2_revision_id=unknown"
+            "&gpu2_version=unknown"
+            "&gpu2_renderer=unknown"
+            "&gpu3_make=unknown"
+            "&gpu3_model=unknown"
+            "&gpu3_device_id=unknown"
+            "&gpu3_revision_id=unknown"
+            "&gpu3_version=unknown"
+            "&gpu3_renderer=unknown";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -133,7 +205,31 @@ TEST_F(MetricsReporterToolbarTest, openGLErrorRun) {
             "as=androidsdk_emu_crash&version=standalone&core_version=unknown"
             "&os=lynx&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&exf=1&opengl_alive=0&system_time=1080&user_time=180"
-            "&adb_liveness=0&wall_time=0&exit_started=0";
+            "&adb_liveness=0&wall_time=0&exit_started=0"
+            "&gpu0_make=unknown"
+            "&gpu0_model=unknown"
+            "&gpu0_device_id=unknown"
+            "&gpu0_revision_id=unknown"
+            "&gpu0_version=unknown"
+            "&gpu0_renderer=unknown"
+            "&gpu1_make=unknown"
+            "&gpu1_model=unknown"
+            "&gpu1_device_id=unknown"
+            "&gpu1_revision_id=unknown"
+            "&gpu1_version=unknown"
+            "&gpu1_renderer=unknown"
+            "&gpu2_make=unknown"
+            "&gpu2_model=unknown"
+            "&gpu2_device_id=unknown"
+            "&gpu2_revision_id=unknown"
+            "&gpu2_version=unknown"
+            "&gpu2_renderer=unknown"
+            "&gpu3_make=unknown"
+            "&gpu3_model=unknown"
+            "&gpu3_device_id=unknown"
+            "&gpu3_revision_id=unknown"
+            "&gpu3_version=unknown"
+            "&gpu3_renderer=unknown";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -155,7 +251,7 @@ TEST_F(MetricsReporterToolbarTest, openGLErrorRun) {
     free(formatted_url);
 }
 
-TEST_F(MetricsReporterToolbarTest, gpuStrings) {
+TEST_F(MetricsReporterToolbarTest, guestGpuStrings) {
     char* formatted_url = NULL;
     AndroidMetrics metrics;
     static const char kExpected[] =
@@ -164,7 +260,31 @@ TEST_F(MetricsReporterToolbarTest, gpuStrings) {
             "00000000-0000-0000-0000-000000000000&guest_arch=x86_64&exf"
             "=0&opengl_alive=1&system_time=1170&user_time=220"
             "&adb_liveness=0&wall_time=0&exit_started=0"
-            "&ggl_vendor=Some_Vendor&ggl_renderer=&ggl_version=1%20.%200";
+            "&ggl_vendor=Some_Vendor&ggl_renderer=&ggl_version=1%20.%200"
+            "&gpu0_make=unknown"
+            "&gpu0_model=unknown"
+            "&gpu0_device_id=unknown"
+            "&gpu0_revision_id=unknown"
+            "&gpu0_version=unknown"
+            "&gpu0_renderer=unknown"
+            "&gpu1_make=unknown"
+            "&gpu1_model=unknown"
+            "&gpu1_device_id=unknown"
+            "&gpu1_revision_id=unknown"
+            "&gpu1_version=unknown"
+            "&gpu1_renderer=unknown"
+            "&gpu2_make=unknown"
+            "&gpu2_model=unknown"
+            "&gpu2_device_id=unknown"
+            "&gpu2_revision_id=unknown"
+            "&gpu2_version=unknown"
+            "&gpu2_renderer=unknown"
+            "&gpu3_make=unknown"
+            "&gpu3_model=unknown"
+            "&gpu3_device_id=unknown"
+            "&gpu3_revision_id=unknown"
+            "&gpu3_version=unknown"
+            "&gpu3_renderer=unknown";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -181,6 +301,99 @@ TEST_F(MetricsReporterToolbarTest, gpuStrings) {
     ANDROID_METRICS_STRASSIGN(metrics.guest_gl_vendor, "Some_Vendor");
     ANDROID_METRICS_STRASSIGN(metrics.guest_gl_renderer, "");
     ANDROID_METRICS_STRASSIGN(metrics.guest_gl_version, "1 . 0");
+
+    EXPECT_EQ(kExpectedLen,
+              formatToolbarGetUrl(&formatted_url, mToolbarUrl, &metrics));
+    EXPECT_STREQ(kExpected, formatted_url);
+    androidMetrics_fini(&metrics);
+    free(formatted_url);
+}
+
+TEST_F(MetricsReporterToolbarTest, gpuStrings) {
+    char* formatted_url = NULL;
+    AndroidMetrics metrics;
+    static const char kExpected[] =
+            "https://tools.google.com/service/update?as=androidsdk_emu_crash"
+            "&version=standalone&core_version=unknown&os=lynx&id="
+            "00000000-0000-0000-0000-000000000000&guest_arch=x86_64&exf"
+            "=0&opengl_alive=1&system_time=1170&user_time=220"
+            "&adb_liveness=0&wall_time=0&exit_started=0"
+            "&gpu0_make=Advanced%20Micro%20Devices%2C%20Inc."
+            "&gpu0_model=AMD%20Radeon%20%28TM%29%20R5%20M335"
+            "&gpu0_device_id=0x0166"
+            "&gpu0_revision_id=0x0166"
+            "&gpu0_version=10.18.15.4281"
+            "&gpu0_renderer=OpenGL%20version%20string%3A%203.0%20Mesa%2010.4.2%"
+            "20%28git-%29"
+            "&gpu1_make=Advanced%20Micro%20Devices%2C%20Inc."
+            "&gpu1_model=AMD%20Radeon%20%28TM%29%20R5%20M335"
+            "&gpu1_device_id=0x0166"
+            "&gpu1_revision_id=0x0166"
+            "&gpu1_version=10.18.15.4281"
+            "&gpu1_renderer=OpenGL%20version%20string%3A%203.0%20Mesa%2010.4.2%"
+            "20%28git-%29"
+            "&gpu2_make=Advanced%20Micro%20Devices%2C%20Inc."
+            "&gpu2_model=AMD%20Radeon%20%28TM%29%20R5%20M335"
+            "&gpu2_device_id=0x0166"
+            "&gpu2_revision_id=0x0166"
+            "&gpu2_version=10.18.15.4281"
+            "&gpu2_renderer=OpenGL%20version%20string%3A%203.0%20Mesa%2010.4.2%"
+            "20%28git-%29"
+            "&gpu3_make=Advanced%20Micro%20Devices%2C%20Inc."
+            "&gpu3_model=AMD%20Radeon%20%28TM%29%20R5%20M335"
+            "&gpu3_device_id=0x0166"
+            "&gpu3_revision_id=0x0166"
+            "&gpu3_version=10.18.15.4281"
+            "&gpu3_renderer=OpenGL%20version%20string%3A%203.0%20Mesa%2010.4.2%"
+            "20%28git-%29";
+    static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
+
+    androidMetrics_init(&metrics);
+    ANDROID_METRICS_STRASSIGN(metrics.emulator_version, "standalone");
+    ANDROID_METRICS_STRASSIGN(metrics.host_os_type, "lynx");
+    ANDROID_METRICS_STRASSIGN(metrics.guest_arch, "x86_64");
+    metrics.tick = 1;
+    metrics.system_time = 1170;
+    metrics.user_time = 220;
+    metrics.is_dirty = 0;
+    metrics.num_failed_reports = 7;
+    metrics.guest_gpu_enabled = 0;
+    metrics.opengl_alive = 1;
+
+    // Just make it unrealistically long---we expect
+    // this case to be < 1500 chars, and even it should pass.
+    ANDROID_METRICS_STRASSIGN(metrics.gpu0_make,
+                              "Advanced Micro Devices, Inc.");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu0_model, "AMD Radeon (TM) R5 M335");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu0_device_id, "0x0166");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu0_revision_id, "0x0166");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu0_version, "10.18.15.4281");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu0_renderer,
+                              "OpenGL version string: 3.0 Mesa 10.4.2 (git-)");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu1_make,
+                              "Advanced Micro Devices, Inc.");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu1_model, "AMD Radeon (TM) R5 M335");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu1_device_id, "0x0166");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu1_revision_id, "0x0166");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu1_version, "10.18.15.4281");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu1_renderer,
+                              "OpenGL version string: 3.0 Mesa 10.4.2 (git-)");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu2_make,
+                              "Advanced Micro Devices, Inc.");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu2_model, "AMD Radeon (TM) R5 M335");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu2_device_id, "0x0166");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu2_revision_id, "0x0166");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu2_version, "10.18.15.4281");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu2_renderer,
+                              "OpenGL version string: 3.0 Mesa 10.4.2 (git-)");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu3_make,
+                              "Advanced Micro Devices, Inc.");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu3_model, "AMD Radeon (TM) R5 M335");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu3_device_id, "0x0166");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu3_revision_id, "0x0166");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu3_version, "10.18.15.4281");
+    ANDROID_METRICS_STRASSIGN(metrics.gpu3_renderer,
+                              "OpenGL version string: 3.0 Mesa 10.4.2 (git-)");
 
     EXPECT_EQ(kExpectedLen,
               formatToolbarGetUrl(&formatted_url, mToolbarUrl, &metrics));
