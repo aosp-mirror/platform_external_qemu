@@ -144,6 +144,30 @@
     },
     {
       "key": {
+        "uuid": "c2c1f56d_68112f71",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-27T02:05:52Z",
+      "side": 1,
+      "message": "I don\u0027t want us to put effort into implementing breaking and merging URLs because jvg@\u0027s efforts to move to a real library to do this will take care of that.\n\nI was suggesting clipping the GL strings reported (individually) if the full URL length is too long.\nThat way, we still get some information about all the GL strings.",
+      "parentUuid": "62be89e4_f3f7943a",
+      "range": {
+        "startLine": 73,
+        "startChar": 20,
+        "endLine": 73,
+        "endChar": 41
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2c1f56d_684c8fb6",
         "filename": "android/metrics/metrics_reporter_toolbar_unittest.cpp",
         "patchSetId": 1
