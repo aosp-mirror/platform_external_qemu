@@ -120,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "62be89e4_f3f7943a",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-27T02:03:26Z",
+      "side": 1,
+      "message": "Got it, that would be nice, but: I asked Prathmesh, and he says we can\u0027t count on the backend processing separate requests properly. I suppose I will just check the length of the resulting URL, and then remove keys if it doesn\u0027t fit (starting with GPU info).",
+      "parentUuid": "e2b0b90b_569888a3",
+      "range": {
+        "startLine": 73,
+        "startChar": 20,
+        "endLine": 73,
+        "endChar": 41
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2c1f56d_684c8fb6",
         "filename": "android/metrics/metrics_reporter_toolbar_unittest.cpp",
         "patchSetId": 1
