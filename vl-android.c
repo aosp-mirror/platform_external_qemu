@@ -1837,6 +1837,27 @@ static void android_add_nand_image(void *opaque, const char *part_name,
   nand_add_dev(tmp);
 }
 
+#define METRICS_ASSIGN_GPU_PROPS(metrics, i, props) do { \
+    ANDROID_METRICS_STRASSIGN(metrics.gpu##i##_make, \
+                              props->makes[i]); \
+    ANDROID_METRICS_STRASSIGN(metrics.gpu##i##_model, \
+                              props->models[i]); \
+    ANDROID_METRICS_STRASSIGN(metrics.gpu##i##_device_id, \
+                              props->device_ids[i]); \
+    ANDROID_METRICS_STRASSIGN(metrics.gpu##i##_revision_id, \
+                              props->revision_ids[i]); \
+    ANDROID_METRICS_STRASSIGN(metrics.gpu##i##_version, \
+                              props->versions[i]); \
+    ANDROID_METRICS_STRASSIGN(metrics.gpu##i##_renderer, \
+                              props->renderers[i]); \
+} while(0);
+
+#define METRICS_GPUREPORT(metrics, i, props) do { \
+    if (i < props->num_gpus) { \
+        METRICS_ASSIGN_GPU_PROPS(metrics, i, props) \
+    } \
+} while(0);
+
 static void android_init_metrics(int opengl_alive)
 {
     char path[PATH_MAX], *pathend=path, *bufend=pathend+sizeof(path);
@@ -1874,6 +1895,14 @@ static void android_init_metrics(int opengl_alive)
                                            &metrics.guest_gl_renderer,
                                            &metrics.guest_gl_version);
     }
+
+    // Tell the metrics the host GPU information
+    emugl_host_gpu_props* gpu_props = emuglConfig_get_host_gpu_props();
+    METRICS_GPUREPORT(metrics, 0, gpu_props);
+    METRICS_GPUREPORT(metrics, 1, gpu_props);
+    METRICS_GPUREPORT(metrics, 2, gpu_props);
+    METRICS_GPUREPORT(metrics, 3, gpu_props);
+    free_emugl_host_gpu_props(gpu_props);
 
     metrics.opengl_alive = opengl_alive;
     androidMetrics_write(&metrics);
