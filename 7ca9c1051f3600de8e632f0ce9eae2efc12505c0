@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "82bb7df1_e568dd62",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-27T01:49:20Z",
+      "side": 1,
+      "message": "what\u0027s the url length limit? we\u0027ve already stuffed so much data into there - it might start to fail soon",
+      "range": {
+        "startLine": 73,
+        "startChar": 20,
+        "endLine": 73,
+        "endChar": 41
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_684c8fb6",
+        "filename": "android/metrics/metrics_reporter_toolbar_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-27T01:49:20Z",
+      "side": 1,
+      "message": "any new test that actually sets the host gpu fields? to make sure those are always reported",
+      "range": {
+        "startLine": 201,
+        "startChar": 3,
+        "endLine": 201,
+        "endChar": 70
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82bb7df1_8557e1a4",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-27T01:49:20Z",
+      "side": 1,
+      "message": "crefs, please. we\u0027re already making so many copies",
+      "range": {
+        "startLine": 75,
+        "startChar": 3,
+        "endLine": 80,
+        "endChar": 26
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2c1f56d_0816338f",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-27T01:49:20Z",
+      "side": 1,
+      "message": "what about just strduping the strings?",
+      "range": {
+        "startLine": 87,
+        "startChar": 5,
+        "endLine": 87,
+        "endChar": 37
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e27a7932_80d58401",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-27T01:49:20Z",
+      "side": 1,
+      "message": "call (delete) for (new) and (delete[]) for (new[])",
+      "range": {
+        "startLine": 103,
+        "startChar": 4,
+        "endLine": 103,
+        "endChar": 8
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e27a7932_e00c888f",
+        "filename": "android/opengl/emugl_config.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-27T01:49:20Z",
+      "side": 1,
+      "message": "const char* ?",
+      "range": {
+        "startLine": 42,
+        "startChar": 3,
+        "endLine": 47,
+        "endChar": 20
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62be89e4_f339d4d7",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-27T01:49:20Z",
+      "side": 1,
+      "message": "part of the debugging code?",
+      "range": {
+        "startLine": 254,
+        "startChar": 3,
+        "endLine": 254,
+        "endChar": 9
+      },
+      "revId": "7ca9c1051f3600de8e632f0ce9eae2efc12505c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
