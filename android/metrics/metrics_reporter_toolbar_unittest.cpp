@@ -49,7 +49,13 @@ TEST_F(MetricsReporterToolbarTest, defaultMetrics) {
             "as=androidsdk_emu_crash&version=unknown&core_version=unknown"
             "&os=unknown&id=00000000-0000-0000-0000-000000000000"
             "&guest_arch=unknown&exf=1&opengl_alive=0&system_time=0"
-            "&user_time=0&adb_liveness=0&wall_time=0&exit_started=0";
+            "&user_time=0&adb_liveness=0&wall_time=0&exit_started=0"
+            "&host_gpu_makes=unknown"
+            "&host_gpu_models=unknown"
+            "&host_gpu_device_ids=unknown"
+            "&host_gpu_revision_ids=unknown"
+            "&host_gpu_versions=unknown"
+            "&host_gpu_renderers=unknown";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -68,7 +74,13 @@ TEST_F(MetricsReporterToolbarTest, cleanRun) {
             "as=androidsdk_emu_crash&version=standalone&core_version=qemu15"
             "&os=lynx&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&exf=0&opengl_alive=1&system_time=1170&user_time=220"
-            "&adb_liveness=0&wall_time=10&exit_started=1";
+            "&adb_liveness=0&wall_time=10&exit_started=1"
+            "&host_gpu_makes=unknown"
+            "&host_gpu_models=unknown"
+            "&host_gpu_device_ids=unknown"
+            "&host_gpu_revision_ids=unknown"
+            "&host_gpu_versions=unknown"
+            "&host_gpu_renderers=unknown";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -101,7 +113,13 @@ TEST_F(MetricsReporterToolbarTest, dirtyRun) {
             "as=androidsdk_emu_crash&version=standalone&core_version=unknown"
             "&os=lynx&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&exf=1&opengl_alive=1&system_time=1080&user_time=180"
-            "&adb_liveness=0&wall_time=101&exit_started=0";
+            "&adb_liveness=0&wall_time=101&exit_started=0"
+            "&host_gpu_makes=unknown"
+            "&host_gpu_models=unknown"
+            "&host_gpu_device_ids=unknown"
+            "&host_gpu_revision_ids=unknown"
+            "&host_gpu_versions=unknown"
+            "&host_gpu_renderers=unknown";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -133,7 +151,13 @@ TEST_F(MetricsReporterToolbarTest, openGLErrorRun) {
             "as=androidsdk_emu_crash&version=standalone&core_version=unknown"
             "&os=lynx&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&exf=1&opengl_alive=0&system_time=1080&user_time=180"
-            "&adb_liveness=0&wall_time=0&exit_started=0";
+            "&adb_liveness=0&wall_time=0&exit_started=0"
+            "&host_gpu_makes=unknown"
+            "&host_gpu_models=unknown"
+            "&host_gpu_device_ids=unknown"
+            "&host_gpu_revision_ids=unknown"
+            "&host_gpu_versions=unknown"
+            "&host_gpu_renderers=unknown";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 
     androidMetrics_init(&metrics);
@@ -164,6 +188,12 @@ TEST_F(MetricsReporterToolbarTest, gpuStrings) {
             "00000000-0000-0000-0000-000000000000&guest_arch=x86_64&exf"
             "=0&opengl_alive=1&system_time=1170&user_time=220"
             "&adb_liveness=0&wall_time=0&exit_started=0"
+            "&host_gpu_makes=unknown"
+            "&host_gpu_models=unknown"
+            "&host_gpu_device_ids=unknown"
+            "&host_gpu_revision_ids=unknown"
+            "&host_gpu_versions=unknown"
+            "&host_gpu_renderers=unknown"
             "&ggl_vendor=Some_Vendor&ggl_renderer=&ggl_version=1%20.%200";
     static const int kExpectedLen = (int)(sizeof(kExpected) - 1);
 

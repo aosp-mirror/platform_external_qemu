@@ -67,6 +67,48 @@ void setGpuBlacklistStatus(bool switchedSoftware) {
         switchedSoftware;
 }
 
+// Get a description of host GPU properties.
+// Need to free after use.
+emugl_host_gpu_props* emuglConfig_get_host_gpu_props() {
+    GpuInfoList* gpulist = GpuInfoList::get();
+    emugl_host_gpu_props* res = new emugl_host_gpu_props;
+    std::string makes = gpulist->getMakes();
+    std::string models = gpulist->getModels();
+    std::string device_ids = gpulist->getDeviceIDs();
+    std::string revision_ids = gpulist->getRevisionIDs();
+    std::string versions = gpulist->getDriverVersions();
+    std::string renderers = gpulist->getRenderers();
+    unsigned int makes_len = makes.length() + 1;
+    unsigned int models_len = models.length() + 1;
+    unsigned int device_ids_len = device_ids.length() + 1;
+    unsigned int revision_ids_len = revision_ids.length() + 1;
+    unsigned int versions_len = versions.length() + 1;
+    unsigned int renderers_len = renderers.length() + 1;
+    res->makes = new char[makes_len];
+    res->models = new char[models_len];
+    res->device_ids = new char[device_ids_len];
+    res->revision_ids = new char[revision_ids_len];
+    res->versions = new char[versions_len];
+    res->renderers = new char[renderers_len];
+    strncpy(res->makes, makes.c_str(), makes_len);
+    strncpy(res->models, models.c_str(), models_len);
+    strncpy(res->device_ids, device_ids.c_str(), device_ids_len);
+    strncpy(res->revision_ids, revision_ids.c_str(), revision_ids_len);
+    strncpy(res->versions, versions.c_str(), versions_len);
+    strncpy(res->renderers, renderers.c_str(), renderers_len);
+    return res;
+}
+
+void free_emugl_host_gpu_props(emugl_host_gpu_props* props) {
+    free(props->makes);
+    free(props->models);
+    free(props->device_ids);
+    free(props->revision_ids);
+    free(props->versions);
+    free(props->renderers);
+    free(props);
+}
+
 bool emuglConfig_init(EmuglConfig* config,
                       bool gpu_enabled,
                       const char* gpu_mode,

@@ -57,6 +57,13 @@ int formatToolbarGetUrl(char** ptr,
     static const char wallclock_time_key[] = "wall_time";
     static const char exit_started_key[] = "exit_started";
 
+    static const char host_gpu_makes_key[] = "host_gpu_makes";
+    static const char host_gpu_models_key[] = "host_gpu_models";
+    static const char host_gpu_device_ids_key[] = "host_gpu_device_ids";
+    static const char host_gpu_revision_ids_key[] = "host_gpu_revision_ids";
+    static const char host_gpu_versions_key[] = "host_gpu_versions";
+    static const char host_gpu_renderers_key[] = "host_gpu_renderers";
+
     assert(ptr != NULL);
     assert(*ptr == NULL);
 
@@ -66,8 +73,9 @@ int formatToolbarGetUrl(char** ptr,
     fullUrl += Uri::FormatEncodeArguments(
             "?as=%s&%s=%s&%s=%s&%s=%s&%s=%s&%s=%s"
             "&%s=%d&%s=%d&%s=%" PRId64 "&%s=%" PRId64 "&%s=%d"
-            "&%s=%" PRId64
-            "&%s=%d",
+            "&%s=%" PRId64 // Wallclock time
+            "&%s=%d" // Exit started
+            "&%s=%s&%s=%s&%s=%s&%s=%s&%s=%s&%s=%s", // Host GPU properties
             product_name, version_key, metrics->emulator_version,
             core_version_key, metrics->core_version, host_os_key,
             metrics->host_os_type, client_id_key, client_id, guest_arch_key,
@@ -76,7 +84,13 @@ int formatToolbarGetUrl(char** ptr,
             metrics->system_time, user_time_key, metrics->user_time,
             adb_liveness_key, metrics->adb_liveness,
             wallclock_time_key, metrics->wallclock_time,
-            exit_started_key, metrics->exit_started ? 1 : 0);
+            exit_started_key, metrics->exit_started ? 1 : 0,
+            host_gpu_makes_key, metrics->host_gpu_makes,
+            host_gpu_models_key, metrics->host_gpu_models,
+            host_gpu_device_ids_key, metrics->host_gpu_device_ids,
+            host_gpu_revision_ids_key, metrics->host_gpu_revision_ids,
+            host_gpu_versions_key, metrics->host_gpu_versions,
+            host_gpu_renderers_key, metrics->host_gpu_renderers);
     free(client_id);
 
     if (metrics->guest_gpu_enabled > 0) {

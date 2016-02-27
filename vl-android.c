@@ -1875,6 +1875,16 @@ static void android_init_metrics(int opengl_alive)
                                            &metrics.guest_gl_version);
     }
 
+    // Tell the metrics the host GPU information
+    emugl_host_gpu_props* gpu_props = emuglConfig_get_host_gpu_props();
+    ANDROID_METRICS_STRASSIGN(metrics.host_gpu_makes, gpu_props->makes);
+    ANDROID_METRICS_STRASSIGN(metrics.host_gpu_models, gpu_props->models);
+    ANDROID_METRICS_STRASSIGN(metrics.host_gpu_device_ids, gpu_props->device_ids);
+    ANDROID_METRICS_STRASSIGN(metrics.host_gpu_revision_ids, gpu_props->revision_ids);
+    ANDROID_METRICS_STRASSIGN(metrics.host_gpu_versions, gpu_props->versions);
+    ANDROID_METRICS_STRASSIGN(metrics.host_gpu_renderers, gpu_props->renderers);
+    free_emugl_host_gpu_props(gpu_props);
+
     metrics.opengl_alive = opengl_alive;
     androidMetrics_write(&metrics);
     androidMetrics_fini(&metrics);

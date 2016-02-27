@@ -52,7 +52,7 @@ GpuInfo& GpuInfoList::currGpu() {
     return infos.back();
 }
 
-std::string GpuInfoList::dump() {
+std::string GpuInfoList::dump() const {
     std::stringstream ss;
     for (unsigned int i = 0; i < infos.size(); i++) {
         ss << "GPU #" << i + 1 << std::endl;
@@ -77,6 +77,51 @@ std::string GpuInfoList::dump() {
         }
     }
     return ss.str();
+}
+
+std::string GpuInfoList::appendAll(GpuInfoField field) const {
+    std::stringstream ss;
+    for (unsigned int i = 0; i < infos.size(); i++) {
+        switch (field) {
+        case GPUINFO_FIELD_MAKE:
+            ss << infos[i].make; break;
+        case GPUINFO_FIELD_MODEL:
+            ss << infos[i].model; break;
+        case GPUINFO_FIELD_DEVICEID:
+            ss << infos[i].device_id; break;
+        case GPUINFO_FIELD_REVISIONID:
+            ss << infos[i].revision_id; break;
+        case GPUINFO_FIELD_VERSION:
+            ss << infos[i].version; break;
+        case GPUINFO_FIELD_RENDERER:
+            ss << infos[i].renderer; break;
+        default:
+            break;
+        }
+        if (i != infos.size() - 1) {
+            ss << " ";
+        }
+    }
+    return ss.str();
+}
+
+std::string GpuInfoList::getMakes() const {
+    return appendAll(GPUINFO_FIELD_MAKE);
+}
+std::string GpuInfoList::getModels() const {
+    return appendAll(GPUINFO_FIELD_MODEL);
+}
+std::string GpuInfoList::getDeviceIDs() const {
+    return appendAll(GPUINFO_FIELD_DEVICEID);
+}
+std::string GpuInfoList::getRevisionIDs() const {
+    return appendAll(GPUINFO_FIELD_REVISIONID);
+}
+std::string GpuInfoList::getDriverVersions() const {
+    return appendAll(GPUINFO_FIELD_VERSION);
+}
+std::string GpuInfoList::getRenderers() const {
+    return appendAll(GPUINFO_FIELD_RENDERER);
 }
 
 // Actual blacklist starts here.
