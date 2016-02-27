@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include "android/opengl/emugl_config.h"
+
 #include "android/utils/looper.h"
 #include "android/utils/compiler.h"
 #include "android/utils/system.h"
@@ -136,6 +138,9 @@ extern ABool androidMetrics_tryReportAll(void);
 
 // Update the metrics ASAP instead of replying on the next scheduled timer tick
 extern bool androidMetrics_update(void);
+
+extern void androidMetrics_populateGpuProps(AndroidMetrics* metrics,
+                                            emugl_host_gpu_prop_list* props);
 
 #undef METRICS_INT
 #undef METRICS_STRING

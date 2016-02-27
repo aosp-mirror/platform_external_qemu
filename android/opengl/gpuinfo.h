@@ -51,6 +51,15 @@ struct BlacklistEntry {
     const char* renderer;
 };
 
+enum GpuInfoField {
+    GPUINFO_FIELD_MAKE = 0,
+    GPUINFO_FIELD_MODEL = 1,
+    GPUINFO_FIELD_DEVICEID = 2,
+    GPUINFO_FIELD_REVISIONID = 3,
+    GPUINFO_FIELD_VERSION = 4,
+    GPUINFO_FIELD_RENDERER = 5
+};
+
 // GpuInfo/GpuInfoList are the representation of parsed information
 // about the system's GPU.s
 class GpuInfo {
@@ -76,7 +85,8 @@ public:
     GpuInfoList() : blacklist_status(false) { }
     void addGpu();
     GpuInfo& currGpu();
-    std::string dump();
+    std::string dump() const;
+    void clear();
 
     static GpuInfoList* get(); // For the global GpuInfoList
     std::vector<GpuInfo> infos;
