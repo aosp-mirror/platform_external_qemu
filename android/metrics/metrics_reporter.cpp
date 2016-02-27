@@ -127,8 +127,12 @@ const char* androidMetrics_getMetricsFilePath() {
     }
 
     /* TODO(pprabhu) Deal with pid collisions. */
-    pathend = bufprint(pathend, bufend, PATH_SEP "%s.%d.%s", metricsFilePrefix,
-                       getpid(), metricsFileSuffix);
+    pathend = bufprint(pathend,
+                       bufend,
+                       PATH_SEP "%s.%d.%s",
+                       metricsFilePrefix,
+                       getpid(),
+                       metricsFileSuffix);
     if (pathend >= bufend || path_exists(path)) {
         mwarning("Failed to get a writable, unused path for metrics. Tried: %s",
                  path);
@@ -138,9 +142,10 @@ const char* androidMetrics_getMetricsFilePath() {
      * exits.
      */
     if (filelock_create(path) == 0) {
-        mwarning("Failed to lock file at %s. "
-                 "This indicates metric file name collision.",
-                 path);
+        mwarning(
+                "Failed to lock file at %s. "
+                "This indicates metric file name collision.",
+                path);
         return NULL;
     }
 
@@ -243,10 +248,12 @@ ABool androidMetrics_keepAlive(Looper* metrics_looper,
     // purpose of which writing some metrics there
     assert(sMetricsIniFile);
 
-    auto emulatorName = android::base::StringFormat(
-            "emulator-%d", control_console_port);
+    auto emulatorName =
+            android::base::StringFormat("emulator-%d", control_console_port);
     sAdbLivenessChecker = android::metrics::AdbLivenessChecker::create(
-            android::base::ThreadLooper::get(), sMetricsIniFile, emulatorName,
+            android::base::ThreadLooper::get(),
+            sMetricsIniFile,
+            emulatorName,
             20 * 1000);
     sAdbLivenessChecker->start();
 
@@ -303,7 +310,7 @@ ABool androidMetrics_readPath(AndroidMetrics* androidMetrics,
 #undef METRICS_DURATION
 #define METRICS_INT(n, s, d) am->n = iniFile_getInteger(ini, s, d);
 #define METRICS_STRING(n, s, d)                                         \
-    if (iniFile_hasKey(ini, s)) {                                     \
+    if (iniFile_hasKey(ini, s)) {                                       \
         ANDROID_METRICS_STRASSIGN(am->n, iniFile_getString(ini, s, d)); \
     }
 #define METRICS_DURATION(n, s, d) am->n = iniFile_getInt64(ini, s, d);
@@ -315,7 +322,7 @@ ABool androidMetrics_readPath(AndroidMetrics* androidMetrics,
 }
 
 ABool androidMetrics_read(AndroidMetrics* androidMetrics) {
-    if(!androidMetrics_getMetricsFilePath()) {
+    if (!androidMetrics_getMetricsFilePath()) {
         return 0;
     }
 
@@ -416,8 +423,8 @@ ABool androidMetrics_tryReportAll() {
         androidMetrics_fini(&metrics);
     }
     VERBOSE_PRINT(init, "metrics: Processed %d reports.", num_reports);
-    VERBOSE_PRINT(init, "metrics: Uploaded %d reports successfully.",
-                  num_uploads);
+    VERBOSE_PRINT(
+            init, "metrics: Uploaded %d reports successfully.", num_uploads);
 
     return success;
 }
@@ -429,13 +436,16 @@ void androidMetrics_injectUploader(
 
 /* typedef'ed to: androidMetricsUploaderFunction */
 ABool androidMetrics_uploadMetrics(const AndroidMetrics* metrics) {
-    VERBOSE_PRINT(metrics, "metrics: Uploading a report with status '%s', "
-                           "num failures '%d' "
-                           "(version '%s/%s', sys/user/wall times '%ld/%ld/%ld').",
+    VERBOSE_PRINT(metrics,
+                  "metrics: Uploading a report with status '%s', "
+                  "num failures '%d' "
+                  "(version '%s/%s', sys/user/wall times '%ld/%ld/%ld').",
                   metrics->is_dirty ? "crash" : "clean",
                   metrics->num_failed_reports,
-                  metrics->emulator_version, metrics->core_version,
-                  metrics->system_time, metrics->user_time,
+                  metrics->emulator_version,
+                  metrics->core_version,
+                  metrics->system_time,
+                  metrics->user_time,
                   metrics->wallclock_time);
 
     return androidMetrics_uploadMetricsToolbar(metrics);
@@ -449,4 +459,35 @@ bool androidMetrics_update() {
     }
 
     return true;
+}
+
+#define METRICS_ASSIGN_GPU_PROPS(metrics, i, plist)              \
+    do {                                                         \
+        ANDROID_METRICS_STRASSIGN(metrics->gpu##i##_make,        \
+                                  plist->props[i].make);         \
+        ANDROID_METRICS_STRASSIGN(metrics->gpu##i##_model,       \
+                                  plist->props[i].model);        \
+        ANDROID_METRICS_STRASSIGN(metrics->gpu##i##_device_id,   \
+                                  plist->props[i].device_id);    \
+        ANDROID_METRICS_STRASSIGN(metrics->gpu##i##_revision_id, \
+                                  plist->props[i].revision_id);  \
+        ANDROID_METRICS_STRASSIGN(metrics->gpu##i##_version,     \
+                                  plist->props[i].version);      \
+        ANDROID_METRICS_STRASSIGN(metrics->gpu##i##_renderer,    \
+                                  plist->props[i].renderer);     \
+    } while (0);
+
+#define METRICS_GPUREPORT(metrics, i, plist)            \
+    do {                                                \
+        if (i < plist->num_gpus) {                      \
+            METRICS_ASSIGN_GPU_PROPS(metrics, i, plist) \
+        }                                               \
+    } while (0);
+
+void androidMetrics_populateGpuProps(AndroidMetrics* metrics,
+                                     emugl_host_gpu_prop_list* plist) {
+    METRICS_GPUREPORT(metrics, 0, plist);
+    METRICS_GPUREPORT(metrics, 1, plist);
+    METRICS_GPUREPORT(metrics, 2, plist);
+    METRICS_GPUREPORT(metrics, 3, plist);
 }
