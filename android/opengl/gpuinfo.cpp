@@ -52,7 +52,7 @@ GpuInfo& GpuInfoList::currGpu() {
     return infos.back();
 }
 
-std::string GpuInfoList::dump() {
+std::string GpuInfoList::dump() const {
     std::stringstream ss;
     for (unsigned int i = 0; i < infos.size(); i++) {
         ss << "GPU #" << i + 1 << std::endl;
