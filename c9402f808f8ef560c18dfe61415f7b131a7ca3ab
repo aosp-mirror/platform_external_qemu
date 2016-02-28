@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2e32149_81ce9ace",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-02-28T20:43:03Z",
+      "side": 1,
+      "message": "interesting, so this has to set to \"no\" to enable swiftshader in guest?",
+      "revId": "c9402f808f8ef560c18dfe61415f7b131a7ca3ab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
