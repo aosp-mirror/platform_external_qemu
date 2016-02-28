@@ -12,6 +12,7 @@
 #include "android/avd/keys.h"
 #include "android/avd/util.h"
 
+#include "android/android.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -272,7 +273,7 @@ _getAvdConfigValue(const char* avdPath,
     CIniFile* ini;
     char* result = NULL;
     char temp[PATH_MAX], *p = temp, *end = p + sizeof(temp);
-    p = bufprint(temp, end, "%s" PATH_SEP "config.ini", avdPath);
+    p = bufprint(temp, end, "%s" PATH_SEP CORE_CONFIG_INI, avdPath);
     if (p >= end) {
         APANIC("AVD path too long: %s\n", avdPath);
     }

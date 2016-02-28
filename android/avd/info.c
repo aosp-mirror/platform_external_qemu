@@ -580,7 +580,7 @@ _avdInfo_getContentFilePath(AvdInfo*  i, const char* fileName)
 static int
 _avdInfo_getConfigIni(AvdInfo*  i)
 {
-    char*  iniPath = _avdInfo_getContentFilePath(i, "config.ini");
+    char*  iniPath = _avdInfo_getContentFilePath(i, CORE_CONFIG_INI);
 
     /* Allow non-existing config.ini */
     if (iniPath == NULL) {
@@ -594,7 +594,7 @@ _avdInfo_getConfigIni(AvdInfo*  i)
 
     if (i->configIni == NULL) {
         derror("bad config: %s",
-               "virtual device has corrupted config.ini");
+               "virtual device has corrupted " CORE_CONFIG_INI);
         return -1;
     }
     return 0;
@@ -616,7 +616,8 @@ _avdInfo_getSearchPaths( AvdInfo*  i )
                                          i->searchPaths );
     if (i->numSearchPaths == 0) {
         derror("no search paths found in this AVD's configuration.\n"
-               "Weird, the AVD's config.ini file is malformed. Try re-creating it.\n");
+               "Weird, the AVD's " CORE_CONFIG_INI " file is malformed. "
+               "Try re-creating it.\n");
         exit(2);
     }
     else
@@ -1246,7 +1247,8 @@ avdInfo_getSkinInfo( AvdInfo*  i, char** pSkinName, char** pSkinDir )
         }
 
         /* The SKIN_PATH entry was not valid, so look at SKIN_NAME */
-        D("Warning: config.ini contains invalid %s entry: %s", SKIN_PATH, skinPath);
+        D("Warning: " CORE_CONFIG_INI " contains invalid %s entry: %s",
+          SKIN_PATH, skinPath);
         AFREE(skinPath);
 
         skinName = iniFile_getString( i->configIni, SKIN_NAME, NULL );

@@ -32,6 +32,12 @@ ANDROID_BEGIN_HEADER
 
 /* Some commonly-used file names */
 
+/* The name of the .ini file that contains the initial hardware
+ * properties for the AVD. This file is specific to the AVD and
+ * is in the AVD's directory.
+ */
+#define CORE_CONFIG_INI "config.ini"
+
 /* The name of the .ini file that contains the complete hardware
  * properties for the AVD. This file is specific to the AVD and
  * is in the AVD's directory. This will be used to launch the

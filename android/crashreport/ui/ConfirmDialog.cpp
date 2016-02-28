@@ -132,7 +132,12 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
                              "rendering for this device. This\n"
                              "could avoid driver problems and make it easier "
                              "to debug the OpenGL code in\n"
-                             "your app."));
+                             "your app."
+#ifdef __APPLE__
+                                       " (You may need to reduce your screen "
+                             "resolution to run this way.)"
+#endif
+                             ));
         }
         mSuggestionText->show();
     } else {
@@ -353,7 +358,7 @@ void ConfirmDialog::dontSendReport() {
 }
 
 // If the user requests a switch to software GPU, modify
-// hardware-qemu.ini to have "hw.gpu.mode=guest"
+// config.ini
 void ConfirmDialog::setSwGpu() {
     if ( mSoftwareGPU->isChecked() &&
          mReportingDir                )
@@ -366,7 +371,7 @@ void ConfirmDialog::setSwGpu() {
         IniFile iniF(avdInfoPath);
         iniF.read();
 
-        // Get the path to hardware-qemu.ini
+        // Get the path to config.ini
         std::string diskPartDir = iniF.getString("disk.dataPartition.path", "");
         if ( !diskPartDir.empty() ) {
             // Keep the path; discard the file name
@@ -375,13 +380,14 @@ void ConfirmDialog::setSwGpu() {
             bool isOK = PathUtils::split(diskPartDir, &outputDir, &unused);
             if (isOK) {
                 std::string hwQemuPath = PathUtils::
-                        join(outputDir, CORE_HARDWARE_INI).c_str();
-                // We have the path to hardware-qemu.ini
+                        join(outputDir, CORE_CONFIG_INI).c_str();
+                // We have the path to config.ini
                 // Read that
                 IniFile hwQemuIniF(hwQemuPath);
                 hwQemuIniF.read();
 
-                // Set hw.gpu.mode=guest
+                // Set hw.gpu.enabled=no and hw.gpu.mode=guest
+                hwQemuIniF.setString("hw.gpu.enabled", "no");
                 hwQemuIniF.setString("hw.gpu.mode", "guest");
 
                 // Write the modified configuration back
