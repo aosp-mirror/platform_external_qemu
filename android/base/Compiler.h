@@ -28,3 +28,12 @@
     T& operator=(const T& other) = delete
 
 #endif
+
+#ifndef DISALLOW_COPY_ASSIGN_AND_MOVE
+
+#define DISALLOW_COPY_ASSIGN_AND_MOVE(T) \
+    DISALLOW_COPY_AND_ASSIGN(T); \
+    T(T&&) = delete; \
+    T& operator=(T&&) = delete
+
+#endif
