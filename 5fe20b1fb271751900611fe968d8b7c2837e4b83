@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "02feade5_c531d046",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-29T21:16:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e27a7932_2da7e41a",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 16
+      },
+      "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "02594de9_2a26fbfc",
         "filename": "android/metrics/metrics_reporter_toolbar.cpp",
         "patchSetId": 6
@@ -108,6 +132,30 @@
       "writtenOn": "2016-02-29T19:47:02Z",
       "side": 1,
       "message": "please add a comment to the next generations that these parameters should go last to make sure that empty gpu strings won\u0027t truncate the real data",
+      "range": {
+        "startLine": 132,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 35
+      },
+      "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82ea9d1e_c680b625",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-29T21:16:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "02594de9_2a26fbfc",
       "range": {
         "startLine": 132,
         "startChar": 0,
@@ -215,6 +263,30 @@
     },
     {
       "key": {
+        "uuid": "02594de9_ca24074d",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-29T21:16:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "82ea9d1e_66c0caf4",
+      "range": {
+        "startLine": 75,
+        "startChar": 31,
+        "endLine": 75,
+        "endChar": 37
+      },
+      "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "82ea9d1e_8657ce2e",
         "filename": "android/opengl/emugl_config.h",
         "patchSetId": 6
@@ -243,6 +315,30 @@
       "writtenOn": "2016-02-29T19:47:02Z",
       "side": 1,
       "message": "you could move this into some helper metric function and just export a simple \u0027androidMetrics_populateGpuProps()\u0027 function \nThis would also get rid of duplicated code in qemu1/2",
+      "range": {
+        "startLine": 1841,
+        "startChar": 0,
+        "endLine": 1858,
+        "endChar": 7
+      },
+      "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22ef3134_a6612cb4",
+        "filename": "vl-android.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1858,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-29T21:16:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62be89e4_39df2b83",
       "range": {
         "startLine": 1841,
         "startChar": 0,
