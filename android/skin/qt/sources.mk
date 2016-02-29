@@ -43,6 +43,8 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/event-serializer.cpp \
     android/skin/qt/event-subscriber.cpp \
     android/skin/qt/error-dialog.cpp \
+    android/skin/qt/gl-anti-aliasing.cpp \
+    android/skin/qt/gl-canvas.cpp \
     android/skin/qt/gl-widget.cpp \
     android/skin/qt/extended-pages/common.cpp \
     android/skin/qt/extended-pages/battery-page.cpp \
@@ -62,6 +64,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/tool-window.cpp \
 
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
+    android/skin/qt/accelerometer-3d-widget.h \
     android/skin/qt/angle-input-widget.h \
     android/skin/qt/editable-slider-widget.h \
     android/skin/qt/gl-widget.h \
