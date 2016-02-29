@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c26bb568_713ce7c7",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-29T19:39:11Z",
+      "side": 1,
+      "message": "this doesn\u0027t need to be a macro it is only used as %s\u003d%* for two arguments AFAIK",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 16
+      },
+      "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
