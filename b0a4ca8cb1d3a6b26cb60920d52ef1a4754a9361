@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "62be89e4_3c8959e3",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-29T21:25:43Z",
+      "side": 1,
+      "message": "1. please make all these static\n2.\ntemplate \u003cclass Val\u003e\nstatic void urlAddKeyVal(String* dst, const char* format, const char* key, const Val\u0026 val) {\n    url_limit_append(\n            dst,\n            Uri::FormatEncodeArguments(format, key, val));\n}",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 67
+      },
+      "revId": "b0a4ca8cb1d3a6b26cb60920d52ef1a4754a9361",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_073c0c18",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-29T21:25:43Z",
+      "side": 1,
+      "message": "if this thing fails on a limit, there\u0027s no sense in sending the data",
+      "range": {
+        "startLine": 113,
+        "startChar": 0,
+        "endLine": 115,
+        "endChar": 64
+      },
+      "revId": "b0a4ca8cb1d3a6b26cb60920d52ef1a4754a9361",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a26ec178_fe36653b",
+        "filename": "android/metrics/metrics_reporter_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-29T21:25:43Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 192,
+        "startChar": 0,
+        "endLine": 193,
+        "endChar": 4
+      },
+      "revId": "b0a4ca8cb1d3a6b26cb60920d52ef1a4754a9361",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02594de9_0a13ffec",
+        "filename": "android/opengl/emugl_config.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-29T21:25:43Z",
+      "side": 1,
+      "message": "please return and pass this struct by value",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 24
+      },
+      "revId": "b0a4ca8cb1d3a6b26cb60920d52ef1a4754a9361",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
