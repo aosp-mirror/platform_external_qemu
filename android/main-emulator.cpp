@@ -441,7 +441,7 @@ int main(int argc, char** argv)
     }
 
     // Detect if this is google API's
-   
+
     bool google_apis = checkForGoogleAPIs(avdName);
     int api_level = getApiLevel(avdName);
 
@@ -464,10 +464,13 @@ int main(int argc, char** argv)
          on_blacklist = isHostGpuBlacklisted();
     }
 
-    // This is for testing purposes only.
-    android::base::ScopedCPtr<const char> testGpuBlacklist(path_getAvdGpuBlacklisted(avdName));
-    if (testGpuBlacklist.get()) {
-        on_blacklist = !strcmp(testGpuBlacklist.get(), "yes");
+    if (avdName) {
+        // This is for testing purposes only.
+        android::base::ScopedCPtr<const char> testGpuBlacklist(
+                path_getAvdGpuBlacklisted(avdName));
+        if (testGpuBlacklist.get()) {
+            on_blacklist = !strcmp(testGpuBlacklist.get(), "yes");
+        }
     }
 
     if ((!gpu && gpuMode && !strcmp(gpuMode, "auto")) ||
