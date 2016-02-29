@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "62be89e4_59a09fbc",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1030,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-29T18:07:50Z",
+      "side": 1,
+      "message": "can we just use std::min/std::max instead?",
+      "range": {
+        "startLine": 1030,
+        "startChar": 25,
+        "endLine": 1030,
+        "endChar": 28
+      },
+      "revId": "1856699c4a4b8f1dc2454924900c42732a1f0940",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
