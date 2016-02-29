@@ -22,6 +22,92 @@
       "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02594de9_2a26fbfc",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-29T19:47:02Z",
+      "side": 1,
+      "message": "please add a comment to the next generations that these parameters should go last to make sure that empty gpu strings won\u0027t truncate the real data",
+      "range": {
+        "startLine": 132,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 35
+      },
+      "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02594de9_ea8463ff",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-29T19:47:02Z",
+      "side": 1,
+      "message": "please don\u0027t use C heap functions, new/delete are safer",
+      "range": {
+        "startLine": 75,
+        "startChar": 31,
+        "endLine": 75,
+        "endChar": 37
+      },
+      "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82ea9d1e_8657ce2e",
+        "filename": "android/opengl/emugl_config.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-29T19:47:02Z",
+      "side": 1,
+      "message": "why not an array of structs? that\u0027s much simpler concept for the user",
+      "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62be89e4_39df2b83",
+        "filename": "vl-android.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1858,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-29T19:47:02Z",
+      "side": 1,
+      "message": "you could move this into some helper metric function and just export a simple \u0027androidMetrics_populateGpuProps()\u0027 function \nThis would also get rid of duplicated code in qemu1/2",
+      "range": {
+        "startLine": 1841,
+        "startChar": 0,
+        "endLine": 1858,
+        "endChar": 7
+      },
+      "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
