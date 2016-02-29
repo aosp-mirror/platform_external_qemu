@@ -10,11 +10,16 @@
 
 #pragma once
 
+#include "android/skin/qt/gl-canvas.h"
+#include "android/skin/qt/gl-anti-aliasing.h"
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
+
+#include <cmath>
+#include <memory>
+
 #include <QWidget>
 
 struct EGLState;
-
-struct GLESv2Dispatch;
 struct EGLDispatch;
 
 // Helper class used to perform EGL/GLESv2 rendering inside a Qt widget.
@@ -25,7 +30,7 @@ struct EGLDispatch;
 // and resizeGL() properly. These methods can use the |mEGL| and |mGLES2|
 // fields to perform EGL/GLESv2 calls.
 class GLWidget : public QWidget {
-Q_OBJECT
+    Q_OBJECT
 public:
     explicit GLWidget(QWidget* parent = 0);
 
@@ -61,6 +66,10 @@ protected:
     // new dimensions in pixels.
     virtual void resizeGL(int w, int h) {}
 
+    int realPixelsWidth() const { return std::ceil(width() * devicePixelRatio()); }
+    int realPixelsHeight() const { return std::ceil(height() * devicePixelRatio()); }
+    void toggleAA() { mEnableAA = !mEnableAA; }
+
 private:
     void paintEvent(QPaintEvent*) override;
     void resizeEvent(QResizeEvent*) override;
@@ -70,4 +79,8 @@ private:
 
     EGLState* mEGLState;
     bool mValid;
+
+    std::unique_ptr<GLCanvas> mCanvas;
+    std::unique_ptr<GLAntiAliasing> mAntiAliasing;
+    bool mEnableAA;
 };

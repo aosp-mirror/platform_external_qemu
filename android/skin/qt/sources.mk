@@ -43,6 +43,8 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/event-serializer.cpp \
     android/skin/qt/event-subscriber.cpp \
     android/skin/qt/error-dialog.cpp \
+    android/skin/qt/gl-anti-aliasing.cpp \
+    android/skin/qt/gl-canvas.cpp \
     android/skin/qt/gl-widget.cpp \
     android/skin/qt/extended-pages/common.cpp \
     android/skin/qt/extended-pages/battery-page.cpp \

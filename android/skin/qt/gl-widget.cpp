@@ -34,9 +34,7 @@ struct MyGLESv2Dispatch : public GLESv2Dispatch {
     // was an error when trying to initialize/load the library.
     static const GLESv2Dispatch* get();
 
-    MyGLESv2Dispatch() {
-        mValid = gles2_dispatch_init(&mDispatch);
-    }
+    MyGLESv2Dispatch() { mValid = gles2_dispatch_init(&mDispatch); }
 
 private:
     GLESv2Dispatch mDispatch;
@@ -46,8 +44,7 @@ private:
 // Must be declared outside of MyGLESv2Dispatch scope due to the use of
 // sizeof(T) within the template definition.
 android::base::LazyInstance<MyGLESv2Dispatch> sGLESv2Dispatch =
-            LAZY_INSTANCE_INIT;
-
+        LAZY_INSTANCE_INIT;
 
 // static
 const GLESv2Dispatch* MyGLESv2Dispatch::get() {
@@ -67,16 +64,13 @@ struct MyEGLDispatch : public EGLDispatch {
     // an error when trying to initialize/load the library.
     static const EGLDispatch* get();
 
-    MyEGLDispatch() {
-        mValid = init_egl_dispatch();
-    }
+    MyEGLDispatch() { mValid = init_egl_dispatch(); }
 
 private:
     bool mValid;
 };
 
-android::base::LazyInstance<MyEGLDispatch> sEGLDispatch =
-        LAZY_INSTANCE_INIT;
+android::base::LazyInstance<MyEGLDispatch> sEGLDispatch = LAZY_INSTANCE_INIT;
 
 // static
 const EGLDispatch* MyEGLDispatch::get() {
@@ -101,7 +95,8 @@ GLWidget::GLWidget(QWidget* parent) :
         mEGL(MyEGLDispatch::get()),
         mGLES2(MyGLESv2Dispatch::get()),
         mEGLState(nullptr),
-        mValid(false) {
+        mValid(false),
+        mEnableAA(false) {
     setAutoFillBackground(false);
     setAttribute(Qt::WA_OpaquePaintEvent, true);
     setAttribute(Qt::WA_PaintOnScreen, true);
@@ -124,7 +119,8 @@ bool GLWidget::ensureInit() {
 
     mEGLState->display = mEGL->eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (mEGLState->display == EGL_NO_DISPLAY) {
-        qWarning("Failed to get EGL display");
+        qWarning("Failed to get EGL display: EGL error %d",
+                 mEGL->eglGetError());
         return false;
     }
 
@@ -133,73 +129,68 @@ bool GLWidget::ensureInit() {
 
     // Try to initialize EGL display.
     // Initializing an already-initialized display is OK.
-    if (mEGL->eglInitialize(mEGLState->display, &egl_maj, &egl_min) == EGL_FALSE) {
-        qWarning("Failed to initialize EGL display");
+    if (mEGL->eglInitialize(mEGLState->display, &egl_maj, &egl_min) ==
+        EGL_FALSE) {
+        qWarning("Failed to initialize EGL display: EGL error %d",
+                 mEGL->eglGetError());
         return false;
     }
 
     // Get an EGL config.
-    const EGLint config_attribs[] =
-        {
-            EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-            EGL_RED_SIZE, 8,
-            EGL_GREEN_SIZE, 8,
-            EGL_BLUE_SIZE, 8,
-            EGL_DEPTH_SIZE, 24,
-            EGL_NONE
-        };
+    const EGLint config_attribs[] = {EGL_SURFACE_TYPE,
+                                     EGL_WINDOW_BIT,
+                                     EGL_RENDERABLE_TYPE,
+                                     EGL_OPENGL_ES2_BIT,
+                                     EGL_RED_SIZE,
+                                     8,
+                                     EGL_GREEN_SIZE,
+                                     8,
+                                     EGL_BLUE_SIZE,
+                                     8,
+                                     EGL_DEPTH_SIZE,
+                                     24,
+                                     EGL_SAMPLES,
+                                     0,  // No multisampling
+                                     EGL_NONE};
     EGLint num_config;
-    if (mEGL->eglChooseConfig(
-                mEGLState->display,
-                config_attribs,
-                &egl_config,
-                1,
-                &num_config) == EGL_FALSE) {
-        qWarning("Failed to choose EGL config");
+    EGLBoolean choose_result = mEGL->eglChooseConfig(
+            mEGLState->display, config_attribs, &egl_config, 1, &num_config);
+    if (choose_result == EGL_FALSE || num_config < 1) {
+        qWarning("Failed to choose EGL config: EGL error %d",
+                 mEGL->eglGetError());
         return false;
     }
 
     // Create a context.
-    EGLint context_attribs[] =
-        {
-            EGL_CONTEXT_CLIENT_VERSION, 2,
-            EGL_NONE
-        };
+    EGLint context_attribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
     mEGLState->context = mEGL->eglCreateContext(
-            mEGLState->display,
-            egl_config,
-            EGL_NO_CONTEXT,
-            context_attribs);
+            mEGLState->display, egl_config, EGL_NO_CONTEXT, context_attribs);
     if (mEGLState->context == EGL_NO_CONTEXT) {
-        qWarning("Failed to create EGL context");
+        qWarning("Failed to create EGL context %d", mEGL->eglGetError());
     }
 
     // Finally, create a window surface associated with this widget.
     mEGLState->surface = mEGL->eglCreateWindowSurface(
-            mEGLState->display,
-            egl_config,
-            (EGLNativeWindowType)(winId()),
+            mEGLState->display, egl_config, (EGLNativeWindowType)(winId()),
             nullptr);
     if (mEGLState->surface == EGL_NO_SURFACE) {
-        qWarning("Failed to create an EGL surface");
+        qWarning("Failed to create an EGL surface %d", mEGL->eglGetError());
         return false;
     }
 
     mValid = true;
 
     makeContextCurrent();
+    mCanvas.reset(new GLCanvas(realPixelsWidth(), realPixelsHeight(), mGLES2));
+    mAntiAliasing.reset(new GLAntiAliasing(mGLES2));
     initGL();
 
     return true;
 }
 
 void GLWidget::makeContextCurrent() {
-    mEGL->eglMakeCurrent(
-            mEGLState->display,
-            mEGLState->surface,
-            mEGLState->surface,
-            mEGLState->context);
+    mEGL->eglMakeCurrent(mEGLState->display, mEGLState->surface,
+                         mEGLState->surface, mEGLState->context);
 }
 
 void GLWidget::renderFrame() {
@@ -207,7 +198,23 @@ void GLWidget::renderFrame() {
         return;
     }
     makeContextCurrent();
-    repaintGL();
+
+    // Render 3D scene to texture.
+    if (mEnableAA) {
+        mCanvas->bind();
+        repaintGL();
+        mCanvas->unbind();
+    } else {
+        mGLES2->glViewport(0, 0, realPixelsWidth(), realPixelsHeight());
+        repaintGL();
+    }
+
+    if (mEnableAA) {
+        mAntiAliasing->apply(mCanvas->texture(),
+                             realPixelsWidth(),
+                             realPixelsHeight());
+    }
+
     mEGL->eglSwapBuffers(mEGLState->display, mEGLState->surface);
 }
 
@@ -228,18 +235,20 @@ void GLWidget::resizeEvent(QResizeEvent* e) {
         // EGL state at the time the resize event is generated, the default
         // framebuffer will not be created.
         makeContextCurrent();
-        resizeGL(e->size().width(), e->size().height());
-        repaintGL();
-        mEGL->eglSwapBuffers(mEGLState->display, mEGLState->surface);
+        // Re-create the framebuffer with new size.
+        mCanvas.reset(new GLCanvas(e->size().width() * devicePixelRatio(),
+                                   e->size().height() * devicePixelRatio(),
+                                   mGLES2));
+        resizeGL(e->size().width() * devicePixelRatio(),
+                 e->size().height() * devicePixelRatio());
+        renderFrame();
     }
-
 }
-
 
 GLWidget::~GLWidget() {
     if (mEGL && mEGLState) {
         mEGL->eglDestroyContext(mEGLState->display, mEGLState->context);
         mEGL->eglDestroySurface(mEGLState->display, mEGLState->surface);
+        delete mEGLState;
     }
-    delete mEGLState;
 }
