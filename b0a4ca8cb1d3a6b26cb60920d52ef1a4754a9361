@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "02feade5_c506f03e",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-29T21:50:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62be89e4_3c8959e3",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 67
+      },
+      "revId": "b0a4ca8cb1d3a6b26cb60920d52ef1a4754a9361",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e2b0b90b_073c0c18",
         "filename": "android/metrics/metrics_reporter_toolbar.cpp",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-29T21:25:43Z",
       "side": 1,
       "message": "if this thing fails on a limit, there\u0027s no sense in sending the data",
+      "range": {
+        "startLine": 113,
+        "startChar": 0,
+        "endLine": 115,
+        "endChar": 64
+      },
+      "revId": "b0a4ca8cb1d3a6b26cb60920d52ef1a4754a9361",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02feade5_0501f824",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-29T21:50:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e2b0b90b_073c0c18",
       "range": {
         "startLine": 113,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "22ef3134_c680b825",
+        "filename": "android/metrics/metrics_reporter_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-29T21:50:39Z",
+      "side": 1,
+      "message": "Oops, didn\u0027t put this in yet. (Done)",
+      "parentUuid": "a26ec178_fe36653b",
+      "range": {
+        "startLine": 192,
+        "startChar": 0,
+        "endLine": 193,
+        "endChar": 4
+      },
+      "revId": "b0a4ca8cb1d3a6b26cb60920d52ef1a4754a9361",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "02594de9_0a13ffec",
         "filename": "android/opengl/emugl_config.h",
         "patchSetId": 7
@@ -82,6 +154,30 @@
       "writtenOn": "2016-02-29T21:25:43Z",
       "side": 1,
       "message": "please return and pass this struct by value",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 24
+      },
+      "revId": "b0a4ca8cb1d3a6b26cb60920d52ef1a4754a9361",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e27a7932_a32c45dd",
+        "filename": "android/opengl/emugl_config.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-29T21:50:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "02594de9_0a13ffec",
       "range": {
         "startLine": 57,
         "startChar": 0,
