@@ -107,11 +107,21 @@ void LocationPage::on_loc_playStopButton_clicked() {
     }
 }
 
+void LocationPage::on_loc_decimalModeSwitch_clicked() {
+    // It looks better when not highlighted
+    mUi->loc_decimalModeSwitch->clearFocus();
+}
+
 void LocationPage::on_loc_decimalModeSwitch_toggled(bool checked) {
     if (checked) {
         mUi->loc_latitudeInput->setInputMode(AngleInputWidget::InputMode::Decimal);
         mUi->loc_longitudeInput->setInputMode(AngleInputWidget::InputMode::Decimal);
     }
+}
+
+void LocationPage::on_loc_sexagesimalModeSwitch_clicked() {
+    // It looks better when not highlighted
+    mUi->loc_sexagesimalModeSwitch->clearFocus();
 }
 
 void LocationPage::on_loc_sexagesimalModeSwitch_toggled(bool checked) {

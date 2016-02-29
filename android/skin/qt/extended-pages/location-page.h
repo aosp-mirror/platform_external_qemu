@@ -38,7 +38,9 @@ private slots:
     void on_loc_GpxKmlButton_clicked();
     void on_loc_pathTable_cellChanged(int row, int col);
     void on_loc_playStopButton_clicked();
+    void on_loc_decimalModeSwitch_clicked();
     void on_loc_decimalModeSwitch_toggled(bool checked);
+    void on_loc_sexagesimalModeSwitch_clicked();
     void on_loc_sexagesimalModeSwitch_toggled(bool checked);
     void on_loc_sendPointButton_clicked();
     void on_loc_longitudeInput_valueChanged(double);
@@ -46,7 +48,7 @@ private slots:
     void on_loc_altitudeInput_editingFinished();
     void on_loc_playbackSpeed_currentIndexChanged(int index);
 
-    // Called when the thread that loads and parses 
+    // Called when the thread that loads and parses
     // geo data from file is initiated.
     void geoDataThreadStarted();
 
