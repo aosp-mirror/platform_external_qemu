@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "e27a7932_2da7e41a",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-29T19:57:17Z",
+      "side": 1,
+      "message": "ah, I see your point :)",
+      "parentUuid": "02feade5_629d52dc",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 16
+      },
+      "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "02594de9_2a26fbfc",
         "filename": "android/metrics/metrics_reporter_toolbar.cpp",
         "patchSetId": 6
@@ -155,6 +179,30 @@
       "side": 1,
       "message": "if you change it to be an array of structs, the code would be like\n\nfor (...) {\n   free(field1);\n   free(field2);\n   ...\n}\ndelete [] arrayOfStructs;",
       "parentUuid": "a26ec178_83227299",
+      "range": {
+        "startLine": 75,
+        "startChar": 31,
+        "endLine": 75,
+        "endChar": 37
+      },
+      "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82ea9d1e_66c0caf4",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-29T19:57:17Z",
+      "side": 1,
+      "message": "Got it, thanks!",
+      "parentUuid": "82ea9d1e_46a0266b",
       "range": {
         "startLine": 75,
         "startChar": 31,
