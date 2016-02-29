@@ -16,6 +16,24 @@
       "revId": "c9402f808f8ef560c18dfe61415f7b131a7ca3ab",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c26bb568_5f01af51",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-02-29T16:35:18Z",
+      "side": 1,
+      "message": "I didn\u0027t experiment to determine the minimum settings that would get what we want. Perhaps hw.gpu.mode\u003dguest is enough.\n\nI set hw.gpu.enabled\u003dno because the gpu.mode line does not exist in the default file and I wasn\u0027t sure I\u0027d get the desired behavior by just added a new mode\u003dguest line.",
+      "parentUuid": "a2e32149_81ce9ace",
+      "revId": "c9402f808f8ef560c18dfe61415f7b131a7ca3ab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
