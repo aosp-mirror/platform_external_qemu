@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a2e32149_cab27731",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-29T21:16:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "02feade5_821fbe4d",
+      "range": {
+        "startLine": 36,
+        "startChar": 35,
+        "endLine": 36,
+        "endChar": 39
+      },
+      "revId": "be3b22bf66b2675c02a6d854f4f23dc3b7c65dd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a2e32149_44282062",
         "filename": "android/metrics/metrics_reporter_toolbar.cpp",
         "patchSetId": 3
@@ -178,6 +202,30 @@
       "side": 1,
       "message": "please just wrap it into the ScopedCPtr",
       "parentUuid": "62be89e4_36a73ae6",
+      "range": {
+        "startLine": 107,
+        "startChar": 4,
+        "endLine": 107,
+        "endChar": 20
+      },
+      "revId": "be3b22bf66b2675c02a6d854f4f23dc3b7c65dd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02594de9_6aedd317",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-29T21:16:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "82ea9d1e_c67f16b7",
       "range": {
         "startLine": 107,
         "startChar": 4,
