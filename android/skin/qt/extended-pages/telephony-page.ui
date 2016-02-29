@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>130</y>
+     <y>148</y>
      <width>280</width>
      <height>140</height>
     </rect>
@@ -127,7 +127,7 @@
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>280</y>
+     <y>298</y>
      <width>140</width>
      <height>36</height>
     </rect>
@@ -199,6 +199,25 @@
    </property>
    <property name="ColorGroup" stdset="0">
     <string>Tool</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="tel_SmsGroup">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>130</y>
+     <width>141</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+   </property>
+   <property name="title">
+    <string>SMS message</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string notr="true">Title</string>
    </property>
   </widget>
  </widget>
