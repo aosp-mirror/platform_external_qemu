@@ -602,7 +602,7 @@ static int adb_pipe_send(void *opaque, const AndroidPipeBuffer* buffers,
 
         if (reply) {
             adb_reply(apipe, reply);
-            android_pipe_wake(adb_state.connected_pipe->hwpipe, PIPE_WAKE_READ);
+            android_pipe_wake(apipe->hwpipe, PIPE_WAKE_READ);
         }
     } else {
         ret = adb_pipe_proxy_send(apipe, buffers, cnt);
