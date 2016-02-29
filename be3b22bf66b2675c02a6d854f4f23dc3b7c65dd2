@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2e32149_44282062",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-29T17:57:20Z",
+      "side": 1,
+      "message": "Non-const out params must be pointers (not references) according to google style guide.",
+      "range": {
+        "startLine": 37,
+        "startChar": 22,
+        "endLine": 37,
+        "endChar": 33
+      },
+      "revId": "be3b22bf66b2675c02a6d854f4f23dc3b7c65dd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82ea9d1e_03e8d09a",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-29T17:57:20Z",
+      "side": 1,
+      "message": "This eats up valuable URL length even if the host doesn\u0027t have 4 host gpus, making it likely that the guest GPU information gets dropped...",
+      "range": {
+        "startLine": 103,
+        "startChar": 2,
+        "endLine": 106,
+        "endChar": 34
+      },
+      "revId": "be3b22bf66b2675c02a6d854f4f23dc3b7c65dd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62be89e4_36a73ae6",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-29T17:57:20Z",
+      "side": 1,
+      "message": "I\u0027d move the allocate and free of |client_id| closer to use, now that that\u0027s broken up.",
+      "range": {
+        "startLine": 107,
+        "startChar": 4,
+        "endLine": 107,
+        "endChar": 20
+      },
+      "revId": "be3b22bf66b2675c02a6d854f4f23dc3b7c65dd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2e32149_244ebc39",
+        "filename": "android/metrics/metrics_reporter_toolbar_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-29T17:57:20Z",
+      "side": 1,
+      "message": "Please clang-foramt. These lines are \u003e80 chars.",
+      "range": {
+        "startLine": 366,
+        "startChar": 97,
+        "endLine": 366,
+        "endChar": 102
+      },
+      "revId": "be3b22bf66b2675c02a6d854f4f23dc3b7c65dd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2e32149_048c58b2",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-02-29T17:57:20Z",
+      "side": 1,
+      "message": "nit: please use new-delete (or malloc-free)",
+      "range": {
+        "startLine": 98,
+        "startChar": 8,
+        "endLine": 98,
+        "endChar": 12
+      },
+      "revId": "be3b22bf66b2675c02a6d854f4f23dc3b7c65dd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
