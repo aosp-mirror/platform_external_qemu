@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "02feade5_629d52dc",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-29T19:54:26Z",
+      "side": 1,
+      "message": "do you really need variadic args here? I only see two arguments everywhere - key\u003dvalue",
+      "parentUuid": "02594de9_6a5ab359",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 16
+      },
+      "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "02594de9_2a26fbfc",
         "filename": "android/metrics/metrics_reporter_toolbar.cpp",
         "patchSetId": 6
@@ -107,6 +131,30 @@
       "side": 1,
       "message": "Is it ok to follow up strdup() with delete and not free()?",
       "parentUuid": "02594de9_ea8463ff",
+      "range": {
+        "startLine": 75,
+        "startChar": 31,
+        "endLine": 75,
+        "endChar": 37
+      },
+      "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82ea9d1e_46a0266b",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-02-29T19:54:26Z",
+      "side": 1,
+      "message": "if you change it to be an array of structs, the code would be like\n\nfor (...) {\n   free(field1);\n   free(field2);\n   ...\n}\ndelete [] arrayOfStructs;",
+      "parentUuid": "a26ec178_83227299",
       "range": {
         "startLine": 75,
         "startChar": 31,
