@@ -11,10 +11,9 @@
 #pragma once
 
 #include <QWidget>
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
 
 struct EGLState;
-
-struct GLESv2Dispatch;
 struct EGLDispatch;
 
 // Helper class used to perform EGL/GLESv2 rendering inside a Qt widget.
@@ -25,7 +24,7 @@ struct EGLDispatch;
 // and resizeGL() properly. These methods can use the |mEGL| and |mGLES2|
 // fields to perform EGL/GLESv2 calls.
 class GLWidget : public QWidget {
-Q_OBJECT
+    Q_OBJECT
 public:
     explicit GLWidget(QWidget* parent = 0);
 
@@ -62,6 +61,14 @@ protected:
     virtual void resizeGL(int w, int h) {}
 
 private:
+    void initFramebuffer();
+    void bindFramebuffer();
+    void unbindFramebuffer();
+    void destroyFramebuffer();
+    void initAAProgram();
+    void destroyAAProgram();
+
+private:
     void paintEvent(QPaintEvent*) override;
     void resizeEvent(QResizeEvent*) override;
     void showEvent(QShowEvent*) override;
@@ -70,4 +77,14 @@ private:
 
     EGLState* mEGLState;
     bool mValid;
+
+    GLuint mFramebuffer;
+    GLuint mTargetTexture;
+    GLuint mDepthTexture;
+
+    GLuint mAAProgram;
+    GLuint mAAVertexBuffer;
+    GLuint mAAInputUniformLocation;
+    GLuint mAAResolutionUniformLocation;
+    GLuint mAAPositionAttribLocation;
 };
