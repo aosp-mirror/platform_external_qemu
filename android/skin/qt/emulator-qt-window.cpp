@@ -1027,7 +1027,7 @@ void EmulatorQtWindow::doResize(const QSize& size,
         double widthScale = (double)newSize.width() / (double)originalWidth;
         double heightScale = (double)newSize.height() / (double)originalHeight;
 
-        simulateSetScale(MIN(widthScale, heightScale));
+        simulateSetScale(MAX(.2, MIN(widthScale, heightScale)));
     }
 }
 
