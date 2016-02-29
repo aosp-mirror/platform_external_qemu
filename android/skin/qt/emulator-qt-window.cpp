@@ -59,9 +59,6 @@
 #define  D(...)   ((void)0)
 #endif
 
-#define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
-
 using namespace android::base;
 
 // Make sure it is POD here
@@ -1027,7 +1024,7 @@ void EmulatorQtWindow::doResize(const QSize& size,
         double widthScale = (double)newSize.width() / (double)originalWidth;
         double heightScale = (double)newSize.height() / (double)originalHeight;
 
-        simulateSetScale(MIN(widthScale, heightScale));
+        simulateSetScale(std::max(.2, std::min(widthScale, heightScale)));
     }
 }
 
@@ -1274,7 +1271,7 @@ void EmulatorQtWindow::zoomIn(const QPoint &focus, const QPoint &viewportFocus)
     double maxZoom = mZoomFactor * 2.0 / scale;
 
     if (scale < 2) {
-        simulateSetZoom(MIN(mZoomFactor + .25, maxZoom));
+        simulateSetZoom(std::min(mZoomFactor + .25, maxZoom));
     }
 }
 
@@ -1287,7 +1284,7 @@ void EmulatorQtWindow::zoomOut(const QPoint &focus, const QPoint &viewportFocus)
 {
     saveZoomPoints(focus, viewportFocus);
     if (mZoomFactor > 1) {
-        simulateSetZoom(MAX(mZoomFactor - .25, 1));
+        simulateSetZoom(std::max(mZoomFactor - .25, 1.0));
     }
 }
 
@@ -1313,7 +1310,7 @@ void EmulatorQtWindow::zoomTo(const QPoint &focus, const QSize &rectSize)
     double idealWidthZoom = mZoomFactor * (double) mContainer.width() / (double) (rectSize.width() + 20);
     double idealHeightZoom = mZoomFactor * (double) mContainer.height() / (double) (rectSize.height() + 20);
 
-    simulateSetZoom(MIN(MIN(idealWidthZoom, idealHeightZoom), maxZoom));
+    simulateSetZoom(std::min({idealWidthZoom, idealHeightZoom, maxZoom}));
 }
 
 void EmulatorQtWindow::panHorizontal(bool left)
