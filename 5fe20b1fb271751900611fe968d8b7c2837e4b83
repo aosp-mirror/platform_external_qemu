@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "02594de9_6a5ab359",
+        "filename": "android/metrics/metrics_reporter_toolbar.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-29T19:51:26Z",
+      "side": 1,
+      "message": "Is there a version of Uri::FormatEncodeArguments that is like vsnprintf (takes the argument list and not the actual variable args)? I ended up making it a macro to deal with the variable arguments.",
+      "parentUuid": "c26bb568_713ce7c7",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 16
+      },
+      "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "02594de9_2a26fbfc",
         "filename": "android/metrics/metrics_reporter_toolbar.cpp",
         "patchSetId": 6
@@ -59,6 +83,30 @@
       "writtenOn": "2016-02-29T19:47:02Z",
       "side": 1,
       "message": "please don\u0027t use C heap functions, new/delete are safer",
+      "range": {
+        "startLine": 75,
+        "startChar": 31,
+        "endLine": 75,
+        "endChar": 37
+      },
+      "revId": "5fe20b1fb271751900611fe968d8b7c2837e4b83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a26ec178_83227299",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-02-29T19:51:26Z",
+      "side": 1,
+      "message": "Is it ok to follow up strdup() with delete and not free()?",
+      "parentUuid": "02594de9_ea8463ff",
       "range": {
         "startLine": 75,
         "startChar": 31,
