@@ -220,6 +220,13 @@
     <string notr="true">Title</string>
    </property>
   </widget>
+  <zorder>tel_SmsGroup</zorder>
+  <zorder>sms_messageBox</zorder>
+  <zorder>tel_fromGroup</zorder>
+  <zorder>tel_startEndButton</zorder>
+  <zorder>tel_numberBox</zorder>
+  <zorder>sms_sendButton</zorder>
+  <zorder>tel_holdCallButton</zorder>
  </widget>
  <customwidgets>
   <customwidget>
