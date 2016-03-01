@@ -76,9 +76,10 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mSavePreference =
         new QCheckBox(tr("Automatically send future crash reports "
                          "(Re-configure in Emulator settings menu)"));
+
+    // Create a checkbox, but don't use it unless the GPU caused the crash
     mSoftwareGPU = new QCheckBox(tr("Use software rendering for this device"));
     mSoftwareGPU->setChecked(false);
-    mSoftwareGPU->show();
 
     QSettings settings;
     bool save_preference_checked =
