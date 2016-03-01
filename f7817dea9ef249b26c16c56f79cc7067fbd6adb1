@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e27a7932_59a46e13",
+        "filename": "android/crashreport/ui/ConfirmDialog.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-01T00:21:55Z",
+      "side": 1,
+      "message": "Does this automatically show the checkbox?",
+      "range": {
+        "startLine": 184,
+        "startChar": 30,
+        "endLine": 184,
+        "endChar": 42
+      },
+      "revId": "f7817dea9ef249b26c16c56f79cc7067fbd6adb1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
