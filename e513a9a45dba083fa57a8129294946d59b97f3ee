@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a26ec178_d50b3f72",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T01:32:23Z",
+      "side": 1,
+      "message": "what\u0027s the license of the original code?",
+      "range": {
+        "startLine": 115,
+        "startChar": 3,
+        "endLine": 115,
+        "endChar": 12
+      },
+      "revId": "e513a9a45dba083fa57a8129294946d59b97f3ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02594de9_783929d6",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T01:32:23Z",
+      "side": 1,
+      "message": "you could use raw string literals here - R(\" ... \");\nthose can contain line breaks",
+      "range": {
+        "startLine": 118,
+        "startChar": 4,
+        "endLine": 118,
+        "endChar": 7
+      },
+      "revId": "e513a9a45dba083fa57a8129294946d59b97f3ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62be89e4_82e920d3",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T01:32:23Z",
+      "side": 1,
+      "message": "is there any way to get a better error explanation? eglGetError etc?",
+      "range": {
+        "startLine": 247,
+        "startChar": 9,
+        "endLine": 247,
+        "endChar": 48
+      },
+      "revId": "e513a9a45dba083fa57a8129294946d59b97f3ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
