@@ -2918,7 +2918,7 @@ static void android_init_metrics()
     // Tell the metrics the host GPU information
     emugl_host_gpu_prop_list gpu_props = emuglConfig_get_host_gpu_props();
     androidMetrics_populateGpuProps(&metrics, &gpu_props);
-    free_emugl_host_gpu_props(&gpu_props);
+    free_emugl_host_gpu_props(gpu_props);
 
     metrics.opengl_alive = is_opengl_alive;
     androidMetrics_write(&metrics);
