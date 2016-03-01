@@ -48,8 +48,9 @@ TEST_F(MetricsReporterToolbarTest, defaultMetrics) {
             "https://tools.google.com/service/update?"
             "as=androidsdk_emu_crash&version=unknown&core_version=unknown"
             "&os=unknown&id=00000000-0000-0000-0000-000000000000"
-            "&guest_arch=unknown&exf=1&opengl_alive=0&system_time=0"
-            "&user_time=0&adb_liveness=0&wall_time=0&exit_started=0"
+            "&guest_arch=unknown&guest_api_level=-1&exf=1&opengl_alive=0"
+            "&system_time=0&user_time=0&adb_liveness=0&wall_time=0"
+            "&exit_started=0"
             "&gpu0_make=unknown"
             "&gpu0_model=unknown"
             "&gpu0_device_id=unknown"
@@ -91,8 +92,8 @@ TEST_F(MetricsReporterToolbarTest, cleanRun) {
             "https://tools.google.com/service/update?"
             "as=androidsdk_emu_crash&version=standalone&core_version=qemu15"
             "&os=lynx&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
-            "&exf=0&opengl_alive=1&system_time=1170&user_time=220"
-            "&adb_liveness=0&wall_time=10&exit_started=1"
+            "&guest_api_level=100500&exf=0&opengl_alive=1&system_time=1170"
+            "&user_time=220&adb_liveness=0&wall_time=10&exit_started=1"
             "&gpu0_make=unknown"
             "&gpu0_model=unknown"
             "&gpu0_device_id=unknown"
@@ -124,6 +125,7 @@ TEST_F(MetricsReporterToolbarTest, cleanRun) {
     ANDROID_METRICS_STRASSIGN(metrics.core_version, "qemu15");
     ANDROID_METRICS_STRASSIGN(metrics.host_os_type, "lynx");
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, "x86_64");
+    metrics.guest_api_level = 100500;
     metrics.guest_gpu_enabled = 0;
     metrics.opengl_alive = 1;
     metrics.tick = 1;
@@ -148,6 +150,7 @@ TEST_F(MetricsReporterToolbarTest, dirtyRun) {
             "https://tools.google.com/service/update?"
             "as=androidsdk_emu_crash&version=standalone&core_version=unknown"
             "&os=lynx&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
+            "&guest_api_level=-1"
             "&exf=1&opengl_alive=1&system_time=1080&user_time=180"
             "&adb_liveness=0&wall_time=101&exit_started=0"
             "&gpu0_make=unknown"
@@ -204,6 +207,7 @@ TEST_F(MetricsReporterToolbarTest, openGLErrorRun) {
             "https://tools.google.com/service/update?"
             "as=androidsdk_emu_crash&version=standalone&core_version=unknown"
             "&os=lynx&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
+            "&guest_api_level=-1"
             "&exf=1&opengl_alive=0&system_time=1080&user_time=180"
             "&adb_liveness=0&wall_time=0&exit_started=0"
             "&gpu0_make=unknown"
@@ -257,8 +261,9 @@ TEST_F(MetricsReporterToolbarTest, guestGpuStrings) {
     static const char kExpected[] =
             "https://tools.google.com/service/update?as=androidsdk_emu_crash"
             "&version=standalone&core_version=unknown&os=lynx&id="
-            "00000000-0000-0000-0000-000000000000&guest_arch=x86_64&exf"
-            "=0&opengl_alive=1&system_time=1170&user_time=220"
+            "00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
+            "&guest_api_level=-1"
+            "&exf=0&opengl_alive=1&system_time=1170&user_time=220"
             "&adb_liveness=0&wall_time=0&exit_started=0"
             "&ggl_vendor=Some_Vendor&ggl_renderer=&ggl_version=1%20.%200"
             "&gpu0_make=unknown"
@@ -315,8 +320,9 @@ TEST_F(MetricsReporterToolbarTest, gpuStrings) {
     static const char kExpected[] =
             "https://tools.google.com/service/update?as=androidsdk_emu_crash"
             "&version=standalone&core_version=unknown&os=lynx&id="
-            "00000000-0000-0000-0000-000000000000&guest_arch=x86_64&exf"
-            "=0&opengl_alive=1&system_time=1170&user_time=220"
+            "00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
+            "&guest_api_level=-1"
+            "&exf=0&opengl_alive=1&system_time=1170&user_time=220"
             "&adb_liveness=0&wall_time=0&exit_started=0"
             "&gpu0_make=Advanced%20Micro%20Devices%2C%20Inc."
             "&gpu0_model=AMD%20Radeon%20%28TM%29%20R5%20M335"
