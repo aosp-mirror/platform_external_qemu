@@ -200,20 +200,6 @@ void CrashReporter::attachUptime() {
     CrashReporter::get()->attachData(fileName, timeStr);
 }
 
-void CrashReporter::attachProcessListPosix()
-{
-    char command[MAX_PATH + 128] = {};
-    snprintf(command, sizeof(command) - 1,
-             "ps x -A -F -w >%s/%s",
-             CrashReporter::get()->getDataExchangeDir().c_str(),
-             CrashReporter::kProcessListFileName);
-
-    if (system(command) != 0) {
-        CrashReporter::get()->attachData(CrashReporter::kProcessListFileName,
-                                         "Failed to get a process list");
-    }
-}
-
 }  // namespace crashreport
 }  // namespace android
 

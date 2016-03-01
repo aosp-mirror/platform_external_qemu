@@ -28,6 +28,7 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/String.h"
+#include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
 #include "android/crashreport/CrashSystem.h"
 #include "android/curl-support.h"
@@ -60,6 +61,7 @@
 
 using android::base::PathUtils;
 using android::base::String;
+using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
 
@@ -93,13 +95,13 @@ CrashService::CrashService(const std::string& version,
                            const char* dataDir)
     : mDumpRequestContext(),
       mServerState(),
+      mDataDirectory(dataDir ? dataDir : ""),
       mVersion(version),
       mBuild(build),
       mVersionId(),
       mDumpFile(),
       mReportId(),
       mComments(),
-      mDataDirectory(dataDir ? dataDir : ""),
       mDidCrashOnExit(false) {
     mVersionId = version;
     mVersionId += "-";
@@ -388,6 +390,19 @@ bool CrashService::setClient(int clientpid) {
     }
     mClientPID = clientpid;
     return true;
+}
+
+void CrashService::collectProcessList()
+{
+    if (mDataDirectory.empty()) {
+        return;
+    }
+
+    const auto command = StringFormat(
+                             "ps x -A -F -w >%s/%s",
+                             mDataDirectory,
+                             CrashReporter::kProcessListFileName);
+    system(command.c_str());
 }
 
 void CrashService::retrieveDumpMessage() {

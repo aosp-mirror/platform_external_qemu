@@ -104,7 +104,6 @@ public:
 
 protected:
     static void attachUptime();
-    static void attachProcessListPosix();
 
 private:
     virtual void writeDump() = 0;
