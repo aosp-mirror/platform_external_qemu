@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "02594de9_f8299921",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-01T02:02:13Z",
+      "side": 1,
+      "message": "They didn\u0027t specify a license. I don\u0027t think it applies anyway since I\u0027m not using their code directly: it\u0027s in a different language and mine is GLSL.",
+      "parentUuid": "a26ec178_d50b3f72",
+      "range": {
+        "startLine": 115,
+        "startChar": 3,
+        "endLine": 115,
+        "endChar": 12
+      },
+      "revId": "e513a9a45dba083fa57a8129294946d59b97f3ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "02594de9_783929d6",
         "filename": "android/skin/qt/gl-widget.cpp",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "a26ec178_55018fe6",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-01T02:02:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "02594de9_783929d6",
+      "range": {
+        "startLine": 118,
+        "startChar": 4,
+        "endLine": 118,
+        "endChar": 7
+      },
+      "revId": "e513a9a45dba083fa57a8129294946d59b97f3ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62be89e4_82e920d3",
         "filename": "android/skin/qt/gl-widget.cpp",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2016-03-01T01:32:23Z",
       "side": 1,
       "message": "is there any way to get a better error explanation? eglGetError etc?",
+      "range": {
+        "startLine": 247,
+        "startChar": 9,
+        "endLine": 247,
+        "endChar": 48
+      },
+      "revId": "e513a9a45dba083fa57a8129294946d59b97f3ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2e32149_36ef0ea3",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-01T02:02:13Z",
+      "side": 1,
+      "message": "eglGetError returns an error code, not a meaningful description, which barely improves the error message... I\u0027ll add it anyway though",
+      "parentUuid": "62be89e4_82e920d3",
       "range": {
         "startLine": 247,
         "startChar": 9,
