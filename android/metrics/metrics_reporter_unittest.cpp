@@ -11,6 +11,7 @@
 
 #include "android/metrics/metrics_reporter.h"
 #include "android/metrics/internal/metrics_reporter_internal.h"
+#include "android/opengl/emugl_config.h"
 
 #include <gtest/gtest.h>
 #include <fstream>
@@ -182,6 +183,255 @@ TEST_F(MetricsReporterTest, reportAllPartialFailure) {
     ASSERT_FALSE(androidMetrics_tryReportAll());
     ASSERT_EQ(3, this->upload_calls_count_);
     ASSERT_EQ(0, this->upload_success_count_);
+}
+
+TEST_F(MetricsReporterTest, populateGpuProps) {
+    AndroidMetrics metrics;
+    androidMetrics_init(&metrics);
+
+    emugl_host_gpu_prop_list plist;
+    plist.num_gpus = 4;
+    plist.props = new emugl_host_gpu_props[plist.num_gpus];
+
+    plist.props[0].make = strdup("TEST GPU0 MAKE");
+    plist.props[0].model = strdup("TEST GPU0 MODEL");
+    plist.props[0].device_id = strdup("TEST GPU0 DEVICEID");
+    plist.props[0].revision_id = strdup("TEST GPU0 REVISIONID");
+    plist.props[0].version = strdup("TEST GPU0 VERSION");
+    plist.props[0].renderer = strdup("TEST GPU0 RENDERER");
+
+    plist.props[1].make = strdup("TEST GPU1 MAKE");
+    plist.props[1].model = strdup("TEST GPU1 MODEL");
+    plist.props[1].device_id = strdup("TEST GPU1 DEVICEID");
+    plist.props[1].revision_id = strdup("TEST GPU1 REVISIONID");
+    plist.props[1].version = strdup("TEST GPU1 VERSION");
+    plist.props[1].renderer = strdup("TEST GPU1 RENDERER");
+
+    plist.props[2].make = strdup("TEST GPU2 MAKE");
+    plist.props[2].model = strdup("TEST GPU2 MODEL");
+    plist.props[2].device_id = strdup("TEST GPU2 DEVICEID");
+    plist.props[2].revision_id = strdup("TEST GPU2 REVISIONID");
+    plist.props[2].version = strdup("TEST GPU2 VERSION");
+    plist.props[2].renderer = strdup("TEST GPU2 RENDERER");
+
+    plist.props[3].make = strdup("TEST GPU3 MAKE");
+    plist.props[3].model = strdup("TEST GPU3 MODEL");
+    plist.props[3].device_id = strdup("TEST GPU3 DEVICEID");
+    plist.props[3].revision_id = strdup("TEST GPU3 REVISIONID");
+    plist.props[3].version = strdup("TEST GPU3 VERSION");
+    plist.props[3].renderer = strdup("TEST GPU3 RENDERER");
+
+    androidMetrics_populateGpuProps(&metrics, &plist);
+    free_emugl_host_gpu_props(plist);
+
+    EXPECT_STREQ(metrics.gpu0_make, "TEST GPU0 MAKE");
+    EXPECT_STREQ(metrics.gpu0_model, "TEST GPU0 MODEL");
+    EXPECT_STREQ(metrics.gpu0_device_id, "TEST GPU0 DEVICEID");
+    EXPECT_STREQ(metrics.gpu0_revision_id, "TEST GPU0 REVISIONID");
+    EXPECT_STREQ(metrics.gpu0_version, "TEST GPU0 VERSION");
+    EXPECT_STREQ(metrics.gpu0_renderer, "TEST GPU0 RENDERER");
+
+    EXPECT_STREQ(metrics.gpu1_make, "TEST GPU1 MAKE");
+    EXPECT_STREQ(metrics.gpu1_model, "TEST GPU1 MODEL");
+    EXPECT_STREQ(metrics.gpu1_device_id, "TEST GPU1 DEVICEID");
+    EXPECT_STREQ(metrics.gpu1_revision_id, "TEST GPU1 REVISIONID");
+    EXPECT_STREQ(metrics.gpu1_version, "TEST GPU1 VERSION");
+    EXPECT_STREQ(metrics.gpu1_renderer, "TEST GPU1 RENDERER");
+
+    EXPECT_STREQ(metrics.gpu2_make, "TEST GPU2 MAKE");
+    EXPECT_STREQ(metrics.gpu2_model, "TEST GPU2 MODEL");
+    EXPECT_STREQ(metrics.gpu2_device_id, "TEST GPU2 DEVICEID");
+    EXPECT_STREQ(metrics.gpu2_revision_id, "TEST GPU2 REVISIONID");
+    EXPECT_STREQ(metrics.gpu2_version, "TEST GPU2 VERSION");
+    EXPECT_STREQ(metrics.gpu2_renderer, "TEST GPU2 RENDERER");
+
+    EXPECT_STREQ(metrics.gpu3_make, "TEST GPU3 MAKE");
+    EXPECT_STREQ(metrics.gpu3_model, "TEST GPU3 MODEL");
+    EXPECT_STREQ(metrics.gpu3_device_id, "TEST GPU3 DEVICEID");
+    EXPECT_STREQ(metrics.gpu3_revision_id, "TEST GPU3 REVISIONID");
+    EXPECT_STREQ(metrics.gpu3_version, "TEST GPU3 VERSION");
+    EXPECT_STREQ(metrics.gpu3_renderer, "TEST GPU3 RENDERER");
+
+    ASSERT_TRUE(androidMetrics_write(&metrics));
+    androidMetrics_fini(&metrics);
+}
+
+TEST_F(MetricsReporterTest, populateGpuProps_2gpu) {
+    AndroidMetrics metrics;
+    androidMetrics_init(&metrics);
+
+    emugl_host_gpu_prop_list plist;
+    plist.num_gpus = 2;
+    plist.props = new emugl_host_gpu_props[plist.num_gpus];
+
+    plist.props[0].make = strdup("TEST GPU0 MAKE");
+    plist.props[0].model = strdup("TEST GPU0 MODEL");
+    plist.props[0].device_id = strdup("TEST GPU0 DEVICEID");
+    plist.props[0].revision_id = strdup("TEST GPU0 REVISIONID");
+    plist.props[0].version = strdup("TEST GPU0 VERSION");
+    plist.props[0].renderer = strdup("TEST GPU0 RENDERER");
+
+    plist.props[1].make = strdup("TEST GPU1 MAKE");
+    plist.props[1].model = strdup("TEST GPU1 MODEL");
+    plist.props[1].device_id = strdup("TEST GPU1 DEVICEID");
+    plist.props[1].revision_id = strdup("TEST GPU1 REVISIONID");
+    plist.props[1].version = strdup("TEST GPU1 VERSION");
+    plist.props[1].renderer = strdup("TEST GPU1 RENDERER");
+
+    androidMetrics_populateGpuProps(&metrics, &plist);
+    free_emugl_host_gpu_props(plist);
+
+    EXPECT_STREQ(metrics.gpu0_make, "TEST GPU0 MAKE");
+    EXPECT_STREQ(metrics.gpu0_model, "TEST GPU0 MODEL");
+    EXPECT_STREQ(metrics.gpu0_device_id, "TEST GPU0 DEVICEID");
+    EXPECT_STREQ(metrics.gpu0_revision_id, "TEST GPU0 REVISIONID");
+    EXPECT_STREQ(metrics.gpu0_version, "TEST GPU0 VERSION");
+    EXPECT_STREQ(metrics.gpu0_renderer, "TEST GPU0 RENDERER");
+
+    EXPECT_STREQ(metrics.gpu1_make, "TEST GPU1 MAKE");
+    EXPECT_STREQ(metrics.gpu1_model, "TEST GPU1 MODEL");
+    EXPECT_STREQ(metrics.gpu1_device_id, "TEST GPU1 DEVICEID");
+    EXPECT_STREQ(metrics.gpu1_revision_id, "TEST GPU1 REVISIONID");
+    EXPECT_STREQ(metrics.gpu1_version, "TEST GPU1 VERSION");
+    EXPECT_STREQ(metrics.gpu1_renderer, "TEST GPU1 RENDERER");
+
+    EXPECT_STREQ(metrics.gpu2_make, "unknown");
+    EXPECT_STREQ(metrics.gpu2_model, "unknown");
+    EXPECT_STREQ(metrics.gpu2_device_id, "unknown");
+    EXPECT_STREQ(metrics.gpu2_revision_id, "unknown");
+    EXPECT_STREQ(metrics.gpu2_version, "unknown");
+    EXPECT_STREQ(metrics.gpu2_renderer, "unknown");
+
+    EXPECT_STREQ(metrics.gpu3_make, "unknown");
+    EXPECT_STREQ(metrics.gpu3_model, "unknown");
+    EXPECT_STREQ(metrics.gpu3_device_id, "unknown");
+    EXPECT_STREQ(metrics.gpu3_revision_id, "unknown");
+    EXPECT_STREQ(metrics.gpu3_version, "unknown");
+    EXPECT_STREQ(metrics.gpu3_renderer, "unknown");
+
+    ASSERT_TRUE(androidMetrics_write(&metrics));
+    androidMetrics_fini(&metrics);
+}
+
+TEST_F(MetricsReporterTest, populateGpuProps_5gpu) {
+    AndroidMetrics metrics;
+    androidMetrics_init(&metrics);
+
+    emugl_host_gpu_prop_list plist;
+    plist.num_gpus = 5;
+    plist.props = new emugl_host_gpu_props[plist.num_gpus];
+
+    plist.props[0].make = strdup("TEST GPU0 MAKE");
+    plist.props[0].model = strdup("TEST GPU0 MODEL");
+    plist.props[0].device_id = strdup("TEST GPU0 DEVICEID");
+    plist.props[0].revision_id = strdup("TEST GPU0 REVISIONID");
+    plist.props[0].version = strdup("TEST GPU0 VERSION");
+    plist.props[0].renderer = strdup("TEST GPU0 RENDERER");
+
+    plist.props[1].make = strdup("TEST GPU1 MAKE");
+    plist.props[1].model = strdup("TEST GPU1 MODEL");
+    plist.props[1].device_id = strdup("TEST GPU1 DEVICEID");
+    plist.props[1].revision_id = strdup("TEST GPU1 REVISIONID");
+    plist.props[1].version = strdup("TEST GPU1 VERSION");
+    plist.props[1].renderer = strdup("TEST GPU1 RENDERER");
+
+    plist.props[2].make = strdup("TEST GPU2 MAKE");
+    plist.props[2].model = strdup("TEST GPU2 MODEL");
+    plist.props[2].device_id = strdup("TEST GPU2 DEVICEID");
+    plist.props[2].revision_id = strdup("TEST GPU2 REVISIONID");
+    plist.props[2].version = strdup("TEST GPU2 VERSION");
+    plist.props[2].renderer = strdup("TEST GPU2 RENDERER");
+
+    plist.props[3].make = strdup("TEST GPU3 MAKE");
+    plist.props[3].model = strdup("TEST GPU3 MODEL");
+    plist.props[3].device_id = strdup("TEST GPU3 DEVICEID");
+    plist.props[3].revision_id = strdup("TEST GPU3 REVISIONID");
+    plist.props[3].version = strdup("TEST GPU3 VERSION");
+    plist.props[3].renderer = strdup("TEST GPU3 RENDERER");
+
+    plist.props[4].make = strdup("TEST GPU4 MAKE");
+    plist.props[4].model = strdup("TEST GPU4 MODEL");
+    plist.props[4].device_id = strdup("TEST GPU4 DEVICEID");
+    plist.props[4].revision_id = strdup("TEST GPU4 REVISIONID");
+    plist.props[4].version = strdup("TEST GPU4 VERSION");
+    plist.props[4].renderer = strdup("TEST GPU4 RENDERER");
+
+    androidMetrics_populateGpuProps(&metrics, &plist);
+    free_emugl_host_gpu_props(plist);
+
+    EXPECT_STREQ(metrics.gpu0_make, "TEST GPU0 MAKE");
+    EXPECT_STREQ(metrics.gpu0_model, "TEST GPU0 MODEL");
+    EXPECT_STREQ(metrics.gpu0_device_id, "TEST GPU0 DEVICEID");
+    EXPECT_STREQ(metrics.gpu0_revision_id, "TEST GPU0 REVISIONID");
+    EXPECT_STREQ(metrics.gpu0_version, "TEST GPU0 VERSION");
+    EXPECT_STREQ(metrics.gpu0_renderer, "TEST GPU0 RENDERER");
+
+    EXPECT_STREQ(metrics.gpu1_make, "TEST GPU1 MAKE");
+    EXPECT_STREQ(metrics.gpu1_model, "TEST GPU1 MODEL");
+    EXPECT_STREQ(metrics.gpu1_device_id, "TEST GPU1 DEVICEID");
+    EXPECT_STREQ(metrics.gpu1_revision_id, "TEST GPU1 REVISIONID");
+    EXPECT_STREQ(metrics.gpu1_version, "TEST GPU1 VERSION");
+    EXPECT_STREQ(metrics.gpu1_renderer, "TEST GPU1 RENDERER");
+
+    EXPECT_STREQ(metrics.gpu2_make, "TEST GPU2 MAKE");
+    EXPECT_STREQ(metrics.gpu2_model, "TEST GPU2 MODEL");
+    EXPECT_STREQ(metrics.gpu2_device_id, "TEST GPU2 DEVICEID");
+    EXPECT_STREQ(metrics.gpu2_revision_id, "TEST GPU2 REVISIONID");
+    EXPECT_STREQ(metrics.gpu2_version, "TEST GPU2 VERSION");
+    EXPECT_STREQ(metrics.gpu2_renderer, "TEST GPU2 RENDERER");
+
+    EXPECT_STREQ(metrics.gpu3_make, "TEST GPU3 MAKE");
+    EXPECT_STREQ(metrics.gpu3_model, "TEST GPU3 MODEL");
+    EXPECT_STREQ(metrics.gpu3_device_id, "TEST GPU3 DEVICEID");
+    EXPECT_STREQ(metrics.gpu3_revision_id, "TEST GPU3 REVISIONID");
+    EXPECT_STREQ(metrics.gpu3_version, "TEST GPU3 VERSION");
+    EXPECT_STREQ(metrics.gpu3_renderer, "TEST GPU3 RENDERER");
+
+    ASSERT_TRUE(androidMetrics_write(&metrics));
+    androidMetrics_fini(&metrics);
+}
+
+TEST_F(MetricsReporterTest, populateGpuProps_0gpu) {
+    AndroidMetrics metrics;
+    androidMetrics_init(&metrics);
+
+    emugl_host_gpu_prop_list plist;
+    plist.num_gpus = 0;
+    plist.props = new emugl_host_gpu_props[plist.num_gpus];
+
+    androidMetrics_populateGpuProps(&metrics, &plist);
+    free_emugl_host_gpu_props(plist);
+
+    EXPECT_STREQ(metrics.gpu0_make, "unknown");
+    EXPECT_STREQ(metrics.gpu0_model, "unknown");
+    EXPECT_STREQ(metrics.gpu0_device_id, "unknown");
+    EXPECT_STREQ(metrics.gpu0_revision_id, "unknown");
+    EXPECT_STREQ(metrics.gpu0_version, "unknown");
+    EXPECT_STREQ(metrics.gpu0_renderer, "unknown");
+
+    EXPECT_STREQ(metrics.gpu1_make, "unknown");
+    EXPECT_STREQ(metrics.gpu1_model, "unknown");
+    EXPECT_STREQ(metrics.gpu1_device_id, "unknown");
+    EXPECT_STREQ(metrics.gpu1_revision_id, "unknown");
+    EXPECT_STREQ(metrics.gpu1_version, "unknown");
+    EXPECT_STREQ(metrics.gpu1_renderer, "unknown");
+
+    EXPECT_STREQ(metrics.gpu2_make, "unknown");
+    EXPECT_STREQ(metrics.gpu2_model, "unknown");
+    EXPECT_STREQ(metrics.gpu2_device_id, "unknown");
+    EXPECT_STREQ(metrics.gpu2_revision_id, "unknown");
+    EXPECT_STREQ(metrics.gpu2_version, "unknown");
+    EXPECT_STREQ(metrics.gpu2_renderer, "unknown");
+
+    EXPECT_STREQ(metrics.gpu3_make, "unknown");
+    EXPECT_STREQ(metrics.gpu3_model, "unknown");
+    EXPECT_STREQ(metrics.gpu3_device_id, "unknown");
+    EXPECT_STREQ(metrics.gpu3_revision_id, "unknown");
+    EXPECT_STREQ(metrics.gpu3_version, "unknown");
+    EXPECT_STREQ(metrics.gpu3_renderer, "unknown");
+
+    ASSERT_TRUE(androidMetrics_write(&metrics));
+    androidMetrics_fini(&metrics);
 }
 
 }  // namespace

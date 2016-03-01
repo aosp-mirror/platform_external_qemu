@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/opengl/emugl_config.h"
+#include "android/opengl/gpuinfo.h"
 
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
@@ -279,6 +280,85 @@ TEST(EmuglConfig, initNoWindowWithoutMesa) {
 }
 
 TEST(EmuglConfig, setupEnv) {
+}
+
+TEST(EmuglConfig, hostGpuProps) {
+    GpuInfoList* gpulist = GpuInfoList::get();
+    gpulist->clear();
+    EXPECT_TRUE(gpulist->infos.size() == 0);
+    gpulist->addGpu();
+    gpulist->currGpu().make = "TEST GPU0 MAKE";
+    gpulist->currGpu().model = "TEST GPU0 MODEL";
+    gpulist->currGpu().device_id = "TEST GPU0 DEVICEID";
+    gpulist->currGpu().revision_id = "TEST GPU0 REVISIONID";
+    gpulist->currGpu().version = "TEST GPU0 VERSION";
+    gpulist->currGpu().renderer = "TEST GPU0 RENDERER";
+    gpulist->addGpu();
+    gpulist->currGpu().make = "TEST GPU1 MAKE";
+    gpulist->currGpu().model = "TEST GPU1 MODEL";
+    gpulist->currGpu().device_id = "TEST GPU1 DEVICEID";
+    gpulist->currGpu().revision_id = "TEST GPU1 REVISIONID";
+    gpulist->currGpu().version = "TEST GPU1 VERSION";
+    gpulist->currGpu().renderer = "TEST GPU1 RENDERER";
+    gpulist->addGpu();
+    gpulist->currGpu().make = "TEST GPU2 MAKE";
+    gpulist->currGpu().model = "TEST GPU2 MODEL";
+    gpulist->currGpu().device_id = "TEST GPU2 DEVICEID";
+    gpulist->currGpu().revision_id = "TEST GPU2 REVISIONID";
+    gpulist->currGpu().version = "TEST GPU2 VERSION";
+    gpulist->currGpu().renderer = "TEST GPU2 RENDERER";
+    gpulist->addGpu();
+    gpulist->currGpu().make = "TEST GPU3 MAKE";
+    gpulist->currGpu().model = "TEST GPU3 MODEL";
+    gpulist->currGpu().device_id = "TEST GPU3 DEVICEID";
+    gpulist->currGpu().revision_id = "TEST GPU3 REVISIONID";
+    gpulist->currGpu().version = "TEST GPU3 VERSION";
+    gpulist->currGpu().renderer = "TEST GPU3 RENDERER";
+
+    emugl_host_gpu_prop_list gpu_props = emuglConfig_get_host_gpu_props();
+    EXPECT_TRUE(gpu_props.num_gpus == 4);
+
+    EXPECT_STREQ("TEST GPU0 MAKE", gpu_props.props[0].make);
+    EXPECT_STREQ("TEST GPU1 MAKE", gpu_props.props[1].make);
+    EXPECT_STREQ("TEST GPU2 MAKE", gpu_props.props[2].make);
+    EXPECT_STREQ("TEST GPU3 MAKE", gpu_props.props[3].make);
+
+    EXPECT_STREQ("TEST GPU0 MODEL", gpu_props.props[0].model);
+    EXPECT_STREQ("TEST GPU1 MODEL", gpu_props.props[1].model);
+    EXPECT_STREQ("TEST GPU2 MODEL", gpu_props.props[2].model);
+    EXPECT_STREQ("TEST GPU3 MODEL", gpu_props.props[3].model);
+
+    EXPECT_STREQ("TEST GPU0 DEVICEID", gpu_props.props[0].device_id);
+    EXPECT_STREQ("TEST GPU1 DEVICEID", gpu_props.props[1].device_id);
+    EXPECT_STREQ("TEST GPU2 DEVICEID", gpu_props.props[2].device_id);
+    EXPECT_STREQ("TEST GPU3 DEVICEID", gpu_props.props[3].device_id);
+
+    EXPECT_STREQ("TEST GPU0 REVISIONID", gpu_props.props[0].revision_id);
+    EXPECT_STREQ("TEST GPU1 REVISIONID", gpu_props.props[1].revision_id);
+    EXPECT_STREQ("TEST GPU2 REVISIONID", gpu_props.props[2].revision_id);
+    EXPECT_STREQ("TEST GPU3 REVISIONID", gpu_props.props[3].revision_id);
+
+    EXPECT_STREQ("TEST GPU0 VERSION", gpu_props.props[0].version);
+    EXPECT_STREQ("TEST GPU1 VERSION", gpu_props.props[1].version);
+    EXPECT_STREQ("TEST GPU2 VERSION", gpu_props.props[2].version);
+    EXPECT_STREQ("TEST GPU3 VERSION", gpu_props.props[3].version);
+
+    EXPECT_STREQ("TEST GPU0 RENDERER", gpu_props.props[0].renderer);
+    EXPECT_STREQ("TEST GPU1 RENDERER", gpu_props.props[1].renderer);
+    EXPECT_STREQ("TEST GPU2 RENDERER", gpu_props.props[2].renderer);
+    EXPECT_STREQ("TEST GPU3 RENDERER", gpu_props.props[3].renderer);
+
+    free_emugl_host_gpu_props(gpu_props);
+}
+
+TEST(EmuglConfig, hostGpuProps_empty) {
+    GpuInfoList* gpulist = GpuInfoList::get();
+    gpulist->clear();
+    EXPECT_TRUE(gpulist->infos.size() == 0);
+
+    emugl_host_gpu_prop_list gpu_props = emuglConfig_get_host_gpu_props();
+    EXPECT_TRUE(gpu_props.num_gpus == 0);
+    free_emugl_host_gpu_props(gpu_props);
 }
 
 }  // namespace base
