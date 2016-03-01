@@ -876,6 +876,13 @@ skin_file_load_from_v1(SkinFile* file,
     return 0;
 }
 
+// Names for auto-generated layouts.
+// We don't need "portrait" - it is the first layout in
+// skin files by convention, and we generate other
+// orientations from it.
+static const char* auto_layout_names[] =
+    { "reverse_landscape", "reverse_portrait", "landscape" };
+
 static int
 skin_file_load_from_v2(SkinFile* file,
                        AConfig* aconfig,
@@ -929,12 +936,24 @@ skin_file_load_from_v2(SkinFile* file,
         SkinLayout* layout = file->layouts;
         SkinLayout* first_layout = layout;
         SkinRotation r;
+
         for (r = SKIN_ROTATION_90; r <= SKIN_ROTATION_270; r++) {
+            // Find the place in the list of parts at which to insert new
+            // rotated versions of parts.
             while (*last_part_ptr) {
                 last_part_ptr = &((*last_part_ptr)->next);
             }
+
+            // Rotate the layout.
             layout->next = skin_layout_create_rotated(first_layout, last_part_ptr, r);
             if (layout->next != NULL) {
+                // Update layout name.
+                int layout_name_idx = r - SKIN_ROTATION_90;
+                if (layout_name_idx >= 0 &&
+                    layout_name_idx < sizeof(auto_layout_names) / sizeof(const char*)) {
+                    layout->next->name = auto_layout_names[layout_name_idx];
+                }
+
                 layout = layout->next;
                 layout->next = NULL;
             } else {
