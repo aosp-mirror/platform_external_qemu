@@ -112,9 +112,6 @@ public:
 
     bool onCrash();
 
-protected:
-    static void attachProcessListPosix();
-
 private:
     virtual bool onCrashPlatformSpecific() = 0;
     virtual void writeDump() = 0;

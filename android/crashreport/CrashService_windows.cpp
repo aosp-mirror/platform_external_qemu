@@ -14,11 +14,13 @@
 
 #include "android/crashreport/CrashService_windows.h"
 
-#include "android/base/String.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/String.h"
+#include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
 
 #include "android/base/system/Win32UnicodeString.h"
+#include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/CrashSystem.h"
 #include "android/utils/debug.h"
 
@@ -208,6 +210,28 @@ bool HostCrashService::getMemInfo() {
          << "Thread count: " << pi.ThreadCount << "\n";
 
     return fout.good();
+}
+
+void HostCrashService::collectProcessList()
+{
+    if (mDataDirectory.empty()) {
+        return;
+    }
+
+    auto command = android::base::StringFormat(
+                       "tasklist /V >%s\\%s",
+                       mDataDirectory,
+                       CrashReporter::kProcessListFileName);
+
+    if (system(command.c_str()) != 0) {
+        // try to call the "query process *" command, which used to exist
+        // before the taskkill
+        command = android::base::StringFormat(
+                    "query process * >%s\\%s",
+                    mDataDirectory,
+                    CrashReporter::kProcessListFileName);
+        system(command.c_str());
+    }
 }
 
 }  // namespace crashreport

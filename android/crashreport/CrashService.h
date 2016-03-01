@@ -164,6 +164,10 @@ public:
     // Read the dump message passed by the watched/dumped application
     void retrieveDumpMessage();
 
+    // Collects the process list, default implementation runs the POSIX ps
+    // command
+    virtual void collectProcessList();
+
 protected:
     // Initialize serverstate
     void initCrashServer();
@@ -188,9 +192,11 @@ protected:
     ServerState mServerState;
 
     int mClientPID = 0;
+    std::string mDataDirectory;
 
     static const char* const kHwInfoName;
     static const char* const kMemInfoName;
+
 private:
     CrashService();
 
@@ -203,7 +209,6 @@ private:
     std::string mDumpFile;
     std::string mReportId;
     std::string mComments;
-    std::string mDataDirectory;
     std::string mDumpMessage;
     std::string mCrashOnExitMessage;
     std::map<std::string, std::string> mReportValues;

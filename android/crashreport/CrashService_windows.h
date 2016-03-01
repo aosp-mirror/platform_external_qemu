@@ -57,6 +57,7 @@ public:
 protected:
     virtual bool getHWInfo() override;
     virtual bool getMemInfo() override;
+    virtual void collectProcessList() override;
 
 private:
     std::unique_ptr<::google_breakpad::CrashGenerationServer> mCrashServer;
