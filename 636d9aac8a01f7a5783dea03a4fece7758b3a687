@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e2b0b90b_472e9443",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-01T00:12:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e27a7932_a3d52501",
+      "range": {
+        "startLine": 114,
+        "startChar": 9,
+        "endLine": 117,
+        "endChar": 30
+      },
+      "revId": "636d9aac8a01f7a5783dea03a4fece7758b3a687",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62be89e4_fc4e4138",
         "filename": "android/skin/qt/gl-widget.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-02-29T21:59:00Z",
       "side": 1,
       "message": "use gl_FragCoord.xy and remove the outCoord varying and the inCoord attribute.",
+      "range": {
+        "startLine": 175,
+        "startChar": 28,
+        "endLine": 175,
+        "endChar": 49
+      },
+      "revId": "636d9aac8a01f7a5783dea03a4fece7758b3a687",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_273388ae",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-01T00:12:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62be89e4_fc4e4138",
       "range": {
         "startLine": 175,
         "startChar": 28,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "a2e32149_3b2c17dc",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-01T00:12:15Z",
+      "side": 1,
+      "message": "I was trying to avoid calling makeContextCurrent twice, but I guess it doesn\u0027t make a difference",
+      "parentUuid": "e27a7932_634dfdb1",
+      "revId": "636d9aac8a01f7a5783dea03a4fece7758b3a687",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c26bb568_b437ad96",
         "filename": "android/skin/qt/gl-widget.cpp",
         "patchSetId": 2
@@ -76,6 +142,30 @@
       "writtenOn": "2016-02-29T21:59:00Z",
       "side": 1,
       "message": "SInce you  are not using the depth texture, you should use a render buffer instead.",
+      "range": {
+        "startLine": 409,
+        "startChar": 16,
+        "endLine": 409,
+        "endChar": 23
+      },
+      "revId": "636d9aac8a01f7a5783dea03a4fece7758b3a687",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02feade5_f00da817",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-01T00:12:15Z",
+      "side": 1,
+      "message": "My initial version used a renderbuffer, however the program would hang on the call to mGLES2-\u003eglGenRenderbuffersEXT. I wasn\u0027t too keen on debugging it, so decided to go with a texture attachment. What is the disadvantage of using a texture for the dept attachment vs a renderbuffer?",
+      "parentUuid": "c26bb568_b437ad96",
       "range": {
         "startLine": 409,
         "startChar": 16,
@@ -111,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "e27a7932_f930baea",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-01T00:12:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a26ec178_be61cde1",
+      "range": {
+        "startLine": 510,
+        "startChar": 23,
+        "endLine": 510,
+        "endChar": 34
+      },
+      "revId": "636d9aac8a01f7a5783dea03a4fece7758b3a687",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "22ef3134_f1ec90b0",
         "filename": "android/skin/qt/gl-widget.cpp",
         "patchSetId": 2
@@ -122,6 +236,30 @@
       "writtenOn": "2016-02-29T21:59:00Z",
       "side": 1,
       "message": "You don\u0027t need an index buffer if you use a full screen triangle: you\u0027ll render a single triangle, so you can use glDrawArrays instead.",
+      "range": {
+        "startLine": 524,
+        "startChar": 29,
+        "endLine": 524,
+        "endChar": 43
+      },
+      "revId": "636d9aac8a01f7a5783dea03a4fece7758b3a687",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c26bb568_6ac94c21",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 524,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-01T00:12:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "22ef3134_f1ec90b0",
       "range": {
         "startLine": 524,
         "startChar": 29,
