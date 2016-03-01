@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2b0b90b_2c8a4809",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1863,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-01T23:20:32Z",
+      "side": 1,
+      "message": "Please guard this with if(android_avdInfo)\n\nI think android_avdInfo may be NULL when running from inside a system image build environment. Then this will refuese to proceed.",
+      "revId": "ed0886eab1d00d5f767a3c499af4f3eff1269f9a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
