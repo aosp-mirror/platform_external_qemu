@@ -128,8 +128,6 @@ public:
     Display() {}
     virtual ~Display() {}
 
-    virtual bool release() = 0;
-
     virtual void queryConfigs(int renderableType,
                               AddConfigCallback* addConfigFunc,
                               void* addConfigOpaque) = 0;

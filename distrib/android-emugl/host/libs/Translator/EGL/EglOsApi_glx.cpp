@@ -243,9 +243,7 @@ class GlxDisplay : public EglOS::Display {
 public:
     explicit GlxDisplay(X11Display* disp) : mDisplay(disp) {}
 
-    virtual bool release() {
-        return XCloseDisplay(mDisplay);
-    }
+    virtual ~GlxDisplay() { XCloseDisplay(mDisplay); }
 
     virtual void queryConfigs(int renderableType,
                               EglOS::AddConfigCallback* addConfigFunc,
