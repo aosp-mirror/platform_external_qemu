@@ -126,8 +126,6 @@ static void attachMemoryInfo()
 
 bool HostCrashReporter::onCrashPlatformSpecific() {
     attachMemoryInfo();
-    CrashReporter::attachProcessListPosix();
-
     return true;    // proceed with handling the crash
 }
 
