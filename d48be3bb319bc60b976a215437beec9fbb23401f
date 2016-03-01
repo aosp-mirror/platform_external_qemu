@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2e32149_f042ce17",
+        "filename": "android/opengl/emugl_config.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T01:32:08Z",
+      "side": 1,
+      "message": "same thing here - you don\u0027t need to pass a pointer",
+      "range": {
+        "startLine": 58,
+        "startChar": 55,
+        "endLine": 58,
+        "endChar": 56
+      },
+      "revId": "d48be3bb319bc60b976a215437beec9fbb23401f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
