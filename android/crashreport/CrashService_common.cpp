@@ -399,7 +399,7 @@ void CrashService::collectProcessList()
     }
 
     const auto command = StringFormat(
-                             "ps x -A -F -w >%s/%s",
+                             "ps aux >%s/%s",
                              mDataDirectory,
                              CrashReporter::kProcessListFileName);
     system(command.c_str());
