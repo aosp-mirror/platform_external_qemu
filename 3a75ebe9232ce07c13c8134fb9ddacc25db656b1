@@ -1,0 +1,481 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2b0b90b_96be0bf4",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "should we stop it if main loop is already stopped or while it\u0027s still running?",
+      "range": {
+        "startLine": 347,
+        "startChar": 0,
+        "endLine": 347,
+        "endChar": 25
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_7996d06a",
+        "filename": "android/skin/qt/event-serializer.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "what if the line wasn\u0027t empty? does it mean you\u0027re throwing away some data?",
+      "range": {
+        "startLine": 84,
+        "startChar": 0,
+        "endLine": 84,
+        "endChar": 17
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02594de9_7e683161",
+        "filename": "android/skin/qt/event-serializer.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "you could just do iss \u003e\u003e var and so on. Don\u0027t need to do getline/cast for every single variable\njust skip the delimiter after the reading with \"stream.ignore(1, \u0027:\u0027);\"",
+      "range": {
+        "startLine": 100,
+        "startChar": 25,
+        "endLine": 100,
+        "endChar": 28
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02feade5_8395fdf7",
+        "filename": "android/skin/qt/event-serializer.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "this function may throw, and that would crash the whole emulator",
+      "range": {
+        "startLine": 101,
+        "startChar": 45,
+        "endLine": 101,
+        "endChar": 49
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c26bb568_f6c9a59e",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "istream?",
+      "range": {
+        "startLine": 50,
+        "startChar": 56,
+        "endLine": 50,
+        "endChar": 69
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62be89e4_bc29e4cd",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "endOfStream? all other functions use camelCase here",
+      "range": {
+        "startLine": 53,
+        "startChar": 5,
+        "endLine": 53,
+        "endChar": 18
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62be89e4_1c8fb018",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "this may throw",
+      "range": {
+        "startLine": 94,
+        "startChar": 17,
+        "endLine": 94,
+        "endChar": 21
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c26bb568_98aad799",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "why do you need a separate stream here? can\u0027t you just pass the original one to the function and it would deserialize an even from it, stopping at the end of the event record",
+      "range": {
+        "startLine": 103,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 42
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02594de9_be0a29b6",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "I doubt it\u0027s a good idea",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 30
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62be89e4_7cac6c69",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "why is this needed?",
+      "range": {
+        "startLine": 50,
+        "startChar": 3,
+        "endLine": 50,
+        "endChar": 22
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a26ec178_26daafec",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "nit: nullptr",
+      "range": {
+        "startLine": 54,
+        "startChar": 22,
+        "endLine": 54,
+        "endChar": 26
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62be89e4_5cb1a8c2",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "I\u0027m trying to understand what this means.\nQFileInfo().path() returns the parent directory\u0027s path. isWritable() for the directory - does it check if one have permission to write files into it?",
+      "range": {
+        "startLine": 64,
+        "startChar": 4,
+        "endLine": 65,
+        "endChar": 27
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2e32149_9ea42c15",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "is zero delay fine for us? also, what about millisecond accuracy",
+      "range": {
+        "startLine": 107,
+        "startChar": 48,
+        "endLine": 107,
+        "endChar": 61
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02594de9_feb7411e",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "could you please change the serializeEvents function to serialize into a passed ostream\u0026 object? then you could just write the code like this:\n\nstd::ofstream file(name);\nif (!file) return;\n\nserializeEvents(container(), file);\n\nno extra copying, extra allocations and conversions Qt\u003c-\u003eSTL",
+      "range": {
+        "startLine": 145,
+        "startChar": 40,
+        "endLine": 145,
+        "endChar": 55
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a26ec178_e62fb781",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "1. std::ofstream would save us one string conversion here\n2. please remove the commented code\n3. you don\u0027t need to close the file explicitly",
+      "range": {
+        "startLine": 139,
+        "startChar": 0,
+        "endLine": 150,
+        "endChar": 1
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c26bb568_b8febb7d",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "if you change the deserialization function to work with istream, you can just create an ifstream here and pass it directly",
+      "range": {
+        "startLine": 159,
+        "startChar": 0,
+        "endLine": 161,
+        "endChar": 45
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02feade5_a30479f9",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "emplace() accepts two arguments, so there will be no extra copying. Also, map\u0027s pair type is pair\u003cconst key, value\u003e, so your pair will be copied one more time",
+      "range": {
+        "startLine": 168,
+        "startChar": 25,
+        "endLine": 168,
+        "endChar": 31
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e27a7932_0c822184",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "this should\u0027ve been implemented with a base interface and two different implementations - one of them is the recorder, and another one is a player. On startup you would create the needed implementation based on the command line parameters\n\nThat would give much more clear code and separation of concerns",
+      "range": {
+        "startLine": 208,
+        "startChar": 0,
+        "endLine": 218,
+        "endChar": 17
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82ea9d1e_4a1664dd",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 230,
+        "startChar": 0,
+        "endLine": 230,
+        "endChar": 11
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_b9fb388e",
+        "filename": "android/skin/qt/ui-event-recorder.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "nit: any function which\u0027s implemented in the class body is already inline by the standard",
+      "range": {
+        "startLine": 41,
+        "startChar": 4,
+        "endLine": 41,
+        "endChar": 10
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c26bb568_38208be5",
+        "filename": "android/skin/qt/ui-event-recorder.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T19:56:16Z",
+      "side": 1,
+      "message": "you could add a parameter:\n\nvoid print(std::ostream\u0026 out \u003d std::cout);\n\nthis would enable unit testing",
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
