@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c26bb568_051be1b9",
+        "filename": "android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1009,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T01:17:08Z",
+      "side": 1,
+      "message": "could you please reverse the order of checks here, so there\u0027s no incremental updates to the minRam variable?",
+      "range": {
+        "startLine": 1000,
+        "startChar": 4,
+        "endLine": 1009,
+        "endChar": 41
+      },
+      "revId": "551800fb7e8e2afbd58e63012302bdef8726487f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
