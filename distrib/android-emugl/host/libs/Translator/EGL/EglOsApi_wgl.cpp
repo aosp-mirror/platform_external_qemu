@@ -753,12 +753,10 @@ public:
             mDpy(dpy), mDispatch(dispatch) {}
 
     virtual ~WglDisplay() {
-        delete mDpy;
-    }
-
-    virtual bool release() {
-        mDpy->releaseAll();
-        return true;
+        if (mDpy) {
+            mDpy->releaseAll();
+            delete mDpy;
+        }
     }
 
     virtual void queryConfigs(int renderableType,

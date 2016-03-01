@@ -190,10 +190,6 @@ class MacDisplay : public EglOS::Display {
 public:
     explicit MacDisplay(EGLNativeDisplayType dpy) : mDpy(dpy) {}
 
-    virtual bool release() {
-        return true;
-    }
-
     virtual void queryConfigs(int renderableType,
                               EglOS::AddConfigCallback* addConfigFunc,
                               void* addConfigOpaque) {
