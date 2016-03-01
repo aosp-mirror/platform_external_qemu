@@ -149,6 +149,7 @@ int main(int argc, char** argv) {
     }
 
     crashservice->retrieveDumpMessage();
+    crashservice->collectProcessList();
 
     QCoreApplication::setOrganizationName(Ui::Settings::ORG_NAME);
     QCoreApplication::setOrganizationDomain(Ui::Settings::ORG_DOMAIN);
