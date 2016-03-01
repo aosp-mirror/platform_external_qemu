@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e211990a_f32ad073",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T21:48:02Z",
+      "side": 1,
+      "message": "could you please clang-format it?",
+      "range": {
+        "startLine": 26,
+        "startChar": 44,
+        "endLine": 26,
+        "endChar": 48
+      },
+      "revId": "ef2e4f25db9d6c110649a027a17c641480a91519",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_99763c65",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T21:48:02Z",
+      "side": 1,
+      "message": "don\u0027t forget that the starting line-feed and all starting spaces also end up in the string. You might want to move the R\"( to the next line, and untabify the whole shader.\n\nAlso, what about a separate data file?",
+      "range": {
+        "startLine": 117,
+        "startChar": 45,
+        "endLine": 117,
+        "endChar": 48
+      },
+      "revId": "ef2e4f25db9d6c110649a027a17c641480a91519",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a26ec178_61be51f7",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-01T21:48:02Z",
+      "side": 1,
+      "message": "nit: double semicolon",
+      "range": {
+        "startLine": 141,
+        "startChar": 87,
+        "endLine": 141,
+        "endChar": 89
+      },
+      "revId": "ef2e4f25db9d6c110649a027a17c641480a91519",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
