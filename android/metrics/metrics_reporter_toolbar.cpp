@@ -80,6 +80,7 @@ int formatToolbarGetUrl(char** ptr,
     // This is of the form: androidsdk_<product_name>_<event_name>
     static const char product_name[] = "androidsdk_emu_crash";
     static const char guest_arch_key[] = "guest_arch";
+    static const char guest_api_level_key[] = "guest_api_level";
     static const char system_time_key[] = "system_time";
     static const char user_time_key[] = "user_time";
     static const char adb_liveness_key[] = "adb_liveness";
@@ -115,6 +116,7 @@ int formatToolbarGetUrl(char** ptr,
     url_addstrval(&fullUrl, host_os_key, metrics->host_os_type);
     url_addstrval(&fullUrl, client_id_key, client_id.get());
     url_addstrval(&fullUrl, guest_arch_key, metrics->guest_arch);
+    url_addintval(&fullUrl, guest_api_level_key, metrics->guest_api_level);
     url_addintval(&fullUrl, num_crashes_key, metrics->is_dirty ? 1 : 0);
     url_addintval(&fullUrl, opengl_alive_key, metrics->opengl_alive);
     url_addi64val(&fullUrl, system_time_key, metrics->system_time);

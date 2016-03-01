@@ -1860,6 +1860,7 @@ static void android_init_metrics(int opengl_alive)
     ANDROID_METRICS_STRASSIGN(metrics.core_version, QEMU_CORE_VERSION);
     ANDROID_METRICS_STRASSIGN(metrics.host_os_type, get_host_os_type());
     ANDROID_METRICS_STRASSIGN(metrics.guest_arch, android_hw->hw_cpu_arch);
+    metrics.guest_api_level = avdInfo_getApiLevel(android_avdInfo);
     metrics.guest_gpu_enabled = android_hw->hw_gpu_enabled;
     if (android_hw->hw_gpu_enabled) {
         free(metrics.guest_gl_vendor);
