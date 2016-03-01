@@ -84,9 +84,6 @@ bool HostCrashReporter::exceptionFilterCallback(void*) {
     // collect the memory usage at the time of the crash
     crashhandler_copy_attachment(
                 CrashReporter::kProcessMemoryInfoFileName, "/proc/self/status");
-
-    CrashReporter::attachProcessListPosix();
-
     return true;
 }
 

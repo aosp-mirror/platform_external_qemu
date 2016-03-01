@@ -122,8 +122,6 @@ static void attachMemoryInfo()
 bool HostCrashReporter::exceptionFilterCallback(void*) {
     attachUptime();
     attachMemoryInfo();
-    CrashReporter::attachProcessListPosix();
-
     return true;    // proceed with handling the crash
 }
 
