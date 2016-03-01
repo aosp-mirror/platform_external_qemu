@@ -17,6 +17,7 @@
 
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/shared_library.h"
+#include "emugl/common/thread_store.h"
 #include "GLcommon/GLLibrary.h"
 
 #include "OpenglCodecCommon/ErrorLog.h"
@@ -28,7 +29,7 @@
 #include <GL/gl.h>
 #include <GL/wglext.h>
 
-#include <map>
+#include <unordered_map>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -238,7 +239,7 @@ LRESULT CALLBACK dummyWndProc(HWND hwnd,
 // Create a new dummy window, and return its handle.
 // Note that the window is 1x1 pixels and not visible, but
 // it can be used to create a device context and associated
-// OpenGL rendering context.
+// OpenGL rendering context. Return NULL on failure.
 HWND createDummyWindow() {
     WNDCLASSEX wcx;
     wcx.cbSize = sizeof(wcx);                       // size of structure
@@ -524,110 +525,156 @@ private:
 // This code deals with this by implementing the followin scheme:
 //
 // - For each unique PixelFormat ID (a.k.a. EGLConfig number), provide a way
-//   to create a new hidden 1x1 window, a corresponding HDC.
+//   to create a new hidden 1x1 window, and corresponding HDC.
 //
 // - Implement a simple thread-local mapping from PixelFormat IDs to
 //   (HWND, HDC) pairs that are created on demand.
 //
-// DisplayInfo is a structure used to implement the (HWND, HDC) pair, and
-// also record whether SetPixelFormat() was called on it.
-struct DisplayInfo {
-    DisplayInfo() : dc(NULL), hwnd(NULL), isPixelFormatSet(false) {}
-
-    DisplayInfo(HDC hdc, HWND wnd) :
-            dc(hdc), hwnd(wnd), isPixelFormatSet(false) {}
-
-    void release() {
-        if (hwnd) {
-            ReleaseDC(hwnd, dc);
-            DestroyWindow(hwnd);
-            hwnd = NULL;
-        }
-    }
-
-    HDC  dc;
-    HWND hwnd;
-    bool isPixelFormatSet;
-};
-
-struct TlsData {
-    std::map<int, DisplayInfo> m_map;
-};
-
-DWORD s_tlsIndex = 0;
-
-TlsData* getTLS() {
-    TlsData *tls = (TlsData *)TlsGetValue(s_tlsIndex);
-    if (!tls) {
-        tls = new TlsData();
-        TlsSetValue(s_tlsIndex, tls);
-    }
-    return tls;
-}
-
-}  // namespace
-
-class WinDisplay {
+// WinGlobals is the class used to implement this scheme. Usage is the
+// following:
+//
+// - Create a single global instance, passing a WglBaseDispatch pointer
+//   which is required to call its SetPixelFormat() method.
+//
+// - Call getDefaultDummyDC() to retrieve a thread-local device context that
+//   can be used to query / probe the list of available pixel formats for the
+//   host window, but not perform rendering.
+//
+// - Call getDummyDC() to retrieve a thread-local device context that can be
+//   used to create WGL context objects to render into a specific pixel
+//   format.
+//
+// - These devic contexts are thread-local, i.e. they are automatically
+//   reclaimed on thread exit. This also means that the caller should not
+//   call either ReleaseDC() or DeleteDC() on them.
+//
+class WinGlobals {
 public:
-     enum { DEFAULT_DISPLAY = 0 };
+    WinGlobals() = delete;
 
-     WinDisplay() {};
+    // Constructor. |dispatch| will be used to call the right version of
+    // ::SetPixelFormat() depending on GPU emulation configuration. See
+    // technical notes above for details.
+    explicit WinGlobals(const WglBaseDispatch* dispatch)
+            : mDispatch(dispatch), mTls(onThreadTermination) {}
 
-     DisplayInfo& getInfo(int configurationIndex) const {
-         return getTLS()->m_map[configurationIndex];
-     }
+    // Return a thread-local device context that can be used to list
+    // available pixel formats for the host window. The caller cannot use
+    // this context for drawing though. The context is owned
+    // by this instance and will be automatically reclaimed on thread exit.
+    HDC getDefaultDummyDC() {
+        return getInternalDC(nullptr);
+    }
 
-     HDC getDC(int configId) const {
-         return getInfo(configId).dc;
-     }
+    // Return a thread-local device context associated with a specific
+    // pixel format. The result is owned by this instance, and is automatically
+    // reclaimed on thread exit. Don't try to call ReleaseDC() on it.
+    HDC getDummyDC(const WinPixelFormat* format) {
+        return getInternalDC(format);
+    }
 
-     void setInfo(int configurationIndex, const DisplayInfo& info);
+private:
+    // ConfigDC holds a (HWND,HDC) pair to be associated with a given
+    // pixel format ID. This serves as the value type for ConfigMap
+    // declared below. Implemented as a movable type without copy-operations.
+    class ConfigDC {
+    public:
+        // Disable default constructor.
+        ConfigDC() = delete;
 
-     bool isPixelFormatSet(int cfgId) const {
-         return getInfo(cfgId).isPixelFormatSet;
-     }
+        // Constructor. This creates a new dummy 1x1 invisible window and
+        // an associated device context. If |format| is not nullptr, then
+        // calls |dispatch->SetPixelFormat()| on the resulting context to
+        // set the window's pixel format.
+        ConfigDC(const WinPixelFormat* format,
+                 const WglBaseDispatch* dispatch) {
+            mWindow = createDummyWindow();
+            mDeviceContext = nullptr;
+            if (mWindow) {
+                mDeviceContext = GetDC(mWindow);
+                if (format) {
+                    dispatch->SetPixelFormat(mDeviceContext,
+                                             format->configId(),
+                                             format->desc());
+                }
+            }
+        }
 
-     void pixelFormatWasSet(int cfgId) {
-         getTLS()->m_map[cfgId].isPixelFormatSet = true;
-     }
+        // Destructor.
+        ~ConfigDC() {
+            if (mWindow) {
+                ReleaseDC(mWindow, mDeviceContext);
+                DestroyWindow(mWindow);
+                mWindow = nullptr;
+            }
+        }
 
-     bool infoExists(int configurationIndex);
+        // Supports moves - this disables auto-generated copy-constructors.
+        ConfigDC(ConfigDC&& other)
+                : mWindow(other.mWindow),
+                  mDeviceContext(other.mDeviceContext) {
+            other.mWindow = nullptr;
+        }
 
-     void releaseAll();
+        ConfigDC& operator=(ConfigDC&& other) {
+            mWindow = other.mWindow;
+            mDeviceContext = other.mDeviceContext;
+            other.mWindow = nullptr;
+            return *this;
+        }
+
+        // Return device context for this instance.
+        HDC dc() const { return mDeviceContext; }
+
+    private:
+        HWND mWindow;
+        HDC mDeviceContext;
+    };
+
+    // Convenience type alias for mapping pixel format IDs, a.k.a. EGLConfig
+    // IDs, to ConfigDC instances.
+    using ConfigMap = std::unordered_map<int, ConfigDC>;
+
+    // Called when a thread terminates to delete the thread-local map
+    // that associates pixel format IDs with ConfigDC instances.
+    static void onThreadTermination(void* opaque) {
+        auto map = reinterpret_cast<ConfigMap*>(opaque);
+        delete map;
+    }
+
+    // Helper function used by getDefaultDummyDC() and getDummyDC().
+    //
+    // If |format| is nullptr, return a thread-local device context that can
+    // be used to list all available pixel formats for the host window.
+    //
+    // If |format| is not nullptr, then return a thread-local device context
+    // associated with the corresponding pixel format.
+    //
+    // Both cases will lazily create a 1x1 invisible dummy window which
+    // the device is connected to. All objects are automatically destroyed
+    // on thread exit. Return nullptr on failure.
+    HDC getInternalDC(const WinPixelFormat* format) {
+        int formatId = format ? format->configId() : 0;
+        auto map = reinterpret_cast<ConfigMap*>(mTls.get());
+        if (!map) {
+            map = new ConfigMap();
+            mTls.set(map);
+        }
+
+        auto it = map->find(formatId);
+        if (it != map->end()) {
+            return it->second.dc();
+        }
+
+        ConfigDC newValue(format, mDispatch);
+        HDC result = newValue.dc();
+        map->emplace(formatId, std::move(newValue));
+        return result;
+    }
+
+    const WglBaseDispatch* mDispatch;
+    emugl::ThreadStore mTls;
 };
-
-void WinDisplay::releaseAll(){
-    TlsData * tls = getTLS();
-
-    for(std::map<int,DisplayInfo>::iterator it = tls->m_map.begin();
-        it != tls->m_map.end();
-        it++) {
-       (*it).second.release();
-    }
-}
-
-bool WinDisplay::infoExists(int configurationIndex) {
-    return getTLS()->m_map.find(configurationIndex) != getTLS()->m_map.end();
-}
-
-void WinDisplay::setInfo(int configurationIndex, const DisplayInfo& info) {
-    getTLS()->m_map[configurationIndex] = info;
-}
-
-namespace {
-
-static HDC getDummyDC(WinDisplay* display, int cfgId) {
-    HDC dpy = NULL;
-    if (!display->infoExists(cfgId)) {
-        HWND hwnd = createDummyWindow();
-        dpy  = GetDC(hwnd);
-        display->setInfo(cfgId, DisplayInfo(dpy, hwnd));
-    } else {
-        dpy = display->getDC(cfgId);
-    }
-    return dpy;
-}
-
 
 bool initPixelFormat(HDC dc, const WglExtensionsDispatch* dispatch) {
     if (dispatch->wglChoosePixelFormatARB) {
@@ -643,7 +690,7 @@ bool initPixelFormat(HDC dc, const WglExtensionsDispatch* dispatch) {
     }
 }
 
-void pixelFormatToConfig(WinDisplay* display,
+void pixelFormatToConfig(WinGlobals* globals,
                          const WglExtensionsDispatch* dispatch,
                          int renderableType,
                          const PIXELFORMATDESCRIPTOR* frmt,
@@ -652,8 +699,6 @@ void pixelFormatToConfig(WinDisplay* display,
                          void* addConfigOpaque) {
     EglOS::ConfigInfo info;
     memset(&info, 0, sizeof(info));
-
-    HDC dpy = getDummyDC(display, WinDisplay::DEFAULT_DISPLAY);
 
     if (frmt->iPixelType != PFD_TYPE_RGBA) {
         D("%s: Not an RGBA type!\n", __FUNCTION__);
@@ -680,6 +725,8 @@ void pixelFormatToConfig(WinDisplay* display,
     }
 
     GLint window = 0, pbuffer = 0;
+    HDC dpy = globals->getDefaultDummyDC();
+
     if (dispatch->mIsSystemLib) {
         int windowAttrib = WGL_DRAW_TO_WINDOW_ARB;
         EXIT_IF_FALSE(dispatch->wglGetPixelFormatAttribivARB(
@@ -748,21 +795,16 @@ void pixelFormatToConfig(WinDisplay* display,
 
 class WglDisplay : public EglOS::Display {
 public:
-    // TODO(digit): Remove WinDisplay entirely.
-    explicit WglDisplay(WinDisplay* dpy, const WglExtensionsDispatch* dispatch) :
-            mDpy(dpy), mDispatch(dispatch) {}
+    WglDisplay() = delete;
 
-    virtual ~WglDisplay() {
-        if (mDpy) {
-            mDpy->releaseAll();
-            delete mDpy;
-        }
-    }
+    WglDisplay(const WglExtensionsDispatch* dispatch,
+               WinGlobals* globals)
+            : mDispatch(dispatch), mGlobals(globals) {}
 
     virtual void queryConfigs(int renderableType,
                               EglOS::AddConfigCallback addConfigFunc,
                               void* addConfigOpaque) {
-        HDC dpy = getDummyDC(mDpy, WinDisplay::DEFAULT_DISPLAY);
+        HDC dpy = mGlobals->getDefaultDummyDC();
 
         // wglChoosePixelFormat() needs to be called at least once,
         // i.e. it seems that the driver needs to initialize itself.
@@ -779,7 +821,7 @@ public:
             mDispatch->DescribePixelFormat(
                     dpy, configId, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
             pixelFormatToConfig(
-                    mDpy,
+                    mGlobals,
                     mDispatch,
                     renderableType,
                     &pfd,
@@ -825,19 +867,12 @@ public:
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
         const WinPixelFormat* format = WinPixelFormat::from(pixelFormat);
-        HDC dpy = getDummyDC(mDpy, format->configId());
-
-        if (!mDpy->isPixelFormatSet(format->configId())) {
-            if (!mDispatch->SetPixelFormat(dpy,
-                                           format->configId(),
-                                           format->desc())) {
-                return NULL;
-            }
-            mDpy->pixelFormatWasSet(format->configId());
+        HDC dpy = mGlobals->getDummyDC(format);
+        if (!dpy) {
+            return nullptr;
         }
 
         HGLRC ctx = mDispatch->wglCreateContext(dpy);
-
         if (ctx && sharedContext) {
             if (!mDispatch->wglShareLists(WinContext::from(sharedContext), ctx)) {
                 mDispatch->wglDeleteContext(ctx);
@@ -862,8 +897,8 @@ public:
     virtual EglOS::Surface* createPbufferSurface(
             const EglOS::PixelFormat* pixelFormat,
             const EglOS::PbufferInfo* info) {
-        int configId = WinPixelFormat::from(pixelFormat)->configId();
-        HDC dpy = getDummyDC(mDpy, configId);
+        const WinPixelFormat* format = WinPixelFormat::from(pixelFormat);
+        HDC dpy = mGlobals->getDummyDC(format);
 
         int wglTexFormat = WGL_NO_TEXTURE_ARB;
         int wglTexTarget =
@@ -889,7 +924,7 @@ public:
             return NULL;
         }
         HPBUFFERARB pb = dispatch->wglCreatePbufferARB(
-                dpy, configId, info->width, info->height, pbAttribs);
+                dpy, format->configId(), info->width, info->height, pbAttribs);
         if (!pb) {
             GetLastError();
             return NULL;
@@ -942,8 +977,8 @@ public:
     }
 
 private:
-    WinDisplay* mDpy;
     const WglExtensionsDispatch* mDispatch;
+    WinGlobals* mGlobals;
 };
 
 class WglLibrary : public GlLibrary {
@@ -968,13 +1003,7 @@ public:
     }
 
     virtual EglOS::Display* getDefaultDisplay() {
-        WinDisplay* dpy = new WinDisplay();
-
-        HWND hwnd = createDummyWindow();
-        HDC  hdc  =  GetDC(hwnd);
-        dpy->setInfo(WinDisplay::DEFAULT_DISPLAY, DisplayInfo(hdc, hwnd));
-
-        return new WglDisplay(dpy, mDispatch);
+        return new WglDisplay(mDispatch, &mGlobals);
     }
 
     virtual GlLibrary* getGlLibrary() {
@@ -990,16 +1019,15 @@ private:
     const WglExtensionsDispatch* mDispatch;
     WglBaseDispatch mBaseDispatch;
     WglLibrary mGlLib;
+    WinGlobals mGlobals;
 };
 
 WinEngine::WinEngine() :
         mLib(NULL),
         mDispatch(NULL),
         mBaseDispatch(),
-        mGlLib(&mBaseDispatch) {
-    if (!s_tlsIndex) {
-        s_tlsIndex = TlsAlloc();
-    }
+        mGlLib(&mBaseDispatch),
+        mGlobals(&mBaseDispatch) {
     const char* kLibName = "opengl32.dll";
     bool isSystemLib = true;
     const char* env = ::getenv("ANDROID_GL_LIB");
