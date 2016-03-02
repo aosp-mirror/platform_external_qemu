@@ -869,7 +869,7 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
         if (fileName.isEmpty()) {
             showErrorDialog(tr("The screenshot save location is invalid.<br/>"
                                "Check the settings page and ensure the directory "
-                               "exists and is writeable."),
+                               "exists and is writable."),
                             tr("Screenshot"));
             return;
         }

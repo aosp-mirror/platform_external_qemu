@@ -17,7 +17,6 @@
 #include "android/skin/qt/qt-settings.h"
 #include <QApplication>
 #include <QFileDialog>
-#include <QFileInfo>
 #include <QMessageBox>
 #include <QSettings>
 
@@ -159,9 +158,7 @@ void SettingsPage::on_set_saveLocFolderButton_clicked()
 
     dirName = QDir::toNativeSeparators(dirName);
 
-    // Check if this path is writable
-    QFileInfo fInfo(dirName);
-    if ( !fInfo.isDir() || !fInfo.isWritable() ) {
+    if ( !directoryIsWritable(dirName) ) {
         QString errStr = tr("The path is not writable:<br>")
                          + dirName;
         showErrorDialog(errStr, tr("Save location"));
