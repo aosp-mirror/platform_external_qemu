@@ -49,6 +49,23 @@
     },
     {
       "key": {
+        "uuid": "22ef3134_c095405e",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-02T19:52:22Z",
+      "side": 1,
+      "message": "Thanks for the link, that\u0027s a very useful thing to put here :)",
+      "revId": "636d9aac8a01f7a5783dea03a4fece7758b3a687",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62be89e4_fc4e4138",
         "filename": "android/skin/qt/gl-widget.cpp",
         "patchSetId": 2
@@ -314,6 +331,23 @@
         "endLine": 524,
         "endChar": 43
       },
+      "revId": "636d9aac8a01f7a5783dea03a4fece7758b3a687",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22ef3134_80fb388e",
+        "filename": "android/skin/qt/gl-widget.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-02T19:52:22Z",
+      "side": 1,
+      "message": "That\u0027s adding a lot of new methods and member fields to a base widget class for a very specific feature. What about implementing the same with a dedicated helper class, and referencing it as a member, e.g.:\n\n  struct GLWidgetScaler;\n\n  class GLWidget {\n    ....\n  private:\n       ....\n       GLWidgetScaler* mScaler;\n       EGLState* mEGLState;\n       ...\n  };\n\nThat would also be a good opportunity to document the methods above a little, even though they are implementation detail, they add a significant amount of complexity to the current code, and that would help maintenance / understandability.",
       "revId": "636d9aac8a01f7a5783dea03a4fece7758b3a687",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
