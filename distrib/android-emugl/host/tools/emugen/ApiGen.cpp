@@ -767,11 +767,11 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 
     // helper macros
     fprintf(fp,
-            "#ifdef DEBUG_PRINTOUT\n"
-            "#  define DEBUG(...) fprintf(stderr, __VA_ARGS__)\n"
+            "#ifdef OPENGL_DEBUG_PRINTOUT\n"
+            "#  define DEBUG(...) do { print_timestamp(); fprintf(stderr, __VA_ARGS__); } while(0)\n"
             "#else\n"
             "#  define DEBUG(...)  ((void)0)\n"
-            "#endif\n\n");
+            "#endif\n\n", classname.c_str(), classname.c_str());
 
     fprintf(fp,
             "#ifdef CHECK_GLERROR\n"
