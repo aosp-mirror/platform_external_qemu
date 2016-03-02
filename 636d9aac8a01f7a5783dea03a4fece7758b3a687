@@ -178,6 +178,30 @@
     },
     {
       "key": {
+        "uuid": "e211990a_5649f205",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 1078923
+      },
+      "writtenOn": "2016-03-02T00:04:30Z",
+      "side": 1,
+      "message": "Renderbuffers are not queriable, while textures are. The GL can therefore store the data in a more efficient manner. This is especially true for depth buffers. I would highly recommend you use a render buffer. You shouldn\u0027t need to use any extension for it.",
+      "parentUuid": "02feade5_f00da817",
+      "range": {
+        "startLine": 409,
+        "startChar": 16,
+        "endLine": 409,
+        "endChar": 23
+      },
+      "revId": "636d9aac8a01f7a5783dea03a4fece7758b3a687",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a26ec178_be61cde1",
         "filename": "android/skin/qt/gl-widget.cpp",
         "patchSetId": 2
