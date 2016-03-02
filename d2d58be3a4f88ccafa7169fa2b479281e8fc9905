@@ -22,6 +22,30 @@
       "revId": "d2d58be3a4f88ccafa7169fa2b479281e8fc9905",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82ea9d1e_b2e5de21",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-02T20:00:13Z",
+      "side": 1,
+      "message": "As part of crash gardening I created a bug for this earlier today: Here\u0027s the link https://code.google.com/p/android/issues/detail?id\u003d202313",
+      "parentUuid": "c26bb568_8d1b6f94",
+      "range": {
+        "startLine": 124,
+        "startChar": 4,
+        "endLine": 124,
+        "endChar": 63
+      },
+      "revId": "d2d58be3a4f88ccafa7169fa2b479281e8fc9905",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
