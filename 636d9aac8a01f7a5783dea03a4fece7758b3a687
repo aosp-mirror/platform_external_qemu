@@ -202,6 +202,30 @@
     },
     {
       "key": {
+        "uuid": "e27a7932_50c4335d",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-02T06:21:16Z",
+      "side": 1,
+      "message": "As it turned out, we have a bug in emugl that caused this strange behavior. After fixing it, I am able to use renderbuffer objects. I will send out the fix as a separate change.",
+      "parentUuid": "e211990a_5649f205",
+      "range": {
+        "startLine": 409,
+        "startChar": 16,
+        "endLine": 409,
+        "endChar": 23
+      },
+      "revId": "636d9aac8a01f7a5783dea03a4fece7758b3a687",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a26ec178_be61cde1",
         "filename": "android/skin/qt/gl-widget.cpp",
         "patchSetId": 2
