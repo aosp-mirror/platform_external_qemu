@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c26bb568_8d1b6f94",
+        "filename": "android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-02T19:55:31Z",
+      "side": 1,
+      "message": "could you please create a bug for this? We\u0027ve got 5 crash reports, I\u0027d prefer the bug number to be in the CL description",
+      "range": {
+        "startLine": 124,
+        "startChar": 4,
+        "endLine": 124,
+        "endChar": 63
+      },
+      "revId": "d2d58be3a4f88ccafa7169fa2b479281e8fc9905",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
