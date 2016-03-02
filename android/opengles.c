@@ -145,12 +145,17 @@ android_startOpenglesRenderer(int width, int height)
     }
 
     android_init_opengl_logger();
+
+    emugl_logger_struct logfuncs;
+    logfuncs.coarse = android_opengl_logger_write;
+    logfuncs.fine = android_opengl_cxt_logger_write;
+
     if (!initOpenGLRenderer(width,
                             height,
                             rendererUsesSubWindow,
                             rendererAddress,
                             sizeof(rendererAddress),
-                            android_opengl_logger_write)) {
+                            logfuncs)) {
         D("Can't start OpenGLES renderer?");
         return -1;
     }

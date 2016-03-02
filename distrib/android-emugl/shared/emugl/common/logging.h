@@ -16,14 +16,22 @@
 
 typedef void (*logger_t)(const char* fmt, ...);
 extern logger_t emugl_logger;
+extern logger_t emugl_cxt_logger;
 void set_emugl_logger(logger_t f);
+void set_emugl_cxt_logger(logger_t f);
 
 #define GL_LOGGING 1
 
 #if GL_LOGGING
+
 #define GL_LOG(...) do { \
     emugl_logger(__VA_ARGS__); \
 } while (0)
+
+#define GL_CXT_LOG(...) do { \
+    emugl_cxt_logger(__VA_ARGS__); \
+} while (0)
+
 #else
 #define GL_LOG(...) 0
 #endif

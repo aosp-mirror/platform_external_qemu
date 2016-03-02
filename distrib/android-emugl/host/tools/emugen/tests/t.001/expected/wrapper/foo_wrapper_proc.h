@@ -6,6 +6,8 @@
 
 
 #include "foo_types.h"
+
+#include "emugl/common/logging.h"
 #ifndef foo_APIENTRY
 #define foo_APIENTRY 
 #endif
