@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "emugl/common/logging.h"
+
 static inline void* SafePointerFromUInt(GLuint value) {
   return (void*)(uintptr_t)value;
 }
