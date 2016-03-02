@@ -17,9 +17,9 @@
 #include "android/skin/qt/qt-settings.h"
 #include <QApplication>
 #include <QFileDialog>
-#include <QFileInfo>
 #include <QMessageBox>
 #include <QSettings>
+#include <QTemporaryFile>
 
 // Helper function to set the contents of a QLineEdit.
 static void setElidedText(QLineEdit* line_edit, const QString& text) {
@@ -159,9 +159,19 @@ void SettingsPage::on_set_saveLocFolderButton_clicked()
 
     dirName = QDir::toNativeSeparators(dirName);
 
-    // Check if this path is writable
-    QFileInfo fInfo(dirName);
-    if ( !fInfo.isDir() || !fInfo.isWritable() ) {
+    // Check if this path is writable. (Note that QFileInfo::isWritable()
+    // does not work well on Windows.)
+    bool dirIsOK = false;
+    QDir theDir(dirName);
+    if (theDir.exists()) {
+        // See if we can create a file here
+        QTemporaryFile tmpFile(dirName + "/XXXXXX");
+        // If we can open a temporary file, the directory is OK
+        dirIsOK = tmpFile.open();
+        // The temporary file is removed when we leave this scope
+    }
+
+    if (!dirIsOK) {
         QString errStr = tr("The path is not writable:<br>")
                          + dirName;
         showErrorDialog(errStr, tr("Save location"));
