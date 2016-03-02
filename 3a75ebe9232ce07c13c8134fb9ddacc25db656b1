@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "82ea9d1e_4c395cd6",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-02T20:24:02Z",
+      "side": 1,
+      "message": "Assuming both path are taken (which is something I realized in practice) either should be fine. Will be moving to the \"still running\" path.",
+      "parentUuid": "e2b0b90b_96be0bf4",
+      "range": {
+        "startLine": 347,
+        "startChar": 0,
+        "endLine": 347,
+        "endChar": 25
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e2b0b90b_7996d06a",
         "filename": "android/skin/qt/event-serializer.cpp",
         "patchSetId": 8
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-01T19:56:16Z",
       "side": 1,
       "message": "what if the line wasn\u0027t empty? does it mean you\u0027re throwing away some data?",
+      "range": {
+        "startLine": 84,
+        "startChar": 0,
+        "endLine": 84,
+        "endChar": 17
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_8a6edcc9",
+        "filename": "android/skin/qt/event-serializer.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-02T20:24:02Z",
+      "side": 1,
+      "message": "Yes, this data should be ignored because it is a record that i cannot replay",
+      "parentUuid": "e2b0b90b_7996d06a",
       "range": {
         "startLine": 84,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "e27a7932_0fdc4959",
+        "filename": "android/skin/qt/event-serializer.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-02T20:24:02Z",
+      "side": 1,
+      "message": "This was a bit of an overkill but it looks nicer, I guess.",
+      "parentUuid": "02594de9_7e683161",
+      "range": {
+        "startLine": 100,
+        "startChar": 25,
+        "endLine": 100,
+        "endChar": 28
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "02feade5_8395fdf7",
         "filename": "android/skin/qt/event-serializer.cpp",
         "patchSetId": 8
@@ -82,6 +154,30 @@
       "writtenOn": "2016-03-01T19:56:16Z",
       "side": 1,
       "message": "this function may throw, and that would crash the whole emulator",
+      "range": {
+        "startLine": 101,
+        "startChar": 45,
+        "endLine": 101,
+        "endChar": 49
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02594de9_645dff4e",
+        "filename": "android/skin/qt/event-serializer.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-02T20:24:02Z",
+      "side": 1,
+      "message": "This should be covered by updated read from stream",
+      "parentUuid": "02feade5_8395fdf7",
       "range": {
         "startLine": 101,
         "startChar": 45,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "02594de9_21fb7990",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-02T20:24:02Z",
+      "side": 1,
+      "message": "Sure",
+      "parentUuid": "c26bb568_f6c9a59e",
+      "range": {
+        "startLine": 50,
+        "startChar": 56,
+        "endLine": 50,
+        "endChar": 69
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62be89e4_bc29e4cd",
         "filename": "android/skin/qt/event-serializer.h",
         "patchSetId": 8
@@ -128,6 +248,30 @@
       "writtenOn": "2016-03-01T19:56:16Z",
       "side": 1,
       "message": "endOfStream? all other functions use camelCase here",
+      "range": {
+        "startLine": 53,
+        "startChar": 5,
+        "endLine": 53,
+        "endChar": 18
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e211990a_6701dae7",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-02T20:24:02Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "62be89e4_bc29e4cd",
       "range": {
         "startLine": 53,
         "startChar": 5,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "e2b0b90b_0a62cce4",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-02T20:24:02Z",
+      "side": 1,
+      "message": "will wrap around try-catch block",
+      "parentUuid": "62be89e4_1c8fb018",
+      "range": {
+        "startLine": 94,
+        "startChar": 17,
+        "endLine": 94,
+        "endChar": 21
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c26bb568_98aad799",
         "filename": "android/skin/qt/event-serializer.h",
         "patchSetId": 8
@@ -174,6 +342,30 @@
       "writtenOn": "2016-03-01T19:56:16Z",
       "side": 1,
       "message": "why do you need a separate stream here? can\u0027t you just pass the original one to the function and it would deserialize an even from it, stopping at the end of the event record",
+      "range": {
+        "startLine": 103,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 42
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a26ec178_fd5661fd",
+        "filename": "android/skin/qt/event-serializer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-02T20:24:02Z",
+      "side": 1,
+      "message": "This looked cleaner to me and I did not consider this extra stream an overhead worth avoiding. Updating as you suggest.",
+      "parentUuid": "c26bb568_98aad799",
       "range": {
         "startLine": 103,
         "startChar": 0,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "a26ec178_cb3b9321",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-02T20:24:02Z",
+      "side": 1,
+      "message": "removed, this was dead code anyway (pretty sure i copied it from somewhere else in the codebase)",
+      "parentUuid": "02594de9_be0a29b6",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 30
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62be89e4_7cac6c69",
         "filename": "android/skin/qt/ui-event-record-player.cpp",
         "patchSetId": 8
@@ -220,6 +436,30 @@
       "writtenOn": "2016-03-01T19:56:16Z",
       "side": 1,
       "message": "why is this needed?",
+      "range": {
+        "startLine": 50,
+        "startChar": 3,
+        "endLine": 50,
+        "endChar": 22
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e27a7932_0fc52975",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-02T20:24:02Z",
+      "side": 1,
+      "message": "It\u0027s not, it\u0027s a habit. Dropped",
+      "parentUuid": "62be89e4_7cac6c69",
       "range": {
         "startLine": 50,
         "startChar": 3,
@@ -278,6 +518,30 @@
     },
     {
       "key": {
+        "uuid": "02594de9_04e3ebc3",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-02T20:24:02Z",
+      "side": 1,
+      "message": "Yes, it only checks if the file is write-able by the user",
+      "parentUuid": "62be89e4_5cb1a8c2",
+      "range": {
+        "startLine": 64,
+        "startChar": 4,
+        "endLine": 65,
+        "endChar": 27
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a2e32149_9ea42c15",
         "filename": "android/skin/qt/ui-event-record-player.cpp",
         "patchSetId": 8
@@ -289,6 +553,30 @@
       "writtenOn": "2016-03-01T19:56:16Z",
       "side": 1,
       "message": "is zero delay fine for us? also, what about millisecond accuracy",
+      "range": {
+        "startLine": 107,
+        "startChar": 48,
+        "endLine": 107,
+        "endChar": 61
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_8ae5bc21",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-02T20:24:02Z",
+      "side": 1,
+      "message": "It is defined in seconds because it is more intuitive than in milliseconds (e.g. wait a few seconds to boot to homescreen before replay). It could be more accurate and the beginning of a replay session could be  dynamically controlled (e.g. ui or some port), but that would be future work. I prefer to stick to seconds.\n\nreplay_delay \u003d\u003d 0 does has no effect. I will disallow it too",
+      "parentUuid": "a2e32149_9ea42c15",
       "range": {
         "startLine": 107,
         "startChar": 48,
@@ -427,6 +715,30 @@
       "writtenOn": "2016-03-01T19:56:16Z",
       "side": 1,
       "message": "nit",
+      "range": {
+        "startLine": 230,
+        "startChar": 0,
+        "endLine": 230,
+        "endChar": 11
+      },
+      "revId": "3a75ebe9232ce07c13c8134fb9ddacc25db656b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e211990a_2d7ce145",
+        "filename": "android/skin/qt/ui-event-record-player.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-02T20:24:02Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "82ea9d1e_4a1664dd",
       "range": {
         "startLine": 230,
         "startChar": 0,
