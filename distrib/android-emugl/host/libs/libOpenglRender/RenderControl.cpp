@@ -22,6 +22,8 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include "emugl/common/logging.h"
+
 static const GLint rendererVersion = 1;
 
 static GLint rcGetRendererVersion()
