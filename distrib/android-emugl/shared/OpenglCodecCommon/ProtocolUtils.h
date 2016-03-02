@@ -1,10 +1,13 @@
 #ifndef EMUGL_PROTOCOL_UTILS_H
 #define EMUGL_PROTOCOL_UTILS_H
 
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 
 namespace emugl {
 

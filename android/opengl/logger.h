@@ -23,5 +23,6 @@ ANDROID_BEGIN_HEADER
 void android_init_opengl_logger();
 void android_opengl_logger_write(const char* fmt, ...);
 void android_stop_opengl_logger();
+void android_opengl_cxt_logger_write(const char* fmt, ...);
 
 ANDROID_END_HEADER

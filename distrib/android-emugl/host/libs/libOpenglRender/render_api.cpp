@@ -78,8 +78,10 @@ RENDER_APICALL int RENDER_APIENTRY initLibrary(void)
 
 RENDER_APICALL int RENDER_APIENTRY initOpenGLRenderer(
         int width, int height, bool useSubWindow, char* addr, size_t addrLen,
-        void* logger) {
+        void* logger,
+        void* cxt_logger) {
     set_emugl_logger((logger_t)logger);
+    set_emugl_cxt_logger((logger_t)cxt_logger);
     //
     // Fail if renderer is already initialized
     //
