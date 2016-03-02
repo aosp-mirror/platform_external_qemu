@@ -72,6 +72,13 @@
   X(void, glFramebufferTexture2D, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level), (target, attachment, textarget, texture, level)) \
   X(GLenum, glCheckFramebufferStatus, (GLenum target), (target)) \
   X(void, glDeleteFramebuffers, (GLsizei n, const GLuint* framebuffers), (n, framebuffers)) \
+  X(GLboolean, glIsRenderbuffer, (GLuint renderbuffer), (renderbuffer)) \
+  X(void, glBindRenderbuffer, (GLenum target, GLuint renderbuffer), (target, renderbuffer)) \
+  X(void, glDeleteRenderbuffers, (GLsizei n, const GLuint * renderbuffers), (n, renderbuffers)) \
+  X(void, glGenRenderbuffers, (GLsizei n, GLuint * renderbuffers), (n, renderbuffers)) \
+  X(void, glRenderbufferStorage, (GLenum target, GLenum internalformat, GLsizei width, GLsizei height), (target, internalformat, width, height)) \
+  X(void, glGetRenderbufferParameteriv, (GLenum target, GLenum pname, GLint * params), (target, pname, params)) \
+  X(void, glFramebufferRenderbuffer, (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer), (target, attachment, renderbuffertarget, renderbuffer)) \
 
 
 #endif  // GLES2_ONLY_FUNCTIONS_H
