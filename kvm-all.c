@@ -60,6 +60,22 @@
 
 #define KVM_MSI_HASHTAB_SIZE    256
 
+#ifdef USE_ANDROID_EMU
+#include "android/crashreport/crash-handler.h"
+
+static void __attribute__((noreturn)) die(const char* message,
+                                          const char* function) {
+    crashhandler_die_format("KVM operation failed: %s (%s)", message, function);
+    abort(); // just in case
+}
+#else
+static void __attribute__((noreturn)) die(const char* message,
+                                          const char* function) {
+    fprintf(stderr, "KVM operation failed: %s (%s)\n", message, function);
+    abort();
+}
+#endif
+
 typedef struct KVMSlot
 {
     hwaddr start_addr;
@@ -158,8 +174,7 @@ static KVMSlot *kvm_alloc_slot(KVMState *s)
         return slot;
     }
 
-    fprintf(stderr, "%s: no free slot available\n", __func__);
-    abort();
+    die("no free slot available", __func__);
 }
 
 static KVMSlot *kvm_lookup_matching_slot(KVMState *s,
@@ -349,7 +364,7 @@ static void kvm_log_start(MemoryListener *listener,
     r = kvm_dirty_pages_log_change(section->offset_within_address_space,
                                    int128_get64(section->size), true);
     if (r < 0) {
-        abort();
+        die("dirty pages log change", __func__);
     }
 }
 
@@ -361,7 +376,7 @@ static void kvm_log_stop(MemoryListener *listener,
     r = kvm_dirty_pages_log_change(section->offset_within_address_space,
                                    int128_get64(section->size), false);
     if (r < 0) {
-        abort();
+        die("dirty pages log change", __func__);
     }
 }
 
@@ -703,7 +718,7 @@ static void kvm_set_phys_mem(MemoryRegionSection *section, bool add)
         if (err) {
             fprintf(stderr, "%s: error unregistering overlapping slot: %s\n",
                     __func__, strerror(-err));
-            abort();
+            die("error unregistering overlapping slot", __func__);
         }
 
         /* Workaround for older KVM versions: we can't join slots, even not by
@@ -726,7 +741,8 @@ static void kvm_set_phys_mem(MemoryRegionSection *section, bool add)
             if (err) {
                 fprintf(stderr, "%s: error updating slot: %s\n", __func__,
                         strerror(-err));
-                abort();
+                die("failed to set user memory region "
+                    "(most probably out of memory)", __func__);
             }
 
             start_addr += old.memory_size;
@@ -752,7 +768,8 @@ static void kvm_set_phys_mem(MemoryRegionSection *section, bool add)
                                 "PAGE_SIZE is too big. Please try to use 4k " \
                                 "PAGE_SIZE!\n", __func__);
 #endif
-                abort();
+                die("failed to set user memory region "
+                    "(most probably out of memory)", __func__);
             }
         }
 
@@ -771,7 +788,8 @@ static void kvm_set_phys_mem(MemoryRegionSection *section, bool add)
             if (err) {
                 fprintf(stderr, "%s: error registering suffix slot: %s\n",
                         __func__, strerror(-err));
-                abort();
+                die("failed to set user memory region "
+                    "(most probably out of memory)", __func__);
             }
         }
     }
@@ -793,7 +811,7 @@ static void kvm_set_phys_mem(MemoryRegionSection *section, bool add)
     if (err) {
         fprintf(stderr, "%s: error registering slot: %s\n", __func__,
                 strerror(-err));
-        abort();
+        die("error registering slot", __func__);
     }
 }
 
@@ -818,7 +836,7 @@ static void kvm_log_sync(MemoryListener *listener,
 
     r = kvm_physical_sync_dirty_bitmap(section);
     if (r < 0) {
-        abort();
+        die("sync dirty bitmap", __func__);
     }
 }
 
@@ -852,7 +870,7 @@ static void kvm_mem_ioeventfd_add(MemoryListener *listener,
     if (r < 0) {
         fprintf(stderr, "%s: error adding ioeventfd: %s\n",
                 __func__, strerror(-r));
-        abort();
+        die("error adding ioeventf", __func__);
     }
 }
 
@@ -868,7 +886,7 @@ static void kvm_mem_ioeventfd_del(MemoryListener *listener,
                                data, false, int128_get64(section->size),
                                match_data);
     if (r < 0) {
-        abort();
+        die("set ioeventfd mmio", __func__);
     }
 }
 
@@ -886,7 +904,7 @@ static void kvm_io_ioeventfd_add(MemoryListener *listener,
     if (r < 0) {
         fprintf(stderr, "%s: error adding ioeventfd: %s\n",
                 __func__, strerror(-r));
-        abort();
+        die("error adding ioeventfd", __func__);
     }
 }
 
@@ -903,7 +921,7 @@ static void kvm_io_ioeventfd_del(MemoryListener *listener,
                               data, false, int128_get64(section->size),
                               match_data);
     if (r < 0) {
-        abort();
+        die("set ioeventfd pio", __func__);
     }
 }
 
@@ -949,7 +967,7 @@ int kvm_set_irq(KVMState *s, int irq, int level)
     ret = kvm_vm_ioctl(s, s->irq_set_ioctl, &event);
     if (ret < 0) {
         perror("kvm_set_irq");
-        abort();
+        die("vm ioctl", __func__);
     }
 
     return (s->irq_set_ioctl == KVM_IRQ_LINE) ? 1 : event.status;
@@ -1315,7 +1333,7 @@ void kvm_irqchip_release_virq(KVMState *s, int virq)
 
 int kvm_irqchip_send_msi(KVMState *s, MSIMessage msg)
 {
-    abort();
+    die("should not be called", __func__);
 }
 
 int kvm_irqchip_add_msi_route(KVMState *s, MSIMessage msg)
@@ -1330,7 +1348,7 @@ int kvm_irqchip_add_adapter_route(KVMState *s, AdapterInfo *adapter)
 
 static int kvm_irqchip_assign_irqfd(KVMState *s, int fd, int virq, bool assign)
 {
-    abort();
+    die("should not be called", __func__);
 }
 
 int kvm_irqchip_update_msi_route(KVMState *s, int virq, MSIMessage msg)
