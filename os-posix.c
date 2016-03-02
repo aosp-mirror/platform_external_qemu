@@ -284,7 +284,7 @@ void os_setup_post(void)
 
         close(fd);
 
-        do {        
+        do {
             len = write(daemon_pipe, &status, 1);
         } while (len < 0 && errno == EINTR);
         if (len != 1) {
