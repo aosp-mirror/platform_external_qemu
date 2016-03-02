@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2b0b90b_a571cbb0",
+        "filename": "android/skin/qt/extended-pages/common.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-02T22:07:36Z",
+      "side": 1,
+      "message": "const \u0026? Doesn\u0027t matter too much.",
+      "range": {
+        "startLine": 23,
+        "startChar": 25,
+        "endLine": 23,
+        "endChar": 32
+      },
+      "revId": "59c35aacc89cdba7202d81845c767c2e34d015e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
