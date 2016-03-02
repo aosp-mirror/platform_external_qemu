@@ -150,7 +150,8 @@ android_startOpenglesRenderer(int width, int height)
                             rendererUsesSubWindow,
                             rendererAddress,
                             sizeof(rendererAddress),
-                            android_opengl_logger_write)) {
+                            android_opengl_logger_write,
+                            android_opengl_cxt_logger_write)) {
         D("Can't start OpenGLES renderer?");
         return -1;
     }
