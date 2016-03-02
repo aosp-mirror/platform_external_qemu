@@ -193,6 +193,10 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
     WId wid = effectiveWinId();
     wid = (WId)getNSWindow((void*)wid);
     nsWindowHideWindowButtons((void*)wid);
+
+    WId toolWid = mEmulatorWindow->toolWindow()->effectiveWinId();
+    toolWid = (WId)getNSWindow((void*)toolWid);
+    nsWindowSetToolBarCollectionBehavior((void*)toolWid);
 #endif
 
     mEmulatorWindow->toolWindow()->show();

@@ -37,9 +37,19 @@ void nsWindowHideWindowButtons(void* ns_window) {
     [[window standardWindowButton:NSWindowCloseButton] setHidden:true];
     [[window standardWindowButton:NSWindowMiniaturizeButton] setHidden:true];
     [[window standardWindowButton:NSWindowZoomButton] setHidden:true];
-    [window setCollectionBehavior:NSWindowCollectionBehaviorFullScreenAuxiliary];
+    [window setCollectionBehavior:
+        (NSWindowCollectionBehaviorFullScreenAuxiliary |
+         NSWindowCollectionBehaviorMoveToActiveSpace)];
 }
 
 int numHeldMouseButtons() {
     return (int) [NSEvent pressedMouseButtons];
+}
+
+void nsWindowSetToolBarCollectionBehavior(void* ns_window) {
+    NSWindow* window = (NSWindow *)ns_window;
+    if (!window) {
+        return;
+    }
+    [window setCollectionBehavior:NSWindowCollectionBehaviorMoveToActiveSpace];
 }
