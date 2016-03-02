@@ -1,10 +1,13 @@
 #ifndef EMUGL_PROTOCOL_UTILS_H
 #define EMUGL_PROTOCOL_UTILS_H
 
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 
 namespace emugl {
 
@@ -187,6 +190,24 @@ private:
     void* mBuff;
     size_t mSize;
 };
+
+// Timestamps. This can be useful for debugging performance.
+
+inline void print_timestamp() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    uint64_t curr_micros = (tv.tv_usec) % 1000;
+    uint64_t curr_millis = (tv.tv_usec / 1000) % 1000;
+    uint64_t curr_secs = tv.tv_sec;
+    fprintf(stderr, "time_us="
+                    "%" PRIu64 " s "
+                    "%" PRIu64 " ms "
+                    "%" PRIu64 " us ",
+                    curr_secs,
+                    curr_millis,
+                    curr_micros);
+}
 
 }  // namespace emugl
 
