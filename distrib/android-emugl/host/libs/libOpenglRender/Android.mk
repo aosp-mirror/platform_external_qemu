@@ -38,18 +38,12 @@ host_common_SRC_FILES := \
     TimeUtils.cpp \
     WindowSurface.cpp \
 
-host_common_CFLAGS :=
-
 ifeq ($(BUILD_TARGET_OS),windows)
     host_common_SRC_FILES += Win32PipeStream.cpp
     host_common_LDLIBS += -lws2_32 -lpsapi
 else
     host_common_SRC_FILES += UnixStream.cpp
 endif
-
-#For gl debbuging
-#host_common_CFLAGS += -DCHECK_GL_ERROR
-
 
 ### host libOpenglRender #################################################
 $(call emugl-begin-host-shared-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender)
@@ -71,6 +65,6 @@ LOCAL_STATIC_LIBRARIES += libOpenGLESDispatch
 
 LOCAL_SYMBOL_FILE := render_api.entries
 
-$(call emugl-export,CFLAGS,$(host_common_CFLAGS))
+$(call emugl-export,CFLAGS,$(EMUGL_USER_CFLAGS))
 
 $(call emugl-end-module)

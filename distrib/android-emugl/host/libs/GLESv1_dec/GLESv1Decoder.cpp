@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "emugl/common/logging.h"
+
 static inline void* SafePointerFromUInt(GLuint value) {
   return (void*)(uintptr_t)value;
 }
@@ -43,6 +45,7 @@ GLESv1Decoder::~GLESv1Decoder()
 
 int GLESv1Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
 {
+    this->initContextLogger(emugl_cxt_logger);
     this->initDispatchByName(getProcFunc, getProcFuncData);
 
     glGetCompressedTextureFormats = s_glGetCompressedTextureFormats;

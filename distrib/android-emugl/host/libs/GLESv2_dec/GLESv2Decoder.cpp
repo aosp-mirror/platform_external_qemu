@@ -20,6 +20,8 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#include "emugl/common/logging.h"
+
 static inline void* SafePointerFromUInt(GLuint value) {
   return (void*)(uintptr_t)value;
 }
@@ -55,6 +57,7 @@ void *GLESv2Decoder::s_getProc(const char *name, void *userData)
 
 int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
 {
+    this->initContextLogger(emugl_cxt_logger);
     this->initDispatchByName(getProcFunc, getProcFuncData);
 
     glGetCompressedTextureFormats = s_glGetCompressedTextureFormats;

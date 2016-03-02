@@ -22,6 +22,8 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include "emugl/common/logging.h"
+
 static const GLint rendererVersion = 1;
 
 static GLint rcGetRendererVersion()
@@ -366,6 +368,7 @@ static int rcDestroyClientImage(uint32_t image)
 
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
+    dec->initContextLogger(emugl_cxt_logger);
     dec->rcGetRendererVersion = rcGetRendererVersion;
     dec->rcGetEGLVersion = rcGetEGLVersion;
     dec->rcQueryEGLString = rcQueryEGLString;
