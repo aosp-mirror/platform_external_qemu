@@ -767,11 +767,17 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 
     // helper macros
     fprintf(fp,
+            "#define DEBUG_PRINTOUT 1\n"
             "#ifdef DEBUG_PRINTOUT\n"
-            "#  define DEBUG(...) fprintf(stderr, __VA_ARGS__)\n"
+            "#ifndef TIMEGET\n"
+            "#define TIMEGET\n"
+            "#include <sys/time.h>\n"
+            "unsigned long %s_ts() { struct timeval tv; gettimeofday(&tv, NULL); return tv.tv_usec + tv.tv_sec * 1000000; }\n"
+            "#endif\n"
+            "#  define DEBUG(...) do { fprintf(stderr, \"t=%%lu us \", %s_ts()); fprintf(stderr, __VA_ARGS__); } while(0) \n"
             "#else\n"
             "#  define DEBUG(...)  ((void)0)\n"
-            "#endif\n\n");
+            "#endif\n\n", classname.c_str(), classname.c_str());
 
     fprintf(fp,
             "#ifdef CHECK_GLERROR\n"
