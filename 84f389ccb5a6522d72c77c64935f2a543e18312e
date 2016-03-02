@@ -22,6 +22,30 @@
       "revId": "84f389ccb5a6522d72c77c64935f2a543e18312e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02feade5_4daafee2",
+        "filename": "android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-02T20:04:25Z",
+      "side": 1,
+      "message": "Good idea.\n\nI put it in a Qt-specific area. How\u0027s that?",
+      "parentUuid": "82ea9d1e_6c7f003d",
+      "range": {
+        "startLine": 162,
+        "startChar": 0,
+        "endLine": 172,
+        "endChar": 5
+      },
+      "revId": "84f389ccb5a6522d72c77c64935f2a543e18312e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
