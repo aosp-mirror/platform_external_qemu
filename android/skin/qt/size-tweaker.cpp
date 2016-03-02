@@ -118,7 +118,12 @@ void SizeTweaker::adjustSizesAndPositions() {
     }
 
     int screen_number = QApplication::desktop()->screenNumber(mSubject.data());
-    if (screen_number <= -1) {
+
+    // QDesktopWidget::screenNumber returns -1 if the widget is not on a screen.
+    // The returned index *may* be out of bounds if the screen change event was
+    // triggered as a result of turning off one of the screens.
+    if (screen_number < 0 ||
+        screen_number >= QApplication::screens().size()) {
         return;
     }
     QScreen* screen = QApplication::screens().at(screen_number);
