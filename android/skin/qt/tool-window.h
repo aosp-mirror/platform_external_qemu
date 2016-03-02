@@ -66,7 +66,6 @@ public:
     void hide();
     void show();
     void dockMainWindow();
-    void raiseMainWindow();
     void extendedIsClosing() { extendedWindow = NULL; }
 
     void setToolEmuAgent(const UiEmuAgent* agPtr) { uiEmuAgent = agPtr; }

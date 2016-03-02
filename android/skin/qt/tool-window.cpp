@@ -237,7 +237,7 @@ void ToolWindow::closeEvent(QCloseEvent* ce) {
 
 void ToolWindow::mousePressEvent(QMouseEvent *event)
 {
-    raiseMainWindow();
+    emulator_window->raise();
     QFrame::mousePressEvent(event);
 }
 
@@ -258,10 +258,10 @@ void ToolWindow::show()
 
         if (mIsExtendedWindowActiveOnHide) {
             extendedWindow->raise();
-            extendedWindow->activateWindow();
         }
     }
 }
+
 QString ToolWindow::getAdbFullPath(QStringList* args) {
     QString adbPath = QString::null;
     QSettings settings;
@@ -591,12 +591,6 @@ void ToolWindow::dockMainWindow()
     move(parentWidget()->geometry().right() + 10, parentWidget()->geometry().top());
 }
 
-void ToolWindow::raiseMainWindow()
-{
-    emulator_window->raise();
-    emulator_window->activateWindow();
-}
-
 void ToolWindow::on_back_button_pressed()
 {
     emulator_window->raise();
@@ -605,7 +599,6 @@ void ToolWindow::on_back_button_pressed()
 
 void ToolWindow::on_back_button_released()
 {
-    emulator_window->activateWindow();
     handleUICommand(QtUICommand::BACK, false);
 }
 
@@ -622,7 +615,6 @@ void ToolWindow::on_home_button_pressed()
 
 void ToolWindow::on_home_button_released()
 {
-   emulator_window->activateWindow();
    handleUICommand(QtUICommand::HOME, false);
 }
 
@@ -641,7 +633,6 @@ void ToolWindow::on_power_button_pressed() {
 }
 
 void ToolWindow::on_power_button_released() {
-    emulator_window->activateWindow();
     handleUICommand(QtUICommand::POWER, false);
 }
 
@@ -650,19 +641,20 @@ void ToolWindow::on_volume_up_button_pressed()
     emulator_window->raise();
     handleUICommand(QtUICommand::VOLUME_UP, true);
 }
+
 void ToolWindow::on_volume_up_button_released()
 {
-    emulator_window->activateWindow();
     handleUICommand(QtUICommand::VOLUME_UP, false);
 }
+
 void ToolWindow::on_volume_down_button_pressed()
 {
     emulator_window->raise();
     handleUICommand(QtUICommand::VOLUME_DOWN, true);
 }
+
 void ToolWindow::on_volume_down_button_released()
 {
-    emulator_window->activateWindow();
     handleUICommand(QtUICommand::VOLUME_DOWN, false);
 }
 
@@ -674,7 +666,6 @@ void ToolWindow::on_overview_button_pressed()
 
 void ToolWindow::on_overview_button_released()
 {
-    emulator_window->activateWindow();
     handleUICommand(QtUICommand::OVERVIEW, false);
 }
 
@@ -720,7 +711,6 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
 void ToolWindow::on_more_button_clicked()
 {
     showOrRaiseExtendedWindow(PANE_IDX_LOCATION);
-    extendedWindow->activateWindow();
 }
 
 void ToolWindow::slot_installCanceled()
