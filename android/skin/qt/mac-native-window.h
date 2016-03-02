@@ -18,3 +18,5 @@ extern "C"
 void* getNSWindow(void* ns_view);
 void nsWindowHideWindowButtons(void* ns_window);
 int numHeldMouseButtons();
+
+void nsWindowSetToolBarCollectionBehavior(void* ns_window);
