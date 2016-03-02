@@ -24,4 +24,9 @@ void android_init_opengl_logger();
 void android_opengl_logger_write(const char* fmt, ...);
 void android_stop_opengl_logger();
 
+// This is for logging what goes on in individual OpenGL
+// contexts (cxts). Only called when emugl is compiled
+// with -DOPENGL_DEBUG_PRINTOUT.
+void android_opengl_cxt_logger_write(const char* fmt, ...);
+
 ANDROID_END_HEADER

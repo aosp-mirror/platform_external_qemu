@@ -145,15 +145,21 @@ android_startOpenglesRenderer(int width, int height)
     }
 
     android_init_opengl_logger();
+    void** logfuncs = malloc(2 * sizeof(void*));
+    logfuncs[0] = (void*)android_opengl_logger_write;
+    logfuncs[1] = (void*)android_opengl_cxt_logger_write;
+
     if (!initOpenGLRenderer(width,
                             height,
                             rendererUsesSubWindow,
                             rendererAddress,
                             sizeof(rendererAddress),
-                            android_opengl_logger_write)) {
+                            logfuncs)) {
         D("Can't start OpenGLES renderer?");
         return -1;
     }
+
+    free(logfuncs);
 
     rendererStarted = 1;
     return 0;
