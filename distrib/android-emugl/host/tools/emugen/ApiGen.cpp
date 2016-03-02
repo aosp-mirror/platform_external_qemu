@@ -152,6 +152,7 @@ int ApiGen::genContext(const std::string & filename, SideType side)
     }
     fprintf(fp, "\n");
 
+
     fprintf(fp, "\nstruct %s_%s_context_t {\n\n",
             m_basename.c_str(), sideString(side));
 
@@ -728,7 +729,6 @@ int ApiGen::genContextImpl(const std::string &filename, SideType side)
     fprintf(fp, "#include \"%s_%s_context.h\"\n\n\n", m_basename.c_str(), sideString(side));
     fprintf(fp, "#include <stdio.h>\n\n");
 
-    // init function;
     fprintf(fp, "int %s::initDispatchByName(void *(*getProc)(const char *, void *userData), void *userData)\n{\n", classname.c_str());
     for (size_t i = 0; i < n; i++) {
         EntryPoint *e = &at(i);
@@ -767,11 +767,11 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 
     // helper macros
     fprintf(fp,
-            "#ifdef DEBUG_PRINTOUT\n"
-            "#  define DEBUG(...) fprintf(stderr, __VA_ARGS__)\n"
+            "#ifdef OPENGL_DEBUG_PRINTOUT\n"
+            "#  define DEBUG(...) do { if (cxt_logger) { cxt_logger(__VA_ARGS__); } } while(0)\n"
             "#else\n"
             "#  define DEBUG(...)  ((void)0)\n"
-            "#endif\n\n");
+            "#endif\n\n", classname.c_str(), classname.c_str());
 
     fprintf(fp,
             "#ifdef CHECK_GLERROR\n"
