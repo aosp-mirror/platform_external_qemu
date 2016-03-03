@@ -46,6 +46,30 @@
       "revId": "fb2b1f97f20e0446b56a059dec8a59852dca7a6d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82ea9d1e_acdf411c",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-03T16:38:00Z",
+      "side": 1,
+      "message": "if the process is hanging, your wait would block for 5 sec and QProcess dtor would also wait, for 5 _more_ seconds. Let\u0027s get rid of at least the first 5",
+      "parentUuid": "e2b0b90b_bb5a0856",
+      "range": {
+        "startLine": 206,
+        "startChar": 0,
+        "endLine": 206,
+        "endChar": 30
+      },
+      "revId": "fb2b1f97f20e0446b56a059dec8a59852dca7a6d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
