@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "02feade5_dd86b595",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-03T21:34:01Z",
+      "side": 1,
+      "message": "do you need to delete it explicitly? unique_ptr is actually needed to stop caring about this kind of stuff. you only need to manually reset it to enforce some specific order",
+      "range": {
+        "startLine": 225,
+        "startChar": 0,
+        "endLine": 227,
+        "endChar": 5
+      },
+      "revId": "fc8e9d8c75f62e60375c086039a3f0296aa69d67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
