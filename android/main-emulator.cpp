@@ -441,9 +441,10 @@ int main(int argc, char** argv)
     }
 
     // Detect if this is google API's
-   
-    bool google_apis = checkForGoogleAPIs(avdName);
-    int api_level = getApiLevel(avdName);
+    // in build environment, where avdName is null, don't bother
+    // with gpu blacklist at this moment.
+    bool google_apis = avdName ? checkForGoogleAPIs(avdName) : false;
+    int api_level = avdName ? getApiLevel(avdName) : -1;
 
     bool has_guest_renderer = (!strcmp(avdArch, "x86") ||
                                !strcmp(avdArch, "x86_64")) &&
@@ -465,7 +466,8 @@ int main(int argc, char** argv)
     }
 
     // This is for testing purposes only.
-    android::base::ScopedCPtr<const char> testGpuBlacklist(path_getAvdGpuBlacklisted(avdName));
+    android::base::ScopedCPtr<const char> testGpuBlacklist(
+            avdName ? path_getAvdGpuBlacklisted(avdName) : "no");
     if (testGpuBlacklist.get()) {
         on_blacklist = !strcmp(testGpuBlacklist.get(), "yes");
     }
