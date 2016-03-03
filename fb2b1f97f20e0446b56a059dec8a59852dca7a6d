@@ -22,6 +22,30 @@
       "revId": "fb2b1f97f20e0446b56a059dec8a59852dca7a6d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_bb5a0856",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-03T05:23:35Z",
+      "side": 1,
+      "message": "Removed, but it won\u0027t matter because QProcess dtor calls waitForFinished anyway. Also, turned out the call to close() isn\u0027t really needed (and close() invokes waitForFinished)",
+      "parentUuid": "22ef3134_3407f33c",
+      "range": {
+        "startLine": 206,
+        "startChar": 0,
+        "endLine": 206,
+        "endChar": 30
+      },
+      "revId": "fb2b1f97f20e0446b56a059dec8a59852dca7a6d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
