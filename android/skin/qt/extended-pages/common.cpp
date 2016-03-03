@@ -15,10 +15,10 @@
 #include "android/skin/qt/qt-settings.h"
 #include <QApplication>
 #include <QDir>
-#include <QFileInfo>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QStringList>
+#include <QTemporaryFile>
 #include <QVariant>
 
 void setButtonEnabled(QPushButton*  button, SettingsTheme theme, bool isEnabled)
@@ -53,16 +53,31 @@ void setButtonEnabled(QPushButton*  button, SettingsTheme theme, bool isEnabled)
     }
 }
 
+bool directoryIsWritable(const QString& dirName) {
+    QString dName = QDir::toNativeSeparators(dirName);
+
+    // Check if this path is writable. (Note that QFileInfo::isWritable()
+    // does not work well on Windows.)
+    bool dirIsOK = false;
+    QDir theDir(dName);
+    if (theDir.exists()) {
+        // See if we can create a file here
+        QTemporaryFile tmpFile(dirName + "/XXXXXX");
+        // If we can open a temporary file, the directory is OK
+        dirIsOK = tmpFile.open();
+        // The temporary file is removed when we leave this scope
+    }
+    return dirIsOK;
+}
+
 QString getScreenshotSaveDirectory()
 {
     QSettings settings;
     QString savePath = settings.value(Ui::Settings::SAVE_PATH, "").toString();
 
-    // Check if this path is writable
-    QFileInfo fInfo(savePath);
-    if ( !fInfo.isDir() || !fInfo.isWritable() ) {
-
-        // Clear this, so we'll try the default instead
+    if ( !directoryIsWritable(savePath) ) {
+        // This path is not writable.
+        // Clear it, so we'll try the default instead.
         savePath = "";
     }
 
@@ -117,4 +132,3 @@ QIcon getIconForCurrentTheme(const QString& icon_name) {
     QString iconType = Ui::stylesheetValues(getSelectedTheme())[Ui::THEME_PATH_VAR];
     return QIcon(":/" + iconType + "/" + icon_name);
 }
-
