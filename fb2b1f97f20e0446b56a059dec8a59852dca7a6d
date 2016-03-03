@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "22ef3134_3407f33c",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-03T02:12:40Z",
+      "side": 1,
+      "message": "please don\u0027t add this as if adb is hanging, it would hang the whole process for 5 seconds",
+      "range": {
+        "startLine": 206,
+        "startChar": 0,
+        "endLine": 206,
+        "endChar": 30
+      },
+      "revId": "fb2b1f97f20e0446b56a059dec8a59852dca7a6d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
