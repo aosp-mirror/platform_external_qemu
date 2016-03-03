@@ -9,5 +9,6 @@ common-obj-$(CONFIG_PA) += paaudio.o
 common-obj-$(CONFIG_AUDIO_PT_INT) += audio_pt_int.o
 common-obj-$(CONFIG_AUDIO_WIN_INT) += audio_win_int.o
 common-obj-y += wavcapture.o
+common-obj-$(CONFIG_WINAUDIO) += winaudio.o
 
 sdlaudio.o-cflags := $(SDL_CFLAGS)

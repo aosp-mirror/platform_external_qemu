@@ -559,7 +559,7 @@ CYGWIN*)
 ;;
 MINGW32*)
   mingw32="yes"
-  audio_possible_drivers="dsound sdl"
+  audio_possible_drivers="dsound sdl winaudio"
   if check_include dsound.h; then
     audio_drv_list="dsound"
   else
@@ -2841,6 +2841,10 @@ for drv in $audio_drv_list; do
     dsound)
       libs_softmmu="-lole32 -ldxguid $libs_softmmu"
       audio_win_int="yes"
+    ;;
+
+    winaudio)
+        libs_softmmu="-lwinmm $libs_softmmu"
     ;;
 
     oss)
