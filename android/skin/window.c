@@ -1026,7 +1026,6 @@ struct SkinWindow {
     ButtonState   button;
     BallState     ball;
     char          enabled;
-    char          fullscreen;
     char          no_display;
     bool use_emugl_subwindow;
 
@@ -1550,7 +1549,6 @@ skin_window_resize( SkinWindow*  window, int resize_container )
         int           window_x = window->x_pos;
         int           window_y = window->y_pos;
         double        scale = window->scale;
-        int           fullscreen = window->fullscreen;
 
         // Pre-record the container dimensions
         if (resize_container) {
@@ -1586,12 +1584,8 @@ skin_window_resize( SkinWindow*  window, int resize_container )
         for ( ; back < end; back++ )
             background_redraw( back, &layout->rect, window->surface );
 
-        skin_surface_create_window(window->surface,
-                                   window_x,
-                                   window_y,
-                                   window_w,
-                                   window_h,
-                                   fullscreen);
+        skin_surface_create_window(window->surface, window_x, window_y,
+                                   window_w, window_h);
 
         // Calculate the framebuffer and window sizes and locations
         ADisplay* disp = window->layout.displays;
@@ -1665,9 +1659,7 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
 int
 skin_window_reset ( SkinWindow*  window, SkinLayout*  slayout )
 {
-    if (!window->fullscreen) {
-        skin_winsys_get_window_pos(&window->x_pos, &window->y_pos);
-    }
+    skin_winsys_get_window_pos(&window->x_pos, &window->y_pos);
     if (skin_window_reset_internal( window, slayout ) < 0)
         return -1;
 
@@ -1824,19 +1816,6 @@ skin_window_redraw( SkinWindow*  window, SkinRect*  rect )
 
         skin_surface_update(window->surface, rect);
         skin_window_redraw_opengles( window );
-    }
-}
-
-void
-skin_window_toggle_fullscreen( SkinWindow*  window )
-{
-    if (window && window->surface) {
-        if (!window->fullscreen) {
-            skin_winsys_get_window_pos(&window->x_pos, &window->y_pos);
-        }
-        window->fullscreen = !window->fullscreen;
-        skin_window_resize( window, 1 );
-        skin_window_redraw( window, NULL );
     }
 }
 

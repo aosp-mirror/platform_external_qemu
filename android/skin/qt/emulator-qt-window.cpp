@@ -768,30 +768,30 @@ void EmulatorQtWindow::slot_setWindowTitle(const QString *title, QSemaphore *sem
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorQtWindow::slot_showWindow(SkinSurface* surface, const QRect* rect, int is_fullscreen, QSemaphore *semaphore)
-{
+void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
+                                       const QRect* rect,
+                                       QSemaphore* semaphore) {
     // Zooming forces the scroll bar to be visible for sizing purpose, so reset them
     // back to the default policy.
     mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     mBackingSurface = surface;
-    if (is_fullscreen) {
-        showFullScreen();
-    } else {
-        showNormal();
-        setFixedSize(rect->size());
 
-        // If this was the result of a zoom, don't change the overall window size, and adjust the
-        // scroll bars to reflect the desired focus point.
-        if (mInZoomMode && mNextIsZoom) {
-            mContainer.stopResizeTimer();
-            recenterFocusPoint();
-        } else if (!mNextIsZoom) {
-            mContainer.resize(rect->size());
-        }
-        mNextIsZoom = false;
+    showNormal();
+    setFixedSize(rect->size());
+
+    // If this was the result of a zoom, don't change the overall window size,
+    // and adjust the
+    // scroll bars to reflect the desired focus point.
+    if (mInZoomMode && mNextIsZoom) {
+        mContainer.stopResizeTimer();
+        recenterFocusPoint();
+    } else if (!mNextIsZoom) {
+        mContainer.resize(rect->size());
     }
+    mNextIsZoom = false;
+
     show();
 
     // If the user isn't using an x86 AVD, make sure its because their machine doesn't support

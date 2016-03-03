@@ -56,14 +56,11 @@ extern SkinSurface*  skin_surface_resize(
                             int original_w,
                             int original_h );
 
-
-extern void  skin_surface_create_window(
-                            SkinSurface* surface,
-                            int x,
-                            int y,
-                            int w,
-                            int h,
-                            int is_fullscreen);
+extern void skin_surface_create_window(SkinSurface* surface,
+                                       int x,
+                                       int y,
+                                       int w,
+                                       int h);
 
 extern void skin_surface_reverse_map(SkinSurface* surface,
                                      int* x,
