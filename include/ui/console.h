@@ -13,6 +13,8 @@
 # include <epoxy/gl.h>
 #endif
 
+#include <stdbool.h>
+
 /* keyboard/mouse support */
 
 #define MOUSE_EVENT_LBUTTON 0x01
@@ -103,6 +105,7 @@ void kbd_put_keysym_console(QemuConsole *s, int keysym);
 bool kbd_put_qcode_console(QemuConsole *s, int qcode);
 void kbd_put_string_console(QemuConsole *s, const char *str, int len);
 void kbd_put_keysym(int keysym);
+void kbd_put_keycode(int keycode, bool down);
 
 /* consoles */
 

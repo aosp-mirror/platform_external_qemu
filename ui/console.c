@@ -24,6 +24,7 @@
 #include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "ui/console.h"
+#include "ui/input.h"
 #include "hw/qdev-core.h"
 #include "qemu/timer.h"
 #include "qmp-commands.h"
@@ -1168,6 +1169,12 @@ void kbd_put_string_console(QemuConsole *s, const char *str, int len)
 void kbd_put_keysym(int keysym)
 {
     kbd_put_keysym_console(active_console, keysym);
+}
+
+void kbd_put_keycode(int keycode, bool down)
+{
+    qemu_input_event_send_key_number(
+                active_console, keycode, down);
 }
 
 static void text_console_invalidate(void *opaque)
