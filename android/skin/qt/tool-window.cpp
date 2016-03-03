@@ -110,7 +110,10 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
         "Ctrl+Shift+C SHOW_PANE_CELLULAR\n"
         "Ctrl+Shift+B SHOW_PANE_BATTERY\n"
         "Ctrl+Shift+P SHOW_PANE_PHONE\n"
+// TODO(grigoryj): re-enable this when the virtual sensors UI is complete.
+#if 0
         "Ctrl+Shift+V SHOW_PANE_VIRTSENSORS\n"
+#endif
         "Ctrl+Shift+F SHOW_PANE_FINGER\n"
         "Ctrl+Shift+D SHOW_PANE_DPAD\n"
         "Ctrl+Shift+S SHOW_PANE_SETTINGS\n"
