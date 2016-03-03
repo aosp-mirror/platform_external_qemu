@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e211990a_3c209081",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-03T00:18:15Z",
+      "side": 1,
+      "message": "This is slightly different from what we do in the ToolWindow dtor. Any reason why this is better/worse?\n\nGood catch either way.",
+      "range": {
+        "startLine": 201,
+        "startChar": 4,
+        "endLine": 205,
+        "endChar": 30
+      },
+      "revId": "78f2fd06b51845ace3bd63ca492c466ffc51cfc9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
