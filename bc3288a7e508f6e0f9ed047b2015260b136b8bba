@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2b0b90b_22d48c0b",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-03T22:13:12Z",
+      "side": 0,
+      "message": "I remember that without this Windows had very strange issues with focused window. Is it fine now?",
+      "range": {
+        "startLine": 596,
+        "startChar": 0,
+        "endLine": 597,
+        "endChar": 38
+      },
+      "revId": "bc3288a7e508f6e0f9ed047b2015260b136b8bba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
