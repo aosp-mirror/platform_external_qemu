@@ -1500,9 +1500,8 @@ skin_window_scroll_updated( SkinWindow* window, int dx, int xmax, int dy, int ym
     subwindow.size.w = window->framebuffer.w;
     subwindow.size.h = window->framebuffer.h;
 
-    if (skin_window_recompute_subwindow_rect(window, &subwindow)) {
-        skin_window_show_opengles(window);
-    }
+    skin_window_recompute_subwindow_rect(window, &subwindow);
+    skin_window_show_opengles(window);
 
     // Compute the margins around the sub-window, then transform the current scroll values
     // to take into account these margins.
@@ -1606,9 +1605,9 @@ skin_window_resize( SkinWindow*  window, int resize_container )
         window->framebuffer.w = drect.size.w;
         window->framebuffer.h = drect.size.h;
 
-        skin_window_recompute_subwindow_rect(window, &drect);
-
-        skin_window_show_opengles(window);
+        if (skin_window_recompute_subwindow_rect(window, &drect) && resize_container) {
+            skin_window_show_opengles(window);
+        }
     }
 }
 
