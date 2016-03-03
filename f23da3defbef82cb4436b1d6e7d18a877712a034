@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "82ea9d1e_a74d9ab4",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-03T19:18:51Z",
+      "side": 1,
+      "message": "Don\u0027t do this, use unique_ptr for mRecordPlayer instead (and we should have used unique_ptr for mToolWindow as well)",
+      "range": {
+        "startLine": 211,
+        "startChar": 0,
+        "endLine": 212,
+        "endChar": 29
+      },
+      "revId": "f23da3defbef82cb4436b1d6e7d18a877712a034",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a2e32149_42a595ca",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 11
@@ -87,6 +110,29 @@
         "startChar": 17,
         "endLine": 131,
         "endChar": 29
+      },
+      "revId": "f23da3defbef82cb4436b1d6e7d18a877712a034",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c26bb568_290d9089",
+        "filename": "android/skin/qt/event-record-player.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-03T19:18:51Z",
+      "side": 1,
+      "message": "More of a design question - why do you need a common base class for recorder and player? Also, why does the player need to \"follow\" any widgets?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 25
       },
       "revId": "f23da3defbef82cb4436b1d6e7d18a877712a034",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
