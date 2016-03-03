@@ -441,7 +441,7 @@ int main(int argc, char** argv)
     }
 
     // Detect if this is google API's
-   
+
     bool google_apis = checkForGoogleAPIs(avdName);
     int api_level = getApiLevel(avdName);
 
@@ -464,10 +464,13 @@ int main(int argc, char** argv)
          on_blacklist = isHostGpuBlacklisted();
     }
 
-    // This is for testing purposes only.
-    android::base::ScopedCPtr<const char> testGpuBlacklist(path_getAvdGpuBlacklisted(avdName));
-    if (testGpuBlacklist.get()) {
-        on_blacklist = !strcmp(testGpuBlacklist.get(), "yes");
+    if (avdName) {
+        // This is for testing purposes only.
+        android::base::ScopedCPtr<const char> testGpuBlacklist(
+                path_getAvdGpuBlacklisted(avdName));
+        if (testGpuBlacklist.get()) {
+            on_blacklist = !strcmp(testGpuBlacklist.get(), "yes");
+        }
     }
 
     if ((!gpu && gpuMode && !strcmp(gpuMode, "auto")) ||
@@ -770,6 +773,11 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
 }
 
 static std::string get_key_val(const char* avdName, const char* key) {
+    // Running without an avd (inside android build folder, for instance).
+    if (!avdName) {
+        return "";
+    }
+
     char* sdkRootPath = path_getSdkRoot();
     char* systemImagePath = path_getAvdSystemPath(avdName, sdkRootPath);
 
@@ -800,6 +808,10 @@ static bool checkForGoogleAPIs(const char* avdName) {
 
 static int getApiLevel(const char* avdName) {
     std::string api_level = get_key_val(avdName, "ro.build.version.sdk");
+    if (api_level.empty()) {
+        return -1;
+    }
+
     // for api 10 arm system images, there is no "ro.build.version.sdk"
     // so, return -1;
     try {
