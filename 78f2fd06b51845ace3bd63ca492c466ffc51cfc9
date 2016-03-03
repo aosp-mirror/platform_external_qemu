@@ -22,6 +22,30 @@
       "revId": "78f2fd06b51845ace3bd63ca492c466ffc51cfc9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2b0b90b_4039d5b9",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-03T01:07:41Z",
+      "side": 1,
+      "message": "It didn\u0027t occur to me to look at ToolWindow dtor. Now that I\u0027ve looked at it, using close() is probably a good idea. I still think blocking signals is better than not blocking them - we don\u0027t care about them anyway at this point, so I\u0027d rather err on the side of caution and not invoke any unnecessary signal handlers on the exit path. Also, waitForFinished should stay (otherwise there\u0027s a warning message).",
+      "parentUuid": "e211990a_3c209081",
+      "range": {
+        "startLine": 201,
+        "startChar": 4,
+        "endLine": 205,
+        "endChar": 30
+      },
+      "revId": "78f2fd06b51845ace3bd63ca492c466ffc51cfc9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
