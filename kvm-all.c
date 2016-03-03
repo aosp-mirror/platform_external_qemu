@@ -29,6 +29,8 @@
 #include "exec/ram_addr.h"
 #include "sysemu/kvm.h"
 
+#include "android/crashreport/crash-handler.h"
+
 /* KVM uses PAGE_SIZE in it's definition of COALESCED_MMIO_MAX */
 #define PAGE_SIZE TARGET_PAGE_SIZE
 
@@ -41,6 +43,11 @@
 #define dprintf(fmt, ...) \
     do { } while (0)
 #endif
+
+static void __attribute__((noreturn)) die(const char* message, const char* function) {
+    crashhandler_die_format("KVM operation failed: %s (%s)", message, function);
+    abort(); // just in case
+}
 
 typedef struct KVMSlot
 {
@@ -82,8 +89,7 @@ static KVMSlot *kvm_alloc_slot(KVMState *s)
             return &s->slots[i];
     }
 
-    fprintf(stderr, "%s: no free slot available\n", __func__);
-    abort();
+    die("no free slot available", __func__);
 }
 
 static KVMSlot *kvm_lookup_matching_slot(KVMState *s,
@@ -622,7 +628,7 @@ int kvm_cpu_exec(CPUState *cpu)
 
         if (ret < 0) {
             dprintf("kvm run failed %s\n", strerror(-ret));
-            abort();
+            die("kvm vcpu run failed", __func__);
         }
 
         kvm_run_coalesced_mmio(cpu, run);
@@ -708,7 +714,7 @@ void kvm_set_phys_mem(hwaddr start_addr,
         } else {
             fprintf(stderr, "Only page-aligned memory slots supported\n");
         }
-        abort();
+        die("bad start address", __func__);
     }
 
     /* KVM does not support read-only slots */
@@ -736,7 +742,7 @@ void kvm_set_phys_mem(hwaddr start_addr,
         if (err) {
             fprintf(stderr, "%s: error unregistering overlapping slot: %s\n",
                     __func__, strerror(-err));
-            abort();
+            die("error unregistering overlapping slot", __func__);
         }
 
         /* Workaround for older KVM versions: we can't join slots, even not by
@@ -760,7 +766,8 @@ void kvm_set_phys_mem(hwaddr start_addr,
             if (err) {
                 fprintf(stderr, "%s: error updating slot: %s\n", __func__,
                         strerror(-err));
-                abort();
+                die("failed to set user memory region "
+                    "(most probably out of memory)", __func__);
             }
 
             start_addr += old.memory_size;
@@ -781,7 +788,8 @@ void kvm_set_phys_mem(hwaddr start_addr,
             if (err) {
                 fprintf(stderr, "%s: error registering prefix slot: %s\n",
                         __func__, strerror(-err));
-                abort();
+                die("failed to set user memory region "
+                    "(most probably out of memory)", __func__);
             }
         }
 
@@ -800,7 +808,8 @@ void kvm_set_phys_mem(hwaddr start_addr,
             if (err) {
                 fprintf(stderr, "%s: error registering suffix slot: %s\n",
                         __func__, strerror(-err));
-                abort();
+                die("failed to set user memory region "
+                    "(most probably out of memory)", __func__);
             }
         }
     }
@@ -823,7 +832,8 @@ void kvm_set_phys_mem(hwaddr start_addr,
     if (err) {
         fprintf(stderr, "%s: error registering slot: %s\n", __func__,
                 strerror(-err));
-        abort();
+        die("Failed to set user memory region (most probably out of memory)",
+            __func__);
     }
 }
 
