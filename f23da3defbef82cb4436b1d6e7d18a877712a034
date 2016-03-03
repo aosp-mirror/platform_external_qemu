@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2e32149_42a595ca",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1370,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-03T17:02:06Z",
+      "side": 1,
+      "message": "is it possible that both are true? record_path !\u003d null \u0026\u0026 replay_path !\u003d null",
+      "range": {
+        "startLine": 1361,
+        "startChar": 2,
+        "endLine": 1370,
+        "endChar": 6
+      },
+      "revId": "f23da3defbef82cb4436b1d6e7d18a877712a034",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e27a7932_4e324a4b",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-03T17:02:06Z",
+      "side": 1,
+      "message": "std::unique_ptr ?",
+      "range": {
+        "startLine": 275,
+        "startChar": 4,
+        "endLine": 275,
+        "endChar": 22
+      },
+      "revId": "f23da3defbef82cb4436b1d6e7d18a877712a034",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22ef3134_0a9bac90",
+        "filename": "android/skin/qt/event-record-player.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-03T17:02:06Z",
+      "side": 1,
+      "message": "this is not needed :)",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 5
+      },
+      "revId": "f23da3defbef82cb4436b1d6e7d18a877712a034",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e211990a_3289d951",
+        "filename": "android/skin/qt/event-record-player.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-03T17:02:06Z",
+      "side": 1,
+      "message": "nit: .empty()",
+      "range": {
+        "startLine": 131,
+        "startChar": 17,
+        "endLine": 131,
+        "endChar": 29
+      },
+      "revId": "f23da3defbef82cb4436b1d6e7d18a877712a034",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
