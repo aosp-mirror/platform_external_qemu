@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "02feade5_a21aa84b",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-03T19:51:26Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "82ea9d1e_a74d9ab4",
+      "range": {
+        "startLine": 211,
+        "startChar": 0,
+        "endLine": 212,
+        "endChar": 29
+      },
+      "revId": "f23da3defbef82cb4436b1d6e7d18a877712a034",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a2e32149_42a595ca",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 11
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-03T17:02:06Z",
       "side": 1,
       "message": "is it possible that both are true? record_path !\u003d null \u0026\u0026 replay_path !\u003d null",
+      "range": {
+        "startLine": 1361,
+        "startChar": 2,
+        "endLine": 1370,
+        "endChar": 6
+      },
+      "revId": "f23da3defbef82cb4436b1d6e7d18a877712a034",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82d1bd8e_68cee3d1",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1370,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-03T19:51:26Z",
+      "side": 1,
+      "message": "Yes, it is possible that someone tried to define both the recording and replaying command-line params at the same time by mistake. We don\u0027t have a way to define rules for command-line options  (e.g. options -a and -b are mutually exclusive, or option -c requires also -a to be defined). Because this is an orthogonal issue, I am dealing with it with the rules you see here for my change only.",
+      "parentUuid": "a2e32149_42a595ca",
       "range": {
         "startLine": 1361,
         "startChar": 2,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "82d1bd8e_88851734",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-03T19:51:26Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "e27a7932_4e324a4b",
+      "range": {
+        "startLine": 275,
+        "startChar": 4,
+        "endLine": 275,
+        "endChar": 22
+      },
+      "revId": "f23da3defbef82cb4436b1d6e7d18a877712a034",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "22ef3134_0a9bac90",
         "filename": "android/skin/qt/event-record-player.cpp",
         "patchSetId": 11
@@ -82,6 +154,30 @@
       "writtenOn": "2016-03-03T17:02:06Z",
       "side": 1,
       "message": "this is not needed :)",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 5
+      },
+      "revId": "f23da3defbef82cb4436b1d6e7d18a877712a034",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a26ec178_b64243e6",
+        "filename": "android/skin/qt/event-record-player.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-03T19:51:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "22ef3134_0a9bac90",
       "range": {
         "startLine": 31,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "02feade5_02defcf7",
+        "filename": "android/skin/qt/event-record-player.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-03T19:51:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e211990a_3289d951",
+      "range": {
+        "startLine": 131,
+        "startChar": 17,
+        "endLine": 131,
+        "endChar": 29
+      },
+      "revId": "f23da3defbef82cb4436b1d6e7d18a877712a034",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c26bb568_290d9089",
         "filename": "android/skin/qt/event-record-player.h",
         "patchSetId": 11
@@ -128,6 +248,30 @@
       "writtenOn": "2016-03-03T19:18:51Z",
       "side": 1,
       "message": "More of a design question - why do you need a common base class for recorder and player? Also, why does the player need to \"follow\" any widgets?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 25
+      },
+      "revId": "f23da3defbef82cb4436b1d6e7d18a877712a034",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82ea9d1e_8723368f",
+        "filename": "android/skin/qt/event-record-player.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1058003
+      },
+      "writtenOn": "2016-03-03T19:51:26Z",
+      "side": 1,
+      "message": "The player \"follows\" widgets to make it unnecessary to search for them.  The shared followed list and common start/stop interface (that would make these additions similar to how ui-event-recorder is used in emulator-qt-window currently) is how the design came to be. \n\nI understand that identifying a widget by its full name in the qt tree is possible, but then again I preferred not to do this. Mostly because I think it is unnecessary for the use-cases of this item at the time, but also because I thought this way event records would be more likely to be replay-able in the future. The likelihood of changing a unique followed widget name, thus rendering previously saved event-records un-replayable, is smaller than the likelihood of any dynamic naming scheme covering all layouts and widgets that might be changed/introduced in the future. So I thought about it and preferred the \"follow\" function, to render users of the record/replay utility responsible for keeping it working.",
+      "parentUuid": "c26bb568_290d9089",
       "range": {
         "startLine": 25,
         "startChar": 0,
