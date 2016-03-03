@@ -193,8 +193,24 @@ EmulatorQtWindow* EmulatorQtWindow::getInstance()
     return getInstancePtr().get();
 }
 
+// Helper for EmulatorQtWindow dtor to shut down
+// screenshot processes.
+static void safeKillProcess(QProcess& process) {
+    // We're exiting, so we don't care about signals
+    // emitted by these processes.
+    process.blockSignals(true);
+    // Stop the process forcefully.
+    process.close();
+    process.kill();
+    // Make sure it's ended.
+    process.waitForFinished();
+}
+
 EmulatorQtWindow::~EmulatorQtWindow()
 {
+    safeKillProcess(mScreencapPullProcess);
+    safeKillProcess(mScreencapProcess);
+
     deleteErrorDialog();
     if (mToolWindow) {
         delete mToolWindow;
