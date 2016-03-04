@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "22ef3134_2a2adfc0",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-04T17:52:57Z",
+      "side": 1,
+      "message": "Wouldn\u0027t moving that function to a \"common\" function that takes in a QWidget* be a fine way to do that? It\u0027s not a big deal for this change.",
+      "parentUuid": "c26bb568_3a65cdac",
+      "range": {
+        "startLine": 111,
+        "startChar": 4,
+        "endLine": 114,
+        "endChar": 57
+      },
+      "revId": "e54cee8f15667be8e71f07a156d0a7cc95d9ed79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "82ea9d1e_0d86243e",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 1
