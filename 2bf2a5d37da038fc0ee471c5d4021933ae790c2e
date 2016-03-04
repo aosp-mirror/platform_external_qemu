@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a2e32149_97f51838",
+        "filename": "android/skin/qt/gl-anti-aliasing.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-04T04:39:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "82ea9d1e_b2467399",
+      "revId": "2bf2a5d37da038fc0ee471c5d4021933ae790c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c26bb568_ec7783a3",
         "filename": "android/skin/qt/gl-widget.cpp",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2016-03-04T01:48:35Z",
       "side": 1,
       "message": "nit: shouldn\u0027t there be a space between { and EGL_XXX here?\nWhat does git clang-format says?",
+      "revId": "2bf2a5d37da038fc0ee471c5d4021933ae790c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e211990a_a595a0f7",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-04T04:39:46Z",
+      "side": 1,
+      "message": "It actually got formatted that way after putting it thru clang-format",
+      "parentUuid": "c26bb568_ec7783a3",
       "revId": "2bf2a5d37da038fc0ee471c5d4021933ae790c2e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "c26bb568_2f84adcb",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-04T04:39:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e27a7932_047ade4a",
+      "revId": "2bf2a5d37da038fc0ee471c5d4021933ae790c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e211990a_81e5f921",
         "filename": "android/skin/qt/gl-widget.h",
         "patchSetId": 8
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "e2b0b90b_058cfaee",
+        "filename": "android/skin/qt/gl-widget.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-04T04:39:46Z",
+      "side": 1,
+      "message": "Good idea, thanks",
+      "parentUuid": "e211990a_81e5f921",
+      "revId": "2bf2a5d37da038fc0ee471c5d4021933ae790c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e211990a_61c7fd7f",
         "filename": "android/skin/qt/sources.mk",
         "patchSetId": 8
@@ -81,6 +153,24 @@
       "writtenOn": "2016-03-04T01:48:35Z",
       "side": 1,
       "message": "is this line necessary in this patch?",
+      "revId": "2bf2a5d37da038fc0ee471c5d4021933ae790c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02feade5_351b6dba",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-04T04:39:46Z",
+      "side": 1,
+      "message": "Good catch, its shouldn\u0027t be there. Leaked over from my tests.",
+      "parentUuid": "e211990a_61c7fd7f",
       "revId": "2bf2a5d37da038fc0ee471c5d4021933ae790c2e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
