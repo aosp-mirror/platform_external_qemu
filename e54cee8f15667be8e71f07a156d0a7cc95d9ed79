@@ -165,6 +165,30 @@
       "revId": "e54cee8f15667be8e71f07a156d0a7cc95d9ed79",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a26ec178_6bb37936",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-04T21:34:26Z",
+      "side": 1,
+      "message": "Well, I don\u0027t, and I\u0027m not sure if anyone has one. I\u0027ll try to find someone with Ubuntu laptop, but the chances are slim\n\nI only could find this: http://askubuntu.com/questions/197828/how-to-find-and-change-the-screen-dpi",
+      "parentUuid": "e2b0b90b_5341a882",
+      "range": {
+        "startLine": 592,
+        "startChar": 4,
+        "endLine": 595,
+        "endChar": 36
+      },
+      "revId": "e54cee8f15667be8e71f07a156d0a7cc95d9ed79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
