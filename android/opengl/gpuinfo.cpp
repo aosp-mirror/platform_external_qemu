@@ -126,6 +126,11 @@ static const BlacklistEntry sGpuBlacklist[] = {
 
         {"NVIDIA (0x10de)", nullptr, "0x0393", nullptr, nullptr,
          nullptr},  // NVIDIA GeForce 7300 GT (Mac)
+
+         // Intel HD Graphics on windows
+         {"Intel Corporation", "Intel(R) HD Graphics",
+         nullptr, nullptr, "8.15.0010.2086", nullptr},
+         // bug 201569
 };
 
 static const int sBlacklistSize =
