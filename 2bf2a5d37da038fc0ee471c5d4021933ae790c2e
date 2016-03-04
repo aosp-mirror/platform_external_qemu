@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "82ea9d1e_b2467399",
+        "filename": "android/skin/qt/gl-anti-aliasing.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-04T01:48:35Z",
+      "side": 1,
+      "message": "nit: typo here :)",
+      "revId": "2bf2a5d37da038fc0ee471c5d4021933ae790c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c26bb568_ec7783a3",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-04T01:48:35Z",
+      "side": 1,
+      "message": "nit: shouldn\u0027t there be a space between { and EGL_XXX here?\nWhat does git clang-format says?",
+      "revId": "2bf2a5d37da038fc0ee471c5d4021933ae790c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e27a7932_047ade4a",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-04T01:48:35Z",
+      "side": 1,
+      "message": "nit: trailing ws.",
+      "revId": "2bf2a5d37da038fc0ee471c5d4021933ae790c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e211990a_81e5f921",
+        "filename": "android/skin/qt/gl-widget.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-04T01:48:35Z",
+      "side": 1,
+      "message": "question: do you want to use ceil() here to ensure proper conversion from float to integer pixel dimensions?",
+      "revId": "2bf2a5d37da038fc0ee471c5d4021933ae790c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e211990a_61c7fd7f",
+        "filename": "android/skin/qt/sources.mk",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-04T01:48:35Z",
+      "side": 1,
+      "message": "is this line necessary in this patch?",
+      "revId": "2bf2a5d37da038fc0ee471c5d4021933ae790c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
