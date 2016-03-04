@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "22ef3134_8a1a13b0",
+        "filename": "android/skin/qt/gl-anti-aliasing.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-04T17:59:51Z",
+      "side": 1,
+      "message": "nit: it looks like the only purpose of this include is to use qtWarning(), which will print a message to stderr by default (thought its possible to change this behaviour).\n\nDo we really need this here, since nothing depends on Qt-specific features otherwise. I.e. why not simply printing to stderr through fprintf() instead to remove coupling?",
+      "revId": "d01a11c7b9541bf494128da6268de0e6c8c34c59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c26bb568_3a8cedb2",
+        "filename": "android/skin/qt/gl-anti-aliasing.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-04T17:59:51Z",
+      "side": 1,
+      "message": "nit: It would be nice to have a little bit of documentation here explaining the purpose of the class and what its typical usage here. Also document individual methods if possible. This applies to GLCanvas as well.",
+      "revId": "d01a11c7b9541bf494128da6268de0e6c8c34c59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
