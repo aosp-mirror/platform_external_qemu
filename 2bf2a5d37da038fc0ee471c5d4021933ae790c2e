@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "c26bb568_1a4fa936",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-04T17:46:07Z",
+      "side": 1,
+      "message": "Fine then, I\u0027m not going to complain :)",
+      "parentUuid": "e211990a_a595a0f7",
+      "revId": "2bf2a5d37da038fc0ee471c5d4021933ae790c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e27a7932_047ade4a",
         "filename": "android/skin/qt/gl-widget.cpp",
         "patchSetId": 8
