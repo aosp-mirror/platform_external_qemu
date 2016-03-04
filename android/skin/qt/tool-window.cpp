@@ -576,7 +576,21 @@ bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
 
 void ToolWindow::dockMainWindow()
 {
-    move(parentWidget()->geometry().right() + 10, parentWidget()->geometry().top());
+#ifdef __linux__
+    // On Linux, the gap between the main window and
+    // the tool bar is 8 pixels bigger than is expected.
+    // Kludge a correction.
+    const static int gapAdjust = -8;
+#else
+    // Windows and OSX are OK
+    const static int gapAdjust =  0;
+#endif
+
+    // Align horizontally relative to the main window's frame.
+    // Align vertically to its contents.
+
+    move(parentWidget()->frameGeometry().right() + toolGap + gapAdjust,
+         parentWidget()->geometry().top() );
 }
 
 void ToolWindow::raiseMainWindow()

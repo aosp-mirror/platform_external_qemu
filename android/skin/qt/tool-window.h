@@ -73,6 +73,10 @@ public:
 
     bool handleQtKeyEvent(QKeyEvent* event);
 
+    // The designers want a gap between the main emulator
+    // window and the tool bar. This is how big that gap is.
+    static const int toolGap = 10;
+
 signals:
     void skinUIEvent(SkinEvent* event);
 
