@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e2b0b90b_088acf45",
+        "filename": "android/skin/qt/gl-anti-aliasing.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-04T21:02:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "22ef3134_8a1a13b0",
+      "revId": "d01a11c7b9541bf494128da6268de0e6c8c34c59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c26bb568_3a8cedb2",
         "filename": "android/skin/qt/gl-anti-aliasing.h",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2016-03-04T17:59:51Z",
       "side": 1,
       "message": "nit: It would be nice to have a little bit of documentation here explaining the purpose of the class and what its typical usage here. Also document individual methods if possible. This applies to GLCanvas as well.",
+      "revId": "d01a11c7b9541bf494128da6268de0e6c8c34c59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e211990a_cb1f0b4d",
+        "filename": "android/skin/qt/gl-anti-aliasing.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-04T21:02:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c26bb568_3a8cedb2",
       "revId": "d01a11c7b9541bf494128da6268de0e6c8c34c59",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
