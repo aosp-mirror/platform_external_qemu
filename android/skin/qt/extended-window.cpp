@@ -83,11 +83,12 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_HELP,      mExtendedUi->helpButton},
     };
 
-    move(mEmulatorWindow->geometry().right() + 40,
-         mEmulatorWindow->geometry().top()   + 40 );
+    // There is a gap between the main window and the
+    // tool bar. Use the same gap between the tool bar
+    // and the extended windown.
+    move(mToolWindow->geometry().right() + ToolWindow::toolGap,
+         mToolWindow->geometry().top()       );
     setObjectName("ExtendedControls");
-
-    mSidebarButtons.addButton(mExtendedUi->locationButton);
 
     mSidebarButtons.addButton(mExtendedUi->locationButton);
     mSidebarButtons.addButton(mExtendedUi->cellularButton);
@@ -106,6 +107,45 @@ ExtendedWindow::ExtendedWindow(
 void ExtendedWindow::showPane(ExtendedWindowPane pane) {
     show();
     adjustTabs(pane);
+
+    // Verify that the extended pane is fully visible
+    // (otherwise it may be impossible for the user to
+    // move it)
+    QDesktopWidget *desktop = static_cast<QApplication*>(
+                                     QApplication::instance() )->desktop();
+    int   screenNum = desktop->screenNumber(this); // Screen holding most of this
+
+    QRect screenGeo = desktop->screenGeometry(screenNum);
+    QRect myGeo = geometry();
+
+    bool moved = false;
+    // Leave some padding between the window and the edge of the screen.
+    // This distance isn't precise--it's mainly to prevent the window from
+    // looking like it's a little off screen.
+    static const int gap = 10;
+    if (myGeo.x() + myGeo.width() > screenGeo.x() + screenGeo.width() - gap) {
+        // Right edge is off the screen
+        myGeo.setX(screenGeo.x() + screenGeo.width() - myGeo.width() - gap);
+        moved = true;
+    }
+    if (myGeo.y() + myGeo.height() > screenGeo.y() + screenGeo.height() - gap) {
+        // Bottom edge is off the screen
+        myGeo.setY(screenGeo.y() + screenGeo.height() - myGeo.height() - gap);
+        moved = true;
+    }
+    if (myGeo.x() < screenGeo.x() + gap) {
+        // Top edge is off the screen
+        myGeo.setX(screenGeo.x() + gap);
+        moved = true;
+    }
+    if (myGeo.y() < screenGeo.y() + gap) {
+        // Left edge is off the screen
+        myGeo.setY(screenGeo.y() + gap);
+        moved = true;
+    }
+    if (moved) {
+        setGeometry(myGeo);
+    }
 }
 
 void ExtendedWindow::closeEvent(QCloseEvent *ce) {

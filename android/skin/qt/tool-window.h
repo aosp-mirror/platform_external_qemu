@@ -81,6 +81,10 @@ public:
 
     bool handleQtKeyEvent(QKeyEvent* event);
 
+    // The designers want a gap between the main emulator
+    // window and the tool bar. This is how big that gap is.
+    static const int toolGap = 10;
+
 private:
     int adbShellStopRunner();
     void handleUICommand(QtUICommand cmd, bool down);
