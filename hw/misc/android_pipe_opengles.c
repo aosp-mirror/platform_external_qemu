@@ -44,6 +44,61 @@
 #  define DD(...)  ((void)0)
 #endif
 
+/* opengl_send_all() and opengl_recv_all() are like send_all() and recv_all()
+ * except that they do not loop around EAGAIN. For details, see:
+ * https://android-review.googlesource.com/#/c/180640/
+ */
+static int opengl_send_all(int fd, const void *_buf, int len1)
+{
+#ifdef _WIN32
+    return send_all(fd, _buf, len1);
+#else  // !_WIN32
+    int ret, len;
+    const uint8_t *buf = _buf;
+
+    len = len1;
+    while (len > 0) {
+        ret = write(fd, buf, len);
+        if (ret < 0) {
+            if (errno != EINTR)
+                return -1;
+        } else if (ret == 0) {
+            break;
+        } else {
+            buf += ret;
+            len -= ret;
+        }
+    }
+    return len1 - len;
+#endif  // !_WIN32
+}
+
+static int opengl_recv_all(int fd, void *_buf, int len1, bool single_read)
+{
+#ifdef _WIN32
+    return recv_all(fd, _buf, len1, single_read);
+#else  // !_WIN32
+    int ret, len;
+    uint8_t *buf = _buf;
+
+    len = len1;
+    while ((len > 0) && (ret = recv(fd, buf, len, 0)) != 0) {
+        if (ret < 0) {
+            if (errno != EINTR) {
+                return -1;
+            }
+            continue;
+        } else {
+            if (single_read) {
+                return ret;
+            }
+            buf += ret;
+            len -= ret;
+        }
+    }
+    return len1 - len;
+#endif  // !_WIN32
+}
 
 /* Network pipe implementation */
 enum {
@@ -230,11 +285,7 @@ static int net_pipe_send_buffers(void* opaque,
     buff = buffers;
     while (count > 0) {
         int  avail = buff->size - buffStart;
-#ifdef _WIN32
-        int  len = send_all(pipe->fd, buff->data + buffStart, avail);
-#else
         int  len = opengl_send_all(pipe->fd, buff->data + buffStart, avail);
-#endif
 
         /* the write succeeded */
         if (len > 0) {
@@ -298,11 +349,7 @@ static int net_pipe_recv_buffers(void *opaque,
     buff = buffers;
     while (count > 0) {
         int avail = buff->size - buffStart;
-#ifdef _WIN32
-        int len = recv_all(pipe->fd, buff->data + buffStart, avail, true);
-#else
         int len = opengl_recv_all(pipe->fd, buff->data + buffStart, avail, true);
-#endif
 
         /* the read succeeded */
         if (len > 0) {
