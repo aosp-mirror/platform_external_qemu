@@ -83,11 +83,9 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_HELP,      mExtendedUi->helpButton},
     };
 
-    move(mEmulatorWindow->geometry().right() + 40,
-         mEmulatorWindow->geometry().top()   + 40 );
+    move(mToolWindow->geometry().right() + 10,
+         mToolWindow->geometry().top()       );
     setObjectName("ExtendedControls");
-
-    mSidebarButtons.addButton(mExtendedUi->locationButton);
 
     mSidebarButtons.addButton(mExtendedUi->locationButton);
     mSidebarButtons.addButton(mExtendedUi->cellularButton);
@@ -106,6 +104,40 @@ ExtendedWindow::ExtendedWindow(
 void ExtendedWindow::showPane(ExtendedWindowPane pane) {
     show();
     adjustTabs(pane);
+
+    // Verify that the extended pane is fully visible
+    // (otherwise it may be impossible for the user to
+    // move it)
+    QDesktopWidget *desktop = ((QApplication*)QApplication::instance())->desktop();
+    int   screenNum = desktop->screenNumber(this); // Screen holding most of this
+
+    QRect screenGeo = desktop->screenGeometry(screenNum);
+    QRect myGeo = geometry();
+
+    bool moved = false;
+    if (myGeo.x() + myGeo.width() > screenGeo.x() + screenGeo.width() - 10) {
+        // Right edge is off the screen
+        myGeo.setX(screenGeo.x() + screenGeo.width() - myGeo.width() - 10);
+        moved = true;
+    }
+    if (myGeo.y() + myGeo.height() > screenGeo.y() + screenGeo.height() - 10) {
+        // Bottom edge is off the screen
+        myGeo.setY(screenGeo.y() + screenGeo.height() - myGeo.height() - 10);
+        moved = true;
+    }
+    if (myGeo.x() < screenGeo.x() + 10) {
+        // Top edge is off the screen
+        myGeo.setX(screenGeo.x() + 10);
+        moved = true;
+    }
+    if (myGeo.y() < screenGeo.y() + 10) {
+        // Left edge is off the screen
+        myGeo.setY(screenGeo.y() + 10);
+        moved = true;
+    }
+    if (moved) {
+        setGeometry(myGeo);
+    }
 }
 
 void ExtendedWindow::closeEvent(QCloseEvent *ce) {
