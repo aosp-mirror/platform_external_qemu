@@ -93,6 +93,30 @@
       "revId": "e54cee8f15667be8e71f07a156d0a7cc95d9ed79",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02feade5_98227899",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-04T18:06:33Z",
+      "side": 1,
+      "message": "could you please double check if on high-dpi screens the gap is still 8 pixels? It might be in logical units",
+      "parentUuid": "82ea9d1e_0d86243e",
+      "range": {
+        "startLine": 592,
+        "startChar": 4,
+        "endLine": 595,
+        "endChar": 36
+      },
+      "revId": "e54cee8f15667be8e71f07a156d0a7cc95d9ed79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
