@@ -4577,12 +4577,14 @@ int run_qemu_main(int argc, const char **argv)
         fprintf(stderr, "Could not acquire pid file: %s\n", strerror(errno));
         return 1;
     }
-#ifdef USE_ANDROID_EMU
+#if defined(CONFIG_HAX)
     uint64_t hax_max_ram = 0;
     if (hax_get_max_ram(&hax_max_ram) == 0 && hax_max_ram > 0) {
+#ifdef USE_ANDROID_EMU
         char str[32] = {0};
         snprintf(str, sizeof(str) - 1, "%"PRIu64, hax_max_ram);
         crashhandler_add_string("hax_max_ram.txt", str);
+#endif
         if (ram_size > hax_max_ram) {
             const int requested_meg = ram_size / (1024 * 1024);
             const int actual_meg = hax_max_ram / (1024 * 1024);
@@ -4591,7 +4593,7 @@ int run_qemu_main(int argc, const char **argv)
             ram_size = hax_max_ram;
         }
     }
-#endif
+#endif  /* CONFIG_HAX */
 
     /* store value for the future use */
     qemu_opt_set_number(qemu_find_opts_singleton("memory"), "size", ram_size);
