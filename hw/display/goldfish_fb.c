@@ -17,12 +17,16 @@
 #include "trace.h"
 #include "hw/display/goldfish_fb.h"
 
-#ifdef USE_ANDROID_EMU
-extern int android_display_bpp;
-extern int android_display_use_host_gpu;
-#else
-static const int android_display_use_host_gpu = 0;
-#endif
+static int s_use_host_gpu = 0;
+static int s_display_bpp = 32;
+
+void goldfish_fb_set_use_host_gpu(int enabled) {
+    s_use_host_gpu = enabled;
+}
+
+void goldfish_fb_set_display_depth(int depth) {
+    s_display_bpp = depth;
+}
 
 #define DEST_BITS 8
 #define SOURCE_BITS 16
@@ -339,7 +343,8 @@ static void goldfish_fb_update_display(void *opaque)
         ymin = 0;
         // with -gpu on, the following check and return will save 2%
         // CPU time on OSX; saving on other platforms may differ.
-        if (android_display_use_host_gpu) return;
+        if (s_use_host_gpu) return;
+
         framebuffer_update_display(ds, address_space, s->fb_base,
                                    src_width, src_height,
                                    src_width * source_bytes_per_pixel,
@@ -376,9 +381,9 @@ static uint64_t goldfish_fb_read(void *opaque, hwaddr offset, unsigned size)
     struct goldfish_fb_state *s = opaque;
     DisplaySurface *ds = qemu_console_surface(s->con);
 
-#ifndef USE_ANDROID_EMU
-    int android_display_bpp = surface_bits_per_pixel(ds);
-#endif
+    if (!s_display_bpp) {
+        s_display_bpp = surface_bits_per_pixel(ds);
+    }
 
     switch(offset) {
         case FB_GET_WIDTH:
@@ -407,7 +412,7 @@ static uint64_t goldfish_fb_read(void *opaque, hwaddr offset, unsigned size)
 
         case FB_GET_FORMAT:
             /* A kernel making this query supports high color and true color */
-            switch (android_display_bpp) {   /* hw.lcd.depth */
+            switch (s_display_bpp) {   /* hw.lcd.depth */
             case 32:
             case 24:
                ret = HAL_PIXEL_FORMAT_RGBX_8888;
@@ -416,8 +421,8 @@ static uint64_t goldfish_fb_read(void *opaque, hwaddr offset, unsigned size)
                ret = HAL_PIXEL_FORMAT_RGB_565;
                break;
             default:
-               error_report("goldfish_fb_read: Bad android_display_bpp %d",
-                       android_display_bpp);
+               error_report("goldfish_fb_read: Bad display bit depth %d",
+                       s_display_bpp);
                break;
             }
             s->format = ret;
@@ -454,7 +459,8 @@ static void goldfish_fb_write(void *opaque, hwaddr offset, uint64_t val,
             /* The guest is waiting for us to complete an update cycle
              * and notify it, so make sure we do a redraw immediately.
              */
-            if (android_display_use_host_gpu) return;
+            if (s_use_host_gpu) return;
+
             graphic_hw_update(s->con);
             qemu_set_irq(s->irq, s->int_status & s->int_enable);
             break;

@@ -19,5 +19,7 @@
 #define HW_DISPLAY_GOLDFISH_FB_H
 
 void goldfish_fb_set_rotation(int rotation);
+void goldfish_fb_set_use_host_gpu(int enabled);
+void goldfish_fb_set_display_depth(int depth);
 
 #endif /* HW_DISPLAY_GOLDFISH_FB_H */

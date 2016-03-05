@@ -53,6 +53,7 @@
 #include "hw/xen/xen.h"
 #include "hw/qdev.h"
 #include "hw/loader.h"
+#include "hw/display/goldfish_fb.h"
 #include "monitor/qdev.h"
 #include "sysemu/bt.h"
 #include "net/net.h"
@@ -153,8 +154,6 @@
 
 int android_display_width  = 640;
 int android_display_height = 480;
-int android_display_bpp    = 32;
-int android_display_use_host_gpu = 0;
 
 /////////////////////////////////////////////////////////////
 #else  /* !USE_ANDROID_EMU */
@@ -4196,7 +4195,7 @@ int run_qemu_main(int argc, const char **argv)
         }
         android_display_width  = width;
         android_display_height = height;
-        android_display_bpp    = depth;
+        goldfish_fb_set_display_depth(depth);
     }
 
     /* Initialize camera */
@@ -4224,7 +4223,7 @@ int run_qemu_main(int argc, const char **argv)
                                               android_hw->hw_lcd_height) != 0) {
                 is_opengl_alive = 0;
             } else {
-                android_display_use_host_gpu = 1;
+                goldfish_fb_set_use_host_gpu(1);
                 qemu_gles = 1;   // Using emugl
             }
         } else {
