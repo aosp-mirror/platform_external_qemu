@@ -130,7 +130,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(this, &EmulatorQtWindow::getWindowPos, this, &EmulatorQtWindow::slot_getWindowPos);
     QObject::connect(this, &EmulatorQtWindow::isWindowFullyVisible, this, &EmulatorQtWindow::slot_isWindowFullyVisible);
     QObject::connect(this, &EmulatorQtWindow::pollEvent, this, &EmulatorQtWindow::slot_pollEvent);
-    QObject::connect(this, &EmulatorQtWindow::queueEvent, this, &EmulatorQtWindow::slot_queueEvent);
     QObject::connect(this, &EmulatorQtWindow::releaseBitmap, this, &EmulatorQtWindow::slot_releaseBitmap);
     QObject::connect(this, &EmulatorQtWindow::requestClose, this, &EmulatorQtWindow::slot_requestClose);
     QObject::connect(this, &EmulatorQtWindow::requestUpdate, this, &EmulatorQtWindow::slot_requestUpdate);
@@ -154,8 +153,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(mContainer.verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_verticalScrollChanged(int)));
     QObject::connect(mContainer.horizontalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(slot_scrollRangeChanged(int,int)));
     QObject::connect(mContainer.verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(slot_scrollRangeChanged(int,int)));
-    QObject::connect(mToolWindow, SIGNAL(skinUIEvent(SkinEvent*)), this,
-                     SLOT(slot_queueEvent(SkinEvent*)));
 
     QSettings settings;
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
@@ -359,7 +356,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent *event)
 
 void EmulatorQtWindow::queueQuitEvent()
 {
-    queueEvent(createSkinEvent(kEventQuit));
+    queueSkinEvent(createSkinEvent(kEventQuit));
 }
 
 void EmulatorQtWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -415,7 +412,7 @@ void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
                 sizeof(skin_event->u.text.text) - 1);
         // Ensure the event's text is 0-terminated
         skin_event->u.text.text[sizeof(skin_event->u.text.text)-1] = 0;
-        queueEvent(skin_event);
+        queueSkinEvent(skin_event);
     }
 
     // If we enabled trackball mode, tell Qt to always forward mouse movement
@@ -687,8 +684,7 @@ void EmulatorQtWindow::slot_pollEvent(SkinEvent *event, bool *hasEvent, QSemapho
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorQtWindow::slot_queueEvent(SkinEvent *event, QSemaphore *semaphore)
-{
+void EmulatorQtWindow::queueSkinEvent(SkinEvent* event) {
     const bool firstEvent = mSkinEventQueue.isEmpty();
 
     // For the following two events, only the "last" example of said event matters, so ensure
@@ -717,8 +713,6 @@ void EmulatorQtWindow::slot_queueEvent(SkinEvent *event, QSemaphore *semaphore)
         // if this event is the first one
         uiAgent->userEvents->onNewUserEvent();
     }
-
-    if (semaphore != NULL) semaphore->release();
 }
 
 void EmulatorQtWindow::slot_releaseBitmap(SkinSurface *s, QSemaphore *semaphore)
@@ -809,7 +803,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
 
 void EmulatorQtWindow::slot_screenChanged(QScreen*)
 {
-    queueEvent(createSkinEvent(kEventScreenChanged));
+    queueSkinEvent(createSkinEvent(kEventScreenChanged));
 }
 
 void EmulatorQtWindow::slot_horizontalScrollChanged(int value)
@@ -1058,7 +1052,7 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type, SkinMouseButtonType 
     skin_event->u.mouse.yrel = pos.y() - mPrevMousePosition.y();
     mPrevMousePosition = pos;
 
-    queueEvent(skin_event);
+    queueSkinEvent(skin_event);
 }
 
 void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event) {
@@ -1071,7 +1065,7 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* 
     if (modifiers & Qt::ControlModifier) keyData.mod |= kKeyModLCtrl;
     if (modifiers & Qt::AltModifier) keyData.mod |= kKeyModLAlt;
 
-    queueEvent(skin_event);
+    queueSkinEvent(skin_event);
 }
 
 void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
@@ -1119,12 +1113,12 @@ void EmulatorQtWindow::simulateKeyPress(int keyCode, int modifiers)
     SkinEvent *event = createSkinEvent(kEventKeyDown);
     event->u.key.keycode = keyCode;
     event->u.key.mod = modifiers;
-    slot_queueEvent(event);
+    queueSkinEvent(event);
 
     event = createSkinEvent(kEventKeyUp);
     event->u.key.keycode = keyCode;
     event->u.key.mod = modifiers;
-    slot_queueEvent(event);
+    queueSkinEvent(event);
 }
 
 void EmulatorQtWindow::simulateScrollBarChanged(int x, int y)
@@ -1134,7 +1128,7 @@ void EmulatorQtWindow::simulateScrollBarChanged(int x, int y)
     event->u.scroll.xmax = mContainer.horizontalScrollBar()->maximum();
     event->u.scroll.y = y;
     event->u.scroll.ymax = mContainer.verticalScrollBar()->maximum();
-    slot_queueEvent(event);
+    queueSkinEvent(event);
 }
 
 void EmulatorQtWindow::simulateSetScale(double scale)
@@ -1149,7 +1143,7 @@ void EmulatorQtWindow::simulateSetScale(double scale)
 
     SkinEvent *event = createSkinEvent(kEventSetScale);
     event->u.window.scale = scale;
-    slot_queueEvent(event);
+    queueSkinEvent(event);
 }
 
 void EmulatorQtWindow::simulateSetZoom(double zoom)
@@ -1177,7 +1171,7 @@ void EmulatorQtWindow::simulateSetZoom(double zoom)
     QScrollBar *horizontal = mContainer.horizontalScrollBar();
     event->u.window.scroll_h = horizontal->isVisible() ? horizontal->height() : 0;
     event->u.window.scale = zoom;
-    slot_queueEvent(event);
+    queueSkinEvent(event);
 }
 
 void EmulatorQtWindow::simulateWindowMoved(const QPoint &pos)
@@ -1185,7 +1179,7 @@ void EmulatorQtWindow::simulateWindowMoved(const QPoint &pos)
     SkinEvent *event = createSkinEvent(kEventWindowMoved);
     event->u.window.x = pos.x();
     event->u.window.y = pos.y();
-    slot_queueEvent(event);
+    queueSkinEvent(event);
 
     mOverlay.move(mContainer.mapToGlobal(QPoint()));
 }
@@ -1199,7 +1193,7 @@ void EmulatorQtWindow::simulateZoomedWindowResized(const QSize &size)
     event->u.scroll.xmax = size.width();
     event->u.scroll.ymax = size.height();
     event->u.scroll.scroll_h = horizontal->isVisible() ? horizontal->height() : 0;
-    slot_queueEvent(event);
+    queueSkinEvent(event);
 
     mOverlay.resize(size);
 }

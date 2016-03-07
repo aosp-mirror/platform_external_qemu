@@ -548,7 +548,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                 cmd == QtUICommand::ROTATE_RIGHT ?
                     kEventLayoutNext :
                     kEventLayoutPrev;
-            skinUIEvent(skin_event);
+            emulator_window->queueSkinEvent(skin_event);
         }
         break;
     case QtUICommand::UNGRAB_KEYBOARD:

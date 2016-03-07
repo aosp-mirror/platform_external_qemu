@@ -117,7 +117,6 @@ signals:
     void getWindowPos(int *x, int *y, QSemaphore *semaphore = NULL);
     void isWindowFullyVisible(bool *out_value, QSemaphore *semaphore = NULL);
     void pollEvent(SkinEvent *event, bool *hasEvent, QSemaphore *semaphore = NULL);
-    void queueEvent(SkinEvent *event, QSemaphore *semaphore = NULL);
     void releaseBitmap(SkinSurface *s, QSemaphore *sempahore = NULL);
     void requestClose(QSemaphore *semaphore = NULL);
     void requestUpdate(const QRect *rect, QSemaphore *semaphore = NULL);
@@ -145,6 +144,7 @@ public:
                           const QPoint& pos);
     void panHorizontal(bool left);
     void panVertical(bool up);
+    void queueSkinEvent(SkinEvent* event);
     void recenterFocusPoint();
     void saveZoomPoints(const QPoint &focus, const QPoint &viewportFocus);
     void scaleDown();
@@ -178,7 +178,6 @@ private slots:
     void slot_getWindowPos(int *x, int *y, QSemaphore *semaphore = NULL);
     void slot_isWindowFullyVisible(bool *out_value, QSemaphore *semaphore = NULL);
     void slot_pollEvent(SkinEvent *event, bool *hasEvent, QSemaphore *semaphore = NULL);
-    void slot_queueEvent(SkinEvent *event, QSemaphore *semaphore = NULL);
     void slot_releaseBitmap(SkinSurface *s, QSemaphore *sempahore = NULL);
     void slot_requestClose(QSemaphore *semaphore = NULL);
     void slot_requestUpdate(const QRect *rect, QSemaphore *semaphore = NULL);
