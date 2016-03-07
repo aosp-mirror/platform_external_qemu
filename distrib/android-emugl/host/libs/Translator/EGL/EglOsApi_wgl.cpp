@@ -420,7 +420,7 @@ const WglExtensionsDispatch* initExtensionsDispatch(
 
     dispatch->wglMakeCurrent(hdc, NULL);
     dispatch->wglDeleteContext(ctx);
-    DeleteDC(hdc);
+    ReleaseDC(hwnd, hdc);
     DestroyWindow(hwnd);
 
     return result;
@@ -504,6 +504,33 @@ private:
     HGLRC mCtx;
 };
 
+// A helper class used to deal with a vexing limitation of the WGL API.
+// The documentation for SetPixelFormat() states the following:
+//
+// -- If hdc references a window, calling the SetPixelFormat function also
+// -- changes the pixel format of the window. Setting the pixel format of a
+// -- window more than once [...] is not allowed. An application can only set
+// -- the pixel format of a window one time. Once a window's pixel format is
+// -- set, it cannot be changed.
+// --
+// -- You should select a pixel format in the device context before calling
+// -- the wglCreateContext function. The wglCreateContext function creates a
+// -- rendering context for drawing on the device in the selected pixel format
+// -- of the device context.
+//
+// In other words, creating a GL context requires having a unique window and
+// device context for the corresponding EGLConfig.
+//
+// This code deals with this by implementing the followin scheme:
+//
+// - For each unique PixelFormat ID (a.k.a. EGLConfig number), provide a way
+//   to create a new hidden 1x1 window, a corresponding HDC.
+//
+// - Implement a simple thread-local mapping from PixelFormat IDs to
+//   (HWND, HDC) pairs that are created on demand.
+//
+// DisplayInfo is a structure used to implement the (HWND, HDC) pair, and
+// also record whether SetPixelFormat() was called on it.
 struct DisplayInfo {
     DisplayInfo() : dc(NULL), hwnd(NULL), isPixelFormatSet(false) {}
 
@@ -512,9 +539,10 @@ struct DisplayInfo {
 
     void release() {
         if (hwnd) {
+            ReleaseDC(hwnd, dc);
             DestroyWindow(hwnd);
+            hwnd = NULL;
         }
-        DeleteDC(dc);
     }
 
     HDC  dc;
@@ -791,7 +819,7 @@ public:
         bool ret = mDispatch->SetPixelFormat(dc,
                                              format->configId(),
                                              format->desc());
-        DeleteDC(dc);
+        ReleaseDC(win, dc);
         return ret;
     }
 
