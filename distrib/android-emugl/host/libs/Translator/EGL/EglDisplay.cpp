@@ -43,8 +43,6 @@ EglDisplay::~EglDisplay() {
         m_idpy->destroyContext(m_globalSharedContext);
     }
 
-    m_idpy->release();
-
     for(ConfigsList::iterator it = m_configs.begin();
         it != m_configs.end();
         it++) {
