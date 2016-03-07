@@ -167,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "b76d25ef_3ab9e13f",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-07T19:37:34Z",
+      "side": 1,
+      "message": "I\u0027ve updated the code and comments in hopes of addressing this",
+      "parentUuid": "a2e32149_f5c0d7f5",
+      "range": {
+        "startLine": 118,
+        "startChar": 72,
+        "endLine": 118,
+        "endChar": 74
+      },
+      "revId": "e54cee8f15667be8e71f07a156d0a7cc95d9ed79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "82ea9d1e_0d86243e",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 1
@@ -250,6 +274,30 @@
       "side": 1,
       "message": "Well, I don\u0027t, and I\u0027m not sure if anyone has one. I\u0027ll try to find someone with Ubuntu laptop, but the chances are slim\n\nI only could find this: http://askubuntu.com/questions/197828/how-to-find-and-change-the-screen-dpi",
       "parentUuid": "e2b0b90b_5341a882",
+      "range": {
+        "startLine": 592,
+        "startChar": 4,
+        "endLine": 595,
+        "endChar": 36
+      },
+      "revId": "e54cee8f15667be8e71f07a156d0a7cc95d9ed79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5791490c_028a6cd8",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-07T19:37:34Z",
+      "side": 1,
+      "message": "I was able to change the density on my Linux box, but the test was not really useful. The result was just a magnification or reduction of everything on the screen, so Qt was not adapting to the setting.\nI\u0027d like to go ahead with the value here unless someone has another suggestion.",
+      "parentUuid": "a26ec178_6bb37936",
       "range": {
         "startLine": 592,
         "startChar": 4,
