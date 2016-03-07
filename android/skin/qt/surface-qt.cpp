@@ -126,14 +126,17 @@ extern SkinSurface* skin_surface_resize(SkinSurface *surface, int w, int h, int 
     }
 }
 
-extern void skin_surface_create_window(SkinSurface* surface, int x, int y, int w, int h, int is_fullscreen)
-{
-    D("skin_surface_create_window  %d, %d, %d, %d, fullscreen: %d", x, y, w, h,  is_fullscreen);
+extern void skin_surface_create_window(SkinSurface* surface,
+                                       int x,
+                                       int y,
+                                       int w,
+                                       int h) {
+    D("skin_surface_create_window  %d, %d, %d, %d", x, y, w, h);
     QSemaphore semaphore;
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) return;
     QRect rect(x, y, w, h);
-    window->showWindow(surface, &rect, is_fullscreen, &semaphore);
+    window->showWindow(surface, &rect, &semaphore);
     semaphore.acquire();
     D("ID of backing bitmap surface is %d", surface->id);
 }

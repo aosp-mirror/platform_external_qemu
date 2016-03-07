@@ -124,7 +124,9 @@ signals:
     void setWindowIcon(const unsigned char *data, int size, QSemaphore *semaphore = NULL);
     void setWindowPos(int x, int y, QSemaphore *semaphore = NULL);
     void setTitle(const QString *title, QSemaphore *semaphore = NULL);
-    void showWindow(SkinSurface* surface, const QRect* rect, int is_fullscreen, QSemaphore *semaphore = NULL);
+    void showWindow(SkinSurface* surface,
+                    const QRect* rect,
+                    QSemaphore* semaphore = NULL);
 
     // Qt doesn't support function pointers in signals/slots natively, but
     // pointer to function pointer works fine
@@ -183,7 +185,9 @@ private slots:
     void slot_setWindowIcon(const unsigned char *data, int size, QSemaphore *semaphore = NULL);
     void slot_setWindowPos(int x, int y, QSemaphore *semaphore = NULL);
     void slot_setWindowTitle(const QString *title, QSemaphore *semaphore = NULL);
-    void slot_showWindow(SkinSurface* surface, const QRect* rect, int is_fullscreen, QSemaphore *semaphore = NULL);
+    void slot_showWindow(SkinSurface* surface,
+                         const QRect* rect,
+                         QSemaphore* semaphore = NULL);
     void slot_runOnUiThread(SkinGenericFunction* f, void* data, QSemaphore* semaphore = NULL);
 
     void slot_horizontalScrollChanged(int value);

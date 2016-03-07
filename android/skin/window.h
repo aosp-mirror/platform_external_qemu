@@ -86,7 +86,6 @@ extern void             skin_window_set_title( SkinWindow*  window,
 
 extern void             skin_window_set_trackball( SkinWindow*  window, SkinTrackBall*  ball );
 extern void             skin_window_show_trackball( SkinWindow*  window, int  enable );
-extern void             skin_window_toggle_fullscreen( SkinWindow*  window );
 
 extern void             skin_window_zoomed_window_resized( SkinWindow*  window,
                                                            int dx, int dy, int w, int h,

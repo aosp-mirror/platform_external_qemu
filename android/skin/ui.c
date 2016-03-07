@@ -291,12 +291,6 @@ _skin_ui_handle_key_command(void* opaque, SkinKeyCommand command, int  down)
         }
         break;
 
-    case SKIN_KEY_COMMAND_TOGGLE_FULLSCREEN:
-        if (ui->window) {
-            skin_window_toggle_fullscreen(ui->window);
-        }
-        break;
-
     case SKIN_KEY_COMMAND_TOGGLE_TRACKBALL:
         if (ui->ui_params.enable_trackball) {
             ui->show_trackball = !ui->show_trackball;

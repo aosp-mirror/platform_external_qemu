@@ -41,7 +41,6 @@ typedef struct SkinKeyset  SkinKeyset;
     _SKIN_KEY_COMMAND(CHANGE_LAYOUT_NEXT,"Switch to next layout")       \
     _SKIN_KEY_COMMAND(TOGGLE_NETWORK,"Toggle cell network on/off")           \
     _SKIN_KEY_COMMAND(TOGGLE_TRACING,"Toggle code profiling")           \
-    _SKIN_KEY_COMMAND(TOGGLE_FULLSCREEN,"Toggle fullscreen mode")        \
     _SKIN_KEY_COMMAND(TOGGLE_TRACKBALL,"Toggle trackball mode")         \
     _SKIN_KEY_COMMAND(SHOW_TRACKBALL,"Show trackball") \
     _SKIN_KEY_COMMAND(BUTTON_DPAD_CENTER,"DPad center")       \
