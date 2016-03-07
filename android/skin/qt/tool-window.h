@@ -81,9 +81,6 @@ public:
 
     bool handleQtKeyEvent(QKeyEvent* event);
 
-signals:
-    void skinUIEvent(SkinEvent* event);
-
 private:
     int adbShellStopRunner();
     void handleUICommand(QtUICommand cmd, bool down);
