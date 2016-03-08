@@ -14,52 +14,16 @@
 * limitations under the License.
 */
 
-#include "GLcommon/PointerValidator.h"
+#include <GLcommon/PointerValidator.h>
 #include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
 
-#ifdef _WIN32
-#include <fcntl.h>
-#include <windows.h>
-#endif
-
-// Mac doesn't have this macro
-#ifndef TEMP_FAILURE_RETRY
-// Windows doesn't need it
-#ifdef _WIN32
-#define TEMP_FAILURE_RETRY(exp) (exp)
-
-#else // !_WIN32
-#define TEMP_FAILURE_RETRY(exp)            \
-  ({                                       \
-    ssize_t _rc;                           \
-    do {                                   \
-      _rc = (exp);                         \
-    } while (_rc == -1 && errno == EINTR); \
-    _rc;                                   \
-  })
-
-#endif // !_WIN32
-#endif // TEMP_FAILURE_RETRY
+#ifdef __linux__
 
 PointerValidator::PointerValidator() {
-    int pipeReturnCode = -1;
-
-#ifdef _WIN32
-    SYSTEM_INFO si;
-    GetSystemInfo(&si);
-    m_pageSize = si.dwPageSize;
-    // The pipe has buffer size 1, because we only write and read one byte each time
-    pipeReturnCode = _pipe(m_pipeFd, 1, _O_BINARY);
-
-#else // !_WIN32
     m_pageSize = getpagesize();
-    pipeReturnCode = pipe(m_pipeFd);
-
-#endif // !_WIN32
-
-    if (pipeReturnCode < 0) {
+    if (pipe(m_pipeFd) < 0) {
         // create pipe failed
         m_pipeFd[0] = 0;
         m_pipeFd[1] = 0;
@@ -116,3 +80,19 @@ bool PointerValidator::isValid(const void* buffer, size_t size) const {
 
     return true;
 }
+
+#else  // __linux__
+// win and mac not yet implemented
+PointerValidator::PointerValidator() {}
+
+PointerValidator::~PointerValidator() {}
+
+bool PointerValidator::isValid(const void* ptr) const {
+    return true;
+}
+
+bool PointerValidator::isValid(const void* buffer, size_t size) const {
+    return true;
+}
+
+#endif  // __linux__
