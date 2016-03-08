@@ -63,7 +63,6 @@ QEMU2_COMMON_SOURCES := \
     hmp.c \
     hw/audio/ac97.c \
     hw/audio/es1370.c \
-    hw/audio/goldfish_audio.c \
     hw/audio/hda-codec.c \
     hw/audio/intel-hda.c \
     hw/block/block.c \
@@ -95,8 +94,6 @@ QEMU2_COMMON_SOURCES := \
     hw/core/qdev-properties.c \
     hw/core/qdev.c \
     hw/core/sysbus.c \
-    hw/display/framebuffer.c \
-    hw/display/goldfish_fb.c \
     hw/i2c/core.c \
     hw/i2c/smbus.c \
     hw/i2c/smbus_eeprom.c \
@@ -236,8 +233,6 @@ QEMU2_COMMON_SOURCES := \
     tcg-runtime.c \
     thread-pool.c \
     tpm.c \
-    ui/android-gpu-frame-bridge.c \
-    ui/android-opengles.c \
     ui/console.c \
     ui/cursor.c \
     ui/d3des.c \
@@ -335,7 +330,6 @@ QEMU2_COMMON_SOURCES_darwin-x86_64 := \
     os-posix.c \
 
 QEMU2_TARGET_SOURCES := \
-    android-console.c \
     arch_init.c \
     balloon.c \
     bootdevice.c \
@@ -350,24 +344,12 @@ QEMU2_TARGET_SOURCES := \
     gdbstub.c \
     hw/block/dataplane/virtio-blk.c \
     hw/block/virtio-blk.c \
-    hw/char/goldfish_tty.c \
     hw/char/virtio-serial-bus.c \
     hw/display/vga.c \
-    hw/input/goldfish_events.c \
-    hw/input/goldfish_sensors.c \
-    hw/intc/goldfish_pic.c \
-    hw/misc/android_adb.c \
-    hw/misc/android_adb_dbg.c \
-    hw/misc/android_boot_properties.c \
-    hw/misc/android_pipe.c \
-    hw/misc/android_pipe_test.c \
-    hw/misc/android_qemud.c \
-    hw/misc/goldfish_battery.c \
     hw/net/vhost_net.c \
     hw/net/virtio-net.c \
     hw/scsi/virtio-scsi-dataplane.c \
     hw/scsi/virtio-scsi.c \
-    hw/timer/goldfish_timer.c \
     hw/virtio/virtio-balloon.c \
     hw/virtio/virtio.c \
     ioport.c \
@@ -410,7 +392,6 @@ QEMU2_TARGET_aarch64_SOURCES := \
     hw/arm/pxa2xx.c \
     hw/arm/pxa2xx_gpio.c \
     hw/arm/pxa2xx_pic.c \
-    hw/arm/ranchu.c \
     hw/arm/realview.c \
     hw/arm/spitz.c \
     hw/arm/stellaris.c \
@@ -766,7 +747,6 @@ QEMU2_TARGET_mipsel_SOURCES := \
     hw/mips/mips_malta.c \
     hw/mips/mips_mipssim.c \
     hw/mips/mips_r4k.c \
-    hw/mips/mips_ranchu.c \
     hw/misc/pc-testdev.c \
     hw/net/dp8393x.c \
     hw/net/mipsnet.c \
@@ -836,7 +816,6 @@ QEMU2_TARGET_mips64el_SOURCES := \
     hw/mips/mips_malta.c \
     hw/mips/mips_mipssim.c \
     hw/mips/mips_r4k.c \
-    hw/mips/mips_ranchu.c \
     hw/misc/pc-testdev.c \
     hw/net/dp8393x.c \
     hw/net/mipsnet.c \
@@ -1026,3 +1005,4 @@ QEMU2_TARGET_mips64el_SOURCES_linux-x86 := \
 QEMU2_TARGET_mips64el_SOURCES_windows-x86 := \
 
 QEMU2_TARGET_mips64el_SOURCES_darwin-x86_64 := \
+
