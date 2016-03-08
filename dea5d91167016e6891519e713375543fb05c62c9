@@ -16,6 +16,24 @@
       "revId": "dea5d91167016e6891519e713375543fb05c62c9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "979d8172_1a0e218a",
+        "filename": "android/skin/window.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1402,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-08T20:43:08Z",
+      "side": 1,
+      "message": "I know, such a shame.",
+      "parentUuid": "979d8172_b728d0cc",
+      "revId": "dea5d91167016e6891519e713375543fb05c62c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
