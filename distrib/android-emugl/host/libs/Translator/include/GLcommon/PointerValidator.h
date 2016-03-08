@@ -43,6 +43,9 @@ public:
     // when size=0, always returns true
     bool isValid(const void* buffer, size_t size) const;
 private:
+#ifdef __linux__
     int m_pipeFd[2];
     int m_pageSize;
+#else   // __linux__
+#endif  // __linux__
 };
