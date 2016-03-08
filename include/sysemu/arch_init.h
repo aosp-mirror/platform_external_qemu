@@ -4,6 +4,8 @@
 #include "qmp-commands.h"
 #include "qemu/option.h"
 
+#include <stdbool.h>
+
 enum {
     QEMU_ARCH_ALL = -1,
     QEMU_ARCH_ALPHA = (1 << 0),
@@ -30,7 +32,7 @@ extern const uint32_t arch_type;
 void select_soundhw(const char *optarg);
 void do_acpitable_option(const QemuOpts *opts);
 void do_smbios_option(QemuOpts *opts);
-void audio_init(void);
+bool audio_init(void);
 int kvm_available(void);
 int xen_available(void);
 

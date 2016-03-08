@@ -4469,7 +4469,9 @@ int main(int argc, char **argv, char **envp)
 
     realtime_init();
 
-    audio_init();
+    if (!audio_init()) {
+        exit(1);
+    }
 
     cpu_synchronize_all_post_init();
 
