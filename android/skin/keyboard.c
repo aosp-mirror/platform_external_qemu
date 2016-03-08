@@ -159,9 +159,6 @@ skin_keyboard_enable( SkinKeyboard*  keyboard,
                       int            enabled )
 {
     keyboard->enabled = enabled;
-    if (enabled) {
-        skin_event_enable_unicode(!keyboard->raw_keys);
-    }
 }
 
 static void
@@ -221,7 +218,6 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             if (mod == kKeyModLCtrl || mod == kKeyModRCtrl) {
                 if (down) {
                     kb->raw_keys = !kb->raw_keys;
-                    skin_event_enable_unicode(!kb->raw_keys);
                     D( "switching keyboard to %s mode", kb->raw_keys ? "raw" : "unicode" );
                 }
                 return;
@@ -275,13 +271,6 @@ skin_keyboard_on_command( SkinKeyboard*  keyboard, SkinKeyCommandFunc  cmd_func,
 {
     keyboard->command_func   = cmd_func;
     keyboard->command_opaque = cmd_opaque;
-}
-
-void
-skin_keyboard_on_key_press( SkinKeyboard*  keyboard, SkinKeyEventFunc  press_func, void*  press_opaque )
-{
-    keyboard->press_func   = press_func;
-    keyboard->press_opaque = press_opaque;
 }
 
 void

@@ -50,10 +50,6 @@ extern void           skin_keyboard_set_rotation( SkinKeyboard*     keyboard,
 extern SkinKeyCode    skin_keyboard_rotate_keycode( SkinKeyboard*   keyboard,
                                                     SkinKeyCode  keycode );
 
-extern void           skin_keyboard_on_key_press( SkinKeyboard*     keyboard,
-                                                  SkinKeyEventFunc  press_func,
-                                                  void*             press_opaque );
-
 extern void           skin_keyboard_process_event( SkinKeyboard*  keyboard, SkinEvent*  ev, int  down );
 extern int            skin_keyboard_process_unicode_event( SkinKeyboard*  kb,  unsigned int  unicode, int  down );
 

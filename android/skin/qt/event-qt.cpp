@@ -36,7 +36,3 @@ extern bool skin_event_poll(SkinEvent* event) {
     semaphore.acquire();
     return retval;
 }
-
-extern void skin_event_enable_unicode(bool){
-    D("skin_event_enable_unicode");
-}

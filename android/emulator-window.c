@@ -404,19 +404,6 @@ emulator_window_done(EmulatorWindow* emulator)
     }
 }
 
-QFrameBuffer*
-emulator_window_get_first_framebuffer(EmulatorWindow* emulator)
-{
-    /* register as a framebuffer clients for all displays defined in the skin file */
-    SKIN_FILE_LOOP_PARTS( emulator->layout_file, part )
-        SkinDisplay*  disp = part->display;
-        if (disp->valid) {
-            return disp->framebuffer;
-        }
-    SKIN_FILE_LOOP_END_PARTS
-    return NULL;
-}
-
 /* called periodically to poll for user input events */
 static void emulator_window_refresh(EmulatorWindow* emulator)
 {
@@ -433,7 +420,6 @@ static void emulator_window_refresh(EmulatorWindow* emulator)
         }
     }
 }
-
 
 void
 android_emulator_set_base_port( int  port )

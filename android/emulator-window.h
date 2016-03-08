@@ -60,8 +60,4 @@ emulator_window_done(EmulatorWindow* emulator);
 SkinLayout*
 emulator_window_get_layout(EmulatorWindow* emulator);
 
-/* Gets framebuffer for the first display. */
-QFrameBuffer*
-emulator_window_get_first_framebuffer(EmulatorWindow* emulator);
-
 ANDROID_END_HEADER
