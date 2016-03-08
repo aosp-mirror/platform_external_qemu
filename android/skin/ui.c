@@ -156,12 +156,6 @@ void skin_ui_set_lcd_brightness(SkinUI* ui, int lcd_brightness) {
     }
 }
 
-void skin_ui_set_scale(SkinUI* ui, double scale) {
-    if (ui->window) {
-        skin_window_set_scale(ui->window, scale);
-    }
-}
-
 void skin_ui_reset_title(SkinUI* ui) {
     char  temp[128], *p=temp, *end = p + sizeof(temp);
 

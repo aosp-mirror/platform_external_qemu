@@ -153,23 +153,6 @@ extern int skin_winsys_get_device_pixel_ratio(double *dpr)
     return 0;
 }
 
-extern int skin_winsys_get_monitor_dpi(int *x, int *y)
-{
-    D("skin_winsys_get_monitor_dpi");
-    QSemaphore semaphore;
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
-    if (window == NULL) {
-        D("%s: Could not get window handle", __FUNCTION__);
-        return -1;
-    }
-    int value;
-    window->getMonitorDpi(&value, &semaphore);
-    semaphore.acquire();
-    *x = *y = value;
-    D("%s: result=%d", __FUNCTION__, value);
-    return 0;
-}
-
 extern void *skin_winsys_get_window_handle(void)
 {
     D("skin_winsys_get_window_handle");
@@ -259,11 +242,6 @@ void skin_winsys_destroy() {
 #endif
 }
 
-extern void skin_winsys_set_relative_mouse_mode(bool)
-{
-    D("skin_winsys_set_relative_mouse_mode");
-}
-
 extern void skin_winsys_set_window_icon(const unsigned char *data, size_t size)
 {
     D("skin_winsys_set_window_icon");
@@ -287,16 +265,6 @@ extern void skin_winsys_set_window_pos(int x, int y)
     window->setWindowPos(x, y, &semaphore);
     semaphore.acquire();
 }
-
-void skin_winsys_get_window_borders(int *left, int *right, int *top, int *bottom) {
-    // this function is for backward compatibility with SDL windows,
-    // where window border is not accounted for in window dimensions
-    // and is required when re-positioning windows in _WIN32
-    *left = *right = *top = *bottom = 0;
-
-    return;
-}
-
 
 extern void skin_winsys_set_window_title(const char *title)
 {

@@ -111,7 +111,6 @@ signals:
     void fill(SkinSurface *s, const QRect *rect, const QColor *color, QSemaphore *semaphore = NULL);
     void getBitmapInfo(SkinSurface *s, SkinSurfacePixels *pix, QSemaphore *semaphore = NULL);
     void getDevicePixelRatio(double *out_dpr, QSemaphore *semaphore = NULL);
-    void getMonitorDpi(int *out_dpi, QSemaphore *semaphore = NULL);
     void getScreenDimensions(QRect *out_rect, QSemaphore *semaphore = NULL);
     void getWindowId(WId *out_id, QSemaphore *semaphore = NULL);
     void getWindowPos(int *x, int *y, QSemaphore *semaphore = NULL);
@@ -172,7 +171,6 @@ private slots:
     void slot_fill(SkinSurface *s, const QRect *rect, const QColor *color, QSemaphore *semaphore = NULL);
     void slot_getBitmapInfo(SkinSurface *s, SkinSurfacePixels *pix, QSemaphore *semaphore = NULL);
     void slot_getDevicePixelRatio(double *out_dpr, QSemaphore *semaphore = NULL);
-    void slot_getMonitorDpi(int *out_dpi, QSemaphore *semaphore = NULL);
     void slot_getScreenDimensions(QRect *out_rect, QSemaphore *semaphore = NULL);
     void slot_getWindowId(WId *out_id, QSemaphore *semaphore = NULL);
     void slot_getWindowPos(int *x, int *y, QSemaphore *semaphore = NULL);

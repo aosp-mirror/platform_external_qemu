@@ -96,9 +96,6 @@ typedef struct {
 // On failure, i.e. if there are no events, return false.
 extern bool skin_event_poll(SkinEvent* event);
 
-// Set/unset unicode translation for key events.
-extern void skin_event_enable_unicode(bool enabled);
-
 #ifdef __cplusplus
 }
 #endif
