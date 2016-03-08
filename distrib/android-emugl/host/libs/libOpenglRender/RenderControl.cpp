@@ -19,6 +19,7 @@
 #include "FbConfig.h"
 #include "FrameBuffer.h"
 #include "RenderThreadInfo.h"
+#include "GLProtocolThreadInfo.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
@@ -76,17 +77,16 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     else {
         str = (const char *)s_gles1.glGetString(name);
     }
+    // We add the maximum supported GL protocol number into this string
+    const char* glProtocolStr = GLProtocolThreadInfo::getMaxVersionString();
 
-    if (!str) {
-        return 0;
-    }
-
-    int len = strlen(str) + 1;
+    int len = strlen(str) + strlen(glProtocolStr) + 1;
     if (!buffer || len > bufferSize) {
         return -len;
     }
 
     strcpy((char *)buffer, str);
+    strcat((char *)buffer, glProtocolStr);
     return len;
 }
 
@@ -364,6 +364,10 @@ static int rcDestroyClientImage(uint32_t image)
     return fb->destroyClientImage(image);
 }
 
+static void rcSelectGLProtocol(uint32_t protocol, uint32_t reserved) {
+    GLProtocolThreadInfo::setVersion(protocol);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -394,4 +398,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcOpenColorBuffer2 = rcOpenColorBuffer2;
     dec->rcCreateClientImage = rcCreateClientImage;
     dec->rcDestroyClientImage = rcDestroyClientImage;
+    dec->rcSelectGLProtocol = rcSelectGLProtocol;
 }
