@@ -19,6 +19,7 @@
 #include "FbConfig.h"
 #include "FrameBuffer.h"
 #include "RenderThreadInfo.h"
+#include "GLProtocolThreadInfo.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
@@ -364,6 +365,10 @@ static int rcDestroyClientImage(uint32_t image)
     return fb->destroyClientImage(image);
 }
 
+static void rcSelectGLProtocol(uint32_t protocol) {
+    GLProtocolThreadInfo::setProtocol(protocol);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -394,4 +399,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcOpenColorBuffer2 = rcOpenColorBuffer2;
     dec->rcCreateClientImage = rcCreateClientImage;
     dec->rcDestroyClientImage = rcDestroyClientImage;
+    dec->rcSelectGLProtocol = rcSelectGLProtocol;
 }
