@@ -87,16 +87,14 @@ void GLESv2Context::validateAtt0PostDraw(void)
     m_att0NeedsDisable = false;
 }
 
-bool GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) {
+void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) {
     ArraysMap::iterator it;
-    unsigned int elementCount = indices ? findMaxIndex(count,type,indices) + 1 : count;
 
     //going over all clients arrays Pointers
     for ( it=m_map.begin() ; it != m_map.end(); it++ ) {
         GLenum array_id   = (*it).first;
         GLESpointer* p = (*it).second;
         if(!isArrEnabled(array_id)) continue;
-        if (!validateArrayPointer(first, elementCount, p)) return false;
 
         unsigned int size = p->getSize();
 
@@ -110,7 +108,6 @@ bool GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
                      size,p->getStride(), p->getNormalized());
         }
     }
-    return true;
 }
 
 //setting client side arr

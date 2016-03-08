@@ -571,8 +571,7 @@ GL_API void GL_APIENTRY  glDrawArrays( GLenum mode, GLint first, GLsizei count) 
     if(!ctx->isArrEnabled(GL_VERTEX_ARRAY)) return;
 
     GLESConversionArrays tmpArrs;
-    SET_ERROR_IF(!ctx->setupArraysPointers(tmpArrs, first, count, 0, NULL, true), GL_INVALID_OPERATION)
-
+    ctx->setupArraysPointers(tmpArrs,first,count,0,NULL,true);
     if(mode == GL_POINTS && ctx->isArrEnabled(GL_POINT_SIZE_ARRAY_OES)){
         ctx->drawPointsArrs(tmpArrs,first,count);
     }
@@ -597,24 +596,7 @@ GL_API void GL_APIENTRY  glDrawElements( GLenum mode, GLsizei count, GLenum type
         indices = buf + SafeUIntFromPointer(elementsIndices);
     }
 
-    int bytes = 0;
-    switch (type) {
-        case GL_UNSIGNED_BYTE:
-            bytes = 1;
-            break;
-        case GL_UNSIGNED_SHORT:
-            bytes = 2;
-            break;
-        case GL_UNSIGNED_INT:
-            bytes = 4;
-            break;
-        default:
-            // should not happen, because we checked it at the beginning of this function
-            ERR("**** ERROR unknown type 0x%x (%s,%d)\n", type, __FUNCTION__,__LINE__);
-    }
-    SET_ERROR_IF(!ctx->validateBuffer(indices, count*bytes), GL_INVALID_OPERATION)
-
-    SET_ERROR_IF(!ctx->setupArraysPointers(tmpArrs,0,count,type,indices,false), GL_INVALID_OPERATION)
+    ctx->setupArraysPointers(tmpArrs,0,count,type,indices,false);
     if(mode == GL_POINTS && ctx->isArrEnabled(GL_POINT_SIZE_ARRAY_OES)){
         ctx->drawPointsElems(tmpArrs,count,type,indices);
     }
