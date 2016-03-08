@@ -550,6 +550,15 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                     kEventLayoutNext :
                     kEventLayoutPrev;
             emulator_window->queueSkinEvent(skin_event);
+            // Tell the main emulator window what its
+            // new orientation is.
+            SkinRotation orientation = emulator_window->orientation();
+            if (cmd == QtUICommand::ROTATE_RIGHT) {
+                orientation = skin_rotation_rotate(orientation, SKIN_ROTATION_90);
+            } else {
+                orientation = skin_rotation_rotate(orientation, SKIN_ROTATION_270);
+            }
+            emulator_window->setOrientation(orientation);
         }
         break;
     case QtUICommand::UNGRAB_KEYBOARD:

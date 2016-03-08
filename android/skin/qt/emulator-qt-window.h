@@ -149,6 +149,7 @@ public:
     void scaleDown();
     void scaleUp();
     void screenshot();
+    void setFrameAlways(bool showFrame);
     void setOnTop(bool onTop);
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateScrollBarChanged(int x, int y);
@@ -163,6 +164,9 @@ public:
     void zoomOut(const QPoint &focus, const QPoint &viewportFocus);
     void zoomReset();
     void zoomTo(const QPoint &focus, const QSize &rectSize);
+
+    void setOrientation(SkinRotation rot) { mOrientation = rot;  }
+    SkinRotation orientation()            { return mOrientation; }
 
 private slots:
     void slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore = NULL);
@@ -235,6 +239,7 @@ private:
     void handleKeyEvent(SkinEventType type, QKeyEvent *event);
     QString getTmpImagePath();
     void setFrameOnTop(QFrame* frame, bool onTop);
+    void setSkinMask(bool unconditional);
 
     void* mBatteryState;
 
@@ -246,6 +251,16 @@ private:
     ToolWindow* mToolWindow;
     EmulatorContainer mContainer;
     EmulatorOverlay mOverlay;
+
+    // Window flags to use for frameless and framed appearance
+
+    const Qt::WindowFlags FRAMELESS_WINDOW_FLAGS  = (Qt::Window |
+                                                     Qt::FramelessWindowHint);
+    const Qt::WindowFlags FRAMED_WINDOW_FLAGS     = (Qt::Window               |
+                                                     Qt::WindowTitleHint      |
+                                                     Qt::CustomizeWindowHint    );
+    const Qt::WindowFlags FRAME_WINDOW_FLAGS_MASK = (FRAMELESS_WINDOW_FLAGS |
+                                                     FRAMED_WINDOW_FLAGS     );
 
     QPointF mFocus;
     QPoint mViewportFocus;
@@ -268,6 +283,11 @@ private:
     EventCapturer mEventCapturer;
     std::shared_ptr<UIEventRecorder<android::base::CircularBuffer>>
         mEventLogger;
+
+    bool         mIsSkinned;
+    bool         mFrameAlways;   // true = no floating emulator
+    QSize        mPreviousSize;  // Size of the main window
+    SkinRotation mOrientation;   // Rotation of the main window
 };
 
 struct SkinSurface {

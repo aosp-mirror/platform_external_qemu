@@ -34,6 +34,7 @@ const QString ADB_PATH("set/adbPath");
 const QString ALLOW_KEYBOARD_GRAB("set/allowKeyboardGrab");
 const QString AUTO_FIND_ADB("set/autoFindAdb");
 const QString ALWAYS_ON_TOP("set/alwaysOnTop");
+const QString FRAME_ALWAYS("set/frameAlways");
 const QString SAVE_PATH("set/savePath");
 const QString UI_THEME("set/theme");
 

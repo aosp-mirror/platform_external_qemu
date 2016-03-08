@@ -11,6 +11,7 @@
  */
 
 #include <QtCore>
+#include <QBitmap>
 #include <QCheckBox>
 #include <QCursor>
 #include <QDesktopWidget>
@@ -36,6 +37,7 @@
 #include "android/cpu_accelerator.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulator-window.h"
+#include "android/globals.h"
 #include "android/opengl/gpuinfo.h"
 
 #include "android/skin/event.h"
@@ -44,6 +46,7 @@
 #include "android/skin/qt/event-serializer.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/winsys-qt.h"
+#include "android/skin/rect.h"
 #include "android/ui-emu-agent.h"
 
 #if defined(__APPLE__)
@@ -115,6 +118,24 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     mBackingSurface = NULL;
     mBatteryState = NULL;
 
+    // Skinless emulators have names (which are "magically" generated"),
+    // but they have NULL directories.
+    char *skinName;
+    char *skinDir;
+    avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+    mIsSkinned = (skinDir != NULL);
+
+    // Initialize some values in the QCoreApplication so we can easily
+    // and consistently access QSettings to save and restore user settings
+    QCoreApplication::setOrganizationName(Ui::Settings::ORG_NAME);
+    QCoreApplication::setOrganizationDomain(Ui::Settings::ORG_DOMAIN);
+    QCoreApplication::setApplicationName(Ui::Settings::APP_NAME);
+
+    QSettings settings;
+    // TODO: Change the default to 'false' after "move" and "resize"
+    //       have been implemented for frameless AVDs.
+    mFrameAlways = settings.value(Ui::Settings::FRAME_ALWAYS, true).toBool();
+
     mToolWindow = new ToolWindow(this, &mContainer, mEventLogger);
 
     this->setAcceptDrops(true);
@@ -153,7 +174,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(mContainer.horizontalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(slot_scrollRangeChanged(int,int)));
     QObject::connect(mContainer.verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(slot_scrollRangeChanged(int,int)));
 
-    QSettings settings;
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
     setOnTop(onTop);
 
@@ -177,6 +197,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
                 ->attachData("recent-ui-actions.txt",
                              serializeEvents(event_logger->container()));
         });
+
+    setFrameAlways(mFrameAlways);
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr()
@@ -446,8 +468,96 @@ void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent *event)
                      event->pos());
 }
 
+// Set the window flags based on whether we should
+// have a frame or not.
+// Mask off the background of the skin PNG if we
+// are running frameless. If not |unconditional|,
+// generate and apply the mask only if the window
+// has changed size.
+
+void EmulatorQtWindow::setSkinMask(bool unconditional)
+{
+    QSize newSize = mContainer.size();
+
+    if (unconditional || (newSize != mPreviousSize)) {
+
+        mPreviousSize = newSize;
+
+        bool haveFrame = (mFrameAlways || mInZoomMode || !mIsSkinned);
+
+        Qt::WindowFlags flags = mContainer.windowFlags();
+        flags &= ~FRAME_WINDOW_FLAGS_MASK;
+        flags |= (haveFrame ? FRAMED_WINDOW_FLAGS : FRAMELESS_WINDOW_FLAGS);
+
+        mContainer.setWindowFlags(flags);
+
+        // Re-generate and apply the mask
+        if (haveFrame) {
+            // We have a frame. Do not use a mask around the device.
+#ifdef _WIN32
+            mContainer.clearMask();
+#else
+            // On Linux and Mac, clearMask() doesn't seem to work,
+            // so we create a full rectangular mask. (Which doesn't
+            // work right on Windows!)
+            QBitmap fullMask(mContainer.width(), mContainer.height());
+            QPainter painter(&fullMask);
+            painter.fillRect(mContainer.rect(), Qt::black);
+            mContainer.setMask(fullMask);
+#endif
+        } else {
+            // Frameless: Do an intelligent mask.
+            // Start by reloading the skin PNG file.
+            char *skinName;
+            char *skinDir;
+            avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+            QString skinPath = skinDir;
+            skinPath += skinName;
+            skinPath += "/port_back.png";
+            QPixmap rawPixmap(skinPath);
+            if ( !rawPixmap.isNull() ) {
+                // Rotate the skin to match the emulator window
+                QTransform rotater;
+                int rotationAmount;
+                switch (mOrientation) {
+                    case SKIN_ROTATION_0:    rotationAmount =   0;   break;
+                    case SKIN_ROTATION_90:   rotationAmount =  90;   break;
+                    case SKIN_ROTATION_180:  rotationAmount = 180;   break;
+                    case SKIN_ROTATION_270:  rotationAmount = 270;   break;
+                    default:                 rotationAmount =   0;   break;
+                }
+                rotater.rotate(rotationAmount);
+                QPixmap rotatedPMap(rawPixmap.transformed(rotater));
+
+                // Scale the bitmap to the current window size
+                int width = mContainer.width();
+                QPixmap scaledPixmap = rotatedPMap.scaledToWidth(width);
+
+                // Convert from bit map to a mask
+                QBitmap bitmap = scaledPixmap.mask();
+#ifdef __APPLE__
+                // On Mac, the mask is automatically stretched so its
+                // rectangular extent is as big as the widget it is
+                // applied to. To avoid stretching, set two points to
+                // make the mask's extent the full widget size.
+                QPainter painter(&bitmap);
+                painter.setBrush(Qt::black);
+                QPoint twoPoints[2] = { QPoint(bitmap.width()-1, 0),    // North east
+                                        QPoint(0, bitmap.height()-1) }; // South west
+                painter.drawPoints(twoPoints, 2);
+#endif
+                // Apply the mask
+                mContainer.setMask(bitmap);
+            }
+        }
+        mContainer.show();
+    }
+}
+
 void EmulatorQtWindow::paintEvent(QPaintEvent *)
 {
+    setSkinMask(false);
+
     QPainter painter(this);
     QRect bg(QPoint(0, 0), this->size());
 
@@ -455,7 +565,14 @@ void EmulatorQtWindow::paintEvent(QPaintEvent *)
 
     // Ensure we actually have a valid bitmap before attempting to
     // rescale
-    if (mBackingSurface && !mBackingSurface->bitmap->isNull()) {
+    if (mBackingSurface) {
+        QPainter painter(this);
+
+        if ( !mIsSkinned ) {
+            QRect bg(QPoint(0, 0), this->size());
+            painter.fillRect(bg, Qt::black);
+        }
+
         QRect r(0, 0, mBackingSurface->w, mBackingSurface->h);
         // Rescale with smooth transformation to avoid aliasing
         QImage scaled_bitmap = mBackingSurface->bitmap->scaled(
@@ -511,6 +628,13 @@ void EmulatorQtWindow::setOnTop(bool onTop)
         mToolWindow->show();
     }
 #endif
+}
+
+void EmulatorQtWindow::setFrameAlways(bool frameAlways)
+{
+    mFrameAlways = frameAlways;
+    setSkinMask(true);
+    mContainer.show();
 }
 
 void EmulatorQtWindow::setFrameOnTop(QFrame* frame, bool onTop)
@@ -1223,6 +1347,7 @@ void EmulatorQtWindow::toggleZoomMode()
     } else {
         mOverlay.showForZoom();
     }
+    setSkinMask(true);
 }
 
 void EmulatorQtWindow::recenterFocusPoint()

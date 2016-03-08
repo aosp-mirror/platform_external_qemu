@@ -70,6 +70,12 @@ SettingsPage::SettingsPage(QWidget *parent) :
     mUi->set_allowKeyboardGrab->setChecked(
             settings.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool());
 
+    // Show frame around the device?
+    mUi->set_frameAlways->setChecked(
+            // TODO: Set the default to 'false' after "move" and "resize"
+            //       have been implemented for frameless AVDs
+            settings.value(Ui::Settings::FRAME_ALWAYS, true).toBool());
+
 #ifdef __linux__
     // "Always on top" is not supported for Linux (see emulator-qt-window.cpp)
     // Make the control invisible
@@ -238,6 +244,13 @@ void SettingsPage::on_set_onTop_toggled(bool checked) {
     settings.setValue(Ui::Settings::ALWAYS_ON_TOP, checked);
 
     emit(onTopChanged(checked));
+}
+
+void SettingsPage::on_set_frameAlways_toggled(bool checked) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::FRAME_ALWAYS, checked);
+
+    emit(frameAlwaysChanged(checked));
 }
 
 void SettingsPage::on_set_autoFindAdb_toggled(bool checked) {
