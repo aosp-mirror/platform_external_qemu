@@ -29,6 +29,7 @@ struct Packet {
 	unsigned int packet_len;
 	… parameter 1
 	… parameter 2
+	[optional, var_length] checksum
 };
 A general Decoder->Encoder reply is expected to be received in the
 context of the ‘call’ that triggered it, thus it includes the reply
@@ -46,7 +47,8 @@ will be encoded into :
 	101, // foo opcode
 	14, // sizeof(opcode) + sizeof(packet_len) + sizeof(int) + sizeof(short)
 	p1, // 4 bytes
-	s1 // 2 bytes
+	s1, // 2 bytes
+	checksum // optional, size is currently 4 but depends on protocol
 }
 
 Since ‘foo’ returns value, the caller is expected to read back the return packet from the server->client stream. The return value in this example is in thus the return packet is:
