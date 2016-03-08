@@ -14,6 +14,7 @@
 #include "android/adb-qemud.h"
 #include "android/adb-server.h"
 #include "android/android.h"
+#include "android/console.h"
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
@@ -206,21 +207,13 @@ report_console( const char*  proto_port, int  console_port )
     restore_sigalrm (&sigstate);
 }
 
-static int qemu_control_console_start(int port, const QAndroidBatteryAgent* batteryAgent,
-                                      const QAndroidFingerAgent* fingerAgent,
-                                      const QAndroidLocationAgent* locationAgent,
-                                      const QAndroidUserEventAgent* userEventAgent,
-                                      const QAndroidVmOperations* vmOperations,
-                                      const QAndroidNetAgent* netAgent) {
+static int qemu_control_console_start(int port,
+                                      const AndroidConsoleAgents* agents) {
     if (!s_support_android_emu_console) {
         return 0;
     }
 
-    return control_console_start(port, batteryAgent,
-                                 fingerAgent, locationAgent,
-                                 userEventAgent,
-                                 vmOperations,
-                                 netAgent);
+    return control_console_start(port, agents);
 }
 
 void android_emulation_setup_use_android_emu_console(bool enabled) {
@@ -235,17 +228,7 @@ void android_emulation_setup_use_configurable_ports(bool enabled) {
  * it should be used to setup any Android-specific items in the emulation before the
  * main loop runs
  */
-void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
-                             const QAndroidCellularAgent* cellularAgent,
-                             const QAndroidFingerAgent* fingerAgent,
-                             const QAndroidLocationAgent* locationAgent,
-                             const QAndroidSensorsAgent* sensorsAgent,
-                             const QAndroidTelephonyAgent* telephonyAgent,
-                             const QAndroidUserEventAgent* userEventAgent,
-                             const QAndroidVmOperations* vmOperations,
-                             const QAndroidNetAgent* netAgent)
-{
-    uint32_t guest_ip;
+void android_emulation_setup(const AndroidConsoleAgents* agents) {
 
         /* Set the port where the emulator expects adb to run on the host
          * machine */
@@ -259,6 +242,7 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
         }
     }
 
+    uint32_t guest_ip;
     inet_strtoip("10.0.2.15", &guest_ip);
 
     if (android_op_port && android_op_ports) {
@@ -298,16 +282,14 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
             // Set up redirect from host to guest system. adbd on the guest listens
             // on 5555.
             if (legacy_adb) {
-                netAgent->slirpRedir(false, adb_port, guest_ip, 5555);
+                agents->net->slirpRedir(false, adb_port, guest_ip, 5555);
             } else {
                 adb_server_init(adb_port);
                 android_adb_service_init();
             }
-            if (qemu_control_console_start(console_port, batteryAgent, fingerAgent,
-                                        locationAgent, userEventAgent,
-                                        vmOperations, netAgent) < 0) {
+            if (qemu_control_console_start(console_port, agents) < 0) {
                 if (legacy_adb) {
-                    netAgent->slirpUnredir(false, adb_port);
+                    agents->net->slirpUnredir(false, adb_port);
                 }
             }
 
@@ -336,7 +318,7 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
                 /* setup first redirection for ADB, the Android Debug Bridge */
                 adb_port = base_port + 1;
                 if (legacy_adb) {
-                    if (!netAgent->slirpRedir(false, adb_port, guest_ip, 5555))
+                    if (!agents->net->slirpRedir(false, adb_port, guest_ip, 5555))
                         continue;
                 } else {
                     if (adb_server_init(adb_port))
@@ -345,11 +327,9 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
                 }
 
                 /* setup second redirection for the emulator console */
-                if (qemu_control_console_start(base_port, batteryAgent, fingerAgent,
-                                            locationAgent, userEventAgent,
-                                            vmOperations, netAgent) < 0) {
+                if (qemu_control_console_start(base_port, agents) < 0) {
                     if (legacy_adb) {
-                        netAgent->slirpUnredir(false, adb_port);
+                        agents->net->slirpUnredir(false, adb_port);
                     }
                     continue;
                 }
@@ -395,7 +375,7 @@ void android_emulation_setup(const QAndroidBatteryAgent* batteryAgent,
         }
     }
 
-    telephonyAgent->initModem(android_base_port);
+    agents->telephony->initModem(android_base_port);
 
     /* setup the http proxy, if any */
     if (VERBOSE_CHECK(proxy))

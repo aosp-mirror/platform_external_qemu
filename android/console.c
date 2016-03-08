@@ -99,12 +99,8 @@ typedef struct ControlClientRec_
 typedef struct ControlGlobalRec_
 {
     // Interfaces to call into QEMU specific code.
-    QAndroidBatteryAgent* battery_agent;
-    QAndroidFingerAgent* finger_agent;
-    QAndroidLocationAgent* location_agent;
-    QAndroidUserEventAgent* user_event_agent;
-    QAndroidVmOperations* vm_operations;
-    QAndroidNetAgent* net_agent;
+#define ANDROID_CONSOLE_DEFINE_FIELD(type, name) type name ## _agent [1];
+    ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_DEFINE_FIELD)
 
     /* IO */
     Looper* looper;
@@ -120,8 +116,8 @@ typedef struct ControlGlobalRec_
 
 } ControlGlobalRec;
 
-static inline QAndroidVmOperations* vmopers(ControlClient client) {
-    return client->global->vm_operations;
+static inline const QAndroidVmOperations* vmopers(ControlClient client) {
+    return client->global->vm_agent;
 }
 
 //////////// Module level globals //////////////////////////
@@ -614,19 +610,8 @@ static void control_global_accept(void* opaque,
     }
 }
 
-#define COPY_AGENT(to, from)        \
-    do {                            \
-        to = malloc(sizeof(*from)); \
-        *(to) = *(from);            \
-    } while (0);
-
 int control_console_start(int control_port,
-                          const QAndroidBatteryAgent* battery_agent,
-                          const QAndroidFingerAgent* finger_agent,
-                          const QAndroidLocationAgent* location_agent,
-                          const QAndroidUserEventAgent* user_event_agent,
-                          const QAndroidVmOperations* vm_operations,
-                          const QAndroidNetAgent* net_agent) {
+                          const AndroidConsoleAgents* agents) {
     ControlGlobal global = &_g_global;
     Socket  fd;
     int     ret;
@@ -635,12 +620,9 @@ int control_console_start(int control_port,
     memset( global, 0, sizeof(*global) );
     // Copy the QEMU specific interfaces passed in to make lifetime management
     // simpler.
-    COPY_AGENT(global->battery_agent, battery_agent);
-    COPY_AGENT(global->finger_agent, finger_agent);
-    COPY_AGENT(global->location_agent, location_agent);
-    COPY_AGENT(global->user_event_agent, user_event_agent);
-    COPY_AGENT(global->vm_operations, vm_operations);
-    COPY_AGENT(global->net_agent, net_agent);
+#define ANDROID_CONSOLE_COPY_AGENT(type, name) \
+        global-> name ## _agent [0] = agents-> name [0];
+    ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_COPY_AGENT)
 
     fd = socket_create_inet( SOCKET_STREAM );
     if (fd < 0) {
