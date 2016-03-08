@@ -5,6 +5,7 @@
 #define GUARD_foo_encoder_context_t
 
 #include "IOStream.h"
+#include "GLProtocol.h"
 #include "foo_client_context.h"
 
 
@@ -14,8 +15,9 @@
 struct foo_encoder_context_t : public foo_client_context_t {
 
 	IOStream *m_stream;
+	GLProtocol *m_protocol;
 
-	foo_encoder_context_t(IOStream *stream);
+	foo_encoder_context_t(IOStream *stream, GLProtocol *protocol);
 };
 
 #endif  // GUARD_foo_encoder_context_t
