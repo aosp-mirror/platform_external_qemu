@@ -11,23 +11,23 @@
 
 #include "android/opengl/EmuglBackendScanner.h"
 
-#include "android/base/String.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
 #include <gtest/gtest.h>
 
+#include <string>
+#include <vector>
+
 #include <fcntl.h>
 #include <unistd.h>
 
-using android::base::String;
-using android::base::StringVector;
 using android::base::System;
 using android::base::TestSystem;
 using android::base::TestTempDir;
 
-static void make_dir(const String& path) {
+static void make_dir(const std::string& path) {
 #ifdef _WIN32
     EXPECT_EQ(0, ::mkdir(path.c_str()));
 #else
@@ -35,15 +35,15 @@ static void make_dir(const String& path) {
 #endif
 }
 
-static void make_subdir(const String& path, const char* subdir) {
-    String dir = path;
+static void make_subdir(const std::string& path, const char* subdir) {
+    std::string dir = path;
     dir.append("/");
     dir.append(subdir);
     make_dir(dir);
 }
 
-static void make_subfile(const String& dir, const char* file) {
-    String path = dir;
+static void make_subfile(const std::string& dir, const char* file) {
+    std::string path = dir;
     path.append("/");
     path.append(file);
     int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0755);
@@ -57,20 +57,20 @@ namespace opengl {
 TEST(EmuglBackendScanner, noLibDir) {
     TestTempDir myDir("emugl_backend_scanner");
     // Don't create any files
-    StringVector names = EmuglBackendScanner::scanDir(myDir.path());
+    std::vector<std::string> names = EmuglBackendScanner::scanDir(myDir.path());
     EXPECT_TRUE(names.empty());
 }
 
 TEST(EmuglBackendScanner, noBackends) {
     TestTempDir myDir("emugl_backend_scanner");
     // Create lib directory.
-    String libDir(myDir.path());
+    std::string libDir(myDir.path());
     libDir += "/";
     libDir += System::kLibSubDir;
     make_dir(libDir);
 
     // Don't create any files
-    StringVector names = EmuglBackendScanner::scanDir(myDir.path());
+    std::vector<std::string> names = EmuglBackendScanner::scanDir(myDir.path());
     EXPECT_TRUE(names.empty());
 }
 
@@ -79,7 +79,7 @@ TEST(EmuglBackendScanner, listBackends) {
     TestTempDir* myDir = testSys.getTempRoot();
 
     // Create lib directory.
-    String libDir(myDir->path());
+    std::string libDir(myDir->path());
     libDir += "/foo/";
     make_dir(libDir);
     libDir += System::kLibSubDir;
@@ -106,7 +106,7 @@ TEST(EmuglBackendScanner, listBackends) {
     make_subdir(libDir, "gles_sixth");
 
     // Now check the scanner
-    StringVector names = EmuglBackendScanner::scanDir("foo");
+    std::vector<std::string> names = EmuglBackendScanner::scanDir("foo");
     ASSERT_EQ(3U, names.size());
     EXPECT_STREQ("fifth", names[0].c_str());
     EXPECT_STREQ("second", names[1].c_str());
@@ -128,7 +128,7 @@ TEST(EmuglBackendScanner, listBackendsWithProgramBitness) {
     myDir->makeSubDir("foo/lib64/gles_fifth");
     myDir->makeSubDir("foo/lib64/gles_sixth");
 
-    StringVector names = EmuglBackendScanner::scanDir("foo", 32);
+    std::vector<std::string> names = EmuglBackendScanner::scanDir("foo", 32);
     ASSERT_EQ(3U, names.size());
     EXPECT_STREQ("first", names[0].c_str());
     EXPECT_STREQ("second", names[1].c_str());

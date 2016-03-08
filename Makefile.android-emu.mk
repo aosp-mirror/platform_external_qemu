@@ -61,7 +61,6 @@ LOCAL_SRC_FILES := \
     android/base/containers/PodVector.cpp \
     android/base/containers/PointerSet.cpp \
     android/base/containers/HashUtils.cpp \
-    android/base/containers/StringVector.cpp \
     android/base/files/PathUtils.cpp \
     android/base/files/StdioStream.cpp \
     android/base/files/Stream.cpp \
@@ -69,7 +68,6 @@ LOCAL_SRC_FILES := \
     android/base/misc/HttpUtils.cpp \
     android/base/misc/StringUtils.cpp \
     android/base/misc/Utf8Utils.cpp \
-    android/base/String.cpp \
     android/base/StringFormat.cpp \
     android/base/StringView.cpp \
     android/base/sockets/SocketDrainer.cpp \
@@ -369,7 +367,6 @@ LOCAL_SRC_FILES := \
   android/base/containers/PodVector_unittest.cpp \
   android/base/containers/PointerSet_unittest.cpp \
   android/base/containers/ScopedPointerSet_unittest.cpp \
-  android/base/containers/StringVector_unittest.cpp \
   android/base/containers/TailQueueList_unittest.cpp \
   android/base/EintrWrapper_unittest.cpp \
   android/base/files/IniFile_unittest.cpp \
@@ -388,7 +385,6 @@ LOCAL_SRC_FILES := \
   android/base/sockets/ScopedSocket_unittest.cpp \
   android/base/sockets/SocketDrainer_unittest.cpp \
   android/base/sockets/SocketWaiter_unittest.cpp \
-  android/base/String_unittest.cpp \
   android/base/StringFormat_unittest.cpp \
   android/base/StringView_unittest.cpp \
   android/base/synchronization/ConditionVariable_unittest.cpp \

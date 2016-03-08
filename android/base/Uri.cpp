@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-// Some free functions for manipulating Strings as URIs. Wherever possible,
+// Some free functions for manipulating strings as URIs. Wherever possible,
 // these functions take const references to StringView to avoid unnecessary
 // copies.
 
@@ -23,8 +23,7 @@ namespace android {
 namespace base {
 
 // Function to encode an individual character and append it to *|res|
-static void appendEncodedChar(char c, String* res)
-{
+static void appendEncodedChar(char c, std::string* res) {
     switch (c) {
         case '!':
         case '#':
@@ -49,14 +48,14 @@ static void appendEncodedChar(char c, String* res)
             StringAppendFormat(res, "%%%02X", c);
             break;
         default:
-            res->append(c);
+            res->push_back(c);
             break;
     }
 }
 
 // static
-String Uri::Encode(StringView uri) {
-    String encodedUri;
+std::string Uri::Encode(StringView uri) {
+    std::string encodedUri;
     encodedUri.reserve(uri.size());
     for (const char c : uri) {
         appendEncodedChar(c, &encodedUri);
@@ -65,8 +64,8 @@ String Uri::Encode(StringView uri) {
 }
 
 // static
-String Uri::Decode(StringView uri) {
-    String decodedUri;
+std::string Uri::Decode(StringView uri) {
+    std::string decodedUri;
     decodedUri.reserve(uri.size());
     for (StringView::const_iterator cit = uri.begin(); cit != uri.end();
          ++cit) {
@@ -90,16 +89,15 @@ String Uri::Decode(StringView uri) {
             if (decodedChar == 0) {
                 return "";
             }
-            decodedUri.append(decodedChar);
+            decodedUri.push_back(decodedChar);
         } else {
-            decodedUri.append(*cit);
+            decodedUri.push_back(*cit);
         }
     }
     return decodedUri;
 }
 
-String Uri::FormatHelper::encodeArg(StringView str)
-{
+std::string Uri::FormatHelper::encodeArg(StringView str) {
     return Uri::Encode(str);
 }
 

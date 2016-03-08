@@ -80,7 +80,7 @@ wchar_t* Win32UnicodeString::data() {
     return mStr;
 }
 
-String Win32UnicodeString::toString() const {
+std::string Win32UnicodeString::toString() const {
     return convertToUtf8(mStr, mSize);
 }
 
@@ -146,8 +146,8 @@ wchar_t* Win32UnicodeString::release() {
 }
 
 // static
-String Win32UnicodeString::convertToUtf8(const wchar_t* str, int len) {
-    String result;
+std::string Win32UnicodeString::convertToUtf8(const wchar_t* str, int len) {
+    std::string result;
     const int utf8Len = calcUtf8BufferLength(str, len);
     if (utf8Len > 0) {
         result.resize(static_cast<size_t>(utf8Len));

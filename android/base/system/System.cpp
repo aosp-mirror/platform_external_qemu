@@ -37,6 +37,7 @@
 #include <mach/mach.h>
 #endif  // __APPLE__
 
+#include <algorithm>
 #include <array>
 #include <chrono>
 
@@ -100,7 +101,7 @@ public:
 
     virtual ~HostSystem() {}
 
-    virtual const String& getProgramDirectory() const {
+    virtual const std::string& getProgramDirectory() const {
         if (mProgramDir.empty()) {
 #if defined(__linux__)
             char path[1024];
@@ -142,7 +143,7 @@ public:
                     appDir.resize(static_cast<size_t>(len));
                     GetModuleFileNameW(0, appDir.data(), appDir.size());
                 }
-                String dir = appDir.toString();
+                std::string dir = appDir.toString();
                 char* sep = ::strrchr(&dir[0], '\\');
                 if (sep) {
                     *sep = '\0';
@@ -156,13 +157,13 @@ public:
         return mProgramDir;
     }
 
-    virtual String getCurrentDirectory() const {
+    virtual std::string getCurrentDirectory() const {
 #if defined(_WIN32)
         int currentLen = GetCurrentDirectoryW(0, nullptr);
         if (currentLen < 0) {
             // Could not get size of working directory. Something is really
             // fishy here, return an empty string.
-            return String();
+            return std::string();
         }
         wchar_t* currentDir =
                 static_cast<wchar_t*>(calloc(currentLen + 1, sizeof(wchar_t)));
@@ -172,30 +173,28 @@ public:
             currentDir[0] = L'0';
         }
 
-        String result = Win32UnicodeString::convertToUtf8(currentDir);
+        std::string result = Win32UnicodeString::convertToUtf8(currentDir);
         ::free(currentDir);
         return result;
 #else   // !_WIN32
         char currentDir[PATH_MAX];
         if (!getcwd(currentDir, sizeof(currentDir))) {
-            return String();
+            return std::string();
         }
-        return String(currentDir);
+        return std::string(currentDir);
 #endif  // !_WIN32
     }
 
-    virtual const String& getLauncherDirectory() const {
+    virtual const std::string& getLauncherDirectory() const {
         if (mLauncherDir.empty()) {
-            String programDir = getProgramDirectory();
+            std::string programDir = getProgramDirectory();
 
-            String launcherName("emulator");
+            std::string launcherName("emulator");
 #ifdef _WIN32
             launcherName += ".exe";
 #endif
-            StringVector pathList;
-            pathList.push_back(programDir);
-            pathList.push_back(launcherName);
-            String launcherPath = PathUtils::recompose(pathList);
+            std::vector<std::string> pathList = {programDir, launcherName};
+            std::string launcherPath = PathUtils::recompose(pathList);
 
             if (pathIsFile(launcherPath)) {
                 mLauncherDir = programDir;
@@ -205,13 +204,13 @@ public:
             // we are probably executing a qemu2 binary, which live in
             // <launcher-dir>/qemu/<os>-<arch>/
             // look for the launcher in grandparent directory
-            StringVector programDirVector =
+            std::vector<std::string> programDirVector =
                     PathUtils::decompose(programDir);
             if (programDirVector.size() >= 2) {
                 programDirVector.resize(programDirVector.size() - 2);
-                String grandparentDir = PathUtils::recompose(programDirVector);
+                std::string grandparentDir = PathUtils::recompose(programDirVector);
                 programDirVector.push_back(launcherName);
-                String launcherPath = PathUtils::recompose(programDirVector);
+                std::string launcherPath = PathUtils::recompose(programDirVector);
                 if (pathIsFile(launcherPath)) {
                     mLauncherDir = grandparentDir;
                     return mLauncherDir;
@@ -223,7 +222,7 @@ public:
         return mLauncherDir;
     }
 
-    virtual const String& getHomeDirectory() const {
+    virtual const std::string& getHomeDirectory() const {
         if (mHomeDir.empty()) {
 #if defined(_WIN32)
             // NOTE: SHGetFolderPathW always takes a buffer of MAX_PATH size,
@@ -238,8 +237,8 @@ public:
                 mHomeDir = Win32UnicodeString::convertToUtf8(path);
             } else {
                 // Fallback to windows-equivalent of HOME env var
-                String homedrive = envGet("HOMEDRIVE");
-                String homepath = envGet("HOMEPATH");
+                std::string homedrive = envGet("HOMEDRIVE");
+                std::string homepath = envGet("HOMEPATH");
                 if (!homedrive.empty() && !homepath.empty()) {
                     mHomeDir.assign(homedrive);
                     mHomeDir.append(homepath);
@@ -265,7 +264,7 @@ public:
         return mHomeDir;
     }
 
-    virtual const String& getAppDataDirectory() const {
+    virtual const std::string& getAppDataDirectory() const {
 #if defined(_WIN32)
         if (mAppDataDir.empty()) {
             // NOTE: See comment in getHomeDirectory().
@@ -362,14 +361,15 @@ public:
 #endif
     }
 
-    virtual StringVector scanDirEntries(StringView dirPath,
-                                        bool fullPath = false) const {
-        StringVector result = scanDirInternal(dirPath);
+    virtual std::vector<std::string> scanDirEntries(
+            StringView dirPath,
+            bool fullPath = false) const {
+        std::vector<std::string> result = scanDirInternal(dirPath);
         if (fullPath) {
             // Pre-pend |dirPath| to each entry.
-            String prefix = PathUtils::addTrailingDirSeparator(dirPath);
+            std::string prefix = PathUtils::addTrailingDirSeparator(dirPath);
             for (size_t n = 0; n < result.size(); ++n) {
-                String path = prefix;
+                std::string path = prefix;
                 path.append(result[n]);
                 result[n] = path;
             }
@@ -377,12 +377,12 @@ public:
         return result;
     }
 
-    virtual String envGet(StringView varname) const {
+    virtual std::string envGet(StringView varname) const {
 #ifdef _WIN32
         Win32UnicodeString varname_unicode(varname);
         const wchar_t* value = _wgetenv(varname_unicode.c_str());
         if (!value) {
-            return String();
+            return std::string();
         } else {
             return Win32UnicodeString::convertToUtf8(value);
         }
@@ -391,13 +391,13 @@ public:
         if (!value) {
             value = "";
         }
-        return String(value);
+        return std::string(value);
 #endif
     }
 
     virtual void envSet(StringView varname, StringView varvalue) {
 #ifdef _WIN32
-        String envStr =
+        std::string envStr =
                 StringFormat("%s=%s", varname, varvalue);
         // Note: this leaks the result of release().
         _wputenv(Win32UnicodeString(envStr).release());
@@ -429,7 +429,7 @@ public:
         return res;
     }
 
-    virtual bool isRemoteSession(String* sessionType) const {
+    virtual bool isRemoteSession(std::string* sessionType) const {
         if (envTest("NX_TEMP")) {
             if (sessionType) {
                 *sessionType = "NX";
@@ -515,7 +515,7 @@ public:
         return time(NULL);
     }
 
-    bool runCommand(const StringVector& commandLine,
+    bool runCommand(const std::vector<std::string>& commandLine,
                     RunOptions options,
                     System::Duration timeoutMs,
                     System::ProcessExitCode* outExitCode,
@@ -526,7 +526,7 @@ public:
         }
 
 #ifdef _WIN32
-        StringVector commandLineCopy = commandLine;
+        std::vector<std::string> commandLineCopy = commandLine;
         STARTUPINFOW startup = {};
         startup.cb = sizeof(startup);
         if ((options & RunOptions::ShowOutput) == 0) {
@@ -542,7 +542,7 @@ public:
 
             // 1. Find the commmand-line interpreter - which hides behind the
             // %COMSPEC% environment variable
-            String comspec = envGet("COMSPEC");
+            std::string comspec = envGet("COMSPEC");
             if (comspec.empty()) {
                 comspec = "cmd.exe";
             }
@@ -552,10 +552,10 @@ public:
             // This executes a command with arguments passed and redirects
             // stdout to nul, stderr is attached to stdout (so it also
             // goes to nul)
-            commandLineCopy.prepend("/C");
-            commandLineCopy.prepend(comspec);
-            commandLineCopy.append(">nul");
-            commandLineCopy.append("2>&1");
+            commandLineCopy.insert(commandLineCopy.begin(), "/C");
+            commandLineCopy.insert(commandLineCopy.begin(), comspec);
+            commandLineCopy.push_back(">nul");
+            commandLineCopy.push_back("2>&1");
         }
 
         PROCESS_INFORMATION pinfo = {};
@@ -564,7 +564,7 @@ public:
         // path found by the system
         StringView executableRef;
         // a buffer to store the executable path if we need to search for it
-        String executable;
+        std::string executable;
         if (PathUtils::isAbsolute(commandLineCopy[0])) {
             executableRef = commandLineCopy[0];
         } else {
@@ -592,7 +592,7 @@ public:
             executableRef = executable;
         }
 
-        String args = executableRef;
+        std::string args = executableRef;
         for (size_t i = 1; i < commandLineCopy.size(); ++i) {
             args += ' ';
             args += android::base::Win32Utils::quoteCommandLine(commandLineCopy[i]);
@@ -658,13 +658,13 @@ public:
 #endif  // !_WIN32
     }
 
-    virtual String getTempDir() const {
+    virtual std::string getTempDir() const {
 #ifdef _WIN32
         Win32UnicodeString path(PATH_MAX);
         DWORD retval = GetTempPathW(path.size(), path.data());
         if (!retval) {
             // Best effort!
-            return String("C:\\Temp");
+            return std::string("C:\\Temp");
         }
         if (retval > path.size()) {
             path.resize(static_cast<size_t>(retval));
@@ -676,7 +676,7 @@ public:
         ::_wmkdir(path.c_str());
         return path.toString();
 #else   // !_WIN32
-        String result;
+        std::string result;
         const char* tmppath = getenv("ANDROID_TMP");
         if (!tmppath) {
             const char* user = getenv("USER");
@@ -694,7 +694,7 @@ public:
     }
 
 #ifndef _WIN32
-    bool runCommandPosix(const StringVector& commandLine,
+    bool runCommandPosix(const std::vector<std::string>& commandLine,
                          RunOptions options,
                          System::Duration timeoutMs,
                          System::ProcessExitCode* outExitCode,
@@ -705,7 +705,7 @@ public:
         }
         params[commandLine.size()] = nullptr;
 
-        String cmd = "";
+        std::string cmd = "";
         if(LOG_IS_ON(VERBOSE)) {
             cmd = "|";
             for (const auto& param : commandLine) {
@@ -800,10 +800,10 @@ public:
 #endif  // !_WIN32
 
 private:
-    mutable String mProgramDir;
-    mutable String mLauncherDir;
-    mutable String mHomeDir;
-    mutable String mAppDataDir;
+    mutable std::string mProgramDir;
+    mutable std::string mLauncherDir;
+    mutable std::string mHomeDir;
+    mutable std::string mAppDataDir;
 };
 
 LazyInstance<HostSystem> sHostSystem = LAZY_INSTANCE_INIT;
@@ -897,8 +897,8 @@ System* System::setForTesting(System* system) {
 }
 
 // static
-StringVector System::scanDirInternal(StringView dirPath) {
-    StringVector result;
+std::vector<std::string> System::scanDirInternal(StringView dirPath) {
+    std::vector<std::string> result;
 
     if (dirPath.empty()) {
         return result;
@@ -913,7 +913,7 @@ StringVector System::scanDirInternal(StringView dirPath) {
         do {
             const wchar_t* name = findData.name;
             if (wcscmp(name, L".") != 0 && wcscmp(name, L"..") != 0) {
-                result.append(Win32UnicodeString::convertToUtf8(name));
+                result.push_back(Win32UnicodeString::convertToUtf8(name));
             }
         } while (_wfindnext(findIndex, &findData) >= 0);
         _findclose(findIndex);
@@ -928,13 +928,13 @@ StringVector System::scanDirInternal(StringView dirPath) {
             }
             const char* name = entry->d_name;
             if (strcmp(name, ".") != 0 && strcmp(name, "..") != 0) {
-                result.append(String(name));
+                result.push_back(std::string(name));
             }
         }
         ::closedir(dir);
     }
 #endif  // !_WIN32
-    sortStringVector(&result);
+    std::sort(result.begin(), result.end());
     return result;
 }
 
@@ -1002,7 +1002,7 @@ void System::addLibrarySearchDir(StringView path) {
     System* system = System::get();
     const char* varName = kLibrarySearchListEnvVarName;
 
-    String libSearchPath = system->envGet(varName);
+    std::string libSearchPath = system->envGet(varName);
     if (libSearchPath.size()) {
         libSearchPath =
                 StringFormat("%s%c%s", path, kPathSeparator, libSearchPath);
@@ -1013,20 +1013,21 @@ void System::addLibrarySearchDir(StringView path) {
 }
 
 // static
-String System::findBundledExecutable(StringView programName) {
+std::string System::findBundledExecutable(StringView programName) {
     System* const system = System::get();
-    const String executableName = PathUtils::toExecutableName(programName);
+    const std::string executableName = PathUtils::toExecutableName(programName);
 
     // first, try the root launcher directory
-    StringVector pathList = { system->getLauncherDirectory(), executableName };
-    String executablePath = PathUtils::recompose(pathList);
+    std::vector<std::string> pathList = {system->getLauncherDirectory(),
+                                         executableName};
+    std::string executablePath = PathUtils::recompose(pathList);
     if (system->pathIsFile(executablePath)) {
         return executablePath;
     }
 
     // it's not there - let's try the 'bin/' subdirectory
     assert(pathList.size() == 2);
-    assert(pathList[1] == executableName);
+    assert(pathList[1] == executableName.c_str());
     pathList[1] = kBinSubDir;
     pathList.push_back(executableName);
     executablePath = PathUtils::recompose(pathList);
@@ -1045,7 +1046,7 @@ String System::findBundledExecutable(StringView programName) {
     }
 #endif
 
-    return String();
+    return std::string();
 }
 
 void System::sleepMs(unsigned n) {
@@ -1056,7 +1057,7 @@ void System::sleepMs(unsigned n) {
 #endif
 }
 
-String toString(OsType osType) {
+std::string toString(OsType osType) {
     switch (osType) {
     case OsType::Windows:
         return "Windows";

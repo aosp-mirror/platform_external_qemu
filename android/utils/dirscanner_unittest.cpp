@@ -11,13 +11,13 @@
 
 #include "android/utils/dirscanner.h"
 
-#include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/testing/TestTempDir.h"
-#include "android/base/String.h"
 
 #include <gtest/gtest.h>
+
+#include <algorithm>
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -25,12 +25,10 @@
 #define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
 
 using android::base::TestTempDir;
-using android::base::String;
-using android::base::StringVector;
 using android::base::PathUtils;
 
-static void make_subfile(const String& dir, const char* file) {
-    String path = dir;
+static void make_subfile(const std::string& dir, const char* file) {
+    std::string path = dir;
     path.append("/");
     path.append(file);
     int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0755);
@@ -65,20 +63,20 @@ TEST(DirScanner, scanNormal) {
     EXPECT_TRUE(scanner);
     EXPECT_EQ(kCount, dirScanner_numEntries(scanner));
 
-    StringVector entries;
+    std::vector<std::string> entries;
     for (;;) {
         const char* entry = dirScanner_next(scanner);
         if (!entry) {
             break;
         }
-        entries.append(String(entry));
+        entries.push_back(std::string(entry));
     }
     dirScanner_free(scanner);
 
     // There is no guarantee on the order of files returned by
     // the file system, so sort them here to ensure consistent
     // comparisons.
-    ::android::base::sortStringVector(&entries);
+    std::sort(entries.begin(), entries.end());
 
     EXPECT_EQ(kCount, entries.size());
     for (size_t n = 0; n < kCount; ++n) {
@@ -104,26 +102,26 @@ TEST(DirScanner, scanFull) {
     EXPECT_TRUE(scanner);
     EXPECT_EQ(kCount, dirScanner_numEntries(scanner));
 
-    StringVector entries;
+    std::vector<std::string> entries;
     for (;;) {
         const char* entry = dirScanner_nextFull(scanner);
         if (!entry) {
             break;
         }
-        entries.append(String(entry));
+        entries.push_back(std::string(entry));
     }
     dirScanner_free(scanner);
 
     // There is no guarantee on the order of files returned by
     // the file system, so sort them here to ensure consistent
     // comparisons.
-    ::android::base::sortStringVector(&entries);
+    std::sort(entries.begin(), entries.end());
 
     EXPECT_EQ(kCount, entries.size());
     for (size_t n = 0; n < kCount; ++n) {
-        String expected =
+        std::string expected =
                 android::base::PathUtils::addTrailingDirSeparator(
-                        String(myDir.path()));
+                        std::string(myDir.path()));
         expected += kExpected[n];
         EXPECT_STREQ(expected.c_str(), entries[n].c_str()) << "#" << n;
     }

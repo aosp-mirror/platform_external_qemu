@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "android/base/String.h"
 #include "android/base/StringView.h"
 
 #include <string>
@@ -23,23 +22,23 @@
 namespace android {
 namespace base {
 
-// Create a new String instance that contains the printf-style formatted
+// Create a new string instance that contains the printf-style formatted
 // output from |format| and potentially any following arguments.
-String StringFormatRaw(const char* format, ...);
+std::string StringFormatRaw(const char* format, ...);
 
 // A variant of StringFormat() which uses a va_list to list formatting
 // parameters instead.
-String StringFormatWithArgs(const char* format, va_list args);
+std::string StringFormatWithArgs(const char* format, va_list args);
 
 // Appends a formatted string at the end of an existing string.
-// |string| is the target String instance, |format| the format string,
+// |string| is the target string instance, |format| the format string,
 // followed by any formatting parameters. This is more efficient than
 // appending the result of StringFormat(format,...) to |*string| directly.
-void StringAppendFormatRaw(String* string, const char* format, ...);
+void StringAppendFormatRaw(std::string* string, const char* format, ...);
 
 // A variant of StringAppendFormat() that takes a va_list to list
 // formatting parameters.
-void StringAppendFormatWithArgs(String* string,
+void StringAppendFormatWithArgs(std::string* string,
                                 const char* format,
                                 va_list args);
 
@@ -63,14 +62,14 @@ T&& unpackFormatArg(T&& t,
 // These templated versions of StringFormat*() allow one to pass all kinds of
 // string objects into the argument list
 template <class... Args>
-String StringFormat(const char* format, Args&&... args)
-{
+std::string StringFormat(const char* format, Args&&... args) {
     return StringFormatRaw(format, unpackFormatArg(std::forward<Args>(args))...);
 }
 
 template <class... Args>
-void StringAppendFormat(String* string, const char* format, Args&&... args)
-{
+void StringAppendFormat(std::string* string,
+                        const char* format,
+                        Args&&... args) {
     StringAppendFormatRaw(string, format,
                           unpackFormatArg(std::forward<Args>(args))...);
 }

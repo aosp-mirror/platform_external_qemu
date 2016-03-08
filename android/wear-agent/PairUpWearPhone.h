@@ -13,11 +13,13 @@
 
 #include "android/base/Compiler.h"
 
+#include <string>
+#include <vector>
+
 namespace android {
 
 namespace base {
 class Looper;
-class StringVector;
 }  // namespace base
 
 namespace wear {
@@ -41,7 +43,7 @@ class PairUpWearPhone {
 public:
     // "devices" is a list of serial-ids, could contain both emulators and real devices.
     PairUpWearPhone(::android::base::Looper* looper,
-                    const ::android::base::StringVector& devices,
+                    const std::vector<std::string>& devices,
                     int adbHostPort);
 
     ~PairUpWearPhone();

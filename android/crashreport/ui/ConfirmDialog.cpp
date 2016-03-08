@@ -15,7 +15,6 @@
 #include "android/android.h"
 #include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
-#include "android/base/String.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/globals.h"
 
@@ -47,7 +46,6 @@ extern "C" const unsigned char* android_emulator_icon_find(const char* name,
 
 using android::base::IniFile;
 using android::base::PathUtils;
-using android::base::String;
 using android::base::StringView;
 using android::crashreport::CrashService;
 
@@ -376,8 +374,8 @@ void ConfirmDialog::setSwGpu() {
         std::string diskPartDir = iniF.getString("disk.dataPartition.path", "");
         if ( !diskPartDir.empty() ) {
             // Keep the path; discard the file name
-            String outputDir;
-            String unused;
+            std::string outputDir;
+            std::string unused;
             bool isOK = PathUtils::split(diskPartDir, &outputDir, &unused);
             if (isOK) {
                 std::string hwQemuPath = PathUtils::

@@ -11,19 +11,18 @@
 */
 #include "android/utils/dirscanner.h"
 
-#include "android/base/containers/StringVector.h"
-#include "android/base/String.h"
 #include "android/base/system/System.h"
 #include "android/base/files/PathUtils.h"
 
-using android::base::String;
-using android::base::StringVector;
+#include <string>
+#include <vector>
+
 using android::base::PathUtils;
 
 struct DirScanner {
-    StringVector entries;
-    String prefix;
-    String result;
+    std::vector<std::string> entries;
+    std::string prefix;
+    std::string result;
     size_t pos;
 
     explicit DirScanner(const char* dir) :

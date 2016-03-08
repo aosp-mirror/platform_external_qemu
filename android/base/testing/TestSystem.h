@@ -14,11 +14,9 @@
 
 #pragma once
 
-#include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
-#include "android/base/String.h"
 #include "android/base/testing/TestTempDir.h"
 
 namespace android {
@@ -53,7 +51,7 @@ public:
         delete mTempDir;
     }
 
-    virtual const String& getProgramDirectory() const { return mProgramDir; }
+    virtual const std::string& getProgramDirectory() const { return mProgramDir; }
 
     // Set directory of currently executing binary.  This must be a subdirectory
     // of mLauncherDir and specified relative to mLauncherDir
@@ -67,7 +65,7 @@ public:
         }
     }
 
-    virtual const String& getLauncherDirectory() const {
+    virtual const std::string& getLauncherDirectory() const {
         if (mLauncherDir.size()) {
             return mLauncherDir;
         } else {
@@ -81,13 +79,13 @@ public:
         setProgramSubDir(mProgramSubdir);
     }
 
-    virtual const String& getHomeDirectory() const {
+    virtual const std::string& getHomeDirectory() const {
         return mHomeDir;
     }
 
     void setHomeDirectory(StringView homeDir) { mHomeDir = homeDir; }
 
-    virtual const String& getAppDataDirectory() const {
+    virtual const std::string& getAppDataDirectory() const {
         return mAppDataDir;
     }
 
@@ -95,7 +93,7 @@ public:
         mAppDataDir = appDataDir;
     }
 
-    virtual String getCurrentDirectory() const { return mCurrentDir; }
+    virtual std::string getCurrentDirectory() const { return mCurrentDir; }
 
     // Set current directory during unit-testing.
     void setCurrentDirectoryForTesting(StringView path) { mCurrentDir = path; }
@@ -112,21 +110,21 @@ public:
         mOsType = type;
     }
 
-    virtual String envGet(StringView varname) const {
+    virtual std::string envGet(StringView varname) const {
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
-            const String& name = mEnvPairs[n];
+            const std::string& name = mEnvPairs[n];
             if (name == varname) {
                 return mEnvPairs[n + 1];
             }
         }
-        return String();
+        return std::string();
     }
 
     virtual std::vector<std::string> envGetAll() const override {
         std::vector<std::string> res;
         for (size_t i = 0; i < mEnvPairs.size(); i += 2) {
-            const String& name = mEnvPairs[i];
-            const String& val = mEnvPairs[i + 1];
+            const std::string& name = mEnvPairs[i];
+            const std::string& val = mEnvPairs[i + 1];
             res.push_back(std::string(name.c_str(), name.size())
                           + '=' + val.c_str());
         }
@@ -145,24 +143,24 @@ public:
         if (varvalue.empty()) {
             // Remove definition, if any.
             if (index >= 0) {
-                mEnvPairs.remove(index);
-                mEnvPairs.remove(index);
+                mEnvPairs.erase(mEnvPairs.begin() + index,
+                                mEnvPairs.begin() + index + 2);
             }
         } else {
             if (index >= 0) {
                 // Replacement.
-                mEnvPairs[index + 1] = String(varvalue);
+                mEnvPairs[index + 1] = varvalue;
             } else {
                 // Addition.
-                mEnvPairs.append(String(varname));
-                mEnvPairs.append(String(varvalue));
+                mEnvPairs.push_back(varname);
+                mEnvPairs.push_back(varvalue);
             }
         }
     }
 
     virtual bool envTest(StringView varname) const {
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
-            const String& name = mEnvPairs[n];
+            const std::string& name = mEnvPairs[n];
             if (name == varname) {
                 return true;
             }
@@ -194,21 +192,22 @@ public:
         return pathCanExecInternal(toTempRoot(path));
     }
 
-    virtual StringVector scanDirEntries(StringView dirPath,
-                                        bool fullPath = false) const {
+    virtual std::vector<std::string> scanDirEntries(
+            StringView dirPath,
+            bool fullPath = false) const {
         if (!mTempDir) {
             // Nothing to return for now.
             LOG(ERROR) << "No temp root yet!";
-            return StringVector();
+            return std::vector<std::string>();
         }
-        String newPath = toTempRoot(dirPath);
-        StringVector result = scanDirInternal(newPath);
+        std::string newPath = toTempRoot(dirPath);
+        std::vector<std::string> result = scanDirInternal(newPath);
         if (fullPath) {
-            String prefix = PathUtils::addTrailingDirSeparator(
-                    String(dirPath));
+            std::string prefix = PathUtils::addTrailingDirSeparator(
+                    std::string(dirPath));
             size_t prefixLen = prefix.size();
             for (size_t n = 0; n < result.size(); ++n) {
-                result[n] = String(result[n].c_str() + prefixLen);
+                result[n] = std::string(result[n].c_str() + prefixLen);
             }
         }
         return result;
@@ -218,12 +217,12 @@ public:
         if (!mTempDir) {
             mTempDir = new TestTempDir("TestSystem");
             mTempRootPrefix = PathUtils::addTrailingDirSeparator(
-                    String(mTempDir->path()));
+                    std::string(mTempDir->path()));
         }
         return mTempDir;
     }
 
-    virtual bool isRemoteSession(String* sessionType) const {
+    virtual bool isRemoteSession(std::string* sessionType) const {
         if (!mIsRemoteSession) {
             return false;
         }
@@ -253,7 +252,7 @@ public:
     // receive the parameters of a runCommand() call. Register it
     // with setShellCommand().
     typedef bool(ShellCommand)(void* opaque,
-                               const StringVector& commandLine,
+                               const std::vector<std::string>& commandLine,
                                System::Duration timeoutMs,
                                System::ProcessExitCode* outExitCode,
                                System::Pid* outChildPid);
@@ -265,7 +264,7 @@ public:
         mShellOpaque = shellOpaque;
     }
 
-    bool runCommand(const StringVector& commandLine,
+    bool runCommand(const std::vector<std::string>& commandLine,
                     RunOptions options,
                     System::Duration timeoutMs,
                     System::ProcessExitCode* outExitCode,
@@ -285,7 +284,7 @@ public:
         return result;
     }
 
-    virtual String getTempDir() const { return String("/tmp"); }
+    virtual std::string getTempDir() const { return std::string("/tmp"); }
 
     virtual time_t getUnixTime() const {
         return mUnixTime;
@@ -296,31 +295,31 @@ public:
     }
 
 private:
-    String toTempRoot(StringView path) const {
-        String result = mTempRootPrefix;
+    std::string toTempRoot(StringView path) const {
+        std::string result = mTempRootPrefix;
         result += path;
         return result;
     }
 
-    String fromTempRoot(StringView path) {
+    std::string fromTempRoot(StringView path) {
         if (path.size() > mTempRootPrefix.size()) {
             return path.c_str() + mTempRootPrefix.size();
         }
         return path;
     }
 
-    String mProgramDir;
-    String mProgramSubdir;
-    String mLauncherDir;
-    String mHomeDir;
-    String mAppDataDir;
-    String mCurrentDir;
+    std::string mProgramDir;
+    std::string mProgramSubdir;
+    std::string mLauncherDir;
+    std::string mHomeDir;
+    std::string mAppDataDir;
+    std::string mCurrentDir;
     int mHostBitness;
     bool mIsRemoteSession;
-    String mRemoteSessionType;
+    std::string mRemoteSessionType;
     mutable TestTempDir* mTempDir;
-    mutable String mTempRootPrefix;
-    StringVector mEnvPairs;
+    mutable std::string mTempRootPrefix;
+    std::vector<std::string> mEnvPairs;
     System* mPrevSystem;
     Times mTimes;
     ShellCommand* mShellFunc;

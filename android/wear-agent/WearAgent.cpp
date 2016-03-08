@@ -15,16 +15,17 @@
 #include "android/base/async/AsyncReader.h"
 #include "android/base/async/AsyncWriter.h"
 #include "android/base/async/Looper.h"
-#include "android/base/containers/StringVector.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/sockets/SocketUtils.h"
-#include "android/base/String.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/utils/debug.h"
 #include "android/wear-agent/PairUpWearPhone.h"
+
+#include <string>
+#include <vector>
 
 #include <ctype.h>
 #include <stdio.h>
@@ -117,7 +118,7 @@ private:
     bool expectLength() const { return LENGTH == mExpectReplayType; }
     bool expectMsg() const { return MESSAGE == mExpectReplayType; }
     static bool isValidHexNumber(const char* str, const int sz);
-    static void parseAdbDevices(char* buf, StringVector* devices);
+    static void parseAdbDevices(char* buf, std::vector<std::string>* devices);
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(WearAgentImpl);
 };
@@ -184,7 +185,7 @@ void WearAgentImpl::onRead() {
                 DPRINT("message received from ADB:\n%s", mReadBuffer);
                 mPairUpWearPhone.reset();
 
-                StringVector devices;
+                std::vector<std::string> devices;
                 parseAdbDevices(mReadBuffer, &devices);
                 if (devices.size() >= 2) {
                     mPairUpWearPhone.reset(new PairUpWearPhone(mLooper,
@@ -378,7 +379,8 @@ void WearAgentImpl::cleanupConnection() {
     mPairUpWearPhone.reset();
 }
 
-void WearAgentImpl::parseAdbDevices(char* buf, StringVector* devices) {
+void WearAgentImpl::parseAdbDevices(char* buf,
+                                    std::vector<std::string>* devices) {
     if (!buf) return;
 
     static const char kDelimiters[] = " \t\r\n";
@@ -387,7 +389,7 @@ void WearAgentImpl::parseAdbDevices(char* buf, StringVector* devices) {
     char* prev = NULL;
     while (pch) {
         if (!strcmp("device", pch) && prev) {
-            devices->push_back(String(prev));
+            devices->push_back(std::string(prev));
         }
         prev = pch;
         pch = strtok(NULL, kDelimiters);

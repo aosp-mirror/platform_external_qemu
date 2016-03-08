@@ -11,17 +11,14 @@
 
 #pragma once
 
-#include "android/base/containers/StringVector.h"
-#include "android/base/String.h"
+#include <string>
+#include <vector>
 
 namespace android {
 namespace opengl {
 
 class EmuglBackendList {
 public:
-    typedef android::base::String String;
-    typedef android::base::StringVector StringVector;
-
     // Parse the content of |execDir|/<lib>/ for Emugl backends.
     // |programBitness| can be 0 (autodetect), 32 or 64, and determines
     // the value of <lib> which will be 'lib' for 32-bit systems,
@@ -29,17 +26,17 @@ public:
     EmuglBackendList(const char* execDir, int programBitness);
 
     // Return the name of the default Emugl backend.
-    const String& defaultName() const { return mDefaultName; }
+    const std::string& defaultName() const { return mDefaultName; }
 
     // Return the list of installed Emugl backends.
-    const StringVector& names() const { return mNames; }
+    const std::vector<std::string>& names() const { return mNames; }
 
     // Returns true if |name| is part of names().
     bool contains(const char* name) const;
 
     // Convert the name of an Emugl backend into the path of the
     // corresponding sub-directory, if it exits, or NULL otherwise.
-    String getLibDirPath(const char* name);
+    std::string getLibDirPath(const char* name);
 
     // List of supported Emugl shared libraries.
     enum Library {
@@ -54,13 +51,14 @@ public:
     // will be empty if there is no such library.
     // |library| is a library type. On success, return true and sets
     // |*libPath| to the library's path value. On failure, return false.
-    bool getBackendLibPath(const char* name, Library library, String* libPath);
+    bool getBackendLibPath(const char* name, Library library,
+                           std::string* libPath);
 
 private:
-    String mDefaultName;
-    StringVector mNames;
+    std::string mDefaultName;
+    std::vector<std::string> mNames;
     int mProgramBitness;
-    String mExecDir;
+    std::string mExecDir;
 };
 
 }  // namespace opengl

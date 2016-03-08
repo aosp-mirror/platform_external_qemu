@@ -209,7 +209,7 @@ TEST(Stream, putStringWithBaseString) {
     };
     uint8_t buffer[32];
     MemoryStream stream(buffer, sizeof(buffer));
-    stream.putString(String(kInput));
+    stream.putString(std::string(kInput));
     for (size_t n = 0; n < sizeof(kExpected); ++n) {
         EXPECT_EQ(kExpected[n], buffer[n]) << "#" << n;
     }
@@ -250,7 +250,7 @@ TEST(Stream, getString) {
     };
     static const char kExpected[] = "Hello world";
     MemoryStream stream(kInput, sizeof(kInput));
-    String str = stream.getString();
+    std::string str = stream.getString();
     EXPECT_EQ(sizeof(kExpected) - 1U, str.size());
     EXPECT_STREQ(kExpected, str.c_str());
 }

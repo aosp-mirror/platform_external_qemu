@@ -36,6 +36,7 @@
 #include "android/skin/qt/tool-window.h"
 #include "ui_tools.h"
 
+#include <string>
 #include <cassert>
 
 using namespace android::base;
@@ -357,7 +358,7 @@ int ToolWindow::adbShellStopRunner() {
     }
 
     // convert the command + arguments to the format needed in System class call
-    StringVector fullArgs;
+    std::vector<std::string> fullArgs;
     fullArgs.push_back(command.toUtf8().constData());
     for (const auto& arg : args) {
         fullArgs.push_back(arg.toUtf8().constData());

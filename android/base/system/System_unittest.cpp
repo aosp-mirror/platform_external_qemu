@@ -17,11 +17,12 @@
 #include "android/base/EintrWrapper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
-#include "android/base/String.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
 #include <gtest/gtest.h>
+
+#include <string>
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -31,8 +32,8 @@
 namespace android {
 namespace base {
 
-static void make_subfile(const String& dir, const char* file) {
-    String path = dir;
+static void make_subfile(const std::string& dir, const char* file) {
+    std::string path = dir;
     path.append("/");
     path.append(file);
     int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0755);
@@ -49,19 +50,19 @@ TEST(System, get) {
 }
 
 TEST(System, getProgramDirectory) {
-    String dir = System::get()->getProgramDirectory();
+    std::string dir = System::get()->getProgramDirectory();
     EXPECT_FALSE(dir.empty());
     LOG(INFO) << "Program directory: [" << dir.c_str() << "]";
 }
 
 TEST(System, getHomeDirectory) {
-    String dir = System::get()->getHomeDirectory();
+    std::string dir = System::get()->getHomeDirectory();
     EXPECT_FALSE(dir.empty());
     LOG(INFO) << "Home directory: [" << dir.c_str() << "]";
 }
 
 TEST(System, getAppDataDirectory) {
-    String dir = System::get()->getAppDataDirectory();
+    std::string dir = System::get()->getAppDataDirectory();
 #if defined(__linux__)
     EXPECT_TRUE(dir.empty());
 #else
@@ -72,7 +73,7 @@ TEST(System, getAppDataDirectory) {
 }
 
 TEST(System, getCurrentDirectory) {
-    String dir = System::get()->getCurrentDirectory();
+    std::string dir = System::get()->getCurrentDirectory();
     EXPECT_FALSE(dir.empty());
     LOG(INFO) << "Current directory: [" << dir.c_str() << "]";
 }
@@ -88,13 +89,13 @@ TEST(TestSystem, getDirectory) {
     const char  kAppDataDir[] = "/lala/kaka";
 #endif // __linux__
     TestSystem testSys(kLauncherDir, 32, kHomeDir, kAppDataDir);
-    String ldir = System::get()->getLauncherDirectory();
+    std::string ldir = System::get()->getLauncherDirectory();
     EXPECT_STREQ(kLauncherDir, ldir.c_str());
-    String pdir = System::get()->getProgramDirectory();
+    std::string pdir = System::get()->getProgramDirectory();
     EXPECT_STREQ(kLauncherDir, pdir.c_str());
-    String hdir = System::get()->getHomeDirectory();
+    std::string hdir = System::get()->getHomeDirectory();
     EXPECT_STREQ(kHomeDir, hdir.c_str());
-    String adir = System::get()->getAppDataDirectory();
+    std::string adir = System::get()->getAppDataDirectory();
 #if defined(__linux__)
     EXPECT_TRUE(adir.empty());
 #else
@@ -111,9 +112,9 @@ TEST(TestSystem, getDirectoryProgramDir) {
     TestSystem testSys(kLauncherDir, 32, "/home", "/app");
     testSys.setProgramSubDir(kProgramDir);
 
-    String ldir = System::get()->getLauncherDirectory();
+    std::string ldir = System::get()->getLauncherDirectory();
     EXPECT_STREQ(kLauncherDir, ldir.c_str());
-    String pdir = System::get()->getProgramDirectory();
+    std::string pdir = System::get()->getProgramDirectory();
 #ifdef _WIN32
     EXPECT_STREQ("/foo/bar\\qemu/os-arch", pdir.c_str());
 #else
@@ -155,7 +156,8 @@ TEST(System, scandDirEntries) {
         make_subfile(myDir.path(), kInput[n]);
     }
 
-    StringVector entries = System::get()->scanDirEntries(myDir.path());
+    std::vector<std::string> entries =
+            System::get()->scanDirEntries(myDir.path());
 
     EXPECT_EQ(kCount, entries.size());
     for (size_t n = 0; n < kCount; ++n) {
@@ -199,7 +201,7 @@ TEST(System, pathIsDir) {
 TEST(System, pathOperations) {
     System* sys = System::get();
     TestTempDir tempDir("path_opts");
-    String fooPath = tempDir.path();
+    std::string fooPath = tempDir.path();
     fooPath += "/foo";
 
     EXPECT_FALSE(sys->pathExists(fooPath));
@@ -290,11 +292,12 @@ TEST(System, scanDirEntriesWithFullPaths) {
         make_subfile(myDir.path(), kInput[n]);
     }
 
-    StringVector entries = System::get()->scanDirEntries(myDir.path(), true);
+    std::vector<std::string> entries =
+            System::get()->scanDirEntries(myDir.path(), true);
 
     EXPECT_EQ(kCount, entries.size());
     for (size_t n = 0; n < kCount; ++n) {
-        String expected(myDir.path());
+        std::string expected(myDir.path());
         expected = PathUtils::addTrailingDirSeparator(expected);
         expected += kExpected[n];
         EXPECT_STREQ(expected.c_str(), entries[n].c_str()) << "#" << n;
@@ -302,7 +305,7 @@ TEST(System, scanDirEntriesWithFullPaths) {
 }
 
 TEST(System, isRemoteSession) {
-    String sessionType;
+    std::string sessionType;
     bool isRemote = System::get()->isRemoteSession(&sessionType);
     if (isRemote) {
         LOG(INFO) << "Remote session type [" << sessionType.c_str() << "]";
@@ -329,17 +332,17 @@ TEST(System, findBundledExecutable) {
     TestTempDir* testDir = testSys.getTempRoot();
     ASSERT_TRUE(testDir->makeSubDir("foo"));
 
-    StringVector pathList;
-    pathList.push_back(String("foo"));
-    pathList.push_back(String(System::kBinSubDir));
+    std::vector<std::string> pathList;
+    pathList.push_back(std::string("foo"));
+    pathList.push_back(std::string(System::kBinSubDir));
     ASSERT_TRUE(testDir->makeSubDir(PathUtils::recompose(pathList).c_str()));
 
-    pathList.push_back(String(kProgramFile));
-    String programPath = PathUtils::recompose(pathList);
+    pathList.push_back(std::string(kProgramFile));
+    std::string programPath = PathUtils::recompose(pathList);
     make_subfile(testDir->path(), programPath.c_str());
 
-    String path = testSys.findBundledExecutable("myprogram");
-    String expectedPath("/");
+    std::string path = testSys.findBundledExecutable("myprogram");
+    std::string expectedPath("/");
     expectedPath += programPath;
     EXPECT_STREQ(expectedPath.c_str(), path.c_str());
 
@@ -364,10 +367,10 @@ TEST(System, getUnixTime) {
 
 TEST(System, runCommandTrue) {
 #ifndef _WIN32
-    StringVector cmd = {"ls"};
+    std::vector<std::string> cmd = {"ls"};
 #else
     // 'dir' is a builtin command, so all you need is a sane cmd.exe
-    StringVector cmd = {"cmd.exe", "/C", "dir"};
+    std::vector<std::string> cmd = {"cmd.exe", "/C", "dir"};
 #endif
 
     EXPECT_TRUE(System::get()->runCommand(cmd));
@@ -383,12 +386,13 @@ TEST(System, runCommandTrue) {
 
 TEST(System, runCommandTimeout) {
 #ifndef _WIN32
-    StringVector cmd = {"sleep", "0.5"};
+    std::vector<std::string> cmd = {"sleep", "0.5"};
 #else
     // 2 Attempts give us a delay of 1 second.
     // 'ping' is not listed as an internal cmd.exe command, but seems to be that
     // way on recent windows boxes and wine. Safe to assume?
-    StringVector cmd = {"cmd.exe", "/C", "ping", "-n", "2", "127.0.0.1"};
+    std::vector<std::string> cmd = {"cmd.exe", "/C", "ping",
+                                    "-n",      "2",  "127.0.0.1"};
 #endif
 
     EXPECT_FALSE(

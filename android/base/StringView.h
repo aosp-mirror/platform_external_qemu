@@ -17,15 +17,13 @@
 namespace android {
 namespace base {
 
-class String;
-
 // A StringView is a simple (address, size) pair that points to an
 // existing read-only string. It's a convenience class used to hidden
-// creation of String() objects un-necessarily.
+// creation of std::string() objects un-necessarily.
 //
 // Consider the two following functions:
 //
-//     size_t  count1(const String& str) {
+//     size_t  count1(const std::string& str) {
 //         size_t result = 0;
 //         for (size_t n = 0; n < str.size(); ++n) {
 //              if (str[n] == '1') {
@@ -49,15 +47,15 @@ class String;
 //       size_t n2 = count2("I can count 2 too");
 //
 // In the first case, the compiler will silently create a temporary
-// String object, copy the input string into it (allocating memory in
-// the heap), call count1() and destroy the String upon its return.
+// std::string object, copy the input string into it (allocating memory in
+// the heap), call count1() and destroy the std::string upon its return.
 //
 // In the second case, the compiler will create a temporary StringView,
 // initialize it trivially before calling count2(), this results in
 // much less generated code, as well as better performance.
 //
 // Generally speaking, always use a reference or pointer to StringView
-// instead of a String if your function or method doesn't need to modify
+// instead of a std::string if your function or method doesn't need to modify
 // its input.
 //
 class StringView {
@@ -70,9 +68,6 @@ public:
     // IMPORTANT: This is intentionally not 'explicit'.
     StringView(const char* string) :
             mString(string ? string : ""), mSize(string ? strlen(string) : 0) {}
-
-    // IMPORTANT: This is intentionally not 'explicit'.
-    StringView(const String& str);
 
     // IMPORTANT: This is intentionally not 'explicit'.
     StringView(const std::string& str) :
@@ -129,13 +124,16 @@ public:
         return *this;
     }
 
+    // Convert to std::string when needed.
+    operator std::string() const { return std::string(mString, mSize); }
+
 private:
     const char* mString;
     size_t mSize;
 };
 
 // Comparison operators. Defined as functions to allow automatic type
-// conversions with C strings and String objects.
+// conversions with C strings and std::string objects.
 
 bool operator==(const StringView& x, const StringView& y);
 

@@ -15,8 +15,8 @@
 #include "android/metrics/StudioHelper.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
-#include "android/base/String.h"
 #include "android/base/Version.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/metrics/studio-helper.h"
@@ -26,8 +26,10 @@
 
 #include <libxml/tree.h>
 
-#include <stdlib.h>
 #include <fstream>
+
+#include <stdlib.h>
+#include <string.h>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -104,15 +106,15 @@ const Version StudioHelper::extractAndroidStudioVersion(
     // a "2" for release and a "1" for previews; this will
     // allow proper sorting
     Version rawVersion(cVersion);
-    String adjustedVersion(rawVersion.toString());
+    std::string adjustedVersion(rawVersion.toString());
     adjustedVersion.append(micro);
 
     return Version(adjustedVersion.c_str());
 }
 
 // static
-String StudioHelper::latestAndroidStudioDir(const String& scanPath) {
-    String latest_path;
+std::string StudioHelper::latestAndroidStudioDir(const std::string& scanPath) {
+    std::string latest_path;
 
     if (scanPath.empty()) {
         return latest_path;
@@ -145,7 +147,7 @@ String StudioHelper::latestAndroidStudioDir(const String& scanPath) {
         free(name);
         if (v.isValid() && latest_version < v) {
             latest_version = v;
-            latest_path = String(full_path);
+            latest_path = std::string(full_path);
         }
     }
 
@@ -153,35 +155,35 @@ String StudioHelper::latestAndroidStudioDir(const String& scanPath) {
 }
 
 // static
-String StudioHelper::pathToStudioXML(const String& studioPath,
-                                     const String& filename) {
+std::string StudioHelper::pathToStudioXML(const std::string& studioPath,
+                                          const std::string& filename) {
     if (studioPath.empty() || filename.empty())
-        return String();
+        return std::string();
 
     // build /path/to/.AndroidStudio/subpath/to/file.xml
-    StringVector vpath;
-    vpath.append(studioPath);
+    std::vector<std::string> vpath;
+    vpath.push_back(studioPath);
 #ifndef __APPLE__
-    vpath.append(String(kAndroidStudioDirInfix));
+    vpath.push_back(std::string(kAndroidStudioDirInfix));
 #endif  // !__APPLE__
-    vpath.append(String(kAndroidStudioDirSuffix));
-    vpath.append(filename);
+    vpath.push_back(std::string(kAndroidStudioDirSuffix));
+    vpath.push_back(filename);
     return PathUtils::recompose(vpath);
 }
 
 #ifdef _WIN32
 // static
-String StudioHelper::pathToStudioUUIDWindows() {
+std::string StudioHelper::pathToStudioUUIDWindows() {
     System* sys = System::get();
-    String appDataPath = sys->getAppDataDirectory();
+    std::string appDataPath = sys->getAppDataDirectory();
 
-    String retval;
+    std::string retval;
     if (!appDataPath.empty()) {
         // build /path/to/APPDATA/subpath/to/StudioUUID file
-        StringVector vpath;
-        vpath.append(appDataPath);
-        vpath.append(String(kAndroidStudioUuidDir));
-        vpath.append(String(kAndroidStudioUuid));
+        std::vector<std::string> vpath;
+        vpath.push_back(appDataPath);
+        vpath.push_back(std::string(kAndroidStudioUuidDir));
+        vpath.push_back(std::string(kAndroidStudioUuid));
 
         retval = PathUtils::recompose(vpath);
     }
@@ -193,14 +195,14 @@ String StudioHelper::pathToStudioUUIDWindows() {
 /*****************************************************************************/
 
 // Recurse through studio xml doc and return the value described in match
-// as a String, if one is set. Otherwise, return an empty string
+// as a string, if one is set. Otherwise, return an empty string
 //
-static String eval_studio_config_xml(xmlDocPtr doc,
-                                     xmlNodePtr root,
-                                     const StudioXml* const match) {
+static std::string eval_studio_config_xml(xmlDocPtr doc,
+                                          xmlNodePtr root,
+                                          const StudioXml* const match) {
     xmlNodePtr current = NULL;
     xmlChar* xmlval = NULL;
-    String retVal;
+    std::string retVal;
 
     for (current = root; current; current = current->next) {
         if (current->type == XML_ELEMENT_NODE) {
@@ -216,7 +218,7 @@ static String eval_studio_config_xml(xmlDocPtr doc,
                         // we are simply reading the result and don't
                         // operate on it, soe simply reinterpret as
                         // as char * array
-                        retVal = String(reinterpret_cast<char*>(xmlval));
+                        retVal = std::string(reinterpret_cast<char*>(xmlval));
                         xmlFree(xmlval);
                         break;
                     }
@@ -235,13 +237,13 @@ static String eval_studio_config_xml(xmlDocPtr doc,
 // Find latest studio preferences directory and return the
 // value of the xml entry described in |match|.
 //
-static String parseStudioXML(const StudioXml* const match) {
-    String retval;
+static std::string parseStudioXML(const StudioXml* const match) {
+    std::string retval;
 
     System* sys = System::get();
     // Get path to .AndroidStudio
-    String appDataPath;
-    String studio = sys->envGet("ANDROID_STUDIO_PREFERENCES");
+    std::string appDataPath;
+    std::string studio = sys->envGet("ANDROID_STUDIO_PREFERENCES");
     if (studio.empty()) {
 #ifdef __APPLE__
         appDataPath = sys->getAppDataDirectory();
@@ -258,8 +260,8 @@ static String parseStudioXML(const StudioXml* const match) {
     }
 
     // Find match->filename xml file under .AndroidStudio
-    String xml_path =
-            StudioHelper::pathToStudioXML(studio, String(match->filename));
+    std::string xml_path =
+            StudioHelper::pathToStudioXML(studio, std::string(match->filename));
     if (xml_path.empty()) {
         D("Failed to find %s in %s", match->filename, studio.c_str());
         return retval;
@@ -278,17 +280,17 @@ static String parseStudioXML(const StudioXml* const match) {
 }
 
 #ifdef _WIN32
-static String android_studio_get_Windows_uuid() {
+static std::string android_studio_get_Windows_uuid() {
     // Appropriately sized container for UUID
-    String uuid_file_path = StudioHelper::pathToStudioUUIDWindows();
-    String retval;
+    std::string uuid_file_path = StudioHelper::pathToStudioUUIDWindows();
+    std::string retval;
 
     // Read UUID from file
     std::ifstream uuid_file(uuid_file_path.c_str());
     if (uuid_file) {
         std::string line;
         std::getline(uuid_file, line);
-        retval = String(line.c_str());
+        retval = std::string(line.c_str());
     }
 
     return retval;
@@ -311,7 +313,7 @@ int android_studio_get_optins() {
             .keyname = "allowed",  // assuming "true"/"false" string values
     };
 
-    String xmlVal = parseStudioXML(&optins);
+    std::string xmlVal = parseStudioXML(&optins);
     if (xmlVal.empty()) {
         D("Failed to parse %s preferences file %s", kAndroidStudioDir,
           optins.filename);
@@ -332,8 +334,8 @@ int android_studio_get_optins() {
     return retval;
 }
 
-static String android_studio_get_installation_id_legacy() {
-    String retval;
+static std::string android_studio_get_installation_id_legacy() {
+    std::string retval;
 #ifndef __WIN32
     static const StudioXml uuid = {
             .filename = "options.xml",
@@ -366,7 +368,7 @@ static String android_studio_get_installation_id_legacy() {
 // cannot be retrieved, a fixed dummy UUID will be returned.  Caller is
 // responsible for freeing returned string.
 char* android_studio_get_installation_id() {
-    String uuid_path =
+    std::string uuid_path =
             PathUtils::join(ConfigDirs::getUserDirectory(), "uid.txt");
     std::ifstream uuid_file(uuid_path.c_str());
     if (uuid_file) {
@@ -381,7 +383,7 @@ char* android_studio_get_installation_id() {
     // locations.
     auto uuid = android_studio_get_installation_id_legacy();
     if (!uuid.empty()) {
-        return uuid.release();
+        return android::base::strDup(uuid);
     }
 
     D("Defaulting to zero installation ID");

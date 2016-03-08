@@ -24,7 +24,6 @@
 #include <string.h>
 
 using android::base::RunOptions;
-using android::base::String;
 using android::base::System;
 #ifdef _WIN32
 using android::base::Win32UnicodeString;
@@ -247,9 +246,9 @@ std::string load_gpu_info() {
 
 #ifdef _WIN32
     int num_chars = contents.size() / sizeof(wchar_t);
-    String utf8String = Win32UnicodeString::convertToUtf8(
+    std::string utf8String = Win32UnicodeString::convertToUtf8(
             reinterpret_cast<const wchar_t*>(contents.c_str()), num_chars);
-    return std::string(utf8String.c_str());
+    return utf8String;
 #else
     return contents;
 #endif

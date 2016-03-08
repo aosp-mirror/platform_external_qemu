@@ -15,7 +15,6 @@
 #include "android/crashreport/CrashReporter.h"
 
 #include "android/crashreport/crash-handler.h"
-#include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/system/Win32UnicodeString.h"
@@ -42,7 +41,6 @@
 #define I(...) printf(__VA_ARGS__)
 
 using android::base::PathUtils;
-using android::base::String;
 using android::base::StringView;
 using android::base::System;
 using android::base::Uuid;
@@ -240,7 +238,7 @@ bool crashhandler_init() {
         return false;
     }
 
-    ::android::base::StringVector cmdline =
+    std::vector<std::string> cmdline =
             CrashSystem::get()->getCrashServiceCmdLine(crashpipe.mServer,
                                                        procident);
 

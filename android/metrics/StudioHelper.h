@@ -15,7 +15,6 @@
 #pragma once
 
 #include "android/base/Version.h"
-#include "android/base/String.h"
 
 namespace android {
 
@@ -35,20 +34,20 @@ struct StudioHelper {
     // directries and return the path to the latest one, or NULL
     // if none can be found. Returned value is a String
     //
-    static base::String latestAndroidStudioDir(const base::String& scanPath);
+    static std::string latestAndroidStudioDir(const std::string& scanPath);
 
     // Construct and return the complete path to Android Studio XML
     // preferences |filename| under path |studioPath|.
     // Returned value is a String
-    static base::String pathToStudioXML(const base::String& studioPath,
-                                        const base::String& filename);
+    static std::string pathToStudioXML(const std::string& studioPath,
+                                       const std::string& filename);
 
 #ifdef _WIN32
     // Microsoft Windows only
     // Construct and return the complete path to Android Studio
     // UUID storage file. Returned value is a String
     //
-    static android::base::String pathToStudioUUIDWindows();
+    static std::string pathToStudioUUIDWindows();
 #endif
 };
 

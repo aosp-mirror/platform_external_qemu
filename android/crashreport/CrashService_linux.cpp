@@ -14,7 +14,6 @@
 
 #include "android/crashreport/CrashService_linux.h"
 
-#include "android/base/String.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 
@@ -38,7 +37,6 @@
 
 namespace android {
 
-using ::android::base::String;
 using ::android::base::PathUtils;
 using ::android::base::System;
 
@@ -118,9 +116,9 @@ bool HostCrashService::getHWInfo() {
         E("Unable to get data directory for crash report attachments");
         return false;
     }
-    String file_path = PathUtils::join(data_directory, kHwInfoName);
+    std::string file_path = PathUtils::join(data_directory, kHwInfoName);
 
-    String syscmd(HWINFO_CMD);
+    std::string syscmd(HWINFO_CMD);
     syscmd += " > ";
     syscmd += file_path;
     fprintf(stderr, "Running '%s' to get hardware info", syscmd.c_str());
@@ -135,7 +133,7 @@ bool HostCrashService::getHWInfo() {
 
 bool HostCrashService::getMemInfo() {
     // /proc/meminfo contains all the details we need so just upload that
-    String file_path = PathUtils::join(getDataDirectory(), kMemInfoName);
+    std::string file_path = PathUtils::join(getDataDirectory(), kMemInfoName);
     return path_copy_file(file_path.c_str(), "/proc/meminfo") == 0;
 }
 

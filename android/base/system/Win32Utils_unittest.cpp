@@ -52,7 +52,7 @@ TEST(Win32Utils, quoteCommandLine) {
       const char* input = kData[n].input;
       const char* expected = kData[n].expected;
 
-      String out = Win32Utils::quoteCommandLine(input);
+      std::string out = Win32Utils::quoteCommandLine(input);
       EXPECT_STREQ(expected, out.c_str()) << "Quoting '" << input << "'";
   }
 }
@@ -69,7 +69,7 @@ TEST(Win32Utils, getErrorString) {
         return;
     }
 
-    String file_not_found = Win32Utils::getErrorString(2);
+    std::string file_not_found = Win32Utils::getErrorString(2);
     EXPECT_TRUE(0 == strcmp("The system cannot find the file specified.\r\n",
                             file_not_found.c_str()) ||
                 0 == strcmp("File not found.\r\n", file_not_found.c_str()));

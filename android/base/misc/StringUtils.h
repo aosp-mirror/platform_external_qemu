@@ -14,20 +14,28 @@
 
 #pragma once
 
-#include "android/base/containers/StringVector.h"
-#include "android/base/String.h"
+#include "android/base/StringView.h"
+
+#include <stddef.h>
+
+#ifdef _WIN32
+// Returns a pointer to the first occurrence of |needle| in |haystack|, or a
+// NULL pointer if |needle| is not part of |haystack|.
+// Intentionally in global namespace. This is already provided by the system
+// C library on Linux and OS X.
+extern "C" const void* memmem(const void* haystack, size_t haystack_len,
+                              const void* needle, size_t needlelen);
+#endif  // _WIN32
 
 namespace android {
 namespace base {
 
-// Sort an array of String instances.
-void sortStringArray(String* strings, size_t n);
+// Copy the content of |view| into a new heap-allocated zero-terminated
+// C string. Caller must free() the result.
+char* strDup(StringView str);
 
-// Sort a StringVector instance normally. Required because Minw64 qsort()
-// does not work with 3 items!!
-inline void sortStringVector(StringVector* strings) {
-    sortStringArray(&(*strings)[0], strings->size());
-}
+// Returns true iff |haystack| contains |needle|.
+bool strContains(StringView haystack, const char* needle);
 
 }  // namespace base
 }  // namespace android

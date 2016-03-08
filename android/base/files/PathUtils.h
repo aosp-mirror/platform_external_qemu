@@ -11,9 +11,10 @@
 
 #pragma once
 
-#include "android/base/containers/StringVector.h"
-#include "android/base/String.h"
 #include "android/base/StringView.h"
+
+#include <string>
+#include <vector>
 
 namespace android {
 namespace base {
@@ -47,10 +48,9 @@ public:
     static const char* const kExeNameSuffix;
 
     // Returns the executable name for a base name |baseName|
-    static String toExecutableName(StringView baseName,
-                                   HostType hostType);
+    static std::string toExecutableName(StringView baseName, HostType hostType);
 
-    static String toExecutableName(StringView baseName) {
+    static std::string toExecutableName(StringView baseName) {
         return toExecutableName(baseName, HOST_TYPE);
     }
 
@@ -76,20 +76,20 @@ public:
     }
 
     // Remove trailing separators from a |path| string, for a given |hostType|.
-    static String removeTrailingDirSeparator(StringView path,
-                                             HostType hostType);
+    static std::string removeTrailingDirSeparator(StringView path,
+                                                  HostType hostType);
 
     // Remove trailing separators from a |path| string for the current host.
-    static String removeTrailingDirSeparator(StringView path) {
+    static std::string removeTrailingDirSeparator(StringView path) {
         return removeTrailingDirSeparator(path, HOST_TYPE);
     }
 
     // Add a trailing separator if needed.
-    static String addTrailingDirSeparator(StringView path,
-                                          HostType hostType);
+    static std::string addTrailingDirSeparator(StringView path,
+                                               HostType hostType);
 
     // Add a trailing separator if needed.
-    static String addTrailingDirSeparator(StringView path) {
+    static std::string addTrailingDirSeparator(StringView path) {
         return addTrailingDirSeparator(path, HOST_TYPE);
     }
 
@@ -142,13 +142,13 @@ public:
     //
     static bool split(StringView path,
                       HostType hostType,
-                      String* dirName,
-                      String* baseName);
+                      std::string* dirName,
+                      std::string* baseName);
 
     // A variant of split() for the current process' host type.
     static bool split(StringView path,
-                             String* dirName,
-                             String* baseName) {
+                      std::string* dirName,
+                      std::string* baseName) {
         return split(path, HOST_TYPE, dirName, baseName);
     }
 
@@ -157,16 +157,20 @@ public:
     // the result will be the concatenation of |path1| and |path2|, if
     // |path1| doesn't end with a directory separator, a |hostType| specific
     // one will be inserted between the two paths in the result.
-    static String join(StringView path1, StringView path2, HostType hostType);
+    static std::string join(StringView path1,
+                            StringView path2,
+                            HostType hostType);
 
     // A variant of join() for the current process' host type.
-    static String join(StringView path1, StringView path2) {
+    static std::string join(StringView path1, StringView path2) {
         return join(path1, path2, HOST_TYPE);
     }
 
     // A convenience function to join a bunch of paths at once
     template <class... Paths>
-    static String join(StringView path1, StringView path2, Paths&&... paths) {
+    static std::string join(StringView path1,
+                            StringView path2,
+                            Paths&&... paths) {
         return join(path1, join(path2, std::forward<Paths>(paths)...));
     }
 
@@ -179,11 +183,12 @@ public:
     // each one being a path component (prefix or subdirectory or file
     // name). Directory separators do not appear in components, except
     // for the root prefix, if any.
-    static StringVector decompose(StringView path, HostType hostType);
+    static std::vector<std::string> decompose(StringView path,
+                                              HostType hostType);
 
     // Decompose |path| into individual components for the host platform.
     // See comments above for more details.
-    static StringVector decompose(StringView path) {
+    static std::vector<std::string> decompose(StringView path) {
         return decompose(path, HOST_TYPE);
     }
 
@@ -193,13 +198,13 @@ public:
     // first component is a root prefix, it will be kept as is, i.e.:
     //   [ 'C:', 'foo' ] -> 'C:foo' on Win32, but not Posix where it will
     // be 'C:/foo'.
-    static String recompose(const StringVector& components,
+    static std::string recompose(const std::vector<std::string>& components,
                                  HostType hostType);
 
     // Recompose a path from individual components into a file path string
     // for the current host. |components| is a vector os strings.
     // Returns a new file path string.
-    static String recompose(const StringVector& components) {
+    static std::string recompose(const std::vector<std::string>& components) {
         return recompose(components, HOST_TYPE);
     }
 
@@ -207,7 +212,7 @@ public:
     // by removing instances of '.' and '..' when that makes sense.
     // Note that it is not possible to simplify initial instances of
     // '..', i.e. "foo/../../bar" -> "../bar"
-    static void simplifyComponents(StringVector* components);
+    static void simplifyComponents(std::vector<std::string>* components);
 };
 
 // Useful shortcuts to avoid too much typing.

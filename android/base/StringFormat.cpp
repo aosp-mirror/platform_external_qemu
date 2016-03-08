@@ -16,28 +16,28 @@
 namespace android {
 namespace base {
 
-String StringFormatRaw(const char* format, ...) {
+std::string StringFormatRaw(const char* format, ...) {
     va_list args;
     va_start(args, format);
-    String result = StringFormatWithArgs(format, args);
+    auto result = StringFormatWithArgs(format, args);
     va_end(args);
     return result;
 }
 
-String StringFormatWithArgs(const char* format, va_list args) {
-    String result;
+std::string StringFormatWithArgs(const char* format, va_list args) {
+    std::string result;
     StringAppendFormatWithArgs(&result, format, args);
     return result;
 }
 
-void StringAppendFormatRaw(String* string, const char* format, ...) {
+void StringAppendFormatRaw(std::string* string, const char* format, ...) {
     va_list args;
     va_start(args, format);
     StringAppendFormatWithArgs(string, format, args);
     va_end(args);
 }
 
-void StringAppendFormatWithArgs(String* string,
+void StringAppendFormatWithArgs(std::string* string,
                                 const char* format,
                                 va_list args) {
     size_t cur_size = string->size();

@@ -12,11 +12,12 @@
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 
-#include "android/base/String.h"
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
 #include "android/globals.h"
 #include "android/opengl/EmuglBackendList.h"
+
+#include <string>
 
 #include <assert.h>
 #include <inttypes.h>
@@ -33,9 +34,7 @@
 #endif
 
 using android::base::RunOptions;
-using android::base::String;
 using android::base::StringFormat;
-using android::base::StringVector;
 using android::base::System;
 using android::opengl::EmuglBackendList;
 
@@ -47,7 +46,7 @@ static void resetBackendList(int bitness) {
             System::get()->getLauncherDirectory().c_str(), bitness);
 }
 
-static bool stringVectorContains(const StringVector& list,
+static bool stringVectorContains(const std::vector<std::string>& list,
                                  const char* value) {
     for (size_t n = 0; n < list.size(); ++n) {
         if (!strcmp(list[n].c_str(), value)) {
@@ -155,7 +154,7 @@ bool emuglConfig_init(EmuglConfig* config,
         // The default will be 'host' unless:
         // 1. NX or Chrome Remote Desktop is detected, or |no_window| is true.
         // 2. The user's host GPU is on the blacklist.
-        String sessionType;
+        std::string sessionType;
         if (System::get()->isRemoteSession(&sessionType)) {
             D("%s: %s session detected\n", __FUNCTION__, sessionType.c_str());
             if (!sBackendList->contains("mesa")) {
@@ -200,9 +199,9 @@ bool emuglConfig_init(EmuglConfig* config,
     // to desktop GL, 'guest' does not use host-side emulation,
     // anything else must be checked against existing host-side backends.
     if (strcmp(gpu_mode, "host") != 0 && strcmp(gpu_mode, "guest") != 0) {
-        const StringVector& backends = sBackendList->names();
+        const std::vector<std::string>& backends = sBackendList->names();
         if (!stringVectorContains(backends, gpu_mode)) {
-            String error = StringFormat(
+            std::string error = StringFormat(
                 "Invalid GPU mode '%s', use one of: on off host guest", gpu_mode);
             for (size_t n = 0; n < backends.size(); ++n) {
                 error += " ";
@@ -240,7 +239,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     if (strcmp(config->backend, "host") != 0) {
         // If the backend is not 'host', we also need to add the
         // backend directory.
-        String dir = sBackendList->getLibDirPath(config->backend);
+        std::string dir = sBackendList->getLibDirPath(config->backend);
         if (dir.size()) {
             D("Adding to the library search path: %s\n", dir.c_str());
             system->addLibrarySearchDir(dir);
@@ -260,7 +259,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     //    ANDROID_GLESv2_LIB
     //
     // If a backend provides one of these libraries, use it.
-    String lib;
+    std::string lib;
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_EGL, &lib)) {
         system->envSet("ANDROID_EGL_LIB", lib);

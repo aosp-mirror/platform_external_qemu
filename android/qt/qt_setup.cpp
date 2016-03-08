@@ -13,7 +13,6 @@
 
 #include "android/base/system/System.h"
 #include "android/base/StringFormat.h"
-#include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
 #include "android/qt/qt_path.h"
@@ -26,7 +25,7 @@ using namespace android::base;
 
 bool androidQtSetupEnv(int bitness) {
     // Add <progdir>/<lib>/qt/lib if it exists to the library search path.
-    String  qtLibSubDir = androidQtGetLibraryDir(bitness);
+    std::string qtLibSubDir = androidQtGetLibraryDir(bitness);
     System* system = System::get();
 
     if (!system->pathIsDir(qtLibSubDir)) {
@@ -38,7 +37,7 @@ bool androidQtSetupEnv(int bitness) {
     system->addLibrarySearchDir(qtLibSubDir);
 
     // Set the platforms plugin path too.
-    String qtPluginsSubDir = androidQtGetPluginsDir(bitness);
+    std::string qtPluginsSubDir = androidQtGetPluginsDir(bitness);
 
     VERBOSE_PRINT(init,
         "Setting Qt plugin search path: QT_QPA_PLATFORM_PLUGIN_PATH=%s",

@@ -75,7 +75,7 @@ void stream_put_string(Stream* stream, const char* str) {
 }
 
 char* stream_get_string(Stream* stream) {
-    android::base::String ret = asBaseStream(stream)->getString();
+    std::string ret = asBaseStream(stream)->getString();
     if (ret.empty()) {
         return NULL;
     }

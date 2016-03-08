@@ -14,7 +14,7 @@
 // This source acts as a small C++ -> C bridge between android/emulation/
 // and android-qemu1-glue/main.c
 
-#include "android/base/String.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/cpu_accelerator.h"
 
@@ -25,7 +25,8 @@ extern "C" AndroidCpuAcceleration androidCpuAcceleration_getStatus(
     AndroidCpuAcceleration result = android::GetCurrentCpuAcceleratorStatusCode();
 
     if (status_p) {
-        *status_p = android::GetCurrentCpuAcceleratorStatus().release();
+        *status_p = android::base::strDup(
+                android::GetCurrentCpuAcceleratorStatus());
     }
 
     return result;

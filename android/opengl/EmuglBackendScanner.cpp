@@ -12,25 +12,26 @@
 #include "android/opengl/EmuglBackendScanner.h"
 
 #include "android/base/Log.h"
-#include "android/base/String.h"
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
 #include "android/base/misc/StringUtils.h"
 
 #include "android/utils/path.h"
 
+#include <algorithm>
+#include <string>
+#include <vector>
+
 namespace android {
 namespace opengl {
 
-using android::base::String;
 using android::base::StringFormat;
-using android::base::StringVector;
 using android::base::System;
 
 // static
-StringVector EmuglBackendScanner::scanDir(const char* execDir,
-                                          int programBitness) {
-    StringVector names;
+std::vector<std::string> EmuglBackendScanner::scanDir(const char* execDir,
+                                                      int programBitness) {
+    std::vector<std::string> names;
 
     if (!execDir || !System::get()->pathExists(execDir)) {
         LOG(ERROR) << "Invalid executable directory: " << execDir;
@@ -40,30 +41,30 @@ StringVector EmuglBackendScanner::scanDir(const char* execDir,
         programBitness = System::get()->getProgramBitness();
     }
     const char* subdir = (programBitness == 64) ? "lib64" : "lib";
-    String subDir = StringFormat("%s/%s/", execDir, subdir);
+    std::string subDir = StringFormat("%s/%s/", execDir, subdir);
 
-    StringVector entries = System::get()->scanDirEntries(subDir);
+    std::vector<std::string> entries = System::get()->scanDirEntries(subDir);
 
     static const char kBackendPrefix[] = "gles_";
     const size_t kBackendPrefixSize = sizeof(kBackendPrefix) - 1U;
 
     for (size_t n = 0; n < entries.size(); ++n) {
-        const String& entry = entries[n];
+        const std::string& entry = entries[n];
         if (entry.size() <= kBackendPrefixSize ||
             memcmp(entry.c_str(), kBackendPrefix, kBackendPrefixSize)) {
             continue;
         }
 
         // Check that it is a directory.
-        String full_dir = StringFormat("%s/%s", subDir.c_str(), entry.c_str());
+        std::string full_dir = StringFormat("%s/%s", subDir.c_str(), entry.c_str());
         if (!System::get()->pathIsDir(full_dir)) {
             continue;
         }
-        names.push_back(String(entry.c_str() + kBackendPrefixSize));
+        names.push_back(std::string(entry.c_str() + kBackendPrefixSize));
     }
 
     // Need to sort the backends in consistent order.
-    sortStringVector(&names);
+    std::sort(names.begin(), names.end());
 
     return names;
 }

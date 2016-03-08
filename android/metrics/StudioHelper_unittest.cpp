@@ -15,10 +15,8 @@
 #include "android/metrics/StudioHelper.h"
 #include "android/metrics/studio-helper.h"
 
-#include "android/base/containers/StringVector.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
-#include "android/base/String.h"
 #include "android/base/Version.h"
 #include "android/utils/path.h"
 
@@ -98,8 +96,8 @@ TEST(DotAndroidStudio, androidStudioScanner) {
     TestSystem testSys("/root", 32, "/root/home");
     TestTempDir* testDir = testSys.getTempRoot();
 
-    String studioPath;
-    String foundStudioPath;
+    std::string studioPath;
+    std::string foundStudioPath;
 
     testDir->makeSubDir("root");
     testDir->makeSubDir("root/home");
@@ -166,9 +164,10 @@ TEST(DotAndroidStudio, androidStudioXMLPathBuilder) {
             "root/home/" ANDROID_STUDIO_DIR ANDROID_STUDIO_DIR_PREVIEW "1.4");
     testDir->makeSubFile("root/home/" ANDROID_STUDIO_DIR "10.40");
 
-    String foundStudioPath = StudioHelper::latestAndroidStudioDir("/root/home");
-    String foundStudioXMLPath = StudioHelper::pathToStudioXML(
-            foundStudioPath, String("usage.statistics.xml"));
+    std::string foundStudioPath =
+            StudioHelper::latestAndroidStudioDir("/root/home");
+    std::string foundStudioXMLPath = StudioHelper::pathToStudioXML(
+            foundStudioPath, std::string("usage.statistics.xml"));
 
 #ifdef __APPLE__
     // Normally, path to .AndroidStudio in MacOSX would include
@@ -190,9 +189,9 @@ TEST(DotAndroidStudio, androidStudioXMLPathBuilder) {
 TEST(DotAndroidStudio, androidStudioUuid) {
     TestSystem testSys("/root", 32);
     TestTempDir* testDir = testSys.getTempRoot();
-    testSys.setHomeDirectory(String(testDir->path()).append("/root/home"));
+    testSys.setHomeDirectory(std::string(testDir->path()).append("/root/home"));
     testSys.setAppDataDirectory(
-            String(testDir->path()).append("/root/appdata"));
+            std::string(testDir->path()).append("/root/appdata"));
 
     testDir->makeSubDir("root");
     testDir->makeSubDir("root/home");
@@ -210,7 +209,7 @@ TEST(DotAndroidStudio, androidStudioUuid) {
                          "/" ANDROID_STUDIO_UUID);
 
     auto legacyUuidFilePath =
-            String(testDir->path())
+            std::string(testDir->path())
                     .append("/root/appdata/" ANDROID_STUDIO_UUID_DIR
                             "/" ANDROID_STUDIO_UUID);
     ofstream legacyUuidFile(legacyUuidFilePath.c_str());
@@ -225,7 +224,7 @@ TEST(DotAndroidStudio, androidStudioUuid) {
 
     auto expectedUuid = "20220000-0000-0000-0000-000000000000";
     auto uuidFilePath =
-            String(testDir->path()).append("/root/home/.android/uid.txt");
+            std::string(testDir->path()).append("/root/home/.android/uid.txt");
     ofstream uuidFile(uuidFilePath.c_str());
     ASSERT_FALSE(uuidFile.fail());
     uuidFile << expectedUuid << endl;
