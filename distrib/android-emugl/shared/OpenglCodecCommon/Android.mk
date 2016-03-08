@@ -5,6 +5,8 @@ LOCAL_PATH := $(call my-dir)
 
 commonSources := \
         glUtils.cpp \
+        ChecksumCalculator.cpp \
+        ChecksumCalculatorThreadInfo.cpp \
 
 host_commonSources := $(commonSources)
 

@@ -22,15 +22,23 @@ void fooAlphaFunc_enc(void *self , FooInt func, FooFloat ref)
 
 	foo_encoder_context_t *ctx = (foo_encoder_context_t *)self;
 	IOStream *stream = ctx->m_stream;
+	ChecksumCalculator *checksumCalculator = ctx->m_checksumCalculator;
 
 	 unsigned char *ptr;
-	 const size_t packetSize = 8 + 4 + 4;
-	ptr = stream->alloc(packetSize);
+	 unsigned char *buf;
+	 const size_t sizeWithoutChecksum = 8 + 4 + 4;
+	 const size_t checksumSize = checksumCalculator->checksumByteSize();
+	 const size_t totalSize = sizeWithoutChecksum + checksumSize;
+	buf = stream->alloc(totalSize);
+	ptr = buf;
 	int tmp = OP_fooAlphaFunc;memcpy(ptr, &tmp, 4); ptr += 4;
-	memcpy(ptr, &packetSize, 4);  ptr += 4;
+	memcpy(ptr, &totalSize, 4);  ptr += 4;
 
 		memcpy(ptr, &func, 4); ptr += 4;
 		memcpy(ptr, &ref, 4); ptr += 4;
+
+	if (checksumCalculator->getVersion() > 0) checksumCalculator->addBuffer(buf, ptr-buf);
+	if (checksumCalculator->getVersion() > 0) checksumCalculator->writeChecksum(ptr, checksumSize); ptr += checksumSize;
 }
 
 FooBoolean fooIsBuffer_enc(void *self , void* stuff)
@@ -38,16 +46,24 @@ FooBoolean fooIsBuffer_enc(void *self , void* stuff)
 
 	foo_encoder_context_t *ctx = (foo_encoder_context_t *)self;
 	IOStream *stream = ctx->m_stream;
+	ChecksumCalculator *checksumCalculator = ctx->m_checksumCalculator;
 
 	const unsigned int __size_stuff =  (4 * sizeof(float));
 	 unsigned char *ptr;
-	 const size_t packetSize = 8 + __size_stuff + 1*4;
-	ptr = stream->alloc(packetSize);
+	 unsigned char *buf;
+	 const size_t sizeWithoutChecksum = 8 + __size_stuff + 1*4;
+	 const size_t checksumSize = checksumCalculator->checksumByteSize();
+	 const size_t totalSize = sizeWithoutChecksum + checksumSize;
+	buf = stream->alloc(totalSize);
+	ptr = buf;
 	int tmp = OP_fooIsBuffer;memcpy(ptr, &tmp, 4); ptr += 4;
-	memcpy(ptr, &packetSize, 4);  ptr += 4;
+	memcpy(ptr, &totalSize, 4);  ptr += 4;
 
 	*(unsigned int *)(ptr) = __size_stuff; ptr += 4;
 	memcpy(ptr, stuff, __size_stuff);ptr += __size_stuff;
+
+	if (checksumCalculator->getVersion() > 0) checksumCalculator->addBuffer(buf, ptr-buf);
+	if (checksumCalculator->getVersion() > 0) checksumCalculator->writeChecksum(ptr, checksumSize); ptr += checksumSize;
 
 	FooBoolean retval;
 	stream->readback(&retval, 1);
@@ -59,14 +75,22 @@ void fooDoEncoderFlush_enc(void *self , FooInt param)
 
 	foo_encoder_context_t *ctx = (foo_encoder_context_t *)self;
 	IOStream *stream = ctx->m_stream;
+	ChecksumCalculator *checksumCalculator = ctx->m_checksumCalculator;
 
 	 unsigned char *ptr;
-	 const size_t packetSize = 8 + 4;
-	ptr = stream->alloc(packetSize);
+	 unsigned char *buf;
+	 const size_t sizeWithoutChecksum = 8 + 4;
+	 const size_t checksumSize = checksumCalculator->checksumByteSize();
+	 const size_t totalSize = sizeWithoutChecksum + checksumSize;
+	buf = stream->alloc(totalSize);
+	ptr = buf;
 	int tmp = OP_fooDoEncoderFlush;memcpy(ptr, &tmp, 4); ptr += 4;
-	memcpy(ptr, &packetSize, 4);  ptr += 4;
+	memcpy(ptr, &totalSize, 4);  ptr += 4;
 
 		memcpy(ptr, &param, 4); ptr += 4;
+
+	if (checksumCalculator->getVersion() > 0) checksumCalculator->addBuffer(buf, ptr-buf);
+	if (checksumCalculator->getVersion() > 0) checksumCalculator->writeChecksum(ptr, checksumSize); ptr += checksumSize;
 	stream->flush();
 }
 
@@ -75,23 +99,32 @@ void fooTakeConstVoidPtrConstPtr_enc(void *self , const void* const* param)
 
 	foo_encoder_context_t *ctx = (foo_encoder_context_t *)self;
 	IOStream *stream = ctx->m_stream;
+	ChecksumCalculator *checksumCalculator = ctx->m_checksumCalculator;
 
 	const unsigned int __size_param = ;
 	 unsigned char *ptr;
-	 const size_t packetSize = 8 + __size_param + 1*4;
-	ptr = stream->alloc(packetSize);
+	 unsigned char *buf;
+	 const size_t sizeWithoutChecksum = 8 + __size_param + 1*4;
+	 const size_t checksumSize = checksumCalculator->checksumByteSize();
+	 const size_t totalSize = sizeWithoutChecksum + checksumSize;
+	buf = stream->alloc(totalSize);
+	ptr = buf;
 	int tmp = OP_fooTakeConstVoidPtrConstPtr;memcpy(ptr, &tmp, 4); ptr += 4;
-	memcpy(ptr, &packetSize, 4);  ptr += 4;
+	memcpy(ptr, &totalSize, 4);  ptr += 4;
 
 	*(unsigned int *)(ptr) = __size_param; ptr += 4;
 	memcpy(ptr, param, __size_param);ptr += __size_param;
+
+	if (checksumCalculator->getVersion() > 0) checksumCalculator->addBuffer(buf, ptr-buf);
+	if (checksumCalculator->getVersion() > 0) checksumCalculator->writeChecksum(ptr, checksumSize); ptr += checksumSize;
 }
 
 }  // namespace
 
-foo_encoder_context_t::foo_encoder_context_t(IOStream *stream)
+foo_encoder_context_t::foo_encoder_context_t(IOStream *stream, ChecksumCalculator *checksumCalculator)
 {
 	m_stream = stream;
+	m_checksumCalculator = checksumCalculator;
 
 	this->fooAlphaFunc = &fooAlphaFunc_enc;
 	this->fooIsBuffer = &fooIsBuffer_enc;
