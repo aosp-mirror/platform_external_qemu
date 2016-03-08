@@ -21,7 +21,6 @@
 #include "GLESpointer.h"
 #include "objectNameManager.h"
 #include "emugl/common/mutex.h"
-#include "PointerValidator.h"
 #include <string>
 
 typedef std::map<GLenum,GLESpointer*>  ArraysMap;
@@ -141,7 +140,7 @@ public:
     void  enableArr(GLenum arr,bool enable);
     const GLvoid* setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data,bool normalize = false);
     virtual const GLESpointer* getPointer(GLenum arrType);
-    virtual bool setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) = 0;
+    virtual void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) = 0;
     void bindBuffer(GLenum target,GLuint buffer);
     void unbindBuffer(GLuint buffer);
     bool isBuffer(GLuint buffer);
@@ -182,8 +181,6 @@ public:
     virtual bool glGetFloatv(GLenum pname, GLfloat *params);
     virtual bool glGetFixedv(GLenum pname, GLfixed *params);
 
-    bool validatePointer(const void* ptr) const { return m_pointerValidator.isValid(ptr); }
-    bool validateBuffer(const void* buffer, size_t size) const {return m_pointerValidator.isValid(buffer, size);}
 protected:
     static void buildStrings(const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
     virtual bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) = 0;
@@ -193,7 +190,6 @@ protected:
     void convertIndirectVBO(GLESConversionArrays& fArrs,GLsizei count,GLenum indices_type,const GLvoid* indices,GLenum array_id,GLESpointer* p);
     void initCapsLocked(const GLubyte * extensionString);
     virtual void initExtensionString() =0;
-    bool validateArrayPointer(GLint first, GLsizei count, const GLESpointer* p) const;
 
     static emugl::Mutex   s_lock;
     static GLDispatch     s_glDispatch;
@@ -220,8 +216,6 @@ private:
     static std::string    s_glVendor;
     static std::string    s_glRenderer;
     static std::string    s_glVersion;
-
-    PointerValidator       m_pointerValidator;
 };
 
 #endif
