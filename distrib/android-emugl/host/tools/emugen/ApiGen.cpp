@@ -762,6 +762,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp, "#include \"%s_opcodes.h\"\n\n", m_basename.c_str());
     fprintf(fp, "#include \"%s_dec.h\"\n\n\n", m_basename.c_str());
     fprintf(fp, "#include \"ProtocolUtils.h\"\n\n");
+    fprintf(fp, "#include \"GLProtocolThreadInfo.h\"\n\n");
     fprintf(fp, "#include <stdio.h>\n\n");
     fprintf(fp, "typedef unsigned int tsize_t; // Target \"size_t\", which is 32-bit for now. It may or may not be the same as host's size_t when emugen is compiled.\n\n");
 
@@ -797,6 +798,9 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 \twhile ((len - pos >= 8) && !unknownOpcode) {   \n\
 \t\tuint32_t opcode = *(uint32_t *)ptr;   \n\
 \t\tsize_t packetLen = *(uint32_t *)(ptr + 4);\n\
+\t\tuint32_t glProtocol = GLProtocolThreadInfo::getProtocol();\n\
+\t\t// Protocol version 1\n\
+\t\tuint32_t checksum = 0;\n\
 \t\tif (len - pos < packetLen)  return pos; \n\
 \t\tswitch(opcode) {\n");
 
@@ -804,6 +808,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
         enum Pass_t {
             PASS_FIRST = 0,
             PASS_VariableDeclarations = PASS_FIRST,
+            PASS_Protocol,
             PASS_TmpBuffAlloc,
             PASS_MemAlloc,
             PASS_DebugPrint,
@@ -1043,6 +1048,16 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 #endif  // !USE_ALIGNED_BUFFERS
                     varoffset += " + 4";
                 }
+            }
+
+            if (pass == PASS_Protocol) {
+                fprintf(fp,
+                        "\t\t\tif (glProtocol == 1) {\n"
+                        "\t\t\t\tchecksum = Unpack<GLenum,uint32_t>(ptr + %s);\n"
+                        "\t\t\t}\n",
+                        varoffset.c_str());
+
+                varoffset += " + 4";
             }
 
             if (pass == PASS_FunctionCall ||
