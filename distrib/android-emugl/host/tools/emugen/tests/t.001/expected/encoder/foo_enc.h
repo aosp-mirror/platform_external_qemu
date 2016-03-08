@@ -5,6 +5,7 @@
 #define GUARD_foo_encoder_context_t
 
 #include "IOStream.h"
+#include "ChecksumCalculator.h"
 #include "foo_client_context.h"
 
 
@@ -14,8 +15,9 @@
 struct foo_encoder_context_t : public foo_client_context_t {
 
 	IOStream *m_stream;
+	ChecksumCalculator *m_checksumCalculator;
 
-	foo_encoder_context_t(IOStream *stream);
+	foo_encoder_context_t(IOStream *stream, ChecksumCalculator *checksumCalculator);
 };
 
 #endif  // GUARD_foo_encoder_context_t
