@@ -5,6 +5,8 @@ LOCAL_PATH := $(call my-dir)
 
 commonSources := \
         glUtils.cpp \
+        GLProtocol.cpp \
+        GLProtocolThreadInfo.cpp \
 
 host_commonSources := $(commonSources)
 
