@@ -18,22 +18,37 @@
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/net_agent.h"
+#include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
 
+// A macro used to list all the agents used by the Android Console.
+// The macro takes a parameter |X| which must be a macro that takes two
+// parameter as follows:  X(type, name), where |type| is the agent type
+// name, and |name| is a field name. See usage below to declare
+// AndroidConsoleAgents.
+#define ANDROID_CONSOLE_AGENTS_LIST(X) \
+   X(QAndroidBatteryAgent, battery) \
+   X(QAndroidFingerAgent, finger) \
+   X(QAndroidLocationAgent, location) \
+   X(QAndroidTelephonyAgent, telephony) \
+   X(QAndroidUserEventAgent, user_event) \
+   X(QAndroidVmOperations, vm) \
+   X(QAndroidNetAgent, net)
+
+// A structure used to group pointers to all agent interfaces used by the
+// Android console.
+#define ANDROID_CONSOLE_DEFINE_POINTER(type,name) const type* name;
+typedef struct AndroidConsoleAgents {
+    ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_DEFINE_POINTER)
+} AndroidConsoleAgents;
+
 // Generic entry point to start an android console.
-// QEMU implementations should populate |vm_operations| with QEMU specific
-// functions.
-// Takes ownership of |vm_operations|.
-extern int control_console_start(int port,
-                                 const QAndroidBatteryAgent* battery_agent,
-                                 const QAndroidFingerAgent* finger_agent,
-                                 const QAndroidLocationAgent* location_agent,
-                                 const QAndroidUserEventAgent* user_event_agent,
-                                 const QAndroidVmOperations* vm_operations,
-                                 const QAndroidNetAgent* net_agent);
+// QEMU implementations should populate |*agents| with QEMU specific
+// functions. Takes ownership of |agents|.
+extern int control_console_start(int port, const AndroidConsoleAgents* agents);
 
 ANDROID_END_HEADER

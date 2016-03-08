@@ -16,15 +16,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "android/emulation/control/battery_agent.h"
-#include "android/emulation/control/cellular_agent.h"
-#include "android/emulation/control/finger_agent.h"
-#include "android/emulation/control/location_agent.h"
-#include "android/emulation/control/net_agent.h"
-#include "android/emulation/control/sensors_agent.h"
-#include "android/emulation/control/telephony_agent.h"
-#include "android/emulation/control/user_event_agent.h"
-#include "android/emulation/control/vm_operations.h"
 #include "android/skin/rect.h"
 #include "android/utils/compiler.h"
 
@@ -136,16 +127,10 @@ extern void android_emulation_setup_use_android_emu_console(bool enabled);
 // Call this from QEMU1 to enable configurable ADB and console ports.
 extern void android_emulation_setup_use_configurable_ports(bool enabled);
 
-extern void android_emulation_setup(
-        const QAndroidBatteryAgent* batteryAgent,
-        const QAndroidCellularAgent* cellularAgent,
-        const QAndroidFingerAgent* fingerAgent,
-        const QAndroidLocationAgent* locationAgent,
-        const QAndroidSensorsAgent* sensorsAgent,
-        const QAndroidTelephonyAgent* telephonyAgent,
-        const QAndroidUserEventAgent* userEventAgent,
-        const QAndroidVmOperations* vmOperations,
-        const QAndroidNetAgent* netAgent);
+// See android/console.h
+struct AndroidConsoleAgents;
+
+extern void android_emulation_setup(const struct AndroidConsoleAgents* agents);
 
 extern void  android_emulation_teardown( void );
 
