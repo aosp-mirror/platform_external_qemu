@@ -112,7 +112,7 @@ void skin_ui_set_name(SkinUI* ui, const char* name);
 
 void skin_ui_set_lcd_brightness(SkinUI* ui, int lcd_brightness);
 
-void skin_ui_set_scale(SkinUI* ui, double scale);
+void skin_ui_set_scale(SkinUI* ui, double scale)
 
 void skin_ui_update_display(SkinUI* ui, int x, int y, int w, int h);
 

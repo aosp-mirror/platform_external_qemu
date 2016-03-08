@@ -89,9 +89,6 @@ typedef struct {
     uint32_t a_mask;
 } SkinSurfacePixelFormat;
 
-extern void    skin_surface_get_format(SkinSurface* s,
-                                       SkinSurfacePixelFormat* format);
-
 extern void    skin_surface_update(SkinSurface* surface, SkinRect* rect);
 
 extern void    skin_surface_upload(SkinSurface* surface,

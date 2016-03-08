@@ -851,14 +851,12 @@ ball_state_show( BallState*  state, int  enable )
     if (enable) {
         if ( !state->tracking ) {
             state->tracking = 1;
-            skin_winsys_set_relative_mouse_mode(true);
             skin_trackball_refresh( state->ball );
             skin_window_redraw( state->window, &state->rect );
         }
     } else {
         if ( state->tracking ) {
             state->tracking = 0;
-            skin_winsys_set_relative_mouse_mode(false);
             skin_window_redraw( state->window, &state->rect );
         }
     }
@@ -1025,9 +1023,8 @@ struct SkinWindow {
     FingerState   secondary_finger;
     ButtonState   button;
     BallState     ball;
-    char          enabled;
     char          no_display;
-    bool use_emugl_subwindow;
+    bool          use_emugl_subwindow;
 
     char          enable_touch;
     char          enable_trackball;
@@ -1379,13 +1376,11 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     /* Check that the window is fully visible */
     if (!window->no_display && !skin_winsys_is_window_fully_visible()) {
         int win_x, win_y, win_w, win_h;
-        int border_left, border_right, border_top, border_bottom;
         int new_x, new_y;
 
         skin_winsys_get_window_pos(&win_x, &win_y);
-        skin_winsys_get_window_borders(&border_left, &border_right, &border_top, &border_bottom);
-        win_w = skin_surface_width(window->surface)  + border_left + border_right;
-        win_h = skin_surface_height(window->surface) + border_top + border_bottom;
+        win_w = skin_surface_width(window->surface);
+        win_h = skin_surface_height(window->surface);
 
         VERBOSE_PRINT(init, "Window was not fully visible: "
                 "monitor=[%d,%d,%d,%d] window=[%d,%d,%d,%d]",
@@ -1403,8 +1398,8 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
         new_y = (monitor.size.h - win_h)/2;
 
         /* If it is still too large, we ensure the top-border is visible */
-        if (new_y < border_top)
-            new_y = border_top;
+        if (new_y < 0)
+            new_y = 0;
 
         VERBOSE_PRINT(init, "Window repositioned to [%d,%d]", new_x, new_y);
 
