@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "979d8172_b728d0cc",
+        "filename": "android/skin/window.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1402,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-08T20:08:19Z",
+      "side": 1,
+      "message": "Bummer. Except for these lines, this CL is entirely deletions! You had to ruin it with a modification.",
+      "revId": "dea5d91167016e6891519e713375543fb05c62c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
