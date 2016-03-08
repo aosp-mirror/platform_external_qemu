@@ -790,7 +790,7 @@ int recv_all(int fd, void *_buf, int len1, bool single_read)
     uint8_t *buf = _buf;
 
     len = len1;
-    while ((len > 0) && (ret = recv(fd, buf, len, 0)) != 0) {
+    while ((len > 0) && (ret = read(fd, buf, len)) != 0) {
         if (ret < 0) {
             if (errno != EINTR && errno != EAGAIN) {
                 return -1;
