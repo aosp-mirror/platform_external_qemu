@@ -22,10 +22,6 @@
 extern "C" {
 #endif
 
-// Enable/Disable relative mouse mode. Used for trackball emulation.
-// This hides the cursor and grabs the input.
-void skin_winsys_set_relative_mouse_mode(bool enabled);
-
 // Return window handle of main UI.
 void* skin_winsys_get_window_handle(void);
 
@@ -36,18 +32,11 @@ void skin_winsys_get_monitor_rect(SkinRect* rect);
 // the window. Return 0 in case of success, -1 in case of failure.
 int skin_winsys_get_device_pixel_ratio(double* dpr);
 
-// Return the monitor's horizontal and vertical resolution in dots per
-// inches. Return 0 in case of success, -1 in case of failure.
-int skin_winsys_get_monitor_dpi(int* x_dpi, int* y_dpi);
-
 // Set main window position.
 void skin_winsys_set_window_pos(int window_x, int window_y);
 
 // Get main window position.
 void skin_winsys_get_window_pos(int* window_x, int* window_y);
-
-// Get main window borders.
-void skin_winsys_get_window_borders(int *left, int *right, int *top, int *bottom);
 
 // Set window title.
 void skin_winsys_set_window_title(const char* title);

@@ -141,19 +141,6 @@ extern void skin_surface_create_window(SkinSurface* surface,
     D("ID of backing bitmap surface is %d", surface->id);
 }
 
-extern void skin_surface_get_format(SkinSurface *s, SkinSurfacePixelFormat *format)
-{
-    D("skin_surface_get_format %d", s->id);
-    format->a_mask = 0xff000000;
-    format->r_mask = 0x00ff0000;
-    format->g_mask = 0x0000ff00;
-    format->b_mask = 0x000000ff;
-    format->a_shift = 24;
-    format->r_shift = 16;
-    format->g_shift = 8;
-    format->b_shift = 0;
-}
-
 extern void skin_surface_update(SkinSurface *surface, SkinRect *rect)
 {
 #if 0
