@@ -26,3 +26,4 @@ GL_ENTRY(int, rcUpdateColorBuffer, uint32_t colorbuffer, GLint x, GLint y, GLint
 GL_ENTRY(int, rcOpenColorBuffer2, uint32_t colorbuffer)
 GL_ENTRY(uint32_t, rcCreateClientImage, uint32_t context, EGLenum target, GLuint buffer)
 GL_ENTRY(int, rcDestroyClientImage, uint32_t image)
+GL_ENTRY(void, rcSelectChecksumHelper, uint32_t newProtocol, uint32_t reserved)
