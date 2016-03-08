@@ -77,7 +77,7 @@ static int accel_init_machine(AccelClass *acc, MachineState *ms)
     return ret;
 }
 
-void configure_accelerator(MachineState *ms)
+int configure_accelerator(MachineState *ms)
 {
     const char *p;
     char buf[10];
@@ -122,12 +122,13 @@ void configure_accelerator(MachineState *ms)
         if (!init_failed) {
             fprintf(stderr, "No accelerator found!\n");
         }
-        exit(1);
+        return -1;
     }
 
     if (init_failed) {
         fprintf(stderr, "Back to %s accelerator.\n", acc->name);
     }
+    return 0;
 }
 
 

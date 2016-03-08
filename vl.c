@@ -4272,7 +4272,9 @@ int main(int argc, char **argv, char **envp)
         exit(1);
     }
 
-    configure_accelerator(current_machine);
+    if (configure_accelerator(current_machine) < 0) {
+        exit(1);
+    }
 
     if (qtest_chrdev) {
         qtest_init(qtest_chrdev, qtest_log, &error_fatal);
