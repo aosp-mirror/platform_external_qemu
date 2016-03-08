@@ -96,7 +96,9 @@ bool GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
         GLenum array_id   = (*it).first;
         GLESpointer* p = (*it).second;
         if(!isArrEnabled(array_id)) continue;
+#ifdef GL_ARRAY_POINTER_VALIDATION
         if (!validateArrayPointer(first, elementCount, p)) return false;
+#endif
 
         unsigned int size = p->getSize();
 
