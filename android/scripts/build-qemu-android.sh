@@ -205,8 +205,8 @@ build_qemu_android () {
         fi
 
         LINKPROG_FLAGS=
-        if [ -z "$OPT_NO_ANDROID" ]; then
-            # If --no-android is used, don't try to generate LINK-qemu-* files
+        if [ "$OPT_NO_ANDROID" ]; then
+            # If --no-android is used, generate LINK-qemu-* files
             LINKPROG_FLAGS="LINKPROG=$BUILD_DIR/link-prog"
         fi
 
@@ -413,7 +413,7 @@ EOF
     done
 
     # Copy LINK-* files, adjusting hard-coded paths in them.
-    if [ -z "$OPT_NO_ANDROID" ]; then
+    if [ "$OPT_NO_ANDROID" ]; then
         for LINK_FILE in "$BUILD_DIR"/LINK-qemu-system-*; do
             sed \
                 -e 's|'${PREBUILTS_DIR}'|@PREBUILTS_DIR@|g' \
