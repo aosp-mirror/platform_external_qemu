@@ -67,8 +67,8 @@ LOCAL_SRC_FILES += \
     hw/timer/goldfish_timer.c \
     $(call qemu2-if-target,arm arm64,\
         hw/arm/ranchu.c) \
-    $(call qem2-if-target,mips mips64,\
-        hw/mips/mip_ranchu.c) \
+    $(call qemu2-if-target,mips mips64,\
+        hw/mips/mips_ranchu.c) \
 
 ifeq (arm64,$(QEMU2_TARGET))
 LOCAL_GENERATED_SOURCES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm64.c
