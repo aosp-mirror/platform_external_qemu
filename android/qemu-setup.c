@@ -69,7 +69,7 @@ get_report_console_options( char*  end, int  *maxtries )
         return 0;
 
     if (end[0] != ',') {
-        derror( "socket port/path can be followed by [,<option>]+ only\n");
+        derror("socket port/path can be followed by [,<option>]+ only");
         exit(3);
     }
     end += 1;
@@ -85,7 +85,8 @@ get_report_console_options( char*  end, int  *maxtries )
             *maxtries = strtol( end, NULL, 10 );
             flags |= REPORT_CONSOLE_MAX;
         } else {
-            derror( "socket port/path can be followed by [,server][,max=<count>] only\n");
+            derror("socket port/path can be followed by "
+                   "[,server][,max=<count>] only");
             exit(3);
         }
 
@@ -115,8 +116,8 @@ report_console( const char*  proto_port, int  console_port )
         if (flags & REPORT_CONSOLE_SERVER) {
             s = socket_loopback_server( port, SOCKET_STREAM );
             if (s < 0) {
-                fprintf(stderr, "could not create server socket on TCP:%ld: %s\n",
-                        port, errno_str);
+                derror("could not create server socket on TCP:%ld: %s", port,
+                       errno_str);
                 exit(3);
             }
         } else {
@@ -129,14 +130,14 @@ report_console( const char*  proto_port, int  console_port )
                 sleep_ms(1000);
             }
             if (s < 0) {
-                fprintf(stderr, "could not connect to server on TCP:%ld: %s\n",
-                        port, errno_str);
+                derror("could not connect to server on TCP:%ld: %s", port,
+                       errno_str);
                 exit(3);
             }
         }
     } else if ( !strncmp( proto_port, "unix:", 5) ) {
 #ifdef _WIN32
-        fprintf(stderr, "sorry, the unix: protocol is not supported on Win32\n");
+        derror("sorry, the unix: protocol is not supported on Win32");
         exit(3);
 #else
         char*  path = strdup(proto_port+5);
@@ -148,8 +149,8 @@ report_console( const char*  proto_port, int  console_port )
         if (flags & REPORT_CONSOLE_SERVER) {
             s = socket_unix_server( path, SOCKET_STREAM );
             if (s < 0) {
-                fprintf(stderr, "could not bind unix socket on '%s': %s\n",
-                        proto_port+5, errno_str);
+                derror("could not bind unix socket on '%s': %s", proto_port + 5,
+                       errno_str);
                 exit(3);
             }
         } else {
@@ -161,15 +162,16 @@ report_console( const char*  proto_port, int  console_port )
                 sleep_ms(1000);
             }
             if (s < 0) {
-                fprintf(stderr, "could not connect to unix socket on '%s': %s\n",
-                        path, errno_str);
+                derror("could not connect to unix socket on '%s': %s", path,
+                       errno_str);
                 exit(3);
             }
         }
         free(path);
 #endif
     } else {
-        fprintf(stderr, "-report-console must be followed by a 'tcp:<port>' or 'unix:<path>'\n");
+        derror("-report-console must be followed by a 'tcp:<port>' or "
+               "'unix:<path>'");
         exit(3);
     }
 
@@ -181,7 +183,7 @@ report_console( const char*  proto_port, int  console_port )
         } while (s2 < 0 && --tries > 0);
 
         if (s2 < 0) {
-            fprintf(stderr, "could not accept console-reporting client connection: %s\n",
+            derror("could not accept console-reporting client connection: %s",
                    errno_str);
             exit(3);
         }
@@ -196,8 +198,8 @@ report_console( const char*  proto_port, int  console_port )
         snprintf( temp, sizeof(temp), "%d", console_port );
 
         if (socket_send(s, temp, strlen(temp)) < 0) {
-            fprintf(stderr, "could not send console number report: %d: %s\n",
-                    errno, errno_str );
+            derror("could not send console number report: %d: %s", errno,
+                   errno_str);
             exit(3);
         }
         socket_close(s);
@@ -224,6 +226,38 @@ void android_emulation_setup_use_configurable_ports(bool enabled) {
     s_support_configurable_ports = enabled;
 }
 
+// Try to bind to specific |console_port| and |adb_port| on the localhost
+// interface. |legacy_adb| is true iff the legacy ADB network redirection
+// through guest:tcp:5555 must also be setup.
+//
+// Returns true on success, false otherwise. Note that failure is clean, i.e.
+// it won't leave ports bound by mistake.
+static bool setup_console_and_adb_ports(int console_port,
+                                        int adb_port,
+                                        bool legacy_adb,
+                                        const AndroidConsoleAgents* agents) {
+    // The guest IP that ADB listens to in legacy mode.
+    uint32_t guest_ip;
+    inet_strtoip("10.0.2.15", &guest_ip);
+
+    if (legacy_adb) {
+        agents->net->slirpRedir(false, adb_port, guest_ip, 5555);
+    } else {
+        if (adb_server_init(adb_port) < 0) {
+            return false;
+        }
+    }
+    if (qemu_control_console_start(console_port, agents) < 0) {
+        if (legacy_adb) {
+            agents->net->slirpUnredir(false, adb_port);
+        } else {
+            adb_server_undo_init();
+        }
+        return false;
+    }
+    return true;
+}
+
 /* this function is called from qemu_main() once all arguments have been parsed
  * it should be used to setup any Android-specific items in the emulation before the
  * main loop runs
@@ -236,17 +270,15 @@ void android_emulation_setup(const AndroidConsoleAgents* agents) {
     if ( adb_host_port_str && strlen( adb_host_port_str ) > 0 ) {
         android_adb_port = (int) strtol( adb_host_port_str, NULL, 0 );
         if ( android_adb_port <= 0 ) {
-            derror( "env var ANDROID_ADB_SERVER_PORT must be a number > 0. Got \"%s\"\n",
-                    adb_host_port_str );
+            derror("env var ANDROID_ADB_SERVER_PORT must be a number > 0. Got "
+                   "\"%s\"",
+                   adb_host_port_str);
             exit(1);
         }
     }
 
-    uint32_t guest_ip;
-    inet_strtoip("10.0.2.15", &guest_ip);
-
     if (android_op_port && android_op_ports) {
-        fprintf( stderr, "options -port and -ports cannot be used together.\n");
+        derror("options -port and -ports cannot be used together.");
         exit(1);
     }
 
@@ -263,35 +295,27 @@ void android_emulation_setup(const AndroidConsoleAgents* agents) {
             int console_port = strtol( android_op_ports, &comma_location, 0 );
 
             if ( comma_location == NULL || *comma_location != ',' ) {
-                derror( "option -ports must be followed by two comma separated positive integer numbers" );
+                derror("option -ports must be followed by two comma separated "
+                       "positive integer numbers");
                 exit(1);
             }
 
             adb_port = strtol( comma_location+1, &end, 0 );
 
             if ( end == NULL || *end ) {
-                derror( "option -ports must be followed by two comma separated positive integer numbers" );
+                derror("option -ports must be followed by two comma separated "
+                       "positive integer numbers");
                 exit(1);
             }
 
             if ( console_port == adb_port ) {
-                derror( "option -ports must be followed by two different integer numbers" );
+                derror("option -ports must be followed by two different "
+                       "integer numbers");
                 exit(1);
             }
 
-            // Set up redirect from host to guest system. adbd on the guest listens
-            // on 5555.
-            if (legacy_adb) {
-                agents->net->slirpRedir(false, adb_port, guest_ip, 5555);
-            } else {
-                adb_server_init(adb_port);
-                android_adb_service_init();
-            }
-            if (qemu_control_console_start(console_port, agents) < 0) {
-                if (legacy_adb) {
-                    agents->net->slirpUnredir(false, adb_port);
-                }
-            }
+            setup_console_and_adb_ports(console_port, adb_port, legacy_adb,
+                                        agents);
 
             base_port = console_port;
         } else {
@@ -300,8 +324,9 @@ void android_emulation_setup(const AndroidConsoleAgents* agents) {
                 int    port = strtol( android_op_port, &end, 0 );
                 if ( end == NULL || *end ||
                     (unsigned)((port - base_port) >> 1) >= (unsigned)tries ) {
-                    derror( "option -port must be followed by an even integer number between %d and %d\n",
-                            base_port, base_port + (tries-1)*2 );
+                    derror("option -port must be followed by an even integer "
+                           "number between %d and %d",
+                           base_port, base_port + (tries - 1) * 2);
                     exit(1);
                 }
                 if ( (port & 1) != 0 ) {
@@ -317,20 +342,9 @@ void android_emulation_setup(const AndroidConsoleAgents* agents) {
 
                 /* setup first redirection for ADB, the Android Debug Bridge */
                 adb_port = base_port + 1;
-                if (legacy_adb) {
-                    if (!agents->net->slirpRedir(false, adb_port, guest_ip, 5555))
-                        continue;
-                } else {
-                    if (adb_server_init(adb_port))
-                        continue;
-                    android_adb_service_init();
-                }
 
-                /* setup second redirection for the emulator console */
-                if (qemu_control_console_start(base_port, agents) < 0) {
-                    if (legacy_adb) {
-                        agents->net->slirpUnredir(false, adb_port);
-                    }
+                if (!setup_console_and_adb_ports(base_port, adb_port,
+                                                 legacy_adb, agents)) {
                     continue;
                 }
 
@@ -340,7 +354,8 @@ void android_emulation_setup(const AndroidConsoleAgents* agents) {
             }
 
             if (!success) {
-                fprintf(stderr, "it seems too many emulator instances are running on this machine. Aborting\n" );
+                derror("It seems too many emulator instances are running on "
+                       "this machine. Aborting.");
                 exit(1);
             }
         }

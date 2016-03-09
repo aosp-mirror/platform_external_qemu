@@ -73,12 +73,18 @@ struct AdbGuestRoutines {
 
 /* Initializes ADB server.
  * Param:
- *  port - socket port that is assigned for communication with the ADB host. This
+ *  port - socket port that is assigned for communication with the ADB host.
+ * This
  *      is 'base port' + 1.
  * Return:
- *  0 on success, or != 0 on failure.
+ *  0 on success, or -1 on failure.
  */
 extern int adb_server_init(int port);
+
+/* Un-initialize ADB server. This is used to unbind any socket that was bound
+ * in adb_server_init(), but will not perform a full cleanup. Hence must only
+ * be called after adb_server_init() but before registering the service. */
+extern void adb_server_undo_init(void);
 
 /* Checks if ADB server has been initialized. */
 extern int adb_server_is_initialized(void);
