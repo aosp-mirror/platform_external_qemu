@@ -53,24 +53,37 @@ static bool s_support_android_emu_console = false;
 // this requires s_support_android_emu_console == true too to work properly.
 static bool s_support_configurable_ports = false;
 
+// The following code is used to support the -report-console option,
+// which takes a parameter in one of the following formats:
+//
+//    tcp:<port>[,<options>]
+//    unix:<path>[,<options>]
+//
+// Where <options> is a comma-separated list of options which can be
+//    server        - Enable server mode (waits for client connection).
+//    max=<count>   - Set maximum connection attempts (client mode only).
+//
 
-
+// bit flags returned by get_report_console_options() below.
 enum {
     REPORT_CONSOLE_SERVER = (1 << 0),
     REPORT_CONSOLE_MAX    = (1 << 1)
 };
 
-static int
-get_report_console_options( char*  end, int  *maxtries )
-{
-    int    flags = 0;
+// Look at |end| for a comma-separated list of -report-console options
+// and return a set of corresponding bit flags. Return -1 on failure.
+// On success, if REPORT_CONSOLE_MAX is set in the result, |*maxtries|
+// will be updated with the <count> parameter of the max= option.
+static int get_report_console_options(char* end, int* maxtries) {
+    int flags = 0;
 
-    if (end == NULL || *end == 0)
+    if (end == NULL || *end == 0) {
         return 0;
+    }
 
     if (end[0] != ',') {
         derror("socket port/path can be followed by [,<option>]+ only");
-        exit(3);
+        return -1;
     }
     end += 1;
     while (*end) {
@@ -87,7 +100,7 @@ get_report_console_options( char*  end, int  *maxtries )
         } else {
             derror("socket port/path can be followed by "
                    "[,server][,max=<count>] only");
-            exit(3);
+            return -1;
         }
 
         end = p;
@@ -97,9 +110,10 @@ get_report_console_options( char*  end, int  *maxtries )
     return flags;
 }
 
-static void
-report_console( const char*  proto_port, int  console_port )
-{
+// Implement -report-console option. |proto_port| is the option's parameter
+// as described above (e.g. 'tcp:<port>,server'). And |console_port| is
+// the emulator's console port to report. Return 0 on success, -1 on failure.
+static int report_console(const char* proto_port, int console_port) {
     int   s = -1, s2;
     int   maxtries = 10;
     int   flags = 0;
@@ -112,13 +126,16 @@ report_console( const char*  proto_port, int  console_port )
         long   port = strtol(proto_port + 4, &end, 10);
 
         flags = get_report_console_options( end, &maxtries );
+        if (flags < 0) {
+            return -1;
+        }
 
         if (flags & REPORT_CONSOLE_SERVER) {
             s = socket_loopback_server( port, SOCKET_STREAM );
             if (s < 0) {
                 derror("could not create server socket on TCP:%ld: %s", port,
                        errno_str);
-                exit(3);
+                return -1;
             }
         } else {
             for ( ; maxtries > 0; maxtries-- ) {
@@ -132,18 +149,22 @@ report_console( const char*  proto_port, int  console_port )
             if (s < 0) {
                 derror("could not connect to server on TCP:%ld: %s", port,
                        errno_str);
-                exit(3);
+                return -1;
             }
         }
     } else if ( !strncmp( proto_port, "unix:", 5) ) {
 #ifdef _WIN32
         derror("sorry, the unix: protocol is not supported on Win32");
-        exit(3);
+        return -1;
 #else
         char*  path = strdup(proto_port+5);
         char*  end  = strchr(path, ',');
         if (end != NULL) {
             flags = get_report_console_options( end, &maxtries );
+            if (flags < 0) {
+                free(path);
+                return -1;
+            }
             *end  = 0;
         }
         if (flags & REPORT_CONSOLE_SERVER) {
@@ -151,7 +172,7 @@ report_console( const char*  proto_port, int  console_port )
             if (s < 0) {
                 derror("could not bind unix socket on '%s': %s", proto_port + 5,
                        errno_str);
-                exit(3);
+                return -1;
             }
         } else {
             for ( ; maxtries > 0; maxtries-- ) {
@@ -164,7 +185,7 @@ report_console( const char*  proto_port, int  console_port )
             if (s < 0) {
                 derror("could not connect to unix socket on '%s': %s", path,
                        errno_str);
-                exit(3);
+                return -1;
             }
         }
         free(path);
@@ -172,7 +193,7 @@ report_console( const char*  proto_port, int  console_port )
     } else {
         derror("-report-console must be followed by a 'tcp:<port>' or "
                "'unix:<path>'");
-        exit(3);
+        return -1;
     }
 
     if (flags & REPORT_CONSOLE_SERVER) {
@@ -185,7 +206,7 @@ report_console( const char*  proto_port, int  console_port )
         if (s2 < 0) {
             derror("could not accept console-reporting client connection: %s",
                    errno_str);
-            exit(3);
+            return -1;
         }
 
         socket_close(s);
@@ -200,13 +221,14 @@ report_console( const char*  proto_port, int  console_port )
         if (socket_send(s, temp, strlen(temp)) < 0) {
             derror("could not send console number report: %d: %s", errno,
                    errno_str);
-            exit(3);
+            return -1;
         }
         socket_close(s);
     }
     D( "console port number sent to remote. resuming boot" );
 
     restore_sigalrm (&sigstate);
+    return 0;
 }
 
 static int qemu_android_console_start(int port,
@@ -361,7 +383,9 @@ void android_emulation_setup(const AndroidConsoleAgents* agents) {
         }
 
         if (android_op_report_console) {
-            report_console(android_op_report_console, base_port);
+            if (report_console(android_op_report_console, base_port) < 0) {
+                exit(1);
+            }
         }
 
         /* Save base port. */
