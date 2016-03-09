@@ -117,6 +117,30 @@
       "revId": "e65c8b7e68bfe18a1648f49476d6eb83a38942c7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d7de195a_0abaee37",
+        "filename": "android/adb-server.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-09T18:34:36Z",
+      "side": 1,
+      "message": "init() will simply bind a socket on the host, this must be performed early, and the thing that must be undone by adb_server_undo_init(), immediately after if there is a need for it.\n\nLater, the adb-server implementation will respond to host ADB server connections, create several objects and maintain a bridge between the host ADB server and the adbd guest daemon (through adb-qemud.h). All this state is not finalized by adb_server_undo_init(), and this is by design.\n\nI\u0027d like to refactor this code in the future, but for now I\u0027m only concerned about small cleanups that help the rebase / upstreaming.",
+      "parentUuid": "d7de195a_2af80a67",
+      "range": {
+        "startLine": 86,
+        "startChar": 12,
+        "endLine": 86,
+        "endChar": 29
+      },
+      "revId": "e65c8b7e68bfe18a1648f49476d6eb83a38942c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
