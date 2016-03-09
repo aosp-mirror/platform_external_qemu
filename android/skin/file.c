@@ -45,11 +45,9 @@ skin_background_done( SkinBackground*  background )
         skin_image_unref(&background->image);
 }
 
-static int
-skin_background_init_from( SkinBackground*  background,
-                           AConfig*         node,
-                           const char*      basepath )
-{
+static int skin_background_init_from(SkinBackground* background,
+                                     const AConfig* node,
+                                     const char* basepath) {
     const char* img = aconfig_str(node, "image", NULL);
     int         x   = aconfig_int(node, "x", 0);
     int         y   = aconfig_int(node, "y", 0);
@@ -86,11 +84,9 @@ skin_display_done(SkinDisplay*  display)
     }
 }
 
-static int
-skin_display_init_from(SkinDisplay* display,
-                       AConfig* node,
-                       const SkinFramebufferFuncs* fb_funcs)
-{
+static int skin_display_init_from(SkinDisplay* display,
+                                  const AConfig* node,
+                                  const SkinFramebufferFuncs* fb_funcs) {
     display->rect.pos.x  = aconfig_int(node, "x", 0);
     display->rect.pos.y  = aconfig_int(node, "y", 0);
     display->rect.size.w = aconfig_int(node, "width", 0);
@@ -237,10 +233,8 @@ static unsigned translate_button_name(const char* name) {
     return 0;
 }
 
-static SkinButton*
-skin_button_create_from(AConfig* node,
-                        const char* basepath)
-{
+static SkinButton* skin_button_create_from(const AConfig* node,
+                                           const char* basepath) {
     SkinButton*  button;
     ANEW0(button);
     if (button) {
@@ -290,9 +284,8 @@ skin_part_free( SkinPart*  part )
     }
 }
 
-static SkinLocation*
-skin_location_create_from_v2( AConfig*  node, SkinPart*  parts )
-{
+static SkinLocation* skin_location_create_from_v2(const AConfig* node,
+                                                  SkinPart* parts) {
     const char*    partname = aconfig_str(node, "name", NULL);
     int            x        = aconfig_int(node, "x", 0);
     int            y        = aconfig_int(node, "y", 0);
@@ -323,27 +316,26 @@ skin_location_create_from_v2( AConfig*  node, SkinPart*  parts )
     return location;
 }
 
-static SkinPart*
-skin_part_create_from_v1(AConfig* root,
-                         const char* basepath,
-                         const SkinFramebufferFuncs* fb_funcs)
-{
-    SkinPart*  part;
-    AConfig*  node;
-    SkinBox   box;
+static SkinPart* skin_part_create_from_v1(
+        const AConfig* root,
+        const char* basepath,
+        const SkinFramebufferFuncs* fb_funcs) {
+    SkinPart* part;
+    const AConfig* node;
+    SkinBox box;
 
     ANEW0(part);
     part->name = root->name;
 
-    node = aconfig_find(root, "background");
+    node = aconfig_find_const(root, "background");
     if (node)
         skin_background_init_from(part->background, node, basepath);
 
-    node = aconfig_find(root, "display");
+    node = aconfig_find_const(root, "display");
     if (node)
         skin_display_init_from(part->display, node, fb_funcs);
 
-    node = aconfig_find(root, "button");
+    node = aconfig_find_const(root, "button");
     if (node) {
         for (node = node->first_child; node != NULL; node = node->next)
         {
@@ -377,27 +369,26 @@ skin_part_create_from_v1(AConfig* root,
     return part;
 }
 
-static SkinPart*
-skin_part_create_from_v2(AConfig* root,
-                         const char* basepath,
-                         const SkinFramebufferFuncs* fb_funcs)
-{
-    SkinPart*  part;
-    AConfig*  node;
-    SkinBox   box;
+static SkinPart* skin_part_create_from_v2(
+        const AConfig* root,
+        const char* basepath,
+        const SkinFramebufferFuncs* fb_funcs) {
+    SkinPart* part;
+    const AConfig* node;
+    SkinBox box;
 
     ANEW0(part);
     part->name = root->name;
 
-    node = aconfig_find(root, "background");
+    node = aconfig_find_const(root, "background");
     if (node)
         skin_background_init_from(part->background, node, basepath);
 
-    node = aconfig_find(root, "display");
+    node = aconfig_find_const(root, "display");
     if (node)
         skin_display_init_from(part->display, node, fb_funcs);
 
-    node = aconfig_find(root, "buttons");
+    node = aconfig_find_const(root, "buttons");
     if (node) {
         for (node = node->first_child; node != NULL; node = node->next)
         {
@@ -518,22 +509,20 @@ skin_layout_event_decode( const char*  event, int  *ptype, int  *pcode, int *pva
     return 0;
 }
 
-static SkinLayout*
-skin_layout_create_from_v2(AConfig* root,
-                           SkinPart* parts,
-                           const char* basepath)
-{
+static SkinLayout* skin_layout_create_from_v2(const AConfig* root,
+                                              SkinPart* parts,
+                                              const char* basepath) {
     SkinLayout*    layout;
     int            width, height;
     SkinLocation** ptail;
-    AConfig*       node;
+    const AConfig* node;
 
     ANEW0(layout);
 
     width  = aconfig_int( root, "width", 400 );
     height = aconfig_int( root, "height", 400 );
 
-    node = aconfig_find( root, "event" );
+    node = aconfig_find_const(root, "event");
     if (node != NULL) {
         skin_layout_event_decode( node->value,
                                   &layout->event_type,
@@ -549,13 +538,13 @@ skin_layout_create_from_v2(AConfig* root,
     layout->color = aconfig_unsigned( root, "color", 0x808080 ) | 0xff000000;
     ptail         = &layout->locations;
 
-    node = aconfig_find( root, "dpad-rotation" );
+    node = aconfig_find_const(root, "dpad-rotation");
     if (node != NULL) {
         layout->dpad_rotation     = aconfig_int( root, "dpad-rotation", 0 );
         layout->has_dpad_rotation = 1;
     }
 
-    node = aconfig_find( root, "onion" );
+    node = aconfig_find_const(root, "onion");
     if (node != NULL) {
         const char* img = aconfig_str(node, "image", NULL);
         layout->onion_image = skin_image_find_in( basepath, img );
@@ -806,12 +795,10 @@ Fail:
 /** SKIN FILE
  **/
 
-static int
-skin_file_load_from_v1(SkinFile* file,
-                       AConfig* aconfig,
-                       const char* basepath,
-                       const SkinFramebufferFuncs* fb_funcs)
-{
+static int skin_file_load_from_v1(SkinFile* file,
+                                  const AConfig* aconfig,
+                                  const char* basepath,
+                                  const SkinFramebufferFuncs* fb_funcs) {
     SkinPart*      part;
     SkinLayout*    layout;
     SkinLayout**   ptail = &file->layouts;
@@ -883,16 +870,12 @@ skin_file_load_from_v1(SkinFile* file,
 static const char* auto_layout_names[] =
     { "reverse_landscape", "reverse_portrait", "landscape" };
 
-static int
-skin_file_load_from_v2(SkinFile* file,
-                       AConfig* aconfig,
-                       const char* basepath,
-                       const SkinFramebufferFuncs* fb_funcs)
-{
-    AConfig*  node;
-
+static int skin_file_load_from_v2(SkinFile* file,
+                                  const AConfig* aconfig,
+                                  const char* basepath,
+                                  const SkinFramebufferFuncs* fb_funcs) {
     /* first, load all parts */
-    node = aconfig_find(aconfig, "parts");
+    const AConfig* node = aconfig_find_const(aconfig, "parts");
     if (node == NULL)
         return -1;
     else
@@ -916,7 +899,7 @@ skin_file_load_from_v2(SkinFile* file,
         return -1;
 
     /* then load all layouts */
-    node = aconfig_find(aconfig, "layouts");
+    node = aconfig_find_const(aconfig, "layouts");
     if (node == NULL)
         return -1;
     else
@@ -968,17 +951,14 @@ skin_file_load_from_v2(SkinFile* file,
     return 0;
 }
 
-SkinFile*
-skin_file_create_from_aconfig(
-        AConfig* aconfig,
-        const char* basepath,
-        const SkinFramebufferFuncs* fb_funcs)
-{
+SkinFile* skin_file_create_from_aconfig(const AConfig* aconfig,
+                                        const char* basepath,
+                                        const SkinFramebufferFuncs* fb_funcs) {
     SkinFile*  file;
 
     ANEW0(file);
 
-    if ( aconfig_find(aconfig, "parts") != NULL) {
+    if (aconfig_find_const(aconfig, "parts") != NULL) {
         if (skin_file_load_from_v2(
                 file, aconfig, basepath, fb_funcs) < 0) {
             goto BAD_FILE;

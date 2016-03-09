@@ -25,7 +25,7 @@
 ANDROID_BEGIN_HEADER
 
 typedef struct {
-    AConfig*       aconfig;
+    const AConfig* aconfig;
     SkinFile*      layout_file;
     int            win_x;
     int            win_y;
@@ -43,14 +43,13 @@ EmulatorWindow*
 emulator_window_get(void);
 
 /* Initializes EmulatorWindow structure instance. */
-int
-emulator_window_init(EmulatorWindow*   emulator,
-                     AConfig*          aconfig,
-                     const char*       basepath,
-                     int               x,
-                     int               y,
-                     AndroidOptions*   opts,
-                     const UiEmuAgent* uiEmuAgent);
+int emulator_window_init(EmulatorWindow* emulator,
+                         const AConfig* aconfig,
+                         const char* basepath,
+                         int x,
+                         int y,
+                         const AndroidOptions* opts,
+                         const UiEmuAgent* uiEmuAgent);
 
 /* Uninitializes EmulatorWindow structure instance on exit. */
 void
