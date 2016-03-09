@@ -209,13 +209,13 @@ report_console( const char*  proto_port, int  console_port )
     restore_sigalrm (&sigstate);
 }
 
-static int qemu_control_console_start(int port,
+static int qemu_android_console_start(int port,
                                       const AndroidConsoleAgents* agents) {
     if (!s_support_android_emu_console) {
         return 0;
     }
 
-    return control_console_start(port, agents);
+    return android_console_start(port, agents);
 }
 
 void android_emulation_setup_use_android_emu_console(bool enabled) {
@@ -247,7 +247,7 @@ static bool setup_console_and_adb_ports(int console_port,
             return false;
         }
     }
-    if (qemu_control_console_start(console_port, agents) < 0) {
+    if (qemu_android_console_start(console_port, agents) < 0) {
         if (legacy_adb) {
             agents->net->slirpUnredir(false, adb_port);
         } else {
