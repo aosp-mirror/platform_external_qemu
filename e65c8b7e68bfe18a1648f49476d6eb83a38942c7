@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d7de195a_77739b26",
+        "filename": "android/adb-server.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-09T17:56:44Z",
+      "side": 1,
+      "message": "nit: _dinit is new naming convention. How about _finalize (that exists in other places)",
+      "range": {
+        "startLine": 86,
+        "startChar": 12,
+        "endLine": 86,
+        "endChar": 29
+      },
+      "revId": "e65c8b7e68bfe18a1648f49476d6eb83a38942c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
