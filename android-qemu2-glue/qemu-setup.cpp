@@ -20,7 +20,7 @@
 
 extern "C" void qemu2_android_console_setup(AndroidConsoleAgents* agents);
 
-void qemu_android_emulation_setup() {
+bool qemu_android_emulation_setup() {
     static const AndroidConsoleAgents consoleAgents = {
             gQAndroidBatteryAgent,
             gQAndroidFingerAgent,
@@ -30,5 +30,5 @@ void qemu_android_emulation_setup() {
             gQAndroidVmOperations,
             gQAndroidNetAgent
     };
-    android_emulation_setup(&consoleAgents);
+    return android_emulation_setup(&consoleAgents);
 }

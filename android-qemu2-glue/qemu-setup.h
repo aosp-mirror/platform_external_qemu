@@ -16,8 +16,10 @@
 
 #include "android/utils/compiler.h"
 
+#include <stdbool.h>
+
 ANDROID_BEGIN_HEADER
 
-extern void qemu_android_emulation_setup(void);
+extern bool qemu_android_emulation_setup(void);
 
 ANDROID_END_HEADER

@@ -4927,7 +4927,9 @@ int run_qemu_main(int argc, const char **argv)
 
 #if defined(USE_ANDROID_EMU)
     /* call android-specific setup function */
-    qemu_android_emulation_setup();
+    if (!qemu_android_emulation_setup()) {
+        return 1;
+    }
 
     extern void android_emulator_set_base_port(int);
     android_emulator_set_base_port(android_base_port);
