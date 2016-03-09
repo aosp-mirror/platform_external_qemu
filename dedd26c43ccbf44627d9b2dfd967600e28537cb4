@@ -39,6 +39,24 @@
       "revId": "dedd26c43ccbf44627d9b2dfd967600e28537cb4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d7de195a_8d183898",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/gles2_only.entries",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-09T18:54:16Z",
+      "side": 1,
+      "message": "Intended, this logically separates that function from the previous group",
+      "parentUuid": "d7de195a_ad6894f6",
+      "revId": "dedd26c43ccbf44627d9b2dfd967600e28537cb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
