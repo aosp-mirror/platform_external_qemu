@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d7de195a_8ad01e17",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-09T17:59:37Z",
+      "side": 1,
+      "message": "This function is called from main. If you can return the error just one more step then we can eliminate this exit :)",
+      "range": {
+        "startLine": 387,
+        "startChar": 16,
+        "endLine": 387,
+        "endChar": 24
+      },
+      "revId": "4dd4066ba427b14295b04f00a4e10448d462d0f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
