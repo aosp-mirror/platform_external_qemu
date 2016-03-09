@@ -48,12 +48,14 @@ extern SkinWindow* skin_window_create(SkinLayout* layout,
                                       int y,
                                       int no_display,
                                       bool use_emugl_subwindow,
-                                      const SkinWindowFuncs* win_funcs);
+                                      const SkinWindowFuncs* win_funcs,
+                                      bool has_frame);
 
 extern void             skin_window_enable_touch( SkinWindow*  window, int  enabled );
 extern void             skin_window_enable_trackball( SkinWindow*  window, int  enabled );
 extern void             skin_window_enable_dpad( SkinWindow*  window, int  enabled );
 extern void             skin_window_enable_qwerty( SkinWindow*  window, int  enabled );
+extern void             skin_window_set_framed( SkinWindow*  window, int  has_frame );
 
 extern int              skin_window_reset ( SkinWindow*  window, SkinLayout*  layout );
 extern void             skin_window_free  ( SkinWindow*  window );
@@ -80,6 +82,9 @@ extern void             skin_window_position_changed( SkinWindow*   window,
 extern void             skin_window_scroll_updated( SkinWindow*    window,
                                                     int dx, int xmax,
                                                     int dy, int ymax );
+
+extern void             skin_window_set_framed( SkinWindow*  window,
+                                                int          has_frame );
 
 extern void             skin_window_set_title( SkinWindow*  window,
                                                const char*  title );

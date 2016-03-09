@@ -22,6 +22,7 @@
 #include "android/opengles.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/set-ui-emu-agent.h"
+#include "android/skin/ui.h"
 #include "android/skin/winsys.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/debug.h"
@@ -245,7 +246,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
 
     emulator->ui = skin_ui_create(
             emulator->layout_file, android_hw->hw_initialOrientation,
-            &my_ui_funcs, &my_ui_params, s_use_emugl_subwindow);
+            &my_ui_funcs, &my_ui_params, s_use_emugl_subwindow, emulator->has_frame);
     if (!emulator->ui) {
         return;
     }

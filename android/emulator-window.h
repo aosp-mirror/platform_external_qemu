@@ -33,6 +33,7 @@ typedef struct {
     SkinImage*     onion;
     SkinRotation   onion_rotation;
     int            onion_alpha;
+    bool           has_frame;
 
     AndroidOptions opts[1];  /* copy of options */
     UiEmuAgent     uiEmuAgent[1];

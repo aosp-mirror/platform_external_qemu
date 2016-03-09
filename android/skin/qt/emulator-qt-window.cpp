@@ -485,6 +485,12 @@ void EmulatorQtWindow::setSkinMask(bool unconditional)
 
         bool haveFrame = (mFrameAlways || mInZoomMode || !mIsSkinned);
 
+        EmulatorWindow* ew = emulator_window_get();
+        ew->has_frame = haveFrame;
+        if (ew &&  ew->ui) {
+            skin_ui_set_framed(ew->ui, haveFrame);
+        }
+
         Qt::WindowFlags flags = mContainer.windowFlags();
         flags &= ~FRAME_WINDOW_FLAGS_MASK;
         flags |= (haveFrame ? FRAMED_WINDOW_FLAGS : FRAMELESS_WINDOW_FLAGS);

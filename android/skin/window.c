@@ -1025,6 +1025,7 @@ struct SkinWindow {
     BallState     ball;
     char          no_display;
     bool          use_emugl_subwindow;
+    bool          has_frame;
 
     char          enable_touch;
     char          enable_trackball;
@@ -1038,6 +1039,10 @@ struct SkinWindow {
     int           x_pos;
     int           y_pos;
     double        scale;
+
+    // For dragging the window
+    int           drag_x_pos;
+    int           drag_y_pos;
 
     // Zoom-related parameters
     double        zoom;
@@ -1331,7 +1336,8 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
                                int y,
                                int no_display,
                                bool use_emugl_subwindow,
-                               const SkinWindowFuncs* win_funcs) {
+                               const SkinWindowFuncs* win_funcs,
+                               bool has_frame) {
     SkinWindow*  window;
 
     ANEW0(window);
@@ -1340,6 +1346,7 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     window->no_display   = no_display;
     window->use_emugl_subwindow = use_emugl_subwindow;
     window->surface = NULL;
+    window->has_frame = has_frame;
 
     /* enable everything by default */
     window->enable_touch     = 1;
@@ -1350,6 +1357,9 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     window->x_pos = x;
     window->y_pos = y;
     window->scroll_h = 0;
+
+    window->drag_x_pos = 0;
+    window->drag_y_pos = 0;
 
     SkinRect  monitor;
     int       win_w = slayout->size.w;
@@ -1435,6 +1445,12 @@ void
 skin_window_enable_qwerty( SkinWindow*  window, int  enabled )
 {
     window->enable_qwerty = !!enabled;
+}
+
+void
+skin_window_set_framed( SkinWindow* window, int has_frame )
+{
+    window->has_frame = has_frame;
 }
 
 void
@@ -1885,6 +1901,12 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
                              finger->pos.y,
                              button_state);
         } else {
+            if ( !window->has_frame ) {
+                // Outside the display. We are
+                // frameless, so drag the window.
+                window->drag_x_pos = ev->u.mouse.x;
+                window->drag_y_pos = ev->u.mouse.y;
+            }
             window->button.pressed = NULL;
             button = window->button.hover;
             if(button) {
@@ -1899,6 +1921,8 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         break;
 
     case kEventMouseButtonUp:
+        window->drag_x_pos = 0;
+        window->drag_y_pos = 0;
         if ( window->ball.tracking ) {
             skin_window_trackball_press( window, 0 );
             break;
@@ -1930,6 +1954,14 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         break;
 
     case kEventMouseMotion:
+        if (window->drag_x_pos != 0  &&  window->drag_y_pos != 0) {
+            // The user is dragging the window
+            int posX, posY;
+            skin_winsys_get_window_pos(&posX, &posY);
+            posX += ev->u.mouse.x - window->drag_x_pos;
+            posY += ev->u.mouse.y - window->drag_y_pos;
+            skin_winsys_set_window_pos(posX, posY);
+        }
         if ( window->ball.tracking ) {
             skin_window_trackball_move(window,
                                        ev->u.mouse.xrel,

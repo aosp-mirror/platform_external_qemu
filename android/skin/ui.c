@@ -76,7 +76,8 @@ SkinUI* skin_ui_create(SkinFile* layout_file,
                        const char* initial_orientation,
                        const SkinUIFuncs* ui_funcs,
                        const SkinUIParams* ui_params,
-                       bool use_emugl_subwindow) {
+                       bool use_emugl_subwindow,
+                       bool has_frame) {
     SkinUI* ui;
 
     ANEW0(ui);
@@ -97,7 +98,7 @@ SkinUI* skin_ui_create(SkinFile* layout_file,
 
     ui->window = skin_window_create(
             ui->layout, ui->ui_params.window_x, ui->ui_params.window_y,
-            0, use_emugl_subwindow, ui->ui_funcs->window_funcs);
+            0, use_emugl_subwindow, ui->ui_funcs->window_funcs, has_frame);
     if (!ui->window) {
         skin_ui_free(ui);
         return NULL;
@@ -511,4 +512,8 @@ void skin_ui_set_name(SkinUI* ui, const char* name) {
 
 bool skin_ui_is_trackball_active(SkinUI* ui) {
     return (ui && ui->ui_params.enable_trackball && ui->show_trackball);
+}
+
+void skin_ui_set_framed(SkinUI* ui, int has_frame) {
+    skin_window_set_framed(ui->window, has_frame);
 }

@@ -97,12 +97,15 @@ SkinUI* skin_ui_create(struct SkinFile* layout_file,
                        const char* initial_orientation,
                        const SkinUIFuncs* ui_funcs,
                        const SkinUIParams* params,
-                       bool use_emugl_subwindow);
+                       bool use_emugl_subwindow,
+                       bool has_frame);
 
 void skin_ui_set_onion(SkinUI* ui,
                        struct SkinImage* onion,
                        SkinRotation onion_rotation,
                        int onion_alpha);
+
+void skin_ui_set_framed(SkinUI* ui, int has_frame);
 
 void skin_ui_free(SkinUI* ui);
 
