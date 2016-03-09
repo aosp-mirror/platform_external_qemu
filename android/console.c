@@ -610,7 +610,7 @@ static void control_global_accept(void* opaque,
     }
 }
 
-int control_console_start(int control_port,
+int android_console_start(int control_port,
                           const AndroidConsoleAgents* agents) {
     ControlGlobal global = &_g_global;
     Socket  fd;
