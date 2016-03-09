@@ -3814,7 +3814,9 @@ int main(int argc, char **argv, char **envp)
     }
 
     /* call android-specific setup function */
-    qemu_android_emulation_setup();
+    if (!qemu_android_emulation_setup()) {
+        return 1;
+    }
 
     android_emulator_set_base_port(android_base_port);
 
