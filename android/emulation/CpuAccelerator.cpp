@@ -375,7 +375,7 @@ using namespace android;
     CTL_CODE(HAX_DEVICE_TYPE, 0x910, METHOD_BUFFERED, FILE_ANY_ACCESS)
 
 // The minimum API version supported by the Android emulator.
-#define HAX_MIN_VERSION  1
+#define HAX_MIN_VERSION  3 // 6.0.0
 
 AndroidCpuAcceleration ProbeHAX(std::string* status) {
     status->clear();
@@ -502,7 +502,7 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
 #define HAX_IOCTL_VERSION _IOWR(0, 0x20, HaxModuleVersion)
 
 // The minimum API version supported by the Android emulator.
-#define HAX_MIN_VERSION  1
+#define HAX_MIN_VERSION  3 // 6.0.0
 
 AndroidCpuAcceleration ProbeHAX(std::string* status) {
     AndroidCpuAcceleration cpu = ProbeHaxCpu(status);
