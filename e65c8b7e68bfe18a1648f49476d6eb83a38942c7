@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "d7de195a_6acdf27e",
+        "filename": "android/adb-server.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-09T17:59:41Z",
+      "side": 1,
+      "message": "in the init() function we create a looper first, then socket, then the IO object. Shouldn\u0027t we delete everything in the opposite order?\nAlso, do we want to delete the looper here too?",
+      "range": {
+        "startLine": 464,
+        "startChar": 1,
+        "endLine": 470,
+        "endChar": 5
+      },
+      "revId": "e65c8b7e68bfe18a1648f49476d6eb83a38942c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d7de195a_77739b26",
         "filename": "android/adb-server.h",
         "patchSetId": 2
