@@ -601,7 +601,7 @@ static const char* event_help[] = {
 };
 
 void android_console_event_types(Monitor* mon, const QDict* qdict) {
-    int count = gf_get_event_type_count();
+    int count = goldfish_get_event_type_count();
     int nn;
 
     monitor_printf(mon,
@@ -615,9 +615,9 @@ void android_console_event_types(Monitor* mon, const QDict* qdict) {
         char tmp[16];
         char* p = tmp;
         int code_count;
-        gf_get_event_type_name(nn, p);
+        goldfish_get_event_type_name(nn, p);
 
-        code_count = gf_get_event_code_count(p);
+        code_count = goldfish_get_event_code_count(p);
 
         monitor_printf(mon, "    %-8s", p);
 
@@ -641,7 +641,7 @@ void android_console_event_codes(Monitor* mon, const QDict* qdict) {
         return;
     }
 
-    count = gf_get_event_code_count(arg);
+    count = goldfish_get_event_code_count(arg);
 
     /* If the type is invalid then bail */
     if (count < 0) {
@@ -657,7 +657,7 @@ void android_console_event_codes(Monitor* mon, const QDict* qdict) {
                 mon, "type '%s' accepts the following <code> aliases:\n", arg);
         for (nn = 0; nn < count; nn++) {
             char temp[20], *p = temp;
-            gf_get_event_code_name(arg, nn, p);
+            goldfish_get_event_code_name(arg, nn, p);
             monitor_printf(mon, "    %-12s\n", p);
         }
     }
@@ -684,7 +684,7 @@ void android_console_event_send(Monitor* mon, const QDict* qdict) {
     if (g_ascii_isdigit(*substr[0])) {
         type = g_ascii_strtoull(substr[0], NULL, 0);
     } else {
-        type = gf_get_event_type_value(substr[0]);
+        type = goldfish_get_event_type_value(substr[0]);
     }
     if (type == -1) {
         monitor_printf(mon,
@@ -700,7 +700,7 @@ void android_console_event_send(Monitor* mon, const QDict* qdict) {
     if (g_ascii_isdigit(*substr[1])) {
         code = g_ascii_strtoull(substr[1], NULL, 0);
     } else {
-        code = gf_get_event_code_value(type, substr[1]);
+        code = goldfish_get_event_code_value(type, substr[1]);
     }
     if (code == -1) {
         monitor_printf(mon,
@@ -722,7 +722,7 @@ void android_console_event_send(Monitor* mon, const QDict* qdict) {
     }
     value = g_ascii_strtoull(substr[2], NULL, 0);
 
-    gf_event_send(type, code, value);
+    goldfish_event_send(type, code, value);
 
     monitor_printf(mon, "OK\n");
 

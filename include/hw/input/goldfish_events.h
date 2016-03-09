@@ -12,13 +12,13 @@
 #ifndef _HW_GOLDFISH_EVENT_H
 #define _HW_GOLDFISH_EVENT_H
 
-extern int gf_get_event_type_count(void);
-extern int gf_get_event_type_name(int type, char *buf);
-extern int gf_get_event_type_value(char *codename);
-extern int gf_get_event_code_count(const char *typename);
-extern int gf_get_event_code_name(const char *typename, unsigned int code,
+extern int goldfish_get_event_type_count(void);
+extern int goldfish_get_event_type_name(int type, char *buf);
+extern int goldfish_get_event_type_value(char *codename);
+extern int goldfish_get_event_code_count(const char *typename);
+extern int goldfish_get_event_code_name(const char *typename, unsigned int code,
                                   char *buf);
-extern int gf_get_event_code_value(int typeval, char *codename);
-extern int gf_event_send(int type, int code, int value);
+extern int goldfish_get_event_code_value(int typeval, char *codename);
+extern int goldfish_event_send(int type, int code, int value);
 
 #endif

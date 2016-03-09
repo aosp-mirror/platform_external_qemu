@@ -603,7 +603,7 @@ typedef struct ABSEntry {
     uint32_t    flat;
 } ABSEntry;
 
-static const VMStateDescription vmstate_gf_evdev = {
+static const VMStateDescription vmstate_goldfish_evdev = {
     .name = "goldfish-events",
     .version_id = 1,
     .minimum_version_id = 1,
@@ -721,7 +721,7 @@ static int get_page_data(GoldfishEvDevState *s, int offset)
     return 0;
 }
 
-int gf_event_send(int type, int code, int value)
+int goldfish_event_send(int type, int code, int value)
 {
     DeviceState *s = qdev_find_recursive(sysbus_get_default(),
                                            TYPE_GOLDFISHEVDEV);
@@ -783,13 +783,13 @@ static void events_write(void *opaque, hwaddr offset,
     }
 }
 
-static const MemoryRegionOps gf_evdev_ops = {
+static const MemoryRegionOps goldfish_evdev_ops = {
     .read = events_read,
     .write = events_write,
     .endianness = DEVICE_NATIVE_ENDIAN,
 };
 
-static void gf_evdev_put_mouse(void *opaque,
+static void goldfish_evdev_put_mouse(void *opaque,
                                int dx, int dy, int dz, int buttons_state)
 {
     GoldfishEvDevState *s = (GoldfishEvDevState *)opaque;
@@ -908,8 +908,8 @@ static const int dpad_map[Q_KEY_CODE_MAX] = {
     [Q_KEY_CODE_KP_5] = LINUX_KEY_CENTER,
 };
 
-static void gf_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
-                                     InputEvent *evt)
+static void goldfish_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
+                                           InputEvent *evt)
 {
 
     GoldfishEvDevState *s = GOLDFISHEVDEV(dev);
@@ -972,7 +972,7 @@ static void gf_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
     }
 }
 
-static const GoldfishEventTypeInfo *gf_get_event_type(const char *typename)
+static const GoldfishEventTypeInfo *goldfish_get_event_type(const char *typename)
 {
     const GoldfishEventTypeInfo *type = NULL;
     int count = 0;
@@ -989,7 +989,7 @@ static const GoldfishEventTypeInfo *gf_get_event_type(const char *typename)
     return type;
 }
 
-int gf_get_event_type_count(void)
+int goldfish_get_event_type_count(void)
 {
     int count = 0;
 
@@ -1000,16 +1000,16 @@ int gf_get_event_type_count(void)
     return count;
 }
 
-int gf_get_event_type_name(int type, char *buf)
+int goldfish_get_event_type_name(int type, char *buf)
 {
    g_stpcpy(buf, ev_type_table[type].name);
 
    return 0;
 }
 
-int gf_get_event_type_value(char *typename)
+int goldfish_get_event_type_value(char *typename)
 {
-    const GoldfishEventTypeInfo *type = gf_get_event_type(typename);
+    const GoldfishEventTypeInfo *type = goldfish_get_event_type(typename);
     int ret = -1;
 
     if (type) {
@@ -1019,7 +1019,7 @@ int gf_get_event_type_value(char *typename)
     return ret;
 }
 
-static const GoldfishEventCodeInfo *gf_get_event_code(int typeval,
+static const GoldfishEventCodeInfo *goldfish_get_event_code(int typeval,
                                                       const char *codename)
 {
     const GoldfishEventTypeInfo *type = &ev_type_table[typeval];
@@ -1038,13 +1038,13 @@ static const GoldfishEventCodeInfo *gf_get_event_code(int typeval,
     return code;
 }
 
-int gf_get_event_code_count(const char *typename)
+int goldfish_get_event_code_count(const char *typename)
 {
     const GoldfishEventTypeInfo *type = NULL;
     const GoldfishEventCodeInfo *codes;
     int count = -1;     /* Return -1 if type not found */
 
-    type = gf_get_event_type(typename);
+    type = goldfish_get_event_type(typename);
 
     /* Count the number of codes for the specified type if found */
     if (type) {
@@ -1060,12 +1060,12 @@ int gf_get_event_code_count(const char *typename)
     return count;
 }
 
-int gf_get_event_code_name(const char *typename, unsigned int code, char *buf)
+int goldfish_get_event_code_name(const char *typename, unsigned int code, char *buf)
 {
-    const GoldfishEventTypeInfo *type = gf_get_event_type(typename);
+    const GoldfishEventTypeInfo *type = goldfish_get_event_type(typename);
     int ret = -1;   /* Return -1 if type not found */
 
-    if (type && type->codes && code < gf_get_event_code_count(typename)) {
+    if (type && type->codes && code < goldfish_get_event_code_count(typename)) {
         g_stpcpy(buf, type->codes[code].name);
         ret = 0;
     }
@@ -1073,9 +1073,9 @@ int gf_get_event_code_name(const char *typename, unsigned int code, char *buf)
     return ret;
 }
 
-int gf_get_event_code_value(int typeval, char *codename)
+int goldfish_get_event_code_value(int typeval, char *codename)
 {
-    const GoldfishEventCodeInfo *code = gf_get_event_code(typeval, codename);
+    const GoldfishEventCodeInfo *code = goldfish_get_event_code(typeval, codename);
     int ret = -1;
 
     if (code) {
@@ -1085,28 +1085,28 @@ int gf_get_event_code_value(int typeval, char *codename)
     return ret;
 }
 
-static QemuInputHandler gf_evdev_key_input_handler = {
+static QemuInputHandler goldfish_evdev_key_input_handler = {
     .name = "goldfish event device key handler",
     .mask = INPUT_EVENT_MASK_KEY,
-    .event = gf_evdev_handle_keyevent,
+    .event = goldfish_evdev_handle_keyevent,
 };
 
-static void gf_evdev_init(Object *obj)
+static void goldfish_evdev_init(Object *obj)
 {
     GoldfishEvDevState *s = GOLDFISHEVDEV(obj);
     DeviceState *dev = DEVICE(obj);
     SysBusDevice *sbd = SYS_BUS_DEVICE(obj);
 
-    memory_region_init_io(&s->iomem, obj, &gf_evdev_ops, s,
+    memory_region_init_io(&s->iomem, obj, &goldfish_evdev_ops, s,
                           "goldfish-events", 0x1000);
     sysbus_init_mmio(sbd, &s->iomem);
     sysbus_init_irq(sbd, &s->irq);
 
-    qemu_input_handler_register(dev, &gf_evdev_key_input_handler);
+    qemu_input_handler_register(dev, &goldfish_evdev_key_input_handler);
     // Register the mouse handler for both absolute and relative position
     // reports. (Relative reports are used in trackball mode.)
-    qemu_add_mouse_event_handler(gf_evdev_put_mouse, s, 1, "goldfish-events");
-    qemu_add_mouse_event_handler(gf_evdev_put_mouse, s, 0, "goldfish-events-rel");
+    qemu_add_mouse_event_handler(goldfish_evdev_put_mouse, s, 1, "goldfish-events");
+    qemu_add_mouse_event_handler(goldfish_evdev_put_mouse, s, 0, "goldfish-events-rel");
 
 #if defined(USE_ANDROID_EMU)
     s->have_dpad = android_hw->hw_dPad;
@@ -1124,7 +1124,7 @@ static void gf_evdev_init(Object *obj)
 
 }
 
-static void gf_evdev_realize(DeviceState *dev, Error **errp)
+static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
 {
 
     GoldfishEvDevState *s = GOLDFISHEVDEV(dev);
@@ -1309,7 +1309,7 @@ static void gf_evdev_realize(DeviceState *dev, Error **errp)
 #endif
 }
 
-static void gf_evdev_reset(DeviceState *dev)
+static void goldfish_evdev_reset(DeviceState *dev)
 {
     GoldfishEvDevState *s = GOLDFISHEVDEV(dev);
 
@@ -1319,7 +1319,7 @@ static void gf_evdev_reset(DeviceState *dev)
     s->state = 0;
 }
 
-static Property gf_evdev_props[] = {
+static Property goldfish_evdev_props[] = {
     DEFINE_PROP_BOOL("have-dpad", GoldfishEvDevState, have_dpad, false),
     DEFINE_PROP_BOOL("have-trackball", GoldfishEvDevState,
                      have_trackball, false),
@@ -1334,27 +1334,27 @@ static Property gf_evdev_props[] = {
     DEFINE_PROP_END_OF_LIST()
 };
 
-static void gf_evdev_class_init(ObjectClass *klass, void *data)
+static void goldfish_evdev_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
 
-    dc->realize = gf_evdev_realize;
-    dc->reset = gf_evdev_reset;
-    dc->props = gf_evdev_props;
-    dc->vmsd = &vmstate_gf_evdev;
+    dc->realize = goldfish_evdev_realize;
+    dc->reset = goldfish_evdev_reset;
+    dc->props = goldfish_evdev_props;
+    dc->vmsd = &vmstate_goldfish_evdev;
 }
 
-static const TypeInfo gf_evdev_info = {
+static const TypeInfo goldfish_evdev_info = {
     .name = TYPE_GOLDFISHEVDEV,
     .parent = TYPE_SYS_BUS_DEVICE,
     .instance_size = sizeof(GoldfishEvDevState),
-    .instance_init = gf_evdev_init,
-    .class_init = gf_evdev_class_init,
+    .instance_init = goldfish_evdev_init,
+    .class_init = goldfish_evdev_class_init,
 };
 
-static void gf_evdev_register_types(void)
+static void goldfish_evdev_register_types(void)
 {
-    type_register_static(&gf_evdev_info);
+    type_register_static(&goldfish_evdev_info);
 }
 
-type_init(gf_evdev_register_types)
+type_init(goldfish_evdev_register_types)

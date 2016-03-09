@@ -40,7 +40,7 @@ static void user_event_key(unsigned code, bool down) {
     if (VERBOSE_CHECK(keys))
         printf(">> KEY [0x%03x,%s]\n", (code & 0x3ff), down ? "down" : " up ");
 
-    gf_event_send(0x01, code, down);
+    goldfish_event_send(0x01, code, down);
 }
 
 static void user_event_keycode(int code) {
@@ -49,7 +49,7 @@ static void user_event_keycode(int code) {
 
 static void user_event_generic(int type, int code, int value) {
     if (eventDeviceHandle) {
-        gf_event_send(type, code, value);
+        goldfish_event_send(type, code, value);
     }
 }
 
