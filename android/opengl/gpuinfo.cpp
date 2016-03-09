@@ -48,6 +48,7 @@ void GpuInfoList::addGpu() {
     infos.push_back(GpuInfo());
 }
 GpuInfo& GpuInfoList::currGpu() {
+    if (infos.empty()) { addGpu(); }
     return infos.back();
 }
 
