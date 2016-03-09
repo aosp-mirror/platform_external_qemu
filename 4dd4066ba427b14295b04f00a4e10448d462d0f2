@@ -22,6 +22,30 @@
       "revId": "4dd4066ba427b14295b04f00a4e10448d462d0f2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d7de195a_ca074669",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-09T18:01:43Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "d7de195a_8ad01e17",
+      "range": {
+        "startLine": 387,
+        "startChar": 16,
+        "endLine": 387,
+        "endChar": 24
+      },
+      "revId": "4dd4066ba427b14295b04f00a4e10448d462d0f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
