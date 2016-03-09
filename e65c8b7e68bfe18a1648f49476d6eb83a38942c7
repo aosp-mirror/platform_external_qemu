@@ -69,6 +69,30 @@
       "revId": "e65c8b7e68bfe18a1648f49476d6eb83a38942c7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d7de195a_2af80a67",
+        "filename": "android/adb-server.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-09T18:07:35Z",
+      "side": 1,
+      "message": "What\u0027s the difference between \u0027undoing init\u0027 and \u0027finalizing\u0027 something? I just can\u0027t imagine what is it. If we had some kind of two-stage init, like adb_create + adb_init, then adb_finalize + adb_free would look fine. But as of now, undo_init() means exactly the same as \u0027finalize\u0027 when I read the code",
+      "parentUuid": "d7de195a_2ae24aea",
+      "range": {
+        "startLine": 86,
+        "startChar": 12,
+        "endLine": 86,
+        "endChar": 29
+      },
+      "revId": "e65c8b7e68bfe18a1648f49476d6eb83a38942c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
