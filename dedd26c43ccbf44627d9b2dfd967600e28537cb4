@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d7de195a_0d6a08f2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-09T18:51:13Z",
+      "side": 1,
+      "message": "typo",
+      "range": {
+        "startLine": 7,
+        "startChar": 33,
+        "endLine": 7,
+        "endChar": 44
+      },
+      "revId": "dedd26c43ccbf44627d9b2dfd967600e28537cb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d7de195a_ad6894f6",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/gles2_only.entries",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-09T18:51:13Z",
+      "side": 1,
+      "message": "nit: empty line",
+      "revId": "dedd26c43ccbf44627d9b2dfd967600e28537cb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
