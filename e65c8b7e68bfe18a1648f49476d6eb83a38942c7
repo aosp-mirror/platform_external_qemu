@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d7de195a_6a9292cf",
+        "filename": "android/adb-server.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-09T18:31:13Z",
+      "side": 1,
+      "message": "Order of destruction for fd/loopIo doesn\u0027t matter.\n\nThere is no need to delete the looper, it\u0027s a single thread-specific instance returned by looper_getForThread().",
+      "parentUuid": "d7de195a_6acdf27e",
+      "range": {
+        "startLine": 464,
+        "startChar": 1,
+        "endLine": 470,
+        "endChar": 5
+      },
+      "revId": "e65c8b7e68bfe18a1648f49476d6eb83a38942c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d7de195a_77739b26",
         "filename": "android/adb-server.h",
         "patchSetId": 2
