@@ -284,10 +284,9 @@ static bool setup_console_and_adb_ports(int console_port,
  * it should be used to setup any Android-specific items in the emulation before the
  * main loop runs
  */
-void android_emulation_setup(const AndroidConsoleAgents* agents) {
-
-        /* Set the port where the emulator expects adb to run on the host
-         * machine */
+bool android_emulation_setup(const AndroidConsoleAgents* agents) {
+    /* Set the port where the emulator expects adb to run on the host
+     * machine */
     char* adb_host_port_str = getenv( "ANDROID_ADB_SERVER_PORT" );
     if ( adb_host_port_str && strlen( adb_host_port_str ) > 0 ) {
         android_adb_port = (int) strtol( adb_host_port_str, NULL, 0 );
@@ -295,13 +294,13 @@ void android_emulation_setup(const AndroidConsoleAgents* agents) {
             derror("env var ANDROID_ADB_SERVER_PORT must be a number > 0. Got "
                    "\"%s\"",
                    adb_host_port_str);
-            exit(1);
+            return false;
         }
     }
 
     if (android_op_port && android_op_ports) {
         derror("options -port and -ports cannot be used together.");
-        exit(1);
+        return false;
     }
 
     if (s_support_configurable_ports) {
@@ -319,7 +318,7 @@ void android_emulation_setup(const AndroidConsoleAgents* agents) {
             if ( comma_location == NULL || *comma_location != ',' ) {
                 derror("option -ports must be followed by two comma separated "
                        "positive integer numbers");
-                exit(1);
+                return false;
             }
 
             adb_port = strtol( comma_location+1, &end, 0 );
@@ -327,13 +326,13 @@ void android_emulation_setup(const AndroidConsoleAgents* agents) {
             if ( end == NULL || *end ) {
                 derror("option -ports must be followed by two comma separated "
                        "positive integer numbers");
-                exit(1);
+                return false;
             }
 
             if ( console_port == adb_port ) {
                 derror("option -ports must be followed by two different "
                        "integer numbers");
-                exit(1);
+                return false;
             }
 
             setup_console_and_adb_ports(console_port, adb_port, legacy_adb,
@@ -349,7 +348,7 @@ void android_emulation_setup(const AndroidConsoleAgents* agents) {
                     derror("option -port must be followed by an even integer "
                            "number between %d and %d",
                            base_port, base_port + (tries - 1) * 2);
-                    exit(1);
+                    return false;
                 }
                 if ( (port & 1) != 0 ) {
                     port &= ~1;
@@ -378,13 +377,13 @@ void android_emulation_setup(const AndroidConsoleAgents* agents) {
             if (!success) {
                 derror("It seems too many emulator instances are running on "
                        "this machine. Aborting.");
-                exit(1);
+                return false;
             }
         }
 
         if (android_op_report_console) {
             if (report_console(android_op_report_console, base_port) < 0) {
-                exit(1);
+                return false;
             }
         }
 
@@ -506,4 +505,6 @@ void android_emulation_setup(const AndroidConsoleAgents* agents) {
 
     /* initilize fingperprint here */
     android_hw_fingerprint_init();
+
+    return true;
 }
