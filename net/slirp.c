@@ -827,6 +827,6 @@ int net_slirp_parse_legacy(QemuOptsList *opts_list, const char *optarg, int *ret
     return 1;
 }
 
-int net_slirp_is_inited() {
+int net_slirp_is_inited(void) {
     return !QTAILQ_EMPTY(&slirp_stacks);
 }

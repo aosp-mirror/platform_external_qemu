@@ -33,6 +33,7 @@ IGNORED_OBJECTS = [
     '../disas/libvixl/a64/instructions-a64.o',
     '../disas/libvixl/utils.o',
     'gdbstub-xml.o',
+    '../hw/display/framebuffer.o',
     'hw/misc/android_boot_properties.o',
     'hw/misc/android_pipe_opengles.o',
     '../qmp-marshal.o',

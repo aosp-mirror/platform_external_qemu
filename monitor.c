@@ -4329,7 +4329,11 @@ static void file_completion(Monitor *mon, const char *input)
             /* stat the file to find out if it's a directory.
              * In that case add a slash to speed up typing long paths
              */
+#ifdef USE_ANDROID_EMU
             if (android_stat(file, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+#else
+            if (stat(file, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+#endif
                 pstrcat(file, sizeof(file), "/");
             }
             readline_add_completion(mon->rs, file);

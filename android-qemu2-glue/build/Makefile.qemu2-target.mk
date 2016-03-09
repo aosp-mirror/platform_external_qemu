@@ -48,6 +48,28 @@ LOCAL_SRC_FILES += \
     $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES) \
     $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES_$(BUILD_TARGET_TAG))
 
+LOCAL_SRC_FILES += \
+    android-console.c \
+    hw/audio/goldfish_audio.c \
+    hw/char/goldfish_tty.c \
+    hw/display/framebuffer.c \
+    hw/display/goldfish_fb.c \
+    hw/input/goldfish_events.c \
+    hw/input/goldfish_sensors.c \
+    hw/intc/goldfish_pic.c \
+    hw/misc/android_adb.c \
+    hw/misc/android_adb_dbg.c \
+    hw/misc/android_boot_properties.c \
+    hw/misc/android_pipe.c \
+    hw/misc/android_pipe_test.c \
+    hw/misc/android_qemud.c\
+    hw/misc/goldfish_battery.c \
+    hw/timer/goldfish_timer.c \
+    $(call qemu2-if-target,arm arm64,\
+        hw/arm/ranchu.c) \
+    $(call qem2-if-target,mips mips64,\
+        hw/mips/mip_ranchu.c) \
+
 ifeq (arm64,$(QEMU2_TARGET))
 LOCAL_GENERATED_SOURCES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm64.c
 else
