@@ -78,3 +78,6 @@ void glGenRenderbuffers(GLsizei n, GLuint *renderbuffers);
 void glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
 void glGetRenderbufferParameteriv(GLenum target, GLenum pname, GLint *params);
 void glFramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
+
+void glGenerateMipmap(GLenum target);
+

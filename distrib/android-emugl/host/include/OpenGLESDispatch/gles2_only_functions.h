@@ -79,6 +79,7 @@
   X(void, glRenderbufferStorage, (GLenum target, GLenum internalformat, GLsizei width, GLsizei height), (target, internalformat, width, height)) \
   X(void, glGetRenderbufferParameteriv, (GLenum target, GLenum pname, GLint * params), (target, pname, params)) \
   X(void, glFramebufferRenderbuffer, (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer), (target, attachment, renderbuffertarget, renderbuffer)) \
+  X(void, glGenerateMipmap, (GLenum target), (target)) \
 
 
 #endif  // GLES2_ONLY_FUNCTIONS_H
