@@ -79,8 +79,6 @@ SkinRotation  android_framebuffer_rotation;
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
-extern int  control_console_start( int  port );  /* in control.c */
-
 extern int qemu_milli_needed;
 
 /* the default device DPI if none is specified by the skin
