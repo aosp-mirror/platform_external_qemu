@@ -22,6 +22,30 @@
       "revId": "25219ce475dee44373edd6e1a4d66f0d572c0a08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_9eda61e9",
+        "filename": "android/skin/qt/extended-pages/help-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-10T23:43:51Z",
+      "side": 1,
+      "message": "No, it\u0027s not official, but I figured if the code sees 24 it\u0027s OK to say that here.",
+      "parentUuid": "57bb093b_956404f4",
+      "range": {
+        "startLine": 46,
+        "startChar": 37,
+        "endLine": 46,
+        "endChar": 43
+      },
+      "revId": "25219ce475dee44373edd6e1a4d66f0d572c0a08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
