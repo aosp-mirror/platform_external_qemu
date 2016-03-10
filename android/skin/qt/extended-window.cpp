@@ -65,8 +65,8 @@ ExtendedWindow::ExtendedWindow(
         this, SLOT(switchOnTop(bool)));
 
     connect(
-        mExtendedUi->settingsPage, SIGNAL(onAllowKeyboardGrabChanged(bool)),
-        mEmulatorWindow, SLOT(setAllowKeyboardInputGrab(bool)));
+        mExtendedUi->settingsPage, SIGNAL(onForwardShortcutsToDeviceChanged(bool)),
+        mEmulatorWindow, SLOT(setForwardShortcutsToDevice(bool)));
 
     connect(
         mExtendedUi->settingsPage, SIGNAL(themeChanged(SettingsTheme)),
