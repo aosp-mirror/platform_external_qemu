@@ -93,7 +93,7 @@ void EmulatorOverlay::keyPressEvent(QKeyEvent* event) {
 }
 
 void EmulatorOverlay::keyReleaseEvent(QKeyEvent* event) {
-    if (event->key() == Qt::Key_Alt && mMode == OverlayMode::Multitouch) {
+    if (event->key() == Qt::Key_Control && mMode == OverlayMode::Multitouch) {
         hide();
     } else {
         mEmulatorWindow->keyReleaseEvent(event);

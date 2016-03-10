@@ -104,16 +104,16 @@ void HelpPage::initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand
             QString key_combo;
 
             // Unfortunately, QKeySequence doesn't handle modifier-only key
-            // sequences very well. In this case, "multitouch" is Alt and
+            // sequences very well. In this case, "multitouch" is Ctrl and
             // QKeySequence::toString sometimes produces strings with weird
             // characters. To mitigate this problem, we simply hardcode the
             // string for the "multitouch" key combo.
             if (key_sequence_and_command.value() ==
                        QtUICommand::SHOW_MULTITOUCH) {
 #ifdef Q_OS_MAC
-                key_combo = "\u2325";  // Alt
+                key_combo = "\u2318";  // Cmd
 #else
-                key_combo = "Alt";
+                key_combo = "Ctrl";
 #endif
             } else {
                 key_combo  = key_sequence_and_command.key().toString(QKeySequence::NativeText);
