@@ -156,7 +156,7 @@
     <string notr="true">folder</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="set_allowKeyboardGrab">
+  <widget class="QCheckBox" name="set_forwardShortcutsToDevice">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -311,7 +311,7 @@
     <rect>
      <x>20</x>
      <y>94</y>
-     <width>211</width>
+     <width>281</width>
      <height>21</height>
     </rect>
    </property>
@@ -324,7 +324,7 @@
     <string notr="true">border: 0px;</string>
    </property>
    <property name="title">
-    <string>Grab screen focus with mouse</string>
+    <string>Forward keyboard shortcuts to virtual device</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>Title</string>
@@ -394,7 +394,7 @@
  </widget>
  <tabstops>
   <tabstop>set_themeBox</tabstop>
-  <tabstop>set_allowKeyboardGrab</tabstop>
+  <tabstop>set_forwardShortcutsToDevice</tabstop>
   <tabstop>set_onTop</tabstop>
   <tabstop>set_saveLocBox</tabstop>
   <tabstop>set_saveLocFolderButton</tabstop>
