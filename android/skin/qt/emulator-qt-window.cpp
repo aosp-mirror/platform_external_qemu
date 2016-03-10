@@ -157,8 +157,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
     setOnTop(onTop);
 
-    setForwardShortcutsToDevice(
-            settings.value(Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, false).toBool());
+    bool shortcutBool =
+          settings.value(Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, false).toBool();
+    setForwardShortcutsToDevice(shortcutBool ? 1 : 0);
 
     initErrorDialog(this);
 }
@@ -1154,8 +1155,8 @@ void EmulatorQtWindow::simulateZoomedWindowResized(const QSize &size)
     mOverlay.resize(size);
 }
 
-void EmulatorQtWindow::setForwardShortcutsToDevice(bool value) {
-    mForwardShortcutsToDevice = value;
+void EmulatorQtWindow::setForwardShortcutsToDevice(int index) {
+    mForwardShortcutsToDevice = (index != 0);
 }
 
 void EmulatorQtWindow::slot_runOnUiThread(SkinGenericFunction* f, void* data, QSemaphore* semaphore) {
