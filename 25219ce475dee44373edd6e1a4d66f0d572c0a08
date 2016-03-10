@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "57bb093b_956404f4",
+        "filename": "android/skin/qt/extended-pages/help-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-10T22:23:25Z",
+      "side": 1,
+      "message": "Is this official? Might be better to just say \"N preview\" unless it\u0027s officially API 24 (even though I don\u0027t know what else it could possibly be).",
+      "range": {
+        "startLine": 46,
+        "startChar": 37,
+        "endLine": 46,
+        "endChar": 43
+      },
+      "revId": "25219ce475dee44373edd6e1a4d66f0d572c0a08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
