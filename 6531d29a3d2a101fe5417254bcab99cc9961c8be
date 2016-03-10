@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "d7de195a_89481e07",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-10T16:15:20Z",
+      "side": 1,
+      "message": "At this point I haven\u0027t narrowed it down at all.",
+      "parentUuid": "b7344567_65dbc034",
+      "range": {
+        "startLine": 21,
+        "startChar": 5,
+        "endLine": 23,
+        "endChar": 12
+      },
+      "revId": "6531d29a3d2a101fe5417254bcab99cc9961c8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b7344567_85d84437",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -117,6 +141,30 @@
     },
     {
       "key": {
+        "uuid": "d7de195a_6954d29d",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-10T16:15:20Z",
+      "side": 1,
+      "message": "I *think* the default is supposed to be \u0027frameless,\u0027 but I\u0027ll double-check with J.",
+      "parentUuid": "b7344567_25e5b8f1",
+      "range": {
+        "startLine": 135,
+        "startChar": 4,
+        "endLine": 136,
+        "endChar": 54
+      },
+      "revId": "6531d29a3d2a101fe5417254bcab99cc9961c8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b7344567_45e23ceb",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -140,6 +188,30 @@
     },
     {
       "key": {
+        "uuid": "d7de195a_495916d5",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 534,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-10T16:15:20Z",
+      "side": 1,
+      "message": "My expectation/hope is that a 90-degree rotation would be exact.\n\nAre you suggesting checking if the other order looks better?",
+      "parentUuid": "b7344567_45e23ceb",
+      "range": {
+        "startLine": 519,
+        "startChar": 16,
+        "endLine": 534,
+        "endChar": 72
+      },
+      "revId": "6531d29a3d2a101fe5417254bcab99cc9961c8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b7344567_e50d908d",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -151,6 +223,30 @@
       "writtenOn": "2016-03-10T02:04:51Z",
       "side": 1,
       "message": "Every paint event? Lot of work to do...",
+      "range": {
+        "startLine": 559,
+        "startChar": 4,
+        "endLine": 559,
+        "endChar": 23
+      },
+      "revId": "6531d29a3d2a101fe5417254bcab99cc9961c8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d7de195a_09530eb5",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-10T16:15:20Z",
+      "side": 1,
+      "message": "I\u0027m calling it every paint event, but it only does work if the size has changed",
+      "parentUuid": "b7344567_e50d908d",
       "range": {
         "startLine": 559,
         "startChar": 4,
