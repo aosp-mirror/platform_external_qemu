@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d7de195a_d520f585",
+        "filename": "android/skin/qt/extended-pages/help-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-10T19:30:05Z",
+      "side": 1,
+      "message": "Is that actually what N currently is labelled as? Why not just label it 24...",
+      "range": {
+        "startLine": 46,
+        "startChar": 13,
+        "endLine": 46,
+        "endChar": 17
+      },
+      "revId": "849451fb901989da154ebc6125c684be0f405037",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
