@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d7de195a_65652a8a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-10T02:04:51Z",
+      "side": 1,
+      "message": "\"Better mode\"?",
+      "range": {
+        "startLine": 14,
+        "startChar": 22,
+        "endLine": 14,
+        "endChar": 33
+      },
+      "revId": "6531d29a3d2a101fe5417254bcab99cc9961c8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7344567_c5f5eca3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-10T02:04:51Z",
+      "side": 1,
+      "message": "Still think this is gonna be real tricky to do.",
+      "range": {
+        "startLine": 19,
+        "startChar": 47,
+        "endLine": 19,
+        "endChar": 54
+      },
+      "revId": "6531d29a3d2a101fe5417254bcab99cc9961c8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7344567_65dbc034",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-10T02:04:51Z",
+      "side": 1,
+      "message": "Host GPU only, or also with GPU off / mesa / swiftshader?",
+      "range": {
+        "startLine": 21,
+        "startChar": 5,
+        "endLine": 23,
+        "endChar": 12
+      },
+      "revId": "6531d29a3d2a101fe5417254bcab99cc9961c8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7344567_85d84437",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-10T02:04:51Z",
+      "side": 1,
+      "message": "Bad rebase maybe? I thought this was somewhere else...",
+      "range": {
+        "startLine": 128,
+        "startChar": 4,
+        "endLine": 132,
+        "endChar": 65
+      },
+      "revId": "6531d29a3d2a101fe5417254bcab99cc9961c8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7344567_25e5b8f1",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-10T02:04:51Z",
+      "side": 1,
+      "message": "Remove this? Please....",
+      "range": {
+        "startLine": 135,
+        "startChar": 4,
+        "endLine": 136,
+        "endChar": 54
+      },
+      "revId": "6531d29a3d2a101fe5417254bcab99cc9961c8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7344567_45e23ceb",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 534,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-10T02:04:51Z",
+      "side": 1,
+      "message": "Even though these are affine transforms, there might be a difference between scale then rotate vs. rotate then scale. Perhaps worth trying, might work slightly better due to rounding error?",
+      "range": {
+        "startLine": 519,
+        "startChar": 16,
+        "endLine": 534,
+        "endChar": 72
+      },
+      "revId": "6531d29a3d2a101fe5417254bcab99cc9961c8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7344567_e50d908d",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-10T02:04:51Z",
+      "side": 1,
+      "message": "Every paint event? Lot of work to do...",
+      "range": {
+        "startLine": 559,
+        "startChar": 4,
+        "endLine": 559,
+        "endChar": 23
+      },
+      "revId": "6531d29a3d2a101fe5417254bcab99cc9961c8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
