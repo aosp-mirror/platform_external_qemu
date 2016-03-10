@@ -65,8 +65,8 @@ ExtendedWindow::ExtendedWindow(
         this, SLOT(switchOnTop(bool)));
 
     connect(
-        mExtendedUi->settingsPage, SIGNAL(onForwardShortcutsToDeviceChanged(bool)),
-        mEmulatorWindow, SLOT(setForwardShortcutsToDevice(bool)));
+        mExtendedUi->settingsPage, SIGNAL(onForwardShortcutsToDeviceChanged(int)),
+        mEmulatorWindow, SLOT(setForwardShortcutsToDevice(int)));
 
     connect(
         mExtendedUi->settingsPage, SIGNAL(themeChanged(SettingsTheme)),
