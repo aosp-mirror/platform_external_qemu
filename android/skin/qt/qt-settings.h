@@ -31,9 +31,9 @@ const QString SHOW_GPU_WARNING("showGpuWarning");
 //       we're in "namespace Settings".
 
 const QString ADB_PATH("set/adbPath");
-const QString ALLOW_KEYBOARD_GRAB("set/allowKeyboardGrab");
 const QString AUTO_FIND_ADB("set/autoFindAdb");
 const QString ALWAYS_ON_TOP("set/alwaysOnTop");
+const QString FORWARD_SHORTCUTS_TO_DEVICE("set/forwardShortcutsToDevice");
 const QString SAVE_PATH("set/savePath");
 const QString UI_THEME("set/theme");
 

@@ -77,8 +77,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
         mZoomFactor(1.0),
         mInZoomMode(false),
         mNextIsZoom(false),
-        mGrabKeyboardInput(false),
-        mMouseInside(false),
+        mForwardShortcutsToDevice(false),
         mPrevMousePosition(0, 0),
         mMainLoopThread(nullptr),
         mAvdWarningBox(QMessageBox::Information,
@@ -157,8 +156,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
     setOnTop(onTop);
 
-    setAllowKeyboardInputGrab(
-            settings.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool());
+    setForwardShortcutsToDevice(
+            settings.value(Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, false).toBool());
 
     initErrorDialog(this);
     setObjectName("MainWindow");
@@ -431,9 +430,6 @@ void EmulatorQtWindow::mouseMoveEvent(QMouseEvent *event)
 
 void EmulatorQtWindow::mousePressEvent(QMouseEvent *event)
 {
-    if (mAllowKeyboardInputGrab) {
-        mGrabKeyboardInput = true;
-    }
     handleMouseEvent(kEventMouseButtonDown,
                      getSkinMouseButton(event),
                      event->pos());
@@ -1063,18 +1059,7 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* 
 
 void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
 {
-    bool must_ungrab = event->key() == Qt::Key_Alt &&
-                       event->modifiers() == (Qt::ControlModifier + Qt::AltModifier);
-    if (mGrabKeyboardInput && must_ungrab) {
-        mGrabKeyboardInput = false;
-    }
-
-    bool grab =
-        mGrabKeyboardInput &&
-        mAllowKeyboardInputGrab &&
-        mouseInside();
-
-    if (!grab && mInZoomMode) {
+    if (!mForwardShortcutsToDevice && mInZoomMode) {
         if (event->key() == Qt::Key_Control) {
             if (type == kEventKeyDown) {
                 mOverlay.hide();
@@ -1085,7 +1070,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
         }
     }
 
-    if (!grab &&
+    if (!mForwardShortcutsToDevice &&
          event->key() == Qt::Key_Alt &&
          event->modifiers() == Qt::AltModifier) {
         if (type == kEventKeyDown) {
@@ -1096,7 +1081,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
         }
     }
 
-    if (grab || !mToolWindow->handleQtKeyEvent(event)) {
+    if (mForwardShortcutsToDevice || !mToolWindow->handleQtKeyEvent(event)) {
         forwardKeyEventToEmulator(type, event);
     }
 }
@@ -1191,8 +1176,8 @@ void EmulatorQtWindow::simulateZoomedWindowResized(const QSize &size)
     mOverlay.resize(size);
 }
 
-void EmulatorQtWindow::setAllowKeyboardInputGrab(bool value) {
-    mAllowKeyboardInputGrab = value;
+void EmulatorQtWindow::setForwardShortcutsToDevice(bool value) {
+    mForwardShortcutsToDevice = value;
 }
 
 void EmulatorQtWindow::slot_runOnUiThread(SkinGenericFunction* f, void* data, QSemaphore* semaphore) {

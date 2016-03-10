@@ -64,11 +64,11 @@ SettingsPage::SettingsPage(QWidget *parent) :
     }
     mUi->set_themeBox->setCurrentIndex(static_cast<int>(theme));
 
-    connect(mUi->set_allowKeyboardGrab, SIGNAL(toggled(bool)),
-            this, SIGNAL(onAllowKeyboardGrabChanged(bool)));
+    connect(mUi->set_forwardShortcutsToDevice, SIGNAL(toggled(bool)),
+            this, SIGNAL(onForwardShortcutsToDeviceChanged(bool)));
 
-    mUi->set_allowKeyboardGrab->setChecked(
-            settings.value(Ui::Settings::ALLOW_KEYBOARD_GRAB, false).toBool());
+    mUi->set_forwardShortcutsToDevice->setChecked(
+            settings.value(Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, false).toBool());
 
 #ifdef __linux__
     // "Always on top" is not supported for Linux (see emulator-qt-window.cpp)
@@ -228,9 +228,9 @@ void SettingsPage::on_set_adbPathBox_textEdited(const QString&) {
             settings.value(Ui::Settings::ADB_PATH, "").toString());
 }
 
-void SettingsPage::on_set_allowKeyboardGrab_toggled(bool checked) {
+void SettingsPage::on_set_forwardShortcutsToDevice_toggled(bool checked) {
     QSettings settings;
-    settings.setValue(Ui::Settings::ALLOW_KEYBOARD_GRAB, checked);
+    settings.setValue(Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, checked);
 }
 
 void SettingsPage::on_set_onTop_toggled(bool checked) {
