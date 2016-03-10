@@ -25,12 +25,12 @@ public:
     explicit SettingsPage(QWidget *parent = 0);
 
 signals:
-    void onForwardShortcutsToDeviceChanged(bool value);
+    void onForwardShortcutsToDeviceChanged(int index);
     void onTopChanged(bool isOnTop);
     void themeChanged(SettingsTheme new_theme);
 
 private slots:
-    void on_set_forwardShortcutsToDevice_toggled(bool checked);
+    void on_set_forwardShortcutsToDevice_currentIndexChanged(int index);
     void on_set_onTop_toggled(bool checked);
     void on_set_autoFindAdb_toggled(bool checked);
     void on_set_saveLocBox_textEdited(const QString&);

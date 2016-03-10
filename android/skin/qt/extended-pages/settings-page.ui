@@ -156,28 +156,6 @@
     <string notr="true">folder</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="set_forwardShortcutsToDevice">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>112</y>
-     <width>211</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>24</width>
-     <height>24</height>
-    </size>
-   </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Toggle</string>
-   </property>
-  </widget>
   <widget class="QCheckBox" name="set_autoFindAdb">
    <property name="geometry">
     <rect>
@@ -306,7 +284,7 @@
     <string notr="true">folder</string>
    </property>
   </widget>
-  <widget class="QGroupBox" name="mouseFocusTitle">
+  <widget class="QGroupBox" name="kbdShortcutsTitle">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -324,7 +302,7 @@
     <string notr="true">border: 0px;</string>
    </property>
    <property name="title">
-    <string>Forward keyboard shortcuts to virtual device</string>
+    <string>Send keyboard shortcuts to</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>Title</string>
@@ -391,13 +369,61 @@
     </property>
    </item>
   </widget>
+  <widget class="QComboBox" name="set_forwardShortcutsToDevice">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>112</y>
+     <width>280</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">padding: 3px 3px 3px 3px;</string>
+   </property>
+   <item>
+    <property name="text">
+     <string>Emulator controls (default)</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Virtual device</string>
+    </property>
+   </item>
+  </widget>
+  <zorder>kbdShortcutsTitle</zorder>
+  <zorder>set_crashReprotPrefTitle</zorder>
+  <zorder>set_onTop</zorder>
+  <zorder>set_adbPathBox</zorder>
+  <zorder>saveLocationTitle</zorder>
+  <zorder>set_saveLocBox</zorder>
+  <zorder>set_saveLocFolderButton</zorder>
+  <zorder>set_autoFindAdb</zorder>
+  <zorder>set_onTopTitle</zorder>
+  <zorder>themeTitle</zorder>
+  <zorder>set_themeBox</zorder>
+  <zorder>set_adbPathButton</zorder>
+  <zorder>autoFindAdbTitle</zorder>
+  <zorder>set_crashReportPrefComboBox</zorder>
+  <zorder>set_forwardShortcutsToDevice</zorder>
  </widget>
  <tabstops>
   <tabstop>set_themeBox</tabstop>
-  <tabstop>set_forwardShortcutsToDevice</tabstop>
-  <tabstop>set_onTop</tabstop>
   <tabstop>set_saveLocBox</tabstop>
   <tabstop>set_saveLocFolderButton</tabstop>
+  <tabstop>set_forwardShortcutsToDevice</tabstop>
+  <tabstop>set_autoFindAdb</tabstop>
+  <tabstop>set_adbPathBox</tabstop>
+  <tabstop>set_adbPathButton</tabstop>
+  <tabstop>set_onTop</tabstop>
+  <tabstop>set_crashReportPrefComboBox</tabstop>
  </tabstops>
  <resources>
   <include location="../resources.qrc"/>
