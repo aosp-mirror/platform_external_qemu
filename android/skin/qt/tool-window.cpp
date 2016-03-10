@@ -147,8 +147,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
     QTextStream stream(&default_shortcuts);
     mShortcutKeyStore.populateFromTextStream(stream, parseQtUICommand);
     // Need to add this one separately because QKeySequence cannot parse
-    // the string "Alt".
-    mShortcutKeyStore.add(QKeySequence(Qt::Key_Alt | Qt::AltModifier),
+    // the string "Ctrl".
+    mShortcutKeyStore.add(QKeySequence(Qt::Key_Control | Qt::ControlModifier),
                           QtUICommand::SHOW_MULTITOUCH);
 
     // Update tool tips on all push buttons.
