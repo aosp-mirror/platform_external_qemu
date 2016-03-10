@@ -130,7 +130,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
         "Ctrl+Shift+Down  PAN_DOWN\n"
         "Ctrl+Shift+Left  PAN_LEFT\n"
         "Ctrl+Shift+Right PAN_RIGHT\n"
-        "Ctrl+G     GRAB_KEYBOARD\n"
         "Ctrl+=     VOLUME_UP\n"
         "Ctrl+-     VOLUME_DOWN\n"
         "Ctrl+P     POWER\n"
@@ -148,11 +147,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
     QTextStream stream(&default_shortcuts);
     mShortcutKeyStore.populateFromTextStream(stream, parseQtUICommand);
     // Need to add this one separately because QKeySequence cannot parse
-    // the string "Ctrl+Alt".
-    mShortcutKeyStore.add(
-            QKeySequence(Qt::Key_Alt | Qt::AltModifier | Qt::ControlModifier),
-            QtUICommand::UNGRAB_KEYBOARD);
-    // Same thing goes for multitouch.
+    // the string "Alt".
     mShortcutKeyStore.add(QKeySequence(Qt::Key_Alt | Qt::AltModifier),
                           QtUICommand::SHOW_MULTITOUCH);
 
@@ -474,11 +469,6 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
             emulator_window->panHorizontal(false);
         }
         break;
-    case QtUICommand::GRAB_KEYBOARD:
-        if (down) {
-            emulator_window->setGrabKeyboardInput(true);
-        }
-        break;
     case QtUICommand::VOLUME_UP:
         uiAgentAction([down](const UiEmuAgent& agent) {
             agent.userEvents->sendKey(kKeyCodeVolumeUp, down);
@@ -539,14 +529,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
             skinUIEvent(skin_event);
         }
         break;
-    case QtUICommand::UNGRAB_KEYBOARD:
-        // Ungrabbing is handled in EmulatorQtWindow, and doesn't
-        // really need an element in the QtUICommand enum. This
-        // enum element exists solely for the purpose of displaying
-        // it in the list of keyboard shortcuts in the Help page.
     case QtUICommand::SHOW_MULTITOUCH:
-    // Like the above, multitouch only has an enum element so it
-    // automatically appears in the help page.
+    // Multitouch is handled in EmulatorQtWindow, and doesn't
+    // really need an element in the QtUICommand enum. This
+    // enum element exists solely for the purpose of displaying
+    // it in the list of keyboard shortcuts in the Help page.
     default:;
     }
 }

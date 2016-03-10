@@ -85,9 +85,6 @@ public:
     void mouseReleaseEvent(QMouseEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
     void startThread(StartFunction f, int argc, char **argv);
-    void setGrabKeyboardInput(bool grab) {
-        mGrabKeyboardInput = grab;
-    }
 
     /*
      In Qt, signals are normally events of interest that a class can emit, which can be hooked up to arbitrary slots. Here
@@ -206,7 +203,7 @@ public slots:
 
     void activateWindow();
     void raise();
-    void setAllowKeyboardInputGrab(bool value);
+    void setForwardShortcutsToDevice(bool value);
     void show();
     void showMinimized();
 
@@ -249,9 +246,7 @@ private:
     double mZoomFactor;
     bool mInZoomMode;
     bool mNextIsZoom;
-    bool mAllowKeyboardInputGrab = false;
-    bool mGrabKeyboardInput;
-    bool mMouseInside;
+    bool mForwardShortcutsToDevice;
     QPoint mPrevMousePosition;
 
     QProcess mScreencapProcess;
