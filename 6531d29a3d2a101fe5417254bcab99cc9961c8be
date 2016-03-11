@@ -118,6 +118,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_8c6d1644",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-11T17:08:14Z",
+      "side": 1,
+      "message": "Yes, it was supposed to be moved from tool-window.cpp, but wound up being in both places.\nI have now removed it from the old location.",
+      "parentUuid": "b7344567_85d84437",
+      "range": {
+        "startLine": 128,
+        "startChar": 4,
+        "endLine": 132,
+        "endChar": 65
+      },
+      "revId": "6531d29a3d2a101fe5417254bcab99cc9961c8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b7344567_25e5b8f1",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
