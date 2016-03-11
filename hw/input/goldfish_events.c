@@ -14,12 +14,6 @@
  * GNU General Public License for more details.
  */
 
-#if defined(USE_ANDROID_EMU)
-#include "android/globals.h"  /* for android_hw */
-#include "android-qemu2-glue/qemu-control-impl.h"
-#include "android/multitouch-screen.h"
-#endif
-
 #include "hw/sysbus.h"
 #include "ui/input.h"
 #include "ui/console.h"
@@ -555,7 +549,7 @@ typedef struct GoldfishEvDevState {
     MemoryRegion iomem;
     qemu_irq irq;
 
-    /* Device properties (TODO: actually make these props) */
+    /* Device properties */
     bool have_dpad;
     bool have_trackball;
     bool have_camera;
@@ -602,6 +596,19 @@ typedef struct ABSEntry {
     uint32_t    fuzz;
     uint32_t    flat;
 } ABSEntry;
+
+/* Pointer to the global device instance. Also serves as an initialization
+ * flag in goldfish_event_send() to filter-out events that are sent from
+ * the UI before the device was properly realized.
+ */
+static GoldfishEvDevState* s_evdev = NULL;
+
+static const GoldfishEventMultitouchFuncs* s_multitouch_funcs = NULL;
+
+void goldfish_events_enable_multitouch(
+        const GoldfishEventMultitouchFuncs* funcs) {
+    s_multitouch_funcs = funcs;
+}
 
 static const VMStateDescription vmstate_goldfish_evdev = {
     .name = "goldfish-events",
@@ -723,9 +730,7 @@ static int get_page_data(GoldfishEvDevState *s, int offset)
 
 int goldfish_event_send(int type, int code, int value)
 {
-    DeviceState *s = qdev_find_recursive(sysbus_get_default(),
-                                           TYPE_GOLDFISHEVDEV);
-    GoldfishEvDevState *dev = GOLDFISHEVDEV(s);
+    GoldfishEvDevState *dev = s_evdev;
 
     if (dev) {
         enqueue_event(dev, type, code, value);
@@ -794,17 +799,16 @@ static void goldfish_evdev_put_mouse(void *opaque,
 {
     GoldfishEvDevState *s = (GoldfishEvDevState *)opaque;
 
-#ifdef USE_ANDROID_EMU
     /* Note that, like the "classic" Android emulator, we
      * have dz == 0 for touchscreen, == 1 for trackball
      */
     if (s->have_multitouch  &&  dz == 0) {
-        /* Convert mouse event into multi-touch event */
-        multitouch_update_pointer(MTES_DEVICE, (buttons_state & 2) ? 1 : 0, dx, dy,
-                                      (buttons_state & 1) ? 0x81 : 0);
-        return;
+        if (s_multitouch_funcs) {
+            s_multitouch_funcs->translate_mouse_event(dx, dy, buttons_state);
+            return;
+        }
     }
-#endif
+
     if (s->have_touch  &&  dz == 0) {
         enqueue_event(s, EV_ABS, ABS_X, dx);
         enqueue_event(s, EV_ABS, ABS_Y, dy);
@@ -1107,21 +1111,6 @@ static void goldfish_evdev_init(Object *obj)
     // reports. (Relative reports are used in trackball mode.)
     qemu_add_mouse_event_handler(goldfish_evdev_put_mouse, s, 1, "goldfish-events");
     qemu_add_mouse_event_handler(goldfish_evdev_put_mouse, s, 0, "goldfish-events-rel");
-
-#if defined(USE_ANDROID_EMU)
-    s->have_dpad = android_hw->hw_dPad;
-    s->have_trackball = android_hw->hw_trackBall;
-
-    s->have_camera = strcmp(android_hw->hw_camera_back, "none") ||
-                     strcmp(android_hw->hw_camera_front, "none");
-
-    s->have_keyboard = android_hw->hw_keyboard;
-    s->have_keyboard_lid = android_hw->hw_keyboard_lid;
-
-    s->have_touch = androidHwConfig_isScreenTouch(android_hw);
-    s->have_multitouch = androidHwConfig_isScreenMultiTouch(android_hw);
-#endif
-
 }
 
 static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
@@ -1276,16 +1265,17 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
             events_set_bit(s, EV_ABS, ABS_MT_TOUCH_MAJOR);
             events_set_bit(s, EV_ABS, ABS_MT_PRESSURE);
 
-#ifdef USE_ANDROID_EMU
-            abs_values[ABS_MT_SLOT].max = multitouch_get_max_slot();
-            abs_values[ABS_MT_TRACKING_ID].max
-                = abs_values[ABS_MT_SLOT].max + 1;
-            abs_values[ABS_MT_POSITION_X].max = abs_values[ABS_X].max;
-            abs_values[ABS_MT_POSITION_Y].max = abs_values[ABS_Y].max;
-            /* TODO : make next 2 less random */
-            abs_values[ABS_MT_TOUCH_MAJOR].max = 0x7fffffff;
-            abs_values[ABS_MT_PRESSURE].max = 0x100;
-#endif  // USE_ANDROID_EMU
+            if (s_multitouch_funcs) {
+                abs_values[ABS_MT_SLOT].max =
+                        s_multitouch_funcs->get_max_slot();
+                abs_values[ABS_MT_TRACKING_ID].max =
+                        abs_values[ABS_MT_SLOT].max + 1;
+                abs_values[ABS_MT_POSITION_X].max = abs_values[ABS_X].max;
+                abs_values[ABS_MT_POSITION_Y].max = abs_values[ABS_Y].max;
+                /* TODO : make next 2 less random */
+                abs_values[ABS_MT_TOUCH_MAJOR].max = 0x7fffffff;
+                abs_values[ABS_MT_PRESSURE].max = 0x100;
+            }
         }
     }
 
@@ -1302,11 +1292,9 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
         events_set_bit(s, EV_SW, 0);
     }
 
-#if defined(USE_ANDROID_EMU)
-    // The android control agent might fire buffered events to the device, so
-    // ensure that it is enabled after the initialization is complete.
-    qemu_control_setEventDevice(s);
-#endif
+    /* Register global variable. */
+    assert(s_evdev == NULL);
+    s_evdev = s;
 }
 
 static void goldfish_evdev_reset(DeviceState *dev)

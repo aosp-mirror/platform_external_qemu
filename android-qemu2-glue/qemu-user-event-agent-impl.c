@@ -11,20 +11,13 @@
 */
 #include "android-qemu1-glue/qemu-control-impl.h"
 
+#include "android/multitouch-screen.h"
 #include "android/utils/debug.h"
 #include "hw/input/goldfish_events.h"
 #include "ui/console.h"
 
 #include <stdbool.h>
 #include <stdio.h>
-
-// just a flag that qemu is initialized and it's ok to send user events
-static void* eventDeviceHandle = NULL;
-
-void qemu_control_setEventDevice(void* opaque) {
-    assert(eventDeviceHandle == NULL);
-    eventDeviceHandle = opaque;
-}
 
 static void user_event_keycodes(int* kcodes, int count) {
     int nn;
@@ -48,9 +41,7 @@ static void user_event_keycode(int code) {
 }
 
 static void user_event_generic(int type, int code, int value) {
-    if (eventDeviceHandle) {
-        goldfish_event_send(type, code, value);
-    }
+    goldfish_event_send(type, code, value);
 }
 
 static void user_event_mouse(int dx, int dy, int dz, int buttonsState) {
@@ -76,3 +67,15 @@ static const QAndroidUserEventAgent sQAndroidUserEventAgent = {
 
 const QAndroidUserEventAgent* const gQAndroidUserEventAgent =
         &sQAndroidUserEventAgent;
+
+static void translate_mouse_event(int x,
+                                  int y,
+                                  int buttons_state) {
+    multitouch_update_pointer(MTES_DEVICE, (buttons_state & 2) ? 1 : 0,
+                              x, y, (buttons_state & 1) ? 0x81 : 0);
+}
+
+const GoldfishEventMultitouchFuncs qemu2_goldfish_event_multitouch_funcs = {
+    .get_max_slot = multitouch_get_max_slot,
+    .translate_mouse_event = translate_mouse_event,
+};

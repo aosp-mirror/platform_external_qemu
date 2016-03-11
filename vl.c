@@ -149,6 +149,7 @@
 #include "android/camera/camera-service.h"
 #include "android/opengles.h"
 #include "android/version.h"
+#include "hw/input/goldfish_events.h"
 
 #define QEMU_CORE_VERSION "qemu2 " QEMU_VERSION
 
@@ -4813,6 +4814,74 @@ int run_qemu_main(int argc, const char **argv)
     if (machine_class->compat_props) {
         qdev_prop_register_global_list(machine_class->compat_props);
     }
+
+#if defined(USE_ANDROID_EMU)
+    /* Configure goldfish events device */
+    {
+        bool have_multitouch = androidHwConfig_isScreenMultiTouch(android_hw);
+
+        /* TODO(digit): Should we set this up as command-line parameters
+         * in android-qemu2-glue/main.cpp:main() instead? as in:
+         *
+         *    -set device.goldfish-events.have-dpad=<value>
+         *    -set device.goldfish-events.have-trackball=<value>
+         *    ...
+         */
+
+        // The GlobalProperty values are directly added to a global linked list
+        // so store them in a static array instead of the stack to ensure they
+        // have the proper lifecycle. We then initialize the array with
+        // values computed dynamically.
+#define LIST_GOLDFISH_EVENT_PROPS(X) \
+    X("have-dpad", android_hw->hw_dPad) \
+    X("have-trackball", android_hw->hw_trackBall) \
+    X("have-camera", \
+            strcmp(android_hw->hw_camera_back, "none") || \
+            strcmp(android_hw->hw_camera_front, "none")) \
+    X("have-keyboard", android_hw->hw_keyboard) \
+    X("have-lidswitch", android_hw->hw_keyboard_lid) \
+    X("have-touch", androidHwConfig_isScreenTouch(android_hw)) \
+    X("have-multitouch", have_multitouch)
+
+#define GOLDFISH_DECLARE_PROP(name, value) \
+        { \
+            .driver = "goldfish-events", \
+            .property = name, \
+        },
+
+        static GlobalProperty goldfish_events_properties[] = {
+            LIST_GOLDFISH_EVENT_PROPS(GOLDFISH_DECLARE_PROP) \
+            { /* end of list */ }
+        };
+
+        // Then initialize them.
+#define GOLDFISH_INIT_PROP(name, val)  \
+            goldfish_events_properties[n].value = (val) ? "true" : "false"; \
+            VERBOSE_PRINT(init, \
+                          "goldfish_events.%s: %s", \
+                          goldfish_events_properties[n].property, \
+                          goldfish_events_properties[n].value); \
+            n++;
+
+        int n = 0;
+        LIST_GOLDFISH_EVENT_PROPS(GOLDFISH_INIT_PROP)
+
+#undef GOLDFISH_INIT_PROP
+#undef GOLDFISH_DECLARE_PROP
+
+        qdev_prop_register_global_list(goldfish_events_properties);
+
+        if (have_multitouch) {
+            // in android-qemu2-glue/qemu-user-event-agent-impl.c
+            extern const GoldfishEventMultitouchFuncs
+                    qemu2_goldfish_event_multitouch_funcs;
+
+            goldfish_events_enable_multitouch(
+                    &qemu2_goldfish_event_multitouch_funcs);
+        }
+    }
+#endif  // USE_ANDROID_EMU
+
     qemu_add_globals();
 
     qdev_machine_init();
@@ -4943,7 +5012,7 @@ int run_qemu_main(int argc, const char **argv)
 
     extern void android_emulator_set_base_port(int);
     android_emulator_set_base_port(android_base_port);
-#endif
+#endif  // USE_ANDROID_EMU
 
     if (qemu_opts_foreach(qemu_find_opts("mon"), mon_init_func, NULL, 1) != 0) {
         return 1;
