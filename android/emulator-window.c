@@ -91,12 +91,6 @@ static void emulator_window_window_mouse_event(unsigned x,
     user_event_agent->sendMouseEvent(x, y, 0, state);
 }
 
-static void emulator_window_window_generic_event(int event_type,
-                                           int event_code,
-                                           int event_value) {
-    user_event_agent->sendGenericEvent(event_type, event_code, event_value);
-}
-
 static void emulator_window_set_device_orientation(SkinRotation rotation) {
     android_sensors_set_coarse_orientation((AndroidCoarseOrientation) rotation);
 }
@@ -171,7 +165,6 @@ emulator_window_setup( EmulatorWindow*  emulator )
     static const SkinWindowFuncs my_window_funcs = {
         .key_event = &emulator_window_window_key_event,
         .mouse_event = &emulator_window_window_mouse_event,
-        .generic_event = &emulator_window_window_generic_event,
         .set_device_orientation = &emulator_window_set_device_orientation,
         .opengles_show = &emulator_window_opengles_show_window,
         .opengles_hide = &emulator_window_opengles_hide_window,
