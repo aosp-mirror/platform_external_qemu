@@ -1,0 +1,228 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "57bb093b_075f4119",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-11T17:53:48Z",
+      "side": 1,
+      "message": "nit: tabs. clang-format?",
+      "range": {
+        "startLine": 72,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 1
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_075aa120",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-11T17:53:48Z",
+      "side": 1,
+      "message": "do we need any separator here?",
+      "range": {
+        "startLine": 94,
+        "startChar": 35,
+        "endLine": 94,
+        "endChar": 37
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_c73b79b1",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-11T17:53:48Z",
+      "side": 1,
+      "message": "LazyInstance\u003c\u003e ?",
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_47282964",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-11T17:53:48Z",
+      "side": 1,
+      "message": "what about thread safety? Do we need it?",
+      "range": {
+        "startLine": 42,
+        "startChar": 4,
+        "endLine": 42,
+        "endChar": 38
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_276245a7",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-11T17:53:48Z",
+      "side": 1,
+      "message": "what is this? I thought the checksum is just a single 4-byte int",
+      "range": {
+        "startLine": 79,
+        "startChar": 11,
+        "endLine": 79,
+        "endChar": 50
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_c7d7f967",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-11T17:53:48Z",
+      "side": 1,
+      "message": "could you please use std::vector ?",
+      "range": {
+        "startLine": 89,
+        "startChar": 50,
+        "endLine": 89,
+        "endChar": 56
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_27efe568",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-11T17:53:48Z",
+      "side": 1,
+      "message": "typo?",
+      "range": {
+        "startLine": 23,
+        "startChar": 7,
+        "endLine": 23,
+        "endChar": 21
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_870051e6",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-11T17:53:48Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 47,
+        "startChar": 25,
+        "endLine": 47,
+        "endChar": 26
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_e7367dc9",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-11T17:53:48Z",
+      "side": 1,
+      "message": "should we have a reset() or restart() function so one can be sure he\u0027s calculating the checksum from 0?",
+      "range": {
+        "startLine": 62,
+        "startChar": 4,
+        "endLine": 62,
+        "endChar": 54
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_a74bd502",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocolThreadInfo.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-11T17:53:48Z",
+      "side": 1,
+      "message": "this one has to be atomic. std::atomic\u003cint\u003e",
+      "range": {
+        "startLine": 47,
+        "startChar": 24,
+        "endLine": 47,
+        "endChar": 37
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
