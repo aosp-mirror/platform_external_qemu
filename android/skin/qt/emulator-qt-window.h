@@ -203,7 +203,7 @@ public slots:
 
     void activateWindow();
     void raise();
-    void setForwardShortcutsToDevice(bool value);
+    void setForwardShortcutsToDevice(int index);
     void show();
     void showMinimized();
 
