@@ -189,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_87e211e8",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-11T17:22:21Z",
+      "side": 1,
+      "message": "It is. This is just me being sad.",
+      "parentUuid": "d7de195a_6954d29d",
+      "range": {
+        "startLine": 135,
+        "startChar": 4,
+        "endLine": 136,
+        "endChar": 54
+      },
+      "revId": "6531d29a3d2a101fe5417254bcab99cc9961c8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b7344567_45e23ceb",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -236,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_070d8189",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 534,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-11T17:22:21Z",
+      "side": 1,
+      "message": "Yes, it could due to rounding errors since you\u0027re applying the transforms one by one instead of composited into a single QTransform.",
+      "parentUuid": "d7de195a_495916d5",
+      "range": {
+        "startLine": 519,
+        "startChar": 16,
+        "endLine": 534,
+        "endChar": 72
+      },
+      "revId": "6531d29a3d2a101fe5417254bcab99cc9961c8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b7344567_e50d908d",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -271,6 +319,30 @@
       "side": 1,
       "message": "I\u0027m calling it every paint event, but it only does work if the size has changed",
       "parentUuid": "b7344567_e50d908d",
+      "range": {
+        "startLine": 559,
+        "startChar": 4,
+        "endLine": 559,
+        "endChar": 23
+      },
+      "revId": "6531d29a3d2a101fe5417254bcab99cc9961c8be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_67028d5a",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-11T17:22:21Z",
+      "side": 1,
+      "message": "Why not call it every resize event then? Or even every slot_showWindow, which is kind of our \"official\" resize event.",
+      "parentUuid": "d7de195a_09530eb5",
       "range": {
         "startLine": 559,
         "startChar": 4,
