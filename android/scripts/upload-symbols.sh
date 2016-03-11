@@ -47,11 +47,7 @@ Use --crash-prod or --crash-staging to select between servers
 
 Use --symbol-dir to provide symbol directory
 
-Symbol directory structure matches objs/build/symbols:
-> symbol_dir
-  > binary_name
-    > binary build id
-      > binary_name.sym"
+Symbol directory contains any structure of *.sym files:"
 
 option_parse "$@"
 
