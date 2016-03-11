@@ -64,11 +64,14 @@ SettingsPage::SettingsPage(QWidget *parent) :
     }
     mUi->set_themeBox->setCurrentIndex(static_cast<int>(theme));
 
-    connect(mUi->set_forwardShortcutsToDevice, SIGNAL(toggled(bool)),
-            this, SIGNAL(onForwardShortcutsToDeviceChanged(bool)));
+    connect(mUi->set_forwardShortcutsToDevice, SIGNAL(currentIndexChanged(int)),
+            this, SIGNAL(onForwardShortcutsToDeviceChanged(int)));
 
-    mUi->set_forwardShortcutsToDevice->setChecked(
-            settings.value(Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, false).toBool());
+    // "Send keyboard shortcuts": a pull-down that acts like a checkbox
+    bool shortcutBool = settings.value(
+               Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, false).toBool();
+
+    mUi->set_forwardShortcutsToDevice->setCurrentIndex( shortcutBool ? 1 : 0 );
 
 #ifdef __linux__
     // "Always on top" is not supported for Linux (see emulator-qt-window.cpp)
@@ -228,9 +231,9 @@ void SettingsPage::on_set_adbPathBox_textEdited(const QString&) {
             settings.value(Ui::Settings::ADB_PATH, "").toString());
 }
 
-void SettingsPage::on_set_forwardShortcutsToDevice_toggled(bool checked) {
+void SettingsPage::on_set_forwardShortcutsToDevice_currentIndexChanged(int index) {
     QSettings settings;
-    settings.setValue(Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, checked);
+    settings.setValue(Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, (index != 0));
 }
 
 void SettingsPage::on_set_onTop_toggled(bool checked) {
