@@ -523,10 +523,6 @@ extern "C" int main(int argc, char **argv) {
     /* update the avd hw config from this new skin */
     avdInfo_getSkinHardwareIni(avd, opts->skin, opts->skindir);
 
-    if (opts->dynamic_skin == 0) {
-        opts->dynamic_skin = avdInfo_shouldUseDynamicSkin(avd);
-    }
-
     // Read hardware configuration, apply overrides from options.
     AndroidHwConfig* hw = android_hw;
     if (avdInfo_initHwConfig(avd, hw) < 0) {
