@@ -46,7 +46,7 @@ $(LOCAL_BUILT_MODULE): $(foreach lib,$(LOCAL_SHARED_LIBRARIES),$(call local-shar
 
 ifeq (true,$(LOCAL_INSTALL))
 LOCAL_INSTALL_MODULE := $(call local-shared-library-install-path,$(LOCAL_MODULE))
-$(eval $(call install-stripped-binary,$(LOCAL_BUILT_MODULE),$(LOCAL_INSTALL_MODULE),--strip-unneeded))
+$(eval $(call install-binary,$(LOCAL_BUILT_MODULE),$(LOCAL_INSTALL_MODULE),--strip-unneeded))
 
 include $(_BUILD_CORE_DIR)/emulator/symbols.make
 endif  # LOCAL_INSTALL == true
