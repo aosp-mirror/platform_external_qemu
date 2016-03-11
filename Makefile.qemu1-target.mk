@@ -251,7 +251,6 @@ LOCAL_LDLIBS := \
 LOCAL_LDFLAGS := \
     $(EMULATOR_LIBUI_LDFLAGS) \
 
-LOCAL_GENERATE_SYMBOLS := true
 $(call gen-hx-header,qemu-options.hx,qemu-options.def,vl-android.c qemu-options.h)
 $(call gen-hw-config-defs)
 

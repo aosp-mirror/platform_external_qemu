@@ -13,7 +13,5 @@
 # limitations under the License.
 #
 ifeq (true,$(BUILD_GENERATE_SYMBOLS))
-ifeq (true,$(LOCAL_GENERATE_SYMBOLS))
 $(eval $(call build-install-symbol,$(LOCAL_BUILT_MODULE)))
-endif
 endif
