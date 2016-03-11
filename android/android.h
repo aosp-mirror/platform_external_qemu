@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -130,7 +131,8 @@ extern void android_emulation_setup_use_configurable_ports(bool enabled);
 // See android/console.h
 struct AndroidConsoleAgents;
 
-extern void android_emulation_setup(const struct AndroidConsoleAgents* agents);
+// Setup Android emulation. Return true on success.
+extern bool android_emulation_setup(const struct AndroidConsoleAgents* agents);
 
 extern void  android_emulation_teardown( void );
 

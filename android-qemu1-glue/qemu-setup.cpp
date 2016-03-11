@@ -18,19 +18,14 @@
 #include "android/console.h"
 #include "android-qemu1-glue/qemu-control-impl.h"
 
-void qemu_android_emulation_setup() {
+bool qemu_android_emulation_setup() {
+  android_emulation_setup_use_android_emu_console(true);
+  android_emulation_setup_use_configurable_ports(true);
 
-    android_emulation_setup_use_android_emu_console(true);
-    android_emulation_setup_use_configurable_ports(true);
-
-    static const AndroidConsoleAgents consoleAgents = {
-        gQAndroidBatteryAgent,
-        gQAndroidFingerAgent,
-        gQAndroidLocationAgent,
-        gQAndroidTelephonyAgent,
-        gQAndroidUserEventAgent,
-        gQAndroidVmOperations,
-        gQAndroidNetAgent,
-    };
-    android_emulation_setup(&consoleAgents);
+  static const AndroidConsoleAgents consoleAgents = {
+      gQAndroidBatteryAgent,   gQAndroidFingerAgent,    gQAndroidLocationAgent,
+      gQAndroidTelephonyAgent, gQAndroidUserEventAgent, gQAndroidVmOperations,
+      gQAndroidNetAgent,
+  };
+  return android_emulation_setup(&consoleAgents);
 }

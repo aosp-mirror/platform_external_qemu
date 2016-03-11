@@ -460,6 +460,16 @@ adb_server_init(int port)
     return 0;
 }
 
+void adb_server_undo_init(void) {
+    if (_adb_server_initialized) {
+        socket_close(_adb_server.so);
+        _adb_server.so = -1;
+        loopIo_free(_adb_server.io);
+        _adb_server.io = NULL;
+        _adb_server_initialized = 0;
+    }
+}
+
 int
 adb_server_is_initialized(void)
 {

@@ -49,6 +49,6 @@ typedef struct AndroidConsoleAgents {
 // Generic entry point to start an android console.
 // QEMU implementations should populate |*agents| with QEMU specific
 // functions. Takes ownership of |agents|.
-extern int control_console_start(int port, const AndroidConsoleAgents* agents);
+extern int android_console_start(int port, const AndroidConsoleAgents* agents);
 
 ANDROID_END_HEADER
