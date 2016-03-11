@@ -53,9 +53,6 @@
  */
 #define  SKIN_NAME       "skin.name"
 
-/* the config.ini key that specifies if this AVD should use a dynamic skin */
-#define  SKIN_DYNAMIC    "skin.dynamic"
-
 /* default skin name */
 #define  SKIN_DEFAULT    "HVGA"
 

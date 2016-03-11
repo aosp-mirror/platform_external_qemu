@@ -500,10 +500,6 @@ A full SDK depends on other notable sources from different locations:
           executable is never called or used by the Android emulator itself,
           but by the AVD Manager UI tool instead.
 
-       sdk/emulator/skins/
-          Sources for the 'dynamic' skin, i.e. the UI of emulator windows
-          as currently implemented.
-
        sdk/emulator/snapshot/snapshot.img
           An empty QCOW2 partition image file, this is copied by the AVD
           Manager into a new AVD's content directory if the user enables

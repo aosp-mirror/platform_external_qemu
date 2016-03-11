@@ -1336,31 +1336,6 @@ avdInfo_getSkinInfo( AvdInfo*  i, char** pSkinName, char** pSkinDir )
     return;
 }
 
-int
-avdInfo_shouldUseDynamicSkin( AvdInfo* i)
-{
-    if (i == NULL || i->configIni == NULL)
-        return 0;
-    return iniFile_getBoolean( i->configIni, SKIN_DYNAMIC, "no" );
-}
-
-char*
-avdInfo_getDynamicSkinPath( AvdInfo* i)
-{
-    char tmp[PATH_MAX];
-
-    if (i->inAndroidBuild) {
-        snprintf(tmp, sizeof(tmp), "%s/sdk/emulator/skins/dynamic/", i->androidBuildRoot);
-    } else {
-        snprintf(tmp, sizeof(tmp), "%s/tools/lib/emulator/skins/dynamic/", i->sdkRootPath);
-    }
-
-    if (!path_exists(tmp))
-        return NULL;
-
-    return ASTRDUP(tmp);
-}
-
 char*
 avdInfo_getCharmapFile( AvdInfo* i, const char* charmapName )
 {

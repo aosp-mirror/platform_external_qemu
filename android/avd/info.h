@@ -232,12 +232,6 @@ const char*  avdInfo_getContentPath( AvdInfo*  i );
  */
 void         avdInfo_getSkinInfo( AvdInfo*  i, char** pSkinName, char** pSkinDir );
 
-/* Returns whether the AVD specifies the use of a dynamic skin */
-int          avdInfo_shouldUseDynamicSkin( AvdInfo* i);
-
-/* Returns the path that contains layout and assets for dynamic skin */
-char*        avdInfo_getDynamicSkinPath( AvdInfo* i);
-
 /* Find a charmap file named <charmapName>.kcm for this AVD.
  * Returns the path of the file on success, or NULL if not found.
  * The result string must be freed by the caller.
