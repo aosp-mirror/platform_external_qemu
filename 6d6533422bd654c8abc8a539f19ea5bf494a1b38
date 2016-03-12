@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_a07c5147",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-12T01:34:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_075f4119",
+      "range": {
+        "startLine": 72,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 1
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_075aa120",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 12
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-11T17:53:48Z",
       "side": 1,
       "message": "do we need any separator here?",
+      "range": {
+        "startLine": 94,
+        "startChar": 35,
+        "endLine": 94,
+        "endChar": 37
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_2037c1c7",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-12T01:34:43Z",
+      "side": 1,
+      "message": "it turns out the extension string we get always have a space at the end.",
+      "parentUuid": "57bb093b_075aa120",
       "range": {
         "startLine": 94,
         "startChar": 35,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_e0adb963",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-12T01:34:43Z",
+      "side": 1,
+      "message": "I rewrote this part to take both your commands and David\u0027s commands. In the new version we initialize them in compilation time, so we don\u0027t have memory / thread safety issues :)",
+      "parentUuid": "57bb093b_c73b79b1",
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_47282964",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.cpp",
         "patchSetId": 12
@@ -76,6 +142,30 @@
       "writtenOn": "2016-03-11T17:53:48Z",
       "side": 1,
       "message": "what about thread safety? Do we need it?",
+      "range": {
+        "startLine": 42,
+        "startChar": 4,
+        "endLine": 42,
+        "endChar": 38
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_207981a3",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-12T01:34:43Z",
+      "side": 1,
+      "message": "Right, it is not thread-safe. I rewrote this part to avoid all those issues.",
+      "parentUuid": "57bb093b_47282964",
       "range": {
         "startLine": 42,
         "startChar": 4,
@@ -111,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_c094f5f8",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-12T01:34:43Z",
+      "side": 1,
+      "message": "It is a counter for the reads / writes so that we can make sure we receive all packages and they arrive at the correct order.",
+      "parentUuid": "57bb093b_276245a7",
+      "range": {
+        "startLine": 79,
+        "startChar": 11,
+        "endLine": 79,
+        "endChar": 50
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_c7d7f967",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.cpp",
         "patchSetId": 12
@@ -122,6 +236,30 @@
       "writtenOn": "2016-03-11T17:53:48Z",
       "side": 1,
       "message": "could you please use std::vector ?",
+      "range": {
+        "startLine": 89,
+        "startChar": 50,
+        "endLine": 89,
+        "endChar": 56
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_204b415b",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-12T01:34:43Z",
+      "side": 1,
+      "message": "David suggested to use a fixed size static buffer to avoid memory allocation.",
+      "parentUuid": "57bb093b_c7d7f967",
       "range": {
         "startLine": 89,
         "startChar": 50,
@@ -157,6 +295,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_0da0f6cd",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-12T01:34:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_27efe568",
+      "range": {
+        "startLine": 23,
+        "startChar": 7,
+        "endLine": 23,
+        "endChar": 21
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_870051e6",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.h",
         "patchSetId": 12
@@ -168,6 +330,30 @@
       "writtenOn": "2016-03-11T17:53:48Z",
       "side": 1,
       "message": "const",
+      "range": {
+        "startLine": 47,
+        "startChar": 25,
+        "endLine": 47,
+        "endChar": 26
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_6da542dd",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-12T01:34:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_870051e6",
       "range": {
         "startLine": 47,
         "startChar": 25,
@@ -203,6 +389,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_40be4591",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocol.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-12T01:34:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_e7367dc9",
+      "range": {
+        "startLine": 62,
+        "startChar": 4,
+        "endLine": 62,
+        "endChar": 54
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_a74bd502",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocolThreadInfo.cpp",
         "patchSetId": 12
@@ -214,6 +424,30 @@
       "writtenOn": "2016-03-11T17:53:48Z",
       "side": 1,
       "message": "this one has to be atomic. std::atomic\u003cint\u003e",
+      "range": {
+        "startLine": 47,
+        "startChar": 24,
+        "endLine": 47,
+        "endChar": 37
+      },
+      "revId": "6d6533422bd654c8abc8a539f19ea5bf494a1b38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_e01ad94c",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/GLProtocolThreadInfo.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-12T01:34:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_a74bd502",
       "range": {
         "startLine": 47,
         "startChar": 24,
