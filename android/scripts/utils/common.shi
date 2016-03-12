@@ -578,6 +578,32 @@ build_symbols () {
     done
 }
 
+install_debuginfo () {
+    local LIBPATH="$1"
+    shift
+    echo "DEBUGINFO"
+    if [ ! -z $PREBUILTS_DEBUGINFO_DIR ]; then
+        echo "DEBUGINFO working "
+        case $LIBPATH in
+            "$PREBUILTS_DIR"*)
+            ;;
+            *)
+            panic "Expecting $DEST_ROOT to be subdir of $PREBUILTS_DIR"
+            ;;
+        esac
+        DEBUGINFO_PATH=$(echo $LIBPATH |
+            sed -e "s+$PREBUILTS_DIR+$PREBUILTS_DEBUGINFO_DIR+g")
+        run mkdir -p "$(dirname $DEBUGINFO_PATH)"
+
+        if [ "$(get_build_os)" = "darwin" ]; then
+            run dsymutil --out="DEBUGINFO_PATH" "$LIBPATH"
+        else
+            run cp "$LIBPATH" "$DEBUGINFO_PATH"
+        fi
+    fi
+
+}
+
 # Strips a library in place
 # Expects TOOLCHAIN_WRAPPER_DIR to be valid (set by builder_prepare_for_host*)
 # Panics if not found
@@ -593,16 +619,19 @@ strip_libs () {
     if [ ! -d $TOOLCHAIN_WRAPPER_DIR ]; then
         panic "TOOLCHAIN_WRAPPER_DIR is not a directory"
     fi
-    for LIB in $LIBS; do
-        if [ "$(get_build_os)" = "darwin" ]; then
-            run strip -S $DEST_ROOT/$LIB || panic "Could not strip $DEST_ROOT"
-        else
-            local OBJCOPY="$TOOLCHAIN_WRAPPER_DIR"/$(builder_gnu_config_host_prefix)objcopy
-            if [ ! -f "$OBJCOPY" ]; then
-                panic "Could not find objcopy at $OBJCOPY"
+    if [ -z $OPT_NO_STRIP ]; then
+        for LIB in $LIBS; do
+            install_debuginfo $DEST_ROOT/$LIB
+            if [ "$(get_build_os)" = "darwin" ]; then
+                run strip -S $DEST_ROOT/$LIB || panic "Could not strip $DEST_ROOT"
+            else
+                local OBJCOPY="$TOOLCHAIN_WRAPPER_DIR"/$(builder_gnu_config_host_prefix)objcopy
+                if [ ! -f "$OBJCOPY" ]; then
+                    panic "Could not find objcopy at $OBJCOPY"
+                fi
+                run "$OBJCOPY" --strip-unneeded $DEST_ROOT/$LIB || \
+                    panic "Could not strip $DEST_ROOT/$LIB"
             fi
-            run "$OBJCOPY" --strip-unneeded $DEST_ROOT/$LIB || \
-                panic "Could not strip $DEST_ROOT/$LIB"
-        fi
-    done
+        done
+    fi
 }

@@ -66,6 +66,9 @@ package_builder_register_options () {
 
   OPT_HOST=
   option_register_var "--host=<host>" OPT_HOST "Specify host system of generated binaries [$DEFAULT_HOST_SYSTEMS]"
+
+  OPT_NO_STRIP=
+  option_register_var "--no-strip" OPT_NO_STRIP "Disables stripping of libraries and generation of unstripped directory"
 }
 
 _shu_builder_cleanup_temp_dir () {
