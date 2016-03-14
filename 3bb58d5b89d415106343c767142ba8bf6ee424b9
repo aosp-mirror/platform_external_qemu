@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "57bb093b_203694c4",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-14T22:10:31Z",
+      "side": 1,
+      "message": "This won\u0027t match an ADB version that is just an integer (like \"24\"). My Mac currently has version 24.0.0, which could be shortened to 24 but isn\u0027t.\n\nIs it safe to assume this number will always have a major + minor version number?",
+      "range": {
+        "startLine": 293,
+        "startChar": 20,
+        "endLine": 293,
+        "endChar": 62
+      },
+      "revId": "3bb58d5b89d415106343c767142ba8bf6ee424b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_204df43e",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-14T22:10:31Z",
+      "side": 1,
+      "message": "Much like the architecture warning (\"you\u0027re using an ARM image but should use an x86 one\"), it seems like this message should be permanently dismiss-able, even if we really don\u0027t want the user to ignore it.",
+      "range": {
+        "startLine": 346,
+        "startChar": 7,
+        "endLine": 347,
+        "endChar": 47
+      },
+      "revId": "3bb58d5b89d415106343c767142ba8bf6ee424b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
