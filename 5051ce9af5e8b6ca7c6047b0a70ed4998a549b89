@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "57bb093b_2bbf9d27",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 749,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-03-14T14:51:27Z",
+      "side": 1,
+      "message": "nit: since getAvdSystemPath is used at multiple places, would it be better\nto check for NULL of avdName, just in case someone mis-use it ?",
+      "revId": "5051ce9af5e8b6ca7c6047b0a70ed4998a549b89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
