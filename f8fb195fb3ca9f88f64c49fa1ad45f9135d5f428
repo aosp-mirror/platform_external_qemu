@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "57bb093b_fa48b907",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T20:59:35Z",
+      "side": 1,
+      "message": "could you please move this after the C++ headers?",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 19
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_da3fb5b9",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
         "patchSetId": 16
@@ -140,6 +163,75 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_facef9d0",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T20:59:35Z",
+      "side": 1,
+      "message": "I\u0027d prefer this to be on top of the file and expressed as a max of (0, v1MaxLen)\nso during the v2 implementation one could easily see what to change",
+      "range": {
+        "startLine": 117,
+        "startChar": 17,
+        "endLine": 117,
+        "endChar": 33
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_9a4ecd0d",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T20:59:35Z",
+      "side": 1,
+      "message": "why static? this would give us all possible threading issues at once, and I really don\u0027t see why it\u0027s better than a simple stack buffer",
+      "range": {
+        "startLine": 118,
+        "startChar": 4,
+        "endLine": 118,
+        "endChar": 10
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_fa6d5942",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T20:59:35Z",
+      "side": 1,
+      "message": "I\u0027m curious why reversing the bits gives us something more than just writing down the unchanged 32-bit length?",
+      "range": {
+        "startLine": 135,
+        "startChar": 4,
+        "endLine": 141,
+        "endChar": 18
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_3a508100",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.h",
         "patchSetId": 16
@@ -179,6 +271,75 @@
         "startChar": 4,
         "endLine": 83,
         "endChar": 18
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_05c8c26c",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelperThreadInfo.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T20:59:35Z",
+      "side": 1,
+      "message": "nit: tab",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 1
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_85f672ad",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelperThreadInfo.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T20:59:35Z",
+      "side": 1,
+      "message": "nit: too long line. Could you please run git clang-format?",
+      "range": {
+        "startLine": 77,
+        "startChar": 79,
+        "endLine": 78,
+        "endChar": 1
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_05b1e20a",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelperThreadInfo.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T20:59:35Z",
+      "side": 1,
+      "message": "could you please give a note here: e.g. this is the class that makes checksum calculation thread-safe, please only use the checksum through it\n2. helper -\u003e calculator as well",
+      "range": {
+        "startLine": 21,
+        "startChar": 6,
+        "endLine": 21,
+        "endChar": 30
       },
       "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
