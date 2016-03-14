@@ -23,6 +23,7 @@ const QString ORG_NAME("Android Open Source Project");
 const QString ORG_DOMAIN("android.com");
 const QString APP_NAME("Emulator");
 
+const QString SHOW_ADB_WARNING("showAdbWarning");
 const QString SHOW_AVD_ARCH_WARNING("showAvdArchWarning");
 const QString SHOW_GPU_WARNING("showGpuWarning");
 

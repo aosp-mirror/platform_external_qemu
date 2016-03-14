@@ -43,11 +43,19 @@ struct ConfigDirs {
     //   output is returned.
     static std::string getAvdRootDirectory();
 
+    // Returns the path to the root of the android sdk by checking if the
+    // ANDROID_SDK_ROOT environment variable is defined.
+    static std::string getSdkRootDirectoryByEnv();
+
+    // Returns the path to the root of the android sdk by inferring it from the
+    // path of the running emulator binary.
+    static std::string getSdkRootDirectoryByPath();
+
     // Returns the path to the root of the android sdk.
     // - If ANDROID_SDK_ROOT is defined in the environment and the path exists,
     //   its value is returned.
     //
-    // - Otherwise, Sdk root is inferred from the path of the runnign emulator
+    // - Otherwise, Sdk root is inferred from the path of the running emulator
     //   binary.
     static std::string getSdkRootDirectory();
 };

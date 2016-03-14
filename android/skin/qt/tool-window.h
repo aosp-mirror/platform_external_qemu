@@ -29,6 +29,7 @@
 #include <QHash>
 #include <QKeyEvent>
 #include <QMap>
+#include <QMessageBox>
 #include <QPair>
 #include <QProcess>
 #include <QProgressDialog>
@@ -85,7 +86,12 @@ public:
     // window and the tool bar. This is how big that gap is.
     static const int toolGap = 10;
 
+    void setupAdbPath();
+
 private:
+    bool isAdbVersionCurrent(const std::string& sdkRootDirectory) const;
+    void showAdbWarning();
+
     int adbShellStopRunner();
     void handleUICommand(QtUICommand cmd, bool down);
 
@@ -126,6 +132,7 @@ private:
     QString mDetectedAdbPath;
     std::weak_ptr<UIEventRecorder<android::base::CircularBuffer>> mUIEventRecorder;
     SizeTweaker mSizeTweaker;
+    QMessageBox mAdbWarningBox;
 
 private slots:
     void on_back_button_pressed();
@@ -153,6 +160,8 @@ private slots:
 
     void slot_pushCanceled();
     void slot_pushFinished(int exitStatus);
+
+    void slot_adbWarningMessageAccepted();
 };
 
 typedef void(ToolWindow::*ToolWindowSlot)();
