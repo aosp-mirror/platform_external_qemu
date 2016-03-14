@@ -87,6 +87,7 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
 
 static bool checkForGoogleAPIs(const char* avdName);
 static int getApiLevel(const char* avdName);
+static std::string getAvdSystemPath(const char* avdName);
 
 #ifdef _WIN32
 static const char kExeExtension[] = ".exe";
@@ -400,6 +401,18 @@ int main(int argc, char** argv)
         if (ranchu == RANCHU_ON && !isCpuArchSupportedByRanchu(avdArch)) {
             APANIC("CPU Architecture '%s' is not supported by the QEMU2 emulator",
                    avdArch);
+        }
+        std::string systemPath = getAvdSystemPath(avdName);
+        if (systemPath.empty()) {
+            const char* env = getenv("ANDROID_SDK_ROOT");
+            if (!env || !env[0]) {
+                APANIC("Cannot find AVD system path. Please define "
+                       "ANDROID_SDK_ROOT\n");
+            } else {
+                APANIC("Broken AVD system path. Check your ANDROID_SDK_ROOT "
+                       "value [%s]!\n",
+                       env);
+            }
         }
     }
 #ifdef _WIN32
@@ -731,6 +744,26 @@ static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs) {
     free(launcherDir);
 }
 
+// Return the system directory path of a given AVD named |avdName|.
+// Return empty string on failure.
+static std::string getAvdSystemPath(const char* avdName) {
+    std::string result;
+    if (!avdName) {
+        return result;
+    }
+    char* sdkRootPath = path_getSdkRoot();
+    if (!sdkRootPath) {
+        return result;
+    }
+    char* systemPath = path_getAvdSystemPath(avdName, sdkRootPath);
+    if (systemPath != nullptr) {
+         result = systemPath;
+         AFREE(systemPath);
+    }
+    AFREE(sdkRootPath);
+    return result;
+}
+
 // Verify and AVD's system image directory to see if it supports ranchu.
 static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                                              const char* avdArch,
@@ -757,12 +790,14 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                  androidBuildTop, avdArch, "kernel-ranchu");
     } else {
         // This is a regular SDK AVD launch.
-        char* sdkRootPath = path_getSdkRoot();
-        char* systemImagePath = path_getAvdSystemPath(avdName, sdkRootPath);
-        asprintf(&kernel_file, "%s/%s", systemImagePath, "kernel-ranchu");
-
-        AFREE(systemImagePath);
-        AFREE(sdkRootPath);
+        std::string systemImagePath = getAvdSystemPath(avdName);
+        if (systemImagePath.empty()) {
+            D("Cannot find system image path. Please define "
+              "ANDROID_SDK_ROOT\n");
+            return false;
+        }
+        asprintf(&kernel_file, "%s/%s", systemImagePath.c_str(),
+                 "kernel-ranchu");
     }
     result = path_exists(kernel_file);
     D("Probing for %s: file %s\n", kernel_file, result ? "exists" : "missing");
@@ -771,14 +806,17 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
     return result;
 }
 
-static std::string get_key_val(const char* avdName, const char* key) {
+static std::string getAvdBuildProperty(const char* avdName, const char* key) {
+    std::string result;
     // Running without an avd (inside android build folder, for instance).
     if (!avdName) {
-        return "";
+        return result;
     }
 
-    char* sdkRootPath = path_getSdkRoot();
-    char* systemImagePath = path_getAvdSystemPath(avdName, sdkRootPath);
+    std::string systemImagePath = getAvdSystemPath(avdName);
+    if (systemImagePath.empty()) {
+        return result;
+    }
 
     std::string buildprop_file = std::string(systemImagePath) + "/build.prop";
 
@@ -792,21 +830,21 @@ static std::string get_key_val(const char* avdName, const char* key) {
                 // build.prop key without =, crazy!
                 continue;
             }
-            std::string val = temp.substr(keypos + 1, temp.length() + 1);
-            return val;
+            result = temp.substr(keypos + 1, temp.length() + 1);
         }
     }
-    return std::string();
+    return result;
 }
 
 static bool checkForGoogleAPIs(const char* avdName) {
-    std::string api_type = get_key_val(avdName, "ro.product.name");
+    std::string api_type = getAvdBuildProperty(avdName, "ro.product.name");
     return (api_type.find("sdk_google") != std::string::npos) ||
            (api_type.find("google_sdk") != std::string::npos);
 }
 
 static int getApiLevel(const char* avdName) {
-    std::string api_level = get_key_val(avdName, "ro.build.version.sdk");
+    std::string api_level =
+            getAvdBuildProperty(avdName, "ro.build.version.sdk");
     if (api_level.empty()) {
         return -1;
     }
