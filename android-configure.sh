@@ -667,6 +667,16 @@ install_prebuilt_dll () {
     copy_file "$SRC_PATH" "$DST_FILE"
 }
 
+PREBUILT_ARCHS=
+case $HOST_OS in
+    windows)
+        PREBUILT_ARCHS="x86 x86_64"
+        ;;
+    *)
+        PREBUILT_ARCHS="x86_64"
+        ;;
+esac
+
 ###
 ### Copy Swiftshader if available
 ###
@@ -685,7 +695,7 @@ if [ -d $SWIFTSHADER_PREBUILTS_DIR ]; then
         *)
     esac
     for LIBNAME in EGL GLES_CM GLESv2; do
-        for SWIFTSHADER_ARCH in x86 x86_64; do
+        for SWIFTSHADER_ARCH in $PREBUILT_ARCHS; do
             if [ "$SWIFTSHADER_ARCH" = "x86" ]; then
                 SWIFTSHADER_LIBDIR=lib
             else
@@ -723,7 +733,7 @@ if [ -d $MESA_PREBUILTS_DIR ]; then
             MESA_LIBNAME=
     esac
     for LIBNAME in $MESA_LIBNAME; do
-        for MESA_ARCH in x86 x86_64; do
+        for MESA_ARCH in $PREBUILT_ARCHS; do
             if [ "$MESA_ARCH" = "x86" ]; then
                 MESA_LIBDIR=lib
             else
@@ -751,7 +761,7 @@ fi
 
 # Copy Qt shared libraries, if needed.
 log "Copying Qt prebuilt libraries from $QT_PREBUILTS_DIR"
-for QT_ARCH in x86 x86_64; do
+for QT_ARCH in $PREBUILT_ARCHS; do
     QT_SRCDIR=$QT_PREBUILTS_DIR/$HOST_OS-$QT_ARCH
     case $QT_ARCH in
         x86) QT_DSTDIR=$OUT_DIR/lib/qt;;
@@ -786,7 +796,7 @@ done
 
 # Copy e2fsprogs binaries.
 log "Copying e2fsprogs binaries."
-for E2FS_ARCH in x86 x86_64; do
+for E2FS_ARCH in $PREBUILT_ARCHS; do
     # NOTE: in windows only 32-bit binaries are available, so we'll copy the
     # 32-bit executables to the bin64/ directory to cover all our bases
     case $HOST_OS in
