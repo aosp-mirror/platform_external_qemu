@@ -239,7 +239,7 @@ $(hide) $(PRIVATE_CUSTOM_TOOL)
 endef
 
 # Installs a binary to a new destination
-# If required, will strip the binary and leave an unstripped copy in debug dir
+# If required, will strip the binary
 define install-binary
 _SRC := $(1)
 _SRC1 := $$(notdir $$(_SRC))
@@ -263,6 +263,42 @@ else  # BUILD_STRIP_BINARIES != true
 endif # BUILD_STRIP_BINARIES != true
 endef
 
+# Installs a prebuilt library
+# If required, will generates symbols and debug info
+define install-prebuilt
+_PAIR := $(subst :, ,$(1))
+_SRC := $$(word 1, $$(_PAIR))
+_DST := $$(word 2, $$(_PAIR))
+$(call install-binary,$$(_SRC),$$(_DST),--strip-unneeded)
+ifeq (true,$(BUILD_GENERATE_SYMBOLS))
+$$(eval $$(call build-install-debug-info,$$(_SRC),$$(_DST)))
+$$(eval $$(call build-install-symbol,$$(_SRC),$$(_DST)))
+endif
+endef
+
+# Installs a prebuilt symlink
+# If required, will generate symbols
+define install-prebuilt-symlink
+_PAIR := $(subst :, ,$(1))
+_SRC := $$(word 1, $$(_PAIR))
+_DST := $$(word 2, $$(_PAIR))
+_BUILD_EXECUTABLES += $$(_DST)
+$$(_DST): PRIVATE_DST := $$(_DST)
+$$(_DST): PRIVATE_SRC := $$(_SRC)
+$$(_DST): $$(_SRC)
+	@echo "Installing symlink: $$(PRIVATE_DST)"
+	$(hide) cp -a $$(PRIVATE_SRC) $$(PRIVATE_DST)
+ifeq (true,$(BUILD_GENERATE_SYMBOLS))
+$$(eval $$(call build-install-symbol,$$(_SRC),$$(_DST)))
+endif
+endef
+
+#ifeq (true,$(BUILD_GENERATE_SYMBOLS))
+#$(eval $(call build-install-debug-info,$(_SRC),$(_DST)))
+#$(eval $(call build-install-symbol,$(_SRC),$(_DST)))
+#endif
+
+# Builds and installs the debug-info for a binary to a debug destination
 define build-install-debug-info
 _INTERMEDIATE_MODULE := $(1)
 _MODULE := $(2)
