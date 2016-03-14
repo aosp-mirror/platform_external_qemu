@@ -79,10 +79,12 @@ _getAvdContentPath(const char* avdName)
             envName = "ANDROID_SDK_HOME";
             searchDir = kSdkHomeSearchDir;
         }
-        APANIC("%s is defined but could not find %s.ini file in %s\n"
-                "(Note: avd is searched in the order of $ANDROID_AVD_HOME,"
-                "%s and %s)\n",
-                envName, avdName, searchDir, kSdkHomeSearchDir, kHomeSearchDir);
+        APANIC("Unknown AVD name [%s], use -list-avds to see valid list.\n"
+               "%s is defined but could not find %s.ini file in %s\n"
+               "(Note: avd is searched in the order of $ANDROID_AVD_HOME,"
+               "%s and %s)\n",
+               avdName, envName, avdName, searchDir, kSdkHomeSearchDir,
+               kHomeSearchDir);
     }
 
     avdPath = iniFile_getString(ini, ROOT_ABS_PATH_KEY, NULL);
