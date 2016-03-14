@@ -423,18 +423,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 bin/uic \
                 $QT_SHARED_LIBS
 
-        # Build the symbol files
-        build_symbols \
-                "$(builder_install_prefix)" \
-                "$INSTALL_DIR/$SYSTEM" \
-                "$SYSTEM" \
-                $QT_SHARED_LIBS
-
-        # Strip the libs
-        strip_libs \
-                "$INSTALL_DIR/$SYSTEM" \
-                $QT_SHARED_LIBS
-
         case $SYSTEM in
             windows*)
                 # libqtmain.a is needed on Windows to implement WinMain et al.
@@ -444,6 +432,11 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                         lib/libqtmain.a
                 ;;
         esac
+
+        build_debug_info \
+                "$(builder_install_prefix)" \
+                "$INSTALL_DIR/$SYSTEM" \
+                $QT_SHARED_LIBS
 
         # Copy headers into common directory and add symlink
         copy_directory \
