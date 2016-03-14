@@ -1,0 +1,211 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "57bb093b_a50616fc",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T21:41:01Z",
+      "side": 1,
+      "message": "I intuitively assumed the opposite meaning: coarse logging is fast - because it\u0027s coarse and doesn\u0027t write that much data, and fine logging is really slow\nBut the comments say it\u0027s the opposite. Could you please explain a little bit more - why?",
+      "range": {
+        "startLine": 44,
+        "startChar": 12,
+        "endLine": 44,
+        "endChar": 14
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_850b1206",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T21:41:01Z",
+      "side": 1,
+      "message": "I\u0027d prefer if we used single naming style in a single class. there\u0027s already camelCase here",
+      "range": {
+        "startLine": 48,
+        "startChar": 9,
+        "endLine": 48,
+        "endChar": 20
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_a541f617",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T21:41:01Z",
+      "side": 1,
+      "message": "haven\u0027t we already landed the removal of base::String? now this shouldn\u0027t require extra copying",
+      "range": {
+        "startLine": 76,
+        "startChar": 23,
+        "endLine": 78,
+        "endChar": 51
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_a58bb69e",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T21:41:01Z",
+      "side": 1,
+      "message": "sizeof(buf) - 1\nSome implementations of snprintf (hi, Microsoft!) don\u0027t null-terminate the buffer if running out of space. that\u0027s why it\u0027s better to have your own guaranteed 0 in the end of the buffer and doesn\u0027t pass it to the snprintf()",
+      "range": {
+        "startLine": 108,
+        "startChar": 18,
+        "endLine": 108,
+        "endChar": 29
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_254ce619",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T21:41:01Z",
+      "side": 1,
+      "message": "why do we need this unconditional message?",
+      "range": {
+        "startLine": 127,
+        "startChar": 8,
+        "endLine": 127,
+        "endChar": 62
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_0549e209",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T21:41:01Z",
+      "side": 1,
+      "message": "\\n after each message?",
+      "range": {
+        "startLine": 130,
+        "startChar": 8,
+        "endLine": 130,
+        "endChar": 26
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_a54e160d",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T21:41:01Z",
+      "side": 1,
+      "message": "nit: !.empty()\nsometimes it\u0027s really more efficient.",
+      "range": {
+        "startLine": 133,
+        "startChar": 8,
+        "endLine": 133,
+        "endChar": 23
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_a52c5693",
+        "filename": "android/opengl/logger.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T21:41:01Z",
+      "side": 1,
+      "message": "what is cxt ?",
+      "range": {
+        "startLine": 26,
+        "startChar": 20,
+        "endLine": 26,
+        "endChar": 23
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_25634688",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/render_api_functions.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-14T21:41:01Z",
+      "side": 1,
+      "message": "maybe it\u0027s time to create a struct with logging functions? So later it\u0027s easier to update the interface\nstruct Logger { func1* f1; func2* f2; ... };",
+      "range": {
+        "startLine": 25,
+        "startChar": 99,
+        "endLine": 25,
+        "endChar": 130
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
