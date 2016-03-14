@@ -178,3 +178,12 @@ void android_boot_property_add(const char* name,
     g_ptr_array_add(all_boot_properties, g_strdup(name));
     g_ptr_array_add(all_boot_properties, g_strdup(value));
 }
+
+void android_boot_property_add2(const char* name, size_t namelen,
+                                const char* value, size_t valuelen) {
+    if (!all_boot_properties) {
+        all_boot_properties = g_ptr_array_new_full(8, g_free);
+    }
+    g_ptr_array_add(all_boot_properties, g_strndup(name, namelen));
+    g_ptr_array_add(all_boot_properties, g_strndup(value, valuelen));
+}

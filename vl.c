@@ -104,6 +104,7 @@
 
 #ifdef CONFIG_ANDROID
 
+
 #ifdef USE_ANDROID_EMU
 #include "config.h"
 
@@ -156,8 +157,11 @@ int android_display_bpp    = 32;
 int android_display_use_host_gpu = 0;
 
 /////////////////////////////////////////////////////////////
+#else  /* !USE_ANDROID_EMU */
 
-#endif  /* USE_ANDROID_EMU */
+#include "hw/misc/android_boot_properties.h"
+
+#endif  /* !USE_ANDROID_EMU */
 
 #define  LCD_DENSITY_LDPI      120
 #define  LCD_DENSITY_MDPI      160
@@ -638,17 +642,22 @@ static void save_cmd_property(const char* propStr) {
 }
 
 // Provide the saved System boot parameters from the command line
-static void process_cmd_properties() {
+static void process_cmd_properties(void) {
     int idx;
-    for(idx = 0; idx<n_cmd_props; idx++) {
+    for(idx = 0; idx < n_cmd_props; idx++) {
         // The string should be of the form
         // "keyname=value"
         const char* pkey = cmd_props[idx];
         const char* peq = strchr(pkey, '=');
         if (peq) {
             // Pass ptr and length for both parts
+#ifdef USE_ANDROID_EMU
             boot_property_add2(pkey, (peq - pkey),
-                               peq+1, strlen(peq+1));
+                               peq + 1, strlen(peq + 1));
+#else  // !USE_ANDROID_EMU
+            android_boot_property_add2(pkey, (peq - pkey),
+                                       peq + 1, strlen(peq + 1));
+#endif  // !USE_ANDROID_EMU
         }
     }
 }
@@ -4104,11 +4113,11 @@ int run_qemu_main(int argc, const char **argv)
                 android_op_dns_server = (char*)optarg;
                 break;
 
+#ifdef USE_ANDROID_EMU
             case QEMU_OPTION_list_webcam:
               android_list_web_cameras();
               return 0;
 
-#ifdef USE_ANDROID_EMU
             case QEMU_OPTION_http_proxy:
                 op_http_proxy = (char*)optarg;
                 break;

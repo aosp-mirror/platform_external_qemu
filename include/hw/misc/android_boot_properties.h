@@ -13,10 +13,15 @@
 #ifndef ANDROID_BOOT_PROPERTIES_H
 #define ANDROID_BOOT_PROPERTIES_H
 
+#include <stddef.h>
+
 /* Initialize Android boot properties backend. */
 void android_boot_properties_init(void);
 
 /* Add one boot property (key, value) pair */
 void android_boot_property_add(const char* name, const char* value);
+
+void android_boot_property_add2(const char* name, size_t namelen,
+                                const char* value, size_t valuelen);
 
 #endif  /* ANDROID_BOOT_PROPERTIES_H */
