@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_94422186",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-03-14T23:06:45Z",
+      "side": 1,
+      "message": "My intuition follows yours, but the comment was unclear. It\u0027s been revised.",
+      "parentUuid": "57bb093b_a50616fc",
+      "range": {
+        "startLine": 44,
+        "startChar": 12,
+        "endLine": 44,
+        "endChar": 14
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_850b1206",
         "filename": "android/opengl/logger.cpp",
         "patchSetId": 14
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-14T21:41:01Z",
       "side": 1,
       "message": "I\u0027d prefer if we used single naming style in a single class. there\u0027s already camelCase here",
+      "range": {
+        "startLine": 48,
+        "startChar": 9,
+        "endLine": 48,
+        "endChar": 20
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_f44f2dad",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-03-14T23:06:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_850b1206",
       "range": {
         "startLine": 48,
         "startChar": 9,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_341895ba",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-03-14T23:06:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_a541f617",
+      "range": {
+        "startLine": 76,
+        "startChar": 23,
+        "endLine": 78,
+        "endChar": 51
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_a58bb69e",
         "filename": "android/opengl/logger.cpp",
         "patchSetId": 14
@@ -82,6 +154,30 @@
       "writtenOn": "2016-03-14T21:41:01Z",
       "side": 1,
       "message": "sizeof(buf) - 1\nSome implementations of snprintf (hi, Microsoft!) don\u0027t null-terminate the buffer if running out of space. that\u0027s why it\u0027s better to have your own guaranteed 0 in the end of the buffer and doesn\u0027t pass it to the snprintf()",
+      "range": {
+        "startLine": 108,
+        "startChar": 18,
+        "endLine": 108,
+        "endChar": 29
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_74121d9a",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-03-14T23:06:45Z",
+      "side": 1,
+      "message": "Good point! Done.",
+      "parentUuid": "57bb093b_a58bb69e",
       "range": {
         "startLine": 108,
         "startChar": 18,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_f4260dfd",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-03-14T23:06:45Z",
+      "side": 1,
+      "message": "That should only show up if we\u0027ve turned on the opengl printout build option/#define.",
+      "parentUuid": "57bb093b_254ce619",
+      "range": {
+        "startLine": 127,
+        "startChar": 8,
+        "endLine": 127,
+        "endChar": 62
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_0549e209",
         "filename": "android/opengl/logger.cpp",
         "patchSetId": 14
@@ -128,6 +248,30 @@
       "writtenOn": "2016-03-14T21:41:01Z",
       "side": 1,
       "message": "\\n after each message?",
+      "range": {
+        "startLine": 130,
+        "startChar": 8,
+        "endLine": 130,
+        "endChar": 26
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_748dfd21",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-03-14T23:06:45Z",
+      "side": 1,
+      "message": "I ended up taking it off again to be compatible with emugl\u0027s scheme of printing newline for each message that describes the name and arguments of each opengl call.",
+      "parentUuid": "57bb093b_0549e209",
       "range": {
         "startLine": 130,
         "startChar": 8,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_54927940",
+        "filename": "android/opengl/logger.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-03-14T23:06:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_a54e160d",
+      "range": {
+        "startLine": 133,
+        "startChar": 8,
+        "endLine": 133,
+        "endChar": 23
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_a52c5693",
         "filename": "android/opengl/logger.h",
         "patchSetId": 14
@@ -186,6 +354,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_346a55f2",
+        "filename": "android/opengl/logger.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-03-14T23:06:45Z",
+      "side": 1,
+      "message": "Added a comment describing it. cxt means \"context\", and the function is for logging what happens within a openGL context, which is the fine-grained logging that we\u0027re doing here.",
+      "parentUuid": "57bb093b_a52c5693",
+      "range": {
+        "startLine": 26,
+        "startChar": 20,
+        "endLine": 26,
+        "endChar": 23
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_25634688",
         "filename": "distrib/android-emugl/host/include/OpenglRender/render_api_functions.h",
         "patchSetId": 14
@@ -197,6 +389,30 @@
       "writtenOn": "2016-03-14T21:41:01Z",
       "side": 1,
       "message": "maybe it\u0027s time to create a struct with logging functions? So later it\u0027s easier to update the interface\nstruct Logger { func1* f1; func2* f2; ... };",
+      "range": {
+        "startLine": 25,
+        "startChar": 99,
+        "endLine": 25,
+        "endChar": 130
+      },
+      "revId": "7ef7d680ce9cfcf75a0eedba0dcc6d77bb13b62e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_74ddfd87",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/render_api_functions.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-03-14T23:06:45Z",
+      "side": 1,
+      "message": "Hrm, not sure what to do here; the render_api.entries seems not to use any struct types, and not sure how to cleanly put the new struct definition in these multiple places.\n\nI made it a void** for now. Any ideas?",
+      "parentUuid": "57bb093b_25634688",
       "range": {
         "startLine": 25,
         "startChar": 99,
