@@ -237,4 +237,10 @@ BUILD_TARGET_SUFFIX := 64
 include $(LOCAL_PATH)/Makefile.common.mk
 endif
 
+$(foreach prebuilt_pair,$(PREBUILT_PATH_PAIRS), \
+    $(eval $(call install-prebuilt, $(prebuilt_pair))))
+
+$(foreach prebuilt_sym_pair,$(PREBUILT_SYMPATH_PAIRS), \
+    $(eval $(call install-prebuilt-symlink, $(prebuilt_sym_pair))))
+
 ## VOILA!!

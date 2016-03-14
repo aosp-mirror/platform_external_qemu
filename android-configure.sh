@@ -617,6 +617,9 @@ fi
 # Build the config.make file
 #
 
+PREBUILT_PATH_PAIRS=
+PREBUILT_SYMPATH_PAIRS=
+
 # Copy a single file
 # $1: Source file path.
 # $2: Destination file path (not a directory!)
@@ -651,17 +654,19 @@ copy_file () {
 }
 
 
-# Copy a prebuilt file
+# Set a prebuilt file to be copied
 # $1: PKG root directory
 # $2: Source file path relative to PKG SRC directory
 # $3: Destination file path (not a directory!) relative to OUT_DIR
 install_prebuilt_dll () {
-    local PKG_SRC="$1"
-    local SRC_FILE="$2"
-    local DST_FILE="$3"
-    local SRC_PATH="$PKG_SRC/$SRC_FILE"
+    local SRC_FILE="$1"
+    local DST_FILE="$2"
 
-    copy_file "$SRC_PATH" "$DST_FILE"
+    if [ -L $SRC_FILE ]; then
+        PREBUILT_SYMPATH_PAIRS="$PREBUILT_SYMPATH_PAIRS $SRC_FILE:$DST_FILE"
+    else
+        PREBUILT_PATH_PAIRS="$PREBUILT_PATH_PAIRS $SRC_FILE:$DST_FILE"
+    fi
 }
 
 PREBUILT_ARCHS=
@@ -704,8 +709,7 @@ if [ -d $SWIFTSHADER_PREBUILTS_DIR ]; then
             SWIFTSHADER_DSTDIR="$OUT_DIR/$SWIFTSHADER_LIBDIR/gles_swiftshader"
             SWIFTSHADER_DSTLIB="$FINAL_LIBNAME"
             if [ -f "$SWIFTSHADER_SRCDIR/lib/$SWIFTSHADER_LIBNAME" ]; then
-                install_prebuilt_dll "$SWIFTSHADER_SRCDIR" \
-                                 "lib/$SWIFTSHADER_LIBNAME" \
+                install_prebuilt_dll "$SWIFTSHADER_SRCDIR/lib/$SWIFTSHADER_LIBNAME" \
                                  "$SWIFTSHADER_DSTDIR/$SWIFTSHADER_DSTLIB"
             fi
         done
@@ -742,7 +746,7 @@ if [ -d $MESA_PREBUILTS_DIR ]; then
             if [ "$LIBNAME" = "opengl32.dll" ]; then
                 MESA_DSTLIB="mesa_opengl32.dll"
             fi
-            install_prebuilt_dll "$MESA_SRCDIR" "lib/$LIBNAME" "$MESA_DSTDIR/$MESA_DSTLIB"
+            install_prebuilt_dll "$MESA_SRCDIR/lib/$LIBNAME" "$MESA_DSTDIR/$MESA_DSTLIB"
             if [ "$HOST_OS" = "linux" -a "$LIBNAME" = "libGL.so" ]; then
                 # Special handling for Linux, this is needed because SDL
                 # will actually try to load libGL.so.1 before GPU emulation
@@ -787,7 +791,7 @@ for QT_ARCH in $PREBUILT_ARCHS; do
             # are always copied to $OUT_DIR/lib[64]/qt/lib/.
             QT_DST_LIB=$(printf %s "$QT_DST_LIB" | sed -e 's|^bin/|lib/|g')
         fi
-        install_prebuilt_dll "$QT_SRCDIR" "$QT_LIB" "$QT_DSTDIR/$QT_DST_LIB"
+        install_prebuilt_dll "$QT_SRCDIR/$QT_LIB" "$QT_DSTDIR/$QT_DST_LIB"
     done
 done
 
@@ -979,6 +983,20 @@ if [ -z "$OPTION_PREBUILT_QEMU2" ]; then
         echo "QEMU2_TOP_DIR := $QEMU2_TOP_DIR" >> $config_mk
     fi
 fi
+
+echo "PREBUILT_PATH_PAIRS := \\" >> $config_mk
+for PREBUILT_PATH_PAIR in $PREBUILT_PATH_PAIRS;
+do
+    echo "    $PREBUILT_PATH_PAIR \\" >> $config_mk
+done
+echo "" >> $config_mk
+
+echo "PREBUILT_SYMPATH_PAIRS := \\" >> $config_mk
+for PREBUILT_SYMPATH_PAIR in $PREBUILT_SYMPATH_PAIRS;
+do
+    echo "    $PREBUILT_SYMPATH_PAIR \\" >> $config_mk
+done
+echo "" >> $config_mk
 
 # Build the config-host.h file
 #
