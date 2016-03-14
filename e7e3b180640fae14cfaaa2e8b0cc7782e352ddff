@@ -22,6 +22,30 @@
       "revId": "e7e3b180640fae14cfaaa2e8b0cc7782e352ddff",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_051e0250",
+        "filename": "android/cmdline-options.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-14T21:18:16Z",
+      "side": 0,
+      "message": "What we *really* need to do is make a list of deprecated-but-not-yet-removed flags and remove them all at once.",
+      "parentUuid": "57bb093b_05fa8288",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 95,
+        "endChar": 8
+      },
+      "revId": "e7e3b180640fae14cfaaa2e8b0cc7782e352ddff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
