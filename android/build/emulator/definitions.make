@@ -239,7 +239,7 @@ $(hide) $(PRIVATE_CUSTOM_TOOL)
 endef
 
 # Installs a binary to a new destination
-# If required, will strip the binary and leave an unstripped copy in debug dir
+# If required, will strip the binary
 define install-binary
 _SRC := $(1)
 _SRC1 := $$(notdir $$(_SRC))
@@ -263,6 +263,50 @@ else  # BUILD_STRIP_BINARIES != true
 endif # BUILD_STRIP_BINARIES != true
 endef
 
+# Installs a prebuilt library
+# If required, will generates symbols and debug info
+define install-prebuilt
+_PAIR := $(subst :, ,$(1))
+_SRC := $$(word 1, $$(_PAIR))
+_DST := $$(word 2, $$(_PAIR))
+$(call install-binary,$$(_SRC),$$(_DST),--strip-unneeded)
+ifeq (true,$(BUILD_GENERATE_SYMBOLS))
+$$(eval $$(call build-install-debug-info,$$(_SRC),$$(_DST)))
+$$(eval $$(call build-install-symbol,$$(_SRC),$$(_DST)))
+endif
+endef
+
+# Installs a prebuilt symlink
+# If required, will generate symbols
+define install-prebuilt-symlink
+_PAIR := $(subst :, ,$(1))
+_SRC := $$(word 1, $$(_PAIR))
+_DST := $$(word 2, $$(_PAIR))
+_BUILD_EXECUTABLES += $$(_DST)
+$$(_DST): PRIVATE_DST := $$(_DST)
+$$(_DST): PRIVATE_SRC := $$(_SRC)
+$$(_DST): $$(_SRC)
+	@echo "Installing symlink: $$(PRIVATE_DST)"
+	$(hide) cp -fa $$(PRIVATE_SRC) $$(PRIVATE_DST)
+ifeq (true,$(BUILD_GENERATE_SYMBOLS))
+$$(eval $$(call build-install-symbol,$$(_SRC),$$(_DST)))
+
+# also copy over debug-info link
+ifeq (darwin,$(BUILD_TARGET_OS))
+_DEBUG_INFO_SRC := $$(_SRC).dSYM
+_DEBUG_INFO := $$(call local-debug-info-install-path,$$(_DST))
+_BUILD_DEBUG_INFOS += $$(_DEBUG_INFO)
+$$(_DEBUG_INFO): PRIVATE_DEBUG_INFO := $$(_DEBUG_INFO)
+$$(_DEBUG_INFO): PRIVATE_DEBUG_INFO_SRC := $$(_DEBUG_INFO_SRC)
+$$(_DEBUG_INFO): $$(_SRC)
+	@echo "Installing symlink debug info: $$(PRIVATE_DEBUG_INFO)"
+	$(hide) cp -fa $$(PRIVATE_DEBUG_INFO_SRC) $$(PRIVATE_DEBUG_INFO)
+endif # BUILD_TARGET_OS=darwin
+
+endif # BUILD_GENERATE_SYMBOLS
+endef
+
+# Builds and installs the debug-info for a binary to a debug destination
 define build-install-debug-info
 _INTERMEDIATE_MODULE := $(1)
 _MODULE := $(2)
@@ -275,10 +319,14 @@ $$(_DEBUG_INFO): $$(_INTERMEDIATE_MODULE)
 	@echo "Build debug info: $$(PRIVATE_DEBUG_INFO)"
 	@mkdir -p $$(dir $$(PRIVATE_DEBUG_INFO))
 ifeq (darwin,$(BUILD_TARGET_OS))
+ifeq (,$$(wildcard $$(_INTERMEDIATE_MODULE).dSYM))
 	$(hide) dsymutil --out=$$(PRIVATE_DEBUG_INFO) $$(PRIVATE_INTERMEDIATE_MODULE)
-else
-	$(hide) cp -f $$(PRIVATE_INTERMEDIATE_MODULE) $$(PRIVATE_DEBUG_INFO)
+else # dSYM exists
+	$(hide) cp -rf $$(PRIVATE_INTERMEDIATE_MODULE).dSYM $$(PRIVATE_DEBUG_INFO)
 endif
+else # BUILD_TARGET_OS != darwin
+	$(hide) cp -f $$(PRIVATE_INTERMEDIATE_MODULE) $$(PRIVATE_DEBUG_INFO)
+endif # BUILD_TARGET_OS
 endef
 
 # Builds, then installs a symbol from a module target
