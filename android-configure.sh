@@ -764,7 +764,7 @@ for QT_ARCH in x86 x86_64; do
         darwin) QT_DLL_FILTER="*.dylib";;
         *) QT_DLL_FILTER="*.so*";;
     esac
-    QT_LIBS=$(cd "$QT_SRCDIR" && find . -name "$QT_DLL_FILTER" ! -name "*.sym" 2>/dev/null)
+    QT_LIBS=$(cd "$QT_SRCDIR" && find . -name "$QT_DLL_FILTER" -not -path "*.dSYM/*" 2>/dev/null)
     if [ -z "$QT_LIBS" ]; then
         panic "Cannot find Qt prebuilt libraries!?"
     fi
