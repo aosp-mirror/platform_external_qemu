@@ -326,6 +326,18 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                     "$INSTALL_DIR/$SYSTEM/lib/$LIB"
         done
 
+        case $SYSTEM in
+            linux-*)
+                # Special handling for Linux, this is needed because QT
+                # will actually try to load libGL.so.1 before GPU emulation
+                # is initialized. This is actually a link to the system's
+                # libGL.so, and will thus prevent the Mesa version from
+                # loading. By creating the symlink, Mesa will also be used
+                # by QT.
+                ln -sf libGL.so "$INSTALL_DIR/$SYSTEM/lib/libGL.so.1"
+                ;;
+        esac
+
     ) || panic "[$SYSTEM] Could not build mesa!"
 
 done

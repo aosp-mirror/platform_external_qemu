@@ -731,7 +731,7 @@ if [ -d $MESA_PREBUILTS_DIR ]; then
             MESA_LIBNAME=opengl32.dll
             ;;
         linux)
-            MESA_LIBNAME=libGL.so
+            MESA_LIBNAME="libGL.so libGL.so.1"
             ;;
         *)
             MESA_LIBNAME=
@@ -750,15 +750,6 @@ if [ -d $MESA_PREBUILTS_DIR ]; then
                 MESA_DSTLIB="mesa_opengl32.dll"
             fi
             install_prebuilt_dll "$MESA_SRCDIR/lib/$LIBNAME" "$MESA_DSTDIR/$MESA_DSTLIB"
-            if [ "$HOST_OS" = "linux" -a "$LIBNAME" = "libGL.so" ]; then
-                # Special handling for Linux, this is needed because SDL
-                # will actually try to load libGL.so.1 before GPU emulation
-                # is initialized. This is actually a link to the system's
-                # libGL.so, and will thus prevent the Mesa version from
-                # loading. By creating the symlink, Mesa will also be used
-                # by SDL.
-                ln -sf libGL.so "$MESA_DSTDIR/libGL.so.1"
-            fi
         done
     done
 fi
