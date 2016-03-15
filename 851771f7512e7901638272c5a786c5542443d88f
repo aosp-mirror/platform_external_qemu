@@ -45,6 +45,30 @@
       "revId": "851771f7512e7901638272c5a786c5542443d88f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17c6f1d9_8e9fdf89",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumCalculator.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T21:11:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "17c6f1d9_8ecd1fae",
+      "range": {
+        "startLine": 98,
+        "startChar": 38,
+        "endLine": 98,
+        "endChar": 39
+      },
+      "revId": "851771f7512e7901638272c5a786c5542443d88f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
