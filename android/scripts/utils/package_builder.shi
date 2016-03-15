@@ -45,7 +45,7 @@ package_builder_register_options () {
   if [ -z "$DEFAULT_HOST_SYSTEMS" ]; then
     case $(get_build_os) in
       linux)
-        DEFAULT_HOST_SYSTEMS="linux-x86_64,linux-x86,windows-x86_64,windows-x86"
+        DEFAULT_HOST_SYSTEMS="linux-x86_64,windows-x86_64,windows-x86"
         ;;
       darwin)
         DEFAULT_HOST_SYSTEMS="darwin-x86_64"

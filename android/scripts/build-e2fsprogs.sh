@@ -31,7 +31,7 @@ shell_import utils/package_builder.shi
 # enough executable version of e2fsprogs is readily available from Cygwin.
 case $(get_build_os) in
     linux)
-        DEFAULT_HOST_SYSTEMS="linux-x86,linux-x86_64,windows-x86"
+        DEFAULT_HOST_SYSTEMS="linux-x86_64,windows-x86"
         ;;
 esac
 

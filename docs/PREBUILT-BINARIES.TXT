@@ -126,8 +126,8 @@ specific third-party libraries or executables. In particular:
     temporary build directories, generate SDK toolchain wrappers, and
     configure simple projects.
 
-  - On Linux, they will build binaries for linux-x86,linux-x86_64,
-    windows-x86 and windows-x86_64 automatically.
+  - On Linux, they will build binaries for linux-x86_64, windows-x86 and
+    windows-x86_64 automatically.
 
     Also, they support the --darwin-ssh=<hostname> which allows one
     to perform a remote build of Darwin binaries through SSH.
