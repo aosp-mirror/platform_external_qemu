@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_ca17e221",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T19:03:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_fa48b907",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 19
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_da3fb5b9",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
         "patchSetId": 16
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-14T20:27:09Z",
       "side": 1,
       "message": "could you please use \u0027static\u0027 instead? unnamed namespace doesn\u0027t add anything but some inconvenience, and it\u0027s already stopped being the preferred way of hiding implementations",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 9
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_2a378ec7",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T19:03:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_da3fb5b9",
       "range": {
         "startLine": 31,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_aa7c1e47",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T19:03:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_9a2c0d94",
+      "range": {
+        "startLine": 47,
+        "startChar": 1,
+        "endLine": 51,
+        "endChar": 31
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_da205586",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
         "patchSetId": 16
@@ -82,6 +154,30 @@
       "writtenOn": "2016-03-14T20:27:09Z",
       "side": 1,
       "message": "what about passing a version to the constructor, having kMaxVersion as default?",
+      "range": {
+        "startLine": 54,
+        "startChar": 21,
+        "endLine": 54,
+        "endChar": 31
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_4a6772b5",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T19:03:27Z",
+      "side": 1,
+      "message": "On the guest, there is an issue that encoder constructors also want to take the pointer of ChecksumHelper. And the version number here won\u0027t be initialized until we send non-checksum messages between encoder and decoder to agree on the checksum version. So we have to choose between putting version in ChecksumHelper constructor or putting ChecksumHelper pointer in encoder constructor. The later option seems to make the code cleaner.",
+      "parentUuid": "57bb093b_da205586",
       "range": {
         "startLine": 54,
         "startChar": 21,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_8a795a58",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T19:03:27Z",
+      "side": 1,
+      "message": "Sorry, bytes... Done.",
+      "parentUuid": "57bb093b_fa171921",
+      "range": {
+        "startLine": 76,
+        "startChar": 19,
+        "endLine": 76,
+        "endChar": 20
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_5a81057f",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
         "patchSetId": 16
@@ -128,6 +248,30 @@
       "writtenOn": "2016-03-14T20:27:09Z",
       "side": 1,
       "message": "what about passing a buffer lengths here too? so the function could check if there\u0027s enough space. Many STL functions originally had this interface of \u0027just an output iterator\u0027, but now all of such functions are deprecated: too often people are misusing them\nnow all such functions require begin and end iterators for the output.\nhere, pointer + size is the equivalent",
+      "range": {
+        "startLine": 91,
+        "startChar": 41,
+        "endLine": 91,
+        "endChar": 55
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_0a59ead5",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T19:03:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_5a81057f",
       "range": {
         "startLine": 91,
         "startChar": 41,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_aa689e65",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T19:03:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_fa3279ce",
+      "range": {
+        "startLine": 96,
+        "startChar": 38,
+        "endLine": 96,
+        "endChar": 40
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_facef9d0",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
         "patchSetId": 16
@@ -174,6 +342,30 @@
       "writtenOn": "2016-03-14T20:59:35Z",
       "side": 1,
       "message": "I\u0027d prefer this to be on top of the file and expressed as a max of (0, v1MaxLen)\nso during the v2 implementation one could easily see what to change",
+      "range": {
+        "startLine": 117,
+        "startChar": 17,
+        "endLine": 117,
+        "endChar": 33
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_2d3208ef",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T19:03:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_facef9d0",
       "range": {
         "startLine": 117,
         "startChar": 17,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_0d3744de",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T19:03:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_9a4ecd0d",
+      "range": {
+        "startLine": 118,
+        "startChar": 4,
+        "endLine": 118,
+        "endChar": 10
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_fa6d5942",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
         "patchSetId": 16
@@ -220,6 +436,30 @@
       "writtenOn": "2016-03-14T20:59:35Z",
       "side": 1,
       "message": "I\u0027m curious why reversing the bits gives us something more than just writing down the unchanged 32-bit length?",
+      "range": {
+        "startLine": 135,
+        "startChar": 4,
+        "endLine": 141,
+        "endChar": 18
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_0d110435",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T19:03:27Z",
+      "side": 1,
+      "message": "I heard Vince mentioned about it someday. I guess the reason would be it is less likely to coincide with some data we are transmitting?",
+      "parentUuid": "57bb093b_fa6d5942",
       "range": {
         "startLine": 135,
         "startChar": 4,
@@ -255,6 +495,30 @@
     },
     {
       "key": {
+        "uuid": "bc5fca26_ea028758",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T19:03:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_3a508100",
+      "range": {
+        "startLine": 81,
+        "startChar": 6,
+        "endLine": 81,
+        "endChar": 20
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_9ad08dc9",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.h",
         "patchSetId": 16
@@ -266,6 +530,30 @@
       "writtenOn": "2016-03-14T20:27:09Z",
       "side": 1,
       "message": "disallow_copy_assign_and_move() ?",
+      "range": {
+        "startLine": 83,
+        "startChar": 4,
+        "endLine": 83,
+        "endChar": 18
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_4d0b0c07",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelper.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T19:03:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_9ad08dc9",
       "range": {
         "startLine": 83,
         "startChar": 4,
@@ -301,6 +589,30 @@
     },
     {
       "key": {
+        "uuid": "57bb093b_3d4a3127",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelperThreadInfo.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T19:03:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_05c8c26c",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 1
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_85f672ad",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelperThreadInfo.cpp",
         "patchSetId": 16
@@ -324,6 +636,30 @@
     },
     {
       "key": {
+        "uuid": "bc5fca26_0a0efb85",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelperThreadInfo.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T19:03:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_85f672ad",
+      "range": {
+        "startLine": 77,
+        "startChar": 79,
+        "endLine": 78,
+        "endChar": 1
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57bb093b_05b1e20a",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelperThreadInfo.h",
         "patchSetId": 16
@@ -335,6 +671,30 @@
       "writtenOn": "2016-03-14T20:59:35Z",
       "side": 1,
       "message": "could you please give a note here: e.g. this is the class that makes checksum calculation thread-safe, please only use the checksum through it\n2. helper -\u003e calculator as well",
+      "range": {
+        "startLine": 21,
+        "startChar": 6,
+        "endLine": 21,
+        "endChar": 30
+      },
+      "revId": "f8fb195fb3ca9f88f64c49fa1ad45f9135d5f428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_bd5d81f1",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumHelperThreadInfo.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-15T19:03:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57bb093b_05b1e20a",
       "range": {
         "startLine": 21,
         "startChar": 6,
