@@ -72,8 +72,10 @@ HelpPage::HelpPage(QWidget *parent) :
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
     mUi->help_androidVersionBox->setPlainText(apiVersionString(apiLevel));
 
-    // Show the ADB port number
-    mUi->help_adbPortBox->setPlainText( QString::number(android_adb_port) );
+    // Show the "serial number" that can be used to connect ADB
+    // to this device
+    mUi->help_adbSerialNumberBox->setPlainText(
+            "emulator-" + QString::number(android_base_port) );
 
     // launch the latest version loader in a separate thread
     auto latestVersionThread = new QThread();
