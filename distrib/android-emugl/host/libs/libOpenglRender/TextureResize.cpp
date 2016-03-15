@@ -25,9 +25,7 @@
 #define ERR(...)  fprintf(stderr, __VA_ARGS__)
 #define MAX_FACTOR_POWER 4
 
-namespace {
-
-const char kCommonShaderSource[] =
+static const char kCommonShaderSource[] =
     "precision mediump float;\n"
     "varying vec2 vUV00, vUV01;\n"
     "#if FACTOR > 2\n"
@@ -40,7 +38,7 @@ const char kCommonShaderSource[] =
     "#endif\n"
     "#endif\n";
 
-const char kVertexShaderSource[] =
+static const char kVertexShaderSource[] =
     "attribute vec2 aPosition;\n"
 
     "void main() {\n"
@@ -125,19 +123,21 @@ const char kFragmentShaderSource[] =
     "  gl_FragColor = sum;\n"
     "}\n";
 
-const float kVertexData[] = {-1, -1, 3, -1, -1, 3};
+static const float kVertexData[] = {-1, -1, 3, -1, -1, 3};
 
-void detachShaders(GLuint program) {
-    GLuint shaders[2];
-    GLsizei count;
+static void detachShaders(GLuint program) {
+    GLuint shaders[2] = {};
+    GLsizei count = 0;
     s_gles2.glGetAttachedShaders(program, 2, &count, shaders);
-    for (GLsizei i = 0; i < count; i++) {
-        s_gles2.glDetachShader(program, shaders[i]);
-        s_gles2.glDeleteShader(shaders[i]);
+    if (s_gles2.glGetError() == GL_NO_ERROR) {
+        for (GLsizei i = 0; i < count; i++) {
+            s_gles2.glDetachShader(program, shaders[i]);
+            s_gles2.glDeleteShader(shaders[i]);
+        }
     }
 }
 
-GLuint createShader(GLenum type, const std::initializer_list<const char*>& source) {
+static GLuint createShader(GLenum type, const std::initializer_list<const char*>& source) {
     GLint success, infoLength;
 
     GLuint shader = s_gles2.glCreateShader(type);
@@ -159,7 +159,7 @@ GLuint createShader(GLenum type, const std::initializer_list<const char*>& sourc
     return shader;
 }
 
-void attachShaders(TextureResize::Framebuffer* fb, const char* factorDefine,
+static void attachShaders(TextureResize::Framebuffer* fb, const char* factorDefine,
         const char* dimensionDefine, GLuint width, GLuint height) {
 
     std::ostringstream dimensionConst;
@@ -185,8 +185,6 @@ void attachShaders(TextureResize::Framebuffer* fb, const char* factorDefine,
     fb->aPosition = s_gles2.glGetAttribLocation(fb->program, "aPosition");
     fb->uTexture = s_gles2.glGetUniformLocation(fb->program, "uTexture");
 }
-
-}  // namespace
 
 TextureResize::TextureResize(GLuint width, GLuint height) :
         mWidth(width),
