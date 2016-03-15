@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "17c6f1d9_2e8fcb5a",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumCalculator.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-15T21:11:03Z",
+      "side": 1,
+      "message": "memcpy(checksumPtr+sizeof(val), \u0026m_numWrite, sizeof(m_numWrite));\n\nalso, could you please search for other 4s in the file and do the same thing?",
+      "range": {
+        "startLine": 99,
+        "startChar": 19,
+        "endLine": 99,
+        "endChar": 58
+      },
+      "revId": "9eccd2c5e1d3a923af19deea8b6bf43cca6d7b7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
