@@ -5,6 +5,8 @@ Revisions:
 ----------
     Revision 2. Dated 2009-12-07
     Dynamic Layout support added 10/2012
+    Dynamic Layout support removed 3/2016
+    Revision 3. Dated 2016-03-10
 
 Introduction:
 -------------
@@ -17,9 +19,6 @@ The content of this window is dictated by a "skin", i.e. a collection of
 images and configuration data that indicates how to populate the window.
 
 This document specifies how to generate a new skin for the emulator.
-The emulator also supports dynamically creating the layout section of
-the skin, thereby removing the necessity to create skins for each new
-handset type. See the last section regarding info on dynamic controls.
 
 General File Format:
 --------------------
@@ -134,7 +133,7 @@ The layout can have the following keys (and corresponding values):
                              rotation (in 90-degrees increment) to apply to
                              the part before display.
 
-- 'dpad-rotation': 
+- 'dpad-rotation':
              An option integer in the 0..3 range indicating which
              counterclockwise rotation (in 90-degrees increments) to apply to
              the D-Pad keys for proper usage.
@@ -227,16 +226,3 @@ file instead:
 - 'network.delay':
     Default network latency for this skin. Values correspond to the
     -netdelay <delay> emulator command-line option.
-
-Dynamic Layouts:
-----------------
-
-The emulator also supports a skin that is dynamically generated. This
-skin (present in folder "dynamic" in the skins folder) follows the same
-format as other skins, except that it only defines the list of parts/controls
-that can be used in the skin. The layouts section is generated at
-runtime by the emulator. The parts section describes all the controls that
-can be used in any handset. All these parts have both an enabled and a
-disabled version defined in the skin, and at runtime the emulator reads
-the hardware definition and decides which of those two controls to actually
-use.

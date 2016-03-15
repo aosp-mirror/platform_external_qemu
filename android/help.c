@@ -133,8 +133,6 @@ help_build_images( stralloc_t*  out )
     "  If the kernel image is not found in the out directory, then it is searched\n"
     "  in <build-root>/prebuilts/qemu-kernel/.\n\n"
 
-    "  Skins will be looked in <build-root>/development/tools/emulator/skins/\n\n"
-
     "  You can use the -sysdir, -system, -kernel, -ramdisk, -datadir, -data options\n"
     "  to specify different search directories or specific image files. You can\n"
     "  also use the -cache and -sdcard options to indicate specific cache partition\n"
@@ -855,15 +853,6 @@ help_skin(stralloc_t*  out)
     PRINTF(
     "  note that <skin> can also be '<width>x<height>' (e.g. '320x480') to\n"
     "  specify an exact framebuffer size, without any visual ornaments.\n\n" );
-}
-
-static void
-help_dynamic_skin(stralloc_t* out)
-{
-    PRINTF(
-    "  use '-dynamic_skin' to dynamically generate a skin based on the settings\n"
-    "  in the AVD. This option only has effect if the -skin WxH option is used\n"
-    "  to specify the width and height of the framebuffer\n");
 }
 
 /* default network settings for emulator */
