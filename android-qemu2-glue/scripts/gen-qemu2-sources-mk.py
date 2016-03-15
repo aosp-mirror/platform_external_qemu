@@ -18,7 +18,6 @@ import sys
 TARGET_SUFFIX="-softmmu"
 
 EXPECTED_HOSTS = set([
-    'linux-x86',
     'linux-x86_64',
     'windows-x86',
     'windows-x86_64',

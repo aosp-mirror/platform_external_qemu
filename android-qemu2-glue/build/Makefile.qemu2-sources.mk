@@ -267,26 +267,6 @@ QEMU2_COMMON_SOURCES_darwin-x86_64 := \
     net/vhost-user.c \
     os-posix.c \
 
-QEMU2_COMMON_SOURCES_linux-x86 := \
-    aio-posix.c \
-    audio/audio_pt_int.c \
-    audio/paaudio.c \
-    backends/hostmem-file.c \
-    backends/rng-random.c \
-    block/raw-posix.c \
-    coroutine-ucontext.c \
-    fsdev/qemu-fsdev-dummy.c \
-    fsdev/qemu-fsdev-opts.c \
-    hw/tpm/tpm_passthrough.c \
-    hw/usb/dev-mtp.c \
-    migration-exec.c \
-    migration-fd.c \
-    migration-unix.c \
-    net/tap-linux.c \
-    net/tap.c \
-    net/vhost-user.c \
-    os-posix.c \
-
 QEMU2_COMMON_SOURCES_linux-x86_64 := \
     aio-posix.c \
     audio/audio_pt_int.c \
@@ -838,13 +818,6 @@ QEMU2_TARGET_x86_64_SOURCES := \
 
 QEMU2_TARGET_aarch64_SOURCES_darwin-x86_64 := \
 
-QEMU2_TARGET_aarch64_SOURCES_linux-x86 := \
-    hw/misc/vfio.c \
-    hw/scsi/vhost-scsi.c \
-    hw/virtio/vhost-backend.c \
-    hw/virtio/vhost-user.c \
-    hw/virtio/vhost.c \
-
 QEMU2_TARGET_aarch64_SOURCES_linux-x86_64 := \
     hw/misc/vfio.c \
     hw/scsi/vhost-scsi.c \
@@ -862,23 +835,6 @@ QEMU2_TARGET_i386_SOURCES_darwin-x86_64 := \
     target-i386/hax-darwin.c \
     target-i386/hax-slot.c \
     target-i386/kvm-stub.c \
-
-QEMU2_TARGET_i386_SOURCES_linux-x86 := \
-    hax-stub.c \
-    hw/i386/kvm/apic.c \
-    hw/i386/kvm/clock.c \
-    hw/i386/kvm/i8254.c \
-    hw/i386/kvm/i8259.c \
-    hw/i386/kvm/ioapic.c \
-    hw/i386/kvm/pci-assign.c \
-    hw/misc/ivshmem.c \
-    hw/misc/vfio.c \
-    hw/scsi/vhost-scsi.c \
-    hw/virtio/vhost-backend.c \
-    hw/virtio/vhost-user.c \
-    hw/virtio/vhost.c \
-    kvm-all.c \
-    target-i386/kvm.c \
 
 QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
     hax-stub.c \
@@ -913,13 +869,6 @@ QEMU2_TARGET_i386_SOURCES_windows-x86_64 := \
 
 QEMU2_TARGET_mips64el_SOURCES_darwin-x86_64 := \
 
-QEMU2_TARGET_mips64el_SOURCES_linux-x86 := \
-    hw/misc/vfio.c \
-    hw/scsi/vhost-scsi.c \
-    hw/virtio/vhost-backend.c \
-    hw/virtio/vhost-user.c \
-    hw/virtio/vhost.c \
-
 QEMU2_TARGET_mips64el_SOURCES_linux-x86_64 := \
     hw/misc/vfio.c \
     hw/scsi/vhost-scsi.c \
@@ -932,13 +881,6 @@ QEMU2_TARGET_mips64el_SOURCES_windows-x86 := \
 QEMU2_TARGET_mips64el_SOURCES_windows-x86_64 := \
 
 QEMU2_TARGET_mipsel_SOURCES_darwin-x86_64 := \
-
-QEMU2_TARGET_mipsel_SOURCES_linux-x86 := \
-    hw/misc/vfio.c \
-    hw/scsi/vhost-scsi.c \
-    hw/virtio/vhost-backend.c \
-    hw/virtio/vhost-user.c \
-    hw/virtio/vhost.c \
 
 QEMU2_TARGET_mipsel_SOURCES_linux-x86_64 := \
     hw/misc/vfio.c \
@@ -957,23 +899,6 @@ QEMU2_TARGET_x86_64_SOURCES_darwin-x86_64 := \
     target-i386/hax-darwin.c \
     target-i386/hax-slot.c \
     target-i386/kvm-stub.c \
-
-QEMU2_TARGET_x86_64_SOURCES_linux-x86 := \
-    hax-stub.c \
-    hw/i386/kvm/apic.c \
-    hw/i386/kvm/clock.c \
-    hw/i386/kvm/i8254.c \
-    hw/i386/kvm/i8259.c \
-    hw/i386/kvm/ioapic.c \
-    hw/i386/kvm/pci-assign.c \
-    hw/misc/ivshmem.c \
-    hw/misc/vfio.c \
-    hw/scsi/vhost-scsi.c \
-    hw/virtio/vhost-backend.c \
-    hw/virtio/vhost-user.c \
-    hw/virtio/vhost.c \
-    kvm-all.c \
-    target-i386/kvm.c \
 
 QEMU2_TARGET_x86_64_SOURCES_linux-x86_64 := \
     hax-stub.c \
