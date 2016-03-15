@@ -1,19 +1,34 @@
 # Rules to build the final target-specific QEMU2 binaries from sources.
 
+# The QEMU-specific target name for a given emulator CPU architecture.
 QEMU2_TARGET_CPU_x86 := i386
 QEMU2_TARGET_CPU_x86_64 := x86_64
 QEMU2_TARGET_CPU_mips := mipsel
 QEMU2_TARGET_CPU_mips64 := mips64el
+QEMU2_TARGET_CPU_arm := arm
 QEMU2_TARGET_CPU_arm64 := aarch64
 
+# The engine will use the sources from target-<name> to emulate a given
+# emulator CPU architecture.
 QEMU2_TARGET_TARGET_x86 := i386
 QEMU2_TARGET_TARGET_x86_64 := i386
 QEMU2_TARGET_TARGET_mips := mips
 QEMU2_TARGET_TARGET_mips64 := mips
+QEMU2_TARGET_TARGET_arm := arm
 QEMU2_TARGET_TARGET_arm64 := arm
 
+# As a special case, the 32-bit ARM binary is named qemu-system-armel to match
 QEMU2_TARGET_CPU := $(QEMU2_TARGET_CPU_$(QEMU2_TARGET))
 QEMU2_TARGET_TARGET := $(QEMU2_TARGET_TARGET_$(QEMU2_TARGET))
+
+# upstream QEMU, even though the upstream configure script now uses the 'arm'
+# target name (and stores the build files under arm-softmmu instead of
+# armel-softmmu. qemu-system-armel is also  what the top-level 'emulator'
+# launcher expects.
+QEMU2_TARGET_SYSTEM := $(QEMU2_TARGET_CPU)
+ifeq (arm,$(QEMU2_TARGET))
+    QEMU2_TARGET_SYSTEM := armel
+endif
 
 # If $(QEMU2_TARGET) is $1, then return $2, or the empty string otherwise.
 qemu2-if-target = $(if $(filter $1,$(QEMU2_TARGET)),$2,$3)
@@ -21,7 +36,7 @@ qemu2-if-target = $(if $(filter $1,$(QEMU2_TARGET)),$2,$3)
 # If $(QEMU2_TARGET_CPU) is $1, then return $2, or the empty string otherwise.
 qemu2-if-target-arch = $(if $(filter $1,$(QEMU2_TARGET_CPU)),$2)
 
-$(call start-emulator-program,qemu-system-$(QEMU2_TARGET_CPU))
+$(call start-emulator-program,qemu-system-$(QEMU2_TARGET_SYSTEM))
 
 LOCAL_CFLAGS += \
     $(QEMU2_CFLAGS) \
@@ -91,7 +106,7 @@ LOCAL_PREBUILTS_OBJ_FILES += \
 LOCAL_WHOLE_STATIC_LIBRARIES += \
     libqemu2_common \
     libqemu2_glue \
-    $(call qemu2-if-target,arm64, libqemu2_common_aarch64) \
+    $(call qemu2-if-target,arm arm64, libqemu2_common_aarch64) \
 
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
