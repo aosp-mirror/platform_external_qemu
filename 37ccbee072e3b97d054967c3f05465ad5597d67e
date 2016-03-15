@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "57bb093b_fe4f04ad",
+        "filename": "android/opengles.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-15T09:10:18Z",
+      "side": 1,
+      "message": "on-stack variable should be ok here if you\u0027re freeing it after the call; well, malloc is fine as well :)",
+      "range": {
+        "startLine": 148,
+        "startChar": 21,
+        "endLine": 148,
+        "endChar": 47
+      },
+      "revId": "37ccbee072e3b97d054967c3f05465ad5597d67e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57bb093b_be457c91",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/render_api.entries",
+        "patchSetId": 15
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-15T09:10:18Z",
+      "side": 1,
+      "message": "you could try defining a struct here in the same way as it defines a typedef",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 71
+      },
+      "revId": "37ccbee072e3b97d054967c3f05465ad5597d67e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
