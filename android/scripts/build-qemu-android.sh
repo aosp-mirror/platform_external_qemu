@@ -62,7 +62,7 @@ allowing one to inspect build failures easily."
 package_builder_register_options
 
 VALID_TARGETS="arm,arm64,x86,x86_64,mips,mips64"
-DEFAULT_TARGETS="arm64,mips,mips64,x86,x86_64"
+DEFAULT_TARGETS="arm,arm64,mips,mips64,x86,x86_64"
 
 OPT_TARGET=
 option_register_var "--target=<list>" OPT_TARGET \
@@ -478,10 +478,15 @@ EOF
         dump "[$SYSTEM] Retrieving remote darwin binaries."
         run mkdir -p "$BINARY_DIR" ||
                 panic "Could not create installation directory: $BINARY_DIR"
-        run $ANDROID_EMULATOR_SSH_WRAPPER scp -r \
+        builder_remote_darwin_run scp -r \
             "$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM/qemu-system-* \
-            "$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM/LINK-qemu-system-* \
             $BINARY_DIR/
+
+        if [ -n "$OPT_NO_ANDROID" ]; then
+            builder_remote_darwin_run scp -r \
+                "$DARWIN_SSH":$REMOTE_DIR/prebuilts/qemu-android/$SYSTEM/LINK-qemu-system-* \
+                $BINARY_DIR/
+        fi
 
         timestamp_set "$INSTALL_DIR/$SYSTEM" qemu-android
     done

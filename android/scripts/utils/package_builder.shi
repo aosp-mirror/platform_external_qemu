@@ -45,7 +45,7 @@ package_builder_register_options () {
   if [ -z "$DEFAULT_HOST_SYSTEMS" ]; then
     case $(get_build_os) in
       linux)
-        DEFAULT_HOST_SYSTEMS="linux-x86_64,linux-x86,windows-x86_64,windows-x86"
+        DEFAULT_HOST_SYSTEMS="linux-x86_64,windows-x86_64,windows-x86"
         ;;
       darwin)
         DEFAULT_HOST_SYSTEMS="darwin-x86_64"
@@ -255,6 +255,11 @@ build_disable_cxx11 () {
     _SHU_BUILDER_NO_CXX11=true
 }
 
+# Run a command on the remote Darwin host when --darwin-ssh is used.
+builder_remote_darwin_run () {
+    run $ANDROID_EMULATOR_SSH_WRAPPER ssh  "$DARWIN_SSH" "$@"
+}
+
 # Prepare for a remote darwin build. This takes as a parameter the
 # name of a temporary directory, e..g '/tmp/foo/bar/'.
 # This function populates the directory with some scripts and
@@ -326,16 +331,19 @@ builder_run_remote_darwin_build () {
     fi
     chmod a+x "$BUILD_SH"
 
-    log "Copying files to remote darwin host"
+    log "Erasing previours remote build directory."
+    builder_remote_darwin_run rm -rf /tmp/$DARWIN_PKG_NAME
+
+    log "Copying files to remote darwin host."
     (tar cf - -C "$DARWIN_PKG_DIR"/.. "$DARWIN_PKG_NAME") |
-        ($ANDROID_EMULATOR_SSH_WRAPPER ssh "$DARWIN_SSH" tar xf - -C /tmp) ||
+        (builder_remote_darwin_run tar xf - -C /tmp) ||
             panic "Could not send files to remote darwin host"
 
     rm -rf "$DARWIN_PKG_DIR"
 
     log "Performing remote darwin build."
     log "COMMAND: ssh $DARWIN_SSH /tmp/$DARWIN_PKG_NAME/build.sh"
-    $ANDROID_EMULATOR_SSH_WRAPPER ssh "$DARWIN_SSH" $DARWIN_REMOTE_DIR/build.sh
+    builder_remote_darwin_run $DARWIN_REMOTE_DIR/build.sh
 }
 
 # Generate a small shell script that can be sourced to prepare the
