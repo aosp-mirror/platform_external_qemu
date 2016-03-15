@@ -84,8 +84,9 @@ process_symbol () {
     CODE_FILE=$DEBUG_FILE
     CODE_IDENTIFIER=$DEBUG_IDENTIFIER
 
-    curl \
+    echo -n -e curl \
         --show-error \
+        --silent \
         --dump-header /dev/null \
         --form product="$PRODUCT" \
         --form codeFile="$CODE_FILE" \
@@ -93,12 +94,14 @@ process_symbol () {
         --form debugFile="$DEBUG_FILE" \
         --form debugIdentifier="$DEBUG_IDENTIFIER" \
         --form symbolFile="@$SYMBOL_FILE" \
-        "$URL" ||
-            panic "Curl failed with return code $?"
+        "$URL" \
+        "\0"
 }
 
+process_dir () {
+    find $SYMBOL_DIR -type f -print0 -name "*.sym" | while read -d $'\0' file; do
+        process_symbol $file
+    done
+}
 
-find $SYMBOL_DIR -type f -print0 -name "*.sym" | while read -d $'\0' file; do
-    echo "Processing $file"
-    process_symbol $file
-done
+process_dir | xargs -0 -n1 -P 5 -t bash -c
