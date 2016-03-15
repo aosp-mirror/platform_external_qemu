@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "17c6f1d9_d987e3cf",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/render_api.entries",
+        "patchSetId": 17
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-15T21:57:36Z",
+      "side": 1,
+      "message": "very nit: you could even typedef the function types here to use them in the struct\n\ndon\u0027t do it if it feels way too much nit :)",
+      "range": {
+        "startLine": 15,
+        "startChar": 2,
+        "endLine": 16,
+        "endChar": 3
+      },
+      "revId": "36512b91c4774bd54cb6f33ed8a86f6e3b0b6078",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
