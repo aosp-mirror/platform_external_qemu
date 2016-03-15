@@ -100,14 +100,13 @@ bool ChecksumCalculator::writeChecksum(void* outputChecksum, size_t outputChecks
     char *checksumPtr = (char *)outputChecksum;
     switch (m_version) {
         case 1: { // protocol v1 is to reverse the packetLen and write it at the end
-            uint32_t val = computeV1Checksum(NULL, m_v1BufferTotalLength);
+            uint32_t val = computeV1Checksum();
             memcpy(checksumPtr, &val, sizeof(val));
             memcpy(checksumPtr+sizeof(val), &m_numWrite, sizeof(m_numWrite));
             break;
         }
     }
     resetChecksum();
-    m_isEncodingChecksum = false;
     m_numWrite++;
     return true;
 }
@@ -121,14 +120,18 @@ void ChecksumCalculator::resetChecksum() {
     m_isEncodingChecksum = false;
 }
 
-bool ChecksumCalculator::validate(const void* buf, size_t bufLen, const void* expectedChecksum) {
+bool ChecksumCalculator::validate(const void* expectedChecksum, size_t expectedChecksumLen) {
+    size_t checksumSize = checksumByteSize();
+    if (expectedChecksumLen != checksumSize) {
+        m_numRead++;
+        resetChecksum();
+        return false;
+    }
     // buffers for computing the checksum
     unsigned char sChecksumBuffer[kMaxChecksumSize];
-
-    size_t checksumSize = checksumByteSize();
     switch (m_version) {
         case 1: {
-            uint32_t val = computeV1Checksum(buf, bufLen);
+            uint32_t val = computeV1Checksum();
             memcpy(sChecksumBuffer, &val, sizeof(val));
             memcpy(sChecksumBuffer+sizeof(val), &m_numRead, sizeof(m_numRead));
             break;
@@ -136,11 +139,12 @@ bool ChecksumCalculator::validate(const void* buf, size_t bufLen, const void* ex
     }
     bool isValid = !memcmp(sChecksumBuffer, expectedChecksum, checksumSize);
     m_numRead++;
+    resetChecksum();
     return isValid;
 }
 
-uint32_t ChecksumCalculator::computeV1Checksum(const void* buf, size_t bufLen) {
-    uint32_t revLen = bufLen;
+uint32_t ChecksumCalculator::computeV1Checksum() {
+    uint32_t revLen = m_v1BufferTotalLength;
     revLen = (revLen & 0xffff0000) >> 16 | (revLen & 0x0000ffff) << 16;
     revLen = (revLen & 0xff00ff00) >> 8 | (revLen & 0x00ff00ff) << 8;
     revLen = (revLen & 0xf0f0f0f0) >> 4 | (revLen & 0x0f0f0f0f) << 4;

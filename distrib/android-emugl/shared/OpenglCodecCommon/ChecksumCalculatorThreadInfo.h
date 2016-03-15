@@ -35,8 +35,21 @@ public:
         return ChecksumCalculator::getMaxVersionStr();
     }
 
-    static bool validate(void* buf, size_t packetLen);
-    static void validOrDie(void* buf, size_t packetLen, const char* message);
+    static size_t checksumByteSize();
+    static bool writeChecksum(void* buf,
+                              size_t bufLen,
+                              void* outputChecksum,
+                              size_t outputChecksumLen);
+
+    static bool validate(void* buf,
+                         size_t bufLen,
+                         void* checksum,
+                         size_t checksumLen);
+    static void validOrDie(void* buf,
+                           size_t bufLen,
+                           void* checksum,
+                           size_t checksumLen,
+                           const char* message);
 
 private:
     ChecksumCalculator m_protocol;
