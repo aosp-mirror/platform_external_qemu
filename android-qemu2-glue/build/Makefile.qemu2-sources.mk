@@ -252,7 +252,22 @@ QEMU2_COMMON_SOURCES := \
     vmstate.c \
     xbzrle.c \
 
-QEMU2_COMMON_SOURCES_linux-x86_64 := \
+QEMU2_COMMON_SOURCES_darwin-x86_64 := \
+    aio-posix.c \
+    audio/coreaudio.c \
+    backends/rng-random.c \
+    block/raw-posix.c \
+    coroutine-sigaltstack.c \
+    hw/usb/dev-mtp.c \
+    migration-exec.c \
+    migration-fd.c \
+    migration-unix.c \
+    net/tap-bsd.c \
+    net/tap.c \
+    net/vhost-user.c \
+    os-posix.c \
+
+QEMU2_COMMON_SOURCES_linux-x86 := \
     aio-posix.c \
     audio/audio_pt_int.c \
     audio/paaudio.c \
@@ -272,18 +287,7 @@ QEMU2_COMMON_SOURCES_linux-x86_64 := \
     net/vhost-user.c \
     os-posix.c \
 
-QEMU2_COMMON_SOURCES_windows-x86_64 := \
-    aio-win32.c \
-    audio/audio_win_int.c \
-    audio/winaudio.c \
-    audio/winwaveaudio.c \
-    block/raw-win32.c \
-    block/win32-aio.c \
-    coroutine-win32.c \
-    net/tap-win32.c \
-    os-win32.c \
-
-QEMU2_COMMON_SOURCES_linux-x86 := \
+QEMU2_COMMON_SOURCES_linux-x86_64 := \
     aio-posix.c \
     audio/audio_pt_int.c \
     audio/paaudio.c \
@@ -314,20 +318,16 @@ QEMU2_COMMON_SOURCES_windows-x86 := \
     net/tap-win32.c \
     os-win32.c \
 
-QEMU2_COMMON_SOURCES_darwin-x86_64 := \
-    aio-posix.c \
-    audio/coreaudio.c \
-    backends/rng-random.c \
-    block/raw-posix.c \
-    coroutine-sigaltstack.c \
-    hw/usb/dev-mtp.c \
-    migration-exec.c \
-    migration-fd.c \
-    migration-unix.c \
-    net/tap-bsd.c \
-    net/tap.c \
-    net/vhost-user.c \
-    os-posix.c \
+QEMU2_COMMON_SOURCES_windows-x86_64 := \
+    aio-win32.c \
+    audio/audio_win_int.c \
+    audio/winaudio.c \
+    audio/winwaveaudio.c \
+    block/raw-win32.c \
+    block/win32-aio.c \
+    coroutine-win32.c \
+    net/tap-win32.c \
+    os-win32.c \
 
 QEMU2_TARGET_SOURCES := \
     arch_init.c \
@@ -534,89 +534,6 @@ QEMU2_TARGET_aarch64_SOURCES := \
     target-arm/translate-a64.c \
     target-arm/translate.c \
 
-QEMU2_TARGET_x86_64_SOURCES := \
-    hw/acpi/acpi_interface.c \
-    hw/acpi/core.c \
-    hw/acpi/cpu_hotplug.c \
-    hw/acpi/ich9.c \
-    hw/acpi/memory_hotplug.c \
-    hw/acpi/pcihp.c \
-    hw/acpi/piix4.c \
-    hw/audio/adlib.c \
-    hw/audio/cs4231a.c \
-    hw/audio/fmopl.c \
-    hw/audio/gus.c \
-    hw/audio/gusemu_hal.c \
-    hw/audio/gusemu_mixer.c \
-    hw/audio/pcspk.c \
-    hw/audio/sb16.c \
-    hw/block/fdc.c \
-    hw/char/debugcon.c \
-    hw/char/parallel.c \
-    hw/cpu/icc_bus.c \
-    hw/display/cirrus_vga.c \
-    hw/display/vga-isa.c \
-    hw/display/vga-pci.c \
-    hw/display/vmware_vga.c \
-    hw/dma/i8257.c \
-    hw/i2c/pm_smbus.c \
-    hw/i2c/smbus_ich9.c \
-    hw/i386/acpi-build.c \
-    hw/i386/bios-linker-loader.c \
-    hw/i386/intel_iommu.c \
-    hw/i386/kvmvapic.c \
-    hw/i386/multiboot.c \
-    hw/i386/pc.c \
-    hw/i386/pc_piix.c \
-    hw/i386/pc_q35.c \
-    hw/i386/pc_sysfw.c \
-    hw/i386/smbios.c \
-    hw/ide/isa.c \
-    hw/ide/piix.c \
-    hw/input/pckbd.c \
-    hw/input/vmmouse.c \
-    hw/intc/apic.c \
-    hw/intc/apic_common.c \
-    hw/intc/i8259.c \
-    hw/intc/i8259_common.c \
-    hw/intc/ioapic.c \
-    hw/intc/ioapic_common.c \
-    hw/isa/apm.c \
-    hw/isa/lpc_ich9.c \
-    hw/mem/pc-dimm.c \
-    hw/misc/applesmc.c \
-    hw/misc/debugexit.c \
-    hw/misc/pc-testdev.c \
-    hw/misc/pvpanic.c \
-    hw/misc/sga.c \
-    hw/misc/vmport.c \
-    hw/net/ne2000-isa.c \
-    hw/pci-host/piix.c \
-    hw/pci-host/q35.c \
-    hw/pci/pci-hotplug-old.c \
-    hw/timer/hpet.c \
-    hw/timer/i8254.c \
-    hw/timer/i8254_common.c \
-    hw/timer/mc146818rtc.c \
-    hw/tpm/tpm_tis.c \
-    hw/watchdog/wdt_ib700.c \
-    target-i386/arch_dump.c \
-    target-i386/arch_memory_mapping.c \
-    target-i386/cc_helper.c \
-    target-i386/cpu.c \
-    target-i386/excp_helper.c \
-    target-i386/fpu_helper.c \
-    target-i386/gdbstub.c \
-    target-i386/helper.c \
-    target-i386/int_helper.c \
-    target-i386/machine.c \
-    target-i386/mem_helper.c \
-    target-i386/misc_helper.c \
-    target-i386/seg_helper.c \
-    target-i386/smm_helper.c \
-    target-i386/svm_helper.c \
-    target-i386/translate.c \
-
 QEMU2_TARGET_i386_SOURCES := \
     hw/acpi/acpi_interface.c \
     hw/acpi/core.c \
@@ -700,72 +617,6 @@ QEMU2_TARGET_i386_SOURCES := \
     target-i386/svm_helper.c \
     target-i386/translate.c \
 
-QEMU2_TARGET_mipsel_SOURCES := \
-    disas/mips.c \
-    hax-stub.c \
-    hw/acpi/acpi_interface.c \
-    hw/acpi/core.c \
-    hw/acpi/cpu_hotplug.c \
-    hw/acpi/ich9.c \
-    hw/acpi/memory_hotplug.c \
-    hw/acpi/pcihp.c \
-    hw/acpi/piix4.c \
-    hw/audio/adlib.c \
-    hw/audio/cs4231a.c \
-    hw/audio/fmopl.c \
-    hw/audio/gus.c \
-    hw/audio/gusemu_hal.c \
-    hw/audio/gusemu_mixer.c \
-    hw/audio/pcspk.c \
-    hw/audio/sb16.c \
-    hw/block/fdc.c \
-    hw/char/parallel.c \
-    hw/core/empty_slot.c \
-    hw/display/cirrus_vga.c \
-    hw/display/g364fb.c \
-    hw/display/jazz_led.c \
-    hw/display/vga-isa-mm.c \
-    hw/display/vga-isa.c \
-    hw/display/vga-pci.c \
-    hw/display/vmware_vga.c \
-    hw/dma/i8257.c \
-    hw/dma/rc4030.c \
-    hw/i2c/pm_smbus.c \
-    hw/i2c/smbus_ich9.c \
-    hw/ide/isa.c \
-    hw/ide/piix.c \
-    hw/input/pckbd.c \
-    hw/intc/i8259.c \
-    hw/intc/i8259_common.c \
-    hw/isa/apm.c \
-    hw/isa/piix4.c \
-    hw/mips/addr.c \
-    hw/mips/cputimer.c \
-    hw/mips/gt64xxx_pci.c \
-    hw/mips/mips_int.c \
-    hw/mips/mips_jazz.c \
-    hw/mips/mips_malta.c \
-    hw/mips/mips_mipssim.c \
-    hw/mips/mips_r4k.c \
-    hw/misc/pc-testdev.c \
-    hw/net/dp8393x.c \
-    hw/net/mipsnet.c \
-    hw/net/ne2000-isa.c \
-    hw/nvram/ds1225y.c \
-    hw/timer/i8254.c \
-    hw/timer/i8254_common.c \
-    hw/timer/mc146818rtc.c \
-    kvm-stub.c \
-    target-mips/cpu.c \
-    target-mips/dsp_helper.c \
-    target-mips/gdbstub.c \
-    target-mips/helper.c \
-    target-mips/lmi_helper.c \
-    target-mips/machine.c \
-    target-mips/msa_helper.c \
-    target-mips/op_helper.c \
-    target-mips/translate.c \
-
 QEMU2_TARGET_mips64el_SOURCES := \
     disas/mips.c \
     hax-stub.c \
@@ -836,14 +687,156 @@ QEMU2_TARGET_mips64el_SOURCES := \
     target-mips/op_helper.c \
     target-mips/translate.c \
 
-QEMU2_TARGET_aarch64_SOURCES_linux-x86_64 := \
-    hw/misc/vfio.c \
-    hw/scsi/vhost-scsi.c \
-    hw/virtio/vhost-backend.c \
-    hw/virtio/vhost-user.c \
-    hw/virtio/vhost.c \
+QEMU2_TARGET_mipsel_SOURCES := \
+    disas/mips.c \
+    hax-stub.c \
+    hw/acpi/acpi_interface.c \
+    hw/acpi/core.c \
+    hw/acpi/cpu_hotplug.c \
+    hw/acpi/ich9.c \
+    hw/acpi/memory_hotplug.c \
+    hw/acpi/pcihp.c \
+    hw/acpi/piix4.c \
+    hw/audio/adlib.c \
+    hw/audio/cs4231a.c \
+    hw/audio/fmopl.c \
+    hw/audio/gus.c \
+    hw/audio/gusemu_hal.c \
+    hw/audio/gusemu_mixer.c \
+    hw/audio/pcspk.c \
+    hw/audio/sb16.c \
+    hw/block/fdc.c \
+    hw/char/parallel.c \
+    hw/core/empty_slot.c \
+    hw/display/cirrus_vga.c \
+    hw/display/g364fb.c \
+    hw/display/jazz_led.c \
+    hw/display/vga-isa-mm.c \
+    hw/display/vga-isa.c \
+    hw/display/vga-pci.c \
+    hw/display/vmware_vga.c \
+    hw/dma/i8257.c \
+    hw/dma/rc4030.c \
+    hw/i2c/pm_smbus.c \
+    hw/i2c/smbus_ich9.c \
+    hw/ide/isa.c \
+    hw/ide/piix.c \
+    hw/input/pckbd.c \
+    hw/intc/i8259.c \
+    hw/intc/i8259_common.c \
+    hw/isa/apm.c \
+    hw/isa/piix4.c \
+    hw/mips/addr.c \
+    hw/mips/cputimer.c \
+    hw/mips/gt64xxx_pci.c \
+    hw/mips/mips_int.c \
+    hw/mips/mips_jazz.c \
+    hw/mips/mips_malta.c \
+    hw/mips/mips_mipssim.c \
+    hw/mips/mips_r4k.c \
+    hw/misc/pc-testdev.c \
+    hw/net/dp8393x.c \
+    hw/net/mipsnet.c \
+    hw/net/ne2000-isa.c \
+    hw/nvram/ds1225y.c \
+    hw/timer/i8254.c \
+    hw/timer/i8254_common.c \
+    hw/timer/mc146818rtc.c \
+    kvm-stub.c \
+    target-mips/cpu.c \
+    target-mips/dsp_helper.c \
+    target-mips/gdbstub.c \
+    target-mips/helper.c \
+    target-mips/lmi_helper.c \
+    target-mips/machine.c \
+    target-mips/msa_helper.c \
+    target-mips/op_helper.c \
+    target-mips/translate.c \
 
-QEMU2_TARGET_aarch64_SOURCES_windows-x86_64 := \
+QEMU2_TARGET_x86_64_SOURCES := \
+    hw/acpi/acpi_interface.c \
+    hw/acpi/core.c \
+    hw/acpi/cpu_hotplug.c \
+    hw/acpi/ich9.c \
+    hw/acpi/memory_hotplug.c \
+    hw/acpi/pcihp.c \
+    hw/acpi/piix4.c \
+    hw/audio/adlib.c \
+    hw/audio/cs4231a.c \
+    hw/audio/fmopl.c \
+    hw/audio/gus.c \
+    hw/audio/gusemu_hal.c \
+    hw/audio/gusemu_mixer.c \
+    hw/audio/pcspk.c \
+    hw/audio/sb16.c \
+    hw/block/fdc.c \
+    hw/char/debugcon.c \
+    hw/char/parallel.c \
+    hw/cpu/icc_bus.c \
+    hw/display/cirrus_vga.c \
+    hw/display/vga-isa.c \
+    hw/display/vga-pci.c \
+    hw/display/vmware_vga.c \
+    hw/dma/i8257.c \
+    hw/i2c/pm_smbus.c \
+    hw/i2c/smbus_ich9.c \
+    hw/i386/acpi-build.c \
+    hw/i386/bios-linker-loader.c \
+    hw/i386/intel_iommu.c \
+    hw/i386/kvmvapic.c \
+    hw/i386/multiboot.c \
+    hw/i386/pc.c \
+    hw/i386/pc_piix.c \
+    hw/i386/pc_q35.c \
+    hw/i386/pc_sysfw.c \
+    hw/i386/smbios.c \
+    hw/ide/isa.c \
+    hw/ide/piix.c \
+    hw/input/pckbd.c \
+    hw/input/vmmouse.c \
+    hw/intc/apic.c \
+    hw/intc/apic_common.c \
+    hw/intc/i8259.c \
+    hw/intc/i8259_common.c \
+    hw/intc/ioapic.c \
+    hw/intc/ioapic_common.c \
+    hw/isa/apm.c \
+    hw/isa/lpc_ich9.c \
+    hw/mem/pc-dimm.c \
+    hw/misc/applesmc.c \
+    hw/misc/debugexit.c \
+    hw/misc/pc-testdev.c \
+    hw/misc/pvpanic.c \
+    hw/misc/sga.c \
+    hw/misc/vmport.c \
+    hw/net/ne2000-isa.c \
+    hw/pci-host/piix.c \
+    hw/pci-host/q35.c \
+    hw/pci/pci-hotplug-old.c \
+    hw/timer/hpet.c \
+    hw/timer/i8254.c \
+    hw/timer/i8254_common.c \
+    hw/timer/mc146818rtc.c \
+    hw/tpm/tpm_tis.c \
+    hw/watchdog/wdt_ib700.c \
+    target-i386/arch_dump.c \
+    target-i386/arch_memory_mapping.c \
+    target-i386/cc_helper.c \
+    target-i386/cpu.c \
+    target-i386/excp_helper.c \
+    target-i386/fpu_helper.c \
+    target-i386/gdbstub.c \
+    target-i386/helper.c \
+    target-i386/int_helper.c \
+    target-i386/machine.c \
+    target-i386/mem_helper.c \
+    target-i386/misc_helper.c \
+    target-i386/seg_helper.c \
+    target-i386/smm_helper.c \
+    target-i386/svm_helper.c \
+    target-i386/translate.c \
+
+QEMU2_TARGET_aarch64_SOURCES_darwin-x86_64 := \
 
 QEMU2_TARGET_aarch64_SOURCES_linux-x86 := \
     hw/misc/vfio.c \
@@ -852,66 +845,25 @@ QEMU2_TARGET_aarch64_SOURCES_linux-x86 := \
     hw/virtio/vhost-user.c \
     hw/virtio/vhost.c \
 
+QEMU2_TARGET_aarch64_SOURCES_linux-x86_64 := \
+    hw/misc/vfio.c \
+    hw/scsi/vhost-scsi.c \
+    hw/virtio/vhost-backend.c \
+    hw/virtio/vhost-user.c \
+    hw/virtio/vhost.c \
+
 QEMU2_TARGET_aarch64_SOURCES_windows-x86 := \
 
-QEMU2_TARGET_aarch64_SOURCES_darwin-x86_64 := \
+QEMU2_TARGET_aarch64_SOURCES_windows-x86_64 := \
 
-QEMU2_TARGET_x86_64_SOURCES_linux-x86_64 := \
-    hax-stub.c \
-    hw/i386/kvm/apic.c \
-    hw/i386/kvm/clock.c \
-    hw/i386/kvm/i8254.c \
-    hw/i386/kvm/i8259.c \
-    hw/i386/kvm/ioapic.c \
-    hw/i386/kvm/pci-assign.c \
-    hw/misc/ivshmem.c \
-    hw/misc/vfio.c \
-    hw/scsi/vhost-scsi.c \
-    hw/virtio/vhost-backend.c \
-    hw/virtio/vhost-user.c \
-    hw/virtio/vhost.c \
-    kvm-all.c \
-    target-i386/kvm.c \
-
-QEMU2_TARGET_x86_64_SOURCES_windows-x86_64 := \
-    kvm-stub.c \
-    target-i386/hax-all.c \
-    target-i386/hax-slot.c \
-    target-i386/hax-windows.c \
-    target-i386/kvm-stub.c \
-
-QEMU2_TARGET_x86_64_SOURCES_linux-x86 := \
-    hax-stub.c \
-    hw/i386/kvm/apic.c \
-    hw/i386/kvm/clock.c \
-    hw/i386/kvm/i8254.c \
-    hw/i386/kvm/i8259.c \
-    hw/i386/kvm/ioapic.c \
-    hw/i386/kvm/pci-assign.c \
-    hw/misc/ivshmem.c \
-    hw/misc/vfio.c \
-    hw/scsi/vhost-scsi.c \
-    hw/virtio/vhost-backend.c \
-    hw/virtio/vhost-user.c \
-    hw/virtio/vhost.c \
-    kvm-all.c \
-    target-i386/kvm.c \
-
-QEMU2_TARGET_x86_64_SOURCES_windows-x86 := \
-    kvm-stub.c \
-    target-i386/hax-all.c \
-    target-i386/hax-slot.c \
-    target-i386/hax-windows.c \
-    target-i386/kvm-stub.c \
-
-QEMU2_TARGET_x86_64_SOURCES_darwin-x86_64 := \
+QEMU2_TARGET_i386_SOURCES_darwin-x86_64 := \
     kvm-stub.c \
     target-i386/hax-all.c \
     target-i386/hax-darwin.c \
     target-i386/hax-slot.c \
     target-i386/kvm-stub.c \
 
-QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
+QEMU2_TARGET_i386_SOURCES_linux-x86 := \
     hax-stub.c \
     hw/i386/kvm/apic.c \
     hw/i386/kvm/clock.c \
@@ -928,14 +880,7 @@ QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
     kvm-all.c \
     target-i386/kvm.c \
 
-QEMU2_TARGET_i386_SOURCES_windows-x86_64 := \
-    kvm-stub.c \
-    target-i386/hax-all.c \
-    target-i386/hax-slot.c \
-    target-i386/hax-windows.c \
-    target-i386/kvm-stub.c \
-
-QEMU2_TARGET_i386_SOURCES_linux-x86 := \
+QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
     hax-stub.c \
     hw/i386/kvm/apic.c \
     hw/i386/kvm/clock.c \
@@ -959,41 +904,14 @@ QEMU2_TARGET_i386_SOURCES_windows-x86 := \
     target-i386/hax-windows.c \
     target-i386/kvm-stub.c \
 
-QEMU2_TARGET_i386_SOURCES_darwin-x86_64 := \
+QEMU2_TARGET_i386_SOURCES_windows-x86_64 := \
     kvm-stub.c \
     target-i386/hax-all.c \
-    target-i386/hax-darwin.c \
     target-i386/hax-slot.c \
+    target-i386/hax-windows.c \
     target-i386/kvm-stub.c \
 
-QEMU2_TARGET_mipsel_SOURCES_linux-x86_64 := \
-    hw/misc/vfio.c \
-    hw/scsi/vhost-scsi.c \
-    hw/virtio/vhost-backend.c \
-    hw/virtio/vhost-user.c \
-    hw/virtio/vhost.c \
-
-QEMU2_TARGET_mipsel_SOURCES_windows-x86_64 := \
-
-QEMU2_TARGET_mipsel_SOURCES_linux-x86 := \
-    hw/misc/vfio.c \
-    hw/scsi/vhost-scsi.c \
-    hw/virtio/vhost-backend.c \
-    hw/virtio/vhost-user.c \
-    hw/virtio/vhost.c \
-
-QEMU2_TARGET_mipsel_SOURCES_windows-x86 := \
-
-QEMU2_TARGET_mipsel_SOURCES_darwin-x86_64 := \
-
-QEMU2_TARGET_mips64el_SOURCES_linux-x86_64 := \
-    hw/misc/vfio.c \
-    hw/scsi/vhost-scsi.c \
-    hw/virtio/vhost-backend.c \
-    hw/virtio/vhost-user.c \
-    hw/virtio/vhost.c \
-
-QEMU2_TARGET_mips64el_SOURCES_windows-x86_64 := \
+QEMU2_TARGET_mips64el_SOURCES_darwin-x86_64 := \
 
 QEMU2_TARGET_mips64el_SOURCES_linux-x86 := \
     hw/misc/vfio.c \
@@ -1002,7 +920,89 @@ QEMU2_TARGET_mips64el_SOURCES_linux-x86 := \
     hw/virtio/vhost-user.c \
     hw/virtio/vhost.c \
 
+QEMU2_TARGET_mips64el_SOURCES_linux-x86_64 := \
+    hw/misc/vfio.c \
+    hw/scsi/vhost-scsi.c \
+    hw/virtio/vhost-backend.c \
+    hw/virtio/vhost-user.c \
+    hw/virtio/vhost.c \
+
 QEMU2_TARGET_mips64el_SOURCES_windows-x86 := \
 
-QEMU2_TARGET_mips64el_SOURCES_darwin-x86_64 := \
+QEMU2_TARGET_mips64el_SOURCES_windows-x86_64 := \
+
+QEMU2_TARGET_mipsel_SOURCES_darwin-x86_64 := \
+
+QEMU2_TARGET_mipsel_SOURCES_linux-x86 := \
+    hw/misc/vfio.c \
+    hw/scsi/vhost-scsi.c \
+    hw/virtio/vhost-backend.c \
+    hw/virtio/vhost-user.c \
+    hw/virtio/vhost.c \
+
+QEMU2_TARGET_mipsel_SOURCES_linux-x86_64 := \
+    hw/misc/vfio.c \
+    hw/scsi/vhost-scsi.c \
+    hw/virtio/vhost-backend.c \
+    hw/virtio/vhost-user.c \
+    hw/virtio/vhost.c \
+
+QEMU2_TARGET_mipsel_SOURCES_windows-x86 := \
+
+QEMU2_TARGET_mipsel_SOURCES_windows-x86_64 := \
+
+QEMU2_TARGET_x86_64_SOURCES_darwin-x86_64 := \
+    kvm-stub.c \
+    target-i386/hax-all.c \
+    target-i386/hax-darwin.c \
+    target-i386/hax-slot.c \
+    target-i386/kvm-stub.c \
+
+QEMU2_TARGET_x86_64_SOURCES_linux-x86 := \
+    hax-stub.c \
+    hw/i386/kvm/apic.c \
+    hw/i386/kvm/clock.c \
+    hw/i386/kvm/i8254.c \
+    hw/i386/kvm/i8259.c \
+    hw/i386/kvm/ioapic.c \
+    hw/i386/kvm/pci-assign.c \
+    hw/misc/ivshmem.c \
+    hw/misc/vfio.c \
+    hw/scsi/vhost-scsi.c \
+    hw/virtio/vhost-backend.c \
+    hw/virtio/vhost-user.c \
+    hw/virtio/vhost.c \
+    kvm-all.c \
+    target-i386/kvm.c \
+
+QEMU2_TARGET_x86_64_SOURCES_linux-x86_64 := \
+    hax-stub.c \
+    hw/i386/kvm/apic.c \
+    hw/i386/kvm/clock.c \
+    hw/i386/kvm/i8254.c \
+    hw/i386/kvm/i8259.c \
+    hw/i386/kvm/ioapic.c \
+    hw/i386/kvm/pci-assign.c \
+    hw/misc/ivshmem.c \
+    hw/misc/vfio.c \
+    hw/scsi/vhost-scsi.c \
+    hw/virtio/vhost-backend.c \
+    hw/virtio/vhost-user.c \
+    hw/virtio/vhost.c \
+    kvm-all.c \
+    target-i386/kvm.c \
+
+QEMU2_TARGET_x86_64_SOURCES_windows-x86 := \
+    kvm-stub.c \
+    target-i386/hax-all.c \
+    target-i386/hax-slot.c \
+    target-i386/hax-windows.c \
+    target-i386/kvm-stub.c \
+
+QEMU2_TARGET_x86_64_SOURCES_windows-x86_64 := \
+    kvm-stub.c \
+    target-i386/hax-all.c \
+    target-i386/hax-slot.c \
+    target-i386/hax-windows.c \
+    target-i386/kvm-stub.c \
 
