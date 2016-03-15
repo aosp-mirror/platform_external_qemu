@@ -190,7 +190,6 @@ static void initialize_console_and_adb(void)
                      MONITOR_DYNAMIC_CMDS);
         android_base_port = baseport;
 
-        printf("console on port %d, ADB on port %d\n", baseport, baseport + 1);
         return;
     }
     error_report("it seems too many emulator instances are running "

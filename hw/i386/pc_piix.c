@@ -157,7 +157,6 @@ static void android_init_console_and_adb(int console_baseport,
                      MONITOR_DYNAMIC_CMDS);
         android_base_port = baseport;
 
-        printf("console on port %d, ADB on port %d\n", baseport, baseport + 1);
         return;
     }
     error_report("it seems too many emulator instances are running "
@@ -868,7 +867,7 @@ static QEMUMachine pc_machine_v0_14 = {
     PC_I440FX_1_2_MACHINE_OPTIONS,
     .name = "pc-0.14",
     .compat_props = (GlobalProperty[]) {
-        PC_COMPAT_0_14, 
+        PC_COMPAT_0_14,
         {
             .driver   = "qxl",
             .property = "revision",

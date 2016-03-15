@@ -506,7 +506,6 @@ static void initialize_console_and_adb(VirtBoardInfo *vbi)
                      MONITOR_ANDROID_CONSOLE |
                      MONITOR_USE_READLINE |
                      MONITOR_DYNAMIC_CMDS);
-        printf("console on port %d, ADB on port %d\n", baseport, baseport + 1);
         android_base_port = baseport;
         return;
     }
