@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "17c6f1d9_6e1423d0",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumCalculator.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-15T21:06:51Z",
+      "side": 1,
+      "message": "cool!",
+      "range": {
+        "startLine": 31,
+        "startChar": 7,
+        "endLine": 31,
+        "endChar": 16
+      },
+      "revId": "851771f7512e7901638272c5a786c5542443d88f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17c6f1d9_8ecd1fae",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumCalculator.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-15T21:06:51Z",
+      "side": 1,
+      "message": "all 4s -\u003e sizeof(...) ?",
+      "range": {
+        "startLine": 98,
+        "startChar": 38,
+        "endLine": 98,
+        "endChar": 39
+      },
+      "revId": "851771f7512e7901638272c5a786c5542443d88f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
