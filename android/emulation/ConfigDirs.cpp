@@ -63,11 +63,10 @@ std::string ConfigDirs::getAvdRootDirectory() {
 }
 
 // static
-std::string ConfigDirs::getSdkRootDirectory() {
-    std::string sdkRoot;
+std::string ConfigDirs::getSdkRootDirectoryByEnv() {
     auto system = System::get();
+    std::string sdkRoot = system->envGet("ANDROID_SDK_ROOT");
 
-    sdkRoot = system->envGet("ANDROID_SDK_ROOT");
     if (sdkRoot.size()) {
         // Unquote a possibly "quoted" path.
         if (sdkRoot[0] == '"') {
@@ -82,16 +81,32 @@ std::string ConfigDirs::getSdkRootDirectory() {
             return sdkRoot;
         }
     }
+    return std::string();
+}
 
-    // Otherwise, infer from the path of the emulator's binary.
+std::string ConfigDirs::getSdkRootDirectoryByPath() {
+    auto system = System::get();
+
     auto parts = PathUtils::decompose(system->getLauncherDirectory());
     parts.push_back("..");
     PathUtils::simplifyComponents(&parts);
-    sdkRoot = PathUtils::recompose(parts);
+
+    std::string sdkRoot = PathUtils::recompose(parts);
     if (system->pathIsDir(sdkRoot) && system->pathCanRead(sdkRoot)) {
         return sdkRoot;
     }
     return std::string();
+}
+
+// static
+std::string ConfigDirs::getSdkRootDirectory() {
+    std::string sdkRoot = getSdkRootDirectoryByEnv();
+    if (!sdkRoot.empty()) {
+        return sdkRoot;
+    }
+
+    // Otherwise, infer from the path of the emulator's binary.
+    return getSdkRootDirectoryByPath();
 }
 
 }  // namespace android

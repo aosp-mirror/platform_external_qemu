@@ -785,6 +785,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
     if (mFirstShowEvent) {
         showAvdArchWarning();
         showGpuWarning();
+        mToolWindow->setupAdbPath();
     }
     mFirstShowEvent = false;
 
