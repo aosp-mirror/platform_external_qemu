@@ -202,7 +202,7 @@
     </attribute>
     <widget class="QPlainTextEdit" name="help_adbSerialNumberBox">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -229,6 +229,9 @@
      </property>
      <property name="horizontalScrollBarPolicy">
       <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
      </property>
      <property name="plainText">
       <string notr="true">emulator-5554</string>
@@ -308,7 +311,7 @@
     </widget>
     <widget class="QPlainTextEdit" name="help_versionBox">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -342,13 +345,16 @@
      <property name="undoRedoEnabled">
       <bool>false</bool>
      </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
      <property name="plainText">
       <string>1.4</string>
      </property>
     </widget>
     <widget class="QPlainTextEdit" name="help_androidVersionBox">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -382,13 +388,16 @@
      <property name="undoRedoEnabled">
       <bool>false</bool>
      </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
      <property name="plainText">
       <string>Unknown API version</string>
      </property>
     </widget>
     <widget class="QPlainTextEdit" name="help_latestVersionBox">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -421,6 +430,9 @@
      </property>
      <property name="undoRedoEnabled">
       <bool>false</bool>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
      </property>
      <property name="plainText">
       <string>Unavailable</string>

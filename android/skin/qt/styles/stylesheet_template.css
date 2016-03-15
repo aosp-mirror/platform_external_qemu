@@ -3,7 +3,7 @@
   This software is licensed under the terms of the GNU General Public
   License version 2, as published by the Free Software Foundation, and
   may be copied, distributed, and modified under those terms.
- 
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -39,16 +39,17 @@
     background-color: %%BKG_COLOR%%;
 }
 QGroupBox::title { margin-top: 4px; margin-left: 0px }
-QPlainTextEdit:disabled, QTextEdit:disabled, QLineEdit:disabled { border: 0px }
-QPlainTextEdit, QTextEdit, QLineEdit {
+QTextEdit:disabled, QLineEdit:disabled { border: 0px }
+QTextEdit, QLineEdit {
     border-top: 0px;
     border-bottom: 1px solid %%EDIT_COLOR%%;
 }
-QPlainTextEdit:disabled {
-    background: transparent
-}
 QLineEdit:focus {
     border-bottom: 2px solid %%TOOL_COLOR%%;
+}
+QPlainTextEdit:disabled, QPlainTextEdit[readOnly=true] {
+    border: 0px;
+    background: transparent
 }
 QPlainTextEdit {
     background: %%TAB_BKG_COLOR%%;
