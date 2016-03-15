@@ -22,6 +22,30 @@
       "revId": "36512b91c4774bd54cb6f33ed8a86f6e3b0b6078",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17c6f1d9_99d72b69",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/render_api.entries",
+        "patchSetId": 17
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-03-15T22:39:00Z",
+      "side": 1,
+      "message": "Typedefing the function types totally works (although it seems we need to do this outside render_api_functions, or there is a redefinition error). Thanks!",
+      "parentUuid": "17c6f1d9_d987e3cf",
+      "range": {
+        "startLine": 15,
+        "startChar": 2,
+        "endLine": 16,
+        "endChar": 3
+      },
+      "revId": "36512b91c4774bd54cb6f33ed8a86f6e3b0b6078",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
