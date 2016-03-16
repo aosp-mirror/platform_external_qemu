@@ -419,20 +419,6 @@ QString ToolWindow::getAdbFullPath(QStringList* args) {
     return adbPath;
 }
 
-QString ToolWindow::getScreenshotSaveFile()
-{
-    QDateTime currentTime = QDateTime::currentDateTime();
-    QString fileName = "Screenshot_" + currentTime.toString("yyyyMMdd-HHmmss") + ".png";
-    QString dirName = getScreenshotSaveDirectory();
-
-    // An empty directory means the designated save location is not valid.
-    if (dirName.isEmpty()) {
-        return dirName;
-    }
-
-    return QDir::toNativeSeparators(QDir(dirName).filePath(fileName));
-}
-
 void ToolWindow::runAdbInstall(const QString &path)
 {
     if (mInstallProcess.state() != QProcess::NotRunning) {

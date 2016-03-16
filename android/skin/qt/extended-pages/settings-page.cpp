@@ -15,6 +15,7 @@
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/ScreenCapturer.h"
 #include <QApplication>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -35,8 +36,8 @@ SettingsPage::SettingsPage(QWidget *parent) :
     mUi->set_saveLocBox->installEventFilter(this);
     mUi->set_adbPathBox->installEventFilter(this);
 
-    QString savePath =
-        QDir::toNativeSeparators(getScreenshotSaveDirectory());
+    QString savePath = QDir::toNativeSeparators(
+            android::qt::ScreenCapturer::getSaveDirectory());
 
     if (savePath.isEmpty()) {
         mUi->set_saveLocBox->setText(tr("None"));

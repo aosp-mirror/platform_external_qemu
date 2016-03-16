@@ -60,6 +60,7 @@
 #endif
 
 using namespace android::base;
+using android::qt::ScreenCapturer;
 
 // Make sure it is POD here
 static LazyInstance<EmulatorQtWindow::Ptr> sInstance = LAZY_INSTANCE_INIT;
@@ -138,15 +139,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(this, &EmulatorQtWindow::runOnUiThread, this, &EmulatorQtWindow::slot_runOnUiThread);
     QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit, this, &EmulatorQtWindow::slot_clearInstance);
 
-    QObject::connect(&mScreencapProcess, SIGNAL(finished(int)), this, SLOT(slot_screencapFinished(int)));
-    QObject::connect(&mScreencapProcess,
-                     SIGNAL(error(QProcess::ProcessError)), this,
-                     SLOT(slot_showProcessErrorDialog(QProcess::ProcessError)));
-    QObject::connect(&mScreencapPullProcess, SIGNAL(finished(int)), this, SLOT(slot_screencapPullFinished(int)));
-    QObject::connect(&mScreencapPullProcess,
-                     SIGNAL(error(QProcess::ProcessError)), this,
-                     SLOT(slot_showProcessErrorDialog(QProcess::ProcessError)));
-
     QObject::connect(mContainer.horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_horizontalScrollChanged(int)));
     QObject::connect(mContainer.verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_verticalScrollChanged(int)));
     QObject::connect(mContainer.horizontalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(slot_scrollRangeChanged(int,int)));
@@ -189,22 +181,8 @@ EmulatorQtWindow* EmulatorQtWindow::getInstance()
     return getInstancePtr().get();
 }
 
-// Helper for EmulatorQtWindow dtor to shut down
-// screenshot processes.
-static void safeKillProcess(QProcess& process) {
-    // We're exiting, so we don't care about signals
-    // emitted by these processes.
-    process.blockSignals(true);
-    // Stop the process forcefully.
-    process.kill();
-}
-
 EmulatorQtWindow::~EmulatorQtWindow()
 {
-    // Kill those processes to avoid potential races.
-    safeKillProcess(mScreencapPullProcess);
-    safeKillProcess(mScreencapProcess);
-
     deleteErrorDialog();
     if (mToolWindow) {
         delete mToolWindow;
@@ -268,26 +246,6 @@ void EmulatorQtWindow::showGpuWarning()
         mGpuWarningBox.setCheckBox(checkbox);
         mGpuWarningBox.show();
     }
-}
-
-void EmulatorQtWindow::slot_showProcessErrorDialog(
-        QProcess::ProcessError exitStatus) {
-    QString msg;
-    switch (exitStatus) {
-        case QProcess::Timedout:
-            // Our wait for process starting is best effort. If we timed out,
-            // meh.
-            return;
-        case QProcess::FailedToStart:
-            msg =
-                    tr("Failed to start process.<br/>"
-                       "Check settings to verify that your chosen ADB path "
-                       "is valid.");
-            break;
-        default:
-            msg = tr("Unexpected error occured while grabbing screenshot.");
-    }
-    showErrorDialog(msg, tr("Screenshot"));
 }
 
 void EmulatorQtWindow::slot_startupTick() {
@@ -815,7 +773,7 @@ void EmulatorQtWindow::slot_scrollRangeChanged(int min, int max)
 
 void EmulatorQtWindow::screenshot()
 {
-    if (mScreencapProcess.state() != QProcess::NotRunning) {
+    if (mScreenCapturer && mScreenCapturer->inFlight()) {
         // Modal dialogs should prevent this
         return;
     }
@@ -826,75 +784,58 @@ void EmulatorQtWindow::screenshot()
         return;
     }
 
-    // Add the arguments
-    args << "shell";                // Running a shell command
-    args << "screencap";            // Take a screen capture
-    args << "-p";                   // Print it to a file
-    args << REMOTE_SCREENSHOT_FILE; // The temporary screenshot file
+    // We must reset the object on every request because the path to adb might
+    // have changed.
+    mScreenCapturer.reset(new android::qt::ScreenCapturer(
+            command, args,
+            [this](ScreenCapturer::Result result, const QString& errString) {
+                EmulatorQtWindow::screenshotDone(result, errString);
+            }));
 
-    // Display the flash animation immediately as feedback - if it fails, an error dialog will
-    // indicate as such.
+    // Display the flash animation immediately as feedback - if it fails, an
+    // error dialog will indicate as such.
     mOverlay.showAsFlash();
-
-    mScreencapProcess.start(command, args);
-    // TODO(pprabhu): It is a bad idea to call |waitForStarted| from the GUI
-    // thread, because it can freeze the UI till timeout.
-    if (!mScreencapProcess.waitForStarted(5000)) {
-        slot_showProcessErrorDialog(mScreencapProcess.error());
-    }
+    mScreenCapturer->start();
 }
 
+void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result,
+                                      const QString& errString) {
+    auto detail = errString;
+    detail = detail.replace('\n', "<br/>");
+    QString msg;
+    switch (result) {
+        case ScreenCapturer::Result::kSuccess:
+             return;
 
-void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
-{
-    if (exitStatus) {
-        QByteArray er = mScreencapProcess.readAllStandardError();
-        er = er.replace('\n', "<br/>");
-        QString msg = tr("The screenshot could not be captured. Output:<br/><br/>") + QString(er);
-        showErrorDialog(msg, tr("Screenshot"));
-    } else {
-        // Pull the image from its remote location to the desired location
-        QStringList args;
-        QString command = mToolWindow->getAdbFullPath(&args);
-        if (command.isNull()) {
-            return;
-        }
+        case ScreenCapturer::Result::kOperationInProgress:
+            msg += tr("Another screen capture is already in progress.<br/>");
+            msg += tr("Please try again later.");
+            break;
+        case ScreenCapturer::Result::kCaptureFailed:
+            msg += tr(
+                    "The screenshot could not be captured. Output:<br/><br/>");
+            msg += detail;
+            break;
+        case ScreenCapturer::Result::kSaveLocationInvalid:
+            msg +=
+                    tr("The screenshot save location is invalid.<br/>"
+                       "Check the settings page and ensure the directory "
+                       "exists and is writeable.");
+            break;
+        case ScreenCapturer::Result::kPullFailed:
+            msg +=
+                    tr("The screenshot could not be loaded from the device."
+                       "Output:<br/><br/>");
+            msg += detail;
+            break;
+        default:
+            msg += tr("Unexpected error:<br/><br/>");
+            if (!detail.isEmpty()) {
+                msg += detail;
+            }
+     }
 
-        // Add the arguments
-        args << "pull";                 // Pulling a file
-        args << REMOTE_SCREENSHOT_FILE; // Which file to pull
-
-        QString fileName = mToolWindow->getScreenshotSaveFile();
-        if (fileName.isEmpty()) {
-            showErrorDialog(tr("The screenshot save location is invalid.<br/>"
-                               "Check the settings page and ensure the directory "
-                               "exists and is writable."),
-                            tr("Screenshot"));
-            return;
-        }
-
-        args << fileName;
-
-        // Use a different process to avoid infinite looping when pulling the
-        // file.
-        mScreencapPullProcess.start(command, args);
-        // TODO(pprabhu): It is a bad idea to call |waitForStarted| from the GUI
-        // thread, because it can freeze the UI till timeout.
-        if (!mScreencapPullProcess.waitForStarted(5000)) {
-            slot_showProcessErrorDialog(mScreencapPullProcess.error());
-        }
-    }
-}
-
-void EmulatorQtWindow::slot_screencapPullFinished(int exitStatus)
-{
-    if (exitStatus) {
-        QByteArray er = mScreencapPullProcess.readAllStandardError();
-        er = er.replace('\n', "<br/>");
-        QString msg = tr("The screenshot could not be loaded from the device. Output:<br/><br/>")
-                        + QString(er);
-        showErrorDialog(msg, tr("Screenshot"));
-    }
+    showErrorDialog(msg, tr("Screenshot"));
 }
 
 // Convert a Qt::Key_XXX code into the corresponding Linux keycode value.
