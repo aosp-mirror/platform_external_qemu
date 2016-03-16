@@ -518,7 +518,12 @@ _avdInfo_getApiLevel( AvdInfo*  i )
         }
     }
     if (p == NULL || !isdigit(*p)) {
-        goto NOT_A_NUMBER;
+        // current preview versions of N have 'N' as their target
+        if (p[0] == 'N' && p[1] == 0) {
+            level = 24;
+        } else {
+            goto NOT_A_NUMBER;
+        }
     } else {
         char* end;
         long  val = strtol(p, &end, 10);
