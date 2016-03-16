@@ -112,6 +112,7 @@ private:
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void paintEvent(QPaintEvent*) override;
     virtual void hideEvent(QHideEvent* event) override;
+    virtual void showEvent(QShowEvent* event) override;
 
     QWidget *button_area;
     EmulatorQtWindow *emulator_window;

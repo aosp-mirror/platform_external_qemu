@@ -10,12 +10,6 @@
  ** GNU General Public License for more details.
  */
 
-#include <QCoreApplication>
-#include <QDateTime>
-#include <QPushButton>
-#include <QSettings>
-#include <QtWidgets>
-
 #include "android/android.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
@@ -35,6 +29,16 @@
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/tool-window.h"
 #include "ui_tools.h"
+
+#if defined(__APPLE__)
+#include "android/skin/qt/mac-native-window.h"
+#endif
+
+#include <QCoreApplication>
+#include <QDateTime>
+#include <QPushButton>
+#include <QSettings>
+#include <QtWidgets>
 
 #include <cassert>
 #include <string>
@@ -359,6 +363,14 @@ void ToolWindow::hideEvent(QHideEvent*) {
     mIsExtendedWindowActiveOnHide =
             extendedWindow != nullptr
             && QApplication::activeWindow() == extendedWindow;
+}
+
+void ToolWindow::showEvent(QShowEvent*) {
+#ifdef __APPLE__
+    WId toolWid = effectiveWinId();
+    toolWid = (WId)getNSWindow((void*)toolWid);
+    nsWindowSetToolBarCollectionBehavior((void*)toolWid);
+#endif
 }
 
 void ToolWindow::show()

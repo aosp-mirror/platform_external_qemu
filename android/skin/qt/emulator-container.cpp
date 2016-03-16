@@ -142,7 +142,16 @@ bool EmulatorContainer::event(QEvent* e) {
         }
 
 #endif
+    } else {
+#ifdef __APPLE__
+        if (e->type() == QEvent::NonClientAreaMouseMove ||
+            e->type() == QEvent::Enter || e->type() == QEvent::Leave) {
+            mEmulatorWindow->toolWindow()->hide();
+            mEmulatorWindow->toolWindow()->show();
+            mEmulatorWindow->toolWindow()->activateWindow();
+        }
     }
+#endif
 
     return QScrollArea::event(e);
 }
