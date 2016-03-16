@@ -37,6 +37,10 @@
 #include "android/skin/qt/tool-window.h"
 #include "android/utils/debug.h"
 
+#if defined(__APPLE__)
+#include "android/skin/qt/mac-native-window.h"
+#endif
+
 #include <cassert>
 #include <string>
 
@@ -198,6 +202,14 @@ void ToolWindow::hideEvent(QHideEvent*) {
     if (mExtendedWindow) {
         mIsExtendedWindowVisibleOnShow = mExtendedWindow->isVisible();
     }
+}
+
+void ToolWindow::showEvent(QShowEvent*) {
+#ifdef __APPLE__
+    WId toolWid = effectiveWinId();
+    toolWid = (WId)getNSWindow((void*)toolWid);
+    nsWindowSetToolBarCollectionBehavior((void*)toolWid);
+#endif
 }
 
 void ToolWindow::show() {

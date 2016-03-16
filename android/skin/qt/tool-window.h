@@ -105,6 +105,7 @@ private:
     virtual void mousePressEvent(QMouseEvent* event) override;
     virtual void paintEvent(QPaintEvent*) override;
     virtual void hideEvent(QHideEvent* event) override;
+    virtual void showEvent(QShowEvent* event) override;
 
     EmulatorQtWindow* mEmulatorWindow;
     std::unique_ptr<ExtendedWindow> mExtendedWindow;
