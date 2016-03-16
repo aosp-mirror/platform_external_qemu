@@ -277,7 +277,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 dump "$(builder_text) Building $PKG_NAME"
                 case $SYSTEM in
                     windows-*)
-                        export LDFLAGS="-static -s -Xlinker --build-id"
+                        export LDFLAGS="-static -Xlinker --build-id"
                         export CXXFLAGS="-std=gnu++11"
                         ;;
                 esac
