@@ -95,6 +95,7 @@ typedef struct {
     gboolean    data_out;       /* can we output data? */
     adb_pipe *adb_pipes[PIPE_QUEUE_LEN];
     adb_pipe *connected_pipe;
+    guint       listen_chan_event; /* an event id if we're listening or 0 */
 } adb_backend_state;
 
 struct adb_timer_data_struct {
@@ -205,7 +206,6 @@ static gboolean tcp_adb_accept(GIOChannel *channel, GIOCondition cond,
 */
 static void tcp_adb_server_close(adb_backend_state *bs)
 {
-    g_assert(bs->chan);
     g_assert(bs->listen_chan);
 
     /* clean-up connected pipes */
@@ -216,13 +216,17 @@ static void tcp_adb_server_close(adb_backend_state *bs)
         bs->connected_pipe = NULL;
     }
 
-    /* wait for new connections */
-    g_io_add_watch(bs->listen_chan, G_IO_IN, tcp_adb_accept, bs);
-
-    /* finally close down this socket */
-    g_io_channel_shutdown(bs->chan, FALSE, NULL);
-    g_io_channel_unref(bs->chan);
-    bs->chan = NULL;
+    if (bs->listen_chan_event == 0) {
+        /* wait for new connections */
+        bs->listen_chan_event =
+                g_io_add_watch(bs->listen_chan, G_IO_IN, tcp_adb_accept, bs);
+    }
+    if (bs->chan) {
+        /* close down this socket */
+        g_io_channel_shutdown(bs->chan, FALSE, NULL);
+        g_io_channel_unref(bs->chan);
+        bs->chan = NULL;
+    }
 }
 
 /*
@@ -291,6 +295,10 @@ static gboolean tcp_adb_connect(adb_backend_state *bs, int fd)
 
         qemu_set_nonblock(fd);
         bs->chan = io_channel_from_socket(fd);
+        if (!bs->chan) {
+            close(fd);
+            return FALSE;
+        }
 
         /* If we don't have a pipe to use for the tcp backend, then find one in
          * the accept state.  Note, this can happen, for example, if the previous
@@ -347,13 +355,14 @@ static gboolean tcp_adb_accept(GIOChannel *channel, GIOCondition cond,
         fd = qemu_accept(g_io_channel_unix_get_fd(bs->listen_chan), addr, &len);
         if (fd < 0 && errno != EINTR) {
             DPRINTF("%s: failed to accept %d/%d\n", __func__, fd, errno);
-            return FALSE;
+            return TRUE; // couldn't add a connection, let's try again
         } else if (fd >= 0) {
             break;
         }
     }
 
     if (tcp_adb_connect(bs, fd)) {
+        bs->listen_chan_event = 0;
         return FALSE;
     } else {
         return TRUE;
@@ -369,12 +378,14 @@ static bool adb_server_listen_incoming(int port)
 
     host_port = g_strdup_printf("127.0.0.1:%d", port);
     fd = inet_listen(host_port, NULL, 0, SOCK_STREAM, 0, &err);
+    g_free(host_port);
     if (fd < 0) {
         return false;
     }
 
     bs->listen_chan = io_channel_from_socket(fd);
-    g_io_add_watch(bs->listen_chan, G_IO_IN, tcp_adb_accept, bs);
+    bs->listen_chan_event =
+            g_io_add_watch(bs->listen_chan, G_IO_IN, tcp_adb_accept, bs);
     return true;
 }
 
@@ -797,6 +808,7 @@ bool qemu2_adb_server_init(int port)
     if (!pipe_backend_initialized) {
         adb_state.chan = NULL;
         adb_state.listen_chan = NULL;
+        adb_state.listen_chan_event = 0;
         adb_state.data_in = FALSE;
         adb_state.connected_pipe = NULL;
 
