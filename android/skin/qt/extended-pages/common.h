@@ -18,12 +18,8 @@
 // corresponding icon for the button.
 void setButtonEnabled(QPushButton*  button, SettingsTheme theme, bool isEnabled);
 
-
 // Determine if a directory (path) is writable
 bool directoryIsWritable(const QString& dirName);
-
-// Get the path to the folder where screenshots are saved.
-QString getScreenshotSaveDirectory();
 
 // Get the currently active UI theme.
 SettingsTheme getSelectedTheme();

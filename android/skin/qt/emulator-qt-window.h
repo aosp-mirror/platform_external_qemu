@@ -23,7 +23,6 @@
 #include <QMoveEvent>
 #include <QObject>
 #include <QPainter>
-#include <QProcess>
 #include <QResizeEvent>
 #include <QWidget>
 
@@ -35,6 +34,7 @@
 #include "android/skin/qt/emulator-container.h"
 #include "android/skin/qt/emulator-overlay.h"
 #include "android/skin/qt/error-dialog.h"
+#include "android/skin/qt/ScreenCapturer.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/skin/qt/ui-event-recorder.h"
 
@@ -194,16 +194,11 @@ private slots:
     void slot_avdArchWarningMessageAccepted();
     void slot_gpuWarningMessageAccepted();
 
-    void slot_showProcessErrorDialog(QProcess::ProcessError exitStatus);
-
     /*
      Here are conventional slots that perform interesting high-level functions in the emulator. These can be hooked up to signals
      from UI elements or called independently.
      */
 public slots:
-    void slot_screencapFinished(int exitStatus);
-    void slot_screencapPullFinished(int exitStatus);
-
     void activateWindow();
     void raise();
     void setForwardShortcutsToDevice(int index);
@@ -233,6 +228,9 @@ private:
     QString getTmpImagePath();
     void setFrameOnTop(QFrame* frame, bool onTop);
 
+    void screenshotDone(android::qt::ScreenCapturer::Result result,
+                        const QString& errString);
+
     void* mBatteryState;
 
     QTimer          mStartupTimer;
@@ -252,8 +250,6 @@ private:
     bool mForwardShortcutsToDevice;
     QPoint mPrevMousePosition;
 
-    QProcess mScreencapProcess;
-    QProcess mScreencapPullProcess;
     MainLoopThread *mMainLoopThread;
 
     QMessageBox mAvdWarningBox;
@@ -261,6 +257,7 @@ private:
     bool mFirstShowEvent;
 
     EventCapturer mEventCapturer;
+    std::shared_ptr<android::qt::ScreenCapturer> mScreenCapturer;
     std::shared_ptr<UIEventRecorder<android::base::CircularBuffer>>
         mEventLogger;
 };

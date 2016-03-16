@@ -60,6 +60,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/size-tweaker.cpp \
     android/skin/qt/QtLooper.cpp \
     android/skin/qt/qt-ui-commands.cpp \
+    android/skin/qt/ScreenCapturer.cpp \
     android/skin/qt/stylesheet.cpp \
     android/skin/qt/tool-window.cpp \
 
@@ -85,6 +86,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-window.h \
     android/skin/qt/raised-material-button.h \
     android/skin/qt/size-tweaker.h \
+    android/skin/qt/ScreenCapturer.h \
     android/skin/qt/QtTimerImpl.h \
     android/skin/qt/tool-window.h \
 
