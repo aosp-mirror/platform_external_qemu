@@ -30,7 +30,6 @@ void user_config_done( void );
 
 void user_config_get_window_pos( int *window_x, int *window_y );
 
-extern SkinKeyset*  android_keyset;
 void parse_keyset(const char*  keyset, AndroidOptions*  opts);
 void write_default_keyset( void );
 
@@ -43,9 +42,6 @@ void parse_skin_files(const char*      skinDirPath,
                       AndroidHwConfig* hwConfig,
                       AConfig*        *skinConfig,
                       char*           *skinPath);
-
-/* Returns the amount of pixels used by the default display. */
-int64_t  get_screen_pixels(AConfig*  skinConfig);
 
 void ui_init(AConfig*          skinConfig,
              const char*       skinPath,
