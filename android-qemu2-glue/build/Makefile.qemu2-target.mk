@@ -129,6 +129,4 @@ LOCAL_LDLIBS += \
 
 LOCAL_INSTALL_DIR := qemu/$(BUILD_TARGET_TAG)
 
-LOCAL_GENERATE_SYMBOLS := true
-
 $(call end-emulator-program)
