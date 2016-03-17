@@ -214,6 +214,7 @@ LOCAL_SRC_FILES := \
     android/emulation/bufprint_config_dirs.cpp \
     android/emulation/ConfigDirs.cpp \
     android/emulation/control/LineConsumer.cpp \
+    android/emulation/control/ScreenCapturer.cpp \
     android/emulation/CpuAccelerator.cpp \
     android/emulation/nand_limits.c \
     android/emulation/qemud/android_qemud_client.cpp \
