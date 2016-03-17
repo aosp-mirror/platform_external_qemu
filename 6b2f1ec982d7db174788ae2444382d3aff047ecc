@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_2f38eacb",
+        "filename": "android/base/system/System_unittest.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-17T23:17:08Z",
+      "side": 1,
+      "message": "very nit: could you please make it \"static_cast\u003cbool\u003e(getline ...)\"?",
+      "range": {
+        "startLine": 432,
+        "startChar": 20,
+        "endLine": 432,
+        "endChar": 46
+      },
+      "revId": "6b2f1ec982d7db174788ae2444382d3aff047ecc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
