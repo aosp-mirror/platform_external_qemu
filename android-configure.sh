@@ -620,8 +620,8 @@ fi
 # Build the config.make file
 #
 
-# Prebuilts
-PREBUILT_SYMBOLS=
+PREBUILT_PATH_PAIRS=
+PREBUILT_SYMPATH_PAIRS=
 
 # Copy a single file
 # $1: Source file path.
@@ -657,28 +657,30 @@ copy_file () {
 }
 
 
-# Copy a prebuilt file
+# Set a prebuilt file to be copied
 # $1: PKG root directory
 # $2: Source file path relative to PKG SRC directory
 # $3: Destination file path (not a directory!) relative to OUT_DIR
 install_prebuilt_dll () {
-    local PKG_SRC="$1"
-    local SRC_FILE="$2"
-    local DST_FILE="$3"
-    local SRC_PATH="$PKG_SRC/$SRC_FILE"
-    local SRC_SYMBOL_PATH="$PKG_SRC/symbols/$SRC_FILE.sym"
+    local SRC_FILE="$1"
+    local DST_FILE="$2"
 
-    copy_file "$SRC_PATH" "$DST_FILE"
-
-    # Symbol file does not exist for symlinks
-    if [ ! -L $SRC_PATH ]; then
-        if [ ! -f $SRC_SYMBOL_PATH ]; then
-            log "WARNING Couldn't find symbol for $SRC_PATH : $SRC_SYMBOL_PATH"
-        else
-            PREBUILT_SYMBOLS="$PREBUILT_SYMBOLS $SRC_SYMBOL_PATH"
-        fi
+    if [ -L $SRC_FILE ]; then
+        PREBUILT_SYMPATH_PAIRS="$PREBUILT_SYMPATH_PAIRS $SRC_FILE:$DST_FILE"
+    else
+        PREBUILT_PATH_PAIRS="$PREBUILT_PATH_PAIRS $SRC_FILE:$DST_FILE"
     fi
 }
+
+PREBUILT_ARCHS=
+case $HOST_OS in
+    windows)
+        PREBUILT_ARCHS="x86 x86_64"
+        ;;
+    *)
+        PREBUILT_ARCHS="x86_64"
+        ;;
+esac
 
 ###
 ### Copy Swiftshader if available
@@ -698,7 +700,7 @@ if [ -d $SWIFTSHADER_PREBUILTS_DIR ]; then
         *)
     esac
     for LIBNAME in EGL GLES_CM GLESv2; do
-        for SWIFTSHADER_ARCH in x86 x86_64; do
+        for SWIFTSHADER_ARCH in $PREBUILT_ARCHS; do
             if [ "$SWIFTSHADER_ARCH" = "x86" ]; then
                 SWIFTSHADER_LIBDIR=lib
             else
@@ -710,8 +712,7 @@ if [ -d $SWIFTSHADER_PREBUILTS_DIR ]; then
             SWIFTSHADER_DSTDIR="$OUT_DIR/$SWIFTSHADER_LIBDIR/gles_swiftshader"
             SWIFTSHADER_DSTLIB="$FINAL_LIBNAME"
             if [ -f "$SWIFTSHADER_SRCDIR/lib/$SWIFTSHADER_LIBNAME" ]; then
-                install_prebuilt_dll "$SWIFTSHADER_SRCDIR" \
-                                 "lib/$SWIFTSHADER_LIBNAME" \
+                install_prebuilt_dll "$SWIFTSHADER_SRCDIR/lib/$SWIFTSHADER_LIBNAME" \
                                  "$SWIFTSHADER_DSTDIR/$SWIFTSHADER_DSTLIB"
             fi
         done
@@ -730,13 +731,13 @@ if [ -d $MESA_PREBUILTS_DIR ]; then
             MESA_LIBNAME=opengl32.dll
             ;;
         linux)
-            MESA_LIBNAME=libGL.so
+            MESA_LIBNAME="libGL.so libGL.so.1"
             ;;
         *)
             MESA_LIBNAME=
     esac
     for LIBNAME in $MESA_LIBNAME; do
-        for MESA_ARCH in x86 x86_64; do
+        for MESA_ARCH in $PREBUILT_ARCHS; do
             if [ "$MESA_ARCH" = "x86" ]; then
                 MESA_LIBDIR=lib
             else
@@ -748,23 +749,14 @@ if [ -d $MESA_PREBUILTS_DIR ]; then
             if [ "$LIBNAME" = "opengl32.dll" ]; then
                 MESA_DSTLIB="mesa_opengl32.dll"
             fi
-            install_prebuilt_dll "$MESA_SRCDIR" "lib/$LIBNAME" "$MESA_DSTDIR/$MESA_DSTLIB"
-            if [ "$HOST_OS" = "linux" -a "$LIBNAME" = "libGL.so" ]; then
-                # Special handling for Linux, this is needed because SDL
-                # will actually try to load libGL.so.1 before GPU emulation
-                # is initialized. This is actually a link to the system's
-                # libGL.so, and will thus prevent the Mesa version from
-                # loading. By creating the symlink, Mesa will also be used
-                # by SDL.
-                ln -sf libGL.so "$MESA_DSTDIR/libGL.so.1"
-            fi
+            install_prebuilt_dll "$MESA_SRCDIR/lib/$LIBNAME" "$MESA_DSTDIR/$MESA_DSTLIB"
         done
     done
 fi
 
 # Copy Qt shared libraries, if needed.
 log "Copying Qt prebuilt libraries from $QT_PREBUILTS_DIR"
-for QT_ARCH in x86 x86_64; do
+for QT_ARCH in $PREBUILT_ARCHS; do
     QT_SRCDIR=$QT_PREBUILTS_DIR/$HOST_OS-$QT_ARCH
     case $QT_ARCH in
         x86) QT_DSTDIR=$OUT_DIR/lib/qt;;
@@ -780,7 +772,7 @@ for QT_ARCH in x86 x86_64; do
         darwin) QT_DLL_FILTER="*.dylib";;
         *) QT_DLL_FILTER="*.so*";;
     esac
-    QT_LIBS=$(cd "$QT_SRCDIR" && find . -name "$QT_DLL_FILTER" ! -name "*.sym" 2>/dev/null)
+    QT_LIBS=$(cd "$QT_SRCDIR" && find . -name "$QT_DLL_FILTER" -not -path "*.dSYM/*" 2>/dev/null)
     if [ -z "$QT_LIBS" ]; then
         panic "Cannot find Qt prebuilt libraries!?"
     fi
@@ -793,13 +785,13 @@ for QT_ARCH in x86 x86_64; do
             # are always copied to $OUT_DIR/lib[64]/qt/lib/.
             QT_DST_LIB=$(printf %s "$QT_DST_LIB" | sed -e 's|^bin/|lib/|g')
         fi
-        install_prebuilt_dll "$QT_SRCDIR" "$QT_LIB" "$QT_DSTDIR/$QT_DST_LIB"
+        install_prebuilt_dll "$QT_SRCDIR/$QT_LIB" "$QT_DSTDIR/$QT_DST_LIB"
     done
 done
 
 # Copy e2fsprogs binaries.
 log "Copying e2fsprogs binaries."
-for E2FS_ARCH in x86 x86_64; do
+for E2FS_ARCH in $PREBUILT_ARCHS; do
     # NOTE: in windows only 32-bit binaries are available, so we'll copy the
     # 32-bit executables to the bin64/ directory to cover all our bases
     case $HOST_OS in
@@ -950,11 +942,6 @@ if [ "$OPTION_STRIP" = "yes" ]; then
 fi
 if [ "$OPTION_SYMBOLS" = "yes" ]; then
     echo "BUILD_GENERATE_SYMBOLS := true" >> $config_mk
-    echo "BUILD_PREBUILT_SYMBOLS := \\" >> $config_mk
-    for PREBUILT_SYMBOL in $PREBUILT_SYMBOLS;
-    do
-        echo "    $PREBUILT_SYMBOL \\" >> $config_mk
-    done
     echo "" >> $config_mk
 fi
 if [ "$OPTION_CRASHUPLOAD" = "prod" ]; then
@@ -993,6 +980,20 @@ if [ -z "$OPTION_PREBUILT_QEMU2" ]; then
         echo "QEMU2_TOP_DIR := $QEMU2_TOP_DIR" >> $config_mk
     fi
 fi
+
+echo "PREBUILT_PATH_PAIRS := \\" >> $config_mk
+for PREBUILT_PATH_PAIR in $PREBUILT_PATH_PAIRS;
+do
+    echo "    $PREBUILT_PATH_PAIR \\" >> $config_mk
+done
+echo "" >> $config_mk
+
+echo "PREBUILT_SYMPATH_PAIRS := \\" >> $config_mk
+for PREBUILT_SYMPATH_PAIR in $PREBUILT_SYMPATH_PAIRS;
+do
+    echo "    $PREBUILT_SYMPATH_PAIR \\" >> $config_mk
+done
+echo "" >> $config_mk
 
 # Build the config-host.h file
 #

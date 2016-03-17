@@ -532,6 +532,32 @@ aosp_prebuilt_breakpad_dump_syms_for () {
     printf %s "${SYMTOOL_PATH}"
 }
 
+# Build debug_info from unstripped binaries
+# Platform specific. On mac, generates the dSYMs alongside the libraries
+#
+# $1: Src root directory
+# $2: Target root directory
+# $3+: List of binary paths relative to Src root
+build_debug_info () {
+    local SRC_ROOT="$1"
+    local DEST_ROOT="$2"
+    shift
+    shift
+    local BINARY_FILES="$@"
+    for BINARY in $BINARY_FILES; do
+        if [ "$(get_build_os)" = "darwin" ]; then
+            DSYM_DIR=$DEST_ROOT/$BINARY.dSYM
+            if [ -L "$SRC_ROOT"/$BINARY ]; then
+                DEST=`readlink $SRC_ROOT/$BINARY`
+                ln -fs $DEST.dSYM $DSYM_DIR
+            else
+                dsymutil --out=$DSYM_DIR $SRC_ROOT/$BINARY ||
+                panic "Failed to create dsym for $SRC_ROOT/$BINARY"
+            fi
+        fi
+    done
+}
+
 # Build breakpad symbols from unstripped binaries
 # Builds a symbols directory at the destination root dir and populates it with
 # *.sym extension symbol files mirroring the binary file paths
