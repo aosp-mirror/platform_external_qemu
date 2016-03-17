@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_6ba49de3",
+        "filename": "android/skin/qt/ScreenCapturer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-17T18:48:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c5c0e36_db9e7329",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 5
+      },
+      "revId": "a02816072f5deee33c136c06f834f771c113cca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5c5c0e36_fbca5717",
         "filename": "android/skin/qt/ScreenCapturer.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-17T01:20:30Z",
       "side": 1,
       "message": "is this really needs to be done at each constructor call?",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 72
+      },
+      "revId": "a02816072f5deee33c136c06f834f771c113cca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_4e5e07ed",
+        "filename": "android/skin/qt/ScreenCapturer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-17T18:48:59Z",
+      "side": 1,
+      "message": "I hate Qt\u0027s metatyping.\n\nMoved to using a private data member instead of a slot argument.",
+      "parentUuid": "5c5c0e36_fbca5717",
       "range": {
         "startLine": 64,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_ae7ce346",
+        "filename": "android/skin/qt/ScreenCapturer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-17T18:48:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c5c0e36_3b546ff4",
+      "range": {
+        "startLine": 113,
+        "startChar": 4,
+        "endLine": 114,
+        "endChar": 79
+      },
+      "revId": "a02816072f5deee33c136c06f834f771c113cca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5c5c0e36_fb293768",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2016-03-17T01:20:30Z",
       "side": 1,
       "message": "what if we destroy the emulator window while capture\u0027s in progress? it feels to me like we\u0027d get an access violation - mScreenCapturer is deleted but its async call might access |this|",
+      "range": {
+        "startLine": 789,
+        "startChar": 5,
+        "endLine": 789,
+        "endChar": 19
+      },
+      "revId": "a02816072f5deee33c136c06f834f771c113cca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_4e456721",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 789,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-17T18:48:59Z",
+      "side": 1,
+      "message": "Done. Like other places we\u0027ve had to solve this, managed ownership with shared_ptr.\n\nMore and more we find repeating this pattern when using android::base::async.\n.. smells like base/ should support this.",
+      "parentUuid": "5c5c0e36_fb293768",
       "range": {
         "startLine": 789,
         "startChar": 5,
