@@ -58,7 +58,7 @@ struct AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild);
  * modified by the function, |hw| is the hardware configuration that will
  * be modified by the function, and |avd| is the AVD information data.
  */
-void handleCommonEmulatorOptions(AndroidOptions* opts,
+bool handleCommonEmulatorOptions(AndroidOptions* opts,
                                  AndroidHwConfig* hw,
                                  AvdInfo* avd);
 

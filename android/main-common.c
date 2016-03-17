@@ -502,7 +502,7 @@ AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild)
  * hw_sdCard_path
  * hw_ramSize
  */
-void handleCommonEmulatorOptions(AndroidOptions* opts,
+bool handleCommonEmulatorOptions(AndroidOptions* opts,
                                  AndroidHwConfig* hw,
                                  AvdInfo* avd) {
     int forceArmv7 = 0;
@@ -526,13 +526,13 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
                 } else {
                     derror( "ANDROID_SDK_ROOT is undefined");
                 }
-                exit(2);
+                return false;
             }
             D("autoconfig: -kernel %s", kernelFile);
         }
         if (!path_exists(kernelFile)) {
             derror( "Invalid or missing kernel image file: %s", kernelFile );
-            exit(2);
+            return false;
         }
 
         hw->kernel_path = kernelFile;
@@ -597,14 +597,14 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
                                               sizeof(versionString))) {
         derror("Can't find 'Linux version ' string in kernel image file: %s",
                hw->kernel_path);
-        exit(2);
+        return false;
     }
 
     KernelVersion kernelVersion = 0;
     if (!android_parseLinuxVersionString(versionString, &kernelVersion)) {
         derror("Can't parse 'Linux version ' string in kernel image file: '%s'",
                versionString);
-        exit(2);
+        return false;
     }
 
     // make sure we're using the proper engine (qemu1/qemu2) for the kernel
@@ -612,13 +612,13 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
         derror("New emulator backend requires minimum kernel version 3.10+ (currently got lower)\n"
                "Please make sure you've got updated system images and do not force the specific "
                "kernel image together with the engine version");
-        exit(2);
+        return false;
     } else if (!opts->ranchu && kernelVersion >= KERNEL_VERSION_3_10_0) {
         char* kernel_file = path_basename(hw->kernel_path);
         if (kernel_file && !strcmp(kernel_file, "kernel-ranchu")) {
             derror("This kernel requires the new emulation engine\n"
                    "Please do not force the specific kernel image together with the engine version");
-            exit(2);
+            return false;
         }
         free(kernel_file);
     }
@@ -693,7 +693,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
     if (opts->sysdir != NULL) {
         if (!path_exists(opts->sysdir)) {
             derror("Directory does not exist: %s", opts->sysdir);
-            exit(1);
+            return false;
         }
     }
 
@@ -759,7 +759,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
 
         if (path_get_size(systemImage, &systemBytes) < 0) {
             derror("Missing system image: %s", systemImage);
-            exit(1);
+            return false;
         }
 
         hw->disk_systemPartition_size =
@@ -789,7 +789,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
                 dataImage = avdInfo_getDefaultDataImagePath(avd);
                 if (dataImage == NULL) {
                     derror("No data image path for this configuration!");
-                    exit (1);
+                    return false;
                 }
                 opts->wipe_data = 1;
                 break;
@@ -806,7 +806,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
             initImage = ASTRDUP(opts->initdata);
             if (!path_exists(initImage)) {
                 derror("Invalid initial data image path: %s", initImage);
-                exit(1);
+                return false;
             }
         } else {
             initImage = avdInfo_getDataInitImagePath(avd);
@@ -876,7 +876,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
 
         if (sizeMB < 0 || *end != 0) {
             derror( "-cache-size must be followed by a positive integer" );
-            exit(1);
+            return false;
         }
         hw->disk_cachePartition_size = (uint64_t) sizeMB * ONE_MB;
     }
@@ -939,7 +939,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
         if ((strcmp(opts->selinux, "permissive") != 0)
                 && (strcmp(opts->selinux, "disabled") != 0)) {
             derror("-selinux must be \"disabled\" or \"permissive\"");
-            exit(1);
+            return false;
         }
 
         // SELinux 'disabled' mode is no longer supported starting with M.
@@ -960,7 +960,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
         long   ramSize = strtol(opts->memory, &end, 0);
         if (ramSize < 0 || *end != 0) {
             derror( "-memory must be followed by a positive integer" );
-            exit(1);
+            return false;
         }
         hw->hw_ramSize = ramSize;
     }
@@ -1326,6 +1326,8 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
         dwarning("Increasing vm heap size to %iMB", minVMHeapSize);
         hw->vm_heapSize = minVMHeapSize;
     }
+
+    return true;
 }
 
 bool handleCpuAcceleration(AndroidOptions* opts, AvdInfo* avd,

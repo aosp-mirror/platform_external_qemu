@@ -204,9 +204,6 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    // we know it's qemu1, and don't care what user wanted to trick us into
-    opts->ranchu = 0;
-
     while (argc-- > 1) {
         opt = (++argv)[0];
 
@@ -440,7 +437,11 @@ int main(int argc, char **argv) {
 #endif
     }
 
-    handleCommonEmulatorOptions(opts, hw, avd);
+    // we know it's qemu1, and don't care what user wanted to trick us into
+    opts->ranchu = 0;
+    if (!handleCommonEmulatorOptions(opts, hw, avd)) {
+        return 1;
+    }
 
     n = 1;
 
