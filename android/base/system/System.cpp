@@ -519,7 +519,8 @@ public:
                     RunOptions options,
                     System::Duration timeoutMs,
                     System::ProcessExitCode* outExitCode,
-                    System::Pid* outChildPid) override {
+                    System::Pid* outChildPid,
+                    const std::string& outputFile) override {
         // Sanity check.
         if (commandLine.empty()) {
             return false;
@@ -529,7 +530,37 @@ public:
         std::vector<std::string> commandLineCopy = commandLine;
         STARTUPINFOW startup = {};
         startup.cb = sizeof(startup);
-        if ((options & RunOptions::ShowOutput) == 0) {
+
+        // Open new stdout and stderr handles if requested
+        android::base::Win32Utils::ScopedHandle outputHandle(nullptr);
+        if ((options & RunOptions::DumpOutputToFile) != 0 &&
+            !outputFile.empty()) {
+            Win32UnicodeString fileUnicode(outputFile);
+
+            // Use this struct to allow the file handle to be inherited by
+            // the child process.
+            SECURITY_ATTRIBUTES attribs;
+            attribs.nLength = sizeof(attribs);
+            attribs.lpSecurityDescriptor = nullptr; // Use the default DACL
+            attribs.bInheritHandle = TRUE;          // Let children inherit
+
+            outputHandle.reset(::CreateFileW(fileUnicode.c_str(),
+                                         GENERIC_WRITE,      // Write only
+                                         FILE_SHARE_READ,    // Others read
+                                         &attribs,           // Inherit handle
+                                         CREATE_ALWAYS,      // Create/truncate
+                                         FILE_ATTRIBUTE_NORMAL,
+                                         nullptr));           // No template
+
+            if (outputHandle > 0) {
+                startup.dwFlags |= STARTF_USESTDHANDLES;
+                startup.hStdOutput = outputHandle.get();
+                startup.hStdError = outputHandle.get();
+            }
+        }
+
+        if ((options & RunOptions::ShowOutput) == 0 ||
+            outputHandle <= 0) {
             startup.dwFlags = STARTF_USESHOWWINDOW;
 
             // 'Normal' way of hiding console output is passing null std handles
@@ -652,7 +683,7 @@ public:
             return false;
         }
         auto result = runCommandPosix(commandLine, options, timeoutMs,
-                                      outExitCode, outChildPid);
+                                      outExitCode, outChildPid, outputFile);
         pthread_sigmask(SIG_SETMASK, &oldset, nullptr);
         return result;
 #endif  // !_WIN32
@@ -698,7 +729,8 @@ public:
                          RunOptions options,
                          System::Duration timeoutMs,
                          System::ProcessExitCode* outExitCode,
-                         System::Pid* outChildPid) {
+                         System::Pid* outChildPid,
+                         const std::string& outputFile) {
         char** const params = new char*[commandLine.size() + 1];
         for (size_t i = 0; i < commandLine.size(); ++i) {
             params[i] = const_cast<char*>(commandLine[i].c_str());
@@ -715,6 +747,22 @@ public:
             cmd += "|";
         }
 
+        // If an output file was requested, open it before forking, since
+        // creating a file in the child of a multi-threaded process is sketchy.
+        //
+        // It will be immediately closed in the parent process, and dup2'd into
+        // stdout and stderr in the child process.
+        int outputFd = 0;
+        if ((options & RunOptions::DumpOutputToFile) != 0 &&
+            !outputFile.empty()) {
+
+            // Ensure the umask doesn't get in the way while creating the
+            // output file.
+            mode_t old = umask(0);
+            outputFd = open(outputFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0700);
+            umask(old);
+        }
+
         int pid = fork();
         if (pid < 0) {
             LOG(VERBOSE) << "Failed to fork for command " << cmd;
@@ -725,6 +773,11 @@ public:
             delete[] params;
             if (outChildPid) {
                 *outChildPid = pid;
+            }
+
+            // Immediately close the output file if it exists
+            if (outputFd > 0) {
+                close(outputFd);
             }
 
             if ((options & RunOptions::WaitForCompletion) == 0) {
@@ -782,10 +835,15 @@ public:
         // stdout/stderr. None of it is safe in the child process forked from a
         // parent with multiple threads.
 
-        if (!(options & RunOptions::ShowOutput)) {
+        // Hide all output unless specified or if the desired output file
+        // could not be created or opened.
+        if (!(options & RunOptions::ShowOutput) || outputFd <= 0) {
             int fd = open("/dev/null", O_WRONLY);
             dup2(fd, 1);
             dup2(fd, 2);
+        } else {
+            dup2(outputFd, 1);
+            dup2(outputFd, 2);
         }
         if (execvp(commandLine[0].c_str(), params) == -1) {
             // emulator doesn't really like exit calls from a forked process
