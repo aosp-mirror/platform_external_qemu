@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_0f21a696",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 569,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-17T23:21:23Z",
+      "side": 1,
+      "message": "It was only a problem when using echo - I can\u0027t see this being a problem anywhere else.",
+      "parentUuid": "7c21d2e1_ef92520b",
+      "range": {
+        "startLine": 562,
+        "startChar": 0,
+        "endLine": 569,
+        "endChar": 50
+      },
+      "revId": "3a9d9e340fefd8248689cf48c6626f738024dcca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_4f19debc",
         "filename": "android/base/system/System.h",
         "patchSetId": 5
@@ -59,6 +83,30 @@
       "writtenOn": "2016-03-17T23:15:39Z",
       "side": 1,
       "message": "could you please group all STL headers together with \u003cstring\u003e ?",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 18
+      },
+      "revId": "3a9d9e340fefd8248689cf48c6626f738024dcca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_2fe90a63",
+        "filename": "android/base/system/System_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-17T23:21:23Z",
+      "side": 1,
+      "message": "Whoops, my bad.",
+      "parentUuid": "7c21d2e1_8f5bd62b",
       "range": {
         "startLine": 23,
         "startChar": 0,
@@ -106,6 +154,30 @@
       "side": 1,
       "message": "how exactly does it not work? what\u0027s the result?\nit\u0027s supposed to be cross-platform, so it might be another our bug",
       "parentUuid": "7c21d2e1_0f4ec6b2",
+      "range": {
+        "startLine": 431,
+        "startChar": 20,
+        "endLine": 431,
+        "endChar": 27
+      },
+      "revId": "3a9d9e340fefd8248689cf48c6626f738024dcca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_0f0246ef",
+        "filename": "android/base/system/System_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-17T23:21:23Z",
+      "side": 1,
+      "message": "It just didn\u0027t compile. Adding a !! in front made it work. I have no idea...",
+      "parentUuid": "7c21d2e1_6fbdc292",
       "range": {
         "startLine": 431,
         "startChar": 20,
