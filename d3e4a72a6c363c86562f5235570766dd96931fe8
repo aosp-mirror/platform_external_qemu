@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_6ed2eb4a",
+        "filename": "android/skin/qt/ScreenCapturer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-17T18:50:46Z",
+      "side": 1,
+      "message": "RFC: We don\u0027t have multiple inheritance.\nIn this case, both of these parent classes are not an \"is-a\" relationship.\n\nInstead, they are functionalities that can only be obtained via inheritance.\n\nIf we hate this, I can write a simple QtSignalSlot object that takes two std::functions and gives you a signal-slot relationship between them. ScreenCapturer then uses composition to obtain signal-slot.\n\nThoughts?",
+      "range": {
+        "startLine": 32,
+        "startChar": 23,
+        "endLine": 33,
+        "endChar": 75
+      },
+      "revId": "d3e4a72a6c363c86562f5235570766dd96931fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
