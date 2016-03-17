@@ -66,6 +66,8 @@ enum class RunOptions {
 
     ShowOutput = 4,
 
+    DumpOutputToFile = RunOptions::ShowOutput | 8,
+
     Default = 0,  // don't wait, hide all output
 };
 
@@ -275,9 +277,14 @@ public:
     //     timeoutMs: If |options| includes WaitForCompletion, this argument
     //             specifies the maximum time to wait before aborting the
     //             command. Waits forever if set to 0.
+    //     outExitCode: An optional pointer to an existing location where the
+    //             exit code for the launched process is returned.
     //     outChildPid: An optional pointer to an existing location where the
-    //             pid for the launched child process is returned. Only valid if
-    //             function returns true.
+    //             pid for the launched child process is returned. Only valid
+    //             if function returns true.
+    //     outTempFile: An optional string containing the name of a file to
+    //             redirect stdout and stderr to. Only used if |options|
+    //             includes DumpOutputToFile.
     //
     // Returns true if the function succeeded in running the command. If you
     // request |RunOptions::WaitForCompletion|, this does not mean that the
@@ -288,7 +295,8 @@ public:
                             RunOptions options = RunOptions::Default,
                             System::Duration timeoutMs = kInfinite,
                             System::ProcessExitCode* outExitCode = nullptr,
-                            System::Pid* outChildPid = nullptr) = 0;
+                            System::Pid* outChildPid = nullptr,
+                            const std::string& outTempFile = "") = 0;
 
 protected:
     static System* setForTesting(System* system);

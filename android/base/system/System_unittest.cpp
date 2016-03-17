@@ -406,5 +406,29 @@ TEST(System, runCommandTimeout) {
     EXPECT_GT(pid, 0);
 }
 
+TEST(System, runCommandWithOutput) {
+#ifndef _WIN32
+    std::vector<std::string> cmd = {"echo", "hello"};
+#else
+    std::vector<std::string> cmd = {"cmd.exe", "/C", "echo", "hello"};
+#endif
+    System::ProcessExitCode exitCode = 0;
+    System::Pid pid = 666;
+    std::string outputFile = PathUtils::recompose({System::get()->getTempDir(), std::string("test.txt")});
+    printf("Temp file %s\n", outputFile.c_str()); fflush(stdout);
+
+    EXPECT_TRUE(System::get()->runCommand(cmd, RunOptions::WaitForCompletion | RunOptions::DumpOutputToFile,
+                                          System::kInfinite, &exitCode,
+                                          &pid, outputFile));
+    EXPECT_EQ(0, exitCode);
+    EXPECT_GT(pid, 0);
+
+    EXPECT_TRUE(System::get()->pathExists(outputFile));
+    EXPECT_TRUE(System::get()->pathIsFile(outputFile));
+    EXPECT_TRUE(System::get()->pathCanRead(outputFile));
+
+    EXPECT_EQ(0, std::remove(outputFile.c_str()));
+}
+
 }  // namespace base
 }  // namespace android
