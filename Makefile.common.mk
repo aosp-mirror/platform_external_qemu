@@ -144,8 +144,6 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
     # Ensure this is always built, even if 32-bit binaries are disabled.
     LOCAL_IGNORE_BITNESS := true
 
-    LOCAL_GENERATE_SYMBOLS := true
-
     ifeq ($(BUILD_TARGET_OS),windows)
     $(eval $(call insert-windows-icon))
     endif
@@ -173,7 +171,6 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
     LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
 
     LOCAL_IGNORE_BITNESS := true
-    LOCAL_GENERATE_SYMBOLS := true
 
     ifeq ($(BUILD_TARGET_OS),windows)
     $(eval $(call insert-windows-icon))
