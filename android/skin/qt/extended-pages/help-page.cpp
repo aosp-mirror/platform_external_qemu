@@ -19,11 +19,11 @@
 #include <QThread>
 #include <QUrl>
 
-const QString DOCS_URL =
+const char DOCS_URL[] =
     "http://developer.android.com/r/studio-ui/emulator.html";
-const QString FILE_BUG_URL =
+const char FILE_BUG_URL[] =
     "https://code.google.com/p/android/issues/entry?template=Android%20Emulator%20Bug";
-const QString SEND_FEEDBACK_URL =
+const char SEND_FEEDBACK_URL[] =
     "https://code.google.com/p/android/issues/entry?template=Emulator%20Feature%20Request";
 
 static QString apiVersionString(int apiVersion)
@@ -135,15 +135,15 @@ void HelpPage::initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand
 }
 
 void HelpPage::on_help_docs_clicked() {
-    QDesktopServices::openUrl(QUrl(DOCS_URL));
+    QDesktopServices::openUrl(QUrl::fromEncoded(DOCS_URL));
 }
 
 void HelpPage::on_help_fileBug_clicked() {
-    QDesktopServices::openUrl(QUrl(FILE_BUG_URL));
+    QDesktopServices::openUrl(QUrl::fromEncoded(FILE_BUG_URL));
 }
 
 void HelpPage::on_help_sendFeedback_clicked() {
-    QDesktopServices::openUrl(QUrl(SEND_FEEDBACK_URL));
+    QDesktopServices::openUrl(QUrl::fromEncoded(SEND_FEEDBACK_URL));
 }
 
 void LatestVersionLoadTask::run() {
