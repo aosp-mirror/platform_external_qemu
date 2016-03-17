@@ -151,7 +151,7 @@ public:
     void addBuffer(const void* buf, size_t bufLen);
     // Write the checksum from the list of buffers to outputChecksum
     // Will reset the list of buffers by calling resetChecksum.
-    // Return false if the buffer is not long enough
+    // Return false if the buffer is not long enough0001
     // Please query buffer size from checksumByteSize()
     bool writeChecksum(void* outputChecksum, size_t outputChecksumLen);
     // Restore the states for computing checksums.
@@ -160,8 +160,8 @@ public:
     // Notes: it doesn't update the internal read / write counter
     void resetChecksum();
 
-    // Calculate the checksum from the list of buffers and
-    // compare it with the checksum encoded in expectedChecksum
+    // Calculate the checksum from the list of buffers and1000
+    // compare it with the checksum encoded in expectedChecksum0001
     // Will reset the list of buffers by calling resetChecksum.
     bool validate(const void* expectedChecksum, size_t expectedChecksumLen);
 protected:
@@ -173,9 +173,14 @@ protected:
     // m_isEncodingChecksum is true when between addBuffer and writeChecksum
     bool m_isEncodingChecksum = false;
 private:
-    // Compute a 32bit checksum
-    // Used in protocol v1
+    // protocol v1
+    // Compute a 32bit checksum from the buffer list
     uint32_t computeV1Checksum();
     // The buffer used in protocol version 1 to compute checksum.
     uint32_t m_v1BufferTotalLength = 0;
+    
+    // protocol v2
+    uint32_t m_v2PartialCRC;
+    void addBufferV2(const void* buf, size_t bufLen);
+    void crcTest();
 };

@@ -27,15 +27,16 @@
 // 4. update addBuffer, writeChecksum, resetChecksum, validate
 
 // change CHECKSUMHELPER_MAX_VERSION when you want to update the protocol version
-#define CHECKSUMHELPER_MAX_VERSION 1
+#define CHECKSUMHELPER_MAX_VERSION 2
 
 // checksum buffer size
 // Please add a new checksum buffer size when implementing a new protocol,
 // as well as modifying the maxChecksumSize function.
 static const size_t kV1ChecksumSize = 8;
+static const size_t kV2ChecksumSize = 8;
 
 static constexpr size_t maxChecksumSize() {
-    return 0 > kV1ChecksumSize ? 0 : kV1ChecksumSize;
+    return kV2ChecksumSize > kV1ChecksumSize ? kV2ChecksumSize : kV1ChecksumSize;
 }
 
 static const size_t kMaxChecksumSize = maxChecksumSize();
@@ -70,6 +71,7 @@ bool ChecksumCalculator::setVersion(uint32_t version) {
         return false;
     }
     m_version = version;
+    resetChecksum();
     LOG_CHECKSUMHELPER("%s: ChecksumCalculator Set Version %d\n", __FUNCTION__,
                 m_version);
     return true;
@@ -81,6 +83,8 @@ size_t ChecksumCalculator::checksumByteSize() const {
             return 0;
         case 1:
             return sizeof(uint32_t) + sizeof(m_numWrite);
+        case 2:
+            return sizeof(m_v2PartialCRC) + sizeof(m_numWrite);
         default:
             return 0;
     }
@@ -91,6 +95,9 @@ void ChecksumCalculator::addBuffer(const void* buf, size_t packetLen) {
     switch (m_version) {
         case 1:
             m_v1BufferTotalLength += packetLen;
+            break;
+        case 2:
+            addBufferV2(buf, packetLen);
             break;
     }
 }
@@ -105,6 +112,11 @@ bool ChecksumCalculator::writeChecksum(void* outputChecksum, size_t outputChecks
             memcpy(checksumPtr+sizeof(val), &m_numWrite, sizeof(m_numWrite));
             break;
         }
+        case 2: {
+            memcpy(checksumPtr, &m_v2PartialCRC, sizeof(m_v2PartialCRC));
+            memcpy(checksumPtr+sizeof(m_v2PartialCRC), &m_numWrite, sizeof(m_numWrite));
+            break;
+        }
     }
     resetChecksum();
     m_numWrite++;
@@ -115,6 +127,9 @@ void ChecksumCalculator::resetChecksum() {
     switch (m_version) {
         case 1:
             m_v1BufferTotalLength = 0;
+            break;
+        case 2:
+            m_v2PartialCRC = 0;
             break;
     }
     m_isEncodingChecksum = false;
@@ -136,6 +151,11 @@ bool ChecksumCalculator::validate(const void* expectedChecksum, size_t expectedC
             memcpy(sChecksumBuffer+sizeof(val), &m_numRead, sizeof(m_numRead));
             break;
         }
+        case 2: {
+            memcpy(sChecksumBuffer, &m_v2PartialCRC, sizeof(m_v2PartialCRC));
+            memcpy(sChecksumBuffer+sizeof(m_v2PartialCRC), &m_numRead, sizeof(m_numRead));
+            break;
+        }
     }
     bool isValid = !memcmp(sChecksumBuffer, expectedChecksum, checksumSize);
     m_numRead++;
@@ -151,4 +171,72 @@ uint32_t ChecksumCalculator::computeV1Checksum() {
     revLen = (revLen & 0xcccccccc) >> 2 | (revLen & 0x33333333) << 2;
     revLen = (revLen & 0xaaaaaaaa) >> 1 | (revLen & 0x55555555) << 1;
     return revLen;
+}
+
+// Version 2, CRC protocol
+// CRC-32, reversed order
+static const uint32_t kV2CRCPoly = 0xEDB88320;
+static const size_t kV2LookupTableBits = 8;
+static const size_t kV2LookupTableSize = 256;
+
+// Compute CRC value for a CRC table entry
+// crc:         current crc value (initialized as the entry index being computed)
+// k:           number of bits not yet processed
+// crcPoly:     the constant crc polynomial
+// Use this at compile time to construct crc lookup table.
+static constexpr uint32_t v2ComputeCRC(uint32_t crc, int k, uint32_t crcPoly) {
+    return k == 0 ? crc :
+        v2ComputeCRC(crc & 1 ? crc >> 1 ^ crcPoly : crc >> 1, k-1, crcPoly);
+}
+
+// A very tricky method to initialize CRC table at compile time.
+// It recursively calls a variadic template function to construct the array.
+// The ending of the recursion needs to be determined by function overload
+// tricks.
+//
+// C++ has too much restriction on compile time variable initialization, forcing
+// us to write such crazy code...
+struct V2CRCTable {
+    uint32_t val[kV2LookupTableSize];
+};
+
+// An auxiliary structure to tell compiler which overload function to use
+template <bool IsDone>
+struct V2CRCTableBranch { };
+
+template <>
+struct V2CRCTableBranch<true> {
+    typedef bool Ok;
+};
+
+// Called at the end of CRC table construction recursion.
+// Must be declared before the recursive version of v2ComputeCRCTable
+template <int Bits, int Size, typename... T>
+constexpr V2CRCTable v2ComputeCRCTable(uint32_t crcPoly,
+                                       typename V2CRCTableBranch< (Size==0) >::Ok,
+                                       T... table) {
+    return V2CRCTable{{table...}};
+}
+
+// Calls a variadic template function to construct the CRC table, append the new
+// CRC to the end of the variable list for the next level recursion.
+template <int Bits, int Size, typename... T>
+constexpr V2CRCTable v2ComputeCRCTable(uint32_t crcPoly,
+                                       typename V2CRCTableBranch< (Size>0) >::Ok,
+                                       T... table) {
+    return  v2ComputeCRCTable<Bits, Size-1>(crcPoly, true,
+            v2ComputeCRC(Size-1, Bits, crcPoly), table...);
+}
+
+static constexpr V2CRCTable kV2CRCTable = v2ComputeCRCTable<kV2LookupTableBits,
+                                                kV2LookupTableSize>
+                                                (kV2CRCPoly, true);
+
+// Runtime CRC update code
+void ChecksumCalculator::addBufferV2(const void* buf, size_t bufLen) {
+    unsigned char* ptr = (unsigned char*)buf;
+    for (size_t i=0; i<bufLen; i++) {
+        // Standard one-line CRC update code (reversed CRC)
+        m_v2PartialCRC = (m_v2PartialCRC >> 8) ^ kV2CRCTable.val[(m_v2PartialCRC & 0xff) ^ ptr[i]];
+    }
 }
