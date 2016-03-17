@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5c5c0e36_db9e7329",
+        "filename": "android/skin/qt/ScreenCapturer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-17T01:20:30Z",
+      "side": 1,
+      "message": "you could do this for only one of the vectors and later assign it to another one\nthen add the strings that differ",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 5
+      },
+      "revId": "a02816072f5deee33c136c06f834f771c113cca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c5c0e36_fbca5717",
+        "filename": "android/skin/qt/ScreenCapturer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-17T01:20:30Z",
+      "side": 1,
+      "message": "is this really needs to be done at each constructor call?",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 72
+      },
+      "revId": "a02816072f5deee33c136c06f834f771c113cca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c5c0e36_3b546ff4",
+        "filename": "android/skin/qt/ScreenCapturer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-17T01:20:30Z",
+      "side": 1,
+      "message": "please use QString::arg()\nhttp://doc.qt.io/qt-5/qstring.html#arg",
+      "range": {
+        "startLine": 113,
+        "startChar": 4,
+        "endLine": 114,
+        "endChar": 79
+      },
+      "revId": "a02816072f5deee33c136c06f834f771c113cca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c5c0e36_fb293768",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 789,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-17T01:20:30Z",
+      "side": 1,
+      "message": "what if we destroy the emulator window while capture\u0027s in progress? it feels to me like we\u0027d get an access violation - mScreenCapturer is deleted but its async call might access |this|",
+      "range": {
+        "startLine": 789,
+        "startChar": 5,
+        "endLine": 789,
+        "endChar": 19
+      },
+      "revId": "a02816072f5deee33c136c06f834f771c113cca1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
