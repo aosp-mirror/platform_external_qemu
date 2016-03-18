@@ -367,11 +367,9 @@ extern "C" int main(int argc, char **argv) {
         if (exitStatus == EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER) {
             // Copy all QEMU options to |args|, and set |n| to the number
             // of options in |args| (|argc| must be positive here).
-            n = 1;
-            do {
+            for (n = 1; n < argc; ++n) {
                 args[n] = argv[n - 1];
-            } while (n++ < argc);
-            args[n] = NULL;
+            }
 
             // Skip the translation of command-line options and jump
             // straight to qemu_main().
@@ -385,30 +383,8 @@ extern "C" int main(int argc, char **argv) {
     // just because we know that we're in the new emulator as we got here
     opts->ranchu = 1;
 
-    /* -charmap is incompatible with -attach-core, because particular
-     * charmap gets set up in the running core. */
-    if (skin_charmap_setup(opts->charmap)) {
-        exit(1);
-    }
 
     avd = android_avdInfo;
-
-    /* The Qt UI handles keyboard shortcuts on its own. Don't load any keyset. */
-    SkinKeyset* keyset = skin_keyset_new_from_text("");
-    if (!keyset) {
-        fprintf(stderr, "PANIC: unable to create empty default keyset!!\n" );
-        return 1;
-    }
-    skin_keyset_set_default(keyset);
-    if (!opts->keyset) {
-        write_default_keyset();
-    }
-
-    AConfig* skinConfig;
-    char* skinPath;
-    user_config_init();
-    parse_skin_files(opts->skindir, opts->skin, opts, hw,
-                     &skinConfig, &skinPath);
 
     char boot_prop_ip[128] = {};
     if (opts->shared_net_id) {
@@ -979,11 +955,15 @@ extern "C" int main(int argc, char **argv) {
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, NULL);
 #endif  // !_WIN32
-    ui_init(skinConfig, skinPath, opts, &uiEmuAgent);
+
+    if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
+        return 1;
+    }
+
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, n, (char**)args);
     skin_winsys_enter_main_loop(opts->no_window, argc, argv);
-    ui_done();
-    aconfig_node_free(skinConfig);
+
+    emulator_finiUserInterface();
 
     process_late_teardown();
     return 0;
