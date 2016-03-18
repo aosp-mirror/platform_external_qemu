@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_89b0e724",
+        "filename": "android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-18T22:48:47Z",
+      "side": 1,
+      "message": "I\u0027ve seen adb screenshot hang for a long time and then fail if you try to take screenshot early in emulator boot.\n\nLet\u0027s keep it there.",
+      "parentUuid": "7c21d2e1_493b8fb1",
+      "range": {
+        "startLine": 142,
+        "startChar": 8,
+        "endLine": 144,
+        "endChar": 17
+      },
+      "revId": "2a602ee6d1587e43f34bcc033fdb172ad14f8321",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_895e27ea",
         "filename": "android/emulation/control/ScreenCapturer.cpp",
         "patchSetId": 4
@@ -82,6 +106,30 @@
       "writtenOn": "2016-03-18T22:05:20Z",
       "side": 1,
       "message": "could you please make it a constructor argument with a default value set to \u0027normal\u0027 timeout? This looks like an abomination imho",
+      "range": {
+        "startLine": 77,
+        "startChar": 9,
+        "endLine": 77,
+        "endChar": 32
+      },
+      "revId": "2a602ee6d1587e43f34bcc033fdb172ad14f8321",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_09951764",
+        "filename": "android/emulation/control/ScreenCapturer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-18T22:48:47Z",
+      "side": 1,
+      "message": ":(\n\nI was trying \u0027friend class ScreenCapturerTest\u0027 but that didn\u0027t work. Dunno what I was doing wrong.\n\nIt\u0027s an all choice, and all paths seem dark. But one can never see too far, now that the enemy has grown strong again.\n\nDone.",
+      "parentUuid": "7c21d2e1_cec1456d",
       "range": {
         "startLine": 77,
         "startChar": 9,
@@ -153,6 +201,30 @@
       "side": 1,
       "message": "a local helper function? std::find(v.begin(), v.end(), val) !\u003d v.end()",
       "parentUuid": "7c21d2e1_8954679d",
+      "range": {
+        "startLine": 167,
+        "startChar": 4,
+        "endLine": 167,
+        "endChar": 79
+      },
+      "revId": "2a602ee6d1587e43f34bcc033fdb172ad14f8321",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_f4c5f6b1",
+        "filename": "android/emulation/control/ScreenCapturer_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-18T22:48:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c21d2e1_29bf3bf2",
       "range": {
         "startLine": 167,
         "startChar": 4,
