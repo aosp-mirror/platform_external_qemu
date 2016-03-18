@@ -22,6 +22,30 @@
       "revId": "39386d3922ea8bcfc0942b4183306d0978805e6a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_1ae1dbe5",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumCalculator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-18T17:33:55Z",
+      "side": 1,
+      "message": "Oh I did not notice we already have one :(\n\nYes, we should reuse them. But I probably won\u0027t continue working on this patch as it has performance issue.\n\n(In terms of performance, this implementation should be very similar to the existing code, since the algorithm is the same and the runtime code is very similar.)",
+      "parentUuid": "7c21d2e1_74458d21",
+      "range": {
+        "startLine": 176,
+        "startChar": 0,
+        "endLine": 177,
+        "endChar": 25
+      },
+      "revId": "39386d3922ea8bcfc0942b4183306d0978805e6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
