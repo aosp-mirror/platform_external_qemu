@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_32dccde4",
+        "filename": "android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-18T00:35:49Z",
+      "side": 1,
+      "message": "as I understand, this runs on the main qemu thread. start()/cancel() usually runs on main Qt thread. It means we still have multi-threading issues here\ne.g. mCanceled should be atomic\u003cbool\u003e",
+      "range": {
+        "startLine": 160,
+        "startChar": 21,
+        "endLine": 160,
+        "endChar": 37
+      },
+      "revId": "7449e2cb28a8ba43aa7c4f84299c50044fe860a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_b271ddaf",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 849,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-18T00:35:49Z",
+      "side": 1,
+      "message": "why do we need to give such a silly warning? Instead we should just disable the button and enable it back when it\u0027s OK to click it again\nOr I\u0027m missing something?",
+      "range": {
+        "startLine": 847,
+        "startChar": 7,
+        "endLine": 849,
+        "endChar": 49
+      },
+      "revId": "7449e2cb28a8ba43aa7c4f84299c50044fe860a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_f26b55bb",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 869,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-18T00:35:49Z",
+      "side": 1,
+      "message": "all others are totally expected ;)",
+      "range": {
+        "startLine": 869,
+        "startChar": 23,
+        "endLine": 869,
+        "endChar": 34
+      },
+      "revId": "7449e2cb28a8ba43aa7c4f84299c50044fe860a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_859e157b",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 870,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-18T00:35:49Z",
+      "side": 1,
+      "message": "do we really need to check it?",
+      "range": {
+        "startLine": 870,
+        "startChar": 10,
+        "endLine": 870,
+        "endChar": 36
+      },
+      "revId": "7449e2cb28a8ba43aa7c4f84299c50044fe860a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
