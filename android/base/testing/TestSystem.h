@@ -256,7 +256,8 @@ public:
                                const StringVector& commandLine,
                                System::Duration timeoutMs,
                                System::ProcessExitCode* outExitCode,
-                               System::Pid* outChildPid);
+                               System::Pid* outChildPid,
+                               const String& outputFile);
 
     // Register a silent shell function. |shell| is the function callback,
     // and |shellOpaque| a user-provided pointer passed as its first parameter.
@@ -269,7 +270,8 @@ public:
                     RunOptions options,
                     System::Duration timeoutMs,
                     System::ProcessExitCode* outExitCode,
-                    System::Pid* outChildPid) override {
+                    System::Pid* outChildPid,
+                    const String& outputFile) override {
         if (!commandLine.size()) {
             return false;
         }
@@ -279,7 +281,7 @@ public:
         ;
         if (mShellFunc) {
             result = (*mShellFunc)(mShellOpaque, commandLine, timeoutMs,
-                                   outExitCode, outChildPid);
+                                   outExitCode, outChildPid, outputFile);
         }
 
         return result;

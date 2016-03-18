@@ -519,7 +519,8 @@ public:
                     RunOptions options,
                     System::Duration timeoutMs,
                     System::ProcessExitCode* outExitCode,
-                    System::Pid* outChildPid) override {
+                    System::Pid* outChildPid,
+                    const String& outputFile) override {
         // Sanity check.
         if (commandLine.empty()) {
             return false;
@@ -529,7 +530,10 @@ public:
         StringVector commandLineCopy = commandLine;
         STARTUPINFOW startup = {};
         startup.cb = sizeof(startup);
-        if ((options & RunOptions::ShowOutput) == 0) {
+
+        if ((options & RunOptions::ShowOutput) == 0 ||
+            ((options & RunOptions::DumpOutputToFile) != 0 &&
+             !outputFile.empty())) {
             startup.dwFlags = STARTF_USESHOWWINDOW;
 
             // 'Normal' way of hiding console output is passing null std handles
@@ -538,7 +542,8 @@ public:
             // whole FILE* machinery just stops working. E.g., resize2fs always
             // creates corrupted images if you try doing it in a 'normal' way.
             // So, instead, we do the following: run the command in a cmd.exe
-            // with stdout and stderr redirected to nul.
+            // with stdout and stderr redirected to either nul (for no output)
+            // or the specified file (for file output).
 
             // 1. Find the commmand-line interpreter - which hides behind the
             // %COMSPEC% environment variable
@@ -554,8 +559,14 @@ public:
             // goes to nul)
             commandLineCopy.prepend("/C");
             commandLineCopy.prepend(comspec);
-            commandLineCopy.append(">nul");
-            commandLineCopy.append("2>&1");
+            if ((options & RunOptions::ShowOutput) == 0) {
+                commandLineCopy.push_back(">nul");
+                commandLineCopy.push_back("2>&1");
+            } else {
+                commandLineCopy.push_back(">");
+                commandLineCopy.push_back(outputFile);
+                commandLineCopy.push_back("2>&1");
+            }
         }
 
         PROCESS_INFORMATION pinfo = {};
@@ -652,7 +663,7 @@ public:
             return false;
         }
         auto result = runCommandPosix(commandLine, options, timeoutMs,
-                                      outExitCode, outChildPid);
+                                      outExitCode, outChildPid, outputFile);
         pthread_sigmask(SIG_SETMASK, &oldset, nullptr);
         return result;
 #endif  // !_WIN32
@@ -662,14 +673,15 @@ public:
 #ifdef _WIN32
         Win32UnicodeString path(PATH_MAX);
         DWORD retval = GetTempPathW(path.size(), path.data());
+        if (retval > path.size()) {
+            path.resize(static_cast<size_t>(retval));
+            retval = GetTempPathW(path.size(), path.data());
+        }
         if (!retval) {
             // Best effort!
             return String("C:\\Temp");
         }
-        if (retval > path.size()) {
-            path.resize(static_cast<size_t>(retval));
-            GetTempPathW(path.size(), path.data());
-        }
+        path.resize(retval);
         // The result of GetTempPath() is already user-dependent
         // so don't append the username or userid to the result.
         path.append(L"\\AndroidEmulator");
@@ -698,7 +710,8 @@ public:
                          RunOptions options,
                          System::Duration timeoutMs,
                          System::ProcessExitCode* outExitCode,
-                         System::Pid* outChildPid) {
+                         System::Pid* outChildPid,
+                         const String& outputFile) {
         char** const params = new char*[commandLine.size() + 1];
         for (size_t i = 0; i < commandLine.size(); ++i) {
             params[i] = const_cast<char*>(commandLine[i].c_str());
@@ -715,6 +728,22 @@ public:
             cmd += "|";
         }
 
+        // If an output file was requested, open it before forking, since
+        // creating a file in the child of a multi-threaded process is sketchy.
+        //
+        // It will be immediately closed in the parent process, and dup2'd into
+        // stdout and stderr in the child process.
+        int outputFd = 0;
+        if ((options & RunOptions::DumpOutputToFile) != 0 &&
+            !outputFile.empty()) {
+            // Ensure the umask doesn't get in the way while creating the
+            // output file.
+            mode_t old = umask(0);
+            outputFd = open(outputFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC,
+                            0700);
+            umask(old);
+        }
+
         int pid = fork();
         if (pid < 0) {
             LOG(VERBOSE) << "Failed to fork for command " << cmd;
@@ -725,6 +754,11 @@ public:
             delete[] params;
             if (outChildPid) {
                 *outChildPid = pid;
+            }
+
+            // Immediately close the output file if it exists
+            if (outputFd > 0) {
+                close(outputFd);
             }
 
             if ((options & RunOptions::WaitForCompletion) == 0) {
@@ -782,10 +816,15 @@ public:
         // stdout/stderr. None of it is safe in the child process forked from a
         // parent with multiple threads.
 
-        if (!(options & RunOptions::ShowOutput)) {
+        // Hide all output unless specified or if the desired output file
+        // could not be created or opened.
+        if (!(options & RunOptions::ShowOutput) || outputFd <= 0) {
             int fd = open("/dev/null", O_WRONLY);
             dup2(fd, 1);
             dup2(fd, 2);
+        } else {
+            dup2(outputFd, 1);
+            dup2(outputFd, 2);
         }
         if (execvp(commandLine[0].c_str(), params) == -1) {
             // emulator doesn't really like exit calls from a forked process
