@@ -66,6 +66,7 @@
 
 using namespace android::base;
 using android::emulation::ApkInstaller;
+using android::emulation::FilePusher;
 using android::emulation::ScreenCapturer;
 using std::string;
 using std::vector;
@@ -73,49 +74,48 @@ using std::vector;
 // Make sure it is POD here
 static LazyInstance<EmulatorQtWindow::Ptr> sInstance = LAZY_INSTANCE_INIT;
 
+// static
+const StringView EmulatorQtWindow::kRemoteDownloadsDir = "/sdcard/Download";
+
 void EmulatorQtWindow::create()
 {
     sInstance.get() = Ptr(new EmulatorQtWindow());
 }
 
-EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
-    : QFrame(parent),
-      mStartupDialog(this),
-      mContainer(this),
-      mOverlay(this, &mContainer),
-      mZoomFactor(1.0),
-      mInZoomMode(false),
-      mNextIsZoom(false),
-      mForwardShortcutsToDevice(false),
-      mPrevMousePosition(0, 0),
-      mMainLoopThread(nullptr),
-      mAvdWarningBox(QMessageBox::Information,
-                     tr("Recommended AVD"),
-                     tr("Running an x86 based Android Virtual Device (AVD) is "
-                        "10x faster.<br/>"
-                        "We strongly recommend creating a new AVD."),
-                     QMessageBox::Ok,
-                     this),
-      mGpuWarningBox(QMessageBox::Information,
-                     tr("GPU Driver Issue"),
-                     tr("Your GPU driver information:\n\n") +
-                             (GpuInfoList::get()->blacklist_status
-                                      ? QString::fromStdString(
-                                                GpuInfoList::get()->dump())
-                                      : "") +
-                             tr("\nSome users have experienced emulator "
-                                "stability issues with this driver version. "
-                                "As a result, we're selecting a software "
-                                "renderer. Please check with your manufacturer"
-                                " to see if there is an updated driver "
-                                "available."),
-                     QMessageBox::Ok,
-                     this),
-      mFirstShowEvent(true),
-      mEventLogger(new UIEventRecorder<android::base::CircularBuffer>(
-              &mEventCapturer,
-              android::base::CircularBuffer<EventRecord>(1000))),
-      mInstallDialog(this) {
+EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
+        QFrame(parent),
+        mStartupDialog(this),
+        mContainer(this),
+        mOverlay(this, &mContainer),
+        mZoomFactor(1.0),
+        mInZoomMode(false),
+        mNextIsZoom(false),
+        mForwardShortcutsToDevice(false),
+        mPrevMousePosition(0, 0),
+        mMainLoopThread(nullptr),
+        mAvdWarningBox(QMessageBox::Information,
+                       tr("Recommended AVD"),
+                       tr("Running an x86 based Android Virtual Device (AVD) is 10x faster.<br/>"
+                          "We strongly recommend creating a new AVD."),
+                       QMessageBox::Ok,
+                       this),
+        mGpuWarningBox(QMessageBox::Information,
+                       tr("GPU Driver Issue"),
+                       tr("Your GPU driver information:\n\n") +
+                       (GpuInfoList::get()->blacklist_status ?
+                           QString::fromStdString(GpuInfoList::get()->dump()) : "") +
+                       tr("\nSome users have experienced emulator stability issues"
+                          " with this driver version.  As a result, we're selecting"
+                          " a software renderer.  Please check with your"
+                          " manufacturer to see if there is an updated driver available."),
+                       QMessageBox::Ok,
+                       this),
+        mFirstShowEvent(true),
+        mEventLogger(new UIEventRecorder<android::base::CircularBuffer>(
+            &mEventCapturer,
+            android::base::CircularBuffer<EventRecord>(1000))),
+        mInstallDialog(this),
+        mPushDialog(this) {
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
     // pop-up to let the user know we're still
@@ -159,6 +159,13 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mInstallDialog.close();
     QObject::connect(&mInstallDialog, SIGNAL(canceled()), this,
                      SLOT(slot_installCanceled()));
+
+    mPushDialog.setWindowTitle(tr("File Copy"));
+    mPushDialog.setLabelText(tr("Copying files..."));
+    mPushDialog.setRange(0, 100);
+    mPushDialog.close();
+    QObject::connect(&mPushDialog, SIGNAL(canceled()), this,
+                     SLOT(slot_adbPushCanceled()));
 
     QObject::connect(mContainer.horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_horizontalScrollChanged(int)));
     QObject::connect(mContainer.verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_verticalScrollChanged(int)));
@@ -213,6 +220,10 @@ EmulatorQtWindow::~EmulatorQtWindow()
     }
     mInstallDialog.disconnect();
     mInstallDialog.close();
+
+    mPushDialog.disconnect();
+    mPushDialog.close();
+    mFilePusher.reset();
 
     deleteErrorDialog();
     if (mToolWindow) {
@@ -384,7 +395,7 @@ void EmulatorQtWindow::dropEvent(QDropEvent *event)
                 return;
             }
         }
-        mToolWindow->runAdbPush(urls);
+        runAdbPush(urls);
     }
 }
 
@@ -815,9 +826,8 @@ void EmulatorQtWindow::screenshot()
         return;
     }
 
-    QStringList qargs;
-    QString command = mToolWindow->getAdbFullPath(&qargs);
-    if (command.isNull()) {
+    auto args = getAdbFullPathStd();
+    if (args.empty()) {
         showErrorDialog(
                 tr("Could not locate 'adb'<br/>"
                    "Check settings to verify that your chosen adb path is "
@@ -835,10 +845,6 @@ void EmulatorQtWindow::screenshot()
         return;
     }
 
-    vector<string> args = {command.toStdString()};
-    for (const auto arg : qargs) {
-        args.push_back(arg.toStdString());
-    }
     if (!mScreenCapturer) {
         mScreenCapturer = ScreenCapturer::create(
                 android::base::ThreadLooper::get(), args,
@@ -901,20 +907,14 @@ void EmulatorQtWindow::runAdbInstall(const QString& path) {
         return;
     }
 
-    QStringList qargs;
-    QString command = mToolWindow->getAdbFullPath(&qargs);
-    if (command.isNull()) {
+    auto args = getAdbFullPathStd();
+    if (args.empty()) {
         showErrorDialog(
                 tr("Could not locate 'adb'<br/>"
                    "Check settings to verify that your chosen adb path is "
                    "valid."),
                 tr("APK Installer"));
         return;
-    }
-
-    vector<string> args = {command.toStdString()};
-    for (const auto arg : qargs) {
-        args.push_back(arg.toStdString());
     }
 
     if (!mApkInstaller) {
@@ -974,6 +974,79 @@ void EmulatorQtWindow::installDone(ApkInstaller::Result result,
 
     showErrorDialog(msg, tr("APK Installer"));
 }
+
+void EmulatorQtWindow::runAdbPush(QList<QUrl> urls) {
+    auto adbCommandArgs = getAdbFullPathStd();
+    if (adbCommandArgs.empty()) {
+        showErrorDialog(
+                tr("Could not locate 'adb'<br/>"
+                   "Check settings to verify that your chosen adb path is "
+                   "valid."),
+                tr("File Copy"));
+        return;
+    }
+    if (!mFilePusher) {
+        mFilePusher.reset(new FilePusher(
+                    android::base::ThreadLooper::get(),
+                    adbCommandArgs,
+                    [this] (StringView filePath,
+                            FilePusher::Result result,
+                            StringView errorString) {
+                            this->adbPushDone(filePath, result, errorString);
+                    },
+                    [this] (unsigned progressPercent, bool done) {
+                            this->adbPushProgress(progressPercent, done);
+                    }));
+    } else {
+        mFilePusher->setAdbCommandArgs(adbCommandArgs);
+    }
+
+    for (const auto url : urls) {
+        mFilePusher->enqueue(url.toLocalFile().toStdString(),
+                kRemoteDownloadsDir);
+    }
+}
+
+void EmulatorQtWindow::slot_adbPushCanceled() {
+    if (mFilePusher) {
+        mFilePusher->cancel();
+    }
+}
+
+void EmulatorQtWindow::adbPushProgress(unsigned progressPercent,
+                                       bool done) {
+    if (done) {
+        mPushDialog.hide();
+        return;
+    }
+
+    mPushDialog.setValue(progressPercent);
+    mPushDialog.show();
+}
+
+void EmulatorQtWindow::adbPushDone(StringView filePath,
+                                        FilePusher::Result result,
+                                        StringView errorString) {
+    if (result != FilePusher::Result::Success) {
+        showErrorDialog(tr("Aiiieee, a balrog is come!"),
+                tr("File Copy"));
+    }
+}
+
+vector<string> EmulatorQtWindow::getAdbFullPathStd() {
+    QStringList qargs;
+    QString command = mToolWindow->getAdbFullPath(&qargs);
+    if (command.isNull()) {
+        return {};
+    }
+
+    vector<string> args = {command.toStdString()};
+    for (const auto arg : qargs) {
+        args.push_back(arg.toStdString());
+    }
+    return args;
+}
+
 
 // Convert a Qt::Key_XXX code into the corresponding Linux keycode value.
 // On failure, return -1.

@@ -32,7 +32,6 @@
 #include <QMessageBox>
 #include <QPair>
 #include <QProcess>
-#include <QProgressDialog>
 #include <QToolButton>
 #include <QUrl>
 #include <QFrame>
@@ -40,7 +39,6 @@
 
 #include <memory>
 
-#define REMOTE_DOWNLOADS_DIR "/sdcard/Download"
 #define REMOTE_SCREENSHOT_FILE "/data/local/tmp/screen.png"
 
 namespace Ui {
@@ -75,7 +73,6 @@ public:
 
     QString getAdbFullPath(QStringList *args);
 
-    void runAdbPush(const QList<QUrl> &urls);
     void runAdbShellStopAndQuit();
 
     bool handleQtKeyEvent(QKeyEvent* event);
@@ -119,10 +116,7 @@ private:
     QBoxLayout *top_layout;
     const UiEmuAgent *uiEmuAgent;
     Ui::ToolControls *toolsUi;
-    QProcess mPushProcess;
     bool mStartedAdbStopProcess = false;
-    QProgressDialog mPushDialog;
-    QQueue<QUrl> mFilesToPush;
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
     bool mIsExtendedWindowActiveOnHide = false;
     QString mDetectedAdbPath;
@@ -150,9 +144,6 @@ private slots:
     void on_volume_up_button_pressed();
     void on_volume_up_button_released();
     void on_zoom_button_clicked();
-
-    void slot_pushCanceled();
-    void slot_pushFinished(int exitStatus);
 
     void slot_adbWarningMessageAccepted();
 };

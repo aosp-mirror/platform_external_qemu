@@ -216,6 +216,7 @@ LOCAL_SRC_FILES := \
     android/emulation/bufprint_config_dirs.cpp \
     android/emulation/ConfigDirs.cpp \
     android/emulation/control/ApkInstaller.cpp \
+    android/emulation/control/FilePusher.cpp \
     android/emulation/control/LineConsumer.cpp \
     android/emulation/control/ScreenCapturer.cpp \
     android/emulation/CpuAccelerator.cpp \
