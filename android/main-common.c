@@ -1753,24 +1753,30 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     /* If we have a valid snapshot storage path */
 
     if (opts->snapstorage) {
-        hw->disk_snapStorage_path = ASTRDUP(opts->snapstorage);
+        if (is_qemu2) {
+            dwarning("QEMU2 does not support snapshots - option will be ignored.");
+        } else {
+            // QEMU2 does not support some of the flags below, and the emulator will
+            // fail to start if they are passed in, so for now, ignore them.
+            hw->disk_snapStorage_path = ASTRDUP(opts->snapstorage);
 
-        /* -no-snapshot is equivalent to using both -no-snapshot-load
-        * and -no-snapshot-save. You can still load/save snapshots dynamically
-        * from the console though.
-        */
-        if (opts->no_snapshot) {
-            opts->no_snapshot_load = 1;
-            opts->no_snapshot_save = 1;
-            if (opts->snapshot) {
-                dwarning("ignoring -snapshot option due to the use of -no-snapshot.");
+            /* -no-snapshot is equivalent to using both -no-snapshot-load
+            * and -no-snapshot-save. You can still load/save snapshots dynamically
+            * from the console though.
+            */
+            if (opts->no_snapshot) {
+                opts->no_snapshot_load = 1;
+                opts->no_snapshot_save = 1;
+                if (opts->snapshot) {
+                    dwarning("ignoring -snapshot option due to the use of -no-snapshot.");
+                }
             }
-        }
 
-        if (!opts->no_snapshot_load || !opts->no_snapshot_save) {
-            if (opts->snapshot == NULL) {
-                opts->snapshot = "default-boot";
-                D("autoconfig: -snapshot %s", opts->snapshot);
+            if (!opts->no_snapshot_load || !opts->no_snapshot_save) {
+                if (opts->snapshot == NULL) {
+                    opts->snapshot = "default-boot";
+                    D("autoconfig: -snapshot %s", opts->snapshot);
+                }
             }
         }
     }
@@ -1880,6 +1886,26 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
             reassign_string(&hw->hw_gpu_mode, config.backend);
         }
         D("%s", config.status);
+
+#ifdef _WIN32
+        // BUG: https://code.google.com/p/android/issues/detail?id=199427
+        // Booting will be severely slowed down, if not disabled outright, when
+        // 1. On Windows
+        // 2. Using an AVD resolution of >= 1080p (can vary across host setups)
+        // 3. -gpu mesa
+        // What happens is that Mesa will hog the CPU, while disallowing
+        // critical boot services from making progress, causing
+        // the services to give up and put the emulator in a reboot loop
+        // until it either fails to boot altogether or gets lucky and
+        // successfully boots.
+        // This workaround disables the boot animation under the above conditions,
+        // which frees up the CPU enough for the device to boot.
+        if ((opts->gpu && !strcmp(opts->gpu, "mesa")) ||
+            (hw->hw_gpu_mode && !strcmp(hw->hw_gpu_mode, "mesa"))) {
+            opts->no_boot_anim = 1;
+            D("Starting AVD without boot animation.\n");
+        }
+#endif
     }
 
     /* Quit emulator on condition that both, gpu and snapstorage are on. This is
