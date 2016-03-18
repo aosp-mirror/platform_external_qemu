@@ -28,6 +28,8 @@
 #include <QWidget>
 
 #include "android/base/containers/CircularBuffer.h"
+#include "android/base/StringView.h"
+#include "android/emulation/control/ApkInstaller.h"
 #include "android/globals.h"
 #include "android/skin/event.h"
 #include "android/skin/surface.h"
@@ -196,6 +198,8 @@ private slots:
 
     void slot_showProcessErrorDialog(QProcess::ProcessError exitStatus);
 
+    void slot_installCanceled();
+
     /*
      Here are conventional slots that perform interesting high-level functions in the emulator. These can be hooked up to signals
      from UI elements or called independently.
@@ -233,6 +237,12 @@ private:
     QString getTmpImagePath();
     void setFrameOnTop(QFrame* frame, bool onTop);
 
+    void runAdbInstall(const QString& path);
+    void installDone(android::emulation::ApkInstaller::Result result,
+                     android::base::StringView outputFilePath,
+                     android::base::StringView errorString);
+    void parseInstallOutputFile(const QString& outputFilePath);
+
     void* mBatteryState;
 
     QTimer          mStartupTimer;
@@ -263,6 +273,9 @@ private:
     EventCapturer mEventCapturer;
     std::shared_ptr<UIEventRecorder<android::base::CircularBuffer>>
         mEventLogger;
+
+    std::shared_ptr<android::emulation::ApkInstaller> mApkInstaller;
+    QProgressDialog mInstallDialog;
 };
 
 struct SkinSurface {

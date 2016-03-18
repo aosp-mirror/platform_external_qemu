@@ -28,6 +28,7 @@
 #include <QSettings>
 #include <QWindow>
 
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
@@ -60,6 +61,9 @@
 #endif
 
 using namespace android::base;
+using android::emulation::ApkInstaller;
+using std::string;
+using std::vector;
 
 // Make sure it is POD here
 static LazyInstance<EmulatorQtWindow::Ptr> sInstance = LAZY_INSTANCE_INIT;
@@ -69,38 +73,44 @@ void EmulatorQtWindow::create()
     sInstance.get() = Ptr(new EmulatorQtWindow());
 }
 
-EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
-        QFrame(parent),
-        mStartupDialog(this),
-        mContainer(this),
-        mOverlay(this, &mContainer),
-        mZoomFactor(1.0),
-        mInZoomMode(false),
-        mNextIsZoom(false),
-        mForwardShortcutsToDevice(false),
-        mPrevMousePosition(0, 0),
-        mMainLoopThread(nullptr),
-        mAvdWarningBox(QMessageBox::Information,
-                       tr("Recommended AVD"),
-                       tr("Running an x86 based Android Virtual Device (AVD) is 10x faster.<br/>"
-                          "We strongly recommend creating a new AVD."),
-                       QMessageBox::Ok,
-                       this),
-        mGpuWarningBox(QMessageBox::Information,
-                       tr("GPU Driver Issue"),
-                       tr("Your GPU driver information:\n\n") +
-                       (GpuInfoList::get()->blacklist_status ?
-                           QString::fromStdString(GpuInfoList::get()->dump()) : "") +
-                       tr("\nSome users have experienced emulator stability issues"
-                          " with this driver version.  As a result, we're selecting"
-                          " a software renderer.  Please check with your"
-                          " manufacturer to see if there is an updated driver available."),
-                       QMessageBox::Ok,
-                       this),
-        mFirstShowEvent(true),
-        mEventLogger(new UIEventRecorder<android::base::CircularBuffer>(
-            &mEventCapturer,
-            android::base::CircularBuffer<EventRecord>(1000))) {
+EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
+    : QFrame(parent),
+      mStartupDialog(this),
+      mContainer(this),
+      mOverlay(this, &mContainer),
+      mZoomFactor(1.0),
+      mInZoomMode(false),
+      mNextIsZoom(false),
+      mForwardShortcutsToDevice(false),
+      mPrevMousePosition(0, 0),
+      mMainLoopThread(nullptr),
+      mAvdWarningBox(QMessageBox::Information,
+                     tr("Recommended AVD"),
+                     tr("Running an x86 based Android Virtual Device (AVD) is "
+                        "10x faster.<br/>"
+                        "We strongly recommend creating a new AVD."),
+                     QMessageBox::Ok,
+                     this),
+      mGpuWarningBox(QMessageBox::Information,
+                     tr("GPU Driver Issue"),
+                     tr("Your GPU driver information:\n\n") +
+                             (GpuInfoList::get()->blacklist_status
+                                      ? QString::fromStdString(
+                                                GpuInfoList::get()->dump())
+                                      : "") +
+                             tr("\nSome users have experienced emulator "
+                                "stability issues with this driver version. "
+                                "As a result, we're selecting a software "
+                                "renderer. Please check with your manufacturer"
+                                " to see if there is an updated driver "
+                                "available."),
+                     QMessageBox::Ok,
+                     this),
+      mFirstShowEvent(true),
+      mEventLogger(new UIEventRecorder<android::base::CircularBuffer>(
+              &mEventCapturer,
+              android::base::CircularBuffer<EventRecord>(1000))),
+      mInstallDialog(this) {
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
     // pop-up to let the user know we're still
@@ -146,6 +156,13 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(&mScreencapPullProcess,
                      SIGNAL(error(QProcess::ProcessError)), this,
                      SLOT(slot_showProcessErrorDialog(QProcess::ProcessError)));
+
+    mInstallDialog.setWindowTitle(tr("APK Installer"));
+    mInstallDialog.setLabelText(tr("Installing APK..."));
+    mInstallDialog.setRange(0, 0);  // Makes it a "busy" dialog
+    mInstallDialog.close();
+    QObject::connect(&mInstallDialog, SIGNAL(canceled()), this,
+                     SLOT(slot_installCanceled()));
 
     QObject::connect(mContainer.horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_horizontalScrollChanged(int)));
     QObject::connect(mContainer.verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_verticalScrollChanged(int)));
@@ -204,6 +221,12 @@ EmulatorQtWindow::~EmulatorQtWindow()
     // Kill those processes to avoid potential races.
     safeKillProcess(mScreencapPullProcess);
     safeKillProcess(mScreencapProcess);
+
+    if (mApkInstaller) {
+        mApkInstaller->cancel();
+    }
+    mInstallDialog.disconnect();
+    mInstallDialog.close();
 
     deleteErrorDialog();
     if (mToolWindow) {
@@ -374,7 +397,7 @@ void EmulatorQtWindow::dropEvent(QDropEvent *event)
     QString url = urls[0].toLocalFile();
 
     if (url.endsWith(".apk") && urls.length() == 1) {
-        mToolWindow->runAdbInstall(url);
+        runAdbInstall(url);
         return;
     } else {
 
@@ -897,6 +920,12 @@ void EmulatorQtWindow::slot_screencapPullFinished(int exitStatus)
     }
 }
 
+void EmulatorQtWindow::slot_installCanceled() {
+    if (mApkInstaller && mApkInstaller->inFlight()) {
+        mApkInstaller->cancel();
+    }
+}
+
 // Convert a Qt::Key_XXX code into the corresponding Linux keycode value.
 // On failure, return -1.
 static int convertKeyCode(int sym)
@@ -1316,6 +1345,120 @@ void EmulatorQtWindow::panVertical(bool up)
         bar->setValue(bar->value() - bar->singleStep());
     } else {
         bar->setValue(bar->value() + bar->singleStep());
+    }
+}
+
+void EmulatorQtWindow::runAdbInstall(const QString& path) {
+    if (mApkInstaller && mApkInstaller->inFlight()) {
+        // Modal dialogs should prevent this.
+        return;
+    }
+
+    QStringList qargs;
+    QString command = mToolWindow->getAdbFullPath(&qargs);
+    if (command.isNull()) {
+        showErrorDialog(
+                tr("Could not locate 'adb'<br/>"
+                   "Check settings to verify that your chosen adb path is "
+                   "valid."),
+                tr("APK Installer"));
+        return;
+    }
+
+    vector<string> args = {command.toStdString()};
+    for (const auto arg : qargs) {
+        args.push_back(arg.toStdString());
+    }
+
+    if (!mApkInstaller) {
+        mApkInstaller = ApkInstaller::create(
+                android::base::ThreadLooper::get(), args, path.toStdString(),
+                [this](ApkInstaller::Result result, StringView outputFilePath,
+                       StringView errorString) {
+                    EmulatorQtWindow::installDone(result, outputFilePath,
+                                                  errorString);
+                });
+    } else {
+        mApkInstaller->setApkFilePath(path.toStdString());
+        mApkInstaller->setAdbCommandArgs(args);
+    }
+
+    // Show a dialog so the user knows something is happening
+    mInstallDialog.show();
+    mApkInstaller->start();
+}
+
+void EmulatorQtWindow::installDone(ApkInstaller::Result result,
+                                   StringView outputFilePath,
+                                   StringView errorString) {
+    mInstallDialog.hide();
+
+    QString detail = errorString.c_str();
+    detail = detail.replace('\n', "<br/>");
+    QString msg;
+    switch (result) {
+        case ApkInstaller::Result::kSuccess:
+            // The process can return success even though the install fails.
+            // Parse the output file to see if it actually failed.
+            parseInstallOutputFile(QString(outputFilePath.c_str()));
+            return;
+
+        case ApkInstaller::Result::kOperationInProgress:
+            msg += tr("Another APK install is already in progress.<br/>");
+            msg += tr("Please try again after it completes.");
+            break;
+
+        case ApkInstaller::Result::kApkPermissionsError:
+            msg += tr("Unable to read the given APK.<br/>");
+            msg += tr("Ensure that the file is readable.");
+            break;
+
+        case ApkInstaller::Result::kAdbConnectionFailed:
+            msg += tr("Failed to start adb.<br/>");
+            msg +=
+                    tr("Check settings to verify your chosen adb path is "
+                       "valid.");
+            break;
+
+        default:
+            msg += tr("Unexpected error:<br/><br/>");
+            msg += detail;
+    }
+
+    showErrorDialog(msg, tr("APK Installer"));
+}
+
+void EmulatorQtWindow::parseInstallOutputFile(const QString& outputFilePath) {
+    QFile outputFile(outputFilePath);
+
+    // "adb install" does not return a helpful exit status, so instead we parse
+    // the output of the process looking for "Failure \[(.*)\]"
+    if (!outputFile.exists() || !outputFile.open(QFile::ReadOnly)) {
+        // TODO(birenbaum): what do here?
+
+        // Couldn't find or open the output file. This shouldn't happen, but if
+        // it does, its most likely that the second process couldn't be started
+        // for some reason. Maybe adb is the problem?
+        showErrorDialog(tr("Failed to start adb.<br/>Check settings to verify "
+                           "your chosen adb path."),
+                        tr("APK Installer"));
+        return;
+    }
+
+    // Read the file, but cap the amount read.
+    static const int kMaxBytesRead = 2048;
+    QByteArray contents = outputFile.read(kMaxBytesRead);
+    if (contents.length() > kMaxBytesRead) {
+        // TODO(birenbaum): do something if the file was longer?
+    }
+
+    QRegularExpression regex("Failure \\[(.*)\\]");
+    QRegularExpressionMatch match = regex.match(contents);
+
+    if (match.hasMatch()) {
+        QString msg = tr("The APK failed to install. Error code: %1")
+                              .arg(match.captured(1));
+        showErrorDialog(msg, tr("APK Installer"));
     }
 }
 
