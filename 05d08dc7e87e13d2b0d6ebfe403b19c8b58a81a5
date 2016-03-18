@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_6fbdb3dd",
+        "filename": "android/emulation/control/ScreenCapturer_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-18T23:05:17Z",
+      "side": 1,
+      "message": "just FYI\nthis could be done more elegantly with a custom operator\u003c\u003c for vector\u003cstring\u003e\nstd::ostream\u0026 operator\u003c\u003c(std::ostream\u0026 out, const vector\u003cstring\u003e\u0026 v) {\n   ...\n}",
+      "range": {
+        "startLine": 99,
+        "startChar": 15,
+        "endLine": 99,
+        "endChar": 38
+      },
+      "revId": "05d08dc7e87e13d2b0d6ebfe403b19c8b58a81a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_b4a41ee4",
+        "filename": "android/emulation/control/ScreenCapturer_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-18T23:05:17Z",
+      "side": 1,
+      "message": "this is usually called \"join\"",
+      "range": {
+        "startLine": 102,
+        "startChar": 11,
+        "endLine": 102,
+        "endChar": 25
+      },
+      "revId": "05d08dc7e87e13d2b0d6ebfe403b19c8b58a81a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
