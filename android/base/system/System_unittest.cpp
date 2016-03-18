@@ -23,6 +23,10 @@
 
 #include <gtest/gtest.h>
 
+#include <fstream>
+#include <iostream>
+#include <string>
+
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -401,6 +405,40 @@ TEST(System, runCommandTimeout) {
     EXPECT_EQ(0, exitCode);
     EXPECT_GT(pid, 0);
 }
+
+TEST(System, runCommandWithOutput) {
+    StringVector cmd = {"echo", "hello"};
+    System::Pid pid = 666;
+    System::ProcessExitCode exitCode = 0;
+    String outputFile = PathUtils::recompose(
+            {System::get()->getTempDir(), String("test.txt")});
+
+    EXPECT_TRUE(System::get()->runCommand(
+            cmd, RunOptions::WaitForCompletion | RunOptions::DumpOutputToFile,
+            System::kInfinite, &exitCode, &pid, outputFile));
+
+    EXPECT_TRUE(System::get()->pathExists(outputFile));
+    EXPECT_TRUE(System::get()->pathIsFile(outputFile));
+    EXPECT_TRUE(System::get()->pathCanRead(outputFile));
+
+    std::ifstream file(outputFile.c_str());
+    EXPECT_TRUE(file.is_open());
+
+    if (file.is_open()) {
+        std::string line;
+        EXPECT_TRUE(static_cast<bool>(std::getline(file, line)));
+
+        // An idosyncrasy of cmd.exe's "echo" command - we add spaces between
+        // arguments, and that space gets captured by echo. This is only a
+        // problem with echo itself.
+        EXPECT_TRUE(!strncmp("hello", line.c_str(), 5));
+
+        file.close();
+    }
+
+    EXPECT_EQ(0, std::remove(outputFile.c_str()));
+}
+
 
 }  // namespace base
 }  // namespace android
