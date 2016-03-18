@@ -27,46 +27,35 @@ namespace {
 
 class ChecksumCalculatorThreadStore : public ::emugl::ThreadStore {
 public:
-    ChecksumCalculatorThreadStore() : ::emugl::ThreadStore(&destructor) {}
+    ChecksumCalculatorThreadStore() : ::emugl::ThreadStore(NULL) {}
+};
+
 #ifdef TRACE_CHECKSUMHELPER
-    static std::atomic<size_t> mNumInstances;
+std::atomic<size_t> sNumInstances(0);
 #endif  // TRACE_CHECKSUMHELPER
 
-private:
-    static void destructor(void* value) {
-        LOG_CHECKSUMHELPER("%s: GLprotocol deleted %p (%lu instances)\n",
-                           __FUNCTION__, value, (size_t)mNumInstances - 1);
-        delete static_cast<ChecksumCalculatorThreadInfo*>(value);
-#ifdef TRACE_CHECKSUMHELPER
-        mNumInstances--;
-#endif  // TRACE_CHECKSUMHELPER
-    }
-};
+}
 
 static ::emugl::LazyInstance<ChecksumCalculatorThreadStore> s_tls =
         LAZY_INSTANCE_INIT;
 
-ChecksumCalculatorThreadInfo* getChecksumCalculatorThreadInfo() {
-    ChecksumCalculatorThreadInfo* pti =
-            static_cast<ChecksumCalculatorThreadInfo*>(s_tls->get());
-    if (!pti) {
-        pti = new ChecksumCalculatorThreadInfo();
-#ifdef TRACE_CHECKSUMHELPER
-        ChecksumCalculatorThreadStore::mNumInstances++;
-#endif  // TRACE_CHECKSUMHELPER
-        s_tls->set(pti);
-        LOG_CHECKSUMHELPER(
-                "%s: GLprotocol created %p (%lu instances)\n", __FUNCTION__,
-                pti, (size_t)ChecksumCalculatorThreadStore::mNumInstances);
-    }
-    return pti;
+static ChecksumCalculatorThreadInfo* getChecksumCalculatorThreadInfo() {
+    return static_cast<ChecksumCalculatorThreadInfo*>(s_tls->get());
 }
 
-}  // namespace
+ChecksumCalculatorThreadInfo::ChecksumCalculatorThreadInfo() {
+    LOG_CHECKSUMHELPER(
+        "%s: Checksum thread created (%u instances)\n", __FUNCTION__,
+        (size_t)sNumInstances);
+    s_tls->set(this);
+}
 
-#ifdef TRACE_CHECKSUMHELPER
-std::atomic<size_t> ChecksumCalculatorThreadStore::mNumInstances(0);
-#endif  // TRACE_CHECKSUMHELPER
+ChecksumCalculatorThreadInfo::~ChecksumCalculatorThreadInfo() {
+    LOG_CHECKSUMHELPER(
+        "%s: GLprotocol destroyed (%u instances)\n", __FUNCTION__,
+        (size_t)sNumInstances);
+    s_tls->set(NULL);
+}
 
 uint32_t ChecksumCalculatorThreadInfo::getVersion() {
     return getChecksumCalculatorThreadInfo()->m_protocol.getVersion();
