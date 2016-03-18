@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "7c21d2e1_49dc2fe5",
+        "filename": "android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-18T22:05:20Z",
+      "side": 1,
+      "message": "I\u0027m so ashamed for missing this",
+      "range": {
+        "startLine": 101,
+        "startChar": 0,
+        "endLine": 101,
+        "endChar": 15
+      },
+      "revId": "2a602ee6d1587e43f34bcc033fdb172ad14f8321",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_493b8fb1",
         "filename": "android/emulation/control/ScreenCapturer.cpp",
         "patchSetId": 4
@@ -41,6 +64,52 @@
         "startChar": 8,
         "endLine": 168,
         "endChar": 17
+      },
+      "revId": "2a602ee6d1587e43f34bcc033fdb172ad14f8321",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_cec1456d",
+        "filename": "android/emulation/control/ScreenCapturer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-18T22:05:20Z",
+      "side": 1,
+      "message": "could you please make it a constructor argument with a default value set to \u0027normal\u0027 timeout? This looks like an abomination imho",
+      "range": {
+        "startLine": 77,
+        "startChar": 9,
+        "endLine": 77,
+        "endChar": 32
+      },
+      "revId": "2a602ee6d1587e43f34bcc033fdb172ad14f8321",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_6969338b",
+        "filename": "android/emulation/control/ScreenCapturer_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-18T22:05:20Z",
+      "side": 1,
+      "message": "you have a lot of commented out checks in this file. Some of them look really useful",
+      "range": {
+        "startLine": 167,
+        "startChar": 4,
+        "endLine": 167,
+        "endChar": 79
       },
       "revId": "2a602ee6d1587e43f34bcc033fdb172ad14f8321",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
