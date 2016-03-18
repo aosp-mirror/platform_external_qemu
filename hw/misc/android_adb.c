@@ -96,6 +96,7 @@ typedef struct {
     adb_pipe *adb_pipes[PIPE_QUEUE_LEN];
     adb_pipe *connected_pipe;
     guint       listen_chan_event; /* an event id if we're listening or 0 */
+    QemuMutex*  mutex;
 } adb_backend_state;
 
 struct adb_timer_data_struct {
@@ -104,6 +105,11 @@ struct adb_timer_data_struct {
 };
 
 static adb_backend_state adb_state;
+
+// adb_state is accessed from both the main thread (where all tcp connects are
+// coming from) and the guest CPU threads (which deliver guest's messages)
+// that's why we need to protect it with a mutex
+QemuMutex adb_state_mutex;
 
 static struct adb_timer_data_struct adb_timer_data;
 
@@ -130,7 +136,8 @@ static QemuOpts* adb_server_config(void) {
         server_port = (int) g_ascii_strtoll(server_port_str, NULL, 0);
         if(server_port <= 0 || server_port > G_MAXUINT16) {
             fprintf(stderr,
-                "%s: ANDROID_ADB_SERVER_PORT is invalid: got \"%s\", expected number in range (0;%d>, using default port\n",
+                "%s: ANDROID_ADB_SERVER_PORT is invalid: got \"%s\", "
+                "expected number in range (0;%d>, using default port\n",
                 __func__, server_port_str, G_MAXUINT16);
             server_port = ADB_SERVER_PORT;
         }
@@ -173,7 +180,6 @@ static void adb_server_notify(int adb_port) {
 
     g_free(message);
     g_free(handshake);
-    return;
 }
 
 /* TODO: Needs a common implementation with the likes of qemu-char.c */
@@ -203,10 +209,15 @@ static gboolean tcp_adb_accept(GIOChannel *channel, GIOCondition cond,
 **
 ** We need to ensure we clean-up any connection state and re-enable
 ** the watch on the listen socket so new connections can be created.
+** Note: this function could be called from any thread - both host and
+**  guest may initiate a connection closing process
 */
 static void tcp_adb_server_close(adb_backend_state *bs)
 {
     g_assert(bs->listen_chan);
+    g_assert(bs->mutex);
+
+    qemu_mutex_lock(bs->mutex);
 
     /* clean-up connected pipes */
     if (bs->connected_pipe) {
@@ -227,6 +238,8 @@ static void tcp_adb_server_close(adb_backend_state *bs)
         g_io_channel_unref(bs->chan);
         bs->chan = NULL;
     }
+
+    qemu_mutex_unlock(bs->mutex);
 }
 
 /*
@@ -242,19 +255,23 @@ static gboolean tcp_adb_server_data(GIOChannel *channel, GIOCondition cond,
 {
     adb_backend_state *bs = (adb_backend_state *) opaque;
     if (cond & G_IO_IN) {
+        qemu_mutex_lock(bs->mutex);
         bs->data_in = TRUE;
         if (bs->connected_pipe && bs->connected_pipe->flags & PIPE_WAKE_READ) {
             DPRINTF("%s: waking up pipe for incomming data\n", __func__);
             android_pipe_wake(bs->connected_pipe->hwpipe, PIPE_WAKE_READ);
         }
+        qemu_mutex_unlock(bs->mutex);
     }
 
     if (cond & G_IO_OUT) {
+        qemu_mutex_lock(bs->mutex);
         bs->data_out = TRUE;
         if (bs->connected_pipe && bs->connected_pipe->flags & PIPE_WAKE_WRITE) {
             DPRINTF("%s: waking up pipe for now able to write\n", __func__);
             android_pipe_wake(bs->connected_pipe->hwpipe, PIPE_WAKE_WRITE);
         }
+        qemu_mutex_unlock(bs->mutex);
     }
 
     if ((cond & G_IO_ERR) ||
@@ -277,10 +294,14 @@ static gboolean tcp_adb_server_timer(void *opaque) {
         // after a while
         return TRUE;
     }
+
+    qemu_mutex_lock(bs->mutex);
     if (bs->chan && bs->connected_pipe && bs->connected_pipe->state == ADB_CONNECTION_STATE_CONNECTED) {
         g_io_add_watch(bs->chan, G_IO_IN|G_IO_ERR|G_IO_HUP,
                            tcp_adb_server_data, bs);
     }
+    qemu_mutex_unlock(bs->mutex);
+
     return TRUE;
 }
 
@@ -290,49 +311,49 @@ static gboolean tcp_adb_connect(adb_backend_state *bs, int fd)
         DPRINTF("%s: existing connection %p, fail connect!\n",
                 __func__, bs->chan);
         return FALSE;
-    } else {
-        DPRINTF("%s: in-coming connection on %d\n", __func__, fd);
-
-        qemu_set_nonblock(fd);
-        bs->chan = io_channel_from_socket(fd);
-        if (!bs->chan) {
-            close(fd);
-            return FALSE;
-        }
-
-        /* If we don't have a pipe to use for the tcp backend, then find one in
-         * the accept state.  Note, this can happen, for example, if the previous
-         * connected pipe was closed for some reason.  Also note that this becomes
-         * sort of random which pipe we select, but there doesn't seem to be any
-         * clearly defined semantics about the ordering here.  A proper fifo may
-         * be a better data structure for this.
-         */
-        if (!bs->connected_pipe) {
-            int i;
-            for (i = 0; i < PIPE_QUEUE_LEN; i++) {
-                if (bs->adb_pipes[i] &&
-                    bs->adb_pipes[i]->state == ADB_CONNECTION_STATE_ACCEPT) {
-                    bs->connected_pipe = bs->adb_pipes[i];
-                }
-            }
-        }
-
-        /* Tell the adbd that the adb server has conected and that we're ready to
-         * receive the start package */
-        if (bs->connected_pipe) {
-            DPRINTF("Incoming TCP connection on already accepted pipe, connect\n");
-            adb_pipe *apipe = bs->connected_pipe;
-            apipe->chan = bs->chan;
-            if (apipe->out_next) {
-                fprintf(stderr, "Pending reply on non-connected pipe, error\n");
-                abort();
-            }
-            adb_reply(apipe, _ok_resp);
-            android_pipe_wake(bs->connected_pipe->hwpipe, PIPE_WAKE_READ);
-        }
-
-        return TRUE;
     }
+
+    DPRINTF("%s: in-coming connection on %d\n", __func__, fd);
+
+    qemu_set_nonblock(fd);
+    bs->chan = io_channel_from_socket(fd);
+    if (!bs->chan) {
+        close(fd);
+        return FALSE;
+    }
+
+    /* If we don't have a pipe to use for the tcp backend, then find one in
+     * the accept state.  Note, this can happen, for example, if the previous
+     * connected pipe was closed for some reason.  Also note that this becomes
+     * sort of random which pipe we select, but there doesn't seem to be any
+     * clearly defined semantics about the ordering here.  A proper fifo may
+     * be a better data structure for this.
+     */
+    if (!bs->connected_pipe) {
+        int i;
+        for (i = 0; i < PIPE_QUEUE_LEN; i++) {
+            if (bs->adb_pipes[i] &&
+                bs->adb_pipes[i]->state == ADB_CONNECTION_STATE_ACCEPT) {
+                bs->connected_pipe = bs->adb_pipes[i];
+            }
+        }
+    }
+
+    /* Tell the adbd that the adb server has conected and that we're ready to
+     * receive the start package */
+    if (bs->connected_pipe) {
+        DPRINTF("Incoming TCP connection on already accepted pipe, connect\n");
+        adb_pipe *apipe = bs->connected_pipe;
+        apipe->chan = bs->chan;
+        if (apipe->out_next) {
+            fprintf(stderr, "Pending reply on non-connected pipe, error\n");
+            abort();
+        }
+        adb_reply(apipe, _ok_resp);
+        android_pipe_wake(bs->connected_pipe->hwpipe, PIPE_WAKE_READ);
+    }
+
+    return TRUE;
 }
 
 /* Accept incoming connections. If the connect succeeds and we create
@@ -361,12 +382,14 @@ static gboolean tcp_adb_accept(GIOChannel *channel, GIOCondition cond,
         }
     }
 
-    if (tcp_adb_connect(bs, fd)) {
-        bs->listen_chan_event = 0;
-        return FALSE;
-    } else {
-        return TRUE;
+    qemu_mutex_lock(bs->mutex);
+    const bool connected = tcp_adb_connect(bs, fd);
+    if (connected) {
+        bs->listen_chan_event = 0; // the listener will be gone after return
     }
+    qemu_mutex_unlock(bs->mutex);
+
+    return !connected;
 }
 
 static bool adb_server_listen_incoming(int port)
@@ -431,7 +454,7 @@ static void adb_pipe_close(void *opaque )
     DPRINTF("%s: hwpipe=%p\n", __FUNCTION__, apipe->hwpipe);
     if (adb_state.connected_pipe == apipe) {
         tcp_adb_server_close(&adb_state);
-        adb_state.connected_pipe = NULL;
+        // tcp_adb_server_close() has cleaned |adb_state.connected_pipe| for us
     }
     for (i = 0; i < PIPE_QUEUE_LEN; i++) {
         if (adb_state.adb_pipes[i] == apipe) {
@@ -469,7 +492,8 @@ static int pipe_send_data(adb_pipe *apipe, char *data, unsigned len,
 
 static bool match_request(const char *request, int len, const char *match)
 {
-    return len == strlen(match) && !strncmp(request, match, strlen(match));
+    const int matchLen = strlen(match);
+    return len == matchLen && memcmp(request, match, matchLen) == 0;
 }
 
 static const char *handle_request(adb_pipe *apipe, const char *request, int len)
@@ -487,15 +511,18 @@ static const char *handle_request(adb_pipe *apipe, const char *request, int len)
          * elect ourselves.  If the tcp connection is ready as well, go ahead
          * and thell adbd to carry on.
          */
+        qemu_mutex_lock(bs->mutex);
         if (!bs->connected_pipe) {
             bs->connected_pipe = apipe;
             if (bs->chan) {
                 g_assert(!bs->connected_pipe->chan);
                 bs->connected_pipe->chan = bs->chan;
+                qemu_mutex_unlock(bs->mutex);
                 DPRINTF("Already have tcp connection, reply 'ok' to 'accept'\n");
                 return _ok_resp;
             }
         }
+        qemu_mutex_unlock(bs->mutex);
 
         DPRINTF("no tcp connection, wait for it\n");
         return NULL; /* wait until adb server connects */
@@ -507,9 +534,11 @@ static const char *handle_request(adb_pipe *apipe, const char *request, int len)
         }
 
         if (!bs->chan) {
+            qemu_mutex_lock(bs->mutex);
             DPRINTF("adbd requested 'start' but tcp connection not yet connected, error\n");
             bs->connected_pipe->chan = NULL;
             android_pipe_close(apipe->hwpipe);
+            qemu_mutex_unlock(bs->mutex);
             return NULL;
         }
 
@@ -517,7 +546,9 @@ static const char *handle_request(adb_pipe *apipe, const char *request, int len)
         if (adb_timer_data.adb_data_timer_id) {
             g_source_remove(adb_timer_data.adb_data_timer_id);
         }
-        adb_timer_data.adb_data_timer_id = g_timeout_add(1000, /* ms */ tcp_adb_server_timer, &adb_timer_data);
+        adb_timer_data.adb_data_timer_id =
+                g_timeout_add(1000 /* ms */, tcp_adb_server_timer,
+                              &adb_timer_data);
         return NULL; /* start proxying data */
     } else {
         /* unrecognized command */
@@ -538,7 +569,10 @@ static int adb_pipe_proxy_send(adb_pipe *apipe, const AndroidPipeBuffer *buffers
     gsize total_copied = 0;
     adb_backend_state *bs = &adb_state;
 
-    g_assert(apipe->chan);
+    GIOChannel* chan = apipe->chan;
+    g_assert(chan);
+
+    g_io_channel_ref(chan);
 
     DPRINTF("%s: %p/%d\n", __func__, buffers, cnt);
     do {
@@ -546,8 +580,9 @@ static int adb_pipe_proxy_send(adb_pipe *apipe, const AndroidPipeBuffer *buffers
         gchar *bptr = (gchar *) buffers[0].data;
         gsize bsize = buffers[0].size;
         gsize copied = 0;
+
         GIOStatus status = g_io_channel_write_chars(
-            apipe->chan, bptr, bsize, &copied, &error);
+            chan, bptr, bsize, &copied, &error);
 
         total_copied += copied;
 
@@ -557,19 +592,22 @@ static int adb_pipe_proxy_send(adb_pipe *apipe, const AndroidPipeBuffer *buffers
         if (total_copied > 0 &&
             ((status == G_IO_STATUS_EOF || status == G_IO_STATUS_AGAIN))) {
             bs->data_out = FALSE;
+            g_io_channel_unref(chan);
             return total_copied;
         }
 
         /* Can't write and more data.... */
         if (status == G_IO_STATUS_AGAIN) {
             DPRINTF("%s: out of data, setting up watch\n", __func__);
-            g_io_add_watch(apipe->chan, G_IO_IN|G_IO_ERR|G_IO_HUP,
+            g_io_add_watch(chan, G_IO_IN|G_IO_ERR|G_IO_HUP,
                            tcp_adb_server_data, bs);
+            g_io_channel_unref(chan);
             bs->data_out = FALSE;
             return PIPE_ERROR_AGAIN;
         }
 
         if (status == G_IO_STATUS_EOF) {
+            g_io_channel_unref(chan);
             bs->data_out = FALSE;
             tcp_adb_server_close(bs);
             return 0;
@@ -577,6 +615,7 @@ static int adb_pipe_proxy_send(adb_pipe *apipe, const AndroidPipeBuffer *buffers
 
         if (status != G_IO_STATUS_NORMAL) {
             DPRINTF("%s: went wrong (%d)\n", __func__, status);
+            g_io_channel_unref(chan);
             bs->data_out = FALSE;
             tcp_adb_server_close(bs);
             return PIPE_ERROR_IO;
@@ -591,6 +630,7 @@ static int adb_pipe_proxy_send(adb_pipe *apipe, const AndroidPipeBuffer *buffers
         buffers++;
     } while (--cnt);
 
+    g_io_channel_unref(chan);
     return total_copied;
 }
 
@@ -632,12 +672,7 @@ static int pipe_recv_data(adb_pipe *apipe, const char *data, unsigned len,
     int chunk;
 
     while (remain > 0 && cnt > 0) {
-        if (remain > buffers[0].size) {
-            chunk = buffers[0].size;
-        } else {
-            chunk = remain;
-        }
-
+        chunk = buffers[0].size < remain ? buffers[0].size : remain;
         memcpy(buffers[0].data, data, chunk);
         data += chunk;
         remain -= chunk;
@@ -655,8 +690,10 @@ static int adb_pipe_proxy_recv(adb_pipe *apipe, AndroidPipeBuffer *buffers,
     gsize total_copied = 0;
     adb_backend_state *bs = &adb_state;
 
-    g_assert(apipe->chan);
-    g_assert(bs->chan == apipe->chan);
+    GIOChannel* chan = apipe->chan;
+    g_assert(chan);
+    g_assert(bs->chan == chan);
+    g_io_channel_ref(chan);
 
     DPRINTF("%s: hwpipe=%p (buffers %p/%d)\n", __func__, apipe->hwpipe, buffers, cnt);
     do {
@@ -665,7 +702,7 @@ static int adb_pipe_proxy_recv(adb_pipe *apipe, AndroidPipeBuffer *buffers,
         gsize bsize = buffers[0].size;
         gsize copied = 0;
         GIOStatus status = g_io_channel_read_chars(
-            apipe->chan, bptr, bsize, &copied, &error);
+            chan, bptr, bsize, &copied, &error);
 
         DPRINTF("%s: read %zd bytes into %p[%zd] -> %d\n", __func__,
                 copied, bptr, bsize, status);
@@ -676,6 +713,7 @@ static int adb_pipe_proxy_recv(adb_pipe *apipe, AndroidPipeBuffer *buffers,
          * let it come back to here */
         if (total_copied > 0 &&
             ((status == G_IO_STATUS_EOF || status == G_IO_STATUS_AGAIN))) {
+            g_io_channel_unref(chan);
             bs->data_in = FALSE;
             return total_copied;
         }
@@ -683,19 +721,22 @@ static int adb_pipe_proxy_recv(adb_pipe *apipe, AndroidPipeBuffer *buffers,
         /* no data to read.... */
         if (status == G_IO_STATUS_AGAIN) {
             DPRINTF("%s: out of data, setting up watch\n", __func__);
-            g_io_add_watch(apipe->chan, G_IO_IN|G_IO_ERR|G_IO_HUP,
+            g_io_add_watch(chan, G_IO_IN|G_IO_ERR|G_IO_HUP,
                            tcp_adb_server_data, bs);
+            g_io_channel_unref(chan);
             bs->data_in = FALSE;
             return PIPE_ERROR_AGAIN;
         }
 
         if (status == G_IO_STATUS_EOF) {
+            g_io_channel_unref(chan);
             bs->data_in = FALSE;
             return 0;
         }
 
         if (status != G_IO_STATUS_NORMAL) {
             DPRINTF("%s: went wrong (%d)\n", __func__, status);
+            g_io_channel_unref(chan);
             bs->data_in = FALSE;
             tcp_adb_server_close(bs);
             return PIPE_ERROR_IO;
@@ -710,6 +751,7 @@ static int adb_pipe_proxy_recv(adb_pipe *apipe, AndroidPipeBuffer *buffers,
         cnt--;
     } while (cnt);
 
+    g_io_channel_unref(chan);
     return total_copied;
 }
 
@@ -811,6 +853,8 @@ bool qemu2_adb_server_init(int port)
         adb_state.listen_chan_event = 0;
         adb_state.data_in = FALSE;
         adb_state.connected_pipe = NULL;
+        qemu_mutex_init(&adb_state_mutex);
+        adb_state.mutex = &adb_state_mutex;
 
         android_pipe_add_type("qemud:adb", NULL, &adb_pipe_funcs);
         pipe_backend_initialized = true;
