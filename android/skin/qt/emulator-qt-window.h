@@ -12,23 +12,10 @@
 
 #pragma once
 
-#include <QtCore>
-#include <QApplication>
-#include <QDragEnterEvent>
-#include <QDropEvent>
-#include <QFrame>
-#include <QImage>
-#include <QMessageBox>
-#include <QMouseEvent>
-#include <QMoveEvent>
-#include <QObject>
-#include <QPainter>
-#include <QResizeEvent>
-#include <QWidget>
-
 #include "android/base/containers/CircularBuffer.h"
 #include "android/base/StringView.h"
 #include "android/emulation/control/ApkInstaller.h"
+#include "android/emulation/control/FilePusher.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/globals.h"
 #include "android/skin/event.h"
@@ -40,7 +27,24 @@
 #include "android/skin/qt/tool-window.h"
 #include "android/skin/qt/ui-event-recorder.h"
 
+#include <QtCore>
+#include <QApplication>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QFrame>
+#include <QImage>
+#include <QMessageBox>
+#include <QMouseEvent>
+#include <QMoveEvent>
+#include <QObject>
+#include <QPainter>
+#include <QProgressDialog>
+#include <QResizeEvent>
+#include <QWidget>
+
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace Ui {
     class EmulatorWindow;
@@ -198,6 +202,7 @@ private slots:
     void slot_gpuWarningMessageAccepted();
 
     void slot_installCanceled();
+    void slot_adbPushCanceled();
 
     /*
      Here are conventional slots that perform interesting high-level functions in the emulator. These can be hooked up to signals
@@ -212,6 +217,7 @@ public slots:
     void slot_screenChanged();
 
 private:
+    static const android::base::StringView kRemoteDownloadsDir;
 
     // When the main window appears, close the "Starting..."
     // pop-up, if it was displayed.
@@ -231,11 +237,18 @@ private:
     void handleKeyEvent(SkinEventType type, QKeyEvent *event);
     void setFrameOnTop(QFrame* frame, bool onTop);
 
+    std::vector<std::string> getAdbFullPathStd();
     void screenshotDone(android::emulation::ScreenCapturer::Result result);
 
     void runAdbInstall(const QString& path);
     void installDone(android::emulation::ApkInstaller::Result result,
                      android::base::StringView errorString);
+
+    static const int kPushProgressBarMax;
+    void runAdbPush(const QList<QUrl>& urls);
+    void adbPushProgress(double progress, bool done);
+    void adbPushDone(android::base::StringView filePath,
+                     android::emulation::FilePusher::Result result);
 
     QTimer          mStartupTimer;
     QProgressDialog mStartupDialog;
@@ -267,6 +280,10 @@ private:
 
     std::shared_ptr<android::emulation::ApkInstaller> mApkInstaller;
     QProgressDialog mInstallDialog;
+
+    android::emulation::FilePusher::Ptr mFilePusher;
+    android::emulation::FilePusher::SubscriptionToken mFilePusherSubscription;
+    QProgressDialog mPushDialog;
 };
 
 struct SkinSurface {
