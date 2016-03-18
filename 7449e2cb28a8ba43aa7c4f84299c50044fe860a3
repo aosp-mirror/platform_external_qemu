@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_a3b06a24",
+        "filename": "android/emulation/control/ScreenCapturer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-18T21:10:15Z",
+      "side": 1,
+      "message": "No, this is where I intended the adb error to be returned in.",
+      "parentUuid": "7c21d2e1_23e3da1f",
+      "range": {
+        "startLine": 44,
+        "startChar": 31,
+        "endLine": 44,
+        "endChar": 68
+      },
+      "revId": "7449e2cb28a8ba43aa7c4f84299c50044fe860a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_b271ddaf",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 3
