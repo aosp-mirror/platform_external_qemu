@@ -35,7 +35,9 @@
 //      (1) take a list of buffers one by one and compute their checksum string,
 //          in this case the checksum should be as the data in those buffers are
 //          concatenated;
-//      (2) take a buffer and a checksum string, tell if they match;
+//      (2) compute the checksum of the buffer list, then either write them into
+//          a buffer provided by user, or compare it against a checksum provided
+//          by user
 //      (3) support different checksum version in future.
 //
 // For backward compatibility, checksum version 0 behaves the same as there is
@@ -48,11 +50,11 @@
 //
 // To evaluate checksums from a list of data buffers buf1, buf2... Please call
 // addBuffer(buf1, buf1len), addBuffer(buf2, buf2len) ... in order.
-// Then allocate a checksum buffer with size checksumByteSize(), and call
+// Then if the checksum needs to be encoded into a buffer, one needs to allocate
+// a checksum buffer with size checksumByteSize(), and call
 // writeChecksum(checksumBuffer) to write the checksum to the buffer.
-//
-// To calculate if a data buffer match its checksum, please call
-// validate(buf, bufLen, checksumBuffer)
+// If the checksum needs to be validated against an existing one, one needs to
+// call validate(existChecksum, existChecksumLen).
 //
 // The checksum generator and validator must be set to the same version, and
 // the validator must check ALL checksums in the order they are generated,
@@ -68,14 +70,15 @@
 //     ChecksumCalculator encoder;
 //     encoder.setVersion(1);
 //     encoder.addBuffer(buf, bufLen);
-//     std::vector<unsigned char> message(bufLen + checksumByteSize());
+//     std::vector<unsigned char> message(bufLen + encoder.checksumByteSize());
 //     memcpy(&message[0], buf, bufLen);
-//     encoder.writeChecksum(&message[0] + bufLen, checksumByteSize());
+//     encoder.writeChecksum(&message[0] + bufLen, encoder.checksumByteSize());
 //
 //     // decoding message
 //     ChecksumCalculator decoder;
 //     decoder.setVersion(1);
-//     return decoder.validate(&message[0], bufLen, &message[0] + bufLen);
+//     decoder.addBuffer(&message[0], bufLen);
+//     return decoder.validate(&message[0] + bufLen, decoder.checksumByteSize());
 // }
 // The return value is true.
 //
@@ -87,28 +90,34 @@
 //     ChecksumCalculator encoder;
 //     encoder.setVersion(1);
 //
-//     std::vector<unsigned char> message1(bufLen1 + checksumByteSize());
-//     std::vector<unsigned char> message2(bufLen2 + checksumByteSize());
+//     std::vector<unsigned char> message1(bufLen1 + encoder.checksumByteSize());
+//     std::vector<unsigned char> message2(bufLen2 + encoder.checksumByteSize());
 //
 //     encoder.addBuffer(buf1, bufLen1);
-//     std::vector<unsigned char> message1(bufLen1 + checksumByteSize());
+//     std::vector<unsigned char> message1(bufLen1 + encoder.checksumByteSize());
 //     memcpy(&message1[0], buf1, bufLen1);
-//     encoder.writeChecksum(&message1[0] + bufLen1, checksumByteSize());
+//     encoder.writeChecksum(&message1[0] + bufLen1, encoder.checksumByteSize());
 //
 //     encoder.addBuffer(buf2, bufLen2);
-//     std::vector<unsigned char> message2(bufLen2 + checksumByteSize());
+//     std::vector<unsigned char> message2(bufLen2 + encoder.checksumByteSize());
 //     memcpy(&message2[0], buf2, bufLen2);
-//     encoder.writeChecksum(&message2[0] + bufLen2, checksumByteSize());
+//     encoder.writeChecksum(&message2[0] + bufLen2, encoder.checksumByteSize());
 //
 //     // decoding messages
 //     ChecksumCalculator decoder;
 //     decoder.setVersion(1);
+//     decoder.addBuffer(&message2[0], bufLen2);
 //     // returns false because the decoding order is not consistent with
 //     // encoding order
-//     if (decoder.validate(&message2[0], bufLen2, &message2[0] + bufLen2) &&
-//          decoder.validate(&message1[0], bufLen1, &message1[0] + bufLen1) ) {
-//          return true;
+//     if (!decoder.validate(&message2[0]+bufLen2, decoder.checksumByteSize())) {
+//         return false;
 //     }
+//
+//     decoder.addBuffer(&message1[0], bufLen1);
+//     if (!decoder.validate(&message1[0]+bufLen1, decoder.checksumByteSize())) {
+//         return false;
+//     }
+//
 //     return false;
 // }
 
@@ -141,18 +150,20 @@ public:
     // the final checksum value and reset its state.
     void addBuffer(const void* buf, size_t bufLen);
     // Write the checksum from the list of buffers to outputChecksum
+    // Will reset the list of buffers by calling resetChecksum.
     // Return false if the buffer is not long enough
     // Please query buffer size from checksumByteSize()
     bool writeChecksum(void* outputChecksum, size_t outputChecksumLen);
     // Restore the states for computing checksums.
-    // Automatically called at the end of writeChecksum.
+    // Automatically called at the end of writeChecksum and validate.
     // Can also be used to abandon the current checksum being calculated.
     // Notes: it doesn't update the internal read / write counter
     void resetChecksum();
 
-    // Calculate the checksum of a packet (with size specified by packetLen),
-    // and compare it with the checksum encoded in expectedChecksum
-    bool validate(const void* buf, size_t bufLen, const void* expectedChecksum);
+    // Calculate the checksum from the list of buffers and
+    // compare it with the checksum encoded in expectedChecksum
+    // Will reset the list of buffers by calling resetChecksum.
+    bool validate(const void* expectedChecksum, size_t expectedChecksumLen);
 protected:
     uint32_t m_version = 0;
     // A temporary state used to compute the total length of a list of buffers,
@@ -164,7 +175,7 @@ protected:
 private:
     // Compute a 32bit checksum
     // Used in protocol v1
-    static uint32_t computeV1Checksum(const void* buf, size_t bufLen);
+    uint32_t computeV1Checksum();
     // The buffer used in protocol version 1 to compute checksum.
     uint32_t m_v1BufferTotalLength = 0;
 };
