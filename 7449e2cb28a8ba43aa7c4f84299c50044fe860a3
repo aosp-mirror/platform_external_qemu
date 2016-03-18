@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_a59eb927",
+        "filename": "android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-18T00:49:22Z",
+      "side": 1,
+      "message": "taskDoneFunction runs on whichever thread is using ScreenCapturer (i.e. Qt thread)\n\ntaskFunction runs on its own thread.\n\nqemu thread is not involved at all.\n\nmCancelled is only ever accessed from the client thread (qt thread)",
+      "parentUuid": "7c21d2e1_32dccde4",
+      "range": {
+        "startLine": 160,
+        "startChar": 21,
+        "endLine": 160,
+        "endChar": 37
+      },
+      "revId": "7449e2cb28a8ba43aa7c4f84299c50044fe860a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_b271ddaf",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-18T00:35:49Z",
       "side": 1,
       "message": "why do we need to give such a silly warning? Instead we should just disable the button and enable it back when it\u0027s OK to click it again\nOr I\u0027m missing something?",
+      "range": {
+        "startLine": 847,
+        "startChar": 7,
+        "endLine": 849,
+        "endChar": 49
+      },
+      "revId": "7449e2cb28a8ba43aa7c4f84299c50044fe860a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_e5a8b152",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 849,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-18T00:49:22Z",
+      "side": 1,
+      "message": "This shouldn\u0027t happen at all, \u0027cause we do what you suggested.\nThis is the error message you\u0027ll get if the disable is broken for whatever reason.",
+      "parentUuid": "7c21d2e1_b271ddaf",
       "range": {
         "startLine": 847,
         "startChar": 7,
@@ -82,6 +130,30 @@
       "writtenOn": "2016-03-18T00:35:49Z",
       "side": 1,
       "message": "do we really need to check it?",
+      "range": {
+        "startLine": 870,
+        "startChar": 10,
+        "endLine": 870,
+        "endChar": 36
+      },
+      "revId": "7449e2cb28a8ba43aa7c4f84299c50044fe860a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_25dc89e4",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 870,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-18T00:49:22Z",
+      "side": 1,
+      "message": "cut-paste for existing code ;)\n\nWill fix.",
+      "parentUuid": "7c21d2e1_859e157b",
       "range": {
         "startLine": 870,
         "startChar": 10,
