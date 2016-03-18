@@ -114,6 +114,30 @@
       "revId": "2a602ee6d1587e43f34bcc033fdb172ad14f8321",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_8954679d",
+        "filename": "android/emulation/control/ScreenCapturer_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-18T22:13:39Z",
+      "side": 1,
+      "message": "dang.\nShould\u0027ve deleted those comments so you don\u0027t find out about them :P\n\nWe don\u0027t have a generic way of checking std::vector::contains expectations.\nYet.",
+      "parentUuid": "7c21d2e1_6969338b",
+      "range": {
+        "startLine": 167,
+        "startChar": 4,
+        "endLine": 167,
+        "endChar": 79
+      },
+      "revId": "2a602ee6d1587e43f34bcc033fdb172ad14f8321",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
