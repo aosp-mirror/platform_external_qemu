@@ -22,6 +22,30 @@
       "revId": "eb020adf80922a900d83ace76be9391aa776f3f8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_4f854f8b",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1431,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-18T23:28:45Z",
+      "side": 1,
+      "message": "That means we need to leave the \"errorString\" argument in the above. Which is fine - I\u0027ll see to migrating this stuff over.",
+      "parentUuid": "7c21d2e1_af404b13",
+      "range": {
+        "startLine": 1431,
+        "startChar": 23,
+        "endLine": 1431,
+        "endChar": 45
+      },
+      "revId": "eb020adf80922a900d83ace76be9391aa776f3f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
