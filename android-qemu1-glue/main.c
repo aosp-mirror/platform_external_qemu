@@ -134,8 +134,6 @@ int main(int argc, char **argv) {
 
     AndroidHwConfig*  hw = android_hw;
     AvdInfo*          avd;
-    AConfig*          skinConfig;
-    char*             skinPath;
     int exitStatus = 1;
 
     AndroidOptions  opts[1] = {};
@@ -189,26 +187,11 @@ int main(int argc, char **argv) {
     // we know it's qemu1, and don't care what user wanted to trick us into
     opts->ranchu = 0;
 
-    if (skin_charmap_setup(opts->charmap)) {
-        return 1;
-    }
-
     avd = android_avdInfo;
 
-    /* The Qt UI handles keyboard shortcuts on its own. Don't load any keyset. */
-    SkinKeyset* keyset = skin_keyset_new_from_text("");
-    if (!keyset) {
-        fprintf(stderr, "PANIC: unable to create empty default keyset!!\n" );
+    if (!emulator_parseUiCommandLineOptions(opts, avd, hw)) {
         return 1;
     }
-    skin_keyset_set_default(keyset);
-    if (!opts->keyset) {
-        write_default_keyset();
-    }
-
-    user_config_init();
-    parse_skin_files(opts->skindir, opts->skin, opts, hw,
-                     &skinConfig, &skinPath);
 
     n = 1;
 
@@ -423,31 +406,6 @@ int main(int argc, char **argv) {
         args[n++] = opts->http_proxy;
     }
 
-    if (!opts->charmap) {
-        /* Try to find a valid charmap name */
-        char* charmap = avdInfo_getCharmapFile(avd, hw->hw_keyboard_charmap);
-        if (charmap != NULL) {
-            D("autoconfig: -charmap %s", charmap);
-            opts->charmap = charmap;
-        }
-    }
-
-    if (opts->charmap) {
-        char charmap_name[SKIN_CHARMAP_NAME_SIZE];
-
-        if (!path_exists(opts->charmap)) {
-            derror("Charmap file does not exist: %s", opts->charmap);
-            return 1;
-        }
-        /* We need to store the charmap name in the hardware configuration.
-         * However, the charmap file itself is only used by the UI component
-         * and doesn't need to be set to the emulation engine.
-         */
-        kcm_extract_charmap_name(opts->charmap, charmap_name,
-                                 sizeof(charmap_name));
-        reassign_string(&hw->hw_keyboard_charmap, charmap_name);
-    }
-
     /* Deal with camera emulation */
     if (opts->webcam_list) {
         /* List connected webcameras */
@@ -604,7 +562,9 @@ int main(int argc, char **argv) {
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, NULL);
 #endif
-    ui_init(skinConfig, skinPath, opts, &uiEmuAgent);
+    if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
+        return 1;
+    }
 
     // This is a workaround for b.android.com/198256
     // Qemu1 QT GUI on OSX crashes on exit when QT releases NSWindow.
@@ -617,7 +577,8 @@ int main(int argc, char **argv) {
 #endif
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, n, args);
     skin_winsys_enter_main_loop(opts->no_window, argc, argv);
-    ui_done();
+
+    emulator_finiUserInterface();
 
     process_late_teardown();
     return 0;
