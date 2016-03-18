@@ -246,8 +246,7 @@ _getSdkSystemImage( const char*  path, const char*  optionName, const char*  fil
     return image;
 }
 
-void sanitizeOptions( AndroidOptions* opts )
-{
+static void sanitizeOptions(AndroidOptions* opts) {
     /* legacy support: we used to use -system <dir> and -image <file>
      * instead of -sysdir <dir> and -system <file>, so handle this by checking
      * whether the options point to directories or files.
@@ -338,8 +337,7 @@ void sanitizeOptions( AndroidOptions* opts )
     }
 }
 
-AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild)
-{
+static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
     AvdInfo* ret = NULL;
     char   tmp[MAX_PATH];
     char*  tmpend = tmp + sizeof(tmp);
@@ -1337,6 +1335,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     return true;
 }
 
+
 bool handleCpuAcceleration(AndroidOptions* opts, AvdInfo* avd,
                            CpuAccelMode* accel_mode, char* accel_status) {
     /* Handle CPU acceleration options. */
@@ -1455,9 +1454,18 @@ bool handleCpuAcceleration(AndroidOptions* opts, AvdInfo* avd,
  * buffer size. (It may actually boot a slightly larger screen, but we set
  * limit to this commonly seen resolution.)
  */
-static bool use_software_gpu_and_screen_too_large(AndroidHwConfig *hw) {
-    return (!hw->hw_gpu_enabled &&
-            hw->hw_lcd_width * hw->hw_lcd_height > 768 * 1280);
+static bool use_software_gpu_and_screen_too_large(AndroidHwConfig* hw) {
+    const int kMaxWidth = 1280;
+    const int kMaxHeight = 768;
+
+    if (!hw->hw_gpu_enabled &&
+            (hw->hw_lcd_width * hw->hw_lcd_height > kMaxWidth * kMaxHeight)) {
+        derror("GPU emulation is disabled.\n"
+                   "Only screen size of 768 X 1280 or smaller is supported "
+                   "when GPU emulation is disabled.");
+        return true;
+    }
+    return false;
 }
 
 // _findQemuInformationalOption: search for informational QEMU options
@@ -1494,15 +1502,6 @@ static char* _findQemuInformationalOption(int qemu_argc, char** qemu_argv) {
         }
     }
     return NULL;
-}
-
-// TODO(digit): Remove this function once QEMU2 has been refactored to call
-//              emulator_parseCommonCommandLineOptions() directly.
-bool handleCommonEmulatorOptions(AndroidOptions* opts,
-                                 AndroidHwConfig* hw,
-                                 AvdInfo* avd) {
-    return emulator_handleCommonEmulatorOptions(opts, hw, avd,
-                                                opts->ranchu != 0);
 }
 
 bool emulator_parseCommonCommandLineOptions(int* p_argc,
@@ -1871,13 +1870,9 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
         hw->hw_gpu_enabled = config.enabled;
         if (use_software_gpu_and_screen_too_large(hw)) {
-            derror("GPU emulation is disabled.\n"
-                   "Only screen size of 768 X 1280 or smaller is supported "
-                   "when GPU emulation is disabled.");
             return false;
         }
-        if (config.enabled)
-        {
+        if (config.enabled) {
             /* Only update hw_gpu_mode if emuglConfig_init determined that gpu
              * is enabled. Leave the default untouched otherwise, because there
              * is no canonical value to return from emulConfig_init function in
