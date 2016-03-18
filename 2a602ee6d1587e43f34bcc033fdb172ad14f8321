@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_493b8fb1",
+        "filename": "android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-18T22:05:16Z",
+      "side": 1,
+      "message": "Probably only happens when the ADB session fails to start. Might be easier just having a single Result::kAdbConnectionFailed or something like that, though I suppose it would be nice to surface *which* process failed.",
+      "range": {
+        "startLine": 142,
+        "startChar": 8,
+        "endLine": 144,
+        "endChar": 17
+      },
+      "revId": "2a602ee6d1587e43f34bcc033fdb172ad14f8321",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_895e27ea",
+        "filename": "android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-18T22:05:16Z",
+      "side": 1,
+      "message": "Same as the above",
+      "range": {
+        "startLine": 166,
+        "startChar": 8,
+        "endLine": 168,
+        "endChar": 17
+      },
+      "revId": "2a602ee6d1587e43f34bcc033fdb172ad14f8321",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
