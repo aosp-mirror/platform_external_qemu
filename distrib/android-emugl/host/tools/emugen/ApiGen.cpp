@@ -319,6 +319,7 @@ int ApiGen::genEncoderHeader(const std::string &filename)
     fprintf(fp, "#define GUARD_%s\n\n", classname.c_str());
 
     fprintf(fp, "#include \"IOStream.h\"\n");
+    fprintf(fp, "#include \"ChecksumCalculator.h\"\n");
     fprintf(fp, "#include \"%s_%s_context.h\"\n\n\n", m_basename.c_str(), sideString(CLIENT_SIDE));
 
     for (size_t i = 0; i < m_encoderHeaders.size(); i++) {
@@ -328,9 +329,10 @@ int ApiGen::genEncoderHeader(const std::string &filename)
 
     fprintf(fp, "struct %s : public %s_%s_context_t {\n\n",
             classname.c_str(), m_basename.c_str(), sideString(CLIENT_SIDE));
-    fprintf(fp, "\tIOStream *m_stream;\n\n");
+    fprintf(fp, "\tIOStream *m_stream;\n");
+    fprintf(fp, "\tChecksumCalculator *m_checksumCalculator;\n\n");
 
-    fprintf(fp, "\t%s(IOStream *stream);\n", classname.c_str());
+    fprintf(fp, "\t%s(IOStream *stream, ChecksumCalculator *checksumCalculator);\n", classname.c_str());
     fprintf(fp, "};\n\n");
 
     fprintf(fp, "#endif  // GUARD_%s", classname.c_str());
@@ -424,17 +426,17 @@ static void writeVarLargeEncodingExpression(Var& var, FILE* fp)
     const char* varname = var.name().c_str();
 
     fprintf(fp, "\tstream->writeFully(&__size_%s,4);\n", varname);
+    fprintf(fp, "\tif (checksumCalculator->getVersion() > 0) checksumCalculator->addBuffer(&__size_%s,4);\n", varname);
     if (var.nullAllowed()) {
-        fprintf(fp, "\tif (%s != NULL) ", varname);
-    } else {
-        fprintf(fp, "\t");
+        fprintf(fp, "\tif (%s != NULL) {\n", varname);
     }
     if (var.writeExpression() != "") {
         fprintf(fp, "%s", var.writeExpression().c_str());
     } else {
-        fprintf(fp, "stream->writeFully(%s, __size_%s)", varname, varname);
+        fprintf(fp, "\t\tstream->writeFully(%s, __size_%s);\n", varname, varname);
+        fprintf(fp, "\t\tif (checksumCalculator->getVersion() > 0) checksumCalculator->addBuffer(%s, __size_%s);\n", varname, varname);
     }
-    fprintf(fp, ";\n");
+    if (var.nullAllowed()) fprintf(fp, "\t}\n");
 }
 #endif /* WITH_LARGE_SUPPORT */
 
@@ -477,7 +479,8 @@ int ApiGen::genEncoderImpl(const std::string &filename)
         fprintf(fp, "\n\t%s *ctx = (%s *)self;\n",
                 classname.c_str(),
                 classname.c_str());
-        fprintf(fp, "\tIOStream *stream = ctx->m_stream;\n\n");
+        fprintf(fp, "\tIOStream *stream = ctx->m_stream;\n");
+        fprintf(fp, "\tChecksumCalculator *checksumCalculator = ctx->m_checksumCalculator;\n\n");
         VarsArray & evars = e->vars();
         size_t  maxvars = evars.size();
         size_t  j;
@@ -499,6 +502,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
             fprintf(fp, "%s;\n", buff);
         }
 
+        bool hasLargeFields = false;
 #if WITH_LARGE_SUPPORT
         // We need to take care of 'isLarge' variable in a special way
         // Anything before an isLarge variable can be packed into a single
@@ -509,9 +513,10 @@ int ApiGen::genEncoderImpl(const std::string &filename)
         size_t  nvars   = 0;
         size_t  npointers = 0;
 
-        // First, compute the total size, 8 bytes for the opcode + payload size
+        // First, compute the total size, 8 bytes for the opcode + payload size (without checksum)
         fprintf(fp, "\t unsigned char *ptr;\n");
-        fprintf(fp, "\t const size_t packetSize = 8");
+        fprintf(fp, "\t unsigned char *buf;\n");
+        fprintf(fp, "\t const size_t sizeWithoutChecksum = 8");
 
         for (j = 0; j < maxvars; j++) {
             fprintf(fp, " + ");
@@ -522,11 +527,17 @@ int ApiGen::genEncoderImpl(const std::string &filename)
         }
         fprintf(fp, ";\n");
 
+        // Then, size of the checksum string
+        fprintf(fp, "\t const size_t checksumSize = checksumCalculator->checksumByteSize();\n");
+
+        // And, size of the whole thing
+        fprintf(fp, "\t const size_t totalSize = sizeWithoutChecksum + checksumSize;\n");
+
         // We need to divide the packet into fragments. Each fragment contains
         // either copied arguments to a temporary buffer, or direct writes for
         // large variables.
         //
-        // The first fragment must also contain the opcode+payload_size
+        // The first fragment must also contain the opcode+payload_size+checksum_size
         //
         nvars = 0;
         while (nvars < maxvars || maxvars == 0) {
@@ -543,11 +554,12 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 
                 if (nvars == 0 && j == maxvars) {
                     // Simple shortcut for the common case where we don't have large variables;
-                    fprintf(fp, "\tptr = stream->alloc(packetSize);\n");
+                    fprintf(fp, "\tbuf = stream->alloc(totalSize);\n");
 
                 } else {
+                    hasLargeFields = true;
                     // allocate buffer from the stream until the first large variable
-                    fprintf(fp, "\tptr = stream->alloc(");
+                    fprintf(fp, "\tbuf = stream->alloc(");
                     plus = "";
 
                     if (nvars == 0) {
@@ -565,21 +577,25 @@ int ApiGen::genEncoderImpl(const std::string &filename)
                     }
                     fprintf(fp,");\n");
                 }
+                fprintf(fp, "\tptr = buf;\n");
 
                 // encode packet header if needed.
                 if (nvars == 0) {
                     fprintf(fp, "\tint tmp = OP_%s;memcpy(ptr, &tmp, 4); ptr += 4;\n",  e->name().c_str());
-                    fprintf(fp, "\tmemcpy(ptr, &packetSize, 4);  ptr += 4;\n\n");
+                    fprintf(fp, "\tmemcpy(ptr, &totalSize, 4);  ptr += 4;\n\n");
                 }
 
-                if (maxvars == 0)
+                if (maxvars == 0) {
+                    fprintf(fp, "\n\tif (checksumCalculator->getVersion() > 0) checksumCalculator->addBuffer(buf, ptr-buf);\n");
                     break;
+                }
 
                 // encode non-large fields in this fragment
                 for (j = nvars; j < maxvars && !evars[j].isLarge(); j++) {
                     writeVarEncodingExpression(evars[j],fp);
                 }
 
+                fprintf(fp, "\n\tif (checksumCalculator->getVersion() > 0) checksumCalculator->addBuffer(buf, ptr-buf);\n");
                 // Ensure the fragment is commited if it is followed by a large variable
                 if (j < maxvars) {
                     fprintf(fp, "\tstream->flush();\n");
@@ -598,25 +614,37 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 #else /* !WITH_LARGE_SUPPORT */
         size_t nvars = evars.size();
         size_t npointers = 0;
-        fprintf(fp, "\t const size_t packetSize = 8");
+        fprintf(fp, "\t const size_t sizeWithoutChecksum = 8");
         for (size_t j = 0; j < nvars; j++) {
             npointers += getVarEncodingSizeExpression(evars[j],e,buff,sizeof(buff));
             fprintf(fp, " + %s", buff);
         }
         fprintf(fp, " + %u * 4;\n", (unsigned int) npointers);
+        // Size of checksum
+        fprintf(fp, "\t const size_t checksumSize = checksumCalculator->checksumByteSize();\n");
+        // Size of the whole thing
+        fprintf(fp, "\t const size_t totalSize = sizeWithoutChecksum + checksumSize;\n");
 
         // allocate buffer from the stream;
-        fprintf(fp, "\t unsigned char *ptr = stream->alloc(packetSize);\n\n");
+        fprintf(fp, "\t unsigned char *ptr = stream->alloc(sizeWithoutChecksum);\n\n");
 
         // encode into the stream;
         fprintf(fp, "\tint tmp = OP_%s; memcpy(ptr, &tmp, 4); ptr += 4;\n",  e->name().c_str());
-        fprintf(fp, "\tmemcpy(ptr, &packetSize, 4);  ptr += 4;\n\n");
+        fprintf(fp, "\tmemcpy(ptr, &sizeWithoutChecksum, 4);  ptr += 4;\n\n");
 
         // out variables
         for (size_t j = 0; j < nvars; j++) {
             writeVarEncodingExpression(evars[j], fp);
         }
 #endif /* !WITH_LARGE_SUPPORT */
+
+        // checksum
+        if (hasLargeFields) {
+            fprintf(fp, "\tbuf = stream->alloc(checksumSize);\n");
+            fprintf(fp, "\tif (checksumCalculator->getVersion() > 0) checksumCalculator->writeChecksum(buf, checksumSize);\n");
+        } else {
+            fprintf(fp, "\tif (checksumCalculator->getVersion() > 0) checksumCalculator->writeChecksum(ptr, checksumSize); ptr += checksumSize;\n");
+        }
 
         // in variables;
         for (size_t j = 0; j < nvars; j++) {
@@ -657,8 +685,9 @@ int ApiGen::genEncoderImpl(const std::string &filename)
     fprintf(fp, "}  // namespace\n\n");
 
     // constructor
-    fprintf(fp, "%s::%s(IOStream *stream)\n{\n", classname.c_str(), classname.c_str());
-    fprintf(fp, "\tm_stream = stream;\n\n");
+    fprintf(fp, "%s::%s(IOStream *stream, ChecksumCalculator *checksumCalculator)\n{\n", classname.c_str(), classname.c_str());
+    fprintf(fp, "\tm_stream = stream;\n");
+    fprintf(fp, "\tm_checksumCalculator = checksumCalculator;\n\n");
 
     for (size_t i = 0; i < n; i++) {
         EntryPoint *e = &at(i);
@@ -762,6 +791,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp, "#include \"%s_opcodes.h\"\n\n", m_basename.c_str());
     fprintf(fp, "#include \"%s_dec.h\"\n\n\n", m_basename.c_str());
     fprintf(fp, "#include \"ProtocolUtils.h\"\n\n");
+    fprintf(fp, "#include \"ChecksumCalculatorThreadInfo.h\"\n\n");
     fprintf(fp, "#include <stdio.h>\n\n");
     fprintf(fp, "typedef unsigned int tsize_t; // Target \"size_t\", which is 32-bit for now. It may or may not be the same as host's size_t when emugen is compiled.\n\n");
 
@@ -804,6 +834,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
         enum Pass_t {
             PASS_FIRST = 0,
             PASS_VariableDeclarations = PASS_FIRST,
+            PASS_Protocol,
             PASS_TmpBuffAlloc,
             PASS_MemAlloc,
             PASS_DebugPrint,
@@ -1043,6 +1074,20 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 #endif  // !USE_ALIGNED_BUFFERS
                     varoffset += " + 4";
                 }
+            }
+
+            if (pass == PASS_Protocol) {
+                fprintf(fp,
+                        "\t\t\tif (ChecksumCalculatorThreadInfo::getVersion() > 0) {\n"
+                        "\t\t\t\tChecksumCalculatorThreadInfo::validOrDie(ptr, %s, \"%s::decode,"
+                        " OP_%s: GL checksumCalculator failure\\n\");\n"
+                        "\t\t\t}\n",
+                        varoffset.c_str(),
+                        classname.c_str(),
+                        e->name().c_str()
+                        );
+
+                varoffset += " + 4";
             }
 
             if (pass == PASS_FunctionCall ||

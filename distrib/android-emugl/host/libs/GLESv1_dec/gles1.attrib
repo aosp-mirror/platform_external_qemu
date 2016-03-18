@@ -76,7 +76,8 @@ glBufferData
 #void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, GLvoid *data)
 glBufferSubData
 	dir data in
-	len data size nullAllowed
+	len data size
+	var_flag data nullAllowed
 
 #void glClipPlanex(GLenum plane, GLfixed *eqn)
 glClipPlanex
@@ -96,7 +97,8 @@ glCompressedTexImage2D
 
 #void glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, GLvoid *data)
 glCompressedTexSubImage2D
-	len data imageSize nullAllowed
+	len data imageSize
+        var_flag data nullAllowed
 
 #void glDeleteBuffers(GLsizei n, GLuint *buffers)
 glDeleteBuffers

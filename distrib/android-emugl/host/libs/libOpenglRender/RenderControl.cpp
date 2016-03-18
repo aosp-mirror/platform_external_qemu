@@ -19,6 +19,7 @@
 #include "FbConfig.h"
 #include "FrameBuffer.h"
 #include "RenderThreadInfo.h"
+#include "ChecksumCalculatorThreadInfo.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
@@ -65,28 +66,35 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
 static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 {
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
-    if (!tInfo || !tInfo->currContext.Ptr()) {
-        return 0;
-    }
-
     const char *str = NULL;
-    if (tInfo->currContext->isGL2()) {
-        str = (const char *)s_gles2.glGetString(name);
-    }
-    else {
-        str = (const char *)s_gles1.glGetString(name);
+    int len = 0;
+    if (tInfo && tInfo->currContext.Ptr()) {
+        if (tInfo->currContext->isGL2()) {
+            str = (const char *)s_gles2.glGetString(name);
+        }
+        else {
+            str = (const char *)s_gles1.glGetString(name);
+        }
+        len = strlen(str) + 1;
     }
 
-    if (!str) {
-        return 0;
+    // We add the maximum supported GL protocol number into GL_EXTENSIONS
+    const char* glProtocolStr = NULL;
+    if (name == GL_EXTENSIONS) {
+        glProtocolStr = ChecksumCalculatorThreadInfo::getMaxVersionString();
+        if (len==0) len = 1; // the last byte
+        len += strlen(glProtocolStr) + 1;
     }
 
-    int len = strlen(str) + 1;
     if (!buffer || len > bufferSize) {
         return -len;
     }
 
-    strcpy((char *)buffer, str);
+    if (name == GL_EXTENSIONS) {
+        sprintf((char *)buffer, "%s%s ", str ? str : "", glProtocolStr);
+    } else {
+        strcpy((char *)buffer, str);
+    }
     return len;
 }
 
@@ -364,6 +372,10 @@ static int rcDestroyClientImage(uint32_t image)
     return fb->destroyClientImage(image);
 }
 
+static void rcSelectChecksumCalculator(uint32_t protocol, uint32_t reserved) {
+    ChecksumCalculatorThreadInfo::setVersion(protocol);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -394,4 +406,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcOpenColorBuffer2 = rcOpenColorBuffer2;
     dec->rcCreateClientImage = rcCreateClientImage;
     dec->rcDestroyClientImage = rcDestroyClientImage;
+    dec->rcSelectChecksumCalculator = rcSelectChecksumCalculator;
 }
