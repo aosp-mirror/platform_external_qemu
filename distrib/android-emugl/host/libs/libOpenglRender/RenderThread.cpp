@@ -24,6 +24,7 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
+#include "../../../shared/OpenglCodecCommon/ChecksumCalculatorThreadInfo.h"
 
 #define STREAM_BUFFER_SIZE 4*1024*1024
 
@@ -47,6 +48,7 @@ void RenderThread::forceStop() {
 
 intptr_t RenderThread::main() {
     RenderThreadInfo tInfo;
+    ChecksumCalculatorThreadInfo tChecksumInfo;
 
     //
     // initialize decoders
