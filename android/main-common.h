@@ -22,6 +22,34 @@
 
 ANDROID_BEGIN_HEADER
 
+// Special value return
+#define EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER  (-1)
+
+// Parse command-line options and setups |opt| and |hw| structures.
+// |p_argc| and |p_argv| are pointers to the command-line parameters
+// received from main(). |targetArch| is the target architecture for
+// platform builds. |is_qemu2| is true if this is called from QEMU2,
+// false if called from the classic emulator. |opt| and |hw| are
+// caller-provided structures that will be initialized by the function.
+//
+// On success, return true and sets |*the_avd| to the address of a new
+// AvdInfo instance. On failure, return false and sets |*exit_status|
+// to a process exit status.
+//
+// NOTE: As a special case |*exit_status| will be set to
+// EMLATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER on failure to indicate that
+// a QEMU positional parameter was detected. The caller should copy all
+// arguments from |*p_argc| and |*p_argv| and call the QEMU main function
+// with them, then exit.
+bool emulator_parseCommonCommandLineOptions(int* p_argc,
+                                            char*** p_argv,
+                                            const char* targetArch,
+                                            bool is_qemu2,
+                                            AndroidOptions* opt,
+                                            AndroidHwConfig* hw,
+                                            AvdInfo** the_avd,
+                                            int* exit_status);
+
 /* Common routines used by both android-qemu1-glue/main.c and android/main-ui.c */
 
 // Reset the value of |*string| to a copy of |new_value|. This
