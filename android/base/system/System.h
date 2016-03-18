@@ -296,7 +296,7 @@ public:
                             System::Duration timeoutMs = kInfinite,
                             System::ProcessExitCode* outExitCode = nullptr,
                             System::Pid* outChildPid = nullptr,
-                            const std::string& outTempFile = "") = 0;
+                            const std::string& outputFile = "") = 0;
 
 protected:
     static System* setForTesting(System* system);
