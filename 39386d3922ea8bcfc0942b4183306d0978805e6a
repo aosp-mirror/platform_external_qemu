@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_74458d21",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ChecksumCalculator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-18T17:03:35Z",
+      "side": 1,
+      "message": "both qemu and qemu2 codebases have crc implementaion. Should we try reusing those instead?",
+      "range": {
+        "startLine": 176,
+        "startChar": 0,
+        "endLine": 177,
+        "endChar": 25
+      },
+      "revId": "39386d3922ea8bcfc0942b4183306d0978805e6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
