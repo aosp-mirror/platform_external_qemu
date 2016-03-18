@@ -95,8 +95,6 @@ ifeq ($(BUILD_TARGET_OS),darwin)
     BUILD_TARGET_CFLAGS += -D_DARWIN_C_SOURCE=1
     # Clang complains about this flag being not useful anymore.
     BUILD_TARGET_CFLAGS := $(filter-out -falign-functions=0,$(BUILD_TARGET_CFLAGS))
-    # Embed Info.plist at build time to ensure the menu bar is correct
-    BUILD_TARGET_LDFLAGS += -sectcreate __TEXT __info_plist $(LOCAL_PATH)/android/Info.plist
 endif
 
 # NOTE: The following definitions are only used by the standalone build.
