@@ -41,6 +41,9 @@
 
 #include <string>
 
+#include "android/base/async/ThreadLooper.h"
+#include "android/skin/qt/QtLooper.h"
+
 #ifdef Q_OS_LINUX
 // This include needs to be after all the Qt includes
 // because it defines macros/types that conflict with
