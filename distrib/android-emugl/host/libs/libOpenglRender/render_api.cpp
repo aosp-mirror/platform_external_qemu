@@ -33,6 +33,7 @@
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
+#include "emugl/common/crash_reporter.h"
 #include "emugl/common/logging.h"
 
 #include <string.h>
@@ -78,7 +79,8 @@ RENDER_APICALL int RENDER_APIENTRY initLibrary(void)
 
 RENDER_APICALL int RENDER_APIENTRY initOpenGLRenderer(
         int width, int height, bool useSubWindow, char* addr, size_t addrLen,
-        emugl_logger_struct logfuncs) {
+        emugl_logger_struct logfuncs, emugl_crash_func_t crashfunc) {
+    set_emugl_crash_reporter(crashfunc);
     set_emugl_logger(logfuncs.coarse);
     set_emugl_cxt_logger(logfuncs.fine);
     //
