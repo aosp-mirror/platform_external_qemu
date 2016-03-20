@@ -34,13 +34,16 @@
 
 #ifdef __APPLE__
 #import <Carbon/Carbon.h>
+#include <crt_externs.h>
 #include <mach/clock.h>
 #include <mach/mach.h>
+#include <spawn.h>
 #endif  // __APPLE__
 
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <memory>
 
 #ifndef _WIN32
 #include <fcntl.h>
@@ -73,6 +76,9 @@ extern "C" char** environ;
 
 namespace android {
 namespace base {
+
+using std::string;
+using std::unique_ptr;
 
 static System::WallDuration getTickCountMs() {
 #ifdef _WIN32
@@ -746,8 +752,14 @@ public:
             umask(old);
         }
 
+#if defined(__APPLE__)
+        int pid = runViaPosixSpawn(commandLine[0].c_str(), params, options,
+                                   outputFile);
+#else
+        assert(0):
         int pid = runViaForkAndExec(commandLine[0].c_str(), params, options,
                                     outputFd);
+#endif  // !defined(__APPLE__)
         // Immediately close the output file if it exists
         if (outputFd > 0) {
             close(outputFd);
@@ -849,6 +861,83 @@ public:
         // Should not happen, but let's keep the compiler happy
         return -1;
     }
+
+#if defined(__APPLE__)
+    int runViaPosixSpawn(const char* command,
+                         const ScopedCPtr<char*>& params,
+                         RunOptions options,
+                         const string& outputFile) {
+        posix_spawnattr_t attr;
+        if (posix_spawnattr_init(&attr)) {
+            LOG(VERBOSE) << "Failed to initialize spawnattr obj.";
+            return -1;
+        }
+        // Automatically destroy the successfully initialized attr.
+        auto attrDeleter = [](posix_spawnattr_t* t) {
+            posix_spawnattr_destroy(t);
+        };
+        unique_ptr<posix_spawnattr_t, decltype(attrDeleter)> scopedAttr(
+                &attr, attrDeleter);
+
+        if (posix_spawnattr_setflags(&attr, POSIX_SPAWN_CLOEXEC_DEFAULT)) {
+            LOG(VERBOSE) << "Failed to request CLOEXEC.";
+            return -1;
+        }
+
+        posix_spawn_file_actions_t fileActions;
+        if (posix_spawn_file_actions_init(&fileActions)) {
+            LOG(VERBOSE) << "Failed to initialize fileactions obj.";
+            return -1;
+        }
+        // Automatically destroy the successfully initialized fileActions.
+        auto fileActionsDeleter = [](posix_spawn_file_actions_t* t) {
+            posix_spawn_file_actions_destroy(t);
+        };
+        unique_ptr<posix_spawn_file_actions_t, decltype(fileActionsDeleter)>
+                scopedFileActions(&fileActions, fileActionsDeleter);
+
+        if ((options & RunOptions::DumpOutputToFile) != RunOptions::None) {
+            if (posix_spawn_file_actions_addopen(&fileActions, 1, outputFile.c_str(),
+                        O_WRONLY | O_CREAT | O_TRUNC, 0700) ||
+                posix_spawn_file_actions_addopen(&fileActions, 2, outputFile.c_str(),
+                        O_WRONLY | O_CREAT | O_TRUNC, 0700)) {
+                LOG(VERBOSE) << "Failed to redirect child output to file "
+                             << outputFile;
+                return -1;
+            }
+        } else if ((options & RunOptions::ShowOutput) != RunOptions::None) {
+            if (posix_spawn_file_actions_addinherit_np(&fileActions, 1) ||
+                posix_spawn_file_actions_addinherit_np(&fileActions, 2)) {
+                LOG(VERBOSE) << "Failed to request child stdout/stderr to be "
+                                "left intact";
+                return -1;
+            }
+        } else {
+            if (posix_spawn_file_actions_addopen(&fileActions, 1, "/dev/null",
+                        O_WRONLY, 0700) ||
+                posix_spawn_file_actions_addopen(&fileActions, 2, "/dev/null",
+                        O_WRONLY, 0700)) {
+                LOG(VERBOSE) << "Failed to redirect child output to /dev/null";
+                return -1;
+            }
+        }
+
+        // Posix spawn requires that argv[0] exists.
+        assert(params[0] != nullptr);
+        // Global variable |environ| is defined only for executables (as opposed
+        // to
+        // shared libraries). OTOH, _NSGetEnviron is always available on OSX.
+        auto childEnviron = const_cast<char* const*>(*_NSGetEnviron());
+
+        int pid;
+        if (int error_code = posix_spawnp(&pid, command, &fileActions, &attr, params.get(),
+                         childEnviron)) {
+            LOG(VERBOSE) << "posix_spawnp failed: " << strerror(error_code);
+            return -1;
+        }
+        return pid;
+    }
+#endif  // defined(__APPLE__)
 #endif  // !_WIN32
 
 private:

@@ -26,7 +26,7 @@ namespace {
 testing::LogOutput* gLogOutput = NULL;
 
 bool gDcheckLevel = false;
-LogSeverity gMinLogLevel = LOG_INFO;
+LogSeverity gMinLogLevel = LOG_VERBOSE;
 
 // Convert a severity level into a string.
 const char* severityLevelToString(LogSeverity severity) {
