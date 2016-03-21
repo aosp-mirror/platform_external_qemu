@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_078df421",
+        "filename": "distrib/android-emugl/shared/emugl/common/crash_reporter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-03-21T18:26:21Z",
+      "side": 1,
+      "message": "should the default crash reporter actually abort? would it be safer to just do nothing?",
+      "revId": "d6bafcb9bb7a1d9ad83f814580ddce65f83fb677",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
