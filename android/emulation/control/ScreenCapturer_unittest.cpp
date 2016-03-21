@@ -56,11 +56,7 @@ public:
         mLooper = android::base::ThreadLooper::get();
         mCapturer = ScreenCapturer::create(
                 mLooper, {"adb"}, mTestSystem.getTempDir(),
-                [this](Result result, StringView outputFilePath,
-                       StringView errorString) {
-                    this->resultSaver(result, outputFilePath, errorString);
-                },
-                10);
+                [this](Result result) { this->resultSaver(result); }, 10);
         mCapturerWeak = mCapturer;
     }
 
@@ -152,13 +148,7 @@ public:
         return myResult;
     }
 
-    void resultSaver(Result result,
-                     StringView outputFilePath,
-                     StringView errorString) {
-        mResult = result;
-        mOutputFilePath = outputFilePath;
-        mErrorString = errorString;
-    }
+    void resultSaver(Result result) { mResult = result; }
 
 protected:
     android::base::TestSystem mTestSystem;
@@ -175,8 +165,6 @@ protected:
 
     // Result from the ScreenCapturer callback is saved here.
     Result mResult = Result::kUnknownError;
-    String mOutputFilePath;
-    String mErrorString;
 
     DISALLOW_COPY_AND_ASSIGN(ScreenCapturerTest);
 };
