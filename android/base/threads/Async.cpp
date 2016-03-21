@@ -27,6 +27,10 @@ class SelfDeletingThread final : public FunctorThread {
 public:
     using FunctorThread::FunctorThread;
 
+    explicit SelfDeletingThread(const FunctorThread::Functor& func,
+                                ThreadFlags flags = ThreadFlags::MaskSignals)
+        : FunctorThread(func, flags | ThreadFlags::Detach) {}
+
     virtual void onExit() override {
         delete this;
     }
