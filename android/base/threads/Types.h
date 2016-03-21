@@ -25,7 +25,11 @@ using ThreadFunctor = std::function<intptr_t()>;
 
 enum class ThreadFlags {
     None = 0,
-    MaskSignals = 1
+    MaskSignals = 1,
+    // A Detach thread is a launch-and-forget thread.
+    // |wait| and |tryWait| on a Detach thread always fails.
+    // OTOH, you _must_ |wait| on a non Detach thread to ensure proper cleanup.
+    Detach = 1 << 1
 };
 
 // enum class doesn't allow bit operations unless there's an
