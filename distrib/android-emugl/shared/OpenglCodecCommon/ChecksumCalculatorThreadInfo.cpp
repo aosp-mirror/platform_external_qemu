@@ -65,16 +65,38 @@ bool ChecksumCalculatorThreadInfo::setVersion(uint32_t version) {
     return getChecksumCalculatorThreadInfo()->m_protocol.setVersion(version);
 }
 
-bool ChecksumCalculatorThreadInfo::validate(void* buf, size_t packetLen) {
-    return getChecksumCalculatorThreadInfo()->m_protocol.validate(
-            buf, packetLen, (char*)buf + packetLen);
+size_t ChecksumCalculatorThreadInfo::checksumByteSize() {
+    return getChecksumCalculatorThreadInfo()->m_protocol.checksumByteSize();
+}
+
+bool ChecksumCalculatorThreadInfo::writeChecksum(void* buf,
+                                                 size_t bufLen,
+                                                 void* outputChecksum,
+                                                 size_t outputChecksumLen) {
+    ChecksumCalculator& protocol =
+            getChecksumCalculatorThreadInfo()->m_protocol;
+    protocol.addBuffer(buf, bufLen);
+    return protocol.writeChecksum(outputChecksum, outputChecksumLen);
+}
+
+bool ChecksumCalculatorThreadInfo::validate(void* buf,
+                                            size_t bufLen,
+                                            void* checksum,
+                                            size_t checksumLen) {
+    ChecksumCalculator& protocol =
+            getChecksumCalculatorThreadInfo()->m_protocol;
+    protocol.addBuffer(buf, bufLen);
+    return protocol.validate(checksum, checksumLen);
 }
 
 void ChecksumCalculatorThreadInfo::validOrDie(void* buf,
-                                              size_t packetLen,
+                                              size_t bufLen,
+                                              void* checksum,
+                                              size_t checksumLen,
                                               const char* message) {
     // We should actually call crashhandler_die(message), but I don't think we
     // can link to that library from here
-    if (!validate(buf, packetLen))
+    if (!validate(buf, bufLen, checksum, checksumLen)) {
         abort();
+    }
 }
