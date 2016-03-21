@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_ad0329a7",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 723,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T20:55:25Z",
+      "side": 1,
+      "message": "zyy@: Done in the earlier CL.\n\nThis needs to be a char[] because it\u0027s being passed in to execvp/posix_spawnp.",
+      "parentUuid": "7c21d2e1_4d942dbb",
+      "range": {
+        "startLine": 723,
+        "startChar": 8,
+        "endLine": 723,
+        "endChar": 25
+      },
+      "revId": "ef2cc5047d7787dfb1484e473755f9f6171b160d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_8db2a50f",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 5
@@ -60,6 +84,30 @@
       "writtenOn": "2016-03-21T19:58:26Z",
       "side": 1,
       "message": "in the beginning of this file \u0027environ\u0027 is redefined to use nsgetenviron() on OSX",
+      "range": {
+        "startLine": 941,
+        "startChar": 54,
+        "endLine": 941,
+        "endChar": 67
+      },
+      "revId": "ef2cc5047d7787dfb1484e473755f9f6171b160d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_cd83fd2f",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 941,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T20:55:25Z",
+      "side": 1,
+      "message": "Replaced with |environ|.\nCan\u0027t say I like such arbitrary macro usage though. :/",
+      "parentUuid": "7c21d2e1_8db2a50f",
       "range": {
         "startLine": 941,
         "startChar": 54,
