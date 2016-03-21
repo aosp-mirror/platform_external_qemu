@@ -16,6 +16,24 @@
       "revId": "d6bafcb9bb7a1d9ad83f814580ddce65f83fb677",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_e7042038",
+        "filename": "distrib/android-emugl/shared/emugl/common/crash_reporter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-03-21T18:31:44Z",
+      "side": 1,
+      "message": "Currently it is called when GL checksum fails, which means the GL pipe is in unrecoverable state. Continuing using the pipe will have random behavior and give us crazy crash reports... So it is better to crash it right there which reports what is actually corrupting the pipe.",
+      "parentUuid": "7c21d2e1_078df421",
+      "revId": "d6bafcb9bb7a1d9ad83f814580ddce65f83fb677",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
