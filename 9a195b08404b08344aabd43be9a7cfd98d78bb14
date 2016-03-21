@@ -479,6 +479,23 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_9815c1cf",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:36:18Z",
+      "side": 1,
+      "message": "Please carry the skin related TODO from tool-window implementation here.",
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_b831a5a3",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 3
