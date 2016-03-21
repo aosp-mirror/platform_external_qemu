@@ -14,6 +14,7 @@
 
 #include "android/utils/compiler.h"
 #include "android/utils/ini.h"
+#include "android/hw-lcd.h"
 
 #include <stdint.h>
 
@@ -65,6 +66,9 @@ int  androidHwConfig_isScreenNoTouch( AndroidHwConfig* config );
 int  androidHwConfig_isScreenTouch( AndroidHwConfig* config );
 /* Checks if screen supports multi-touch. */
 int  androidHwConfig_isScreenMultiTouch( AndroidHwConfig* config );
+
+/* Returns the Screen Size */
+hwLcd_screenSize_t androidHwConfig_getScreenSize(AndroidHwConfig* config);
 
 // Return an integer indicating if the kernel requires a new device
 // naming scheme. More specifically:
