@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_ed91a13c",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 717,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-21T20:05:52Z",
+      "side": 1,
+      "message": "I\u0027ve already added it to the other CL, but please use unique_ptr\u003cchar*[]\u003e here",
+      "range": {
+        "startLine": 717,
+        "startChar": 8,
+        "endLine": 717,
+        "endChar": 26
+      },
+      "revId": "3d5c2680a754a8fa373f24f90baf534ecd4d0d31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
