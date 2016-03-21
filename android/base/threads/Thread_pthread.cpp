@@ -73,7 +73,7 @@ bool Thread::start() {
 }
 
 bool Thread::wait(intptr_t *exitStatus) {
-    if (!mStarted) {
+    if (!mStarted || (mFlags & ThreadFlags::Detach) != ThreadFlags::None) {
         return false;
     }
 
@@ -91,7 +91,7 @@ bool Thread::wait(intptr_t *exitStatus) {
 }
 
 bool Thread::tryWait(intptr_t *exitStatus) {
-    if (!mStarted) {
+    if (!mStarted || (mFlags & ThreadFlags::Detach) != ThreadFlags::None) {
         return false;
     }
 
@@ -114,6 +114,13 @@ void* Thread::thread_main(void *arg) {
         Thread* self = reinterpret_cast<Thread*>(arg);
         if ((self->mFlags & ThreadFlags::MaskSignals) != ThreadFlags::None) {
             Thread::maskAllSignals();
+        }
+
+        if ((self->mFlags & ThreadFlags::Detach) != ThreadFlags::None) {
+            if (pthread_detach(pthread_self())) {
+                // This only means a slow memory leak, so use VERBOSE.
+                LOG(VERBOSE) << "Failed to set thread to detach mode";
+            }
         }
 
         ret = self->main();
