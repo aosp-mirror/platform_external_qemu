@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_2b5f1e48",
+        "filename": "android/emulation/control/ScreenCapturer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T23:55:40Z",
+      "side": 0,
+      "message": "My bad: Should have jumped in on the review here.\n\nI am a little sad to see outputFilePath go -- there\u0027s no way that this object now returns the path where the file was saved. Even if the UI isn\u0027t currently doing anything with this information, seems like there should be some way of knowing where the screenshot actually got saved to.",
+      "range": {
+        "startLine": 43,
+        "startChar": 57,
+        "endLine": 43,
+        "endChar": 71
+      },
+      "revId": "743f3d787352b9b88a59f47d5b6c3cb18afb0271",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
