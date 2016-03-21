@@ -95,8 +95,7 @@ void ScreenCapturer::cancel() {
 
 void ScreenCapturer::start() {
     if (inFlight()) {
-        mResultCallback(ScreenCapturer::Result::kOperationInProgress, "",
-                        "Another screen capture in progress");
+        mResultCallback(ScreenCapturer::Result::kOperationInProgress);
         return;
     }
     mCancelled = false;
@@ -122,8 +121,7 @@ void ScreenCapturer::start() {
     mParallelTask->start();
 
     if (!inFlight()) {
-        mResultCallback(ScreenCapturer::Result::kUnknownError, "",
-                        "Failed to spawn thread for you!");
+        mResultCallback(ScreenCapturer::Result::kUnknownError);
     }
 }
 
@@ -138,7 +136,6 @@ intptr_t ScreenCapturer::taskFunction(ScreenCapturer::Result* outResult) {
                                  System::RunOptions::TerminateOnTimeout,
                          kScreenCaptureTimeoutMs, &exitCode) ||
         exitCode != 0) {
-        // TODO(pprabhu): Capture stderr and return an intelligent error string.
         *outResult = Result::kCaptureFailed;
         return 0;
     }
@@ -162,7 +159,6 @@ intptr_t ScreenCapturer::taskFunction(ScreenCapturer::Result* outResult) {
                                  System::RunOptions::TerminateOnTimeout,
                          kPullTimeoutMs, &exitCode) ||
         exitCode != 0) {
-        // TODO(pprabhu): Capture stderr and return an intelligent error string.
         *outResult = Result::kPullFailed;
         return 0;
     }
@@ -172,7 +168,7 @@ intptr_t ScreenCapturer::taskFunction(ScreenCapturer::Result* outResult) {
 
 void ScreenCapturer::taskDoneFunction(const Result& result) {
     if (!mCancelled) {
-        mResultCallback(result, mFilePath, "Detailed error not supported yet");
+        mResultCallback(result);
     }
     // Ensure no shared_ptr's linger beyond this in the task.
     // NOTE: May invalidate |this|.
