@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "7c21d2e1_98c5c109",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:34:41Z",
+      "side": 1,
+      "message": "super-nit: typo on --\u003e of.",
+      "range": {
+        "startLine": 11,
+        "startChar": 29,
+        "endLine": 11,
+        "endChar": 31
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_982781fb",
         "filename": "android/emulation/control/ApkInstaller.cpp",
         "patchSetId": 3
@@ -41,6 +64,52 @@
         "startChar": 17,
         "endLine": 65,
         "endChar": 19
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_38277596",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:34:41Z",
+      "side": 1,
+      "message": "My vote would be for failure.\n\nrunCommand will currently fail if it can\u0027t open the log file to write. Telling the user that we succeeded, and then her finding out we lied is bad.\n\nInstead, telling them we failed. They\u0027ll probably go to SO and find the accepted answer be \"oh, just check the app, it\u0027s installed\"\n\n:P",
+      "range": {
+        "startLine": 156,
+        "startChar": 8,
+        "endLine": 157,
+        "endChar": 31
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_d85f39e9",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:34:41Z",
+      "side": 1,
+      "message": "+Bjoern: What\u0027s the best practice for reading file paths now?\n\n\nAlso: Since you\u0027re reading and parsing the file yourself, I\u0027d pull this into a helper function and unit-test that function alone.",
+      "range": {
+        "startLine": 163,
+        "startChar": 4,
+        "endLine": 163,
+        "endChar": 40
       },
       "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -117,6 +186,167 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_b885258e",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:34:41Z",
+      "side": 1,
+      "message": "nit: errorCode usually means and int / enum. How aobut errorString instead?",
+      "range": {
+        "startLine": 171,
+        "startChar": 21,
+        "endLine": 171,
+        "endChar": 30
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_186431b2",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:34:41Z",
+      "side": 1,
+      "message": "redundant. Fallthrough is already return true.",
+      "range": {
+        "startLine": 179,
+        "startChar": 6,
+        "endLine": 182,
+        "endChar": 5
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_98966100",
+        "filename": "android/emulation/control/ApkInstaller.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:34:41Z",
+      "side": 1,
+      "message": "copy paste error ;)",
+      "range": {
+        "startLine": 60,
+        "startChar": 25,
+        "endLine": 60,
+        "endChar": 35
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_7893ad10",
+        "filename": "android/emulation/control/ApkInstaller.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:34:41Z",
+      "side": 1,
+      "message": "ditto.",
+      "range": {
+        "startLine": 65,
+        "startChar": 12,
+        "endLine": 65,
+        "endChar": 22
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_f8603ddf",
+        "filename": "android/emulation/control/ApkInstaller.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:34:41Z",
+      "side": 1,
+      "message": "scrub for screen.*capture everywhere :P",
+      "range": {
+        "startLine": 69,
+        "startChar": 18,
+        "endLine": 69,
+        "endChar": 32
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_986f81ca",
+        "filename": "android/emulation/control/ApkInstaller.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:34:41Z",
+      "side": 1,
+      "message": "static variables should be const char[] instead of std::string.",
+      "range": {
+        "startLine": 75,
+        "startChar": 17,
+        "endLine": 75,
+        "endChar": 28
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_786c4dd5",
+        "filename": "android/emulation/control/ApkInstaller.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:34:41Z",
+      "side": 1,
+      "message": "misnomer?",
+      "range": {
+        "startLine": 79,
+        "startChar": 17,
+        "endLine": 79,
+        "endChar": 62
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_5844e994",
         "filename": "android/emulation/control/ApkInstaller.h",
         "patchSetId": 3
@@ -163,6 +393,69 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_b84fe562",
+        "filename": "android/emulation/control/ApkInstaller.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:34:41Z",
+      "side": 1,
+      "message": "nit: Out params should be named so: outErrorCode.",
+      "range": {
+        "startLine": 85,
+        "startChar": 40,
+        "endLine": 85,
+        "endChar": 49
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_d833b9f1",
+        "filename": "android/emulation/control/ApkInstaller.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:34:41Z",
+      "side": 1,
+      "message": "const?",
+      "range": {
+        "startLine": 96,
+        "startChar": 4,
+        "endLine": 96,
+        "endChar": 15
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_58c6a9be",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:34:41Z",
+      "side": 1,
+      "message": "Best practice is to include local headers first, then third-party headers (here Qt), then system headers.",
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_7818cd52",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 3
@@ -179,6 +472,29 @@
         "startChar": 0,
         "endLine": 29,
         "endChar": 18
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_b831a5a3",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 898,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:34:41Z",
+      "side": 1,
+      "message": "Currently, we\u0027re not doing anything on |cancel| beyond ensuring that the callbacks from EmulatorQtWindow are not called.\n\nIn the case of ApiInstaller, this worries me a little. If the user hit cancel, it was likely because she launched a HUGE install that was undead. If we dont really cancel the install, it\u0027ll block future attempts at installing. This will confuse the user.\n\nwdyt?\n\n\nAlso, shouldn\u0027t this also mInstallDialog.hide()?\nSince |cancel| doesn\u0027t really trigger a call to EmulatorQtWindow::installDone, currently hitting the cancel button will seem to have no effect to the user?",
+      "range": {
+        "startLine": 898,
+        "startChar": 8,
+        "endLine": 898,
+        "endChar": 32
       },
       "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -225,6 +541,29 @@
         "startChar": 12,
         "endLine": 965,
         "endChar": 33
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_d8fe19ca",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 969,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-21T21:34:41Z",
+      "side": 1,
+      "message": "same super nit: Not really a code.",
+      "range": {
+        "startLine": 969,
+        "startChar": 61,
+        "endLine": 969,
+        "endChar": 65
       },
       "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
