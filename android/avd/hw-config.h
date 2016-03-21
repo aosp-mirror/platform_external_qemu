@@ -14,6 +14,7 @@
 
 #include "android/utils/compiler.h"
 #include "android/utils/ini.h"
+#include "android/hw-lcd.h"
 
 #include <stdint.h>
 
@@ -24,6 +25,7 @@ typedef int       hw_int_t;
 typedef int64_t   hw_disksize_t;
 typedef char*     hw_string_t;
 typedef double    hw_double_t;
+
 
 /* these macros are used to define the fields of AndroidHwConfig
  * declared below
@@ -65,6 +67,12 @@ int  androidHwConfig_isScreenNoTouch( AndroidHwConfig* config );
 int  androidHwConfig_isScreenTouch( AndroidHwConfig* config );
 /* Checks if screen supports multi-touch. */
 int  androidHwConfig_isScreenMultiTouch( AndroidHwConfig* config );
+
+/* Checks if screen supports multi-touch. */
+int  androidHwConfig_isScreenMultiTouch( AndroidHwConfig* config );
+
+/* Returns the Screen Size */
+hwLcd_screenSize_t androidHwConfig_getScreenSize( AndroidHwConfig* config );
 
 // Return an integer indicating if the kernel requires a new device
 // naming scheme. More specifically:
