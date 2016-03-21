@@ -138,6 +138,13 @@ androidHwConfig_isScreenMultiTouch( AndroidHwConfig* config )
     return strcmp(config->hw_screen, "multi-touch") == 0;
 }
 
+hwLcd_screenSize_t
+androidHwConfig_getScreenSize( AndroidHwConfig* config )
+{
+    return hwLcd_getScreenSize(config->hw_lcd_height, config->hw_lcd_height,
+                               config->hw_lcd_density);
+}
+
 int
 androidHwConfig_getKernelDeviceNaming( AndroidHwConfig* config )
 {
