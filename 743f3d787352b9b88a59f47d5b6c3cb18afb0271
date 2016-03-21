@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_f8bafd31",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 869,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-21T21:29:34Z",
+      "side": 0,
+      "message": "you could\u0027ve used std::regex for this",
+      "range": {
+        "startLine": 869,
+        "startChar": 4,
+        "endLine": 869,
+        "endChar": 22
+      },
+      "revId": "743f3d787352b9b88a59f47d5b6c3cb18afb0271",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
