@@ -98,9 +98,6 @@ extern int  android_framebuffer_h;
 extern int  android_framebuffer_phys_w;
 extern int  android_framebuffer_phys_h;
 
-/* framebuffer rotation, relative to device */
-extern SkinRotation  android_framebuffer_rotation;
-
 /**  in android_main.c */
 
 /* this is the port used for the control console in this emulator instance.
