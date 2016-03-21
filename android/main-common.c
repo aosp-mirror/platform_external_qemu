@@ -955,57 +955,85 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
     }
 
     if (opts->memory) {
+        // override avd memory setting
         char*  end;
         long   ramSize = strtol(opts->memory, &end, 0);
         if (ramSize < 0 || *end != 0) {
             derror( "-memory must be followed by a positive integer" );
             exit(1);
         }
-        if (ramSize < 32 || ramSize > 4096) {
-            derror( "physical memory size must be between 32 and 4096 MB" );
-            exit(1);
-        }
         hw->hw_ramSize = ramSize;
-    } else {
-        int ramSize = hw->hw_ramSize;
-        if (ramSize <= 0) {
-            /* Compute the default RAM size based on the size of screen.
-             * This is only used when the skin doesn't provide the ram
-             * size through its hardware.ini (i.e. legacy ones) or when
-             * in the full Android build system.
-             */
-            int64_t pixels  = hw->hw_lcd_width * hw->hw_lcd_height;
-            /* The following thresholds are a bit liberal, but we
-             * essentially want to ensure the following mappings:
-             *
-             *   320x480 -> 96
-             *   800x600 -> 128
-             *  1024x768 -> 256
-             *
-             * These are just simple heuristics, they could change in
-             * the future.
-             */
-            if (pixels <= 250000)
-                ramSize = 96;
-            else if (pixels <= 500000)
-                ramSize = 128;
-            else
-                ramSize = 256;
-        }
-        hw->hw_ramSize = ramSize;
-    }
-    bool is32bitWindowsHost = false;
-#ifdef _WIN32
-    is32bitWindowsHost = (32 == android_getHostBitness());
-#endif
-    // For recent system versions, ensure a minimum of 1GB or memory, anything
-    // lower is very painful during the boot process and after that.
-    if (hw->hw_ramSize < 1024 && avdInfo_getApiLevel(avd) >= 21 && !is32bitWindowsHost) {
-        dwarning("Increasing RAM size to 1GB");
-        hw->hw_ramSize = 1024;
     }
 
-    D("Physical RAM size: %dMB\n", hw->hw_ramSize);
+    if (hw->hw_ramSize <= 0) {
+        /* Compute the default RAM size based on the size of screen.
+         * This is only used when the skin doesn't provide the ram
+         * size through its hardware.ini (i.e. legacy ones) or when
+         * in the full Android build system.
+         */
+        int64_t pixels  = hw->hw_lcd_width * hw->hw_lcd_height;
+        /* The following thresholds are a bit liberal, but we
+         * essentially want to ensure the following mappings:
+         *
+         *   320x480 -> 96
+         *   800x600 -> 128
+         *  1024x768 -> 256
+         *
+         * These are just simple heuristics, they could change in
+         * the future.
+         */
+        if (pixels <= 250000)
+            hw->hw_ramSize = 96;
+        else if (pixels <= 500000)
+            hw->hw_ramSize = 128;
+        else
+            hw->hw_ramSize = 256;
+    }
+
+    // all 64 bit archs we support include "64"
+    bool guest_is_32_bit = strstr(hw->hw_cpu_arch, "64") == 0;
+    bool host_is_32_bit = sizeof(void*) == 4;
+    bool limit_is_4gb = (guest_is_32_bit || host_is_32_bit);
+
+    // enforce CDD minimums
+    int minRam = 32;
+    if (avdInfo_getApiLevel(avd) >= 21) {
+        if (guest_is_32_bit) {
+            // TODO: adjust min based on screen size, wear, 23+
+            // android wear min is actually 416 but most people boot phones
+            minRam = 512;
+        }
+        else {
+            minRam = 832;
+        }
+        if (!host_is_32_bit) {
+            // This isn't a CDD minimum but was present in earlier versions of the emulator
+            // For recent system versions, ensure a minimum of 1GB or memory, anything
+            // lower is very painful during the boot process and after that.
+            minRam = 1024;
+        }
+    }
+    else if (avdInfo_getApiLevel(avd) >= 14) {
+        minRam = 340;
+    }
+    else if (avdInfo_getApiLevel(avd) >= 9) {
+        minRam = 128;
+    }
+    else if (avdInfo_getApiLevel(avd) >= 7) {
+        minRam = 92;
+    }
+
+    if (hw->hw_ramSize < minRam) {
+        dwarning("Increasing RAM size to %iMB", minRam);
+        hw->hw_ramSize = minRam;
+    }
+    else if (limit_is_4gb && hw->hw_ramSize > 4096) {
+        dwarning("Decreasing RAM size to 4096MB");
+        hw->hw_ramSize = 4096;
+    }
+    else {
+        D("Physical RAM size: %dMB\n", hw->hw_ramSize);
+    }
 }
 
 bool handleCpuAcceleration(AndroidOptions* opts, AvdInfo* avd,
