@@ -785,7 +785,6 @@ void EmulatorQtWindow::slot_scrollRangeChanged(int min, int max)
 void EmulatorQtWindow::screenshot()
 {
     if (mScreenCapturer && mScreenCapturer->inFlight()) {
-        // Modal dialogs should prevent this
         return;
     }
 
@@ -849,9 +848,9 @@ void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result,
             msg += tr("Please try again later.");
             break;
         case ScreenCapturer::Result::kCaptureFailed:
-            msg += tr(
-                    "The screenshot could not be captured. Output:<br/><br/>");
-            msg += detail;
+            msg += tr("The screenshot could not be captured.<br/>"
+                      "Check settings to verify that your chosen adb path is "
+                      "valid.");
             break;
         case ScreenCapturer::Result::kSaveLocationInvalid:
             msg +=
@@ -861,13 +860,11 @@ void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result,
             break;
         case ScreenCapturer::Result::kPullFailed:
             msg +=
-                    tr("The screenshot could not be loaded from the device."
-                       "Output:<br/><br/>");
-            msg += detail;
+                    tr("The screenshot could not be loaded from the device.");
             break;
         default:
-            msg += tr("Unexpected error:<br/><br/>");
-            msg += detail;
+            msg += tr("There was an unknown error while capturing the "
+                      "screenshot.");
     }
 
     showErrorDialog(msg, tr("Screenshot"));
