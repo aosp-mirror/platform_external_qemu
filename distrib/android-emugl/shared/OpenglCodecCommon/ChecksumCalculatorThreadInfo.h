@@ -24,8 +24,8 @@
 
 class ChecksumCalculatorThreadInfo {
 public:
-    ChecksumCalculatorThreadInfo() {}
-    ~ChecksumCalculatorThreadInfo() {}
+    ChecksumCalculatorThreadInfo();
+    ~ChecksumCalculatorThreadInfo();
 
     static uint32_t getVersion();
     static bool setVersion(uint32_t version);
