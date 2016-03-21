@@ -1380,6 +1380,6 @@ int avdInfo_getSnapshotPresent(AvdInfo* i)
     }
 }
 
-const FileData* avdInfo_getBootProperties(AvdInfo* i) {
+const FileData* avdInfo_getBootProperties(const AvdInfo* i) {
     return i->bootProperties;
 }

@@ -217,6 +217,7 @@ LOCAL_SRC_FILES := \
     android/emulation/control/ScreenCapturer.cpp \
     android/emulation/CpuAccelerator.cpp \
     android/emulation/nand_limits.c \
+    android/emulation/ParameterList.cpp \
     android/emulation/qemud/android_qemud_client.cpp \
     android/emulation/qemud/android_qemud_multiplexer.cpp \
     android/emulation/qemud/android_qemud_serial.cpp \
@@ -249,6 +250,8 @@ LOCAL_SRC_FILES := \
     android/kernel/kernel_utils.cpp \
     android/loadpng.c \
     android/main-common.c \
+    android/main-kernel-parameters.cpp \
+    android/main-qemu-parameters.cpp \
     android/metrics/AdbLivenessChecker.cpp \
     android/metrics/IniFileAutoFlusher.cpp \
     android/metrics/metrics_reporter.cpp \
