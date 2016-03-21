@@ -16,6 +16,7 @@
 
 #include "ChecksumCalculatorThreadInfo.h"
 
+#include "emugl/common/crash_reporter.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/thread_store.h"
 
@@ -97,6 +98,6 @@ void ChecksumCalculatorThreadInfo::validOrDie(void* buf,
     // We should actually call crashhandler_die(message), but I don't think we
     // can link to that library from here
     if (!validate(buf, bufLen, checksum, checksumLen)) {
-        abort();
+        emugl_crash_reporter(message);
     }
 }

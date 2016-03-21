@@ -6,6 +6,7 @@ LOCAL_PATH := $(call my-dir)
 ### emugl_common host library ###########################################
 
 commonSources := \
+        crash_reporter.cpp \
         id_to_object_map.cpp \
         lazy_instance.cpp \
         logging.cpp \
