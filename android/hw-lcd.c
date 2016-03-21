@@ -11,6 +11,7 @@
 */
 #include "android/hw-lcd.h"
 #include "android/boot-properties.h"
+#include <math.h>
 #include <stdio.h>
 
 void
@@ -35,8 +36,10 @@ hwLcd_setBootProperty(int density)
             density = LCD_DENSITY_XHDPI;
         else if (density < (LCD_DENSITY_360DPI + LCD_DENSITY_400DPI)/2)
             density = LCD_DENSITY_360DPI;
-        else if (density < (LCD_DENSITY_400DPI + LCD_DENSITY_XXHDPI)/2)
+        else if (density < (LCD_DENSITY_400DPI + LCD_DENSITY_420DPI) / 2)
             density = LCD_DENSITY_400DPI;
+        else if (density < (LCD_DENSITY_420DPI + LCD_DENSITY_XXHDPI) / 2)
+            density = LCD_DENSITY_420DPI;
         else if (density < (LCD_DENSITY_XXHDPI + LCD_DENSITY_560DPI)/2)
             density = LCD_DENSITY_XXHDPI;
         else if (density < (LCD_DENSITY_560DPI + LCD_DENSITY_XXXHDPI)/2)
@@ -47,4 +50,20 @@ hwLcd_setBootProperty(int density)
 
     snprintf(temp, sizeof temp, "%d", density);
     boot_property_add("qemu.sf.lcd_density", temp);
+}
+
+hwLcd_screenSize_t hwLcd_getScreenSize(int heightPx, int widthPx, int density) {
+    double screen_inches = sqrt(pow((double)heightPx / density, 2) +
+                               pow((double)widthPx / density, 2));
+
+    if (screen_inches >= 7.5) {
+        return LCD_SIZE_XLARGE;
+    }
+    if (screen_inches >= 5) {
+        return LCD_SIZE_LARGE;
+    }
+    if (screen_inches >= 3.6) {
+        return LCD_SIZE_NORMAL;
+    }
+    return LCD_SIZE_SMALL;
 }
