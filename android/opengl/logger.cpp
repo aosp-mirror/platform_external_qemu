@@ -71,11 +71,11 @@ OpenGLLogger::OpenGLLogger() :
     mFineLogActive(false) {
     const std::string& data_dir =
         CrashReporter::get()->getDataExchangeDir();
-    mFileName = PathUtils::join(data_dir,
-                                "opengl_log.txt");
+    mFileName = std::string(PathUtils::join(String(data_dir),
+                                "opengl_log.txt").c_str());
     mFileHandle.open(mFileName, std::ios::app);
-    mFineLogFileName = PathUtils::join(data_dir,
-                                       "opengl_cxt_log.txt");
+    mFineLogFileName = std::string(PathUtils::join(String(data_dir),
+                                       "opengl_cxt_log.txt").c_str());
     mFineLogFileHandle.open(mFineLogFileName, std::ios::app);
 }
 
