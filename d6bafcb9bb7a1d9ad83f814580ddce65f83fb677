@@ -34,6 +34,24 @@
       "revId": "d6bafcb9bb7a1d9ad83f814580ddce65f83fb677",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_c7d75cc2",
+        "filename": "distrib/android-emugl/shared/emugl/common/crash_reporter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-03-21T18:33:45Z",
+      "side": 1,
+      "message": "got it, thanks :)",
+      "parentUuid": "7c21d2e1_e7042038",
+      "revId": "d6bafcb9bb7a1d9ad83f814580ddce65f83fb677",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
