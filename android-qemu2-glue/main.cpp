@@ -204,7 +204,8 @@ static std::string getNthParentDir(const char* path, size_t n) {
 */
 
 static void makePartitionCmd(const char** args, int* argsPosition, int* driveIndex,
-                             AndroidHwConfig* hw, ImageType type) {
+                             AndroidHwConfig* hw, ImageType type,
+                             int apiLevel) {
     int n   = *argsPosition;
     int idx = *driveIndex;
 
@@ -218,9 +219,20 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
 
     switch (type) {
         case IMAGE_TYPE_SYSTEM:
-            driveParam += StringFormat("index=%d,id=system,read-only,file=%s",
-                                      idx++,
-                                      hw->disk_systemPartition_initPath);
+            // API 15 and under images need a read+write
+            // system image.
+            if (apiLevel <= 15) {
+                driveParam += StringFormat(
+                        "index=%d,id=system,file=%s",
+                        idx++,
+                        hw->disk_systemPartition_initPath);
+            } else {
+                driveParam += StringFormat(
+                        "index=%d,id=system,read-only,file=%s",
+                        idx++,
+                        hw->disk_systemPartition_initPath);
+            }
+
             deviceParam = StringFormat("%s,drive=system",
                                        kTarget.storageDeviceType);
             break;
@@ -1248,9 +1260,16 @@ extern "C" int main(int argc, char **argv) {
      */
     int s;
     int drvIndex = 0;
+    int api_level;
+    if (avd)  {
+        api_level = avdInfo_getApiLevel(avd);
+    } else {
+        api_level = 1000;
+    }
     for (s = 0; s < kMaxPartitions; s++) {
         makePartitionCmd(args, &n, &drvIndex, hw,
-                         kTarget.imagePartitionTypes[s]);
+                         kTarget.imagePartitionTypes[s],
+                         api_level);
     }
 
     // Network
