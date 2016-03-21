@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_d869f98c",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-21T21:32:27Z",
+      "side": 1,
+      "message": "I\u0027m not sure how much information about what went wrong we can get - we\u0027d need to find some good examples of what stdout / stderr look like before trying to do any parsing, and I don\u0027t think we want to just read in the whole file and say \"look here for more info.\"",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 37,
+        "endChar": 6
+      },
+      "revId": "560064564bf00d629741a005b052bf7cf7c7b730",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_78cd6dd4",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-21T21:32:27Z",
+      "side": 1,
+      "message": "Does this happen once per emptying-of-the-queue, or just once per lifetime of this FilePusher?",
+      "range": {
+        "startLine": 59,
+        "startChar": 4,
+        "endLine": 60,
+        "endChar": 15
+      },
+      "revId": "560064564bf00d629741a005b052bf7cf7c7b730",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_78a60d20",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-21T21:32:27Z",
+      "side": 1,
+      "message": "The items that have already been pushed? Not sure if we need to keep track of this - if someone gives us the same file twice, we should push it twice (for example, what if they made changes while another large file was being copied?)",
+      "range": {
+        "startLine": 92,
+        "startChar": 4,
+        "endLine": 92,
+        "endChar": 58
+      },
+      "revId": "560064564bf00d629741a005b052bf7cf7c7b730",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
