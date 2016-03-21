@@ -46,6 +46,30 @@
       "revId": "743f3d787352b9b88a59f47d5b6c3cb18afb0271",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_138d3222",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 869,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-21T22:31:14Z",
+      "side": 0,
+      "message": "Yep, got rid of regex usage altogether, and had problems with it as Prathmesh mentioned.",
+      "parentUuid": "7c21d2e1_78f9edd9",
+      "range": {
+        "startLine": 869,
+        "startChar": 4,
+        "endLine": 869,
+        "endChar": 22
+      },
+      "revId": "743f3d787352b9b88a59f47d5b6c3cb18afb0271",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
