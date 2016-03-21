@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_8aa9ebef",
+        "filename": "android/avd/hw-config.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-03-21T19:55:32Z",
+      "side": 1,
+      "message": "fixed",
+      "parentUuid": "7c21d2e1_aa14af96",
+      "range": {
+        "startLine": 70,
+        "startChar": 0,
+        "endLine": 71,
+        "endChar": 67
+      },
+      "revId": "b81c6353f311472e36aac031d04bcf5a568b3f2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_4a03735d",
         "filename": "android/hw-lcd.c",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_4af253fc",
+        "filename": "android/hw-lcd.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-03-21T19:55:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c21d2e1_4a03735d",
+      "range": {
+        "startLine": 59,
+        "startChar": 36,
+        "endLine": 59,
+        "endChar": 41
+      },
+      "revId": "b81c6353f311472e36aac031d04bcf5a568b3f2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_2a41df83",
         "filename": "android/main-common.c",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2016-03-21T19:39:02Z",
       "side": 1,
       "message": "nit: could you please clang-format your CL?",
+      "range": {
+        "startLine": 1040,
+        "startChar": 33,
+        "endLine": 1040,
+        "endChar": 34
+      },
+      "revId": "b81c6353f311472e36aac031d04bcf5a568b3f2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_0aacdbd0",
+        "filename": "android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1040,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-03-21T19:55:32Z",
+      "side": 1,
+      "message": "Done.  I\u0027ve made some manual changes to keep the style consistent in the header files.",
+      "parentUuid": "7c21d2e1_2a41df83",
       "range": {
         "startLine": 1040,
         "startChar": 33,
