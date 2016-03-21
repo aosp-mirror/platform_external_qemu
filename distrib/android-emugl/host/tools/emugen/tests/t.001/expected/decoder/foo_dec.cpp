@@ -16,8 +16,8 @@
 
 typedef unsigned int tsize_t; // Target "size_t", which is 32-bit for now. It may or may not be the same as host's size_t when emugen is compiled.
 
-#ifdef DEBUG_PRINTOUT
-#  define DEBUG(...) fprintf(stderr, __VA_ARGS__)
+#ifdef OPENGL_DEBUG_PRINTOUT
+#  define DEBUG(...) do { if (emugl_cxt_logger) { emugl_cxt_logger(__VA_ARGS__); } } while(0)
 #else
 #  define DEBUG(...)  ((void)0)
 #endif

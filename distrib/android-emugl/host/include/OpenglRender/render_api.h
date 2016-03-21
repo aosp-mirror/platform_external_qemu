@@ -42,6 +42,13 @@ extern "C" {
     typedef return_type (RENDER_APIENTRY *func_name ## Fn) signature; \
     RENDER_APICALL return_type RENDER_APIENTRY func_name signature;
 
+typedef void (*emugl_logger_func_t)(const char* fmt, ...);
+
+typedef struct {
+    emugl_logger_func_t coarse;
+    emugl_logger_func_t fine;
+} emugl_logger_struct;
+
 LIST_RENDER_API_FUNCTIONS(RENDER_API_DECLARE)
 
 #ifdef __cplusplus

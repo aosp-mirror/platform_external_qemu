@@ -232,6 +232,7 @@ GLES_DEFAULT=dgl
 OPTION_PREBUILT_QEMU2=
 OPTION_DEBUG=no
 OPTION_SANITIZER=no
+OPTION_EMUGL_PRINTOUT=no
 OPTION_IGNORE_AUDIO=no
 OPTION_AOSP_PREBUILTS_DIR=
 OPTION_OUT_DIR=
@@ -288,6 +289,8 @@ for opt do
   --mingw) OPTION_MINGW=yes
   ;;
   --sanitizer=*) OPTION_SANITIZER=$optarg
+  ;;
+  --emugl-printout) OPTION_EMUGL_PRINTOUT=yes
   ;;
   --cc=*) OPTION_CC="$optarg"
   ;;
@@ -930,6 +933,9 @@ if [ $OPTION_DEBUG = "yes" ] ; then
 fi
 if [ $OPTION_SANITIZER != "no" ] ; then
     echo "BUILD_SANITIZER := $OPTION_SANITIZER" >> $config_mk
+fi
+if [ $OPTION_EMUGL_PRINTOUT = "yes" ] ; then
+    echo "BUILD_EMUGL_PRINTOUT := true" >> $config_mk
 fi
 if [ "$OPTION_STRIP" = "yes" ]; then
     echo "BUILD_STRIP_BINARIES := true" >> $config_mk
