@@ -182,7 +182,7 @@ bool GLWidget::ensureInit() {
 
     makeContextCurrent();
     mCanvas.reset(new GLCanvas(realPixelsWidth(), realPixelsHeight(), mGLES2));
-    mAntiAliasing.reset(new GLAntiAliasing(mGLES2));
+    mTextureDraw.reset(new TextureDraw(mGLES2));
     initGL();
 
     return true;
@@ -210,9 +210,11 @@ void GLWidget::renderFrame() {
     }
 
     if (mEnableAA) {
-        mAntiAliasing->apply(mCanvas->texture(),
-                             realPixelsWidth(),
-                             realPixelsHeight());
+        mGLES2->glBindTexture(GL_TEXTURE_2D, mCanvas->texture());
+        mGLES2->glGenerateMipmap(GL_TEXTURE_2D);
+        mTextureDraw->draw(mCanvas->texture(),
+                           realPixelsWidth(),
+                           realPixelsHeight());
     }
 
     mEGL->eglSwapBuffers(mEGLState->display, mEGLState->surface);

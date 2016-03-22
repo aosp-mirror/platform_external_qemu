@@ -11,7 +11,7 @@
 #pragma once
 
 #include "android/skin/qt/gl-canvas.h"
-#include "android/skin/qt/gl-anti-aliasing.h"
+#include "android/skin/qt/gl-texture-draw.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
 #include <cmath>
@@ -81,6 +81,6 @@ private:
     bool mValid;
 
     std::unique_ptr<GLCanvas> mCanvas;
-    std::unique_ptr<GLAntiAliasing> mAntiAliasing;
+    std::unique_ptr<TextureDraw> mTextureDraw;
     bool mEnableAA;
 };

@@ -14,8 +14,8 @@
 #include "GLES2/gl2.h"
 
 GLCanvas::GLCanvas(int w, int h, const GLESv2Dispatch* gl_dispatch) :
-        mWidth(w),
-        mHeight(h),
+        mWidth(w * 4),
+        mHeight(h * 4),
         mGLES2(gl_dispatch),
         mFramebuffer(0),
         mTargetTexture(0),
@@ -46,8 +46,8 @@ GLCanvas::GLCanvas(int w, int h, const GLESv2Dispatch* gl_dispatch) :
     mGLES2->glTexParameteri(GL_TEXTURE_2D,
                             GL_TEXTURE_WRAP_T,
                             GL_CLAMP_TO_EDGE);
-    mGLES2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    mGLES2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    mGLES2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    mGLES2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     mGLES2->glFramebufferTexture2D(GL_FRAMEBUFFER,
                                    GL_COLOR_ATTACHMENT0,
                                    GL_TEXTURE_2D,

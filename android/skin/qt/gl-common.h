@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
+#include "GLES2/gl2.h"
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include <cstdio>
 
 // Helper macro for checking error status and cleaning up.
@@ -18,3 +21,7 @@
         fprintf(stderr, error_msg); \
         return; \
     }
+
+GLuint createShader(const GLESv2Dispatch* gles2,
+                    GLint shader_type,
+                    const char* shader_code);
