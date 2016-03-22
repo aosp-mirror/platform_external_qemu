@@ -22,6 +22,30 @@
       "revId": "31f307ac57c6bf6b442e461247d2f9417c9a3ca8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bcb50adc_2355789b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-22T18:46:55Z",
+      "side": 1,
+      "message": "Ah ah, forgot to look it up, will update.",
+      "parentUuid": "7c21d2e1_76c3b2ac",
+      "range": {
+        "startLine": 25,
+        "startChar": 41,
+        "endLine": 25,
+        "endChar": 58
+      },
+      "revId": "31f307ac57c6bf6b442e461247d2f9417c9a3ca8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
