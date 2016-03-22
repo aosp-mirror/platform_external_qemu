@@ -238,8 +238,6 @@ private:
     void installDone(android::emulation::ApkInstaller::Result result,
                      android::base::StringView errorString);
 
-    void* mBatteryState;
-
     QTimer          mStartupTimer;
     QProgressDialog mStartupDialog;
 
