@@ -22,6 +22,30 @@
       "revId": "bc3288a7e508f6e0f9ed047b2015260b136b8bba",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_50a5cedd",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-22T22:40:28Z",
+      "side": 0,
+      "message": "I believe all these changes were in an attempt to use window activation to make the behavior correct, but it didn\u0027t work. Updating this CL with only what will definitely be necessary.",
+      "parentUuid": "e2b0b90b_22d48c0b",
+      "range": {
+        "startLine": 596,
+        "startChar": 0,
+        "endLine": 597,
+        "endChar": 38
+      },
+      "revId": "bc3288a7e508f6e0f9ed047b2015260b136b8bba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
