@@ -22,6 +22,30 @@
       "revId": "743f3d787352b9b88a59f47d5b6c3cb18afb0271",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_abd78ec2",
+        "filename": "android/emulation/control/ScreenCapturer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-22T00:03:16Z",
+      "side": 0,
+      "message": "The only thing you lose is the file name, but I guess that can be helpful to have if you\u0027re taking a lot of screenshots (or for testing purposes).\n\nRe-adding it in master would be fine, but we don\u0027t need it in 2.0.",
+      "parentUuid": "7c21d2e1_2b5f1e48",
+      "range": {
+        "startLine": 43,
+        "startChar": 57,
+        "endLine": 43,
+        "endChar": 71
+      },
+      "revId": "743f3d787352b9b88a59f47d5b6c3cb18afb0271",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
