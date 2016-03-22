@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_4b4a5226",
+        "filename": "android/emulation/control/ApkInstaller_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-22T00:19:18Z",
+      "side": 1,
+      "message": "not needed",
+      "range": {
+        "startLine": 30,
+        "startChar": 21,
+        "endLine": 30,
+        "endChar": 31
+      },
+      "revId": "ee8c3cc1175ce3ce5458bc7f4c683ac9a4308bbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_8b856a8e",
+        "filename": "android/emulation/control/ApkInstaller_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-22T00:19:18Z",
+      "side": 1,
+      "message": "not needed.",
+      "range": {
+        "startLine": 31,
+        "startChar": 21,
+        "endLine": 31,
+        "endChar": 27
+      },
+      "revId": "ee8c3cc1175ce3ce5458bc7f4c683ac9a4308bbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_6b4d963d",
+        "filename": "android/emulation/control/ApkInstaller_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-22T00:19:18Z",
+      "side": 1,
+      "message": "don\u0027t need ifstream, methinks.",
+      "range": {
+        "startLine": 36,
+        "startChar": 11,
+        "endLine": 36,
+        "endChar": 19
+      },
+      "revId": "ee8c3cc1175ce3ce5458bc7f4c683ac9a4308bbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_2b2a7e5c",
+        "filename": "android/emulation/control/ApkInstaller_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-22T00:19:18Z",
+      "side": 1,
+      "message": "I usually don\u0027t prefer this check.\nBasically, this only verifies that the returned error string is exactly some constant. This will only break when that constant changes, and will have to be updated to meet that same constant again...\nimo, that\u0027s testing implementation, not behaviour.\n\nBut I\u0027ve heard arguments on either side -- if you were to suddenly start returning some actually meaningful error message instead, this will catch that.",
+      "range": {
+        "startLine": 45,
+        "startChar": 4,
+        "endLine": 45,
+        "endChar": 70
+      },
+      "revId": "ee8c3cc1175ce3ce5458bc7f4c683ac9a4308bbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_2b539ee4",
+        "filename": "android/emulation/control/ApkInstaller_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-22T00:19:18Z",
+      "side": 1,
+      "message": "Good tests. Thank you. :)",
+      "range": {
+        "startLine": 48,
+        "startChar": 19,
+        "endLine": 48,
+        "endChar": 53
+      },
+      "revId": "ee8c3cc1175ce3ce5458bc7f4c683ac9a4308bbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_4b9b72e7",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-22T00:19:18Z",
+      "side": 1,
+      "message": "This change leaked from your previous CL.",
+      "range": {
+        "startLine": 235,
+        "startChar": 9,
+        "endLine": 235,
+        "endChar": 23
+      },
+      "revId": "ee8c3cc1175ce3ce5458bc7f4c683ac9a4308bbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
