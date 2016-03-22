@@ -70,6 +70,9 @@ int  androidHwConfig_isScreenMultiTouch( AndroidHwConfig* config );
 /* Returns the Screen Size */
 hwLcd_screenSize_t androidHwConfig_getScreenSize(AndroidHwConfig* config);
 
+/* Returns CDD defined minimum heap size in MB */
+int androidHwConfig_getMinVmHeapSize(AndroidHwConfig* config, int apiLevel);
+
 // Return an integer indicating if the kernel requires a new device
 // naming scheme. More specifically:
 //  -1 -> don't know, caller will need to auto-detect.
