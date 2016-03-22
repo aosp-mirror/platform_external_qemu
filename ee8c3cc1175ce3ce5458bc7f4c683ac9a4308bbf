@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1cc45660_58b7c1fd",
+        "filename": "android/emulation/control/ApkInstaller_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-22T00:40:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c21d2e1_4b4a5226",
+      "range": {
+        "startLine": 30,
+        "startChar": 21,
+        "endLine": 30,
+        "endChar": 31
+      },
+      "revId": "ee8c3cc1175ce3ce5458bc7f4c683ac9a4308bbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_8b856a8e",
         "filename": "android/emulation/control/ApkInstaller_unittest.cpp",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-22T00:19:18Z",
       "side": 1,
       "message": "not needed.",
+      "range": {
+        "startLine": 31,
+        "startChar": 21,
+        "endLine": 31,
+        "endChar": 27
+      },
+      "revId": "ee8c3cc1175ce3ce5458bc7f4c683ac9a4308bbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1cc45660_38c20555",
+        "filename": "android/emulation/control/ApkInstaller_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-22T00:40:01Z",
+      "side": 1,
+      "message": "Used for System::kProgramBitness",
+      "parentUuid": "7c21d2e1_8b856a8e",
       "range": {
         "startLine": 31,
         "startChar": 21,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "1cc45660_18bd49de",
+        "filename": "android/emulation/control/ApkInstaller_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-22T00:40:01Z",
+      "side": 1,
+      "message": "Need to be more careful when cleaning up my imports.",
+      "parentUuid": "7c21d2e1_6b4d963d",
+      "range": {
+        "startLine": 36,
+        "startChar": 11,
+        "endLine": 36,
+        "endChar": 19
+      },
+      "revId": "ee8c3cc1175ce3ce5458bc7f4c683ac9a4308bbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_2b2a7e5c",
         "filename": "android/emulation/control/ApkInstaller_unittest.cpp",
         "patchSetId": 5
@@ -82,6 +154,30 @@
       "writtenOn": "2016-03-22T00:19:18Z",
       "side": 1,
       "message": "I usually don\u0027t prefer this check.\nBasically, this only verifies that the returned error string is exactly some constant. This will only break when that constant changes, and will have to be updated to meet that same constant again...\nimo, that\u0027s testing implementation, not behaviour.\n\nBut I\u0027ve heard arguments on either side -- if you were to suddenly start returning some actually meaningful error message instead, this will catch that.",
+      "range": {
+        "startLine": 45,
+        "startChar": 4,
+        "endLine": 45,
+        "endChar": 70
+      },
+      "revId": "ee8c3cc1175ce3ce5458bc7f4c683ac9a4308bbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1cc45660_b8a455d1",
+        "filename": "android/emulation/control/ApkInstaller_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-22T00:40:01Z",
+      "side": 1,
+      "message": "What about a happy medium: add a ApkInstaller:kDefaultErrorString that gets used everywhere so we only ever change one place, and the tests don\u0027t break?\n\nI think its important to have a test distinguishing between \"the output file couldn\u0027t be read for some reason\" and \"the output file says the install failed\", although based on what you\u0027ve said, the first shouldn\u0027t ever happen...",
+      "parentUuid": "7c21d2e1_2b2a7e5c",
       "range": {
         "startLine": 45,
         "startChar": 4,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "1cc45660_f8aecdac",
+        "filename": "android/emulation/control/ApkInstaller_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-22T00:40:01Z",
+      "side": 1,
+      "message": "YW! An automated end-to-end test feels too tricky for a basic unit test, but we should include it in the test plan (which I believe we\u0027re working on updating.)\n\nSomething like \"run an API 21 emulator, install an APK that works, and then install an APK that doesn\u0027t\". You can get a failed install super easily by setting your app to a minimum API 23.",
+      "parentUuid": "7c21d2e1_2b539ee4",
+      "range": {
+        "startLine": 48,
+        "startChar": 19,
+        "endLine": 48,
+        "endChar": 53
+      },
+      "revId": "ee8c3cc1175ce3ce5458bc7f4c683ac9a4308bbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_4b9b72e7",
         "filename": "android/skin/qt/emulator-qt-window.h",
         "patchSetId": 5
@@ -128,6 +248,30 @@
       "writtenOn": "2016-03-22T00:19:18Z",
       "side": 1,
       "message": "This change leaked from your previous CL.",
+      "range": {
+        "startLine": 235,
+        "startChar": 9,
+        "endLine": 235,
+        "endChar": 23
+      },
+      "revId": "ee8c3cc1175ce3ce5458bc7f4c683ac9a4308bbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1cc45660_78bc7ddf",
+        "filename": "android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-22T00:40:01Z",
+      "side": 1,
+      "message": "Not sure what you mean? This isn\u0027t a bad rebase, this is what master currently looks like. We may just change it back.",
+      "parentUuid": "7c21d2e1_4b9b72e7",
       "range": {
         "startLine": 235,
         "startChar": 9,
