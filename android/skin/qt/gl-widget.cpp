@@ -56,7 +56,7 @@ const GLESv2Dispatch* MyGLESv2Dispatch::get() {
     }
 }
 
-// Helper class used to laziy initialize the global EGL dispatch table
+// Helper class used to lazily initialize the global EGL dispatch table
 // in a thread safe way. Note that the dispatch table is provided by
 // libOpenGLESDispatch as the 's_egl' global variable.
 struct MyEGLDispatch : public EGLDispatch {
@@ -178,14 +178,13 @@ bool GLWidget::ensureInit() {
         return false;
     }
 
-    mValid = true;
 
     makeContextCurrent();
     mCanvas.reset(new GLCanvas(realPixelsWidth(), realPixelsHeight(), mGLES2));
-    mAntiAliasing.reset(new GLAntiAliasing(mGLES2));
-    initGL();
+    mTextureDraw.reset(new TextureDraw(mGLES2));
+    mValid = initGL();
 
-    return true;
+    return mValid;
 }
 
 void GLWidget::makeContextCurrent() {
@@ -210,9 +209,11 @@ void GLWidget::renderFrame() {
     }
 
     if (mEnableAA) {
-        mAntiAliasing->apply(mCanvas->texture(),
-                             realPixelsWidth(),
-                             realPixelsHeight());
+        mGLES2->glBindTexture(GL_TEXTURE_2D, mCanvas->texture());
+        mGLES2->glGenerateMipmap(GL_TEXTURE_2D);
+        mTextureDraw->draw(mCanvas->texture(),
+                           realPixelsWidth(),
+                           realPixelsHeight());
     }
 
     mEGL->eglSwapBuffers(mEGLState->display, mEGLState->surface);

@@ -11,7 +11,7 @@
 #pragma once
 
 #include "android/skin/qt/gl-canvas.h"
-#include "android/skin/qt/gl-anti-aliasing.h"
+#include "android/skin/qt/gl-texture-draw.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
 #include <cmath>
@@ -52,7 +52,9 @@ protected:
     // This will always happen before the first repaintGL() or resizeGL()
     // call. The implementation can assume that |mEGL| and |mGLES2| are valid,
     // and that the widget's context is already set.
-    virtual void initGL() {}
+    // This function should return true if the initialization is successful and
+    // false otherwise.
+    virtual bool initGL() { return true; }
 
     // Called whenever a frame needs to be repainted by the widget.
     // The implementation can assume that |mEGL| and |mGLES2| are valid,
@@ -69,6 +71,7 @@ protected:
     int realPixelsWidth() const { return std::ceil(width() * devicePixelRatio()); }
     int realPixelsHeight() const { return std::ceil(height() * devicePixelRatio()); }
     void toggleAA() { mEnableAA = !mEnableAA; }
+    bool isValid() const { return mValid; }
 
 private:
     void paintEvent(QPaintEvent*) override;
@@ -81,6 +84,6 @@ private:
     bool mValid;
 
     std::unique_ptr<GLCanvas> mCanvas;
-    std::unique_ptr<GLAntiAliasing> mAntiAliasing;
+    std::unique_ptr<TextureDraw> mTextureDraw;
     bool mEnableAA;
 };
