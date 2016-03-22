@@ -406,7 +406,7 @@ TEST(System, runCommandTimeout) {
     EXPECT_GT(pid, 0);
 }
 
-TEST(System, runCommandWithOutput) {
+TEST(System, DISABLED_runCommandWithOutput) {
     StringVector cmd = {"echo", "hello"};
     System::Pid pid = 666;
     System::ProcessExitCode exitCode = 0;
