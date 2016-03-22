@@ -145,9 +145,290 @@ androidHwConfig_getScreenSize( AndroidHwConfig* config )
                                config->hw_lcd_density);
 }
 
-int
-androidHwConfig_getKernelDeviceNaming( AndroidHwConfig* config )
-{
+int androidHwConfig_getMinVmHeapSize(AndroidHwConfig* config, int apiLevel) {
+    int minVMHeapSize = 16;
+    hwLcd_screenSize_t screenSize = androidHwConfig_getScreenSize(config);
+    // Taken from requirements in CDD Documents on VM/Runtime Compatibility
+    // TODO: android wear minimums
+    if (apiLevel >= 23) {
+        if (screenSize >= LCD_SIZE_XLARGE) {
+            if (config->hw_lcd_density >= LCD_DENSITY_XXXHDPI) {
+                minVMHeapSize = 768;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_560DPI) {
+                minVMHeapSize = 576;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
+                minVMHeapSize = 384;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_420DPI) {
+                minVMHeapSize = 336;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
+                minVMHeapSize = 288;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_360DPI) {
+                minVMHeapSize = 240;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XHDPI) {
+                minVMHeapSize = 192;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_280DPI) {
+                minVMHeapSize = 144;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_HDPI) {
+                minVMHeapSize = 96;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_TVDPI) {
+                minVMHeapSize = 96;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_MDPI) {
+                minVMHeapSize = 80;
+            } else {
+                minVMHeapSize = 48;
+            }
+        } else if (screenSize >= LCD_SIZE_LARGE) {
+            if (config->hw_lcd_density >= LCD_DENSITY_XXXHDPI) {
+                minVMHeapSize = 512;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_560DPI) {
+                minVMHeapSize = 384;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
+                minVMHeapSize = 256;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_420DPI) {
+                minVMHeapSize = 228;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
+                minVMHeapSize = 192;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_360DPI) {
+                minVMHeapSize = 160;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XHDPI) {
+                minVMHeapSize = 128;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_280DPI) {
+                minVMHeapSize = 96;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_HDPI) {
+                minVMHeapSize = 80;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_TVDPI) {
+                minVMHeapSize = 80;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_MDPI) {
+                minVMHeapSize = 48;
+            } else {
+                minVMHeapSize = 32;
+            }
+        } else { // screenSize >= LCD_SIZE_SMALL
+            if (config->hw_lcd_density >= LCD_DENSITY_XXXHDPI) {
+                minVMHeapSize = 256;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_560DPI) {
+                minVMHeapSize = 192;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
+                minVMHeapSize = 128;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_420DPI) {
+                minVMHeapSize = 112;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
+                minVMHeapSize = 96;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_360DPI) {
+                minVMHeapSize = 80;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XHDPI) {
+                minVMHeapSize = 80;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_280DPI) {
+                minVMHeapSize = 48;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_HDPI) {
+                minVMHeapSize = 48;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_TVDPI) {
+                minVMHeapSize = 48;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_MDPI) {
+                minVMHeapSize = 32;
+            } else {
+                minVMHeapSize = 32;
+            }
+        }
+    } else if (apiLevel >= 22) {
+        if (screenSize >= LCD_SIZE_XLARGE) {
+            if (config->hw_lcd_density >= LCD_DENSITY_XXXHDPI) {
+                minVMHeapSize = 768;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_560DPI) {
+                minVMHeapSize = 576;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
+                minVMHeapSize = 384;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
+                minVMHeapSize = 288;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XHDPI) {
+                minVMHeapSize = 192;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_280DPI) {
+                minVMHeapSize = 144;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_HDPI) {
+                minVMHeapSize = 96;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_TVDPI) {
+                minVMHeapSize = 96;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_MDPI) {
+                minVMHeapSize = 80;
+            } else {
+                minVMHeapSize = 48;
+            }
+        } else if (screenSize >= LCD_SIZE_LARGE) {
+            if (config->hw_lcd_density >= LCD_DENSITY_XXXHDPI) {
+                minVMHeapSize = 512;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_560DPI) {
+                minVMHeapSize = 384;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
+                minVMHeapSize = 256;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
+                minVMHeapSize = 192;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XHDPI) {
+                minVMHeapSize = 128;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_280DPI) {
+                minVMHeapSize = 96;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_HDPI) {
+                minVMHeapSize = 80;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_TVDPI) {
+                minVMHeapSize = 80;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_MDPI) {
+                minVMHeapSize = 48;
+            } else {
+                minVMHeapSize = 32;
+            }
+        } else { // screenSize >= LCD_SIZE_SMALL
+            if (config->hw_lcd_density >= LCD_DENSITY_XXXHDPI) {
+                minVMHeapSize = 256;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_560DPI) {
+                minVMHeapSize = 192;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
+                minVMHeapSize = 128;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
+                minVMHeapSize = 96;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XHDPI) {
+                minVMHeapSize = 80;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_280DPI) {
+                minVMHeapSize = 48;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_HDPI) {
+                minVMHeapSize = 48;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_TVDPI) {
+                minVMHeapSize = 48;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_MDPI) {
+                minVMHeapSize = 32;
+            } else {
+                minVMHeapSize = 32;
+            }
+        }
+    }
+
+    else if (apiLevel >= 21) {
+        if (screenSize >= LCD_SIZE_XLARGE) {
+            if (config->hw_lcd_density >= LCD_DENSITY_XXXHDPI) {
+                minVMHeapSize = 768;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_560DPI) {
+                minVMHeapSize = 576;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
+                minVMHeapSize = 384;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
+                minVMHeapSize = 288;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XHDPI) {
+                minVMHeapSize = 192;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_HDPI) {
+                minVMHeapSize = 96;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_TVDPI) {
+                minVMHeapSize = 96;
+            } else {
+                minVMHeapSize = 64;
+            }
+        } else if (screenSize >= LCD_SIZE_LARGE) {
+            if (config->hw_lcd_density >= LCD_DENSITY_XXXHDPI) {
+                minVMHeapSize = 512;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_560DPI) {
+                minVMHeapSize = 384;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
+                minVMHeapSize = 256;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
+                minVMHeapSize = 192;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XHDPI) {
+                minVMHeapSize = 128;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_HDPI) {
+                minVMHeapSize = 64;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_TVDPI) {
+                minVMHeapSize = 64;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_MDPI) {
+                minVMHeapSize = 32;
+            } else {
+                minVMHeapSize = 16;
+            }
+        } else { // screenSize >= LCD_SIZE_SMALL
+            if (config->hw_lcd_density >= LCD_DENSITY_XXXHDPI) {
+                minVMHeapSize = 256;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_560DPI) {
+                minVMHeapSize = 192;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
+                minVMHeapSize = 128;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
+                minVMHeapSize = 96;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XHDPI) {
+                minVMHeapSize = 64;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_HDPI) {
+                minVMHeapSize = 32;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_TVDPI) {
+                minVMHeapSize = 32;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_MDPI) {
+                minVMHeapSize = 16;
+            } else {
+                minVMHeapSize = 16;
+            }
+        }
+    } else if (apiLevel >= 19) {
+        if (screenSize >= LCD_SIZE_XLARGE) {
+            if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
+                minVMHeapSize = 256;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
+                minVMHeapSize = 192;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XHDPI) {
+                minVMHeapSize = 128;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_HDPI) {
+                minVMHeapSize = 64;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_TVDPI) {
+                minVMHeapSize = 64;
+            } else {
+                minVMHeapSize = 32;
+            }
+        } else { // screenSize >= LCD_SIZE_SMALL
+            if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
+                minVMHeapSize = 128;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
+                minVMHeapSize = 96;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_XHDPI) {
+                minVMHeapSize = 64;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_HDPI) {
+                minVMHeapSize = 32;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_TVDPI) {
+                minVMHeapSize = 32;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_MDPI) {
+                minVMHeapSize = 16;
+            } else {
+                minVMHeapSize = 16;
+            }
+        }
+    } else if (apiLevel >= 14) {
+        if (screenSize >= LCD_SIZE_XLARGE) {
+            if (config->hw_lcd_density >= LCD_DENSITY_XHDPI) {
+                minVMHeapSize = 128;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_HDPI) {
+                minVMHeapSize = 64;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_TVDPI) {
+                minVMHeapSize = 64;
+            } else {
+                minVMHeapSize = 32;
+            }
+        } else { // screenSize >= LCD_SIZE_SMALL
+            if (config->hw_lcd_density >= LCD_DENSITY_XHDPI) {
+                minVMHeapSize = 64;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_HDPI) {
+                minVMHeapSize = 32;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_TVDPI) {
+                minVMHeapSize = 32;
+            } else if (config->hw_lcd_density >= LCD_DENSITY_MDPI) {
+                minVMHeapSize = 16;
+            } else {
+                minVMHeapSize = 16;
+            }
+        }
+    } else if (apiLevel >= 7) {
+        if (config->hw_lcd_density >= 240) {
+            minVMHeapSize = 24;
+        } else {
+            minVMHeapSize = 16;
+        }
+    } else {
+        minVMHeapSize = 16;
+    }
+    return minVMHeapSize;
+}
+
+int androidHwConfig_getKernelDeviceNaming(AndroidHwConfig* config) {
     if (!strcmp(config->kernel_newDeviceNaming, "no"))
         return 0;
     if (!strcmp(config->kernel_newDeviceNaming, "yes"))
