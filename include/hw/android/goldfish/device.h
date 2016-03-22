@@ -64,7 +64,7 @@ void nand_dev_init(uint32_t base);
 
 #ifdef TARGET_I386
 /* Maximum IRQ number available for a device on x86. */
-#define GFD_MAX_IRQ      16
+#define GFD_MAX_IRQ      18
 /* IRQ reserved for keyboard. */
 #define GFD_KBD_IRQ      1
 /* IRQ reserved for RTC. */
