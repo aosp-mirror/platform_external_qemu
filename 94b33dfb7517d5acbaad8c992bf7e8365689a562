@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_fceb03c9",
+        "filename": "android/emulation/control/ApkInstaller_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-22T19:12:53Z",
+      "side": 1,
+      "message": "Looks like PS7 undid some of the changes you had made for PS6.\n\nBad rebase?",
+      "range": {
+        "startLine": 30,
+        "startChar": 21,
+        "endLine": 30,
+        "endChar": 31
+      },
+      "revId": "94b33dfb7517d5acbaad8c992bf7e8365689a562",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
