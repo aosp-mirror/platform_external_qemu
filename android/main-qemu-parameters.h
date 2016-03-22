@@ -11,19 +11,24 @@
 
 #pragma once
 
+#include "android/avd/info.h"
+#include "android/avd/util.h"
 #include "android/cmdline-option.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
 
-// Return a heap-allocated string containing the kernel parameter.
-// |opts| corresponds to the command-line options after they have been
-// processed by emulator_parseCommonCommandLineOptions().
-// |is_qemu2| is true to indicate that this is called from QEMU2, otherwise
-// QEMU1 is assumed.
-char* emulator_getKernelParameters(const AndroidOptions* opts,
-                                   const char* targetArch,
-                                   const char* kernelSerialPrefix,
-                                   bool is_qemu2);
+typedef struct QemuParameters QemuParameters;
+
+QemuParameters* qemu_parameters_create(const char* argv0,
+                                       const AndroidOptions* opts,
+                                       const AvdInfo* avd,
+                                       const char* androidHwInitPath,
+                                       bool is_qemu2);
+
+size_t qemu_parameters_size(const QemuParameters* params);
+char** qemu_parameters_array(const QemuParameters* params);
+
+void qemu_parameters_free(QemuParameters* params);
 
 ANDROID_END_HEADER

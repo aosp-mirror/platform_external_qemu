@@ -45,6 +45,8 @@
 #include "android/skin/charmap.h"
 #include "android/user-config.h"
 
+#include "android/main-kernel-parameters.h"
+#include "android/main-qemu-parameters.h"
 #include "android/utils/aconfig-file.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -140,7 +142,8 @@ int main(int argc, char **argv) {
 
     process_early_setup(argc, argv);
 
-    args[0] = argv[0];
+    const char* argv0 = argv[0];
+    //args[0] = argv[0];
 
     static const char kTargetArch[] =
 #if defined(TARGET_ARM)
@@ -195,280 +198,284 @@ int main(int argc, char **argv) {
 
     n = 1;
 
-    /* net.shared_net_ip boot property value. */
-    char boot_prop_ip[64] = {};
-    if (opts->shared_net_id) {
-        char*  end;
-        long   shared_net_id = strtol(opts->shared_net_id, &end, 0);
-        if (end == NULL || *end || shared_net_id < 1 || shared_net_id > 255) {
-            fprintf(stderr, "option -shared-net-id must be an integer between 1 and 255\n");
-            return 1;
-        }
-        snprintf(boot_prop_ip, sizeof(boot_prop_ip),
-                 "net.shared_net_ip=10.1.2.%ld", shared_net_id);
-    }
-    if (boot_prop_ip[0]) {
-        args[n++] = "-boot-property";
-        args[n++] = boot_prop_ip;
-    }
+//     /* net.shared_net_ip boot property value. */
+//     char boot_prop_ip[64] = {};
+//     if (opts->shared_net_id) {
+//         char*  end;
+//         long   shared_net_id = strtol(opts->shared_net_id, &end, 0);
+//         if (end == NULL || *end || shared_net_id < 1 || shared_net_id > 255) {
+//             fprintf(stderr, "option -shared-net-id must be an integer between 1 and 255\n");
+//             return 1;
+//         }
+//         snprintf(boot_prop_ip, sizeof(boot_prop_ip),
+//                  "net.shared_net_ip=10.1.2.%ld", shared_net_id);
+//     }
+//     if (boot_prop_ip[0]) {
+//         args[n++] = "-boot-property";
+//         args[n++] = boot_prop_ip;
+//     }
 
-    if (opts->tcpdump) {
-        args[n++] = "-tcpdump";
-        args[n++] = opts->tcpdump;
-    }
+//     if (opts->tcpdump) {
+//         args[n++] = "-tcpdump";
+//         args[n++] = opts->tcpdump;
+//     }
 
-#ifdef CONFIG_NAND_LIMITS
-    if (opts->nand_limits) {
-        args[n++] = "-nand-limits";
-        args[n++] = opts->nand_limits;
-    }
-#endif
+// #ifdef CONFIG_NAND_LIMITS
+//     if (opts->nand_limits) {
+//         args[n++] = "-nand-limits";
+//         args[n++] = opts->nand_limits;
+//     }
+// #endif
 
-    if (opts->timezone) {
-        args[n++] = "-timezone";
-        args[n++] = opts->timezone;
-    }
+//     if (opts->timezone) {
+//         args[n++] = "-timezone";
+//         args[n++] = opts->timezone;
+//     }
+//
+//     if (opts->netspeed) {
+//         args[n++] = "-netspeed";
+//         args[n++] = opts->netspeed;
+//     }
+//     if (opts->netdelay) {
+//         args[n++] = "-netdelay";
+//         args[n++] = opts->netdelay;
+//     }
+//     if (opts->netfast) {
+//         args[n++] = "-netfast";
+//     }
+//
+//     if (opts->audio) {
+//         args[n++] = "-audio";
+//         args[n++] = opts->audio;
+//     }
+//
+//     if (opts->cpu_delay) {
+//         args[n++] = "-cpu-delay";
+//         args[n++] = opts->cpu_delay;
+//     }
+//
+//     if (opts->dns_server) {
+//         args[n++] = "-dns-server";
+//         args[n++] = opts->dns_server;
+//     }
 
-    if (opts->netspeed) {
-        args[n++] = "-netspeed";
-        args[n++] = opts->netspeed;
-    }
-    if (opts->netdelay) {
-        args[n++] = "-netdelay";
-        args[n++] = opts->netdelay;
-    }
-    if (opts->netfast) {
-        args[n++] = "-netfast";
-    }
+//     if (opts->snapstorage) {
+//         /* We still use QEMU command-line options for the following since
+//         * they can change from one invokation to the next and don't really
+//         * correspond to the hardware configuration itself.
+//         */
+//         if (!opts->no_snapshot_load) {
+//             args[n++] = "-loadvm";
+//             args[n++] = ASTRDUP(opts->snapshot);
+//         }
+//
+//         if (!opts->no_snapshot_save) {
+//             args[n++] = "-savevm-on-exit";
+//             args[n++] = ASTRDUP(opts->snapshot);
+//         }
+//
+//         if (opts->no_snapshot_update_time) {
+//             args[n++] = "-snapshot-no-time-update";
+//         }
+//     }
 
-    if (opts->audio) {
-        args[n++] = "-audio";
-        args[n++] = opts->audio;
-    }
+//     /* we always send the kernel messages from ttyS0 to android_kmsg */
+//     if (opts->show_kernel) {
+//         args[n++] = "-show-kernel";
+//     }
+//
+//     if (opts->shell || opts->logcat) {
+//         args[n++] = "-serial";
+//         args[n++] = opts->shell_serial;
+//         shell_serial = serial++;
+//     }
+//
+//     if (opts->radio) {
+//         args[n++] = "-radio";
+//         args[n++] = opts->radio;
+//     }
+//
+//     if (opts->gps) {
+//         args[n++] = "-gps";
+//         args[n++] = opts->gps;
+//     }
+//
+//     if (opts->code_profile) {
+//         args[n++] = "-code-profile";
+//         args[n++] = opts->code_profile;
+//     }
 
-    if (opts->cpu_delay) {
-        args[n++] = "-cpu-delay";
-        args[n++] = opts->cpu_delay;
-    }
-
-    if (opts->dns_server) {
-        args[n++] = "-dns-server";
-        args[n++] = opts->dns_server;
-    }
-
-    if (opts->snapstorage) {
-        /* We still use QEMU command-line options for the following since
-        * they can change from one invokation to the next and don't really
-        * correspond to the hardware configuration itself.
-        */
-        if (!opts->no_snapshot_load) {
-            args[n++] = "-loadvm";
-            args[n++] = ASTRDUP(opts->snapshot);
-        }
-
-        if (!opts->no_snapshot_save) {
-            args[n++] = "-savevm-on-exit";
-            args[n++] = ASTRDUP(opts->snapshot);
-        }
-
-        if (opts->no_snapshot_update_time) {
-            args[n++] = "-snapshot-no-time-update";
-        }
-    }
-
-    /* we always send the kernel messages from ttyS0 to android_kmsg */
-    if (opts->show_kernel) {
-        args[n++] = "-show-kernel";
-    }
-
-    if (opts->shell || opts->logcat) {
-        args[n++] = "-serial";
-        args[n++] = opts->shell_serial;
-        shell_serial = serial++;
-    }
-
-    if (opts->radio) {
-        args[n++] = "-radio";
-        args[n++] = opts->radio;
-    }
-
-    if (opts->gps) {
-        args[n++] = "-gps";
-        args[n++] = opts->gps;
-    }
-
-    if (opts->code_profile) {
-        args[n++] = "-code-profile";
-        args[n++] = opts->code_profile;
-    }
-
-    /* Pass boot properties to the core. First, those from boot.prop,
-     * then those from the command-line */
-    const FileData* bootProperties = avdInfo_getBootProperties(avd);
-    if (!fileData_isEmpty(bootProperties)) {
-        PropertyFileIterator iter[1];
-        propertyFileIterator_init(iter,
-                                  bootProperties->data,
-                                  bootProperties->size);
-        while (propertyFileIterator_next(iter)) {
-            char temp[MAX_PROPERTY_NAME_LEN + MAX_PROPERTY_VALUE_LEN + 2];
-            snprintf(temp, sizeof temp, "%s=%s", iter->name, iter->value);
-            args[n++] = "-boot-property";
-            args[n++] = ASTRDUP(temp);
-        }
-    }
-
-    if (opts->prop != NULL) {
-        ParamList*  pl = opts->prop;
-        for ( ; pl != NULL; pl = pl->next ) {
-            args[n++] = "-boot-property";
-            args[n++] = pl->param;
-        }
-    }
+//     /* Pass boot properties to the core. First, those from boot.prop,
+//      * then those from the command-line */
+//     const FileData* bootProperties = avdInfo_getBootProperties(avd);
+//     if (!fileData_isEmpty(bootProperties)) {
+//         PropertyFileIterator iter[1];
+//         propertyFileIterator_init(iter,
+//                                   bootProperties->data,
+//                                   bootProperties->size);
+//         while (propertyFileIterator_next(iter)) {
+//             char temp[MAX_PROPERTY_NAME_LEN + MAX_PROPERTY_VALUE_LEN + 2];
+//             snprintf(temp, sizeof temp, "%s=%s", iter->name, iter->value);
+//             args[n++] = "-boot-property";
+//             args[n++] = ASTRDUP(temp);
+//         }
+//     }
+//
+//     if (opts->prop != NULL) {
+//         ParamList*  pl = opts->prop;
+//         for ( ; pl != NULL; pl = pl->next ) {
+//             args[n++] = "-boot-property";
+//             args[n++] = pl->param;
+//         }
+//     }
 
     /* Setup the kernel init options
      */
-    {
-        static char  params[1024];
-        char        *p = params, *end = p + sizeof(params);
+//     {
+//         static char  params[1024];
+//         char        *p = params, *end = p + sizeof(params);
+//
+//         /* Don't worry about having a leading space here, this is handled
+//          * by the core later. */
+//
+//         p = bufprint(p, end, " androidboot.hardware=goldfish");
+// #ifdef TARGET_I386
+//         p = bufprint(p, end, " clocksource=pit");
+// #endif
+//
+//         if (opts->shell || opts->logcat) {
+//             p = bufprint(p, end, " androidboot.console=%s%d",
+//                          androidHwConfig_getKernelSerialPrefix(android_hw),
+//                          shell_serial );
+//         }
+//
+//         if (!opts->no_jni) {
+//             p = bufprint(p, end, " android.checkjni=1");
+//         }
+//
+//         if (opts->no_boot_anim) {
+//             p = bufprint( p, end, " android.bootanim=0" );
+//         }
+//
+//         if (opts->logcat) {
+//             char*  q = bufprint(p, end, " androidboot.logcat=%s", opts->logcat);
+//
+//             if (q < end) {
+//                 /* replace any space by a comma ! */
+//                 {
+//                     int  nn;
+//                     for (nn = 1; p[nn] != 0; nn++)
+//                         if (p[nn] == ' ' || p[nn] == '\t')
+//                             p[nn] = ',';
+//                     p += nn;
+//                 }
+//             }
+//             p = q;
+//         }
+//
+//         if (opts->bootchart) {
+//             p = bufprint(p, end, " androidboot.bootchart=%s", opts->bootchart);
+//         }
+//
+//         if (opts->selinux) {
+//             p = bufprint(p, end, " androidboot.selinux=%s", opts->selinux);
+//         }
+//
+//         if (p >= end) {
+//             fprintf(stderr, "### ERROR: kernel parameters too long\n");
+//             return 1;
+//         }
+//
+//         hw->kernel_parameters = strdup(params);
+//     }
 
-        /* Don't worry about having a leading space here, this is handled
-         * by the core later. */
+    const char* serialPrefix = androidHwConfig_getKernelSerialPrefix(hw);
+    hw->kernel_parameters = emulator_getKernelParameters(
+            opts, kTargetArch, serialPrefix, false);
 
-        p = bufprint(p, end, " androidboot.hardware=goldfish");
-#ifdef TARGET_I386
-        p = bufprint(p, end, " clocksource=pit");
-#endif
+//     if (opts->ports) {
+//         args[n++] = "-android-ports";
+//         args[n++] = opts->ports;
+//     }
+//
+//     if (opts->port) {
+//         args[n++] = "-android-port";
+//         args[n++] = opts->port;
+//     }
+//
+//     if (opts->report_console) {
+//         args[n++] = "-android-report-console";
+//         args[n++] = opts->report_console;
+//     }
+//
+//     if (opts->http_proxy) {
+//         args[n++] = "-http-proxy";
+//         args[n++] = opts->http_proxy;
+//     }
+//
+//     /* Deal with camera emulation */
+//     if (opts->webcam_list) {
+//         /* List connected webcameras */
+//         args[n++] = "-list-webcam";
+//     }
+//
+//     /* Set up the interfaces for inter-emulator networking */
+//     if (opts->shared_net_id) {
+//         unsigned int shared_net_id = atoi(opts->shared_net_id);
+//         char nic[37];
+//
+//         args[n++] = "-net";
+//         args[n++] = "nic,vlan=0";
+//         args[n++] = "-net";
+//         args[n++] = "user,vlan=0";
+//
+//         args[n++] = "-net";
+//         snprintf(nic, sizeof nic, "nic,vlan=1,macaddr=52:54:00:12:34:%02x", shared_net_id);
+//         args[n++] = strdup(nic);
+//         args[n++] = "-net";
+//         args[n++] = "socket,vlan=1,mcast=230.0.0.10:1234";
+//     }
 
-        if (opts->shell || opts->logcat) {
-            p = bufprint(p, end, " androidboot.console=%s%d",
-                         androidHwConfig_getKernelSerialPrefix(android_hw),
-                         shell_serial );
-        }
-
-        if (!opts->no_jni) {
-            p = bufprint(p, end, " android.checkjni=1");
-        }
-
-        if (opts->no_boot_anim) {
-            p = bufprint( p, end, " android.bootanim=0" );
-        }
-
-        if (opts->logcat) {
-            char*  q = bufprint(p, end, " androidboot.logcat=%s", opts->logcat);
-
-            if (q < end) {
-                /* replace any space by a comma ! */
-                {
-                    int  nn;
-                    for (nn = 1; p[nn] != 0; nn++)
-                        if (p[nn] == ' ' || p[nn] == '\t')
-                            p[nn] = ',';
-                    p += nn;
-                }
-            }
-            p = q;
-        }
-
-        if (opts->bootchart) {
-            p = bufprint(p, end, " androidboot.bootchart=%s", opts->bootchart);
-        }
-
-        if (opts->selinux) {
-            p = bufprint(p, end, " androidboot.selinux=%s", opts->selinux);
-        }
-
-        if (p >= end) {
-            fprintf(stderr, "### ERROR: kernel parameters too long\n");
-            return 1;
-        }
-
-        hw->kernel_parameters = strdup(params);
-    }
-
-    if (opts->ports) {
-        args[n++] = "-android-ports";
-        args[n++] = opts->ports;
-    }
-
-    if (opts->port) {
-        args[n++] = "-android-port";
-        args[n++] = opts->port;
-    }
-
-    if (opts->report_console) {
-        args[n++] = "-android-report-console";
-        args[n++] = opts->report_console;
-    }
-
-    if (opts->http_proxy) {
-        args[n++] = "-http-proxy";
-        args[n++] = opts->http_proxy;
-    }
-
-    /* Deal with camera emulation */
-    if (opts->webcam_list) {
-        /* List connected webcameras */
-        args[n++] = "-list-webcam";
-    }
-
-    /* Set up the interfaces for inter-emulator networking */
-    if (opts->shared_net_id) {
-        unsigned int shared_net_id = atoi(opts->shared_net_id);
-        char nic[37];
-
-        args[n++] = "-net";
-        args[n++] = "nic,vlan=0";
-        args[n++] = "-net";
-        args[n++] = "user,vlan=0";
-
-        args[n++] = "-net";
-        snprintf(nic, sizeof nic, "nic,vlan=1,macaddr=52:54:00:12:34:%02x", shared_net_id);
-        args[n++] = strdup(nic);
-        args[n++] = "-net";
-        args[n++] = "socket,vlan=1,mcast=230.0.0.10:1234";
-    }
-
-#if defined(TARGET_I386) || defined(TARGET_X86_64)
-    char* accel_status = NULL;
-    CpuAccelMode accel_mode = ACCEL_AUTO;
-    bool accel_ok = handleCpuAcceleration(opts, avd, &accel_mode, accel_status);
-
-    // CPU acceleration only works for x86 and x86_64 system images.
-    if (accel_mode == ACCEL_OFF && accel_ok) {
-        args[n++] = ASTRDUP(kDisableAccelerator);
-    } else if (accel_mode == ACCEL_ON) {
-        if (!accel_ok) {
-            derror("CPU acceleration not supported on this machine!");
-            derror("Reason: %s", accel_status);
-            return 1;
-        }
-        args[n++] = ASTRDUP(kEnableAccelerator);
-    } else {
-        args[n++] = accel_ok ? ASTRDUP(kEnableAccelerator)
-                             : ASTRDUP(kDisableAccelerator);
-    }
-
-    AFREE(accel_status);
-#else
-    if (VERBOSE_CHECK(init)) {
-        dwarning("CPU acceleration only works with x86/x86_64 "
-            "system images.");
-    }
-#endif
+// #if defined(TARGET_I386) || defined(TARGET_X86_64)
+//     char* accel_status = NULL;
+//     CpuAccelMode accel_mode = ACCEL_AUTO;
+//     bool accel_ok = handleCpuAcceleration(opts, avd, &accel_mode, accel_status);
+//
+//     // CPU acceleration only works for x86 and x86_64 system images.
+//     if (accel_mode == ACCEL_OFF && accel_ok) {
+//         args[n++] = ASTRDUP(kDisableAccelerator);
+//     } else if (accel_mode == ACCEL_ON) {
+//         if (!accel_ok) {
+//             derror("CPU acceleration not supported on this machine!");
+//             derror("Reason: %s", accel_status);
+//             return 1;
+//         }
+//         args[n++] = ASTRDUP(kEnableAccelerator);
+//     } else {
+//         args[n++] = accel_ok ? ASTRDUP(kEnableAccelerator)
+//                              : ASTRDUP(kDisableAccelerator);
+//     }
+//
+//     AFREE(accel_status);
+// #else
+//     if (VERBOSE_CHECK(init)) {
+//         dwarning("CPU acceleration only works with x86/x86_64 "
+//             "system images.");
+//     }
+// #endif
 
     if (hw->hw_cpu_ncore > 1) {
         dwarning("Classic qemu does not support SMP. "
                 "The hw.cpu.ncore option from your config file is ignored.");
     }
 
-    while(argc-- > 0) {
-        args[n++] = *argv++;
-    }
-    args[n] = 0;
-    // We started with 128 slots in |args|.
-    assert(n < 128);
-
+//     while(argc-- > 0) {
+//         args[n++] = *argv++;
+//     }
+//     args[n] = 0;
+//     // We started with 128 slots in |args|.
+//     assert(n < 128);
+//
     /* Generate a hardware-qemu.ini for this AVD. The real hardware
      * configuration is ususally stored in several files, e.g. the AVD's
      * config.ini plus the skin-specific hardware.ini.
@@ -476,8 +483,8 @@ int main(int argc, char **argv) {
      * The new file will group all definitions and will be used to
      * launch the core with the -android-hw <file> option.
      */
+    const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
     {
-        const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
         CIniFile* hwIni = iniFile_newEmpty(NULL);
         androidHwConfig_write(hw, hwIni);
 
@@ -497,8 +504,8 @@ int main(int argc, char **argv) {
             derror("Could not write hardware.ini to %s: %s", coreHwIniPath, strerror(errno));
             return 2;
         }
-        args[n++] = "-android-hw";
-        args[n++] = strdup(coreHwIniPath);
+//         args[n++] = "-android-hw";
+//         args[n++] = strdup(coreHwIniPath);
 
         crashhandler_copy_attachment(CRASH_AVD_HARDWARE_INFO, coreHwIniPath);
 
@@ -522,25 +529,14 @@ int main(int argc, char **argv) {
         }
     }
 
-    if(VERBOSE_CHECK(init)) {
-        int i;
-        printf("QEMU options list:\n");
-        for(i = 0; i < n; i++) {
-            printf("emulator: argv[%02d] = \"%s\"\n", i, args[i]);
-        }
-        /* Dump final command-line option to make debugging the core easier */
-        printf("Concatenated QEMU options:\n");
-        for (i = 0; i < n; i++) {
-            /* To make it easier to copy-paste the output to a command-line,
-             * quote anything that contains spaces.
-             */
-            if (strchr(args[i], ' ') != NULL) {
-                printf(" '%s'", args[i]);
-            } else {
-                printf(" %s", args[i]);
-            }
-        }
-        printf("\n");
+    QemuParameters* qemuParams = qemu_parameters_create(argv0,
+                                                        opts,
+                                                        avd,
+                                                        coreHwIniPath,
+                                                        false // is_qemu2
+                                                        );
+    if (!qemuParams) {
+        return 1;
     }
 
     static UiEmuAgent uiEmuAgent;
@@ -575,10 +571,15 @@ int main(int argc, char **argv) {
 #ifdef __APPLE__
     skin_acquire_window_inst();
 #endif
-    skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, n, args);
+    skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop,
+                             qemu_parameters_size(qemuParams),
+                             qemu_parameters_array(qemuParams));
+
     skin_winsys_enter_main_loop(opts->no_window, argc, argv);
 
     emulator_finiUserInterface();
+
+    qemu_parameters_free(qemuParams);
 
     process_late_teardown();
     return 0;
