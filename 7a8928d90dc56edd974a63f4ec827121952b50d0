@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_bd77c260",
+        "filename": "android/avd/hw-config.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-22T23:48:33Z",
+      "side": 1,
+      "message": "could you please leave just \"else\", putting \"screenSize \u003e\u003d LCD_SIZE_SMALL\" in a comment on the same line - to emphasize that we\u0027re assigning something in each code path?\n\non all branches",
+      "range": {
+        "startLine": 278,
+        "startChar": 15,
+        "endLine": 278,
+        "endChar": 50
+      },
+      "revId": "7a8928d90dc56edd974a63f4ec827121952b50d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
