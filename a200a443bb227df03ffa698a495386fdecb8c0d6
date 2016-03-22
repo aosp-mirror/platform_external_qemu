@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_c548e257",
+        "filename": "android/skin/qt/wavefront-obj-parser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-22T21:50:42Z",
+      "side": 1,
+      "message": "Nit: whitespace",
+      "range": {
+        "startLine": 54,
+        "startChar": 25,
+        "endLine": 54,
+        "endChar": 28
+      },
+      "revId": "a200a443bb227df03ffa698a495386fdecb8c0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_050e7a18",
+        "filename": "android/skin/qt/wavefront-obj-parser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-22T21:50:42Z",
+      "side": 1,
+      "message": "qWarning here?",
+      "range": {
+        "startLine": 84,
+        "startChar": 20,
+        "endLine": 84,
+        "endChar": 33
+      },
+      "revId": "a200a443bb227df03ffa698a495386fdecb8c0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
