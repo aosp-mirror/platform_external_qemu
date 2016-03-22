@@ -52,8 +52,9 @@ public:
         mTestSystem.setShellCommand(&ScreenCapturerTest::obsequiousShellCommand,
                                     this);
         mLooper = android::base::ThreadLooper::get();
+        mTestSystem.getTempRoot()->makeSubDir("ScreencapOut");
         mCapturer = ScreenCapturer::create(
-                mLooper, {"adb"}, mTestSystem.getTempDir(),
+                mLooper, {"adb"}, "ScreencapOut",
                 [this](Result result) { this->resultSaver(result); }, 10);
         mCapturerWeak = mCapturer;
     }
