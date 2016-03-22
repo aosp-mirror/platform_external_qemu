@@ -22,6 +22,30 @@
       "revId": "94b33dfb7517d5acbaad8c992bf7e8365689a562",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_0a95e95a",
+        "filename": "android/emulation/control/ApkInstaller_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-22T21:14:30Z",
+      "side": 1,
+      "message": "These were the only two that got re-added...weird.",
+      "parentUuid": "7c21d2e1_fceb03c9",
+      "range": {
+        "startLine": 30,
+        "startChar": 21,
+        "endLine": 30,
+        "endChar": 31
+      },
+      "revId": "94b33dfb7517d5acbaad8c992bf7e8365689a562",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
