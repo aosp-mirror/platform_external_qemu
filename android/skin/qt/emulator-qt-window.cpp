@@ -127,7 +127,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mStartupTimer.start();
 
     mBackingSurface = NULL;
-    mBatteryState = NULL;
 
     mToolWindow = new ToolWindow(this, &mContainer, mEventLogger);
 
