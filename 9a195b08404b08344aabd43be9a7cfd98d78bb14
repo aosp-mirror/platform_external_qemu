@@ -120,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_4b47f2f6",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-22T01:19:00Z",
+      "side": 1,
+      "message": "you could use the android::base::Uuid here",
+      "parentUuid": "7c21d2e1_d3bd5adf",
+      "range": {
+        "startLine": 43,
+        "startChar": 53,
+        "endLine": 43,
+        "endChar": 75
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_988021e8",
         "filename": "android/emulation/control/ApkInstaller.cpp",
         "patchSetId": 3
