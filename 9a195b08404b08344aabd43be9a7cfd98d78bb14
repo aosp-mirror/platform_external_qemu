@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_8be9ea64",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-22T00:19:18Z",
+      "side": 1,
+      "message": "Or, salt the file name with System::get()-\u003enowMs()\nSee ScreenCapturer\u0027s output file name generation.",
+      "parentUuid": "7c21d2e1_d3bd5adf",
+      "range": {
+        "startLine": 43,
+        "startChar": 53,
+        "endLine": 43,
+        "endChar": 75
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_988021e8",
         "filename": "android/emulation/control/ApkInstaller.cpp",
         "patchSetId": 3
@@ -1023,6 +1047,30 @@
       "side": 1,
       "message": "mInstallDialog gets hidden by pressing the cancel button in the first place, so we don\u0027t need to manually hide it.\n\nI think you and I spoke about this offline, and I agree - cancel will almost always be used to stop a huge install.\n\nThe only option I see is kill()-ing the launched process, but that involves using the output PID before the functions, so it\u0027s a coin toss.\n\nIsn\u0027t that out PID our ONLY handle to the process in anyway?",
       "parentUuid": "7c21d2e1_b831a5a3",
+      "range": {
+        "startLine": 898,
+        "startChar": 8,
+        "endLine": 898,
+        "endChar": 32
+      },
+      "revId": "9a195b08404b08344aabd43be9a7cfd98d78bb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_cb3be27d",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 898,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-22T00:19:18Z",
+      "side": 1,
+      "message": "Oh yeah, now I remember.\n\nDon\u0027t have a trivial answer here. We either have to change runCommand to allow cancellation somehow, or call runCommand in non-blocking mode and have a platform independent way of waiting on the process.\n\nLatter is preferable, but I don\u0027t want to require that for this CL.",
+      "parentUuid": "7c21d2e1_b32c2634",
       "range": {
         "startLine": 898,
         "startChar": 8,
