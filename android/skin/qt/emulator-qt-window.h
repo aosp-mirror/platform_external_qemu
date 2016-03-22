@@ -28,6 +28,7 @@
 
 #include "android/base/containers/CircularBuffer.h"
 #include "android/base/StringView.h"
+#include "android/emulation/control/ApkInstaller.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/globals.h"
 #include "android/skin/event.h"
@@ -195,6 +196,8 @@ private slots:
     void slot_avdArchWarningMessageAccepted();
     void slot_gpuWarningMessageAccepted();
 
+    void slot_installCanceled();
+
     /*
      Here are conventional slots that perform interesting high-level functions in the emulator. These can be hooked up to signals
      from UI elements or called independently.
@@ -231,6 +234,10 @@ private:
 
     void screenshotDone(android::emulation::ScreenCapturer::Result result);
 
+    void runAdbInstall(const QString& path);
+    void installDone(android::emulation::ApkInstaller::Result result,
+                     android::base::StringView errorString);
+
     void* mBatteryState;
 
     QTimer          mStartupTimer;
@@ -260,6 +267,9 @@ private:
     std::shared_ptr<android::emulation::ScreenCapturer> mScreenCapturer;
     std::shared_ptr<UIEventRecorder<android::base::CircularBuffer>>
         mEventLogger;
+
+    std::shared_ptr<android::emulation::ApkInstaller> mApkInstaller;
+    QProgressDialog mInstallDialog;
 };
 
 struct SkinSurface {
