@@ -2,6 +2,46 @@
   "comments": [
     {
       "key": {
+        "uuid": "7c21d2e1_45e7c02b",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-23T23:03:15Z",
+      "side": 1,
+      "message": "To be consistent with the other methods this should have virtual in front of it.",
+      "revId": "38652ad11451bb4a0a727e7e4bb6c7355a2815dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_652be41b",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-23T23:03:15Z",
+      "side": 1,
+      "message": "This is not really related to this particular CL since you\u0027re already following the existing practice but here goes.\n\nI think having a SystemImpl class instead of HostSystem would be a better idea. TestSystem could then inherit SystemImpl and override the necessary methods. Then when TestSystem wants to call the actual implementation it just calls SystemImpl::pathFileSize instead of pathFileSizeInternal.\n\nThis would make it easier to understand what\u0027s going on as it would prevent functionality existing in both HostSystem and System and when you get to pathFileSize in SystemImpl you would immediately see the implementation instead of having another level of indirection.",
+      "range": {
+        "startLine": 487,
+        "startChar": 0,
+        "endLine": 489,
+        "endChar": 5
+      },
+      "revId": "38652ad11451bb4a0a727e7e4bb6c7355a2815dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_a5583c27",
         "filename": "android/base/system/System.h",
         "patchSetId": 2
@@ -13,6 +53,30 @@
       "writtenOn": "2016-03-23T22:41:02Z",
       "side": 1,
       "message": "return value would be so much more convenient compared to this interface. What about a signed return value and \u003c0 for error?\n\nI mean, having any file of size 2^63+ is already enough for emulator to fail miserably",
+      "range": {
+        "startLine": 217,
+        "startChar": 17,
+        "endLine": 217,
+        "endChar": 29
+      },
+      "revId": "38652ad11451bb4a0a727e7e4bb6c7355a2815dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_c5a570e0",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-23T23:03:15Z",
+      "side": 1,
+      "message": "At some point I think we should have an Optional class, this seems like a case where that would be useful. It would more clearly indicate the intent without overloading the meaning of the return value.",
+      "parentUuid": "7c21d2e1_a5583c27",
       "range": {
         "startLine": 217,
         "startChar": 17,
