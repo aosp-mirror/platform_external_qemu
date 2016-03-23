@@ -173,6 +173,15 @@ end-emulator-program = \
     $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
     $(eval $(end-emulator-module-ev)) \
 
+start-emulator-shared-library = \
+    $(eval include $(CLEAR_VARS)) \
+    $(eval LOCAL_MODULE := $1) \
+    $(eval LOCAL_MODULE_CLASS := SHARED_LIBRARIES) \
+    $(eval LOCAL_BUILD_FILE := $(BUILD_HOST_SHARED_LIBRARY))
+
+end-emulator-shared-library = \
+    $(eval $(end-emulator-module-ev))
+
 define end-emulator-module-ev
 LOCAL_BITS := $$(BUILD_TARGET_BITS)
 include $$(LOCAL_BUILD_FILE)

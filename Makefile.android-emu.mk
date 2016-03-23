@@ -619,6 +619,34 @@ $(call gen-hw-config-defs)
 
 $(call end-emulator-program)
 
+# All of AndroidEmu as a shared library, to make distributing and using
+# precompiled binaries for the upstream QEMU build easier. This must also
+# include all static libraries that AndroidEmu depends on.
+#
+# TODO(digit): Make the rest of the build use this instead of the
+#              static libraries.
+
+$(call start-emulator-shared-library, libandroidemu)
+
+LOCAL_WHOLE_STATIC_LIBRARIES := \
+    $(filter-out emulator-zlib, \
+        $(ANDROID_EMU_STATIC_LIBRARIES)) \
+    emulator-zlib
+
+LOCAL_LDLIBS := \
+    $(ANDROID_EMU_LDLIBS) \
+    $(CXX_STD_LIB)
+
+$(call end-emulator-shared-library)
+
+$(call start-emulator-program, libandroidemu_unittest)
+
+LOCAL_SRC_FILES := android/libandroidemu_unittest.cpp
+
+LOCAL_SHARED_LIBRARIES := libandroidemu
+
+$(call end-emulator-program)
+
 # Done
 
 LOCAL_PATH := $(_ANDROID_EMU_OLD_LOCAL_PATH)
