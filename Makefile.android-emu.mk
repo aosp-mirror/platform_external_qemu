@@ -522,11 +522,8 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SRC_FILES += \
     $(ANDROID_SKIN_SOURCES) \
-    android/gpu_frame.cpp \
     android/emulator-window.c \
     android/main-common-ui.c \
-    android/resource.c \
-    android/user-config.c \
 
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
@@ -564,6 +561,33 @@ LOCAL_STATIC_LIBRARIES += \
 # $(BUILD_OBJS_DIR)/lib[64]/
 $(call local-link-static-c++lib)
 $(call gen-hw-config-defs)
+
+$(call end-emulator-program)
+
+# All of AndroidEmu as a shared library, to make distributing and using
+# precompiled binaries for the upstream QEMU build easier. This must also
+# include all static libraries that AndroidEmu depends on.
+#
+# TODO(digit): Make the rest of the build use this instead of the
+#              static libraries.
+
+$(call start-emulator-shared-library, libandroidemu)
+
+LOCAL_WHOLE_STATIC_LIBRARIES := \
+    $(filter-out emulator-zlib, \
+        $(ANDROID_EMU_STATIC_LIBRARIES)) \
+    emulator-zlib
+
+LOCAL_LDLIBS := \
+    $(ANDROID_EMU_LDLIBS) \
+
+$(call end-emulator-shared-library)
+
+$(call start-emulator-program, libandroidemu_unittest)
+
+LOCAL_SRC_FILES := android/libandroidemu_unittest.cpp
+
+LOCAL_SHARED_LIBRARIES := libandroidemu
 
 $(call end-emulator-program)
 
