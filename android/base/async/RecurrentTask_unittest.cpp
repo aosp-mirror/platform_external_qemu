@@ -37,6 +37,10 @@ public:
         mPtrMayBeNull = nullptr;
     }
 
+    RecurrentTask& task() {
+        return mRecurrentTask;
+    }
+
     void start() { mRecurrentTask.start(); }
 
     bool countOne() {
@@ -72,8 +76,10 @@ TEST(RecurrentTaskTest, zeroTimes) {
     CountUpToN tasker(looper, 0);
     tasker.start();
 
+    EXPECT_TRUE(tasker.task().inFlight());
     EXPECT_EQ(0, tasker.curCount());
     looper->runWithTimeoutMs(500);
+    EXPECT_FALSE(tasker.task().inFlight());
     EXPECT_EQ(0, tasker.curCount());
 }
 
@@ -82,8 +88,10 @@ TEST(RecurrentTaskTest, fiveTimes) {
     CountUpToN tasker(looper, 5);
     tasker.start();
 
+    EXPECT_TRUE(tasker.task().inFlight());
     EXPECT_EQ(0, tasker.curCount());
     looper->runWithTimeoutMs(500);
+    EXPECT_FALSE(tasker.task().inFlight());
     EXPECT_EQ(5, tasker.curCount());
 }
 
