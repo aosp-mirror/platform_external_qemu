@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "7c21d2e1_20e2894e",
+        "filename": "android/skin/qt/wavefront-obj-parser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-23T00:42:09Z",
+      "side": 1,
+      "message": "why?",
+      "range": {
+        "startLine": 15,
+        "startChar": 10,
+        "endLine": 15,
+        "endChar": 18
+      },
+      "revId": "a200a443bb227df03ffa698a495386fdecb8c0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_4037bd95",
+        "filename": "android/skin/qt/wavefront-obj-parser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-23T00:42:09Z",
+      "side": 1,
+      "message": "can the string be empty, e.g. if it\u0027s a blank line in the input?",
+      "range": {
+        "startLine": 47,
+        "startChar": 12,
+        "endLine": 47,
+        "endChar": 25
+      },
+      "revId": "a200a443bb227df03ffa698a495386fdecb8c0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_c548e257",
         "filename": "android/skin/qt/wavefront-obj-parser.cpp",
         "patchSetId": 1
@@ -18,6 +64,29 @@
         "startChar": 25,
         "endLine": 54,
         "endChar": 28
+      },
+      "revId": "a200a443bb227df03ffa698a495386fdecb8c0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_a04799f5",
+        "filename": "android/skin/qt/wavefront-obj-parser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-23T00:42:09Z",
+      "side": 1,
+      "message": "auto\u0026 .. \u003d ..\nwithout pointers?",
+      "range": {
+        "startLine": 60,
+        "startChar": 12,
+        "endLine": 60,
+        "endChar": 16
       },
       "revId": "a200a443bb227df03ffa698a495386fdecb8c0d6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
