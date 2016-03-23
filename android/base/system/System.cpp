@@ -17,16 +17,14 @@
 #include "android/base/EintrWrapper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
-#include "android/base/misc/StringUtils.h"
 #include "android/base/StringFormat.h"
+#include "android/base/system/Process.h"
 
 #ifdef _WIN32
 #include "android/base/system/Win32UnicodeString.h"
-#include "android/base/system/Win32Utils.h"
 #endif
 
 #ifdef _WIN32
-#include <shlobj.h>
 #include <windows.h>
 #include <shlobj.h>
 #endif
@@ -35,28 +33,20 @@
 #import <Carbon/Carbon.h>
 #include <mach/clock.h>
 #include <mach/mach.h>
-#include <spawn.h>
 #endif  // __APPLE__
 
 #include <algorithm>
 #include <array>
-#include <chrono>
-#include <memory>
 #include <vector>
 
 #ifndef _WIN32
-#include <fcntl.h>
 #include <dirent.h>
 #include <pwd.h>
-#include <signal.h>
 #include <sys/times.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <time.h>
 #endif
 #include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -77,7 +67,6 @@ namespace android {
 namespace base {
 
 using std::string;
-using std::unique_ptr;
 using std::vector;
 
 static System::WallDuration getTickCountMs() {
@@ -532,153 +521,29 @@ public:
                     System::ProcessExitCode* outExitCode,
                     System::Pid* outChildPid,
                     const std::string& outputFile) override {
-        // Sanity check.
-        if (commandLine.empty()) {
-            return false;
+        // RunOptions::DontWait is no longer supported.
+        // Use andriod::base::Process instead.
+        assert((options & RunOptions::WaitForCompletion) != RunOptions::None);
+
+        Process::Options procOptions = Process::Options::None;
+        Process::RunOptions procRunOptions = Process::RunOptions::None;
+        if ((options & RunOptions::ShowOutput) != RunOptions::None) {
+            procOptions |= Process::Options::ShowOutput;
+        }
+        if ((options & RunOptions::DumpOutputToFile) != RunOptions::None) {
+            procOptions |= Process::Options::DumpOutputToFile;
+        }
+        if ((options & RunOptions::TerminateOnTimeout) != RunOptions::None) {
+            procRunOptions = Process::RunOptions::TerminateOnTimeout;
         }
 
-#ifdef _WIN32
-        std::vector<std::string> commandLineCopy = commandLine;
-        STARTUPINFOW startup = {};
-        startup.cb = sizeof(startup);
-
-        if ((options & RunOptions::ShowOutput) == 0 ||
-            ((options & RunOptions::DumpOutputToFile) != 0 &&
-             !outputFile.empty())) {
-            startup.dwFlags = STARTF_USESHOWWINDOW;
-
-            // 'Normal' way of hiding console output is passing null std handles
-            // to the CreateProcess() function and CREATE_NO_WINDOW as a flag.
-            // Sadly, in this case Cygwin runtime goes completely mad - its
-            // whole FILE* machinery just stops working. E.g., resize2fs always
-            // creates corrupted images if you try doing it in a 'normal' way.
-            // So, instead, we do the following: run the command in a cmd.exe
-            // with stdout and stderr redirected to either nul (for no output)
-            // or the specified file (for file output).
-
-            // 1. Find the commmand-line interpreter - which hides behind the
-            // %COMSPEC% environment variable
-            std::string comspec = envGet("COMSPEC");
-            if (comspec.empty()) {
-                comspec = "cmd.exe";
-            }
-
-            // 2. Now turn the command into the proper cmd command:
-            //   cmd.exe /C "command" "arguments" ... >nul 2>&1
-            // This executes a command with arguments passed and redirects
-            // stdout to nul, stderr is attached to stdout (so it also
-            // goes to nul)
-            commandLineCopy.insert(commandLineCopy.begin(), "/C");
-            commandLineCopy.insert(commandLineCopy.begin(), comspec);
-
-            if ((options & RunOptions::DumpOutputToFile) != RunOptions::None) {
-                commandLineCopy.push_back(">");
-                commandLineCopy.push_back(outputFile);
-                commandLineCopy.push_back("2>&1");
-            } else if ((options & RunOptions::ShowOutput) == RunOptions::None) {
-                commandLineCopy.push_back(">nul");
-                commandLineCopy.push_back("2>&1");
-            }
+        if (timeoutMs == System::kInfinite) {
+            timeoutMs = Process::kInfinite;
         }
 
-        PROCESS_INFORMATION pinfo = {};
-
-        // this will point to either the commandLineCopy[0] or the executable
-        // path found by the system
-        StringView executableRef;
-        // a buffer to store the executable path if we need to search for it
-        std::string executable;
-        if (PathUtils::isAbsolute(commandLineCopy[0])) {
-            executableRef = commandLineCopy[0];
-        } else {
-            // try searching %PATH% and current directory for the binary
-            const Win32UnicodeString name(commandLineCopy[0]);
-            const Win32UnicodeString extension(PathUtils::kExeNameSuffix);
-            Win32UnicodeString buffer(MAX_PATH);
-
-            DWORD size = ::SearchPathW(nullptr, name.c_str(), extension.c_str(),
-                          buffer.size() + 1, buffer.data(), nullptr);
-            if (size > buffer.size()) {
-                // function may ask for more space
-                buffer.resize(size);
-                size = ::SearchPathW(nullptr, name.c_str(), extension.c_str(),
-                                     buffer.size() + 1, buffer.data(), nullptr);
-            }
-            if (size == 0) {
-                // Couldn't find anything matching the passed name
-                return false;
-            }
-            if (buffer.size() != size) {
-                buffer.resize(size);
-            }
-            executable = buffer.toString();
-            executableRef = executable;
-        }
-
-        std::string args = executableRef;
-        for (size_t i = 1; i < commandLineCopy.size(); ++i) {
-            args += ' ';
-            args += android::base::Win32Utils::quoteCommandLine(commandLineCopy[i]);
-        }
-
-        Win32UnicodeString commandUnicode(executableRef);
-        Win32UnicodeString argsUnicode(args);
-
-        if (!::CreateProcessW(commandUnicode.c_str(), // program path
-                argsUnicode.data(), // command line args, has to be writable
-                nullptr,            // process handle is not inheritable
-                nullptr,            // thread handle is not inheritable
-                FALSE,              // no, don't inherit any handles
-                0,                  // default creation flags
-                nullptr,            // use parent's environment block
-                nullptr,            // use parent's starting directory
-                &startup,           // startup info, i.e. std handles
-                &pinfo)) {
-            return false;
-        }
-
-        CloseHandle(pinfo.hThread);
-        // make sure we close the process handle on exit
-        const android::base::Win32Utils::ScopedHandle process(pinfo.hProcess);
-
-        if (outChildPid) {
-            *outChildPid = pinfo.dwProcessId;
-        }
-
-        if ((options & RunOptions::WaitForCompletion) == 0) {
-            return true;
-        }
-
-        // We were requested to wait for the process to complete.
-        DWORD ret = ::WaitForSingleObject(pinfo.hProcess,
-                                          timeoutMs ? timeoutMs : INFINITE);
-        if (ret == WAIT_FAILED || ret == WAIT_TIMEOUT) {
-            if ((options & RunOptions::TerminateOnTimeout) != 0) {
-                ::TerminateProcess(pinfo.hProcess, 1);
-            }
-            return false;
-        }
-
-        DWORD exitCode;
-        auto exitCodeSuccess = ::GetExitCodeProcess(pinfo.hProcess, &exitCode);
-        assert(exitCodeSuccess);
-        if (outExitCode) {
-            *outExitCode = exitCode;
-        }
-        return true;
-
-#else   // !_WIN32
-        sigset_t oldset;
-        sigset_t set;
-        if (sigemptyset(&set) || sigaddset(&set, SIGCHLD) ||
-            pthread_sigmask(SIG_UNBLOCK, &set, &oldset)) {
-            return false;
-        }
-        auto result = runCommandPosix(commandLine, options, timeoutMs,
-                                      outExitCode, outChildPid, outputFile);
-        pthread_sigmask(SIG_SETMASK, &oldset, nullptr);
-        return result;
-#endif  // !_WIN32
+        return Process::runCommand(commandLine, procOptions, procRunOptions,
+                                   outputFile, timeoutMs, outExitCode,
+                                   outChildPid);
     }
 
     virtual std::string getTempDir() const {
@@ -716,239 +581,6 @@ public:
         return result;
 #endif  // !_WIN32
     }
-
-#ifndef _WIN32
-    bool runCommandPosix(const std::vector<std::string>& commandLine,
-                         RunOptions options,
-                         System::Duration timeoutMs,
-                         System::ProcessExitCode* outExitCode,
-                         System::Pid* outChildPid,
-                         const std::string& outputFile) {
-        vector<char*> params;
-        for (const auto& item : commandLine) {
-            params.push_back(const_cast<char*>(item.c_str()));
-        }
-        params.push_back(nullptr);
-
-        std::string cmd = "";
-        if(LOG_IS_ON(VERBOSE)) {
-            cmd = "|";
-            for (const auto& param : commandLine) {
-                cmd += param;
-                cmd += " ";
-            }
-            cmd += "|";
-        }
-
-#if defined(__APPLE__)
-        int pid = runViaPosixSpawn(commandLine[0].c_str(), params, options,
-                                   outputFile);
-#else
-        int pid = runViaForkAndExec(commandLine[0].c_str(), params, options,
-                                    outputFile);
-#endif  // !defined(__APPLE__)
-
-        if (pid < 0) {
-            LOG(VERBOSE) << "Failed to fork for command " << cmd;
-            return false;
-        }
-
-        if (outChildPid) {
-            *outChildPid = pid;
-        }
-
-        if ((options & RunOptions::WaitForCompletion) == 0) {
-            return true;
-        }
-
-        // We were requested to wait for the process to complete.
-        int exitCode;
-        // Do not use SIGCHLD here because we're not sure if we're
-        // running on the main thread and/or what our sigmask is.
-        if (timeoutMs == kInfinite) {
-            // Let's just wait forever and hope that the child process
-            // exits.
-            HANDLE_EINTR(waitpid(pid, &exitCode, 0));
-            if (outExitCode) {
-                *outExitCode = WEXITSTATUS(exitCode);
-            }
-            return WIFEXITED(exitCode);
-        }
-
-        auto startTime = std::chrono::steady_clock::now();
-        auto elapsed = std::chrono::milliseconds::zero();
-        while (elapsed.count() < timeoutMs) {
-            pid_t waitPid = HANDLE_EINTR(waitpid(pid, &exitCode, WNOHANG));
-            if (waitPid < 0) {
-                auto local_errno = errno;
-                LOG(VERBOSE) << "Error running command " << cmd
-                             << ". waitpid failed with |"
-                             << strerror(local_errno) << "|";
-                return false;
-            }
-
-            if (waitPid > 0) {
-                if (outExitCode) {
-                    *outExitCode = WEXITSTATUS(exitCode);
-                }
-                return WIFEXITED(exitCode);
-            }
-
-            sleepMs(10);
-            elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-                    std::chrono::steady_clock::now() - startTime);
-        }
-
-        // Timeout occured.
-        if ((options & RunOptions::TerminateOnTimeout) != 0) {
-            kill(pid, SIGKILL);
-            waitpid(pid, nullptr, WNOHANG);
-        }
-        LOG(VERBOSE) << "Timed out with running command " << cmd;
-        return false;
-    }
-
-    int runViaForkAndExec(const char* command,
-                          const vector<char*>& params,
-                          RunOptions options,
-                          const string& outputFile) {
-        // If an output file was requested, open it before forking, since
-        // creating a file in the child of a multi-threaded process is sketchy.
-        //
-        // It will be immediately closed in the parent process, and dup2'd into
-        // stdout and stderr in the child process.
-        int outputFd = 0;
-        if ((options & RunOptions::DumpOutputToFile) != RunOptions::None) {
-            if (outputFile.empty()) {
-                LOG(VERBOSE) << "Can not redirect output to empty file!";
-                return -1;
-            }
-
-            // Ensure the umask doesn't get in the way while creating the
-            // output file.
-            mode_t old = umask(0);
-            outputFd = open(outputFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC,
-                            0700);
-            umask(old);
-            if (outputFd < 0) {
-                LOG(VERBOSE) << "Failed to open file to redirect stdout/stderr";
-                return -1;
-            }
-        }
-
-        int pid = fork();
-
-        if (pid != 0) {
-            if (outputFd > 0) {
-                close(outputFd);
-            }
-            // Return the child's pid / error code to parent process.
-            return pid;
-        }
-
-        // In the child process.
-        // Do not do __anything__ except execve. That includes printing to
-        // stdout/stderr. None of it is safe in the child process forked from a
-        // parent with multiple threads.
-        if ((options & RunOptions::DumpOutputToFile) != RunOptions::None) {
-            dup2(outputFd, 1);
-            dup2(outputFd, 2);
-            close(outputFd);
-        } else if ((options & RunOptions::ShowOutput) == RunOptions::None) {
-            // We were requested to RunOptions::HideAllOutput
-            int fd = open("/dev/null", O_WRONLY);
-            if (fd > 0) {
-                dup2(fd, 1);
-                dup2(fd, 2);
-                close(fd);
-            }
-        }
-        if (execvp(command, params.data()) == -1) {
-            // emulator doesn't really like exit calls from a forked process
-            // (it just hangs), so let's just kill it
-            if (raise(SIGKILL) != 0) {
-                exit(RunFailed);
-            }
-        }
-        // Should not happen, but let's keep the compiler happy
-        return -1;
-    }
-
-#if defined(__APPLE__)
-    int runViaPosixSpawn(const char* command,
-                         const vector<char*>& params,
-                         RunOptions options,
-                         const string& outputFile) {
-        posix_spawnattr_t attr;
-        if (posix_spawnattr_init(&attr)) {
-            LOG(VERBOSE) << "Failed to initialize spawnattr obj.";
-            return -1;
-        }
-        // Automatically destroy the successfully initialized attr.
-        auto attrDeleter = [](posix_spawnattr_t* t) {
-            posix_spawnattr_destroy(t);
-        };
-        unique_ptr<posix_spawnattr_t, decltype(attrDeleter)> scopedAttr(
-                &attr, attrDeleter);
-
-        if (posix_spawnattr_setflags(&attr, POSIX_SPAWN_CLOEXEC_DEFAULT)) {
-            LOG(VERBOSE) << "Failed to request CLOEXEC.";
-            return -1;
-        }
-
-        posix_spawn_file_actions_t fileActions;
-        if (posix_spawn_file_actions_init(&fileActions)) {
-            LOG(VERBOSE) << "Failed to initialize fileactions obj.";
-            return -1;
-        }
-        // Automatically destroy the successfully initialized fileActions.
-        auto fileActionsDeleter = [](posix_spawn_file_actions_t* t) {
-            posix_spawn_file_actions_destroy(t);
-        };
-        unique_ptr<posix_spawn_file_actions_t, decltype(fileActionsDeleter)>
-                scopedFileActions(&fileActions, fileActionsDeleter);
-
-        if ((options & RunOptions::DumpOutputToFile) != RunOptions::None) {
-            if (posix_spawn_file_actions_addopen(
-                        &fileActions, 1, outputFile.c_str(),
-                        O_WRONLY | O_CREAT | O_TRUNC, 0700) ||
-                posix_spawn_file_actions_addopen(
-                        &fileActions, 2, outputFile.c_str(),
-                        O_WRONLY | O_CREAT | O_TRUNC, 0700)) {
-                LOG(VERBOSE) << "Failed to redirect child output to file "
-                             << outputFile;
-                return -1;
-            }
-        } else if ((options & RunOptions::ShowOutput) != RunOptions::None) {
-            if (posix_spawn_file_actions_addinherit_np(&fileActions, 1) ||
-                posix_spawn_file_actions_addinherit_np(&fileActions, 2)) {
-                LOG(VERBOSE) << "Failed to request child stdout/stderr to be "
-                                "left intact";
-                return -1;
-            }
-        } else {
-            if (posix_spawn_file_actions_addopen(&fileActions, 1, "/dev/null",
-                                                 O_WRONLY, 0700) ||
-                posix_spawn_file_actions_addopen(&fileActions, 2, "/dev/null",
-                                                 O_WRONLY, 0700)) {
-                LOG(VERBOSE) << "Failed to redirect child output to /dev/null";
-                return -1;
-            }
-        }
-
-        // Posix spawn requires that argv[0] exists.
-        assert(params[0] != nullptr);
-
-        int pid;
-        if (int error_code = posix_spawnp(&pid, command, &fileActions, &attr,
-                                          params.data(), environ)) {
-            LOG(VERBOSE) << "posix_spawnp failed: " << strerror(error_code);
-            return -1;
-        }
-        return pid;
-    }
-#endif  // defined(__APPLE__)
-#endif  // !_WIN32
 
 private:
     mutable std::string mProgramDir;
