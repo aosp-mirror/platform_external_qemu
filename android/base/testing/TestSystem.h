@@ -192,6 +192,11 @@ public:
         return pathCanExecInternal(toTempRoot(path));
     }
 
+    virtual bool pathFileSize(StringView path,
+                              FileSize* outFileSize) const override {
+        return pathFileSizeInternal(toTempRoot(path), outFileSize);
+    }
+
     virtual std::vector<std::string> scanDirEntries(
             StringView dirPath,
             bool fullPath = false) const {
