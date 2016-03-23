@@ -63,7 +63,10 @@ public:
     void cancel();
 
     // Is an install being done currently?
-    bool inFlight() const { return mParallelTask && mParallelTask->inFlight(); }
+    // The task may be complete but awaiting the return of mResultCallback
+    // in taskDoneFunction. So don't check if we're in flight, just check if
+    // the task exists at all. If it does, we're still in flight.
+    bool inFlight() const { return bool(mParallelTask); }
 
     // Update various paths.
     // Fails if an install is in progress, indicated by the return value.
