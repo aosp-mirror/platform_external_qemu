@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_73e73202",
+        "filename": "android/base/misc/StringUtils_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T17:39:13Z",
+      "side": 1,
+      "message": "add a couple more tests for edge cases: when search string is longer than source string, and when search and/or source string are just a single character and/or empty.",
+      "range": {
+        "startLine": 37,
+        "startChar": 14,
+        "endLine": 37,
+        "endChar": 21
+      },
+      "revId": "d8fe3838cf94e292f8d784a53ca61efb65a3f63c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
