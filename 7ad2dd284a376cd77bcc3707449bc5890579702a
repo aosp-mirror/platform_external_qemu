@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_13e2361a",
+        "filename": "android/base/misc/StringUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-23T18:05:38Z",
+      "side": 1,
+      "message": "I think, having support of types without const_iterator is a single real benefit here, and it\u0027s a very insignificant one. So let me change it to cref.\nThanks",
+      "parentUuid": "7c21d2e1_f32de2dc",
+      "range": {
+        "startLine": 46,
+        "startChar": 17,
+        "endLine": 46,
+        "endChar": 24
+      },
+      "revId": "7ad2dd284a376cd77bcc3707449bc5890579702a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_90d61c3b",
         "filename": "android/base/misc/StringUtils.h",
         "patchSetId": 1
@@ -72,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_53114e34",
+        "filename": "android/base/misc/StringUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-23T18:05:38Z",
+      "side": 1,
+      "message": "1. joining strings isn\u0027t really the base code for performance in general, if you need to do it where performance matters - shame on you :)\n2. stringstream is the simplest possible way of serializing non-character types\n3. it\u0027s everywhere already: emugl, gpuinfo, crash service. We can always optimize the implementation if it isn\u0027t fast enough",
+      "parentUuid": "7c21d2e1_90d61c3b",
+      "range": {
+        "startLine": 55,
+        "startChar": 12,
+        "endLine": 55,
+        "endChar": 14
+      },
+      "revId": "7ad2dd284a376cd77bcc3707449bc5890579702a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_93eaa693",
         "filename": "android/base/misc/StringUtils.h",
         "patchSetId": 1
@@ -83,6 +131,30 @@
       "writtenOn": "2016-03-23T17:45:41Z",
       "side": 1,
       "message": "If you want to be more compact, you can do: for (out \u003c\u003c *(it++); it !\u003d itEnd; ++it) {\n...\n}",
+      "range": {
+        "startLine": 56,
+        "startChar": 12,
+        "endLine": 56,
+        "endChar": 18
+      },
+      "revId": "7ad2dd284a376cd77bcc3707449bc5890579702a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_d3c6de13",
+        "filename": "android/base/misc/StringUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-23T18:05:38Z",
+      "side": 1,
+      "message": "yeah, but IMO the existing code is a little bit more readable",
+      "parentUuid": "7c21d2e1_93eaa693",
       "range": {
         "startLine": 56,
         "startChar": 12,
