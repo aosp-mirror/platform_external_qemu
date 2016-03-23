@@ -65,7 +65,11 @@ public:
     void cancel();
 
     // Is a screenshot being taken currently?
-    bool inFlight() const { return mParallelTask && mParallelTask->inFlight(); }
+    // Qt can ask us this question from multiple threads (e.g. drag-and-drop
+    // creates a new thread). |ParallelTask| is not thread-safe.
+    // Luckily, if |mParallelTask| exists at all, we're currently serving a
+    // previous request.
+    bool inFlight() const { return bool(mParallelTask); }
 
     // Update various paths.
     // Fails if a screen capture is in progress, indicated by the return value.
