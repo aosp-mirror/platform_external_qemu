@@ -189,6 +189,30 @@
       "revId": "145cbd5e399de925629866de4850e00f790280d2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_17a33b7a",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-23T23:18:19Z",
+      "side": 1,
+      "message": "I\u0027m fine with that, though I think we should also just prevent drag-and-drop from happening at all (which is easy to do) when a modal dialog is present. I\u0027ll update the CL to master with this change.",
+      "parentUuid": "7c21d2e1_17605b0b",
+      "range": {
+        "startLine": 190,
+        "startChar": 8,
+        "endLine": 190,
+        "endChar": 44
+      },
+      "revId": "145cbd5e399de925629866de4850e00f790280d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
