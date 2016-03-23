@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_f32de2dc",
+        "filename": "android/base/misc/StringUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T17:45:41Z",
+      "side": 1,
+      "message": "To allow passing rvalues w/o creating an extraneous copy:\n\njoin(RangeClass(/*arguments*/), ...)",
+      "parentUuid": "7c21d2e1_309930a0",
+      "range": {
+        "startLine": 46,
+        "startChar": 17,
+        "endLine": 46,
+        "endChar": 24
+      },
+      "revId": "7ad2dd284a376cd77bcc3707449bc5890579702a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_90d61c3b",
         "filename": "android/base/misc/StringUtils.h",
         "patchSetId": 1
@@ -41,6 +65,29 @@
         "startChar": 12,
         "endLine": 55,
         "endChar": 14
+      },
+      "revId": "7ad2dd284a376cd77bcc3707449bc5890579702a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_93eaa693",
+        "filename": "android/base/misc/StringUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T17:45:41Z",
+      "side": 1,
+      "message": "If you want to be more compact, you can do: for (out \u003c\u003c *(it++); it !\u003d itEnd; ++it) {\n...\n}",
+      "range": {
+        "startLine": 56,
+        "startChar": 12,
+        "endLine": 56,
+        "endChar": 18
       },
       "revId": "7ad2dd284a376cd77bcc3707449bc5890579702a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
