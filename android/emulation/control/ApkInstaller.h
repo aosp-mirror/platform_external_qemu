@@ -63,7 +63,7 @@ public:
     void cancel();
 
     // Is an install being done currently?
-    bool inFlight() const { return mParallelTask && mParallelTask->inFlight(); }
+    bool inFlight() const { return bool(mParallelTask); }
 
     // Update various paths.
     // Fails if an install is in progress, indicated by the return value.
