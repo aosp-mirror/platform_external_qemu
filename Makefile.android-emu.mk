@@ -185,7 +185,6 @@ LOCAL_C_INCLUDES := \
 LOCAL_SRC_FILES := \
     android/adb-qemud.c \
     android/adb-server.c \
-    android/android-constants.c \
     android/avd/hw-config.c \
     android/avd/info.c \
     android/avd/scanner.c \
@@ -260,6 +259,7 @@ LOCAL_SRC_FILES := \
     android/metrics/StudioHelper.cpp \
     android/multitouch-port.c \
     android/multitouch-screen.c \
+    android/network/constants.c \
     android/opengl/EmuglBackendList.cpp \
     android/opengl/EmuglBackendScanner.cpp \
     android/opengl/emugl_config.cpp \
@@ -431,6 +431,7 @@ LOCAL_SRC_FILES := \
   android/metrics/metrics_reporter_unittest.cpp \
   android/metrics/metrics_reporter_toolbar_unittest.cpp \
   android/metrics/StudioHelper_unittest.cpp \
+  android/network/constants_unittest.cpp \
   android/opengl/EmuglBackendList_unittest.cpp \
   android/opengl/EmuglBackendScanner_unittest.cpp \
   android/opengl/emugl_config_unittest.cpp \
