@@ -16,6 +16,10 @@
 
 #include <gtest/gtest.h>
 
+#include <list>
+#include <string>
+#include <vector>
+
 namespace android {
 namespace base {
 
@@ -54,6 +58,18 @@ TEST(StringUtils, strContainsWithStdString) {
     EXPECT_TRUE(strContains(haystack, "stuff"));
     EXPECT_FALSE(strContains(haystack, "This is a short phrase"));
     EXPECT_TRUE(strContains(haystack, "a long string"));
+}
+
+TEST(StringUtils, join) {
+    using android::base::join;
+
+    EXPECT_STREQ("", join(std::vector<int>{}).c_str());
+    EXPECT_STREQ("aa", join(std::vector<std::string>{"aa"}).c_str());
+    EXPECT_STREQ("aa,bb", join(std::list<const char*>{"aa", "bb"}).c_str());
+    EXPECT_STREQ("1,2,3", join(std::vector<int>{1, 2, 3}).c_str());
+    EXPECT_STREQ("1|2|3", join(std::vector<int>{1, 2, 3}, '|').c_str());
+    EXPECT_STREQ("1<|>2<|>sd",
+                 join(std::vector<const char*>{"1", "2", "sd"}, "<|>").c_str());
 }
 
 }  // namespace base
