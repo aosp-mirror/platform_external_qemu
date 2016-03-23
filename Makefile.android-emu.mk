@@ -1,7 +1,6 @@
 # Declarations related to the AndroidEmu library, which group Android-specific
 # emulation features that are used by both QEMU1 and QEMU2 engines.
 #
-# This file defines the following important modules:
 #
 #  - android-emu-base
 #  - android-emu
@@ -76,6 +75,7 @@ LOCAL_SRC_FILES := \
     android/base/synchronization/MessageChannel.cpp \
     android/base/Log.cpp \
     android/base/memory/LazyInstance.cpp \
+    android/base/system/Process_common.cpp \
     android/base/system/System.cpp \
     android/base/threads/Async.cpp \
     android/base/threads/FunctorThread.cpp \
@@ -136,14 +136,16 @@ LOCAL_SRC_FILES := \
 ifeq ($(BUILD_TARGET_OS),windows)
 LOCAL_SRC_FILES += \
     android/base/synchronization/ConditionVariable_win32.cpp \
-    android/base/threads/Thread_win32.cpp \
+    android/base/system/Process_win32.cpp \
     android/base/system/Win32Utils.cpp \
     android/base/system/Win32UnicodeString.cpp \
+    android/base/threads/Thread_win32.cpp \
     android/utils/win32_cmdline_quote.cpp \
     android/utils/win32_unicode.cpp \
 
 else
 LOCAL_SRC_FILES += \
+    android/base/system/Process_posix.cpp \
     android/base/threads/Thread_pthread.cpp \
 
 endif
