@@ -22,6 +22,30 @@
       "revId": "7a8928d90dc56edd974a63f4ec827121952b50d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_e014f197",
+        "filename": "android/avd/hw-config.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-03-23T00:03:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c21d2e1_bd77c260",
+      "range": {
+        "startLine": 278,
+        "startChar": 15,
+        "endLine": 278,
+        "endChar": 50
+      },
+      "revId": "7a8928d90dc56edd974a63f4ec827121952b50d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
