@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_da00aa24",
+        "filename": "android/emulation/control/ScreenCapturer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-23T23:57:38Z",
+      "side": 1,
+      "message": "What if mParallelTask is about to be constructed when this is called, this would then return false. The Qt thread would pause execution and then construction of mParallelTask continues and runs to some point. Then when the Qt thread resumes it thinks there is nothing in flight even though there is. I\u0027m not familiar enough with this to say if that\u0027s a problem or not, just a heads up to make sure you considered that.",
+      "revId": "3f17cdda8261a7a136dc8e2396e8c25e2c51b1e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
