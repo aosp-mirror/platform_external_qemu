@@ -165,6 +165,30 @@
       "revId": "145cbd5e399de925629866de4850e00f790280d2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_17605b0b",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-23T23:12:37Z",
+      "side": 1,
+      "message": "Ah now I understand.\n\nI think the real problem is in line 107. There, we create a new ParallTask and blow away the currently waiting parallel task.\n\nHow about simply change the condition in line 101 to be simply if (mParallelTask)\n\nThat is, if mParallelTask is valid, don\u0027t allow another start. This makes sense because we destroy mParallelTask in line 194, once we\u0027re done.\n\nAnd yes, this problem exists in ScreenCapturer too. We should fix it there and also add a unit test that will fail under these conditions.",
+      "parentUuid": "7c21d2e1_e5c07469",
+      "range": {
+        "startLine": 190,
+        "startChar": 8,
+        "endLine": 190,
+        "endChar": 44
+      },
+      "revId": "145cbd5e399de925629866de4850e00f790280d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
