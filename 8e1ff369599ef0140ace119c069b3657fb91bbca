@@ -45,6 +45,29 @@
       "revId": "8e1ff369599ef0140ace119c069b3657fb91bbca",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_17b05b51",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-23T23:43:29Z",
+      "side": 1,
+      "message": "I would still prefer to keep this in - it prevents some Qt garbage from being printed when a modal dialog is up and another action fails, and goes along with the rest of the UI halting when a modal dialog is up.",
+      "range": {
+        "startLine": 361,
+        "startChar": 4,
+        "endLine": 366,
+        "endChar": 5
+      },
+      "revId": "8e1ff369599ef0140ace119c069b3657fb91bbca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
