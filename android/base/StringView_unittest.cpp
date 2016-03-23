@@ -22,11 +22,40 @@ TEST(StringView, InitEmpty) {
 }
 
 TEST(StringView, InitWithCString) {
+    static const char* kString = "Hello";
+    StringView view(kString);
+    EXPECT_STREQ(kString, view.str());
+    EXPECT_FALSE(view.empty());
+    EXPECT_EQ(strlen(kString), view.size());
+}
+
+TEST(StringView, InitWithConstBuffer) {
     static const char kString[] = "Hello";
     StringView view(kString);
     EXPECT_STREQ(kString, view.str());
     EXPECT_FALSE(view.empty());
     EXPECT_EQ(strlen(kString), view.size());
+}
+
+namespace {
+    // Just a test class which needs compile-time constant as an agrument
+    template <int N>
+    struct checkConst {
+        checkConst() {
+            std::cout << "N = " << N << '/';
+        }
+    };
+}
+
+TEST(StringView, InitConstexpr) {
+    static constexpr StringView kStringView = "Hello";
+
+    // these lines compile only if the argument is a compile-time constant
+    checkConst<kStringView[0]> checker1;
+    checkConst<kStringView.c_str()[1]> checker2;
+    checkConst<kStringView.begin()[2]> checker3;
+    checkConst<kStringView.size()> checker4;
+    checkConst<kStringView.empty()> checker5;
 }
 
 TEST(StringView, InitWithStringView) {

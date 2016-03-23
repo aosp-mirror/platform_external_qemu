@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "android/base/TypeUtils.h"
+
 #include <string>
 #include <string.h>
 
@@ -60,44 +62,67 @@ namespace base {
 //
 class StringView {
 public:
-    StringView() : mString(""), mSize(0U) {}
+    constexpr StringView() : mString(""), mSize(0U) {}
 
-    StringView(const StringView& other) :
+    constexpr StringView(const StringView& other) :
         mString(other.data()), mSize(other.size()) {}
 
-    // IMPORTANT: This is intentionally not 'explicit'.
-    StringView(const char* string) :
+    // IMPORTANT: all StringView constructors are intentionally not explict
+    // it is needed to allow seamless creation of StringView from all types
+    // of strings around - as it's intended to be a generic string wrapper
+
+    // A constexpr constructor from a constant buffer, initializing |mSize|
+    // as well. This allows one to declare a static const StringView instance
+    // and initialize it at compile time, with no runtime overhead:
+    //
+    // static constexpr StringView message = "blah";
+    //
+    template <size_t size>
+    constexpr StringView(const char (&buf)[size]) :
+        mString(buf), mSize(size - 1) {}
+
+    // Constructor from a const char pointer. It has to be templated to make
+    // sure the array-based one is chosen for an array - otherwise non-templated
+    // overload always wins
+    // Note: the parameter type is a const reference to a const pointer. This
+    //   is to make this overload a poorer choice for the case of an array. For
+    //   the 'const char[]' argument both 'reference to an array' and 'pointer'
+    //   overloads are tied, so compiler can't choose without help
+    template <class Char, class = enable_if<std::is_same<Char, char>>>
+    constexpr StringView(const Char* const & string) :
             mString(string ? string : ""), mSize(string ? strlen(string) : 0) {}
 
-    // IMPORTANT: This is intentionally not 'explicit'.
     StringView(const std::string& str) :
         mString(str.c_str()), mSize(str.size()) {}
 
-    StringView(const char* str, size_t len)
+    constexpr StringView(const char* str, size_t len)
         : mString(str ? str : ""), mSize(len) {}
 
-    StringView(const char* begin, const char* end)
+    constexpr StringView(const char* begin, const char* end)
         : mString(begin ? begin : ""), mSize(begin ? end - begin : 0) {}
 
-    const char* c_str() const { return mString; }
-    const char* str() const { return mString; }
-    const char* data() const { return mString; }
-    size_t size() const { return mSize; }
+    constexpr StringView(std::nullptr_t) :
+            mString(""), mSize(0) {}
+
+    constexpr const char* c_str() const { return mString; }
+    constexpr const char* str() const { return mString; }
+    constexpr const char* data() const { return mString; }
+    constexpr size_t size() const { return mSize; }
 
     typedef const char* iterator;
     typedef const char* const_iterator;
 
-    const_iterator begin() const { return mString; }
-    const_iterator end() const { return mString + mSize; }
+    constexpr const_iterator begin() const { return mString; }
+    constexpr const_iterator end() const { return mString + mSize; }
 
-    bool empty() const { return !size(); }
+    constexpr bool empty() const { return !size(); }
 
     void clear() {
         mSize = 0;
         mString = "";
     }
 
-    char operator[](size_t index) {
+    constexpr char operator[](size_t index) const {
         return mString[index];
     }
 
