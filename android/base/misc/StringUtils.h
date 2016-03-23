@@ -16,6 +16,9 @@
 
 #include "android/base/StringView.h"
 
+#include <iterator>
+#include <sstream>
+
 #include <stddef.h>
 
 #ifdef _WIN32
@@ -36,6 +39,33 @@ char* strDup(StringView str);
 
 // Returns true iff |haystack| contains |needle|.
 bool strContains(StringView haystack, const char* needle);
+
+// Joins all elements from the |range| into a single string, using |delim|
+// as a delimiter
+template <class Range, class Delimiter>
+std::string join(const Range& range, const Delimiter& delim) {
+    std::ostringstream out;
+
+    // make sure we use the ADL versions of begin/end for custom ranges
+    using std::begin;
+    using std::end;
+    auto it = begin(range);
+    const auto itEnd = end(range);
+    if (it != itEnd) {
+        out << *it;
+        for (++it; it != itEnd; ++it) {
+            out << delim << *it;
+        }
+    }
+
+    return out.str();
+}
+
+// Convenience version of join() with delimiter set to a single comma
+template <class Range>
+std::string join(const Range& range) {
+    return join(range, ',');
+}
 
 }  // namespace base
 }  // namespace android

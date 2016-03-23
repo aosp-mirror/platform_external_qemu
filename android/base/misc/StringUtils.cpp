@@ -14,7 +14,7 @@
 
 #include "android/base/misc/StringUtils.h"
 
-#include "android/base/memory/QSort.h"
+#include <algorithm>
 
 #include <stdlib.h>
 #include <string.h>
@@ -22,22 +22,18 @@
 #ifdef _WIN32
 const void* memmem(const void* haystack, size_t haystackLen,
                    const void* needle, size_t needleLen) {
-    if (needleLen == 0 ) {
-        return haystack;
+    if (!haystack || !needle) {
+        return nullptr;
     }
 
-    if (haystackLen < needleLen) {
-        return NULL;
-    }
-
-    const char* haystackPos = (const char*)haystack;
-    const char* haystackEnd = haystackPos + (haystackLen - needleLen) + 1;
-    for (; haystackPos < haystackEnd; haystackPos++) {
-        if (0==memcmp(haystackPos, needle, needleLen)) {
-            return haystackPos;
-        }
-    }
-    return NULL;
+    const auto it = std::search(
+                        static_cast<const char*>(haystack),
+                        static_cast<const char*>(haystack) + haystackLen,
+                        static_cast<const char*>(needle),
+                        static_cast<const char*>(needle) + needleLen);
+    return it == static_cast<const char*>(haystack) + haystackLen
+            ? nullptr
+            : it;
 }
 #endif  // _WIN32
 

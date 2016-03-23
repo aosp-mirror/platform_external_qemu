@@ -16,8 +16,43 @@
 
 #include <gtest/gtest.h>
 
+#include <list>
+#include <string>
+#include <vector>
+
 namespace android {
 namespace base {
+
+#ifdef _WIN32
+TEST(StringUtils, memmem) {
+    auto src = "string";
+
+    // basic cases - when the substring is there
+    EXPECT_EQ(src + 2, memmem(src, strlen(src), "ring", 4));
+    EXPECT_EQ(src + 1, memmem(src, strlen(src), "tri", 3));
+
+    // no substring
+    EXPECT_EQ(nullptr, memmem(src, strlen(src), "123", 3));
+    EXPECT_EQ(nullptr, memmem(src, strlen(src), "strings", 7));
+
+    // make sure it's looking at lengths, and not at the null-terminator
+    EXPECT_EQ(src + 2, memmem(src, strlen(src), "ringer", 4));
+    EXPECT_EQ(nullptr, memmem(src, 2, "tr", 2));
+
+    // corner cases - empty/single char and the needle same as haystack
+    EXPECT_EQ(src, memmem(src, strlen(src), "", 0));
+    EXPECT_EQ(src, memmem(src, strlen(src), "s", 1));
+    EXPECT_EQ(src, memmem(src, 1, "s", 1));
+    EXPECT_EQ(nullptr, memmem("", 0, "s", 1));
+    EXPECT_EQ(nullptr, memmem("", 0, "", 0));
+    EXPECT_EQ(src, memmem(src, strlen(src), src, strlen(src)));
+
+    // null input parameters
+    EXPECT_EQ(nullptr, memmem(src, strlen(src), nullptr, 2));
+    EXPECT_EQ(nullptr, memmem(nullptr, 10, "asdf", 4));
+    EXPECT_EQ(nullptr, memmem(nullptr, 10, nullptr, 1));
+}
+#endif // _WIN32
 
 TEST(StringUtils, strDupWithStringView) {
     StringView view("Hello World");
@@ -54,6 +89,32 @@ TEST(StringUtils, strContainsWithStdString) {
     EXPECT_TRUE(strContains(haystack, "stuff"));
     EXPECT_FALSE(strContains(haystack, "This is a short phrase"));
     EXPECT_TRUE(strContains(haystack, "a long string"));
+}
+
+TEST(StringUtils, join) {
+    using android::base::join;
+
+    EXPECT_STREQ("", join(std::vector<int>{}).c_str());
+    EXPECT_STREQ("aa", join(std::vector<std::string>{"aa"}).c_str());
+    EXPECT_STREQ("aa,bb", join(std::list<const char*>{"aa", "bb"}).c_str());
+    EXPECT_STREQ("1,2,3", join(std::vector<int>{1, 2, 3}).c_str());
+    EXPECT_STREQ("1|2|3", join(std::vector<int>{1, 2, 3}, '|').c_str());
+    EXPECT_STREQ("1<|>2<|>sd",
+                 join(std::vector<const char*>{"1", "2", "sd"}, "<|>").c_str());
+    EXPECT_STREQ("...---...",
+                 join(std::vector<const char*>{"...", "..."}, "---").c_str());
+    EXPECT_STREQ("...---...",
+                 join(std::vector<const char*>{"...", "---", "..."}, "").c_str());
+
+    // check some special cases - lvalue modifiable and const references
+    using StringVec = std::vector<std::string>;
+    StringVec src = { "1", "a", "foo" };
+
+    EXPECT_STREQ("1,a,foo", join(src).c_str());
+    EXPECT_STREQ("1, a, foo", join(src, ", ").c_str());
+    EXPECT_STREQ("1,a,foo", join(const_cast<const StringVec&>(src)).c_str());
+    EXPECT_STREQ("1, a, foo",
+                 join(const_cast<const StringVec&>(src), ", ").c_str());
 }
 
 }  // namespace base
