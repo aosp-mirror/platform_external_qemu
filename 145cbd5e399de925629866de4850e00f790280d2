@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_45b34015",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-23T22:23:44Z",
+      "side": 1,
+      "message": "There is a return statement here in ScreenCapturer.\n\nOne of my unit-tests caught it.\nWe missed it \u003cagain\u003e in the code review here.",
+      "parentUuid": "7c21d2e1_aa5f6b16",
+      "range": {
+        "startLine": 102,
+        "startChar": 8,
+        "endLine": 103,
+        "endChar": 5
+      },
+      "revId": "145cbd5e399de925629866de4850e00f790280d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_0a3f97bb",
         "filename": "android/emulation/control/ApkInstaller.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-23T21:53:27Z",
       "side": 1,
       "message": "If this function blocks (which it does if there was an error), and another install is started, you can get an assertion failure because you try to reset the mParallelTask while its running.\n\nTwo options:\n1. Protect ApkInstaller-\u003estart() with an atomic boolean that is \"true\" when the result callback is running.\n2. Only call mParallelTask-\u003ereset() if mParallelTask-\u003einFlight() returns false.",
+      "range": {
+        "startLine": 190,
+        "startChar": 8,
+        "endLine": 190,
+        "endChar": 44
+      },
+      "revId": "145cbd5e399de925629866de4850e00f790280d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_0504a863",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-23T22:23:44Z",
+      "side": 1,
+      "message": "Option 1: -2. Sounds horrible\n\nWhy does the result callback block? Because the user is being told that there was an error? Then we shouldn\u0027t be starting another install.\n\nI\u0027d say, immediately fail another attempt to start if we\u0027re still inFlight.\n\nAnd what assertion failure? I\u0027d like to understand the issue a bit better here.",
+      "parentUuid": "7c21d2e1_0a3f97bb",
       "range": {
         "startLine": 190,
         "startChar": 8,
