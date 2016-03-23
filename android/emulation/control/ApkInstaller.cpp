@@ -99,6 +99,7 @@ void ApkInstaller::cancel() {
 void ApkInstaller::start() {
     if (inFlight()) {
         mResultCallback(ApkInstaller::Result::kOperationInProgress, "");
+        return;
     }
     mCancelled = false;
 
