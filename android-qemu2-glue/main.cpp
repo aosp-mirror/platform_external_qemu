@@ -68,6 +68,9 @@ extern "C" {
 
 int android_base_port;
 
+extern bool android_op_wipe_data;
+extern bool android_op_writable_system;
+
 using namespace android::base;
 
 namespace {
@@ -204,7 +207,7 @@ static std::string getNthParentDir(const char* path, size_t n) {
 */
 
 static void makePartitionCmd(const char** args, int* argsPosition, int* driveIndex,
-                             AndroidHwConfig* hw, ImageType type,
+                             AndroidHwConfig* hw, ImageType type, bool writable,
                              int apiLevel) {
     int n   = *argsPosition;
     int idx = *driveIndex;
@@ -219,20 +222,18 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
 
     switch (type) {
         case IMAGE_TYPE_SYSTEM:
+            driveParam += StringFormat("index=%d,id=system,file=%s",
+                                        idx++,
+                                        hw->disk_systemPartition_initPath);
             // API 15 and under images need a read+write
             // system image.
-            if (apiLevel <= 15) {
-                driveParam += StringFormat(
-                        "index=%d,id=system,file=%s",
-                        idx++,
-                        hw->disk_systemPartition_initPath);
-            } else {
-                driveParam += StringFormat(
-                        "index=%d,id=system,read-only,file=%s",
-                        idx++,
-                        hw->disk_systemPartition_initPath);
+            if (apiLevel > 15) {
+                // API > 15 uses read-only system partition.
+                // You can override this explicitly
+                // by passing -writable-system to emulator.
+                if (!writable)
+                    driveParam += ",read-only";
             }
-
             deviceParam = StringFormat("%s,drive=system",
                                        kTarget.storageDeviceType);
             break;
@@ -328,8 +329,6 @@ static void enter_qemu_main_loop(int argc, char **argv) {
 // implementation, that later calls qMain().
 #define main qt_main
 #endif
-
-extern bool android_op_wipe_data;
 
 extern "C" int main(int argc, char **argv) {
     process_early_setup(argc, argv);
@@ -807,7 +806,7 @@ extern "C" int main(int argc, char **argv) {
     args[n++] = hw->disk_ramdisk_path;
 
     /*
-     * add partition parameters with the seqeuence
+     * add partition parameters with the sequence
      * pre-defined in targetInfo.imagePartitionTypes
      */
     int s;
@@ -819,9 +818,10 @@ extern "C" int main(int argc, char **argv) {
         api_level = 1000;
     }
     for (s = 0; s < kMaxPartitions; s++) {
+        bool writable = (kTarget.imagePartitionTypes[s] == IMAGE_TYPE_SYSTEM) ?
+                    android_op_writable_system : true;
         makePartitionCmd(args, &n, &drvIndex, hw,
-                         kTarget.imagePartitionTypes[s],
-                         api_level);
+                         kTarget.imagePartitionTypes[s], writable, api_level);
     }
 
     // Network
