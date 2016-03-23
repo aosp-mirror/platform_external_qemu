@@ -12,25 +12,25 @@
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
-// This class encapsulates the logic necessary to apply a screen-space
-// antialiasing technique.
-class GLAntiAliasing {
+// This class encapsulates the logic necessary to draw the
+// contents of the texture on screen.
+class TextureDraw {
 public:
     // |gl_dispatch| is the GL ES 2 dispatch table.
-    explicit GLAntiAliasing(const GLESv2Dispatch* gl_dispatch);
+    explicit TextureDraw(const GLESv2Dispatch* gl_dispatch);
 
     // Frees the resources associated with this instance.
-    ~GLAntiAliasing();
+    ~TextureDraw();
 
-    // Renders the contents of 2D |input_texture| on screen with anti-aliasing
-    // applied. |width| and |height| are the dimensions of the texture.
-    void apply(GLuint input_texture, int width, int height);
+    // Renders the contents of 2D |input_texture| on screen
+    // |width| and |height| are the dimensions of the texture.
+    void draw(GLuint input_texture, int width, int height);
 
 private:
     const GLESv2Dispatch* mGLES2;
-    GLuint mAAProgram;
-    GLuint mAAVertexBuffer;
-    GLuint mAAInputUniformLocation;
-    GLuint mAAResolutionUniformLocation;
-    GLuint mAAPositionAttribLocation;
+    GLuint mProgram;
+    GLuint mVertexBuffer;
+    GLuint mInputUniformLocation;
+    GLuint mResolutionUniformLocation;
+    GLuint mPositionAttribLocation;
 };

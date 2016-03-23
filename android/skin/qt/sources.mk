@@ -33,6 +33,7 @@ ANDROID_SKIN_STATIC_LIBRARIES += \
     libemugl_common
 
 ANDROID_SKIN_SOURCES += \
+    android/skin/qt/accelerometer-3d-widget.cpp \
     android/skin/qt/angle-input-widget.cpp \
     android/skin/qt/editable-slider-widget.cpp \
     android/skin/qt/emulator-container.cpp \
@@ -43,8 +44,9 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/event-serializer.cpp \
     android/skin/qt/event-subscriber.cpp \
     android/skin/qt/error-dialog.cpp \
-    android/skin/qt/gl-anti-aliasing.cpp \
     android/skin/qt/gl-canvas.cpp \
+    android/skin/qt/gl-common.cpp \
+    android/skin/qt/gl-texture-draw.cpp \
     android/skin/qt/gl-widget.cpp \
     android/skin/qt/extended-pages/common.cpp \
     android/skin/qt/extended-pages/battery-page.cpp \
@@ -62,8 +64,10 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/qt-ui-commands.cpp \
     android/skin/qt/stylesheet.cpp \
     android/skin/qt/tool-window.cpp \
+    android/skin/qt/wavefront-obj-parser.cpp
 
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
+    android/skin/qt/accelerometer-3d-widget.h \
     android/skin/qt/angle-input-widget.h \
     android/skin/qt/editable-slider-widget.h \
     android/skin/qt/gl-widget.h \
