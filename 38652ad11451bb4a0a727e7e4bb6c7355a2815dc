@@ -42,6 +42,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_774ef768",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-23T23:23:20Z",
+      "side": 1,
+      "message": "Agree, in principle.\nI\u0027m definitely not doing any sweeping changes here. (That\u0027s why I let all those eye-sore \"virtual XXX override\" be for now :)",
+      "parentUuid": "7c21d2e1_652be41b",
+      "range": {
+        "startLine": 487,
+        "startChar": 0,
+        "endLine": 489,
+        "endChar": 5
+      },
+      "revId": "38652ad11451bb4a0a727e7e4bb6c7355a2815dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_a5583c27",
         "filename": "android/base/system/System.h",
         "patchSetId": 2
@@ -77,6 +101,30 @@
       "side": 1,
       "message": "At some point I think we should have an Optional class, this seems like a case where that would be useful. It would more clearly indicate the intent without overloading the meaning of the return value.",
       "parentUuid": "7c21d2e1_a5583c27",
+      "range": {
+        "startLine": 217,
+        "startChar": 17,
+        "endLine": 217,
+        "endChar": 29
+      },
+      "revId": "38652ad11451bb4a0a727e7e4bb6c7355a2815dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_f78787ce",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-23T23:23:20Z",
+      "side": 1,
+      "message": "Uh-uh.\n\nMe not returning negative result for error. That\u0027s the cause of many-a-linux-kernel-bugs.\nThis is how windows function GetFileSizeEx does it, and I think that\u0027s the right thing to do.",
+      "parentUuid": "7c21d2e1_c5a570e0",
       "range": {
         "startLine": 217,
         "startChar": 17,
