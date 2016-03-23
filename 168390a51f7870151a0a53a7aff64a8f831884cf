@@ -200,6 +200,52 @@
       "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_f33329f1",
+        "filename": "android/skin/qt/gl-common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-23T00:59:30Z",
+      "side": 1,
+      "message": "nit: please sort",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 44
+      },
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_f30de91c",
+        "filename": "android/skin/qt/gl-texture-draw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-23T00:59:30Z",
+      "side": 1,
+      "message": "explain?",
+      "range": {
+        "startLine": 81,
+        "startChar": 3,
+        "endLine": 82,
+        "endChar": 60
+      },
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
