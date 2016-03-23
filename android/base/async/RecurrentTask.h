@@ -63,21 +63,30 @@ public:
     }
 
     void start() {
+        stop();
+        mInFlight = true;
         mTimer->startRelative(mTaskIntervalMs);
     }
 
     void stop() {
+        mInFlight = false;
         if(mTimer) {
             mTimer->stop();
         }
     }
 
+    bool inFlight() {
+        return mInFlight;
+    }
+
 protected:
     static void taskCallback(void* opaqueThis, Looper::Timer* timer) {
         auto thisPtr = static_cast<RecurrentTask*>(opaqueThis);
-        if (thisPtr->mFunction()) {
-            thisPtr->mTimer->startRelative(thisPtr->mTaskIntervalMs);
+        if (!thisPtr->mFunction()) {
+            thisPtr->mInFlight = false;
+            return;
         }
+        thisPtr->mTimer->startRelative(thisPtr->mTaskIntervalMs);
     }
 
 private:
@@ -85,6 +94,7 @@ private:
     TaskFunction mFunction;
     Looper::Duration mTaskIntervalMs;
     std::unique_ptr<Looper::Timer> mTimer;
+    bool mInFlight = false;
 };
 
 }  // namespace base
