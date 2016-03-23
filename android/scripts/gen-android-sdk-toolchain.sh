@@ -200,6 +200,21 @@ gen_wrapper_program ()
         esac
     fi
 
+    # Ensure generated object files can be included in shared libraries
+    # or position-independent executables (for Darwin).
+    case $PROG in
+        cc|gcc|clang|c++|g++|clang++|ld|ld.bfd|ld.gold)
+            case $CURRENT_HOST in
+                linux*)
+                    FLAGS=$FLAGS" -fPIC"
+                    ;;
+                darwin-*)
+                    FLAGS=$FLAGS" -fPIC -fno-common"
+                    ;;
+            esac
+            ;;
+    esac
+
     if [ -z "$DST_PREFIX" ]; then
         # Avoid infinite loop by getting real path of destination
         # program
