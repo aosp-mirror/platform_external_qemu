@@ -48,6 +48,23 @@
     },
     {
       "key": {
+        "uuid": "1cc45660_d8fbd1d2",
+        "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-23T15:02:28Z",
+      "side": 1,
+      "message": "// Returns true for success, false for failure",
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_93f74d78",
         "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
         "patchSetId": 1
@@ -140,6 +157,23 @@
     },
     {
       "key": {
+        "uuid": "1cc45660_78263d54",
+        "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-23T15:02:28Z",
+      "side": 1,
+      "message": "Interesting order of indexes",
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_53c8351e",
         "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
         "patchSetId": 1
@@ -157,6 +191,23 @@
         "endLine": 226,
         "endChar": 62
       },
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1cc45660_b8ee1516",
+        "filename": "android/skin/qt/accelerometer-3d-widget.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-23T15:02:28Z",
+      "side": 1,
+      "message": "cut-paste error? yaw--\u003epitch and yaw--\u003eroll",
       "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -203,6 +254,23 @@
     },
     {
       "key": {
+        "uuid": "1cc45660_981a39fd",
+        "filename": "android/skin/qt/gl-common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-23T15:02:28Z",
+      "side": 1,
+      "message": "Just \u0027success\u0027, rather than \u0027success \u003d\u003d GL_TRUE\u0027?",
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_f33329f1",
         "filename": "android/skin/qt/gl-common.h",
         "patchSetId": 1
@@ -226,6 +294,23 @@
     },
     {
       "key": {
+        "uuid": "1cc45660_b817f5d5",
+        "filename": "android/skin/qt/gl-texture-draw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-23T15:02:28Z",
+      "side": 1,
+      "message": "I prefer !success",
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_f30de91c",
         "filename": "android/skin/qt/gl-texture-draw.cpp",
         "patchSetId": 1
@@ -243,6 +328,23 @@
         "endLine": 82,
         "endChar": 60
       },
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1cc45660_d814b1d3",
+        "filename": "android/skin/qt/gl-texture-draw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-23T15:02:28Z",
+      "side": 1,
+      "message": "Zero seems a strange stride. Does this indicate additional bytes to skip at the end of a row?",
       "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
