@@ -16,6 +16,24 @@
       "revId": "6c903b2f68021dd16049b6e573a26d56cf7db988",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_1946d7fa",
+        "filename": "android/main-common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1050,
+      "author": {
+        "id": 1081114
+      },
+      "writtenOn": "2016-03-23T19:21:13Z",
+      "side": 1,
+      "message": "Changed to increase ram size to 2x heap size.",
+      "parentUuid": "7c21d2e1_b6419818",
+      "revId": "6c903b2f68021dd16049b6e573a26d56cf7db988",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
