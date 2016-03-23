@@ -205,6 +205,7 @@ TEST(System, pathOperations) {
     TestTempDir tempDir("path_opts");
     std::string fooPath = tempDir.path();
     fooPath += "/foo";
+    System::FileSize fileSize;
 
     EXPECT_FALSE(sys->pathExists(fooPath));
     EXPECT_FALSE(sys->pathIsFile(fooPath));
@@ -212,6 +213,7 @@ TEST(System, pathOperations) {
     EXPECT_FALSE(sys->pathCanRead(fooPath));
     EXPECT_FALSE(sys->pathCanWrite(fooPath));
     EXPECT_FALSE(sys->pathCanExec(fooPath));
+    EXPECT_FALSE(sys->pathFileSize(fooPath, &fileSize));
 
     make_subfile(tempDir.path(), "foo");
 
@@ -278,6 +280,17 @@ TEST(System, pathOperations) {
 #endif
     EXPECT_TRUE(sys->pathCanWrite(fooPath));
     EXPECT_TRUE(sys->pathCanExec(fooPath));
+
+    EXPECT_FALSE(sys->pathFileSize(fooPath, nullptr));
+    EXPECT_TRUE(sys->pathFileSize(fooPath, &fileSize));
+    EXPECT_EQ(0, fileSize);
+
+    std::ofstream fooFile(fooPath);
+    ASSERT_TRUE(bool(fooFile));
+    fooFile << "Some non-zero data";
+    fooFile.close();
+    EXPECT_TRUE(sys->pathFileSize(fooPath, &fileSize));
+    EXPECT_LT(0, fileSize);
 }
 
 TEST(System, scanDirEntriesWithFullPaths) {
