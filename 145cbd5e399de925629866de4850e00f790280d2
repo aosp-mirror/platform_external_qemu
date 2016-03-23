@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_aa5f6b16",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-23T21:53:27Z",
+      "side": 1,
+      "message": "There should be a return statement here. Going to work it onto master to make sure it works, then update this.",
+      "range": {
+        "startLine": 102,
+        "startChar": 8,
+        "endLine": 103,
+        "endChar": 5
+      },
+      "revId": "145cbd5e399de925629866de4850e00f790280d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_0a3f97bb",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-23T21:53:27Z",
+      "side": 1,
+      "message": "If this function blocks (which it does if there was an error), and another install is started, you can get an assertion failure because you try to reset the mParallelTask while its running.\n\nTwo options:\n1. Protect ApkInstaller-\u003estart() with an atomic boolean that is \"true\" when the result callback is running.\n2. Only call mParallelTask-\u003ereset() if mParallelTask-\u003einFlight() returns false.",
+      "range": {
+        "startLine": 190,
+        "startChar": 8,
+        "endLine": 190,
+        "endChar": 44
+      },
+      "revId": "145cbd5e399de925629866de4850e00f790280d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
