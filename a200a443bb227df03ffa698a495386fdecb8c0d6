@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_f92ae35a",
+        "filename": "android/skin/qt/wavefront-obj-parser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T19:40:29Z",
+      "side": 1,
+      "message": "leftover code",
+      "parentUuid": "7c21d2e1_20e2894e",
+      "range": {
+        "startLine": 15,
+        "startChar": 10,
+        "endLine": 15,
+        "endChar": 18
+      },
+      "revId": "a200a443bb227df03ffa698a495386fdecb8c0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_4037bd95",
         "filename": "android/skin/qt/wavefront-obj-parser.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-23T00:42:09Z",
       "side": 1,
       "message": "can the string be empty, e.g. if it\u0027s a blank line in the input?",
+      "range": {
+        "startLine": 47,
+        "startChar": 12,
+        "endLine": 47,
+        "endChar": 25
+      },
+      "revId": "a200a443bb227df03ffa698a495386fdecb8c0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_f97dc342",
+        "filename": "android/skin/qt/wavefront-obj-parser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T19:40:29Z",
+      "side": 1,
+      "message": "No, the stream read operation should just skip over it. I added a check just in case.",
+      "parentUuid": "7c21d2e1_4037bd95",
       "range": {
         "startLine": 47,
         "startChar": 12,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_39359bb9",
+        "filename": "android/skin/qt/wavefront-obj-parser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T19:40:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c21d2e1_c548e257",
+      "range": {
+        "startLine": 54,
+        "startChar": 25,
+        "endLine": 54,
+        "endChar": 28
+      },
+      "revId": "a200a443bb227df03ffa698a495386fdecb8c0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_a04799f5",
         "filename": "android/skin/qt/wavefront-obj-parser.cpp",
         "patchSetId": 1
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_3978fb4e",
+        "filename": "android/skin/qt/wavefront-obj-parser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T19:40:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c21d2e1_a04799f5",
+      "range": {
+        "startLine": 60,
+        "startChar": 12,
+        "endLine": 60,
+        "endChar": 16
+      },
+      "revId": "a200a443bb227df03ffa698a495386fdecb8c0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_050e7a18",
         "filename": "android/skin/qt/wavefront-obj-parser.cpp",
         "patchSetId": 1
@@ -105,6 +201,30 @@
       "writtenOn": "2016-03-22T21:50:42Z",
       "side": 1,
       "message": "qWarning here?",
+      "range": {
+        "startLine": 84,
+        "startChar": 20,
+        "endLine": 84,
+        "endChar": 33
+      },
+      "revId": "a200a443bb227df03ffa698a495386fdecb8c0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_39d11b71",
+        "filename": "android/skin/qt/wavefront-obj-parser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T19:40:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c21d2e1_050e7a18",
       "range": {
         "startLine": 84,
         "startChar": 20,
