@@ -76,6 +76,7 @@ class System {
 public:
     typedef int64_t  Duration;
     typedef uint64_t WallDuration;
+    using FileSize = uint64_t;
 
     // Information about user, system and wall clock times for some process,
     // in milliseconds
@@ -211,6 +212,9 @@ public:
     // user.
     virtual bool pathCanExec(StringView path) const = 0;
 
+    // Get the size of file at |path|.
+    // Fails if path is not a file or not readable, and in case of other errors.
+    virtual bool pathFileSize(StringView path, FileSize* outFileSize) const = 0;
     // Scan directory |dirPath| for entries, and return them as a sorted
     // vector or entries. If |fullPath| is true, then each item of the
     // result vector contains a full path.
@@ -312,6 +316,7 @@ protected:
     static bool pathCanReadInternal(StringView path);
     static bool pathCanWriteInternal(StringView path);
     static bool pathCanExecInternal(StringView path);
+    static bool pathFileSizeInternal(StringView path, FileSize* outFileSize);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(System);
