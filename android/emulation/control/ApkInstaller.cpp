@@ -97,8 +97,12 @@ void ApkInstaller::cancel() {
 }
 
 void ApkInstaller::start() {
-    if (inFlight()) {
+    // The task may be complete but awaiting the return of mResultCallback
+    // in taskDoneFunction. So don't check if we're in flight, just check if
+    // the task exists at all. If it does, we're still in flight.
+    if (mParallelTask) {
         mResultCallback(ApkInstaller::Result::kOperationInProgress, "");
+        return;
     }
     mCancelled = false;
 
