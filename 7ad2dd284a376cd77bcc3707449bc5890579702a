@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_309930a0",
+        "filename": "android/base/misc/StringUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-23T17:37:24Z",
+      "side": 1,
+      "message": "Why rvalue ref instead of const lvalue ref?\n(What do we gain? We\u0027re never going to modify range?)\n\nAllowing Range when const_iterator is not defined for it?",
+      "range": {
+        "startLine": 46,
+        "startChar": 17,
+        "endLine": 46,
+        "endChar": 24
+      },
+      "revId": "7ad2dd284a376cd77bcc3707449bc5890579702a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_90d61c3b",
+        "filename": "android/base/misc/StringUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-23T17:37:24Z",
+      "side": 1,
+      "message": "Are we marrying stringstream finally?\n\nI thought digit@ had some points against using \u0027em?\nPerformance issues in stdlib a thing of the past?",
+      "range": {
+        "startLine": 55,
+        "startChar": 12,
+        "endLine": 55,
+        "endChar": 14
+      },
+      "revId": "7ad2dd284a376cd77bcc3707449bc5890579702a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_53c14e4e",
+        "filename": "android/base/misc/StringUtils_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-23T17:37:24Z",
+      "side": 1,
+      "message": "suggested test case:\njoin(vector\u003cconst char*\u003e{\"...\", \"...\"}, \"---\")\n\n;)",
+      "revId": "7ad2dd284a376cd77bcc3707449bc5890579702a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
