@@ -56,32 +56,6 @@ extern int      qemu_net_max_latency;
 /* global flag, when true, network is disabled */
 extern int      qemu_net_disable;
 
-/* list of supported network speed names and values in bits/seconds */
-typedef struct {
-    const char*  name;
-    const char*  display;
-    int          upload;
-    int          download;
-} NetworkSpeed;
-
-extern const NetworkSpeed   android_netspeeds[];
-extern const size_t android_netspeeds_count;
-
-/* list of supported network latency names and min-max values in ms */
-typedef struct {
-    const char*  name;
-    const char*  display;
-    int          min_ms;
-    int          max_ms;
-} NetworkLatency;
-
-extern const NetworkLatency  android_netdelays[];
-extern const size_t android_netdelays_count;
-
-/* default network settings for emulator */
-#define  DEFAULT_NETSPEED  "full"
-#define  DEFAULT_NETDELAY  "none"
-
 /* enable/disable interrupt polling mode. the emulator will always use 100%
  * of host CPU time, but will get high-quality time measurments. this is
  * required for the tracing mode unless you can bear 10ms granularities

@@ -1,6 +1,7 @@
 #include "android/help.h"
 #include "android/cmdline-option.h"
 #include "android/emulation/bufprint_config_dirs.h"
+#include "android/network/constants.h"
 #include "android/utils/path.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -855,10 +856,6 @@ help_skin(stralloc_t*  out)
     "  specify an exact framebuffer size, without any visual ornaments.\n\n" );
 }
 
-/* default network settings for emulator */
-#define  DEFAULT_NETSPEED  "full"
-#define  DEFAULT_NETDELAY  "none"
-
 static void
 help_shaper(stralloc_t*  out)
 {
@@ -870,37 +867,33 @@ help_shaper(stralloc_t*  out)
 
     "  the format of -netspeed is one of the following (numbers are kbits/s):\n\n" );
 
-    for (n = 0;; ++n) {
-        const NetworkSpeed* android_netspeed = &android_netspeeds[n];
-        if (!android_netspeed->name) {
-            break;
-        }
-        PRINTF( "    -netspeed %-12s %-15s  (up: %.1f, down: %.1f)\n",
+    for (n = 0; n < android_network_speeds_count; ++n) {
+        const AndroidNetworkSpeed* android_netspeed =
+                &android_network_speeds[n];
+        PRINTF( "    -netspeed %-12s %-15s  (up: %.1f KiB/s, down: %.1f KiB/s)\n",
                         android_netspeed->name,
-                        android_netspeed->display,
-                        android_netspeed->upload/1000.,
-                        android_netspeed->download/1000. );
+                        android_netspeed->display_name,
+                        android_netspeed->upload_bauds/8192.,
+                        android_netspeed->download_bauds/8192. );
     }
     PRINTF( "\n" );
     PRINTF( "    -netspeed %-12s %s", "<num>", "select both upload and download speed\n");
     PRINTF( "    -netspeed %-12s %s", "<up>:<down>", "select individual up and down speed\n");
 
     PRINTF( "\n  The format of -netdelay is one of the following (numbers are msec):\n\n" );
-    for (n = 0; ; ++n) {
-        const NetworkLatency* android_netdelay = &android_netdelays[n];
-        if (!android_netdelay->name) {
-            break;
-        }
+    for (n = 0; n < android_network_latencies_count; ++n) {
+        const AndroidNetworkLatency* android_netdelay =
+                &android_network_latencies[n];
         PRINTF( "    -netdelay %-10s   %-15s  (min %d, max %d)\n",
-                        android_netdelay->name, android_netdelay->display,
+                        android_netdelay->name, android_netdelay->display_name,
                         android_netdelay->min_ms, android_netdelay->max_ms );
     }
     PRINTF( "    -netdelay %-10s   %s", "<num>", "select exact latency\n");
     PRINTF( "    -netdelay %-10s   %s", "<min>:<max>", "select min and max latencies\n\n");
 
     PRINTF( "  the emulator uses the following defaults:\n\n" );
-    PRINTF( "    Default network speed   is '%s'\n",   DEFAULT_NETSPEED);
-    PRINTF( "    Default network latency is '%s'\n\n", DEFAULT_NETDELAY);
+    PRINTF( "    Default network speed   is '%s'\n",   kAndroidNetworkDefaultSpeed);
+    PRINTF( "    Default network latency is '%s'\n\n", kAndroidNetworkDefaultLatency);
 }
 
 static void

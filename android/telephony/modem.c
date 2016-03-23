@@ -18,6 +18,7 @@
 #include "android/telephony/sysdeps.h"
 
 #include "android/emulation/bufprint_config_dirs.h"
+#include "android/network/constants.h"
 #include "android/utils/aconfig-file.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/timezone.h"
@@ -135,6 +136,10 @@ android_parse_network_type( const char*  speed )
         { NULL, 0 }
     };
     int  nn;
+
+    if (!speed || !speed[0]) {
+        speed = kAndroidNetworkDefaultSpeed;
+    }
 
     for (nn = 0; types[nn].name; nn++) {
         if (!strcmp(speed, types[nn].name))
