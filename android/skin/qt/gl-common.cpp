@@ -10,6 +10,8 @@
 
 #include "android/skin/qt/gl-common.h"
 
+#include <cstring>
+
 #include <QtGlobal>
 
 GLuint createShader(const GLESv2Dispatch* gles2,
