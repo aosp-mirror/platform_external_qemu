@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_a5583c27",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-23T22:41:02Z",
+      "side": 1,
+      "message": "return value would be so much more convenient compared to this interface. What about a signed return value and \u003c0 for error?\n\nI mean, having any file of size 2^63+ is already enough for emulator to fail miserably",
+      "range": {
+        "startLine": 217,
+        "startChar": 17,
+        "endLine": 217,
+        "endChar": 29
+      },
+      "revId": "38652ad11451bb4a0a727e7e4bb6c7355a2815dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
