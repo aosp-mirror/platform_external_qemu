@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_da9f0a77",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-23T23:45:41Z",
+      "side": 1,
+      "message": "Moved.",
+      "parentUuid": "7c21d2e1_f7894753",
+      "range": {
+        "startLine": 100,
+        "startChar": 4,
+        "endLine": 102,
+        "endChar": 65
+      },
+      "revId": "8e1ff369599ef0140ace119c069b3657fb91bbca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_d7a523e0",
         "filename": "android/emulation/control/ApkInstaller.h",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-23T23:43:15Z",
       "side": 1,
       "message": "Please add a comment explaining the bug we found (as in why we can\u0027t use mParallelTask-\u003einFlight() which seems to be the thing to do at first sight).",
+      "range": {
+        "startLine": 65,
+        "startChar": 32,
+        "endLine": 65,
+        "endChar": 41
+      },
+      "revId": "8e1ff369599ef0140ace119c069b3657fb91bbca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_baa216c4",
+        "filename": "android/emulation/control/ApkInstaller.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-23T23:45:41Z",
+      "side": 1,
+      "message": "Moved from .cpp",
+      "parentUuid": "7c21d2e1_d7a523e0",
       "range": {
         "startLine": 65,
         "startChar": 32,
