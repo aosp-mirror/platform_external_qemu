@@ -99,7 +99,7 @@ intptr_t RenderServer::main()
         SocketStream *stream = m_listenSock->accept();
         if (!stream) {
             fprintf(stderr,"Error accepting connection, aborting\n");
-            break;
+            continue;
         }
 
         unsigned int clientFlags;
