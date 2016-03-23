@@ -120,7 +120,7 @@ void ScreenCapturer::start() {
 
     mParallelTask->start();
 
-    if (!inFlight()) {
+    if (!mParallelTask->inFlight()) {
         mResultCallback(ScreenCapturer::Result::kUnknownError);
     }
 }
