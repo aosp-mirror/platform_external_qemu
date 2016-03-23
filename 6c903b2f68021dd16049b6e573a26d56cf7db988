@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_b6419818",
+        "filename": "android/main-common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1050,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-03-23T18:21:32Z",
+      "side": 1,
+      "message": "No matter what, we shouldn\u0027t decrease below CDD min.  We should increase system ram or fail to launch.",
+      "revId": "6c903b2f68021dd16049b6e573a26d56cf7db988",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
