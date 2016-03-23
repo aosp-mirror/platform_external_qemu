@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_f6f03084",
+        "filename": "android/main-common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1760,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-23T18:12:50Z",
+      "side": 1,
+      "message": "nit: alignment",
+      "range": {
+        "startLine": 1759,
+        "startChar": 7,
+        "endLine": 1760,
+        "endChar": 22
+      },
+      "revId": "4fc990a0faf733955cedde45ef55c59d5716d0cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
