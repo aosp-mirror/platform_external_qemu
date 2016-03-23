@@ -60,44 +60,54 @@ namespace base {
 //
 class StringView {
 public:
-    StringView() : mString(""), mSize(0U) {}
+    constexpr StringView() : mString(""), mSize(0U) {}
 
-    StringView(const StringView& other) :
+    constexpr StringView(const StringView& other) :
         mString(other.data()), mSize(other.size()) {}
 
+    // A constexpr constructor from a constant buffer, initializing |mSize|
+    // as well. This allows one to declare a static const StringView instance
+    // and initialize it at compile time, with no runtime overhead:
+    //
+    // static const StringView message = "blah";
+    //
+    template <size_t size>
+    constexpr StringView(const char (&buf)[size]) :
+        mString(buf), mSize(size - 1) {}
+
     // IMPORTANT: This is intentionally not 'explicit'.
-    StringView(const char* string) :
+    constexpr StringView(const char* string) :
             mString(string ? string : ""), mSize(string ? strlen(string) : 0) {}
 
     // IMPORTANT: This is intentionally not 'explicit'.
     StringView(const std::string& str) :
         mString(str.c_str()), mSize(str.size()) {}
 
-    StringView(const char* str, size_t len)
+    constexpr StringView(const char* str, size_t len)
         : mString(str ? str : ""), mSize(len) {}
 
-    StringView(const char* begin, const char* end)
+    constexpr StringView(const char* begin, const char* end)
         : mString(begin ? begin : ""), mSize(begin ? end - begin : 0) {}
 
-    const char* c_str() const { return mString; }
-    const char* str() const { return mString; }
-    const char* data() const { return mString; }
-    size_t size() const { return mSize; }
+    constexpr const char* c_str() const { return mString; }
+    constexpr const char* str() const { return mString; }
+    constexpr const char* data() const { return mString; }
+    constexpr size_t size() const { return mSize; }
 
     typedef const char* iterator;
     typedef const char* const_iterator;
 
-    const_iterator begin() const { return mString; }
-    const_iterator end() const { return mString + mSize; }
+    constexpr const_iterator begin() const { return mString; }
+    constexpr const_iterator end() const { return mString + mSize; }
 
-    bool empty() const { return !size(); }
+    constexpr bool empty() const { return !size(); }
 
     void clear() {
         mSize = 0;
         mString = "";
     }
 
-    char operator[](size_t index) {
+    constexpr char operator[](size_t index) {
         return mString[index];
     }
 
