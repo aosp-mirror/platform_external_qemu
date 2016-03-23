@@ -23,6 +23,37 @@
 namespace android {
 namespace base {
 
+#ifdef _WIN32
+TEST(StringUtils, memmem) {
+    auto src = "string";
+
+    // basic cases - when the substring is there
+    EXPECT_EQ(src + 2, memmem(src, strlen(src), "ring", 4));
+    EXPECT_EQ(src + 1, memmem(src, strlen(src), "tri", 3));
+
+    // no substring
+    EXPECT_EQ(nullptr, memmem(src, strlen(src), "123", 3));
+    EXPECT_EQ(nullptr, memmem(src, strlen(src), "strings", 7));
+
+    // make sure it's looking at lengths, and not at the null-terminator
+    EXPECT_EQ(src + 2, memmem(src, strlen(src), "ringer", 4));
+    EXPECT_EQ(nullptr, memmem(src, 2, "tr", 2));
+
+    // corner cases - empty/single char and the needle same as haystack
+    EXPECT_EQ(src, memmem(src, strlen(src), "", 0));
+    EXPECT_EQ(src, memmem(src, strlen(src), "s", 1));
+    EXPECT_EQ(src, memmem(src, 1, "s", 1));
+    EXPECT_EQ(nullptr, memmem("", 0, "s", 1));
+    EXPECT_EQ(nullptr, memmem("", 0, "", 0));
+    EXPECT_EQ(src, memmem(src, strlen(src), src, strlen(src)));
+
+    // null input parameters
+    EXPECT_EQ(nullptr, memmem(src, strlen(src), nullptr, 2));
+    EXPECT_EQ(nullptr, memmem(nullptr, 10, "asdf", 4));
+    EXPECT_EQ(nullptr, memmem(nullptr, 10, nullptr, 1));
+}
+#endif // _WIN32
+
 TEST(StringUtils, strDupWithStringView) {
     StringView view("Hello World");
     char* s = strDup(view);
