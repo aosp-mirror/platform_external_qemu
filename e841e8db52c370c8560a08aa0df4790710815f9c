@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_36648fb2",
+        "filename": "include/hw/android/goldfish/device.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2016-03-23T03:26:35Z",
+      "side": 1,
+      "message": "Hmm... 16 IRQ lines is the hard limit imposed by the i8259 PIC. I\u0027m not positive that it can handle IRQ numbers \u003e\u003d 16 (more than 4 bits).",
+      "revId": "e841e8db52c370c8560a08aa0df4790710815f9c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
