@@ -22,6 +22,30 @@
       "revId": "743f3d787352b9b88a59f47d5b6c3cb18afb0271",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_1ff877d5",
+        "filename": "android/skin/qt/resources.qrc",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 0,
+      "message": "It was Qt creator :\u0027(",
+      "parentUuid": "7c21d2e1_533b15cd",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 14
+      },
+      "revId": "743f3d787352b9b88a59f47d5b6c3cb18afb0271",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

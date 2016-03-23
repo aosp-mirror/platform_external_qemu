@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_c45576f2",
+        "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "If initialization fails, mGLES2 will be nullptr. I added checks to the members that touch it.",
+      "parentUuid": "7c21d2e1_535cb550",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 42
+      },
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_b359b161",
         "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-23T00:52:53Z",
       "side": 1,
       "message": "could you please use static functions instead?",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 10
+      },
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_04766ea7",
+        "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c21d2e1_b359b161",
       "range": {
         "startLine": 34,
         "startChar": 0,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_a45fa216",
+        "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1cc45660_d8fbd1d2",
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_93f74d78",
         "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
         "patchSetId": 1
@@ -76,6 +142,30 @@
       "writtenOn": "2016-03-23T00:52:53Z",
       "side": 1,
       "message": "any error checking?",
+      "range": {
+        "startLine": 73,
+        "startChar": 11,
+        "endLine": 73,
+        "endChar": 24
+      },
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_a4584227",
+        "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "Added",
+      "parentUuid": "7c21d2e1_93f74d78",
       "range": {
         "startLine": 73,
         "startChar": 11,
@@ -111,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_8456dea5",
+        "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c21d2e1_f3d7a9c1",
+      "range": {
+        "startLine": 95,
+        "startChar": 28,
+        "endLine": 95,
+        "endChar": 34
+      },
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_7319f998",
         "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
         "patchSetId": 1
@@ -122,6 +236,30 @@
       "writtenOn": "2016-03-23T00:52:53Z",
       "side": 1,
       "message": "some magic numbers here. any comment to explain the stuff?",
+      "range": {
+        "startLine": 110,
+        "startChar": 28,
+        "endLine": 110,
+        "endChar": 92
+      },
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_4464e68e",
+        "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c21d2e1_7319f998",
       "range": {
         "startLine": 110,
         "startChar": 28,
@@ -157,6 +295,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_1f0fd74e",
+        "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "Yeah, we already have a \"valid\" flag in GLWidget, I\u0027ve added a method to expose its value, and also made initGL return true/false depending on the result, which will be assigned to the flag",
+      "parentUuid": "7c21d2e1_33b941a8",
+      "range": {
+        "startLine": 132,
+        "startChar": 2,
+        "endLine": 135,
+        "endChar": 5
+      },
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1cc45660_78263d54",
         "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
         "patchSetId": 1
@@ -168,6 +330,24 @@
       "writtenOn": "2016-03-23T15:02:28Z",
       "side": 1,
       "message": "Interesting order of indexes",
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_1fa8774f",
+        "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "Removed that block of code since it was purely for debugging, but for the sake of clarity - the order of yaw, pitch and roll is different in QQuaternion::getEulerAngles arguments.",
+      "parentUuid": "1cc45660_78263d54",
       "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -197,6 +377,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_9fbc6798",
+        "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "removed commented code",
+      "parentUuid": "7c21d2e1_53c8351e",
+      "range": {
+        "startLine": 226,
+        "startChar": 38,
+        "endLine": 226,
+        "endChar": 62
+      },
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1cc45660_b8ee1516",
         "filename": "android/skin/qt/accelerometer-3d-widget.h",
         "patchSetId": 1
@@ -214,6 +418,24 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_9fd587ba",
+        "filename": "android/skin/qt/accelerometer-3d-widget.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "Nice catch",
+      "parentUuid": "1cc45660_b8ee1516",
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_93e10de8",
         "filename": "android/skin/qt/accelerometer-3d-widget.h",
         "patchSetId": 1
@@ -225,6 +447,24 @@
       "writtenOn": "2016-03-23T00:52:53Z",
       "side": 1,
       "message": "hm, isn\u0027t it simpler to have a single \"position changed\" event here? and a struct of {yaw, pitch, roll}?\nIt just feels to me like for the most of the events all three change, and the handler would do three redraws/updates instead of a single one\n\nsame for the set() methods",
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_0ac797ba",
+        "filename": "android/skin/qt/accelerometer-3d-widget.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "I\u0027ve decided to change the approach and only use the quaternion. The client can derive the euler angles on their own, if they need to.",
+      "parentUuid": "7c21d2e1_93e10de8",
       "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -254,6 +494,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_eac163a4",
+        "filename": "android/skin/qt/accelerometer-3d-widget.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c21d2e1_73445995",
+      "range": {
+        "startLine": 52,
+        "startChar": 23,
+        "endLine": 53,
+        "endChar": 34
+      },
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1cc45660_981a39fd",
         "filename": "android/skin/qt/gl-common.cpp",
         "patchSetId": 1
@@ -265,6 +529,24 @@
       "writtenOn": "2016-03-23T15:02:28Z",
       "side": 1,
       "message": "Just \u0027success\u0027, rather than \u0027success \u003d\u003d GL_TRUE\u0027?",
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_3f03bbf4",
+        "filename": "android/skin/qt/gl-common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "It\u0027s a safety measure. Since \"success\" isn\u0027t boolean, it might have any value if used incorrectly in the preceding code. Any value other that GL_TRUE (even non-zero one) indicates that there was some sort of problem. Also, theoretically, the spec does not guarantee that GL_FALSE is 0 (afaik) so it\u0027s always better to check those explicitly. I even changed the (!success) above to an explicit comparison.",
+      "parentUuid": "1cc45660_981a39fd",
       "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -294,6 +576,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_3f70dba7",
+        "filename": "android/skin/qt/gl-common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c21d2e1_f33329f1",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 44
+      },
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1cc45660_b817f5d5",
         "filename": "android/skin/qt/gl-texture-draw.cpp",
         "patchSetId": 1
@@ -305,6 +611,24 @@
       "writtenOn": "2016-03-23T15:02:28Z",
       "side": 1,
       "message": "I prefer !success",
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_bf8b2b9d",
+        "filename": "android/skin/qt/gl-texture-draw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "see my other comment - even though most implementations probably define GL_FALSE as 0, I don\u0027t think it\u0027s guaranteed by the spec.",
+      "parentUuid": "1cc45660_b817f5d5",
       "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -334,6 +658,30 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_bf504ba9",
+        "filename": "android/skin/qt/gl-texture-draw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "Wrote a comment. It\u0027s basically a trick to avoid fiddling with 2 triangles to draw a rect.",
+      "parentUuid": "7c21d2e1_f30de91c",
+      "range": {
+        "startLine": 81,
+        "startChar": 3,
+        "endLine": 82,
+        "endChar": 60
+      },
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1cc45660_d814b1d3",
         "filename": "android/skin/qt/gl-texture-draw.cpp",
         "patchSetId": 1
@@ -345,6 +693,24 @@
       "writtenOn": "2016-03-23T15:02:28Z",
       "side": 1,
       "message": "Zero seems a strange stride. Does this indicate additional bytes to skip at the end of a row?",
+      "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_fff2c3f9",
+        "filename": "android/skin/qt/gl-texture-draw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-23T22:07:48Z",
+      "side": 1,
+      "message": "Yeah, a 0 stride indicates that the attributes are tightly packed into the array. If the array had more than one type of attributes in it (say, position and texture coordinates), the stride would have to be non-zero. In our case, we only have position.",
+      "parentUuid": "1cc45660_d814b1d3",
       "revId": "168390a51f7870151a0a53a7aff64a8f831884cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
