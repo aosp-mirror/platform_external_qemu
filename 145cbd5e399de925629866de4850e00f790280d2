@@ -141,6 +141,30 @@
       "revId": "145cbd5e399de925629866de4850e00f790280d2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_e5c07469",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-23T23:02:38Z",
+      "side": 1,
+      "message": "We may not fix this problem in ParallelTask, but it is a problem in the pattern we are using here.\n\nOnce you are in the scope of taskDoneFunction, parallelTask-\u003einFlight() is false. Therefore, if the result callback either blocks OR just takes a long time, its possible for the user to start up parallelTask again. And if, while that task is running, the result callback completes, we crash.",
+      "parentUuid": "7c21d2e1_c55570f2",
+      "range": {
+        "startLine": 190,
+        "startChar": 8,
+        "endLine": 190,
+        "endChar": 44
+      },
+      "revId": "145cbd5e399de925629866de4850e00f790280d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
