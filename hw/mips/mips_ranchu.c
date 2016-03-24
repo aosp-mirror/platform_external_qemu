@@ -35,6 +35,7 @@
 #define MIPS_CPU_SAVE_VERSION 1
 #define MIPS_CPU_IRQ_BASE     8
 
+#define HIGHMEM_OFFSET    0x20000000
 #define GOLDFISH_IO_SPACE 0x1f000000
 
 #define VIRTIO_TRANSPORTS 16
@@ -107,6 +108,8 @@ static DevMapEntry devmap[] = {
 struct machine_params {
     uint64_t kernel_entry;
     uint64_t cmdline_ptr;
+    unsigned ram_size;
+    unsigned highmem_size;
     MIPSCPU *cpu;
 } ranchu_params;
 
@@ -119,8 +122,8 @@ static void main_cpu_reset(void* opaque1)
 
     cpu->env.active_tc.PC = opaque->kernel_entry;
     cpu->env.active_tc.gpr[4] = opaque->cmdline_ptr; /* a0 */
-    cpu->env.active_tc.gpr[5] = 0;                   /* a1 */
-    cpu->env.active_tc.gpr[6] = 0;                   /* a2 */
+    cpu->env.active_tc.gpr[5] = opaque->ram_size;    /* a1 */
+    cpu->env.active_tc.gpr[6] = opaque->highmem_size;/* a2 */
     cpu->env.active_tc.gpr[7] = 0;                   /* a3 */
 
 }
@@ -270,9 +273,21 @@ static void android_load_kernel(CPUMIPSState *env, int ram_size,
     else
         strcpy (kernel_cmd, kernel_cmdline);
 
+    /* Setup Highmem */
+    char kernel_cmd2[1024];
+    if (ranchu_params.highmem_size) {
+        sprintf (kernel_cmd2, "%s mem=%um@0x0 mem=%um@0x%x",
+                 kernel_cmd,
+                 GOLDFISH_IO_SPACE / (1024 * 1024),
+                 ranchu_params.highmem_size / (1024 * 1024),
+                 HIGHMEM_OFFSET);
+    } else {
+        strcpy (kernel_cmd2, kernel_cmd);
+    }
+
     cpu_physical_memory_write(ram_size - TARGET_PAGE_SIZE,
-                              (void *)kernel_cmd,
-                              strlen(kernel_cmd) + 1);
+                              (void *)kernel_cmd2,
+                              strlen(kernel_cmd2) + 1);
 
     ranchu_params.cmdline_ptr = PHYS_TO_VIRT(cmdline);
 }
@@ -385,12 +400,15 @@ static void ranchu_init(MachineState *machine)
     vmstate_register_ram_global(ram_lo);
     memory_region_add_subregion(get_system_memory(), 0, ram_lo);
 
+    ranchu_params.ram_size = MIN(ram_size, GOLDFISH_IO_SPACE);
+
     /* post IO hole, if there is enough RAM */
     if (ram_size > GOLDFISH_IO_SPACE) {
         memory_region_init_ram(ram_hi, NULL, "ranchu_high.ram",
             ram_size - GOLDFISH_IO_SPACE, &error_abort);
         vmstate_register_ram_global(ram_hi);
-        memory_region_add_subregion(get_system_memory(), 0x20000000, ram_hi);
+        memory_region_add_subregion(get_system_memory(), HIGHMEM_OFFSET, ram_hi);
+        ranchu_params.highmem_size = ram_size - GOLDFISH_IO_SPACE;
     }
 
     ranchu_params.cpu = cpu;
@@ -429,7 +447,7 @@ static void ranchu_init(MachineState *machine)
     if (ram_size > GOLDFISH_IO_SPACE) {
         qemu_fdt_setprop_sized_cells(fdt, "/memory", "reg",
                     1, 0, 2, GOLDFISH_IO_SPACE,
-                    1, 0x20000000, 2, ram_size - GOLDFISH_IO_SPACE);
+                    1, HIGHMEM_OFFSET, 2, ram_size - GOLDFISH_IO_SPACE);
     } else {
         qemu_fdt_setprop_sized_cells(fdt, "/memory", "reg", 1, 0, 2, ram_size);
     }
