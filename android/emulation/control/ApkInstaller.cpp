@@ -141,7 +141,14 @@ intptr_t ApkInstaller::taskFunction(ApkInstaller::Result* outResult) {
                                  System::RunOptions::TerminateOnTimeout,
                          kInstallTimeoutMs, &exitCode, &pid, mOutputFilePath) ||
         exitCode != 0) {
-        *outResult = Result::kAdbConnectionFailed;
+        // If the device is full, we may be able to get some information from
+        // the output (if it exists).
+        string errorString;
+        if (!parseOutputForFailure(mOutputFilePath, &errorString)) {
+            *outResult = Result::kDeviceStorageFull;
+        } else {
+            *outResult = Result::kAdbConnectionFailed;
+        }
         return 0;
     }
 
@@ -160,7 +167,11 @@ intptr_t ApkInstaller::taskFunction(ApkInstaller::Result* outResult) {
 bool ApkInstaller::parseOutputForFailure(const string& outputFilePath,
                                          string* outErrorString) {
     // "adb install" does not return a helpful exit status, so instead we parse
-    // the output of the process looking for "Failure [<some error code>]"
+    // the output of the process looking for:
+    // - "adb: error: failed to copy" in the case that the apk could not be
+    //   copied because the device is full
+    // - "Failure [<some error code>]", in the case that the apk could not be
+    //   installed because of a specific error
     std::ifstream file(outputFilePath);
     if (!file.is_open()) {
         *outErrorString = kDefaultErrorString;
@@ -178,6 +189,8 @@ bool ApkInstaller::parseOutputForFailure(const string& outputFilePath,
             } else {
                 *outErrorString = kDefaultErrorString;
             }
+            return false;
+        } else if (!line.compare(0, 26, "adb: error: failed to copy")) {
             return false;
         }
     }
