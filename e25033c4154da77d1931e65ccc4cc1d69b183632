@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c21d2e1_a6bcbf32",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-03-24T06:50:03Z",
+      "side": 1,
+      "message": "bohu-macbookpro:Downloads bohu$ adb install -r smallwh-deqp.apk \nfailed to copy \u0027smallwh-deqp.apk\u0027 to \u0027/data/local/tmp/smallwh-deqp.apk\u0027: No space left on device\n13955 KB/s (91733817 bytes in 6.419s)\n\nseems there is no \"Failure\" here",
+      "revId": "e25033c4154da77d1931e65ccc4cc1d69b183632",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
