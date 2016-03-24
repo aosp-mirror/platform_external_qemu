@@ -383,8 +383,11 @@ extern "C" int main(int argc, char **argv) {
     // just because we know that we're in the new emulator as we got here
     opts->ranchu = 1;
 
-
     avd = android_avdInfo;
+
+    if (!emulator_parseUiCommandLineOptions(opts, avd, hw)) {
+        return 1;
+    }
 
     char boot_prop_ip[128] = {};
     if (opts->shared_net_id) {
