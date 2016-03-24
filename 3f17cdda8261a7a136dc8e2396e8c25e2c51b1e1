@@ -34,6 +34,24 @@
       "revId": "3f17cdda8261a7a136dc8e2396e8c25e2c51b1e1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_9a2d924a",
+        "filename": "android/emulation/control/ScreenCapturer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-24T00:20:26Z",
+      "side": 1,
+      "message": "Ah cool, I should\u0027ve read that commit message :)\n\nI think a slightly safer way of doing this would be to have an std::atomic\u003cbool\u003e mInFlight data member that you compare-exchange at the beginning of start() so that start() will only continue if inFlight was previously false. Then once you\u0027re done and have reset the task pointer you also clear the mInFlight flag. This inFlight method would then simply look at the flag.",
+      "parentUuid": "7c21d2e1_9a4bd257",
+      "revId": "3f17cdda8261a7a136dc8e2396e8c25e2c51b1e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
