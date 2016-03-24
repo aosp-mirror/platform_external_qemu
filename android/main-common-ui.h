@@ -13,14 +13,35 @@
 #pragma once
 
 #include "android/avd/hw-config.h"
+#include "android/avd/info.h"
 #include "android/cmdline-option.h"
-#include "android/skin/keyset.h"
 #include "android/ui-emu-agent.h"
+#include "android/utils/aconfig-file.h"
 #include "android/utils/compiler.h"
+
 
 #include <stdbool.h>
 
 ANDROID_BEGIN_HEADER
+
+// Handle UI-related command-line options and AVD configuration.
+// This function will update the content of |hw| based on the values
+// found in |opts| and |avd|, so call this before writing hardware-qemu.img
+// to disk. Return true on success, false otherwise.
+bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
+                                        AvdInfo* avd,
+                                        AndroidHwConfig* hw);
+
+// Initialize user interface. Return true on success, false on failure.
+bool emulator_initUserInterface(const AndroidOptions* opts,
+                                const UiEmuAgent* uiEmuAgent);
+
+// Finalize the user interface. Call this on exit.
+void emulator_finiUserInterface(void);
+
+// TODO(digit): Remove the deprecated declarations below once QEMU2 has been
+//              ported to use emulator_parseUiCommandLineOptions() and
+//              emulator_initUserInterface()
 
 /** Emulator user configuration (e.g. last window position)
  **/
@@ -30,7 +51,6 @@ void user_config_done( void );
 
 void user_config_get_window_pos( int *window_x, int *window_y );
 
-extern SkinKeyset*  android_keyset;
 void parse_keyset(const char*  keyset, AndroidOptions*  opts);
 void write_default_keyset( void );
 
@@ -44,12 +64,9 @@ void parse_skin_files(const char*      skinDirPath,
                       AConfig*        *skinConfig,
                       char*           *skinPath);
 
-/* Returns the amount of pixels used by the default display. */
-int64_t  get_screen_pixels(AConfig*  skinConfig);
-
-void ui_init(AConfig*          skinConfig,
+bool ui_init(const AConfig*    skinConfig,
              const char*       skinPath,
-             AndroidOptions*   opts,
+             const AndroidOptions* opts,
              const UiEmuAgent* uiEmuAgent);
 
 void ui_done(void);

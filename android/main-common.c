@@ -9,22 +9,28 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include "android/main-common.h"
+
 #include "android/avd/info.h"
 #include "android/avd/util.h"
+#include "android/cpu_accelerator.h"
 #include "android/emulation/bufprint_config_dirs.h"
+#include "android/globals.h"
 #include "android/kernel/kernel_utils.h"
+#include "android/help.h"
+#include "android/opengl/emugl_config.h"
+#include "android/resource.h"
+#include "android/snapshot.h"
+#include "android/user-config.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
+#include "android/utils/dirscanner.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/host_bitness.h"
 #include "android/utils/path.h"
-#include "android/utils/dirscanner.h"
+#include "android/utils/stralloc.h"
 #include "android/utils/x86_cpuid.h"
-#include "android/cpu_accelerator.h"
-#include "android/main-common.h"
-#include "android/globals.h"
-#include "android/resource.h"
-#include "android/user-config.h"
+#include "android/version.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -240,8 +246,7 @@ _getSdkSystemImage( const char*  path, const char*  optionName, const char*  fil
     return image;
 }
 
-void sanitizeOptions( AndroidOptions* opts )
-{
+static void sanitizeOptions(AndroidOptions* opts) {
     /* legacy support: we used to use -system <dir> and -image <file>
      * instead of -sysdir <dir> and -system <file>, so handle this by checking
      * whether the options point to directories or files.
@@ -332,8 +337,7 @@ void sanitizeOptions( AndroidOptions* opts )
     }
 }
 
-AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild)
-{
+static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
     AvdInfo* ret = NULL;
     char   tmp[MAX_PATH];
     char*  tmpend = tmp + sizeof(tmp);
@@ -502,9 +506,10 @@ AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild)
  * hw_sdCard_path
  * hw_ramSize
  */
-void handleCommonEmulatorOptions(AndroidOptions* opts,
-                                 AndroidHwConfig* hw,
-                                 AvdInfo* avd) {
+static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
+                                                 AndroidHwConfig* hw,
+                                                 AvdInfo* avd,
+                                                 bool is_qemu2) {
     int forceArmv7 = 0;
 
     // Kernel options
@@ -513,7 +518,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
         int    kernelFileLen;
 
         if (kernelFile == NULL) {
-            kernelFile = opts->ranchu ?
+            kernelFile = is_qemu2 ?
                     avdInfo_getRanchuKernelPath(avd) :
                     avdInfo_getKernelPath(avd);
             if (kernelFile == NULL) {
@@ -526,13 +531,13 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
                 } else {
                     derror( "ANDROID_SDK_ROOT is undefined");
                 }
-                exit(2);
+                return false;
             }
             D("autoconfig: -kernel %s", kernelFile);
         }
         if (!path_exists(kernelFile)) {
             derror( "Invalid or missing kernel image file: %s", kernelFile );
-            exit(2);
+            return false;
         }
 
         hw->kernel_path = kernelFile;
@@ -597,28 +602,28 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
                                               sizeof(versionString))) {
         derror("Can't find 'Linux version ' string in kernel image file: %s",
                hw->kernel_path);
-        exit(2);
+        return false;
     }
 
     KernelVersion kernelVersion = 0;
     if (!android_parseLinuxVersionString(versionString, &kernelVersion)) {
         derror("Can't parse 'Linux version ' string in kernel image file: '%s'",
                versionString);
-        exit(2);
+        return false;
     }
 
     // make sure we're using the proper engine (qemu1/qemu2) for the kernel
-    if (opts->ranchu && kernelVersion < KERNEL_VERSION_3_10_0) {
+    if (is_qemu2 && kernelVersion < KERNEL_VERSION_3_10_0) {
         derror("New emulator backend requires minimum kernel version 3.10+ (currently got lower)\n"
                "Please make sure you've got updated system images and do not force the specific "
                "kernel image together with the engine version");
-        exit(2);
-    } else if (!opts->ranchu && kernelVersion >= KERNEL_VERSION_3_10_0) {
+        return false;
+    } else if (!is_qemu2 && kernelVersion >= KERNEL_VERSION_3_10_0) {
         char* kernel_file = path_basename(hw->kernel_path);
         if (kernel_file && !strcmp(kernel_file, "kernel-ranchu")) {
             derror("This kernel requires the new emulation engine\n"
                    "Please do not force the specific kernel image together with the engine version");
-            exit(2);
+            return false;
         }
         free(kernel_file);
     }
@@ -693,7 +698,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
     if (opts->sysdir != NULL) {
         if (!path_exists(opts->sysdir)) {
             derror("Directory does not exist: %s", opts->sysdir);
-            exit(1);
+            return false;
         }
     }
 
@@ -759,7 +764,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
 
         if (path_get_size(systemImage, &systemBytes) < 0) {
             derror("Missing system image: %s", systemImage);
-            exit(1);
+            return false;
         }
 
         hw->disk_systemPartition_size =
@@ -789,7 +794,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
                 dataImage = avdInfo_getDefaultDataImagePath(avd);
                 if (dataImage == NULL) {
                     derror("No data image path for this configuration!");
-                    exit (1);
+                    return false;
                 }
                 opts->wipe_data = 1;
                 break;
@@ -806,7 +811,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
             initImage = ASTRDUP(opts->initdata);
             if (!path_exists(initImage)) {
                 derror("Invalid initial data image path: %s", initImage);
-                exit(1);
+                return false;
             }
         } else {
             initImage = avdInfo_getDataInitImagePath(avd);
@@ -876,7 +881,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
 
         if (sizeMB < 0 || *end != 0) {
             derror( "-cache-size must be followed by a positive integer" );
-            exit(1);
+            return false;
         }
         hw->disk_cachePartition_size = (uint64_t) sizeMB * ONE_MB;
     }
@@ -939,7 +944,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
         if ((strcmp(opts->selinux, "permissive") != 0)
                 && (strcmp(opts->selinux, "disabled") != 0)) {
             derror("-selinux must be \"disabled\" or \"permissive\"");
-            exit(1);
+            return false;
         }
 
         // SELinux 'disabled' mode is no longer supported starting with M.
@@ -960,7 +965,7 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
         long   ramSize = strtol(opts->memory, &end, 0);
         if (ramSize < 0 || *end != 0) {
             derror( "-memory must be followed by a positive integer" );
-            exit(1);
+            return false;
         }
         hw->hw_ramSize = ramSize;
     }
@@ -1326,7 +1331,10 @@ void handleCommonEmulatorOptions(AndroidOptions* opts,
         dwarning("Increasing vm heap size to %iMB", minVMHeapSize);
         hw->vm_heapSize = minVMHeapSize;
     }
+
+    return true;
 }
+
 
 bool handleCpuAcceleration(AndroidOptions* opts, AvdInfo* avd,
                            CpuAccelMode* accel_mode, char* accel_status) {
@@ -1438,4 +1446,514 @@ bool handleCpuAcceleration(AndroidOptions* opts, AvdInfo* avd,
         AFREE(abi);
     }
     return accel_ok;
+}
+
+/*
+ * Return true if software GPU is used and AVD screen is too large for it.
+ * Software GPU can boot 768 X 1280 (Nexus 4) or smaller due to software
+ * buffer size. (It may actually boot a slightly larger screen, but we set
+ * limit to this commonly seen resolution.)
+ */
+static bool use_software_gpu_and_screen_too_large(AndroidHwConfig* hw) {
+    const int kMaxWidth = 1280;
+    const int kMaxHeight = 768;
+
+    if (!hw->hw_gpu_enabled &&
+            (hw->hw_lcd_width * hw->hw_lcd_height > kMaxWidth * kMaxHeight)) {
+        derror("GPU emulation is disabled.\n"
+                   "Only screen size of 768 X 1280 or smaller is supported "
+                   "when GPU emulation is disabled.");
+        return true;
+    }
+    return false;
+}
+
+// _findQemuInformationalOption: search for informational QEMU options
+//
+// Scans the given command-line options for any informational QEMU option (see
+// |qemu_info_opts| for the list of informational QEMU options). Returns the
+// first matching option, or NULL if no match is found.
+//
+// |qemu_argc| is the number of command-line options in |qemu_argv|.
+// |qemu_argv| is the array of command-line options to be searched. It is the
+// caller's responsibility to ensure that all these options are intended for
+// QEMU.
+static char* _findQemuInformationalOption(int qemu_argc, char** qemu_argv) {
+    /* Informational QEMU options, which make QEMU print some information to
+     * the console and exit. */
+    static const char* const qemu_info_opts[] = {
+        "-h",
+        "-help",
+        "-version",
+        "-audio-help",
+        "?",           /* e.g. '-cpu ?' for listing available CPU models */
+        NULL           /* denotes the end of the list */
+    };
+    int i = 0;
+
+    for (; i < qemu_argc; i++) {
+        char* arg = qemu_argv[i];
+        const char* const* oo = qemu_info_opts;
+
+        for (; *oo; oo++) {
+            if (!strcmp(*oo, arg)) {
+                return arg;
+            }
+        }
+    }
+    return NULL;
+}
+
+bool emulator_parseCommonCommandLineOptions(int* p_argc,
+                                            char*** p_argv,
+                                            const char* targetArch,
+                                            bool is_qemu2,
+                                            AndroidOptions* opts,
+                                            AndroidHwConfig* hw,
+                                            AvdInfo** the_avd,
+                                            int* exit_status) {
+
+    *exit_status = 1;
+
+    if (android_parse_options(p_argc, p_argv, opts) < 0) {
+        return false;
+    }
+
+    opts->ranchu = is_qemu2;
+
+    while ((*p_argc)-- > 1) {
+        const char* opt = (++*p_argv)[0];
+
+        if(!strcmp(opt, "-qemu")) {
+            --(*p_argc);
+            ++(*p_argv);
+            break;
+        }
+
+        if (!strcmp(opt, "-help")) {
+            STRALLOC_DEFINE(out);
+            android_help_main(out);
+            printf("%.*s", out->n, out->s);
+            stralloc_reset(out);
+            return false;
+        }
+
+        if (!strncmp(opt, "-help-",6)) {
+            STRALLOC_DEFINE(out);
+            opt += 6;
+
+            if (!strcmp(opt, "all")) {
+                android_help_all(out);
+            }
+            else if (android_help_for_option(opt, out) == 0) {
+                /* ok */
+            }
+            else if (android_help_for_topic(opt, out) == 0) {
+                /* ok */
+            }
+            if (out->n > 0) {
+                printf("\n%.*s", out->n, out->s);
+                *exit_status = 0;
+                return false;
+            }
+
+            fprintf(stderr, "unknown option: -help-%s\n", opt);
+            fprintf(stderr, "please use -help for a list of valid topics\n");
+            return false;
+        }
+
+        if (opt[0] == '-') {
+            fprintf(stderr, "unknown option: %s\n", opt);
+            fprintf(stderr, "please use -help for a list of valid options\n");
+            return false;
+        }
+
+        fprintf(stderr, "invalid command-line parameter: %s.\n", opt);
+        fprintf(stderr, "Hint: use '@foo' to launch a virtual device named 'foo'.\n");
+        fprintf(stderr, "please use -help for more information\n");
+        return false;
+    }
+
+    if (opts->version) {
+      printf("Android emulator version %s\n"
+             "Copyright (C) 2006-2015 The Android Open Source Project and many "
+             "others.\n"
+             "This program is a derivative of the QEMU CPU emulator "
+             "(www.qemu.org).\n\n",
+#if defined ANDROID_BUILD_ID
+             EMULATOR_VERSION_STRING " (build_id " STRINGIFY(ANDROID_BUILD_ID) ")");
+#else
+             EMULATOR_VERSION_STRING);
+#endif
+        printf("  This software is licensed under the terms of the GNU General Public\n"
+               "  License version 2, as published by the Free Software Foundation, and\n"
+               "  may be copied, distributed, and modified under those terms.\n\n"
+               "  This program is distributed in the hope that it will be useful,\n"
+               "  but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+               "  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+               "  GNU General Public License for more details.\n\n");
+
+        *exit_status = 0;
+        return false;
+    }
+
+    if (opts->snapshot_list) {
+        if (opts->snapstorage == NULL) {
+            /* Need to find the default snapstorage */
+            int inAndroidBuild = 0;
+            AvdInfo* avd = createAVD(opts, &inAndroidBuild);
+            opts->snapstorage = avdInfo_getSnapStoragePath(avd);
+            avdInfo_free(avd);
+            if (opts->snapstorage != NULL) {
+                D("autoconfig: -snapstorage %s", opts->snapstorage);
+            } else {
+                if (inAndroidBuild) {
+                    derror("You must use the -snapstorage <file> option to specify a snapshot storage file!\n");
+                } else {
+                    derror("This AVD doesn't have snapshotting enabled!\n");
+                }
+                return false;
+            }
+        }
+        snapshot_print(opts->snapstorage);
+        *exit_status = 0;
+        return false;
+    }
+
+    // Both |argc| and |argv| have been modified by the big while loop above:
+    // |argc| should now be the number of options after '-qemu', and if that is
+    // positive, |argv| should point to the first option following '-qemu'.
+    // Now we check if any of these QEMU options is an 'informational' option,
+    // e.g. '-h', '-version', etc.
+    // The extra pair of parentheses is to keep gcc happy.
+    char* qemu_info_opt = _findQemuInformationalOption(*p_argc, *p_argv);
+    if ( qemu_info_opt) {
+        D("Found informational option '%s' after '-qemu'.\n"
+          "All options before '-qemu' will be ignored!", qemu_info_opt);
+        *exit_status = EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER;
+        return false;
+    }
+
+    sanitizeOptions(opts);
+
+    if (opts->selinux) {
+        if ((strcmp(opts->selinux, "permissive") != 0)
+                && (strcmp(opts->selinux, "disabled") != 0)) {
+            derror("-selinux must be \"disabled\" or \"permissive\"");
+            return false;
+        }
+    }
+
+    /* Parses options and builds an appropriate AVD. */
+    int inAndroidBuild = 0;
+    AvdInfo* avd = *the_avd = createAVD(opts, &inAndroidBuild);
+
+    /* get the skin from the virtual device configuration */
+    if (opts->skindir != NULL) {
+        if (opts->skin == NULL) {
+            /* NOTE: Normally handled by sanitizeOptions(), just be safe */
+            derror("The -skindir <path> option requires a -skin <name> option");
+            *exit_status = 2;
+            return false;
+        }
+    } else {
+        char* skinName;
+        char* skinDir;
+
+        avdInfo_getSkinInfo(avd, &skinName, &skinDir);
+
+        if (opts->skin == NULL) {
+            opts->skin = skinName;
+            D("autoconfig: -skin %s", opts->skin);
+        } else {
+            AFREE(skinName);
+        }
+
+        opts->skindir = skinDir;
+        D("autoconfig: -skindir %s", opts->skindir);
+    }
+    /* update the avd hw config from this new skin */
+    avdInfo_getSkinHardwareIni(avd, opts->skin, opts->skindir);
+
+    if (avdInfo_initHwConfig(avd, hw) < 0) {
+        derror("could not read hardware configuration ?");
+        return false;
+    }
+
+    if (!opts->netspeed && skin_network_speed) {
+        D("skin network speed: '%s'", skin_network_speed);
+        if (strcmp(skin_network_speed, NETWORK_SPEED_DEFAULT) != 0) {
+            opts->netspeed = (char*)skin_network_speed;
+        }
+    }
+
+    if (!opts->netdelay && skin_network_delay) {
+        D("skin network delay: '%s'", skin_network_delay);
+        if (strcmp(skin_network_delay, NETWORK_DELAY_DEFAULT) != 0) {
+            opts->netdelay = (char*)skin_network_delay;
+        }
+    }
+
+    if (opts->code_profile) {
+        char* profilePath =
+                avdInfo_getCodeProfilePath(avd, opts->code_profile);
+        if (profilePath == NULL) {
+            derror( "bad -code-profile parameter" );
+            return false;
+        }
+        int ret = path_mkdir_if_needed(profilePath, 0755);
+        if (ret < 0) {
+            derror("could not create directory '%s'\n", profilePath);
+            *exit_status = 2;
+            return false;
+        }
+        reassign_string(&opts->code_profile, profilePath);
+    }
+
+    // Update CPU architecture for HW configs created from build directory.
+    if (inAndroidBuild) {
+        reassign_string(&hw->hw_cpu_arch, targetArch);
+    }
+
+    if (!emulator_handleCommonEmulatorOptions(opts, hw, avd, is_qemu2)) {
+        return false;
+    }
+
+    /** SNAPSHOT STORAGE HANDLING */
+
+    /* Determine snapstorage path. -no-snapstorage disables all snapshotting
+     * support. This means you can't resume a snapshot at load, save it at
+     * exit, or even load/save them dynamically at runtime with the console.
+     */
+    if (opts->no_snapstorage) {
+        if (opts->snapshot) {
+            dwarning("ignoring -snapshot option due to the use of -no-snapstorage");
+            opts->snapshot = NULL;
+        }
+
+        if (opts->snapstorage) {
+            dwarning("ignoring -snapstorage option due to the use of -no-snapstorage");
+            opts->snapstorage = NULL;
+        }
+    } else {
+        if (!opts->snapstorage && avdInfo_getSnapshotPresent(avd)) {
+            opts->snapstorage = avdInfo_getSnapStoragePath(avd);
+            if (opts->snapstorage != NULL) {
+                D("autoconfig: -snapstorage %s", opts->snapstorage);
+            }
+        }
+
+        if (opts->snapstorage && !path_exists(opts->snapstorage)) {
+            D("no image at '%s', state snapshots disabled", opts->snapstorage);
+            opts->snapstorage = NULL;
+        }
+    }
+
+    /* If we have a valid snapshot storage path */
+
+    if (opts->snapstorage) {
+        if (is_qemu2) {
+            dwarning("QEMU2 does not support snapshots - option will be ignored.");
+        } else {
+            // QEMU2 does not support some of the flags below, and the emulator will
+            // fail to start if they are passed in, so for now, ignore them.
+            hw->disk_snapStorage_path = ASTRDUP(opts->snapstorage);
+
+            /* -no-snapshot is equivalent to using both -no-snapshot-load
+            * and -no-snapshot-save. You can still load/save snapshots dynamically
+            * from the console though.
+            */
+            if (opts->no_snapshot) {
+                opts->no_snapshot_load = 1;
+                opts->no_snapshot_save = 1;
+                if (opts->snapshot) {
+                    dwarning("ignoring -snapshot option due to the use of -no-snapshot.");
+                }
+            }
+
+            if (!opts->no_snapshot_load || !opts->no_snapshot_save) {
+                if (opts->snapshot == NULL) {
+                    opts->snapshot = "default-boot";
+                    D("autoconfig: -snapshot %s", opts->snapshot);
+                }
+            }
+        }
+    }
+
+    if (!opts->logcat || opts->logcat[0] == 0) {
+        opts->logcat = getenv("ANDROID_LOG_TAGS");
+        if (opts->logcat && opts->logcat[0] == 0)
+            opts->logcat = NULL;
+    }
+
+    /* XXXX: TODO: implement -shell and -logcat through qemud instead */
+    if (!opts->shell_serial) {
+#ifdef _WIN32
+        opts->shell_serial = strdup("con:");
+#else
+        opts->shell_serial = strdup("stdio");
+#endif
+    } else {
+        opts->shell = 1;
+    }
+
+    if (hw->vm_heapSize == 0) {
+        /* Compute the default heap size based on the RAM size.
+         * Essentially, we want to ensure the following liberal mappings:
+         *
+         *   96MB RAM -> 16MB heap
+         *  128MB RAM -> 24MB heap
+         *  256MB RAM -> 48MB heap
+         */
+        int  ramSize = hw->hw_ramSize;
+        int  heapSize;
+
+        if (ramSize < 100)
+            heapSize = 16;
+        else if (ramSize < 192)
+            heapSize = 24;
+        else
+            heapSize = 48;
+
+        hw->vm_heapSize = heapSize;
+    }
+
+    {
+        EmuglConfig config;
+
+        bool blacklisted = false;
+        bool on_blacklist = false;
+
+        // If the user has specified a renderer
+        // that is neither "auto" nor "host",
+        // don't check the blacklist.
+        if (!((!opts->gpu &&
+               strcmp(hw->hw_gpu_mode, "auto") &&
+               strcmp(hw->hw_gpu_mode, "host")) ||
+              (opts->gpu && strcmp(opts->gpu, "auto") &&
+               strcmp(opts->gpu, "host") &&
+               strcmp(opts->gpu, "on")))) {
+            on_blacklist = isHostGpuBlacklisted();
+        }
+
+        // For testing purposes only.
+        if (hw->hw_gpu_blacklisted) {
+            on_blacklist = !strcmp(hw->hw_gpu_blacklisted, "yes");
+        }
+
+        if ((!opts->gpu && !strcmp(hw->hw_gpu_mode, "auto")) ||
+            (opts->gpu && !strcmp(opts->gpu, "auto"))) {
+            blacklisted = on_blacklist;
+            setGpuBlacklistStatus(blacklisted);
+        }
+
+        int api_level = avdInfo_getApiLevel(avd);
+        char* api_arch = avdInfo_getTargetAbi(avd);
+        bool isGoogle = avdInfo_isGoogleApis(avd);
+
+        bool has_guest_renderer = isGoogle &&
+                                  (api_level >= 23) &&
+                                  (!strcmp(api_arch, "x86") ||
+                                   !strcmp(api_arch, "x86_64"));
+
+        if (!emuglConfig_init(&config,
+                              hw->hw_gpu_enabled,
+                              hw->hw_gpu_mode,
+                              opts->gpu,
+                              0,
+                              opts->no_window,
+                              blacklisted,
+                              has_guest_renderer)) {
+            derror("%s", config.status);
+            return false;
+        }
+
+        hw->hw_gpu_enabled = config.enabled;
+        if (use_software_gpu_and_screen_too_large(hw)) {
+            return false;
+        }
+        if (config.enabled) {
+            /* Only update hw_gpu_mode if emuglConfig_init determined that gpu
+             * is enabled. Leave the default untouched otherwise, because there
+             * is no canonical value to return from emulConfig_init function in
+             * that case.
+             */
+            reassign_string(&hw->hw_gpu_mode, config.backend);
+        }
+        D("%s", config.status);
+
+#ifdef _WIN32
+        // BUG: https://code.google.com/p/android/issues/detail?id=199427
+        // Booting will be severely slowed down, if not disabled outright, when
+        // 1. On Windows
+        // 2. Using an AVD resolution of >= 1080p (can vary across host setups)
+        // 3. -gpu mesa
+        // What happens is that Mesa will hog the CPU, while disallowing
+        // critical boot services from making progress, causing
+        // the services to give up and put the emulator in a reboot loop
+        // until it either fails to boot altogether or gets lucky and
+        // successfully boots.
+        // This workaround disables the boot animation under the above conditions,
+        // which frees up the CPU enough for the device to boot.
+        if ((opts->gpu && !strcmp(opts->gpu, "mesa")) ||
+            (hw->hw_gpu_mode && !strcmp(hw->hw_gpu_mode, "mesa"))) {
+            opts->no_boot_anim = 1;
+            D("Starting AVD without boot animation.\n");
+        }
+#endif
+    }
+
+    /* Quit emulator on condition that both, gpu and snapstorage are on. This is
+     * a temporary solution preventing the emulator from crashing until GPU state
+     * can be properly saved / resored in snapshot file. */
+    if (hw->hw_gpu_enabled && opts->snapstorage && (!opts->no_snapshot_load ||
+                                                    !opts->no_snapshot_save)) {
+        derror("Snapshots and gpu are mutually exclusive at this point. Please turn one of them off, and restart the emulator.");
+        return false;
+    }
+
+    if (opts->camera_back) {
+        /* Validate parameter. */
+        if (memcmp(opts->camera_back, "webcam", 6) &&
+            strcmp(opts->camera_back, "emulated") &&
+            strcmp(opts->camera_back, "none")) {
+            derror("Invalid value for -camera-back <mode> parameter: %s\n"
+                   "Valid values are: 'emulated', 'webcam<N>', or 'none'\n",
+                   opts->camera_back);
+            return false;
+        }
+        hw->hw_camera_back = ASTRDUP(opts->camera_back);
+    }
+
+    if (opts->camera_front) {
+        /* Validate parameter. */
+        if (memcmp(opts->camera_front, "webcam", 6) &&
+            strcmp(opts->camera_front, "emulated") &&
+            strcmp(opts->camera_front, "none")) {
+            derror("Invalid value for -camera-front <mode> parameter: %s\n"
+                   "Valid values are: 'emulated', 'webcam<N>', or 'none'\n",
+                   opts->camera_front);
+            return false;
+        }
+        hw->hw_camera_front = ASTRDUP(opts->camera_front);
+    }
+
+    hw->avd_name = ASTRDUP(avdInfo_getName(avd));
+
+    /* Setup screen emulation */
+    if (opts->screen) {
+        if (strcmp(opts->screen, "touch") &&
+            strcmp(opts->screen, "multi-touch") &&
+            strcmp(opts->screen, "no-touch")) {
+
+            derror("Invalid value for -screen <mode> parameter: %s\n"
+                   "Valid values are: touch, multi-touch, or no-touch\n",
+                   opts->screen);
+            return false;
+        }
+        hw->hw_screen = ASTRDUP(opts->screen);
+    }
+
+    *exit_status = 0;
+    return true;
 }
