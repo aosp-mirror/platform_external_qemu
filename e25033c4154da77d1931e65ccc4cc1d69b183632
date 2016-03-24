@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7c21d2e1_9ce58a8b",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-03-24T15:12:21Z",
+      "side": 1,
+      "message": "no-op is ok, I don\u0027t think it is big problem.",
+      "parentUuid": "7c21d2e1_5c7032a8",
+      "revId": "e25033c4154da77d1931e65ccc4cc1d69b183632",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_a6bcbf32",
         "filename": "android/emulation/control/ApkInstaller.cpp",
         "patchSetId": 2
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "But there is a \"failed to copy\", and since we\u0027re doing output parsing in the first place, we may just want to add another case in this loop.",
       "parentUuid": "7c21d2e1_a6bcbf32",
+      "revId": "e25033c4154da77d1931e65ccc4cc1d69b183632",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_7ce8965e",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-03-24T15:12:21Z",
+      "side": 1,
+      "message": "please add.",
+      "parentUuid": "7c21d2e1_1c76baa7",
       "revId": "e25033c4154da77d1931e65ccc4cc1d69b183632",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
