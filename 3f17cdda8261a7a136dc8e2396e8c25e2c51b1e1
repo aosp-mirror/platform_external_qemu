@@ -52,6 +52,24 @@
       "revId": "3f17cdda8261a7a136dc8e2396e8c25e2c51b1e1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c21d2e1_ed3b3a7b",
+        "filename": "android/emulation/control/ScreenCapturer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-24T01:27:50Z",
+      "side": 1,
+      "message": "I suggested basically that, but Prathmesh felt it was too much of a bandaid that would only fix this specific case.",
+      "parentUuid": "7c21d2e1_9a2d924a",
+      "revId": "3f17cdda8261a7a136dc8e2396e8c25e2c51b1e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
