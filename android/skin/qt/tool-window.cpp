@@ -274,7 +274,7 @@ bool ToolWindow::isAdbVersionCurrent(
                     // The version should look like "major.minor", but further
                     // minor versions are acceptable (and ignored).
                     // Same goes for "rc#" at the end.
-                    QRegularExpression regex("(\\d+).(\\d+)");
+                    QRegularExpression regex("(\\d+).?(\\d+)?");
                     QRegularExpressionMatch match = regex.match(lineParts[1]);
                     if (match.hasMatch()) {
                         bool isValidNumber;
