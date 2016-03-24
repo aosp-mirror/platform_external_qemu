@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9cb846d6_426428c4",
+        "filename": "android/emulation/ParameterList.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-24T11:56:58Z",
+      "side": 1,
+      "message": "Yes, I see this was very recently added :)",
+      "parentUuid": "7c21d2e1_36c00866",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 5
+      },
+      "revId": "63af1ed848c9d00acfa12865b15b1365eb21ac3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_c25a8dc8",
         "filename": "android/emulation/ParameterList.h",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-23T18:34:31Z",
       "side": 1,
       "message": "\u003d default ?",
+      "range": {
+        "startLine": 30,
+        "startChar": 19,
+        "endLine": 30,
+        "endChar": 44
+      },
+      "revId": "63af1ed848c9d00acfa12865b15b1365eb21ac3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9cb846d6_62592c03",
+        "filename": "android/emulation/ParameterList.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-24T11:56:58Z",
+      "side": 1,
+      "message": "excellent idea, thanks.",
+      "parentUuid": "7c21d2e1_c25a8dc8",
       "range": {
         "startLine": 30,
         "startChar": 19,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "3c5f5acd_465fb246",
+        "filename": "android/emulation/ParameterList.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-24T11:56:58Z",
+      "side": 1,
+      "message": "good idea too.",
+      "parentUuid": "7c21d2e1_e2feb1c9",
+      "range": {
+        "startLine": 50,
+        "startChar": 10,
+        "endLine": 50,
+        "endChar": 19
+      },
+      "revId": "63af1ed848c9d00acfa12865b15b1365eb21ac3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_020e65cd",
         "filename": "android/emulation/ParameterList.h",
         "patchSetId": 3
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "bcb50adc_a975e9d4",
+        "filename": "android/emulation/ParameterList.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-24T11:56:58Z",
+      "side": 1,
+      "message": "I didn\u0027t realize that, but I wrote test code and that\u0027s true. Thanks, that\u0027s informative.",
+      "parentUuid": "7c21d2e1_020e65cd",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 34
+      },
+      "revId": "63af1ed848c9d00acfa12865b15b1365eb21ac3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_2209e9c5",
         "filename": "android/emulation/ParameterList.h",
         "patchSetId": 3
@@ -105,6 +201,30 @@
       "writtenOn": "2016-03-23T18:34:31Z",
       "side": 1,
       "message": "it feels to me like these functions should be external to the class",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 56
+      },
+      "revId": "63af1ed848c9d00acfa12865b15b1365eb21ac3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fce942d0_d01d6c46",
+        "filename": "android/emulation/ParameterList.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-24T11:56:58Z",
+      "side": 1,
+      "message": "This class is mostly for convenience (we could use a std:;vector\u003cstd::string\u003e directly), so having these methods actually makes the client code simpler / easier to look at.",
+      "parentUuid": "7c21d2e1_2209e9c5",
       "range": {
         "startLine": 57,
         "startChar": 0,
