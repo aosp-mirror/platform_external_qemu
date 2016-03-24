@@ -18,8 +18,18 @@
 
 namespace android {
 namespace base {
+
+// add some convenience shortcuts for an overly complex std::enable_if syntax
+template <class Predicate, class Type = void*>
+using enable_if =
+    typename std::enable_if<Predicate::value, Type>::type;
+
+template <bool predicate, class Type = void*>
+using enable_if_c =
+    typename std::enable_if<predicate, Type>::type;
+
 template <class From, class To, class Type = void*>
-using enable_if_convertible =
-    typename std::enable_if<std::is_convertible<From, To>::value, Type>::type;
+using enable_if_convertible = enable_if<std::is_convertible<From, To>>;
+
 }
 }

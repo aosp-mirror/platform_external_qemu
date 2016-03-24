@@ -177,7 +177,7 @@ TEST(System, envGetAndSet) {
     sys->envSet(kVarName, kVarValue);
     EXPECT_TRUE(sys->envTest(kVarName));
     EXPECT_STREQ(kVarValue, sys->envGet(kVarName).c_str());
-    sys->envSet(kVarName, NULL);
+    sys->envSet(kVarName, nullptr);
     EXPECT_FALSE(sys->envTest(kVarName));
     EXPECT_STREQ("", sys->envGet(kVarName).c_str());
 }
