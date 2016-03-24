@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9cb846d6_e2c45c0d",
+        "filename": "android/base/StringView.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-24T16:34:45Z",
+      "side": 1,
+      "message": "Today I learned about constexpr constructors and methods. Wow, I\u0027m impressed and scared at the same time, but this is impressive.",
+      "revId": "e7e0a5e22bfb039b4c798bf66b889c2750c76f36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
