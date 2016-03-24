@@ -105,6 +105,24 @@
       "revId": "e25033c4154da77d1931e65ccc4cc1d69b183632",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ca2fa11_8eb51b18",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-24T16:49:37Z",
+      "side": 1,
+      "message": "Turns out adb actually returns error as its exit code when the device is full, so the message we give is just \"Failed to start adb. Check settings to verify your chosen adb path is valid.\" Maybe we should just make that error message a bit more open and say some additional stuff?",
+      "parentUuid": "7c21d2e1_7ce8965e",
+      "revId": "e25033c4154da77d1931e65ccc4cc1d69b183632",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
