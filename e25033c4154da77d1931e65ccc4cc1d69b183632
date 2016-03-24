@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "7c21d2e1_1ca35a7a",
+        "filename": "android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-03-24T14:30:51Z",
+      "side": 1,
+      "message": "cancel does not actually cancel; the apk is installed anyway",
+      "revId": "e25033c4154da77d1931e65ccc4cc1d69b183632",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c21d2e1_a6bcbf32",
         "filename": "android/emulation/control/ApkInstaller.cpp",
         "patchSetId": 2
