@@ -11,6 +11,7 @@
 
 #include "net-android.h"
 #include "android/android.h"
+#include "android/network/constants.h"
 #include "android/telephony/modem_driver.h"
 #include "android/shaper.h"
 
@@ -72,40 +73,14 @@ slirp_init_shapers(void* slirp_state, void* net_client_state, Slirp* slirp)
 int
 android_parse_network_speed(const char*  speed)
 {
-    int          n;
-    char*  end;
-    double       sp;
-
-    if (speed == NULL || speed[0] == 0) {
-        speed = DEFAULT_NETSPEED;
-    }
-
-    for (n = 0; android_netspeeds[n].name != NULL; n++) {
-        if (!strcmp(android_netspeeds[n].name, speed)) {
-            qemu_net_download_speed = android_netspeeds[n].download;
-            qemu_net_upload_speed   = android_netspeeds[n].upload;
-            return 0;
-        }
-    }
-
-    /* is this a number ? */
-    sp = strtod(speed, &end);
-    if (end == speed) {
+    double upload = 0., download = 0.;
+    if (!android_network_speed_parse(speed, &upload, &download)) {
         return -1;
     }
 
-    qemu_net_download_speed = qemu_net_upload_speed = sp*1000.;
-    if (*end == ':') {
-        speed = end+1;
-        sp = strtod(speed, &end);
-        if (end > speed) {
-            qemu_net_download_speed = sp*1000.;
-        }
-    }
+    qemu_net_upload_speed = upload;
+    qemu_net_download_speed = download;
 
-    if (android_modem)
-        amodem_set_data_network_type( android_modem,
-                                      android_parse_network_type(speed) );
     return 0;
 }
 
@@ -113,34 +88,12 @@ android_parse_network_speed(const char*  speed)
 int
 android_parse_network_latency(const char*  delay)
 {
-    int  n;
-    char*  end;
-    double  sp;
-
-    if (delay == NULL || delay[0] == 0)
-        delay = DEFAULT_NETDELAY;
-
-    for (n = 0; android_netdelays[n].name != NULL; n++) {
-        if ( !strcmp( android_netdelays[n].name, delay ) ) {
-            qemu_net_min_latency = android_netdelays[n].min_ms;
-            qemu_net_max_latency = android_netdelays[n].max_ms;
-            return 0;
-        }
-    }
-
-    /* is this a number ? */
-    sp = strtod(delay, &end);
-    if (end == delay) {
+    double min_delay_ms = 0., max_delay_ms = 0.;
+    if (!android_network_latency_parse(delay, &min_delay_ms, &max_delay_ms)) {
         return -1;
     }
+    qemu_net_min_latency = (int)min_delay_ms;
+    qemu_net_max_latency = (int)max_delay_ms;
 
-    qemu_net_min_latency = qemu_net_max_latency = (int)sp;
-    if (*end == ':') {
-        delay = (const char*)end+1;
-        sp = strtod(delay, &end);
-        if (end > delay) {
-            qemu_net_max_latency = (int)sp;
-        }
-    }
     return 0;
 }

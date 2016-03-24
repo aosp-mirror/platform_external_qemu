@@ -75,7 +75,7 @@ static void cellular_setStandard(enum CellularStandard cStandard)
 
     switch (cStandard) {
         case Cellular_Std_GSM:    speedName = "gsm";    break;
-        case Cellular_Std_HSCSD:  speedName = "hscsc";  break;
+        case Cellular_Std_HSCSD:  speedName = "hscsd";  break;
         case Cellular_Std_GPRS:   speedName = "gprs";   break;
         case Cellular_Std_EDGE:   speedName = "edge";   break;
         case Cellular_Std_UMTS:   speedName = "umts";   break;
@@ -88,13 +88,16 @@ static void cellular_setStandard(enum CellularStandard cStandard)
 
     // Find this entry in the speed table and set
     // qemu_net_download_speed and qemu_net_upload_speed
-    android_parse_network_speed(speedName);
+    if (android_parse_network_speed(speedName) < 0) {
+        return;
+    }
 
     // Tell the network shaper the new rates
     netshaper_set_rate(slirp_shaper_in,  qemu_net_download_speed);
     netshaper_set_rate(slirp_shaper_out, qemu_net_upload_speed);
 
     if (android_modem) {
+        // Tell the guest about the new network type.
         amodem_set_data_network_type(android_modem,
                                      android_parse_network_type(speedName));
     }
