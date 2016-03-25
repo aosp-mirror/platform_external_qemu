@@ -57,6 +57,7 @@ LOCAL_SRC_FILES := \
     android/base/async/AsyncReader.cpp \
     android/base/async/AsyncWriter.cpp \
     android/base/async/Looper.cpp \
+    android/base/async/ScopedSocketWatch.cpp \
     android/base/async/ThreadLooper.cpp \
     android/base/containers/PodVector.cpp \
     android/base/containers/PointerSet.cpp \
@@ -367,6 +368,7 @@ LOCAL_LDLIBS += \
 LOCAL_SRC_FILES := \
   android/avd/util_unittest.cpp \
   android/base/async/RecurrentTask_unittest.cpp \
+  android/base/async/ScopedSocketWatch_unittest.cpp \
   android/base/containers/CircularBuffer_unittest.cpp \
   android/base/containers/HashUtils_unittest.cpp \
   android/base/containers/PodVector_unittest.cpp \
