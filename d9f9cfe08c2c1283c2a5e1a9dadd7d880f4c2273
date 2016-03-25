@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d1cc697f_2202ce2e",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-25T22:31:59Z",
+      "side": 1,
+      "message": "What happened to the virtual keyword?",
+      "revId": "d9f9cfe08c2c1283c2a5e1a9dadd7d880f4c2273",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d1cc697f_62e5b6bf",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-25T22:31:59Z",
+      "side": 1,
+      "message": "Remember to update the comment above as well.",
+      "revId": "d9f9cfe08c2c1283c2a5e1a9dadd7d880f4c2273",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
