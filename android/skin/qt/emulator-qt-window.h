@@ -203,7 +203,6 @@ private slots:
      from UI elements or called independently.
      */
 public slots:
-    void activateWindow();
     void raise();
     void setForwardShortcutsToDevice(int index);
     void show();
@@ -229,7 +228,6 @@ private:
     SkinEvent *createSkinEvent(SkinEventType type);
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void handleKeyEvent(SkinEventType type, QKeyEvent *event);
-    QString getTmpImagePath();
     void setFrameOnTop(QFrame* frame, bool onTop);
 
     void screenshotDone(android::emulation::ScreenCapturer::Result result);
