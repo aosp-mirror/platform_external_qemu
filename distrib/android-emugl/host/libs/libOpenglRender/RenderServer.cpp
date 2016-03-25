@@ -98,7 +98,7 @@ intptr_t RenderServer::main()
     while(1) {
         SocketStream *stream = m_listenSock->accept();
         if (!stream) {
-            fprintf(stderr,"Error accepting connection, aborting\n");
+            fprintf(stderr,"Error accepting gles connection, ignoring.\n");
             continue;
         }
 
