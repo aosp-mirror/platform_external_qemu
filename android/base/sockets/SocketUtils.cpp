@@ -467,6 +467,32 @@ ssize_t socketSend(int socket, const void* buffer, size_t bufferLen) {
     return ret;
 }
 
+bool socketSendAll(int socket, const void* buffer, size_t bufferLen) {
+    auto buf = static_cast<const char*>(buffer);
+    while (bufferLen > 0) {
+        ssize_t ret = socketSend(socket, buf, bufferLen);
+        if (ret <= 0) {
+            return false;
+        }
+        buf += ret;
+        bufferLen -= ret;
+    }
+    return true;
+}
+
+bool socketRecvAll(int socket, void* buffer, size_t bufferLen) {
+    auto buf = static_cast<char*>(buffer);
+    while (bufferLen > 0) {
+        ssize_t ret = socketRecv(socket, buf, bufferLen);
+        if (ret <= 0) {
+            return false;
+        }
+        buf += ret;
+        bufferLen -= ret;
+    }
+    return true;
+}
+
 void socketShutdownWrites(int socket) {
 #ifdef _WIN32
     ::shutdown(socket, SD_SEND);
