@@ -60,6 +60,25 @@ TEST(ApkInstaller, parseOutputForFailureBadOutput) {
     EXPECT_STREQ(errorString.c_str(), ApkInstaller::kDefaultErrorString);
 }
 
+TEST(ApkInstaller, parseOutputForFailureDeviceFull) {
+    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
+                      "/appdir");
+    TestTempDir* dir = system.getTempRoot();
+    string outputFile = dir->makeSubPath("output.txt");
+
+    ofstream ofs(outputFile);
+    EXPECT_TRUE(ofs.is_open());
+    ofs << "[ 92%] /data/local/tmp/a-big-apk.apk\n"
+           "[ 92%] /data/local/tmp/a-big-apk.apk\n"
+           "[ 92%] /data/local/tmp/a-big-apk.apk\n"
+           "adb: error: failed to copy 'a-big-apk.apk' to '/data/local/tmp/a-big-apk.apk': No space left on device\n";
+
+    ofs.close();
+
+    string errorString;
+    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(outputFile, &errorString));
+}
+
 TEST(ApkInstaller, parseOutputForFailureInstallFailed) {
     TestSystem system("/progdir", System::kProgramBitness, "/homedir",
                       "/appdir");

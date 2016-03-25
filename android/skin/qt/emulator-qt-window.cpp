@@ -958,6 +958,11 @@ void EmulatorQtWindow::installDone(ApkInstaller::Result result,
                        "valid.");
             break;
 
+        case ApkInstaller::Result::kDeviceStorageFull:
+            msg += tr("The virtual device storage is full.<br/>"
+                     "Clear space and try again.");
+            break;
+
         case ApkInstaller::Result::kInstallFailed:
             msg += tr("The APK failed to install.<br/> Error: %1")
                            .arg(errorString.c_str());
