@@ -68,10 +68,10 @@ public:
     void show();
     void dockMainWindow();
     void raiseMainWindow();
-    void extendedIsClosing() { extendedWindow = NULL; }
+    void extendedIsClosing() { mExtendedWindow = NULL; }
 
-    void setToolEmuAgent(const UiEmuAgent* agPtr) { uiEmuAgent = agPtr; }
-    const UiEmuAgent* getUiEmuAgent() const { return uiEmuAgent; }
+    void setToolEmuAgent(const UiEmuAgent* agPtr) { mUiEmuAgent = agPtr; }
+    const UiEmuAgent* getUiEmuAgent() const { return mUiEmuAgent; }
 
     QString getAdbFullPath(QStringList *args);
 
@@ -113,12 +113,10 @@ private:
     virtual void paintEvent(QPaintEvent*) override;
     virtual void hideEvent(QHideEvent* event) override;
 
-    QWidget *button_area;
-    EmulatorQtWindow *emulator_window;
-    ExtendedWindow *extendedWindow;
-    QBoxLayout *top_layout;
-    const UiEmuAgent *uiEmuAgent;
-    Ui::ToolControls *toolsUi;
+    EmulatorQtWindow* mEmulatorWindow;
+    ExtendedWindow* mExtendedWindow;
+    const UiEmuAgent* mUiEmuAgent;
+    Ui::ToolControls* mToolsUi;
     QProcess mPushProcess;
     bool mStartedAdbStopProcess = false;
     QProgressDialog mPushDialog;
