@@ -32,6 +32,14 @@ ssize_t socketRecv(int socket, void* buffer, size_t bufferLen);
 // a convenience.
 ssize_t socketSend(int socket, const void* buffer, size_t bufferLen);
 
+// Same as socketSend() but loop around transient writes.
+// Returns true if all bytes were sent, false otherwise.
+bool socketSendAll(int socket, const void* buffer, size_t bufferLen);
+
+// Same as socketRecv() but loop around transient reads.
+// Returns ture if all bytes were received, false otherwise.
+bool socketRecvAll(int socket, void* buffer, size_t bufferLen);
+
 // Shutdown all writes to a socket.
 void socketShutdownWrites(int socket);
 
