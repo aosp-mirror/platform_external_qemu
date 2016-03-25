@@ -484,6 +484,11 @@ public:
         return pathCanExecInternal(path);
     }
 
+    virtual bool pathFileSize(StringView path,
+                              FileSize* outFileSize) const override {
+        return pathFileSizeInternal(path, outFileSize);
+    }
+
     Times getProcessTimes() const {
         Times res = {};
 
@@ -1142,6 +1147,23 @@ bool System::pathCanExecInternal(StringView path) {
         return false;
     }
     return pathAccess(path, X_OK) == 0;
+}
+
+// static
+bool System::pathFileSizeInternal(StringView path, FileSize* outFileSize) {
+    if (path.empty() || !outFileSize) {
+        return false;
+    }
+    PathStat st;
+    int ret = pathStat(path, &st);
+    if (ret < 0 || !S_ISREG(st.st_mode)) {
+        return false;
+    }
+    // This is off_t on POSIX and a 32/64 bit integral type on windows based on
+    // the host / compiler combination. We cast everything to 64 bit unsigned to
+    // play safe.
+    *outFileSize = static_cast<FileSize>(st.st_size);
+    return true;
 }
 
 // static
