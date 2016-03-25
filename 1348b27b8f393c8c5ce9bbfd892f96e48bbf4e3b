@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "910bd117_8c9d779b",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-03-25T17:20:15Z",
+      "side": 1,
+      "message": "nit: alignment",
+      "revId": "1348b27b8f393c8c5ce9bbfd892f96e48bbf4e3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
