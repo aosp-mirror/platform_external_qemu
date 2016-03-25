@@ -51,6 +51,10 @@
 #include <shellapi.h>
 #endif
 
+#ifdef __APPLE__
+#include <signal.h>
+#endif
+
 using android::base::System;
 using android::base::String;
 #ifdef _WIN32
@@ -88,12 +92,40 @@ static GlobalState* globalState() {
     return &sGlobalState;
 }
 
+static void enableSigChild() {
+    // The issue only occurs on Darwin so to be safe just do this on Darwin
+    // to prevent potential issues. The function exists on all platforms to
+    // make the calling code look cleaner. In addition the issue only occurs
+    // when the extended window has been created. We do not currently know
+    // why this only happens on Darwin and why it only happens once the
+    // extended window is created. The sigmask is not changed after the
+    // extended window has been created.
+#ifdef __APPLE__
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, SIGCHLD);
+    // We only need to enable SIGCHLD for the Qt main thread since that's where
+    // all the Qt stuff runs. The main loop should eventually make syscalls that
+    // trigger signals.
+    int result = pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
+    if (result != 0) {
+        D("Could not set thread sigmask: %d", result);
+    }
+#endif
+}
+
 std::shared_ptr<void> skin_winsys_get_shared_ptr() {
     return std::static_pointer_cast<void>(EmulatorQtWindow::getInstancePtr());
 }
 
 extern void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv) {
     D("Starting QT main loop\n");
+
+    // In order for QProcess to correctly handle processes that exit we need
+    // to enable SIGCHLD. That's how Qt knows to wait for the child process. If
+    // it doesn't wait the process will be left as a zombie and the finished
+    // signal will not be emitted from QProcess.
+    enableSigChild();
 
     if (!no_window) {
         // Give Qt the fonts from our resource file
