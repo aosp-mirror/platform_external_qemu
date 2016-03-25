@@ -55,6 +55,7 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SRC_FILES := \
     android/base/async/AsyncReader.cpp \
+    android/base/async/AsyncSocketServer.cpp \
     android/base/async/AsyncWriter.cpp \
     android/base/async/Looper.cpp \
     android/base/async/ScopedSocketWatch.cpp \
@@ -368,6 +369,7 @@ LOCAL_LDLIBS += \
 LOCAL_SRC_FILES := \
   android/avd/util_unittest.cpp \
   android/base/async/Looper_unittest.cpp \
+  android/base/async/AsyncSocketServer_unittest.cpp \
   android/base/async/RecurrentTask_unittest.cpp \
   android/base/async/ScopedSocketWatch_unittest.cpp \
   android/base/containers/CircularBuffer_unittest.cpp \
