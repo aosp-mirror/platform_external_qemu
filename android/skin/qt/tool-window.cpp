@@ -53,10 +53,10 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        QWidget* parent,
                        ToolWindow::UIEventRecorderPtr event_recorder)
     : QFrame(parent),
-      emulator_window(window),
-      extendedWindow(NULL),
-      uiEmuAgent(NULL),
-      toolsUi(new Ui::ToolControls),
+      mEmulatorWindow(window),
+      mExtendedWindow(NULL),
+      mUiEmuAgent(NULL),
+      mToolsUi(new Ui::ToolControls),
       mPushDialog(this),
       mUIEventRecorder(event_recorder),
       mSizeTweaker(this),
@@ -78,7 +78,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     Qt::WindowFlags flag = Qt::Tool;
 #endif
     setWindowFlags(flag | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::Drawer);
-    toolsUi->setupUi(this);
+    mToolsUi->setupUi(this);
 
     // Initialize some values in the QCoreApplication so we can easily
     // and consistently access QSettings to save and restore user settings
@@ -166,11 +166,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
                         " (" + shortcuts->at(0).toString(QKeySequence::NativeText) + ")");
                 }
             }
-        } else if (
-            button != toolsUi->close_button &&
-            button != toolsUi->minimize_button &&
-            button != toolsUi->more_button)
-                {
+        } else if (button != mToolsUi->close_button &&
+                   button != mToolsUi->minimize_button &&
+                   button != mToolsUi->more_button) {
             // Almost all toolbar buttons are required to have a uiCommand property.
             // Unfortunately, we have no way of enforcing it at compile time.
             assert(0);
@@ -179,10 +177,10 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 
 #ifndef Q_OS_MAC
     // Swap minimize and close buttons on non-apple OSes
-    int tmp_x = toolsUi->close_button->x();
-    toolsUi->close_button->move(toolsUi->minimize_button->x(),
-                                toolsUi->close_button->y());
-    toolsUi->minimize_button->move(tmp_x, toolsUi->minimize_button->y());
+    int tmp_x = mToolsUi->close_button->x();
+    mToolsUi->close_button->move(mToolsUi->minimize_button->x(),
+                                 mToolsUi->close_button->y());
+    mToolsUi->minimize_button->move(tmp_x, mToolsUi->minimize_button->y());
 #endif
 }
 
@@ -338,8 +336,8 @@ void ToolWindow::showAdbWarning() {
 void ToolWindow::hide()
 {
     QFrame::hide();
-    if (extendedWindow) {
-        extendedWindow->hide();
+    if (mExtendedWindow) {
+        mExtendedWindow->hide();
     }
 }
 
@@ -357,8 +355,8 @@ void ToolWindow::mousePressEvent(QMouseEvent *event)
 
 void ToolWindow::hideEvent(QHideEvent*) {
     mIsExtendedWindowActiveOnHide =
-            extendedWindow != nullptr
-            && QApplication::activeWindow() == extendedWindow;
+            mExtendedWindow != nullptr &&
+            QApplication::activeWindow() == mExtendedWindow;
 }
 
 void ToolWindow::show()
@@ -367,12 +365,12 @@ void ToolWindow::show()
     setFixedSize(size());
     QFrame::show();
 
-    if (extendedWindow) {
-        extendedWindow->show();
+    if (mExtendedWindow) {
+        mExtendedWindow->show();
 
         if (mIsExtendedWindowActiveOnHide) {
-            extendedWindow->raise();
-            extendedWindow->activateWindow();
+            mExtendedWindow->raise();
+            mExtendedWindow->activateWindow();
         }
     }
 }
@@ -413,7 +411,7 @@ void ToolWindow::runAdbShellStopAndQuit()
     if (async([this] { return this->adbShellStopRunner(); })) {
         mStartedAdbStopProcess = true;
     } else {
-        emulator_window->queueQuitEvent();
+        mEmulatorWindow->queueQuitEvent();
     }
 }
 
@@ -421,7 +419,7 @@ int ToolWindow::adbShellStopRunner() {
     QStringList args;
     const auto command = getAdbFullPath(&args);
     if (command.isNull()) {
-        emulator_window->queueQuitEvent();
+        mEmulatorWindow->queueQuitEvent();
         return 1;
     }
 
@@ -437,7 +435,7 @@ int ToolWindow::adbShellStopRunner() {
     System::get()->runCommand(fullArgs, RunOptions::WaitForCompletion |
                                                 RunOptions::HideAllOutput);
 
-    emulator_window->queueQuitEvent();
+    mEmulatorWindow->queueQuitEvent();
     return 0;
 }
 
@@ -508,51 +506,51 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         break;
     case QtUICommand::TAKE_SCREENSHOT:
         if (down) {
-            emulator_window->screenshot();
+            mEmulatorWindow->screenshot();
         }
         break;
     case QtUICommand::ENTER_ZOOM:
         if (down) {
-            emulator_window->toggleZoomMode();
+            mEmulatorWindow->toggleZoomMode();
         }
-        toolsUi->zoom_button->setChecked(emulator_window->isInZoomMode());
+        mToolsUi->zoom_button->setChecked(mEmulatorWindow->isInZoomMode());
         break;
     case QtUICommand::ZOOM_IN:
         if (down) {
-            if (emulator_window->isInZoomMode()) {
-                emulator_window->zoomIn();
+            if (mEmulatorWindow->isInZoomMode()) {
+                mEmulatorWindow->zoomIn();
             } else {
-                emulator_window->scaleUp();
+                mEmulatorWindow->scaleUp();
             }
         }
         break;
     case QtUICommand::ZOOM_OUT:
         if (down) {
-            if (emulator_window->isInZoomMode()) {
-                emulator_window->zoomOut();
+            if (mEmulatorWindow->isInZoomMode()) {
+                mEmulatorWindow->zoomOut();
             } else {
-                emulator_window->scaleDown();
+                mEmulatorWindow->scaleDown();
             }
         }
         break;
     case QtUICommand::PAN_UP:
         if (down) {
-            emulator_window->panVertical(true);
+            mEmulatorWindow->panVertical(true);
         }
         break;
     case QtUICommand::PAN_DOWN:
         if (down) {
-            emulator_window->panVertical(false);
+            mEmulatorWindow->panVertical(false);
         }
         break;
     case QtUICommand::PAN_LEFT:
         if (down) {
-            emulator_window->panHorizontal(true);
+            mEmulatorWindow->panHorizontal(true);
         }
         break;
     case QtUICommand::PAN_RIGHT:
         if (down) {
-            emulator_window->panHorizontal(false);
+            mEmulatorWindow->panHorizontal(false);
         }
         break;
     case QtUICommand::VOLUME_UP:
@@ -594,16 +592,16 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
     case QtUICommand::ROTATE_LEFT:
         if (down) {
             // TODO: remove this after we preserve zoom after rotate
-            if (emulator_window->isInZoomMode()) {
-                toolsUi->zoom_button->click();
+            if (mEmulatorWindow->isInZoomMode()) {
+                mToolsUi->zoom_button->click();
             }
 
             // Rotating the emulator preserves size, but this can be a problem
             // if, for example, a very-wide emulator in landscape is rotated to
             // portrait. To avoid this situation (which makes the scroll bars
             // appear), force a resize to the new size.
-            QSize containerSize = emulator_window->containerSize();
-            emulator_window->doResize(
+            QSize containerSize = mEmulatorWindow->containerSize();
+            mEmulatorWindow->doResize(
                     QSize(containerSize.height(), containerSize.width()), true,
                     true);
 
@@ -612,7 +610,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                 cmd == QtUICommand::ROTATE_RIGHT ?
                     kEventLayoutNext :
                     kEventLayoutPrev;
-            emulator_window->queueSkinEvent(skin_event);
+            mEmulatorWindow->queueSkinEvent(skin_event);
         }
         break;
     case QtUICommand::SHOW_MULTITOUCH:
@@ -626,8 +624,8 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
 
 template <class Action>
 void ToolWindow::uiAgentAction(Action a) const {
-    if (uiEmuAgent) {
-        a(*uiEmuAgent);
+    if (mUiEmuAgent) {
+        a(*mUiEmuAgent);
     }
 }
 
@@ -668,19 +666,19 @@ void ToolWindow::dockMainWindow()
 
 void ToolWindow::raiseMainWindow()
 {
-    emulator_window->raise();
-    emulator_window->activateWindow();
+    mEmulatorWindow->raise();
+    mEmulatorWindow->activateWindow();
 }
 
 void ToolWindow::on_back_button_pressed()
 {
-    emulator_window->raise();
+    mEmulatorWindow->raise();
     handleUICommand(QtUICommand::BACK, true);
 }
 
 void ToolWindow::on_back_button_released()
 {
-    emulator_window->activateWindow();
+    mEmulatorWindow->activateWindow();
     handleUICommand(QtUICommand::BACK, false);
 }
 
@@ -691,65 +689,65 @@ void ToolWindow::on_close_button_clicked()
 
 void ToolWindow::on_home_button_pressed()
 {
-    emulator_window->raise();
+    mEmulatorWindow->raise();
     handleUICommand(QtUICommand::HOME, true);
 }
 
 void ToolWindow::on_home_button_released()
 {
-   emulator_window->activateWindow();
-   handleUICommand(QtUICommand::HOME, false);
+    mEmulatorWindow->activateWindow();
+    handleUICommand(QtUICommand::HOME, false);
 }
 
 void ToolWindow::on_minimize_button_clicked()
 {
-    if (extendedWindow) {
-        extendedWindow->hide();
+    if (mExtendedWindow) {
+        mExtendedWindow->hide();
     }
     this->hide();
-    emulator_window->showMinimized();
+    mEmulatorWindow->showMinimized();
 }
 
 void ToolWindow::on_power_button_pressed() {
-    emulator_window->raise();
+    mEmulatorWindow->raise();
     handleUICommand(QtUICommand::POWER, true);
 }
 
 void ToolWindow::on_power_button_released() {
-    emulator_window->activateWindow();
+    mEmulatorWindow->activateWindow();
     handleUICommand(QtUICommand::POWER, false);
 }
 
 void ToolWindow::on_volume_up_button_pressed()
 {
-    emulator_window->raise();
+    mEmulatorWindow->raise();
     handleUICommand(QtUICommand::VOLUME_UP, true);
 }
 void ToolWindow::on_volume_up_button_released()
 {
-    emulator_window->activateWindow();
+    mEmulatorWindow->activateWindow();
     handleUICommand(QtUICommand::VOLUME_UP, false);
 }
 void ToolWindow::on_volume_down_button_pressed()
 {
-    emulator_window->raise();
+    mEmulatorWindow->raise();
     handleUICommand(QtUICommand::VOLUME_DOWN, true);
 }
 void ToolWindow::on_volume_down_button_released()
 {
-    emulator_window->activateWindow();
+    mEmulatorWindow->activateWindow();
     handleUICommand(QtUICommand::VOLUME_DOWN, false);
 }
 
 void ToolWindow::on_overview_button_pressed()
 {
-    emulator_window->raise();
+    mEmulatorWindow->raise();
     handleUICommand(QtUICommand::OVERVIEW, true);
 }
 
 void ToolWindow::on_overview_button_released()
 {
-    emulator_window->activateWindow();
+    mEmulatorWindow->activateWindow();
     handleUICommand(QtUICommand::OVERVIEW, false);
 }
 
@@ -774,28 +772,28 @@ void ToolWindow::on_zoom_button_clicked()
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
     // Show the tabbed pane
-    if (extendedWindow) {
+    if (mExtendedWindow) {
         // It already exists. Don't create another.
         // (But raise it in case it's hidden.)
-        extendedWindow->raise();
-        extendedWindow->showPane(pane);
+        mExtendedWindow->raise();
+        mExtendedWindow->showPane(pane);
         return;
     }
 
-    extendedWindow = new ExtendedWindow(emulator_window, this, uiEmuAgent,
-                                        &mShortcutKeyStore);
+    mExtendedWindow = new ExtendedWindow(mEmulatorWindow, this, mUiEmuAgent,
+                                         &mShortcutKeyStore);
     if (auto recorder_ptr = mUIEventRecorder.lock()) {
-        recorder_ptr->startRecording(extendedWindow);
+        recorder_ptr->startRecording(mExtendedWindow);
     }
-    extendedWindow->show();
-    extendedWindow->showPane(pane);
-    extendedWindow->raise();
+    mExtendedWindow->show();
+    mExtendedWindow->showPane(pane);
+    mExtendedWindow->raise();
 }
 
 void ToolWindow::on_more_button_clicked()
 {
     showOrRaiseExtendedWindow(PANE_IDX_LOCATION);
-    extendedWindow->activateWindow();
+    mExtendedWindow->activateWindow();
 }
 
 void ToolWindow::slot_pushCanceled()

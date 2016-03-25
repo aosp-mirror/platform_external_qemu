@@ -465,11 +465,6 @@ void EmulatorQtWindow::paintEvent(QPaintEvent *)
     }
 }
 
-void EmulatorQtWindow::activateWindow()
-{
-    mContainer.activateWindow();
-}
-
 void EmulatorQtWindow::raise()
 {
     mContainer.raise();
@@ -863,27 +858,25 @@ void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result) {
             return;
 
         case ScreenCapturer::Result::kOperationInProgress:
-            msg += tr("Another screen capture is already in progress.<br/>");
-            msg += tr("Please try again later.");
+            msg = tr("Another screen capture is already in progress.<br/>"
+                     "Please try again later.");
             break;
         case ScreenCapturer::Result::kCaptureFailed:
-            msg += tr("The screenshot could not be captured.<br/>"
-                      "Check settings to verify that your chosen adb path is "
-                      "valid.");
+            msg = tr("The screenshot could not be captured.<br/>"
+                     "Check settings to verify that your chosen adb path is "
+                     "valid.");
             break;
         case ScreenCapturer::Result::kSaveLocationInvalid:
-            msg +=
-                    tr("The screenshot save location is invalid.<br/>"
-                       "Check the settings page and ensure the directory "
-                       "exists and is writeable.");
+            msg = tr("The screenshot save location is invalid.<br/>"
+                     "Check the settings page and ensure the directory "
+                     "exists and is writeable.");
             break;
         case ScreenCapturer::Result::kPullFailed:
-            msg +=
-                    tr("The screenshot could not be loaded from the device.");
+            msg = tr("The screenshot could not be loaded from the device.");
             break;
         default:
-            msg += tr("There was an unknown error while capturing the "
-                      "screenshot.");
+            msg = tr("There was an unknown error while capturing the "
+                     "screenshot.");
     }
 
     showErrorDialog(msg, tr("Screenshot"));
@@ -944,32 +937,32 @@ void EmulatorQtWindow::installDone(ApkInstaller::Result result,
 
         case ApkInstaller::Result::kOperationInProgress:
             msg = tr("Another APK install is already in progress.<br/>"
-                       "Please try again after it completes.");
+                     "Please try again after it completes.");
             break;
 
         case ApkInstaller::Result::kApkPermissionsError:
             msg = tr("Unable to read the given APK.<br/>"
-                       "Ensure that the file is readable.");
+                     "Ensure that the file is readable.");
             break;
 
         case ApkInstaller::Result::kAdbConnectionFailed:
-            msg += tr("Failed to start adb.<br/>"
-                       "Check settings to verify your chosen adb path is "
-                       "valid.");
+            msg = tr("Failed to start adb.<br/>"
+                     "Check settings to verify your chosen adb path is "
+                     "valid.");
             break;
 
         case ApkInstaller::Result::kDeviceStorageFull:
-            msg += tr("The virtual device storage is full.<br/>"
+            msg = tr("The virtual device storage is full.<br/>"
                      "Clear space and try again.");
             break;
 
         case ApkInstaller::Result::kInstallFailed:
-            msg += tr("The APK failed to install.<br/> Error: %1")
-                           .arg(errorString.c_str());
+            msg = tr("The APK failed to install.<br/> Error: %1")
+                          .arg(errorString.c_str());
             break;
 
         default:
-            msg += tr("There was an unknown error while installing the APK.");
+            msg = tr("There was an unknown error while installing the APK.");
     }
 
     showErrorDialog(msg, tr("APK Installer"));
