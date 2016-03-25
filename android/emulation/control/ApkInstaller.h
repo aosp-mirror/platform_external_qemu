@@ -34,6 +34,7 @@ public:
         kOperationInProgress,
         kApkPermissionsError,
         kAdbConnectionFailed,
+        kDeviceStorageFull,
         kInstallFailed,
         kUnknownError
     };
