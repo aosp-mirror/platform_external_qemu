@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9c4da65c_94498a62",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-25T01:17:07Z",
+      "side": 1,
+      "message": "It may be worth noting why we mask of SIGCHLD in all other threads, since its not obvious why its masked off in the first place (unless you\u0027re familiar with QEMU).",
+      "range": {
+        "startLine": 122,
+        "startChar": 4,
+        "endLine": 125,
+        "endChar": 48
+      },
+      "revId": "38014e483b08edf06f5fe12f57124a2d80f11a36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
