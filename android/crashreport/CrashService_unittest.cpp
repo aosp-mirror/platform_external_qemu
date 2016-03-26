@@ -105,7 +105,9 @@ TEST(CrashService, startAttachWaitCrash) {
     crash->startCrashServer(crashpipe.mServer);
     std::vector<std::string> cmdline = getTestCrasherCmdLine(crashpipe.mClient);
 
-    int pid = CrashSystem::spawnService(cmdline);
+    auto process = CrashSystem::spawnService(cmdline);
+    EXPECT_TRUE(bool(process));
+    int pid = process->getPid();
     EXPECT_GT(pid, 0);
     int64_t waitduration = crash->waitForDumpFile(pid, 10000);
     EXPECT_NE(waitduration, -1);
@@ -127,7 +129,10 @@ TEST(CrashService, startAttachWaitNoCrash) {
     crash->startCrashServer(crashpipe.mServer);
     std::vector<std::string> cmdline = getTestCrasherCmdLine(crashpipe.mClient);
     cmdline.push_back(StringView("-nocrash"));
-    int pid = CrashSystem::spawnService(cmdline);
+
+    auto process = CrashSystem::spawnService(cmdline);
+    EXPECT_TRUE(bool(process));
+    int pid = process->getPid();
     EXPECT_GT(pid, 0);
     int64_t waitduration = crash->waitForDumpFile(pid, 10000);
     EXPECT_EQ(waitduration, -1);
@@ -143,7 +148,10 @@ TEST(CrashService, startWaitNoAttach) {
     crash->startCrashServer(crashpipe.mServer);
     std::vector<std::string> cmdline = getTestCrasherCmdLine(crashpipe.mClient);
     cmdline.push_back(StringView("-noattach"));
-    int pid = CrashSystem::spawnService(cmdline);
+
+    auto process = CrashSystem::spawnService(cmdline);
+    EXPECT_TRUE(bool(process));
+    int pid = process->getPid();
     EXPECT_GT(pid, 0);
     int64_t waitduration = crash->waitForDumpFile(pid, 1);
     EXPECT_EQ(waitduration, -1);
@@ -160,7 +168,11 @@ TEST(CrashService, startAttachWaitTimeout) {
     std::vector<std::string> cmdline = getTestCrasherCmdLine(crashpipe.mClient);
     cmdline.push_back(StringView("-delay_ms"));
     cmdline.push_back(StringView("100"));
-    int pid = CrashSystem::spawnService(cmdline);
+
+    auto process = CrashSystem::spawnService(cmdline);
+    EXPECT_TRUE(bool(process));
+    int pid = process->getPid();
+    EXPECT_GT(pid, 0);
     EXPECT_GT(pid, 0);
     int64_t waitduration = crash->waitForDumpFile(pid, 1);
     EXPECT_EQ(waitduration, -1);

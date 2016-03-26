@@ -41,6 +41,7 @@
 #define I(...) printf(__VA_ARGS__)
 
 using android::base::PathUtils;
+using android::base::Process;
 using android::base::StringView;
 using android::base::System;
 using android::base::Uuid;
@@ -242,9 +243,16 @@ bool crashhandler_init() {
             CrashSystem::get()->getCrashServiceCmdLine(crashpipe.mServer,
                                                        procident);
 
-    int pid = CrashSystem::spawnService(cmdline);
-    if (pid > 0) {
-        CrashReporter::get()->setupChildCrashProcess(pid);
+    std::unique_ptr<Process> process = CrashSystem::spawnService(cmdline);
+    if (process) {
+        CrashReporter::get()->setupChildCrashProcess(process->getPid());
+        // We will leak this |Process| object upon destruction.  Since the
+        // CrashService is our child process, but _is designed_ to oulive us, we
+        // can not successfully reap it when exiting. |Process| tries to reap
+        // the child process at destruction, and will complain loudly if it
+        // thinks we are leaking the process (which we are). So, leak the object
+        // as well.
+        process.release();
     } else {
         W("Could not spawn crash service\n");
         return false;

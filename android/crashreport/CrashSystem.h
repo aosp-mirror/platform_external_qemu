@@ -15,7 +15,9 @@
 #pragma once
 
 #include "android/base/Compiler.h"
+#include "android/base/system/Process.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -97,7 +99,8 @@ public:
     // Takes path to crash dump as argument
     static bool isDump(const std::string& str);
 
-    static int spawnService(const std::vector<std::string>& commandLine);
+    static std::unique_ptr<android::base::Process> spawnService(
+            const std::vector<std::string>& commandLine);
 
 protected:
     static CrashSystem* setForTesting(CrashSystem* crashsystem);
