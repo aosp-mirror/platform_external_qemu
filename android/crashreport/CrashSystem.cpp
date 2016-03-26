@@ -52,9 +52,10 @@ namespace crashreport {
 
 using ::android::base::LazyInstance;
 using ::android::base::PathUtils;
-using ::android::base::RunOptions;
+using ::android::base::Process;
 using ::android::base::StringFormat;
 using ::android::base::System;
+using std::unique_ptr;
 
 namespace {
 
@@ -122,11 +123,13 @@ CrashSystem* sCrashSystemForTesting = nullptr;
 
 }  // namespace
 
-int CrashSystem::spawnService(const std::vector<std::string>& commandLine) {
-    System::Pid pid;
-    auto success = System::get()->runCommand(commandLine, RunOptions::Default,
-                                             System::kInfinite, nullptr, &pid);
-    return success ? pid : -1;
+unique_ptr<Process> CrashSystem::spawnService(
+        const std::vector<std::string>& commandLine) {
+    unique_ptr<Process> process(new Process(commandLine));
+    if (process->start()) {
+        return process;
+    }
+    return nullptr;
 }
 
 const std::string& CrashSystem::getCaBundlePath() {
