@@ -75,6 +75,8 @@ int main(int argc, char **argv) {
         "arm"
 #elif defined(TARGET_I386)
         "x86"
+#elif defined(TARGET_X86_64)
+        "x86_64"
 #elif defined(TARGET_MIPS)
         "mips"
 #elif defined(TARGET_MIPS64)
@@ -184,8 +186,8 @@ int main(int argc, char **argv) {
                                                         opts,
                                                         avd,
                                                         coreHwIniPath,
-                                                        false // is_qemu2
-                                                        );
+                                                        false, // is_qemu2
+                                                        kTargetArch);
     if (!qemuParams) {
         return 1;
     }
