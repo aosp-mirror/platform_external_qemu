@@ -1336,7 +1336,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
 }
 
 
-bool handleCpuAcceleration(AndroidOptions* opts, AvdInfo* avd,
+bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                            CpuAccelMode* accel_mode, char* accel_status) {
     /* Handle CPU acceleration options. */
     if (opts->no_accel) {

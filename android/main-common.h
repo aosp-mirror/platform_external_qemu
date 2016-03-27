@@ -89,7 +89,7 @@ typedef enum {
  *  status - a string about cpu acceleration status
  * Return: if cpu acceleration is available
  */
-bool handleCpuAcceleration(AndroidOptions* opts, AvdInfo* avd,
+bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                            CpuAccelMode* accel_mode, char* accel_status);
 
 ANDROID_END_HEADER

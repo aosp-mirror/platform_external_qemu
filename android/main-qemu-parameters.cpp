@@ -9,12 +9,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/main-common.h"
 #include "android/main-qemu-parameters.h"
 
 #include "android/emulation/ParameterList.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_data.h"
 #include "android/utils/property_file.h"
+#include "android/utils/system.h"
 
 #include <memory>
 
@@ -40,10 +42,11 @@ void qemu_parameters_free(QemuParameters* params) {
 
 QemuParameters* qemu_parameters_create(
         const char* argv0,
-        const AndroidOptions* opts,
+        AndroidOptions* opts,
         const AvdInfo* avd,
         const char* androidHwIniPath,
-        bool is_qemu2) {
+        bool is_qemu2,
+        const char* targetArch) {
     std::unique_ptr<QemuParameters> result(new QemuParameters);
     android::ParameterList& params = result->params;
 
@@ -151,32 +154,34 @@ QemuParameters* qemu_parameters_create(
         params.add2("-net", "socket,vlan=1,mcast=230.0.0.10:1234");
     }
 
-#if defined(TARGET_I386) || defined(TARGET_X86_64)
-    char* accel_status = NULL;
-    CpuAccelMode accel_mode = ACCEL_AUTO;
-    bool accel_ok = handleCpuAcceleration(opts, avd, &accel_mode, accel_status);
+    if (targetArch &&
+        (!strcmp(targetArch, "x86") ||
+         !strcmp(targetArch, "x86_64"))) {
+        char* accel_status = NULL;
+        CpuAccelMode accel_mode = ACCEL_AUTO;
+        bool accel_ok = handleCpuAcceleration(opts, avd, &accel_mode, accel_status);
 
-    // CPU acceleration only works for x86 and x86_64 system images.
-    if (accel_mode == ACCEL_OFF && accel_ok) {
-        params.add(kDsiableAccelerator);
-    } else if (accel_mode == ACCEL_ON) {
-        if (!accel_ok) {
-            derror("CPU acceleration not supported on this machine!");
-            derror("Reason: %s", accel_status);
-            return NULL;
+        // CPU acceleration only works for x86 and x86_64 system images.
+        if (accel_mode == ACCEL_OFF && accel_ok) {
+            params.add(kDisableAccelerator);
+        } else if (accel_mode == ACCEL_ON) {
+            if (!accel_ok) {
+                derror("CPU acceleration not supported on this machine!");
+                derror("Reason: %s", accel_status);
+                return NULL;
+            }
+            params.add(kEnableAccelerator);
+        } else {
+            params.add(accel_ok ? kEnableAccelerator : kDisableAccelerator);
         }
-        params.add(kEnableAccelerator);
-    } else {
-        params.add(accel_ok ? kEnableAccelerator : kDisableAccelerator);
-    }
 
-    AFREE(accel_status);
-#else
-    if (VERBOSE_CHECK(init)) {
-        dwarning("CPU acceleration only works with x86/x86_64 "
-            "system images.");
+        AFREE(accel_status);
+    } else {
+        if (VERBOSE_CHECK(init)) {
+            dwarning("CPU acceleration only works with x86/x86_64 "
+                    "system images.");
+        }
     }
-#endif
 
     params.add2("-android-hw", androidHwIniPath);
 
