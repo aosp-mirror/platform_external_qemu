@@ -746,10 +746,16 @@ void EmulatorQtWindow::slot_setWindowTitle(const QString *title, QSemaphore *sem
 void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
                                        const QRect* rect,
                                        QSemaphore* semaphore) {
-    // Zooming forces the scroll bar to be visible for sizing purpose, so reset them
-    // back to the default policy.
-    mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    // Zooming forces the scroll bar to be visible for sizing purposes. They
+    // should never be shown when not in zoom mode, and will be set to
+    // "ScrollBarAsNeeded" when entering zoom mode.
+    if (mInZoomMode) {
+        mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    } else {
+        mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    }
 
     mBackingSurface = surface;
 
@@ -1277,6 +1283,10 @@ void EmulatorQtWindow::toggleZoomMode()
         doResize(mContainer.size());
         mOverlay.hide();
     } else {
+        // Ensure the scroll bars are visible for resizing purposes.
+        mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
         mOverlay.showForZoom();
     }
 }
