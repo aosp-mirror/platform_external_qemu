@@ -777,6 +777,7 @@ void EmulatorQtWindow::slot_scrollRangeChanged(int min, int max)
 void EmulatorQtWindow::screenshot()
 {
     if (mScreenCapturer && mScreenCapturer->inFlight()) {
+        // Modal dialogs should prevent this
         return;
     }
 
@@ -807,8 +808,12 @@ void EmulatorQtWindow::screenshot()
     if (!mScreenCapturer) {
         mScreenCapturer = ScreenCapturer::create(
                 android::base::ThreadLooper::get(), args,
-                savePath.toStdString(), [this](ScreenCapturer::Result result) {
-                    EmulatorQtWindow::screenshotDone(result);
+                savePath.toStdString(),
+                [this](ScreenCapturer::Result result, StringView outputFilePath,
+                       StringView errorString) {
+                    EmulatorQtWindow::screenshotDone(result, outputFilePath,
+                                                     errorString);
+
                 });
     } else {
         mScreenCapturer->setAdbCommandArgs(args);
@@ -821,7 +826,11 @@ void EmulatorQtWindow::screenshot()
     mScreenCapturer->start();
 }
 
-void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result) {
+void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result,
+                                      StringView outputFilePath,
+                                      StringView errorString) {
+    QString detail = errorString.c_str();
+    detail = detail.replace('\n', "<br/>");
     QString msg;
     switch (result) {
         case ScreenCapturer::Result::kSuccess:
@@ -832,9 +841,9 @@ void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result) {
             msg += tr("Please try again later.");
             break;
         case ScreenCapturer::Result::kCaptureFailed:
-            msg += tr("The screenshot could not be captured.<br/>"
-                      "Check settings to verify that your chosen adb path is "
-                      "valid.");
+            msg += tr(
+                    "The screenshot could not be captured. Output:<br/><br/>");
+            msg += detail;
             break;
         case ScreenCapturer::Result::kSaveLocationInvalid:
             msg +=
@@ -844,11 +853,13 @@ void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result) {
             break;
         case ScreenCapturer::Result::kPullFailed:
             msg +=
-                    tr("The screenshot could not be loaded from the device.");
+                    tr("The screenshot could not be loaded from the device."
+                       "Output:<br/><br/>");
+            msg += detail;
             break;
         default:
-            msg += tr("There was an unknown error while capturing the "
-                      "screenshot.");
+            msg += tr("Unexpected error:<br/><br/>");
+            msg += detail;
     }
 
     showErrorDialog(msg, tr("Screenshot"));

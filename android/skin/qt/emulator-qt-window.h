@@ -226,7 +226,9 @@ private:
     QString getTmpImagePath();
     void setFrameOnTop(QFrame* frame, bool onTop);
 
-    void screenshotDone(android::emulation::ScreenCapturer::Result result);
+    void screenshotDone(android::emulation::ScreenCapturer::Result result,
+                        android::base::StringView outputFilePath,
+                        android::base::StringView errorString);
 
     void* mBatteryState;
 

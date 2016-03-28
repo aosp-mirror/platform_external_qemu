@@ -38,7 +38,10 @@ public:
         kUnknownError
     };
 
-    using ResultCallback = std::function<void(Result result)>;
+    using ResultCallback =
+            std::function<void(Result result,
+                               android::base::StringView outputFilePath,
+                               android::base::StringView errorString)>;
 
     // Entry point to ScreenCapturer.
     // Objects of this type are managed via std::shared_ptr
