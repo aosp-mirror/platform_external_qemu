@@ -90,7 +90,7 @@ private:
     bool isAdbVersionCurrent(const std::string& sdkRootDirectory) const;
     void showAdbWarning();
 
-    int adbShellStopRunner();
+    void adbShellStopRunner();
     void handleUICommand(QtUICommand cmd, bool down);
 
     template <class Action>
