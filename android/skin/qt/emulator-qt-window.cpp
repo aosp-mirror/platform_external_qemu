@@ -746,11 +746,6 @@ void EmulatorQtWindow::slot_setWindowTitle(const QString *title, QSemaphore *sem
 void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
                                        const QRect* rect,
                                        QSemaphore* semaphore) {
-    // Zooming forces the scroll bar to be visible for sizing purpose, so reset them
-    // back to the default policy.
-    mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-
     mBackingSurface = surface;
 
     showNormal();
@@ -768,6 +763,17 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
     mNextIsZoom = false;
 
     show();
+
+    // Zooming forces the scroll bar to be visible for sizing purposes. They
+    // should never be shown when not in zoom mode, and should only show when
+    // necessary when in zoom mode.
+    if (mInZoomMode) {
+        mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    } else {
+        mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    }
 
     // If the user isn't using an x86 AVD, make sure its because their machine doesn't support
     // CPU acceleration. If it does, recommend switching to an x86 AVD.
@@ -1274,9 +1280,19 @@ void EmulatorQtWindow::toggleZoomMode()
 
     // Exiting zoom mode snaps back to aspect ratio
     if (!mInZoomMode) {
+
+        // Scroll bars should be turned off immediately.
+        mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
         doResize(mContainer.size());
         mOverlay.hide();
     } else {
+        // Once in zoom mode, the scroll bars should automatically show up
+        // when necessary.
+        mContainer.setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        mContainer.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
         mOverlay.showForZoom();
     }
 }
