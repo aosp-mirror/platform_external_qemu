@@ -21,10 +21,11 @@ ANDROID_BEGIN_HEADER
 typedef struct QemuParameters QemuParameters;
 
 QemuParameters* qemu_parameters_create(const char* argv0,
-                                       const AndroidOptions* opts,
+                                       AndroidOptions* opts,
                                        const AvdInfo* avd,
                                        const char* androidHwInitPath,
-                                       bool is_qemu2);
+                                       bool is_qemu2,
+                                       const char* targetArch);
 
 size_t qemu_parameters_size(const QemuParameters* params);
 char** qemu_parameters_array(const QemuParameters* params);
