@@ -23,11 +23,10 @@
 #include <QMoveEvent>
 #include <QObject>
 #include <QPainter>
+#include <QProcess>
 #include <QResizeEvent>
 #include <QWidget>
 
-#include "android/base/StringView.h"
-#include "android/emulation/control/ScreenCapturer.h"
 #include "android/globals.h"
 #include "android/skin/event.h"
 #include "android/skin/surface.h"
@@ -192,11 +191,16 @@ private slots:
     void slot_avdArchWarningMessageAccepted();
     void slot_gpuWarningMessageAccepted();
 
+    void slot_showProcessErrorDialog(QProcess::ProcessError exitStatus);
+
     /*
      Here are conventional slots that perform interesting high-level functions in the emulator. These can be hooked up to signals
      from UI elements or called independently.
      */
 public slots:
+    void slot_screencapFinished(int exitStatus);
+    void slot_screencapPullFinished(int exitStatus);
+
     void activateWindow();
     void raise();
     void setForwardShortcutsToDevice(int index);
@@ -226,10 +230,6 @@ private:
     QString getTmpImagePath();
     void setFrameOnTop(QFrame* frame, bool onTop);
 
-    void screenshotDone(android::emulation::ScreenCapturer::Result result,
-                        android::base::StringView outputFilePath,
-                        android::base::StringView errorString);
-
     void* mBatteryState;
 
     QTimer          mStartupTimer;
@@ -249,13 +249,13 @@ private:
     bool mForwardShortcutsToDevice;
     QPoint mPrevMousePosition;
 
+    QProcess mScreencapProcess;
+    QProcess mScreencapPullProcess;
     MainLoopThread *mMainLoopThread;
 
     QMessageBox mAvdWarningBox;
     QMessageBox mGpuWarningBox;
     bool mFirstShowEvent;
-
-    std::shared_ptr<android::emulation::ScreenCapturer> mScreenCapturer;
 };
 
 struct SkinSurface {

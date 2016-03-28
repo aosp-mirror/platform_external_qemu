@@ -14,7 +14,6 @@
 #include <pthread.h>
 #endif
 
-#include "android/base/async/ThreadLooper.h"
 #include "android/base/system/System.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/qt/qt_path.h"
@@ -23,7 +22,6 @@
 #include "android/skin/winsys.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/emulator-qt-no-window.h"
-#include "android/skin/qt/QtLooper.h"
 #include "android/utils/setenv.h"
 #include "android/main-common-ui.h"
 
@@ -145,8 +143,6 @@ extern void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv) {
             D("Could not load font resource: \":/lib/fonts/Roboto-Medium");
         }
     }
-
-    android::base::ThreadLooper::setLooper(android::qt::createLooper());
 
     GlobalState* g = globalState();
     g->argc = argc;
