@@ -65,7 +65,9 @@ public:
     const UiEmuAgent* getUiEmuAgent() const { return uiEmuAgent; }
 
     QString getAdbFullPath(QStringList *args);
+    QString getScreenshotSaveFile();
 
+    void runAdbInstall(const QString &path);
     void runAdbPush(const QList<QUrl> &urls);
     void runAdbShellStopAndQuit();
 
@@ -108,9 +110,11 @@ private:
     QBoxLayout *top_layout;
     const UiEmuAgent *uiEmuAgent;
     Ui::ToolControls *toolsUi;
+    QProcess mInstallProcess;
     QProcess mPushProcess;
     bool mStartedAdbStopProcess = false;
     QProgressDialog mPushDialog;
+    QProgressDialog mInstallDialog;
     QQueue<QUrl> mFilesToPush;
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
     bool mIsExtendedWindowActiveOnHide = false;
@@ -137,6 +141,9 @@ private slots:
     void on_volume_up_button_pressed();
     void on_volume_up_button_released();
     void on_zoom_button_clicked();
+
+    void slot_installCanceled();
+    void slot_installFinished(int exitStatus);
 
     void slot_pushCanceled();
     void slot_pushFinished(int exitStatus);
