@@ -11,35 +11,85 @@
 
 #pragma once
 
+#include "android/base/StringView.h"
+
 #include <string>
+#include <tuple>
 
 namespace android {
 namespace base {
 
 // Class |Version| is a class for software version manipulations
 // it is able to parse, store, compare and convert version back to string
-// Expected string format is "major.minor.micro", where all three components
-// are unsigned numbers (and, hopefully, reasonably small)
+// Expected string format is "major.minor.micro[.build]", where all
+// components are unsigned numbers (and, hopefully, reasonably small)
 class Version {
 public:
-    explicit Version(const char* ver);
-    Version(unsigned int major, unsigned int minor, unsigned int micro);
+    enum Component { kMajor, kMinor, kMicro, kBuild };
 
-    bool isValid() const;
+    using ComponentType = unsigned int;
 
-    bool operator<(const Version& other) const;
-    bool operator==(const Version& other) const;
-    bool operator!=(const Version& other) const;
+    // This is the value for an invalid/missing version component.
+    static constexpr ComponentType kNone = static_cast<ComponentType>(-1);
+
+    explicit Version(StringView ver);
+    constexpr Version(ComponentType major,
+                      ComponentType minor,
+                      ComponentType micro,
+                      ComponentType build = 0);
+
+    constexpr bool isValid() const;
+
+    constexpr bool operator<(const Version& other) const;
+    constexpr bool operator==(const Version& other) const;
+    constexpr bool operator!=(const Version& other) const;
+
+    static constexpr Version invalid();
 
     std::string toString() const;
 
-    static Version Invalid();
+    template <Component C>
+    constexpr ComponentType component() const {
+        return std::get<static_cast<size_t>(C)>(mData);
+    }
 
 private:
-    unsigned int mMajor;
-    unsigned int mMinor;
-    unsigned int mMicro;
+    ComponentType& component(Component c);
+
+private:
+    static const int kComponentCount = kBuild + 1;
+
+    std::tuple<ComponentType, ComponentType, ComponentType, ComponentType>
+            mData;
 };
+
+// all constexpr functions have to be defined in the header, just like templates
+
+constexpr Version::Version(ComponentType major,
+                           ComponentType minor,
+                           ComponentType micro,
+                           ComponentType build)
+    : mData(major, minor, micro, build) {}
+
+constexpr bool Version::isValid() const {
+    return *this != invalid();
+}
+
+constexpr bool Version::operator<(const Version& other) const {
+    return mData < other.mData;
+}
+
+constexpr bool Version::operator==(const Version& other) const {
+    return mData == other.mData;
+}
+
+constexpr bool Version::operator!=(const Version& other) const {
+    return !(*this == other);
+}
+
+constexpr Version Version::invalid() {
+    return Version(kNone, kNone, kNone);
+}
 
 }  // namespace android
 }  // namespace base

@@ -10,118 +10,78 @@
 // GNU General Public License for more details.
 
 #include "android/base/Version.h"
-
 #include "android/base/StringFormat.h"
 
-#include <errno.h>
-#include <limits.h>
-#include <stdlib.h>
-
 #include <sstream>
+#include <assert.h>
 
 namespace android {
 namespace base {
 
-// parse the current part of the version string and return if there's anything
-// else left
-namespace {
+static constexpr StringView kInvalidVersion = "invalid";
 
-enum VersionParseResult {
-    kContinue,
-    kComplete,
-    kError,
-};
-
-}  // namespace
-
-static VersionParseResult parseVersionPart(const char* start,
-                                           char** end,
-                                           unsigned int* value) {
-    errno = 0;
-    const int val = strtol(start, end, 10);
-    if (errno) {
-        return kError;
-    }
-    if (*end == start || (**end != '.' && **end != 0)) {
-        return kError;
-    }
-
-    *value = val;
-    return **end == '.' ? kContinue : kComplete;
+static bool isEof(std::istream& in) {
+    return in.peek() == std::char_traits<char>::eof();
 }
 
-Version::Version(const char* ver) : mMajor(0), mMinor(0), mMicro(0) {
-    char* end;
-    VersionParseResult res = parseVersionPart(ver, &end, &mMajor);
-    if (res != kContinue) {
-        if (res == kError) {
-            *this = Invalid();
-        }
+Version::Version(StringView ver) : mData() {
+    std::istringstream in;
+    in.rdbuf()->pubsetbuf(const_cast<char*>(ver.data()), ver.size());
+    in >> std::noskipws;
+
+    // read the main part, major.minor.micro
+    in >> std::get<kMajor>(mData);
+    if (!in) {
+        *this = invalid();
         return;
     }
 
-    res = parseVersionPart(end + 1, &end, &mMinor);
-    if (res != kContinue) {
-        if (res == kError) {
-            *this = Invalid();
+    static const char delimiters[kComponentCount - 1] = {'.', '.', '-'};
+    for (int comp = kMinor; comp <= kBuild && !isEof(in); ++comp) {
+        char c;
+        in >> c >> component(static_cast<Component>(comp));
+        if (c != delimiters[comp - 1] || !in) {
+            *this = invalid();
+            return;
         }
-        return;
     }
 
-    res = parseVersionPart(end + 1, &end, &mMicro);
-    if (res != kComplete) {
-        *this = Invalid();
+    // make sure the stream is consumed to the end
+    if (!isEof(in)) {
+        *this = invalid();
     }
-}
-
-Version::Version(unsigned int major, unsigned int minor, unsigned int micro)
-    : mMajor(major), mMinor(minor), mMicro(micro) {
-}
-
-bool Version::isValid() const {
-    return *this != Invalid();
-}
-
-bool Version::operator<(const Version& other) const {
-    if (mMajor < other.mMajor) {
-        return true;
-    }
-    if (mMajor > other.mMajor) {
-        return false;
-    }
-
-    if (mMinor < other.mMinor) {
-        return true;
-    }
-    if (mMinor > other.mMinor) {
-        return false;
-    }
-
-    return mMicro < other.mMicro;
-}
-
-bool Version::operator==(const Version& other) const {
-    return mMajor == other.mMajor
-            && mMinor == other.mMinor
-            && mMicro == other.mMicro;
-}
-
-bool Version::operator!=(const Version& other) const {
-    return !(*this == other);
 }
 
 std::string Version::toString() const {
     if (!isValid()) {
-        return std::string("invalid");
+        return kInvalidVersion;
     }
 
-    const std::string res = StringFormat("%u.%u.%u", mMajor, mMinor, mMicro);
+    std::string res = StringFormat("%u.%u.%u", component<kMajor>(),
+                                   component<kMinor>(), component<kMicro>());
+    if (component<kBuild>() != kNone && component<kBuild>() != 0) {
+        StringAppendFormat(&res, "-%u", component<kBuild>());
+    }
     return res;
 }
 
-Version Version::Invalid() {
-    static const Version invalid(UINT_MAX, UINT_MAX, UINT_MAX);
-    return invalid;
+Version::ComponentType& Version::component(Version::Component c) {
+    // this has to be a switch: tuple isn't a container, so it doesn't
+    // provide runtime indexing
+    switch (c) {
+        case kMajor:
+            return std::get<kMajor>(mData);
+        case kMinor:
+            return std::get<kMinor>(mData);
+        case kMicro:
+            return std::get<kMicro>(mData);
+        case kBuild:
+            return std::get<kBuild>(mData);
+    }
+
+    assert(false);
+    static ComponentType none = kNone;
+    return none;
 }
 
 }  // namespace android

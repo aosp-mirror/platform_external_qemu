@@ -69,7 +69,7 @@ static Version parseVersion(xmlNodePtr node, const xmlChar* ns) {
         }
     }
     if (!revNode) {
-        return Version::Invalid();
+        return Version::invalid();
     }
 
     int major = -1, minor = -1, micro = -1;
@@ -96,7 +96,7 @@ static Version parseVersion(xmlNodePtr node, const xmlChar* ns) {
     }
 
     if (major < 0 || minor < 0 || micro < 0) {
-        return Version::Invalid();
+        return Version::invalid();
     }
 
     return Version(major, minor, micro);
@@ -109,16 +109,16 @@ Version VersionExtractor::extractVersion(const std::string& data) const {
     const xmlAutoPtr<xmlDoc> doc(
             xmlReadMemory(data.c_str(), data.size(), "none.xml", nullptr, 0));
     if (!doc) {
-        return Version::Invalid();
+        return Version::invalid();
     }
 
     const xmlNodePtr root = xmlDocGetRootElement(doc.get());
     if (!root->ns ||
         xmlStrcmp(root->ns->href, BAD_CAST kXmlNamespace) != 0) {
-        return Version::Invalid();
+        return Version::invalid();
     }
 
-    Version ver = Version::Invalid();
+    Version ver = Version::invalid();
 
     // iterate over all nodes in the document and find all <tool> ones
     for (xmlNodePtr node = root->children; node; node = node->next) {
