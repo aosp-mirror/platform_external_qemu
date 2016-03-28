@@ -64,7 +64,6 @@
 #include <string>
 
 using namespace android::base;
-using android::emulation::ApkInstaller;
 using android::emulation::ScreenCapturer;
 using std::string;
 
@@ -104,8 +103,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
                           " manufacturer to see if there is an updated driver available."),
                        QMessageBox::Ok,
                        this),
-        mFirstShowEvent(true),
-        mInstallDialog(this)
+        mFirstShowEvent(true)
 {
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
@@ -146,14 +144,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget *parent) :
     QObject::connect(this, &EmulatorQtWindow::runOnUiThread, this, &EmulatorQtWindow::slot_runOnUiThread);
     QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit, this, &EmulatorQtWindow::slot_clearInstance);
 
-    // TODO: make dialogs affected by themes and changes
-    mInstallDialog.setWindowTitle(tr("APK Installer"));
-    mInstallDialog.setLabelText(tr("Installing APK..."));
-    mInstallDialog.setRange(0, 0);  // Makes it a "busy" dialog
-    mInstallDialog.close();
-    QObject::connect(&mInstallDialog, SIGNAL(canceled()), this,
-                     SLOT(slot_installCanceled()));
-
     QObject::connect(mContainer.horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_horizontalScrollChanged(int)));
     QObject::connect(mContainer.verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(slot_verticalScrollChanged(int)));
     QObject::connect(mContainer.horizontalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(slot_scrollRangeChanged(int,int)));
@@ -187,12 +177,6 @@ EmulatorQtWindow::~EmulatorQtWindow()
     if (mScreenCapturer) {
         mScreenCapturer->cancel();
     }
-
-    if (mApkInstaller) {
-        mApkInstaller->cancel();
-    }
-    mInstallDialog.disconnect();
-    mInstallDialog.close();
 
     deleteErrorDialog();
     if (mToolWindow) {
@@ -338,19 +322,12 @@ void EmulatorQtWindow::dragEnterEvent(QDragEnterEvent *event)
 
 void EmulatorQtWindow::dropEvent(QDropEvent *event)
 {
-    // Modal dialogs don't prevent drag-and-drop! Manually check for a modal
-    // dialog, and if so, reject the event.
-    if (QApplication::activeModalWidget() != nullptr) {
-        event->ignore();
-        return;
-    }
-
     // Get the first url - if it's an APK and the only file, attempt to install it
     QList<QUrl> urls = event->mimeData()->urls();
     QString url = urls[0].toLocalFile();
 
     if (url.endsWith(".apk") && urls.length() == 1) {
-        runAdbInstall(url);
+        mToolWindow->runAdbInstall(url);
         return;
     } else {
 
@@ -875,87 +852,6 @@ void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result) {
     }
 
     showErrorDialog(msg, tr("Screenshot"));
-}
-
-void EmulatorQtWindow::slot_installCanceled() {
-    if (mApkInstaller && mApkInstaller->inFlight()) {
-        mApkInstaller->cancel();
-    }
-}
-
-void EmulatorQtWindow::runAdbInstall(const QString& path) {
-    if (mApkInstaller && mApkInstaller->inFlight()) {
-        // Modal dialogs should prevent this.
-        return;
-    }
-
-    QStringList qargs;
-    QString command = mToolWindow->getAdbFullPath(&qargs);
-    if (command.isNull()) {
-        showErrorDialog(
-                tr("Could not locate 'adb'<br/>"
-                   "Check settings to verify that your chosen adb path is "
-                   "valid."),
-                tr("APK Installer"));
-        return;
-    }
-
-    StringVector args = {command.toStdString()};
-    for (const auto arg : qargs) {
-        args.push_back(arg.toStdString());
-    }
-
-    if (!mApkInstaller) {
-        mApkInstaller = ApkInstaller::create(
-                android::base::ThreadLooper::get(), args, path.toStdString(),
-                [this](ApkInstaller::Result result, StringView errorString) {
-                    EmulatorQtWindow::installDone(result, errorString);
-                });
-    } else {
-        mApkInstaller->setApkFilePath(path.toStdString());
-        mApkInstaller->setAdbCommandArgs(args);
-    }
-
-    // Show a dialog so the user knows something is happening
-    mInstallDialog.show();
-    mApkInstaller->start();
-}
-
-void EmulatorQtWindow::installDone(ApkInstaller::Result result,
-                                   StringView errorString) {
-    mInstallDialog.hide();
-
-    QString msg;
-    switch (result) {
-        case ApkInstaller::Result::kSuccess:
-            return;
-
-        case ApkInstaller::Result::kOperationInProgress:
-            msg = tr("Another APK install is already in progress.<br/>"
-                       "Please try again after it completes.");
-            break;
-
-        case ApkInstaller::Result::kApkPermissionsError:
-            msg = tr("Unable to read the given APK.<br/>"
-                       "Ensure that the file is readable.");
-            break;
-
-        case ApkInstaller::Result::kAdbConnectionFailed:
-            msg = tr("Failed to start adb.<br/>"
-                       "Check settings to verify your chosen adb path is "
-                       "valid.");
-            break;
-
-        case ApkInstaller::Result::kInstallFailed:
-            msg = tr("The APK failed to install.<br/> Error: %1")
-                           .arg(errorString.c_str());
-            break;
-
-        default:
-            msg = tr("There was an unknown error while installing the APK.");
-    }
-
-    showErrorDialog(msg, tr("APK Installer"));
 }
 
 // Convert a Qt::Key_XXX code into the corresponding Linux keycode value.

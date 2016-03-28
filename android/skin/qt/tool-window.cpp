@@ -55,6 +55,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
       uiEmuAgent(NULL),
       toolsUi(new Ui::ToolControls),
       mPushDialog(this),
+      mInstallDialog(this),
       mSizeTweaker(this) {
     Q_INIT_RESOURCE(resources);
     twInstance = this;
@@ -76,6 +77,14 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
     QCoreApplication::setOrganizationName(Ui::Settings::ORG_NAME);
     QCoreApplication::setOrganizationDomain(Ui::Settings::ORG_DOMAIN);
     QCoreApplication::setApplicationName(Ui::Settings::APP_NAME);
+
+    // TODO: make this affected by themes and changes
+    mInstallDialog.setWindowTitle(tr("APK Installer"));
+    mInstallDialog.setLabelText(tr("Installing APK..."));
+    mInstallDialog.setRange(0, 0); // Makes it a "busy" dialog
+    mInstallDialog.close();
+    QObject::connect(&mInstallDialog, SIGNAL(canceled()), this, SLOT(slot_installCanceled()));
+    QObject::connect(&mInstallProcess, SIGNAL(finished(int)), this, SLOT(slot_installFinished(int)));
 
     mPushDialog.setWindowTitle(tr("File Copy"));
     mPushDialog.setLabelText(tr("Copying files..."));
@@ -180,6 +189,13 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
 
 ToolWindow::~ToolWindow() {
     // make sure we don't receive any signals while being destroyed
+    mInstallProcess.disconnect();
+    mInstallDialog.disconnect();
+    if (mInstallProcess.state() != QProcess::NotRunning) {
+        mInstallProcess.kill();
+    }
+    mInstallDialog.close();
+
     mPushProcess.disconnect();
     mPushDialog.disconnect();
     if (mPushProcess.state() != QProcess::NotRunning) {
@@ -255,6 +271,37 @@ QString ToolWindow::getAdbFullPath(QStringList* args) {
     *args << "emulator-" + QString::number(android_base_port);
     return adbPath;
 }
+
+void ToolWindow::runAdbInstall(const QString &path)
+{
+    if (mInstallProcess.state() != QProcess::NotRunning) {
+        showErrorDialog(tr("Another APK install is currently pending.<br/>"
+                           "Try again after current APK installation completes."),
+                        tr("APK Installer"));
+        return;
+    }
+
+    // Default the -r flag to replace the current version
+    // TODO: is replace the desired default behavior?
+    // TODO: enable other flags? -lrstdg available
+    QStringList args;
+    QString command = getAdbFullPath(&args);
+    if (command.isNull()) {
+        return;
+    }
+
+    args << "install";  // The desired command
+    args << "-r";       // The flags for adb install
+    args << path;       // The path to the APK to install
+
+    // Show a dialog so the user knows something is happening
+    mInstallDialog.show();
+
+    // Keep track of this process
+    mInstallProcess.start(command, args);
+    mInstallProcess.waitForStarted();
+}
+
 
 void ToolWindow::runAdbShellStopAndQuit()
 {
@@ -646,6 +693,36 @@ void ToolWindow::on_more_button_clicked()
 {
     showOrRaiseExtendedWindow(PANE_IDX_LOCATION);
     extendedWindow->activateWindow();
+}
+
+void ToolWindow::slot_installCanceled()
+{
+    if (mInstallProcess.state() != QProcess::NotRunning) {
+        mInstallProcess.kill();
+    }
+}
+
+void ToolWindow::slot_installFinished(int exitStatus)
+{
+    mInstallDialog.close();
+
+    if (exitStatus) {
+        showErrorDialog(tr("The APK failed to install: adb could not connect to the emulator."),
+                        tr("APK Installer"));
+        return;
+    }
+
+    // "adb install" does not return a helpful exit status, so instead we parse the standard
+    // output of the process looking for "Failure \[(.*)\]"
+
+    QString output = QString(mInstallProcess.readAllStandardOutput());
+    QRegularExpression regex("Failure \\[(.*)\\]");
+    QRegularExpressionMatch match = regex.match(output);
+
+    if (match.hasMatch()) {
+        QString msg = tr("The APK failed to install. Error code: ") + match.captured(1);
+        showErrorDialog(msg, tr("APK Installer"));
+    }
 }
 
 void ToolWindow::slot_pushCanceled()
