@@ -408,19 +408,19 @@ void ToolWindow::runAdbShellStopAndQuit()
         return;
     }
 
-    if (async([this] { return this->adbShellStopRunner(); })) {
+    if (async([this] { this->adbShellStopRunner(); })) {
         mStartedAdbStopProcess = true;
     } else {
         mEmulatorWindow->queueQuitEvent();
     }
 }
 
-int ToolWindow::adbShellStopRunner() {
+void ToolWindow::adbShellStopRunner() {
     QStringList args;
     const auto command = getAdbFullPath(&args);
     if (command.isNull()) {
         mEmulatorWindow->queueQuitEvent();
-        return 1;
+        return;
     }
 
     // convert the command + arguments to the format needed in System class call
@@ -436,7 +436,6 @@ int ToolWindow::adbShellStopRunner() {
                                                 RunOptions::HideAllOutput);
 
     mEmulatorWindow->queueQuitEvent();
-    return 0;
 }
 
 void ToolWindow::runAdbPush(const QList<QUrl> &urls)
