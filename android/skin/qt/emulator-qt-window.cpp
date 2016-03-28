@@ -340,6 +340,13 @@ void EmulatorQtWindow::dragEnterEvent(QDragEnterEvent *event)
 
 void EmulatorQtWindow::dropEvent(QDropEvent *event)
 {
+    // Modal dialogs don't prevent drag-and-drop! Manually check for a modal
+    // dialog, and if so, reject the event.
+    if (QApplication::activeModalWidget() != nullptr) {
+        event->ignore();
+        return;
+    }
+
     // Get the first url - if it's an APK and the only file, attempt to install it
     QList<QUrl> urls = event->mimeData()->urls();
     QString url = urls[0].toLocalFile();
