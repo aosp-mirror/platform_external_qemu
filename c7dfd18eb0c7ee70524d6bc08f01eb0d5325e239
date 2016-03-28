@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d1cc697f_5f8404d1",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-28T17:50:52Z",
+      "side": 0,
+      "message": "why?",
+      "range": {
+        "startLine": 4,
+        "startChar": 0,
+        "endLine": 4,
+        "endChar": 52
+      },
+      "revId": "c7dfd18eb0c7ee70524d6bc08f01eb0d5325e239",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
