@@ -78,7 +78,7 @@ TEST(VersionExtractorTest, badVersion) {
                     R"(</sdk:sdk-repository>)";
 
     VersionExtractor vx;
-    EXPECT_EQ(Version::Invalid(), vx.extractVersion(xml));
+    EXPECT_EQ(Version::invalid(), vx.extractVersion(xml));
 
     // no namespace
     xml = R"(<sdk-repository>)"
@@ -91,7 +91,7 @@ TEST(VersionExtractorTest, badVersion) {
             R"(</tool>)"
             R"(</sdk-repository>)";
 
-    EXPECT_EQ(Version::Invalid(), vx.extractVersion(xml));
+    EXPECT_EQ(Version::invalid(), vx.extractVersion(xml));
 
     // no 'tool' element
     xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repository/12"> )"
@@ -104,7 +104,7 @@ TEST(VersionExtractorTest, badVersion) {
             R"(</sdk:tool1>)"
             R"(</sdk:sdk-repository>)";
 
-    EXPECT_EQ(Version::Invalid(), vx.extractVersion(xml));
+    EXPECT_EQ(Version::invalid(), vx.extractVersion(xml));
 
     // wrong namespace
     xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.windows-phone.com/sdk/iOS/repository/12"> )"
@@ -117,7 +117,7 @@ TEST(VersionExtractorTest, badVersion) {
             R"(</sdk:tool>)"
             R"(</sdk:sdk-repository>)";
 
-    EXPECT_EQ(Version::Invalid(), vx.extractVersion(xml));
+    EXPECT_EQ(Version::invalid(), vx.extractVersion(xml));
 
     // no 'revision'
     xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repository/12"> )"
@@ -130,7 +130,7 @@ TEST(VersionExtractorTest, badVersion) {
             R"(</sdk:tool>)"
             R"(</sdk:sdk-repository>)";
 
-    EXPECT_EQ(Version::Invalid(), vx.extractVersion(xml));
+    EXPECT_EQ(Version::invalid(), vx.extractVersion(xml));
 
     // no major
     xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repository/12"> )"
@@ -142,7 +142,7 @@ TEST(VersionExtractorTest, badVersion) {
             R"(</sdk:tool>)"
             R"(</sdk:sdk-repository>)";
 
-    EXPECT_EQ(Version::Invalid(), vx.extractVersion(xml));
+    EXPECT_EQ(Version::invalid(), vx.extractVersion(xml));
 
     // no minor
     xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repository/12"> )"
@@ -154,7 +154,7 @@ TEST(VersionExtractorTest, badVersion) {
             R"(</sdk:tool>)"
             R"(</sdk:sdk-repository>)";
 
-    EXPECT_EQ(Version::Invalid(), vx.extractVersion(xml));
+    EXPECT_EQ(Version::invalid(), vx.extractVersion(xml));
 
     // no micro
     xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repository/12"> )"
@@ -166,7 +166,7 @@ TEST(VersionExtractorTest, badVersion) {
             R"(</sdk:tool>)"
             R"(</sdk:sdk-repository>)";
 
-    EXPECT_EQ(Version::Invalid(), vx.extractVersion(xml));
+    EXPECT_EQ(Version::invalid(), vx.extractVersion(xml));
 
     // bad number in version
     xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repository/12"> )"
@@ -179,7 +179,7 @@ TEST(VersionExtractorTest, badVersion) {
             R"(</sdk:tool>)"
             R"(</sdk:sdk-repository>)";
 
-    EXPECT_EQ(Version::Invalid(), vx.extractVersion(xml));
+    EXPECT_EQ(Version::invalid(), vx.extractVersion(xml));
 
     // bad number in version 2
     xml = R"(<sdk:sdk-repository xmlns:sdk="http://schemas.android.com/sdk/android/repository/12"> )"
@@ -192,5 +192,5 @@ TEST(VersionExtractorTest, badVersion) {
             R"(</sdk:tool>)"
             R"(</sdk:sdk-repository>)";
 
-    EXPECT_EQ(Version::Invalid(), vx.extractVersion(xml));
+    EXPECT_EQ(Version::invalid(), vx.extractVersion(xml));
 }

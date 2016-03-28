@@ -62,12 +62,12 @@ TEST(DotAndroidStudio, androidStudioVersioning) {
 
     str = "prefix_" ANDROID_STUDIO_DIR;
     Version v3studio(StudioHelper::extractAndroidStudioVersion(str));
-    Version v3 = Version::Invalid();
+    Version v3 = Version::invalid();
     EXPECT_EQ(v3studio, v3);
 
     str = ANDROID_STUDIO_DIR ANDROID_STUDIO_DIR_PREVIEW "_suffix";
     Version v4studio(StudioHelper::extractAndroidStudioVersion(str));
-    Version v4 = Version::Invalid();
+    Version v4 = Version::invalid();
     EXPECT_EQ(v4studio, v4);
 
     str = ANDROID_STUDIO_DIR "1";

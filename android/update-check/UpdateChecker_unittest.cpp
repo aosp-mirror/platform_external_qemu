@@ -224,7 +224,7 @@ TEST(UpdateChecker, asyncWorker) {
 
     /////////////////////////////////////////////////////////////////////
     // failed to get the last version
-    test.mVersionExtractor->mExtractVersionResult = Version::Invalid();
+    test.mVersionExtractor->mExtractVersionResult = Version::invalid();
 
     test.mUC->asyncWorker();
     EXPECT_EQ(3, test.mDataLoader->mLoadCallCount);
