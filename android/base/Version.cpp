@@ -13,115 +13,50 @@
 
 #include "android/base/StringFormat.h"
 
-#include <errno.h>
-#include <limits.h>
-#include <stdlib.h>
-
 #include <sstream>
 
 namespace android {
 namespace base {
 
-// parse the current part of the version string and return if there's anything
-// else left
-namespace {
+using std::get;  // for get<|index|>(|tuple|)
 
-enum VersionParseResult {
-    kContinue,
-    kComplete,
-    kError,
-};
+static constexpr StringView kInvalidVersion = "invalid";
 
-}  // namespace
-
-static VersionParseResult parseVersionPart(const char* start,
-                                           char** end,
-                                           unsigned int* value) {
-    errno = 0;
-    const int val = strtol(start, end, 10);
-    if (errno) {
-        return kError;
-    }
-    if (*end == start || (**end != '.' && **end != 0)) {
-        return kError;
-    }
-
-    *value = val;
-    return **end == '.' ? kContinue : kComplete;
-}
-
-Version::Version(const char* ver) : mMajor(0), mMinor(0), mMicro(0) {
-    char* end;
-    VersionParseResult res = parseVersionPart(ver, &end, &mMajor);
-    if (res != kContinue) {
-        if (res == kError) {
-            *this = Invalid();
-        }
+Version::Version(StringView ver) : mData() {
+    std::istringstream in(ver);
+    char c[2];
+    in >> std::noskipws >> get<kMajor>(mData) >> c[0] >> get<kMinor>(mData)
+       >> c[1] >> get<kMicro>(mData);
+    if (c[0] != '.' || c[1] != '.' || !in) {
+        *this = invalid();
         return;
     }
 
-    res = parseVersionPart(end + 1, &end, &mMinor);
-    if (res != kContinue) {
-        if (res == kError) {
-            *this = Invalid();
+    if (in.peek() != std::char_traits<char>::eof()) {
+        // it has to be the build string - "-<build>"
+        in >> c[0] >> get<kBuild>(mData);
+        if (c[0] != '-' || !in) {
+            *this = invalid();
         }
-        return;
     }
 
-    res = parseVersionPart(end + 1, &end, &mMicro);
-    if (res != kComplete) {
-        *this = Invalid();
+    // make sure the stream is consumed to the end
+    if (in.peek() != std::char_traits<char>::eof()) {
+        *this = invalid();
     }
-}
-
-Version::Version(unsigned int major, unsigned int minor, unsigned int micro)
-    : mMajor(major), mMinor(minor), mMicro(micro) {
-}
-
-bool Version::isValid() const {
-    return *this != Invalid();
-}
-
-bool Version::operator<(const Version& other) const {
-    if (mMajor < other.mMajor) {
-        return true;
-    }
-    if (mMajor > other.mMajor) {
-        return false;
-    }
-
-    if (mMinor < other.mMinor) {
-        return true;
-    }
-    if (mMinor > other.mMinor) {
-        return false;
-    }
-
-    return mMicro < other.mMicro;
-}
-
-bool Version::operator==(const Version& other) const {
-    return mMajor == other.mMajor
-            && mMinor == other.mMinor
-            && mMicro == other.mMicro;
-}
-
-bool Version::operator!=(const Version& other) const {
-    return !(*this == other);
 }
 
 std::string Version::toString() const {
     if (!isValid()) {
-        return std::string("invalid");
+        return kInvalidVersion;
     }
 
-    const std::string res = StringFormat("%u.%u.%u", mMajor, mMinor, mMicro);
+    std::string res = StringFormat("%u.%u.%u", get<kMajor>(mData),
+                                   get<kMinor>(mData), get<kMicro>(mData));
+    if (get<kBuild>(mData) != kNone && get<kBuild>(mData) != 0) {
+        StringAppendFormat(&res, "-%u", get<kBuild>(mData));
+    }
     return res;
-}
-
-Version Version::Invalid() {
-    static const Version invalid(UINT_MAX, UINT_MAX, UINT_MAX);
-    return invalid;
 }
 
 }  // namespace android
