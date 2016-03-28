@@ -11,35 +11,71 @@
 
 #pragma once
 
+#include "android/base/StringView.h"
+
 #include <string>
+#include <tuple>
 
 namespace android {
 namespace base {
 
 // Class |Version| is a class for software version manipulations
 // it is able to parse, store, compare and convert version back to string
-// Expected string format is "major.minor.micro", where all three components
-// are unsigned numbers (and, hopefully, reasonably small)
+// Expected string format is "major.minor.micro[.build]", where all
+// components are unsigned numbers (and, hopefully, reasonably small)
 class Version {
 public:
-    explicit Version(const char* ver);
-    Version(unsigned int major, unsigned int minor, unsigned int micro);
+    static constexpr unsigned int kNone = static_cast<unsigned int>(-1);
 
-    bool isValid() const;
+    explicit Version(StringView ver);
+    constexpr Version(unsigned int major, unsigned int minor,
+                      unsigned int micro, unsigned int build = 0);
 
-    bool operator<(const Version& other) const;
-    bool operator==(const Version& other) const;
-    bool operator!=(const Version& other) const;
+    constexpr bool isValid() const;
+
+    constexpr bool operator<(const Version& other) const;
+    constexpr bool operator==(const Version& other) const;
+    constexpr bool operator!=(const Version& other) const;
+
+    static constexpr Version Invalid();
 
     std::string toString() const;
 
-    static Version Invalid();
-
 private:
-    unsigned int mMajor;
-    unsigned int mMinor;
-    unsigned int mMicro;
+    std::tuple<unsigned int, unsigned int, unsigned int, unsigned int> mData;
+
+    enum {
+        kMajor, kMinor, kMicro, kBuild
+    };
 };
+
+// all constexpr functions have to be defined in the header, just like templates
+
+constexpr Version::Version(unsigned int major,
+                           unsigned int minor,
+                           unsigned int micro,
+                           unsigned int build)
+    : mData(major, minor, micro, build) {}
+
+constexpr bool Version::isValid() const {
+    return *this != Invalid();
+}
+
+constexpr bool Version::operator<(const Version& other) const {
+    return mData < other.mData;
+}
+
+constexpr bool Version::operator==(const Version& other) const {
+    return mData == other.mData;
+}
+
+constexpr bool Version::operator!=(const Version& other) const {
+    return !(*this == other);
+}
+
+constexpr Version Version::Invalid() {
+    return Version(kNone, kNone, kNone);
+}
 
 }  // namespace android
 }  // namespace base
