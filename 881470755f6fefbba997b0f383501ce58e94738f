@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "51031991_e0dfbef6",
+        "filename": "android/base/system/Process.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-29T20:11:32Z",
+      "side": 1,
+      "message": "The OS should definitely clean that stuff up if a process crashes, otherwise that\u0027s a pretty serious bug. Or are we talking about the \"system\" as in there are things that are internal in the emulator that will not behave correctly if a child process disappears all of a sudden? In the latter case I think we should specify \"system\" to say \"emulator\" or \"qemu\". In that case it seems to be a meaningless statement as it just says that any kind of communication you have with a process will not work well if you kill that process, that should not be unexpected.",
+      "parentUuid": "d1cc697f_59aed9a9",
+      "range": {
+        "startLine": 71,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 25
+      },
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d1cc697f_dfac94fc",
         "filename": "android/base/system/Process.h",
         "patchSetId": 6
