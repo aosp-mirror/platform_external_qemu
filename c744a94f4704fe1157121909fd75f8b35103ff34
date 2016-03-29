@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "51031991_4fec85a9",
+        "filename": "android/skin/qt/editable-slider-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-29T17:31:11Z",
+      "side": 1,
+      "message": "all these magic constants are just screaming: \"please use layouts!!!11one\"",
+      "range": {
+        "startLine": 24,
+        "startChar": 3,
+        "endLine": 24,
+        "endChar": 31
+      },
+      "revId": "c744a94f4704fe1157121909fd75f8b35103ff34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
