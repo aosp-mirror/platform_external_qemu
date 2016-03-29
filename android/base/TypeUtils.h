@@ -19,17 +19,50 @@
 namespace android {
 namespace base {
 
+namespace details {
+
+// a simple helper class for SFINAE later
+template <class X = void>
+struct dummy {
+    using type = X;
+};
+
+}  // namespaces details
+
 // add some convenience shortcuts for an overly complex std::enable_if syntax
 template <class Predicate, class Type = void*>
-using enable_if =
-    typename std::enable_if<Predicate::value, Type>::type;
+using enable_if = typename std::enable_if<Predicate::value, Type>::type;
 
 template <bool predicate, class Type = void*>
-using enable_if_c =
-    typename std::enable_if<predicate, Type>::type;
+using enable_if_c = typename std::enable_if<predicate, Type>::type;
 
 template <class From, class To, class Type = void*>
 using enable_if_convertible = enable_if<std::is_convertible<From, To>>;
 
-}
-}
+// -----------------------------------------------------------------------------
+// A predicate for checking if some object is callable
+template <class F, class Signature, class X = void>
+struct is_callable : std::false_type {};
+
+// This specialization is SFINAE-d out if template arguments can't be combined
+// into a call expression F(), or if the result of that call is not |R|
+template <class F, class R>
+struct is_callable<
+        F,
+        R(),
+        typename std::enable_if<std::is_same<
+                typename details::dummy<decltype(std::declval<F>()())>::type,
+                R>::value>::type> : std::true_type {};
+
+// One more specialization, for non empty argument list
+template <class F, class R, class... Args>
+struct is_callable<F,
+                   R(Args...),
+                   typename std::enable_if<std::is_same<
+                           typename details::dummy<decltype(std::declval<F>()(
+                                   std::declval<Args>()...))>::type,
+                           R>::value>::type> : std::true_type {};
+// -----------------------------------------------------------------------------
+
+}  // namespace base
+}  // namespace android

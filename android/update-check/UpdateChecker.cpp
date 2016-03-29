@@ -196,7 +196,7 @@ bool UpdateChecker::needsCheck() const {
 }
 
 bool UpdateChecker::runAsyncCheck() {
-    return android::base::async([this] { asyncWorker(); delete this; return 0; });
+    return android::base::async([this] { asyncWorker(); delete this; });
 }
 
 void UpdateChecker::asyncWorker() {
