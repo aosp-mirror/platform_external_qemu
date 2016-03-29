@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "51031991_909df936",
+        "filename": "android/skin/qt/emulator-container.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-29T22:28:44Z",
+      "side": 1,
+      "message": "do we need to cancel the event here?",
+      "range": {
+        "startLine": 157,
+        "startChar": 7,
+        "endLine": 158,
+        "endChar": 25
+      },
+      "revId": "bd533bbc10628e315f9906740f5f6cfe7388c30a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
