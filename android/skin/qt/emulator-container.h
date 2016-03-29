@@ -26,6 +26,7 @@ public:
     explicit EmulatorContainer(EmulatorQtWindow* window);
     virtual ~EmulatorContainer();
 
+    void changeEvent(QEvent* event) override;
     void closeEvent(QCloseEvent* event) override;
     bool event(QEvent* e) override;
     void focusInEvent(QFocusEvent* event) override;
