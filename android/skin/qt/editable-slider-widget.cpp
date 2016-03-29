@@ -9,16 +9,19 @@ EditableSliderWidget::EditableSliderWidget(QWidget *parent) :
     mLineEditValidator(&mLineEdit) {
 
     // Arrange the child widgets in a layout.
+    mSliderLabelsLayout.setSpacing(0);
     mSliderLabelsLayout.addWidget(&mMinValueLabel);
     mSliderLabelsLayout.addWidget(&mMaxValueLabel);
     mAnnotatedSliderLayout.setSpacing(0);
-    mAnnotatedSliderLayout.addSpacing(4);
     mAnnotatedSliderLayout.addWidget(&mSlider);
+    mAnnotatedSliderLayout.addSpacing(3);
     mAnnotatedSliderLayout.addLayout(&mSliderLabelsLayout);
+    mEditBoxLayout.setSpacing(0);
     mEditBoxLayout.addWidget(&mLineEdit);
     mEditBoxLayout.addStretch();
+    mMainLayout.setSpacing(0);
     mMainLayout.addLayout(&mAnnotatedSliderLayout);
-    mMainLayout.addSpacing(4);
+    mMainLayout.addSpacing(16);
     mMainLayout.addLayout(&mEditBoxLayout);
     setLayout(&mMainLayout);
 
@@ -35,7 +38,7 @@ EditableSliderWidget::EditableSliderWidget(QWidget *parent) :
     mLineEditValidator.setDecimals(1);
     mLineEdit.setValidator(&mLineEditValidator);
     mLineEdit.setAlignment(Qt::AlignRight | Qt::AlignTop);
-    mLineEdit.setMaximumWidth(64);
+    mLineEdit.setMaximumWidth(50);
     mLineEdit.setTextMargins(0, 0, 0, 4);
     mLineEdit.setProperty("class", "EditableValue");
 
