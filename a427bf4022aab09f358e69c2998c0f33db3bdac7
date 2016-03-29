@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3189453b_adc07df9",
+        "filename": "android/base/Version.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-29T13:10:53Z",
+      "side": 1,
+      "message": "Since this is a public constant, please document its usage properly.",
+      "revId": "a427bf4022aab09f358e69c2998c0f33db3bdac7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3189453b_edba858d",
+        "filename": "android/base/Version.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-29T13:10:53Z",
+      "side": 1,
+      "message": "nit: s/Invalid/invalid()/ since this is a function call. Otherwise \u0027static constexpr Version kInvalid;\u0027 would be better.",
+      "revId": "a427bf4022aab09f358e69c2998c0f33db3bdac7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
