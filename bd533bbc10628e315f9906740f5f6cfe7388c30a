@@ -22,6 +22,30 @@
       "revId": "bd533bbc10628e315f9906740f5f6cfe7388c30a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "51031991_100a2908",
+        "filename": "android/skin/qt/emulator-container.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-29T22:32:09Z",
+      "side": 1,
+      "message": "I think we actually *don\u0027t* want to cancel it. This event simply indicates that there was a stage change (in this case, a state change in the OS level window for this widget), so we just want to undo what happened.\n\nWhile I was digging around in the native qcocoawindow and qxcbwindow, it looks like there are some functions responsible for sync\u0027ing the \"Qt window state\" and the \"OS window state\" - this is what led me to believe that we can\u0027t strictly prevent maximizing, but we can at least immediately undo it.",
+      "parentUuid": "51031991_909df936",
+      "range": {
+        "startLine": 157,
+        "startChar": 7,
+        "endLine": 158,
+        "endChar": 25
+      },
+      "revId": "bd533bbc10628e315f9906740f5f6cfe7388c30a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
