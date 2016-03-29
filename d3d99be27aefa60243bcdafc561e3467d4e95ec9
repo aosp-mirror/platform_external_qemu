@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3189453b_cdf6a9ea",
+        "filename": "android/base/TypeUtils.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-29T17:54:11Z",
+      "side": 1,
+      "message": "ultra-nit: please use a closing comment, e.g.\n\n  }  // namespace details\n\nAlso, does this need to be called \"dummy\"? would something like \"forward_type\" be better (since it looks like the only use is to ensure that  \u0027dummy\u003cT\u003e::type \u003d\u003d T\u0027 ?",
+      "revId": "d3d99be27aefa60243bcdafc561e3467d4e95ec9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3189453b_edf365f7",
+        "filename": "android/base/TypeUtils.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-29T17:54:11Z",
+      "side": 1,
+      "message": "wow, I wish I could understand what\u0027s going here, but I trust your expertise on this one :)",
+      "revId": "d3d99be27aefa60243bcdafc561e3467d4e95ec9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
