@@ -33,6 +33,24 @@
       "revId": "d3d99be27aefa60243bcdafc561e3467d4e95ec9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "51031991_355aba5c",
+        "filename": "android/base/TypeUtils.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-29T19:05:35Z",
+      "side": 1,
+      "message": "Well, I can explain it for you, but I doubt adding it to the comment in the code would help :)\nthis is a partial specialization of the is_callable template, for the case when the requested call signature has no arguments - R()\nIt performs two checks:\n1. is it possible to construct a call expression from the F template argument - F()? To check this, std::declval\u003cF\u003e() returns a value of type F, and we add () after that value - which literally creates \u0027foo()\u0027 with foo having type F\nThe return type of that expression is being passed as a template argument into the dummy\u003c\u003e template, so if the whole F() is ill-formed, compiler just drops the partial specialization instead of giving an error (SFINAE)\n\n2. dummy\u003c\u003e passes through its template argument into dummy\u003c\u003e::type, which is a return type from the F(); is_same\u003c\u003e compares it with the requested return type - R. enable_if\u003c\u003e uses the same SFINAE trick to drop the current partial specialization if is_same doesn\u0027t return true.\n\nTogether, we have two checks here: \u0027is the F callable without arguments\u0027 and \u0027does that call return something of type R\u0027\n\nThe second specialization (class... Args) does exactly the same thing, but for a call F(Args...) instead of F()\n\nC++17 does have std::is_callable\u003c\u003e, so we will throw all this ugliness away as soon as our toolset supports the next standard",
+      "parentUuid": "3189453b_edf365f7",
+      "revId": "d3d99be27aefa60243bcdafc561e3467d4e95ec9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
