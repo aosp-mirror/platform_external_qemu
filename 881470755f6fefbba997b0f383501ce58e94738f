@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "d1cc697f_59aed9a9",
+        "filename": "android/base/system/Process.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-29T01:29:48Z",
+      "side": 1,
+      "message": "If the process locked some system file, or opened some shared memory, or any other thing that outlives it and needs to be closed explicitly - oops, looks like we\u0027re just screwed the whole system",
+      "parentUuid": "d1cc697f_9dca141c",
+      "range": {
+        "startLine": 71,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 25
+      },
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d1cc697f_dfac94fc",
         "filename": "android/base/system/Process.h",
         "patchSetId": 6
@@ -412,6 +436,30 @@
       "side": 1,
       "message": "I would love for this class to be movable, could we do that instead? At some point I\u0027m sure we\u0027re going to want to put a bunch of these in a vector.",
       "parentUuid": "d1cc697f_3fd58068",
+      "range": {
+        "startLine": 135,
+        "startChar": 4,
+        "endLine": 135,
+        "endChar": 28
+      },
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d1cc697f_d9b909ef",
+        "filename": "android/base/system/Process.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-29T01:29:48Z",
+      "side": 1,
+      "message": "That\u0027s true, but it also means we need to make sure it\u0027s _actually_ movable (including a UT)",
+      "parentUuid": "d1cc697f_7dae3060",
       "range": {
         "startLine": 135,
         "startChar": 4,
