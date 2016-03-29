@@ -341,7 +341,7 @@ void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent *event) {
         mQuat = q * mQuat;
         mPrevMouseX = event->x();
         mPrevMouseY = event->y();
-        repaint();
+        renderFrame();
         emit(rotationChanged(mQuat));
     }
 }
