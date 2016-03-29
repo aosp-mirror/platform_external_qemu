@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3189453b_4dfc7957",
+        "filename": "android/base/system/Process.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-29T09:54:29Z",
+      "side": 1,
+      "message": "Historical, android/base/ was Apache initially, while the rest was GPLv2. I don\u0027t remember exactly why. We should select a license and stick to it.",
+      "parentUuid": "d1cc697f_027cdf41",
+      "range": {
+        "startLine": 3,
+        "startChar": 0,
+        "endLine": 5,
+        "endChar": 42
+      },
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d1cc697f_1f9a7c2a",
         "filename": "android/base/system/Process.h",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-28T17:50:52Z",
       "side": 1,
       "message": "what\u0027s the difference between options and runoptions? it doesn\u0027t look clear to me, at least without a comment.",
+      "range": {
+        "startLine": 55,
+        "startChar": 15,
+        "endLine": 55,
+        "endChar": 22
+      },
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3189453b_cd0f8950",
+        "filename": "android/base/system/Process.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-29T09:54:29Z",
+      "side": 1,
+      "message": "That should be better documented. When is this used, also specify how outputs are handled more clearly (e.g. does DumpOuputToFile will send botht he process stdout/stderr to the file, or only its stdout? what happens to the process stderr if ShowOutput is used, etc)\n\nThe distinction between Options and RunOptions seem also completely arbitrary / confusing.",
+      "parentUuid": "d1cc697f_1f9a7c2a",
       "range": {
         "startLine": 55,
         "startChar": 15,
@@ -141,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "3189453b_ad123d79",
+        "filename": "android/base/system/Process.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-29T09:54:29Z",
+      "side": 1,
+      "message": "nit: kRunFailed instead, we only omit the k prefix for enum class values.",
+      "parentUuid": "d1cc697f_9f65ace9",
+      "range": {
+        "startLine": 80,
+        "startChar": 0,
+        "endLine": 80,
+        "endChar": 28
+      },
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d1cc697f_ff215890",
         "filename": "android/base/system/Process.h",
         "patchSetId": 6
@@ -175,6 +247,30 @@
       "writtenOn": "2016-03-28T19:40:15Z",
       "side": 1,
       "message": "Since the first thing we\u0027re doing is creating a copy of commandLine and outputFile we should pass them by value instead. This way we avoid unnecessary copies by allowing the compiler to construct the objects in place if possible.",
+      "range": {
+        "startLine": 84,
+        "startChar": 0,
+        "endLine": 86,
+        "endChar": 47
+      },
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3189453b_ed0c455e",
+        "filename": "android/base/system/Process.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-29T09:54:29Z",
+      "side": 1,
+      "message": "nit: Why is outputFile a member of the class? This looks like something you want to pass to runCommand() instead.",
+      "parentUuid": "d1cc697f_62bbeb08",
       "range": {
         "startLine": 84,
         "startChar": 0,
@@ -297,6 +393,30 @@
     },
     {
       "key": {
+        "uuid": "3189453b_4db399c6",
+        "filename": "android/base/system/Process.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-29T09:54:29Z",
+      "side": 1,
+      "message": "why pass another commandLine here when you used one in the constructor?\n\nIt\u0027s hard to see the exact purpose of Process instances with a function like this. It would be more logical to decide that Process corresponds to the state of a running process started by a static function that takes a variety of parameters. In this case things like exit code, child pid, etc... become members of the class instead of returned by the function.\n\nYou can also create a ProcessParameters class to setup startup parameters e.g. commandLine, options, output file redirection, timeout), and pass a const reference to it to a static Process::spawn() function.",
+      "parentUuid": "d1cc697f_62fe8bca",
+      "range": {
+        "startLine": 104,
+        "startChar": 16,
+        "endLine": 104,
+        "endChar": 26
+      },
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d1cc697f_df481434",
         "filename": "android/base/system/Process.h",
         "patchSetId": 6
@@ -401,6 +521,30 @@
     },
     {
       "key": {
+        "uuid": "3189453b_8d158166",
+        "filename": "android/base/system/Process.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-29T09:54:29Z",
+      "side": 1,
+      "message": "I agree, and this class should probably be an abstract interface, with a static function to create platform-specific intstances. This would allow a mock implementation to be inserted during unit testing as well (which helps make them more hermetic).",
+      "parentUuid": "d1cc697f_fd12407a",
+      "range": {
+        "startLine": 112,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 6
+      },
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d1cc697f_3fd58068",
         "filename": "android/base/system/Process.h",
         "patchSetId": 6
@@ -466,6 +610,23 @@
         "endLine": 135,
         "endChar": 28
       },
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3189453b_6db855a2",
+        "filename": "android/base/system/Process_posix.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-29T09:54:29Z",
+      "side": 1,
+      "message": "Use the System:: abstraction that allows injecting a mock environment to make unit-testing more hermetic!",
       "revId": "881470755f6fefbba997b0f383501ce58e94738f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -546,6 +707,30 @@
       "writtenOn": "2016-03-28T19:40:15Z",
       "side": 1,
       "message": "Since start() is non-blocking doesn\u0027t this mean that we won\u0027t get the signal if the process terminates after the second pthread_sigmask if SIGCHLD was blocked before this?\n\nIn general I\u0027m not a fan of relying on signals here since it creates a very non-obvious dependency between different parts of the program and as we have seen the sigmask can change any time and we won\u0027t be able to catch all the problems that might happen because of it.\n\nI realize this is probably not the unix way but I think having a separate ProcessReaper class (or some other name) running in its own thread that\u0027s responsible for reaping processes would be a better idea. That way it becomes much more clear where reaping happens and who is responsible. With such a design we could have callbacks on process exits similar to what QProcess has and we never have to worry about sigmasks.\n\nThe same design could be used for Windows although I think in that case we might not need to have the Reaper run its own thread, it could use callback based waits to use an OS worker thread instead which I think is more efficient. But the interface and outward behavior would be the same for all OS\u0027s.\n\nThis would also require some changes to how we wait for processes, but this could be done with a condition variable instead in that case.",
+      "range": {
+        "startLine": 72,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 51
+      },
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3189453b_8d9ca13a",
+        "filename": "android/base/system/Process_posix.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-29T09:54:29Z",
+      "side": 1,
+      "message": "I agree with Bjoern, modifying the signal mask this way is asking for trouble, and will make certain things very difficult to debug :(",
+      "parentUuid": "d1cc697f_78239eed",
       "range": {
         "startLine": 72,
         "startChar": 0,
@@ -650,6 +835,23 @@
     },
     {
       "key": {
+        "uuid": "3189453b_cda6a980",
+        "filename": "android/base/system/Process_posix.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-29T09:54:29Z",
+      "side": 1,
+      "message": "please preserve errno here, since close() can fail sometimes and you want the caller to get the error value from the fork() instead.",
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d1cc697f_4237c734",
         "filename": "android/base/system/Process_posix.cpp",
         "patchSetId": 6
@@ -667,6 +869,23 @@
         "endLine": 224,
         "endChar": 45
       },
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3189453b_eda3656d",
+        "filename": "android/base/system/Process_posix.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-29T09:54:29Z",
+      "side": 1,
+      "message": "HANDLE_EINTR() please for dup2()",
       "revId": "881470755f6fefbba997b0f383501ce58e94738f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
