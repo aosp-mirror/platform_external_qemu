@@ -46,6 +46,30 @@
       "revId": "bd533bbc10628e315f9906740f5f6cfe7388c30a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "51031991_70227d7f",
+        "filename": "android/skin/qt/emulator-container.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-29T22:33:28Z",
+      "side": 1,
+      "message": "In that case could you please add a comment explaining that? so no one tries to \u0027fix\u0027 the \u0027missing\u0027 cancellation",
+      "parentUuid": "51031991_100a2908",
+      "range": {
+        "startLine": 157,
+        "startChar": 7,
+        "endLine": 158,
+        "endChar": 25
+      },
+      "revId": "bd533bbc10628e315f9906740f5f6cfe7388c30a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
