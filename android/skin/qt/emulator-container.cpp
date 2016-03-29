@@ -147,6 +147,25 @@ bool EmulatorContainer::event(QEvent* e) {
     return QScrollArea::event(e);
 }
 
+void EmulatorContainer::changeEvent(QEvent* event) {
+    // Strictly preventing the maximizing (called "zooming" on OS X) of a
+    // window is hard - it changes by host, and even by window manager on
+    // Linux. Therefore, we counteract it by seeing if the window ever
+    // enters a maximized state, and if it does, immediately undoing that
+    // maximization.
+    //
+    // Note that we *do not* call event->ignore(). Maximizing happens in the
+    // OS-level window, not Qt's representation of the window. This event
+    // simply notifies the Qt representation (and us) that the OS-level window
+    // has changed to a maximized state. We do not want to ignore this state
+    // change, we just want to counteract the effects it had.
+    if (event->type() == QEvent::WindowStateChange) {
+        if (windowState() & Qt::WindowMaximized) {
+            showNormal();
+        }
+    }
+}
+
 void EmulatorContainer::closeEvent(QCloseEvent* event) {
     mEmulatorWindow->closeEvent(event);
 }
