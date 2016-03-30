@@ -1,0 +1,129 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b168d59f_5fb1e308",
+        "filename": "android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-30T17:38:30Z",
+      "side": 1,
+      "message": "Nit: Could we have preferIpv6 be an enum instead? It\u0027s much easier to understand\nresolveHostNameToList(host, ResolvePreference::Any, \u0026results);\nthan\nresolveHostNameToList(host, false, \u0026result);\nwhen taking a quick look at the code.\n\nMaybe with a better name than ResolvePreference though.",
+      "range": {
+        "startLine": 298,
+        "startChar": 0,
+        "endLine": 300,
+        "endChar": 51
+      },
+      "revId": "bec6e515a8e418d3b2344212fc4db9a92c21407e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b168d59f_9fe0dbe3",
+        "filename": "android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-30T17:38:30Z",
+      "side": 1,
+      "message": "Nit: You could do a push_back of a default constructed address and then use \u0026result.back() for a tiny performance improvement. Although you would have to clean that up on failure so failure handling is slower.",
+      "revId": "bec6e515a8e418d3b2344212fc4db9a92c21407e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b168d59f_7ff307b2",
+        "filename": "android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-30T17:38:30Z",
+      "side": 1,
+      "message": "Nit: Same with the enum for preferIpv6",
+      "revId": "bec6e515a8e418d3b2344212fc4db9a92c21407e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b168d59f_5ff9e369",
+        "filename": "android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 504,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-30T17:38:30Z",
+      "side": 1,
+      "message": "Is this actually used anywhere?",
+      "revId": "bec6e515a8e418d3b2344212fc4db9a92c21407e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b168d59f_bf703fdc",
+        "filename": "android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 543,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-30T17:38:30Z",
+      "side": 1,
+      "message": "Nit: Could this be named socketTcp4LoopbackServer to match the convention of IPv6 and make it a little more explicit?",
+      "revId": "bec6e515a8e418d3b2344212fc4db9a92c21407e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b168d59f_1f604b05",
+        "filename": "android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 569,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-30T17:38:30Z",
+      "side": 1,
+      "message": "Nit: Same with the 4 here",
+      "revId": "bec6e515a8e418d3b2344212fc4db9a92c21407e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b168d59f_3f5d0f54",
+        "filename": "android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 642,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-30T17:38:30Z",
+      "side": 1,
+      "message": "Nit: And same here",
+      "revId": "bec6e515a8e418d3b2344212fc4db9a92c21407e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
