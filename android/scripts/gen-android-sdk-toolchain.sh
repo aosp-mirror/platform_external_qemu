@@ -404,7 +404,15 @@ prepare_build_for_host () {
     esac
 
     if [ "$OPT_CXX11" ]; then
-        var_append EXTRA_CXXFLAGS "-std=c++11" "-Werror=c++11-compat"
+        case $CURRENT_HOST in
+            darwin*)
+                var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
+                ;;
+
+            *)
+                var_append EXTRA_CXXFLAGS "-std=c++11" "-Werror=c++11-compat"
+                ;;
+        esac
     fi
 
     CROSS_PREFIX=${GNU_CONFIG_HOST}-
