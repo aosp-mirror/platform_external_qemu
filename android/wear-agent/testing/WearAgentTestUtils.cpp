@@ -199,7 +199,7 @@ bool testRunMockAdbServer(int adbServerSocket,
 }
 
 int testStartMockServer(int* hostPort) {
-    int socket = socketTcpLoopbackServer(0);
+    int socket = socketTcp4LoopbackServer(0);
     if (socket < 0) {
         DPRINT("Could not find available TCP port for test!\n");
         return -1;

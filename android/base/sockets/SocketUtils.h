@@ -46,11 +46,19 @@ void socketSetBlocking(int socket);
 
 // Bind and listen on TCP |port| on loopback interface (i.e. 127.0.0.1).
 // Return new socket on success, or -1/errno on error.
-int socketTcpLoopbackServer(int port);
+int socketTcp4LoopbackServer(int port);
+
+// Bind and listen on TCP |port| on IPv6 loopback interface (i.e. ::1).
+// Return new socket on success, or -1/errno on error.
+int socketTcp6LoopbackServer(int port);
 
 // Connect to TCP |port| on loopback interface (i.e. 127.0.0.1).
 // Return new socket on success, or -1/errno on error.
-int socketTcpLoopbackClient(int port);
+int socketTcp4LoopbackClient(int port);
+
+// Connecto TCP |port| on IPV6 loopback interface (i.e. ::1).
+// Return new socket on success, or -1/errno on error.
+int socketTcp6LoopbackClient(int port);
 
 // Accept a connection on server |socket|, and return the new connection
 // socket descriptor, or -1/errno on error.
@@ -66,7 +74,8 @@ int socketCreatePair(int *s1, int* s2);
 
 // Create a new TCP-based socket. At the moment, this should only be used
 // for unit-testing.
-int socketCreateTcp();
+int socketCreateTcp4();
+int socketCreateTcp6();
 
 // Return the port number of a TCP or UDP socket, or -1/errno otherwise.
 int socketGetPort(int socket);

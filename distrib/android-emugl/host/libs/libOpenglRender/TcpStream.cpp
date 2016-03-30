@@ -41,7 +41,7 @@ TcpStream::TcpStream(int sock, size_t bufSize) :
 }
 
 int TcpStream::listen(char addrstr[MAX_ADDRSTR_LEN]) {
-    m_sock = emugl::socketTcpLoopbackServer(0, SOCK_STREAM);
+    m_sock = emugl::socketTcp4LoopbackServer(0, SOCK_STREAM);
     if (!valid())
         return int(ERR_INVALID_SOCKET);
 
@@ -67,7 +67,7 @@ SocketStream * TcpStream::accept() {
 
 int TcpStream::connect(const char* addr) {
     int port = atoi(addr);
-    m_sock = emugl::socketTcpLoopbackClient(port, SOCK_STREAM);
+    m_sock = emugl::socketTcp4LoopbackClient(port, SOCK_STREAM);
     return valid() ? 0 : -1;
 }
 

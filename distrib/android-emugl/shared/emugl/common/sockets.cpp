@@ -213,7 +213,7 @@ int socketLocalClient(const char* path, int socketType) {
 }
 #endif  // !_WIN32
 
-int socketTcpLoopbackServer(int port, int socketType) {
+int socketTcp4LoopbackServer(int port, int socketType) {
     SockAddr addr;
     int ret = addr.initFromLocalhost(port);
     if (ret < 0) {
@@ -222,7 +222,7 @@ int socketTcpLoopbackServer(int port, int socketType) {
     return socketBindInternal(&addr, socketType);
 }
 
-int socketTcpLoopbackClient(int port, int socketType) {
+int socketTcp4LoopbackClient(int port, int socketType) {
     SockAddr addr;
     int ret = addr.initFromLocalhost(port);
     if (ret < 0) {
