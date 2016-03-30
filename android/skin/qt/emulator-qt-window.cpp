@@ -829,11 +829,6 @@ void EmulatorQtWindow::screenshot()
     mOverlay.showAsFlash();
 
     mScreencapProcess.start(command, args);
-    // TODO(pprabhu): It is a bad idea to call |waitForStarted| from the GUI
-    // thread, because it can freeze the UI till timeout.
-    if (!mScreencapProcess.waitForStarted(5000)) {
-        slot_showProcessErrorDialog(mScreencapProcess.error());
-    }
 }
 
 
@@ -870,11 +865,6 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
         // Use a different process to avoid infinite looping when pulling the
         // file.
         mScreencapPullProcess.start(command, args);
-        // TODO(pprabhu): It is a bad idea to call |waitForStarted| from the GUI
-        // thread, because it can freeze the UI till timeout.
-        if (!mScreencapPullProcess.waitForStarted(5000)) {
-            slot_showProcessErrorDialog(mScreencapPullProcess.error());
-        }
     }
 }
 

@@ -143,9 +143,11 @@ private slots:
     void on_zoom_button_clicked();
 
     void slot_installCanceled();
+    void slot_installError(QProcess::ProcessError exitStatus);
     void slot_installFinished(int exitStatus);
 
     void slot_pushCanceled();
+    void slot_pushError(QProcess::ProcessError exitStatus);
     void slot_pushFinished(int exitStatus);
 };
 
