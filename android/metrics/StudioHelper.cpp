@@ -79,20 +79,23 @@ const Version StudioHelper::extractAndroidStudioVersion(
     }
 
     // get rid of kAndroidStudioDir prefix to get to version
-    const char* cVersion = strstr(dirName, kAndroidStudioDir);
-    if (cVersion == NULL || cVersion != dirName) {
+    if (strncmp(dirName,
+                kAndroidStudioDir,
+                sizeof(kAndroidStudioDir) - 1) != 0) {
         return Version::invalid();
     }
-    cVersion += strlen(kAndroidStudioDir);
+
+    const char* cVersion = dirName + sizeof(kAndroidStudioDir) - 1;
 
     // if this is a preview, get rid of kAndroidStudioDirPreview
-    // prefix too and mark preview as micro version 0
-    // (assume micro version 1 for releases)
-    const char* micro = "2";
-    const char* previewVersion = strstr(cVersion, kAndroidStudioDirPreview);
-    if (previewVersion == cVersion) {
-        cVersion += strlen(kAndroidStudioDirPreview);
-        micro = "1";
+    // prefix too and mark preview as build #1
+    // (assume build #2 for releases)
+    auto build = 2;
+    if (strncmp(cVersion,
+                kAndroidStudioDirPreview,
+                sizeof(kAndroidStudioDirPreview) - 1) == 0) {
+        cVersion += sizeof(kAndroidStudioDirPreview) - 1;
+        build = 1;
     }
 
     // cVersion should now contain at least a number; if not,
@@ -106,10 +109,14 @@ const Version StudioHelper::extractAndroidStudioVersion(
     // a "2" for release and a "1" for previews; this will
     // allow proper sorting
     Version rawVersion(cVersion);
-    std::string adjustedVersion(rawVersion.toString());
-    adjustedVersion.append(micro);
+    if (rawVersion == Version::invalid()) {
+        return Version::invalid();
+    }
 
-    return Version(adjustedVersion.c_str());
+    return Version(rawVersion.component<Version::kMajor>(),
+                   rawVersion.component<Version::kMinor>(),
+                   rawVersion.component<Version::kMicro>(),
+                   build);
 }
 
 // static
