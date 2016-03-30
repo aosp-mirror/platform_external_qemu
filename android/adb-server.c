@@ -89,11 +89,13 @@ struct AdbServer {
     /* Looper for async I/O on ADB server socket. */
     Looper*     looper;
     /* I/O port for asynchronous I/O on ADB server socket. */
-    LoopIo*     io;
+    LoopIo*     io4;
+    LoopIo*     io6;
     /* ADB port. */
     int         port;
     /* Server socket. */
-    int         so;
+    int         so4;
+    int         so6;
     /* List of connected ADB hosts. */
     ACList      adb_hosts;
     /* List of connected ADB guests. */
@@ -370,7 +372,7 @@ _on_server_socket_io(void* opaque, int fd, unsigned events)
     AdbHost* adb_host;
     AdbGuest* adb_guest;
     AdbServer* adb_srv = (AdbServer*)opaque;
-    assert(adb_srv->so == fd);
+    assert(adb_srv->so4 == fd || adb_srv->so6 == fd);
 
     /* Since this is a server socket, we only expect a connection I/O here. */
     if ((events & LOOP_IO_READ) == 0) {
@@ -382,7 +384,7 @@ _on_server_socket_io(void* opaque, int fd, unsigned events)
     adb_host = _adb_host_new(adb_srv);
 
     /* Accept the connection. */
-    adb_host->host_so = socket_accept(fd, &adb_srv->socket_address);
+    adb_host->host_so = socket_accept(fd, NULL);
     if (adb_host->host_so < 0) {
         D("Unable to accept ADB connection: %s", strerror(errno));
         _adb_host_free(adb_host);
@@ -435,24 +437,33 @@ adb_server_init(int port)
         }
 
         /* Create loopback server socket for the ADB port. */
-        sock_address_init_inet(&_adb_server.socket_address,
-                               SOCK_ADDRESS_INET_LOOPBACK, port);
-        _adb_server.so = socket_loopback4_server(port, SOCKET_STREAM);
-        if (_adb_server.so < 0) {
+        _adb_server.so4 = socket_loopback4_server(port, SOCKET_STREAM);
+        _adb_server.so6 = socket_loopback6_server(port, SOCKET_STREAM);
+        if (_adb_server.so4 < 0 && _adb_server.so6 < 0) {
             E("Unable to create ADB server socket: %s", strerror(errno));
             return -1;
         }
 
         /* Prepare server socket for I/O */
-        socket_set_nonblock(_adb_server.so);
-        _adb_server.io = loopIo_new(_adb_server.looper,
-                                    _adb_server.so,
-                                    _on_server_socket_io,
-                                    &_adb_server);
-        loopIo_wantRead(_adb_server.io);
+        if (_adb_server.so4 >= 0) {
+            socket_set_nonblock(_adb_server.so4);
+            _adb_server.io4 = loopIo_new(_adb_server.looper,
+                                         _adb_server.so4,
+                                         _on_server_socket_io,
+                                         &_adb_server);
+            loopIo_wantRead(_adb_server.io4);
+        }
+        if (_adb_server.so6 >= 0) {
+            socket_set_nonblock(_adb_server.so6);
+            _adb_server.io6 = loopIo_new(_adb_server.looper,
+                                         _adb_server.so6,
+                                         _on_server_socket_io,
+                                         &_adb_server);
+            loopIo_wantRead(_adb_server.io6);
+        }
 
-        D("ADB server has been initialized for port %d. Socket: %d",
-          port, _adb_server.so);
+        D("ADB server has been initialized for port %d. Socket: ipv4=%d ipv6=%d",
+          port, _adb_server.so4, _adb_server.so6);
 
         _adb_server_initialized = 1;
     }
@@ -462,10 +473,18 @@ adb_server_init(int port)
 
 void adb_server_undo_init(void) {
     if (_adb_server_initialized) {
-        socket_close(_adb_server.so);
-        _adb_server.so = -1;
-        loopIo_free(_adb_server.io);
-        _adb_server.io = NULL;
+        if (_adb_server.so4 >= 0) {
+            socket_close(_adb_server.so4);
+            _adb_server.so4 = -1;
+            loopIo_free(_adb_server.io4);
+            _adb_server.io4 = NULL;
+        }
+        if (_adb_server.so6 >= 0) {
+            socket_close(_adb_server.so6);
+            _adb_server.so6 = -1;
+            loopIo_free(_adb_server.io6);
+            _adb_server.io6 = NULL;
+        }
         _adb_server_initialized = 0;
     }
 }
