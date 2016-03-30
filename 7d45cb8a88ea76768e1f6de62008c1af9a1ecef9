@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b168d59f_4890470b",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-30T19:04:08Z",
+      "side": 1,
+      "message": "1. Only when the widget is moved from one screen to another.\n2. resizeGL does it for us",
+      "parentUuid": "b168d59f_4df93993",
+      "range": {
+        "startLine": 107,
+        "startChar": 15,
+        "endLine": 107,
+        "endChar": 33
+      },
+      "revId": "7d45cb8a88ea76768e1f6de62008c1af9a1ecef9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b168d59f_8ddc312f",
         "filename": "android/skin/qt/gl-widget.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-30T18:34:03Z",
       "side": 1,
       "message": "nit: nullptr (or 0 if that\u0027s actually an int)",
+      "range": {
+        "startLine": 276,
+        "startChar": 49,
+        "endLine": 276,
+        "endChar": 53
+      },
+      "revId": "7d45cb8a88ea76768e1f6de62008c1af9a1ecef9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b168d59f_08b80fa1",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-30T19:04:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b168d59f_8ddc312f",
       "range": {
         "startLine": 276,
         "startChar": 49,
