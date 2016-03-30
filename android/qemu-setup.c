@@ -140,6 +140,10 @@ static int report_console(const char* proto_port, int console_port) {
         } else {
             for ( ; maxtries > 0; maxtries-- ) {
                 D("trying to find console-report client on tcp:%d", port);
+                s = socket_loopback6_client( port, SOCKET_STREAM );
+                if (s >= 0)
+                    break;
+
                 s = socket_loopback_client( port, SOCKET_STREAM );
                 if (s >= 0)
                     break;
@@ -393,7 +397,10 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
         /* send a simple message to the ADB host server to tell it we just started.
         * it should be listening on port 5037. if we can't reach it, don't bother
         */
-        int s = socket_loopback_client(android_adb_port, SOCKET_STREAM);
+        int s = socket_loopback6_client(android_adb_port, SOCKET_STREAM);
+        if (s < 0) {
+            s = socket_loopback_client(android_adb_port, SOCKET_STREAM);
+        }
         if (s < 0) {
             D("can't connect to ADB server: %s (errno = %d)", errno_str, errno );
         } else {

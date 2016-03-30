@@ -265,6 +265,15 @@ sock_address_init_in6 ( SockAddress*  a, const uint8_t*  ip6[16], uint16_t  port
 }
 
 void
+sock_address_init_in6_loopback( SockAddress* a, uint16_t port )
+{
+    a->family = SOCKET_IN6;
+    a->u.in6.port = port;
+    memset(&a->u.in6.address, 0, 15);
+    a->u.in6.address[15] = 0x01;
+}
+
+void
 sock_address_init_unix( SockAddress*  a, const char*  path )
 {
     a->family       = SOCKET_UNIX;
@@ -1335,6 +1344,20 @@ socket_loopback_server( int  port, SocketType  type )
 }
 
 int
+socket_loopback6_server( int  port, SocketType  type )
+{
+    SockAddress  addr;
+    int          s;
+
+    sock_address_init_in6_loopback( &addr, port );
+    s = socket_create_in6( type );
+    if (s < 0)
+        return -1;
+
+    return socket_bind_server( s, &addr, type );
+}
+
+int
 socket_loopback_client( int  port, SocketType  type )
 {
     SockAddress  addr;
@@ -1343,6 +1366,18 @@ socket_loopback_client( int  port, SocketType  type )
     return socket_in_client( &addr, type );
 }
 
+int
+socket_loopback6_client( int  port, SocketType  type )
+{
+    SockAddress  addr;
+
+    sock_address_init_in6_loopback( &addr, port );
+
+    int s = socket_create_inet( type );
+    if (s < 0) return -1;
+
+    return socket_connect_client( s, &addr );
+}
 
 int
 socket_network_client( const char*  host, int  port, SocketType  type )
