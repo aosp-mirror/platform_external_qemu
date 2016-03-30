@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b168d59f_e72a202b",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 706,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-03-30T22:53:23Z",
+      "side": 1,
+      "message": "You should add a comment above describing how the ordering here is significant.\nOtherwise, a future CL will easily break this on Cinnamon again.",
+      "revId": "d380b2641e33bb92b5041e9b9131647b3b6f1315",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
