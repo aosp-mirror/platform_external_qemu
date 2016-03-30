@@ -703,7 +703,7 @@ void ToolWindow::on_minimize_button_clicked()
     if (mExtendedWindow) {
         mExtendedWindow->hide();
     }
-    this->hide();
+    this->showMinimized();
     mEmulatorWindow->showMinimized();
 }
 
