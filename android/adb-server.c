@@ -437,7 +437,7 @@ adb_server_init(int port)
         /* Create loopback server socket for the ADB port. */
         sock_address_init_inet(&_adb_server.socket_address,
                                SOCK_ADDRESS_INET_LOOPBACK, port);
-        _adb_server.so = socket_loopback_server(port, SOCKET_STREAM);
+        _adb_server.so = socket_loopback4_server(port, SOCKET_STREAM);
         if (_adb_server.so < 0) {
             E("Unable to create ADB server socket: %s", strerror(errno));
             return -1;
