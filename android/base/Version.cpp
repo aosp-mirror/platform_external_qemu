@@ -25,8 +25,7 @@ static bool isEof(std::istream& in) {
 }
 
 Version::Version(StringView ver) : mData() {
-    std::istringstream in;
-    in.rdbuf()->pubsetbuf(const_cast<char*>(ver.data()), ver.size());
+    std::istringstream in(ver);
     in >> std::noskipws;
 
     // read the main part, major.minor.micro
