@@ -88,21 +88,21 @@ private:
 FrameBuffer *FrameBuffer::s_theFrameBuffer = NULL;
 HandleType FrameBuffer::s_nextHandle = 0;
 
-static char* getGLES1ExtensionString(EGLDisplay p_dpy)
+static char* getGLES2ExtensionString(EGLDisplay p_dpy)
 {
     EGLConfig config;
     EGLSurface surface;
 
     static const GLint configAttribs[] = {
         EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
-        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
         EGL_NONE
     };
 
     int n;
     if (!s_egl.eglChooseConfig(p_dpy, configAttribs,
                                &config, 1, &n) || n == 0) {
-        ERR("%s: Could not find GLES 1.x config!\n", __FUNCTION__);
+        ERR("%s: Could not find GLES 2.x config!\n", __FUNCTION__);
         return NULL;
     }
 
@@ -116,33 +116,33 @@ static char* getGLES1ExtensionString(EGLDisplay p_dpy)
 
     surface = s_egl.eglCreatePbufferSurface(p_dpy, config, pbufAttribs);
     if (surface == EGL_NO_SURFACE) {
-        ERR("%s: Could not create GLES 1.x Pbuffer!\n", __FUNCTION__);
+        ERR("%s: Could not create GLES 2.x Pbuffer!\n", __FUNCTION__);
         return NULL;
     }
 
-    static const GLint gles1ContextAttribs[] = {
-        EGL_CONTEXT_CLIENT_VERSION, 1,
+    static const GLint gles2ContextAttribs[] = {
+        EGL_CONTEXT_CLIENT_VERSION, 2,
         EGL_NONE
     };
 
     EGLContext ctx = s_egl.eglCreateContext(p_dpy, config,
                                             EGL_NO_CONTEXT,
-                                            gles1ContextAttribs);
+                                            gles2ContextAttribs);
     if (ctx == EGL_NO_CONTEXT) {
-        ERR("%s: Could not create GLES 1.x Context!\n", __FUNCTION__);
+        ERR("%s: Could not create GLES 2.x Context!\n", __FUNCTION__);
         s_egl.eglDestroySurface(p_dpy, surface);
         return NULL;
     }
 
     if (!s_egl.eglMakeCurrent(p_dpy, surface, surface, ctx)) {
-        ERR("%s: Could not make GLES 1.x context current!\n", __FUNCTION__);
+        ERR("%s: Could not make GLES 2.x context current!\n", __FUNCTION__);
         s_egl.eglDestroySurface(p_dpy, surface);
         s_egl.eglDestroyContext(p_dpy, ctx);
         return NULL;
     }
 
     // the string pointer may become invalid when the context is destroyed
-    const char* s = (const char*)s_gles1.glGetString(GL_EXTENSIONS);
+    const char* s = (const char*)s_gles2.glGetString(GL_EXTENSIONS);
     char* extString = strdup(s ? s : "");
 
     // It is rare but some drivers actually fail this...
@@ -214,11 +214,11 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     // if GLES2 plugin has loaded - try to make GLES2 context and
     // get GLES2 extension string
     //
-    char* gles1Extensions = NULL;
-    gles1Extensions = getGLES1ExtensionString(fb->m_eglDisplay);
-    if (!gles1Extensions) {
+    char* gles2Extensions = NULL;
+    gles2Extensions = getGLES2ExtensionString(fb->m_eglDisplay);
+    if (!gles2Extensions) {
         // Could not create GLES2 context - drop GL2 capability
-        ERR("Failed to obtain GLES 1.x extensions string!\n");
+        ERR("Failed to obtain GLES 2.x extensions string!\n");
         delete fb;
         return false;
     }
@@ -240,7 +240,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     if (!s_egl.eglChooseConfig(fb->m_eglDisplay, configAttribs,
                                &fb->m_eglConfig, 1, &n)) {
         ERR("Failed on eglChooseConfig\n");
-        free(gles1Extensions);
+        free(gles2Extensions);
         delete fb;
         return false;
     }
@@ -257,7 +257,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
                                               glContextAttribs);
     if (fb->m_eglContext == EGL_NO_CONTEXT) {
         ERR("Failed to create context 0x%x\n", s_egl.eglGetError());
-        free(gles1Extensions);
+        free(gles2Extensions);
         delete fb;
         return false;
     }
@@ -277,7 +277,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
                                                glContextAttribs);
     if (fb->m_pbufContext == EGL_NO_CONTEXT) {
         ERR("Failed to create Pbuffer Context 0x%x\n", s_egl.eglGetError());
-        free(gles1Extensions);
+        free(gles2Extensions);
         delete fb;
         return false;
     }
@@ -299,7 +299,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
                                                       pbufAttribs);
     if (fb->m_pbufSurface == EGL_NO_SURFACE) {
         ERR("Failed to create pbuf surface for FB 0x%x\n", s_egl.eglGetError());
-        free(gles1Extensions);
+        free(gles2Extensions);
         delete fb;
         return false;
     }
@@ -309,7 +309,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     ScopedBind bind(fb);
     if (!bind.isValid()) {
         ERR("Failed to make current\n");
-        free(gles1Extensions);
+        free(gles2Extensions);
         delete fb;
         return false;
     }
@@ -321,16 +321,15 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     //const char* gles2Extensions = (const char *)s_gles2.glGetString(GL_EXTENSIONS);
     bool has_gl_oes_image = false;
 
-//     printf("GLES1 [%s]\n", gles1Extensions);
 //     printf("GLES2 [%s]\n", gles2Extensions);
 
     has_gl_oes_image = true;
 
     if (has_gl_oes_image) {
-        has_gl_oes_image &= strstr(gles1Extensions, "GL_OES_EGL_image") != NULL;
+        has_gl_oes_image &= strstr(gles2Extensions, "GL_OES_EGL_image") != NULL;
     }
-    free((void*)gles1Extensions);
-    gles1Extensions = NULL;
+    free((void*)gles2Extensions);
+    gles2Extensions = NULL;
 
     const char *eglExtensions = s_egl.eglQueryString(fb->m_eglDisplay,
                                                      EGL_EXTENSIONS);
@@ -388,18 +387,13 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow)
     }
 
     //
-    // Fail initialization if no GLES configs exist
+    // Don't fail initialization if no GLES configs exist
     //
-    if (nGLConfigs == 0) {
-        bind.release();
-        delete fb;
-        return false;
-    }
 
     //
-    // If no GLES2 configs exist - not GLES2 capability
+    // If no configs at all, exit
     //
-    if (nGL2Configs == 0) {
+    if (nGLConfigs + nGL2Configs == 0) {
         ERR("Failed: No GLES 2.x configs found!\n");
         bind.release();
         delete fb;
