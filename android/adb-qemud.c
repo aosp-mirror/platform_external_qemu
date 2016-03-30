@@ -121,28 +121,7 @@ _adb_on_host_disconnect(void* opaque, void* connection)
     D("ADB client %p(o=%p) is disconnected from the host %p",
       adb_client, adb_client->opaque, connection);
 
-    /* Dispatch the command SYNC(0,0) to guest in order to close transport */
-    // This constant and structure came from system/core/adb/adb.h
-    // (see struct amessage declaration).
-    #define kAdbCommandSync 0x434e5953U
-    static const struct AdbMessageHeader {
-        uint32_t command;
-        uint32_t arg0;
-        uint32_t arg1;
-        uint32_t data_length;
-        uint32_t data_check;
-        uint32_t magic;
-    } message = {
-        kAdbCommandSync,
-        0,
-        0,
-        0,
-        0,
-        kAdbCommandSync ^ 0xffffffffU,
-    };
-    qemud_client_send(adb_client->qemud_client,
-                      (const uint8_t*)&message,
-                      sizeof(message));
+    qemud_client_close(adb_client->qemud_client);
     adb_client->state = ADBC_STATE_HOST_DISCONNECTED;
 }
 

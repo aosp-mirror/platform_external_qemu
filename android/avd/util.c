@@ -213,11 +213,14 @@ propertyFile_isGoogleApis(const FileData* data) {
 
 int
 propertyFile_getAdbdCommunicationMode(const FileData* data) {
-    // adb sporadically hangs when using a pipe to communicate with qemud, so
-    // disable the qemud pipe.
-    // TODO: Fix the hang with qemud and change back to reading the
-    // communication method from the ro.adb.qemud build property.
-    D("Forcing ro.adb.qemud to \"0\".");
+    SearchResult searchResult;
+    int qemud = propertyFile_getInt(data, "ro.adb.qemud", 0, &searchResult);
+    if (searchResult == RESULT_FOUND) {
+        D("Found ro.adb.qemud build property: %d", qemud);
+        return qemud;
+    }
+    D("ro.adb.qemud invalid or not found, API >= 16, defaulting "
+      "ro.adb.qemud = 0");
     return 0;
 }
 
