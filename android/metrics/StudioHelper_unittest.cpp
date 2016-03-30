@@ -52,12 +52,12 @@ TEST(DotAndroidStudio, androidStudioVersioning) {
 
     str = ANDROID_STUDIO_DIR;
     Version v1studio(StudioHelper::extractAndroidStudioVersion(str));
-    Version v1 = Version(0, 0, 2);
+    Version v1 = Version(0, 0, 0, 2);
     EXPECT_EQ(v1studio, v1);
 
     str = ANDROID_STUDIO_DIR ANDROID_STUDIO_DIR_PREVIEW;
     Version v2studio(StudioHelper::extractAndroidStudioVersion(str));
-    Version v2 = Version(0, 0, 1);
+    Version v2 = Version(0, 0, 0, 1);
     EXPECT_EQ(v2studio, v2);
 
     str = "prefix_" ANDROID_STUDIO_DIR;
@@ -72,17 +72,17 @@ TEST(DotAndroidStudio, androidStudioVersioning) {
 
     str = ANDROID_STUDIO_DIR "1";
     Version v5studio(StudioHelper::extractAndroidStudioVersion(str));
-    Version v5 = Version(1, 0, 2);
+    Version v5 = Version(1, 0, 0, 2);
     EXPECT_EQ(v5studio, v5);
 
     str = ANDROID_STUDIO_DIR ANDROID_STUDIO_DIR_PREVIEW "1.3";
     Version v6studio(StudioHelper::extractAndroidStudioVersion(str));
-    Version v6 = Version(1, 3, 1);
+    Version v6 = Version(1, 3, 0, 1);
     EXPECT_EQ(v6studio, v6);
 
     str = ANDROID_STUDIO_DIR "1.20.3";
     Version v7studio(StudioHelper::extractAndroidStudioVersion(str));
-    Version v7 = Version(1, 20, 32);
+    Version v7 = Version(1, 20, 3, 2);
     EXPECT_EQ(v7studio, v7);
 }
 
