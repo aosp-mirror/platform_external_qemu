@@ -829,17 +829,12 @@ void EmulatorQtWindow::screenshot()
     mOverlay.showAsFlash();
 
     mScreencapProcess.start(command, args);
-    // TODO(pprabhu): It is a bad idea to call |waitForStarted| from the GUI
-    // thread, because it can freeze the UI till timeout.
-    if (!mScreencapProcess.waitForStarted(5000)) {
-        slot_showProcessErrorDialog(mScreencapProcess.error());
-    }
 }
 
 
 void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
 {
-    if (exitStatus) {
+    if (exitStatus && mScreencapProcess.error() != QProcess::Crashed) {
         QByteArray er = mScreencapProcess.readAllStandardError();
         er = er.replace('\n', "<br/>");
         QString msg = tr("The screenshot could not be captured. Output:<br/><br/>") + QString(er);
@@ -870,17 +865,12 @@ void EmulatorQtWindow::slot_screencapFinished(int exitStatus)
         // Use a different process to avoid infinite looping when pulling the
         // file.
         mScreencapPullProcess.start(command, args);
-        // TODO(pprabhu): It is a bad idea to call |waitForStarted| from the GUI
-        // thread, because it can freeze the UI till timeout.
-        if (!mScreencapPullProcess.waitForStarted(5000)) {
-            slot_showProcessErrorDialog(mScreencapPullProcess.error());
-        }
     }
 }
 
 void EmulatorQtWindow::slot_screencapPullFinished(int exitStatus)
 {
-    if (exitStatus) {
+    if (exitStatus && mScreencapPullProcess.error() != QProcess::Crashed) {
         QByteArray er = mScreencapPullProcess.readAllStandardError();
         er = er.replace('\n', "<br/>");
         QString msg = tr("The screenshot could not be loaded from the device. Output:<br/><br/>")
