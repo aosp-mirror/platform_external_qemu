@@ -104,7 +104,8 @@ typedef struct ControlGlobalRec_
 
     /* IO */
     Looper* looper;
-    LoopIo* listen_loopio;
+    LoopIo* listen4_loopio;
+    LoopIo* listen6_loopio;
 
     /* the list of current clients */
     ControlClient   clients;
@@ -580,15 +581,10 @@ static void control_global_accept(void* opaque,
                                   int listen_fd,
                                   unsigned events) {
     ControlGlobal global = opaque;
-    ControlClient       client;
-    Socket              fd;
-
-    assert(listen_fd == loopIo_fd(global->listen_loopio));
-    // accept()s are mapped to LOOP_IO_READ
-    assert(events & LOOP_IO_READ);
+    ControlClient client;
+    Socket fd;
 
     D(( "control_global_accept: just in (fd=%d)\n", listen_fd ));
-    assert(listen_fd == loopIo_fd(global->listen_loopio));
     // connect()s are mapped to LOOP_IO_READ
     assert(events & LOOP_IO_READ);
 
@@ -610,12 +606,26 @@ static void control_global_accept(void* opaque,
     }
 }
 
+static void control_global_accept4(void* opaque,
+                                   int listen_fd,
+                                   unsigned events) {
+    ControlGlobal global = opaque;
+    assert(listen_fd == loopIo_fd(global->listen4_loopio));
+    control_global_accept(opaque, listen_fd, events);
+}
+
+static void control_global_accept6(void* opaque,
+                                   int listen_fd,
+                                   unsigned events) {
+    ControlGlobal global = opaque;
+    assert(listen_fd == loopIo_fd(global->listen6_loopio));
+    control_global_accept(opaque, listen_fd, events);
+}
+
+
 int android_console_start(int control_port,
                           const AndroidConsoleAgents* agents) {
     ControlGlobal global = &_g_global;
-    Socket  fd;
-    int     ret;
-    SockAddress  sockaddr;
 
     memset( global, 0, sizeof(*global) );
     // Copy the QEMU specific interfaces passed in to make lifetime management
@@ -624,37 +634,34 @@ int android_console_start(int control_port,
         global-> name ## _agent [0] = agents-> name [0];
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_COPY_AGENT)
 
-    fd = socket_create_inet( SOCKET_STREAM );
-    if (fd < 0) {
-        perror("socket");
-        return -1;
-    }
+    Socket fd4 = socket_loopback_server(control_port, SOCKET_STREAM);
+    Socket fd6 = socket_loopback6_server(control_port, SOCKET_STREAM);
 
-    socket_set_xreuseaddr( fd );
-
-    sock_address_init_inet( &sockaddr, SOCK_ADDRESS_INET_LOOPBACK, control_port );
-
-    ret = socket_bind(fd, &sockaddr );
-    if (ret < 0) {
+    if (fd4 < 0 && fd6 < 0) {
+        // Could not bind to either IPv4 or IPv6 interface?
         perror("bind");
-        socket_close( fd );
         return -1;
     }
-
-    ret = socket_listen(fd, 0);
-    if (ret < 0) {
-        perror("listen");
-        socket_close( fd );
-        return -1;
-    }
-
-    socket_set_nonblock(fd);
 
     global->looper = looper_getForThread();
-    global->listen_loopio =
-            loopIo_new(global->looper, fd, control_global_accept, global);
-    loopIo_wantRead(global->listen_loopio);
-    loopIo_dontWantWrite(global->listen_loopio);
+    if (fd4 >= 0) {
+        global->listen4_loopio =
+                loopIo_new(global->looper, fd4, control_global_accept4, global);
+        loopIo_wantRead(global->listen4_loopio);
+        loopIo_dontWantWrite(global->listen4_loopio);
+    } else {
+        global->listen4_loopio = NULL;
+    }
+
+    if (fd6 >= 0) {
+        global->listen6_loopio =
+                loopIo_new(global->looper, fd6, control_global_accept6, global);
+        loopIo_wantRead(global->listen6_loopio);
+        loopIo_dontWantWrite(global->listen6_loopio);
+    } else {
+        global->listen6_loopio = NULL;
+    }
+
     return 0;
 }
 
