@@ -191,6 +191,30 @@
     },
     {
       "key": {
+        "uuid": "b168d59f_428e685f",
+        "filename": "android/base/system/Process.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-03-30T18:28:10Z",
+      "side": 1,
+      "message": "In the Windows case that just means that DllMain never gets the DLL_*_DETACH messages. Sure this might cause problems for the processes taking part in the IPC but it has no effect on the OS itself. As soon as those other processes die or close that DLL the DLL is not going to hang around.\n\nFor Linux it seems you\u0027re right about SysV and POSIX shared memory acquired using shmget() or shm_open(). That seems horribly broken but anonymous mmap shared memory does not have this limitation so I hope most people would use that instead.\n\nIf that type of shared memory on Linux (and I guess OS X) is the only reason we have this comment I still think we should change it. It doesn\u0027t leave the system in a weird state, it just leaks that bit of memory for those (hopefully few) processes that used POSIX/SysV shared memory. If we want some kind of warning I think it should say that one has to be careful about things like temporary files not being deleted and some details about shmget()/shm_open() shared memory.",
+      "parentUuid": "51031991_5b49e734",
+      "range": {
+        "startLine": 71,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 25
+      },
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d1cc697f_dfac94fc",
         "filename": "android/base/system/Process.h",
         "patchSetId": 6
