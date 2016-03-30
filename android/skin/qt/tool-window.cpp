@@ -705,12 +705,18 @@ void ToolWindow::on_minimize_button_clicked()
     }
 // showMinimized() on OSX will put the toolbar in the minimized state, which is
 // undesired. We only want the main window to minimize, so hide it instead.
+//
+// Also, order of operations matters. The main emulator window *must* be hidden
+// before the toolbar on Linux, or there are problems on Ubuntu Compiz. On OSX,
+// it looks better to hide it before minimizing the main emulator window due to
+// the minimize animation. Windows doesn't seem to care either way.
 #ifdef __APPLE__
     this->hide();
+    mEmulatorWindow->showMinimized();
 #else // __linux__ || _WIN32
+    mEmulatorWindow->showMinimized();
     this->showMinimized();
 #endif
-    mEmulatorWindow->showMinimized();
 }
 
 void ToolWindow::on_power_button_pressed() {
