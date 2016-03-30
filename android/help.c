@@ -929,14 +929,17 @@ help_report_console(stralloc_t*  out)
     "  before starting the emulation. <socket> must be in one of these\n"
     "  formats:\n\n"
 
-    "      tcp:<port>[,server][,max=<seconds>]\n"
-    "      unix:<path>[,server][,max=<seconds>]\n"
+    "      tcp:<port>[,server][,max=<seconds>][,ipv6]\n"
+    "      unix:<path>[,server][,max=<seconds>][,ipv6]\n"
     "\n"
     "  if the 'server' option is used, the emulator opens a server socket\n"
     "  and waits for an incoming connection to it. by default, it will instead\n"
     "  try to make a normal client connection to the socket, and, in case of\n"
     "  failure, will repeat this operation every second for 10 seconds.\n"
     "  the 'max=<seconds>' option can be used to modify the timeout\n\n"
+
+    "  if the 'ipv6' option is used, the interface used will be ::1, otherwise\n"
+    "  it will be 127.0.0.1\n\n"
 
     "  when the connection is established, the emulator sends its console port\n"
     "  number as text to the remote third-party, then closes the connection and\n"
