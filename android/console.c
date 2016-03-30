@@ -634,7 +634,7 @@ int android_console_start(int control_port,
         global-> name ## _agent [0] = agents-> name [0];
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_COPY_AGENT)
 
-    Socket fd4 = socket_loopback_server(control_port, SOCKET_STREAM);
+    Socket fd4 = socket_loopback4_server(control_port, SOCKET_STREAM);
     Socket fd6 = socket_loopback6_server(control_port, SOCKET_STREAM);
 
     if (fd4 < 0 && fd6 < 0) {
