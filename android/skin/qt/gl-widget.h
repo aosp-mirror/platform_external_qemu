@@ -42,6 +42,9 @@ public slots:
     void renderFrame();
     void makeContextCurrent();
 
+private slots:
+    void handleScreenChange(QScreen*);
+
 protected:
     // Dispatch tables for EGL and GLESv2 APIs. Note that these will be nullptr
     // if there was a problem when loading the host libraries.
@@ -79,6 +82,7 @@ private:
     void showEvent(QShowEvent*) override;
 
     bool ensureInit();
+    void destroyContext();
 
     EGLState* mEGLState;
     bool mValid;

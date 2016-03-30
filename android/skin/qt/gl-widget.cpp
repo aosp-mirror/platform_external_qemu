@@ -16,6 +16,7 @@
 
 #include <QResizeEvent>
 #include <QtGlobal>
+#include <QWindow>
 
 // Note that this header must come after ALL Qt headers.
 // Including any Qt headers after it will cause compilation
@@ -101,6 +102,13 @@ GLWidget::GLWidget(QWidget* parent) :
     setAttribute(Qt::WA_OpaquePaintEvent, true);
     setAttribute(Qt::WA_PaintOnScreen, true);
     setAttribute(Qt::WA_NoSystemBackground, true);
+}
+
+void GLWidget::handleScreenChange(QScreen*) {
+    // Destroy the context, forcing its re-creation on
+    // next paint event.
+    destroyContext();
+    resizeGL(realPixelsWidth(), realPixelsHeight());
 }
 
 bool GLWidget::ensureInit() {
@@ -234,6 +242,7 @@ void GLWidget::showEvent(QShowEvent*) {
     if (isVisible() && !visibleRegion().isNull()) {
         renderFrame();
     }
+    connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen*)), this, SLOT(handleScreenChange(QScreen*)));
 }
 
 void GLWidget::resizeEvent(QResizeEvent* e) {
@@ -256,9 +265,25 @@ void GLWidget::resizeEvent(QResizeEvent* e) {
 }
 
 GLWidget::~GLWidget() {
-    if (mEGL && mEGLState) {
-        mEGL->eglDestroyContext(mEGLState->display, mEGLState->context);
+    destroyContext();
+}
+
+void GLWidget::destroyContext() {
+    if (mGLES2 && mEGL && mEGLState) {
+        // Destroy canvas and texturedraw state
+        // within this context.
+        makeContextCurrent();
+        mCanvas.reset(nullptr);
+        mTextureDraw.reset(nullptr);
+
+        // Make sure the context isn't active before destroying it.
+        mEGL->eglMakeCurrent(mEGLState->display, 0, 0, 0);
+
+        // Reset EGL state and set mEGLState to null, which will force
+        // re-initialization when attempting to render the next frame.
         mEGL->eglDestroySurface(mEGLState->display, mEGLState->surface);
+        mEGL->eglDestroyContext(mEGLState->display, mEGLState->context);
         delete mEGLState;
+        mEGLState = nullptr;
     }
 }
