@@ -75,13 +75,13 @@ using namespace android::base;
 const Version StudioHelper::extractAndroidStudioVersion(
         const char* const dirName) {
     if (dirName == NULL) {
-        return Version::Invalid();
+        return Version::invalid();
     }
 
     // get rid of kAndroidStudioDir prefix to get to version
     const char* cVersion = strstr(dirName, kAndroidStudioDir);
     if (cVersion == NULL || cVersion != dirName) {
-        return Version::Invalid();
+        return Version::invalid();
     }
     cVersion += strlen(kAndroidStudioDir);
 
