@@ -703,6 +703,7 @@ void ToolWindow::on_minimize_button_clicked()
     if (mExtendedWindow) {
         mExtendedWindow->hide();
     }
+    mEmulatorWindow->showMinimized();
 // showMinimized() on OSX will put the toolbar in the minimized state, which is
 // undesired. We only want the main window to minimize, so hide it instead.
 #ifdef __APPLE__
@@ -710,7 +711,6 @@ void ToolWindow::on_minimize_button_clicked()
 #else // __linux__ || _WIN32
     this->showMinimized();
 #endif
-    mEmulatorWindow->showMinimized();
 }
 
 void ToolWindow::on_power_button_pressed() {
