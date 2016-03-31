@@ -22,6 +22,30 @@
       "revId": "f0bbcb96e260f382f6823fea01f68318edc46073",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce112444_ba107173",
+        "filename": "android/qemu-setup.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-31T09:23:31Z",
+      "side": 1,
+      "message": "You need to check that the length is equal anyway, so strcmp() doesn\u0027t buy you anything anyway.",
+      "parentUuid": "b168d59f_7fc5c755",
+      "range": {
+        "startLine": 96,
+        "startChar": 12,
+        "endLine": 96,
+        "endChar": 76
+      },
+      "revId": "f0bbcb96e260f382f6823fea01f68318edc46073",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
