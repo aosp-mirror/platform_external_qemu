@@ -267,7 +267,12 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_GLESv1, &lib)) {
         system->envSet("ANDROID_GLESv1_LIB", lib);
+    } else {
+        // A GLESv1 lib is optional---we can deal with a GLESv2 only
+        // backend.
+        system->envSet("ANDROID_GLESv1_LIB", "gles2_only_backend");
     }
+
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_GLESv2, &lib)) {
         system->envSet("ANDROID_GLESv2_LIB", lib);
