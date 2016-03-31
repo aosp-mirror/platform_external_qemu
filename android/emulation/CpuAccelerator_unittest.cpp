@@ -62,6 +62,12 @@ TEST_F(CpuAcceleratorTest, Default) {
     printf("Status: %s\n", status.c_str());
 }
 
+TEST(CpuAccelerator, GetCpuInfo) {
+    auto info = android::GetCpuInfo();
+    EXPECT_NE(info.first, ANDROID_CPU_INFO_FAILED);
+    EXPECT_GT(info.second.size(), 0);
+}
+
 #ifdef __APPLE__
 
 TEST(cpuAcceleratorGetHaxVersion, Test) {
