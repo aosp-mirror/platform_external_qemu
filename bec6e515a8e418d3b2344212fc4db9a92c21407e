@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8e0bac17_186c0502",
+        "filename": "android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-31T09:27:03Z",
+      "side": 1,
+      "message": "Yes, I was porting code from android/utils/sockets.c, but I agree than an enum is much better here. I\u0027ll update the code.",
+      "parentUuid": "b168d59f_5fb1e308",
+      "range": {
+        "startLine": 298,
+        "startChar": 0,
+        "endLine": 300,
+        "endChar": 51
+      },
+      "revId": "bec6e515a8e418d3b2344212fc4db9a92c21407e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b168d59f_9fe0dbe3",
         "filename": "android/base/sockets/SocketUtils.cpp",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2016-03-30T17:38:30Z",
       "side": 1,
       "message": "Nit: You could do a push_back of a default constructed address and then use \u0026result.back() for a tiny performance improvement. Although you would have to clean that up on failure so failure handling is slower.",
+      "revId": "bec6e515a8e418d3b2344212fc4db9a92c21407e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e0bac17_f8603108",
+        "filename": "android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-31T09:27:03Z",
+      "side": 1,
+      "message": "Yes, but I find the current code easier to understand :)",
+      "parentUuid": "b168d59f_9fe0dbe3",
       "revId": "bec6e515a8e418d3b2344212fc4db9a92c21407e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -76,6 +118,24 @@
     },
     {
       "key": {
+        "uuid": "ce112444_7aa89951",
+        "filename": "android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 504,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-31T09:27:03Z",
+      "side": 1,
+      "message": "Ah no, forget to remove this. I was defining:\n\n  using ScopedAddrInfo \u003d std::unique_ptr\u003caddrinfo, AddrInfoDeleter\u003e\n\nbut I don\u0027t need this anymore.",
+      "parentUuid": "b168d59f_5ff9e369",
+      "revId": "bec6e515a8e418d3b2344212fc4db9a92c21407e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b168d59f_bf703fdc",
         "filename": "android/base/sockets/SocketUtils.cpp",
         "patchSetId": 1
@@ -87,6 +147,24 @@
       "writtenOn": "2016-03-30T17:38:30Z",
       "side": 1,
       "message": "Nit: Could this be named socketTcp4LoopbackServer to match the convention of IPv6 and make it a little more explicit?",
+      "revId": "bec6e515a8e418d3b2344212fc4db9a92c21407e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e0bac17_d85d6d54",
+        "filename": "android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 543,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-03-31T09:27:03Z",
+      "side": 1,
+      "message": "Good idea, it looks like QEMU2 doesn\u0027t call these functions so doing so wouldn\u0027t require a multi-repo change.",
+      "parentUuid": "b168d59f_bf703fdc",
       "revId": "bec6e515a8e418d3b2344212fc4db9a92c21407e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
