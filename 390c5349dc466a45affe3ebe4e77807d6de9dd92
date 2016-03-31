@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8e59ec47_e25d0a54",
+        "filename": "android/base/Optional.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-31T17:34:01Z",
+      "side": 1,
+      "message": "Why does this need to be a base type? couldn\u0027t you have the same members inside of your optional class?",
+      "range": {
+        "startLine": 57,
+        "startChar": 6,
+        "endLine": 57,
+        "endChar": 18
+      },
+      "revId": "390c5349dc466a45affe3ebe4e77807d6de9dd92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e59ec47_572ff639",
+        "filename": "android/base/Optional.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-31T17:34:01Z",
+      "side": 1,
+      "message": "I think each compilation unit that includes this header will have its own, separate entities for these variables, if you define them in the header file. Is that really ok?",
+      "range": {
+        "startLine": 85,
+        "startChar": 0,
+        "endLine": 86,
+        "endChar": 31
+      },
+      "revId": "390c5349dc466a45affe3ebe4e77807d6de9dd92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e59ec47_d7e88606",
+        "filename": "android/base/Optional.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-31T17:34:01Z",
+      "side": 1,
+      "message": "Expand the comment to explain that this is needed to be able to construct the optional from types different than T",
+      "range": {
+        "startLine": 91,
+        "startChar": 4,
+        "endLine": 92,
+        "endChar": 45
+      },
+      "revId": "390c5349dc466a45affe3ebe4e77807d6de9dd92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e59ec47_e2d06a15",
+        "filename": "android/base/Optional.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-03-31T17:34:01Z",
+      "side": 1,
+      "message": "shouldn\u0027t you be checking if U and T are the same type here? I don\u0027t remember clearly, but if enable_if_convertible\u003cT,T\u003e is true then wouldn\u0027t this conflict with the above functions?",
+      "range": {
+        "startLine": 229,
+        "startChar": 20,
+        "endLine": 229,
+        "endChar": 21
+      },
+      "revId": "390c5349dc466a45affe3ebe4e77807d6de9dd92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
