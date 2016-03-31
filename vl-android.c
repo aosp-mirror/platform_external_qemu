@@ -2915,6 +2915,12 @@ int main(int argc, char **argv, char **envp)
                   width, height, depth);
             return 1;
         }
+
+        if (android_hw->hw_gpu_mode &&
+                !strcmp(android_hw->hw_gpu_mode, "off")) {
+            depth = 16;
+        }
+
         android_display_width  = width;
         android_display_height = height;
         android_display_bpp    = depth;
