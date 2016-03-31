@@ -180,6 +180,68 @@ TEST(EmuglConfig, init) {
     }
 }
 
+TEST(EmuglConfig, initGLESv2Only) {
+    TestSystem testSys("foo", System::kProgramBitness);
+    TestTempDir* myDir = testSys.getTempRoot();
+    myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
+    makeLibSubDir(myDir, "");
+
+    makeLibSubDir(myDir, "gles_angle");
+
+#ifdef _WIN32
+    const char* egl_lib_name = "libEGL.dll";
+    const char* glesv1_lib_name = "libGLES_CM.dll";
+    const char* glesv2_lib_name = "libGLESv2.dll";
+#elif defined(__APPLE__)
+    const char* egl_lib_name = "libEGL.dylib";
+    const char* glesv1_lib_name = "libGLES_CM.dylib";
+    const char* glesv2_lib_name = "libGLESv2.dylib";
+#else
+    const char* egl_lib_name = "libEGL.so";
+    const char* glesv1_lib_name = "libGLES_CM.so";
+    const char* glesv2_lib_name = "libGLESv2.so";
+#endif
+
+    char egl_lib_path[256] = {};
+    char glesv1_lib_path[256] = {};
+    char glesv2_lib_path[256] = {};
+
+    snprintf(egl_lib_path, sizeof(egl_lib_path), "gles_angle/%s", egl_lib_name);
+    snprintf(glesv1_lib_path, sizeof(glesv1_lib_path), "gles_angle/%s", glesv1_lib_name);
+    snprintf(glesv2_lib_path, sizeof(glesv2_lib_path), "gles_angle/%s", glesv2_lib_name);
+
+    makeLibSubFile(myDir, egl_lib_path);
+    makeLibSubFile(myDir, glesv2_lib_path);
+
+    {
+        EmuglConfig config;
+        EXPECT_TRUE(emuglConfig_init(
+                &config, true, "angle", "auto", 0, false, false, false));
+        EXPECT_TRUE(config.enabled);
+        EXPECT_STREQ("angle", config.backend);
+        EXPECT_STREQ("GPU emulation enabled using 'angle' mode",
+                     config.status);
+        emuglConfig_setupEnv(&config);
+        EXPECT_STREQ("<gles2_only_backend>",
+                     System::get()->envGet("ANDROID_GLESv1_LIB").c_str());
+    }
+
+    makeLibSubFile(myDir, glesv1_lib_path);
+
+    {
+        EmuglConfig config;
+        EXPECT_TRUE(emuglConfig_init(
+                &config, true, "angle", "auto", 0, false, false, false));
+        EXPECT_TRUE(config.enabled);
+        EXPECT_STREQ("angle", config.backend);
+        EXPECT_STREQ("GPU emulation enabled using 'angle' mode",
+                     config.status);
+        emuglConfig_setupEnv(&config);
+        EXPECT_TRUE(strcmp("<gles2_only_backend>",
+                    System::get()->envGet("ANDROID_GLESv1_LIB").c_str()));
+    }
+}
+
 TEST(EmuglConfig, initNxWithMesa) {
     TestSystem testSys("foo", System::kProgramBitness);
     TestTempDir* myDir = testSys.getTempRoot();
