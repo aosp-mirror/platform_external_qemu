@@ -476,7 +476,6 @@ void EmulatorQtWindow::show()
     mContainer.show();
     QFrame::show();
     mToolWindow->show();
-    mToolWindow->dockMainWindow();
 
     QObject::connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen *)), this, SLOT(slot_screenChanged(QScreen *)));
 }
