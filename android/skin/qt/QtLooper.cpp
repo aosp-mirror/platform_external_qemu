@@ -17,6 +17,8 @@
 
 #include <QTime>
 
+#include <memory>
+
 namespace android {
 namespace qt {
 namespace internal {
@@ -24,6 +26,7 @@ namespace internal {
 typedef ::android::base::Looper BaseLooper;
 typedef ::android::base::Looper::Timer BaseTimer;
 typedef ::android::base::Looper::FdWatch BaseFdWatch;
+typedef ::android::base::Looper::Event BaseEvent;
 
 // A partial implementation of android::base::Looper on top of the Qt main
 // event loop. There are few important things here:
@@ -45,7 +48,7 @@ typedef ::android::base::Looper::FdWatch BaseFdWatch;
 
 class QtLooper : public BaseLooper {
 public:
-    QtLooper() : Looper() {}
+    QtLooper() : Looper(), mEventHub(BaseLooper::EventHub::create(this)) {}
 
     //
     // T I M E R S
@@ -115,6 +118,15 @@ public:
     }
 
     //
+    //  E V E N T S
+    //
+
+    virtual BaseEvent* createEvent(BaseEvent::Callback callback,
+                                   void* opaque) override {
+        return mEventHub->createEvent(callback, opaque);
+    }
+
+    //
     //  L O O P E R
     //
     virtual Duration nowMs(ClockType clock) {
@@ -153,6 +165,8 @@ protected:
 
 private:
     DISALLOW_COPY_AND_ASSIGN(QtLooper);
+
+    std::unique_ptr<BaseLooper::EventHub> mEventHub;
 };
 
 }  // namespace internal

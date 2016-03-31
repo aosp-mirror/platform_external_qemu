@@ -204,6 +204,57 @@ public:
                                    FdWatch::Callback callback,
                                    void* opaque) = 0;
 
+    // Interface class for a non-I/O based event that can be signalled
+    // from any thread. The event callback will be triggered on the looper's
+    // thread as soon as possible. |opaque| is the opaque pointer passed
+    // at creation time. |count| is the number of times the event was
+    // signalled, and is always >= 1.
+    class Event {
+    public:
+        using Callback = void (*)(void* opaque, int count);
+
+        Event() = default;
+
+        virtual ~Event() = default;
+
+        // Disable this event. It is still possible to signal it, but this
+        // will only increase its internal counter, i.e. the event callback
+        // will not be triggered until the event is enabled.
+        virtual void disable() = 0;
+
+        // Enable the event.
+        virtual void enable() = 0;
+
+        // Signal this event. This can be called from any thread.
+        virtual void signal() = 0;
+
+        // Return event count. NOTE: This is not thread-safe and should only
+        // be used for testing. The count is reset to 0 just before its
+        // callback is called.
+        virtual int countForTesting() const = 0;
+    };
+
+    // Create a new Event instance from this looper. This must be called
+    // from the looper's thread. Note that new Event instances are enabled
+    // by default.
+    virtual Event* createEvent(Event::Callback callback, void* opaque) = 0;
+
+    // A class used to implement the Event-handling part of a Looper.
+    // This is exposed here to share the implementation with all Looper
+    // instances.
+    class EventHub {
+    public:
+        EventHub() = default;
+        virtual ~EventHub() = default;
+        virtual Event* createEvent(Event::Callback callback, void* opaque) = 0;
+
+        // Create an EventHub instance that can be used with any Looper
+        // implementation. This one relies on a socketPair and an associated
+        // FdWatch. Some Looper implementations may prefer a different
+        // implementation though.
+        static EventHub* create(Looper* looper);
+    };
+
 protected:
     // Default constructor is protected. Use create() method to create
     // new generic Looper instances.
