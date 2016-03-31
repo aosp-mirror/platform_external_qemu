@@ -22,6 +22,30 @@
       "revId": "ae0a8494b51c223e6b0e7886c2933f87f24bd3ba",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e59ec47_1261890a",
+        "filename": "android/base/TypeUtils_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-31T20:04:26Z",
+      "side": 1,
+      "message": "test case #2 is exactly like that:\n\nstatic_assert(!is_template_instantiation\u003cstd::list\u003cstd::vector\u003cint\u003e\u003e, std::vector\u003e::value,\n                  \"list is not an instance of vector\");",
+      "parentUuid": "8e59ec47_af0b7ab2",
+      "range": {
+        "startLine": 62,
+        "startChar": 0,
+        "endLine": 62,
+        "endChar": 18
+      },
+      "revId": "ae0a8494b51c223e6b0e7886c2933f87f24bd3ba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
