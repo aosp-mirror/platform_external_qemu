@@ -257,7 +257,7 @@ sock_address_init_inet( SockAddress*  a, uint32_t  ip, uint16_t  port )
 }
 
 void
-sock_address_init_in6 ( SockAddress*  a, const uint8_t*  ip6[16], uint16_t  port )
+sock_address_init_in6 ( SockAddress*  a, const uint8_t ip6[16], uint16_t  port )
 {
     a->family = SOCKET_IN6;
     a->u.in6.port = port;
