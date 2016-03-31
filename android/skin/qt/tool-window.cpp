@@ -361,9 +361,9 @@ void ToolWindow::hideEvent(QHideEvent*) {
 
 void ToolWindow::show()
 {
+    QFrame::show();
     dockMainWindow();
     setFixedSize(size());
-    QFrame::show();
 
     if (mExtendedWindow) {
         mExtendedWindow->show();
@@ -703,13 +703,10 @@ void ToolWindow::on_minimize_button_clicked()
     if (mExtendedWindow) {
         mExtendedWindow->hide();
     }
-// showMinimized() on OSX will put the toolbar in the minimized state, which is
-// undesired. We only want the main window to minimize, so hide it instead.
-#ifdef __APPLE__
+    // showMinimized() on OSX will put the toolbar in the minimized state,
+    // which is undesired. We only want the main window to minimize, so
+    // hide it instead.
     this->hide();
-#else // __linux__ || _WIN32
-    this->showMinimized();
-#endif
     mEmulatorWindow->showMinimized();
 }
 
