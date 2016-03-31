@@ -14,11 +14,13 @@
 #include <gtest/gtest.h>
 
 #include <functional>
+#include <list>
+#include <vector>
 
 namespace android {
 namespace base {
 
-TEST(StringView, IsCallable) {
+TEST(TypeUtils, IsCallable) {
     class C;
     C* c = nullptr;
 
@@ -48,5 +50,17 @@ TEST(StringView, IsCallable) {
                   "bad required signature");
 }
 
+TEST(TypeUtils, IsTemplateInstantiation) {
+    static_assert(!is_template_instantiation<int, std::vector>::value,
+                  "int is not an instance of vector");
+    static_assert(!is_template_instantiation<std::list<std::vector<int>>, std::vector>::value,
+                  "list is not an instance of vector");
+
+    static_assert(is_template_instantiation<std::vector<int>, std::vector>::value,
+                  "std::vector<int> is an instance of vector");
+    static_assert(is_template_instantiation<std::vector<std::vector<std::vector<int>>>, std::vector>::value,
+                  "nested std::vector<> is an instance of vector");
 }
-}
+
+}  // namespace base
+}  // namespace android
