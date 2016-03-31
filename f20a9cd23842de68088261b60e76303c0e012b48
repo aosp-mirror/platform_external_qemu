@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8e59ec47_72a1e5cc",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 743,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-31T20:37:48Z",
+      "side": 1,
+      "message": "It\u0027s clang-format I swear!",
+      "parentUuid": "8e59ec47_d2f77176",
+      "range": {
+        "startLine": 740,
+        "startChar": 0,
+        "endLine": 743,
+        "endChar": 36
+      },
+      "revId": "f20a9cd23842de68088261b60e76303c0e012b48",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8e59ec47_52fdc150",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-31T20:07:27Z",
       "side": 1,
       "message": "ditto",
+      "range": {
+        "startLine": 795,
+        "startChar": 0,
+        "endLine": 798,
+        "endChar": 36
+      },
+      "revId": "f20a9cd23842de68088261b60e76303c0e012b48",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e59ec47_52a6e1e6",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 798,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-03-31T20:37:48Z",
+      "side": 1,
+      "message": "IBID",
+      "parentUuid": "8e59ec47_52fdc150",
       "range": {
         "startLine": 795,
         "startChar": 0,
