@@ -37,11 +37,11 @@ int socketLocalClient(const char* path, int socketType);
 
 // Bind to a localhost TCP socket, and return its socket descriptor on
 // success, or -errno code on failure.
-int socketTcpLoopbackServer(int port, int socketType);
+int socketTcp4LoopbackServer(int port, int socketType);
 
 // Connect to a localhost TCP port, and return a new socket descriptor on
 // success, or -errno code on failure.
-int socketTcpLoopbackClient(int port, int socketType);
+int socketTcp4LoopbackClient(int port, int socketType);
 
 // Connect to a TCP host, and return a new socket descriptor on
 // success, or -errno code on failure.

@@ -200,6 +200,7 @@ void  sock_address_init_inet( SockAddress*  a, uint32_t  ip, uint16_t  port );
  */
 #if HAVE_IN6_SOCKETS
 void  sock_address_init_in6 ( SockAddress*  a, const uint8_t*  ip6[16], uint16_t  port );
+void  sock_address_init_in6_loopback ( SockAddress* a, uint16_t port );
 #endif
 
 /* Intialize a Unix socket address, this will copy the 'path' string into the
@@ -393,10 +394,12 @@ int   socket_can_read( int  fd );
 int  socket_pair(int  *fd1, int *fd2);
 
 /* create a server socket listening on the host's loopback interface */
-int  socket_loopback_server( int  port, SocketType  type );
+int  socket_loopback4_server( int  port, SocketType  type );
+int  socket_loopback6_server( int  port, SocketType  type );
 
 /* connect to a port on the host's loopback interface */
-int  socket_loopback_client( int  port, SocketType  type );
+int  socket_loopback4_client( int  port, SocketType  type );
+int  socket_loopback6_client( int  port, SocketType  type );
 
 /* create a server socket listening to a Unix domain path */
 #if HAVE_UNIX_SOCKETS

@@ -48,7 +48,10 @@ android_core_send_init_response(const char* msg)
     ui_port = atoi(android_op_ui_port);
     if (ui_port >= 0) {
         // At this point UI always starts the core on the same workstation.
-        fd = socket_loopback_client(ui_port, SOCKET_STREAM);
+        fd = socket_loopback6_client(ui_port, SOCKET_STREAM);
+        if (fd < 0) {
+            fd = socket_loopback4_client(ui_port, SOCKET_STREAM);
+        }
         if (fd == -1) {
             fprintf(stderr, "Unable to create UI socket client for port %s: %s\n",
                     android_op_ui_port, errno_str);

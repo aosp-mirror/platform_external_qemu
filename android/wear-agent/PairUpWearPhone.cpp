@@ -618,7 +618,7 @@ void PairUpWearPhoneImpl::closeConnection(FdWatch* watch) {
 bool PairUpWearPhoneImpl::openConnection(int port,
                                          FdWatch* watch,
                                          Looper::FdWatch::Callback callback) {
-    int so = socketTcpLoopbackClient(port);
+    int so = socketTcp4LoopbackClient(port);
     if (so < 0) {
         DPRINT("failed to open up connection to port %d\n", port);
         watch->reset(NULL);

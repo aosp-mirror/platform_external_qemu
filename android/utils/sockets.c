@@ -265,6 +265,14 @@ sock_address_init_in6 ( SockAddress*  a, const uint8_t*  ip6[16], uint16_t  port
 }
 
 void
+sock_address_init_in6_loopback( SockAddress* a, uint16_t port )
+{
+    // The ::1 IPv6 address as a 16-byte array.
+    static const uint8_t kLoopback[16] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1 };
+    sock_address_init_in6(a, kLoopback, port);
+}
+
+void
 sock_address_init_unix( SockAddress*  a, const char*  path )
 {
     a->family       = SOCKET_UNIX;
@@ -1329,13 +1337,27 @@ socket_in_client( SockAddress*  to, SocketType  type )
 
 
 int
-socket_loopback_server( int  port, SocketType  type )
+socket_loopback4_server( int  port, SocketType  type )
 {
     return socket_in_server( SOCK_ADDRESS_INET_LOOPBACK, port, type );
 }
 
 int
-socket_loopback_client( int  port, SocketType  type )
+socket_loopback6_server( int  port, SocketType  type )
+{
+    SockAddress  addr;
+    int          s;
+
+    sock_address_init_in6_loopback( &addr, port );
+    s = socket_create_in6( type );
+    if (s < 0)
+        return -1;
+
+    return socket_bind_server( s, &addr, type );
+}
+
+int
+socket_loopback4_client( int  port, SocketType  type )
 {
     SockAddress  addr;
 
@@ -1343,6 +1365,18 @@ socket_loopback_client( int  port, SocketType  type )
     return socket_in_client( &addr, type );
 }
 
+int
+socket_loopback6_client( int  port, SocketType  type )
+{
+    SockAddress  addr;
+
+    sock_address_init_in6_loopback( &addr, port );
+
+    int s = socket_create_inet( type );
+    if (s < 0) return -1;
+
+    return socket_connect_client( s, &addr );
+}
 
 int
 socket_network_client( const char*  host, int  port, SocketType  type )
@@ -1452,7 +1486,7 @@ socket_pair(int *fd1, int *fd2)
     /* first, create the 'server' socket.
      * a port number of 0 means 'any port between 1024 and 5000.
      * see Winsock bind() documentation for details */
-    s0 = socket_loopback_server( 0, SOCK_STREAM );
+    s0 = socket_loopback4_server( 0, SOCK_STREAM );
     if (s0 < 0)
         return -1;
 
@@ -1465,7 +1499,7 @@ socket_pair(int *fd1, int *fd2)
     }
 
     port = ntohs(sockin.sin_port);
-    s2   = socket_loopback_client( port, SOCK_STREAM );
+    s2   = socket_loopback4_client( port, SOCK_STREAM );
     if (s2 < 0) {
         closesocket(s0);
         return -1;

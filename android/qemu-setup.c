@@ -62,12 +62,14 @@ static bool s_support_configurable_ports = false;
 // Where <options> is a comma-separated list of options which can be
 //    server        - Enable server mode (waits for client connection).
 //    max=<count>   - Set maximum connection attempts (client mode only).
+//    ipv6          - Use IPv6 localhost (::1) instead of (127.0.0.1)
 //
 
 // bit flags returned by get_report_console_options() below.
 enum {
     REPORT_CONSOLE_SERVER = (1 << 0),
-    REPORT_CONSOLE_MAX    = (1 << 1)
+    REPORT_CONSOLE_MAX    = (1 << 1),
+    REPORT_CONSOLE_IPV6   = (1 << 2),
 };
 
 // Look at |end| for a comma-separated list of -report-console options
@@ -91,15 +93,18 @@ static int get_report_console_options(char* end, int* maxtries) {
         if (p == NULL)
             p = end + strlen(end);
 
-        if (memcmp( end, "server", p-end ) == 0)
+        if ((p - end) == strlen("server") && !memcmp(end, "server", p - end)) {
             flags |= REPORT_CONSOLE_SERVER;
-        else if (memcmp( end, "max=", 4) == 0) {
+        } else if (memcmp( end, "max=", 4) == 0) {
             end  += 4;
             *maxtries = strtol( end, NULL, 10 );
             flags |= REPORT_CONSOLE_MAX;
+        } else if ((p - end) == strlen("ipv6") &&
+                !memcmp(end, "ipv6", p - end)) {
+            flags |= REPORT_CONSOLE_IPV6;
         } else {
             derror("socket port/path can be followed by "
-                   "[,server][,max=<count>] only");
+                   "[,server][,max=<count>][,ipv6] only");
             return -1;
         }
 
@@ -131,7 +136,12 @@ static int report_console(const char* proto_port, int console_port) {
         }
 
         if (flags & REPORT_CONSOLE_SERVER) {
-            s = socket_loopback_server( port, SOCKET_STREAM );
+            // TODO: Listen on both IPv6 and IPv4 interfaces at the same time?
+            if (flags & REPORT_CONSOLE_IPV6) {
+                s = socket_loopback6_server( port, SOCKET_STREAM );
+            } else {
+                s = socket_loopback4_server( port, SOCKET_STREAM );
+            }
             if (s < 0) {
                 derror("could not create server socket on TCP:%ld: %s", port,
                        errno_str);
@@ -140,7 +150,11 @@ static int report_console(const char* proto_port, int console_port) {
         } else {
             for ( ; maxtries > 0; maxtries-- ) {
                 D("trying to find console-report client on tcp:%d", port);
-                s = socket_loopback_client( port, SOCKET_STREAM );
+                if (flags & REPORT_CONSOLE_IPV6) {
+                    s = socket_loopback6_client( port, SOCKET_STREAM );
+                } else {
+                    s = socket_loopback4_client( port, SOCKET_STREAM );
+                }
                 if (s >= 0)
                     break;
 
@@ -393,7 +407,10 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
         /* send a simple message to the ADB host server to tell it we just started.
         * it should be listening on port 5037. if we can't reach it, don't bother
         */
-        int s = socket_loopback_client(android_adb_port, SOCKET_STREAM);
+        int s = socket_loopback6_client(android_adb_port, SOCKET_STREAM);
+        if (s < 0) {
+            s = socket_loopback4_client(android_adb_port, SOCKET_STREAM);
+        }
         if (s < 0) {
             D("can't connect to ADB server: %s (errno = %d)", errno_str, errno );
         } else {

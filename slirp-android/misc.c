@@ -254,7 +254,7 @@ fork_exec(struct socket *so, const char *ex, int do_pty)
 			 * Connect to the socket
 			 * XXX If any of these fail, we're in trouble!
 	 		 */
-            s = socket_loopback_client(sock_address_get_port(&addr), SOCKET_STREAM);
+            s = socket_loopback4_client(sock_address_get_port(&addr), SOCKET_STREAM);
 		}
 
 #if 0

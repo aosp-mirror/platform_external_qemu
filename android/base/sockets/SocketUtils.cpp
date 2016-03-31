@@ -12,6 +12,7 @@
 #include "android/base/sockets/SocketUtils.h"
 
 #include "android/base/EintrWrapper.h"
+#include "android/base/EnumFlags.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketErrors.h"
 
@@ -21,9 +22,12 @@
 #  include <sys/socket.h>
 #  include <unistd.h>
 #  include <fcntl.h>
+#  include <netdb.h>
 #  include <netinet/in.h>
 #  include <netinet/tcp.h>
 #endif
+
+#include <vector>
 
 #include <stdlib.h>
 #include <string.h>
@@ -203,20 +207,181 @@ void socketInitWinsock() {
 union SockAddressStorage {
     struct sockaddr generic;
     struct sockaddr_in inet;
+    struct sockaddr_in6 in6;
 
-    void initLoopback(int port) {
-        memset(&inet, 0, sizeof(inet));
-        inet.sin_family = AF_INET;
-        inet.sin_port = htons(port);
-        inet.sin_addr.s_addr = htonl(0x7f000001);
+    void initLoopbackFor(int port, int domain) {
+        if (domain == AF_INET) {
+            memset(&inet, 0, sizeof(inet));
+            inet.sin_family = AF_INET;
+            inet.sin_port = htons(port);
+            inet.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        } else if (domain == AF_INET6) {
+            memset(&in6, 0, sizeof(in6));
+            in6.sin6_family = AF_INET6;
+            in6.sin6_port = htons(port);
+            in6.sin6_addr = IN6ADDR_LOOPBACK_INIT;
+        } else {
+            CHECK(false) << "Invalid domain " << domain;
+        }
+    }
+
+    // Initialize from a generic BSD socket address.
+    // |from| points to a sockaddr_in or sockaddr_in6 structure.
+    // |fromLen| is its length in bytes.
+    // Return true on success, false/errno otherwise.
+    bool initFromBsd(const void* from, size_t fromLen) {
+        auto src = static_cast<const struct sockaddr*>(from);
+        switch(src->sa_family) {
+            case AF_INET:
+                if (fromLen != sizeof(inet)) {
+                    errno = EINVAL;
+                    return false;
+                }
+                inet = *static_cast<const struct sockaddr_in*>(from);
+                break;
+
+            case AF_INET6:
+                if (fromLen != sizeof(in6)) {
+                    errno = EINVAL;
+                    return false;
+                }
+                in6 = *static_cast<const struct sockaddr_in6*>(from);
+                break;
+
+            default:
+                errno = EINVAL;
+                return false;
+        }
+        return true;
+    }
+
+    void setPort(int port) {
+        switch (generic.sa_family) {
+            case AF_INET: inet.sin_port = htons(port); break;
+            case AF_INET6: in6.sin6_port = htons(port); break;
+            default: ;
+        }
     }
 
     int getPort() {
-        if (generic.sa_family == AF_INET) {
-            return ntohs(inet.sin_port);
-        } else {
+        switch (generic.sa_family) {
+            case AF_INET: return ntohs(inet.sin_port);
+            case AF_INET6: return ntohs(in6.sin6_port);
+            default: return -1;
+        }
+    }
+
+    int family() const {
+        return generic.sa_family;
+    }
+
+    socklen_t size() const {
+        size_t sz;
+        switch (generic.sa_family) {
+            case AF_INET: sz = sizeof(inet); break;
+            case AF_INET6: sz = sizeof(in6); break;
+            default: sz = sizeof(generic);
+        }
+        return static_cast<socklen_t>(sz);
+    }
+
+    enum ResolveOption {
+        kDefaultResolution = 0,
+        kPreferIpv6 = (1 << 0),
+    };
+
+    // Resolve host name |hostName| into a list of SockAddressStorage.
+    // If |preferIpv6| is true, prefer IPv6 addresses if available.
+    // On success, return true and sets |*out| to the result.
+    static bool resolveHostNameToList(
+            const char* hostName, ResolveOption resolveOption,
+            std::vector<SockAddressStorage>* out) {
+        addrinfo* res = nullptr;
+        bool preferIpv6 = (resolveOption == kPreferIpv6);
+        addrinfo hints = {};
+        hints.ai_family = preferIpv6 ? AF_INET6 : AF_UNSPEC;
+        int ret = ::getaddrinfo(hostName, nullptr, &hints, &res);
+        if (ret != 0) {
+            // Handle errors.
+            int err = 0;
+            switch (ret) {
+                case EAI_AGAIN:  // server is down
+                case EAI_FAIL:   // server is sick
+                    err = EHOSTDOWN;
+                    break;
+/* NOTE that in x86_64-w64-mingw32 both EAI_NODATA and EAI_NONAME are the same */
+#if defined(EAI_NODATA) && (EAI_NODATA != EAI_NONAME)
+                case EAI_NODATA:
+#endif
+                case EAI_NONAME:
+                    err = ENOENT;
+                    break;
+
+                case EAI_MEMORY:
+                    err = ENOMEM;
+                    break;
+
+                default:
+                    err = EINVAL;
+            }
+            errno = err;
             return -1;
         }
+
+        // Ensure |res| is always deleted on exit.
+        std::vector<SockAddressStorage> result;
+        for (auto r = res; r != nullptr; r = r->ai_next) {
+            SockAddressStorage addr;
+            if (!addr.initFromBsd(r->ai_addr, r->ai_addrlen)) {
+                continue;
+            }
+            result.emplace_back(std::move(addr));
+        }
+        ::freeaddrinfo(res);
+
+        if (result.empty()) {
+            return false;
+        }
+        out->swap(result);
+        return true;
+    }
+
+    // Initialize a SockAddressStorage instance by resolving |hostname| to
+    // its preferred address, according to |resolveOptions|, with port |port|.
+    // Return true on success, false/errno on error.
+    bool initResolve(const char* hostname, int port,
+                     ResolveOption resolveOptions = kDefaultResolution) {
+        std::vector<SockAddressStorage> addresses;
+        if (!resolveHostNameToList(hostname, resolveOptions, &addresses)) {
+            return false;
+        }
+        const bool preferIpv6 = (resolveOptions & kPreferIpv6);
+        const SockAddressStorage* addr6 = nullptr;
+        const SockAddressStorage* addr4 = nullptr;
+        for (const auto& addr : addresses) {
+            if (addr.family() == AF_INET && !addr4) {
+                addr4 = &addr;
+                if (!preferIpv6) {
+                    break;
+                }
+            } else if (addr.family() == AF_INET6 && !addr6) {
+                addr6 = &addr;
+                if (preferIpv6) {
+                    break;
+                }
+            }
+        }
+        const SockAddressStorage* addr;
+        if (preferIpv6) {
+            addr = addr6 ? addr6 : addr4;
+        } else {
+            addr = addr4 ? addr4 : addr6;
+        }
+        if (!addr) {
+            return false;
+        }
+        *this = *addr;
+        return true;
     }
 };
 
@@ -249,18 +414,16 @@ int socketSetXReuseAddr(int socket) {
 
 #ifdef _WIN32
 int socketTcpConnect(int socket, const SockAddressStorage* addr) {
-    int ret = ::connect(socket, &addr->generic,
-                        static_cast<socklen_t>(sizeof(addr->inet)));
+    int ret = ::connect(socket, &addr->generic, addr->size());
     ON_SOCKET_ERROR_RETURN_M1(ret);
     return ret;
 }
 #endif  // _WIN32
 
 int socketTcpBindAndListen(int socket, const SockAddressStorage* addr) {
-    socklen_t kSize = static_cast<socklen_t>(sizeof(addr->inet));
     int kBacklog = 5;
 
-    int ret = ::bind(socket, &addr->generic, kSize);
+    int ret = ::bind(socket, &addr->generic, addr->size());
     ON_SOCKET_ERROR_RETURN_M1(ret);
 
     ret = ::listen(socket, kBacklog);
@@ -340,9 +503,27 @@ void socketSetBlocking(int socket) {
 #endif
 }
 
-int socketTcpLoopbackServer(int port) {
-    ScopedSocket s(socketCreateTcp());
+// ScopedAddrInfo is a convenience class used to ensure that an addrinfo
+// instance is always properly deleted on scope exit.
+struct AddrInfoDeleter {
+    void operator()(struct addrinfo* info) {
+        if (info) {
+            freeaddrinfo(info);
+        }
+    }
+};
 
+static int socketCreateTcpFor(int domain) {
+#ifdef _WIN32
+    socketInitWinsock();
+#endif
+    int s = ::socket(domain, SOCK_STREAM, 0);
+    ON_SOCKET_ERROR_RETURN_M1(s);
+    return s;
+}
+
+static int socketTcpLoopbackServerFor(int port, int domain) {
+    ScopedSocket s(socketCreateTcpFor(domain));
     if (s.get() < 0) {
         DPLOG(ERROR) << "Could not create TCP socket\n";
         return -1;
@@ -351,7 +532,7 @@ int socketTcpLoopbackServer(int port) {
     socketSetXReuseAddr(s.get());
 
     SockAddressStorage addr;
-    addr.initLoopback(port);
+    addr.initLoopbackFor(port, domain);
 
     if (socketTcpBindAndListen(s.get(), &addr) < 0) {
         DPLOG(ERROR) << "Could not bind to TCP loopback port "
@@ -363,22 +544,37 @@ int socketTcpLoopbackServer(int port) {
     return s.release();
 }
 
-int socketTcpLoopbackClient(int port) {
-    ScopedSocket s(socketCreateTcp());
+int socketTcp4LoopbackServer(int port) {
+    return socketTcpLoopbackServerFor(port, AF_INET);
+}
 
+int socketTcp6LoopbackServer(int port) {
+    return socketTcpLoopbackServerFor(port, AF_INET6);
+}
+
+static int socketTcpLoopbackClientFor(int port, int domain) {
+    ScopedSocket s(socketCreateTcpFor(domain));
     if (s.get() < 0) {
         DPLOG(ERROR) << "Could not create TCP socket\n";
         return -1;
     }
 
     SockAddressStorage addr;
-    addr.initLoopback(port);
+    addr.initLoopbackFor(port, domain);
 
-    if (::connect(s.get(), &addr.generic, sizeof(addr.inet)) < 0) {
+    if (::connect(s.get(), &addr.generic, addr.size()) < 0) {
         return -1;
     }
 
     return s.release();
+}
+
+int socketTcp4LoopbackClient(int port) {
+    return socketTcpLoopbackClientFor(port, AF_INET);
+}
+
+int socketTcp6LoopbackClient(int port) {
+    return socketTcpLoopbackClientFor(port, AF_INET6);
 }
 
 int socketAcceptAny(int serverSocket) {
@@ -412,7 +608,7 @@ int socketCreatePair(int* fd1, int* fd2) {
     /* first, create the 'server' socket.
      * a port number of 0 means 'any port between 1024 and 5000.
      * see Winsock bind() documentation for details */
-    ScopedSocket s0(socketTcpLoopbackServer(0));
+    ScopedSocket s0(socketTcp4LoopbackServer(0));
     if (s0.get() < 0) {
         return -1;
     }
@@ -424,7 +620,7 @@ int socketCreatePair(int* fd1, int* fd2) {
      * extract the server socket's port number */
     int port = socketGetPort(s0.get());
 
-    ScopedSocket s2(socketTcpLoopbackClient(port));
+    ScopedSocket s2(socketTcp4LoopbackClient(port));
     if (!s2.valid()) {
         return -1;
     }
@@ -434,7 +630,7 @@ int socketCreatePair(int* fd1, int* fd2) {
      */
     ScopedSocket s1(socketAccept(s0.get()));
     if (!s1.valid()) {
-        DPLOG(ERROR) << "Could not accept connection from server socket\n";
+            DPLOG(ERROR) << "Could not accept connection from server socket\n";
         return -1;
     }
     socketSetNonBlocking(s1.get());
@@ -446,18 +642,17 @@ int socketCreatePair(int* fd1, int* fd2) {
 #endif /* _WIN32 */
 }
 
-int socketCreateTcp() {
-#ifdef _WIN32
-    socketInitWinsock();
-#endif
-    int s = ::socket(AF_INET, SOCK_STREAM, 0);
-    ON_SOCKET_ERROR_RETURN_M1(s);
-    return s;
+int socketCreateTcp4() {
+    return socketCreateTcpFor(AF_INET);
+}
+
+int socketCreateTcp6() {
+    return socketCreateTcpFor(AF_INET6);
 }
 
 int socketGetPort(int socket) {
     SockAddressStorage addr;
-    socklen_t addrLen = sizeof(addr);
+    socklen_t addrLen = static_cast<socklen_t>(sizeof(addr));
     if (getsockname(socket, &addr.generic, &addrLen) < 0) {
         DPLOG(ERROR) << "Could not get socket name!\n";
         return -1;

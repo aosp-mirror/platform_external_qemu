@@ -651,7 +651,7 @@ solisten(u_int port, u_int32_t laddr, u_int lport, int flags)
     so->so_laddr_ip   = laddr; /* Ditto */
     so->so_haddr_port = port;
 
-    s = socket_loopback_server( port, SOCKET_STREAM );
+    s = socket_loopback4_server( port, SOCKET_STREAM );
     if (s < 0)
         return NULL;
 

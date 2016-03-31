@@ -20,7 +20,7 @@ namespace base {
 namespace {
 
 int OpenNull() {
-    return socketCreateTcp();
+    return socketCreateTcp4();
 }
 
 }  // namespace
