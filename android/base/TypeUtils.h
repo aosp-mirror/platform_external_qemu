@@ -63,6 +63,13 @@ struct is_callable<F,
                                    std::declval<Args>()...))>::type,
                            R>::value>::type> : std::true_type {};
 // -----------------------------------------------------------------------------
+// Check if a type |T| is any instantiation of a template |U|
+template <class T, template <class ...> class U>
+struct is_template_instantiation : std::false_type {};
+
+template <template <class ...> class U, class... Args>
+struct is_template_instantiation<U<Args...>, U> : std::true_type {};
+// -----------------------------------------------------------------------------
 
 }  // namespace base
 }  // namespace android
