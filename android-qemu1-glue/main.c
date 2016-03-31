@@ -781,6 +781,14 @@ int main(int argc, char **argv) {
     {
         EmuglConfig config;
 
+        // If the user is using -gpu off
+        // (not -gpu guest),
+        // force 16-bit color depth.
+
+        if (opts->gpu && !strcmp(opts->gpu, "off")) {
+            hw->hw_lcd_depth = 16;
+        }
+
         bool blacklisted = false;
         bool on_blacklist = false;
 
