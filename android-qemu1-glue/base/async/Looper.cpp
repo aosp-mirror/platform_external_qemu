@@ -18,6 +18,8 @@
 #include "android-qemu1-glue/base/files/QemuFileStream.h"
 #include "android/utils/stream.h"
 
+#include <memory>
+
 extern "C" {
 #include "qemu-common.h"
 #include "qemu/timer.h"
@@ -34,6 +36,7 @@ extern "C" void qemu_system_shutdown_request(void);
 typedef ::android::base::Looper BaseLooper;
 typedef ::android::base::Looper::Timer BaseTimer;
 typedef ::android::base::Looper::FdWatch BaseFdWatch;
+typedef ::android::base::Looper::Event BaseEvent;
 
 // An implementation of android::base::Looper on top of the QEMU main
 // event loop. There are few important things here:
@@ -58,7 +61,8 @@ public:
             mQemuBh(NULL),
             mFdWatches(),
             mPendingFdWatches(),
-            mTimers() {
+            mTimers(),
+            mEventHub(BaseLooper::EventHub::create(this)) {
         mQemuBh = qemu_bh_new(handleBottomHalf, this);
     }
 
@@ -250,6 +254,15 @@ public:
     }
 
     //
+    //  E V E N T S
+    //
+
+    virtual BaseEvent* createEvent(BaseEvent::Callback callback,
+                                   void* opaque) override {
+        return mEventHub->createEvent(callback, opaque);
+    }
+
+    //
     //  L O O P E R
     //
 
@@ -335,6 +348,8 @@ private:
     FdWatchSet mFdWatches;
     FdWatchList mPendingFdWatches;
     TimerSet mTimers;
+
+    std::unique_ptr<BaseLooper::EventHub> mEventHub;
 };
 
 }  // namespace

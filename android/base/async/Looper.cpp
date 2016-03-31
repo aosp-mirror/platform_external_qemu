@@ -39,6 +39,7 @@ public:
             mTimers(),
             mActiveTimers(),
             mPendingTimers(),
+            mEventHub(Looper::EventHub::create(this)),
             mForcedExit(false) {}
 
     virtual ~GenLooper() {}
@@ -318,6 +319,14 @@ public:
     }
 
     //
+    //  E V E N T S
+    //
+    virtual Looper::Event* createEvent(Looper::Event::Callback callback,
+                                       void* opaque) override {
+        return mEventHub->createEvent(callback, opaque);
+    }
+
+    //
     //  M A I N   L O O P
     //
 
@@ -450,6 +459,8 @@ private:
     TimerSet  mTimers;        // Set of all timers.
     TimerList mActiveTimers;  // Sorted list of active timers.
     TimerList mPendingTimers; // Sorted list of pending timers.
+
+    ScopedPtr<EventHub> mEventHub;
 
     bool mForcedExit;
 };
