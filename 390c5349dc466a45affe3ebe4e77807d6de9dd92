@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8e59ec47_fd66cb92",
+        "filename": "android/base/Optional.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-31T18:46:04Z",
+      "side": 1,
+      "message": "Just to reduce the number of instantiations for these members and functions. (size, alignment) is much less unique than a (type)",
+      "parentUuid": "8e59ec47_e25d0a54",
+      "range": {
+        "startLine": 57,
+        "startChar": 6,
+        "endLine": 57,
+        "endChar": 18
+      },
+      "revId": "390c5349dc466a45affe3ebe4e77807d6de9dd92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8e59ec47_572ff639",
         "filename": "android/base/Optional.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-03-31T17:34:01Z",
       "side": 1,
       "message": "I think each compilation unit that includes this header will have its own, separate entities for these variables, if you define them in the header file. Is that really ok?",
+      "range": {
+        "startLine": 85,
+        "startChar": 0,
+        "endLine": 86,
+        "endChar": 31
+      },
+      "revId": "390c5349dc466a45affe3ebe4e77807d6de9dd92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e59ec47_dd630781",
+        "filename": "android/base/Optional.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-31T18:46:04Z",
+      "side": 1,
+      "message": "constexpr may only be defined in a header",
+      "parentUuid": "8e59ec47_572ff639",
       "range": {
         "startLine": 85,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "8e59ec47_5dfdd7c9",
+        "filename": "android/base/Optional.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-31T18:46:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8e59ec47_d7e88606",
+      "range": {
+        "startLine": 91,
+        "startChar": 4,
+        "endLine": 92,
+        "endChar": 45
+      },
+      "revId": "390c5349dc466a45affe3ebe4e77807d6de9dd92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8e59ec47_e2d06a15",
         "filename": "android/base/Optional.h",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2016-03-31T17:34:01Z",
       "side": 1,
       "message": "shouldn\u0027t you be checking if U and T are the same type here? I don\u0027t remember clearly, but if enable_if_convertible\u003cT,T\u003e is true then wouldn\u0027t this conflict with the above functions?",
+      "range": {
+        "startLine": 229,
+        "startChar": 20,
+        "endLine": 229,
+        "endChar": 21
+      },
+      "revId": "390c5349dc466a45affe3ebe4e77807d6de9dd92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e59ec47_dd11c7e8",
+        "filename": "android/base/Optional.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-03-31T18:46:04Z",
+      "side": 1,
+      "message": "somehow compiler doesn\u0027t have any ambiguity for the assignment",
+      "parentUuid": "8e59ec47_e2d06a15",
       "range": {
         "startLine": 229,
         "startChar": 20,
