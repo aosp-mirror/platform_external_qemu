@@ -815,6 +815,13 @@ void EmulatorQtWindow::screenshot()
         return;
     }
 
+    static const int MIN_SCREENSHOT_API = 14;
+    if (avdInfo_getApiLevel(android_avdInfo) < MIN_SCREENSHOT_API) {
+        showErrorDialog(tr("Screenshot is not supported below API 14."),
+                        tr("Screenshot"));
+        return;
+    }
+
     QStringList qargs;
     QString command = mToolWindow->getAdbFullPath(&qargs);
     if (command.isNull()) {
