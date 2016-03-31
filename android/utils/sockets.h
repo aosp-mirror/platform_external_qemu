@@ -199,7 +199,7 @@ void  sock_address_init_inet( SockAddress*  a, uint32_t  ip, uint16_t  port );
  * and the port in host endianess.
  */
 #if HAVE_IN6_SOCKETS
-void  sock_address_init_in6 ( SockAddress*  a, const uint8_t*  ip6[16], uint16_t  port );
+void  sock_address_init_in6 ( SockAddress*  a, const uint8_t ip6[16], uint16_t  port );
 void  sock_address_init_in6_loopback ( SockAddress* a, uint16_t port );
 #endif
 
