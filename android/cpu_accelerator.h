@@ -47,6 +47,19 @@ typedef enum {
     ANDROID_HYPERV_ERROR        = 100,  // Failed to detect status
 } AndroidHyperVStatus;
 
+// +1, cpu info
+typedef enum {
+    ANDROID_CPU_INFO_FAILED = 0,    // this is the value to return if something
+                                    // went wrong
+
+    ANDROID_CPU_INFO_AMD = 1 << 0,       // AMD CPU
+    ANDROID_CPU_INFO_INTEL = 1 << 1,     // Intel CPU
+    ANDROID_CPU_INFO_OTHER = 1 << 2,     // Other CPU manufacturer
+    ANDROID_CPU_INFO_VM = 1 << 3,        // Running in a VM
+    ANDROID_CPU_INFO_VIRT_SUPPORTED = 1 << 4,    // CPU supports
+                                                 // virtualization technologies
+} AndroidCpuInfoFlags;
+
 /* Returns ANDROID_CPU_ACCELERATION_READY if CPU acceleration is
  *  possible on this machine.  If |status| is not NULL, on exit,
  * |*status| will be set to a heap-allocated string describing

@@ -756,4 +756,43 @@ std::pair<AndroidHyperVStatus, std::string> GetHyperVStatus() {
 #endif // _WIN32
 }
 
+std::pair<AndroidCpuInfoFlags, std::string> GetCpuInfo() {
+    int flags = 0;
+    std::string status;
+
+    char vendor_id[13];
+    android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
+    switch (android_get_x86_cpuid_vendor_id_type(vendor_id)) {
+    case VENDOR_ID_AMD:
+        flags |= ANDROID_CPU_INFO_AMD;
+        status += "AMD CPU\n";
+        if (android_get_x86_cpuid_svm_support()) {
+            flags |= ANDROID_CPU_INFO_VIRT_SUPPORTED;
+            status += "Virtualization is supported\n";
+        }
+        break;
+    case VENDOR_ID_INTEL:
+        flags |= ANDROID_CPU_INFO_INTEL;
+        status += "Intel CPU\n";
+        if (android_get_x86_cpuid_vmx_support()) {
+            flags |= ANDROID_CPU_INFO_VIRT_SUPPORTED;
+            status += "Virtualization is supported\n";
+        }
+        break;
+    default:
+        flags |= ANDROID_CPU_INFO_OTHER;
+        status += "Other CPU: ";
+        status += vendor_id;
+        status += '\n';
+        break;
+    }
+
+    if (android_get_x86_cpuid_is_vcpu()) {
+        flags |= ANDROID_CPU_INFO_VM;
+    }
+
+    return std::make_pair(static_cast<AndroidCpuInfoFlags>(flags),
+                          std::move(status));
+}
+
 }  // namespace android
