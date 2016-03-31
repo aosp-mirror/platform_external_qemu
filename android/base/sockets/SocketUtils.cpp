@@ -503,16 +503,6 @@ void socketSetBlocking(int socket) {
 #endif
 }
 
-// ScopedAddrInfo is a convenience class used to ensure that an addrinfo
-// instance is always properly deleted on scope exit.
-struct AddrInfoDeleter {
-    void operator()(struct addrinfo* info) {
-        if (info) {
-            freeaddrinfo(info);
-        }
-    }
-};
-
 static int socketCreateTcpFor(int domain) {
 #ifdef _WIN32
     socketInitWinsock();
