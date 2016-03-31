@@ -85,6 +85,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
     mInstallDialog.close();
     QObject::connect(&mInstallDialog, SIGNAL(canceled()), this, SLOT(slot_installCanceled()));
     QObject::connect(&mInstallProcess, SIGNAL(finished(int)), this, SLOT(slot_installFinished(int)));
+    QObject::connect(&mInstallProcess, SIGNAL(error(QProcess::ProcessError)),
+                     this, SLOT(slot_installError(QProcess::ProcessError)));
 
     mPushDialog.setWindowTitle(tr("File Copy"));
     mPushDialog.setLabelText(tr("Copying files..."));
@@ -92,6 +94,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
     mPushDialog.close();
     QObject::connect(&mPushDialog, SIGNAL(canceled()), this, SLOT(slot_pushCanceled()));
     QObject::connect(&mPushProcess, SIGNAL(finished(int)), this, SLOT(slot_pushFinished(int)));
+    QObject::connect(&mPushProcess, SIGNAL(error(QProcess::ProcessError)), this,
+                     SLOT(slot_pushError(QProcess::ProcessError)));
 
     // Get the latest user selections from the user-config code.
     QSettings settings;
@@ -321,7 +325,6 @@ void ToolWindow::runAdbInstall(const QString &path)
 
     // Keep track of this process
     mInstallProcess.start(command, args);
-    mInstallProcess.waitForStarted();
 }
 
 
@@ -724,13 +727,34 @@ void ToolWindow::slot_installCanceled()
     }
 }
 
+void ToolWindow::slot_installError(QProcess::ProcessError exitStatus) {
+    mInstallDialog.close();
+
+    QString msg;
+    switch (exitStatus) {
+        case QProcess::Timedout:
+            // Our wait for process starting is best effort. If we timed out,
+            // meh.
+            return;
+        case QProcess::FailedToStart:
+            msg = tr("Failed to start process.<br/>"
+                     "Check settings to verify that your chosen ADB path "
+                     "is valid.");
+            break;
+        default:
+            msg = tr("Unexpected error occured while installing APK.");
+    }
+    showErrorDialog(msg, tr("APK Installer"));
+}
+
 void ToolWindow::slot_installFinished(int exitStatus)
 {
     mInstallDialog.close();
 
-    if (exitStatus) {
-        showErrorDialog(tr("The APK failed to install: adb could not connect to the emulator."),
-                        tr("APK Installer"));
+    // If the process crashes, the connected slot to the error() signal will
+    // handle it.
+    if (exitStatus && mInstallProcess.error() != QProcess::Crashed) {
+        showErrorDialog(tr("The APK failed to install."), tr("APK Installer"));
         return;
     }
 
@@ -756,9 +780,32 @@ void ToolWindow::slot_pushCanceled()
     mFilesToPush.clear();
 }
 
+void ToolWindow::slot_pushError(QProcess::ProcessError exitStatus) {
+    mPushDialog.setMaximum(0);
+    mPushDialog.close();
+
+    QString msg;
+    switch (exitStatus) {
+        case QProcess::Timedout:
+            // Our wait for process starting is best effort. If we timed out,
+            // meh.
+            return;
+        case QProcess::FailedToStart:
+            msg = tr("Failed to start process.<br/>"
+                     "Check settings to verify that your chosen ADB path "
+                     "is valid.");
+            break;
+        default:
+            msg = tr("Unexpected error occured while copying files.");
+    }
+    showErrorDialog(msg, tr("File Copy"));
+}
+
 void ToolWindow::slot_pushFinished(int exitStatus)
 {
-    if (exitStatus) {
+    // If the process crashes, the connected slot to the error() signal will
+    // handle it.
+    if (exitStatus && mPushProcess.error() != QProcess::Crashed) {
         QByteArray er = mPushProcess.readAllStandardError();
         er = er.replace('\n', "<br/>");
         QString msg = tr("Unable to copy files. Output:<br/><br/>") + QString(er);
@@ -783,7 +830,6 @@ void ToolWindow::slot_pushFinished(int exitStatus)
 
         // Keep track of this process
         mPushProcess.start(command, args);
-        mPushProcess.waitForStarted();
     }
 }
 
