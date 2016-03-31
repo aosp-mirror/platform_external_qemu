@@ -387,7 +387,6 @@ LOCAL_SRC_FILES := \
   android/base/misc/HttpUtils_unittest.cpp \
   android/base/misc/StringUtils_unittest.cpp \
   android/base/misc/Utf8Utils_unittest.cpp \
-  android/base/Optional_unittest.cpp \
   android/base/sockets/ScopedSocket_unittest.cpp \
   android/base/sockets/SocketDrainer_unittest.cpp \
   android/base/sockets/SocketWaiter_unittest.cpp \
