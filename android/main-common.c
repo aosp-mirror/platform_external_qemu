@@ -1627,8 +1627,12 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         // successfully boots.
         // This workaround disables the boot animation under the above conditions,
         // which frees up the CPU enough for the device to boot.
-        if ((opts->gpu && !strcmp(opts->gpu, "mesa")) ||
-            (hw->hw_gpu_mode && !strcmp(hw->hw_gpu_mode, "mesa"))) {
+        // ANGLE: ANGLE doesn't have GLESv1 support (for now),
+        // so let's also disable the boot animation.
+        if ((opts->gpu && (!strcmp(opts->gpu, "mesa") ||
+                           !strcmp(opts->gpu, "angle"))) ||
+            (hw->hw_gpu_mode && (!strcmp(hw->hw_gpu_mode, "mesa") ||
+                                 !strcmp(hw->hw_gpu_mode, "angle")))) {
             opts->no_boot_anim = 1;
             D("Starting AVD without boot animation.\n");
         }
