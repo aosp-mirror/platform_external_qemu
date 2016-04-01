@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6e0e782a_5a7271e5",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:15:48Z",
+      "side": 1,
+      "message": "My, I\u0027ve been drinking too much champagne during our latest TGIF :)",
+      "parentUuid": "912d9179_8bf891de",
+      "revId": "8472de70569d7559f68cd407a5a7b0cd573b75f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_4d843903",
         "filename": "android/base/sockets/SocketUtils.cpp",
         "patchSetId": 1
@@ -30,6 +48,30 @@
       "writtenOn": "2016-04-01T17:04:59Z",
       "side": 1,
       "message": "nit: static_cast is enough if I remember correctly",
+      "range": {
+        "startLine": 471,
+        "startChar": 15,
+        "endLine": 471,
+        "endChar": 26
+      },
+      "revId": "8472de70569d7559f68cd407a5a7b0cd573b75f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ee00a8f1_1e0aa903",
+        "filename": "android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:15:48Z",
+      "side": 1,
+      "message": "ok, will fix :)",
+      "parentUuid": "2ec1e019_4d843903",
       "range": {
         "startLine": 471,
         "startChar": 15,
