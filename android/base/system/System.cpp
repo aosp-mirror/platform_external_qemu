@@ -565,12 +565,12 @@ public:
             // goes to nul)
             commandLineCopy.prepend("/C");
             commandLineCopy.prepend(comspec);
-            if ((options & RunOptions::DumpOutputToFile) != RunOptions::None) {
+            if ((options & RunOptions::ShowOutput) == 0) {
+                commandLineCopy.push_back(">nul");
+                commandLineCopy.push_back("2>&1");
+            } else {
                 commandLineCopy.push_back(">");
                 commandLineCopy.push_back(outputFile);
-                commandLineCopy.push_back("2>&1");
-            } else if ((options & RunOptions::ShowOutput) == RunOptions::None) {
-                commandLineCopy.push_back(">nul");
                 commandLineCopy.push_back("2>&1");
             }
         }
