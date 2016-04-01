@@ -215,6 +215,30 @@
     },
     {
       "key": {
+        "uuid": "ae14f033_1c34f9d4",
+        "filename": "android/base/system/Process.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T12:15:45Z",
+      "side": 1,
+      "message": "I think that \"the whole system in a weird state\" is scary and ambiguous and not necessary here. How about adding a note with more details as in:\n\n  Note that killing a process while it\u0027s running is not\n  recommended, since it may result in system resource leaks\n  (e.g. temporary files, or SysV shared memory or semaphores\n  on Linux and Darwin).\n\nTo be fair, if you fill up the kernel SysV object ID table in Linux, your system will become unusable because glibc will start to act very weird which affects tons of programs (e.g. in my experience, any USB device became unusable, and weird locale-related error messages are printed on the terminal\u0027s console whenever you try to launch any command).\n\nThat\u0027s the main reason why Android doesn\u0027t support SysV shared objects, and implemented Ashmem.",
+      "parentUuid": "b168d59f_428e685f",
+      "range": {
+        "startLine": 71,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 25
+      },
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d1cc697f_dfac94fc",
         "filename": "android/base/system/Process.h",
         "patchSetId": 6
