@@ -252,6 +252,10 @@ private:
     bool mNextIsZoom;
     bool mForwardShortcutsToDevice;
     QPoint mPrevMousePosition;
+    int mLastKeyMod;
+    int mLastKeyCode;
+    bool mSimulateMod;
+    QString mLastText;
 
     MainLoopThread *mMainLoopThread;
 

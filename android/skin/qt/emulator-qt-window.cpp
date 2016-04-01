@@ -390,12 +390,9 @@ void EmulatorQtWindow::dropEvent(QDropEvent *event)
 
 void EmulatorQtWindow::keyPressEvent(QKeyEvent *event)
 {
+    mSimulateMod = false;
+    fprintf(stderr, "%s: call. txt=%s\n", __FUNCTION__, event->text().toStdString().c_str());
     handleKeyEvent(kEventKeyDown, event);
-}
-
-void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
-{
-    handleKeyEvent(kEventKeyUp, event);
 
     // If the key event generated any text, we need
     // to send an additional TextInput event to the emulator.
@@ -409,6 +406,13 @@ void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
         skin_event->u.text.text[sizeof(skin_event->u.text.text)-1] = 0;
         queueSkinEvent(skin_event);
     }
+}
+
+void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
+{
+    fprintf(stderr, "%s: call. txt=%s\n", __FUNCTION__, event->text().toStdString().c_str());
+    handleKeyEvent(kEventKeyUp, event);
+
 
     // If we enabled trackball mode, tell Qt to always forward mouse movement
     // events. Otherwise, Qt will forward them only when a button is pressed.
@@ -1128,11 +1132,34 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* 
     SkinEventKeyData& keyData = skin_event->u.key;
     keyData.keycode = convertKeyCode(event->key());
 
+    fprintf(stderr, "%s: call. evkey=%d mLastKeyMod=%d code=%d mods=%d\n", __FUNCTION__, event->key(), mLastKeyMod, keyData.keycode, event->modifiers());
     Qt::KeyboardModifiers modifiers = event->modifiers();
     if (modifiers & Qt::ShiftModifier) keyData.mod |= kKeyModLShift;
     if (modifiers & Qt::ControlModifier) keyData.mod |= kKeyModLCtrl;
     if (modifiers & Qt::AltModifier) keyData.mod |= kKeyModLAlt;
 
+    if (type == kEventKeyDown) {
+        mLastKeyMod = 0;
+        if (modifiers & Qt::ShiftModifier) mLastKeyMod |= kKeyModLShift;
+        if (modifiers & Qt::ControlModifier) mLastKeyMod |= kKeyModLCtrl;
+        if (modifiers & Qt::AltModifier) mLastKeyMod |= kKeyModLAlt;
+        if (modifiers) {
+            mLastKeyCode = event->key();
+        }
+    }
+
+    if (type == kEventKeyUp) {
+        if (mLastKeyMod & Qt::ShiftModifier) keyData.mod |= kKeyModLShift;
+        if (mLastKeyMod & Qt::ControlModifier) keyData.mod |= kKeyModLCtrl;
+        if (mLastKeyMod & Qt::AltModifier) keyData.mod |= kKeyModLAlt;
+        if (mLastKeyMod && event->key() != 16777248) {
+            fprintf(stderr, "converting\n");
+            keyData.keycode = convertKeyCode(mLastKeyCode);
+            mSimulateMod = true;
+        }
+    }
+
+    fprintf(stderr, "%s: lastkey=%d final key code=%d\n", __FUNCTION__, mLastKeyCode, keyData.keycode);
     queueSkinEvent(skin_event);
 }
 
