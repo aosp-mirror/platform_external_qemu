@@ -167,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "2eaac053_6597c669",
+        "filename": "android/base/async/AsyncSocketServer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:48:29Z",
+      "side": 1,
+      "message": "Ouch, I think you\u0027re right :) I\u0027ll fix this.",
+      "parentUuid": "2ec1e019_d39bec3e",
+      "range": {
+        "startLine": 111,
+        "startChar": 8,
+        "endLine": 112,
+        "endChar": 28
+      },
+      "revId": "a62928ab5e9d8c72d1d23fa11345242844618106",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_6d8335cb",
         "filename": "android/base/async/AsyncSocketServer.cpp",
         "patchSetId": 1
@@ -226,6 +250,30 @@
       "side": 1,
       "message": "what if ipv4 is completely disabled on the box? I would expect this first call to fail, but if mode was ipv4|ipv6 and we tried v6, we would succeed there",
       "parentUuid": "6e0e782a_7a6d3501",
+      "range": {
+        "startLine": 121,
+        "startChar": 15,
+        "endLine": 121,
+        "endChar": 25
+      },
+      "revId": "a62928ab5e9d8c72d1d23fa11345242844618106",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4eaff461_6697ce69",
+        "filename": "android/base/async/AsyncSocketServer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:48:29Z",
+      "side": 1,
+      "message": "Aaarf, this calls for a new mode kIPv4orIPv6 then, I\u0027ll see what I can do. Would this be the default. What kind of errno value should we check for though?",
+      "parentUuid": "2ec1e019_f38e28ed",
       "range": {
         "startLine": 121,
         "startChar": 15,
