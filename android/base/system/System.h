@@ -66,9 +66,9 @@ enum class RunOptions {
     // Only make sense with |WaitForCompletion|.
     TerminateOnTimeout = 2,
 
-    // These flags and RunOptions::HideAllOutput are mutually exclusive.
     ShowOutput = 4,
-    DumpOutputToFile = 8,
+
+    DumpOutputToFile = RunOptions::ShowOutput | 8,
 
     Default = 0,  // don't wait, hide all output
 };
