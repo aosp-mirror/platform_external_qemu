@@ -372,11 +372,6 @@ void EmulatorQtWindow::dropEvent(QDropEvent *event)
 void EmulatorQtWindow::keyPressEvent(QKeyEvent *event)
 {
     handleKeyEvent(kEventKeyDown, event);
-}
-
-void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
-{
-    handleKeyEvent(kEventKeyUp, event);
 
     // If the key event generated any text, we need
     // to send an additional TextInput event to the emulator.
@@ -390,6 +385,11 @@ void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
         skin_event->u.text.text[sizeof(skin_event->u.text.text)-1] = 0;
         queueEvent(skin_event);
     }
+}
+
+void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
+{
+    handleKeyEvent(kEventKeyUp, event);
 
     // If we enabled trackball mode, tell Qt to always forward mouse movement
     // events. Otherwise, Qt will forward them only when a button is pressed.
