@@ -16,6 +16,24 @@
       "revId": "3497dd148c3c9a31bcfb8e7246f62bf8df5204ef",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e59ec47_c37e7e88",
+        "filename": "android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1635,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-01T16:16:13Z",
+      "side": 1,
+      "message": "Damn, that\u0027s right! Thanks :)",
+      "parentUuid": "ee00a8f1_fe493dae",
+      "revId": "3497dd148c3c9a31bcfb8e7246f62bf8df5204ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
