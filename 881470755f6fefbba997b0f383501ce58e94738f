@@ -239,6 +239,30 @@
     },
     {
       "key": {
+        "uuid": "2ec1e019_cdca698a",
+        "filename": "android/base/system/Process.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-01T17:29:58Z",
+      "side": 1,
+      "message": "I think that\u0027s fair, although I would prefer we change from \"not recommended\" to \"can be dangerous\" since for most processes it\u0027s fine.\n\nThe reason I keep being annoying about this is because I\u0027m worried people will get this idea that you should never kill a process under any circumstances and some time in the future that thinking will narrow the way they think about solving some problem. It\u0027s the sort of thing you see with exceptions, templates, C++ itself compared to other languages and so on.",
+      "parentUuid": "ae14f033_1c34f9d4",
+      "range": {
+        "startLine": 71,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 25
+      },
+      "revId": "881470755f6fefbba997b0f383501ce58e94738f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d1cc697f_dfac94fc",
         "filename": "android/base/system/Process.h",
         "patchSetId": 6
