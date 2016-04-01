@@ -937,6 +937,14 @@ public:
             }
         }
 
+        // We never want to forward our stdin to the child process. On the other
+        // hand, closing it can confuse some programs.
+        if (posix_spawn_file_actions_addopen(&fileActions, 0, "/dev/null",
+                                             O_RDONLY, 0700)) {
+            LOG(VERBOSE) << "Failed to redirect child stdin from /dev/null";
+            return -1;
+        }
+
         // Posix spawn requires that argv[0] exists.
         assert(params[0] != nullptr);
 
