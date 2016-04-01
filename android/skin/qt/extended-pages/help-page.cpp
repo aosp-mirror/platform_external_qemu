@@ -13,9 +13,13 @@
 #include "android/android.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/globals.h"
+#include "android/skin/qt/qt-settings.h"
 #include "android/update-check/UpdateChecker.h"
 #include "android/update-check/VersionExtractor.h"
+
 #include <QDesktopServices>
+#include <QFileInfo>
+#include <QSettings>
 #include <QThread>
 #include <QUrl>
 
@@ -76,6 +80,25 @@ HelpPage::HelpPage(QWidget *parent) :
     // to this device
     mUi->help_adbSerialNumberBox->setPlainText(
             "emulator-" + QString::number(android_base_port) );
+
+    // Read the license text into the display box
+    // The file is <SDK path>/tools/NOTICE.txt
+    QSettings settings;
+    QString adbPath = settings.value(Ui::Settings::ADB_PATH, "").toString();
+    QString lFilePath = QFileInfo(adbPath).absolutePath();
+    QString lFileName = lFilePath + "/../tools/NOTICE.txt";
+
+    QFile licenseFile(lFileName);
+    if (!licenseFile.open(QIODevice::ReadOnly)) {
+        // Could not find the file!
+        mUi->help_licenseText->setPlainText(
+                "Find Android Emulator License NOTICE files here:\n\n"
+                "https://android.googlesource.com/platform/external/"
+                        "qemu/+/emu-master-dev/");
+    } else {
+        QTextStream lText(&licenseFile);
+        mUi->help_licenseText->setPlainText(lText.readAll());
+    }
 
     // launch the latest version loader in a separate thread
     auto latestVersionThread = new QThread();
