@@ -16,6 +16,24 @@
       "revId": "42996da4006e88cbaba5b2fde6a13fa2627d0cc8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e59ec47_839086cf",
+        "filename": "android/emulation/CpuAccelerator.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-01T16:08:09Z",
+      "side": 1,
+      "message": "Most probably someone added a single function that way and then following the existing style made it\nI personally just use the same naming as exists here",
+      "parentUuid": "ce84c4ce_42f15244",
+      "revId": "42996da4006e88cbaba5b2fde6a13fa2627d0cc8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
