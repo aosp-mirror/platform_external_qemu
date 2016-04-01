@@ -267,7 +267,17 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_GLESv1, &lib)) {
         system->envSet("ANDROID_GLESv1_LIB", lib);
+    } else {
+        fprintf(stderr, "OpenGL backend '%s' without OpenGL ES 1.x library detected. "
+                        "Using GLESv2 only.\n",
+                        config->backend);
+        // A GLESv1 lib is optional---we can deal with a GLESv2 only
+        // backend. The string "<gles2_only_backend>"
+        // is used to tell OpenGLESDispatch to create
+        // dummy versions of GLESv1 functions.
+        system->envSet("ANDROID_GLESv1_LIB", "<gles2_only_backend>");
     }
+
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_GLESv2, &lib)) {
         system->envSet("ANDROID_GLESv2_LIB", lib);

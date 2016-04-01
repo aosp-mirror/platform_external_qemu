@@ -56,8 +56,13 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->batteryPage->setBatteryAgent(agentPtr->battery);
     mExtendedUi->telephonyPage->setTelephonyAgent(agentPtr->telephony);
     mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
+<<<<<<< HEAD   (8a1144 Add license information to the Help page)
     mExtendedUi->helpPage->initialize(mToolWindow, shortcuts);
     mExtendedUi->dpadPage->setUserEventsAgent(agentPtr->userEvents);
+=======
+    mExtendedUi->helpPage->initializeKeyboardShortcutList(shortcuts);
+    mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
+>>>>>>> BRANCH (222560 Merge "Pressing volume up/down quickly hangs the emulator" i)
     mExtendedUi->location_page->setLocationAgent(agentPtr->location);
 
     connect(

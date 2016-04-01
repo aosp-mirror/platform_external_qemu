@@ -180,6 +180,64 @@ TEST(EmuglConfig, init) {
     }
 }
 
+TEST(EmuglConfig, initGLESv2Only) {
+    TestSystem testSys("foo", System::kProgramBitness);
+    TestTempDir* myDir = testSys.getTempRoot();
+    myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
+    makeLibSubDir(myDir, "");
+
+    makeLibSubDir(myDir, "gles_angle");
+
+#ifdef _WIN32
+    const char* kEglLibName = "libEGL.dll";
+    const char* kGLESv1LibName = "libGLES_CM.dll";
+    const char* kGLESv2LibName = "libGLESv2.dll";
+#elif defined(__APPLE__)
+    const char* kEglLibName = "libEGL.dylib";
+    const char* kGLESv1LibName = "libGLES_CM.dylib";
+    const char* kGLESv2LibName = "libGLESv2.dylib";
+#else
+    const char* kEglLibName = "libEGL.so";
+    const char* kGLESv1LibName = "libGLES_CM.so";
+    const char* kGLESv2LibName = "libGLESv2.so";
+#endif
+
+    std::string eglLibPath = StringFormat("gles_angle/%s", kEglLibName);
+    std::string GLESv1LibPath = StringFormat("gles_angle/%s", kGLESv1LibName);
+    std::string GLESv2LibPath = StringFormat("gles_angle/%s", kGLESv2LibName);
+
+    makeLibSubFile(myDir, eglLibPath.c_str());
+    makeLibSubFile(myDir, GLESv2LibPath.c_str());
+
+    {
+        EmuglConfig config;
+        EXPECT_TRUE(emuglConfig_init(
+                &config, true, "angle", "auto", 0, false, false, false));
+        EXPECT_TRUE(config.enabled);
+        EXPECT_STREQ("angle", config.backend);
+        EXPECT_STREQ("GPU emulation enabled using 'angle' mode",
+                     config.status);
+        emuglConfig_setupEnv(&config);
+        EXPECT_STREQ("<gles2_only_backend>",
+                     System::get()->envGet("ANDROID_GLESv1_LIB").c_str());
+    }
+
+    makeLibSubFile(myDir, GLESv1LibPath.c_str());
+
+    {
+        EmuglConfig config;
+        EXPECT_TRUE(emuglConfig_init(
+                &config, true, "angle", "auto", 0, false, false, false));
+        EXPECT_TRUE(config.enabled);
+        EXPECT_STREQ("angle", config.backend);
+        EXPECT_STREQ("GPU emulation enabled using 'angle' mode",
+                     config.status);
+        emuglConfig_setupEnv(&config);
+        EXPECT_TRUE(strcmp("<gles2_only_backend>",
+                    System::get()->envGet("ANDROID_GLESv1_LIB").c_str()));
+    }
+}
+
 TEST(EmuglConfig, initNxWithMesa) {
     TestSystem testSys("foo", System::kProgramBitness);
     TestTempDir* myDir = testSys.getTempRoot();
