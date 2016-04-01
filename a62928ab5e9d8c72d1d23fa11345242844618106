@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "2ec1e019_d39bec3e",
+        "filename": "android/base/async/AsyncSocketServer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-01T18:19:07Z",
+      "side": 1,
+      "message": "Doesn\u0027t that mean the logic should be\n(port !\u003d 0 || mode !\u003d kIPv4AndIPv6)\nor\n(port \u003d\u003d 0 \u0026\u0026 mode \u003d\u003d kIPv4AndIPv6) with reverted ternary arguments.\nAs it is now it will do 5 tries if port \u003d\u003d 0 and you only want IPv4. Or am I missing something?",
+      "parentUuid": "0e06dc0a_2558b403",
+      "range": {
+        "startLine": 111,
+        "startChar": 8,
+        "endLine": 112,
+        "endChar": 28
+      },
+      "revId": "a62928ab5e9d8c72d1d23fa11345242844618106",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_6d8335cb",
         "filename": "android/base/async/AsyncSocketServer.cpp",
         "patchSetId": 1
