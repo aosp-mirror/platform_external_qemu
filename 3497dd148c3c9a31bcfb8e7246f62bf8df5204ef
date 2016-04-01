@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ee00a8f1_fe493dae",
+        "filename": "android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1635,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T09:13:15Z",
+      "side": 1,
+      "message": "nit: Can you rewrite it to something like:\n\n  const char* gpu_mode \u003d opts-\u003egpu ? opts-\u003egpu : hw-\u003ehw_gpu_mode;\n  if (gpu_mode \u0026\u0026 (!strcmp(gpu_mode, \"mesa\") || !strcmp(gpu_mode, \"angle\")) {\n    opts-\u003eno_boot_anim \u003d 1;\n    D(...);\n  }\n\nBesides, the -gpu option is supposed to override the content of hw-\u003ehw_gpu_mode, so it would be more correct.",
+      "revId": "3497dd148c3c9a31bcfb8e7246f62bf8df5204ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
