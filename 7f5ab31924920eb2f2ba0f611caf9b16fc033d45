@@ -178,6 +178,30 @@
     },
     {
       "key": {
+        "uuid": "2ec1e019_ccc1026d",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 979,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-01T23:53:11Z",
+      "side": 1,
+      "message": "GetLastError() doesn\u0027t clear the error code, SetLastError(0) does",
+      "parentUuid": "2ec1e019_392faa82",
+      "range": {
+        "startLine": 979,
+        "startChar": 16,
+        "endLine": 979,
+        "endChar": 31
+      },
+      "revId": "7f5ab31924920eb2f2ba0f611caf9b16fc033d45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_1c698183",
         "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
         "patchSetId": 1
@@ -248,6 +272,30 @@
       "side": 1,
       "message": "If it fails it usually takes 3~20 retries to recover. Do you still think a 0.1 sec retry will make a difference?",
       "parentUuid": "2ec1e019_5620452f",
+      "range": {
+        "startLine": 981,
+        "startChar": 22,
+        "endLine": 981,
+        "endChar": 26
+      },
+      "revId": "7f5ab31924920eb2f2ba0f611caf9b16fc033d45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ec1e019_efa5d0c7",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 981,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-01T23:53:11Z",
+      "side": 1,
+      "message": "for 3 seconds it definitely will ;)",
+      "parentUuid": "2ec1e019_cc0d8258",
       "range": {
         "startLine": 981,
         "startChar": 22,
