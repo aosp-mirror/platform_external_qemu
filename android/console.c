@@ -27,6 +27,7 @@
 #include "android/globals.h"
 #include "android/hw-events.h"
 #include "android/hw-sensors.h"
+#include "android/network/constants.h"
 #include "android/shaper.h"
 #include "android/skin/charmap.h"
 #include "android/skin/keycode-buffer.h"
@@ -701,10 +702,11 @@ do_network_status( ControlClient  client, char*  args )
 static void
 dump_network_speeds( ControlClient  client )
 {
-    const NetworkSpeed*  speed = android_netspeeds;
+    const AndroidNetworkSpeed* speed = android_network_speeds;
+    const AndroidNetworkSpeed* speed_end = speed + android_network_speeds_count;
     const char* const  format = "  %-8s %s\r\n";
-    for ( ; speed->name; speed++ ) {
-        control_write( client, format, speed->name, speed->display );
+    for ( ; speed < speed_end; ++speed ) {
+        control_write( client, format, speed->name, speed->display_name );
     }
     control_write( client, format, "<num>", "selects both upload and download speed" );
     control_write( client, format, "<up>:<down>", "select individual upload/download speeds" );
