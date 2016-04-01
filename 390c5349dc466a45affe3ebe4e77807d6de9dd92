@@ -2,6 +2,75 @@
   "comments": [
     {
       "key": {
+        "uuid": "8e59ec47_f9d01815",
+        "filename": "android/base/Optional.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-01T16:34:04Z",
+      "side": 1,
+      "message": "It\u0027s a weird bit of English, but there\u0027s no such thing as \"a semantic\" -- \"semantic\" is an adjective, but not a noun.  So \"...with pointer semantics.\"",
+      "range": {
+        "startLine": 23,
+        "startChar": 45,
+        "endLine": 23,
+        "endChar": 63
+      },
+      "revId": "390c5349dc466a45affe3ebe4e77807d6de9dd92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e59ec47_19d40c08",
+        "filename": "android/base/Optional.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-01T16:34:04Z",
+      "side": 1,
+      "message": "I\u0027d omit the \"stack-stored\" comment; nothing prevents one from dynamically allocating an Optional\u003cT\u003e, or having one as a field of another class that you might dynamically allocate.",
+      "range": {
+        "startLine": 23,
+        "startChar": 18,
+        "endLine": 23,
+        "endChar": 32
+      },
+      "revId": "390c5349dc466a45affe3ebe4e77807d6de9dd92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e59ec47_99923c78",
+        "filename": "android/base/Optional.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-01T16:34:04Z",
+      "side": 1,
+      "message": "How about \"...allow an Optional\u003cT\u003e to be used with pointer-like syntax: *optional retrieves the contained value, and optional-\u003efield dereferences a field of a contained object.\"",
+      "range": {
+        "startLine": 42,
+        "startChar": 57,
+        "endLine": 42,
+        "endChar": 63
+      },
+      "revId": "390c5349dc466a45affe3ebe4e77807d6de9dd92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8e59ec47_e25d0a54",
         "filename": "android/base/Optional.h",
         "patchSetId": 1
@@ -42,6 +111,29 @@
         "startChar": 6,
         "endLine": 57,
         "endChar": 18
+      },
+      "revId": "390c5349dc466a45affe3ebe4e77807d6de9dd92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e59ec47_f913787e",
+        "filename": "android/base/Optional.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-01T16:34:04Z",
+      "side": 1,
+      "message": "What\u0027s the purpose of the int, here and below?  The std:: version of these doesn\u0027t seem to have time (at least for in_place_t)...",
+      "range": {
+        "startLine": 75,
+        "startChar": 32,
+        "endLine": 75,
+        "endChar": 35
       },
       "revId": "390c5349dc466a45affe3ebe4e77807d6de9dd92",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -183,6 +275,29 @@
         "startChar": 20,
         "endLine": 229,
         "endChar": 21
+      },
+      "revId": "390c5349dc466a45affe3ebe4e77807d6de9dd92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e59ec47_19c88cc8",
+        "filename": "android/base/Optional.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-01T16:34:04Z",
+      "side": 1,
+      "message": "vs. just declaring the parent\u0027s operator bool() to be public?  I don\u0027t feel strongly, but that seems slightly simpler to me...",
+      "range": {
+        "startLine": 271,
+        "startChar": 34,
+        "endLine": 271,
+        "endChar": 35
       },
       "revId": "390c5349dc466a45affe3ebe4e77807d6de9dd92",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
