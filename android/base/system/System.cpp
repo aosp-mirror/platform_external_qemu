@@ -35,13 +35,11 @@
 #import <Carbon/Carbon.h>
 #include <mach/clock.h>
 #include <mach/mach.h>
-#include <spawn.h>
 #endif  // __APPLE__
 
 #include <array>
 #include <chrono>
 #include <memory>
-#include <vector>
 
 #ifndef _WIN32
 #include <fcntl.h>
@@ -76,7 +74,6 @@ namespace android {
 namespace base {
 
 using std::unique_ptr;
-using std::vector;
 
 static System::WallDuration getTickCountMs() {
 #ifdef _WIN32
@@ -718,11 +715,11 @@ public:
                          System::ProcessExitCode* outExitCode,
                          System::Pid* outChildPid,
                          const String& outputFile) {
-        vector<char*> params;
-        for (const auto& item : commandLine) {
-            params.push_back(const_cast<char*>(item.c_str()));
+        unique_ptr<char* []> params{new char*[commandLine.size() + 1] };
+        for (size_t i = 0; i < commandLine.size(); ++i) {
+            params[i] = const_cast<char*>(commandLine[i].c_str());
         }
-        params.push_back(nullptr);
+        params[commandLine.size()] = nullptr;
 
         String cmd = "";
         if(LOG_IS_ON(VERBOSE)) {
@@ -734,13 +731,28 @@ public:
             cmd += "|";
         }
 
-#if defined(__APPLE__)
-        int pid = runViaPosixSpawn(commandLine[0].c_str(), params, options,
-                                   outputFile);
-#else
-        int pid = runViaForkAndExec(commandLine[0].c_str(), params, options,
-                                    outputFile);
-#endif  // !defined(__APPLE__)
+        // If an output file was requested, open it before forking, since
+        // creating a file in the child of a multi-threaded process is sketchy.
+        //
+        // It will be immediately closed in the parent process, and dup2'd into
+        // stdout and stderr in the child process.
+        int outputFd = 0;
+        if ((options & RunOptions::DumpOutputToFile) != 0 &&
+            !outputFile.empty()) {
+            // Ensure the umask doesn't get in the way while creating the
+            // output file.
+            mode_t old = umask(0);
+            outputFd = open(outputFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC,
+                            0700);
+            umask(old);
+        }
+
+        int pid = runViaForkAndExec(commandLine[0].c_str(), params.get(),
+                                    options, outputFd);
+        // Immediately close the output file if it exists
+        if (outputFd > 0) {
+            close(outputFd);
+        }
 
         if (pid < 0) {
             LOG(VERBOSE) << "Failed to fork for command " << cmd;
@@ -803,39 +815,12 @@ public:
     }
 
     int runViaForkAndExec(const char* command,
-                          const vector<char*>& params,
+                          char* const* params,
                           RunOptions options,
-                          const String& outputFile) {
-        // If an output file was requested, open it before forking, since
-        // creating a file in the child of a multi-threaded process is sketchy.
-        //
-        // It will be immediately closed in the parent process, and dup2'd into
-        // stdout and stderr in the child process.
-        int outputFd = 0;
-        if ((options & RunOptions::DumpOutputToFile) != RunOptions::None) {
-            if (outputFile.empty()) {
-                LOG(VERBOSE) << "Can not redirect output to empty file!";
-                return -1;
-            }
-
-            // Ensure the umask doesn't get in the way while creating the
-            // output file.
-            mode_t old = umask(0);
-            outputFd = open(outputFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC,
-                            0700);
-            umask(old);
-            if (outputFd < 0) {
-                LOG(VERBOSE) << "Failed to open file to redirect stdout/stderr";
-                return -1;
-            }
-        }
-
+                          int outputFd) {
         int pid = fork();
 
         if (pid != 0) {
-            if (outputFd > 0) {
-                close(outputFd);
-            }
             // Return the child's pid / error code to parent process.
             return pid;
         }
@@ -844,20 +829,18 @@ public:
         // Do not do __anything__ except execve. That includes printing to
         // stdout/stderr. None of it is safe in the child process forked from a
         // parent with multiple threads.
-        if ((options & RunOptions::DumpOutputToFile) != RunOptions::None) {
+
+        // Hide all output unless specified or if the desired output file
+        // could not be created or opened.
+        if (!(options & RunOptions::ShowOutput) || outputFd <= 0) {
+            int fd = open("/dev/null", O_WRONLY);
+            dup2(fd, 1);
+            dup2(fd, 2);
+        } else {
             dup2(outputFd, 1);
             dup2(outputFd, 2);
-            close(outputFd);
-        } else if ((options & RunOptions::ShowOutput) == RunOptions::None) {
-            // We were requested to RunOptions::HideAllOutput
-            int fd = open("/dev/null", O_WRONLY);
-            if (fd > 0) {
-                dup2(fd, 1);
-                dup2(fd, 2);
-                close(fd);
-            }
         }
-        if (execvp(command, params.data()) == -1) {
+        if (execvp(command, params) == -1) {
             // emulator doesn't really like exit calls from a forked process
             // (it just hangs), so let's just kill it
             if (raise(SIGKILL) != 0) {
@@ -867,81 +850,6 @@ public:
         // Should not happen, but let's keep the compiler happy
         return -1;
     }
-
-#if defined(__APPLE__)
-    int runViaPosixSpawn(const char* command,
-                         const vector<char*>& params,
-                         RunOptions options,
-                         const String& outputFile) {
-        posix_spawnattr_t attr;
-        if (posix_spawnattr_init(&attr)) {
-            LOG(VERBOSE) << "Failed to initialize spawnattr obj.";
-            return -1;
-        }
-        // Automatically destroy the successfully initialized attr.
-        auto attrDeleter = [](posix_spawnattr_t* t) {
-            posix_spawnattr_destroy(t);
-        };
-        unique_ptr<posix_spawnattr_t, decltype(attrDeleter)> scopedAttr(
-                &attr, attrDeleter);
-
-        if (posix_spawnattr_setflags(&attr, POSIX_SPAWN_CLOEXEC_DEFAULT)) {
-            LOG(VERBOSE) << "Failed to request CLOEXEC.";
-            return -1;
-        }
-
-        posix_spawn_file_actions_t fileActions;
-        if (posix_spawn_file_actions_init(&fileActions)) {
-            LOG(VERBOSE) << "Failed to initialize fileactions obj.";
-            return -1;
-        }
-        // Automatically destroy the successfully initialized fileActions.
-        auto fileActionsDeleter = [](posix_spawn_file_actions_t* t) {
-            posix_spawn_file_actions_destroy(t);
-        };
-        unique_ptr<posix_spawn_file_actions_t, decltype(fileActionsDeleter)>
-                scopedFileActions(&fileActions, fileActionsDeleter);
-
-        if ((options & RunOptions::DumpOutputToFile) != RunOptions::None) {
-            if (posix_spawn_file_actions_addopen(
-                        &fileActions, 1, outputFile.c_str(),
-                        O_WRONLY | O_CREAT | O_TRUNC, 0700) ||
-                posix_spawn_file_actions_addopen(
-                        &fileActions, 2, outputFile.c_str(),
-                        O_WRONLY | O_CREAT | O_TRUNC, 0700)) {
-                LOG(VERBOSE) << "Failed to redirect child output to file "
-                             << outputFile;
-                return -1;
-            }
-        } else if ((options & RunOptions::ShowOutput) != RunOptions::None) {
-            if (posix_spawn_file_actions_addinherit_np(&fileActions, 1) ||
-                posix_spawn_file_actions_addinherit_np(&fileActions, 2)) {
-                LOG(VERBOSE) << "Failed to request child stdout/stderr to be "
-                                "left intact";
-                return -1;
-            }
-        } else {
-            if (posix_spawn_file_actions_addopen(&fileActions, 1, "/dev/null",
-                                                 O_WRONLY, 0700) ||
-                posix_spawn_file_actions_addopen(&fileActions, 2, "/dev/null",
-                                                 O_WRONLY, 0700)) {
-                LOG(VERBOSE) << "Failed to redirect child output to /dev/null";
-                return -1;
-            }
-        }
-
-        // Posix spawn requires that argv[0] exists.
-        assert(params[0] != nullptr);
-
-        int pid;
-        if (int error_code = posix_spawnp(&pid, command, &fileActions, &attr,
-                                          params.data(), environ)) {
-            LOG(VERBOSE) << "posix_spawnp failed: " << strerror(error_code);
-            return -1;
-        }
-        return pid;
-    }
-#endif  // defined(__APPLE__)
 #endif  // !_WIN32
 
 private:
