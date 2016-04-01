@@ -18,14 +18,15 @@
 #include <QWidget>
 #include <memory>
 
-struct QAndroidUserEventAgent;
+class EmulatorQtWindow;
+
 class DPadPage : public QWidget
 {
     Q_OBJECT
 
 public:
     explicit DPadPage(QWidget *parent = 0);
-    void setUserEventsAgent(const QAndroidUserEventAgent* agent);
+    void setEmulatorWindow(EmulatorQtWindow* eW);
 
 private:
     void toggleButtonPressed(QPushButton* button,
@@ -36,5 +37,5 @@ private:
     bool eventFilter(QObject*, QEvent*) override;
 
     std::unique_ptr<Ui::DPadPage> mUi;
-    const QAndroidUserEventAgent* mUserEventsAgent;
+    EmulatorQtWindow* mEmulatorWindow;
 };

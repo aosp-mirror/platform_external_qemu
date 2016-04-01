@@ -683,6 +683,46 @@ case $HOST_OS in
 esac
 
 ###
+### Copy ANGLE if available
+###
+ANGLE_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/ANGLE
+if [ -d $ANGLE_PREBUILTS_DIR ]; then
+    log "Copying ANGLE prebuilt libraries from $ANGLE_PREBUILTS_DIR"
+    ANGLE_PREFIX=lib
+    ANGLE_HOST=$HOST_OS
+    case $ANGLE_HOST in
+        windows)
+            ANGLE_SUFFIX=.dll
+            ;;
+        linux)
+            ANGLE_SUFFIX=.so
+            ;;
+        *)
+    esac
+    # Windows only (for now)
+    if [ "$ANGLE_HOST" = "windows" ]; then
+        for LIBNAME in EGL GLESv2; do # GLESv2 only for now
+            for ANGLE_ARCH in $PREBUILT_ARCHS; do
+                if [ "$ANGLE_ARCH" = "x86" ]; then
+                    ANGLE_LIBDIR=lib
+                else
+                    ANGLE_LIBDIR=lib64
+                fi
+                ANGLE_LIBNAME=$ANGLE_PREFIX$LIBNAME$ANGLE_SUFFIX
+                ANGLE_SRCDIR=$ANGLE_PREBUILTS_DIR/$ANGLE_HOST-$ANGLE_ARCH
+
+                ANGLE_DSTDIR="$OUT_DIR/$ANGLE_LIBDIR/gles_angle"
+                ANGLE_DSTLIB="$ANGLE_LIBNAME"
+                if [ -f "$ANGLE_SRCDIR/lib/$ANGLE_LIBNAME" ]; then
+                    install_prebuilt_dll "$ANGLE_SRCDIR/lib/$ANGLE_LIBNAME" \
+                                     "$ANGLE_DSTDIR/$ANGLE_DSTLIB"
+                fi
+            done
+        done
+    fi
+fi
+
+###
 ### Copy Swiftshader if available
 ###
 SWIFTSHADER_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/swiftshader
@@ -710,7 +750,7 @@ if [ -d $SWIFTSHADER_PREBUILTS_DIR ]; then
             SWIFTSHADER_SRCDIR=$SWIFTSHADER_PREBUILTS_DIR/$SWIFTSHADER_HOST-$SWIFTSHADER_ARCH
 
             SWIFTSHADER_DSTDIR="$OUT_DIR/$SWIFTSHADER_LIBDIR/gles_swiftshader"
-            SWIFTSHADER_DSTLIB="$FINAL_LIBNAME"
+            SWIFTSHADER_DSTLIB="$SWIFTSHADER_LIBNAME"
             if [ -f "$SWIFTSHADER_SRCDIR/lib/$SWIFTSHADER_LIBNAME" ]; then
                 install_prebuilt_dll "$SWIFTSHADER_SRCDIR/lib/$SWIFTSHADER_LIBNAME" \
                                  "$SWIFTSHADER_DSTDIR/$SWIFTSHADER_DSTLIB"

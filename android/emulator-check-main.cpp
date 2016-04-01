@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+static int help();
+
 // check ability to launch haxm/kvm accelerated VM and exit
 // designed for use by Android Studio
 static int checkCpuAcceleration() {
@@ -42,6 +44,42 @@ static int checkHyperV() {
     return status;
 }
 
+static int getCpuInfo() {
+    AndroidCpuInfoFlags flags;
+    std::string message;
+    std::tie(flags, message) = android::GetCpuInfo();
+    printf("%s\n", message.c_str());
+    return flags;
+}
+
+constexpr struct {
+    const char* arg;
+    const char* help;
+    int (* handler)();
+} options[] = {
+{
+    "accel",
+    "Check the CPU acceleration support",
+    &checkCpuAcceleration
+},
+{
+    "hyper-v",
+    "Check if hyper-v is installed and running (Windows)",
+    &checkHyperV
+},
+{
+    "cpu-info",
+    "Return the CPU model information",
+    &getCpuInfo
+},
+{
+    "-help",
+    "Show this help message",
+    &help
+},
+
+};
+
 static void usage() {
     printf("%s\n",
 R"(Usage: emulator-check <argument>
@@ -49,11 +87,13 @@ R"(Usage: emulator-check <argument>
 Performs the check requested in <argument> and returns the result by the means
 of return code and text message
 
-Argument is one of:
-    accel       Check the CPU acceleration support
-    hyper-v     Check if hyper-v is installed and running (Windows)
-    -help       Show this help message
-)");
+<argument> is one of:\n)");
+
+    for (const auto& option : options) {
+        printf("    %s\t\t%s\n", option.arg, option.help);
+    }
+
+    printf("\n");
 }
 
 static int help() {
@@ -77,14 +117,10 @@ int main(int argc, char** argv) {
 
     const android::base::StringView argument = argv[1];
 
-    if (argument == "accel") {
-        return checkCpuAcceleration();
-    }
-    if (argument == "hyper-v") {
-        return checkHyperV();
-    }
-    if (argument == "--help" || argument == "-help" || argument == "-h") {
-        return help();
+    for (const auto& option : options) {
+        if (argument == option.arg) {
+            return option.handler();
+        }
     }
 
     return error("Bad argument '%s'", argv[1]);
