@@ -553,39 +553,25 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         }
         break;
     case QtUICommand::VOLUME_UP:
-        uiAgentAction([down](const UiEmuAgent& agent) {
-            agent.userEvents->sendKey(kKeyCodeVolumeUp, down);
-        });
+        forwardKeyToEmulator(KEY_VOLUMEUP, down);
         break;
     case QtUICommand::VOLUME_DOWN:
-        uiAgentAction([down](const UiEmuAgent& agent) {
-            agent.userEvents->sendKey(kKeyCodeVolumeDown, down);
-        });
+        forwardKeyToEmulator(KEY_VOLUMEDOWN, down);
         break;
     case QtUICommand::POWER:
-        uiAgentAction([down](const UiEmuAgent& agent) {
-            agent.userEvents->sendKey(kKeyCodePower, down);
-        });
+        forwardKeyToEmulator(KEY_POWER, down);
         break;
     case QtUICommand::MENU:
-        uiAgentAction([down](const UiEmuAgent& agent) {
-            agent.userEvents->sendKey(kKeyCodeMenu, down);
-        });
+        forwardKeyToEmulator(KEY_SOFT1, down);
         break;
     case QtUICommand::HOME:
-        uiAgentAction([down](const UiEmuAgent& agent) {
-            agent.userEvents->sendKey(kKeyCodeHome, down);
-        });
+        forwardKeyToEmulator(KEY_HOME, down);
         break;
     case QtUICommand::BACK:
-        uiAgentAction([down](const UiEmuAgent& agent) {
-            agent.userEvents->sendKey(kKeyCodeBack, down);
-        });
+        forwardKeyToEmulator(KEY_BACK, down);
         break;
     case QtUICommand::OVERVIEW:
-        uiAgentAction([down](const UiEmuAgent& agent) {
-            agent.userEvents->sendKey(kKeyCodeAppSwitch, down);
-        });
+        forwardKeyToEmulator(KEY_APPSWITCH, down);
         break;
     case QtUICommand::ROTATE_RIGHT:
     case QtUICommand::ROTATE_LEFT:
@@ -621,11 +607,12 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
     }
 }
 
-template <class Action>
-void ToolWindow::uiAgentAction(Action a) const {
-    if (mUiEmuAgent) {
-        a(*mUiEmuAgent);
-    }
+void ToolWindow::forwardKeyToEmulator(uint32_t keycode, bool down) {
+    SkinEvent* skin_event = new SkinEvent();
+    skin_event->type = down ? kEventKeyDown : kEventKeyUp;
+    skin_event->u.key.keycode = keycode;
+    skin_event->u.key.mod = 0;
+    mEmulatorWindow->queueSkinEvent(skin_event);
 }
 
 bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
