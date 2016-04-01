@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "2ec1e019_700eae8b",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-01T17:45:16Z",
+      "side": 1,
+      "message": "Nit: I\u0027d prefer to keep this list sorted alphabetically",
+      "revId": "15e2aae631eff23cd90cb1fb6792d15ba8d2c66f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ec1e019_10408a83",
+        "filename": "android/base/async/ScopedSocketWatch.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-01T17:45:16Z",
+      "side": 1,
+      "message": "Question: Do we have a rule about fully qualifying names like this instead of wrapping the whole thing in namespace scopes? It doesn\u0027t really matter, just curious.",
+      "revId": "15e2aae631eff23cd90cb1fb6792d15ba8d2c66f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "912d9179_2b632583",
+        "filename": "android/base/async/ScopedSocketWatch.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-01T17:45:16Z",
+      "side": 1,
+      "message": "Should we check for some invalid fd value here, like -1, and also make sure we set the watch\u0027s fd to -1 after closing? I realize it seems unlikely but if someone is careless we could end up closing the same handle twice. If the fd was reused between the two close calls the second call could accidentally close someone else\u0027s fd.",
+      "revId": "15e2aae631eff23cd90cb1fb6792d15ba8d2c66f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_6d0ed58b",
         "filename": "android/base/async/ScopedSocketWatch.h",
         "patchSetId": 1
