@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce84c4ce_42f15244",
+        "filename": "android/emulation/CpuAccelerator.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T12:09:25Z",
+      "side": 1,
+      "message": "nit: not related to this patch, but why are the functions in this header using CamelCase instead of camelCase() as we normally do? It\u0027s not really important, but I was wondering if there was some specific reason?",
+      "revId": "42996da4006e88cbaba5b2fde6a13fa2627d0cc8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
