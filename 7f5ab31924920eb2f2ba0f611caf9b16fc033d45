@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ec1e019_1c698183",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 981,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-04-01T20:56:20Z",
+      "side": 1,
+      "message": "what is the unit of sleep time, ms ?",
+      "revId": "7f5ab31924920eb2f2ba0f611caf9b16fc033d45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
