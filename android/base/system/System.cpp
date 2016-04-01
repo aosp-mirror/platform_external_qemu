@@ -39,7 +39,6 @@
 
 #include <array>
 #include <chrono>
-#include <memory>
 
 #ifndef _WIN32
 #include <fcntl.h>
@@ -72,8 +71,6 @@ extern "C" char** environ;
 
 namespace android {
 namespace base {
-
-using std::unique_ptr;
 
 static System::WallDuration getTickCountMs() {
 #ifdef _WIN32
@@ -715,7 +712,7 @@ public:
                          System::ProcessExitCode* outExitCode,
                          System::Pid* outChildPid,
                          const String& outputFile) {
-        unique_ptr<char* []> params{new char*[commandLine.size() + 1] };
+        char** const params = new char*[commandLine.size() + 1];
         for (size_t i = 0; i < commandLine.size(); ++i) {
             params[i] = const_cast<char*>(commandLine[i].c_str());
         }
@@ -747,82 +744,71 @@ public:
             umask(old);
         }
 
-        int pid = runViaForkAndExec(commandLine[0].c_str(), params.get(),
-                                    options, outputFd);
-        // Immediately close the output file if it exists
-        if (outputFd > 0) {
-            close(outputFd);
-        }
-
+        int pid = fork();
         if (pid < 0) {
             LOG(VERBOSE) << "Failed to fork for command " << cmd;
             return false;
         }
-
-        if (outChildPid) {
-            *outChildPid = pid;
-        }
-
-        if ((options & RunOptions::WaitForCompletion) == 0) {
-            return true;
-        }
-
-        // We were requested to wait for the process to complete.
-        int exitCode;
-        // Do not use SIGCHLD here because we're not sure if we're
-        // running on the main thread and/or what our sigmask is.
-        if (timeoutMs == kInfinite) {
-            // Let's just wait forever and hope that the child process
-            // exits.
-            HANDLE_EINTR(waitpid(pid, &exitCode, 0));
-            if (outExitCode) {
-                *outExitCode = WEXITSTATUS(exitCode);
-            }
-            return WIFEXITED(exitCode);
-        }
-
-        auto startTime = std::chrono::steady_clock::now();
-        auto elapsed = std::chrono::milliseconds::zero();
-        while (elapsed.count() < timeoutMs) {
-            pid_t waitPid = HANDLE_EINTR(waitpid(pid, &exitCode, WNOHANG));
-            if (waitPid < 0) {
-                auto local_errno = errno;
-                LOG(VERBOSE) << "Error running command " << cmd
-                             << ". waitpid failed with |"
-                             << strerror(local_errno) << "|";
-                return false;
+        if (pid != 0) {
+            // Parent process returns.
+            delete[] params;
+            if (outChildPid) {
+                *outChildPid = pid;
             }
 
-            if (waitPid > 0) {
+            // Immediately close the output file if it exists
+            if (outputFd > 0) {
+                close(outputFd);
+            }
+
+            if ((options & RunOptions::WaitForCompletion) == 0) {
+                return true;
+            }
+
+            // We were requested to wait for the process to complete.
+            int exitCode;
+            // Do not use SIGCHLD here because we're not sure if we're
+            // running on the main thread and/or what our sigmask is.
+            if (timeoutMs == kInfinite) {
+                // Let's just wait forever and hope that the child process
+                // exits.
+                HANDLE_EINTR(waitpid(pid, &exitCode, 0));
                 if (outExitCode) {
                     *outExitCode = WEXITSTATUS(exitCode);
                 }
                 return WIFEXITED(exitCode);
             }
 
-            sleepMs(10);
-            elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-                    std::chrono::steady_clock::now() - startTime);
-        }
+            auto startTime = std::chrono::steady_clock::now();
+            auto elapsed = std::chrono::milliseconds::zero();
+            while (elapsed.count() < timeoutMs) {
+                pid_t waitPid = HANDLE_EINTR(waitpid(pid, &exitCode, WNOHANG));
+                if (waitPid < 0) {
+                    auto local_errno = errno;
+                    LOG(VERBOSE) << "Error running command " << cmd
+                                 << ". waitpid failed with |"
+                                 << strerror(local_errno) << "|";
+                    return false;
+                }
 
-        // Timeout occured.
-        if ((options & RunOptions::TerminateOnTimeout) != 0) {
-            kill(pid, SIGKILL);
-            waitpid(pid, nullptr, WNOHANG);
-        }
-        LOG(VERBOSE) << "Timed out with running command " << cmd;
-        return false;
-    }
+                if (waitPid > 0) {
+                    if (outExitCode) {
+                        *outExitCode = WEXITSTATUS(exitCode);
+                    }
+                    return WIFEXITED(exitCode);
+                }
 
-    int runViaForkAndExec(const char* command,
-                          char* const* params,
-                          RunOptions options,
-                          int outputFd) {
-        int pid = fork();
-
-        if (pid != 0) {
-            // Return the child's pid / error code to parent process.
-            return pid;
+                sleepMs(10);
+                elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::steady_clock::now() - startTime);
+            }
+            // Timeout occured.
+            if ((options & RunOptions::TerminateOnTimeout) != 0) {
+                kill(pid, SIGKILL);
+                waitpid(pid, nullptr, WNOHANG);
+            }
+            LOG(VERBOSE) << "Timed out with running command " << cmd;
+            return false;
         }
 
         // In the child process.
@@ -840,7 +826,7 @@ public:
             dup2(outputFd, 1);
             dup2(outputFd, 2);
         }
-        if (execvp(command, params) == -1) {
+        if (execvp(commandLine[0].c_str(), params) == -1) {
             // emulator doesn't really like exit calls from a forked process
             // (it just hangs), so let's just kill it
             if (raise(SIGKILL) != 0) {
@@ -848,7 +834,7 @@ public:
             }
         }
         // Should not happen, but let's keep the compiler happy
-        return -1;
+        return false;
     }
 #endif  // !_WIN32
 
