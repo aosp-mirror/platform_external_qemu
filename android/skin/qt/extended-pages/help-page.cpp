@@ -13,9 +13,14 @@
 #include "android/android.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/globals.h"
+#include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/tool-window.h"
 #include "android/update-check/UpdateChecker.h"
 #include "android/update-check/VersionExtractor.h"
+
 #include <QDesktopServices>
+#include <QFileInfo>
+#include <QSettings>
 #include <QThread>
 #include <QUrl>
 
@@ -87,6 +92,42 @@ HelpPage::HelpPage(QWidget *parent) :
     connect(latestVersionThread, SIGNAL(finished()), latestVersionThread, SLOT(deleteLater()));
     mUi->help_latestVersionBox->setPlainText(tr("Loading..."));
     latestVersionThread->start();
+}
+
+void HelpPage::initialize(ToolWindow* tW,
+                          const ShortcutKeyStore<QtUICommand>* key_store) {
+
+    initializeLicenseText(tW);
+    initializeKeyboardShortcutList(key_store);
+}
+
+void HelpPage::initializeLicenseText(ToolWindow* tW) {
+    bool textOK = false;
+
+    // Read the license text into the display box
+    // The file is <SDK path>/tools/NOTICE.txt
+
+    if (tW) {
+        QStringList qargs; // Unused
+        QString adbPath = tW->getAdbFullPath(&qargs);
+        QString lFilePath = QFileInfo(adbPath).absolutePath();
+        QString lFileName = lFilePath + "/../tools/NOTICE.txt";
+
+        QFile licenseFile(lFileName);
+        if (licenseFile.open(QIODevice::ReadOnly)) {
+            QTextStream lText(&licenseFile);
+            mUi->help_licenseText->setPlainText(lText.readAll());
+            textOK = true;
+        }
+    }
+
+    if (!textOK) {
+        // Give some backup notice
+        mUi->help_licenseText->setPlainText(
+                "Find Android Emulator License NOTICE files here:\n\n"
+                "https://android.googlesource.com/platform/external/"
+                        "qemu/+/emu-master-dev/");
+    }
 }
 
 static void addShortcutsTableRow(QTableWidget* table_widget,

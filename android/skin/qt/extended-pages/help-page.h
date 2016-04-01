@@ -17,13 +17,15 @@
 #include <QWidget>
 #include <memory>
 
+class ToolWindow;
+
 class HelpPage : public QWidget
 {
     Q_OBJECT
 
 public:
     explicit HelpPage(QWidget *parent = 0);
-    void initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand>* key_store);
+    void initialize(ToolWindow* tW, const ShortcutKeyStore<QtUICommand>* key_store);
 
 private slots:
     void on_help_docs_clicked();
@@ -31,6 +33,10 @@ private slots:
     void on_help_sendFeedback_clicked();
 
 private:
+    void initializeLicenseText(ToolWindow* tW);
+    void initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand>* key_store);
+
+
     std::unique_ptr<Ui::HelpPage> mUi;
 };
 
