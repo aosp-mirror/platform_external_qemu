@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ce84c4ce_629c969c",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:14:20Z",
+      "side": 1,
+      "message": "My bad, you\u0027re totally right, simple mistake here.",
+      "parentUuid": "2ec1e019_700eae8b",
+      "revId": "15e2aae631eff23cd90cb1fb6792d15ba8d2c66f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_10408a83",
         "filename": "android/base/async/ScopedSocketWatch.cpp",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2016-04-01T17:45:16Z",
       "side": 1,
       "message": "Question: Do we have a rule about fully qualifying names like this instead of wrapping the whole thing in namespace scopes? It doesn\u0027t really matter, just curious.",
+      "revId": "15e2aae631eff23cd90cb1fb6792d15ba8d2c66f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce3684de_d5740ed6",
+        "filename": "android/base/async/ScopedSocketWatch.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:14:20Z",
+      "side": 1,
+      "message": "I see namespaces as a way to avoid too much typing. They\u0027re not too useful here since I don\u0027t think there is any loss of expressiveness or clarity.",
+      "parentUuid": "2ec1e019_10408a83",
       "revId": "15e2aae631eff23cd90cb1fb6792d15ba8d2c66f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "0e06dc0a_a543a413",
+        "filename": "android/base/async/ScopedSocketWatch.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:14:20Z",
+      "side": 1,
+      "message": "We could check for negative fd values. I\u0027ll do this.\n\nResetting the watch\u0027s file descriptor modifies the looper\u0027s state in non-trivial ways. It\u0027s probably not worth it since the object is going to be destroyed just after this call.",
+      "parentUuid": "912d9179_2b632583",
+      "revId": "15e2aae631eff23cd90cb1fb6792d15ba8d2c66f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_6d0ed58b",
         "filename": "android/base/async/ScopedSocketWatch.h",
         "patchSetId": 1
@@ -64,6 +118,30 @@
       "writtenOn": "2016-04-01T17:00:39Z",
       "side": 1,
       "message": "const?",
+      "range": {
+        "startLine": 27,
+        "startChar": 58,
+        "endLine": 27,
+        "endChar": 59
+      },
+      "revId": "15e2aae631eff23cd90cb1fb6792d15ba8d2c66f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e1fbc56_dac1e5fe",
+        "filename": "android/base/async/ScopedSocketWatch.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:14:20Z",
+      "side": 1,
+      "message": "Damn, you\u0027re right. And still it compiles and runs correctly??",
+      "parentUuid": "2ec1e019_6d0ed58b",
       "range": {
         "startLine": 27,
         "startChar": 58,
