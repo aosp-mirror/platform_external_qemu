@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ee00a8f1_5e103137",
+        "filename": "android/base/async/AsyncSocketServer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:06:52Z",
+      "side": 1,
+      "message": "Good point. stopListening() ends up calling dontWantRead() on both FdWatch. Whether this removes any scheduled FdWatch from the pending list seems to be implementation-dependent.\n\nLooking at the code, it looks like the generic implementation doesn\u0027t (and this seems like a bug). The QEMU1 glue version does, as well as the QEMU2 one.\n\nI\u0027ll provide a patch to fix the generic version first.",
+      "parentUuid": "2ec1e019_4de2f97c",
+      "range": {
+        "startLine": 85,
+        "startChar": 20,
+        "endLine": 85,
+        "endChar": 33
+      },
+      "revId": "a62928ab5e9d8c72d1d23fa11345242844618106",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_ad983d31",
         "filename": "android/base/async/AsyncSocketServer.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-01T17:17:37Z",
       "side": 1,
       "message": "can this be empty?",
+      "range": {
+        "startLine": 101,
+        "startChar": 24,
+        "endLine": 101,
+        "endChar": 39
+      },
+      "revId": "a62928ab5e9d8c72d1d23fa11345242844618106",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce112444_7d853336",
+        "filename": "android/base/async/AsyncSocketServer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:06:52Z",
+      "side": 1,
+      "message": "it\u0027s a std::function\u003c\u003e, I\u0027m not sure what you mean by empty, but I guess yes.",
+      "parentUuid": "2ec1e019_ad983d31",
       "range": {
         "startLine": 101,
         "startChar": 24,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "0e06dc0a_2558b403",
+        "filename": "android/base/async/AsyncSocketServer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:06:52Z",
+      "side": 1,
+      "message": "I\u0027ll clarify that: we try to find a free IPv4 port, then try to bind to the same IPv6 one, if this doesn\u0027t work, try again (hoping the system will try a different value on the next try).",
+      "parentUuid": "2ec1e019_8dbea181",
+      "range": {
+        "startLine": 111,
+        "startChar": 8,
+        "endLine": 112,
+        "endChar": 28
+      },
+      "revId": "a62928ab5e9d8c72d1d23fa11345242844618106",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_6d8335cb",
         "filename": "android/base/async/AsyncSocketServer.cpp",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2016-04-01T17:17:37Z",
       "side": 1,
       "message": "what if mode is \u0027both\u0027? should we instead of skipping try the ipv6 here?",
+      "range": {
+        "startLine": 121,
+        "startChar": 15,
+        "endLine": 121,
+        "endChar": 25
+      },
+      "revId": "a62928ab5e9d8c72d1d23fa11345242844618106",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6e0e782a_7a6d3501",
+        "filename": "android/base/async/AsyncSocketServer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:06:52Z",
+      "side": 1,
+      "message": "kIPv4 is really a bit-flag indicating we really want to bind to an IPv4 interface. If this fails, there is no point in trying an IPv6 one too.",
+      "parentUuid": "2ec1e019_6d8335cb",
       "range": {
         "startLine": 121,
         "startChar": 15,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "ce3684de_f57712d8",
+        "filename": "android/base/async/AsyncSocketServer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:06:52Z",
+      "side": 1,
+      "message": "Good point, this probably should be restarted on failure. I think it\u0027s important to disable that before calling the callback though to avoid surprises (e.g. the callback calls startListening() and then stopListening() is called on return, which would be confusing).",
+      "parentUuid": "2ec1e019_cd3fc9b7",
+      "range": {
+        "startLine": 40,
+        "startChar": 48,
+        "endLine": 41,
+        "endChar": 26
+      },
+      "revId": "a62928ab5e9d8c72d1d23fa11345242844618106",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_4ddaf909",
         "filename": "android/base/async/AsyncSocketServer.h",
         "patchSetId": 1
@@ -128,6 +248,30 @@
       "writtenOn": "2016-04-01T17:17:37Z",
       "side": 1,
       "message": "nit: to ?",
+      "range": {
+        "startLine": 48,
+        "startChar": 67,
+        "endLine": 48,
+        "endChar": 70
+      },
+      "revId": "a62928ab5e9d8c72d1d23fa11345242844618106",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ae14f033_9c4489f5",
+        "filename": "android/base/async/AsyncSocketServer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:06:52Z",
+      "side": 1,
+      "message": "Ah ah, thanks.",
+      "parentUuid": "2ec1e019_4ddaf909",
       "range": {
         "startLine": 48,
         "startChar": 67,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "ae14f033_7c53f5bd",
+        "filename": "android/base/async/AsyncSocketServer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:06:52Z",
+      "side": 1,
+      "message": "I prefer to let this choice to the caller in general (as in the unit-test case).",
+      "parentUuid": "2ec1e019_6ddfb5f8",
+      "range": {
+        "startLine": 60,
+        "startChar": 11,
+        "endLine": 60,
+        "endChar": 28
+      },
+      "revId": "a62928ab5e9d8c72d1d23fa11345242844618106",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_2df1ad45",
         "filename": "android/base/async/AsyncSocketServer_unittest.cpp",
         "patchSetId": 1
@@ -174,6 +342,30 @@
       "writtenOn": "2016-04-01T17:17:37Z",
       "side": 1,
       "message": "nit: please remove the commented code",
+      "range": {
+        "startLine": 51,
+        "startChar": 7,
+        "endLine": 51,
+        "endChar": 19
+      },
+      "revId": "a62928ab5e9d8c72d1d23fa11345242844618106",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e25349f_195bef2a",
+        "filename": "android/base/async/AsyncSocketServer_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T18:06:52Z",
+      "side": 1,
+      "message": "Will do.",
+      "parentUuid": "2ec1e019_2df1ad45",
       "range": {
         "startLine": 51,
         "startChar": 7,
