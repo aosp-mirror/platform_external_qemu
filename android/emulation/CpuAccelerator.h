@@ -65,4 +65,8 @@ void SetCurrentCpuAcceleratorForTesting(CpuAccelerator accel,
 // and a short message describing it.
 std::pair<AndroidHyperVStatus, std::string> GetHyperVStatus();
 
+// Returns a set of AndroidCpuInfoFlags describing the CPU capabilities
+// (and a text explanation as well)
+std::pair<AndroidCpuInfoFlags, std::string> GetCpuInfo();
+
 }  // namespace android
