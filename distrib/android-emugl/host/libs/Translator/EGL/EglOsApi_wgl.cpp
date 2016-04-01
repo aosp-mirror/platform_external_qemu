@@ -900,7 +900,23 @@ public:
         const WglExtensionsDispatch* dispatch = mDispatch;
 
         if (hdcRead == hdcDraw){
-            return dispatch->wglMakeCurrent(hdcDraw, hdcContext);
+            // The following loop is a work-around for a problem when
+            // occasionally the rendering is incorrect after hibernating and
+            // waking up windows.
+            // wglMakeCurrent will sometimes fail for a short period of time
+            // in such situation.
+            //
+            // For a stricter test, in addition to checking the return value, we
+            // might also want to check its error code. On my computer in such
+            // situation GetLastError() returns 0 (which is documented as
+            // success code). This is not a documented behaviour and is
+            // unreliable. But in case one needs to use it, here is the code:
+            //      while (!(isSuccess = dispatch->wglMakeCurrent(hdcDraw, hdcContext)) && GetLastError()==0) Sleep(1000);
+
+            while (!dispatch->wglMakeCurrent(hdcDraw, hdcContext)) {
+                Sleep(100);
+            }
+            return true;
         } else if (!dispatch->wglMakeContextCurrentARB) {
             return false;
         }
