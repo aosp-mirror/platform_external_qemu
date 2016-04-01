@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ee00a8f1_1e450994",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T09:10:02Z",
+      "side": 1,
+      "message": "nit: When using a magic file name, it\u0027s a good idea to use special characters to show that this can be a real file name. For example by using brackets (e.g. \"\u003cgles2_only_backend\u003e\").\n\nAlso this needs to be documented somewhere.",
+      "revId": "e8b5a68eaeacf57ab965a0affa74ef2c818d0349",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce3684de_d211c4e8",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/GLESv1Dispatch.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-01T09:10:02Z",
+      "side": 1,
+      "message": "Code is ok, but can I ask you to add a comment before these definitions to explain what they\u0027re used for.",
+      "revId": "e8b5a68eaeacf57ab965a0affa74ef2c818d0349",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
