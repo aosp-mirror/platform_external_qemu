@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ec1e019_c1fc721b",
+        "filename": "android/base/Optional.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-01T20:20:25Z",
+      "side": 1,
+      "message": "Is there a case in which reset is different from assignment?  (There may be, but I can\u0027t think of one off the top of my head...)  If not, doesn\u0027t seem parsimonious to have both...",
+      "range": {
+        "startLine": 311,
+        "startChar": 9,
+        "endLine": 311,
+        "endChar": 14
+      },
+      "revId": "521bd725bd1356d71a33221a19a41fe874d0df07",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ec1e019_e132ce38",
+        "filename": "android/base/Optional_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-01T20:20:25Z",
+      "side": 1,
+      "message": "Should you add a case where the argument to the constructor is something like \"const\u0026 int\", to demonstrate the \"std::decay\" mechanism?  (Similar comment in other similar places...)",
+      "range": {
+        "startLine": 36,
+        "startChar": 4,
+        "endLine": 36,
+        "endChar": 5
+      },
+      "revId": "521bd725bd1356d71a33221a19a41fe874d0df07",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ec1e019_a12da66d",
+        "filename": "android/base/Optional_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-01T20:20:25Z",
+      "side": 1,
+      "message": "The switch from \"2\" to \"1\" here made me think that it was relevant to the test.  Maybe just use 2 uniformly, to make it clear that the value doesn\u0027t matter?",
+      "range": {
+        "startLine": 293,
+        "startChar": 30,
+        "endLine": 293,
+        "endChar": 31
+      },
+      "revId": "521bd725bd1356d71a33221a19a41fe874d0df07",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
