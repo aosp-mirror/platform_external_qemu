@@ -202,6 +202,30 @@
     },
     {
       "key": {
+        "uuid": "2ec1e019_4fbae4e2",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 979,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-04-01T23:59:40Z",
+      "side": 1,
+      "message": "ok, so it is doing nothing... let me remove it.",
+      "parentUuid": "2ec1e019_ccc1026d",
+      "range": {
+        "startLine": 979,
+        "startChar": 16,
+        "endLine": 979,
+        "endChar": 31
+      },
+      "revId": "7f5ab31924920eb2f2ba0f611caf9b16fc033d45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_1c698183",
         "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
         "patchSetId": 1
@@ -296,6 +320,30 @@
       "side": 1,
       "message": "for 3 seconds it definitely will ;)",
       "parentUuid": "2ec1e019_cc0d8258",
+      "range": {
+        "startLine": 981,
+        "startChar": 22,
+        "endLine": 981,
+        "endChar": 26
+      },
+      "revId": "7f5ab31924920eb2f2ba0f611caf9b16fc033d45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ec1e019_0ffa9c87",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 981,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-04-01T23:59:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2ec1e019_efa5d0c7",
       "range": {
         "startLine": 981,
         "startChar": 22,
