@@ -237,7 +237,14 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             return;
         }
 
-        if (code == KEY_BACKSPACE || code == KEY_ENTER) {
+        if (code == KEY_APPSWITCH   || code == KEY_PLAY       ||
+            code == KEY_BACK        || code == KEY_POWER      ||
+            code == KEY_BACKSPACE   || code == KEY_SOFT1      ||
+            code == KEY_CENTER      || code == KEY_REWIND     ||
+            code == KEY_ENTER       || code == KEY_VOLUMEDOWN ||
+            code == KEY_FASTFORWARD || code == KEY_VOLUMEUP   ||
+            code == KEY_HOME                                     )
+        {
             skin_keyboard_do_key_event(kb, code, down);
             skin_keyboard_flush(kb);
             return;

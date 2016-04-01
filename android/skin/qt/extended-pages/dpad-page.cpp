@@ -11,9 +11,9 @@
 
 #include "android/skin/qt/extended-pages/dpad-page.h"
 
-#include "android/emulation/control/user_event_agent.h"
-#include "android/settings-agent.h"
+#include "android/skin/event.h"
 #include "android/skin/keycode.h"
+#include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/size-tweaker.h"
@@ -57,17 +57,21 @@ DPadPage::DPadPage(QWidget *parent) :
     installEventFilter(this);
 }
 
-void DPadPage::setUserEventsAgent(const QAndroidUserEventAgent* agent)
+void DPadPage::setEmulatorWindow(EmulatorQtWindow* eW)
 {
-    mUserEventsAgent = agent;
+    mEmulatorWindow = eW;
 }
 
 void DPadPage::toggleButtonPressed(
     QPushButton* button,
     const SkinKeyCode key_code,
     const bool pressed) {
-    if (mUserEventsAgent) {
-        mUserEventsAgent->sendKey(key_code, pressed);
+    if (mEmulatorWindow) {
+        SkinEvent* skin_event = new SkinEvent();
+        skin_event->type = pressed ? kEventKeyDown : kEventKeyUp;
+        skin_event->u.key.keycode = key_code;
+        skin_event->u.key.mod = 0;
+        mEmulatorWindow->queueEvent(skin_event);
     }
 
     QSettings settings;

@@ -83,9 +83,8 @@ signals:
 private:
     int adbShellStopRunner();
     void handleUICommand(QtUICommand cmd, bool down);
+    void forwardKeyToEmulator(uint32_t keycode, bool down);
 
-    template <class Action>
-    void uiAgentAction(Action a) const;
 
     // Helper method, calls handleUICommand with
     // down equal to true and down equal to false.
