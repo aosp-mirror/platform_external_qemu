@@ -250,12 +250,16 @@ ABool androidMetrics_keepAlive(Looper* metrics_looper,
 
     auto emulatorName = android::base::StringFormat(
             "emulator-%d", control_console_port);
+    // TODO(pprabhu) Re-enable liveness checker once darwin fork issues have
+    // been resolved.
+#if 0
     sAdbLivenessChecker = android::metrics::AdbLivenessChecker::create(
             android::base::ThreadLooper::get(),
             sMetricsIniFile,
             emulatorName,
             20 * 1000);
     sAdbLivenessChecker->start();
+#endif
 
     return success;
 }
