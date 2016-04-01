@@ -196,6 +196,27 @@
      </property>
     </widget>
    </widget>
+   <widget class="QWidget" name="tab">
+    <attribute name="title">
+     <string>Licenses</string>
+    </attribute>
+    <widget class="QTextBrowser" name="help_licenseText">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>570</width>
+       <height>500</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+    </widget>
+   </widget>
    <widget class="QWidget" name="tab_5">
     <attribute name="title">
      <string>About</string>
