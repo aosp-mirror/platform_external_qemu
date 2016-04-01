@@ -16,7 +16,12 @@
 
 #include "android/android.h"
 #include "android/console.h"
+#include "android/emulation/vm_lock.h"
 #include "android-qemu1-glue/qemu-control-impl.h"
+
+extern "C" {
+#include "qemu-common.h"
+}  // extern "C"
 
 bool qemu_android_emulation_setup() {
   android_emulation_setup_use_android_emu_console(true);
@@ -27,5 +32,9 @@ bool qemu_android_emulation_setup() {
       gQAndroidTelephonyAgent, gQAndroidUserEventAgent, gQAndroidVmOperations,
       gQAndroidNetAgent,
   };
+
+  android_vm_set_lock_funcs(qemu_mutex_lock_iothread,
+                            qemu_mutex_unlock_iothread);
+
   return android_emulation_setup(&consoleAgents);
 }
