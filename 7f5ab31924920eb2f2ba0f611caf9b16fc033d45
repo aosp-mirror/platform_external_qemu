@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "2ec1e019_7609c180",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 979,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-04-01T22:09:44Z",
+      "side": 1,
+      "message": "no, the error code is still ERROR_SUCCESS when it fails.",
+      "parentUuid": "2ec1e019_87d67acb",
+      "revId": "7f5ab31924920eb2f2ba0f611caf9b16fc033d45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_1c698183",
         "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
         "patchSetId": 1
