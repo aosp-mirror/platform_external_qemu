@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "8e59ec47_e3fce21a",
+        "filename": "android/opengl/emugl_config.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-01T16:16:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ee00a8f1_1e450994",
+      "revId": "e8b5a68eaeacf57ab965a0affa74ef2c818d0349",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ce3684de_d211c4e8",
         "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/GLESv1Dispatch.cpp",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-04-01T09:10:02Z",
       "side": 1,
       "message": "Code is ok, but can I ask you to add a comment before these definitions to explain what they\u0027re used for.",
+      "revId": "e8b5a68eaeacf57ab965a0affa74ef2c818d0349",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e59ec47_c30b1e09",
+        "filename": "distrib/android-emugl/host/libs/libOpenGLESDispatch/GLESv1Dispatch.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-01T16:16:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ce3684de_d211c4e8",
       "revId": "e8b5a68eaeacf57ab965a0affa74ef2c818d0349",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
