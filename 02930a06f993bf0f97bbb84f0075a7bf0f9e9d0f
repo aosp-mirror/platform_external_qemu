@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ec1e019_4f1e64ab",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 870,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-02T00:02:14Z",
+      "side": 1,
+      "message": "if showoutput is set, why do we kill stdin?",
+      "range": {
+        "startLine": 870,
+        "startChar": 8,
+        "endLine": 870,
+        "endChar": 45
+      },
+      "revId": "02930a06f993bf0f97bbb84f0075a7bf0f9e9d0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
