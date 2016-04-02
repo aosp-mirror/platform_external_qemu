@@ -267,7 +267,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     if (sBackendList->getBackendLibPath(
             config->backend, EmuglBackendList::LIBRARY_GLESv1, &lib)) {
         system->envSet("ANDROID_GLESv1_LIB", lib);
-    } else {
+    } else if (strcmp(config->backend, "mesa")) {
         fprintf(stderr, "OpenGL backend '%s' without OpenGL ES 1.x library detected. "
                         "Using GLESv2 only.\n",
                         config->backend);
