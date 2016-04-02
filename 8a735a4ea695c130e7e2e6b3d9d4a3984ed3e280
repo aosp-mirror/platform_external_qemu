@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ec1e019_e0e87ff4",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-02T21:25:53Z",
+      "side": 1,
+      "message": "Smart one!",
+      "range": {
+        "startLine": 411,
+        "startChar": 0,
+        "endLine": 411,
+        "endChar": 39
+      },
+      "revId": "8a735a4ea695c130e7e2e6b3d9d4a3984ed3e280",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
