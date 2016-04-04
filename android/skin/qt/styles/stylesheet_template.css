@@ -121,7 +121,7 @@ QSlider::add-page:horizontal {
     background: %%BOX_COLOR%%;
     border-radius: 1px;
 }
-QTableWidget {
+QTextBrowser, QTableWidget {
     gridline-color: %%TAB_BKG_COLOR%%;
     background: %%TAB_BKG_COLOR%%;
     border: 1px solid %%EDIT_COLOR%%;
