@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ce304415_02484a06",
+        "filename": "android/emulation/VmLock.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T21:30:25Z",
+      "side": 1,
+      "message": "yes, then I thought it was a littler overkill for a single pointer. Chrome provides a Singleton class that provides a pointer-based LazyInstance, but I didn\u0027t feel like implementing it here too.",
+      "parentUuid": "2ec1e019_dad3e652",
+      "range": {
+        "startLine": 17,
+        "startChar": 30,
+        "endLine": 17,
+        "endChar": 42
+      },
+      "revId": "c9709f78f9a35a2412a912dcd06c40c1179871e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_1a0c0eca",
         "filename": "android/emulation/VmLock.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-04T17:44:19Z",
       "side": 1,
       "message": "should we assert() here instead? I mean, we could just enforce the set() call to be the first one, before any get()s\nalso, that would allow us to return a reference instead of a pointer",
+      "range": {
+        "startLine": 22,
+        "startChar": 15,
+        "endLine": 22,
+        "endChar": 24
+      },
+      "revId": "c9709f78f9a35a2412a912dcd06c40c1179871e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce304415_e24446f6",
+        "filename": "android/emulation/VmLock.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T21:30:25Z",
+      "side": 1,
+      "message": "The idea is to allow linking AndroidEmu with unit tests or othe programs (e.g. a fake engine to test only the UI part) that don\u0027t necessarily call set() because there is no VM to lock",
+      "parentUuid": "2ec1e019_1a0c0eca",
       "range": {
         "startLine": 22,
         "startChar": 15,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "ce304415_62395684",
+        "filename": "android/emulation/VmLock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T21:30:25Z",
+      "side": 1,
+      "message": "Well VmLock itself also serves as a default no-op implementation. Given the class simplicity, I think that\u0027s enough (the alternative is to declare it as an interface class, then provide a namespaced DefaultVmLock implementation in VmLock.cpp, which is slightly overkill for this use case, imho).",
+      "parentUuid": "2ec1e019_dafd26cc",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 28
+      },
+      "revId": "c9709f78f9a35a2412a912dcd06c40c1179871e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_1a5e4ebe",
         "filename": "android/emulation/VmLock.h",
         "patchSetId": 1
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "ce304415_c23dc271",
+        "filename": "android/emulation/VmLock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T21:30:25Z",
+      "side": 1,
+      "message": "That\u0027s a good idea, will do.",
+      "parentUuid": "2ec1e019_1a5e4ebe",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 39
+      },
+      "revId": "c9709f78f9a35a2412a912dcd06c40c1179871e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_3a90ea7b",
         "filename": "android/emulation/VmLock.h",
         "patchSetId": 1
@@ -105,6 +201,24 @@
       "writtenOn": "2016-04-04T17:44:19Z",
       "side": 1,
       "message": "could you please also add a ScopedVmLock type alias here? we will need it anyway, and adding it right now would prevent some ugly code from happening",
+      "revId": "c9709f78f9a35a2412a912dcd06c40c1179871e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce304415_a23a3e75",
+        "filename": "android/emulation/VmLock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T21:30:25Z",
+      "side": 1,
+      "message": "Good idea too :)",
+      "parentUuid": "2ec1e019_3a90ea7b",
       "revId": "c9709f78f9a35a2412a912dcd06c40c1179871e6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
