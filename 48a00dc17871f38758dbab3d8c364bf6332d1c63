@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2ec1e019_b8362238",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-04T18:25:27Z",
+      "side": 1,
+      "message": "Good catch",
+      "parentUuid": "2ec1e019_9d20f830",
+      "range": {
+        "startLine": 78,
+        "startChar": 21,
+        "endLine": 78,
+        "endChar": 24
+      },
+      "revId": "48a00dc17871f38758dbab3d8c364bf6332d1c63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_bd5374bc",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-04T18:15:34Z",
       "side": 1,
       "message": "should we write the null-terminator to the buffer?",
+      "range": {
+        "startLine": 98,
+        "startChar": 8,
+        "endLine": 98,
+        "endChar": 16
+      },
+      "revId": "48a00dc17871f38758dbab3d8c364bf6332d1c63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ec1e019_18dbb636",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-04T18:25:27Z",
+      "side": 1,
+      "message": "Yeah",
+      "parentUuid": "2ec1e019_bd5374bc",
       "range": {
         "startLine": 98,
         "startChar": 8,
