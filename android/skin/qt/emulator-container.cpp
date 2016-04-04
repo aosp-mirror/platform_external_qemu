@@ -159,6 +159,12 @@ void EmulatorContainer::changeEvent(QEvent* event) {
     if (event->type() == QEvent::WindowStateChange) {
         if (windowState() & Qt::WindowMaximized) {
             showNormal();
+        } else if (windowState() & Qt::WindowMinimized) {
+            // In case the window was minimized without pressing the toolbar's
+            // minimize button (which is possible on some window managers),
+            // remember to hide the toolbar (which will also hide the extended
+            // window, if it exists).
+            mEmulatorWindow->toolWindow()->hide();
         }
     }
 }
@@ -207,11 +213,15 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
     nsWindowHideWindowButtons((void*)wid);
 #endif // __APPLE__
 
+    // showEvent() gets called when the emulator is minimized because we are
+    // calling showMinimized(), which *technically* is a show event. We only
+    // want to re-show the toolbar when we are transitioning to a not-minimized
+    // state. However, we must do it after changing flags on Linux.
+    if (!(windowState() & Qt::WindowMinimized)) {
 // As seen below in showMinimized(), we need to remove the minimize button on
 // Linux when the window is re-shown. We know this show event is from being
 // un-minimized because the minimized button flag is present.
 #ifdef __linux__
-    if (!(windowState() & Qt::WindowMinimized)) {
         Qt::WindowFlags flags = windowFlags();
         if (flags & Qt::WindowMinimizeButtonHint) {
             setWindowFlags(flags & ~Qt::WindowMinimizeButtonHint);
@@ -227,10 +237,11 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
             event->type = kEventForceRedraw;
             mEmulatorWindow->queueEvent(event);
         }
-    }
 #endif // __linux__
 
-    mEmulatorWindow->toolWindow()->show();
+        mEmulatorWindow->toolWindow()->show();
+        mEmulatorWindow->toolWindow()->dockMainWindow();
+    }
 }
 
 void EmulatorContainer::showMinimized() {
