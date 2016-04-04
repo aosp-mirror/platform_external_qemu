@@ -92,8 +92,10 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 
     if (name == GL_EXTENSIONS) {
         sprintf((char *)buffer, "%s%s ", str ? str : "", glProtocolStr);
-    } else {
+    } else if (str) {
         strcpy((char *)buffer, str);
+    } else {
+        len = 0;
     }
     return len;
 }
