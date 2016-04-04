@@ -38,6 +38,11 @@ std::string load_gpu_info();
 // matches a known unreliable GPU/GPU driver.
 bool parse_and_query_blacklist(const std::string& contents);
 
+// host_gpu_blacklisted_async() does the two steps above,
+// but on a different thread, with a timeout in case
+// the started processes hang or what not.
+bool async_query_host_gpu_blacklisted();
+
 // Below is the implementation.
 
 // We keep a blacklist of known crashy GPU drivers

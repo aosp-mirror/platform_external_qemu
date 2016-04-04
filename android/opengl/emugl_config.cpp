@@ -57,8 +57,7 @@ static bool stringVectorContains(const std::vector<std::string>& list,
 }
 
 bool isHostGpuBlacklisted() {
-    std::string gpu_info_string = load_gpu_info();
-    return parse_and_query_blacklist(gpu_info_string);
+    return async_query_host_gpu_blacklisted();
 }
 
 void setGpuBlacklistStatus(bool switchedSoftware) {
