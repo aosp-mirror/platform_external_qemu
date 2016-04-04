@@ -32,7 +32,12 @@ LocationPage::LocationPage(QWidget *parent) :
     mUi->setupUi(this);
     mNowPlaying = false;
     mTimer.setSingleShot(true);
+
+    // We can only send 1 decimal of altitude (in meters).
+    mAltitudeValidator.setNotation(QDoubleValidator::StandardNotation);
+    mAltitudeValidator.setRange(-1000, 10000, 1);
     mUi->loc_altitudeInput->setValidator(&mAltitudeValidator);
+
     mUi->loc_latitudeInput->setMinValue(-90.0);
     mUi->loc_latitudeInput->setMaxValue(90.0);
     QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout);
