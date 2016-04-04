@@ -106,6 +106,14 @@ public:
         return mOsType;
     }
 
+    virtual bool isRunningUnderWine() const override {
+        return mUnderWine;
+    }
+
+    void setRunningUnderWine(bool underWine) {
+        mUnderWine = underWine;
+    }
+
     void setOsType(OsType type) {
         mOsType = type;
     }
@@ -333,6 +341,7 @@ private:
     void* mShellOpaque;
     time_t mUnixTime;
     OsType mOsType = OsType::Windows;
+    bool mUnderWine = false;
 };
 
 }  // namespace base
