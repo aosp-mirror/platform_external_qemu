@@ -121,7 +121,7 @@ static EGLint rcChooseConfig(EGLint *attribs,
                              uint32_t configs_size)
 {
     FrameBuffer *fb = FrameBuffer::getFB();
-    if (!fb) {
+    if (!fb || attribs_size==0) {
         return 0;
     }
 
