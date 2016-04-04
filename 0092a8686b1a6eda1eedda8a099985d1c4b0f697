@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "2ec1e019_e0586806",
+        "filename": "android/base/async/Looper_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-04T22:59:28Z",
+      "side": 1,
+      "message": "you can always use auto:\n\nif (auto sockets \u003d ...) {\n    sockets-\u003efirst;\n    sockets-\u003esecond;\n}\n\nI don\u0027t want you to change the code, just saying it could be done this way",
+      "parentUuid": "ce304415_c2666293",
+      "range": {
+        "startLine": 26,
+        "startChar": 36,
+        "endLine": 26,
+        "endChar": 69
+      },
+      "revId": "0092a8686b1a6eda1eedda8a099985d1c4b0f697",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_1d2ac8bb",
         "filename": "android/base/async/Looper_unittest.cpp",
         "patchSetId": 1
