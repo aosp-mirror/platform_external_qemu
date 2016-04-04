@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ce304415_2258eed5",
+        "filename": "android/base/async/AsyncSocketServer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T21:33:12Z",
+      "side": 1,
+      "message": "That\u0027s not true, this removes the FdWatch from the pending list but doesn\u0027t remove the event from its state, i.e. on the next server-\u003estartListening() call, it will be triggered immediately.\n\nIn other words, this doesn\u0027t lose concurrent connections.",
+      "parentUuid": "2ec1e019_9d0a3802",
+      "range": {
+        "startLine": 91,
+        "startChar": 12,
+        "endLine": 91,
+        "endChar": 36
+      },
+      "revId": "586f2c1881fb04d676200a66d94c568435276d03",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_9d9558c0",
         "filename": "android/base/async/AsyncSocketServer.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-04T18:10:58Z",
       "side": 1,
       "message": "if these sockets were ScopedSocket objects, you could\u0027ve just removed this whole block of code",
+      "range": {
+        "startLine": 154,
+        "startChar": 16,
+        "endLine": 154,
+        "endChar": 25
+      },
+      "revId": "586f2c1881fb04d676200a66d94c568435276d03",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce304415_824d7a16",
+        "filename": "android/base/async/AsyncSocketServer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T21:33:12Z",
+      "side": 1,
+      "message": "Not remove it, but this simplifies it. I\u0027ll use them, thanks.",
+      "parentUuid": "2ec1e019_9d9558c0",
       "range": {
         "startLine": 154,
         "startChar": 16,
