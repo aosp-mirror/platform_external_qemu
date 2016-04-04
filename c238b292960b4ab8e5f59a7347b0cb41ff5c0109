@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ec1e019_a0f3404b",
+        "filename": "android/emulation/VmLock.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-04T22:57:16Z",
+      "side": 1,
+      "message": "DISALLOW_COPY_.... ? :)",
+      "revId": "c238b292960b4ab8e5f59a7347b0cb41ff5c0109",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
