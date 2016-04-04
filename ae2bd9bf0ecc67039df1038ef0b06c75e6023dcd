@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ec1e019_607238b0",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-04T23:00:57Z",
+      "side": 1,
+      "message": "If the sole purpose of this lambda declaration and immediate call is to allow isUnderWine to be a static const variable, imho, this complexity is not worth the benefit.\n\nI\u0027d strongly recommend writing a static helper function in this file instead.",
+      "range": {
+        "startLine": 375,
+        "startChar": 8,
+        "endLine": 375,
+        "endChar": 52
+      },
+      "revId": "ae2bd9bf0ecc67039df1038ef0b06c75e6023dcd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ec1e019_404a9c51",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-04T23:00:57Z",
+      "side": 1,
+      "message": "typo.",
+      "range": {
+        "startLine": 377,
+        "startChar": 63,
+        "endLine": 377,
+        "endChar": 69
+      },
+      "revId": "ae2bd9bf0ecc67039df1038ef0b06c75e6023dcd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
