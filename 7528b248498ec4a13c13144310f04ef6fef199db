@@ -22,6 +22,30 @@
       "revId": "7528b248498ec4a13c13144310f04ef6fef199db",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ec1e019_7433e23d",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-04T21:01:28Z",
+      "side": 1,
+      "message": "I initially tried to do it on the current thread, but that meant having to mess with skin_winsys_enter_main_loop, which expects that no loopers be created yet (otherwise it aborts), in its setLooper(android::qt::createLooper()) call.",
+      "parentUuid": "2ec1e019_c98a3e45",
+      "range": {
+        "startLine": 478,
+        "startChar": 0,
+        "endLine": 482,
+        "endChar": 57
+      },
+      "revId": "7528b248498ec4a13c13144310f04ef6fef199db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
