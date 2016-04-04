@@ -286,6 +286,30 @@
     },
     {
       "key": {
+        "uuid": "4ee0d4e0_5e033561",
+        "filename": "android/base/async/AsyncSocketServer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T09:49:30Z",
+      "side": 1,
+      "message": "So I\u0027ve been thinking about this this weekend. It looks like there is no easy / portable way to detect that a system has IPv4 disabled. I also doubt you would find a system where 127.0.0.1 is not setup (too many things would break otherwise, imho), and since this class only every listens on this IPv4 interface, I don\u0027t think it\u0027s worth worrying about this use case.\n\nOn the other hand, we could be on a system that doesn\u0027t have proper IPv6 loopback support. At least on Windows, it looks like this is not possible since Windows 7 [1], but we\u0027re supposed to support XP and Vista.\n\nI propose to introduce a new mode then: IPv4AndOptionalIPv6 in this case, and make it the default, what do you think?\n\nProbably with something like:\n\n  kIPv4 \u003d (1 \u003c\u003c 0),\n  kIPv6 \u003d (1 \u003c\u003c 1),\n  kIPv4AndkIPv6 \u003d kIPv4 | kIPv6,\n  kIPv4Optional \u003d (1 \u003c\u003c 2),\n  kIPv6Optional \u003d (1 \u003c\u003c 3),\n  kIPv4AndOptionalIPv6 \u003d kIPv4 | kIPv6 | kIPv6Optional\n\n\n\n\n[1] http://superuser.com/questions/586144/disable-ipv6-loopback-on-windows-7-64-bit",
+      "parentUuid": "4eaff461_6697ce69",
+      "range": {
+        "startLine": 121,
+        "startChar": 15,
+        "endLine": 121,
+        "endChar": 25
+      },
+      "revId": "a62928ab5e9d8c72d1d23fa11345242844618106",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_cd3fc9b7",
         "filename": "android/base/async/AsyncSocketServer.h",
         "patchSetId": 1
