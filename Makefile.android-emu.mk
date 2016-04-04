@@ -367,6 +367,7 @@ LOCAL_LDLIBS += \
 
 LOCAL_SRC_FILES := \
   android/avd/util_unittest.cpp \
+  android/base/async/Looper_unittest.cpp \
   android/base/async/RecurrentTask_unittest.cpp \
   android/base/async/ScopedSocketWatch_unittest.cpp \
   android/base/containers/CircularBuffer_unittest.cpp \
