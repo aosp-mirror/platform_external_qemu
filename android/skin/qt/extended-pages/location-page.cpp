@@ -32,7 +32,12 @@ LocationPage::LocationPage(QWidget *parent) :
     mUi->setupUi(this);
     mNowPlaying = false;
     mTimer.setSingleShot(true);
+
+    // We can only send 1 decimal of altitude (in meters).
+    mAltitudeValidator.setNotation(QDoubleValidator::StandardNotation);
+    mAltitudeValidator.setRange(-1000, 10000, 1);
     mUi->loc_altitudeInput->setValidator(&mAltitudeValidator);
+
     mUi->loc_latitudeInput->setMinValue(-90.0);
     mUi->loc_latitudeInput->setMaxValue(90.0);
     QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout);
@@ -138,6 +143,14 @@ void LocationPage::on_loc_sendPointButton_clicked() {
 
     mUi->loc_latitudeInput->forceUpdate();
     mUi->loc_longitudeInput->forceUpdate();
+
+    double altitude = mUi->loc_altitudeInput->text().toDouble();
+    if (altitude < -1000.0 || altitude > 10000.0) {
+        QSettings settings;
+        mUi->loc_altitudeInput->setText(QString::number(
+                settings.value(Ui::Settings::LOCATION_ALTITUDE, 0.0)
+                        .toDouble()));
+    }
 
     timeval timeVal = {};
     gettimeofday(&timeVal, nullptr);
