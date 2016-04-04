@@ -368,6 +368,34 @@ public:
 #endif
     }
 
+    virtual bool isRunningUnderWine() const override {
+#ifndef _WIN32
+        return false;
+#else
+        static const bool isUnderWine = []() -> bool {
+            // this is the only good way of detecting Wine: it exports a
+            // function 'wine_get_version()' from its ntdll.dll
+            using wineGetVersionFunc = const char* __attribute__((cdecl)) ();
+
+            // Make sure we don't call FreeLibrary() for this handle as
+            // GetModuleHandle() doesn't increment the reference count
+            const HMODULE ntDll = ::GetModuleHandleW(L"ntdll.dll");
+            if (!ntDll) {
+                // some strange version of Windows, definitely not Wine
+                return false;
+            }
+
+            if (const auto wineGetVersion =
+                    reinterpret_cast<wineGetVersionFunc*>(
+                        ::GetProcAddress(ntDll, "wine_get_version"))) {
+                return true;
+            }
+            return false;
+        }();
+        return isUnderWine;
+#endif
+    }
+
     virtual std::vector<std::string> scanDirEntries(
             StringView dirPath,
             bool fullPath = false) const {
