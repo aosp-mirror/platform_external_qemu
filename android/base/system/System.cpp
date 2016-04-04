@@ -864,6 +864,15 @@ public:
                 close(fd);
             }
         }
+
+        // We never want to forward our stdin to the child process. On the other
+        // hand, closing it can confuse some programs.
+        int fd = open("/dev/null", O_RDONLY);
+        if (fd > 0) {
+            dup2(fd, 0);
+            close(fd);
+        }
+
         if (execvp(command, params.data()) == -1) {
             // emulator doesn't really like exit calls from a forked process
             // (it just hangs), so let's just kill it
@@ -935,6 +944,14 @@ public:
                 LOG(VERBOSE) << "Failed to redirect child output to /dev/null";
                 return -1;
             }
+        }
+
+        // We never want to forward our stdin to the child process. On the other
+        // hand, closing it can confuse some programs.
+        if (posix_spawn_file_actions_addopen(&fileActions, 0, "/dev/null",
+                                             O_RDONLY, 0700)) {
+            LOG(VERBOSE) << "Failed to redirect child stdin from /dev/null";
+            return -1;
         }
 
         // Posix spawn requires that argv[0] exists.
