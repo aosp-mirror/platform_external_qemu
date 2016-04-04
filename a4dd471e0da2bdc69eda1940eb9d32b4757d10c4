@@ -1,0 +1,429 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e3d98ed_3f36473a",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 10
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "and no unit-tests? really?",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e3accf4_401feea8",
+        "filename": "android/cmdline-options.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "s/twitter/event_log/",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6e3d98ed_1f3b8320",
+        "filename": "android/emulation/android_pipe_twitter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "don\u0027t use dynamic allocation if you know the buffer is fixed-size. Put all this in a constructor + struct defaults, e.g:\n\n  struct TwitterPipe {\n        explicit TwitterPipe(void* a_hwpipe)\n            : hwpipe(a_hwpipe) {}\n\n        void* hwpipe \u003d nullptr;\n        size_t size \u003d kBufferSize;\n        size_t pos \u003d 0;\n        size_t count \u003d 0;\n        unsigned flags \u003d 0;\n        char buffer[kBufferSize];\n    \n        constexpr size_t kBufferSize \u003d sizeof(tweet_t);\n  };",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e3accf4_20246af5",
+        "filename": "android/emulation/android_pipe_twitter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "D(\"%s: hwpipe\u003d%p\", __FUNCTION__, hwpipe);\n  auto pipe \u003d new TwitterPipe(hwpipe);\n  if (!pipe) {\n      E(\"...\");\n  }\n  return pipe;",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6eb2f8f7_37e5b8f2",
+        "filename": "android/emulation/android_pipe_twitter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "auto pipe \u003d static_cast\u003cTwitterPipe*\u003e(opaque);\n  D(...)\n  delete pipe;",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4ee0d4e0_dec82572",
+        "filename": "android/emulation/android_pipe_twitter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "WARNING: That\u0027s not how this is supposed to work. If the client buffer is small but spans two guest pages, the message will be spent as two separate pipe buffers!! The implementation may even split them into two separate sendBuffers() calls, depending on the kernel driver code.\n\nYou cannot make such assumptions. And there is no framing in the pipe protocol, so you should either use fixed-size messages (which may involved multiple AndroidPipeBuffers), or use some sort of custom framing (e.g. hex4 payload len + payload).",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2eaac053_e546569e",
+        "filename": "android/emulation/android_pipe_twitter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "same issue here.",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ec48060_559cec89",
+        "filename": "android/emulation/android_pipe_twitter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "check the size of the buffer, it can be smaller than sizeof(tweet_t) due to the page split issue discussed above.",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce304415_a246be9c",
+        "filename": "android/emulation/android_pipe_twitter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "use braces, here, i.e.\n  \n  if (pipe-\u003ecount \u003c pipe-\u003esize) {\n      ret |\u003d PIPE_POLL_OUT;\n  }",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce304415_0254ca45",
+        "filename": "android/emulation/android_pipe_twitter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "static const char kMsg[] \u003d \"...\";",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4eaff461_e6f97e93",
+        "filename": "android/emulation/android_pipe_twitter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "Seriously, this could be written as:\n\n  static const tweet_t kTweet \u003d { .tsc \u003d 0, .msg \u003d \"....\"; };\n  android_twitter_tweet(\u0026kTweet);\n\nAlso what\u0027s the point of logging this exactly?",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0ea97c5f_e43c1ac5",
+        "filename": "android/emulation/android_pipe_twitter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "these flags are never used since this never calls android_pipe_wake(). Looks like a bug",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2eaac053_25454e94",
+        "filename": "android/emulation/android_twitter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "Please use a \u0027sCamelCase\u0027 naming scheme for static globals.\nIt\u0027s also better to group all of them in a structure, and use a LazyInstance\u003c\u003e to perform safe lazy initialization\n\n  struct TwitterState {\n      FILE* stream \u003d nullptr;\n  #ifdef _WIN32\n      LARGE_INTEGER cpuFreq \u003d {};\n  #endif\n      Lock lock;\n  };\n\n  static android::base::LazyInstance\u003cTwitterState\u003e sTwitter \u003d\n          LAZY_INSTANCE_INIT;\n\nAlso put these in an anonymous namespace.",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2eaac053_05405283",
+        "filename": "android/emulation/android_twitter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "Please add a #ifdef .. #else .. #error #endif to guard against improper compilation.",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e3accf4_0054c645",
+        "filename": "android/emulation/android_twitter.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "make these functions static or put them in anonymous namespace.",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2eaac053_c549daae",
+        "filename": "android/emulation/android_twitter.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "Seriously, drop the fancy codename, this feature is not important enough to justify making the code harder to understand. A name like AndroidEventLog is much more direct and completely unambiguous about what this thing does.",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4ee0d4e0_9ece9d7d",
+        "filename": "android/emulation/android_twitter.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "nit: s/corellations/correlations/",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4eaff461_c6fc8286",
+        "filename": "android/emulation/android_twitter.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "please specify time units here, and what these are relative to, if applicable.",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2eaac053_653b4620",
+        "filename": "android/emulation/android_twitter.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "I recommend adding an android_ or emulator_ prefix to any C data structure / function name that is defined in a public AndroidEmu header, in order to avoid any potential conflict with future QEMU2 versions (since we\u0027re going to rebase periodically). So what about android_tweet_t instead.\n\nNote that our C++ declarations are already in the android:: namespace.",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ec48060_15927479",
+        "filename": "android/emulation/android_twitter.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "This is seriously lacking in documentation :(",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6eb2f8f7_f7c50059",
+        "filename": "android/main-common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1048,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "If this is an actual error, use derror() to always print a message to the user, otherwise this code will exit the program without justification unless -verbose is used, which is bad user experience.",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ec48060_3597706a",
+        "filename": "android/main-common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1049,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "Don\u0027t use exit() here, return false instead.",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ceb5a4db_5a409584",
+        "filename": "android/process_setup.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "this function is already called from atexit() !?",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e3accf4_e050c253",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/render_api_functions.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "you should use an ANDROID_ prefix for these macros since it\u0027s a public API header. Also I\u0027m pretty sure this not the right header to define these macros. The only thing that should be declared here is something like:\n\n  typedef void (*OnAndroidLogEvent)(const char* format, ...);\n\n  ...\n    X(int, initLibrary, (OnAndroidLogEvent logEvent), (logEvent)),\n    ...\n\nIt\u0027s up to the EmuGL implementation to use a global variable and provide its own internal macro to send messages. I.e. you should avoid add more coupling to subsystems.",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ceb5a4db_7a455993",
+        "filename": "include/hw/android/goldfish/pipe.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T07:25:22Z",
+      "side": 1,
+      "message": "Already in android/emulation/android_pipe_twitter.h, so no need to add it here.",
+      "revId": "a4dd471e0da2bdc69eda1940eb9d32b4757d10c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
