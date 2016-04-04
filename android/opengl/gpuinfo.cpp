@@ -9,9 +9,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/base/async/Looper.h"
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/base/system/Win32UnicodeString.h"
+#include "android/base/threads/ParallelTask.h"
+#include "android/base/threads/Thread.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/utils/file_io.h"
 
@@ -23,6 +27,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+using android::base::Looper;
+using android::base::ParallelTask;
 using android::base::RunOptions;
 using android::base::String;
 using android::base::System;
@@ -30,11 +36,13 @@ using android::base::System;
 using android::base::Win32UnicodeString;
 #endif
 
+static const System::Duration kGPUInfoQueryTimeoutMs = 5000;
+static const System::Duration kQueryCheckIntervalMs = 66;
 static const size_t kFieldLen = 2048;
 
 static const size_t NOTFOUND = std::string::npos;
 
-::android::base::LazyInstance<GpuInfoList> sGpuInfoList =
+static ::android::base::LazyInstance<GpuInfoList> sGpuInfoList =
         LAZY_INSTANCE_INIT;
 
 GpuInfoList* GpuInfoList::get() {
@@ -215,9 +223,13 @@ std::string load_gpu_info() {
     char temp_path_arg[kFieldLen] = {};
     snprintf(temp_path_arg, sizeof(temp_path_arg), "/OUTPUT:%s",
              temp_file_path);
-    sys.runCommand({"wmic", temp_path_arg, "path", "Win32_VideoController",
-                    "get", "/value"},
-                   RunOptions::WaitForCompletion);
+    int wmic_run_res = sys.runCommand({"wmic", temp_path_arg, "path", "Win32_VideoController", "get", "/value"},
+                                      RunOptions::WaitForCompletion |
+                                      RunOptions::TerminateOnTimeout,
+                                      kGPUInfoQueryTimeoutMs);
+    if (!wmic_run_res) {
+        return std::string();
+    }
 #endif
 
     std::ifstream fh(temp_file_path, std::ios::binary);
@@ -448,4 +460,52 @@ bool parse_and_query_blacklist(const std::string& contents) {
     GpuInfoList* gpulist = GpuInfoList::get();
     parse_gpu_info_list(contents, gpulist);
     return gpuinfo_query_blacklist(gpulist, sGpuBlacklist, sBlacklistSize);
+}
+
+void query_blacklist_fn(bool* res) {
+    std::string gpu_info = load_gpu_info();
+    *res = parse_and_query_blacklist(gpu_info);
+}
+
+void query_blacklist_done_fn(const bool& res) { }
+
+// Separate thread for GPU info querying:
+//
+// Our goal is to account for circumstances where obtaining GPU info either
+// takes too long or ties up the host system in a special way where the system
+// ends up hanging. This is bad, since no progress will happen for emulator
+// startup, which is more critical.
+//
+// We therefore use a ParallelTask and a looper with timeout to take care of
+// this case.
+//
+// Note that we use a separate thread (rather than the main thread) because
+// later on when skin_winsys_enter_main_loop is called, it will set the looper
+// of the main thread to a custom Looper that works with Qt
+// (android::qt::createLooper()).  Otherwise, creating a looper on the main
+// thread at this point will prevent the custom looper from being used, which
+// aborts the program.
+class GPUInfoQueryThread : public android::base::Thread {
+public:
+    GPUInfoQueryThread() {
+        this->start();
+    }
+    virtual intptr_t main() override {
+        Looper* looper = android::base::ThreadLooper::get();
+        android::base::runParallelTask<bool>
+            (looper, &query_blacklist_fn, &query_blacklist_done_fn,
+             kQueryCheckIntervalMs);
+        looper->runWithTimeoutMs(kGPUInfoQueryTimeoutMs);
+        looper->forceQuit();
+        return 0;
+    }
+};
+
+static android::base::LazyInstance<GPUInfoQueryThread> sGPUInfoQueryThread =
+        LAZY_INSTANCE_INIT;
+
+bool async_query_host_gpu_blacklisted() {
+    sGPUInfoQueryThread.ptr();
+    sGPUInfoQueryThread->wait();
+    return GpuInfoList::get()->blacklist_status;
 }
