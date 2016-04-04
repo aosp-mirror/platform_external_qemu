@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ce304415_c2666293",
+        "filename": "android/base/async/Looper_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T21:36:01Z",
+      "side": 1,
+      "message": "Sorry, but that\u0027s definitely too ugly for me :) Especially the std::tie() usage after that.",
+      "parentUuid": "2ec1e019_dde520f3",
+      "range": {
+        "startLine": 26,
+        "startChar": 36,
+        "endLine": 26,
+        "endChar": 69
+      },
+      "revId": "0092a8686b1a6eda1eedda8a099985d1c4b0f697",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_1d2ac8bb",
         "filename": "android/base/async/Looper_unittest.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "ce304415_a2635e81",
+        "filename": "android/base/async/Looper_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T21:36:01Z",
+      "side": 1,
+      "message": "Goot idea",
+      "parentUuid": "2ec1e019_1d2ac8bb",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 85,
+        "endChar": 2
+      },
+      "revId": "0092a8686b1a6eda1eedda8a099985d1c4b0f697",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ec1e019_bd7e1487",
         "filename": "android/base/async/Looper_unittest.cpp",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2016-04-04T18:01:30Z",
       "side": 1,
       "message": "nit: FAIL()\n\ngtest.h:\n\n// Generates a fatal failure with a generic message.\n#define GTEST_FAIL() GTEST_FATAL_FAILURE_(\"Failed\")\n\n// Define this macro to 1 to omit the definition of FAIL(), which is a\n// generic name and clashes with some other libraries.\n#if !GTEST_DONT_DEFINE_FAIL\n# define FAIL() GTEST_FAIL()\n#endif",
+      "range": {
+        "startLine": 96,
+        "startChar": 4,
+        "endLine": 96,
+        "endChar": 23
+      },
+      "revId": "0092a8686b1a6eda1eedda8a099985d1c4b0f697",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce304415_02616a78",
+        "filename": "android/base/async/Looper_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-04T21:36:01Z",
+      "side": 1,
+      "message": "Ok, I\u0027ll use GTEST_FAIL() to avoid conflicts.",
+      "parentUuid": "2ec1e019_bd7e1487",
       "range": {
         "startLine": 96,
         "startChar": 4,
