@@ -32,7 +32,7 @@ typedef enum {
     kEventScrollBarChanged,
     kEventSetScale,
     kEventSetZoom,
-    kEventVideoExpose,
+    kEventForceRedraw,
     kEventWindowMoved,
     kEventScreenChanged,
     kEventZoomedWindowResized

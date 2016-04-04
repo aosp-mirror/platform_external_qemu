@@ -30,12 +30,13 @@ public:
     void closeEvent(QCloseEvent* event) override;
     bool event(QEvent* e) override;
     void focusInEvent(QFocusEvent* event) override;
-    void hideEvent(QHideEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
     void moveEvent(QMoveEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent* event) override;
+
+    void showMinimized();
 
     void stopResizeTimer();
     QSize viewportSize() const;

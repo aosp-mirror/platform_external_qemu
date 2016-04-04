@@ -1977,10 +1977,6 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         }
         break;
 
-    case kEventVideoExpose:
-        skin_window_redraw_opengles(window);
-        break;
-
     case kEventScreenChanged:
         // Re-setup the OpenGL ES subwindow with a potentially different
         // framebuffer size (e.g., 2x for retina screens).
