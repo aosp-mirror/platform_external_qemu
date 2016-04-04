@@ -109,6 +109,9 @@ public:
             if (newEvents != mWantedEvents) {
                 mWantedEvents = newEvents;
                 genLooper()->updateFdWatch(mFd, newEvents);
+                if (!newEvents) {
+                    clearPending();
+                }
             }
             // These events are no longer desired.
             mLastEvents &= ~events;
