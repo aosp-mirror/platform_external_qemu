@@ -514,3 +514,9 @@ TEST(gpuinfo_query_blacklist, testBlacklist_Neg) {
 
     EXPECT_FALSE(on_blacklist);
 }
+
+TEST(async_query_host_gpu_blacklisted, testBlacklist_Async) {
+    EXPECT_TRUE(GpuInfoList::get()->infos.size() == 0);
+    async_query_host_gpu_blacklisted();
+    EXPECT_TRUE(GpuInfoList::get()->infos.size() > 0);
+}
