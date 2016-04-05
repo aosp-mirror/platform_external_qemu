@@ -362,6 +362,7 @@ $(call start-emulator-program, android_emu$(BUILD_TARGET_SUFFIX)_unittests)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
+    $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_GTEST_INCLUDES) \
     $(LIBXML2_INCLUDES) \
 
@@ -413,6 +414,7 @@ LOCAL_SRC_FILES := \
   android/base/Uri_unittest.cpp \
   android/base/Uuid_unittest.cpp \
   android/base/Version_unittest.cpp \
+  android/cmdline-option_unittest.cpp \
   android/emulation/android_pipe_pingpong_unittest.cpp \
   android/emulation/android_pipe_zero_unittest.cpp \
   android/emulation/bufprint_config_dirs_unittest.cpp \
