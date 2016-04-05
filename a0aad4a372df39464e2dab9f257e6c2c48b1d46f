@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ea2ccbd_0f09d181",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2016-04-05T22:43:20Z",
+      "side": 1,
+      "message": "Not a fan of these types of casts. I wonder if there\u0027s a way to get the desktop without this.",
+      "range": {
+        "startLine": 484,
+        "startChar": 22,
+        "endLine": 484,
+        "endChar": 37
+      },
+      "revId": "a0aad4a372df39464e2dab9f257e6c2c48b1d46f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ea2ccbd_4ff7d99f",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 805,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2016-04-05T22:43:20Z",
+      "side": 1,
+      "message": "You could probably merge these two, and get rid of the argument in each.",
+      "range": {
+        "startLine": 797,
+        "startChar": 0,
+        "endLine": 805,
+        "endChar": 1
+      },
+      "revId": "a0aad4a372df39464e2dab9f257e6c2c48b1d46f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
