@@ -69,6 +69,30 @@
       "revId": "a0aad4a372df39464e2dab9f257e6c2c48b1d46f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ea2ccbd_4f759995",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 805,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-04-05T22:58:00Z",
+      "side": 1,
+      "message": "Not sure I got what you mean. Qt will complain if I get rid of the argument.",
+      "parentUuid": "8ea2ccbd_4ff7d99f",
+      "range": {
+        "startLine": 797,
+        "startChar": 0,
+        "endLine": 805,
+        "endChar": 1
+      },
+      "revId": "a0aad4a372df39464e2dab9f257e6c2c48b1d46f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
