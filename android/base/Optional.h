@@ -20,7 +20,8 @@
 #include <stddef.h>
 
 // Optional<T> - a template class for passing through an optional value;
-// it's basically a stack-stored object with a pointer semantic.
+// it's basically an object which implements a pointer semantics while storing
+// the value inside, with no extra heap allocations.
 // Use it when you need to return a single value from a function or indicate
 // an error, e.g.:
 //
@@ -39,7 +40,9 @@
 //  - a convenience function makeOptional() would deduce its type for you
 //  - it has an operator bool() which returns true if there's a value in the
 //      optional object
-//  - overloaded operators * and -> make the syntax very poiner-like
+//  - overloaded operators * and -> allow an Optional<T> to be used with
+//      pointer-like syntax: *|optional| retrieves the contained value, and
+//      |optional|->field dereferences a field of a contained object
 //  - valueOr() provides one a convenience getter:
 //      Optional<int> size = ...;
 //      vector.resize(size.valueOr(100));
@@ -100,8 +103,7 @@ class Optional;
 //  actually means Foo<T>;
 template <class U>
 using is_any_optional = is_template_instantiation<
-        typename std::remove_reference<typename std::remove_cv<U>::type>::type,
-        Optional>;
+        typename std::decay<U>::type, Optional>;
 
 template <class T>
 class Optional : private details::OptionalBase<sizeof(T),
@@ -119,6 +121,16 @@ public:
     // std::optional will have this, so let's provide it
     using value_type = T;
 
+    // make sure we forbid some Optional instantiations where things may get
+    // really messy
+    static_assert(!std::is_same<typename std::decay<T>::type, NulloptT>::value,
+                  "Optional of NulloptT is not allowed");
+    static_assert(!std::is_same<typename std::decay<T>::type, InplaceT>::value,
+                  "Optional of InplaceT is not allowed");
+    static_assert(!std::is_reference<T>::value,
+                  "Optional references are not allowed: use a pointer instead");
+
+    // constructors
     constexpr Optional() {}
     constexpr Optional(NulloptT) {}
 
