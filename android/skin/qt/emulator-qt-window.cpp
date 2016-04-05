@@ -477,7 +477,13 @@ void EmulatorQtWindow::show()
     QFrame::show();
     mToolWindow->show();
 
-    QObject::connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen *)), this, SLOT(slot_screenChanged(QScreen *)));
+    QObject::connect(window()->windowHandle(), &QWindow::screenChanged,
+            this, &EmulatorQtWindow::slot_screenChanged);
+    // On Mac, the above function won't be triggered when you plug in a new
+    // monitor and the OS move the emulator to the new screen. In such
+    // situation, it will trigger screenCountChanged.
+    QObject::connect(qApp->desktop(), &QDesktopWidget::screenCountChanged,
+            this, &EmulatorQtWindow::slot_screenChanged);
 }
 
 void EmulatorQtWindow::setOnTop(bool onTop)
@@ -788,7 +794,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
     if (semaphore != NULL) semaphore->release();
 }
 
-void EmulatorQtWindow::slot_screenChanged(QScreen*)
+void EmulatorQtWindow::slot_screenChanged()
 {
     queueSkinEvent(createSkinEvent(kEventScreenChanged));
 }
