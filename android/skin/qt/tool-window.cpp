@@ -597,8 +597,8 @@ void ToolWindow::on_back_button_released()
 
 void ToolWindow::on_close_button_clicked()
 {
-    if (mExtendedWindow) {
-        mExtendedWindow->close();
+    if (extendedWindow) {
+        extendedWindow->close();
     }
     parentWidget()->close();
 }
