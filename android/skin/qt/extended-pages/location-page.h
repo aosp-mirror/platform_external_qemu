@@ -78,7 +78,6 @@ private:
 
     std::unique_ptr<Ui::LocationPage> mUi;
     const QAndroidLocationAgent* mLocationAgent;
-    QDoubleValidator mMagFieldValidator;
     QDoubleValidator mAltitudeValidator;
     GpsFixArray          mGpsFixesArray;
     GeoDataLoaderThread* mGeoDataLoader;
