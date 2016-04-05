@@ -125,7 +125,7 @@ const TargetInfo kTarget = {
 #ifdef TARGET_ARM
     "arm",
     "arm",
-    "cortex-a57",
+    "cortex-a15",
     "ttyAMA",
     " keep_bootcon earlyprintk=ttyAMA0",
     "virtio-blk-device",
