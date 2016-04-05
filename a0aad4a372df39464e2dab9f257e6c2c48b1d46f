@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8ea2ccbd_af09c510",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2016-04-05T22:54:26Z",
+      "side": 1,
+      "message": "It looks like you can use qApp-\u003edesktop() which is a macro to a proper static cast. Let\u0027s use that instead.",
+      "parentUuid": "8ea2ccbd_0f09d181",
+      "range": {
+        "startLine": 484,
+        "startChar": 22,
+        "endLine": 484,
+        "endChar": 37
+      },
+      "revId": "a0aad4a372df39464e2dab9f257e6c2c48b1d46f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8ea2ccbd_4ff7d99f",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
