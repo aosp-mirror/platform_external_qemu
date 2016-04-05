@@ -428,6 +428,7 @@ LOCAL_SRC_FILES := \
   android/emulation/VmLock_unittest.cpp \
   android/emulation/vm_lock_unittest.cpp \
   android/error-messages_unittest.cpp \
+  android/filesystems/ext4_resize_unittest.cpp \
   android/filesystems/ext4_utils_unittest.cpp \
   android/filesystems/fstab_parser_unittest.cpp \
   android/filesystems/partition_config_unittest.cpp \
