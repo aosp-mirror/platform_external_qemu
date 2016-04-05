@@ -123,7 +123,8 @@ bool emuglConfig_init(EmuglConfig* config,
                 gpu_mode = "host";
             }
         } else if (!strcmp(gpu_option, "off") ||
-                   !strcmp(gpu_option, "disable")) {
+                   !strcmp(gpu_option, "disable") ||
+                   !strcmp(gpu_option, "guest")) {
             gpu_enabled = false;
         } else if (!strcmp(gpu_option, "auto")) {
             // Nothing to do
@@ -185,9 +186,11 @@ bool emuglConfig_init(EmuglConfig* config,
                 D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
                   ", using guest GPU backend\n",
                   __FUNCTION__);
+                config->enabled = false;
                 snprintf(config->status, sizeof(config->status),
                         "GPU emulation is in the guest");
                 gpu_mode = "guest";
+                return true;
             }
         } else {
             D("%s: 'host' mode auto-selected\n", __FUNCTION__);
