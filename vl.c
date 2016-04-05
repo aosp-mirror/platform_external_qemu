@@ -237,6 +237,8 @@ int lcd_density = LCD_DENSITY_MDPI;
 char* additional_kernel_params = NULL;
 #ifdef USE_ANDROID_EMU
 extern char* op_http_proxy;
+extern char* android_op_ports;
+extern int android_op_ports_numbers[2];
 static const char* android_hw_file = NULL;
 #endif  // USE_ANDROID_EMU
 #endif  // CONFIG_ANDROID
@@ -4124,6 +4126,16 @@ int run_qemu_main(int argc, const char **argv)
             case QEMU_OPTION_android_hw:
                 android_hw_file = optarg;
                 break;
+
+            case QEMU_OPTION_android_ports:
+                android_op_ports = (char*)optarg;
+                if (!android_parse_ports_option(android_op_ports,
+                                                &android_op_ports_numbers[0],
+                                                &android_op_ports_numbers[1])) {
+                    return 1;
+                }
+                break;
+
 #endif  // USE_ANDROID_EMU
 #endif  // CONFIG_ANDROID
             default:

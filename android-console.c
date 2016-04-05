@@ -18,16 +18,22 @@
 #include "android-console.h"
 
 #include "monitor/monitor.h"
+#include "qemu/config-file.h"
+#include "qemu/option.h"
 #include "qemu/sockets.h"
 #include "net/slirp.h"
 #include "slirp/libslirp.h"
 #include "qmp-commands.h"
 #include "hw/display/goldfish_fb.h"
+#include "hw/misc/android_pipe.h"
 #include "hw/misc/goldfish_battery.h"
 #include "hw/input/goldfish_events.h"
 #include "hw/input/goldfish_sensors.h"
+#include "sysemu/char.h"
 #include "sysemu/sysemu.h"
 #include "hmp.h"
+
+#include "android/error-messages.h"
 
 #ifdef USE_ANDROID_EMU
 
@@ -55,6 +61,11 @@ void qemu2_android_console_setup(const AndroidConsoleAgents* agents) {
 int android_base_port;
 #endif
 
+#ifdef CONFIG_ANDROID
+extern int android_op_ports_numbers[2];
+extern int android_op_port_number;
+#endif // CONFIG_ANDROID
+
 typedef struct {
     int is_udp;
     int host_port;
@@ -62,6 +73,106 @@ typedef struct {
 } RedirRec;
 
 GList* redir_list;
+
+static CharDriverState *android_try_create_console_chardev(int portno)
+{
+    /* Try to create the chardev for the Android console on the specified port.
+     * This is equivalent to the command line options
+     *  -chardev socket,id=monitor,host=127.0.0.1,port=NNN,server,nowait,telnet
+
+     *  -mon chardev=monitor,mode=android-console
+     * Return true on success, false on failure (presumably port-in-use).
+     */
+    Error *err = NULL;
+    CharDriverState *chr;
+    QemuOpts *opts;
+    const char *chardev_opts =
+        "socket,id=private-chardev-for-android-monitor,"
+        "host=127.0.0.1,server,nowait,telnet";
+
+    opts = qemu_opts_parse(qemu_find_opts("chardev"), chardev_opts, 1);
+    assert(opts);
+    qemu_opt_set_number(opts, "port", portno);
+    chr = qemu_chr_new_from_opts(opts, NULL, &err);
+    if (err) {
+        /* Assume this was port-in-use */
+        qemu_opts_del(opts);
+        error_free(err);
+        return NULL;
+    }
+
+    qemu_chr_fe_claim_no_fail(chr);
+    return chr;
+}
+
+static bool perform_console_and_adb_init(int console_port,
+                                         int adb_port,
+                                         int tries) {
+    /* Initialize the console and ADB, which must listen on two
+     * consecutive TCP ports starting from 5554 and working up until
+     * we manage to open both connections.
+     */
+    CharDriverState *chr;
+    // TODO: reconsider a better place to store this monitor handler
+
+    for (; tries > 0; tries--, console_port += 2) {
+        chr = android_try_create_console_chardev(console_port);
+        if (!chr) {
+            continue;
+        }
+
+        if (!qemu2_adb_server_init(adb_port)) {
+            qemu_chr_delete(chr);
+            chr = NULL;
+            continue;
+        }
+
+        /* Confirmed we have both ports, now we can create the console itself.
+         * This is equivalent to
+         * "-mon chardev=private-chardev,mode=android-console"
+         */
+        monitor_init(chr,
+                     MONITOR_ANDROID_CONSOLE |
+                     MONITOR_USE_READLINE |
+                     MONITOR_DYNAMIC_CMDS);
+        android_base_port = console_port;
+
+        return true;
+    }
+    return false;
+}
+
+bool android_initialize_console_and_adb() {
+    int console_port = MAX(android_base_port, ANDROID_CONSOLE_BASEPORT);
+    int adb_port = console_port + 1;
+    int tries = MAX_ANDROID_EMULATORS;
+    // This is the default error message on failure if the user has not
+    // specified the -ports or -port option. In that case it means we
+    // exhausted the number of tries available.
+    const char* error_message =  "It seems too many emulator instances are "
+                                 "running on this machine. Aborting";
+    if (android_op_ports_numbers[0] > 0 && android_op_ports_numbers[1] > 0) {
+        console_port = android_op_ports_numbers[0];
+        adb_port = android_op_ports_numbers[1];
+        // Only make one try, we don't want to change the users selection
+        tries = 1;
+        // On error indicate that the ports are not available instead.
+        error_message = "The console or adb port could not be opened, one or "
+                        "both of them may already be in use.";
+#ifndef _WIN32
+        if (console_port < 1024 || adb_port < 1024) {
+            error_message = "The console or adb port could not be opened, one "
+                            "or both of them may already be in use or you may "
+                            "need root priveleges for ports below 1024";
+        }
+#endif
+    }
+    if (!perform_console_and_adb_init(console_port, adb_port, tries)) {
+        android_init_error_set(EINVAL, error_message);
+        return false;
+    }
+    return true;
+}
 
 void android_monitor_print_error(Monitor* mon, const char* fmt, ...) {
     /* Print an error (typically a syntax error from the parser), with

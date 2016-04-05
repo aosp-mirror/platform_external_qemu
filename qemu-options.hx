@@ -3431,6 +3431,15 @@ STEXI
 Select lcd display density value (default is 160)
 ETEXI
 
+DEF("android-ports", HAS_ARG, QEMU_OPTION_android_ports,
+    "-android-ports <consoleport>,<adbport>"
+    " TCP ports used for the emulator instance and adb bridge\n", QEMU_ARCH_ALL)
+STEXI
+@item -android-ports @var{consoleport},@var{adbport}
+@findex -android-ports
+TCP ports used for the emulator instance and adb bridge
+ETEXI
+
 DEF("http-proxy", HAS_ARG, QEMU_OPTION_http_proxy,
     "-http-proxy <proxy> make TCP connections through a HTTP/HTTPS proxy\n", QEMU_ARCH_ALL)
 STEXI

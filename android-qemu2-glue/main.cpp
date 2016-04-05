@@ -17,6 +17,7 @@
 #include "android/android.h"
 #include "android/avd/hw-config.h"
 #include "android/cmdline-option.h"
+#include "android/constants.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/error-messages.h"
 #include "android/filesystems/ext4_resize.h"
@@ -63,7 +64,6 @@ extern "C" {
 #include <unistd.h>
 
 #include "android/version.h"
-#define ANDROID_CONSOLE_BASEPORT 5554
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
 int android_base_port;
@@ -522,25 +522,20 @@ extern "C" int main(int argc, char **argv) {
     }
 
     if (opts->ports) {
-        dwarning("QEMU2 does not support the \"-ports\" flag - option will be ignored.");
-
-        // QEMU2 does not support this flag and the emulator will fail to start
-        // if it is passed in, so for now, ignore it.
-#ifdef QEMU2_ANDROID_PORTS_SUPPORT
         args[n++] = "-android-ports";
         args[n++] = opts->ports;
-#endif
     }
 
-    android_base_port = ANDROID_CONSOLE_BASEPORT;
     if (opts->port) {
-        android_base_port = atoi(opts->port);
-        if (android_base_port % 2 || android_base_port < ANDROID_CONSOLE_BASEPORT) {
-            fprintf(stderr, "WARNING: -port only supports even number that is equal to"
-                    " or greater than %d; invalid input '%s' ignored.\n",
-                    ANDROID_CONSOLE_BASEPORT, opts->port);
-            android_base_port = ANDROID_CONSOLE_BASEPORT;
+        int port = -1;
+        if (!android_parse_port_option(opts->port, &port)) {
+            return 1;
         }
+        // Reuse the -android-ports parameter since -ports does the same
+        // thing but with the second port just being the console port + 1
+        std::string portsOption = StringFormat("%d,%d", port, port + 1);
+        args[n++] = "-android-ports";
+        args[n++] = strdup(portsOption.c_str());
     }
 
     if (opts->report_console) {

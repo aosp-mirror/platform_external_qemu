@@ -22,9 +22,8 @@
 #ifdef CONFIG_ANDROID
 #ifdef USE_ANDROID_EMU
 #include "android/android.h"
-#else
+#endif  // USE_ANDROID_EMU
 #include "android-console.h"
-#endif
 #endif  // CONFIG_ANDROID
 
 #define PHYS_TO_VIRT(x) ((x) | ~(target_ulong)0x7fffffff)
@@ -126,78 +125,6 @@ static void main_cpu_reset(void* opaque1)
     cpu->env.active_tc.gpr[6] = opaque->highmem_size;/* a2 */
     cpu->env.active_tc.gpr[7] = 0;                   /* a3 */
 
-}
-
-static CharDriverState *try_to_create_console_chardev(int portno)
-{
-    /* Try to create the chardev for the Android console on the specified port.
-     * This is equivalent to the command line options
-     *  -chardev socket,id=monitor,host=127.0.0.1,port=NNN,server,nowait,telnet
-
-     *  -mon chardev=monitor,mode=android-console
-     * Return true on success, false on failure (presumably port-in-use).
-     */
-    Error *err = NULL;
-    CharDriverState *chr;
-    QemuOpts *opts;
-    const char *chardev_opts =
-        "socket,id=private-chardev-for-android-monitor,"
-        "host=127.0.0.1,server,nowait,telnet";
-
-    opts = qemu_opts_parse(qemu_find_opts("chardev"), chardev_opts, 1);
-    assert(opts);
-    qemu_opt_set_number(opts, "port", portno);
-    chr = qemu_chr_new_from_opts(opts, NULL, &err);
-    if (err) {
-        /* Assume this was port-in-use */
-        qemu_opts_del(opts);
-        error_free(err);
-        return NULL;
-    }
-
-    qemu_chr_fe_claim_no_fail(chr);
-    return chr;
-}
-
-static void initialize_console_and_adb(void)
-{
-    /* Initialize the console and ADB, which must listen on two
-     * consecutive TCP ports starting from 5555 and working up until
-     * we manage to open both connections.
-     */
-    int baseport = (android_base_port > ANDROID_CONSOLE_BASEPORT) ?
-        android_base_port : ANDROID_CONSOLE_BASEPORT;
-    int tries = MAX_ANDROID_EMULATORS;
-    CharDriverState *chr;
-
-    for (; tries > 0; tries--, baseport += 2) {
-        chr = try_to_create_console_chardev(baseport);
-        if (!chr) {
-            continue;
-        }
-
-        if (!qemu2_adb_server_init(baseport + 1)) {
-            qemu_chr_delete(chr);
-            chr = NULL;
-            continue;
-        }
-
-        /* Confirmed we have both ports, now we can create the console itself.
-         * This is equivalent to
-         * "-mon chardev=private-chardev,mode=android-console"
-         */
-        /* monitor_init(chr, MONITOR_ANDROID_CONSOLE | MONITOR_USE_READLINE); */
-        monitor_init(chr,
-                     MONITOR_ANDROID_CONSOLE |
-                     MONITOR_USE_READLINE |
-                     MONITOR_DYNAMIC_CMDS);
-        android_base_port = baseport;
-
-        return;
-    }
-    error_report("it seems too many emulator instances are running "
-                 "on this machine. Aborting\n");
-    exit(1);
 }
 
 static void android_load_kernel(CPUMIPSState *env, int ram_size,
@@ -466,7 +393,7 @@ static void ranchu_init(MachineState *machine)
     /* Virtio MMIO devices */
     create_device(fdt, &devmap[RANCHU_MMIO], goldfish_pic, VIRTIO_TRANSPORTS, 1);
 
-    initialize_console_and_adb();
+    android_initialize_console_and_adb();
 
     qemu_fdt_dumpdtb(fdt, fdt_size);
 

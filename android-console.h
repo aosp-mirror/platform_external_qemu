@@ -91,6 +91,8 @@ void android_console_rotate_screen(Monitor *mon, const QDict *qdict);
 
 void android_monitor_print_error(Monitor *mon, const char *fmt, ...);
 
+bool android_initialize_console_and_adb();
+
 #ifdef USE_ANDROID_EMU
 void qemu2_android_console_setup(const AndroidConsoleAgents* agents);
 #endif
