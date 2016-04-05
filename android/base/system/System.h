@@ -117,6 +117,10 @@ public:
     // Return the current OS type
     virtual OsType getOsType() const = 0;
 
+    // Check if we're running under Wine;
+    // returns false for non-Windows builds
+    virtual bool isRunningUnderWine() const = 0;
+
     // Return the program bitness as an integer, either 32 or 64.
 #ifdef __x86_64__
     static const int kProgramBitness = 64;
