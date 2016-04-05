@@ -134,8 +134,6 @@ TEST(EmuglConfig, init) {
         EXPECT_STREQ("GPU emulation enabled using 'vendor' mode",
                      config.status);
         emuglConfig_setupEnv(&config);
-        EXPECT_STREQ("<gles2_only_backend>",
-                     System::get()->envGet("ANDROID_GLESv1_LIB").c_str());
     }
 
     {
