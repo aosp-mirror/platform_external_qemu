@@ -11,9 +11,11 @@
 */
 
 #include "android/console.h"
+#include "android/constants.h"
 #include "android/adb-qemud.h"
 #include "android/adb-server.h"
 #include "android/android.h"
+#include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
@@ -32,8 +34,12 @@
 
 /* Contains arguments for -android-ports option. */
 char* android_op_ports = NULL;
+/* Contains the parsed numbers from android_op_ports */
+int android_op_ports_numbers[2] = {-1, -1};
 /* Contains arguments for -android-port option. */
 char* android_op_port = NULL;
+/* Contains the parsed number from android_op_port */
+int android_op_port_number = -1;
 /* Contains arguments for -android-report-console option. */
 char* android_op_report_console = NULL;
 /* Contains arguments for -http-proxy option. */
@@ -327,31 +333,14 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
         int tries = MAX_ANDROID_EMULATORS;
         int success   = 0;
         int adb_port = -1;
-        int base_port = 5554;
+        int base_port = ANDROID_CONSOLE_BASEPORT;
         int legacy_adb = avdInfo_getAdbdCommunicationMode(android_avdInfo) ? 0 : 1;
 
         if (android_op_ports) {
-            char* comma_location;
-            char* end;
-            int console_port = strtol( android_op_ports, &comma_location, 0 );
-
-            if ( comma_location == NULL || *comma_location != ',' ) {
-                derror("option -ports must be followed by two comma separated "
-                       "positive integer numbers");
-                return false;
-            }
-
-            adb_port = strtol( comma_location+1, &end, 0 );
-
-            if ( end == NULL || *end ) {
-                derror("option -ports must be followed by two comma separated "
-                       "positive integer numbers");
-                return false;
-            }
-
-            if ( console_port == adb_port ) {
-                derror("option -ports must be followed by two different "
-                       "integer numbers");
+            int console_port = -1;
+            if (!android_parse_ports_option(android_op_ports,
+                                            &console_port,
+                                            &adb_port)) {
                 return false;
             }
 
@@ -361,21 +350,9 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
             base_port = console_port;
         } else {
             if (android_op_port) {
-                char*  end;
-                int    port = strtol( android_op_port, &end, 0 );
-                if ( end == NULL || *end ||
-                    (unsigned)((port - base_port) >> 1) >= (unsigned)tries ) {
-                    derror("option -port must be followed by an even integer "
-                           "number between %d and %d",
-                           base_port, base_port + (tries - 1) * 2);
+                if (!android_parse_port_option(android_op_port, &base_port)) {
                     return false;
                 }
-                if ( (port & 1) != 0 ) {
-                    port &= ~1;
-                    dwarning( "option -port must be followed by an even integer, using  port number %d\n",
-                            port );
-                }
-                base_port = port;
                 tries     = 1;
             }
 

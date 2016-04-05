@@ -14,6 +14,8 @@
 
 #include "android/utils/compiler.h"
 
+#include <stdbool.h>
+
 ANDROID_BEGIN_HEADER
 
 /* a structure used to model a linked list of parameters
@@ -39,6 +41,22 @@ typedef struct {
  */
 extern int
 android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt );
+
+/* parse |port_string| into |console_port|. Error checking is done and
+ * approriate warning or error messages shown if needed. If the function
+ * returns false the output parameter is not touched.
+ */
+extern bool android_parse_port_option(const char* port_string,
+                                      int* console_port);
+
+/* parse |ports_string| into |console_port| and |adb_port|. The format of the
+ * -ports option is currently "<console port>,<adb port>". Error checking is
+ * done and the approriate warning or error messages shown if needed. If the
+ * function returns false neither of the output parameters are touched.
+ */
+extern bool android_parse_ports_option(const char* ports_string,
+                                       int* console_port,
+                                       int* adb_port);
 
 /* name of default keyset file */
 #define  KEYSET_FILE    "default.keyset"
