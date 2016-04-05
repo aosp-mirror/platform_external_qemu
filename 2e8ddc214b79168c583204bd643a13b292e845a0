@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "2ec1e019_b9784dc8",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-05T05:58:07Z",
+      "side": 1,
+      "message": "Very valid point, will add it",
+      "parentUuid": "4ee0d4e0_7e0ab104",
+      "revId": "2e8ddc214b79168c583204bd643a13b292e845a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eebd08cb_53b16425",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 2
@@ -102,6 +120,24 @@
       "side": 1,
       "message": "I don\u0027t want to force it, but a static helper function is probably simpler/better at this point for something simple like that. In this specific case I\u0027d favor Prathmesh opinion on this and will ask you to change it then :)\n\nI must say I wonder what the compiled code looks like, and how easy this is to run / step into with a debugger.",
       "parentUuid": "2ec1e019_b9d4cd09",
+      "revId": "2e8ddc214b79168c583204bd643a13b292e845a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ec1e019_19940131",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-05T05:58:07Z",
+      "side": 1,
+      "message": "Will do :)\nThe compiled code is exactly the same for the lambda; stepping through the debugger is also OK (at least in a good IDE, e.g. Visual Studio) - it just steps into the lambda call",
+      "parentUuid": "ce304415_82b1fa28",
       "revId": "2e8ddc214b79168c583204bd643a13b292e845a0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
