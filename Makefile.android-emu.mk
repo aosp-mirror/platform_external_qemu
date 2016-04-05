@@ -55,8 +55,10 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SRC_FILES := \
     android/base/async/AsyncReader.cpp \
+    android/base/async/AsyncSocketServer.cpp \
     android/base/async/AsyncWriter.cpp \
     android/base/async/Looper.cpp \
+    android/base/async/ScopedSocketWatch.cpp \
     android/base/async/ThreadLooper.cpp \
     android/base/containers/PodVector.cpp \
     android/base/containers/PointerSet.cpp \
@@ -224,6 +226,8 @@ LOCAL_SRC_FILES := \
     android/emulation/qemud/android_qemud_service.cpp \
     android/emulation/qemud/android_qemud_sink.cpp \
     android/emulation/serial_line.cpp \
+    android/emulation/VmLock.cpp \
+    android/emulation/vm_lock.cpp \
     android/emulator-window.c \
     android/filesystems/ext4_resize.cpp \
     android/filesystems/ext4_utils.cpp \
@@ -366,7 +370,10 @@ LOCAL_LDLIBS += \
 
 LOCAL_SRC_FILES := \
   android/avd/util_unittest.cpp \
+  android/base/async/Looper_unittest.cpp \
+  android/base/async/AsyncSocketServer_unittest.cpp \
   android/base/async/RecurrentTask_unittest.cpp \
+  android/base/async/ScopedSocketWatch_unittest.cpp \
   android/base/containers/CircularBuffer_unittest.cpp \
   android/base/containers/HashUtils_unittest.cpp \
   android/base/containers/PodVector_unittest.cpp \
@@ -390,6 +397,7 @@ LOCAL_SRC_FILES := \
   android/base/Optional_unittest.cpp \
   android/base/sockets/ScopedSocket_unittest.cpp \
   android/base/sockets/SocketDrainer_unittest.cpp \
+  android/base/sockets/SocketUtils_unittest.cpp \
   android/base/sockets/SocketWaiter_unittest.cpp \
   android/base/StringFormat_unittest.cpp \
   android/base/StringView_unittest.cpp \
@@ -416,6 +424,8 @@ LOCAL_SRC_FILES := \
   android/emulation/ParameterList_unittest.cpp \
   android/emulation/serial_line_unittest.cpp \
   android/emulation/testing/TestAndroidPipeDevice.cpp \
+  android/emulation/VmLock_unittest.cpp \
+  android/emulation/vm_lock_unittest.cpp \
   android/error-messages_unittest.cpp \
   android/filesystems/ext4_utils_unittest.cpp \
   android/filesystems/fstab_parser_unittest.cpp \
