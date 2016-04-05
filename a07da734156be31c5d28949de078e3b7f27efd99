@@ -16,6 +16,24 @@
       "revId": "a07da734156be31c5d28949de078e3b7f27efd99",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ea2ccbd_06ce5eaa",
+        "filename": "android/constants.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-05T21:28:00Z",
+      "side": 1,
+      "message": "Good catch, will fix.",
+      "parentUuid": "ce304415_c5c78cba",
+      "revId": "a07da734156be31c5d28949de078e3b7f27efd99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
