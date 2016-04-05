@@ -93,6 +93,30 @@
       "revId": "a0aad4a372df39464e2dab9f257e6c2c48b1d46f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ea2ccbd_4ff6b9ec",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 805,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2016-04-05T23:01:00Z",
+      "side": 1,
+      "message": "Something like this:\n\nQObject::connect(window()-\u003ewindowHandle(), \u0026QWindow::screenChanged, this, \u0026EmulatorQtWindow::slot_screenChanged);\nQObject::connect(qApp-\u003edesktop(), \u0026QDesktopWidget::screenCountChanged, this, \u0026EmulatorQtWindow::slot_screenChanged);\n\nAnd then:\n\nvoid EmulatorQtWindow::slot_screenChanged()\n\nI believe the SIGNAL and SLOT macros are only used for passing the arguments, which we don\u0027t need here.",
+      "parentUuid": "8ea2ccbd_4f759995",
+      "range": {
+        "startLine": 797,
+        "startChar": 0,
+        "endLine": 805,
+        "endChar": 1
+      },
+      "revId": "a0aad4a372df39464e2dab9f257e6c2c48b1d46f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
