@@ -16,6 +16,24 @@
       "revId": "c238b292960b4ab8e5f59a7347b0cb41ff5c0109",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce304415_a5cb686c",
+        "filename": "android/emulation/VmLock.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-05T10:04:24Z",
+      "side": 1,
+      "message": "Done. Thanks :)",
+      "parentUuid": "2ec1e019_a0f3404b",
+      "revId": "c238b292960b4ab8e5f59a7347b0cb41ff5c0109",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
