@@ -239,6 +239,7 @@ char* additional_kernel_params = NULL;
 extern char* op_http_proxy;
 extern char* android_op_ports;
 extern int android_op_ports_numbers[2];
+extern char* android_op_report_console;
 static const char* android_hw_file = NULL;
 #endif  // USE_ANDROID_EMU
 #endif  // CONFIG_ANDROID
@@ -4134,6 +4135,9 @@ int run_qemu_main(int argc, const char **argv)
                                                 &android_op_ports_numbers[1])) {
                     return 1;
                 }
+                break;
+            case QEMU_OPTION_android_report_console:
+                android_op_report_console = (char*)optarg;
                 break;
 
 #endif  // USE_ANDROID_EMU

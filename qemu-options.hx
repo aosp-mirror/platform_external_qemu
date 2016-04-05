@@ -3440,6 +3440,15 @@ STEXI
 TCP ports used for the emulator instance and adb bridge
 ETEXI
 
+DEF("android-report-console", HAS_ARG, QEMU_OPTION_android_report_console, \
+    "-android-report-console <socket>"
+    " report console port to remote socket\n", QEMU_ARCH_ALL)
+STEXI
+@item -android-report-console @var{socket}
+@findex -android-report-console
+Report console port to remote socket
+ETEXI
+
 DEF("http-proxy", HAS_ARG, QEMU_OPTION_http_proxy,
     "-http-proxy <proxy> make TCP connections through a HTTP/HTTPS proxy\n", QEMU_ARCH_ALL)
 STEXI
