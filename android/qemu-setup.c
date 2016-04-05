@@ -272,6 +272,7 @@ static bool setup_console_and_adb_ports(int console_port,
                                         int adb_port,
                                         bool legacy_adb,
                                         const AndroidConsoleAgents* agents) {
+    bool register_adb_service = false;
     // The guest IP that ADB listens to in legacy mode.
     uint32_t guest_ip;
     inet_strtoip("10.0.2.15", &guest_ip);
@@ -282,14 +283,19 @@ static bool setup_console_and_adb_ports(int console_port,
         if (adb_server_init(adb_port) < 0) {
             return false;
         }
+        register_adb_service = true;
     }
     if (qemu_android_console_start(console_port, agents) < 0) {
         if (legacy_adb) {
             agents->net->slirpUnredir(false, adb_port);
         } else {
+            register_adb_service = false;
             adb_server_undo_init();
         }
         return false;
+    }
+    if (register_adb_service) {
+        android_adb_service_init();
     }
     return true;
 }
