@@ -20,9 +20,54 @@
 namespace android {
 namespace base {
 
+TEST(Optional, TypeProperties) {
+    // Making sure optional has the correct alignment and doesn't waste too much
+    // space
+
+    static_assert(sizeof(Optional<bool>) == 2, "bad Optional<bool> size");
+    static_assert(std::alignment_of<Optional<bool>>::value ==
+                  std::alignment_of<bool>::value,
+                  "bad Optional<bool> alignment");
+
+    static_assert(sizeof(Optional<char>) == 2, "bad Optional<char> size");
+    static_assert(std::alignment_of<Optional<char>>::value ==
+                  std::alignment_of<char>::value,
+                  "bad Optional<char> alignment");
+
+    static_assert(sizeof(Optional<int16_t>) == 4, "bad Optional<int16_t> size");
+    static_assert(std::alignment_of<Optional<int16_t>>::value ==
+                  std::alignment_of<int16_t>::value,
+                  "bad Optional<int16_t> alignment");
+
+    static_assert(sizeof(Optional<int32_t>) == 8, "bad Optional<int32_t> size");
+    static_assert(std::alignment_of<Optional<int32_t>>::value ==
+                  std::alignment_of<int32_t>::value,
+                  "bad Optional<int32_t> alignment");
+
+    static_assert(sizeof(Optional<int64_t>) == 16,
+                  "bad Optional<int64_t> size");
+    static_assert(std::alignment_of<Optional<int64_t>>::value ==
+                  std::alignment_of<int64_t>::value,
+                  "bad Optional<int64_t> alignment");
+
+    struct S128 {
+        int64_t data[2];
+    };
+
+    static_assert(sizeof(Optional<S128>) == 3*sizeof(int64_t),
+                  "bad Optional<S128> size");
+    static_assert(std::alignment_of<Optional<S128>>::value ==
+                  std::alignment_of<S128>::value,
+                  "bad Optional<S128> alignment");
+}
+
 TEST(Optional, ConstructFromValue) {
     {
         Optional<int> o;
+        EXPECT_FALSE(o);
+    }
+    {
+        Optional<int> o = {};
         EXPECT_FALSE(o);
     }
     {
@@ -31,6 +76,12 @@ TEST(Optional, ConstructFromValue) {
     }
     {
         Optional<int> o(1);
+        EXPECT_TRUE(o);
+        EXPECT_EQ(1, *o);
+    }
+    {
+        // check the std::decay<> constructor
+        Optional<int> o = static_cast<const short&>(1);
         EXPECT_TRUE(o);
         EXPECT_EQ(1, *o);
     }
@@ -134,6 +185,14 @@ TEST(Optional, Assign) {
         o = o3;
         EXPECT_TRUE(o);
         EXPECT_EQ(200, *o);
+
+        o = {};
+        EXPECT_FALSE(o);
+
+        // check the std::decay<> assignment
+        o = static_cast<const short&>(1);
+        EXPECT_TRUE(o);
+        EXPECT_EQ(1, *o);
     }
 }
 
@@ -153,6 +212,7 @@ TEST(Optional, MakeOptional) {
         EXPECT_EQ((std::vector<char>{'1', '2'}), *o);
     }
     {
+        // check std::decay<> in the factory function
         auto o = makeOptional("String");
         static_assert(std::is_same<decltype(o), Optional<const char*>>::value,
                       "Bad type deduction in makeOptional()");
@@ -290,9 +350,9 @@ TEST(Optional, CompareLess) {
     EXPECT_TRUE(kNullopt < makeOptional(2));
     EXPECT_TRUE(Optional<int>() < makeOptional(2));
     EXPECT_TRUE(Optional<int>() < 2);
-    EXPECT_FALSE(makeOptional(1) < kNullopt);
-    EXPECT_FALSE(makeOptional(1) < Optional<int>());
-    EXPECT_FALSE(1 < Optional<int>());
+    EXPECT_FALSE(makeOptional(2) < kNullopt);
+    EXPECT_FALSE(makeOptional(2) < Optional<int>());
+    EXPECT_FALSE(2 < Optional<int>());
 
     EXPECT_FALSE(kNullopt < Optional<int>());
     EXPECT_FALSE(Optional<int>() < kNullopt);
