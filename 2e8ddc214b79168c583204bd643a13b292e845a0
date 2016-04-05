@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "4ee0d4e0_7e0ab104",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-05T05:54:34Z",
+      "side": 1,
+      "message": "Makes sense, but I\u0027d recommend adding this to the comment above, so that this doesn\u0027t get \"optimized\" out by another maintainer in the future :)",
+      "parentUuid": "2ec1e019_99c6b163",
+      "revId": "2e8ddc214b79168c583204bd643a13b292e845a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eebd08cb_53b16425",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 2
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "NP\nI\u0027m curious if you want me to get rid of this in favor of a named function - that\u0027s what Prathmesh prefers. I promised to follow the advice from the next reviewer :)",
       "parentUuid": "eebd08cb_53b16425",
+      "revId": "2e8ddc214b79168c583204bd643a13b292e845a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce304415_82b1fa28",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-05T05:54:34Z",
+      "side": 1,
+      "message": "I don\u0027t want to force it, but a static helper function is probably simpler/better at this point for something simple like that. In this specific case I\u0027d favor Prathmesh opinion on this and will ask you to change it then :)\n\nI must say I wonder what the compiled code looks like, and how easy this is to run / step into with a debugger.",
+      "parentUuid": "2ec1e019_b9d4cd09",
       "revId": "2e8ddc214b79168c583204bd643a13b292e845a0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
