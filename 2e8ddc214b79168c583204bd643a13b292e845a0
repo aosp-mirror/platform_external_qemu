@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "2ec1e019_99c6b163",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-05T05:44:55Z",
+      "side": 1,
+      "message": "just to make sure the type is stashed next to the code - if some later wants to detect the Wine version, it would be a simple change with no Googling\ne.g., having exported cdecl functions isn\u0027t very common in Windows world, so that might be missed etc",
+      "parentUuid": "ce304415_22bc6efe",
+      "revId": "2e8ddc214b79168c583204bd643a13b292e845a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eebd08cb_53b16425",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-04-05T05:41:11Z",
       "side": 1,
       "message": "I must admit it took me some time to understand why you\u0027re using a closure and seemingly immediately running it, instead of just running this code. Turns out this is because the result is stored in a static local variable that is only initialized once (and thus further invokations of the function will return the cached value). Interesting technique, thanks :)",
+      "revId": "2e8ddc214b79168c583204bd643a13b292e845a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ec1e019_b9d4cd09",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-05T05:44:55Z",
+      "side": 1,
+      "message": "NP\nI\u0027m curious if you want me to get rid of this in favor of a named function - that\u0027s what Prathmesh prefers. I promised to follow the advice from the next reviewer :)",
+      "parentUuid": "eebd08cb_53b16425",
       "revId": "2e8ddc214b79168c583204bd643a13b292e845a0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
