@@ -42,6 +42,7 @@ AngleInputWidget::AngleInputWidget(QWidget* parent) :
     // Set up validators for the editors.
     setMinValue(-180.0);
     setMaxValue(180.0);
+    mDecimalDegreeValidator.setNotation(QDoubleValidator::StandardNotation);
     mDecimalDegreeValidator.setDecimals(100);
     mMinValidator.setBottom(0);
     mMinValidator.setTop(59);
