@@ -133,6 +133,9 @@ TEST(EmuglConfig, init) {
         EXPECT_STREQ("vendor", config.backend);
         EXPECT_STREQ("GPU emulation enabled using 'vendor' mode",
                      config.status);
+        emuglConfig_setupEnv(&config);
+        EXPECT_STREQ("<gles2_only_backend>",
+                     System::get()->envGet("ANDROID_GLESv1_LIB").c_str());
     }
 
     {
@@ -158,8 +161,6 @@ TEST(EmuglConfig, init) {
                 &config, true, "guest", "auto", 0, false, false, false));
         EXPECT_TRUE(config.enabled);
         EXPECT_STREQ("guest", config.backend);
-        EXPECT_STREQ("GPU emulation enabled using 'guest' mode",
-                     config.status);
     }
 
     {
@@ -174,9 +175,7 @@ TEST(EmuglConfig, init) {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
                 &config, true, "host", "guest", 0, false, false, false));
-        EXPECT_TRUE(config.enabled);
-        EXPECT_STREQ("guest", config.backend);
-        EXPECT_STREQ("GPU emulation enabled using 'guest' mode", config.status);
+        EXPECT_FALSE(config.enabled);
     }
 }
 
