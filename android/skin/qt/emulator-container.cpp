@@ -40,14 +40,11 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
 
 #ifdef __APPLE__
     // Digging into the Qt source code reveals that if the above flags are set
-    // on OSX, the
-    // created window will be given a style mask that removes the resize handles
-    // from the
-    // window. The hint below is the specific customization flag that ensures
-    // the window
-    // will have resize handles. So, we add the button for now, then immediately
-    // disable
-    // it when the window is first shown.
+    // on OSX, the created window will be given a style mask that removes the
+    // resize handles from the window. The hint below is the specific
+    // customization flag that ensures the window will have resize handles.
+    // So, we add the button for now, then immediately disable it when the
+    // window is first shown.
     setWindowFlags(this->windowFlags() | Qt::WindowMaximizeButtonHint);
 
     // On OS X the native scrollbars disappear when not in use which
@@ -162,6 +159,12 @@ void EmulatorContainer::changeEvent(QEvent* event) {
     if (event->type() == QEvent::WindowStateChange) {
         if (windowState() & Qt::WindowMaximized) {
             showNormal();
+        } else if (windowState() & Qt::WindowMinimized) {
+            // In case the window was minimized without pressing the toolbar's
+            // minimize button (which is possible on some window managers),
+            // remember to hide the toolbar (which will also hide the extended
+            // window, if it exists).
+            mEmulatorWindow->toolWindow()->hide();
         }
     }
 }
@@ -172,10 +175,6 @@ void EmulatorContainer::closeEvent(QCloseEvent* event) {
 
 void EmulatorContainer::focusInEvent(QFocusEvent* event) {
     mEmulatorWindow->toolWindow()->raise();
-}
-
-void EmulatorContainer::hideEvent(QHideEvent* event) {
-    mEmulatorWindow->toolWindow()->hide();
 }
 
 void EmulatorContainer::keyPressEvent(QKeyEvent* event) {
@@ -212,9 +211,48 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
     WId wid = effectiveWinId();
     wid = (WId)getNSWindow((void*)wid);
     nsWindowHideWindowButtons((void*)wid);
-#endif
+#endif // __APPLE__
 
-    mEmulatorWindow->toolWindow()->show();
+    // showEvent() gets called when the emulator is minimized because we are
+    // calling showMinimized(), which *technically* is a show event. We only
+    // want to re-show the toolbar when we are transitioning to a not-minimized
+    // state. However, we must do it after changing flags on Linux.
+    if (!(windowState() & Qt::WindowMinimized)) {
+// As seen below in showMinimized(), we need to remove the minimize button on
+// Linux when the window is re-shown. We know this show event is from being
+// un-minimized because the minimized button flag is present.
+#ifdef __linux__
+        Qt::WindowFlags flags = windowFlags();
+        if (flags & Qt::WindowMinimizeButtonHint) {
+            setWindowFlags(flags & ~Qt::WindowMinimizeButtonHint);
+
+            // Changing window flags requires re-showing this window to ensure
+            // the flags are appropriately changed.
+            showNormal();
+
+            // The subwindow won't redraw until the guest screen changes, which
+            // may not happen for a minute (when the clock changes), so force a
+            // redraw after re-showing the window.
+            SkinEvent* event = new SkinEvent();
+            event->type = kEventForceRedraw;
+            mEmulatorWindow->queueEvent(event);
+        }
+#endif // __linux__
+
+        mEmulatorWindow->toolWindow()->show();
+        mEmulatorWindow->toolWindow()->dockMainWindow();
+    }
+}
+
+void EmulatorContainer::showMinimized() {
+// Some Linux window managers (specifically, Compiz, which is the default
+// Ubuntu window manager) will not allow minimizing unless the minimize
+// button is actually there! So, we re-add the button, minimize the window,
+// and then remove the button when it gets reshown.
+#ifdef __linux__
+    setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint);
+#endif // __linux__
+    QScrollArea::showMinimized();
 }
 
 void EmulatorContainer::stopResizeTimer() {

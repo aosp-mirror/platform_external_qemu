@@ -244,9 +244,8 @@ void ToolWindow::hideEvent(QHideEvent*) {
 
 void ToolWindow::show()
 {
-    dockMainWindow();
-    setFixedSize(size());
     QFrame::show();
+    setFixedSize(size());
 
     if (extendedWindow) {
         extendedWindow->show();
@@ -615,9 +614,9 @@ void ToolWindow::on_home_button_released()
 
 void ToolWindow::on_minimize_button_clicked()
 {
-    if (extendedWindow) {
-        extendedWindow->hide();
-    }
+    // showMinimized() on OSX will put the toolbar in the minimized state,
+    // which is undesired. We only want the main window to minimize, so
+    // hide it instead.
     this->hide();
     emulator_window->showMinimized();
 }
