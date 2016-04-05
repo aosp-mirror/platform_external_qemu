@@ -9,6 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include "android/globals.h"
+
 #include "android/skin/file.h"
 
 #include "android/skin/keycode.h"
@@ -92,7 +94,7 @@ static int skin_display_init_from(SkinDisplay* display,
     display->rect.size.w = aconfig_int(node, "width", 0);
     display->rect.size.h = aconfig_int(node, "height", 0);
     display->rotation    = aconfig_unsigned(node, "rotation", SKIN_ROTATION_0);
-    display->bpp         = aconfig_int(node, "bpp", 16);
+    display->bpp         = aconfig_int(node, "bpp", android_hw->hw_lcd_depth);
 
     display->valid = ( display->rect.size.w > 0 && display->rect.size.h > 0 );
     display->framebuffer_funcs = fb_funcs;
