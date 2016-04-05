@@ -382,6 +382,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
                                                  legacy_adb, agents)) {
                     continue;
                 }
+                android_adb_service_init();
 
                 D( "control console listening on port %d, ADB on port %d", base_port, adb_port );
                 success = 1;
