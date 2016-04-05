@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce304415_22bc6efe",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-05T05:41:11Z",
+      "side": 1,
+      "message": "just curious, but is there any specific reason for this typedef and the casting below. It looks like just checking for the existence of the function should be enough. Did you try to run it in a previous iteration.",
+      "revId": "2e8ddc214b79168c583204bd643a13b292e845a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eebd08cb_53b16425",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-05T05:41:11Z",
+      "side": 1,
+      "message": "I must admit it took me some time to understand why you\u0027re using a closure and seemingly immediately running it, instead of just running this code. Turns out this is because the result is stored in a static local variable that is only initialized once (and thus further invokations of the function will return the cached value). Interesting technique, thanks :)",
+      "revId": "2e8ddc214b79168c583204bd643a13b292e845a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
