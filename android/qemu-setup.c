@@ -372,12 +372,6 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
             }
         }
 
-        if (android_op_report_console) {
-            if (report_console(android_op_report_console, base_port) < 0) {
-                return false;
-            }
-        }
-
         /* Save base port. */
         android_base_port = base_port;
 
@@ -406,6 +400,13 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents) {
             socket_close(s);
         }
     }
+
+    if (android_op_report_console) {
+        if (report_console(android_op_report_console, android_base_port) < 0) {
+            return false;
+        }
+    }
+
 
     agents->telephony->initModem(android_base_port);
 
