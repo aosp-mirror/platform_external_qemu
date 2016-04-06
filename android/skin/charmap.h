@@ -51,9 +51,6 @@ void kcm_extract_charmap_name(const char* kcm_file_path,
                               char* charmap_name,
                               int max_len);
 
-/* Gets a pointer to the default hard-coded charmap */
-const SkinCharmap* android_get_default_charmap(void);
-
 /* Parse a charmap file and add it to our list.
  * Key charmap array always contains two maps: one for qwerty, and
  * another for qwerty2 keyboard layout. However, a custom layout can
@@ -96,7 +93,3 @@ skin_charmap_reverse_map_unicode(const SkinCharmap* cmap,
  * Otherwise, return a pointer to the default charmap.
  */
 const SkinCharmap* skin_charmap_get(void);
-
-/* Return the name of the charmap to be used. Same as
- * skin_charmap_get()->name */
-const char* skin_charmap_get_name(void);

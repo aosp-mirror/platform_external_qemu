@@ -394,13 +394,6 @@ trackball_init(TrackBall  ball, int  diameter, int  ring,
     }
 }
 
-static int
-trackball_contains( TrackBall  ball, int  x, int  y )
-{
-    return ( (unsigned)(x) < (unsigned)ball->diameter &&
-             (unsigned)(y) < (unsigned)ball->diameter );
-}
-
 static void
 trackball_done( TrackBall  ball )
 {
@@ -605,12 +598,6 @@ skin_trackball_create  ( const SkinTrackBallParameters*  params )
                     params->event_func
                   );
     return  ball;
-}
-
-int
-skin_trackball_contains( SkinTrackBall*  ball, int  x, int  y )
-{
-    return  trackball_contains(ball, x, y);
 }
 
 int

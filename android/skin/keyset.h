@@ -90,12 +90,6 @@ extern SkinKeyCommand   skin_key_command_from_str( const char*  str, int  len );
 /* returns a short human-friendly description of the command */
 extern const char*      skin_key_command_description( SkinKeyCommand  cmd );
 
-/* returns the number of keysym string descriptors */
-extern int              skin_keysym_str_count( void );
-
-/* return the n-th keysym string descriptor */
-extern const char*      skin_keysym_str( int  index );
-
 /* create a new keyset from a configuration tree node */
 extern SkinKeyset*      skin_keyset_new ( AConfig*  root );
 extern SkinKeyset*      skin_keyset_new_from_text( const char*  text );

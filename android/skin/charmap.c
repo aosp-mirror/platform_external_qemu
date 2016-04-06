@@ -731,17 +731,7 @@ skin_charmap_reverse_map_unicode(const SkinCharmap* cmap,
     return 0;
 }
 
-const SkinCharmap* android_get_default_charmap(void)
-{
-    return &_default_charmap;
-}
-
 const SkinCharmap* skin_charmap_get(void)
 {
     return android_charmap;
-}
-
-const char* skin_charmap_get_name(void)
-{
-    return skin_charmap_get()->name;
 }

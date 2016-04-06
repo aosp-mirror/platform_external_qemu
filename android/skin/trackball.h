@@ -37,8 +37,6 @@ extern SkinTrackBall*  skin_trackball_create(
 
 extern void skin_trackball_rect(SkinTrackBall* ball, SkinRect* rect);
 
-extern int skin_trackball_contains(SkinTrackBall* ball, int x, int y);
-
 extern int skin_trackball_move(SkinTrackBall* ball, int dx, int dy);
 
 extern void skin_trackball_refresh(SkinTrackBall*  ball);

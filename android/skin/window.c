@@ -1813,25 +1813,6 @@ skin_window_redraw( SkinWindow*  window, SkinRect*  rect )
     }
 }
 
-void
-skin_window_get_display( SkinWindow*  window, ADisplayInfo  *info )
-{
-    ADisplay*  disp = window->layout.displays;
-
-    if (disp != NULL) {
-        info->width    = disp->datasize.w;
-        info->height   = disp->datasize.h;
-        info->rotation = disp->rotation;
-        info->data     = disp->data;
-    } else {
-        info->width    = 0;
-        info->height   = 0;
-        info->rotation = SKIN_ROTATION_0;
-        info->data     = NULL;
-    }
-}
-
-
 static void
 skin_window_map_to_scale( SkinWindow*  window, int  *x, int  *y )
 {

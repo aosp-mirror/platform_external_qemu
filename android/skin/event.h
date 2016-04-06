@@ -41,10 +41,7 @@ typedef enum {
 typedef enum {
     kMouseButtonLeft = 1,
     kMouseButtonSecondaryTouch,
-    kMouseButtonRight,
-    kMouseButtonCenter,
-    kMouseButtonScrollUp,
-    kMouseButtonScrollDown,
+    kMouseButtonRight
 } SkinMouseButtonType;
 
 typedef struct {

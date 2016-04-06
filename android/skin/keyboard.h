@@ -30,10 +30,7 @@ extern SkinKeyboard*  skin_keyboard_create(const char* kcm_file_path,
                                            int use_raw_keys,
                                            SkinKeyCodeFlushFunc keycode_flush);
 
-extern void           skin_keyboard_set_keyset( SkinKeyboard*  keyboard, SkinKeyset*  kset );
 extern SkinKeyset*    skin_keyboard_get_keyset( SkinKeyboard* keyboard);
-
-extern const char*    skin_keyboard_charmap_name( SkinKeyboard*  keyboard );
 
 extern void           skin_keyboard_free( SkinKeyboard*  keyboard );
 
@@ -46,9 +43,6 @@ extern void           skin_keyboard_on_command( SkinKeyboard*       keyboard,
 
 extern void           skin_keyboard_set_rotation( SkinKeyboard*     keyboard,
                                                   SkinRotation      rotation );
-
-extern SkinKeyCode    skin_keyboard_rotate_keycode( SkinKeyboard*   keyboard,
-                                                    SkinKeyCode  keycode );
 
 extern void           skin_keyboard_process_event( SkinKeyboard*  keyboard, SkinEvent*  ev, int  down );
 extern int            skin_keyboard_process_unicode_event( SkinKeyboard*  kb,  unsigned int  unicode, int  down );

@@ -249,18 +249,6 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
     }
 }
 
-void
-skin_keyboard_set_keyset( SkinKeyboard*  keyboard, SkinKeyset*  kset )
-{
-    if (kset == NULL)
-        return;
-    if (keyboard->kset && keyboard->kset != skin_keyset_get_default()) {
-        skin_keyset_free(keyboard->kset);
-    }
-    keyboard->kset = kset;
-}
-
-
 SkinKeyset*
 skin_keyboard_get_keyset( SkinKeyboard* keyboard ) {
     return keyboard->kset;
