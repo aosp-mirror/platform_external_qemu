@@ -100,7 +100,6 @@ typedef struct {
     void*         data;
 } ADisplayInfo;
 
-extern void             skin_window_get_display( SkinWindow*  window, ADisplayInfo  *info );
 extern void             skin_window_update_display( SkinWindow*  window, int  x, int  y, int  w, int  h );
 
 extern void skin_window_update_gpu_frame(SkinWindow* window, int w, int h, const void* pixels);

@@ -765,32 +765,6 @@ skin_image_h( SkinImage*  image )
     return  image ? image->h : 0;
 }
 
-int
-skin_image_org_w( SkinImage*  image )
-{
-    if (image) {
-        if (image->desc.rotation == SKIN_ROTATION_90 ||
-            image->desc.rotation == SKIN_ROTATION_270)
-            return image->h;
-        else
-            return image->w;
-    }
-    return 0;
-}
-
-int
-skin_image_org_h( SkinImage*  image )
-{
-    if (image) {
-        if (image->desc.rotation == SKIN_ROTATION_90 ||
-            image->desc.rotation == SKIN_ROTATION_270)
-            return image->w;
-        else
-            return image->h;
-    }
-    return 0;
-}
-
 SkinRotation
 skin_image_rot( SkinImage*  image )
 {

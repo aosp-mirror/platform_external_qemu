@@ -41,8 +41,6 @@ extern SkinImage*    SKIN_IMAGE_NONE;
 extern SkinSurface*  skin_image_surface( SkinImage*  image );
 extern int           skin_image_w      ( SkinImage*  image );
 extern int           skin_image_h      ( SkinImage*  image );
-extern int           skin_image_org_w  ( SkinImage*  image );
-extern int           skin_image_org_h  ( SkinImage*  image );
 extern SkinRotation  skin_image_rot    ( SkinImage*  image );
 
 /* get an image from the cache (load it from the file if necessary).
