@@ -390,7 +390,6 @@ LOCAL_SRC_FILES := \
   android/base/Log_unittest.cpp \
   android/base/memory/LazyInstance_unittest.cpp \
   android/base/memory/MallocUsableSize_unittest.cpp \
-  android/base/memory/ScopedPtr_unittest.cpp \
   android/base/memory/QSort_unittest.cpp \
   android/base/misc/HttpUtils_unittest.cpp \
   android/base/misc/StringUtils_unittest.cpp \
