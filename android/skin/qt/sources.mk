@@ -2,6 +2,7 @@
 
 ANDROID_SKIN_SOURCES += \
     android/skin/qt/event-qt.cpp \
+    android/skin/qt/init-qt.cpp \
     android/skin/qt/surface-qt.cpp \
     android/skin/qt/winsys-qt.cpp \
 

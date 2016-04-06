@@ -65,7 +65,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
                      tr(""),
                      QMessageBox::Ok,
                      this) {
-    Q_INIT_RESOURCE(resources);
     twInstance = this;
 
     // "Tool" type windows live in another layer on top of everything in OSX, which is undesirable
@@ -79,12 +78,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 #endif
     setWindowFlags(flag | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::Drawer);
     mToolsUi->setupUi(this);
-
-    // Initialize some values in the QCoreApplication so we can easily
-    // and consistently access QSettings to save and restore user settings
-    QCoreApplication::setOrganizationName(Ui::Settings::ORG_NAME);
-    QCoreApplication::setOrganizationDomain(Ui::Settings::ORG_DOMAIN);
-    QCoreApplication::setApplicationName(Ui::Settings::APP_NAME);
 
     mPushDialog.setWindowTitle(tr("File Copy"));
     mPushDialog.setLabelText(tr("Copying files..."));
