@@ -19,7 +19,7 @@
 #include "android/base/Uri.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/curl-support.h"
-#include "android/metrics/studio-helper.h"
+#include "android/metrics/studio-config.h"
 #include "android/utils/compiler.h"
 #include "android/utils/debug.h"
 #include "android/utils/uri.h"

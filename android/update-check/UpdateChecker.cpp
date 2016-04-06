@@ -18,7 +18,7 @@
 #include "android/base/threads/Async.h"
 #include "android/base/Uri.h"
 #include "android/curl-support.h"
-#include "android/metrics/studio-helper.h"
+#include "android/metrics/studio-config.h"
 #include "android/update-check/update_check.h"
 #include "android/update-check/VersionExtractor.h"
 #include "android/utils/debug.h"
