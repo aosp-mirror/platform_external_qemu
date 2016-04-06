@@ -1,4 +1,4 @@
-// Copyright 2015 The Android Open Source Project
+// Copyright 2015-2016 The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
@@ -12,8 +12,6 @@
 #include "android/qt/qt_setup.h"
 
 #include "android/base/system/System.h"
-#include "android/base/StringFormat.h"
-#include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
 #include "android/qt/qt_path.h"
 #include "android/utils/debug.h"
@@ -21,12 +19,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-using namespace android::base;
-
 bool androidQtSetupEnv(int bitness) {
     // Add <progdir>/<lib>/qt/lib if it exists to the library search path.
     std::string qtLibSubDir = androidQtGetLibraryDir(bitness);
-    System* system = System::get();
+    auto system = android::base::System::get();
 
     if (!system->pathIsDir(qtLibSubDir)) {
         LOG(ERROR) << "Qt library not found at " << qtLibSubDir.c_str();

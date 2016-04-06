@@ -25,7 +25,7 @@
 #include "android/crashreport/CrashSystem.h"
 #include "android/crashreport/ui/ConfirmDialog.h"
 #include "android/qt/qt_path.h"
-#include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/init-qt.h"
 #include "android/utils/debug.h"
 #include "android/version.h"
 
@@ -68,25 +68,6 @@ static bool displayConfirmDialog(
         return false;
     }
     return false;
-}
-
-static void InitQt(int argc, char** argv) {
-    Q_INIT_RESOURCE(resources);
-
-    // Give Qt the fonts from our resource file
-    QFontDatabase fontDb;
-    int fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto");
-    if (fontId < 0) {
-        D("Count not load font resource: \":/lib/fonts/Roboto");
-    }
-    fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto-Bold");
-    if (fontId < 0) {
-        D("Count not load font resource: \":/lib/fonts/Roboto-Bold");
-    }
-    fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto-Medium");
-    if (fontId < 0) {
-        D("Count not load font resource: \":/lib/fonts/Roboto-Medium");
-    }
 }
 
 /* Main routine */
@@ -151,18 +132,13 @@ int main(int argc, char** argv) {
     crashservice->retrieveDumpMessage();
     crashservice->collectProcessList();
 
-    QCoreApplication::setOrganizationName(Ui::Settings::ORG_NAME);
-    QCoreApplication::setOrganizationDomain(Ui::Settings::ORG_DOMAIN);
-    QCoreApplication::setApplicationName(Ui::Settings::APP_NAME);
+    QApplication app(argc, argv);
+    androidQtDefaultInit();
 
     QSettings settings;
     auto reportPreference =
         static_cast<Ui::Settings::CRASHREPORT_PREFERENCE_VALUE>(
             settings.value(Ui::Settings::CRASHREPORT_PREFERENCE, 0).toInt());
-
-    QApplication app(argc, argv);
-
-    InitQt(argc, argv);
 
     if (!displayConfirmDialog(crashservice.get(),
                               reportPreference,
