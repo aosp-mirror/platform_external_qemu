@@ -11,7 +11,6 @@ ANDROID_SKIN_QT_RESOURCES :=
 ANDROID_SKIN_SOURCES := \
     android/skin/charmap.c \
     android/skin/rect.c \
-    android/skin/region.c \
     android/skin/image.c \
     android/skin/trackball.c \
     android/skin/keyboard.c \
@@ -21,7 +20,6 @@ ANDROID_SKIN_SOURCES := \
     android/skin/file.c \
     android/skin/window.c \
     android/skin/resource.c \
-    android/skin/scaler.c \
     android/skin/ui.c \
 
 # enable MMX code for our skin scaler

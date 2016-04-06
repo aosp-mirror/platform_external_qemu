@@ -16,7 +16,6 @@
 #include "android/skin/charmap.h"
 #include "android/skin/event.h"
 #include "android/skin/image.h"
-#include "android/skin/scaler.h"
 #include "android/skin/winsys.h"
 #include "android/utils/debug.h"
 #include "android/utils/setenv.h"

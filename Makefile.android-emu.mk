@@ -563,7 +563,6 @@ LOCAL_SRC_FILES := \
     android/skin/keycode_unittest.cpp \
     android/skin/keycode-buffer_unittest.cpp \
     android/skin/rect_unittest.cpp \
-    android/skin/region_unittest.cpp \
 
 LOCAL_C_INCLUDES += \
     $(LIBXML2_INCLUDES) \

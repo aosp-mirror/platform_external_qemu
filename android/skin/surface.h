@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "android/skin/region.h"
+#include "android/skin/rect.h"
 #include <stdint.h>
 
 #ifdef __cplusplus
