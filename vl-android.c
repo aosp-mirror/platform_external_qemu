@@ -64,7 +64,7 @@
 #include "android/log-rotate.h"
 #include "android-qemu1-glue/looper-qemu.h"
 #include "android/metrics/metrics_reporter.h"
-#include "android/metrics/studio-helper.h"
+#include "android/metrics/studio-config.h"
 #include "android/multitouch-port.h"
 #include "android/multitouch-screen.h"
 #include "android/opengles.h"

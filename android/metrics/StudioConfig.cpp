@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/metrics/StudioHelper.h"
+#include "android/metrics/StudioConfig.h"
 
+#include "android/base/ArraySize.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/Version.h"
 #include "android/emulation/ConfigDirs.h"
-#include "android/metrics/studio-helper.h"
+#include "android/metrics/studio-config.h"
 #include "android/utils/debug.h"
 #include "android/utils/dirscanner.h"
 #include "android/utils/path.h"
@@ -54,47 +55,52 @@ static const char kAndroidStudioDirPreview[] = "Preview";
 static const char kAndroidStudioUuidHexPattern[] =
         "00000000-0000-0000-0000-000000000000";
 
+/***************************************************************************/
+
+namespace {
 // StudioXML describes the XML parameters we are seeking for in a
 // Studio preferences file. StudioXml structs are statically
 // defined and used in  android_studio_get_installation_id()
 // and android_studio_get_optins().
-typedef struct {
+struct StudioXml {
     const char* filename;
     const char* nodename;
     const char* propname;
     const char* propvalue;
     const char* keyname;
-} StudioXml;
+};
+}  // namespace
 
-/***************************************************************************/
+using android::base::PathUtils;
+using android::base::strDup;
+using android::base::System;
+using android::base::Version;
+using android::base::stringLiteralLength;
+using android::ConfigDirs;
 
-using namespace android;
-using namespace android::base;
+namespace android {
+namespace studio {
 
-// static
-const Version StudioHelper::extractAndroidStudioVersion(
-        const char* const dirName) {
+Version extractAndroidStudioVersion(const char* const dirName) {
     if (dirName == NULL) {
         return Version::invalid();
     }
 
     // get rid of kAndroidStudioDir prefix to get to version
-    if (strncmp(dirName,
-                kAndroidStudioDir,
-                sizeof(kAndroidStudioDir) - 1) != 0) {
+    if (strncmp(dirName, kAndroidStudioDir,
+                stringLiteralLength(kAndroidStudioDir)) != 0) {
         return Version::invalid();
     }
 
-    const char* cVersion = dirName + sizeof(kAndroidStudioDir) - 1;
+    const char* cVersion = dirName + stringLiteralLength(kAndroidStudioDir);
 
     // if this is a preview, get rid of kAndroidStudioDirPreview
     // prefix too and mark preview as build #1
     // (assume build #2 for releases)
     auto build = 2;
-    if (strncmp(cVersion,
-                kAndroidStudioDirPreview,
-                sizeof(kAndroidStudioDirPreview) - 1) == 0) {
-        cVersion += sizeof(kAndroidStudioDirPreview) - 1;
+    if (strncmp(cVersion, kAndroidStudioDirPreview,
+                stringLiteralLength(kAndroidStudioDirPreview)) == 0) {
+        cVersion += stringLiteralLength(kAndroidStudioDirPreview);
         build = 1;
     }
 
@@ -115,12 +121,10 @@ const Version StudioHelper::extractAndroidStudioVersion(
 
     return Version(rawVersion.component<Version::kMajor>(),
                    rawVersion.component<Version::kMinor>(),
-                   rawVersion.component<Version::kMicro>(),
-                   build);
+                   rawVersion.component<Version::kMicro>(), build);
 }
 
-// static
-std::string StudioHelper::latestAndroidStudioDir(const std::string& scanPath) {
+std::string latestAndroidStudioDir(const std::string& scanPath) {
     std::string latest_path;
 
     if (scanPath.empty()) {
@@ -154,16 +158,15 @@ std::string StudioHelper::latestAndroidStudioDir(const std::string& scanPath) {
         free(name);
         if (v.isValid() && latest_version < v) {
             latest_version = v;
-            latest_path = std::string(full_path);
+            latest_path = full_path;
         }
     }
 
     return latest_path;
 }
 
-// static
-std::string StudioHelper::pathToStudioXML(const std::string& studioPath,
-                                          const std::string& filename) {
+std::string pathToStudioXML(const std::string& studioPath,
+                            const std::string& filename) {
     if (studioPath.empty() || filename.empty())
         return std::string();
 
@@ -179,8 +182,7 @@ std::string StudioHelper::pathToStudioXML(const std::string& studioPath,
 }
 
 #ifdef _WIN32
-// static
-std::string StudioHelper::pathToStudioUUIDWindows() {
+std::string pathToStudioUUIDWindows() {
     System* sys = System::get();
     std::string appDataPath = sys->getAppDataDirectory();
 
@@ -260,7 +262,7 @@ static std::string parseStudioXML(const StudioXml* const match) {
         if (appDataPath.empty()) {
             return retval;
         }
-        studio = StudioHelper::latestAndroidStudioDir(appDataPath);
+        studio = latestAndroidStudioDir(appDataPath);
     }
     if (studio.empty()) {
         return retval;
@@ -268,7 +270,7 @@ static std::string parseStudioXML(const StudioXml* const match) {
 
     // Find match->filename xml file under .AndroidStudio
     std::string xml_path =
-            StudioHelper::pathToStudioXML(studio, std::string(match->filename));
+            pathToStudioXML(studio, match->filename);
     if (xml_path.empty()) {
         D("Failed to find %s in %s", match->filename, studio.c_str());
         return retval;
@@ -289,26 +291,26 @@ static std::string parseStudioXML(const StudioXml* const match) {
 #ifdef _WIN32
 static std::string android_studio_get_Windows_uuid() {
     // Appropriately sized container for UUID
-    std::string uuid_file_path = StudioHelper::pathToStudioUUIDWindows();
+    std::string uuid_file_path = pathToStudioUUIDWindows();
     std::string retval;
 
     // Read UUID from file
     std::ifstream uuid_file(uuid_file_path.c_str());
     if (uuid_file) {
-        std::string line;
-        std::getline(uuid_file, line);
-        retval = std::string(line.c_str());
+        std::getline(uuid_file, retval);
     }
 
     return retval;
 }
 #endif  // _WIN32
 
+}  // namespace studio
+}  // namespace android
+
 /*****************************************************************************/
 
 // Get the status of user opt-in to crash reporting in AndroidStudio
 // preferences. Returns 1 only if the user has opted-in, 0 otherwise.
-//
 int android_studio_get_optins() {
     int retval = 0;
 
@@ -320,7 +322,7 @@ int android_studio_get_optins() {
             .keyname = "allowed",  // assuming "true"/"false" string values
     };
 
-    std::string xmlVal = parseStudioXML(&optins);
+    std::string xmlVal = android::studio::parseStudioXML(&optins);
     if (xmlVal.empty()) {
         D("Failed to parse %s preferences file %s", kAndroidStudioDir,
           optins.filename);
@@ -351,7 +353,7 @@ static std::string android_studio_get_installation_id_legacy() {
             .propvalue = "installation.uid",
             .keyname = "value",  // assuming kAndroidStudioUuidHexPattern
     };
-    retval = parseStudioXML(&uuid);
+    retval = android::studio::parseStudioXML(&uuid);
 
     if (retval.empty()) {
         D("Failed to parse %s preferences file %s", kAndroidStudioDir,
@@ -361,7 +363,7 @@ static std::string android_studio_get_installation_id_legacy() {
     // In Microsoft Windows, getting Android Studio installation
     // ID requires searching in completely different path than the
     // rest of Studio preferences ...
-    retval = android_studio_get_Windows_uuid();
+    retval = android::studio::android_studio_get_Windows_uuid();
     if (retval.empty()) {
         D("Failed to parse %s preferences file %s", kAndroidStudioDir,
           kAndroidStudioUuid);
@@ -375,14 +377,16 @@ static std::string android_studio_get_installation_id_legacy() {
 // cannot be retrieved, a fixed dummy UUID will be returned.  Caller is
 // responsible for freeing returned string.
 char* android_studio_get_installation_id() {
-    std::string uuid_path =
-            PathUtils::join(ConfigDirs::getUserDirectory(), "uid.txt");
-    std::ifstream uuid_file(uuid_path.c_str());
-    if (uuid_file) {
-        std::string line;
-        std::getline(uuid_file, line);
-        if (!line.empty()) {
-            return strdup(line.c_str());
+    {
+        std::string uuid_path =
+                PathUtils::join(ConfigDirs::getUserDirectory(), "uid.txt");
+        std::ifstream uuid_file(uuid_path.c_str());
+        if (uuid_file) {
+            std::string line;
+            std::getline(uuid_file, line);
+            if (!line.empty()) {
+                return strDup(line);
+            }
         }
     }
 
@@ -390,9 +394,9 @@ char* android_studio_get_installation_id() {
     // locations.
     auto uuid = android_studio_get_installation_id_legacy();
     if (!uuid.empty()) {
-        return android::base::strDup(uuid);
+        return strDup(uuid);
     }
 
     D("Defaulting to zero installation ID");
-    return strdup(kAndroidStudioUuidHexPattern);
+    return strDup(kAndroidStudioUuidHexPattern);
 }

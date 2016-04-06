@@ -260,7 +260,7 @@ LOCAL_SRC_FILES := \
     android/metrics/IniFileAutoFlusher.cpp \
     android/metrics/metrics_reporter.cpp \
     android/metrics/metrics_reporter_toolbar.cpp \
-    android/metrics/StudioHelper.cpp \
+    android/metrics/StudioConfig.cpp \
     android/multitouch-port.c \
     android/multitouch-screen.c \
     android/network/constants.c \
@@ -441,7 +441,7 @@ LOCAL_SRC_FILES := \
   android/kernel/kernel_utils_unittest.cpp \
   android/metrics/metrics_reporter_unittest.cpp \
   android/metrics/metrics_reporter_toolbar_unittest.cpp \
-  android/metrics/StudioHelper_unittest.cpp \
+  android/metrics/StudioConfig_unittest.cpp \
   android/network/constants_unittest.cpp \
   android/opengl/EmuglBackendList_unittest.cpp \
   android/opengl/EmuglBackendScanner_unittest.cpp \
