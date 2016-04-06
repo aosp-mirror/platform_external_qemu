@@ -17,6 +17,7 @@
 #include "android/base/ArraySize.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"
+#include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/base/Version.h"
 #include "android/emulation/ConfigDirs.h"
@@ -27,6 +28,8 @@
 
 #include <libxml/tree.h>
 
+#include <algorithm>
+#include <iterator>
 #include <fstream>
 
 #include <stdlib.h>
@@ -73,6 +76,7 @@ struct StudioXml {
 
 using android::base::PathUtils;
 using android::base::strDup;
+using android::base::StringView;
 using android::base::System;
 using android::base::Version;
 using android::base::stringLiteralLength;
@@ -80,6 +84,10 @@ using android::ConfigDirs;
 
 namespace android {
 namespace studio {
+
+// Find latest studio preferences directory and return the
+// value of the xml entry described in |match|.
+static std::string parseStudioXML(const StudioXml* const match);
 
 Version extractAndroidStudioVersion(const char* const dirName) {
     if (dirName == NULL) {
@@ -201,6 +209,37 @@ std::string pathToStudioUUIDWindows() {
 }
 #endif
 
+UpdateChannel updateChannel() {
+    static const StudioXml channelInfo = {
+            .filename = "updates.xml",
+            .nodename = "option",
+            .propname = "name",
+            .propvalue = "UPDATE_CHANNEL_TYPE",
+            .keyname = "value",
+    };
+    const auto channelStr = parseStudioXML(&channelInfo);
+
+    static const struct NamedChannel {
+        StringView name;
+        UpdateChannel channel;
+    } channelNames[] = {
+            {"", UpdateChannel::Canary},  // this is the current default
+            {"eap", UpdateChannel::Canary},
+            {"release", UpdateChannel::Stable},
+            {"beta", UpdateChannel::Beta},
+            {"milestone", UpdateChannel::Dev}};
+
+    const auto channelIt =
+            std::find_if(std::begin(channelNames), std::end(channelNames),
+                         [&channelStr](const NamedChannel& channel) {
+                             return channel.name == channelStr;
+                         });
+    if (channelIt != std::end(channelNames)) {
+        return channelIt->channel;
+    }
+    return UpdateChannel::Unknown;
+}
+
 /*****************************************************************************/
 
 // Recurse through studio xml doc and return the value described in match
@@ -243,9 +282,6 @@ static std::string eval_studio_config_xml(xmlDocPtr doc,
     return retVal;
 }
 
-// Find latest studio preferences directory and return the
-// value of the xml entry described in |match|.
-//
 static std::string parseStudioXML(const StudioXml* const match) {
     std::string retval;
 

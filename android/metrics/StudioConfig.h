@@ -19,6 +19,15 @@
 namespace android {
 namespace studio {
 
+// The set of existing update channels, ordered from most to least stable.
+enum class UpdateChannel {
+    Stable,
+    Beta,
+    Dev,
+    Canary,
+    Unknown
+};
+
 // Extract the Android Studio version from directory name |dirName|.
 // dirName is expected to match the following pattern
 //            [.]AndroidStudio[Preview]X.Y
@@ -40,6 +49,10 @@ std::string latestAndroidStudioDir(const std::string& scanPath);
 // Returned value is a String
 std::string pathToStudioXML(const std::string& studioPath,
                             const std::string& filename);
+
+// Returns the currently selected update channel for the latest version
+// of Android Studio
+UpdateChannel updateChannel();
 
 }  // namespace studio
 }  // namespace android
