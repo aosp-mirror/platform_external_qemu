@@ -23,6 +23,7 @@
 #include "android/skin/winsys.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/emulator-qt-no-window.h"
+#include "android/skin/qt/init-qt.h"
 #include "android/skin/qt/QtLooper.h"
 #include "android/utils/setenv.h"
 #include "android/main-common-ui.h"
@@ -127,25 +128,6 @@ extern void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv) {
     // it doesn't wait the process will be left as a zombie and the finished
     // signal will not be emitted from QProcess.
     enableSigChild();
-
-    if (!no_window) {
-        // Give Qt the fonts from our resource file
-        QFontDatabase fontDb;
-        int fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto");
-        if (fontId < 0) {
-            D("Could not load font resource: \":/lib/fonts/Roboto");
-        }
-
-        fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto-Bold");
-        if (fontId < 0) {
-            D("Could not load font resource: \":/lib/fonts/Roboto-Bold");
-        }
-
-        fontId = fontDb.addApplicationFont(":/lib/fonts/Roboto-Medium");
-        if (fontId < 0) {
-            D("Could not load font resource: \":/lib/fonts/Roboto-Medium");
-        }
-    }
 
     android::base::ThreadLooper::setLooper(android::qt::createLooper());
 
@@ -373,6 +355,8 @@ extern void skin_winsys_start(bool no_window, bool raw_keys) {
     } else {
         g->app = new QApplication(g->argc, g->argv);
         g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
+        androidQtDefaultInit();
+
         EmulatorQtWindow::create();
 #ifdef __APPLE__
         // On OS X, Qt automatically generates an application menu with a "Quit"

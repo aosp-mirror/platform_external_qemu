@@ -36,8 +36,6 @@ ExtendedWindow::ExtendedWindow(
     mSizeTweaker(this),
     mSidebarButtons(this)
 {
-    Q_INIT_RESOURCE(resources);
-
     // "Tool" type windows live in another layer on top of everything in OSX, which is undesirable
     // because it means the extended window must be on top of the emulator window. However, on
     // Windows and Linux, "Tool" type windows are the only way to make a window that does not have
