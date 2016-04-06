@@ -114,7 +114,7 @@
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/metrics/metrics_reporter.h"
-#include "android/metrics/studio-helper.h"
+#include "android/metrics/studio-config.h"
 #include "android/update-check/update_check.h"
 #include "android/utils/async.h"
 #include "android/utils/debug.h"
