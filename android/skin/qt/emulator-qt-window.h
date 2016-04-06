@@ -207,7 +207,7 @@ public slots:
     void show();
     void showMinimized();
 
-    void slot_screenChanged(QScreen* screen);
+    void slot_screenChanged();
 
 private:
 
