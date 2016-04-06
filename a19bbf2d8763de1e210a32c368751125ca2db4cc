@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ea2ccbd_07109536",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 490,
+      "author": {
+        "id": 1078059
+      },
+      "writtenOn": "2016-04-06T00:02:14Z",
+      "side": 1,
+      "message": "Could you please put an explicit TODO here?\n\nTODO: uncomment after we upgrade to Qt 5.6",
+      "revId": "a19bbf2d8763de1e210a32c368751125ca2db4cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
