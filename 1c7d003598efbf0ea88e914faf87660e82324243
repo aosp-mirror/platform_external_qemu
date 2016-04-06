@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ea2ccbd_f929c67a",
+        "filename": "android/qt/qt_setup.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-06T20:34:28Z",
+      "side": 1,
+      "message": "how come we have both \"qt_setup.cpp\" and \"init-qt.cpp\"? what is the difference between these two files?",
+      "range": {
+        "startLine": 3,
+        "startChar": 3,
+        "endLine": 7,
+        "endChar": 22
+      },
+      "revId": "1c7d003598efbf0ea88e914faf87660e82324243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ea2ccbd_b94a1e4f",
+        "filename": "android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-06T20:34:28Z",
+      "side": 1,
+      "message": "I would move this portion into your new function",
+      "range": {
+        "startLine": 361,
+        "startChar": 0,
+        "endLine": 389,
+        "endChar": 6
+      },
+      "revId": "1c7d003598efbf0ea88e914faf87660e82324243",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
