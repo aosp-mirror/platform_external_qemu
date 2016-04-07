@@ -13,6 +13,7 @@
 
 #include "android/base/ArraySize.h"
 #include "android/base/Compiler.h"
+#include "android/base/containers/Lookup.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/Optional.h"
 #include "android/utils/debug.h"
@@ -21,20 +22,25 @@
 
 #include <libxml/tree.h>
 
-#include <errno.h>
-#include <stdlib.h>
-
+#include <algorithm>
+#include <iterator>
 #include <limits>
 #include <memory>
+#include <unordered_map>
+
+#include <errno.h>
+#include <stdlib.h>
 
 namespace android {
 namespace update_check {
 
+using android::base::findOrDefault;
 using android::base::Optional;
 using android::base::Version;
+using android::studio::UpdateChannel;
 
 const char* const VersionExtractor::kXmlNamespace =
-        "http://schemas.android.com/sdk/android/repository/12";
+        "http://schemas.android.com/sdk/android/repo/repository2/01";
 
 namespace {
 
@@ -49,10 +55,14 @@ struct DeleteXmlObject {
 }
 
 template <class T>
-using xmlAutoPtr = android::base::ScopedPtr<T, DeleteXmlObject>;
+using xmlAutoPtr = std::unique_ptr<T, DeleteXmlObject>;
 
 static Optional<Version::ComponentType> parseInt(const xmlChar* str,
                                                  const char* stopChars = "") {
+    if (!str) {
+        return {};
+    }
+
     char* end;
     errno = 0;
     const auto value = strtoul(reinterpret_cast<const char*>(str), &end, 10);
@@ -65,11 +75,27 @@ static Optional<Version::ComponentType> parseInt(const xmlChar* str,
     return static_cast<Version::ComponentType>(value);
 }
 
-static Version parseVersion(xmlNodePtr node, const xmlChar* ns) {
+static const xmlChar* getContent(xmlNodePtr node) {
+    // libxml2 has the following structure of the node content:
+    // <a>aaa</a> ->
+    //  xmlNode(name = "a", type=element_node)
+    //    -> first child xmlNode(name = "text", type=element_text)
+    //      ->content
+    if (node->type != XML_ELEMENT_NODE || !node->children ||
+        node->children->type != XML_TEXT_NODE || !node->children->content) {
+        return {};
+    }
+
+    return node->children->content;
+}
+
+static std::pair<Version, std::string> parseVersion(xmlNodePtr node) {
     Optional<Version::ComponentType> major, minor, micro, build;
     xmlNodePtr revNode = nullptr;
+    std::string channelName;
 
-    for (auto child = node->children; (!revNode || !build) && child;
+    for (auto child = node->children;
+         child && (!revNode || !build || channelName.empty());
          child = child->next) {
         if (child->type == XML_COMMENT_NODE && child->content) {
             // the comment with build number has a string "bid:<build>"
@@ -81,27 +107,25 @@ static Version parseVersion(xmlNodePtr node, const xmlChar* ns) {
         } else if (child->type == XML_ELEMENT_NODE &&
                    xmlStrcmp(child->name, BAD_CAST "revision") == 0) {
             revNode = child;
+        } else if (child->type == XML_ELEMENT_NODE &&
+                   xmlStrcmp(child->name, BAD_CAST "channelRef") == 0) {
+            const xmlAutoPtr<xmlChar> channelRef(
+                    xmlGetProp(child, BAD_CAST "ref"));
+            if (channelRef) {
+                channelName = std::string(
+                        reinterpret_cast<const char*>(channelRef.get()));
+            }
         }
     }
 
     if (!revNode) {
-        return Version::invalid();
+        return {};
     }
 
     for (xmlNodePtr verPart = revNode->children; verPart;
          verPart = verPart->next) {
-        // libxml2 has the following structure of the node content:
-        // <a>aaa</a> ->
-        //  xmlNode(name = "a", type=element_node)
-        //    -> first child xmlNode(name = "text", type=element_text)
-        //      ->content
-        if (verPart->type != XML_ELEMENT_NODE || !verPart->children ||
-            verPart->children->type != XML_TEXT_NODE ||
-            !verPart->children->content) {
-            continue;
-        }
-
-        if (const auto val = parseInt(verPart->children->content)) {
+        const auto content = getContent(verPart);
+        if (const auto val = parseInt(content)) {
             if (xmlStrcmp(verPart->name, BAD_CAST "major") == 0) {
                 major = val;
             } else if (xmlStrcmp(verPart->name, BAD_CAST "minor") == 0) {
@@ -113,10 +137,30 @@ static Version parseVersion(xmlNodePtr node, const xmlChar* ns) {
     }
 
     if (!major || !minor || !micro) {
-        return Version::invalid();
+        return {};
     }
 
-    return Version(*major, *minor, *micro, build.valueOr(0));
+    return {Version(*major, *minor, *micro, build.valueOr(0)),
+            std::move(channelName)};
+}
+
+static UpdateChannel parseUpdateChannelName(const xmlChar* name) {
+    static const struct NamedChannel {
+        const xmlChar* name;
+        UpdateChannel channel;
+    } channels[] = {{BAD_CAST "stable", UpdateChannel::Stable},
+                    {BAD_CAST "beta", UpdateChannel::Beta},
+                    {BAD_CAST "dev", UpdateChannel::Dev},
+                    {BAD_CAST "canary", UpdateChannel::Canary}};
+    const auto it = std::find_if(std::begin(channels), std::end(channels),
+                                 [name](const NamedChannel& nc) {
+                                     return xmlStrcmp(nc.name, name) == 0;
+                                 });
+    if (it == std::end(channels)) {
+        return UpdateChannel::Unknown;
+    }
+
+    return it->channel;
 }
 
 IVersionExtractor::Versions VersionExtractor::extractVersions(
@@ -135,30 +179,58 @@ IVersionExtractor::Versions VersionExtractor::extractVersions(
         return {};
     }
 
-    Version ver = Version::invalid();
+    std::unordered_map<std::string, UpdateChannel> channelMap;
+    Versions res;
 
     // iterate over all nodes in the document and find all <tool> ones
     for (xmlNodePtr node = root->children; node; node = node->next) {
         if (node->type != XML_ELEMENT_NODE) {
             continue;
         }
-        if (xmlStrcmp(node->name, BAD_CAST "tool") != 0) {
-            continue;
-        }
+        if (xmlStrcmp(node->name, BAD_CAST "channel") == 0) {
+            // <channel id="id">name</channel>
+            const auto channelName = getContent(node);
+            if (!channelName) {
+                continue;
+            }
+            const xmlAutoPtr<xmlChar> id(xmlGetProp(node, BAD_CAST "id"));
+            if (!id) {
+                continue;
+            }
+            const UpdateChannel channel = parseUpdateChannelName(channelName);
+            if (channel == UpdateChannel::Unknown) {
+                continue;
+            }
+            channelMap[std::string(reinterpret_cast<const char*>(id.get()))] =
+                    channel;
+        } else if (xmlStrcmp(node->name, BAD_CAST "remotePackage") == 0) {
+            // <remotePackage path="tools">
+            //  !version
+            //  !channel info
+            //  !build info
+            // </revotePachage>
+            xmlAutoPtr<xmlChar> pathVal(xmlGetProp(node, BAD_CAST "path"));
+            if (!pathVal || xmlStrcmp(pathVal.get(), BAD_CAST "tools") != 0) {
+                continue;
+            }
 
-        const Version nodeVer = parseVersion(node, root->ns->href);
-        if (nodeVer.isValid() && (!ver.isValid() || ver < nodeVer)) {
-            ver = nodeVer;
+            Version nodeVer;
+            std::string channelName;
+            std::tie(nodeVer, channelName) = parseVersion(node);
+            if (!nodeVer.isValid()) {
+                continue;
+            }
+
+            const auto channel = findOrDefault(channelMap, channelName,
+                                               UpdateChannel::Canary);
+            Version& existingVer = res[channel];
+            if (!existingVer.isValid() || existingVer < nodeVer) {
+                existingVer = nodeVer;
+            }
         }
     }
 
-    if (ver == Version::invalid()) {
-        return {};
-    }
-
-    // the old version of Repository.xml doesn't have any update channel info,
-    // so let's just return that we don't know it
-    return {{UpdateChannel::Unknown, ver}};
+    return res;
 }
 
 Version VersionExtractor::getCurrentVersion() const {
