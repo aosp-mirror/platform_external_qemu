@@ -13,6 +13,7 @@
 
 #include "android/base/threads/Thread.h"
 #include "android/base/Version.h"
+#include "android/update-check/IVersionExtractor.h"
 
 #include <memory>
 #include <string>
@@ -22,18 +23,10 @@ namespace android {
 namespace update_check {
 
 // Set of interfaces for the operations UpdateChecker performs:
-//  IVersionExtractor - extract emulator version from the xml manifest
 //  IDataLoader - download the xml manifest from the Web
 //  ITimeStorage - lock the file to store last update checking time,
 //                 save/load time from the file
 //  INewerVersionReporter - report to the user about available newer version
-
-class IVersionExtractor {
-public:
-    virtual ~IVersionExtractor() {}
-    virtual android::base::Version extractVersion(const std::string& data) const = 0;
-    virtual android::base::Version getCurrentVersion() const = 0;
-};
 
 class IDataLoader {
 public:

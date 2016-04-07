@@ -19,6 +19,7 @@
 #include "android/base/Uri.h"
 #include "android/curl-support.h"
 #include "android/metrics/studio-config.h"
+#include "android/metrics/StudioConfig.h"
 #include "android/update-check/update_check.h"
 #include "android/update-check/VersionExtractor.h"
 #include "android/utils/debug.h"
@@ -223,9 +224,18 @@ void UpdateChecker::asyncWorker() {
 }
 
 Version UpdateChecker::getLatestVersion() {
-    const std::string xml = mDataLoader->load(mCoreVersion);
-    const Version ver = mVersionExtractor->extractVersion(xml);
-    return ver;
+    const auto repositoryXml = mDataLoader->load(mCoreVersion);
+    const auto versions = mVersionExtractor->extractVersions(repositoryXml);
+    const auto updateChannel = android::studio::updateChannel();
+    auto verIt = versions.find(updateChannel);
+    if (verIt == versions.end()) {
+        verIt = versions.find(android::studio::UpdateChannel::Unknown);
+    }
+    if (verIt == versions.end()) {
+        return Version::invalid();
+    }
+
+    return verIt->second;
 }
 
 }  // namespace update_check
