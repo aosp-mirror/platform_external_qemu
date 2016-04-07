@@ -24,6 +24,7 @@ using android::base::StringFormat;
 char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    const char* targetArch,
                                    const char* kernelSerialPrefix,
+                                   AndroidGlesEmulationMode glesMode,
                                    bool is_qemu2) {
     android::ParameterList params;
     bool isX86 = !strcmp(targetArch, "x86");
@@ -62,6 +63,20 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     params.addIf("android.checkjni=1", !opts->no_jni);
     params.addIf("android.bootanim=0", opts->no_boot_anim);
+
+    // qemu.gles is used to pass the GPU emulation mode to the guest
+    // through kernel parameters. Note that the ro.opengles.version
+    // boot property must also be defined for |gles > 0|, but this
+    // is not handled here (see vl-android.c for QEMU1).
+    {
+        int gles;
+        switch (glesMode) {
+            case kAndroidGlesEmulationHost: gles = 1; break;
+            case kAndroidGlesEmulationGuest: gles = 2; break;
+            default: gles = 0;
+        }
+        params.addFormat("qemu.gles=%d", gles);
+    }
 
     if (opts->logcat) {
         std::string param = StringFormat("androidboot.logcat=%s", opts->logcat);

@@ -123,8 +123,17 @@ int main(int argc, char **argv) {
     }
 
     const char* serialPrefix = androidHwConfig_getKernelSerialPrefix(hw);
+    AndroidGlesEmulationMode glesMode = kAndroidGlesEmulationOff;
+    if (android_hw->hw_gpu_enabled) {
+        if (!strcmp(android_hw->hw_gpu_mode, "guest")) {
+            glesMode = kAndroidGlesEmulationGuest;
+        } else {
+            glesMode = kAndroidGlesEmulationHost;
+        }
+    }
+
     hw->kernel_parameters = emulator_getKernelParameters(
-            opts, kTargetArch, serialPrefix, false);
+            opts, kTargetArch, serialPrefix, glesMode, false);
 
     if (hw->hw_cpu_ncore > 1) {
         dwarning("Classic qemu does not support SMP. "
