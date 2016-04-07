@@ -33,6 +33,9 @@ public:
     static constexpr ComponentType kNone = static_cast<ComponentType>(-1);
 
     explicit Version(StringView ver);
+
+    constexpr Version();
+
     constexpr Version(ComponentType major,
                       ComponentType minor,
                       ComponentType micro,
@@ -64,6 +67,8 @@ private:
 };
 
 // all constexpr functions have to be defined in the header, just like templates
+
+constexpr Version::Version() : Version(kNone, kNone, kNone) {}
 
 constexpr Version::Version(ComponentType major,
                            ComponentType minor,
