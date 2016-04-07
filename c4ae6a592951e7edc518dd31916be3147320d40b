@@ -34,6 +34,24 @@
       "revId": "c4ae6a592951e7edc518dd31916be3147320d40b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ae20702e_dcd94115",
+        "filename": "android/metrics/StudioConfig.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-07T15:26:09Z",
+      "side": 1,
+      "message": "Ah, I see, thanks :)",
+      "parentUuid": "8ea2ccbd_46b55ff1",
+      "revId": "c4ae6a592951e7edc518dd31916be3147320d40b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
