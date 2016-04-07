@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "8ea2ccbd_1152e85a",
+        "filename": "android/base/containers/Lookup.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-07T21:35:00Z",
+      "side": 1,
+      "message": "multimap has the same interface, it just returns the first value for a key. I think having a more general interface would be useful here, it could even be a convenient way to find items in a string or a vector (with a specialization for containers that don\u0027t have a find method), perhaps with additional functions like findSequence and containsSequence.\n\nI don\u0027t feel very strongly about this though so if others are fine with this I won\u0027t push for it.",
+      "parentUuid": "8ea2ccbd_48fd6850",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 73
+      },
+      "revId": "78428f1aaca7780b40c706bd00458e230655a7b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8ea2ccbd_32bcd12b",
         "filename": "android/base/containers/Lookup.h",
         "patchSetId": 2
