@@ -37,6 +37,7 @@
 #include <time.h>
 
 using android::base::async;
+using android::base::Optional;
 using android::base::PathUtils;
 using android::base::ScopedCPtr;
 using android::base::StringView;
@@ -205,9 +206,9 @@ bool UpdateChecker::runAsyncCheck() {
 
 void UpdateChecker::asyncWorker() {
     Version current = mVersionExtractor->getCurrentVersion();
-    Version last = getLatestVersion();
+    const auto last = getLatestVersion();
 
-    if (!last.isValid()) {
+    if (!last) {
         // don't record the last check time if we were not able to retrieve
         // the last version - next time we may be more lucky
         dwarning(
@@ -219,21 +220,21 @@ void UpdateChecker::asyncWorker() {
 
     VERBOSE_PRINT(updater,
                   "UpdateCheck: current version '%s', last version '%s'",
-                  current.toString().c_str(), last.toString().c_str());
+                  current.toString().c_str(), last->first.toString().c_str());
 
-    if (current < last) {
-        mReporter->reportNewerVersion(current, last);
+    if (current < last->first) {
+        mReporter->reportNewerVersion(current, last->first);
     }
 
     // Update the last version check time
     mTimeStorage->setTime(System::get()->getUnixTime());
 }
 
-Version UpdateChecker::getLatestVersion() {
+Optional<UpdateChecker::VersionInfo> UpdateChecker::getLatestVersion() {
     const auto repositoryXml = mDataLoader->load(mCoreVersion);
     const auto versions = mVersionExtractor->extractVersions(repositoryXml);
     if (versions.empty()) {
-        return Version::invalid();
+        return {};
     }
 
     const auto updateChannel = android::studio::updateChannel();
@@ -244,10 +245,11 @@ Version UpdateChecker::getLatestVersion() {
     if (greaterIt == versions.begin()) {
         // even the first update channel in the list is greater than the
         // one from Android Studio settings
-        return Version::invalid();
+        return {};
     }
 
-    return std::prev(greaterIt)->second;
+    return std::make_pair(std::prev(greaterIt)->second,
+                          std::prev(greaterIt)->first);
 }
 
 }  // namespace update_check
