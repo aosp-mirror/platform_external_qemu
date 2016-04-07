@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e1af804_b7e26847",
+        "filename": "android/metrics/StudioConfig.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-07T07:24:56Z",
+      "side": 1,
+      "message": "nit: any specific reason not to write the simpler:\n\n  return std::hash(static_cast\u003cIntType\u003e(ch));\n\ninstead?",
+      "revId": "c4ae6a592951e7edc518dd31916be3147320d40b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
