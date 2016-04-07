@@ -56,7 +56,7 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->batteryPage->setBatteryAgent(agentPtr->battery);
     mExtendedUi->telephonyPage->setTelephonyAgent(agentPtr->telephony);
     mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
-    mExtendedUi->helpPage->initializeKeyboardShortcutList(shortcuts);
+    mExtendedUi->helpPage->initialize(shortcuts);
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->location_page->setLocationAgent(agentPtr->location);
 
