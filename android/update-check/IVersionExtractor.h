@@ -16,7 +16,7 @@
 
 #include "android/metrics/StudioConfig.h"
 
-#include <unordered_map>
+#include <map>
 
 namespace android {
 namespace update_check {
@@ -29,7 +29,7 @@ public:
     using UpdateChannel = android::studio::UpdateChannel;
     using Version = android::base::Version;
 
-    using Versions = std::unordered_map<UpdateChannel, Version>;
+    using Versions = std::map<UpdateChannel, Version>;
 
     // Returns the list of the versions by channel extracted from the |data|,
     // or empty collection if the data format is incorrect
