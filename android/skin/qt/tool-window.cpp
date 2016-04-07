@@ -76,7 +76,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 #else
     Qt::WindowFlags flag = Qt::Tool;
 #endif
-    setWindowFlags(flag | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::Drawer);
+    setWindowFlags(flag | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
     mToolsUi->setupUi(this);
 
     mPushDialog.setWindowTitle(tr("File Copy"));
