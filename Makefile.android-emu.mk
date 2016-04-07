@@ -378,6 +378,7 @@ LOCAL_SRC_FILES := \
   android/base/async/ScopedSocketWatch_unittest.cpp \
   android/base/containers/CircularBuffer_unittest.cpp \
   android/base/containers/HashUtils_unittest.cpp \
+  android/base/containers/Lookup_unittest.cpp \
   android/base/containers/PodVector_unittest.cpp \
   android/base/containers/PointerSet_unittest.cpp \
   android/base/containers/ScopedPointerSet_unittest.cpp \
