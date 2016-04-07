@@ -13,6 +13,7 @@
 
 #include "android/base/StringFormat.h"
 #include "android/emulation/ParameterList.h"
+#include "android/utils/debug.h"
 
 #include <memory>
 
@@ -25,25 +26,38 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    const char* kernelSerialPrefix,
                                    bool is_qemu2) {
     android::ParameterList params;
+    bool isX86 = !strcmp(targetArch, "x86");
+
+    // We always force qemu=1 when running inside QEMU.
+    params.add("qemu=1");
 
     params.add("androidboot.hardware=goldfish");
 
-    if (!strcmp(targetArch, "x86")) {
+    if (isX86) {
         params.add("clocksource=pit");
     }
 
+    int lastSerial = 0;
+
+    // The first virtual tty is reserved for receiving kernel messages.
+    params.addFormat("console=%s%d", kernelSerialPrefix, lastSerial++);
+
+    // The second virtual tty is reserved for the legacy QEMUD channel.
+    params.addFormat("android.qemud=%s%d", kernelSerialPrefix, lastSerial++);
+
     if (opts->shell || opts->logcat) {
-        // Technical note: The first tty is reserved for kernel logs,
-        // the second one is reserved for legacy QEMUD, so to get
-        // -shell or -logcat working, we need to setup a new virtual tty
-        // device (which is performed in main-qemu-parameters.cpp and
-        // tell the kernel to use it to open a console, which is performed
-        // here.
-        int shell_serial = 2;
-        std::string param = StringFormat("androidboot.console=%s%d",
-                                         kernelSerialPrefix,
-                                         shell_serial);
-        params.add(std::move(param));
+        // We need a new virtual tty to receive the logcat output and/or
+        // the root console. Note however that on QEMU1/x86, the virtual
+        // machine has a limited number of IRQs that doesn't allow more
+        // than 2 ttys to be used at the same time.
+        if (!isX86) {
+            params.addFormat("androidboot.console=%s%d", kernelSerialPrefix,
+                             lastSerial++);
+        } else {
+            dwarning("Sorry, but -logcat and -shell options are not "
+                     "implemented for x86 AVDs running in the classic "
+                     "emulator");
+        }
     }
 
     params.addIf("android.checkjni=1", !opts->no_jni);
@@ -61,15 +75,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     }
 
     if (opts->bootchart) {
-        std::string param =
-                StringFormat("androidboot.bootchart=%s", opts->bootchart);
-        params.add(std::move(param));
+        params.addFormat("androidboot.bootchart=%s", opts->bootchart);
     }
 
     if (opts->selinux) {
-        std::string param =
-                StringFormat("androidboot.selinux=%s", opts->selinux);
-        params.add(std::move(param));
+        params.addFormat("androidboot.selinux=%s", opts->selinux);
     }
 
     return params.toCStringCopy();

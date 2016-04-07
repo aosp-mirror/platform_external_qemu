@@ -3204,26 +3204,17 @@ int main(int argc, char **argv, char **envp)
         stralloc_add_str(kernel_params, " qemu.gles=0");
     }
 
-    /* We always force qemu=1 when running inside QEMU */
-    stralloc_add_str(kernel_params, " qemu=1");
-
     /* We always initialize the first serial port for the android-kmsg
      * character device (used to send kernel messages) */
     if (!serial_hds_add_at(0, "android-kmsg")) {
         return 1;
     }
-    stralloc_add_format(kernel_params,
-                        " console=%s0",
-                        kernelSerialDevicePrefix);
 
     /* We always initialize the second serial port for the android-qemud
      * character device as well */
     if (!serial_hds_add_at(1, "android-qemud")) {
         return 1;
     }
-    stralloc_add_format(kernel_params,
-                        " android.qemud=%s1",
-                        kernelSerialDevicePrefix);
 
     if (pid_file && qemu_create_pidfile(pid_file) != 0) {
         os_pidfile_error();
