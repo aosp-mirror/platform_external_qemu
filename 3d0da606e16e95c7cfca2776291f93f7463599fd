@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ea2ccbd_d9c5d0b2",
+        "filename": "android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-07T17:11:09Z",
+      "side": 1,
+      "message": "Nit: Looks like there\u0027s a mix of snake_case and camelCase in variable names, comparing this to lastSerial.",
+      "revId": "3d0da606e16e95c7cfca2776291f93f7463599fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ea2ccbd_f9ec141b",
+        "filename": "android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-07T17:11:09Z",
+      "side": 1,
+      "message": "Nice, no more hardcoded serials!",
+      "revId": "3d0da606e16e95c7cfca2776291f93f7463599fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
