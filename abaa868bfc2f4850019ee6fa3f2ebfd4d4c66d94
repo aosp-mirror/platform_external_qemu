@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ea2ccbd_1cba06e2",
+        "filename": "android/main-kernel-parameters.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-07T17:21:25Z",
+      "side": 1,
+      "message": "woo-hoo!",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 27
+      },
+      "revId": "abaa868bfc2f4850019ee6fa3f2ebfd4d4c66d94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
