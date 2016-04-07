@@ -92,12 +92,11 @@ SkinUI* skin_ui_create(SkinFile* layout_file,
                                         ui_funcs->keyboard_flush);
     ui->window = NULL;
 
-    skin_keyboard_enable(ui->keyboard, 1);
     skin_keyboard_on_command(ui->keyboard, _skin_ui_handle_key_command, ui);
 
     ui->window = skin_window_create(
             ui->layout, ui->ui_params.window_x, ui->ui_params.window_y,
-            0, use_emugl_subwindow, ui->ui_funcs->window_funcs);
+            use_emugl_subwindow, ui->ui_funcs->window_funcs);
     if (!ui->window) {
         skin_ui_free(ui);
         return NULL;

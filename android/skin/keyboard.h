@@ -34,9 +34,6 @@ extern SkinKeyset*    skin_keyboard_get_keyset( SkinKeyboard* keyboard);
 
 extern void           skin_keyboard_free( SkinKeyboard*  keyboard );
 
-extern void           skin_keyboard_enable( SkinKeyboard*  keyboard,
-                                            int            enabled );
-
 extern void           skin_keyboard_on_command( SkinKeyboard*       keyboard,
                                                 SkinKeyCommandFunc  cmd_func,
                                                 void*               cmd_opaque );
