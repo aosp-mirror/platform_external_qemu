@@ -28,6 +28,7 @@
 #include "android/version.h"
 
 #include <fstream>
+#include <iterator>
 #include <new>
 #include <string>
 
@@ -35,21 +36,8 @@
 #include <string.h>
 #include <time.h>
 
-static const char kDataFileName[] = ".emu-update-last-check";
-// TODO: kVersionUrl should not be fixed; XY in repository-XY.xml
-//       might change with studio updates irrelevant to the emulator
-static const char kVersionUrl[] =
-        "https://dl.google.com/android/repository/repository-12.xml";
-
-static const char kNewerVersionMessage[] =
-R"(Your emulator is out of date, please update by launching Android Studio:
- - Start Android Studio
- - Select menu "Tools > Android > SDK Manager"
- - Click "SDK Tools" tab
- - Check "Android SDK Tools" checkbox
- - Click "OK"
-)";
-
+using android::base::async;
+using android::base::PathUtils;
 using android::base::ScopedCPtr;
 using android::base::StringView;
 using android::base::System;
@@ -57,9 +45,24 @@ using android::base::Uri;
 using android::base::Version;
 using android::update_check::UpdateChecker;
 
+static const char kDataFileName[] = ".emu-update-last-check";
+// TODO: kVersionUrl should not be fixed; XY in repository-XY.xml
+//       might change with studio updates irrelevant to the emulator
+static constexpr StringView kVersionUrl =
+        "https://dl.google.com/android/repository/repository2-1.xml";
+
+static const char kNewerVersionMessage[] =
+        R"(Your emulator is out of date, please update by launching Android Studio:
+ - Start Android Studio
+ - Select menu "Tools > Android > SDK Manager"
+ - Click "SDK Tools" tab
+ - Check "Android SDK Tools" checkbox
+ - Click "OK"
+)";
+
 void android_checkForUpdates(const char* homePath, const char* coreVersion) {
     std::unique_ptr<UpdateChecker> checker(
-                new (std::nothrow) UpdateChecker(homePath, coreVersion));
+            new UpdateChecker(homePath, coreVersion));
 
     if (checker->init() && checker->needsCheck() && checker->runAsyncCheck()) {
         // checker will delete itself after the check in the worker thread
@@ -90,16 +93,15 @@ public:
         std::string xml;
         std::string url = kVersionUrl;
         if (version) {
-            const ScopedCPtr<char> id(
-                    android_studio_get_installation_id());
+            const ScopedCPtr<char> id(android_studio_get_installation_id());
             url += Uri::FormatEncodeArguments(
-                       "?tool=emulator&uid=%s&os=%s"
-                       "&version=" EMULATOR_VERSION_STRING "&coreVersion=%s",
-                       id.get(), toString(System::get()->getOsType()),
-                       version);
+                    "?tool=emulator&uid=%s&os=%s"
+                    "&version=" EMULATOR_VERSION_STRING "&coreVersion=%s",
+                    id.get(), toString(System::get()->getOsType()), version);
         }
         char* error = nullptr;
-        if (!curl_download(url.c_str(), nullptr, &curlWriteCallback, &xml, &error)) {
+        if (!curl_download(url.c_str(), nullptr, &curlWriteCallback, &xml,
+                           &error)) {
             dwarning("UpdateCheck: Failure: %s", error);
             ::free(error);
         }
@@ -109,10 +111,8 @@ public:
 
 class TimeStorage final : public ITimeStorage {
 public:
-    TimeStorage(const char* configPath) : mFileLock(NULL) {
-        mDataFileName =
-                android::base::PathUtils::addTrailingDirSeparator(configPath)
-                        .append(kDataFileName);
+    TimeStorage(const char* configPath) : mFileLock() {
+        mDataFileName = PathUtils::join(configPath, kDataFileName);
     }
 
     ~TimeStorage() {
@@ -193,11 +193,14 @@ bool UpdateChecker::init() {
 bool UpdateChecker::needsCheck() const {
     const time_t now = System::get()->getUnixTime();
     // Check only if the previous check was 4+ hours ago
-    return now - mTimeStorage->getTime() >= 4*60*60;
+    return now - mTimeStorage->getTime() >= 4 * 60 * 60;
 }
 
 bool UpdateChecker::runAsyncCheck() {
-    return android::base::async([this] { asyncWorker(); delete this; });
+    return async([this] {
+        asyncWorker();
+        delete this;
+    });
 }
 
 void UpdateChecker::asyncWorker() {
@@ -207,13 +210,16 @@ void UpdateChecker::asyncWorker() {
     if (!last.isValid()) {
         // don't record the last check time if we were not able to retrieve
         // the last version - next time we may be more lucky
-        dwarning("UpdateCheck: failed to get the latest version, skipping "
-            "check (current version '%s'", current.toString().c_str());
+        dwarning(
+                "UpdateCheck: failed to get the latest version, skipping "
+                "check (current version '%s'",
+                current.toString().c_str());
         return;
     }
 
-    VERBOSE_PRINT(updater, "UpdateCheck: current version '%s', last version '%s'",
-           current.toString().c_str(), last.toString().c_str());
+    VERBOSE_PRINT(updater,
+                  "UpdateCheck: current version '%s', last version '%s'",
+                  current.toString().c_str(), last.toString().c_str());
 
     if (current < last) {
         mReporter->reportNewerVersion(current, last);
@@ -226,16 +232,22 @@ void UpdateChecker::asyncWorker() {
 Version UpdateChecker::getLatestVersion() {
     const auto repositoryXml = mDataLoader->load(mCoreVersion);
     const auto versions = mVersionExtractor->extractVersions(repositoryXml);
-    const auto updateChannel = android::studio::updateChannel();
-    auto verIt = versions.find(updateChannel);
-    if (verIt == versions.end()) {
-        verIt = versions.find(android::studio::UpdateChannel::Unknown);
-    }
-    if (verIt == versions.end()) {
+    if (versions.empty()) {
         return Version::invalid();
     }
 
-    return verIt->second;
+    const auto updateChannel = android::studio::updateChannel();
+
+    // now find the first channel which is equal to or lower than the selected
+    // update channel
+    const auto greaterIt = versions.upper_bound(updateChannel);
+    if (greaterIt == versions.begin()) {
+        // even the first update channel in the list is greater than the
+        // one from Android Studio settings
+        return Version::invalid();
+    }
+
+    return std::prev(greaterIt)->second;
 }
 
 }  // namespace update_check

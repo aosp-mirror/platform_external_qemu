@@ -36,7 +36,7 @@ public:
         ++mExtractVersionCallCount;
         EXPECT_EQ(mExtractVersionDataParam, data);
         return mExtractVersionResult
-                ? Versions{{UpdateChannel::Unknown, *mExtractVersionResult}}
+                ? Versions{{UpdateChannel::Canary, *mExtractVersionResult}}
                 : Versions{};
     }
 
