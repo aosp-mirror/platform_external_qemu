@@ -43,6 +43,19 @@ TEST(ParameterList, Add) {
     EXPECT_STREQ("zoo", list[2].c_str());
 }
 
+TEST(ParameterList, AddFormat) {
+    ParameterList list;
+    list.addFormat("Hello World");
+    list.addFormat("%s=%s", "foo", "bar");
+    list.addFormat("%s-%s", std::string("zoo"), std::string("crab"));
+
+    EXPECT_EQ(3U, list.size());
+    EXPECT_STREQ("Hello World", list[0].c_str());
+    EXPECT_STREQ("foo=bar", list[1].c_str());
+    EXPECT_STREQ("zoo-crab", list[2].c_str());
+}
+
+
 TEST(ParameterList, Add2) {
     ParameterList list;
     list.add2("foo", "bar");

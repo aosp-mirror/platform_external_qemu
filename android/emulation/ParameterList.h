@@ -11,8 +11,12 @@
 
 #pragma once
 
+#include "android/base/StringFormat.h"
+
 #include <string>
 #include <vector>
+
+#include <stdarg.h>
 
 namespace android {
 
@@ -54,6 +58,23 @@ public:
 
     // Note: this will also handle const char* parameters automatically.
     void add(std::string&& param);
+
+    // Add a new parameter from a printf-formatted string.
+    // |format| is a printf-like formatting string, followed by optional
+    // parameters. Users are recommended to use addFormat() instead.
+    void addFormatRaw(const char* format, ...);
+
+    // Variant of addFormatRaw() that uses a va_list to pass the formatting
+    // arguments.
+    void addFormatWithArgs(const char* format, va_list args);
+
+    // These templated versions of StringFormat*() allow one to pass all kinds of
+    // string objects into the argument list
+    template <class... Args>
+    void addFormat(const char* format, Args&&... args) {
+        return addFormatRaw(format, android::base::unpackFormatArg(
+                std::forward<Args>(args))...);
+    }
 
     // Add two new parameters |param1| and |param2| to the list.
     void add2(const char* param1, const char* param2);
