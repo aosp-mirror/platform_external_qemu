@@ -10,7 +10,8 @@
 // GNU General Public License for more details.
 
 #include "android/update-check/UpdateChecker.h"
-
+#include "android/update-check/VersionExtractor.h"
+#include "android/base/Optional.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/Version.h"
 
@@ -26,15 +27,17 @@ using android::base::Version;
 class MockVersionExtractor : public IVersionExtractor {
 public:
     MockVersionExtractor()
-        : mExtractVersionResult(0, 0, 0),
+        : mExtractVersionResult(Version{0,0,0}),
           mExtractVersionCallCount(0),
           mGetCurrentVersionResult(0, 0, 0),
           mGetCurrentVersionCallCount(0) {}
 
-    virtual Version extractVersion(const std::string& data) const {
+    virtual Versions extractVersions(android::base::StringView data) const override {
         ++mExtractVersionCallCount;
         EXPECT_EQ(mExtractVersionDataParam, data);
-        return mExtractVersionResult;
+        return mExtractVersionResult
+                ? Versions{{UpdateChannel::Unknown, *mExtractVersionResult}}
+                : Versions{};
     }
 
     virtual Version getCurrentVersion() const {
@@ -43,7 +46,7 @@ public:
     }
 
     std::string mExtractVersionDataParam;
-    Version mExtractVersionResult;
+    android::base::Optional<Version> mExtractVersionResult;
     mutable int mExtractVersionCallCount;
     Version mGetCurrentVersionResult;
     mutable int mGetCurrentVersionCallCount;
@@ -130,6 +133,7 @@ public:
 class TestData {
 public:
     TestData() : mSystem("", 32) {
+        mSystem.getTempRoot();
         mDataLoader = new MockDataLoader();
         mReporter = new MockNewerVersionReporter();
         mTimeStorage = new MockTimeStorage();
@@ -224,7 +228,7 @@ TEST(UpdateChecker, asyncWorker) {
 
     /////////////////////////////////////////////////////////////////////
     // failed to get the last version
-    test.mVersionExtractor->mExtractVersionResult = Version::invalid();
+    test.mVersionExtractor->mExtractVersionResult = {};
 
     test.mUC->asyncWorker();
     EXPECT_EQ(3, test.mDataLoader->mLoadCallCount);
