@@ -16,17 +16,14 @@
 
 #include "android/base/Version.h"
 
+#include <functional>
+#include <type_traits>
+
 namespace android {
 namespace studio {
 
 // The set of existing update channels, ordered from most to least stable.
-enum class UpdateChannel {
-    Stable,
-    Beta,
-    Dev,
-    Canary,
-    Unknown
-};
+enum class UpdateChannel { Stable, Beta, Dev, Canary, Unknown };
 
 // Extract the Android Studio version from directory name |dirName|.
 // dirName is expected to match the following pattern
@@ -56,3 +53,17 @@ UpdateChannel updateChannel();
 
 }  // namespace studio
 }  // namespace android
+
+// make sure the UpdateChannel enum is hashable
+namespace std {
+
+template <>
+struct hash<android::studio::UpdateChannel> {
+    size_t operator()(android::studio::UpdateChannel ch) const {
+        using IntType =
+                std::underlying_type<android::studio::UpdateChannel>::type;
+        return std::hash<IntType>()(static_cast<IntType>(ch));
+    }
+};
+
+}  // namespace std
