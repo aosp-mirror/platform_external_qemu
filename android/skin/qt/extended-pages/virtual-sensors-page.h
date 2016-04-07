@@ -32,6 +32,7 @@ private slots:
     void on_pressureSensorValueWidget_valueChanged(double value);
     void on_humiditySensorValueWidget_valueChanged(double value);
     void onPhoneRotationChanged();
+    void updateSlidersFromAccelWidget(const QQuaternion& quat);
 
 private:
     std::unique_ptr<Ui::VirtualSensorsPage> mUi;

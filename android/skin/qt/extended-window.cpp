@@ -22,7 +22,7 @@
 
 #include "ui_extended.h"
 
-#include <QtWidgets>
+#include <QDesktopWidget>
 
 ExtendedWindow::ExtendedWindow(
     EmulatorQtWindow *eW,
@@ -57,6 +57,7 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->helpPage->initialize(shortcuts);
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->location_page->setLocationAgent(agentPtr->location);
+    mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
 
     connect(
         mExtendedUi->settingsPage, SIGNAL(onTopChanged(bool)),
@@ -77,6 +78,7 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_TELEPHONE, mExtendedUi->telephoneButton},
         {PANE_IDX_DPAD,      mExtendedUi->dpadButton},
         {PANE_IDX_FINGER,    mExtendedUi->fingerButton},
+        {PANE_IDX_VIRT_SENSORS, mExtendedUi->virtSensorsButton},
         {PANE_IDX_SETTINGS,  mExtendedUi->settingsButton},
         {PANE_IDX_HELP,      mExtendedUi->helpButton},
     };
@@ -94,6 +96,7 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->telephoneButton);
     mSidebarButtons.addButton(mExtendedUi->dpadButton);
     mSidebarButtons.addButton(mExtendedUi->fingerButton);
+    mSidebarButtons.addButton(mExtendedUi->virtSensorsButton);
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
 
@@ -170,6 +173,8 @@ void ExtendedWindow::on_helpButton_clicked()        { adjustTabs(PANE_IDX_HELP);
 void ExtendedWindow::on_locationButton_clicked()    { adjustTabs(PANE_IDX_LOCATION); }
 void ExtendedWindow::on_settingsButton_clicked()    { adjustTabs(PANE_IDX_SETTINGS); }
 void ExtendedWindow::on_telephoneButton_clicked()   { adjustTabs(PANE_IDX_TELEPHONE); }
+void ExtendedWindow::on_virtSensorsButton_clicked() { adjustTabs(PANE_IDX_VIRT_SENSORS); }
+
 
 void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     auto it = mPaneButtonMap.find(thisIndex);
