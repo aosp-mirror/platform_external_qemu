@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ea2ccbd_926f1d8a",
+        "filename": "android/base/containers/Lookup.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-07T19:14:37Z",
+      "side": 1,
+      "message": "Do we really need these restrictions? If the programmer has an std::multimap or a custom implementation of something that behaves like a map or set they won\u0027t be able to use these functions, this seems to go against the idea of having templates as a way of allowing anything that behaves the right way.",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 73
+      },
+      "revId": "78428f1aaca7780b40c706bd00458e230655a7b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ea2ccbd_32bcd12b",
+        "filename": "android/base/containers/Lookup.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-07T19:14:37Z",
+      "side": 1,
+      "message": "Could these be named \u0027contains\u0027 and \u0027containsAnyOf\u0027 instead? It seems that there could be some confusion as to what \u0027exists\u0027, is it the map, the value or both? Not that it would stump anyone for long but at a quick glance it might cause someone to stop for a second and think it through instead of immediately understanding what\u0027s going on.",
+      "range": {
+        "startLine": 124,
+        "startChar": 0,
+        "endLine": 131,
+        "endChar": 80
+      },
+      "revId": "78428f1aaca7780b40c706bd00458e230655a7b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ea2ccbd_521bd50a",
+        "filename": "android/base/containers/Lookup_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-07T19:14:37Z",
+      "side": 1,
+      "message": "How about a test case where findFirstOf doesn\u0027t find anything?",
+      "revId": "78428f1aaca7780b40c706bd00458e230655a7b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
