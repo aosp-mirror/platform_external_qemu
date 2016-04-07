@@ -11,12 +11,15 @@
 
 #pragma once
 
+#include "android/base/Optional.h"
 #include "android/base/threads/Thread.h"
 #include "android/base/Version.h"
 #include "android/update-check/IVersionExtractor.h"
 
 #include <memory>
 #include <string>
+#include <utility>
+
 #include <time.h>
 
 namespace android {
@@ -68,6 +71,12 @@ public:
 
 class UpdateChecker {
 public:
+    using VersionInfo =
+        std::pair<android::base::Version, android::studio::UpdateChannel>;
+
+    template <class T>
+    using Optional = android::base::Optional<T>;
+
     // |configPath| is the path to the emulator configuration directory
     // where the checker can store its records about last check time
     // |coreVersion| is the application's core version (e.g. qemu2 2.2.0)
@@ -82,7 +91,7 @@ public:
 
     bool runAsyncCheck();
 
-    android::base::Version getLatestVersion();
+    Optional<VersionInfo> getLatestVersion();
 
 protected:
     // constructor for tests
