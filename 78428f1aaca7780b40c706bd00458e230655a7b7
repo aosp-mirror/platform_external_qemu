@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8ea2ccbd_48fd6850",
+        "filename": "android/base/containers/Lookup.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-07T20:39:51Z",
+      "side": 1,
+      "message": "The restrictions are mostly for a better error message, + some correctness:\n  if you use it on something which doesn\u0027t have the required function, template gives you a message pointing into the template code; while now you would just get a \u0027no function matches your arguments\u0027\n  if you use it on a multimap, which value should it return? I doubt there\u0027s a simple interface for that kind of types\n\nI personally prefer to just extend the list of allowed containers here instead of allowing everything. And it also conveniently excludes multimaps, which are really unsafe",
+      "parentUuid": "8ea2ccbd_926f1d8a",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 73
+      },
+      "revId": "78428f1aaca7780b40c706bd00458e230655a7b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8ea2ccbd_32bcd12b",
         "filename": "android/base/containers/Lookup.h",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "8ea2ccbd_88a81053",
+        "filename": "android/base/containers/Lookup.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-07T20:39:51Z",
+      "side": 1,
+      "message": "totally agree, I originally thought about different arguments order: exists(key, map) reads ok, but for (map, key) it has to be \u0027contains\u0027\nthanks",
+      "parentUuid": "8ea2ccbd_32bcd12b",
+      "range": {
+        "startLine": 124,
+        "startChar": 0,
+        "endLine": 131,
+        "endChar": 80
+      },
+      "revId": "78428f1aaca7780b40c706bd00458e230655a7b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8ea2ccbd_521bd50a",
         "filename": "android/base/containers/Lookup_unittest.cpp",
         "patchSetId": 2
@@ -59,6 +107,24 @@
       "writtenOn": "2016-04-07T19:14:37Z",
       "side": 1,
       "message": "How about a test case where findFirstOf doesn\u0027t find anything?",
+      "revId": "78428f1aaca7780b40c706bd00458e230655a7b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ea2ccbd_68adcc5f",
+        "filename": "android/base/containers/Lookup_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-07T20:39:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8ea2ccbd_521bd50a",
       "revId": "78428f1aaca7780b40c706bd00458e230655a7b7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
