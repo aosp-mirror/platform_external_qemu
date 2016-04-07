@@ -62,7 +62,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     if (opts->bootchart) {
         std::string param =
-                StringFormat("androidboot.bootchar=%s", opts->bootchart);
+                StringFormat("androidboot.bootchart=%s", opts->bootchart);
         params.add(std::move(param));
     }
 
