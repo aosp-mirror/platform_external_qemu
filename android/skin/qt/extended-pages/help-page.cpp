@@ -13,7 +13,7 @@
 
 #include "android/android.h"
 #include "android/base/system/System.h"
-#include "android/emulation/bufprint_config_dirs.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/globals.h"
 #include "android/update-check/UpdateChecker.h"
 #include "android/update-check/VersionExtractor.h"
@@ -175,13 +175,35 @@ void HelpPage::on_help_sendFeedback_clicked() {
     QDesktopServices::openUrl(QUrl::fromEncoded(SEND_FEEDBACK_URL));
 }
 
+static const char* updateChannelName(android::studio::UpdateChannel channel) {
+    switch (channel) {
+        case android::studio::UpdateChannel::Stable:
+            return "Stable";
+        case android::studio::UpdateChannel::Dev:
+            return "Dev";
+        case android::studio::UpdateChannel::Beta:
+            return "Beta";
+        case android::studio::UpdateChannel::Canary:
+            return "Canary";
+        default:
+            return nullptr;
+    }
+}
+
 void LatestVersionLoadTask::run() {
     // Get latest version that is available online
-    char configPath[PATH_MAX];
-    bufprint_config_path(configPath, configPath + sizeof(configPath));
-    android::update_check::UpdateChecker upCheck(configPath);
+    android::update_check::UpdateChecker upCheck(
+            android::ConfigDirs::getUserDirectory().c_str());
     const auto latestVersion = upCheck.getLatestVersion();
-    const auto latestVerStr = latestVersion.isValid()
-            ? QString(latestVersion.toString().c_str()) : tr("Unavailable");
-    emit finished(latestVerStr);
+    QString latestVerString;
+    if (!latestVersion) {
+        latestVerString = tr("Unavailable");
+    } else {
+        latestVerString =
+                QString::fromStdString(latestVersion->first.toString());
+        if (const auto channelName = updateChannelName(latestVersion->second)) {
+            latestVerString += tr(" (%1 update channel)").arg(channelName);
+        }
+    }
+    emit finished(latestVerString);
 }

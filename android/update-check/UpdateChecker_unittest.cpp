@@ -23,6 +23,7 @@ namespace android {
 namespace update_check {
 
 using android::base::Version;
+using android::studio::UpdateChannel;
 
 class MockVersionExtractor : public IVersionExtractor {
 public:
@@ -182,13 +183,14 @@ TEST(UpdateChecker, needsCheck) {
 TEST(UpdateChecker, getVersion) {
     TestData test;
 
-    // Set the version number
-    test.mVersionExtractor->mGetCurrentVersionResult = Version(4, 5, 6);
+    test.mDataLoader->mLoadResult =
+            test.mVersionExtractor->mExtractVersionDataParam = "test";
+    test.mVersionExtractor->mExtractVersionResult = Version(1, 0, 0);
 
-    // Get the version as a string
-    Version returnedVersion = test.mVersionExtractor->getCurrentVersion();
-
-    EXPECT_EQ("4.5.6", returnedVersion.toString());
+    auto returnedVersion = test.mUC->getLatestVersion();
+    EXPECT_TRUE(returnedVersion);
+    EXPECT_EQ(Version(1, 0, 0), returnedVersion->first);
+    EXPECT_EQ(UpdateChannel::Canary, returnedVersion->second);
 }
 
 TEST(UpdateChecker, asyncWorker) {
