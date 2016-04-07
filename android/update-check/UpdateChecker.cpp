@@ -213,7 +213,7 @@ void UpdateChecker::asyncWorker() {
         // the last version - next time we may be more lucky
         dwarning(
                 "UpdateCheck: failed to get the latest version, skipping "
-                "check (current version '%s'",
+                "check (current version '%s')",
                 current.toString().c_str());
         return;
     }
