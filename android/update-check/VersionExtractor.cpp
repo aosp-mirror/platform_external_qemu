@@ -235,7 +235,7 @@ IVersionExtractor::Versions VersionExtractor::extractVersions(
 
 Version VersionExtractor::getCurrentVersion() const {
     static const Version currentVersion =
-            Version(EMULATOR_VERSION_STRING_SHORT);
+            Version(EMULATOR_FULL_VERSION_STRING);
     return currentVersion;
 }
 
