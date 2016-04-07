@@ -18,8 +18,8 @@
     <rect>
      <x>0</x>
      <y>20</y>
-     <width>580</width>
-     <height>491</height>
+     <width>621</width>
+     <height>561</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -32,80 +32,11 @@
     <attribute name="title">
      <string>Accelerometer</string>
     </attribute>
-    <widget class="EditableSliderWidget" name="yawAngleWidget" native="true">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>50</y>
-       <width>331</width>
-       <height>80</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>30</y>
-       <width>59</width>
-       <height>15</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Yaw</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>140</y>
-       <width>59</width>
-       <height>15</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Pitch</string>
-     </property>
-    </widget>
-    <widget class="EditableSliderWidget" name="pitchAngleWidget" native="true">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>160</y>
-       <width>331</width>
-       <height>80</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_3">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>260</y>
-       <width>59</width>
-       <height>15</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Roll</string>
-     </property>
-    </widget>
-    <widget class="EditableSliderWidget" name="rollAngleWidget" native="true">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>280</y>
-       <width>331</width>
-       <height>80</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_6">
      <property name="geometry">
       <rect>
-       <x>210</x>
-       <y>390</y>
+       <x>150</x>
+       <y>310</y>
        <width>250</width>
        <height>20</height>
       </rect>
@@ -120,8 +51,8 @@
     <widget class="QLabel" name="label_8">
      <property name="geometry">
       <rect>
-       <x>210</x>
-       <y>420</y>
+       <x>150</x>
+       <y>340</y>
        <width>250</width>
        <height>20</height>
       </rect>
@@ -136,8 +67,8 @@
     <widget class="QLabel" name="accelerometerXLabel">
      <property name="geometry">
       <rect>
-       <x>470</x>
-       <y>390</y>
+       <x>410</x>
+       <y>310</y>
        <width>60</width>
        <height>20</height>
       </rect>
@@ -152,8 +83,8 @@
     <widget class="QLabel" name="accelerometerYLabel">
      <property name="geometry">
       <rect>
-       <x>540</x>
-       <y>390</y>
+       <x>480</x>
+       <y>310</y>
        <width>60</width>
        <height>20</height>
       </rect>
@@ -168,8 +99,8 @@
     <widget class="QLabel" name="accelerometerZLabel">
      <property name="geometry">
       <rect>
-       <x>610</x>
-       <y>390</y>
+       <x>550</x>
+       <y>310</y>
        <width>60</width>
        <height>20</height>
       </rect>
@@ -184,8 +115,8 @@
     <widget class="QLabel" name="magnetometerNorthLabel">
      <property name="geometry">
       <rect>
-       <x>470</x>
-       <y>420</y>
+       <x>410</x>
+       <y>340</y>
        <width>60</width>
        <height>20</height>
       </rect>
@@ -200,8 +131,8 @@
     <widget class="QLabel" name="magnetometerEastLabel">
      <property name="geometry">
       <rect>
-       <x>540</x>
-       <y>420</y>
+       <x>480</x>
+       <y>340</y>
        <width>60</width>
        <height>20</height>
       </rect>
@@ -216,8 +147,8 @@
     <widget class="QLabel" name="magnetometerVerticalLabel">
      <property name="geometry">
       <rect>
-       <x>610</x>
-       <y>420</y>
+       <x>550</x>
+       <y>340</y>
        <width>60</width>
        <height>20</height>
       </rect>
@@ -227,6 +158,16 @@
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="Accelerometer3DWidget" name="accelWidget" native="true">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>600</width>
+       <height>291</height>
+      </rect>
      </property>
     </widget>
    </widget>
@@ -252,7 +193,7 @@
       <rect>
        <x>0</x>
        <y>50</y>
-       <width>320</width>
+       <width>250</width>
        <height>80</height>
       </rect>
      </property>
@@ -275,7 +216,7 @@
       <rect>
        <x>0</x>
        <y>160</y>
-       <width>320</width>
+       <width>250</width>
        <height>80</height>
       </rect>
      </property>
@@ -283,7 +224,7 @@
     <widget class="QLabel" name="label_7">
      <property name="geometry">
       <rect>
-       <x>350</x>
+       <x>280</x>
        <y>30</y>
        <width>170</width>
        <height>15</height>
@@ -296,7 +237,7 @@
     <widget class="QWidget" name="horizontalLayoutWidget">
      <property name="geometry">
       <rect>
-       <x>350</x>
+       <x>270</x>
        <y>50</y>
        <width>220</width>
        <height>40</height>
@@ -374,9 +315,9 @@
     <widget class="EditableSliderWidget" name="lightSensorValueWidget" native="true">
      <property name="geometry">
       <rect>
-       <x>350</x>
+       <x>270</x>
        <y>160</y>
-       <width>320</width>
+       <width>250</width>
        <height>80</height>
       </rect>
      </property>
@@ -384,7 +325,7 @@
     <widget class="QLabel" name="label_9">
      <property name="geometry">
       <rect>
-       <x>360</x>
+       <x>280</x>
        <y>140</y>
        <width>170</width>
        <height>15</height>
@@ -399,7 +340,7 @@
       <rect>
        <x>10</x>
        <y>280</y>
-       <width>320</width>
+       <width>250</width>
        <height>80</height>
       </rect>
      </property>
@@ -420,9 +361,9 @@
     <widget class="EditableSliderWidget" name="humiditySensorValueWidget" native="true">
      <property name="geometry">
       <rect>
-       <x>350</x>
+       <x>270</x>
        <y>280</y>
-       <width>320</width>
+       <width>250</width>
        <height>80</height>
       </rect>
      </property>
@@ -430,7 +371,7 @@
     <widget class="QLabel" name="label_11">
      <property name="geometry">
       <rect>
-       <x>360</x>
+       <x>280</x>
        <y>260</y>
        <width>170</width>
        <height>15</height>
@@ -448,6 +389,12 @@
    <class>EditableSliderWidget</class>
    <extends>QWidget</extends>
    <header>android/skin/qt/editable-slider-widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Accelerometer3DWidget</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/accelerometer-3d-widget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

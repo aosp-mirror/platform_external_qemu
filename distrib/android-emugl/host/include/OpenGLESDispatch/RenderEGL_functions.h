@@ -8,6 +8,7 @@
 #define LIST_RENDER_EGL_FUNCTIONS(X) \
   X(EGLint, eglGetError, ()) \
   X(EGLDisplay, eglGetDisplay, (EGLNativeDisplayType dpy)) \
+  X(EGLBoolean, eglTerminate, (EGLDisplay dpy)) \
   X(EGLBoolean, eglInitialize, (EGLDisplay dpy, EGLint* major, EGLint* minor)) \
   X(char*, eglQueryString, (EGLDisplay dpy, EGLint id)) \
   X(EGLBoolean, eglGetConfigs, (EGLDisplay display, EGLConfig* configs, EGLint config_size, EGLint* num_config)) \

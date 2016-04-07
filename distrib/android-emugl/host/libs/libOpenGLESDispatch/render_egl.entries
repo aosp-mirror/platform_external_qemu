@@ -6,6 +6,7 @@
 
 EGLint eglGetError(void);
 EGLDisplay eglGetDisplay(EGLNativeDisplayType dpy);
+EGLBoolean eglTerminate(EGLDisplay dpy);
 EGLBoolean eglInitialize(EGLDisplay dpy, EGLint* major, EGLint* minor);
 char* eglQueryString(EGLDisplay dpy, EGLint id);
 EGLBoolean eglGetConfigs(EGLDisplay display, EGLConfig* configs, EGLint config_size, EGLint* num_config);
