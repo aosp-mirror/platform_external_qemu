@@ -59,7 +59,8 @@ intptr_t RenderThread::main() {
 
     ReadBuffer readBuf(STREAM_BUFFER_SIZE);
 
-    int stats_totalBytes = 0;
+    size_t stats_totalBytes = 0;
+    size_t stats_usedBytes = 0;
     long long stats_t0 = GetCurrentTimeMS();
 
     //
@@ -88,15 +89,6 @@ intptr_t RenderThread::main() {
         //
         // log received bandwidth statistics
         //
-        stats_totalBytes += readBuf.validData();
-        long long dt = GetCurrentTimeMS() - stats_t0;
-        if (dt > 1000) {
-            //float dts = (float)dt / 1000.0f;
-            //printf("Used Bandwidth %5.3f MB/s\n", ((float)stats_totalBytes / dts) / (1024.0f*1024.0f));
-            stats_totalBytes = 0;
-            stats_t0 = GetCurrentTimeMS();
-        }
-
         //
         // dump stream to file if needed
         //
@@ -105,6 +97,8 @@ intptr_t RenderThread::main() {
             fwrite(readBuf.buf()+skip, 1, readBuf.validData()-skip, dumpFP);
             fflush(dumpFP);
         }
+
+        stats_totalBytes += stat;
 
         bool progress;
         do {
@@ -142,6 +136,16 @@ intptr_t RenderThread::main() {
             m_lock->unlock();
 
         } while( progress );
+
+        long long dt = GetCurrentTimeMS() - stats_t0;
+        if (dt > 1000) {
+            float dts = (float)dt / 1000.0f;
+            printf("Used Bandwidth %5.3f MB/s\n",
+                   ((float)stats_totalBytes / dts) / (1024.0f*1024.0f));
+            stats_totalBytes = 0;
+            stats_usedBytes = 0;
+            stats_t0 = GetCurrentTimeMS();
+        }
 
     }
 
