@@ -19,9 +19,7 @@ ANDROID_BEGIN_HEADER
 // emulator updates check. This function performs a asyncronous update check
 // and prints a message to the user if there's a newer version available.
 // It will skip the check if it has already been done on the same day
-// |homePath| - android emulator home directory where it is ok to store
-// configuration data (last update check time)
 // |coreVersion| - core-specific version, e.g. "qemu2 2.2.0"
-extern void android_checkForUpdates(const char* homePath, const char* coreVersion);
+extern void android_checkForUpdates(const char* coreVersion);
 
 ANDROID_END_HEADER

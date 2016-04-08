@@ -27,18 +27,13 @@ using android::studio::UpdateChannel;
 
 class MockVersionExtractor : public IVersionExtractor {
 public:
-    MockVersionExtractor()
-        : mExtractVersionResult(Version{0,0,0}),
-          mExtractVersionCallCount(0),
-          mGetCurrentVersionResult(0, 0, 0),
-          mGetCurrentVersionCallCount(0) {}
-
-    virtual Versions extractVersions(android::base::StringView data) const override {
+    virtual Versions extractVersions(
+            android::base::StringView data) const override {
         ++mExtractVersionCallCount;
         EXPECT_EQ(mExtractVersionDataParam, data);
-        return mExtractVersionResult
-                ? Versions{{UpdateChannel::Canary, *mExtractVersionResult}}
-                : Versions{};
+        return mExtractVersionResult ? Versions{{UpdateChannel::Canary,
+                                                 *mExtractVersionResult}}
+                                     : Versions{};
     }
 
     virtual Version getCurrentVersion() const {
@@ -47,66 +42,61 @@ public:
     }
 
     std::string mExtractVersionDataParam;
-    android::base::Optional<Version> mExtractVersionResult;
-    mutable int mExtractVersionCallCount;
-    Version mGetCurrentVersionResult;
-    mutable int mGetCurrentVersionCallCount;
+    android::base::Optional<Version> mExtractVersionResult = {{0, 0, 0}};
+    mutable int mExtractVersionCallCount = 0;
+    Version mGetCurrentVersionResult = {0, 0, 0};
+    mutable int mGetCurrentVersionCallCount = 0;
 };
 
 class MockDataLoader : public IDataLoader {
 public:
-    MockDataLoader() : mLoadCallCount(0) {}
-
-    virtual std::string load(const char* version) override {
+    virtual std::string load() override {
         ++mLoadCallCount;
-        EXPECT_EQ(nullptr, version);
         return mLoadResult;
     }
 
+    virtual std::string getUniqueDataKey() override {
+        ++mGetUniqueDataKeyCallCount;
+        return mUniqueDataKey;
+    }
+
     std::string mLoadResult;
-    int mLoadCallCount;
+    int mLoadCallCount = 0;
+
+    std::string mUniqueDataKey;
+    int mGetUniqueDataKeyCallCount = 0;
 };
 
 class MockTimeStorage : public ITimeStorage {
 public:
-    MockTimeStorage()
-        : mLockCallCount(),
-          mGetTimeCallCount(),
-          mSetTimeCallCount(),
-          mLockResult(),
-          mGetTimeResult(),
-          mSetTimeParam() {}
-
-    virtual bool lock() {
+    virtual bool lock() override {
         ++mLockCallCount;
         return mLockResult;
     }
 
-    virtual time_t getTime() {
+    virtual time_t getTime(const std::string& key) override {
+        EXPECT_STREQ(mKeyParam.c_str(), key.c_str());
         ++mGetTimeCallCount;
         return mGetTimeResult;
     }
 
-    virtual void setTime(time_t time) {
+    virtual void setTime(const std::string& key, time_t time) override {
+        EXPECT_STREQ(mKeyParam.c_str(), key.c_str());
         ++mSetTimeCallCount;
         EXPECT_EQ(mSetTimeParam, time);
     }
 
-    int mLockCallCount;
-    int mGetTimeCallCount;
-    int mSetTimeCallCount;
-    bool mLockResult;
-    time_t mGetTimeResult;
-    time_t mSetTimeParam;
+    int mLockCallCount = 0;
+    int mGetTimeCallCount = 0;
+    int mSetTimeCallCount = 0;
+    bool mLockResult = false;
+    time_t mGetTimeResult = 0;
+    time_t mSetTimeParam = 0;
+    std::string mKeyParam;
 };
 
 class MockNewerVersionReporter : public INewerVersionReporter {
 public:
-    MockNewerVersionReporter()
-        : mReportNewerVersionExistingParam(0, 0, 0),
-          mReportNewerVersionNewerParam(0, 0, 0),
-          mReportNewerVersionCallCount(0) {}
-
     virtual void reportNewerVersion(const Version& existing,
                                     const Version& newer) {
         EXPECT_EQ(mReportNewerVersionExistingParam, existing);
@@ -114,9 +104,9 @@ public:
         ++mReportNewerVersionCallCount;
     }
 
-    Version mReportNewerVersionExistingParam;
-    Version mReportNewerVersionNewerParam;
-    int mReportNewerVersionCallCount;
+    Version mReportNewerVersionExistingParam = {0, 0, 0};
+    Version mReportNewerVersionNewerParam = {0, 0, 0};
+    int mReportNewerVersionCallCount = 0;
 };
 
 class TestUpdateChecker : public UpdateChecker {
@@ -167,10 +157,12 @@ TEST(UpdateChecker, needsCheck) {
     TestData test;
     // set last check time and current time to be close enough -
     // no new check is needed
+    test.mTimeStorage->mKeyParam = test.mDataLoader->mUniqueDataKey = "key";
     test.mTimeStorage->mGetTimeResult = time_t(1);
     test.mSystem.setUnixTime(time_t(2));
 
     EXPECT_FALSE(test.mUC->needsCheck());
+    EXPECT_EQ(1, test.mDataLoader->mGetUniqueDataKeyCallCount);
     EXPECT_EQ(1, test.mTimeStorage->mGetTimeCallCount);
 
     /////////////////////////////////////////////////////////////////////
@@ -202,6 +194,7 @@ TEST(UpdateChecker, asyncWorker) {
     test.mVersionExtractor->mExtractVersionResult = Version(1, 0, 0);
     test.mVersionExtractor->mGetCurrentVersionResult = Version(1, 0, 0);
     test.mSystem.setUnixTime(time_t(1));
+    test.mTimeStorage->mKeyParam = test.mDataLoader->mUniqueDataKey = "key";
     test.mTimeStorage->mSetTimeParam = time_t(1);
 
     test.mUC->asyncWorker();
