@@ -52,6 +52,17 @@ void ParameterList::add(std::string&& param) {
     mParams.emplace_back(std::move(param));
 }
 
+void ParameterList::addFormatRaw(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    addFormatWithArgs(format, args);
+    va_end(args);
+}
+
+void ParameterList::addFormatWithArgs(const char* format, va_list args) {
+    add(android::base::StringFormatWithArgs(format, args));
+}
+
 void ParameterList::add2(const char* param1, const char* param2) {
     mParams.push_back(param1);
     mParams.push_back(param2);

@@ -3180,50 +3180,41 @@ int main(int argc, char **argv, char **envp)
      * The GL ES renderer cannot start properly if GPU emulation is disabled
      * because this requires changing the LD_LIBRARY_PATH before launching
      * the emulation engine. */
-    int qemu_gles = 0;
-    int opengl_alive = 1;
-    if (android_hw->hw_gpu_enabled) {
-        if (strcmp(android_hw->hw_gpu_mode, "guest") != 0) {
-            if (android_initOpenglesEmulation() != 0 ||
-                android_startOpenglesRenderer(android_hw->hw_lcd_width,
-                                              android_hw->hw_lcd_height) != 0)
-            {
-                opengl_alive = 0;
-            }
-            qemu_gles = 1;   // Using emugl
-        } else {
-            qemu_gles = 2;   // Using guest
-        }
-    }
-    if (android_hw->hw_gpu_enabled && opengl_alive) {
-        stralloc_add_format(kernel_params, " qemu.gles=%d", qemu_gles);
+
+    bool opengl_emulation = android_hw->hw_gpu_enabled;
+    if (opengl_emulation) {
         char  tmp[64];
         snprintf(tmp, sizeof(tmp), "%d", 0x20000);
         boot_property_add("ro.opengles.version", tmp);
-    } else {
-        stralloc_add_str(kernel_params, " qemu.gles=0");
     }
 
-    /* We always force qemu=1 when running inside QEMU */
-    stralloc_add_str(kernel_params, " qemu=1");
+    bool opengl_broken = false;
+    bool opengl_host_emulation = (opengl_emulation &&
+            strcmp(android_hw->hw_gpu_mode, "guest") != 0);
+    if (opengl_host_emulation) {
+        // Try to initialize EmuGL. This operation can fail, but dont
+        // exit immediately. We want to write the metrics to the file
+        // before doing this, and this is done much later, so record
+        // the error in |opengl_broken| instead.
+        if (android_initOpenglesEmulation() != 0 ||
+            android_startOpenglesRenderer(android_hw->hw_lcd_width,
+                                          android_hw->hw_lcd_height) != 0)
+        {
+            opengl_broken = true;
+        }
+    }
 
     /* We always initialize the first serial port for the android-kmsg
      * character device (used to send kernel messages) */
     if (!serial_hds_add_at(0, "android-kmsg")) {
         return 1;
     }
-    stralloc_add_format(kernel_params,
-                        " console=%s0",
-                        kernelSerialDevicePrefix);
 
     /* We always initialize the second serial port for the android-qemud
      * character device as well */
     if (!serial_hds_add_at(1, "android-qemud")) {
         return 1;
     }
-    stralloc_add_format(kernel_params,
-                        " android.qemud=%s1",
-                        kernelSerialDevicePrefix);
 
     if (pid_file && qemu_create_pidfile(pid_file) != 0) {
         os_pidfile_error();
@@ -3842,9 +3833,10 @@ int main(int argc, char **argv, char **envp)
      * We want to track performance of a running emulator, ignoring any early
      * exits as a result of incorrect setup.
      */
-    android_init_metrics(opengl_alive);
-    if(!opengl_alive) {
-        derror("Could not initialize OpenglES emulation, use '-gpu off' to disable it.");
+    android_init_metrics(!opengl_broken);
+    if (opengl_broken) {
+        derror("Could not initialize OpenglES emulation, use '-gpu off' "
+               "to disable it.");
         return 1;
     }
 
