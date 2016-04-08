@@ -22,6 +22,30 @@
       "revId": "b408c136bc1ece55dfbb0bb2ecb8e75481ac32bc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ed1ec8e_68b0a307",
+        "filename": "android/emulation/ParameterList.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-08T12:08:03Z",
+      "side": 1,
+      "message": "Not needed, but just more convenient because this is used a lot (and even more in the future as we migrate QEMU2 code to use main-kernel-parameters.h and main-qemu-parameters.h)",
+      "parentUuid": "8ea2ccbd_f990947e",
+      "range": {
+        "startLine": 74,
+        "startChar": 9,
+        "endLine": 74,
+        "endChar": 18
+      },
+      "revId": "b408c136bc1ece55dfbb0bb2ecb8e75481ac32bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
