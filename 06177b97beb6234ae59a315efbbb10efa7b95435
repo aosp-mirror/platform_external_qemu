@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ed1ec8e_e8b493f8",
+        "filename": "android/base/containers/Lookup.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-08T11:58:09Z",
+      "side": 1,
+      "message": "these templates would benefit greatly from some documentation (in particular usage examples). I\u0027m assuming this typedef\u0027s to either true_type of false_type, but it\u0027s a little bit hard to decypher from the declaration.",
+      "revId": "06177b97beb6234ae59a315efbbb10efa7b95435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ed1ec8e_88bfd7d2",
+        "filename": "android/base/containers/Lookup.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-08T11:58:09Z",
+      "side": 1,
+      "message": "Do you really want to return the address of a local variable here?",
+      "revId": "06177b97beb6234ae59a315efbbb10efa7b95435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
