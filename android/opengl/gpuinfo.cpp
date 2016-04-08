@@ -404,7 +404,7 @@ void parse_gpu_info_list_windows(const std::string& contents,
                 gpulist->currGpu().version = val;
             } else if (key.find("InstalledDisplayDrivers") != NOTFOUND) {
                 if (line_loc - val_pos == 0) {
-                    continue;
+                    goto NEXT_LINE;
                 }
                 const std::string& dll_str =
                     contents.substr(val_pos, line_loc - val_pos);
@@ -437,6 +437,7 @@ void parse_gpu_info_list_windows(const std::string& contents,
         if (line_loc == contents.size()) {
             break;
         }
+NEXT_LINE:
         p = line_loc + 2;
         line_loc = contents.find("\r\n", p);
         if (line_loc == NOTFOUND) {
