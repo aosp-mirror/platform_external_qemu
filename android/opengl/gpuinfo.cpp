@@ -372,6 +372,41 @@ void parse_gpu_info_list_linux(const std::string& contents,
     }
 }
 
+static void parse_windows_gpu_dlls(int line_loc, int val_pos,
+                            const std::string& contents,
+                            GpuInfoList* gpulist) {
+    if (line_loc - val_pos == 0) {
+        return;
+    }
+
+    const std::string& dll_str =
+        contents.substr(val_pos, line_loc - val_pos);
+
+    size_t vp = 0;
+    size_t dll_sep_loc = dll_str.find(",", vp);
+    size_t dll_end =
+        (dll_sep_loc != NOTFOUND) ?  dll_sep_loc : dll_str.size() - vp;
+    gpulist->currGpu().addDll(dll_str.substr(vp, dll_end - vp));
+
+    while (dll_sep_loc != NOTFOUND) {
+        vp = dll_sep_loc + 1;
+        dll_sep_loc = dll_str.find(",", vp);
+        dll_end =
+            (dll_sep_loc != NOTFOUND) ?  dll_sep_loc : dll_str.size() - vp;
+        gpulist->currGpu().addDll(
+                dll_str.substr(vp, dll_end - vp));
+    }
+
+    const std::string& curr_make = gpulist->currGpu().make;
+    if (curr_make == "NVIDIA") {
+        gpulist->currGpu().addDll("nvoglv32.dll");
+        gpulist->currGpu().addDll("nvoglv64.dll");
+    } else if (curr_make == "Advanced Micro Devices, Inc.") {
+        gpulist->currGpu().addDll("atioglxx.dll");
+        gpulist->currGpu().addDll("atig6txx.dll");
+    }
+}
+
 void parse_gpu_info_list_windows(const std::string& contents,
                                  GpuInfoList* gpulist) {
     size_t line_loc = contents.find("\r\n");
@@ -403,41 +438,12 @@ void parse_gpu_info_list_windows(const std::string& contents,
             } else if (key.find("DriverVersion") != NOTFOUND) {
                 gpulist->currGpu().version = val;
             } else if (key.find("InstalledDisplayDrivers") != NOTFOUND) {
-                if (line_loc - val_pos == 0) {
-                    goto NEXT_LINE;
-                }
-                const std::string& dll_str =
-                    contents.substr(val_pos, line_loc - val_pos);
-
-                size_t vp = 0;
-                size_t dll_sep_loc = dll_str.find(",", vp);
-                size_t dll_end =
-                        (dll_sep_loc != NOTFOUND) ?  dll_sep_loc : dll_str.size() - vp;
-                gpulist->currGpu().addDll(dll_str.substr(vp, dll_end - vp));
-
-                while (dll_sep_loc != NOTFOUND) {
-                    vp = dll_sep_loc + 1;
-                    dll_sep_loc = dll_str.find(",", vp);
-                    dll_end =
-                            (dll_sep_loc != NOTFOUND) ?  dll_sep_loc : dll_str.size() - vp;
-                    gpulist->currGpu().addDll(
-                            dll_str.substr(vp, dll_end - vp));
-                }
-
-                const std::string& curr_make = gpulist->infos.back().make;
-                if (curr_make == "NVIDIA") {
-                    gpulist->currGpu().addDll("nvoglv32.dll");
-                    gpulist->currGpu().addDll("nvoglv64.dll");
-                } else if (curr_make == "Advanced Micro Devices, Inc.") {
-                    gpulist->currGpu().addDll("atioglxx.dll");
-                    gpulist->currGpu().addDll("atig6txx.dll");
-                }
+                parse_windows_gpu_dlls(line_loc, val_pos, contents, gpulist);
             }
         }
         if (line_loc == contents.size()) {
             break;
         }
-NEXT_LINE:
         p = line_loc + 2;
         line_loc = contents.find("\r\n", p);
         if (line_loc == NOTFOUND) {
