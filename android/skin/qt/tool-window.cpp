@@ -69,7 +69,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window, QWidget* parent)
 #else
     Qt::WindowFlags flag = Qt::Tool;
 #endif
-    setWindowFlags(flag | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::Drawer);
+    setWindowFlags(flag | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
     toolsUi->setupUi(this);
 
     // Initialize some values in the QCoreApplication so we can easily
