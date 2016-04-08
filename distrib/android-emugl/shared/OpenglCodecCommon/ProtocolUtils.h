@@ -1,6 +1,7 @@
 #ifndef EMUGL_PROTOCOL_UTILS_H
 #define EMUGL_PROTOCOL_UTILS_H
 
+#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -108,38 +109,56 @@ inline T Unpack(const void* ptr) {
 // are properly aligned (preventing crashes with some backends).
 // Usage example:
 //
-//    InputBuffer inputBuffer(ptr, size);
+//    GenericInputBuffer<> inputBuffer(ptr, size);
 //    glDoStuff(inputBuffer.get());
 //
 // inputBuffer.get() will return the original value of |ptr| if it was
 // aligned on an 8-byte boundary. Otherwise, it will return the address
 // of an aligned heap-allocated copy of the original |size| bytes starting
 // from |ptr|. The heap block is released at scope exit.
-class InputBuffer {
+
+template <size_t StackSize = 1024, size_t Align = 8>
+class GenericInputBuffer {
+    static_assert(Align == 1 || Align == 2 || Align == 4 || Align == 8,
+                  "Bad alignment parameter");
+
 public:
-    InputBuffer(const void* input, size_t size, size_t align = 8) :
-            mBuff(input), mIsCopy(false) {
-        if (((uintptr_t)input & (align - 1U)) != 0) {
-            void* newBuff = malloc(size);
-            memcpy(newBuff, input, size);
-            mBuff = newBuff;
-            mIsCopy = true;
+    GenericInputBuffer(const void* input, size_t size) : mBuff(input) {
+        if (((uintptr_t)input & (Align - 1U)) != 0) {
+            if (size <= StackSize) {
+                mStorage = StorageType::InPlace;
+                memcpy(&mArray[0], input, size);
+            } else {
+                mStorage = StorageType::Heap;
+                auto buf = malloc(size);
+                memcpy(buf, input, size);
+                mBuff = buf;
+            }
         }
     }
 
-    ~InputBuffer() {
-        if (mIsCopy) {
+    ~GenericInputBuffer() {
+        if (mStorage == StorageType::Heap) {
             free((void*)mBuff);
         }
     }
 
     const void* get() const {
-        return mBuff;
+        return mStorage == StorageType::InPlace ? &mArray[0] : mBuff;
     }
 
 private:
-    const void* mBuff;
-    bool mIsCopy;
+    enum class StorageType : char {
+        Original,
+        InPlace,
+        Heap
+    };
+
+    union {
+        char __attribute__((__aligned__(Align))) mArray[StackSize];
+        const void* mBuff;
+    };
+    StorageType mStorage = StorageType::Original;
 };
 
 // Helper class used to ensure that output buffers passed to EGL/GL functions
@@ -147,7 +166,7 @@ private:
 // Usage example:
 //
 //    ptr = stream->alloc(size);
-//    OutputBuffer outputBuffer(ptr, size);
+//    GenericOutputBuffer<> outputBuffer(ptr, size);
 //    glGetStuff(outputBuffer.get());
 //    outputBuffer.flush();
 //
@@ -157,36 +176,68 @@ private:
 //
 // outputBuffer.flush() copies the content of the heap allocated buffer back
 // to |ptr| explictly, if needed. If a no-op if |ptr| was aligned.
-class OutputBuffer {
+template <size_t StackSize = 1024, size_t Align = 8>
+class GenericOutputBuffer {
+    static_assert(Align == 1 || Align == 2 || Align == 4 || Align == 8,
+                  "Bad alignment parameter");
+
 public:
-    OutputBuffer(unsigned char* ptr, size_t size, size_t align = 8) :
-            mOrgBuff(ptr), mBuff(ptr), mSize(size) {
-        if (((uintptr_t)ptr & (align - 1U)) != 0) {
-            void* newBuff = calloc(1, size);
-            mBuff = newBuff;
+    GenericOutputBuffer(unsigned char* ptr, size_t size) :
+            mOrgBuff(ptr), mSize(size) {
+        if (((uintptr_t)ptr & (Align - 1U)) != 0) {
+            if (StackSize <= size) {
+                mStorage = StorageType::InPlace;
+            } else {
+                mStorage = StorageType::Heap;
+                mBuff = calloc(1, size);
+            }
         }
     }
 
-    ~OutputBuffer() {
-        if (mBuff != mOrgBuff) {
+    ~GenericOutputBuffer() {
+        if (mStorage == StorageType::Heap) {
             free(mBuff);
         }
     }
 
     void* get() const {
-        return mBuff;
+        switch (mStorage) {
+        case StorageType::Original:
+            return mOrgBuff;
+        case StorageType::InPlace:
+            return (void*)&mArray[0];
+        case StorageType::Heap:
+            return (void*)mBuff;
+        }
+        assert(0);
+        return nullptr;
     }
 
     void flush() {
-        if (mBuff != mOrgBuff) {
-            memcpy(mOrgBuff, mBuff, mSize);
+        if (mStorage != StorageType::Original) {
+            memcpy(mOrgBuff, get(), mSize);
         }
     }
+
 private:
+    enum class StorageType : char {
+        Original,
+        InPlace,
+        Heap
+    };
+
     unsigned char* mOrgBuff;
-    void* mBuff;
+    union {
+        unsigned char __attribute__((__aligned__(Align))) mArray[StackSize];
+        void* mBuff;
+    };
     size_t mSize;
+    StorageType mStorage = StorageType::Original;
 };
+
+// Pin the defaults for the generally used type names
+using InputBuffer = GenericInputBuffer<>;
+using OutputBuffer = GenericOutputBuffer<>;
 
 }  // namespace emugl
 
