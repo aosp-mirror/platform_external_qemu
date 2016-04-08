@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8e2d6c79_3c8fe9ea",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-08T18:17:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8e2d6c79_9cdff527",
+      "range": {
+        "startLine": 375,
+        "startChar": 0,
+        "endLine": 375,
+        "endChar": 4
+      },
+      "revId": "7908660ec1c881da50ba4689c70703c6fa8307d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8e2d6c79_bce4b9f6",
         "filename": "android/opengl/gpuinfo.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-08T18:06:43Z",
       "side": 1,
       "message": "are we confident this is not empty?",
+      "range": {
+        "startLine": 400,
+        "startChar": 44,
+        "endLine": 400,
+        "endChar": 49
+      },
+      "revId": "7908660ec1c881da50ba4689c70703c6fa8307d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e2d6c79_1c922516",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-08T18:17:07Z",
+      "side": 1,
+      "message": "We can\u0027t (especially after what happened). This also seemed to be missing the currGpu() pattern, weirdly.",
+      "parentUuid": "8e2d6c79_bce4b9f6",
       "range": {
         "startLine": 400,
         "startChar": 44,
