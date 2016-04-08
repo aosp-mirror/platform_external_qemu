@@ -16,6 +16,29 @@
       "revId": "c06c8e5b23c1dfcfc18f13ca991025fed2337ede",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e2d6c79_91bc3e31",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-08T17:55:46Z",
+      "side": 1,
+      "message": "this look has became too large to understand, at least for me\ncould you please just move the whole if() {} into a separate function and do a return in this very place instead of goto?",
+      "range": {
+        "startLine": 407,
+        "startChar": 19,
+        "endLine": 407,
+        "endChar": 35
+      },
+      "revId": "c06c8e5b23c1dfcfc18f13ca991025fed2337ede",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
