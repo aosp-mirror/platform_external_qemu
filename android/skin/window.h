@@ -45,7 +45,6 @@ typedef struct SkinWindowFuncs {
 extern SkinWindow* skin_window_create(SkinLayout* layout,
                                       int x,
                                       int y,
-                                      int no_display,
                                       bool use_emugl_subwindow,
                                       const SkinWindowFuncs* win_funcs);
 

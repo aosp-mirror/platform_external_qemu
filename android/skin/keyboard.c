@@ -32,7 +32,6 @@
 struct SkinKeyboard {
     const SkinCharmap*  charmap;
     SkinKeyset*         kset;
-    char                enabled;
     char                raw_keys;
 
     SkinRotation        rotation;
@@ -150,17 +149,6 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
     return -1;
 }
 
-/* this gets called only if the reverse unicode mapping didn't work
- * or wasn't used (when in raw keys mode)
- */
-
-void
-skin_keyboard_enable( SkinKeyboard*  keyboard,
-                      int            enabled )
-{
-    keyboard->enabled = enabled;
-}
-
 static void
 skin_keyboard_do_key_event( SkinKeyboard*   kb,
                             SkinKeyCode  code,
@@ -175,12 +163,6 @@ skin_keyboard_do_key_event( SkinKeyboard*   kb,
 void
 skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
 {
-    /* ignore key events if we're not enabled */
-    if (!kb->enabled) {
-        //printf( "ignoring key event\n");
-        return;
-    }
-
     if (ev->type == kEventTextInput) {
         if (!kb->raw_keys) {
             // TODO(digit): For each Unicode value in the input text.
@@ -309,7 +291,6 @@ skin_keyboard_create_from_charmap_name(const char* charmap_name,
                 charmap_name, kb->charmap->name );
     }
     kb->raw_keys = use_raw_keys;
-    kb->enabled  = 0;
 
     /* add default keyset */
     if (skin_keyset_get_default()) {

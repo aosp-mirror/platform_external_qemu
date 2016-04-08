@@ -1022,7 +1022,6 @@ struct SkinWindow {
     FingerState   secondary_finger;
     ButtonState   button;
     BallState     ball;
-    char          no_display;
     bool          use_emugl_subwindow;
 
     char          enable_touch;
@@ -1328,7 +1327,6 @@ static int  skin_window_reset_internal (SkinWindow*, SkinLayout*);
 SkinWindow* skin_window_create(SkinLayout* slayout,
                                int x,
                                int y,
-                               int no_display,
                                bool use_emugl_subwindow,
                                const SkinWindowFuncs* win_funcs) {
     SkinWindow*  window;
@@ -1336,7 +1334,6 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     ANEW0(window);
 
     window->win_funcs    = win_funcs;
-    window->no_display   = no_display;
     window->use_emugl_subwindow = use_emugl_subwindow;
     window->surface = NULL;
 
@@ -1373,7 +1370,7 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     skin_winsys_set_window_pos(x, y);
 
     /* Check that the window is fully visible */
-    if (!window->no_display && !skin_winsys_is_window_fully_visible()) {
+    if (!skin_winsys_is_window_fully_visible()) {
         int win_x, win_y, win_w, win_h;
         int new_x, new_y;
 
@@ -1534,68 +1531,65 @@ skin_window_scroll_updated( SkinWindow* window, int dx, int xmax, int dy, int ym
 static void
 skin_window_resize( SkinWindow*  window, int resize_container )
 {
-    if ( !window->no_display ) {
+    int           layout_w = window->layout.rect.size.w;
+    int           layout_h = window->layout.rect.size.h;
+    int           window_w = layout_w;
+    int           window_h = layout_h;
+    int           window_x = window->x_pos;
+    int           window_y = window->y_pos;
+    double        scale = window->scale;
 
-        int           layout_w = window->layout.rect.size.w;
-        int           layout_h = window->layout.rect.size.h;
-        int           window_w = layout_w;
-        int           window_h = layout_h;
-        int           window_x = window->x_pos;
-        int           window_y = window->y_pos;
-        double        scale = window->scale;
+    // Pre-record the container dimensions
+    if (resize_container) {
+        window->container.w = (int) ceil(layout_w * scale);
+        window->container.h = (int) ceil(layout_h * scale);
+    }
 
-        // Pre-record the container dimensions
-        if (resize_container) {
-            window->container.w = (int) ceil(layout_w * scale);
-            window->container.h = (int) ceil(layout_h * scale);
-        }
+    if (window->zoom != 1.0) {
+        scale *= window->zoom;
+    }
 
-        if (window->zoom != 1.0) {
-            scale *= window->zoom;
-        }
+    if (scale != 1.0) {
+        window_w = (int) ceil(layout_w * scale);
+        window_h = (int) ceil(layout_h * scale);
+    }
 
-        if (scale != 1.0) {
-            window_w = (int) ceil(layout_w * scale);
-            window_h = (int) ceil(layout_h * scale);
-        }
+    // Attempt to resize the window surface. If it doesn't exist, a new one will be
+    // allocated. If it does exist, but it's original dimensions do not match the new
+    // ones, it will be de-allocated and a new one will be returned.
+    window->surface = skin_surface_resize(window->surface,
+                                          window_w, window_h,
+                                          layout_w, layout_h);
 
-        // Attempt to resize the window surface. If it doesn't exist, a new one will be
-        // allocated. If it does exist, but it's original dimensions do not match the new
-        // ones, it will be de-allocated and a new one will be returned.
-        window->surface = skin_surface_resize(window->surface,
-                                              window_w, window_h,
-                                              layout_w, layout_h);
+    // Force redraw the background and skin to avoid drawing empty frames. This reduces flicker
+    // on resize and rotate.
+    Layout* layout = &window->layout;
+    skin_surface_fill(window->surface,
+                      &layout->rect,
+                      layout->color);
 
-        // Force redraw the background and skin to avoid drawing empty frames. This reduces flicker
-        // on resize and rotate.
-        Layout* layout = &window->layout;
-        skin_surface_fill(window->surface,
-                          &layout->rect,
-                          layout->color);
+    Background*  back = layout->backgrounds;
+    Background*  end  = back + layout->num_backgrounds;
+    for ( ; back < end; back++ )
+        background_redraw( back, &layout->rect, window->surface );
 
-        Background*  back = layout->backgrounds;
-        Background*  end  = back + layout->num_backgrounds;
-        for ( ; back < end; back++ )
-            background_redraw( back, &layout->rect, window->surface );
+    skin_surface_create_window(window->surface, window_x, window_y,
+                               window_w, window_h);
 
-        skin_surface_create_window(window->surface, window_x, window_y,
-                                   window_w, window_h);
+    // Calculate the framebuffer and window sizes and locations
+    ADisplay* disp = window->layout.displays;
+    SkinRect drect = disp->rect;
+    skin_surface_get_scaled_rect(window->surface, &drect, &drect);
 
-        // Calculate the framebuffer and window sizes and locations
-        ADisplay* disp = window->layout.displays;
-        SkinRect drect = disp->rect;
-        skin_surface_get_scaled_rect(window->surface, &drect, &drect);
+    // Store original values to use for scrolling later
+    window->subwindow_original.x = drect.pos.x;
+    window->subwindow_original.y = drect.pos.y;
 
-        // Store original values to use for scrolling later
-        window->subwindow_original.x = drect.pos.x;
-        window->subwindow_original.y = drect.pos.y;
+    window->framebuffer.w = drect.size.w;
+    window->framebuffer.h = drect.size.h;
 
-        window->framebuffer.w = drect.size.w;
-        window->framebuffer.h = drect.size.h;
-
-        if (skin_window_recompute_subwindow_rect(window, &drect) && resize_container) {
-            skin_window_show_opengles(window);
-        }
+    if (skin_window_recompute_subwindow_rect(window, &drect) && resize_container) {
+        skin_window_show_opengles(window);
     }
 }
 
