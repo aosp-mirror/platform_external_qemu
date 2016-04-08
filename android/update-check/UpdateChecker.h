@@ -12,6 +12,7 @@
 #pragma once
 
 #include "android/base/Optional.h"
+#include "android/base/StringView.h"
 #include "android/base/threads/Thread.h"
 #include "android/base/Version.h"
 #include "android/update-check/IVersionExtractor.h"
@@ -25,30 +26,34 @@
 namespace android {
 namespace update_check {
 
+using android::base::StringView;
+
 // Set of interfaces for the operations UpdateChecker performs:
-//  IDataLoader - download the xml manifest from the Web
+//  IDataLoader - download the xml manifest from the Web site
 //  ITimeStorage - lock the file to store last update checking time,
 //                 save/load time from the file
 //  INewerVersionReporter - report to the user about available newer version
 
 class IDataLoader {
 public:
-    virtual ~IDataLoader() {}
-    virtual std::string load(const char* version) = 0;
+    virtual ~IDataLoader() = default;
+
+    virtual std::string load() = 0;
+    virtual std::string getUniqueDataKey() = 0;
 };
 
 class ITimeStorage {
 public:
-    virtual ~ITimeStorage() {}
+    virtual ~ITimeStorage() = default;
 
     virtual bool lock() = 0;
-    virtual time_t getTime() = 0;
-    virtual void setTime(time_t time) = 0;
+    virtual time_t getTime(const std::string& key) = 0;
+    virtual void setTime(const std::string& key, time_t time) = 0;
 };
 
 class INewerVersionReporter {
 public:
-    virtual ~INewerVersionReporter() {}
+    virtual ~INewerVersionReporter() = default;
 
     virtual void reportNewerVersion(const android::base::Version& existing,
                                     const android::base::Version& newer) = 0;
@@ -77,13 +82,10 @@ public:
     template <class T>
     using Optional = android::base::Optional<T>;
 
-    // |configPath| is the path to the emulator configuration directory
-    // where the checker can store its records about last check time
     // |coreVersion| is the application's core version (e.g. qemu2 2.2.0)
     //      'nullptr' means 'don't send any emulator-specific information in the
     //      request, just check the version
-    explicit UpdateChecker(const char* configPath,
-                           const char* coreVersion = nullptr);
+    explicit UpdateChecker(const char* coreVersion = nullptr);
 
     bool init();
 
@@ -103,7 +105,6 @@ protected:
     void asyncWorker();
 
 private:
-    const char* mCoreVersion;
     std::unique_ptr<IVersionExtractor> mVersionExtractor;
     std::unique_ptr<IDataLoader> mDataLoader;
     std::unique_ptr<ITimeStorage> mTimeStorage;
