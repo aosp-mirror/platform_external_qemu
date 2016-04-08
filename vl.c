@@ -2883,9 +2883,7 @@ static int is_opengl_alive = 1;
 
 static void android_check_for_updates()
 {
-    char configPath[MAX_PATH];
-    bufprint_config_path(configPath, configPath + sizeof(configPath));
-    android_checkForUpdates(configPath, QEMU_CORE_VERSION);
+    android_checkForUpdates(QEMU_CORE_VERSION);
 }
 
 static void android_init_metrics()
