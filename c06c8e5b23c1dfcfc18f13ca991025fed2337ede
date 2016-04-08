@@ -39,6 +39,30 @@
       "revId": "c06c8e5b23c1dfcfc18f13ca991025fed2337ede",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e2d6c79_11904e7c",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-08T18:01:18Z",
+      "side": 1,
+      "message": "Got it! in https://android-review.googlesource.com/#/c/214414/",
+      "parentUuid": "8e2d6c79_91bc3e31",
+      "range": {
+        "startLine": 407,
+        "startChar": 19,
+        "endLine": 407,
+        "endChar": 35
+      },
+      "revId": "c06c8e5b23c1dfcfc18f13ca991025fed2337ede",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
