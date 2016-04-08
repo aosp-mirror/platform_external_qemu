@@ -33,6 +33,24 @@
       "revId": "06177b97beb6234ae59a315efbbb10efa7b95435",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6e62f8c1_fa51e5b2",
+        "filename": "android/base/containers/Lookup.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-08T15:45:54Z",
+      "side": 1,
+      "message": "it\u0027s not a local variable, it\u0027s a pair owned by the map. Iterator doesn\u0027t copy it, it returns the one which is heap-allocated",
+      "parentUuid": "8ed1ec8e_88bfd7d2",
+      "revId": "06177b97beb6234ae59a315efbbb10efa7b95435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
