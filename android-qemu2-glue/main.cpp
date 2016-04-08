@@ -122,20 +122,20 @@ struct TargetInfo {
 
 // The current target architecture information!
 const TargetInfo kTarget = {
-#ifdef TARGET_ARM
-    "arm",
-    "arm",
-    "cortex-a15",
+#ifdef TARGET_ARM64
+    "arm64",
+    "aarch64",
+    "cortex-a57",
     "ttyAMA",
     " keep_bootcon earlyprintk=ttyAMA0",
     "virtio-blk-device",
     "virtio-net-device",
     {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
     {NULL},
-#elif defined(TARGET_ARM64)
-    "arm64",
-    "aarch64",
-    "cortex-a57",
+#elif defined(TARGET_ARM)
+    "arm",
+    "arm",
+    "cortex-a15",
     "ttyAMA",
     " keep_bootcon earlyprintk=ttyAMA0",
     "virtio-blk-device",
