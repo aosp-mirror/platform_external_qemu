@@ -176,6 +176,15 @@ EmulatorQtWindow* EmulatorQtWindow::getInstance()
 
 EmulatorQtWindow::~EmulatorQtWindow()
 {
+    mScreencapProcess.disconnect();
+    if (mScreencapProcess.state() != QProcess::NotRunning) {
+        mScreencapProcess.kill();
+    }
+    mScreencapPullProcess.disconnect();
+    if (mScreencapPullProcess.state() != QProcess::NotRunning) {
+        mScreencapPullProcess.kill();
+    }
+
     deleteErrorDialog();
     if (mToolWindow) {
         delete mToolWindow;
