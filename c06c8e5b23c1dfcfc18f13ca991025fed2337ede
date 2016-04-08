@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b20f290_553a4c1b",
+        "filename": "android/opengl/gpuinfo.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-08T17:49:19Z",
+      "side": 1,
+      "message": "You were to bring balance to the force, not leave it in darkness! ;)",
+      "revId": "c06c8e5b23c1dfcfc18f13ca991025fed2337ede",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
