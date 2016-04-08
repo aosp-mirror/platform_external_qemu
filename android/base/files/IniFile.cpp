@@ -13,10 +13,13 @@
 
 #include "android/base/Log.h"
 
+#include <iomanip>
+#include <fstream>
+#include <string>
+#include <sstream>
+
 #include <assert.h>
 #include <string.h>
-
-#include <string>
 
 namespace android {
 namespace base {
@@ -62,7 +65,7 @@ static CIterator eat(CIterator citer, CIterator cend, Pred pred) {
     return citer;
 }
 
-void IniFile::parseFile(ifstream* inFile) {
+void IniFile::parseFile(std::istream* inFile) {
     string line;
     int lineno = 0;
     // This is the line number we'd print at if the IniFile were immediately
@@ -231,6 +234,21 @@ int IniFile::size() const {
 
 bool IniFile::hasKey(const string& key) const {
     return mData.find(key) != std::end(mData);
+}
+
+std::string IniFile::makeValidKey(StringView str) {
+    std::ostringstream res;
+    res << std::hex << std::uppercase;
+    res << '_'; // mark all keys passed through this function with a leading
+                // underscore
+    for (char c : str) {
+        if (isKeyChar(c)) {
+            res << c;
+        } else {
+            res << '.' << std::setw(2) << std::setfill('0') << static_cast<int>(c);
+        }
+    }
+    return res.str();
 }
 
 string IniFile::getString(const string& key, const string& defaultValue) const {

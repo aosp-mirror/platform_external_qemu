@@ -23,10 +23,9 @@
 #include <unordered_map>
 #include <vector>
 
-namespace {
+namespace android {
+namespace base {
 
-using android::base::IniFile;
-using android::base::TestTempDir;
 using std::endl;
 using std::numeric_limits;
 using std::string;
@@ -34,7 +33,9 @@ using std::unique_ptr;
 using std::unordered_map;
 using std::vector;
 
-class IniFileTest : public testing::Test {
+namespace {
+
+class IniFileTest : public ::testing::Test {
 public:
     void SetUp() override {
         mTempDir.reset(new TestTempDir("inifiletest"));
@@ -99,6 +100,8 @@ protected:
     string mIniFilePath;
     unique_ptr<IniFile> mIni;
 };
+
+}  // namespace
 
 TEST_F(IniFileTest, readWrite) {
     static const unordered_map<string, int> intData = {
@@ -472,4 +475,14 @@ TEST_F(IniFileTest, strDefaultValues) {
     EXPECT_EQ(1024ULL, mIni->getDiskSizeStr("missingKey", "1k"));
 }
 
-}  // namespace
+TEST_F(IniFileTest, makeValidKey) {
+    EXPECT_STREQ("_key", IniFile::makeValidKey("key").c_str());
+    EXPECT_STREQ("_", IniFile::makeValidKey("").c_str());
+    EXPECT_STREQ("_.3D", IniFile::makeValidKey("=").c_str());
+    EXPECT_STREQ("_a.20sign.20.23", IniFile::makeValidKey("a sign #").c_str());
+    EXPECT_STREQ("_some.20number.2010.20within",
+                 IniFile::makeValidKey("some number 10 within").c_str());
+}
+
+}  // namespace base
+}  // namespace android
