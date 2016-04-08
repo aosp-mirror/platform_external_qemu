@@ -26,10 +26,11 @@
 #include "android/utils/tempfile.h"
 
 #include <ctype.h>
+#include <stdbool.h>
 #include <stddef.h>
-#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <errno.h>
 
 /* global variables - see android/globals.h */
@@ -387,7 +388,7 @@ _getSkinPathFromName( const char*  skinName,
 FOUND_IT:
     if (path_split(skinName, pSkinDir, pSkinName) < 0) {
         derror("malformed skin name: %s", skinName);
-        exit(2);
+        return 0;
     }
     D("found skin '%s' in directory: %s", *pSkinName, *pSkinDir);
     return 1;
@@ -553,12 +554,12 @@ NOT_A_NUMBER:
 }
 
 bool
-avdInfo_isGoogleApis(AvdInfo* i) {
+avdInfo_isGoogleApis(const AvdInfo* i) {
     return i->isGoogleApis;
 }
 
 int
-avdInfo_getApiLevel(AvdInfo* i) {
+avdInfo_getApiLevel(const AvdInfo* i) {
     return i->apiLevel;
 }
 
@@ -566,7 +567,7 @@ avdInfo_getApiLevel(AvdInfo* i) {
  * Returns NULL if it doesn't exist, or a strdup() copy otherwise.
  */
 static char*
-_avdInfo_getContentFilePath(AvdInfo*  i, const char* fileName)
+_avdInfo_getContentFilePath(const AvdInfo*  i, const char* fileName)
 {
     char temp[MAX_PATH], *p = temp, *end = p + sizeof(temp);
 
@@ -609,11 +610,11 @@ _avdInfo_getConfigIni(AvdInfo*  i)
  * with SEARCH_PREFIX) which are directory locations searched for
  * AVD platform files.
  */
-static void
+static bool
 _avdInfo_getSearchPaths( AvdInfo*  i )
 {
     if (i->configIni == NULL)
-        return;
+        return true;
 
     i->numSearchPaths = _getSearchPaths( i->configIni,
                                          i->sdkRootPath,
@@ -623,17 +624,18 @@ _avdInfo_getSearchPaths( AvdInfo*  i )
         derror("no search paths found in this AVD's configuration.\n"
                "Weird, the AVD's " CORE_CONFIG_INI " file is malformed. "
                "Try re-creating it.\n");
-        exit(2);
+        return false;
     }
     else
         DD("found a total of %d search paths for this AVD", i->numSearchPaths);
+    return true;
 }
 
 /* Search a file in the SDK search directories. Return NULL if not found,
  * or a strdup() otherwise.
  */
 static char*
-_avdInfo_getSdkFilePath(AvdInfo*  i, const char*  fileName)
+_avdInfo_getSdkFilePath(const AvdInfo*  i, const char*  fileName)
 {
     char temp[MAX_PATH], *p = temp, *end = p + sizeof(temp);
 
@@ -664,7 +666,7 @@ FOUND:
  * SDK search directory. Returns NULL if not found.
  */
 static char*
-_avdInfo_getContentOrSdkFilePath(AvdInfo*  i, const char*  fileName)
+_avdInfo_getContentOrSdkFilePath(const AvdInfo*  i, const char*  fileName)
 {
     char*  path;
 
@@ -681,7 +683,7 @@ _avdInfo_getContentOrSdkFilePath(AvdInfo*  i, const char*  fileName)
 
 #if 0
 static int
-_avdInfo_findContentOrSdkImage(AvdInfo* i, AvdImageType id)
+_avdInfo_findContentOrSdkImage(const AvdInfo* i, AvdImageType id)
 {
     const char* fileName = _imageFileNames[id];
     char*       path     = _avdInfo_getContentOrSdkFilePath(i, fileName);
@@ -715,7 +717,7 @@ _avdInfo_getCoreHwIniPath( AvdInfo* i, const char* basePath )
 
 
 static void
-_avdInfo_readPropertyFile(AvdInfo* i,
+_avdInfo_readPropertyFile(const AvdInfo* i,
                           const char* filePath,
                           FileData* data) {
     int ret = fileData_initFromFile(data, filePath);
@@ -781,7 +783,7 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
 
     if (!_checkAvdName(name)) {
         derror("virtual device name contains invalid characters");
-        exit(1);
+        return NULL;
     }
 
     ANEW0(i);
@@ -799,7 +801,9 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
     /* look for image search paths. handle post 1.1/pre cupcake
      * obsolete SDKs.
      */
-    _avdInfo_getSearchPaths(i);
+    if (!_avdInfo_getSearchPaths(i)) {
+        goto FAIL;
+    }
 
     // Find the build.prop and boot.prop files and read them.
     _avdInfo_getPropertyFile(i, "build.prop", i->buildProperties);
@@ -930,13 +934,13 @@ FAIL:
 }
 
 const char*
-avdInfo_getName( AvdInfo*  i )
+avdInfo_getName( const AvdInfo*  i )
 {
     return i ? i->deviceName : NULL;
 }
 
 const char*
-avdInfo_getImageFile( AvdInfo*  i, AvdImageType  imageType )
+avdInfo_getImageFile( const AvdInfo*  i, AvdImageType  imageType )
 {
     if (i == NULL || (unsigned)imageType >= AVD_IMAGE_MAX)
         return NULL;
@@ -945,7 +949,7 @@ avdInfo_getImageFile( AvdInfo*  i, AvdImageType  imageType )
 }
 
 uint64_t
-avdInfo_getImageFileSize( AvdInfo*  i, AvdImageType  imageType )
+avdInfo_getImageFileSize( const AvdInfo*  i, AvdImageType  imageType )
 {
     const char* file = avdInfo_getImageFile(i, imageType);
     uint64_t    size;
@@ -960,7 +964,7 @@ avdInfo_getImageFileSize( AvdInfo*  i, AvdImageType  imageType )
 }
 
 int
-avdInfo_isImageReadOnly( AvdInfo*  i, AvdImageType  imageType )
+avdInfo_isImageReadOnly( const AvdInfo*  i, AvdImageType  imageType )
 {
     if (i == NULL || (unsigned)imageType >= AVD_IMAGE_MAX)
         return 1;
@@ -969,7 +973,7 @@ avdInfo_isImageReadOnly( AvdInfo*  i, AvdImageType  imageType )
 }
 
 char*
-avdInfo_getKernelPath( AvdInfo*  i )
+avdInfo_getKernelPath( const AvdInfo*  i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_KERNEL ];
 
@@ -1002,7 +1006,8 @@ avdInfo_getKernelPath( AvdInfo*  i )
                      i->androidBuildRoot, i->targetArch, suffix);
         if (p >= end || !path_exists(temp)) {
             derror("bad workspace: cannot find prebuilt kernel in: %s", temp);
-            exit(1);
+            kernelPath = NULL;
+            break;
         }
         kernelPath = ASTRDUP(temp);
 
@@ -1012,7 +1017,7 @@ avdInfo_getKernelPath( AvdInfo*  i )
 }
 
 char*
-avdInfo_getRanchuKernelPath( AvdInfo*  i )
+avdInfo_getRanchuKernelPath( const AvdInfo*  i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_KERNELRANCHU ];
 
@@ -1035,7 +1040,8 @@ avdInfo_getRanchuKernelPath( AvdInfo*  i )
                 return avdInfo_getKernelPath(i);
             } else {
                 derror("bad workspace: cannot find prebuilt ranchu kernel in: %s", temp);
-                exit(1);
+                kernelPath = NULL;
+                break;
             }
         }
         kernelPath = ASTRDUP(temp);
@@ -1046,25 +1052,25 @@ avdInfo_getRanchuKernelPath( AvdInfo*  i )
 
 
 char*
-avdInfo_getRamdiskPath( AvdInfo* i )
+avdInfo_getRamdiskPath( const AvdInfo* i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_RAMDISK ];
     return _avdInfo_getContentOrSdkFilePath(i, imageName);
 }
 
-char*  avdInfo_getCachePath( AvdInfo*  i )
+char*  avdInfo_getCachePath( const AvdInfo*  i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_CACHE ];
     return _avdInfo_getContentFilePath(i, imageName);
 }
 
-char*  avdInfo_getDefaultCachePath( AvdInfo*  i )
+char*  avdInfo_getDefaultCachePath( const AvdInfo*  i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_CACHE ];
     return _getFullFilePath(i->contentPath, imageName);
 }
 
-char*  avdInfo_getSdCardPath( AvdInfo* i )
+char*  avdInfo_getSdCardPath( const AvdInfo* i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_SDCARD ];
     char*       path;
@@ -1088,49 +1094,49 @@ char*  avdInfo_getSdCardPath( AvdInfo* i )
 }
 
 char*
-avdInfo_getSnapStoragePath( AvdInfo* i )
+avdInfo_getSnapStoragePath( const AvdInfo* i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_SNAPSHOTS ];
     return _avdInfo_getContentFilePath(i, imageName);
 }
 
 char*
-avdInfo_getSystemImagePath( AvdInfo*  i )
+avdInfo_getSystemImagePath( const AvdInfo*  i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_USERSYSTEM ];
     return _avdInfo_getContentFilePath(i, imageName);
 }
 
 char*
-avdInfo_getSystemInitImagePath( AvdInfo*  i )
+avdInfo_getSystemInitImagePath( const AvdInfo*  i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_INITSYSTEM ];
     return _avdInfo_getContentOrSdkFilePath(i, imageName);
 }
 
 char*
-avdInfo_getDataImagePath( AvdInfo*  i )
+avdInfo_getDataImagePath( const AvdInfo*  i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_USERDATA ];
     return _avdInfo_getContentFilePath(i, imageName);
 }
 
 char*
-avdInfo_getDefaultDataImagePath( AvdInfo*  i )
+avdInfo_getDefaultDataImagePath( const AvdInfo*  i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_USERDATA ];
     return _getFullFilePath(i->contentPath, imageName);
 }
 
 char*
-avdInfo_getDataInitImagePath( AvdInfo* i )
+avdInfo_getDataInitImagePath( const AvdInfo* i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_INITDATA ];
     return _avdInfo_getContentOrSdkFilePath(i, imageName);
 }
 
 int
-avdInfo_initHwConfig( AvdInfo*  i, AndroidHwConfig*  hw )
+avdInfo_initHwConfig( const AvdInfo*  i, AndroidHwConfig*  hw )
 {
     int  ret = 0;
 
@@ -1177,31 +1183,31 @@ avdInfo_initHwConfig( AvdInfo*  i, AndroidHwConfig*  hw )
 }
 
 const char*
-avdInfo_getContentPath( AvdInfo*  i )
+avdInfo_getContentPath( const AvdInfo*  i )
 {
     return i->contentPath;
 }
 
 int
-avdInfo_inAndroidBuild( AvdInfo*  i )
+avdInfo_inAndroidBuild( const AvdInfo*  i )
 {
     return i->inAndroidBuild;
 }
 
 char*
-avdInfo_getTargetCpuArch(AvdInfo* i) {
+avdInfo_getTargetCpuArch(const AvdInfo* i) {
     return ASTRDUP(i->targetArch);
 }
 
 char*
-avdInfo_getTargetAbi( AvdInfo* i )
+avdInfo_getTargetAbi( const AvdInfo* i )
 {
     /* For now, we can't get the ABI from SDK AVDs */
     return ASTRDUP(i->targetAbi);
 }
 
 char*
-avdInfo_getCodeProfilePath( AvdInfo*  i, const char*  profileName )
+avdInfo_getCodeProfilePath( const AvdInfo*  i, const char*  profileName )
 {
     char   tmp[MAX_PATH], *p=tmp, *end=p + sizeof(tmp);
 
@@ -1219,14 +1225,14 @@ avdInfo_getCodeProfilePath( AvdInfo*  i, const char*  profileName )
 }
 
 const char*
-avdInfo_getCoreHwIniPath( AvdInfo* i )
+avdInfo_getCoreHwIniPath( const AvdInfo* i )
 {
     return i->coreHardwareIniPath;
 }
 
 
 void
-avdInfo_getSkinInfo( AvdInfo*  i, char** pSkinName, char** pSkinDir )
+avdInfo_getSkinInfo( const AvdInfo*  i, char** pSkinName, char** pSkinDir )
 {
     char*  skinName = NULL;
     char*  skinPath;
@@ -1342,7 +1348,7 @@ avdInfo_getSkinInfo( AvdInfo*  i, char** pSkinName, char** pSkinDir )
 }
 
 char*
-avdInfo_getCharmapFile( AvdInfo* i, const char* charmapName )
+avdInfo_getCharmapFile( const AvdInfo* i, const char* charmapName )
 {
     char        fileNameBuff[PATH_MAX];
     const char* fileName;
@@ -1360,7 +1366,7 @@ avdInfo_getCharmapFile( AvdInfo* i, const char* charmapName )
     return _avdInfo_getContentOrSdkFilePath(i, fileName);
 }
 
-int avdInfo_getAdbdCommunicationMode( AvdInfo* i )
+int avdInfo_getAdbdCommunicationMode( const AvdInfo* i )
 {
     if (i->apiLevel < 16) {
         // QEMU pipe for ADB communication was added in android-4.1.1_r1 API 16
@@ -1371,7 +1377,7 @@ int avdInfo_getAdbdCommunicationMode( AvdInfo* i )
     return propertyFile_getAdbdCommunicationMode(i->buildProperties);
 }
 
-int avdInfo_getSnapshotPresent(AvdInfo* i)
+int avdInfo_getSnapshotPresent(const AvdInfo* i)
 {
     if (i->configIni == NULL) {
         return 0;

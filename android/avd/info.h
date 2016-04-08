@@ -134,49 +134,49 @@ void        avdInfo_free( AvdInfo*  i );
 
 /* Return the name of the Android Virtual Device
  */
-const char*  avdInfo_getName( AvdInfo*  i );
+const char*  avdInfo_getName( const AvdInfo*  i );
 
 /* Return the target API level for this AVD.
  * Note that this will be some ridiculously large
  * value (e.g. 1000) if this value cannot be properly
  * determined (e.g. you're using an AVD from a preview SDK)
  */
-int    avdInfo_getApiLevel( AvdInfo*  i );
+int    avdInfo_getApiLevel( const AvdInfo*  i );
 
 /* Returns true if the AVD is on Google APIs. */
-bool   avdInfo_isGoogleApis( AvdInfo*  i );
+bool   avdInfo_isGoogleApis( const AvdInfo*  i );
 
 /* Returns the path to various images corresponding to a given AVD.
  * NULL if the image cannot be found. Returned strings must be freed
  * by the caller.
  */
-char*  avdInfo_getKernelPath( AvdInfo*  i );
-char*  avdInfo_getRanchuKernelPath( AvdInfo*  i );
-char*  avdInfo_getRamdiskPath( AvdInfo*  i );
-char*  avdInfo_getSdCardPath( AvdInfo* i );
-char*  avdInfo_getSnapStoragePath( AvdInfo* i );
+char*  avdInfo_getKernelPath( const AvdInfo*  i );
+char*  avdInfo_getRanchuKernelPath( const AvdInfo*  i );
+char*  avdInfo_getRamdiskPath( const AvdInfo*  i );
+char*  avdInfo_getSdCardPath( const AvdInfo* i );
+char*  avdInfo_getSnapStoragePath( const AvdInfo* i );
 
 /* This function returns NULL if the cache image file cannot be found.
  * Use avdInfo_getDefaultCachePath() to retrieve the default path
  * if you intend to create the partition file there.
  */
-char*  avdInfo_getCachePath( AvdInfo*  i );
-char*  avdInfo_getDefaultCachePath( AvdInfo*  i );
+char*  avdInfo_getCachePath( const AvdInfo*  i );
+char*  avdInfo_getDefaultCachePath( const AvdInfo*  i );
 
 
 /* avdInfo_getSystemImagePath() will return NULL, except if the AVD content
  * directory contains a file named "system-qemu.img".
  */
-char*  avdInfo_getSystemImagePath( AvdInfo* i );
+char*  avdInfo_getSystemImagePath( const AvdInfo* i );
 
 /* avdInfo_getSystemInitImagePath() retrieves the path to the read-only
  * initialization image for this disk image.
  */
-char*  avdInfo_getSystemInitImagePath( AvdInfo*  i );
+char*  avdInfo_getSystemInitImagePath( const AvdInfo*  i );
 
-char*  avdInfo_getDataImagePath( AvdInfo*  i );
-char*  avdInfo_getDefaultDataImagePath( AvdInfo*  i );
-char*  avdInfo_getDataInitImagePath( AvdInfo* i );
+char*  avdInfo_getDataImagePath( const AvdInfo*  i );
+char*  avdInfo_getDefaultDataImagePath( const AvdInfo*  i );
+char*  avdInfo_getDataInitImagePath( const AvdInfo* i );
 
 /* Return a reference to the boot.prop file for this AVD, if any.
  * The file contains additionnal properties to inject at boot time
@@ -188,40 +188,40 @@ const FileData* avdInfo_getBootProperties(const AvdInfo* i);
 /* Returns the path to a given AVD image file. This will return NULL if
  * the file cannot be found / does not exist.
  */
-const char*  avdInfo_getImagePath( AvdInfo*  i, AvdImageType  imageType );
+const char*  avdInfo_getImagePath( const AvdInfo*  i, AvdImageType  imageType );
 
 /* Returns the default path of a given AVD image file. This only makes sense
  * if avdInfo_getImagePath() returned NULL.
  */
-const char*  avdInfo_getImageDefaultPath( AvdInfo*  i, AvdImageType  imageType );
+const char*  avdInfo_getImageDefaultPath( const AvdInfo*  i, AvdImageType  imageType );
 
 
 /* Try to find the path of a given image file, returns NULL
  * if the corresponding file could not be found. the string
  * belongs to the AvdInfo object.
  */
-const char*  avdInfo_getImageFile( AvdInfo*  i, AvdImageType  imageType );
+const char*  avdInfo_getImageFile( const AvdInfo*  i, AvdImageType  imageType );
 
 /* Return the size of a given image file. Returns 0 if the file
  * does not exist or could not be accessed.
  */
-uint64_t     avdInfo_getImageFileSize( AvdInfo*  i, AvdImageType  imageType );
+uint64_t     avdInfo_getImageFileSize( const AvdInfo*  i, AvdImageType  imageType );
 
 /* Returns 1 if the corresponding image file is read-only
  */
-int          avdInfo_isImageReadOnly( AvdInfo*  i, AvdImageType  imageType );
+int          avdInfo_isImageReadOnly( const AvdInfo*  i, AvdImageType  imageType );
 
 /* lock an image file if it is writable. returns 0 on success, or -1
  * otherwise. note that if the file is read-only, it doesn't need to
  * be locked and the function will return success.
  */
-int          avdInfo_lockImageFile( AvdInfo*  i, AvdImageType  imageType, int  abortOnError);
+int          avdInfo_lockImageFile( const AvdInfo*  i, AvdImageType  imageType, int  abortOnError);
 
 /* Manually set the path of a given image file. */
-void         avdInfo_setImageFile( AvdInfo*  i, AvdImageType  imageType, const char*  imagePath );
+void         avdInfo_setImageFile( const AvdInfo*  i, AvdImageType  imageType, const char*  imagePath );
 
 /* Returns the content path of the virtual device */
-const char*  avdInfo_getContentPath( AvdInfo*  i );
+const char*  avdInfo_getContentPath( const AvdInfo*  i );
 
 /* Retrieve the AVD's specific skin information.
  * On exit:
@@ -230,41 +230,41 @@ const char*  avdInfo_getContentPath( AvdInfo*  i );
  *
  * Note that the skin's content will be under <skinDir>/<skinName>.
  */
-void         avdInfo_getSkinInfo( AvdInfo*  i, char** pSkinName, char** pSkinDir );
+void         avdInfo_getSkinInfo( const AvdInfo*  i, char** pSkinName, char** pSkinDir );
 
 /* Find a charmap file named <charmapName>.kcm for this AVD.
  * Returns the path of the file on success, or NULL if not found.
  * The result string must be freed by the caller.
  */
-char*        avdInfo_getCharmapFile( AvdInfo* i, const char* charmapName );
+char*        avdInfo_getCharmapFile( const AvdInfo* i, const char* charmapName );
 
 /* Returns TRUE iff in the Android build system */
-int          avdInfo_inAndroidBuild( AvdInfo*  i );
+int          avdInfo_inAndroidBuild( const AvdInfo*  i );
 
 /* Return the target CPU architecture for this AVD.
  * This returns NULL if that cannot be determined, or a string that
  * must be freed by the caller otherwise.
  */
-char*        avdInfo_getTargetCpuArch(AvdInfo* i);
+char*        avdInfo_getTargetCpuArch(const AvdInfo* i);
 
 /* Returns the target ABI for the corresponding platform image.
  * This may return NULL if it cannot be determined. Otherwise this is
  * a string like "armeabi", "armeabi-v7a" or "x86" that must be freed
  * by the caller.
  */
-char*        avdInfo_getTargetAbi( AvdInfo*  i );
+char*        avdInfo_getTargetAbi( const AvdInfo*  i );
 
 /* Reads the AVD's hardware configuration into 'hw'. returns -1 on error, 0 otherwise */
-int          avdInfo_initHwConfig( AvdInfo*  i, AndroidHwConfig*  hw );
+int          avdInfo_initHwConfig( const AvdInfo*  i, AndroidHwConfig*  hw );
 
 /* Returns a *copy* of the path used to store profile 'foo'. result must be freed by caller */
-char*        avdInfo_getCodeProfilePath( AvdInfo*  i, const char*  profileName );
+char*        avdInfo_getCodeProfilePath( const AvdInfo*  i, const char*  profileName );
 
 /* Returns the path of the hardware.ini where we will write the AVD's
  * complete hardware configuration before launching the corresponding
  * core.
  */
-const char*  avdInfo_getCoreHwIniPath( AvdInfo* i );
+const char*  avdInfo_getCoreHwIniPath( const AvdInfo* i );
 
 /* Returns mode in which ADB daemon running in the guest communicates with the
  * emulator
@@ -273,7 +273,7 @@ const char*  avdInfo_getCoreHwIniPath( AvdInfo* i );
  *      "legacy" mode).
  *  1 - ADBD communicates with the emulator via 'adb' QEMUD service.
  */
-int          avdInfo_getAdbdCommunicationMode( AvdInfo* i );
+int          avdInfo_getAdbdCommunicationMode( const AvdInfo* i );
 
 /* Returns config.ini snapshot presense status.
  * This routine checks if snapshots are enabled in AVD config.ini file.
@@ -282,6 +282,6 @@ int          avdInfo_getAdbdCommunicationMode( AvdInfo* i );
  *  0 - Snapshots are disabled in AVD config.ini file, of config.ini file is not
  *      found.
 */
-int          avdInfo_getSnapshotPresent(AvdInfo* i);
+int          avdInfo_getSnapshotPresent(const AvdInfo* i);
 
 ANDROID_END_HEADER
