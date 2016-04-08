@@ -1,4 +1,5 @@
 #include "android/cmdline-option.h"
+#include "android/constants.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
@@ -301,3 +302,61 @@ parse_env_debug_tags( void )
     parse_debug_tags( env );
 }
 
+bool android_parse_port_option(const char* port_string,
+                               int* console_port) {
+    if (port_string == NULL) {
+        return false;
+    }
+    char* end;
+    int lower_bound = ANDROID_CONSOLE_BASEPORT;
+    int upper_bound = lower_bound + (MAX_ANDROID_EMULATORS - 1) * 2;
+    int port = strtol(port_string, &end, 0);
+    if (end == NULL || *end || port < lower_bound || port > upper_bound) {
+        derror("option -port must be followed by an even integer "
+                 "between %d and %d, '%s' is not a valid input",
+                 lower_bound, upper_bound, port_string);
+        return false;
+    } else if ((port & 1) != 0) {
+        port &= ~1;
+        dwarning("option -port must be followed by an even integer, using port "
+                 "number %d\n", port);
+    }
+    *console_port = port;
+    return true;
+}
+
+bool android_parse_ports_option(const char* ports_string,
+                                int* console_port,
+                                int* adb_port) {
+    if (ports_string == NULL) {
+        return false;
+    }
+
+    char* comma_location;
+    char* end;
+    int first_port = strtol(ports_string, &comma_location, 0);
+
+    if (comma_location == NULL || *comma_location != ',' ||
+        first_port < 1 || first_port > UINT16_MAX) {
+        derror("option -ports must be followed by two comma separated "
+               "positive integer numbers");
+        return false;
+    }
+
+    int second_port = strtol(comma_location+1, &end, 0);
+
+    if (end == NULL || *end || second_port < 1 || second_port > UINT16_MAX) {
+        derror("option -ports must be followed by two comma separated "
+               "positive integer numbers");
+        return false;
+    }
+
+    if (first_port == second_port) {
+        derror("option -ports must be followed by two different "
+               "integer numbers");
+        return false;
+    }
+    *console_port = first_port;
+    *adb_port = second_port;
+    return true;
+}
