@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "8e2d6c79_a8d0f0d1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-09T00:05:33Z",
+      "side": 1,
+      "message": "I guess I\u0027d like to see, somewhere, an argument why this is an advance over the existing \"map::find\".  They seem isomorphic to me -- with the built-in find, you get a MapType::iterator value, and compare with map.end(), in your new version you get a T* and compare with nullptr.  The STL wants us to think of iterators like generalized pointers...so this doesn\u0027t seem like it\u0027s in that spirit.",
+      "range": {
+        "startLine": 12,
+        "startChar": 1,
+        "endLine": 12,
+        "endChar": 47
+      },
+      "revId": "06177b97beb6234ae59a315efbbb10efa7b95435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8ed1ec8e_e8b493f8",
         "filename": "android/base/containers/Lookup.h",
         "patchSetId": 5
@@ -48,6 +71,52 @@
       "side": 1,
       "message": "it\u0027s not a local variable, it\u0027s a pair owned by the map. Iterator doesn\u0027t copy it, it returns the one which is heap-allocated",
       "parentUuid": "8ed1ec8e_88bfd7d2",
+      "revId": "06177b97beb6234ae59a315efbbb10efa7b95435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e2d6c79_287b208e",
+        "filename": "android/base/containers/Lookup.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-09T00:05:33Z",
+      "side": 1,
+      "message": "English pet peeve: which --\u003e that.  (See, e.g., http://afterdeadline.blogs.nytimes.com/2008/11/24/that-which-or-what/?_r\u003d0)\nReasonable people can disagree on this... but I\u0027ll go with Strunk \u0026 White, the New York Times, and my Ph.D. advisor :-).\n\n(Throughout.)\n\nFWIW, I think these spec comments would look better with initial cap and a period.",
+      "range": {
+        "startLine": 61,
+        "startChar": 11,
+        "endLine": 61,
+        "endChar": 16
+      },
+      "revId": "06177b97beb6234ae59a315efbbb10efa7b95435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e2d6c79_8847ac47",
+        "filename": "android/base/containers/Lookup.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-09T00:05:33Z",
+      "side": 1,
+      "message": "I think this comment should be a little more precise.  First of the passed values, in that order to be found?  Or, in the iteration order of the map, the the passed value that occurs first?",
+      "range": {
+        "startLine": 88,
+        "startChar": 23,
+        "endLine": 88,
+        "endChar": 28
+      },
       "revId": "06177b97beb6234ae59a315efbbb10efa7b95435",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
