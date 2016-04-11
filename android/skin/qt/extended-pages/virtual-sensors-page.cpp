@@ -20,9 +20,6 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget *parent) :
     mSensorsAgent(nullptr)
 {
     mUi->setupUi(this);
-    mUi->yawAngleWidget->setRange(-180., 180);
-    mUi->pitchAngleWidget->setRange(-180, 180);
-    mUi->rollAngleWidget->setRange(-180, 180);
     mUi->temperatureSensorValueWidget->setRange(-273.1, 100.0);
     mUi->temperatureSensorValueWidget->setValue(25.0);
     mUi->lightSensorValueWidget->setRange(0, 40000.0);
@@ -42,12 +39,15 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget *parent) :
 
     onPhoneRotationChanged();
 
-    connect(mUi->yawAngleWidget, SIGNAL(valueChanged()), this, SLOT(onPhoneRotationChanged()));
-    connect(mUi->pitchAngleWidget, SIGNAL(valueChanged()), this, SLOT(onPhoneRotationChanged()));
-    connect(mUi->rollAngleWidget, SIGNAL(valueChanged()), this, SLOT(onPhoneRotationChanged()));
     connect(mUi->magNorthWidget, SIGNAL(editingFinished()), this, SLOT(onPhoneRotationChanged()));
     connect(mUi->magEastWidget, SIGNAL(editingFinished()), this, SLOT(onPhoneRotationChanged()));
     connect(mUi->magVerticalWidget, SIGNAL(editingFinished()), this, SLOT(onPhoneRotationChanged()));
+    connect(mUi->accelWidget, SIGNAL(rotationChanged(const QQuaternion&)),
+            this, SLOT(updateSlidersFromAccelWidget(const QQuaternion&)));
+}
+
+void VirtualSensorsPage::updateSlidersFromAccelWidget(const QQuaternion& quat) {
+    onPhoneRotationChanged();
 }
 
 void VirtualSensorsPage::setSensorsAgent(const QAndroidSensorsAgent* agent) {
@@ -98,28 +98,11 @@ static QString formatSensorValue(double value) {
 }
 
 void VirtualSensorsPage::onPhoneRotationChanged() {
-    // Yaw is rotation around Z axis.
-    // Pitch is rotation around X axis.
-    // When the device is positioned on a table with screen
-    // up, the Z axis points from the screen towards the sky,
-    // the X axis points to the top of the device.
-    // The "top" can mean the short or the long edge, depending
-    // on whether the device is in portrait mode or in landscape
-    // mode.
-    double yaw = mUi->yawAngleWidget->getValue();
-    double pitch = mUi->pitchAngleWidget->getValue();
-    double roll = mUi->rollAngleWidget->getValue();
+    QQuaternion device_rotation_quat = mUi->accelWidget->rotation();
 
-    // A quaternion representing the device's rotation.
-    // Yaw, pitch and roll are applied in that order.
-    QQuaternion device_rotation_quat =
-        QQuaternion::fromAxisAndAngle(0, 0, 1.0, yaw) *
-        QQuaternion::fromAxisAndAngle(1.0, 0, 0, pitch) *
-        QQuaternion::fromAxisAndAngle(0, 1.0, 0, roll);
-
-    // Gravity and magnetic vector in the "absolute" frame of
-    // reference (i.e. device operator's frame of reference).
-    QVector3D gravity_vector(0, 0, -9.8);
+    // Gravity and magnetic vector in the device's frame of
+    // reference.
+    QVector3D gravity_vector(0.0, 9.8, 0.0);
     QVector3D magnetic_vector(
             mUi->magNorthWidget->text().toDouble(),
             mUi->magEastWidget->text().toDouble(),
@@ -147,12 +130,6 @@ void VirtualSensorsPage::onPhoneRotationChanged() {
                    device_magnetic_vector.x(),
                    device_magnetic_vector.y(),
                    device_magnetic_vector.z());
-    
-    setSensorValue(mSensorsAgent,
-                   ANDROID_SENSOR_ORIENTATION,
-                   yaw,
-                   pitch,
-                   roll);
 
     // Update labels with new values.
     mUi->accelerometerXLabel->setText(formatSensorValue(device_gravity_vector.x()));

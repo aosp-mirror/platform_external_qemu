@@ -25,18 +25,21 @@ Accelerometer3DWidget::~Accelerometer3DWidget() {
     if (!mGLES2) {
         return;
     }
-    mGLES2->glDeleteProgram(mProgram);
-    mGLES2->glDeleteBuffers(1, &mVertexDataBuffer);
-    mGLES2->glDeleteBuffers(1, &mVertexIndexBuffer);
-    mGLES2->glDeleteTextures(1, &mGlossMap);
-    mGLES2->glDeleteTextures(1, &mDiffuseMap);
-    mGLES2->glDeleteTextures(1, &mSpecularMap);
-    mGLES2->glDeleteTextures(1, &mEnvMap);
+    if (isValid()) {
+        mGLES2->glDeleteProgram(mProgram);
+        mGLES2->glDeleteBuffers(1, &mVertexDataBuffer);
+        mGLES2->glDeleteBuffers(1, &mVertexIndexBuffer);
+        mGLES2->glDeleteTextures(1, &mGlossMap);
+        mGLES2->glDeleteTextures(1, &mDiffuseMap);
+        mGLES2->glDeleteTextures(1, &mSpecularMap);
+        mGLES2->glDeleteTextures(1, &mEnvMap);
+    }
 }
 
 // Helper function that uploads the data from texture in the file
 // specified by |source_filename| into the texture object bound
-// at |target| using the given |format|.
+// at |target| using the given |format|. |format| should be
+// either GL_RGBA or GL_LUMINANCE.
 // Returns true on success, false on failure.
 static bool loadTexture(const GLESv2Dispatch* gles2,
                         const char* source_filename,
@@ -195,7 +198,7 @@ bool Accelerometer3DWidget::initModel() {
     mGLES2->glGenBuffers(1, &mVertexIndexBuffer);
     mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
     mGLES2->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                         indices.size() * sizeof(size_t),
+                         mElementsCount * sizeof(GLuint),
                          &indices[0],
                          GL_STATIC_DRAW);
     CHECK_GL_ERROR_RETURN("Failed to load model", false);
@@ -303,9 +306,7 @@ void Accelerometer3DWidget::repaintGL() {
     GLuint env_map_uniform = mGLES2->glGetUniformLocation(mProgram, "env_map");
     mGLES2->glUniform1i(env_map_uniform, 3);
 
-    // Draw the model.
-    mGLES2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    // Set up attribute pointers.
     mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
     mGLES2->glEnableVertexAttribArray(mVertexPositionAttribute);
     mGLES2->glEnableVertexAttribArray(mVertexNormalAttribute);
@@ -329,6 +330,9 @@ void Accelerometer3DWidget::repaintGL() {
                                   sizeof(float) * 8,
                                   (void*)(sizeof(float) * 6));
     mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
+
+    // Draw the model.
+    mGLES2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     mGLES2->glDrawElements(GL_TRIANGLES, mElementsCount, GL_UNSIGNED_INT, 0);
 }
 
