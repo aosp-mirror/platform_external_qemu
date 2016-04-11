@@ -13,6 +13,7 @@
 #pragma once
 
 #include "android/base/containers/CircularBuffer.h"
+#include "android/emulation/control/AdbInterface.h"
 #include "android/skin/event.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/size-tweaker.h"
@@ -77,6 +78,7 @@ public:
 
     void runAdbPush(const QList<QUrl> &urls);
     void runAdbShellStopAndQuit();
+    void checkAdbVersionAndWarn();
 
     bool handleQtKeyEvent(QKeyEvent* event);
 
@@ -84,12 +86,8 @@ public:
     // window and the tool bar. This is how big that gap is.
     static const int toolGap = 10;
 
-    void setupAdbPath();
-
 private:
-    bool isAdbVersionCurrent(const std::string& sdkRootDirectory) const;
     void showAdbWarning();
-
     void adbShellStopRunner();
     void handleUICommand(QtUICommand cmd, bool down);
     void forwardKeyToEmulator(uint32_t keycode, bool down);
@@ -126,6 +124,7 @@ private:
     std::weak_ptr<UIEventRecorder<android::base::CircularBuffer>> mUIEventRecorder;
     SizeTweaker mSizeTweaker;
     QMessageBox mAdbWarningBox;
+    android::emulation::AdbInterface mAdbInterface;
 
 private slots:
     void on_back_button_pressed();

@@ -187,45 +187,10 @@ ToolWindow::~ToolWindow() {
     mPushDialog.close();
 }
 
-void ToolWindow::setupAdbPath() {
-    mDetectedAdbPath = QString::null;
-
-    // First try finding ADB by the environment variable.
-    auto sdkRootDirectory = android::ConfigDirs::getSdkRootDirectoryByEnv();
-    if (!sdkRootDirectory.empty()) {
-        // If ANDROID_SDK_ROOT is defined, the user most likely wanted to use
-        // that ADB. Store it for later - if the second potential ADB path
-        // also fails, we'll warn the user about this one.
-        mDetectedAdbPath = QString(
-                PathUtils::join(sdkRootDirectory, "platform-tools", "adb")
-                        .c_str());
-        if (isAdbVersionCurrent(sdkRootDirectory)) {
-            return;
-        }
-    }
-
-    // If the first path was non-existent or a bad version, try to infer the
-    // path based on the emulator executable location.
-    sdkRootDirectory = android::ConfigDirs::getSdkRootDirectoryByPath();
-    if (!sdkRootDirectory.empty()) {
-        if (isAdbVersionCurrent(sdkRootDirectory)) {
-            mDetectedAdbPath = QString(
-                    PathUtils::join(sdkRootDirectory, "platform-tools", "adb")
-                            .c_str());
-            return;
-
-            // Only save this path if the ANDROID_SDK_ROOT path was not set.
-        } else if (mDetectedAdbPath.isNull()) {
-            mDetectedAdbPath = QString(
-                    PathUtils::join(sdkRootDirectory, "platform-tools", "adb")
-                            .c_str());
-        }
-    }
-
-    // Getting here means we couldn't find a good ADB version. Pop up a warning
-    // message telling the user to update their ADB.
+void ToolWindow::checkAdbVersionAndWarn() {
     QSettings settings;
-    if (settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
+    if (!mAdbInterface.isAdbVersionCurrent() &&
+        settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
         mAdbWarningBox.setText(tr("The ADB binary found at ") +
                                mDetectedAdbPath +
                                tr(" is obsolete and has serious performance "
@@ -234,81 +199,6 @@ void ToolWindow::setupAdbPath() {
                                   "significantly faster app/file transfer."));
         showAdbWarning();
     }
-}
-
-bool ToolWindow::isAdbVersionCurrent(
-        const std::string& sdkRootDirectory) const {
-    static const int MIN_ADB_VERSION_MAJOR = 23;
-    static const int MIN_ADB_VERSION_MINOR = 1;
-
-    if (sdkRootDirectory.empty()) {
-        return false;
-    }
-
-    // The file at $(ANDROID_SDK_ROOT)/platform-tools/source.properties tells
-    // what version the ADB executable is. Find that file.
-    QString propertiesPath(PathUtils::join(sdkRootDirectory, "platform-tools",
-                                           "source.properties")
-                                   .c_str());
-    QFile propertiesFile(propertiesPath);
-    if (propertiesFile.exists() && propertiesFile.open(QFile::ReadOnly)) {
-        // Find the line starting with "Pkg.Revision". Remove newlines.
-        while (!propertiesFile.atEnd()) {
-            QByteArray line = propertiesFile.readLine();
-            if (line.startsWith("Pkg.Revision")) {
-
-                // Get the version number from that line
-                QList<QByteArray> lineParts = line.split('=');
-                if (lineParts.length() == 2) {
-
-                    // Check the major and minor versions.
-                    // The version should look like "major.minor", but further
-                    // minor versions are acceptable (and ignored).
-                    // Same goes for "rc#" at the end.
-                    QRegularExpression regex("(\\d+).?(\\d+)?");
-                    QRegularExpressionMatch match = regex.match(lineParts[1]);
-                    if (match.hasMatch()) {
-                        bool isValidNumber;
-                        QString majorString = match.captured(1);
-                        if (majorString.isNull()) {
-                            return false;
-                        }
-                        int majorVersion = majorString.toInt(&isValidNumber);
-                        if (!isValidNumber ||
-                            majorVersion < MIN_ADB_VERSION_MAJOR) {
-                            return false;
-                        }
-                        if (majorVersion > 23) {
-                            return true;
-                        }
-
-                        QString minorString = match.captured(2);
-                        if (minorString.isNull()) {
-                            return false;
-                        }
-                        int minorVersion = minorString.toInt(&isValidNumber);
-                        if (!isValidNumber ||
-                            minorVersion < MIN_ADB_VERSION_MINOR) {
-                            return false;
-                        }
-
-                        // Version is > 23.1, good to go.
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    // The "Pkg.Revision" line is malformed
-                    return false;
-                }
-                break;
-            }
-        }
-    }
-
-    // If the file is missing, assume the tools directory is broken in some
-    // way, and updating should fix the problem.
-    return false;
 }
 
 void ToolWindow::showAdbWarning() {
@@ -371,8 +261,8 @@ QString ToolWindow::getAdbFullPath(QStringList* args) {
     QSettings settings;
 
     if (settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
-        if (!mDetectedAdbPath.isNull()) {
-            adbPath = mDetectedAdbPath;
+        if (!mAdbInterface.detectedAdbPath().empty()) {
+            adbPath = QString::fromStdString(mAdbInterface.detectedAdbPath());
         } else {
             showErrorDialog(tr("Could not automatically find ADB.<br>"
                                "Please use the settings page to manually set "
