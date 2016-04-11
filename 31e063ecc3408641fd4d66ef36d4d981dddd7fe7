@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb303615_02e16ae1",
+        "filename": "android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-11T20:52:03Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 37
+      },
+      "revId": "31e063ecc3408641fd4d66ef36d4d981dddd7fe7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb303615_a22cfedc",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-11T20:52:03Z",
+      "side": 1,
+      "message": "nit\nalso, some trailing spaces here and there",
+      "range": {
+        "startLine": 101,
+        "startChar": 70,
+        "endLine": 101,
+        "endChar": 85
+      },
+      "revId": "31e063ecc3408641fd4d66ef36d4d981dddd7fe7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
