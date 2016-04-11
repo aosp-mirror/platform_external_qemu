@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "cb303615_025e8abd",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-11T23:37:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8e2d6c79_da16b82d",
+      "range": {
+        "startLine": 217,
+        "startChar": 0,
+        "endLine": 217,
+        "endChar": 1
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8e2d6c79_9a97e0c3",
         "filename": "android/base/system/System.h",
         "patchSetId": 2
@@ -94,6 +118,30 @@
     },
     {
       "key": {
+        "uuid": "cb303615_c215c2d3",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-11T23:37:11Z",
+      "side": 1,
+      "message": "It\u0027s the system\u0027s root. It\u0027s only really needed for unit tests, TestSystem will return its temp folder location here.",
+      "parentUuid": "8e2d6c79_9a97e0c3",
+      "range": {
+        "startLine": 249,
+        "startChar": 26,
+        "endLine": 249,
+        "endChar": 30
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8e2d6c79_7a24ec8a",
         "filename": "android/base/system/System.h",
         "patchSetId": 2
@@ -105,6 +153,30 @@
       "writtenOn": "2016-04-11T20:47:25Z",
       "side": 1,
       "message": "why not \u003d 0 ?",
+      "range": {
+        "startLine": 250,
+        "startChar": 48,
+        "endLine": 250,
+        "endChar": 63
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb303615_052a14bf",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-11T23:37:11Z",
+      "side": 1,
+      "message": "Because \"empty\" is the reasonable implementation. The client code uses this method to construct a path to a file that it wants to read. Under usual circumstances, we don\u0027t want to do anything special (hence empty string) but during testing we want to prefix all paths with the location of the temporary folder.",
+      "parentUuid": "8e2d6c79_7a24ec8a",
       "range": {
         "startLine": 250,
         "startChar": 48,
@@ -187,6 +259,78 @@
     },
     {
       "key": {
+        "uuid": "cb303615_c5130c7d",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-11T23:37:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cb303615_e281e6ed",
+      "range": {
+        "startLine": 33,
+        "startChar": 5,
+        "endLine": 33,
+        "endChar": 20
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb303615_a5108871",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-11T23:37:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2e22c08a_96198c60",
+      "range": {
+        "startLine": 33,
+        "startChar": 5,
+        "endLine": 33,
+        "endChar": 20
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb303615_050e9457",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-11T23:37:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0ba96e5f_24f232b8",
+      "range": {
+        "startLine": 33,
+        "startChar": 5,
+        "endLine": 33,
+        "endChar": 20
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2baab253_45e3aaf0",
         "filename": "android/emulation/control/AdbInterface.cpp",
         "patchSetId": 2
@@ -198,6 +342,30 @@
       "writtenOn": "2016-04-11T20:47:25Z",
       "side": 1,
       "message": "nit: just \"if (properties_file)\"",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 36
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb303615_0585f4f9",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-11T23:37:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2baab253_45e3aaf0",
       "range": {
         "startLine": 50,
         "startChar": 4,
@@ -233,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "cb303615_85faa457",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-11T23:37:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cb303615_a2a19ebc",
+      "range": {
+        "startLine": 89,
+        "startChar": 4,
+        "endLine": 89,
+        "endChar": 38
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2baab253_85520257",
         "filename": "android/emulation/control/AdbInterface.cpp",
         "patchSetId": 2
@@ -244,6 +436,30 @@
       "writtenOn": "2016-04-11T20:47:25Z",
       "side": 1,
       "message": "nit: space",
+      "range": {
+        "startLine": 98,
+        "startChar": 22,
+        "endLine": 98,
+        "endChar": 23
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb303615_65ffa049",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-11T23:37:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2baab253_85520257",
       "range": {
         "startLine": 98,
         "startChar": 22,
@@ -290,6 +506,54 @@
       "writtenOn": "2016-04-11T20:54:38Z",
       "side": 1,
       "message": "Basically, version 23.1 included some important adb push speed improvements (like, 10x). Add that to the comment.",
+      "parentUuid": "8e2d6c79_7a830c80",
+      "range": {
+        "startLine": 27,
+        "startChar": 48,
+        "endLine": 27,
+        "endChar": 54
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb303615_4587fc08",
+        "filename": "android/emulation/control/AdbInterface.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-11T23:37:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cb303615_8291fa41",
+      "range": {
+        "startLine": 27,
+        "startChar": 48,
+        "endLine": 27,
+        "endChar": 54
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb303615_e52610f9",
+        "filename": "android/emulation/control/AdbInterface.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-11T23:37:11Z",
+      "side": 1,
+      "message": "Done",
       "parentUuid": "8e2d6c79_7a830c80",
       "range": {
         "startLine": 27,
