@@ -311,9 +311,14 @@ public:
 
 private:
     std::string toTempRoot(StringView path) const {
-        std::string result = mTempRootPrefix;
-        result += path;
-        return result;
+        StringView prefix = mTempRootPrefix;
+        if (prefix.size() <= path.size() &&
+            prefix == StringView(path.c_str(), prefix.size())) {
+            // Avoid prepending prefix if it's already there.
+            return path;
+        } else {
+            return mTempRootPrefix + path.c_str();
+        }
     }
 
     std::string fromTempRoot(StringView path) {

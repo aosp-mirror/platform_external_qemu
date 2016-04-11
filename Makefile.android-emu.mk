@@ -214,6 +214,7 @@ LOCAL_SRC_FILES := \
     android/emulation/android_qemud.cpp \
     android/emulation/bufprint_config_dirs.cpp \
     android/emulation/ConfigDirs.cpp \
+    android/emulation/control/AdbInterface.cpp \
     android/emulation/control/ApkInstaller.cpp \
     android/emulation/control/LineConsumer.cpp \
     android/emulation/control/ScreenCapturer.cpp \
@@ -420,6 +421,7 @@ LOCAL_SRC_FILES := \
   android/emulation/android_pipe_zero_unittest.cpp \
   android/emulation/bufprint_config_dirs_unittest.cpp \
   android/emulation/ConfigDirs_unittest.cpp \
+  android/emulation/control/AdbInterface_unittest.cpp \
   android/emulation/control/ApkInstaller_unittest.cpp \
   android/emulation/control/ScreenCapturer_unittest.cpp \
   android/emulation/control/LineConsumer_unittest.cpp \
