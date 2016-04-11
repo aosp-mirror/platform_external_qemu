@@ -89,6 +89,8 @@ public:
         return mAppDataDir;
     }
 
+    std::string getRootDirectory() const override { return getTempRoot()->path(); }
+
     void setAppDataDirectory(StringView appDataDir) {
         mAppDataDir = appDataDir;
     }
