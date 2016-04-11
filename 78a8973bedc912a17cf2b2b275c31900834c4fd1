@@ -1,0 +1,211 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8e2d6c79_da16b82d",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-11T20:47:25Z",
+      "side": 1,
+      "message": "nit: tab",
+      "range": {
+        "startLine": 217,
+        "startChar": 0,
+        "endLine": 217,
+        "endChar": 1
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e2d6c79_9a97e0c3",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-11T20:47:25Z",
+      "side": 1,
+      "message": "what is a \u0027root directory\u0027? / ? C:\\ ? Or some emulator root?\nCould you please expand the comment?",
+      "range": {
+        "startLine": 249,
+        "startChar": 26,
+        "endLine": 249,
+        "endChar": 30
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e2d6c79_7a24ec8a",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-11T20:47:25Z",
+      "side": 1,
+      "message": "why not \u003d 0 ?",
+      "range": {
+        "startLine": 250,
+        "startChar": 48,
+        "endLine": 250,
+        "endChar": 63
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0ba96e5f_24f232b8",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-11T20:47:25Z",
+      "side": 1,
+      "message": "curious if parsing the \u0027adb version\u0027 output could be more correct:\n\nzyy@zyy-linux:~/sources/emu-master-dev/external/qemu$ adb version\nAndroid Debug Bridge version 1.0.35\nRevision 102d0d1e73de-android",
+      "range": {
+        "startLine": 33,
+        "startChar": 5,
+        "endLine": 33,
+        "endChar": 20
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e22c08a_96198c60",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-11T20:47:25Z",
+      "side": 1,
+      "message": "nit: static",
+      "range": {
+        "startLine": 33,
+        "startChar": 5,
+        "endLine": 33,
+        "endChar": 20
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2baab253_45e3aaf0",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-11T20:47:25Z",
+      "side": 1,
+      "message": "nit: just \"if (properties_file)\"",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 36
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb303615_a2a19ebc",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-11T20:47:25Z",
+      "side": 1,
+      "message": "this can be optimized a little - if the path is the same as \u0027by env\u0027, you don\u0027t need to test it again",
+      "range": {
+        "startLine": 89,
+        "startChar": 4,
+        "endLine": 89,
+        "endChar": 38
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2baab253_85520257",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-11T20:47:25Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 98,
+        "startChar": 22,
+        "endLine": 98,
+        "endChar": 23
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e2d6c79_7a830c80",
+        "filename": "android/emulation/control/AdbInterface.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-11T20:47:25Z",
+      "side": 1,
+      "message": "enough for what? :)",
+      "range": {
+        "startLine": 27,
+        "startChar": 48,
+        "endLine": 27,
+        "endChar": 54
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
