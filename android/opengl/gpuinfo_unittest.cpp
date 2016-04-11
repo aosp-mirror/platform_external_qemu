@@ -122,7 +122,7 @@ static const char win_noinstalleddrivers[] =
 "Name=VNC Mirror Driver\r\n"
 "NumberOfColorPlanes=\r\n"
 "NumberOfVideoPages=\r\n"
-"PNPDeviceID=ROOT\DISPLAY\0000\r\n"
+"PNPDeviceID=ROOT\\DISPLAY\\0000\r\n"
 "PowerManagementCapabilities=\r\n"
 "PowerManagementSupported=\r\n"
 "ProtocolSupported=\r\n"
@@ -183,7 +183,7 @@ static const char win_noinstalleddrivers[] =
 "Name=NVIDIA GeForce GTX 660M \r\n"
 "NumberOfColorPlanes=\r\n"
 "NumberOfVideoPages=\r\n"
-"PNPDeviceID=PCI\VEN_10DE&amp;DEV_0FD4&amp;SUBSYS_21151043&amp;REV_A1\4&amp;169534F2&amp;0&amp;0008\r\n"
+"PNPDeviceID=PCI\\VEN_10DE&amp;DEV_0FD4&amp;SUBSYS_21151043&amp;REV_A1\\4&amp;169534F2&amp;0&amp;0008\r\n"
 "PowerManagementCapabilities=\r\n"
 "PowerManagementSupported=\r\n"
 "ProtocolSupported=\r\n"
@@ -481,8 +481,7 @@ TEST(parse_gpu_info_list_windows, WinNoInstalledDriversContinueCase) {
     GpuInfoList gpulist;
     parse_gpu_info_list_windows(contents, &gpulist);
 
-    EXPECT_TRUE(gpulist.infos.size() == 1);
-
+    EXPECT_EQ(2, (int)gpulist.infos.size());
 }
 
 TEST(parse_gpu_info_list_windows, SingleGpu) {
