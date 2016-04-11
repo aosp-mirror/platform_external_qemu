@@ -12,14 +12,15 @@
 #pragma once
 
 #include "android/base/Compiler.h"
+#include "android/base/StringView.h"
 
-#include <inttypes.h>
-
-#include <fstream>
+#include <iosfwd>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include <inttypes.h>
 
 namespace android {
 namespace base {
@@ -67,6 +68,9 @@ public:
     int size() const;
     // Check if a certain key exists in the file.
     bool hasKey(const std::string& key) const;
+
+    // Make sure the string can be used as a valid key
+    static std::string makeValidKey(StringView str);
 
     // ///////////////////// Value Getters
     // //////////////////////////////////////
@@ -126,7 +130,7 @@ public:
 
 protected:
     // Helper functions.
-    void parseFile(std::ifstream* inFile);
+    void parseFile(std::istream* inFile);
     void updateData(const std::string& key, const std::string& value);
     bool writeCommon(bool discardEmpty);
 
