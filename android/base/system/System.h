@@ -246,6 +246,12 @@ public:
     // in Microsoft Windows) or an empty string if it can't be found
     virtual const std::string& getAppDataDirectory() const = 0;
 
+    // Return the path to system's root directory.
+    // This is usually empty for non-test systems.
+    // It's necessary to make unit tests that depend on file locations
+    // work.
+    virtual std::string getRootDirectory() const { return ""; }
+
     // Return the current directory path. Because this can change at
     // runtime, this returns a new std::string instance, not a const-reference
     // to a constant one held by the object. Return an empty string if there is
