@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "cb303615_022a0abf",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-11T20:54:38Z",
+      "side": 1,
+      "message": "I would still rather leave those as their own small modules (ApkInstaller, Screencapturer, and eventually, FilePusher) since they have some not-so-fun threading stuff going on. But yes, those should depend on this :)",
+      "range": {
+        "startLine": 10,
+        "startChar": 24,
+        "endLine": 11,
+        "endChar": 50
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb303615_82161a8f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-11T20:54:38Z",
+      "side": 1,
+      "message": "I think leaving those as their own modules (ApkInstaller already, and FilePusher pending Prathmesh) is still preferable. But, of course, those should depend on this :)",
+      "range": {
+        "startLine": 11,
+        "startChar": 14,
+        "endLine": 11,
+        "endChar": 32
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8e2d6c79_da16b82d",
         "filename": "Makefile.android-emu.mk",
         "patchSetId": 2
@@ -117,6 +163,30 @@
     },
     {
       "key": {
+        "uuid": "cb303615_e281e6ed",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-11T20:54:38Z",
+      "side": 1,
+      "message": "Might want to ask vharron@ about it - I originally implemented this check at his request.",
+      "parentUuid": "0ba96e5f_24f232b8",
+      "range": {
+        "startLine": 33,
+        "startChar": 5,
+        "endLine": 33,
+        "endChar": 20
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2baab253_45e3aaf0",
         "filename": "android/emulation/control/AdbInterface.cpp",
         "patchSetId": 2
@@ -197,6 +267,30 @@
       "writtenOn": "2016-04-11T20:47:25Z",
       "side": 1,
       "message": "enough for what? :)",
+      "range": {
+        "startLine": 27,
+        "startChar": 48,
+        "endLine": 27,
+        "endChar": 54
+      },
+      "revId": "78a8973bedc912a17cf2b2b275c31900834c4fd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb303615_8291fa41",
+        "filename": "android/emulation/control/AdbInterface.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-11T20:54:38Z",
+      "side": 1,
+      "message": "Basically, version 23.1 included some important adb push speed improvements (like, 10x). Add that to the comment.",
+      "parentUuid": "8e2d6c79_7a830c80",
       "range": {
         "startLine": 27,
         "startChar": 48,
