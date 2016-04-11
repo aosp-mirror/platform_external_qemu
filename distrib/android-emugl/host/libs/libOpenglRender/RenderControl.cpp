@@ -75,7 +75,9 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         else {
             str = (const char *)s_gles1.glGetString(name);
         }
-        len = strlen(str) + 1;
+        if (str) {
+            len = strlen(str) + 1;
+        }
     }
 
     // We add the maximum supported GL protocol number into GL_EXTENSIONS
@@ -91,9 +93,14 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
 
     if (name == GL_EXTENSIONS) {
-        sprintf((char *)buffer, "%s%s ", str ? str : "", glProtocolStr);
-    } else {
+        snprintf((char *)buffer, bufferSize, "%s%s ", str ? str : "", glProtocolStr);
+    } else if (str) {
         strcpy((char *)buffer, str);
+    } else {
+        if (bufferSize >= 1) {
+            ((char*)buffer)[0] = '\0';
+        }
+        len = 0;
     }
     return len;
 }
