@@ -172,13 +172,21 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
 
     LOCAL_SRC_FILES := \
         android/emulator-check/main-emulator-check.cpp \
+        android/emulator-check/PlatformInfo.cpp \
 
     LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
+
+    LOCAL_LDLIBS := $(ANDROID_EMU_LDLIBS)
 
     LOCAL_IGNORE_BITNESS := true
 
     ifeq ($(BUILD_TARGET_OS),windows)
-    $(eval $(call insert-windows-icon))
+        $(eval $(call insert-windows-icon))
+    endif
+
+    ifeq ($(BUILD_TARGET_OS),linux)
+        # For PlatformInfo.cpp
+        LOCAL_LDLIBS += -lX11
     endif
 
     $(call local-link-static-c++lib)
