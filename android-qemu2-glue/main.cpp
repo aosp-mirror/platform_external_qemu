@@ -28,6 +28,7 @@
 #include "android/kernel/kernel_utils.h"
 #include "android/main-common.h"
 #include "android/main-common-ui.h"
+#include "android/main-kernel-parameters.h"
 #include "android/opengl/emugl_config.h"
 #include "android/process_setup.h"
 #include "android/utils/bufprint.h"
@@ -93,8 +94,6 @@ const int kMaxTargetQemuParams = 16;
  * the final qemu-system-<qemuArch> binary.
  * |qemuCpu| is the QEMU -cpu parameter value.
  * |ttyPrefix| is the prefix to use for TTY devices.
- * |kernelExtraArgs|, if not NULL, is an optional string appended to the kernel
- * parameters.
  * |storageDeviceType| is the QEMU storage device type.
  * |networkDeviceType| is the QEMU network device type.
  * |imagePartitionTypes| defines the order of how the image partitions are
@@ -114,7 +113,6 @@ struct TargetInfo {
     const char* qemuArch;
     const char* qemuCpu;
     const char* ttyPrefix;
-    const char* kernelExtraArgs;
     const char* storageDeviceType;
     const char* networkDeviceType;
     const ImageType imagePartitionTypes[kMaxPartitions];
@@ -128,7 +126,6 @@ const TargetInfo kTarget = {
     "aarch64",
     "cortex-a57",
     "ttyAMA",
-    " keep_bootcon earlyprintk=ttyAMA0",
     "virtio-blk-device",
     "virtio-net-device",
     {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
@@ -138,7 +135,6 @@ const TargetInfo kTarget = {
     "arm",
     "cortex-a15",
     "ttyAMA",
-    " keep_bootcon earlyprintk=ttyAMA0",
     "virtio-blk-device",
     "virtio-net-device",
     {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
@@ -148,7 +144,6 @@ const TargetInfo kTarget = {
     "mips64el",
     "MIPS64R6-generic",
     "ttyGF",
-    NULL,
     "virtio-blk-device",
     "virtio-net-device",
     {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
@@ -158,7 +153,6 @@ const TargetInfo kTarget = {
     "mipsel",
     "24Kf",
     "ttyGF",
-    NULL,
     "virtio-blk-device",
     "virtio-net-device",
     {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
@@ -168,7 +162,6 @@ const TargetInfo kTarget = {
     "i386",
     "qemu32",
     "ttyS",
-    " androidboot.hardware=ranchu",
     "virtio-blk-pci",
     "virtio-net-pci",
     {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_SD_CARD},
@@ -178,7 +171,6 @@ const TargetInfo kTarget = {
     "x86_64",
     "qemu64",
     "ttyS",
-    " androidboot.hardware=ranchu",
     "virtio-blk-pci",
     "virtio-net-pci",
     {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_SD_CARD},
@@ -343,9 +335,6 @@ extern "C" int main(int argc, char **argv) {
      * and the second one for qemud. So start at the third if we need one
      * for logcat or 'shell'
      */
-    int    serial = 2;
-    int    shell_serial = 0;
-
     const char* args[128];
     args[0] = argv[0];
     int n = 1;  // next parameter index
@@ -480,7 +469,6 @@ extern "C" int main(int argc, char **argv) {
     if (opts->shell || opts->logcat || opts->show_kernel) {
         args[n++] = "-serial";
         args[n++] = opts->shell_serial;
-        shell_serial = serial++;
     }
 
     if (opts->radio) {
@@ -682,108 +670,43 @@ extern "C" int main(int argc, char **argv) {
     std::string memorySize = StringFormat("%ld", hw->hw_ramSize);
     args[n++] = memorySize.c_str();
 
-    // Command-line
-    args[n++] = "-append";
-
-    std::string kernelCommandLine = "qemu=1";
-
-    // Append these kernel parameters here to avoid having to modify QEMU code
-    if (hw->kernel_parameters && hw->kernel_parameters[0] != '\0') {
-        if (hw->kernel_parameters[0] != ' ') {
-            kernelCommandLine += " ";
+    // Kernel command-line parameters.
+    AndroidGlesEmulationMode glesMode = kAndroidGlesEmulationOff;
+    if (hw->hw_gpu_enabled) {
+        if (!strcmp(hw->hw_gpu_mode, "guest")) {
+            glesMode = kAndroidGlesEmulationGuest;
+        } else {
+            glesMode = kAndroidGlesEmulationHost;
         }
-        kernelCommandLine += hw->kernel_parameters;
-        // Clear this value to prevent accidental usage elsewhere
-        hw->kernel_parameters[0] = '\0';
     }
 
-    // Additional memory for -gpu guest software renderers (e.g., SwiftShader)
-    if (!strcmp(android_hw->hw_gpu_mode, "guest")) {
-        VERBOSE_PRINT(init, "Adjusting Contiguous Memory Allocation"
-                            "of %dx%d framebuffer for software renderer.",
-                            hw->hw_lcd_width, hw->hw_lcd_height);
+    uint64_t glesCMA = 0ULL;
+    if (glesMode == kAndroidGlesEmulationGuest) {
         // Set CMA (continguous memory allocation) to values that depend on
         // the desired resolution.
         // We will assume a double buffered 32-bit framebuffer in the calculation.
-        uint64_t bytes = hw->hw_lcd_width * hw->hw_lcd_height * 4;
-        uint64_t used_mb = (2 * bytes + 1024 * 1024 - 1) / (1024 * 1024);
-        char cma_target[22] = {}; // 16 (for number) + 6 more chars + \0
-        snprintf(cma_target, sizeof(cma_target), " cma=%" PRIu64 "M", used_mb);
-        VERBOSE_PRINT(init, "Target allocation size: %s\n", cma_target);
-        kernelCommandLine += cma_target;
+        int framebuffer_width = hw->hw_lcd_width;
+        int framebuffer_height = hw->hw_lcd_height;
+        uint64_t bytes = framebuffer_width * framebuffer_height * 4;
+        const uint64_t one_MB = 1024ULL * 1024;
+        glesCMA = (2 * bytes + one_MB - 1) / one_MB;
+        VERBOSE_PRINT(init, "Adjusting Contiguous Memory Allocation"
+                      "of %dx%d framebuffer for software renderer to %"
+                      PRIu64 "MB.", framebuffer_width, framebuffer_height,
+                      glesCMA);
     }
 
-#ifdef TARGET_I386
-    kernelCommandLine += " clocksource=pit";
-#endif
-
-    if (opts->shell || opts->logcat) {
-        const char* prefix = androidHwConfig_getKernelSerialPrefix(android_hw);
-        StringAppendFormat(&kernelCommandLine, " androidboot.console=%s%d",
-                           prefix, shell_serial);
+    char* kernel_parameters = emulator_getKernelParameters(
+            opts, kTarget.androidArch, kTarget.ttyPrefix,
+            hw->kernel_parameters, glesMode, glesCMA,
+            true  // isQemu2
+            );
+    if (!kernel_parameters) {
+        return 1;
     }
 
-    if (!opts->no_jni) {
-        kernelCommandLine += " android.checkjni=1";
-    }
-
-    if (opts->no_boot_anim) {
-        kernelCommandLine += " android.bootanim=0";
-    }
-
-    if (opts->logcat) {
-        std::string logcat = StringFormat(" androidboot.logcat=%s", opts->logcat);
-        // Replace whitespace with comma starting at the second character
-        // since the first one in the format string above is a whitespace
-        std::replace(&logcat[1], &logcat[logcat.size()], ' ', ',');
-        std::replace(&logcat[1], &logcat[logcat.size()], '\t', ',');
-        kernelCommandLine += logcat;
-    }
-
-    if (opts->bootchart) {
-        kernelCommandLine += StringFormat(" androidboot.bootchart=%s",
-                                          opts->bootchart);
-    }
-
-    if (opts->selinux) {
-        kernelCommandLine += StringFormat(" androidboot.selinux=%s",
-                                          opts->selinux);
-    }
-
-    if (opts->show_kernel) {
-        kernelCommandLine += StringFormat(" console=%s0,38400",
-                                          kTarget.ttyPrefix);
-    }
-
-    if (kTarget.kernelExtraArgs) {
-        kernelCommandLine += kTarget.kernelExtraArgs;
-    }
-    if (opts->selinux) {
-        kernelCommandLine += StringFormat(
-                " androidboot.selinux=%s", opts->selinux);
-    }
-
-    if (hw->hw_gpu_enabled) {
-        if (strcmp(android_hw->hw_gpu_mode, "guest") != 0) {
-            kernelCommandLine += " qemu.gles=1";   // Using emugl
-        } else {
-            kernelCommandLine += " qemu.gles=2";   // Using guest
-        }
-    } else {
-        kernelCommandLine += " qemu.gles=0";
-    }
-
-    if (hw->hw_gsmModem) {
-        // rild checks for qemud, we can just set it to a dummy value instead of
-        // a serial port
-        kernelCommandLine += " android.qemud=1";
-    }
-
-    if (opts->no_boot_anim) {
-        kernelCommandLine += " android.bootanim=0";
-    }
-
-    args[n++] = kernelCommandLine.c_str();
+    args[n++] = "-append";
+    args[n++] = kernel_parameters;
 
     // Support for changing default lcd-density
     std::string lcd_density;
