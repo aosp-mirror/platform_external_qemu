@@ -11,6 +11,7 @@
 
 #include "android/update-check/UpdateChecker.h"
 
+#include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/StringView.h"
@@ -18,7 +19,9 @@
 #include "android/base/threads/Async.h"
 #include "android/base/Uri.h"
 #include "android/curl-support.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/metrics/studio-config.h"
+#include "android/metrics/StudioConfig.h"
 #include "android/update-check/update_check.h"
 #include "android/update-check/VersionExtractor.h"
 #include "android/utils/debug.h"
@@ -27,6 +30,7 @@
 #include "android/version.h"
 
 #include <fstream>
+#include <iterator>
 #include <new>
 #include <string>
 
@@ -34,21 +38,9 @@
 #include <string.h>
 #include <time.h>
 
-static const char kDataFileName[] = ".emu-update-last-check";
-// TODO: kVersionUrl should not be fixed; XY in repository-XY.xml
-//       might change with studio updates irrelevant to the emulator
-static const char kVersionUrl[] =
-        "https://dl.google.com/android/repository/repository-12.xml";
-
-static const char kNewerVersionMessage[] =
-R"(Your emulator is out of date, please update by launching Android Studio:
- - Start Android Studio
- - Select menu "Tools > Android > SDK Manager"
- - Click "SDK Tools" tab
- - Check "Android SDK Tools" checkbox
- - Click "OK"
-)";
-
+using android::base::async;
+using android::base::Optional;
+using android::base::PathUtils;
 using android::base::ScopedCPtr;
 using android::base::StringView;
 using android::base::System;
@@ -56,9 +48,23 @@ using android::base::Uri;
 using android::base::Version;
 using android::update_check::UpdateChecker;
 
-void android_checkForUpdates(const char* homePath, const char* coreVersion) {
-    std::unique_ptr<UpdateChecker> checker(
-                new (std::nothrow) UpdateChecker(homePath, coreVersion));
+static const char kDataFileName[] = "emu-update-last-check.ini";
+// TODO: kVersionUrl should not be fixed; XY in repository-XY.xml
+//       might change with studio updates irrelevant to the emulator
+static constexpr StringView kVersionUrl =
+        "https://dl.google.com/android/repository/repository2-1.xml";
+
+static const char kNewerVersionMessage[] =
+        R"(Your emulator is out of date, please update by launching Android Studio:
+ - Start Android Studio
+ - Select menu "Tools > Android > SDK Manager"
+ - Click "SDK Tools" tab
+ - Check "Android SDK Tools" checkbox
+ - Click "OK"
+)";
+
+void android_checkForUpdates(const char* coreVersion) {
+    std::unique_ptr<UpdateChecker> checker(new UpdateChecker(coreVersion));
 
     if (checker->init() && checker->needsCheck() && checker->runAsyncCheck()) {
         // checker will delete itself after the check in the worker thread
@@ -85,33 +91,51 @@ static size_t curlWriteCallback(char* contents,
 
 class DataLoader final : public IDataLoader {
 public:
-    virtual std::string load(const char* version) override {
+    DataLoader(StringView coreVersion) : mCoreVersion(coreVersion) {}
+
+    virtual std::string load() override {
         std::string xml;
         std::string url = kVersionUrl;
-        if (version) {
-            const ScopedCPtr<char> id(
-                    android_studio_get_installation_id());
+        if (!mCoreVersion.empty()) {
+            const ScopedCPtr<char> id(android_studio_get_installation_id());
             url += Uri::FormatEncodeArguments(
-                       "?tool=emulator&uid=%s&os=%s"
-                       "&version=" EMULATOR_VERSION_STRING "&coreVersion=%s",
-                       id.get(), toString(System::get()->getOsType()),
-                       version);
+                    "?tool=emulator&uid=%s&os=%s", id.get(),
+                    toString(System::get()->getOsType()));
+            // append the fields which may change from run to run: version and
+            // core version
+            url += getVersionUriFields();
         }
         char* error = nullptr;
-        if (!curl_download(url.c_str(), nullptr, &curlWriteCallback, &xml, &error)) {
+        if (!curl_download(url.c_str(), nullptr, &curlWriteCallback, &xml,
+                           &error)) {
             dwarning("UpdateCheck: Failure: %s", error);
             ::free(error);
         }
         return xml;
     }
+
+    virtual std::string getUniqueDataKey() override {
+        return getVersionUriFields();
+    }
+
+private:
+    std::string getVersionUriFields() const {
+        return Uri::FormatEncodeArguments("version=" EMULATOR_VERSION_STRING
+                                          "&coreVersion=%s",
+                                          mCoreVersion);
+    }
+
+private:
+    std::string mCoreVersion;
 };
 
 class TimeStorage final : public ITimeStorage {
+    using IniFile = android::base::IniFile;
+
 public:
-    TimeStorage(const char* configPath) : mFileLock(NULL) {
-        mDataFileName =
-                android::base::PathUtils::addTrailingDirSeparator(configPath)
-                        .append(kDataFileName);
+    TimeStorage() {
+        const std::string configPath = android::ConfigDirs::getUserDirectory();
+        mDataFileName = PathUtils::join(configPath, kDataFileName);
     }
 
     ~TimeStorage() {
@@ -128,31 +152,31 @@ public:
 
         mFileLock = filelock_create(mDataFileName.c_str());
         // if someone's already checking it - don't do it twice
-        return mFileLock != NULL;
+        return mFileLock != nullptr;
     }
 
-    time_t getTime() override {
-        std::ifstream dataFile(mDataFileName.c_str());
-        if (!dataFile) {
-            return time_t();  // no data file
+    time_t getTime(const std::string& key) {
+        IniFile file(mDataFileName);
+        if (!file.read()) {
+            // no file at all, return the lowest possible timestamp
+            return 0;
         }
-        int64_t intTime = 0;
-        dataFile >> intTime;
-        return static_cast<time_t>(intTime);
+
+        return file.getInt64(IniFile::makeValidKey(key), 0);
     }
 
-    void setTime(time_t time) override {
-        std::ofstream dataFile(mDataFileName.c_str());
-        if (!dataFile) {
-            dwarning("UpdateCheck: couldn't open data file for writing");
-        } else {
-            dataFile << static_cast<int64_t>(time) << '\n';
+    void setTime(const std::string& key, time_t time) {
+        IniFile file(mDataFileName);
+        file.read();  // who cares if it didn't exist - we'll create it anyway
+        file.setInt64(IniFile::makeValidKey(key), time);
+        if (!file.write()) {
+            dwarning("UpdateCheck: couldn't save the data file");
         }
     }
 
 private:
     std::string mDataFileName;
-    FileLock* mFileLock;
+    FileLock* mFileLock = nullptr;
 };
 
 class NewerVersionReporter final : public INewerVersionReporter {
@@ -164,19 +188,17 @@ public:
     }
 };
 
-UpdateChecker::UpdateChecker(const char* configPath, const char* coreVersion)
-    : mCoreVersion(coreVersion),
-      mVersionExtractor(new VersionExtractor()),
-      mDataLoader(new DataLoader()),
-      mTimeStorage(new TimeStorage(configPath)),
+UpdateChecker::UpdateChecker(const char* coreVersion)
+    : mVersionExtractor(new VersionExtractor()),
+      mDataLoader(new DataLoader(coreVersion)),
+      mTimeStorage(new TimeStorage()),
       mReporter(new NewerVersionReporter()) {}
 
 UpdateChecker::UpdateChecker(IVersionExtractor* extractor,
                              IDataLoader* loader,
                              ITimeStorage* storage,
                              INewerVersionReporter* reporter)
-    : mCoreVersion(nullptr),
-      mVersionExtractor(extractor),
+    : mVersionExtractor(extractor),
       mDataLoader(loader),
       mTimeStorage(storage),
       mReporter(reporter) {}
@@ -192,40 +214,64 @@ bool UpdateChecker::init() {
 bool UpdateChecker::needsCheck() const {
     const time_t now = System::get()->getUnixTime();
     // Check only if the previous check was 4+ hours ago
-    return now - mTimeStorage->getTime() >= 4*60*60;
+    return now - mTimeStorage->getTime(mDataLoader->getUniqueDataKey()) >=
+           4 * 60 * 60;
 }
 
 bool UpdateChecker::runAsyncCheck() {
-    return android::base::async([this] { asyncWorker(); delete this; });
+    return async([this] {
+        asyncWorker();
+        delete this;
+    });
 }
 
 void UpdateChecker::asyncWorker() {
     Version current = mVersionExtractor->getCurrentVersion();
-    Version last = getLatestVersion();
+    const auto last = getLatestVersion();
 
-    if (!last.isValid()) {
+    if (!last) {
         // don't record the last check time if we were not able to retrieve
         // the last version - next time we may be more lucky
-        dwarning("UpdateCheck: failed to get the latest version, skipping "
-            "check (current version '%s'", current.toString().c_str());
+        dwarning(
+                "UpdateCheck: failed to get the latest version, skipping "
+                "check (current version '%s')",
+                current.toString().c_str());
         return;
     }
 
-    VERBOSE_PRINT(updater, "UpdateCheck: current version '%s', last version '%s'",
-           current.toString().c_str(), last.toString().c_str());
+    VERBOSE_PRINT(updater,
+                  "UpdateCheck: current version '%s', last version '%s'",
+                  current.toString().c_str(), last->first.toString().c_str());
 
-    if (current < last) {
-        mReporter->reportNewerVersion(current, last);
+    if (current < last->first) {
+        mReporter->reportNewerVersion(current, last->first);
     }
 
     // Update the last version check time
-    mTimeStorage->setTime(System::get()->getUnixTime());
+    mTimeStorage->setTime(mDataLoader->getUniqueDataKey(),
+                          System::get()->getUnixTime());
 }
 
-Version UpdateChecker::getLatestVersion() {
-    const std::string xml = mDataLoader->load(mCoreVersion);
-    const Version ver = mVersionExtractor->extractVersion(xml);
-    return ver;
+Optional<UpdateChecker::VersionInfo> UpdateChecker::getLatestVersion() {
+    const auto repositoryXml = mDataLoader->load();
+    const auto versions = mVersionExtractor->extractVersions(repositoryXml);
+    if (versions.empty()) {
+        return {};
+    }
+
+    const auto updateChannel = android::studio::updateChannel();
+
+    // now find the first channel which is equal to or lower than the selected
+    // update channel
+    const auto greaterIt = versions.upper_bound(updateChannel);
+    if (greaterIt == versions.begin()) {
+        // even the first update channel in the list is greater than the
+        // one from Android Studio settings
+        return {};
+    }
+
+    return std::make_pair(std::prev(greaterIt)->second,
+                          std::prev(greaterIt)->first);
 }
 
 }  // namespace update_check

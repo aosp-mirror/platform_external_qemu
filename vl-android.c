@@ -3855,9 +3855,7 @@ int main(int argc, char **argv, char **envp)
 }
 
 void android_check_for_updates() {
-    char configPath[PATH_MAX];
-    bufprint_config_path(configPath, configPath + sizeof(configPath));
-    android_checkForUpdates(configPath, QEMU_CORE_VERSION);
+    android_checkForUpdates(QEMU_CORE_VERSION);
 }
 
 void

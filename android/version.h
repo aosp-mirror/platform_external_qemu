@@ -28,3 +28,7 @@
 #else
 #  define EMULATOR_BUILD_STRING "0"
 #endif
+
+// Full version, with build suffix
+#define EMULATOR_FULL_VERSION_STRING \
+    EMULATOR_VERSION_STRING_SHORT "-" EMULATOR_BUILD_STRING
