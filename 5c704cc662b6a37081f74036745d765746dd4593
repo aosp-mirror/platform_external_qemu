@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4bf286a8_2e858790",
+        "filename": "android-qemu1-glue/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-12T16:54:56Z",
+      "side": 1,
+      "message": "Yes, that\u0027s why their address is passed to emulator_parseCommonCommandLineOptions() above (line 89).\nI\u0027ll add a comment to make this crystal clear.",
+      "parentUuid": "8baf1e8f_78a001b9",
+      "range": {
+        "startLine": 195,
+        "startChar": 56,
+        "endLine": 196,
+        "endChar": 81
+      },
+      "revId": "5c704cc662b6a37081f74036745d765746dd4593",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ebe41af9_3bbd97da",
         "filename": "android/main-qemu-parameters.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-12T16:01:36Z",
       "side": 1,
       "message": "nit",
+      "range": {
+        "startLine": 190,
+        "startChar": 0,
+        "endLine": 194,
+        "endChar": 21
+      },
+      "revId": "5c704cc662b6a37081f74036745d765746dd4593",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b1b66b8_09e88dca",
+        "filename": "android/main-qemu-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-12T16:54:56Z",
+      "side": 1,
+      "message": "Ah yes, will remove",
+      "parentUuid": "ebe41af9_3bbd97da",
       "range": {
         "startLine": 190,
         "startChar": 0,
