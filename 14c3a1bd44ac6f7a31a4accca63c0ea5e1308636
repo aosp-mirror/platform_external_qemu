@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "8baf1e8f_f86ed1c9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-12T18:34:24Z",
+      "side": 1,
+      "message": "add period.",
+      "range": {
+        "startLine": 15,
+        "startChar": 17,
+        "endLine": 15,
+        "endChar": 22
+      },
+      "revId": "14c3a1bd44ac6f7a31a4accca63c0ea5e1308636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baf1e8f_2129f438",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-12T18:34:24Z",
+      "side": 1,
+      "message": "--\u003e and then a later\nand then later, make it \"the already-deleted timer object.\"",
+      "range": {
+        "startLine": 17,
+        "startChar": 36,
+        "endLine": 17,
+        "endChar": 45
+      },
+      "revId": "14c3a1bd44ac6f7a31a4accca63c0ea5e1308636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0bfc0e7c_cc704f15",
         "filename": "android/metrics/IniFileAutoFlusher.cpp",
         "patchSetId": 1
@@ -13,6 +59,52 @@
       "writtenOn": "2016-04-12T17:09:55Z",
       "side": 1,
       "message": "aargh, really? that sounds like a real bug here :(\n\nGenerally, I dislike the use of weak pointers, but it looks like it\u0027s clearly necessary here. Thanks.",
+      "revId": "14c3a1bd44ac6f7a31a4accca63c0ea5e1308636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baf1e8f_ccfa2f86",
+        "filename": "android/metrics/IniFileAutoFlusher.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-12T18:34:24Z",
+      "side": 1,
+      "message": "Why do we only delete the weakPtr when we can\u0027t lock it?  Seems to me that it\u0027s also dead if the callback gets called -- that this method has ownership of the WeakPtr object.  Maybe a unique_ptr\u003cWeakPtr\u003e at the top, to ensure destruction in both cases?",
+      "range": {
+        "startLine": 67,
+        "startChar": 8,
+        "endLine": 67,
+        "endChar": 23
+      },
+      "revId": "14c3a1bd44ac6f7a31a4accca63c0ea5e1308636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baf1e8f_4c8c5f2c",
+        "filename": "android/metrics/metrics_reporter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-12T18:34:24Z",
+      "side": 1,
+      "message": "it --\u003e them",
+      "range": {
+        "startLine": 59,
+        "startChar": 9,
+        "endLine": 59,
+        "endChar": 11
+      },
       "revId": "14c3a1bd44ac6f7a31a4accca63c0ea5e1308636",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
