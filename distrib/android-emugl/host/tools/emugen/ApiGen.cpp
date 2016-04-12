@@ -1118,7 +1118,6 @@ int ApiGen::genDecoderImpl(const std::string &filename)
                         "\t\t\t}\n",
                         varoffset.c_str(),
                         varoffset.c_str(),
-                        varoffset.c_str(),
                         classname.c_str(),
                         e->name().c_str()
                         );

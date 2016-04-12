@@ -55,7 +55,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream)
 			FooFloat var_ref = Unpack<FooFloat,uint32_t>(ptr + 8 + 4);
 			if (useChecksum) {
 				ChecksumCalculatorThreadInfo::validOrDie(ptr, 8 + 4 + 4, ptr + 8 + 4 + 4, checksumSize, 
-					"8 + 4 + 4::decode, OP_foo_decoder_context_t: GL checksumCalculator failure\n");
+					"foo_decoder_context_t::decode, OP_fooAlphaFunc: GL checksumCalculator failure\n");
 			}
 			DEBUG("foo(%p): fooAlphaFunc(%d %f )\n", stream,var_func, var_ref);
 			this->fooAlphaFunc(var_func, var_ref);
@@ -67,7 +67,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream)
 			InputBuffer inptr_stuff(ptr + 8 + 4, size_stuff);
 			if (useChecksum) {
 				ChecksumCalculatorThreadInfo::validOrDie(ptr, 8 + 4 + size_stuff, ptr + 8 + 4 + size_stuff, checksumSize, 
-					"8 + 4 + size_stuff::decode, OP_foo_decoder_context_t: GL checksumCalculator failure\n");
+					"foo_decoder_context_t::decode, OP_fooIsBuffer: GL checksumCalculator failure\n");
 			}
 			size_t totalTmpSize = sizeof(FooBoolean);
 			totalTmpSize += checksumSize;
@@ -86,7 +86,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream)
 			InputBuffer inptr_params(ptr + 8 + 4, size_params);
 			if (useChecksum) {
 				ChecksumCalculatorThreadInfo::validOrDie(ptr, 8 + 4 + size_params, ptr + 8 + 4 + size_params, checksumSize, 
-					"8 + 4 + size_params::decode, OP_foo_decoder_context_t: GL checksumCalculator failure\n");
+					"foo_decoder_context_t::decode, OP_fooUnsupported: GL checksumCalculator failure\n");
 			}
 			DEBUG("foo(%p): fooUnsupported(%p(%u) )\n", stream,(void*)(inptr_params.get()), size_params);
 			this->fooUnsupported((void*)(inptr_params.get()));
@@ -97,7 +97,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream)
 			FooInt var_param = Unpack<FooInt,uint32_t>(ptr + 8);
 			if (useChecksum) {
 				ChecksumCalculatorThreadInfo::validOrDie(ptr, 8 + 4, ptr + 8 + 4, checksumSize, 
-					"8 + 4::decode, OP_foo_decoder_context_t: GL checksumCalculator failure\n");
+					"foo_decoder_context_t::decode, OP_fooDoEncoderFlush: GL checksumCalculator failure\n");
 			}
 			DEBUG("foo(%p): fooDoEncoderFlush(%d )\n", stream,var_param);
 			this->fooDoEncoderFlush(var_param);
@@ -109,7 +109,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream)
 			InputBuffer inptr_param(ptr + 8 + 4, size_param);
 			if (useChecksum) {
 				ChecksumCalculatorThreadInfo::validOrDie(ptr, 8 + 4 + size_param, ptr + 8 + 4 + size_param, checksumSize, 
-					"8 + 4 + size_param::decode, OP_foo_decoder_context_t: GL checksumCalculator failure\n");
+					"foo_decoder_context_t::decode, OP_fooTakeConstVoidPtrConstPtr: GL checksumCalculator failure\n");
 			}
 			DEBUG("foo(%p): fooTakeConstVoidPtrConstPtr(%p(%u) )\n", stream,(const void* const*)(inptr_param.get()), size_param);
 			this->fooTakeConstVoidPtrConstPtr((const void* const*)(inptr_param.get()));
