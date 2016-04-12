@@ -32,10 +32,14 @@ namespace metrics {
 //
 // Currently, it is not possible to release / reset the |iniFile| being
 // monitored.
-class IniFileAutoFlusher {
+class IniFileAutoFlusher
+        : public std::enable_shared_from_this<IniFileAutoFlusher> {
 public:
-    explicit IniFileAutoFlusher(android::base::Looper* looper)
-        : mLooper(looper) {}
+    using Ptr = std::shared_ptr<IniFileAutoFlusher>;
+
+    static Ptr create(android::base::Looper* looper) {
+        return Ptr(new IniFileAutoFlusher(looper));
+    }
 
     ~IniFileAutoFlusher();
 
@@ -51,12 +55,15 @@ protected:
     static void writeCallback(void* opaqueThis,
                               android::base::Looper::Timer* timer);
 
+    explicit IniFileAutoFlusher(android::base::Looper* looper)
+        : mLooper(looper) {}
+
 private:
     android::base::Looper* mLooper;
     std::unique_ptr<android::base::Looper::Timer> mTimer;
     std::shared_ptr<android::base::IniFile> mIniFile;
 
-    DISALLOW_COPY_AND_ASSIGN(IniFileAutoFlusher);
+    DISALLOW_COPY_ASSIGN_AND_MOVE(IniFileAutoFlusher);
 };
 
 }  // namespace metrics
