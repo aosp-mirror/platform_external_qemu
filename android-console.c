@@ -113,6 +113,7 @@ static bool perform_console_and_adb_init(int console_port,
      * we manage to open both connections.
      */
     CharDriverState *chr;
+    bool auto_adb_port = (tries > 1);
     // TODO: reconsider a better place to store this monitor handler
 
     for (; tries > 0; tries--, console_port += 2) {
@@ -121,6 +122,10 @@ static bool perform_console_and_adb_init(int console_port,
             continue;
         }
 
+        /* Use the port specified by the user through -port[s]
+         * or try selecting adb_port automatically
+         */
+        adb_port = (auto_adb_port) ? (console_port + 1) : adb_port;
         if (!qemu2_adb_server_init(adb_port)) {
             qemu_chr_delete(chr);
             chr = NULL;
@@ -146,6 +151,7 @@ bool android_initialize_console_and_adb() {
     int console_port = MAX(android_base_port, ANDROID_CONSOLE_BASEPORT);
     int adb_port = console_port + 1;
     int tries = MAX_ANDROID_EMULATORS;
+
     // This is the default error message on failure if the user has not
     // specified the -ports or -port option. In that case it means we
     // exhausted the number of tries available.

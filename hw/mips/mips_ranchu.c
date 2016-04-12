@@ -28,9 +28,6 @@
 
 #define PHYS_TO_VIRT(x) ((x) | ~(target_ulong)0x7fffffff)
 
-#define ANDROID_CONSOLE_BASEPORT 5554
-#define MAX_ANDROID_EMULATORS    64
-
 #define MIPS_CPU_SAVE_VERSION 1
 #define MIPS_CPU_IRQ_BASE     8
 
