@@ -42,6 +42,8 @@ void qemu_parameters_free(QemuParameters* params) {
 
 QemuParameters* qemu_parameters_create(
         const char* argv0,
+        int qemu_argc,
+        const char* const* qemu_argv,
         AndroidOptions* opts,
         const AvdInfo* avd,
         const char* androidHwIniPath,
@@ -184,6 +186,15 @@ QemuParameters* qemu_parameters_create(
     }
 
     params.add2("-android-hw", androidHwIniPath);
+
+//     printf("QEMU argc=%d [", qemu_argc);
+//     for (int n = 0; n < qemu_argc; ++n) {
+//         printf(" %s", qemu_argv[n]);
+//     }
+//     printf("]\n");
+    for (int n = 0; n < qemu_argc; ++n) {
+        params.add(qemu_argv[n]);
+    }
 
     if(VERBOSE_CHECK(init)) {
         printf("QEMU options list:\n");

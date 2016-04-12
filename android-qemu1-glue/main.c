@@ -192,6 +192,8 @@ int main(int argc, char **argv) {
     }
 
     QemuParameters* qemuParams = qemu_parameters_create(argv0,
+                                                        argc,
+                                                        (const char* const*)argv,
                                                         opts,
                                                         avd,
                                                         coreHwIniPath,
