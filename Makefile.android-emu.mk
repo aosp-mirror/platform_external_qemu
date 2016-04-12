@@ -78,6 +78,7 @@ LOCAL_SRC_FILES := \
     android/base/synchronization/MessageChannel.cpp \
     android/base/Log.cpp \
     android/base/memory/LazyInstance.cpp \
+    android/base/system/PlatformInfo.cpp \
     android/base/system/System.cpp \
     android/base/threads/Async.cpp \
     android/base/threads/FunctorThread.cpp \
@@ -350,6 +351,11 @@ ifeq ($(BUILD_TARGET_OS),windows)
 ANDROID_EMU_LDLIBS += -lvfw32
 # For GetPerformanceInfo in CrashService_windows.cpp
 ANDROID_EMU_LDLIBS += -lpsapi
+endif
+
+ifeq ($(BUILD_TARGET_OS),linux)
+# For PlatformInfo.cpp
+ANDROID_EMU_LDLIBS += -lX11
 endif
 
 ###############################################################################

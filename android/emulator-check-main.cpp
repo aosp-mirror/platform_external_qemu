@@ -12,11 +12,14 @@
 #include "android/base/StringView.h"
 #include "android/cpu_accelerator.h"
 #include "android/emulation/CpuAccelerator.h"
+#include "android/base/system/PlatformInfo.h"
 
 #include <tuple>
 
 #include <stdlib.h>
 #include <stdio.h>
+
+static const int badReturn = 100;
 
 static int help();
 
@@ -52,6 +55,12 @@ static int getCpuInfo() {
     return flags;
 }
 
+static int getWindowManager() {
+    const auto name = android::base::getWindowManagerName();
+    printf("%s\n", name.c_str());
+    return name.empty() ? badReturn : 0;
+}
+
 constexpr struct {
     const char* arg;
     const char* help;
@@ -71,6 +80,11 @@ constexpr struct {
     "cpu-info",
     "Return the CPU model information",
     &getCpuInfo
+},
+{
+    "window-manager",
+    "Return the current window manager name",
+    &getWindowManager
 },
 {
     "-help",
@@ -107,7 +121,7 @@ static int error(const char* format, const char* arg = nullptr) {
         fprintf(stderr, "\n\n");
     }
     usage();
-    return 100;
+    return badReturn;
 }
 
 int main(int argc, char** argv) {
