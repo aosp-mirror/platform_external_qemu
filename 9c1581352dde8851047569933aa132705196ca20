@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "abcf8271_e130e6c5",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-12T17:13:30Z",
+      "side": 1,
+      "message": "This should not be part of android-emu-base, which should not depend on UI libraries like libX11.so. I\u0027d recommend moving this to emulator-libui below instead.",
+      "revId": "9c1581352dde8851047569933aa132705196ca20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
