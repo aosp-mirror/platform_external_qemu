@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4b48c6fd_a149b80c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-12T23:41:02Z",
+      "side": 1,
+      "message": "ack",
+      "parentUuid": "8baf1e8f_f86ed1c9",
+      "range": {
+        "startLine": 15,
+        "startChar": 17,
+        "endLine": 15,
+        "endChar": 22
+      },
+      "revId": "14c3a1bd44ac6f7a31a4accca63c0ea5e1308636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8baf1e8f_2129f438",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-12T18:34:24Z",
       "side": 1,
       "message": "--\u003e and then a later\nand then later, make it \"the already-deleted timer object.\"",
+      "range": {
+        "startLine": 17,
+        "startChar": 36,
+        "endLine": 17,
+        "endChar": 45
+      },
+      "revId": "14c3a1bd44ac6f7a31a4accca63c0ea5e1308636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b48c6fd_01550c9c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-12T23:41:02Z",
+      "side": 1,
+      "message": "ack",
+      "parentUuid": "8baf1e8f_2129f438",
       "range": {
         "startLine": 17,
         "startChar": 36,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "4b48c6fd_012e6c40",
+        "filename": "android/metrics/IniFileAutoFlusher.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-12T23:41:02Z",
+      "side": 1,
+      "message": "It\u0027s not a bug, more a feature :)\nQEMU picks the timer and copies the variables under the lock and then releases it - so the callback is able to call timer-related functions without deadlocking. But this also means anyone else might call those right between releasing the lock and calling the callback:\n\n  cb \u003d timer-\u003ecb;\n  user_data \u003d timer-\u003euser_data;\n  remove_timer_from_pending(timer);\n  unlock();\n    \u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c right here\n  cb(user_data);\n\nThere\u0027s no simple way of making sure the timer is still alive here",
+      "parentUuid": "0bfc0e7c_cc704f15",
+      "revId": "14c3a1bd44ac6f7a31a4accca63c0ea5e1308636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8baf1e8f_ccfa2f86",
         "filename": "android/metrics/IniFileAutoFlusher.cpp",
         "patchSetId": 1
@@ -88,6 +154,30 @@
     },
     {
       "key": {
+        "uuid": "4b48c6fd_a16538ab",
+        "filename": "android/metrics/IniFileAutoFlusher.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-12T23:41:02Z",
+      "side": 1,
+      "message": "if we lock the pointer, reschedule the timer to run again and then release the shared pointer. This means the next callback run would need to start with locking it again",
+      "parentUuid": "8baf1e8f_ccfa2f86",
+      "range": {
+        "startLine": 67,
+        "startChar": 8,
+        "endLine": 67,
+        "endChar": 23
+      },
+      "revId": "14c3a1bd44ac6f7a31a4accca63c0ea5e1308636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8baf1e8f_4c8c5f2c",
         "filename": "android/metrics/metrics_reporter.cpp",
         "patchSetId": 1
@@ -99,6 +189,30 @@
       "writtenOn": "2016-04-12T18:34:24Z",
       "side": 1,
       "message": "it --\u003e them",
+      "range": {
+        "startLine": 59,
+        "startChar": 9,
+        "endLine": 59,
+        "endChar": 11
+      },
+      "revId": "14c3a1bd44ac6f7a31a4accca63c0ea5e1308636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b48c6fd_6164108c",
+        "filename": "android/metrics/metrics_reporter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-12T23:41:02Z",
+      "side": 1,
+      "message": "ack",
+      "parentUuid": "8baf1e8f_4c8c5f2c",
       "range": {
         "startLine": 59,
         "startChar": 9,
