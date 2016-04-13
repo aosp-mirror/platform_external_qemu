@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "eb6dfab4_9309bc87",
+        "filename": "android/emulator-check/PlatformInfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-13T22:19:03Z",
+      "side": 1,
+      "message": "In my experience, anonymous namespaces make debugging harder, because you can\u0027t use GDB\u0027s name-completion anymore with them, and have to type the full name with \"android::base::{anonymous namespace}::something\" ,which is always tedious. Granted, it\u0027s more a GDB ui problem, but you get the idea :)",
+      "parentUuid": "8bd1de8e_52146165",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 6
+      },
+      "revId": "e108a8560ddd7821a9402f4a24acd97853e7cdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bd1de8e_6ef8ab8d",
         "filename": "android/emulator-check/PlatformInfo.cpp",
         "patchSetId": 2
