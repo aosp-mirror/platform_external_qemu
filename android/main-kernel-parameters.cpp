@@ -24,8 +24,9 @@ using android::base::StringFormat;
 char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    const char* targetArch,
                                    const char* kernelSerialPrefix,
+                                   const char* avdKernelParameters,
                                    AndroidGlesEmulationMode glesMode,
-                                   bool is_qemu2) {
+                                   bool isQemu2) {
     android::ParameterList params;
     bool isX86 = !strcmp(targetArch, "x86");
 
@@ -95,6 +96,10 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     if (opts->selinux) {
         params.addFormat("androidboot.selinux=%s", opts->selinux);
+    }
+
+    if (avdKernelParameters && avdKernelParameters[0]) {
+        params.add(avdKernelParameters);
     }
 
     return params.toCStringCopy();

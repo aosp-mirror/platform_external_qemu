@@ -1956,7 +1956,6 @@ int main(int argc, char **argv, char **envp)
     CPUState *cpu;
     int show_vnc_port = 0;
     CIniFile *hw_ini = NULL;
-    STRALLOC_DEFINE(kernel_params);
     STRALLOC_DEFINE(kernel_config);
     int    dns_count = 0;
 
@@ -3167,6 +3166,7 @@ int main(int argc, char **argv, char **envp)
         }
     }
     if (dns_count > 1) {
+        // TODO(digit): Move this to android-qemu1-glue/main.cpp
         stralloc_add_format(kernel_config, " ndns=%d", dns_count);
     }
 
@@ -3613,46 +3613,36 @@ int main(int argc, char **argv, char **envp)
      * collected during initialization.
      *
      * The order is the following:
-     * - parameters from the hw configuration (kernel.parameters)
-     * - additionnal parameters from options (e.g. -memcheck)
-     * - the -append parameters.
+     * - parameters from the command-line -append option.
+     * - additionnal parameters from kernel_config
      */
     {
-        const char* kernel_parameters;
+        STRALLOC_DEFINE(kernel_parameters);
 
-        if (android_hw->kernel_parameters) {
-            stralloc_add_c(kernel_params, ' ');
-            stralloc_add_str(kernel_params, android_hw->kernel_parameters);
+        if (*kernel_cmdline != '\0') {
+            stralloc_add_str(kernel_parameters, kernel_cmdline);
+        }
+        if (kernel_config->n > 0) {
+            stralloc_add_c(kernel_parameters, ' ');
+            stralloc_append(kernel_parameters, kernel_config);
         }
 
-        /* If not empty, kernel_config always contains a leading space */
-        stralloc_append(kernel_params, kernel_config);
-
-        if (*kernel_cmdline) {
-            stralloc_add_c(kernel_params, ' ');
-            stralloc_add_str(kernel_params, kernel_cmdline);
-        }
-
-        /* Remove any leading/trailing spaces */
-        stralloc_strip(kernel_params);
-
-        kernel_parameters = stralloc_cstr(kernel_params);
-        VERBOSE_PRINT(init, "Kernel parameters: %s", kernel_parameters);
+        const char* kernel_params_str = stralloc_cstr(kernel_parameters);
+        VERBOSE_PRINT(init, "Kernel parameters: %s", kernel_params_str);
 
         machine->init(ram_size,
                       boot_devices,
                       kernel_filename,
-                      kernel_parameters,
+                      kernel_params_str,
                       initrd_filename,
                       cpu_model);
 
-        /* Initialize multi-touch emulation. */
-        if (androidHwConfig_isScreenMultiTouch(android_hw)) {
-            mts_port_create(NULL, gQAndroidUserEventAgent, gQAndroidDisplayAgent);
-        }
+        stralloc_reset(kernel_parameters);
+    }
 
-        stralloc_reset(kernel_params);
-        stralloc_reset(kernel_config);
+    /* Initialize multi-touch emulation. */
+    if (androidHwConfig_isScreenMultiTouch(android_hw)) {
+        mts_port_create(NULL, gQAndroidUserEventAgent, gQAndroidDisplayAgent);
     }
 
     /* Send the command-line boot parameters now. The other
