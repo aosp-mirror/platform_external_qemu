@@ -33,6 +33,14 @@ public:
     ~ShaderParser();
 
     void setInfoLog(GLchar * infoLog);
+    // Query whether the shader parsed is valid.
+    // Don't trust the value if we did not call setSrc
+    bool validShader() const;
+    // If validation fails, add proper error messages
+    // to the parser's info log, which is treated
+    // as the actual info log from guest POV.
+    void setInvalidInfoLog();
+
     GLchar* getInfoLog();
 
     void setDeleteStatus(bool val) { m_deleteStatus = val; }
@@ -41,6 +49,10 @@ public:
     void setAttachedProgram(GLuint program) { m_program = program; }
     GLuint getAttachedProgram() const { return m_program; }
 private:
+    // For shader validation purposes, analyze keywords like lowp/highp
+    // appearing in variable declarations or function parameters.
+    void validateGLESKeywords(const char* src);
+
     void parseOriginalSrc();
     void parseGLSLversion();
     void parseBuiltinConstants();
@@ -57,5 +69,6 @@ private:
     GLchar*     m_infoLog;
     bool        m_deleteStatus;
     GLuint      m_program;
+    bool        m_valid;
 };
 #endif

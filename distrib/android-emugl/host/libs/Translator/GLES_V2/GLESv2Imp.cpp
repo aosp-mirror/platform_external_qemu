@@ -382,6 +382,7 @@ GL_APICALL void  GL_APIENTRY glColorMask(GLboolean red, GLboolean green, GLboole
 }
 
 GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
+    fprintf(stderr, "glCompileShader\n");
     GET_CTX();
     if(ctx->shareGroup().Ptr()) {
         const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(SHADER,shader);
@@ -389,14 +390,26 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
         ObjectDataPtr objData = ctx->shareGroup()->getObjectData(SHADER,shader);
         SET_ERROR_IF(objData.Ptr()->getDataType()!= SHADER_DATA,GL_INVALID_OPERATION);
         ShaderParser* sp = (ShaderParser*)objData.Ptr();
-        ctx->dispatcher().glCompileShader(globalShaderName);
+        if (sp->validShader()) {
+            ctx->dispatcher().glCompileShader(globalShaderName);
 
-        GLsizei infoLogLength=0;
-        GLchar* infoLog;
-        ctx->dispatcher().glGetShaderiv(globalShaderName,GL_INFO_LOG_LENGTH,&infoLogLength);
-        infoLog = new GLchar[infoLogLength+1];
-        ctx->dispatcher().glGetShaderInfoLog(globalShaderName,infoLogLength,NULL,infoLog);
-        sp->setInfoLog(infoLog);
+            GLsizei infoLogLength=0;
+            GLchar* infoLog;
+            ctx->dispatcher().glGetShaderiv(globalShaderName,GL_INFO_LOG_LENGTH,&infoLogLength);
+            infoLog = new GLchar[infoLogLength+1];
+            ctx->dispatcher().glGetShaderInfoLog(globalShaderName,infoLogLength,NULL,infoLog);
+            sp->setInfoLog(infoLog);
+        } else {
+            GLsizei infoLogLength=0;
+            GLchar* infoLog;
+            ctx->dispatcher().glGetShaderiv(globalShaderName,GL_INFO_LOG_LENGTH,&infoLogLength);
+            infoLog = new GLchar[infoLogLength+1];
+            ctx->dispatcher().glGetShaderInfoLog(globalShaderName,infoLogLength,NULL,infoLog);
+            sp->setInfoLog(infoLog);
+            fprintf(stderr, "setting invalid info log\n");
+            sp->setInvalidInfoLog();
+            fprintf(stderr, "set invalid info log\n");
+        }
     }
 }
 
