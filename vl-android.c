@@ -413,7 +413,6 @@ static void android_check_for_updates();
 const char* dns_log_filename = NULL;
 const char* drop_log_filename = NULL;
 
-const char* savevm_on_exit = NULL;
 
 #define TFR(expr) do { if ((expr) != -1) break; } while (errno == EINTR)
 
