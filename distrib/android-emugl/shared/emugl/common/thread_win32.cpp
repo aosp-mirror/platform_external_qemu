@@ -38,8 +38,8 @@ private:
 Thread::Thread() :
     mThread(INVALID_HANDLE_VALUE),
     mThreadId(0),
-    mExitStatus(0),
-    mIsRunning(false) {
+    mIsRunning(false),
+    mExitStatus(0) {
     InitializeCriticalSection(&mLock);
 }
 

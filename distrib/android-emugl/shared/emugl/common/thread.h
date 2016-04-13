@@ -83,18 +83,19 @@ private:
 #ifdef _WIN32
     static DWORD WINAPI thread_main(void* arg);
 
+    CRITICAL_SECTION mLock;
     HANDLE mThread;
     DWORD mThreadId;
-    CRITICAL_SECTION mLock;
 #else // !WIN32
     static void* thread_main(void* arg);
 
     pthread_t mThread;
     pthread_mutex_t mLock;
     bool mJoined;
+    bool mStarted;
 #endif
-    intptr_t mExitStatus;
     bool mIsRunning;
+    intptr_t mExitStatus;
 };
 
 }  // namespace emugl
