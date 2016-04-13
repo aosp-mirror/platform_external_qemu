@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb6dfab4_53c64467",
+        "filename": "android/emulator-check/main-emulator-check.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-13T21:44:56Z",
+      "side": 1,
+      "message": "I\u0027d recommend supporting \"help\", \"-h\" and \"--help\" instead.\n\nThe fact that QEMU uses -option instead of --option is  historical (and I think they fixed this upstream). We should probably do the same (i.e. accept both -\u003coption\u003e and --\u003coption\u003e as equivalent). Let\u0027s not carry on this mistake for other binaries we provide.",
+      "revId": "da04ed84e059c16323cddd4a3cca0ad48bab717e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
