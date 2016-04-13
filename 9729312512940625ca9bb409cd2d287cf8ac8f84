@@ -22,6 +22,30 @@
       "revId": "9729312512940625ca9bb409cd2d287cf8ac8f84",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_a828db35",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-13T16:40:48Z",
+      "side": 1,
+      "message": "Will initialize.",
+      "parentUuid": "8bd1de8e_28b22b57",
+      "range": {
+        "startLine": 60,
+        "startChar": 24,
+        "endLine": 60,
+        "endChar": 37
+      },
+      "revId": "9729312512940625ca9bb409cd2d287cf8ac8f84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
