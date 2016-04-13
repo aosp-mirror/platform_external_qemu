@@ -38,6 +38,8 @@
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
+extern bool android_op_writable_system;
+
 int qemu_main(int argc, char **argv);
 
 void enter_qemu_main_loop(int argc, char **argv) {
@@ -200,6 +202,10 @@ int main(int argc, char **argv) {
         kTargetArch);
     if (!qemuParams) {
         return 1;
+    }
+
+    if (!opts->no_snapshot_load || !opts->no_snapshot_save) {
+        android_op_writable_system = true;
     }
 
     static UiEmuAgent uiEmuAgent;
