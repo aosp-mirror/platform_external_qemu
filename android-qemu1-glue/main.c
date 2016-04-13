@@ -191,12 +191,13 @@ int main(int argc, char **argv) {
         }
     }
 
-    QemuParameters* qemuParams = qemu_parameters_create(argv0,
-                                                        opts,
-                                                        avd,
-                                                        coreHwIniPath,
-                                                        false, // is_qemu2
-                                                        kTargetArch);
+    // NOTE: |argc| and |argv| have been adjusted by the
+    // emulator_parseCommonCommandLineOptions() function and now
+    // corresponds to the parameters following -qemu, if any.
+    QemuParameters* qemuParams = qemu_parameters_create(
+        argv0, argc, (const char* const*)argv, opts, avd, coreHwIniPath,
+        false,  // is_qemu2
+        kTargetArch);
     if (!qemuParams) {
         return 1;
     }
