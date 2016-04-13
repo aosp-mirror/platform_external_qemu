@@ -14,6 +14,7 @@ commonSources := \
         pod_vector.cpp \
         shared_library.cpp \
         smart_ptr.cpp \
+        stringparsing.cpp \
         sockets.cpp \
         thread_store.cpp \
 
@@ -53,6 +54,7 @@ host_commonSources := \
     thread_store_unittest.cpp \
     thread_unittest.cpp \
     unique_integer_map_unittest.cpp \
+    stringparsing_unittest.cpp
 
 $(call emugl-begin-host-executable,emugl$(BUILD_TARGET_SUFFIX)_common_host_unittests)
 LOCAL_SRC_FILES := $(host_commonSources)
