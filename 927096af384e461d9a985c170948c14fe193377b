@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8bd1de8e_9e31c2ca",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-13T23:58:43Z",
+      "side": 1,
+      "message": "Ah. Now I understand why this is needed.\n\nextern globals are nasty. Let\u0027s expose this through an opts header -- some way for the system to get the user options at any point in execution (with const modifiers)",
+      "range": {
+        "startLine": 73,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 34
+      },
+      "revId": "927096af384e461d9a985c170948c14fe193377b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
