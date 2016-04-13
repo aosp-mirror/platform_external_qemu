@@ -34,6 +34,24 @@
       "revId": "f3e3832dbd254e76db0c093ee67c26b7f50564fe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_8ea35fd7",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderServer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-04-13T18:00:49Z",
+      "side": 1,
+      "message": "thanks yurii:\nis there other way we could achieve the same goal-wait till all child threads have done, for example, barrier or something else (I don\u0027t know)\n ?\nhow bad it is if we don\u0027t wait-we are exiting anyway ?\n\n\nit is irrelevant to this CL, just want to make sure we don\u0027t have leakage\ncaused by threads--very nasty and hard to debug.",
+      "parentUuid": "8bd1de8e_2b9985f7",
+      "revId": "f3e3832dbd254e76db0c093ee67c26b7f50564fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
