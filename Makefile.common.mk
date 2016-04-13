@@ -171,7 +171,7 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
     $(call start-emulator-program, emulator-check)
 
     LOCAL_SRC_FILES := \
-        android/emulator-check-main.cpp \
+        android/emulator-check/main-emulator-check.cpp \
 
     LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
 
