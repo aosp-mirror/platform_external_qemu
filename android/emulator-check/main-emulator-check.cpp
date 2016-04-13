@@ -9,120 +9,104 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/base/Optional.h"
 #include "android/base/StringView.h"
 #include "android/cpu_accelerator.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/emulator-check/PlatformInfo.h"
 
+#include <algorithm>
+#include <iterator>
+#include <sstream>
 #include <tuple>
 
 #include <stdio.h>
 #include <stdlib.h>
 
+using android::base::StringView;
+using CommandReturn = std::pair<int, std::string>;
+
 static const int kGenericError = 100;
 
-static int help();
+static CommandReturn help();
 
 // check ability to launch haxm/kvm accelerated VM and exit
 // designed for use by Android Studio
-static int checkCpuAcceleration() {
+static CommandReturn checkCpuAcceleration() {
     char* status = nullptr;
     AndroidCpuAcceleration capability =
             androidCpuAcceleration_getStatus(&status);
-    if (status) {
-        FILE* out = stderr;
-        if (capability == ANDROID_CPU_ACCELERATION_READY)
-            out = stdout;
-        fprintf(out, "%s\n", status);
-        free(status);
-    }
-    return capability;
+    std::string message = status ? status : "";
+    free(status);
+    return std::make_pair(capability, std::move(message));
 }
 
-static int checkHyperV() {
-    AndroidHyperVStatus status;
-    std::string message;
-    std::tie(status, message) = android::GetHyperVStatus();
-    printf("%s\n", message.c_str());
-    return status;
+static CommandReturn checkHyperV() {
+    return android::GetHyperVStatus();
 }
 
-static int getCpuInfo() {
-    AndroidCpuInfoFlags flags;
-    std::string message;
-    std::tie(flags, message) = android::GetCpuInfo();
-    printf("%s\n", message.c_str());
-    return flags;
+static CommandReturn getCpuInfo() {
+    auto pair = android::GetCpuInfo();
+    // GetCpuInfo() returns a set of lines, we need to turn it into a
+    // single line.
+    std::replace(pair.second.begin(), pair.second.end(), '\n', '|');
+    return pair;
 }
 
-static int printWindowManagerName() {
-    const auto name = android::getWindowManagerName();
-    printf("%s\n", name.c_str());
-    return name.empty() ? kGenericError : 0;
+static CommandReturn getWindowManager() {
+    const std::string name = android::getWindowManagerName();
+    return std::make_pair(name.empty() ? kGenericError : 0, name);
 }
 
-constexpr struct {
+constexpr struct Option {
     const char* arg;
     const char* help;
-    int (* handler)();
+    CommandReturn (*handler)();
+    bool printRawAndStop;
 } options[] = {
-{
-    "-h",
-    "Show this help message",
-    &help
-},
-{
-    "-help",
-    "Show this help message",
-    &help
-},
-{
-    "--help",
-    "Show this help message",
-    &help
-},
-{
-    "accel",
-    "Check the CPU acceleration support",
-    &checkCpuAcceleration
-},
-{
-    "hyper-v",
-    "Check if hyper-v is installed and running (Windows)",
-    &checkHyperV
-},
-{
-    "cpu-info",
-    "Return the CPU model information",
-    &getCpuInfo
-},
-{
-    "window-mgr",
-    "Return the current window manager name",
-    &printWindowManagerName
-},
+        {"-h", "Show this help message", &help, true},
+        {"-help", "Show this help message", &help, true},
+        {"--help", "Show this help message", &help, true},
+        {"accel", "Check the CPU acceleration support", &checkCpuAcceleration},
+        {"hyper-v", "Check if hyper-v is installed and running (Windows)",
+         &checkHyperV},
+        {"cpu-info", "Return the CPU model information", &getCpuInfo},
+        {"window-mgr", "Return the current window manager name",
+         &getWindowManager},
 };
 
-static void usage() {
-    printf("%s\n",
-R"(Usage: emulator-check <argument>
+static std::string usage() {
+    std::ostringstream str;
+    str <<
+R"(Usage: emulator-check <argument1> [<argument2>...]
 
-Performs the check requested in <argument> and returns the result by the means
-of return code and text message
+Performs the set of checks requested in <argumentX> and returns the result in
+the following format:
+<argument1>:
+<return code for <argument1>>
+<a single line of text information returned for <argument1>>
+<argument1>
+<argument2>:
+<return code for <argument2>>
+<a single line of text information returned for <argument2>>
+<argument2>
+...
 
-<argument> is one of:
-)");
+<argumentX> is any of:
+
+)";
 
     for (const auto& option : options) {
-        printf("    %s\t\t%s\n", option.arg, option.help);
+        str << "    " << option.arg << "\t\t" << option.help << '\n';
     }
 
-    printf("\n");
+    str << '\n';
+
+    return str.str();
 }
 
-static int help() {
-    usage();
-    return 0;
+static CommandReturn help() {
+    return std::make_pair(0, usage());
 }
 
 static int error(const char* format, const char* arg = nullptr) {
@@ -130,22 +114,50 @@ static int error(const char* format, const char* arg = nullptr) {
         fprintf(stderr, format, arg);
         fprintf(stderr, "\n\n");
     }
-    usage();
+    fprintf(stderr, "%s\n", usage().c_str());
     return kGenericError;
 }
 
-int main(int argc, char** argv) {
-    if (argc != 2) {
-        return error("Missing a required argument");
-    }
+static int processArguments(int argc, const char* const* argv) {
+    android::base::Optional<int> retCode;
 
-    const android::base::StringView argument = argv[1];
-
-    for (const auto& option : options) {
-        if (argument == option.arg) {
-            return option.handler();
+    for (int i = 1; i < argc; ++i) {
+        const StringView arg = argv[i];
+        const auto opt = std::find_if(
+                std::begin(options), std::end(options),
+                [arg](const Option& opt) { return arg == opt.arg; });
+        if (opt == std::end(options)) {
+            printf("%s:\n%d\nUnknown argument\n%s\n",
+                   arg.c_str(), kGenericError, arg.c_str());
+            continue;
         }
+
+        auto handlerRes = opt->handler();
+        if (!retCode) {
+            // Remember the first return value for the compatibility with the
+            // previous version.
+            retCode = handlerRes.first;
+        }
+
+        if (opt->printRawAndStop) {
+            printf("%s\n", handlerRes.second.c_str());
+            break;
+        }
+
+        printf("%s:\n%d\n%s\n%s\n",
+               arg.c_str(),
+               handlerRes.first,
+               handlerRes.second.c_str(),
+               arg.c_str());
     }
 
-    return error("Bad argument '%s'", argv[1]);
+    return retCode.valueOr(kGenericError);
+}
+
+int main(int argc, const char* const* argv) {
+    if (argc < 2) {
+        return error("Missing a required argument(s)");
+    }
+
+    return processArguments(argc, argv);
 }
