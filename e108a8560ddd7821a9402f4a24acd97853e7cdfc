@@ -234,6 +234,40 @@
       "revId": "e108a8560ddd7821a9402f4a24acd97853e7cdfc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb6dfab4_d3ec14e1",
+        "filename": "android/emulator-check/main-emulator-check.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-13T21:52:17Z",
+      "side": 1,
+      "message": "nit: Use kBadReturn instead :-| Or even something a little nit more descriptive, e.g. kGenericError",
+      "revId": "e108a8560ddd7821a9402f4a24acd97853e7cdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb6dfab4_f3f110b4",
+        "filename": "android/emulator-check/main-emulator-check.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-13T21:52:17Z",
+      "side": 1,
+      "message": "shouldn\u0027t this be called printWindowManager() instead?",
+      "revId": "e108a8560ddd7821a9402f4a24acd97853e7cdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
