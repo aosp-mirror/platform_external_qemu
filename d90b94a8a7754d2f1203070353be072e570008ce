@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8bd1de8e_51bf46ec",
+        "filename": "android/emulator-check/main-emulator-check.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-04-13T18:36:51Z",
+      "side": 1,
+      "message": "Why does \"help\" have a leading \"-\" but none of the other options do?",
+      "revId": "d90b94a8a7754d2f1203070353be072e570008ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
