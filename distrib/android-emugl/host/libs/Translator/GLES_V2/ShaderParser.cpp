@@ -15,8 +15,12 @@
 */
 
 #include "ShaderParser.h"
+#include "ShaderValidator.h"
 #include <stdlib.h>
 #include <string.h>
+
+#include <string>
+#include <vector>
 
 ShaderParser::ShaderParser():ObjectData(SHADER_DATA),
                              m_type(0),
@@ -26,9 +30,10 @@ ShaderParser::ShaderParser():ObjectData(SHADER_DATA),
                              m_program(0) {
     m_infoLog = new GLchar[1];
     m_infoLog[0] = '\0';
+    m_valid = true;
 };
 
-ShaderParser::ShaderParser(GLenum type):ObjectData(SHADER_DATA), 
+ShaderParser::ShaderParser(GLenum type):ObjectData(SHADER_DATA),
                                         m_type(type),
                                         m_originalSrc(NULL),
                                         m_parsedLines(NULL),
@@ -37,7 +42,13 @@ ShaderParser::ShaderParser(GLenum type):ObjectData(SHADER_DATA),
 
     m_infoLog = new GLchar[1];
     m_infoLog[0] = '\0';
+    m_valid = true;
 };
+
+
+void ShaderParser::validateGLESKeywords(const char* src) {
+    m_valid = validate_glsles_keywords(src);
+}
 
 void ShaderParser::setSrc(const Version& ver,GLsizei count,const GLchar* const* strings,const GLint* length){
     m_src.clear();
@@ -48,6 +59,8 @@ void ShaderParser::setSrc(const Version& ver,GLsizei count,const GLchar* const* 
     if (m_originalSrc)
         free(m_originalSrc);
     m_originalSrc = strdup(m_src.c_str());
+
+    validateGLESKeywords(m_originalSrc);
 
     clearParsedSrc();
 
@@ -337,8 +350,21 @@ void ShaderParser::setInfoLog(GLchar* infoLog)
     m_infoLog = infoLog;
 }
 
+bool ShaderParser::validShader() const {
+    return m_valid;
+}
+
+static const GLchar glsles_invalid[] =
+    { "ERROR: Valid GLSL but not GLSL ES" };
+
+void ShaderParser::setInvalidInfoLog() {
+    GLchar* glsles_invalid_here = new GLchar[2048];
+    memcpy(glsles_invalid_here, glsles_invalid, 2048);
+    setInfoLog(glsles_invalid_here);
+}
+
 GLchar* ShaderParser::getInfoLog()
-{   
+{
     return m_infoLog;
 }
 
