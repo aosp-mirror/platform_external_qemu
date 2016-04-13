@@ -55,12 +55,11 @@ using android::base::System;
  */
 static char* metricsDirPath;
 static char* metricsFilePath;
-static android::metrics::IniFileAutoFlusher* sMetricsFileFlusher;
 // It's generally bad to have global smart pointers. But we are careful to
-// reset it explicitly when exiting.
-std::shared_ptr<android::base::IniFile> sMetricsIniFile;
-std::shared_ptr<android::metrics::AdbLivenessChecker> sAdbLivenessChecker(
-        nullptr);
+// reset them explicitly when exiting.
+static android::metrics::IniFileAutoFlusher::Ptr sMetricsFileFlusher;
+static std::shared_ptr<android::base::IniFile> sMetricsIniFile;
+static std::shared_ptr<android::metrics::AdbLivenessChecker> sAdbLivenessChecker;
 
 static const char metricsRelativeDir[] = "metrics";
 static const char metricsFilePrefix[] = "metrics";
@@ -98,10 +97,9 @@ ABool androidMetrics_moduleInit(const char* avdHome) {
 void androidMetrics_moduleFini(void) {
     sAdbLivenessChecker.reset();
     sMetricsIniFile.reset();
-    delete sMetricsFileFlusher;
+    sMetricsFileFlusher.reset();
     AFREE(metricsDirPath);
     AFREE(metricsFilePath);
-    sMetricsFileFlusher = NULL;
     metricsDirPath = metricsFilePath = NULL;
 }
 
@@ -152,7 +150,7 @@ const char* androidMetrics_getMetricsFilePath() {
     /* The AutoFileFlusher will be stoped and path string will be freed by
      * androidMetrics_seal. */
     metricsFilePath = ASTRDUP(path);
-    sMetricsFileFlusher = new android::metrics::IniFileAutoFlusher(
+    sMetricsFileFlusher = android::metrics::IniFileAutoFlusher::create(
             android::base::ThreadLooper::get());
     sMetricsIniFile = std::make_shared<android::base::IniFile>(metricsFilePath);
     sMetricsFileFlusher->start(sMetricsIniFile);
@@ -284,8 +282,7 @@ ABool androidMetrics_seal() {
 
     sAdbLivenessChecker.reset();
     sMetricsIniFile.reset();
-    delete sMetricsFileFlusher;
-    sMetricsFileFlusher = NULL;
+    sMetricsFileFlusher.reset();
     AFREE(metricsFilePath);
     metricsFilePath = NULL;
     return success;
