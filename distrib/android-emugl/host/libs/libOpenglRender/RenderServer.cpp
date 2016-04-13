@@ -138,7 +138,7 @@ intptr_t RenderServer::main() {
         // if the thread has been created and started, insert it to the list
         if (rt) {
             threads.emplace_back(std::move(rt));
-            DBG("Started new RenderThread\n");
+            DBG("Started new RenderThread (total %d)\n", (int)threads.size());
         }
     }
 
