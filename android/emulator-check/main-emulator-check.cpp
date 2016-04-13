@@ -58,6 +58,21 @@ constexpr struct {
     int (* handler)();
 } options[] = {
 {
+    "-h",
+    "Show this help message",
+    &help
+},
+{
+    "-help",
+    "Show this help message",
+    &help
+},
+{
+    "--help",
+    "Show this help message",
+    &help
+},
+{
     "accel",
     "Check the CPU acceleration support",
     &checkCpuAcceleration
@@ -72,11 +87,6 @@ constexpr struct {
     "Return the CPU model information",
     &getCpuInfo
 },
-{
-    "-help",
-    "Show this help message",
-    &help
-},
 
 };
 
@@ -87,7 +97,8 @@ R"(Usage: emulator-check <argument>
 Performs the check requested in <argument> and returns the result by the means
 of return code and text message
 
-<argument> is one of:\n)");
+<argument> is one of:
+)");
 
     for (const auto& option : options) {
         printf("    %s\t\t%s\n", option.arg, option.help);
