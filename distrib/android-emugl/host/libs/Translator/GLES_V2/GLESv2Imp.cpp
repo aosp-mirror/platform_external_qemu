@@ -397,6 +397,7 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
         infoLog = new GLchar[infoLogLength+1];
         ctx->dispatcher().glGetShaderInfoLog(globalShaderName,infoLogLength,NULL,infoLog);
         sp->setInfoLog(infoLog);
+        sp->amendInfoLogWithValidation();
     }
 }
 
