@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8bd1de8e_a58bd913",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-13T22:40:13Z",
+      "side": 1,
+      "message": "Per our conversation before, I think it would be better to:\n\na. Do this before calling dispatcher().glCompileShader()\nb. Store in ShaderParser if we \"detect a compilation failure\", and skip calling glCompileShader() altogether if we do.",
+      "range": {
+        "startLine": 400,
+        "startChar": 8,
+        "endLine": 400,
+        "endChar": 41
+      },
+      "revId": "8f317b42320ffead65ae52747c8b66d55bbbf68d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
