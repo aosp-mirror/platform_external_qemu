@@ -46,6 +46,25 @@ TEST(AdbInterface, freshAdbVersion) {
     EXPECT_EQ(std::string(dir->path()) + "/Sdk/platform-tools/adb", adb.detectedAdbPath());
 }
 
+TEST(AdbInterface, freshAdbVersionNoMinor) {
+    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
+                      "/appdir");
+    TestTempDir* dir = system.getTempRoot();
+    ASSERT_TRUE(dir->makeSubDir("Sdk"));
+    ASSERT_TRUE(dir->makeSubDir("Sdk/platform-tools"));
+    std::string output_file =
+        dir->makeSubPath("Sdk/platform-tools/source.properties");
+    std::ofstream ofs(output_file);
+    ASSERT_TRUE(ofs.is_open());
+    ofs << "### Comment\nArchive.HostOs=linux\nPkg.License=\\nNoliense\n"
+           "Pkg.LicenseRef=android-sdk-license\nPkg.Revision=24 rc1\n"
+           "Pkg.SourceUrl=https\\://dl.google.com/android/repository/repository-12.xml\n";
+    ofs.close();
+    system.envSet("ANDROID_SDK_ROOT", std::string(dir->path()) +"/Sdk");
+    AdbInterface adb;
+    EXPECT_TRUE(adb.isAdbVersionCurrent());
+    EXPECT_EQ(std::string(dir->path()) + "/Sdk/platform-tools/adb", adb.detectedAdbPath());
+}
 
 TEST(AdbInterface, staleAdbMinorVersion) {
     TestSystem system("/progdir", System::kProgramBitness, "/homedir",
