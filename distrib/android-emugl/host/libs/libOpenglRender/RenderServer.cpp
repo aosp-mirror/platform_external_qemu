@@ -28,32 +28,27 @@
 
 #include "OpenglRender/render_api.h"
 
-#include <set>
+#include <algorithm>
+#include <memory>
+#include <vector>
 
 #include <string.h>
 
-typedef std::set<RenderThread *> RenderThreadsSet;
+using RenderThreadPtr = std::unique_ptr<RenderThread>;
+using RenderThreadsSet = std::vector<RenderThreadPtr>;
 
-RenderServer::RenderServer() :
-    m_lock(),
-    m_listenSock(NULL),
-    m_exiting(false)
-{
-}
+RenderServer::RenderServer() : m_lock(), m_listenSock(nullptr), m_exiting(false) {}
 
-RenderServer::~RenderServer()
-{
+RenderServer::~RenderServer() {
     delete m_listenSock;
 }
 
-
 extern "C" int gRendererStreamMode;
 
-RenderServer *RenderServer::create(char* addr, size_t addrLen)
-{
-    RenderServer *server = new RenderServer();
+RenderServer* RenderServer::create(char* addr, size_t addrLen) {
+    auto server = std::unique_ptr<RenderServer>(new RenderServer());
     if (!server) {
-        return NULL;
+        return nullptr;
     }
 
     if (gRendererStreamMode == RENDER_API_STREAM_MODE_TCP) {
@@ -66,46 +61,48 @@ RenderServer *RenderServer::create(char* addr, size_t addrLen)
 #endif
     }
 
+    if (!server->m_listenSock) {
+        ERR("RenderServer::create failed to create a listening socket\n");
+        return nullptr;
+    }
+
     char addrstr[SocketStream::MAX_ADDRSTR_LEN];
     if (server->m_listenSock->listen(addrstr) < 0) {
         ERR("RenderServer::create failed to listen\n");
-        delete server;
-        return NULL;
+        return nullptr;
     }
 
     size_t len = strlen(addrstr) + 1;
     if (len > addrLen) {
-        ERR("RenderServer address name too big for provided buffer: %zu > %zu\n",
-                len, addrLen);
-        delete server;
-        return NULL;
+        ERR("RenderServer address name too big for provided buffer: %zu > "
+            "%zu\n",
+            len, addrLen);
+        return nullptr;
     }
     memcpy(addr, addrstr, len);
 
-    return server;
+    return server.release();
 }
 
-intptr_t RenderServer::main()
-{
+intptr_t RenderServer::main() {
     RenderThreadsSet threads;
 
 #ifndef _WIN32
     sigset_t set;
     sigfillset(&set);
-    pthread_sigmask(SIG_SETMASK, &set, NULL);
+    pthread_sigmask(SIG_SETMASK, &set, nullptr);
 #endif
 
-    while(1) {
-        SocketStream *stream = m_listenSock->accept();
+    while (1) {
+        std::unique_ptr<SocketStream> stream(m_listenSock->accept());
         if (!stream) {
-            fprintf(stderr,"Error accepting connection, aborting\n");
+            fprintf(stderr, "Error accepting connection, skipping\n");
             continue;
         }
 
         unsigned int clientFlags;
-        if (!stream->readFully(&clientFlags, sizeof(unsigned int))) {
-            fprintf(stderr,"Error reading clientFlags\n");
-            delete stream;
+        if (!stream->readFully(&clientFlags, sizeof(clientFlags))) {
+            fprintf(stderr, "Error reading clientFlags\n");
             continue;
         }
 
@@ -114,57 +111,46 @@ intptr_t RenderServer::main()
         // check if we have been requested to exit while waiting on accept
         if ((clientFlags & IOSTREAM_CLIENT_EXIT_SERVER) != 0) {
             m_exiting = true;
-            delete stream;
             break;
         }
 
-        RenderThread *rt = RenderThread::create(stream, &m_lock);
+        RenderThreadPtr rt(RenderThread::create(stream.get(), &m_lock));
         if (!rt) {
-            fprintf(stderr,"Failed to create RenderThread\n");
-            delete stream;
-        } else if (!rt->start()) {
-            fprintf(stderr,"Failed to start RenderThread\n");
-            delete rt;
-            delete stream;
+            fprintf(stderr, "Failed to create RenderThread\n");
+        } else {
+            stream.release();
+            if (!rt->start()) {
+                fprintf(stderr, "Failed to start RenderThread\n");
+                rt.reset();
+            }
         }
 
         //
         // remove from the threads list threads which are
         // no longer running
         //
-        for (RenderThreadsSet::iterator n,t = threads.begin();
-             t != threads.end();
-             t = n) {
-            // first find next iterator
-            n = t;
-            n++;
-
-            // delete and erase the current iterator
-            // if thread is no longer running
-            if ((*t)->isFinished()) {
-                delete (*t);
-                threads.erase(t);
-            }
-        }
+        threads.erase(std::remove_if(threads.begin(), threads.end(),
+                                     [](const RenderThreadPtr& ptr) {
+                                         return ptr->isFinished();
+                                     }),
+                      threads.end());
 
         // if the thread has been created and started, insert it to the list
         if (rt) {
-            threads.insert(rt);
-            DBG("Started new RenderThread\n");
+            threads.emplace_back(std::move(rt));
+            DBG("Started new RenderThread (total %d)\n", (int)threads.size());
         }
     }
 
     //
     // Wait for all threads to finish
     //
-    for (RenderThreadsSet::iterator t = threads.begin();
-         t != threads.end();
-         t++) {
-        (*t)->forceStop();
-        (*t)->wait(NULL);
-        delete (*t);
+    for (const RenderThreadPtr& ptr : threads) {
+        ptr->forceStop();
     }
-    threads.clear();
+    for (const RenderThreadPtr& ptr : threads) {
+        ptr->wait(nullptr);
+    }
 
     return 0;
 }

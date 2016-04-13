@@ -42,14 +42,18 @@ Thread::Thread() :
     mThread((pthread_t)NULL),
     mLock(),
     mJoined(false),
-    mExitStatus(0),
-    mIsRunning(false) {
+    mStarted(false),
+    mIsRunning(false),
+    mExitStatus(0) {
     pthread_mutex_init(&mLock, NULL);
 }
 
 Thread::~Thread() {
     assert(!mIsRunning);
-    assert(mJoined);
+    if (mStarted && !mIsRunning && !mJoined) {
+        // make sure we don't leave a zombie thread
+        pthread_join(mThread, NULL);
+    }
     pthread_mutex_destroy(&mLock);
 }
 
@@ -62,6 +66,7 @@ bool Thread::start() {
         mIsRunning = false;
     }
     pthread_mutex_unlock(&mLock);
+    mStarted = ret;
     return ret;
 }
 

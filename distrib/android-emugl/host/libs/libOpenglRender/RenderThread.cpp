@@ -15,6 +15,7 @@
 */
 #include "RenderThread.h"
 
+#include "ErrorLog.h"
 #include "FrameBuffer.h"
 #include "ReadBuffer.h"
 #include "RenderControl.h"
@@ -160,6 +161,8 @@ intptr_t RenderThread::main() {
     FrameBuffer::getFB()->drainWindowSurface();
 
     FrameBuffer::getFB()->drainRenderContext();
+
+    DBG("Exited a RenderThread\n");
 
     return 0;
 }
