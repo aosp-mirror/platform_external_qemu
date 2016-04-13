@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb6dfab4_b3bcf8de",
+        "filename": "android/emulator-check/main-emulator-check.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-13T21:42:28Z",
+      "side": 1,
+      "message": "nit: According to the usage text, this should be:\n\n   \"%s:\\n%d\\n%s\\n%s\\n\"\n\nI.e. there is a colon at the end of the first line.",
+      "revId": "3e1316b486a7fc55fb94ee9ccf5e40b630e89d55",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
