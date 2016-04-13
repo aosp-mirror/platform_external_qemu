@@ -38,6 +38,7 @@
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
+
 int qemu_main(int argc, char **argv);
 
 void enter_qemu_main_loop(int argc, char **argv) {
