@@ -16,6 +16,24 @@
       "revId": "d90b94a8a7754d2f1203070353be072e570008ce",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_a25e32f0",
+        "filename": "android/emulator-check/main-emulator-check.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-13T20:51:28Z",
+      "side": 1,
+      "message": "well, the idea is that \u0027help\u0027 is a switch while everything else is a command. people tend to use \u0027-h/-help/--help\u0027 when they run some new tool",
+      "parentUuid": "8bd1de8e_51bf46ec",
+      "revId": "d90b94a8a7754d2f1203070353be072e570008ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
