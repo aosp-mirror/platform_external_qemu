@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb6dfab4_b3e798fa",
+        "filename": "android/emulator-check/PlatformInfo.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-13T21:52:17Z",
+      "side": 1,
+      "message": "nit: I would not put this under android::base::, just android::",
+      "revId": "b0f6dc518f51101e14e01694496fe7764853349b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
