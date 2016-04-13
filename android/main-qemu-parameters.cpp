@@ -12,6 +12,7 @@
 #include "android/main-common.h"
 #include "android/main-qemu-parameters.h"
 
+#include "android/base/StringFormat.h"
 #include "android/emulation/ParameterList.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_data.h"
@@ -45,6 +46,7 @@ QemuParameters* qemu_parameters_create(const char* argv0,
                                        const char* const* qemu_argv,
                                        AndroidOptions* opts,
                                        const AvdInfo* avd,
+                                       const char* kernelParameters,
                                        const char* androidHwIniPath,
                                        bool is_qemu2,
                                        const char* targetArch) {
@@ -188,6 +190,26 @@ QemuParameters* qemu_parameters_create(const char* argv0,
 
     for (int n = 0; n < qemu_argc; ++n) {
         params.add(qemu_argv[n]);
+    }
+
+    // Handling kernel parameters. They are passed to QEMU through the
+    // -append flag.
+    {
+        std::string kernelParams;
+        if (kernelParameters) {
+            kernelParams += kernelParameters;
+        }
+        for (int n = 0; n < qemu_argc; ++n) {
+            if (!strcmp(qemu_argv[n], "-append") && n + 1 < qemu_argc) {
+                android::base::StringAppendFormat(&kernelParams, " %s",
+                                                  qemu_argv[n + 1]);
+                n++;
+            }
+        }
+        if (!kernelParams.empty()) {
+            params.add("-append");
+            params.add(std::move(kernelParams));
+        }
     }
 
     if(VERBOSE_CHECK(init)) {
