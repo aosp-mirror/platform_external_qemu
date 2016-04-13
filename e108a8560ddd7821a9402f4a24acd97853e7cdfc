@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8bd1de8e_cef1d7b4",
+        "filename": "android/emulator-check/PlatformInfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-13T17:47:37Z",
+      "side": 1,
+      "message": "Why is this static, rather than in the anonymous namespace, as with XDeleter?  Same comment for all the static methods in this file.  I imagine the answer is \"I copied them from elsewhere\"...and wouldn\u0027t raise the issue except for the use of an anon namespace earlier, which makes me wonder why there and not here...",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 6
+      },
+      "revId": "e108a8560ddd7821a9402f4a24acd97853e7cdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_6ef8ab8d",
+        "filename": "android/emulator-check/PlatformInfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-13T17:47:37Z",
+      "side": 1,
+      "message": "Maybe a comment to indicate that this is declared (IIUC) just to get the referent deleted -- I was confused because I was looking for a use...",
+      "range": {
+        "startLine": 75,
+        "startChar": 4,
+        "endLine": 75,
+        "endChar": 9
+      },
+      "revId": "e108a8560ddd7821a9402f4a24acd97853e7cdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_2e91930e",
+        "filename": "android/emulator-check/PlatformInfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-13T17:47:37Z",
+      "side": 1,
+      "message": "I\u0027d like to argue against overuse of \"auto\".  This is a case I would vote against: the type is not obvious from the assignment RHS, so to find out the type of supWindowPtr, I\u0027d need to go find the declaration of getXProperty.  And the var name would have made me expect that to be something like \"Window*\", so the type is surprising.  The auto isn\u0027t saving a lot of characters here, either.  The one below, where the RHS is a reinterpret cast, I\u0027m fine with: the type there *is* obvious from the RHS.",
+      "range": {
+        "startLine": 95,
+        "startChar": 4,
+        "endLine": 95,
+        "endChar": 8
+      },
+      "revId": "e108a8560ddd7821a9402f4a24acd97853e7cdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_0eeacf90",
+        "filename": "android/emulator-check/PlatformInfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-13T17:47:37Z",
+      "side": 1,
+      "message": "I guess I\u0027ve lived a sheltered life, and never had to do an X-windows coding...but this is kind of amazing :-)  Though I guess it makes sense, if you want want one return type that can return a variety of types of things.\n\nI was wondering why the supWindowPtr had that name.  Maybe that one could be something like supWindowPtrAsChars?",
+      "range": {
+        "startLine": 111,
+        "startChar": 15,
+        "endLine": 111,
+        "endChar": 24
+      },
+      "revId": "e108a8560ddd7821a9402f4a24acd97853e7cdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_8bb8710b",
+        "filename": "android/emulator-check/PlatformInfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-13T17:47:37Z",
+      "side": 1,
+      "message": "I realize this is a micro thing -- but I\u0027d feel better if the elif was for \"defined(__linux__), and the \"else\" was the \"#error Unsupported platform.\n\n(That way, if there\u0027s ever another platform, it\u0027s easy to extend the pattern.  With the current structure, you\u0027d have edit it in a way such that linux is always last.)",
+      "range": {
+        "startLine": 135,
+        "startChar": 7,
+        "endLine": 135,
+        "endChar": 27
+      },
+      "revId": "e108a8560ddd7821a9402f4a24acd97853e7cdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
