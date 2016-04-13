@@ -21,11 +21,11 @@ Accelerometer3DWidget::Accelerometer3DWidget(QWidget* parent) :
 
 Accelerometer3DWidget::~Accelerometer3DWidget() {
     // Free up allocated resources.
-    makeContextCurrent();
     if (!mGLES2) {
         return;
     }
     if (isValid()) {
+        makeContextCurrent();
         mGLES2->glDeleteProgram(mProgram);
         mGLES2->glDeleteBuffers(1, &mVertexDataBuffer);
         mGLES2->glDeleteBuffers(1, &mVertexIndexBuffer);
