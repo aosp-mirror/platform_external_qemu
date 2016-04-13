@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8bd1de8e_51d2a678",
+        "filename": "android/emulator-check/PlatformInfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-13T19:10:53Z",
+      "side": 1,
+      "message": "unnamed namespaces are mostly inferior to statics, and the Standard has \u0027undeprecated\u0027 statics back:\n\nID: FI 6\nRef: D.2 [depr.static] ¶ Paragraph 1\nComment: The use of static in namespace scope should not be deprecated. Anonymous namespaces are not a sufficient replacement for the functionality.\nProposed Resolution: Strike [depr.static] completely.\nOwner: CWG\nIssue: 1012\nDisposition: ACCEPTED\n\nbut one can\u0027t make a type static - that\u0027s why I put XDeleter into unnamed namespace",
+      "parentUuid": "8bd1de8e_cef1d7b4",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 6
+      },
+      "revId": "e108a8560ddd7821a9402f4a24acd97853e7cdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bd1de8e_6ef8ab8d",
         "filename": "android/emulator-check/PlatformInfo.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-13T17:47:37Z",
       "side": 1,
       "message": "Maybe a comment to indicate that this is declared (IIUC) just to get the referent deleted -- I was confused because I was looking for a use...",
+      "range": {
+        "startLine": 75,
+        "startChar": 4,
+        "endLine": 75,
+        "endChar": 9
+      },
+      "revId": "e108a8560ddd7821a9402f4a24acd97853e7cdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_f1b75a46",
+        "filename": "android/emulator-check/PlatformInfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-13T19:10:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bd1de8e_6ef8ab8d",
       "range": {
         "startLine": 75,
         "startChar": 4,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "8bd1de8e_51f626e8",
+        "filename": "android/emulator-check/PlatformInfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-13T19:10:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bd1de8e_2e91930e",
+      "range": {
+        "startLine": 95,
+        "startChar": 4,
+        "endLine": 95,
+        "endChar": 8
+      },
+      "revId": "e108a8560ddd7821a9402f4a24acd97853e7cdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bd1de8e_0eeacf90",
         "filename": "android/emulator-check/PlatformInfo.cpp",
         "patchSetId": 2
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "8bd1de8e_f1491a0c",
+        "filename": "android/emulator-check/PlatformInfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-13T19:10:53Z",
+      "side": 1,
+      "message": "Well, I mostly followed the pattern of the open-source code I took it from. That\u0027s a good suggestion, and I\u0027ll rename it\nP.S. that\u0027s the first time I met X-window as well",
+      "parentUuid": "8bd1de8e_0eeacf90",
+      "range": {
+        "startLine": 111,
+        "startChar": 15,
+        "endLine": 111,
+        "endChar": 24
+      },
+      "revId": "e108a8560ddd7821a9402f4a24acd97853e7cdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bd1de8e_8bb8710b",
         "filename": "android/emulator-check/PlatformInfo.cpp",
         "patchSetId": 2
@@ -105,6 +201,30 @@
       "writtenOn": "2016-04-13T17:47:37Z",
       "side": 1,
       "message": "I realize this is a micro thing -- but I\u0027d feel better if the elif was for \"defined(__linux__), and the \"else\" was the \"#error Unsupported platform.\n\n(That way, if there\u0027s ever another platform, it\u0027s easy to extend the pattern.  With the current structure, you\u0027d have edit it in a way such that linux is always last.)",
+      "range": {
+        "startLine": 135,
+        "startChar": 7,
+        "endLine": 135,
+        "endChar": 27
+      },
+      "revId": "e108a8560ddd7821a9402f4a24acd97853e7cdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_113aee76",
+        "filename": "android/emulator-check/PlatformInfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-13T19:10:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bd1de8e_8bb8710b",
       "range": {
         "startLine": 135,
         "startChar": 7,
