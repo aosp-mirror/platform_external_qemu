@@ -1064,6 +1064,10 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         }
     }
 
+    if (!opts->no_snapshot_load || !opts->no_snapshot_save) {
+        android_op_writable_system = true;
+    }
+
     return true;
 }
 
