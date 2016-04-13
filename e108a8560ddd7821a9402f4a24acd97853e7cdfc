@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "8bd1de8e_52146165",
+        "filename": "android/emulator-check/PlatformInfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-13T22:05:08Z",
+      "side": 1,
+      "message": "Interesting discussion -- I hadn\u0027t known about this \"undeprecation\".  Perusing the discussion, I think it might be a bit strong to say \"unnamed namespaces are mostly inferior to statics\" -- the sense I got is that they can both do pretty much the same thing, and the undeprecation was because of the vast amount of existing code using \"static\" for this purpose.\n\nStill: never mind.\n\nIf I were the author of this CL, and I had used the anonymous namespace, and you were reviewing, would you object?  Just curious...",
+      "parentUuid": "8bd1de8e_51d2a678",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 6
+      },
+      "revId": "e108a8560ddd7821a9402f4a24acd97853e7cdfc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bd1de8e_6ef8ab8d",
         "filename": "android/emulator-check/PlatformInfo.cpp",
         "patchSetId": 2
