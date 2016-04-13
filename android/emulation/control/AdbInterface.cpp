@@ -54,7 +54,7 @@ bool checkAdbVersion(const std::string& sdk_root_directory) {
             if (sscanf(line.c_str(),
                        " Pkg.Revision = %d.%d",
                        &version_major,
-                       &version_minor) == 2) {
+                       &version_minor) >= 1) {
                 return  version_major > MIN_ADB_VERSION_MAJOR ||
                        (version_major == MIN_ADB_VERSION_MAJOR &&
                         version_minor >= MIN_ADB_VERSION_MINOR);
