@@ -132,8 +132,9 @@ int main(int argc, char **argv) {
         }
     }
 
-    hw->kernel_parameters = emulator_getKernelParameters(
-            opts, kTargetArch, serialPrefix, glesMode, false);
+    char* kernelParameters = emulator_getKernelParameters(
+            opts, kTargetArch, serialPrefix, hw->kernel_parameters,
+            glesMode, false);
 
     if (hw->hw_cpu_ncore > 1) {
         dwarning("Classic qemu does not support SMP. "
@@ -195,8 +196,8 @@ int main(int argc, char **argv) {
     // emulator_parseCommonCommandLineOptions() function and now
     // corresponds to the parameters following -qemu, if any.
     QemuParameters* qemuParams = qemu_parameters_create(
-        argv0, argc, (const char* const*)argv, opts, avd, coreHwIniPath,
-        false,  // is_qemu2
+        argv0, argc, (const char* const*)argv, opts, avd, kernelParameters,
+        coreHwIniPath, false,  // is_qemu2
         kTargetArch);
     if (!qemuParams) {
         return 1;
