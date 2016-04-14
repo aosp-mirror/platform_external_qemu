@@ -58,6 +58,11 @@ static CommandReturn getWindowManager() {
     return std::make_pair(name.empty() ? kGenericError : 0, name);
 }
 
+static CommandReturn getDesktopEnv() {
+    const std::string name = android::getDesktopEnvironmentName();
+    return std::make_pair(name.empty() ? kGenericError : 0, name);
+}
+
 constexpr struct Option {
     const char* arg;
     const char* help;
@@ -73,6 +78,8 @@ constexpr struct Option {
         {"cpu-info", "Return the CPU model information", &getCpuInfo},
         {"window-mgr", "Return the current window manager name",
          &getWindowManager},
+        {"desktop-env", "Return the current desktop environment name",
+         &getDesktopEnv},
 };
 
 static std::string usage() {
