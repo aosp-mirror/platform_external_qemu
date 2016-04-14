@@ -23,6 +23,7 @@
 #include "android/utils/ini.h"
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
+#include "android/utils/string.h"
 #include "android/utils/tempfile.h"
 
 #include <ctype.h>
@@ -468,8 +469,7 @@ _avdInfo_getContentPath( AvdInfo*  i )
             p = bufprint_config_path(temp, end);
             p = bufprint(p, end, PATH_SEP "%s", relPath);
             if (p < end && path_is_dir(temp)) {
-                AFREE(i->contentPath);
-                i->contentPath = ASTRDUP(temp);
+                str_reset(&i->contentPath, temp);
             }
         }
     }
@@ -733,13 +733,13 @@ static void
 _avdInfo_extractBuildProperties(AvdInfo* i) {
     i->targetArch = propertyFile_getTargetArch(i->buildProperties);
     if (!i->targetArch) {
-        i->targetArch = ASTRDUP("arm");
+        str_reset(&i->targetArch, "arm");
         D("Cannot find target CPU architecture, defaulting to '%s'",
           i->targetArch);
     }
     i->targetAbi = propertyFile_getTargetAbi(i->buildProperties);
     if (!i->targetAbi) {
-        i->targetAbi = ASTRDUP("armeabi");
+        str_reset(&i->targetAbi, "armeabi");
         D("Cannot find target CPU ABI, defaulting to '%s'",
           i->targetAbi);
     }
@@ -787,7 +787,7 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
     }
 
     ANEW0(i);
-    i->deviceName = ASTRDUP(name);
+    str_reset(&i->deviceName, name);
 
     if ( _avdInfo_getSdkRoot(i) < 0     ||
          _avdInfo_getRootIni(i) < 0     ||
@@ -895,9 +895,9 @@ avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
     ANEW0(i);
 
     i->inAndroidBuild   = 1;
-    i->androidBuildRoot = ASTRDUP(androidBuildRoot);
-    i->androidOut       = ASTRDUP(androidOut);
-    i->contentPath      = ASTRDUP(androidOut);
+    str_reset(&i->androidBuildRoot, androidBuildRoot);
+    str_reset(&i->androidOut, androidOut);
+    str_reset(&i->contentPath, androidOut);
 
     // Find the build.prop file and read it.
     char* buildPropPath = path_getBuildBuildProp(i->androidOut);
@@ -915,7 +915,7 @@ avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
 
     _avdInfo_extractBuildProperties(i);
 
-    i->deviceName = ASTRDUP("<build>");
+    str_reset(&i->deviceName, "<build>");
 
     /* out/target/product/<name>/config.ini, if exists, provide configuration
      * from build files. */
@@ -998,7 +998,7 @@ avdInfo_getKernelPath( const AvdInfo*  i )
 
         p = bufprint(temp, end, "%s/kernel", i->androidOut);
         if (p < end && path_exists(temp)) {
-            kernelPath = ASTRDUP(temp);
+            str_reset(&kernelPath, temp);
             break;
         }
 
@@ -1009,7 +1009,7 @@ avdInfo_getKernelPath( const AvdInfo*  i )
             kernelPath = NULL;
             break;
         }
-        kernelPath = ASTRDUP(temp);
+        str_reset(&kernelPath, temp);
 
     } while (0);
 
@@ -1044,7 +1044,7 @@ avdInfo_getRanchuKernelPath( const AvdInfo*  i )
                 break;
             }
         }
-        kernelPath = ASTRDUP(temp);
+        str_reset(&kernelPath, temp);
     } while (0);
 
     return kernelPath;
@@ -1176,7 +1176,7 @@ avdInfo_initHwConfig( const AvdInfo*  i, AndroidHwConfig*  hw )
     // https://code.google.com/p/android/issues/detail?id=200332
     //
     if (i->apiLevel <= 21) {
-        hw->hw_screen = ASTRDUP("touch");
+        str_reset(&hw->hw_screen, "touch");
     }
 
     return ret;

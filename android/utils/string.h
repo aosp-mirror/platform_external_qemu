@@ -29,4 +29,16 @@ size_t strlcpy(char* dst, const char * src, size_t size);
 /* Determine if string str ends with the string suffix. */
 bool str_ends_with(const char* str, const char* suffix);
 
+// Reset the value of |*string| to a copy of |new_value|. This
+// will free() the previous value of |*string| first. Note that
+// |new_value| can be NULL if one wants to simply unset the string pointer.
+void str_reset(char** string, const char* new_value);
+
+// Same as str_reset() but do not copy |new_value|, instead transfer its
+// ownership to |*string|. Note that |new_value| can be NULL.
+void str_reset_nocopy(char** string, char* new_value);
+
+// Same as str_reset(string, NULL), i.e. unset a string pointer.
+void str_reset_null(char** string);
+
 ANDROID_END_HEADER
