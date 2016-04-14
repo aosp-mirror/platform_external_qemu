@@ -678,6 +678,15 @@ void EmulatorQtWindow::slot_pollEvent(SkinEvent *event, bool *hasEvent, QSemapho
     } else {
         *hasEvent = true;
         SkinEvent* newEvent = mSkinEventQueue.dequeue();
+
+
+        // TODO(grigoryj): debug output needed for investigating the rotation bug.
+        if (VERBOSE_CHECK(rotation) &&
+            (newEvent->type == kEventLayoutNext ||
+            newEvent->type == kEventLayoutPrev)) {
+            qWarning("Dequed event Layout%s",
+                     newEvent->type == kEventLayoutNext ? "Next" : "Prev");
+        }
         memcpy(event, newEvent, sizeof(SkinEvent));
         delete newEvent;
     }
@@ -703,8 +712,18 @@ void EmulatorQtWindow::slot_queueEvent(SkinEvent *event, QSemaphore *semaphore)
         }
     }
 
-    if (!replaced)
+    if (!replaced) {
         mSkinEventQueue.enqueue(event);
+
+        // TODO(grigoryj): debug output needed for investigating the
+        // rotation bug.
+        if (VERBOSE_CHECK(rotation) &&
+            (event->type ==  kEventLayoutNext ||
+             event->type == kEventLayoutPrev)) {
+            qWarning("Enqueued Layout%s event",
+                      event->type == kEventLayoutNext ? "Next" : "Prev");
+        }
+    }
 
     const auto uiAgent = mToolWindow->getUiEmuAgent();
     if (firstEvent && uiAgent && uiAgent->userEvents

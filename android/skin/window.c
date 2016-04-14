@@ -1656,6 +1656,10 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
     skin_window_redraw( window, NULL );
 
     if ( layout.displays ) {
+        // TODO(grigoryj): debug output for investigating the rotation bug.
+        if (VERBOSE_CHECK(rotation)) {
+            fprintf(stderr, "Setting device orientation %d\n", layout.displays->rotation);
+        }
         window->win_funcs->set_device_orientation(layout.displays->rotation);
     }
 

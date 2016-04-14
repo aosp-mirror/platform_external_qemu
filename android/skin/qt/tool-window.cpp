@@ -34,6 +34,7 @@
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/utils/debug.h"
 #include "ui_tools.h"
 
 #include <cassert>
