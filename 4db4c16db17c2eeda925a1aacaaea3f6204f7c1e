@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8bd1de8e_6bec001c",
+        "filename": "android/base/Log.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-14T19:42:51Z",
+      "side": 1,
+      "message": "StringFormat() ?",
+      "range": {
+        "startLine": 57,
+        "startChar": 17,
+        "endLine": 57,
+        "endChar": 49
+      },
+      "revId": "4db4c16db17c2eeda925a1aacaaea3f6204f7c1e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_cb5eccbc",
+        "filename": "android/base/threads/Thread_pthread.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-14T19:42:51Z",
+      "side": 1,
+      "message": "static_assert(sizeof(tid) \u003e\u003d 4, ...);\nreturn *reinterpret_cast\u003cconst uint32_t*\u003e(\u0026tid);\n?",
+      "range": {
+        "startLine": 152,
+        "startChar": 0,
+        "endLine": 153,
+        "endChar": 70
+      },
+      "revId": "4db4c16db17c2eeda925a1aacaaea3f6204f7c1e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
