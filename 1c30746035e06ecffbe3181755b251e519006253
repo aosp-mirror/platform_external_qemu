@@ -102,6 +102,24 @@
     },
     {
       "key": {
+        "uuid": "8bd1de8e_17fbe9d8",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-14T17:22:03Z",
+      "side": 1,
+      "message": "No, \u003cregex\u003e doesn\u0027t work in MinGW; I was thinking about pcre or something similar.\nBut as it\u0027s a temporary solution (which is something we should put in comments with a reference to a bug for getting rid of this), I\u0027m ok with it",
+      "parentUuid": "8bd1de8e_97d7d909",
+      "revId": "1c30746035e06ecffbe3181755b251e519006253",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bd1de8e_e17ad744",
         "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
         "patchSetId": 5
