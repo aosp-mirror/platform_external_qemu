@@ -22,6 +22,30 @@
       "revId": "927096af384e461d9a985c170948c14fe193377b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_19b20c09",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-04-14T00:14:38Z",
+      "side": 1,
+      "message": "they are; I have no idea how to do the refactor properly;\nfeel free to take on it :)",
+      "parentUuid": "8bd1de8e_9e31c2ca",
+      "range": {
+        "startLine": 73,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 34
+      },
+      "revId": "927096af384e461d9a985c170948c14fe193377b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
