@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "android/base/async/SubscriberList.h"
 #include "android/base/Compiler.h"
 #include "android/skin/qt/qt-std-hash.h"
 
@@ -20,33 +21,6 @@
 #include <memory>
 #include <unordered_set>
 
-namespace internal {
-// Helper class that stores a callable object
-// and invokes it upon destruction (unless invalidate()
-// has been called).
-class SubscriberTokenImpl {
-public:
-    using Callback = std::function<void()>;
-
-    explicit SubscriberTokenImpl(const Callback& cb) :
-        mCb(cb) {}
-
-    ~SubscriberTokenImpl() {
-        if (mCb) mCb();
-    }
-
-    // If this method is called, the stored callable object
-    // will not be invoked upon destruction.
-    void invalidate() {
-        mCb = Callback();
-    }
-
-private:
-    Callback mCb;
-    DISALLOW_COPY_ASSIGN_AND_MOVE(SubscriberTokenImpl);
-};
-}
-
 // Use this class to "spy" on events received by other objects.
 // This class is not thread-safe. All subscribers should be on
 // the UI thread.
@@ -56,7 +30,7 @@ public:
     using Callback = std::function<void(const QObject*, const QEvent*)>;
     using ObjectPredicate = std::function<bool(const QObject*)>;
     using EventTypeSet = std::unordered_set<QEvent::Type>;
-    using SubscriberToken = std::unique_ptr<internal::SubscriberTokenImpl>;
+    using SubscriberToken = android::base::SubscriptionToken;
 
 private:
     struct SubscriberInfo {
@@ -69,16 +43,15 @@ private:
         // Callback provided by the subscriber.
         Callback callback;
 
-        // Pointer to a token that the subscriber is
-        // holding on to.
-        internal::SubscriberTokenImpl* token;
+        SubscriberInfo(EventTypeSet e,
+                       std::unordered_set<QObject*> o,
+                       Callback c)
+            : event_types(e), objects(o), callback(c) {}
     };
 
 public:
     EventCapturer() = default;
-
-    // Invalidates all tokens dispensed by this instance of EventCapturer.
-    ~EventCapturer();
+    virtual ~EventCapturer() = default;
 
     // Ensures that |callback| is invoked for every event that meets
     // the following requirements:
@@ -97,17 +70,11 @@ public:
             const Callback& callback);
 
 private:
-    using SubscriberInfoIterator = std::list<SubscriberInfo>::iterator;
-    // Unsubscribes the subscriber corresponding to the given iterator.
-    void unsubscribe(SubscriberInfoIterator it);
-
     // Intercepts the events from monitored objects.
     bool eventFilter(QObject* target, QEvent* event) override;
 
     // Information about all the subscribers.
-    // DO NOT CHANGE TO std::vector (or any other type of container
-    // that invalidates iterators on removal)!
-    std::list<SubscriberInfo> mSubscribers;
+    android::base::SubscriberList<SubscriberInfo> mSubscribers;
 
     DISALLOW_COPY_AND_ASSIGN(EventCapturer);
 };
