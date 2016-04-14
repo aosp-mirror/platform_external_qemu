@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8bd1de8e_d0eb17f2",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-14T21:53:37Z",
+      "side": 1,
+      "message": "Is there a good way to access Optional.h from emugl?\n\nI moved the string stuff to emugl common to increase the chances of that maybe, and to have the unit tests.",
+      "parentUuid": "8bd1de8e_37b38d2d",
+      "range": {
+        "startLine": 50,
+        "startChar": 6,
+        "endLine": 50,
+        "endChar": 19
+      },
+      "revId": "29aacf49df5b096c1400abe5cb56fb8568a039b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bd1de8e_d79dd191",
         "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-14T17:26:49Z",
       "side": 1,
       "message": "why not \u0027split\u0027 ?",
+      "range": {
+        "startLine": 141,
+        "startChar": 32,
+        "endLine": 141,
+        "endChar": 42
+      },
+      "revId": "29aacf49df5b096c1400abe5cb56fb8568a039b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_50ae07c8",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-14T21:53:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bd1de8e_d79dd191",
       "range": {
         "startLine": 141,
         "startChar": 32,
