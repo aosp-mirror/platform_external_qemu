@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8bd1de8e_645ef522",
+        "filename": "android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1715,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-14T16:24:51Z",
+      "side": 1,
+      "message": "OK, now I see where we are fetching the system DNS servers. I think this patch and the other patch might have benefited from being merged together to make it easier to understand.",
+      "revId": "877cdcc837e35a5e146553ba7866e69c7cd0a12e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_84c32907",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3591,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-14T16:24:51Z",
+      "side": 1,
+      "message": "Nice cleanup!",
+      "range": {
+        "startLine": 3586,
+        "startChar": 0,
+        "endLine": 3591,
+        "endChar": 31
+      },
+      "revId": "877cdcc837e35a5e146553ba7866e69c7cd0a12e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
