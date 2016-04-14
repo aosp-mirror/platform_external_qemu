@@ -135,3 +135,43 @@ int android_dns_parse_servers(const char* input,
     }
     return dnsAddrCount;
 }
+
+int android_dns_get_servers(const char* dnsServerOption,
+                            uint32_t* dnsServerIps) {
+    const int kMaxDnsServers = ANDROID_MAX_DNS_SERVERS;
+    int dnsCount = 0;
+    if (dnsServerOption && dnsServerOption[0]) {
+        dnsCount = android_dns_parse_servers(dnsServerOption, dnsServerIps,
+                                             kMaxDnsServers);
+        if (dnsCount == -2) {
+            derror("Too may DNS servers listed in -dns-server option, a "
+                   "maximum of %d values is supported\n",
+                   ANDROID_MAX_DNS_SERVERS);
+            return -1;
+        }
+        if (dnsCount < 0) {  // Bad format in the option.
+            derror("Malformed or invalid -dns-server parameter: %s",
+                   dnsServerOption);
+            return -1;
+        }
+    }
+    if (!dnsCount) {
+        dnsCount = android_dns_get_system_servers(dnsServerIps, kMaxDnsServers);
+        if (dnsCount < 0) {
+            dwarning(
+                    "Cannot find system DNS servers! Name resolution will "
+                    "be disabled.");
+        }
+    }
+    if (VERBOSE_CHECK(init)) {
+        dprintn("emulator: Found %d DNS servers:", dnsCount);
+        for (int n = 0; n < dnsCount; ++n) {
+            uint32_t ip = dnsServerIps[n];
+            dprintn(" %d.%d.%d.%d", (uint8_t)(ip >> 24), (uint8_t)(ip >> 16),
+                    (uint8_t)(ip >> 8), (uint8_t)(ip));
+        }
+        dprintn("\n");
+    }
+
+    return dnsCount;
+}

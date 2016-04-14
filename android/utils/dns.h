@@ -19,6 +19,26 @@
 
 ANDROID_BEGIN_HEADER
 
+// Maximum number of DNS servers supported by the Android emulator.
+#define ANDROID_MAX_DNS_SERVERS 4
+
+// Retrieve the IP addresses of DNS servers to be used during emulation.
+// |dnsServersOption| is an optional string that corresponds to the -dns-server
+// command-line option. If not empty, this must be a comma-separated list of
+// DNS server names or addresses. If the list is invalid or the parameter
+// NULL or empty, the list of system DNS servers will be probed instead.
+// |dnsServerIps| is an array of ANDROID_MAX_DNS_SERVERS 32-bit IP addresses
+// that will be filled by the function on success. Return the number of
+// IP addresses filled in the array, or -1 in case of error. A return value
+// of 0 is possible and means no DNS server was found. A negative value
+// corresponds to a severe error which should stop emulation (the function
+// will have printed a message to the console to explain why before returning).
+int android_dns_get_servers(const char* dnsServersOption,
+                            uint32_t* dnsServerIps);
+
+// TODO: Remove the declarations below once QEMU2 uses
+//       android_dns_get_servers().
+
 /* Retrieve DNS servers configured by the host system and place them in a
  * provided |buffer|. Up to |bufferSize| DNS servers are retrieved. On success
  * the number of servers is returned, on failure a negative value is returned.
