@@ -1957,7 +1957,6 @@ int main(int argc, char **argv, char **envp)
     int show_vnc_port = 0;
     CIniFile *hw_ini = NULL;
     STRALLOC_DEFINE(kernel_config);
-    int    dns_count = 0;
 
     /* Ensure Looper implementation for this thread is based on the QEMU
      * main loop. */
@@ -3139,33 +3138,12 @@ int main(int argc, char **argv, char **envp)
         qemu_cpu_delay = (int) delay;
     }
 
+    int dns_count = 0;
     if (android_op_dns_server) {
-        dns_count = slirp_parse_dns_servers(android_op_dns_server);
-        if (dns_count == -2) {
-            // Special case for better user feedback on this error message
-            PANIC("too many servers specified in -dns-server-parameter "
-                  "argument '%s'. A maximum of %d is supported.\n",
-                  android_op_dns_server,
-                  slirp_get_max_dns_servers());
-            return 1;
-        } else if (dns_count < 0) {
-            PANIC("invalid -dns-server parameter '%s'\n",
-                    android_op_dns_server);
-            return 1;
-        }
-        if (dns_count == 0) {
-            fprintf( stdout, "### WARNING: will use system default DNS server\n" );
-        }
+        dns_count = slirp_init_dns_servers(android_op_dns_server);
     }
 
-    if (dns_count == 0) {
-        dns_count = slirp_get_system_dns_servers();
-        if (dns_count < 0) {
-            printf("### WARNING: unable to configure any DNS servers, "
-                   "name resolution will not work\n");
-        }
-    }
-    if (dns_count > 1) {
+    if (dns_count > 0) {
         // TODO(digit): Move this to android-qemu1-glue/main.cpp
         stralloc_add_format(kernel_config, " ndns=%d", dns_count);
     }
