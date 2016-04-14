@@ -137,5 +137,9 @@ void Thread::maskAllSignals() {
     // no such thing as signal in Windows
 }
 
+unsigned long getCurrentThreadId() {
+    static_cast<unsigned long>(GetCurrentThreadId());
+}
+
 }  // namespace base
 }  // namespace android
