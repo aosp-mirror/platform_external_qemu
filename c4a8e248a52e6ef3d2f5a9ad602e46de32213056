@@ -46,6 +46,30 @@
       "revId": "c4a8e248a52e6ef3d2f5a9ad602e46de32213056",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_b495c55e",
+        "filename": "android/base/threads/Thread.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-14T00:41:52Z",
+      "side": 1,
+      "message": "other than possibly using it as a key in some map?",
+      "parentUuid": "8bd1de8e_59800474",
+      "range": {
+        "startLine": 120,
+        "startChar": 12,
+        "endLine": 120,
+        "endChar": 30
+      },
+      "revId": "c4a8e248a52e6ef3d2f5a9ad602e46de32213056",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
