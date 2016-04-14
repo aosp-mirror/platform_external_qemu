@@ -202,5 +202,30 @@ TEST(ThreadTest, tryWait) {
     EXPECT_EQ(42, result);
 }
 
+class TidSetterThread : public Thread {
+public:
+    intptr_t main() {
+        mTid = getCurrentThreadId();
+        return 0;
+    }
+
+    unsigned long mTid = 0;
+};
+
+TEST(ThreadTest, id) {
+    EXPECT_NE(0, getCurrentThreadId());
+
+    TidSetterThread thread1;
+    TidSetterThread thread2;
+
+    EXPECT_TRUE(thread1.start());
+    EXPECT_TRUE(thread2.start());
+    EXPECT_TRUE(thread1.wait());
+    EXPECT_TRUE(thread2.wait());
+    EXPECT_NE(0, thread1.mTid);
+    EXPECT_NE(0, thread2.mTid);
+    EXPECT_NE(thread1.mTid, thread2.mTid);
+}
+
 }  // namespace base
 }  // namespace android
