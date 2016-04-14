@@ -400,6 +400,15 @@ int main(int argc, char **argv) {
 
 
     user_config_init();
+    {
+        int api_level = avdInfo_getApiLevel(avd);
+        // have to do this adjustment before 'parse_skin_files'
+        // for gingerbread force 16-bit color depth.
+        // bug: b.android.com/206934
+        if (api_level < 14 || (opts->gpu && !strcmp(opts->gpu, "off"))) {
+            hw->hw_lcd_depth = 16;
+        }
+    }
     parse_skin_files(opts->skindir, opts->skin, opts, hw,
                      &skinConfig, &skinPath);
 
@@ -781,13 +790,6 @@ int main(int argc, char **argv) {
     {
         EmuglConfig config;
 
-        // If the user is using -gpu off
-        // (not -gpu guest),
-        // force 16-bit color depth.
-
-        if (opts->gpu && !strcmp(opts->gpu, "off")) {
-            hw->hw_lcd_depth = 16;
-        }
 
         bool blacklisted = false;
         bool on_blacklist = false;
