@@ -10,18 +10,6 @@
 
 #include "android/skin/qt/event-capturer.h"
 
-EventCapturer::~EventCapturer() {
-    // Invalidate all the tokens dispensed by this instance.
-    // Failing to do that would cause the tokens to try and
-    // call into this instance upon destruction, resulting
-    // in undefined behavior.
-    for (const auto& subscriber : mSubscribers) {
-        if (subscriber.token) {
-            subscriber.token->invalidate();
-        }
-    }
-}
-
 EventCapturer::SubscriberToken EventCapturer::subscribeToEvents(
         QObject* root,
         const EventCapturer::ObjectPredicate& child_predicate,
@@ -49,35 +37,7 @@ EventCapturer::SubscriberToken EventCapturer::subscribeToEvents(
         }
     }
 
-    // Add an entry with information needed for subscriber book-keeping.
-    mSubscribers.emplace_back();
-    auto subscriber = std::prev(mSubscribers.end());
-    subscriber->event_types = event_types;
-    subscriber->objects = std::move(objects);
-    subscriber->callback = callback;
-
-    // Create a new token that calls |unsubscribe| upon destruction.
-    SubscriberToken token(new internal::SubscriberTokenImpl(
-                [this, subscriber] { this->unsubscribe(subscriber); }));
-
-    // Ensure that this instance can invalidate the token.
-    subscriber->token = token.get();
-
-    // Give the token to the subscriber.
-    // The token will remain alive for as long as the subscriber that is
-    // holding on to it is alive.
-    // If the token is destroyed before EventCapturer is destroyed,
-    // it will notify the EventCapturer, and the corresponding subscriber
-    // entry will be removed.
-    // When the EventCapturer is destroyed, it will go through all the
-    // remaining subscriber entries and invalidate their tokens, so that
-    // they don't try notifying the "dead" EventCapturer.
-    return token;
-}
-
-void EventCapturer::unsubscribe(EventCapturer::SubscriberInfoIterator it) {
-    // Remove associated subscriber info.
-    mSubscribers.erase(it);
+    return mSubscribers.emplace(event_types, std::move(objects), callback);
 }
 
 bool EventCapturer::eventFilter(QObject* target, QEvent* event) {
