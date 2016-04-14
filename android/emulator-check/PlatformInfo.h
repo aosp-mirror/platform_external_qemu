@@ -20,4 +20,9 @@ namespace android {
 // manager for the name
 std::string getWindowManagerName();
 
+// Returns the current desktop environment. For Mac and Windows, it just returns
+// the platform name (Mac/Windows), for linux it inspects the common environment
+// variables and makes the best guess based on that.
+std::string getDesktopEnvironmentName();
+
 }  // namespace android

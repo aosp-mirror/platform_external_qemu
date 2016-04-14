@@ -14,10 +14,16 @@
 #include "android/base/StringView.h"
 
 #ifdef __linux__
+#include "android/base/system/System.h"
+
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
+
+#include <algorithm>
 #include <memory>
 #include <vector>
+
+#include <ctype.h>
 #endif
 
 namespace android {
@@ -127,6 +133,27 @@ static std::string getLinuxWindowManagerName() {
 
     return std::string(wmName.begin(), wmName.end());
 }
+
+static std::string getLinuxDesktopEnvironmentName() {
+    using android::base::System;
+
+    auto xdg = System::get()->envGet("XDG_CURRENT_DESKTOP");
+    std::transform(xdg.begin(), xdg.end(), xdg.begin(), tolower);
+    if (xdg.empty()) {
+        // try another one...
+        const auto gdm = System::get()->envGet("GDMSESSION");
+        if (gdm.find("kde") != std::string::npos) {
+            return "kde";
+        } else if (gdm.empty()) {
+            return "mate";
+        }
+    }
+    if (xdg == "x-cinnamon") {
+        return "cinnamon";
+    }
+    // the rest of them are pretty much the same as their name
+    return xdg;
+}
 #endif
 
 std::string getWindowManagerName() {
@@ -136,6 +163,19 @@ std::string getWindowManagerName() {
     return android::base::StringView("Mac");
 #elif defined(__linux__)
     return getLinuxWindowManagerName();
+#else
+    #error Unsupported platform
+#endif
+}
+
+
+std::string getDesktopEnvironmentName() {
+#ifdef _WIN32
+    return android::base::StringView("Windows");
+#elif defined(__APPLE__)
+    return android::base::StringView("Mac");
+#elif defined(__linux__)
+    return getLinuxDesktopEnvironmentName();
 #else
     #error Unsupported platform
 #endif

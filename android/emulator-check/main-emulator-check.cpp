@@ -58,13 +58,18 @@ static CommandReturn getWindowManager() {
     return std::make_pair(name.empty() ? kGenericError : 0, name);
 }
 
+static CommandReturn getDesktopEnv() {
+    const std::string name = android::getDesktopEnvironmentName();
+    return std::make_pair(name.empty() ? kGenericError : 0, name);
+}
+
 constexpr struct Option {
     const char* arg;
     const char* help;
     CommandReturn (*handler)();
     bool printRawAndStop;
 } options[] = {
-        {"-h", "Show this help message", &help, true},
+        {"-h", "\tShow this help message", &help, true},
         {"-help", "Show this help message", &help, true},
         {"--help", "Show this help message", &help, true},
         {"accel", "Check the CPU acceleration support", &checkCpuAcceleration},
@@ -73,6 +78,8 @@ constexpr struct Option {
         {"cpu-info", "Return the CPU model information", &getCpuInfo},
         {"window-mgr", "Return the current window manager name",
          &getWindowManager},
+        {"desktop-env", "Return the current desktop environment name",
+         &getDesktopEnv},
 };
 
 static std::string usage() {
