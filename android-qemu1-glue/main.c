@@ -400,6 +400,15 @@ int main(int argc, char **argv) {
 
 
     user_config_init();
+    {
+        int api_level = avdInfo_getApiLevel(avd);
+        // have to do this adjustment before 'parse_skin_files'
+        // for gingerbread force 16-bit color depth.
+        // bug: b.android.com/206934
+        if (api_level < 14) {
+            hw->hw_lcd_depth = 16;
+        }
+    }
     parse_skin_files(opts->skindir, opts->skin, opts, hw,
                      &skinConfig, &skinPath);
 
