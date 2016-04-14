@@ -34,6 +34,7 @@
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/utils/debug.h"
 #include "ui_tools.h"
 
 #include <cassert>
@@ -477,6 +478,12 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                 cmd == QtUICommand::ROTATE_RIGHT ?
                     kEventLayoutNext :
                     kEventLayoutPrev;
+
+            // TODO(grigoryj): debug output needed for investigating the rotation bug.
+            if (VERBOSE_CHECK(rotation)) {
+                qWarning("Queuing skin event for %s",
+                         cmd == QtUICommand::ROTATE_RIGHT ? "ROTATE_RIGHT" : "ROTATE_LEFT");
+            }
             mEmulatorWindow->queueSkinEvent(skin_event);
         }
         break;
