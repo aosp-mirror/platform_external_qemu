@@ -64,6 +64,7 @@
 // which is overkill, given this plan.
 bool android_op_wipe_data = false;
 bool android_op_writable_system = false;
+const char *savevm_on_exit = NULL;
 
 void reassign_string(char** string, const char* new_value) {
     free(*string);
@@ -1062,6 +1063,10 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
             dwarning("Increasing RAM to %iMB to accomodate min VM heap",
                      minRamSize);
         }
+    }
+
+    if (!opts->no_snapshot_load || !opts->no_snapshot_save) {
+        android_op_writable_system = true;
     }
 
     return true;

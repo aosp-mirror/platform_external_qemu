@@ -334,8 +334,14 @@ void EmulatorQtWindow::closeEvent(QCloseEvent *event)
 {
     crashhandler_exitmode(__FUNCTION__);
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
-        // run "adb shell stop" and call queueQuitEvent afterwards
-        mToolWindow->runAdbShellStopAndQuit();
+        // we dont want to restore to a state where the
+        // framework is stopped by 'adb shell stop'
+        // so skip that step when saving vm on exit
+        if (savevm_on_exit) {
+            queueQuitEvent();
+        } else {
+            mToolWindow->runAdbShellStopAndQuit();
+        }
         event->ignore();
     } else {
         event->accept();

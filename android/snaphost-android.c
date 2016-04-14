@@ -124,7 +124,7 @@ int snaphost_match_configs(CIniFile* hw_ini, const char* name) {
     /* Load HW config from the previous emulator launch. */
     CIniFile* hwcfg_bkp = iniFile_newFromFile(bkp_path);
 
-    if (hwcfg_bkp != NULL) {
+    if (hwcfg_bkp != NULL && iniFile_getPairCount(hwcfg_bkp) > 0) {
         if (_cmp_hw_config(hw_ini, hwcfg_bkp)) {
             E("Unable to load VM from snapshot. The snapshot has been saved for a different hardware configuration.");
             free(bkp_path);
