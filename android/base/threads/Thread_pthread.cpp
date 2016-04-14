@@ -147,5 +147,14 @@ void Thread::maskAllSignals() {
     pthread_sigmask(SIG_SETMASK, &set, nullptr);
 }
 
+unsigned long getCurrentThreadId() {
+    pthread_t tid = pthread_self();
+    // POSIX doesn't require pthread_t to be a numeric type.
+    // Instead, just pick up the first sizeof(long) bytes as the "id".
+    static_assert(sizeof(tid) >= 4,
+                  "Expected pthread_t to be at least sizeof(long) wide");
+    return *reinterpret_cast<unsigned long*>(&tid);
+}
+
 }  // namespace base
 }  // namespace android
