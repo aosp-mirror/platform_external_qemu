@@ -47,7 +47,7 @@ bool skin_winsys_is_window_fully_visible(void);
 // Start main window support. |no_window| must be true to indicate that
 // no window needs to be shown, but that the GUI backend still needs to be
 // initialized.
-void skin_winsys_start(bool no_window, bool raw_keys);
+void skin_winsys_start(bool no_window);
 
 // Set the main window's icon.
 // |icon_data| is the start of the icon in PNG format.

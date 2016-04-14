@@ -118,7 +118,7 @@ OPT_FLAG ( no_audio, "disable audio support" )
 OPT_FLAG ( noaudio,  "same as -no-audio" )
 OPT_PARAM( audio,    "<backend>", "use specific audio backend" )
 
-OPT_FLAG ( raw_keys, "disable Unicode keyboard reverse-mapping" )
+OPT_FLAG ( raw_keys, "disable Unicode keyboard reverse-mapping (deprecated)" )
 OPT_PARAM( radio, "<device>", "redirect radio modem interface to character device" )
 OPT_PARAM( port, "<port>", "TCP port that will be used for the console" )
 OPT_PARAM( ports, "<consoleport>,<adbport>", "TCP ports used for the console and adb bridge" )

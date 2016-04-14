@@ -32,14 +32,11 @@
 struct SkinKeyboard {
     const SkinCharmap*  charmap;
     SkinKeyset*         kset;
-    char                raw_keys;
 
     SkinRotation        rotation;
 
     SkinKeyCommandFunc  command_func;
     void*               command_opaque;
-    SkinKeyEventFunc    press_func;
-    void*               press_opaque;
 
     SkinKeycodeBuffer   keycodes[1];
 };
@@ -80,30 +77,28 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
     if (skin_key_code_is_arrow(code)) {
         code = skin_keycode_rotate(code, -keyboard->rotation);
         D("handling arrow (code=%d mod=%d)", code, mod);
-        if (!keyboard->raw_keys) {
-            int  doCapL, doCapR, doAltL, doAltR;
+        int  doCapL, doCapR, doAltL, doAltR;
 
-            doCapL = mod & kKeyModLShift;
-            doCapR = mod & kKeyModRShift;
-            doAltL = mod & kKeyModLAlt;
-            doAltR = mod & kKeyModRAlt;
+        doCapL = mod & kKeyModLShift;
+        doCapR = mod & kKeyModRShift;
+        doAltL = mod & kKeyModLAlt;
+        doAltR = mod & kKeyModRAlt;
 
-            if (down) {
-                if (doAltL) skin_keyboard_add_key_event(keyboard, kKeyCodeAltLeft, 1);
-                if (doAltR) skin_keyboard_add_key_event(keyboard, kKeyCodeAltRight, 1);
-                if (doCapL) skin_keyboard_add_key_event(keyboard, kKeyCodeCapLeft, 1);
-                if (doCapR) skin_keyboard_add_key_event(keyboard, kKeyCodeCapRight, 1);
-            }
-            skin_keyboard_add_key_event(keyboard, code, down);
-
-            if (!down) {
-                if (doCapR) skin_keyboard_add_key_event(keyboard, kKeyCodeCapRight, 0);
-                if (doCapL) skin_keyboard_add_key_event(keyboard, kKeyCodeCapLeft, 0);
-                if (doAltR) skin_keyboard_add_key_event(keyboard, kKeyCodeAltRight, 0);
-                if (doAltL) skin_keyboard_add_key_event(keyboard, kKeyCodeAltLeft, 0);
-            }
-            code = 0;
+        if (down) {
+            if (doAltL) skin_keyboard_add_key_event(keyboard, kKeyCodeAltLeft, 1);
+            if (doAltR) skin_keyboard_add_key_event(keyboard, kKeyCodeAltRight, 1);
+            if (doCapL) skin_keyboard_add_key_event(keyboard, kKeyCodeCapLeft, 1);
+            if (doCapR) skin_keyboard_add_key_event(keyboard, kKeyCodeCapRight, 1);
         }
+        skin_keyboard_add_key_event(keyboard, code, down);
+
+        if (!down) {
+            if (doAltR) skin_keyboard_add_key_event(keyboard, kKeyCodeAltRight, 0);
+            if (doAltL) skin_keyboard_add_key_event(keyboard, kKeyCodeAltLeft, 0);
+            if (doCapR) skin_keyboard_add_key_event(keyboard, kKeyCodeCapRight, 0);
+            if (doCapL) skin_keyboard_add_key_event(keyboard, kKeyCodeCapLeft, 0);
+        }
+        code = 0;
         return code;
     }
 
@@ -149,37 +144,24 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
     return -1;
 }
 
-static void
-skin_keyboard_do_key_event( SkinKeyboard*   kb,
-                            SkinKeyCode  code,
-                            int             down )
-{
-    if (kb->press_func) {
-        kb->press_func( kb->press_opaque, code, down );
-    }
-    skin_keyboard_add_key_event(kb, code, down);
-}
-
 void
 skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
 {
     if (ev->type == kEventTextInput) {
-        if (!kb->raw_keys) {
-            // TODO(digit): For each Unicode value in the input text.
-            const uint8_t* text = ev->u.text.text;
-            const uint8_t* end = text + sizeof(ev->u.text.text);
-            while (text < end && *text) {
-                uint32_t codepoint = 0;
-                int len = android_utf8_decode(text, end - text, &codepoint);
-                if (len < 0) {
-                    break;
-                }
-                skin_keyboard_process_unicode_event(kb, codepoint, 1);
-                skin_keyboard_process_unicode_event(kb, codepoint, 0);
-                text += len;
+        // TODO(digit): For each Unicode value in the input text.
+        const uint8_t* text = ev->u.text.text;
+        const uint8_t* end = text + sizeof(ev->u.text.text);
+        while (text < end && *text) {
+            uint32_t codepoint = 0;
+            int len = android_utf8_decode(text, end - text, &codepoint);
+            if (len < 0) {
+                break;
             }
-            skin_keyboard_flush(kb);
+            skin_keyboard_process_unicode_event(kb, codepoint, 1);
+            skin_keyboard_process_unicode_event(kb, codepoint, 0);
+            text += len;
         }
+        skin_keyboard_flush(kb);
     } else if (ev->type == kEventKeyDown || ev->type == kEventKeyUp) {
         int keycode = ev->u.key.keycode;
         int mod = ev->u.key.mod;
@@ -190,28 +172,16 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             return;
         }
         if ((int)code > 0) {
-            skin_keyboard_do_key_event(kb, code, down);
+            skin_keyboard_add_key_event(kb, code, down);
             skin_keyboard_flush(kb);
             return;
         }
 
-        /* Ctrl-K is used to switch between 'unicode' and 'raw' modes */
-        if (keycode == kKeyCodeK) {
-            if (mod == kKeyModLCtrl || mod == kKeyModRCtrl) {
-                if (down) {
-                    kb->raw_keys = !kb->raw_keys;
-                    D( "switching keyboard to %s mode", kb->raw_keys ? "raw" : "unicode" );
-                }
-                return;
-            }
-        }
-
         code = keycode;
 
-        if ( !kb->raw_keys &&
-            (code == kKeyCodeAltLeft  || code == kKeyCodeAltRight ||
-             code == kKeyCodeCapLeft  || code == kKeyCodeCapRight ||
-             code == kKeyCodeSym) ) {
+        if (code == kKeyCodeAltLeft  || code == kKeyCodeAltRight ||
+            code == kKeyCodeCapLeft  || code == kKeyCodeCapRight ||
+            code == kKeyCodeSym) {
             return;
         }
 
@@ -223,7 +193,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             code == KEY_FASTFORWARD || code == KEY_VOLUMEUP   ||
             code == KEY_HOME                                     )
         {
-            skin_keyboard_do_key_event(kb, code, down);
+            skin_keyboard_add_key_event(kb, code, down);
             skin_keyboard_flush(kb);
             return;
         }
@@ -276,7 +246,6 @@ skin_keyboard_process_unicode_event( SkinKeyboard*  kb,  unsigned int  unicode, 
 
 static SkinKeyboard*
 skin_keyboard_create_from_charmap_name(const char* charmap_name,
-                                       int  use_raw_keys,
                                        SkinKeyCodeFlushFunc keycode_flush)
 {
     SkinKeyboard*  kb;
@@ -290,7 +259,6 @@ skin_keyboard_create_from_charmap_name(const char* charmap_name,
         fprintf(stderr, "### warning, skin requires unknown '%s' charmap, reverting to '%s'\n",
                 charmap_name, kb->charmap->name );
     }
-    kb->raw_keys = use_raw_keys;
 
     /* add default keyset */
     if (skin_keyset_get_default()) {
@@ -305,7 +273,6 @@ skin_keyboard_create_from_charmap_name(const char* charmap_name,
 
 SkinKeyboard*
 skin_keyboard_create(const char* kcm_file_path,
-                     int use_raw_keys,
                      SkinKeyCodeFlushFunc keycode_flush)
 {
     const char* charmap_name = DEFAULT_ANDROID_CHARMAP;
@@ -316,7 +283,7 @@ skin_keyboard_create(const char* kcm_file_path,
         charmap_name = cmap_buff;
     }
     return skin_keyboard_create_from_charmap_name(
-            charmap_name, use_raw_keys, keycode_flush);
+            charmap_name, keycode_flush);
 }
 
 void
