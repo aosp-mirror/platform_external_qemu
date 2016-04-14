@@ -340,8 +340,10 @@ _skin_ui_handle_key_command(void* opaque, SkinKeyCommand command, int  down)
             }
             if (layout != NULL) {
                 ui->layout = layout;
+                if (VERBOSE_CHECK(rotation)) {
+                    fprintf(stderr, "Applying new layout\n");
+                }
                 skin_window_reset(ui->window, layout);
-
                 SkinRotation rotation = skin_layout_get_dpad_rotation(layout);
 
                 if (ui->keyboard)
@@ -411,10 +413,16 @@ bool skin_ui_process_events(SkinUI* ui) {
             break;
         case kEventLayoutNext:
             DE("EVENT: kEventLayoutNext\n");
+            if (VERBOSE_CHECK(rotation)) {
+                fprintf(stderr, "Polled event: LayoutNext\n");
+            }
             _skin_ui_handle_key_command(ui, SKIN_KEY_COMMAND_CHANGE_LAYOUT_NEXT, 1);
             break;
         case kEventLayoutPrev:
             DE("EVENT: kEventLayoutPrev\n");
+            if (VERBOSE_CHECK(rotation)) {
+                fprintf(stderr, "Polled event: LayoutPrev\n");
+            }
             _skin_ui_handle_key_command(ui, SKIN_KEY_COMMAND_CHANGE_LAYOUT_PREV, 1);
             break;
         case kEventMouseButtonDown:
