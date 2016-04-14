@@ -22,6 +22,30 @@
       "revId": "f82e37d46f109080786838ca9684bcd796279208",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b547ee5_d0531ce7",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3145,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-14T16:17:26Z",
+      "side": 1,
+      "message": "Slirp defaults to calling slirp_init_dns_servers(NULL) in this case, which will get the list of system servers.\n\nNote that the ndns\u003d\u003ccount\u003e generation is moved to AndroidEmu in a future patch that also takes care of always setting the -dns-server in glue/main.cpp, i.e. before calling qemu_main() in vl-android.c",
+      "parentUuid": "eb941ac3_fb1acfb3",
+      "range": {
+        "startLine": 3143,
+        "startChar": 0,
+        "endLine": 3145,
+        "endChar": 5
+      },
+      "revId": "f82e37d46f109080786838ca9684bcd796279208",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
