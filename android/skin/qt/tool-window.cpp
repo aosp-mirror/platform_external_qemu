@@ -477,6 +477,10 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                 cmd == QtUICommand::ROTATE_RIGHT ?
                     kEventLayoutNext :
                     kEventLayoutPrev;
+
+            // TODO(grigoryj): debug output needed for investigating the rotation bug.
+            qWarning("Queuing skin event for %s",
+                     cmd == QtUICommand::ROTATE_RIGHT ? "ROTATE_RIGHT" : "ROTATE_LEFT");
             mEmulatorWindow->queueSkinEvent(skin_event);
         }
         break;

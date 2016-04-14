@@ -317,6 +317,9 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
     uint32_t         mask  = cl->enabledMask;
     Sensor*          sensor;
     char             buffer[128];
+    
+    // For debug purposes only.
+    static float     prev_acceleration[] = {0.0f, 0.0f, 0.0f};
 
     if (_hwSensorClient_enabled(cl, ANDROID_SENSOR_ACCELERATION)) {
         sensor = &hw->sensors[ANDROID_SENSOR_ACCELERATION];
@@ -325,6 +328,16 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
                  sensor->u.acceleration.y,
                  sensor->u.acceleration.z);
         _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
+        
+        // TODO(grigoryj): debug output for investigating rotation bug
+        if (prev_acceleration[0] != sensor->u.acceleration.x ||
+            prev_acceleration[1] != sensor->u.acceleration.y ||
+            prev_acceleration[2] != sensor->u.acceleration.z) {
+            fprintf(stderr, "Sent %s to sensors HAL\n", buffer);
+            prev_acceleration[0] = sensor->u.acceleration.x;
+            prev_acceleration[1] = sensor->u.acceleration.y;
+            prev_acceleration[2] = sensor->u.acceleration.z;
+        }
     }
 
     if (_hwSensorClient_enabled(cl, ANDROID_SENSOR_MAGNETIC_FIELD)) {
@@ -697,24 +710,29 @@ _hwSensors_setCoarseOrientation( HwSensors*  h, AndroidCoarseOrientation  orient
     const double  cos_angle = cos(angle/M_PI);
     const double  sin_angle = sin(angle/M_PI);
 
+    fprintf("setCoarseOrientation - HwSensors %p\n", h);
     switch (orient) {
     case ANDROID_COARSE_PORTRAIT:
+        fprintf(stderr, "Setting coarse orientation to portrait\n");
         _hwSensors_setSensorValue( h, ANDROID_SENSOR_ACCELERATION, 0., g*cos_angle, g*sin_angle );
         break;
 
     case ANDROID_COARSE_REVERSE_LANDSCAPE:
+        fprintf(stderr, "Setting coarse orientation to reverse landscape\n");
         _hwSensors_setSensorValue( h, ANDROID_SENSOR_ACCELERATION, -g*cos_angle, 0., -g*sin_angle );
         break;
 
     case ANDROID_COARSE_REVERSE_PORTRAIT:
+        fprintf(stderr, "Setting coarse orientation to reverse portrait\n");
         _hwSensors_setSensorValue( h, ANDROID_SENSOR_ACCELERATION, 0., -g*cos_angle, -g*sin_angle );
         break;
 
     case ANDROID_COARSE_LANDSCAPE:
+        fprintf(stderr, "Setting coarse orientation to landscape\n");
         _hwSensors_setSensorValue( h, ANDROID_SENSOR_ACCELERATION, g*cos_angle, 0., g*sin_angle );
         break;
     default:
-        ;
+        fprintf(stderr, "Invalid orientation\n");
     }
 }
 
