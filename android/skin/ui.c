@@ -88,7 +88,6 @@ SkinUI* skin_ui_create(SkinFile* layout_file,
     ui->ui_params = ui_params[0];
 
     ui->keyboard = skin_keyboard_create(ui->ui_params.keyboard_charmap,
-                                        ui->ui_params.keyboard_raw_keys,
                                         ui_funcs->keyboard_flush);
     ui->window = NULL;
 

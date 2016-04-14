@@ -367,7 +367,7 @@ ui_init(const AConfig* skinConfig,
     signal(SIGQUIT, SIG_DFL);
 #endif
 
-    skin_winsys_start(opts->no_window, opts->raw_keys);
+    skin_winsys_start(opts->no_window);
 
     if (opts->no_window) {
 #ifndef _WIN32

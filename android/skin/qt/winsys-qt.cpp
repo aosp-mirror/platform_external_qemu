@@ -339,7 +339,7 @@ void skin_winsys_setup_library_paths() {
     D("Qt plugin path: %s\n", qtPluginsPath.c_str());
 }
 
-extern void skin_winsys_start(bool no_window, bool raw_keys) {
+extern void skin_winsys_start(bool no_window) {
     GlobalState* g = globalState();
 #ifdef Q_OS_LINUX
     // This call is required to make doing OpenGL stuff on the UI
