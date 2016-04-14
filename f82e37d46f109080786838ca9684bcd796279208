@@ -70,6 +70,30 @@
       "revId": "f82e37d46f109080786838ca9684bcd796279208",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb1b3a59_a353ba10",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3145,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-14T16:46:44Z",
+      "side": 1,
+      "message": "The other patch rewrites the -dns-server option to resolved IPs, so the second pass will not try to get the system servers, it will just use the ones from the rewrite (be they system servers or actually come from the command-line).\n\nYes, I understand this is a little confusing. I will probably add some comments to the other patch to explain what\u0027s going on.",
+      "parentUuid": "8bd1de8e_c4fc011a",
+      "range": {
+        "startLine": 3143,
+        "startChar": 0,
+        "endLine": 3145,
+        "endChar": 5
+      },
+      "revId": "f82e37d46f109080786838ca9684bcd796279208",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
