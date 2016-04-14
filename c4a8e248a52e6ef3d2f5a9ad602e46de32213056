@@ -22,6 +22,30 @@
       "revId": "c4a8e248a52e6ef3d2f5a9ad602e46de32213056",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_59800474",
+        "filename": "android/base/threads/Thread.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-14T00:28:42Z",
+      "side": 1,
+      "message": "I first considered typedef\u0027ing WORD/pthread_t and returning that, but then realized that that was unnecessary trouble for the user -- this is really meant as a logging tool.\n\nI\u0027m OK with returning an unsigned instead. Do you see any benefit either way?",
+      "parentUuid": "8bd1de8e_395f104c",
+      "range": {
+        "startLine": 120,
+        "startChar": 12,
+        "endLine": 120,
+        "endChar": 30
+      },
+      "revId": "c4a8e248a52e6ef3d2f5a9ad602e46de32213056",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
