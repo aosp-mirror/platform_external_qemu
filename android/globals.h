@@ -39,3 +39,6 @@ extern AvdInfo*          android_avdInfo;
 
 /* the hardware configuration for this specific virtual device */
 extern AndroidHwConfig   android_hw[1];
+
+/* this is to support snapshot (currently only qemu1+software-renderer) */
+extern const char* savevm_on_exit;
