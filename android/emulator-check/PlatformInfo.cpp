@@ -131,9 +131,9 @@ static std::string getLinuxWindowManagerName() {
 
 std::string getWindowManagerName() {
 #ifdef _WIN32
-    return StringView("Windows");
+    return android::base::StringView("Windows");
 #elif defined(__APPLE__)
-    return StringView("Mac");
+    return android::base::StringView("Mac");
 #elif defined(__linux__)
     return getLinuxWindowManagerName();
 #else
