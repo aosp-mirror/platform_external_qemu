@@ -20,6 +20,11 @@
 
 #include <stdint.h>
 
+// NOTE: This include is only here to prevent QEMU2 from failing to compile
+//       calls to str_reset, whose declaration has been moved to
+//       android/utils/string.h.
+#include "android/utils/string.h"
+
 ANDROID_BEGIN_HEADER
 
 // Special value return
@@ -52,9 +57,8 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
 /* Common routines used by both android-qemu1-glue/main.c and android/main-ui.c */
 
-// Reset the value of |*string| to a copy of |new_value|. This
-// will free() the previous value of |*string| first.
-void reassign_string(char** string, const char* new_value);
+// For QEMU2 only
+#define reassign_string(pstr, value) str_reset(pstr, value)
 
 unsigned convertBytesToMB( uint64_t  size );
 uint64_t convertMBToBytes( unsigned  megaBytes );
