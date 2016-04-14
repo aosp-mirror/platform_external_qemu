@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0b732e96_9409a487",
+        "filename": "android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 796,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-14T08:35:33Z",
+      "side": 1,
+      "message": "nit: s/osBittness/osBitness/ :)",
+      "revId": "f54d6f20bf9bdb1164f2c2a60f7defbad62ad148",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b79a672_f643c08f",
+        "filename": "android/utils/x86_cpuid.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-14T08:35:33Z",
+      "side": 1,
+      "message": "nit: s/bittness/bitness/ :)\n\nAlso you could use kBitnessSupportFunc since it\u0027s a constant.",
+      "revId": "f54d6f20bf9bdb1164f2c2a60f7defbad62ad148",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
