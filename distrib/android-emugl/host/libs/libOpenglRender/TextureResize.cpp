@@ -224,6 +224,9 @@ TextureResize::~TextureResize() {
     GLuint tex[2] = {mFBWidth.texture, mFBHeight.texture};
     s_gles2.glDeleteTextures(2, tex);
 
+    detachShaders(mFBWidth.program);
+    detachShaders(mFBHeight.program);
+
     s_gles2.glDeleteProgram(mFBWidth.program);
     s_gles2.glDeleteProgram(mFBHeight.program);
 
