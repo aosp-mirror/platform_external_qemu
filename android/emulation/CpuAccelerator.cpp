@@ -30,6 +30,7 @@
 #include "android/base/files/ScopedFd.h"
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
+#include "android/base/system/System.h"
 #include "android/cpu_accelerator.h"
 #include "android/utils/file_data.h"
 #include "android/utils/file_io.h"
@@ -789,6 +790,23 @@ std::pair<AndroidCpuInfoFlags, std::string> GetCpuInfo() {
 
     if (android_get_x86_cpuid_is_vcpu()) {
         flags |= ANDROID_CPU_INFO_VM;
+        status += "Inside a VM\n";
+    }
+
+    const int osBitness = base::System::get()->getHostBitness();
+    const bool is64BitCapable =
+            osBitness == 64 || android_get_x86_cpuid_is_64bit_capable();
+    if (is64BitCapable) {
+        if (osBitness == 32) {
+            flags |= ANDROID_CPU_INFO_64_BIT_32_BIT_OS;
+            status += "64-bit CPU, 32-bit OS\n";
+        } else {
+            flags |= ANDROID_CPU_INFO_64_BIT;
+            status += "64-bit CPU\n";
+        }
+    } else {
+        flags |= ANDROID_CPU_INFO_32_BIT;
+        status += "32-bit CPU\n";
     }
 
     return std::make_pair(static_cast<AndroidCpuInfoFlags>(flags),

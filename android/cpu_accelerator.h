@@ -58,6 +58,11 @@ typedef enum {
     ANDROID_CPU_INFO_VM = 1 << 3,        // Running in a VM
     ANDROID_CPU_INFO_VIRT_SUPPORTED = 1 << 4,    // CPU supports
                                                  // virtualization technologies
+
+    ANDROID_CPU_INFO_32_BIT = 1 << 5,           // 32-bit CPU, really!
+    ANDROID_CPU_INFO_64_BIT_32_BIT_OS = 1 << 6, // 32-bit OS on a 64-bit CPU
+    ANDROID_CPU_INFO_64_BIT = 1 << 7,           // 64-bit CPU
+
 } AndroidCpuInfoFlags;
 
 /* Returns ANDROID_CPU_ACCELERATION_READY if CPU acceleration is
