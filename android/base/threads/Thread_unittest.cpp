@@ -202,5 +202,9 @@ TEST(ThreadTest, tryWait) {
     EXPECT_EQ(42, result);
 }
 
+TEST(ThreadTest, id) {
+    EXPECT_NE("", getCurrentThreadId());
+}
+
 }  // namespace base
 }  // namespace android

@@ -116,5 +116,8 @@ private:
     bool mFinished = false;
 };
 
+// Helper function to obtain a printable id for the current thread.
+std::string getCurrentThreadId();
+
 }  // namespace base
 }  // namespace android

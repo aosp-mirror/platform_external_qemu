@@ -17,6 +17,8 @@
 #include "android/base/Log.h"
 #include "android/base/threads/ThreadStore.h"
 
+#include <string>
+
 #include <assert.h>
 #include <signal.h>
 #include <stdio.h>
@@ -145,6 +147,10 @@ void Thread::maskAllSignals() {
     sigset_t set;
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, nullptr);
+}
+
+std::string getCurrentThreadId() {
+    return std::to_string(static_cast<long>(pthread_self()));
 }
 
 }  // namespace base

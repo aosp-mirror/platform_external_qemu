@@ -17,6 +17,8 @@
 #include "android/base/Log.h"
 #include "android/base/threads/ThreadStore.h"
 
+#include <string>
+
 #include <assert.h>
 
 namespace android {
@@ -135,6 +137,10 @@ DWORD WINAPI Thread::thread_main(void *arg) {
 // static
 void Thread::maskAllSignals() {
     // no such thing as signal in Windows
+}
+
+std::string getCurrentThreadId() {
+    return std::to_string(static_cast<long>(GetCurrentThreadId()));
 }
 
 }  // namespace base
