@@ -1956,7 +1956,6 @@ int main(int argc, char **argv, char **envp)
     CPUState *cpu;
     int show_vnc_port = 0;
     CIniFile *hw_ini = NULL;
-    STRALLOC_DEFINE(kernel_config);
 
     /* Ensure Looper implementation for this thread is based on the QEMU
      * main loop. */
@@ -3138,14 +3137,11 @@ int main(int argc, char **argv, char **envp)
         qemu_cpu_delay = (int) delay;
     }
 
-    int dns_count = 0;
     if (android_op_dns_server) {
-        dns_count = slirp_init_dns_servers(android_op_dns_server);
-    }
-
-    if (dns_count > 0) {
-        // TODO(digit): Move this to android-qemu1-glue/main.cpp
-        stralloc_add_format(kernel_config, " ndns=%d", dns_count);
+        // NOTE: The front-end should always add the -dns-server <list> option when this
+        // function is called, where <list> contains a list of resolved IP addresses.
+        // As such, we don't need to check for errors here.
+        slirp_init_dns_servers(android_op_dns_server);
     }
 
     /* Initialize OpenGLES emulation */
@@ -3587,36 +3583,14 @@ int main(int argc, char **argv, char **envp)
         cpu_model = android_hw->hw_cpu_model;
     }
 
-    /* Combine kernel command line passed from the UI with parameters
-     * collected during initialization.
-     *
-     * The order is the following:
-     * - parameters from the command-line -append option.
-     * - additionnal parameters from kernel_config
-     */
-    {
-        STRALLOC_DEFINE(kernel_parameters);
+    VERBOSE_PRINT(init, "Kernel parameters: %s", kernel_cmdline);
 
-        if (*kernel_cmdline != '\0') {
-            stralloc_add_str(kernel_parameters, kernel_cmdline);
-        }
-        if (kernel_config->n > 0) {
-            stralloc_add_c(kernel_parameters, ' ');
-            stralloc_append(kernel_parameters, kernel_config);
-        }
-
-        const char* kernel_params_str = stralloc_cstr(kernel_parameters);
-        VERBOSE_PRINT(init, "Kernel parameters: %s", kernel_params_str);
-
-        machine->init(ram_size,
-                      boot_devices,
-                      kernel_filename,
-                      kernel_params_str,
-                      initrd_filename,
-                      cpu_model);
-
-        stralloc_reset(kernel_parameters);
-    }
+    machine->init(ram_size,
+                    boot_devices,
+                    kernel_filename,
+                    kernel_cmdline,
+                    initrd_filename,
+                    cpu_model);
 
     /* Initialize multi-touch emulation. */
     if (androidHwConfig_isScreenMultiTouch(android_hw)) {

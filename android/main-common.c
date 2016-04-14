@@ -25,6 +25,7 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/dirscanner.h"
+#include "android/utils/dns.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/host_bitness.h"
 #include "android/utils/path.h"
@@ -1709,6 +1710,28 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
             return false;
         }
         str_reset(&hw->hw_screen, opts->screen);
+    }
+
+    // DNS server support. Validate the option if any, find the DNS
+    // server IP addresses, then rewrite the option value with the
+    // results.
+    {
+        uint32_t dnsServers[ANDROID_MAX_DNS_SERVERS] = {};
+        int dnsCount = android_dns_get_servers(opts->dns_server, dnsServers);
+        if (dnsCount < 0) {
+            return false;
+        }
+        // Rewrite the option with DNS server IPs.
+        STRALLOC_DEFINE(newOption);
+        int n;
+        for (n = 0; n < dnsCount; ++n) {
+            uint32_t ip = dnsServers[n];
+            stralloc_add_format(newOption, "%s%d.%d.%d.%d", (n > 0) ? "," : "",
+                                (uint8_t)(ip >> 24), (uint8_t)(ip >> 16),
+                                (uint8_t)(ip >> 8), (uint8_t)(ip));
+        }
+        str_reset(&opts->dns_server, stralloc_cstr(newOption));
+        stralloc_reset(newOption);
     }
 
     *exit_status = 0;
