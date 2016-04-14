@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb941ac3_bb2047e4",
+        "filename": "android/main-qemu-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-14T15:57:36Z",
+      "side": 1,
+      "message": "Nit: These two names are  very similar and I had to spend some extra time just to figure out which was which. Could the names be more specific?",
+      "range": {
+        "startLine": 198,
+        "startChar": 0,
+        "endLine": 199,
+        "endChar": 31
+      },
+      "revId": "5b37457b619c91d27fb94a300f38e38fd0f80d57",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
