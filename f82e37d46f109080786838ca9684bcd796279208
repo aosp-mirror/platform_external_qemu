@@ -94,6 +94,30 @@
       "revId": "f82e37d46f109080786838ca9684bcd796279208",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_170ac979",
+        "filename": "vl-android.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3145,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-14T17:00:28Z",
+      "side": 1,
+      "message": "But it will only add the option if it actually finds any DNS servers as I understand it. If there are no system DNS servers the scan will be performed twice since dns_addr_count will be zero when the slirp initialization happens.\n\nI don\u0027t really think that\u0027s really problem in terms of performance or anything, it just seems to indicate that the responsibilities are well separated. Since this is QEMU code I don\u0027t feel like that is as important as if it was our own code though.",
+      "parentUuid": "eb1b3a59_a353ba10",
+      "range": {
+        "startLine": 3143,
+        "startChar": 0,
+        "endLine": 3145,
+        "endChar": 5
+      },
+      "revId": "f82e37d46f109080786838ca9684bcd796279208",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
