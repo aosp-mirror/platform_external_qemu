@@ -22,6 +22,30 @@
       "revId": "8f317b42320ffead65ae52747c8b66d55bbbf68d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_81c95b7a",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-14T13:57:18Z",
+      "side": 1,
+      "message": "Yep, I looked into this some more and it also occurred to me that if system OpenGL thinks there aren\u0027t any compile errors on something we want to have compile errors, it could mess with other parts of the state.",
+      "parentUuid": "8bd1de8e_a58bd913",
+      "range": {
+        "startLine": 400,
+        "startChar": 8,
+        "endLine": 400,
+        "endChar": 41
+      },
+      "revId": "8f317b42320ffead65ae52747c8b66d55bbbf68d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
