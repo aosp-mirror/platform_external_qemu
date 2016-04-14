@@ -216,3 +216,26 @@ bool android_get_x86_cpuid_nx_support()
     const uint32_t CPUID_80000001_EDX_NX = (1<<20); // NX support
     return (cpuid_80000001_edx & CPUID_80000001_EDX_NX) != 0;
 }
+
+bool android_get_x86_cpuid_is_64bit_capable()
+{
+#ifdef __x86_64__
+    return true;    // this was easy
+#else
+    const uint32_t kBitnessSupportFunc = 0x80000001;
+
+    const auto maxFunc = android_get_x86_cpuid_extended_function_max();
+    if (maxFunc < kBitnessSupportFunc) {
+        return false; // if it's that old, it is not a 64-bit one
+    }
+
+    uint32_t edx = 0;
+    android_get_x86_cpuid(kBitnessSupportFunc, 0,
+                          nullptr, nullptr, nullptr, &edx);
+    // bit 29 is the 64-bit mode support
+    if ((edx & (1 << 29)) != 0) {
+        return true;
+    }
+    return false;
+#endif
+}

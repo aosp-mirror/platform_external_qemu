@@ -149,4 +149,7 @@ bool android_get_x86_cpuid_nx_support();
  */
 bool android_get_x86_cpuid_is_vcpu();
 
+// Returns true if the CPU supports AMD64 instruction set.
+bool android_get_x86_cpuid_is_64bit_capable();
+
 ANDROID_END_HEADER
