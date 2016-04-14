@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8bd1de8e_f77295e0",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-14T17:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bd1de8e_a199fff8",
+      "range": {
+        "startLine": 357,
+        "startChar": 7,
+        "endLine": 357,
+        "endChar": 13
+      },
+      "revId": "1c30746035e06ecffbe3181755b251e519006253",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bd1de8e_c1a993eb",
         "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
         "patchSetId": 5
@@ -54,6 +78,24 @@
       "side": 1,
       "message": "Hmm, I guess I don\u0027t usually use regex libraries for this stuff. But, I just found \u003cregex\u003e. Giving this a try now.",
       "parentUuid": "8bd1de8e_c1a993eb",
+      "revId": "1c30746035e06ecffbe3181755b251e519006253",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_97d7d909",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-14T17:06:56Z",
+      "side": 1,
+      "message": "Tried it, it doesn\u0027t seem to work :( Will put example-comments throughout.",
+      "parentUuid": "8bd1de8e_8427a9a6",
       "revId": "1c30746035e06ecffbe3181755b251e519006253",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -106,6 +148,54 @@
     },
     {
       "key": {
+        "uuid": "8bd1de8e_77d4e504",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-14T17:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bd1de8e_a180df74",
+      "range": {
+        "startLine": 8,
+        "startChar": 12,
+        "endLine": 8,
+        "endChar": 23
+      },
+      "revId": "1c30746035e06ecffbe3181755b251e519006253",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_3709cd82",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-14T17:06:56Z",
+      "side": 1,
+      "message": "Too used to doing it that way. I also found out I wasn\u0027t using this anymore, so I just took it out. Done",
+      "parentUuid": "8bd1de8e_e17ad744",
+      "range": {
+        "startLine": 8,
+        "startChar": 34,
+        "endLine": 8,
+        "endChar": 37
+      },
+      "revId": "1c30746035e06ecffbe3181755b251e519006253",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bd1de8e_c177d359",
         "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
         "patchSetId": 5
@@ -117,6 +207,30 @@
       "writtenOn": "2016-04-14T15:55:10Z",
       "side": 1,
       "message": "references?",
+      "range": {
+        "startLine": 14,
+        "startChar": 42,
+        "endLine": 14,
+        "endChar": 43
+      },
+      "revId": "1c30746035e06ecffbe3181755b251e519006253",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_b7f5bd94",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-14T17:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bd1de8e_c177d359",
       "range": {
         "startLine": 14,
         "startChar": 42,
@@ -152,6 +266,30 @@
     },
     {
       "key": {
+        "uuid": "8bd1de8e_573f2109",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-14T17:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bd1de8e_a1cbbfc8",
+      "range": {
+        "startLine": 17,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 15
+      },
+      "revId": "1c30746035e06ecffbe3181755b251e519006253",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bd1de8e_c1d23377",
         "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
         "patchSetId": 5
@@ -163,6 +301,30 @@
       "writtenOn": "2016-04-14T15:55:10Z",
       "side": 1,
       "message": "could you please unscramble this name and document it? I couldn\u0027t make it",
+      "range": {
+        "startLine": 37,
+        "startChar": 32,
+        "endLine": 37,
+        "endChar": 37
+      },
+      "revId": "1c30746035e06ecffbe3181755b251e519006253",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_f720d5e4",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-14T17:06:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bd1de8e_c1d23377",
       "range": {
         "startLine": 37,
         "startChar": 32,
@@ -198,6 +360,30 @@
     },
     {
       "key": {
+        "uuid": "8bd1de8e_57160191",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-14T17:06:56Z",
+      "side": 1,
+      "message": "Thanks for catching this! Done.",
+      "parentUuid": "8bd1de8e_e14777f8",
+      "range": {
+        "startLine": 314,
+        "startChar": 0,
+        "endLine": 315,
+        "endChar": 5
+      },
+      "revId": "1c30746035e06ecffbe3181755b251e519006253",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bd1de8e_c144f3f6",
         "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
         "patchSetId": 5
@@ -209,6 +395,30 @@
       "writtenOn": "2016-04-14T15:55:10Z",
       "side": 1,
       "message": "is this used?",
+      "range": {
+        "startLine": 324,
+        "startChar": 0,
+        "endLine": 324,
+        "endChar": 26
+      },
+      "revId": "1c30746035e06ecffbe3181755b251e519006253",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd1de8e_b7277df4",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-14T17:06:56Z",
+      "side": 1,
+      "message": "Thanks for catching this! Done.",
+      "parentUuid": "8bd1de8e_c144f3f6",
       "range": {
         "startLine": 324,
         "startChar": 0,
