@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "a814e833_5c6031ab",
+        "filename": "android/base/async/SubscriberList.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-15T19:00:49Z",
+      "side": 1,
+      "message": "There were, like, 20 things wrong with that definition. :/",
+      "parentUuid": "a814e833_3958ef2a",
+      "range": {
+        "startLine": 94,
+        "startChar": 37,
+        "endLine": 94,
+        "endChar": 65
+      },
+      "revId": "836ff8799cf8e4f94f6cc54574eba336c5a1cca8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b39d2b4_b695ae5e",
         "filename": "android/base/async/SubscriberList.h",
         "patchSetId": 1
@@ -95,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "a814e833_5cdb9199",
+        "filename": "android/base/async/SubscriberList.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-15T19:00:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2b39d2b4_b695ae5e",
+      "range": {
+        "startLine": 101,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 53
+      },
+      "revId": "836ff8799cf8e4f94f6cc54574eba336c5a1cca8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b39d2b4_56af2aa7",
         "filename": "android/base/async/SubscriberList.h",
         "patchSetId": 1
@@ -106,6 +154,30 @@
       "writtenOn": "2016-04-15T00:35:16Z",
       "side": 1,
       "message": "maybe .back() ?",
+      "range": {
+        "startLine": 125,
+        "startChar": 8,
+        "endLine": 125,
+        "endChar": 12
+      },
+      "revId": "836ff8799cf8e4f94f6cc54574eba336c5a1cca8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a814e833_1c5079aa",
+        "filename": "android/base/async/SubscriberList.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-15T19:00:49Z",
+      "side": 1,
+      "message": "I need the iterator to pass it to unsubscribe later.",
+      "parentUuid": "2b39d2b4_56af2aa7",
       "range": {
         "startLine": 125,
         "startChar": 8,
