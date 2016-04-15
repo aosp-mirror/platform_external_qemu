@@ -447,7 +447,7 @@ int main(int argc, char** argv)
 
     bool has_guest_renderer = (!strcmp(avdArch, "x86") ||
                                !strcmp(avdArch, "x86_64")) &&
-                               (api_level >= 23) &&
+                               (api_level >= 22) &&
                                google_apis;
 
     bool blacklisted = false;
