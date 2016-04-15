@@ -741,7 +741,11 @@ skin_layout_create_rotated(const SkinLayout* src, SkinPart** new_parts_ptr, Skin
     *new_layout = *src;
 
     new_layout->next = NULL;
-    new_layout->has_dpad_rotation = false;
+
+    // DPad rotation is needed to ensure the arrow keys work correctly, even if
+    // the device isn't configured for a DPad
+    new_layout->has_dpad_rotation = true;
+    new_layout->dpad_rotation = by;
     skin_size_rotate(&(new_layout->size), &(src->size), by);
 
     new_layout->locations = NULL;
@@ -930,7 +934,9 @@ static int skin_file_load_from_v2(SkinFile* file,
             }
 
             // Rotate the layout.
-            layout->next = skin_layout_create_rotated(first_layout, last_part_ptr, r);
+            layout->next = skin_layout_create_rotated(
+                    first_layout, last_part_ptr,
+                    (first_layout->dpad_rotation + r) % 4);
             if (layout->next != NULL) {
                 // Update layout name.
                 int layout_name_idx = r - SKIN_ROTATION_90;

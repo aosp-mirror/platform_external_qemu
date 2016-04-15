@@ -243,11 +243,10 @@ skin_keyboard_process_unicode_event( SkinKeyboard*  kb,  unsigned int  unicode, 
                                             kb->keycodes);
 }
 
-
-static SkinKeyboard*
-skin_keyboard_create_from_charmap_name(const char* charmap_name,
-                                       SkinKeyCodeFlushFunc keycode_flush)
-{
+static SkinKeyboard* skin_keyboard_create_from_charmap_name(
+        const char* charmap_name,
+        SkinRotation dpad_rotation,
+        SkinKeyCodeFlushFunc keycode_flush) {
     SkinKeyboard*  kb;
 
     ANEW0(kb);
@@ -268,13 +267,13 @@ skin_keyboard_create_from_charmap_name(const char* charmap_name,
                 skin_keyset_get_default_text());
     }
     skin_keycode_buffer_init(kb->keycodes, keycode_flush);
+    skin_keyboard_set_rotation(kb, dpad_rotation);
     return kb;
 }
 
-SkinKeyboard*
-skin_keyboard_create(const char* kcm_file_path,
-                     SkinKeyCodeFlushFunc keycode_flush)
-{
+SkinKeyboard* skin_keyboard_create(const char* kcm_file_path,
+                                   SkinRotation dpad_rotation,
+                                   SkinKeyCodeFlushFunc keycode_flush) {
     const char* charmap_name = DEFAULT_ANDROID_CHARMAP;
     char        cmap_buff[SKIN_CHARMAP_NAME_SIZE];
 
@@ -282,8 +281,8 @@ skin_keyboard_create(const char* kcm_file_path,
         kcm_extract_charmap_name(kcm_file_path, cmap_buff, sizeof cmap_buff);
         charmap_name = cmap_buff;
     }
-    return skin_keyboard_create_from_charmap_name(
-            charmap_name, keycode_flush);
+    return skin_keyboard_create_from_charmap_name(charmap_name, dpad_rotation,
+                                                  keycode_flush);
 }
 
 void
