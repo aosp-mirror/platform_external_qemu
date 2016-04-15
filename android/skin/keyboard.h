@@ -26,8 +26,9 @@ typedef void (*SkinKeyCommandFunc)( void*  opaque, SkinKeyCommand  command, int 
 typedef void (*SkinKeyEventFunc)( void*  opaque, SkinKeyCode  code, int  down );
 
 /* If kcm_file_path is NULL, create a keyboard using the default built-in qwerty2 charmap */
-extern SkinKeyboard*  skin_keyboard_create(const char* kcm_file_path,
-                                           SkinKeyCodeFlushFunc keycode_flush);
+extern SkinKeyboard* skin_keyboard_create(const char* kcm_file_path,
+                                          SkinRotation dpad_rotation,
+                                          SkinKeyCodeFlushFunc keycode_flush);
 
 extern SkinKeyset*    skin_keyboard_get_keyset( SkinKeyboard* keyboard);
 

@@ -435,14 +435,14 @@ void events_dev_init(uint32_t base, qemu_irq irq)
         events_set_bits(s, EV_KEY, 0x160, 0x1ff);
 
         /* If there is a keyboard, but no DPad, we need to clear the
-         * corresponding bits. Doing this is simpler than trying to exclude
+         * corresponding bit. Doing this is simpler than trying to exclude
          * the DPad values from the ranges above.
+         *
+         * KEY_UP/DOWN/LEFT/RIGHT should be left set so the keyboard
+         * arrow keys are still usable, even though a typical device hard
+         * keyboard would not include those keys.
          */
         if (!config->hw_dPad) {
-            events_clr_bit(s, EV_KEY, KEY_DOWN);
-            events_clr_bit(s, EV_KEY, KEY_UP);
-            events_clr_bit(s, EV_KEY, KEY_LEFT);
-            events_clr_bit(s, EV_KEY, KEY_RIGHT);
             events_clr_bit(s, EV_KEY, KEY_CENTER);
         }
     }
