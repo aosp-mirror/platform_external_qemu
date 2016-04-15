@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a814e833_796547ec",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 714,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-15T18:06:48Z",
+      "side": 1,
+      "message": "Missing output file, verbose check.",
+      "range": {
+        "startLine": 714,
+        "startChar": 4,
+        "endLine": 714,
+        "endChar": 15
+      },
+      "revId": "8a565f517c4c51abf0796c9bc36312a19d0aa9d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a814e833_19640bed",
+        "filename": "android/hw-sensors.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 746,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-15T18:06:48Z",
+      "side": 1,
+      "message": "Nit: whitespace",
+      "range": {
+        "startLine": 746,
+        "startChar": 9,
+        "endLine": 746,
+        "endChar": 12
+      },
+      "revId": "8a565f517c4c51abf0796c9bc36312a19d0aa9d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a814e833_794e676e",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 462,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-15T18:06:48Z",
+      "side": 1,
+      "message": "I think this was \"Smooth\" because of OS X related stuff? Ask Chaoren about it, I think he did this.",
+      "range": {
+        "startLine": 462,
+        "startChar": 20,
+        "endLine": 462,
+        "endChar": 26
+      },
+      "revId": "8a565f517c4c51abf0796c9bc36312a19d0aa9d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
