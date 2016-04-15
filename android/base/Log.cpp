@@ -11,6 +11,11 @@
 
 #include "android/base/Log.h"
 
+#include "android/base/StringFormat.h"
+#include "android/base/threads/Thread.h"
+
+#include <string>
+
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -35,6 +40,9 @@ const char* severityLevelToString(LogSeverity severity) {
     };
     if (severity >= 0 && severity < LOG_NUM_SEVERITIES)
         return kSeverityStrings[severity];
+    if (severity == -1) {
+        return "VERBOSE";
+    }
     return "UNKNOWN";
 }
 
@@ -42,8 +50,16 @@ const char* severityLevelToString(LogSeverity severity) {
 void defaultLogMessage(const LogParams& params,
                        const char* message,
                        size_t messageLen) {
+    // Obtaining current thread's id is expensive. Only do this for verbose
+    // logs.
+    std::string tidStr;
+    if (params.severity >= LOG_VERBOSE) {
+        tidStr = android::base::StringFormat("[%lu]:", getCurrentThreadId());
+    }
+
     fprintf(stderr,
-            "%s:%s:%d:%.*s\n",
+            "%s%s:%s:%d:%.*s\n",
+            tidStr.c_str(),
             severityLevelToString(params.severity),
             params.file,
             params.lineno,
