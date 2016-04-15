@@ -1064,6 +1064,7 @@ static int convertKeyCode(int sym)
         KK(Minus, MINUS),
         KK(Equal, EQUAL),
         KK(Backspace, BACKSPACE),
+        KK(Delete, DELETE),
         KK(Home, HOME),
         KK(Escape, ESC),
         KK(Comma, COMMA),
