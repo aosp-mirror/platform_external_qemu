@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "a814e833_e2e87c98",
+        "filename": "android/base/async/SubscriberList.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-15T20:08:45Z",
+      "side": 1,
+      "message": "let\u0027s not rename it in the same CL. I\u0027m still trying to find a better name",
+      "parentUuid": "a814e833_5cd15148",
+      "range": {
+        "startLine": 68,
+        "startChar": 6,
+        "endLine": 68,
+        "endChar": 20
+      },
+      "revId": "836ff8799cf8e4f94f6cc54574eba336c5a1cca8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b39d2b4_f6f1f6b3",
         "filename": "android/base/async/SubscriberList.h",
         "patchSetId": 1
@@ -119,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "a814e833_c25c5856",
+        "filename": "android/base/async/SubscriberList.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-15T20:08:45Z",
+      "side": 1,
+      "message": "Because for that line it\u0027s actually a perfect forwarding :)\nyou only use forward on a function argument which is also a template argument of the very same function, passed as T\u0026\u0026\nAnything else won\u0027t be \u0027perfect\u0027\nhttp://stackoverflow.com/questions/3582001/advantages-of-using-forward/3582313#3582313",
+      "parentUuid": "a814e833_3958ef2a",
+      "range": {
+        "startLine": 94,
+        "startChar": 37,
+        "endLine": 94,
+        "endChar": 65
+      },
+      "revId": "836ff8799cf8e4f94f6cc54574eba336c5a1cca8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b39d2b4_b695ae5e",
         "filename": "android/base/async/SubscriberList.h",
         "patchSetId": 1
@@ -154,6 +202,30 @@
       "side": 1,
       "message": "Done",
       "parentUuid": "2b39d2b4_b695ae5e",
+      "range": {
+        "startLine": 101,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 53
+      },
+      "revId": "836ff8799cf8e4f94f6cc54574eba336c5a1cca8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a814e833_42e288bc",
+        "filename": "android/base/async/SubscriberList.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-15T20:08:45Z",
+      "side": 1,
+      "message": "are you sure?\n;)",
+      "parentUuid": "a814e833_5cdb9199",
       "range": {
         "startLine": 101,
         "startChar": 0,
