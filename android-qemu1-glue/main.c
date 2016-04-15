@@ -822,7 +822,7 @@ int main(int argc, char **argv) {
         bool isGoogle = avdInfo_isGoogleApis(avd);
 
         bool has_guest_renderer = isGoogle &&
-                                  (api_level >= 23) &&
+                                  (api_level >= 22) &&
                                   (!strcmp(api_arch, "x86") ||
                                    !strcmp(api_arch, "x86_64"));
 
