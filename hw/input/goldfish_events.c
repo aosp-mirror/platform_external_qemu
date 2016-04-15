@@ -1201,14 +1201,14 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
         events_set_bits(s, EV_KEY, 0x160, 0x1ff);
 
         /* If there is a keyboard, but no DPad, we need to clear the
-         * corresponding bits. Doing this is simpler than trying to exclude
+         * corresponding bit. Doing this is simpler than trying to exclude
          * the DPad values from the ranges above.
+         *
+         * LINUX_KEY_UP/DOWN/LEFT/RIGHT should be left set so the keyboard
+         * arrow keys are still usable, even though a typical device hard
+         * keyboard would not include those keys.
          */
         if (!s->have_dpad) {
-            events_clr_bit(s, EV_KEY, LINUX_KEY_DOWN);
-            events_clr_bit(s, EV_KEY, LINUX_KEY_UP);
-            events_clr_bit(s, EV_KEY, LINUX_KEY_LEFT);
-            events_clr_bit(s, EV_KEY, LINUX_KEY_RIGHT);
             events_clr_bit(s, EV_KEY, LINUX_KEY_CENTER);
         }
     }
