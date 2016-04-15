@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "081fb456_3acd7936",
+        "filename": "android/cmdline-options.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-15T16:54:44Z",
+      "side": 1,
+      "message": "should we deprecate it first for a couple of releases?",
+      "range": {
+        "startLine": 121,
+        "startChar": 11,
+        "endLine": 121,
+        "endChar": 19
+      },
+      "revId": "d361eb13618514a7da071021864dae990ba2f977",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
