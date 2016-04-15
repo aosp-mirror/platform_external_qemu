@@ -191,7 +191,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             code == KEY_CENTER      || code == KEY_REWIND     ||
             code == KEY_ENTER       || code == KEY_VOLUMEDOWN ||
             code == KEY_FASTFORWARD || code == KEY_VOLUMEUP   ||
-            code == KEY_HOME                                     )
+            code == KEY_HOME        || code == KEY_DELETE       )
         {
             skin_keyboard_add_key_event(kb, code, down);
             skin_keyboard_flush(kb);
