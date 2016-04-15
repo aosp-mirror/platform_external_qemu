@@ -12,6 +12,8 @@
 #include "android/utils/string.h"
 
 #include <algorithm>
+
+#include <stdlib.h>
 #include <string.h>
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
@@ -41,4 +43,19 @@ bool str_ends_with(const char* str, const char* suffix) {
     int suffix_len = strlen(suffix);
     return (str_len >= suffix_len) &&
            (0 == strcmp(str + (str_len - suffix_len), suffix));
+}
+
+void str_reset(char** string, const char* new_value) {
+    ::free(*string);
+    *string = new_value ? ::strdup(new_value) : nullptr;
+}
+
+void str_reset_nocopy(char** string, char* new_value) {
+    ::free(*string);
+    *string = new_value;
+}
+
+void str_reset_null(char** string) {
+    ::free(*string);
+    *string = nullptr;
 }

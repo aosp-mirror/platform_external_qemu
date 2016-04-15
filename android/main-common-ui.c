@@ -31,6 +31,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
+#include "android/utils/string.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -319,7 +320,7 @@ bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
         char* charmap = avdInfo_getCharmapFile(avd, hw->hw_keyboard_charmap);
         if (charmap != NULL) {
             D("autoconfig: -charmap %s", charmap);
-            opts->charmap = charmap;
+            str_reset_nocopy(&opts->charmap, charmap);
         }
     }
 
@@ -336,7 +337,7 @@ bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
          */
         kcm_extract_charmap_name(opts->charmap, charmap_name,
                                  sizeof(charmap_name));
-        reassign_string(&hw->hw_keyboard_charmap, charmap_name);
+        str_reset(&hw->hw_keyboard_charmap, charmap_name);
     }
 
     return true;

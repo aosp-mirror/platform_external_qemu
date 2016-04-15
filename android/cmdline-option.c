@@ -63,7 +63,7 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
          * '-avd <name>'
          */
         if (aread[0][0] == '@') {
-            opt->avd = aread[0]+1;
+            opt->avd = aread[0] + 1;
             nargs--;
             aread++;
             continue;
@@ -95,7 +95,7 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
         if (!strcmp(arg, "debug")) {
             if (nargs == 0) {
                 derror( "-debug must be followed by tags (see -help-verbose)\n");
-                exit(1);
+                return -1;
             }
             nargs--;
             parse_debug_tags(*aread++);
@@ -166,7 +166,7 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
 
                         if (oo->var_type == OPTION_IS_PARAM)
                         {
-                            ((char**)field)[0] = *aread++;
+                            ((char**)field)[0] = strdup(*aread++);
                         }
                         else if (oo->var_type == OPTION_IS_LIST)
                         {
@@ -176,7 +176,7 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
                             /* note: store list items in reverse order here
                              *       the list is reversed later in this function.
                              */
-                            pl->param = *aread++;
+                            pl->param = strdup(*aread++);
                             pl->next  = *head;
                             *head     = pl;
                         }

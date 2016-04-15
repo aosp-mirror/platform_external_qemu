@@ -40,7 +40,6 @@
 /* proto types */
 static void slirp_net_forward_init(void);
 
-
 #define  D(...)   VERBOSE_PRINT(slirp,__VA_ARGS__)
 #define  DN(...)  do { if (VERBOSE_CHECK(slirp)) dprintn(__VA_ARGS__); } while (0)
 
@@ -49,6 +48,11 @@ uint32_t our_addr_ip;
 /* host dns address */
 uint32_t dns_addr[DNS_ADDR_MAX];
 int      dns_addr_count;
+
+/* Sanity check */
+#if DNS_ADDR_MAX != ANDROID_MAX_DNS_SERVERS
+#error Invalid DNS_ADDR_MAX definition !! Please update slirp-android/main.h
+#endif
 
 /* host loopback address */
 uint32_t loopback_addr_ip;
@@ -81,6 +85,17 @@ struct ex_list *exec_list;
 fd_set *global_readfds, *global_writefds, *global_xfds;
 
 char slirp_hostname[33];
+
+
+int slirp_init_dns_servers(const char* servers)
+{
+    dns_addr_count = android_dns_get_servers(servers, dns_addr);
+    if (dns_addr_count < 0) {
+        dns_addr[0]    = loopback_addr_ip;
+        dns_addr_count = 1;
+    }
+    return dns_addr_count;
+}
 
 int slirp_get_system_dns_servers(void)
 {
@@ -146,11 +161,7 @@ void slirp_init(int restricted, const char *special_ip)
     inet_strtoip("127.0.0.1", &loopback_addr_ip);
 
     if (dns_addr_count == 0) {
-        if (slirp_get_system_dns_servers() < 0) {
-            dns_addr[0]    = loopback_addr_ip;
-            dns_addr_count = 1;
-            fprintf (stderr, "Warning: No DNS servers found\n");
-        }
+        slirp_init_dns_servers(NULL);
     }
 
     inet_strtoip(CTL_SPECIAL, &special_addr_ip);

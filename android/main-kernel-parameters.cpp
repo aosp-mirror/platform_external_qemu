@@ -14,6 +14,7 @@
 #include "android/base/StringFormat.h"
 #include "android/emulation/ParameterList.h"
 #include "android/utils/debug.h"
+#include "android/utils/dns.h"
 
 #include <memory>
 
@@ -24,8 +25,9 @@ using android::base::StringFormat;
 char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    const char* targetArch,
                                    const char* kernelSerialPrefix,
+                                   const char* avdKernelParameters,
                                    AndroidGlesEmulationMode glesMode,
-                                   bool is_qemu2) {
+                                   bool isQemu2) {
     android::ParameterList params;
     bool isX86 = !strcmp(targetArch, "x86");
 
@@ -95,6 +97,18 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     if (opts->selinux) {
         params.addFormat("androidboot.selinux=%s", opts->selinux);
+    }
+
+    if (opts->dns_server) {
+        uint32_t ips[ANDROID_MAX_DNS_SERVERS];
+        int dnsCount = android_dns_get_servers(opts->dns_server, ips);
+        if (dnsCount > 1) {
+            params.addFormat("ndns=%d", dnsCount);
+        }
+    }
+
+    if (avdKernelParameters && avdKernelParameters[0]) {
+        params.add(avdKernelParameters);
     }
 
     return params.toCStringCopy();

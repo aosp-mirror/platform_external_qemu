@@ -41,7 +41,7 @@ int android_dns_get_system_servers(uint32_t* buffer, size_t bufferSize) {
 
     if (GetNetworkParams(fixedInfo, &bufLen) != ERROR_SUCCESS) {
         derror("Failed to get network parameters, cannot retrieve DNS servers");
-        return -1;
+        return kAndroidDnsErrorBadServer;
     }
 
     size_t dnsAddrCount = 0;
@@ -55,7 +55,7 @@ int android_dns_get_system_servers(uint32_t* buffer, size_t bufferSize) {
     }
 
     if (dnsAddrCount == 0)
-        return -1;
+        return kAndroidDnsErrorBadServer;
 
     return dnsAddrCount;
 }
@@ -79,7 +79,7 @@ int android_dns_get_system_servers(uint32_t* buffer, size_t bufferSize)
 #endif
     if (!fin.good()) {
         derror("Failed to open /etc/resolv.conf, cannot retrieve DNS servers");
-        return -1;
+        return kAndroidDnsErrorBadServer;
     }
 
     std::string line;
@@ -95,7 +95,7 @@ int android_dns_get_system_servers(uint32_t* buffer, size_t bufferSize)
     }
 
     if (dnsAddrCount == 0)
-        return -1;
+        return kAndroidDnsErrorBadServer;
 
     return dnsAddrCount;
 }
@@ -114,16 +114,16 @@ int android_dns_parse_servers(const char* input,
         SockAddress addr;
         const char* server = &servers[pos];
         if (sock_address_init_resolve(&addr, server, 53, 0) < 0) {
-            return -1;
+            return kAndroidDnsErrorBadServer;
         }
 
         if (dnsAddrCount >= bufferSize) {
-            return -2;
+            return kAndroidDnsErrorTooManyServers;
         }
 
         int ip = sock_address_get_ip(&addr);
         if (ip == -1) {
-            return -1;
+            return kAndroidDnsErrorBadServer;
         }
 
         buffer[dnsAddrCount++] = static_cast<uint32_t>(ip);
@@ -134,4 +134,45 @@ int android_dns_parse_servers(const char* input,
         ++pos; // Skip the actual null terminator
     }
     return dnsAddrCount;
+}
+
+int android_dns_get_servers(const char* dnsServerOption,
+                            uint32_t* dnsServerIps) {
+    const int kMaxDnsServers = ANDROID_MAX_DNS_SERVERS;
+    int dnsCount = 0;
+    if (dnsServerOption && dnsServerOption[0]) {
+        dnsCount = android_dns_parse_servers(dnsServerOption, dnsServerIps,
+                                             kMaxDnsServers);
+        if (dnsCount == kAndroidDnsErrorTooManyServers) {
+            derror("Too may DNS servers listed in -dns-server option, a "
+                   "maximum of %d values is supported\n",
+                   ANDROID_MAX_DNS_SERVERS);
+            return kAndroidDnsErrorTooManyServers;
+        }
+        if (dnsCount < 0) {  // Bad format in the option.
+            derror("Malformed or invalid -dns-server parameter: %s",
+                   dnsServerOption);
+            return kAndroidDnsErrorBadServer;
+        }
+    }
+    if (!dnsCount) {
+        dnsCount = android_dns_get_system_servers(dnsServerIps, kMaxDnsServers);
+        if (dnsCount < 0) {
+            dnsCount = 0;
+            dwarning(
+                    "Cannot find system DNS servers! Name resolution will "
+                    "be disabled.");
+        }
+    }
+    if (VERBOSE_CHECK(init)) {
+        dprintn("emulator: Found %d DNS servers:", dnsCount);
+        for (int n = 0; n < dnsCount; ++n) {
+            uint32_t ip = dnsServerIps[n];
+            dprintn(" %d.%d.%d.%d", (uint8_t)(ip >> 24), (uint8_t)(ip >> 16),
+                    (uint8_t)(ip >> 8), (uint8_t)(ip));
+        }
+        dprintn("\n");
+    }
+
+    return dnsCount;
 }

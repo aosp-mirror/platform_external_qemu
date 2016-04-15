@@ -12,6 +12,7 @@
 #include "android/main-common.h"
 #include "android/main-qemu-parameters.h"
 
+#include "android/base/StringFormat.h"
 #include "android/emulation/ParameterList.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_data.h"
@@ -41,12 +42,13 @@ void qemu_parameters_free(QemuParameters* params) {
 }
 
 QemuParameters* qemu_parameters_create(const char* argv0,
-                                       int qemu_argc,
-                                       const char* const* qemu_argv,
+                                       int qemuArgc,
+                                       const char* const* qemuArgv,
                                        AndroidOptions* opts,
                                        const AvdInfo* avd,
+                                       const char* initialKernelParameters,
                                        const char* androidHwIniPath,
-                                       bool is_qemu2,
+                                       bool isQemu2,
                                        const char* targetArch) {
     std::unique_ptr<QemuParameters> result(new QemuParameters);
     android::ParameterList& params = result->params;
@@ -186,8 +188,28 @@ QemuParameters* qemu_parameters_create(const char* argv0,
 
     params.add2("-android-hw", androidHwIniPath);
 
-    for (int n = 0; n < qemu_argc; ++n) {
-        params.add(qemu_argv[n]);
+    for (int n = 0; n < qemuArgc; ++n) {
+        params.add(qemuArgv[n]);
+    }
+
+    // Handling kernel parameters. They are passed to QEMU through the
+    // -append flag.
+    {
+        std::string kernelParams;
+        if (initialKernelParameters) {
+            kernelParams += initialKernelParameters;
+        }
+        for (int n = 0; n < qemuArgc; ++n) {
+            if (!strcmp(qemuArgv[n], "-append") && n + 1 < qemuArgc) {
+                android::base::StringAppendFormat(&kernelParams, " %s",
+                                                  qemuArgv[n + 1]);
+                n++;
+            }
+        }
+        if (!kernelParams.empty()) {
+            params.add("-append");
+            params.add(std::move(kernelParams));
+        }
     }
 
     if(VERBOSE_CHECK(init)) {

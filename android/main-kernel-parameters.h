@@ -41,12 +41,19 @@ typedef enum {
 // Return a heap-allocated string containing the kernel parameter.
 // |opts| corresponds to the command-line options after they have been
 // processed by emulator_parseCommonCommandLineOptions().
-// |is_qemu2| is true to indicate that this is called from QEMU2, otherwise
+// |targetArch| is the target architecture (e.g. 'arm64').
+// |kernelSerialPrefix| is the prefix for serial devices in the guest
+// system, which depends on the AVD's architecture and kernel version.
+// |avdKernelParameters| are the optional extra kernel parameters stored
+// in the AVD's kernel.parameters hardware property, if any. They will
+// be appended to the result.
+// |isQemu2| is true to indicate that this is called from QEMU2, otherwise
 // QEMU1 is assumed.
 char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    const char* targetArch,
                                    const char* kernelSerialPrefix,
+                                   const char* avdKernelParameters,
                                    AndroidGlesEmulationMode glesMode,
-                                   bool is_qemu2);
+                                   bool isQemu2);
 
 ANDROID_END_HEADER

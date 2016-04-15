@@ -13,6 +13,8 @@
 
 #include <gtest/gtest.h>
 
+#include <stdlib.h>
+
 TEST(String, str_ends_withFailure) {
     EXPECT_FALSE(str_ends_with("", "suffix"));
     EXPECT_FALSE(str_ends_with("fix", "suffix"));
@@ -25,4 +27,33 @@ TEST(String, str_ends_withSuccess) {
     EXPECT_TRUE(str_ends_with("abc", "abc"));
     EXPECT_TRUE(str_ends_with("abc", "c"));
     EXPECT_TRUE(str_ends_with("0123", "23"));
+}
+
+TEST(String, str_reset) {
+    char* str = strdup("Foo Bar");
+    const char kText[] = "Hello World";
+    str_reset(&str, kText);
+    EXPECT_NE(kText, str);
+    EXPECT_STREQ(kText, str);
+    ::free(str);
+}
+
+TEST(String, str_reset_withNULL) {
+    char* str = strdup("Foo Bar");
+    str_reset(&str, NULL);
+    EXPECT_FALSE(str);
+}
+
+TEST(String, str_reset_nocopy) {
+    char* str = strdup("Foo Bar");
+    char* text = strdup("Hello World");
+    str_reset_nocopy(&str, text);
+    EXPECT_EQ(text, str);
+    ::free(text);
+}
+
+TEST(String, str_reset_null) {
+    char* str = strdup("Hello World");
+    str_reset_null(&str);
+    EXPECT_FALSE(str);
 }
