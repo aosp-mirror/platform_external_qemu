@@ -97,7 +97,8 @@ void LocationPage::on_loc_GpxKmlButton_clicked()
 void LocationPage::on_loc_pathTable_cellChanged(int row, int col)
 {
     // If the cell's contents are bad, turn the cell red
-    bool cellOK = validateCell(mUi->loc_pathTable, row, col);
+    QString outErrorMessage;
+    bool cellOK = validateCell(mUi->loc_pathTable, row, col, &outErrorMessage);
     QColor normalColor =
         getSelectedTheme() == SETTINGS_THEME_LIGHT ? Qt::black : Qt::white;
     QColor newColor = (cellOK ? normalColor : Qt::red);
@@ -181,39 +182,69 @@ void LocationPage::on_loc_playbackSpeed_currentIndexChanged(int index) {
     settings.setValue(Ui::Settings::LOCATION_PLAYBACK_SPEED, index);
 }
 
-bool LocationPage::validateCell(QTableWidget *table, int row, int col)
-{
-
+bool LocationPage::validateCell(QTableWidget* table,
+                                int row,
+                                int col,
+                                QString* outErrorMessage) {
     QTableWidgetItem *theItem;
     double cellValue;
-    bool cellOK;
+    bool cellOK = true;
 
     // The entry is a number. Check its range.
     switch (col) {
         case 0: // Delay
             theItem = table->item(row, col);
             cellValue = theItem->text().toDouble(&cellOK); // Sets 'cellOK'
-            if (!cellOK) return false; // Not a number
+            if (!cellOK) {
+                *outErrorMessage = tr("Delay must be a number.");
+                return false;
+            }
             // Except for the first entry, the delay must be >= 1 millisecond
-            cellOK &= (row == 0  ||  cellValue >= 0.001);
+            if (row != 0 && cellValue < 0.001) {
+                *outErrorMessage =
+                        tr("Delay must be >= 1 millisecond with the exception "
+                           "of the first entry.");
+                cellOK = false;
+            }
             break;
         case 1: // Latitude
             theItem = table->item(row, col);
             cellValue = theItem->text().toDouble(&cellOK); // Sets 'cellOK'
-            if (!cellOK) return false; // Not a number
-            cellOK &= (cellValue >=   -90.0  &&  cellValue <=    90.0);
+            if (!cellOK) {
+                *outErrorMessage = tr("Latitude must be a number.");
+                return false;
+            }
+            if (cellValue < -90.0 || cellValue > 90.0) {
+                *outErrorMessage =
+                        tr("Latitude must be between -90 and 90, inclusive.");
+                cellOK = false;
+            }
             break;
         case 2: // Longitude
             theItem = table->item(row, col);
             cellValue = theItem->text().toDouble(&cellOK); // Sets 'cellOK'
-            if (!cellOK) return false; // Not a number
-            cellOK = (cellValue >=  -180.0  &&  cellValue <=   180.0);
+            if (!cellOK) {
+                *outErrorMessage = tr("Longitude must be a number.");
+                return false;
+            }
+            if (cellValue < -180.0 || cellValue > 180.0) {
+                *outErrorMessage = tr(
+                        "Longitude must be between -180 and 180, inclusive.");
+                cellOK = false;
+            }
             break;
         case 3: // Elevation
             theItem = table->item(row, col);
             cellValue = theItem->text().toDouble(&cellOK); // Sets 'cellOK'
-            if (!cellOK) return false; // Not a number
-            cellOK = (cellValue >= -1000.0  &&  cellValue <= 10000.0);
+            if (!cellOK) {
+                *outErrorMessage = tr("Elevation must be a number.");
+                return false;
+            }
+            if (cellValue < -1000.0 || cellValue > 10000.0) {
+                *outErrorMessage = tr(
+                        "Altitude must be between -1000 and 10000, inclusive.");
+                cellOK = false;
+            }
             break;
         default:
             // Name, description: Anything is OK
@@ -275,12 +306,15 @@ void LocationPage::locationPlaybackStart()
     }
 
     // Validate all the values in the table.
+    QString outErrorMessage;
     for (int row = 0; row < mUi->loc_pathTable->rowCount(); row++) {
         for (int col = 0; col < mUi->loc_pathTable->columnCount(); col++) {
-            if (!validateCell(mUi->loc_pathTable, row, col)) {
-                showErrorDialog(tr("The table contains errors.<br>No locations were sent."),
+            if (!validateCell(mUi->loc_pathTable, row, col, &outErrorMessage)) {
+                mUi->loc_pathTable->setCurrentCell(row, col);
+                showErrorDialog(tr("The table contains errors.No locations "
+                                   "were sent.<br/>Error: %1")
+                                        .arg(outErrorMessage),
                                 tr("GPS Playback"));
-                mUi->loc_pathTable->scrollToItem(mUi->loc_pathTable->item(row, 0));
                 return;
             }
         }

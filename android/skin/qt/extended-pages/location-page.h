@@ -74,7 +74,10 @@ private:
         bool ignore_error);
 
     void populateTable(GpsFixArray *fixes);
-    static bool validateCell(QTableWidget *table, int row, int col);
+    static bool validateCell(QTableWidget* table,
+                             int row,
+                             int col,
+                             QString* outErrorMessage);
 
     std::unique_ptr<Ui::LocationPage> mUi;
     const QAndroidLocationAgent* mLocationAgent;
