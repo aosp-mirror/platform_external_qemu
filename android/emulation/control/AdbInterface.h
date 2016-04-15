@@ -17,6 +17,19 @@
 #include <string>
 #include <vector>
 
+// A convenience class used to check the presence of the host 'adb'
+// command-line client executable, and whether its version is fresh
+// enough to be used by the emulator. Usage is the following:
+//
+//  1/ Create AdbInterface() instance.
+//
+//  2/ Call detectedAdbPath() to retrieve the path of the 'adb'
+//     executable, which will be empty if it could not be found.
+//
+//  3/ Call isAdbVersionCurrent(), which returns true if said executable
+//     is of a sufficiently recent version.
+//
+// TODO: Rename this to something less ambiguous, e.g. HostAdbLocator
 namespace android {
 namespace emulation {
 

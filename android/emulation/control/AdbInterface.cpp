@@ -30,9 +30,9 @@ namespace emulation {
 
 // Helper function, checks if the version of adb in the given SDK is
 // fresh enough.
-bool checkAdbVersion(const std::string& sdk_root_directory) {
-    static const int MIN_ADB_VERSION_MAJOR = 23;
-    static const int MIN_ADB_VERSION_MINOR = 1;
+static bool checkAdbVersion(const std::string& sdk_root_directory) {
+    static const int kMinAdbVersionMajor = 23;
+    static const int kMinAdbVersionMinor = 1;
 
     if (sdk_root_directory.empty()) {
         return false;
@@ -55,9 +55,9 @@ bool checkAdbVersion(const std::string& sdk_root_directory) {
                        " Pkg.Revision = %d.%d",
                        &version_major,
                        &version_minor) >= 1) {
-                return  version_major > MIN_ADB_VERSION_MAJOR ||
-                       (version_major == MIN_ADB_VERSION_MAJOR &&
-                        version_minor >= MIN_ADB_VERSION_MINOR);
+                return  version_major > kMinAdbVersionMajor ||
+                       (version_major == kMinAdbVersionMajor &&
+                        version_minor >= kMinAdbVersionMinor);
             }
         }
     }
