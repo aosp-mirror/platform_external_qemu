@@ -86,7 +86,11 @@ protected:
             thisPtr->mInFlight = false;
             return;
         }
-        thisPtr->mTimer->startRelative(thisPtr->mTaskIntervalMs);
+        // It is possible that the client code in |mFunction| calls |stop|, so
+        // we must double check before reposting the task.
+        if (thisPtr->mInFlight) {
+            thisPtr->mTimer->startRelative(thisPtr->mTaskIntervalMs);
+        }
     }
 
 private:

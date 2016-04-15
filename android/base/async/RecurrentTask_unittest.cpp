@@ -19,9 +19,12 @@
 
 #include <gtest/gtest.h>
 
+#include <memory>
+
 using android::base::Looper;
 using android::base::RecurrentTask;
 using android::base::ThreadLooper;
+using std::unique_ptr;
 
 class CountUpToN {
 public:
@@ -104,4 +107,35 @@ TEST(RecurrentTaskTest, deleteStartedObject) {
     // If |RecurrentTask| does not gracefully handle being deleted while active,
     // this will blow up.
     looper->runWithTimeoutMs(500);
+}
+
+namespace internal {
+bool stopAndReturn(RecurrentTask** task, int* count) {
+    (*task)->stop();
+    // Let's not overflow and succeed flakily.
+    if (*count < 10) {
+        ++(*count);
+    }
+    return true;
+}
+}
+
+TEST(RecurrentTaskTest, stopFromCallback) {
+    Looper* looper = ThreadLooper::get();
+    int count = 0;
+
+    unique_ptr<RecurrentTask*> ptr(new RecurrentTask*);
+    auto rawptr = ptr.get();
+    auto countptr = &count;
+    RecurrentTask task(looper,
+                       [rawptr, countptr]() {
+                           return internal::stopAndReturn(rawptr, countptr);
+                       },
+                       0);
+    *ptr = &task;
+
+    task.start();
+    EXPECT_TRUE(task.inFlight());
+    looper->runWithTimeoutMs(50);
+    EXPECT_EQ(1, count);
 }
