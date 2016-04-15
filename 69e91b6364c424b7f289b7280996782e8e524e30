@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "680e702a_77b9d0ec",
+        "filename": "android/utils/string.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-15T08:47:19Z",
+      "side": 1,
+      "message": "Fixed, thanks.",
+      "parentUuid": "8bd1de8e_3a8c14f9",
+      "range": {
+        "startLine": 50,
+        "startChar": 23,
+        "endLine": 50,
+        "endChar": 32
+      },
+      "revId": "69e91b6364c424b7f289b7280996782e8e524e30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bd1de8e_7a8e8cf1",
         "filename": "android/utils/string_unittest.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-14T17:39:14Z",
       "side": 1,
       "message": "Please add a test for source string NULL.",
+      "range": {
+        "startLine": 32,
+        "startChar": 13,
+        "endLine": 32,
+        "endChar": 22
+      },
+      "revId": "69e91b6364c424b7f289b7280996782e8e524e30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b79a672_b9205be4",
+        "filename": "android/utils/string_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-15T08:47:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bd1de8e_7a8e8cf1",
       "range": {
         "startLine": 32,
         "startChar": 13,
