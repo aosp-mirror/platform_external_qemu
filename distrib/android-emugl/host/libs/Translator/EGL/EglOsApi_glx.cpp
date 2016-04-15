@@ -195,9 +195,15 @@ void pixelFormatToConfig(EGLNativeDisplayType dpy,
     EXIT_IF_FALSE(glXGetFBConfigAttrib(
             dpy, frmt, GLX_SAMPLES, &info.samples_per_pixel));
 
-    //Filter out configs that do not support RGBA
+    // Filter out configs that do not support RGBA
     EXIT_IF_FALSE(glXGetFBConfigAttrib(dpy, frmt, GLX_RENDER_TYPE, &tmp));
     if (!(tmp & GLX_RGBA_BIT)) {
+        return;
+    }
+    // Filter out configs that do not support depthstencil buffers
+    // For dEQP-GLES2.functional.depth_stencil_clear
+    // and dEQP-GLES2.usecases.*
+    if (info.depth_size == 0 || info.stencil_size == 0) {
         return;
     }
 
