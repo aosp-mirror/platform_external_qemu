@@ -22,6 +22,30 @@
       "revId": "3b9f1ec5bdd3b33cdac0590c9b65c72c9d26d8fd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b5f1ef9_589d7d8f",
+        "filename": "android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1729,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-15T07:57:11Z",
+      "side": 1,
+      "message": "Isn\u0027t that necessary, since the parameter is promoted to an int, which can represent all unsigned values of uint8_t correctly?",
+      "parentUuid": "8bd1de8e_1ad95013",
+      "range": {
+        "startLine": 1729,
+        "startChar": 47,
+        "endLine": 1729,
+        "endChar": 48
+      },
+      "revId": "3b9f1ec5bdd3b33cdac0590c9b65c72c9d26d8fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
