@@ -203,8 +203,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .window_x = emulator->win_x,
         .window_y = emulator->win_y,
 
-        .keyboard_charmap = emulator->opts->charmap,
-        .keyboard_raw_keys = emulator->opts->raw_keys != 0,
+        .keyboard_charmap = emulator->opts->charmap
     };
 
     write_window_name(my_ui_params.window_name,

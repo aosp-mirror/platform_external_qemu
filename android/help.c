@@ -1097,20 +1097,7 @@ static void
 help_raw_keys(stralloc_t*  out)
 {
     PRINTF(
-    "  this option is deprecated because one can do the same using Ctrl-K\n"
-    "  at runtime (this keypress toggles between unicode/raw keyboard modes)\n\n"
-
-    "  by default, the emulator tries to reverse-map the characters you type on\n"
-    "  your keyboard to device-specific key presses whenever possible. this is\n"
-    "  done to make the emulator usable with a non-QWERTY keyboard.\n\n"
-
-    "  however, this also means that single keypresses like Shift or Alt are not\n"
-    "  passed to the emulated device. the '-raw-keys' option disables the reverse\n"
-    "  mapping. it should only be used when using a QWERTY keyboard on your machine\n"
-
-    "  (should only be useful to Android system hackers, e.g. when implementing a\n"
-    "  new input method).\n\n"
-    );
+    "  the '-raw-keys' option is obsolete and will be ignored\n\n" );
 }
 
 static void

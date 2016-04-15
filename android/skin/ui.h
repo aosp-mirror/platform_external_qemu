@@ -74,7 +74,6 @@ typedef struct SkinUIParams {
     bool enable_trackball;
 
     const char* keyboard_charmap;
-    bool keyboard_raw_keys;
 
 } SkinUIParams;
 
