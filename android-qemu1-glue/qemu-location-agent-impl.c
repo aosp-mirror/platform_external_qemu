@@ -24,6 +24,7 @@ static bool location_gpsIsSupported() {
 static const QAndroidLocationAgent sQAndroidLocationAgent = {
         .gpsIsSupported = location_gpsIsSupported,
         .gpsCmd = android_gps_send_location,
+        .gpsLoc = android_gps_get_location,
         .gpsSendNmea = android_gps_send_nmea};
 const QAndroidLocationAgent* const gQAndroidLocationAgent =
         &sQAndroidLocationAgent;

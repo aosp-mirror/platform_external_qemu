@@ -33,3 +33,20 @@ extern void  android_gps_send_nmea( const char*  sentence );
 extern void  android_gps_send_location(double latitude, double longitude,
                                        double metersElevation, int nSatellites,
                                        const struct timeval *time);
+
+////////////////////////////////////////////////////////////
+//
+// android_gps_get_location
+//
+// Get the devices' current GPS location.
+//
+// Outputs:
+//    Return value:     1 on success, 0 if failed
+//
+//    Valid only if the return is 1:
+//    *latitude:        Degrees
+//    *longitude:       Degrees
+//    *metersElevation: Meters above sea level
+//    *nSatellites:     Number of satellites used
+extern int android_gps_get_location(double* latitude, double* longitude,
+                                    double* metersElevation, int* nSatellites);

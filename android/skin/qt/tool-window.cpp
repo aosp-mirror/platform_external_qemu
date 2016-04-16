@@ -28,6 +28,7 @@
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/extended-pages/location-page.h"
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/stylesheet.h"
@@ -172,6 +173,17 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 }
 
 ToolWindow::~ToolWindow() {
+}
+
+void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
+    mUiEmuAgent = agPtr;
+
+    // Send the initial location to the device
+    // (it may already have this)
+    double lat, lon, alt;
+    const QAndroidLocationAgent* locAgent = (agPtr ? agPtr->location : nullptr);
+    LocationPage::getDeviceLocation(locAgent, &lat, &lon, &alt);
+    LocationPage::sendLocationToDevice(locAgent, lat, lon, alt);
 }
 
 void ToolWindow::checkAdbVersionAndWarn() {
