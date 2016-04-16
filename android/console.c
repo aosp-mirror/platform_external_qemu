@@ -2291,8 +2291,8 @@ do_geo_fix( ControlClient  client, char*  args )
     memset(&tVal, 0, sizeof(tVal));
     gettimeofday(&tVal, NULL);
 
-    client->global->location_agent->gpsCmd(params[GEO_LAT], params[GEO_LONG],
-                                           altitude, n_satellites, &tVal);
+    client->global->location_agent->gpsSendLoc(params[GEO_LAT], params[GEO_LONG],
+                                               altitude, n_satellites, &tVal);
     return 0;
 }
 

@@ -71,7 +71,7 @@ public:
     void raiseMainWindow();
     void setLastExtendedWindowPane(ExtendedWindowPane pane);
 
-    void setToolEmuAgent(const UiEmuAgent* agPtr) { mUiEmuAgent = agPtr; }
+    void setToolEmuAgent(const UiEmuAgent* agPtr);
     const UiEmuAgent* getUiEmuAgent() const { return mUiEmuAgent; }
 
     QString getAdbFullPath(QStringList *args);

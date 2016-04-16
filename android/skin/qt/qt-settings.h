@@ -49,10 +49,13 @@ const int CRASHREPORT_COMBOBOX_ALWAYS = 0;
 const int CRASHREPORT_COMBOBOX_NEVER = 1;
 const int CRASHREPORT_COMBOBOX_ASK = 2;
 
-const QString LOCATION_LATITUDE("loc/latitude");
-const QString LOCATION_LONGITUDE("loc/longitude");
-const QString LOCATION_ALTITUDE("loc/altitude");
+const QString LOCATION_ENTERED_ALTITUDE("loc/altitude");
+const QString LOCATION_ENTERED_LATITUDE("loc/latitude");
+const QString LOCATION_ENTERED_LONGITUDE("loc/longitude");
 const QString LOCATION_PLAYBACK_FILE("loc/playback_file_path");
 const QString LOCATION_PLAYBACK_SPEED("loc/playback_speed");
+const QString LOCATION_RECENT_ALTITUDE("loc/recent_altitude");
+const QString LOCATION_RECENT_LATITUDE("loc/recent_latitude");
+const QString LOCATION_RECENT_LONGITUDE("loc/recent_longitude");
 }
 }

@@ -134,3 +134,12 @@ android_gps_send_location(double latitude, double longitude,
     // Free it
     stralloc_reset(msgStr);
 }
+
+int
+android_gps_get_location(double* outLatitude, double* outLongitude,
+                         double* outMetersElevation, int* outNSatellites)
+{
+    // TODO: This should use 'adb shell dumpsys location' and parse the result.
+    //       It must ignore parameters the caller does not want (null pointers).
+    return 0;
+}
