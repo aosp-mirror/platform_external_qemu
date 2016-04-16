@@ -16,6 +16,7 @@
 
 #include "android/base/ArraySize.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
@@ -133,22 +134,22 @@ Version extractAndroidStudioVersion(const char* const dirName) {
 }
 
 std::string latestAndroidStudioDir(const std::string& scanPath) {
-    std::string latest_path;
-
     if (scanPath.empty()) {
-        return latest_path;
+        return {};
     }
 
-    DirScanner* scanner = dirScanner_new(scanPath.c_str());
-    if (scanner == NULL) {
-        return latest_path;
+    const auto scanner = android::base::makeCustomScopedPtr(
+            dirScanner_new(scanPath.c_str()), dirScanner_free);
+    if (!scanner) {
+        return {};
     }
 
+    std::string latest_path;
     System* system = System::get();
     Version latest_version(0, 0, 0);
 
     for (;;) {
-        const char* full_path = dirScanner_nextFull(scanner);
+        const char* full_path = dirScanner_nextFull(scanner.get());
         if (full_path == NULL) {
             // End of enumeration.
             break;
