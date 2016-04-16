@@ -31,6 +31,15 @@ public:
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
     void requestStopLoadingGeoData() { mGeoDataLoadingStopRequested = true; }
 
+    static void getDeviceLocation(const QAndroidLocationAgent* locAgent,
+                                  double* pOutLatitude,
+                                  double* pOutLongitude,
+                                  double* pOutAltitude);
+    static void sendLocationToDevice(const QAndroidLocationAgent* locAgent,
+                                     double latitude,
+                                     double longitude,
+                                     double altitude);
+
 signals:
     void geoDataLoadingFinished();
 
@@ -38,10 +47,7 @@ private slots:
     void on_loc_GpxKmlButton_clicked();
     void on_loc_pathTable_cellChanged(int row, int col);
     void on_loc_playStopButton_clicked();
-    void on_loc_decimalModeSwitch_clicked();
-    void on_loc_decimalModeSwitch_toggled(bool checked);
-    void on_loc_sexagesimalModeSwitch_clicked();
-    void on_loc_sexagesimalModeSwitch_toggled(bool checked);
+    void on_loc_modeSwitch_currentIndexChanged(int index);
     void on_loc_sendPointButton_clicked();
     void on_loc_longitudeInput_valueChanged(double);
     void on_loc_latitudeInput_valueChanged(double);
@@ -78,6 +84,8 @@ private:
                              int row,
                              int col,
                              QString* outErrorMessage);
+    void updateDisplayedLocation(double lat, double lon, double alt);
+
 
     std::unique_ptr<Ui::LocationPage> mUi;
     const QAndroidLocationAgent* mLocationAgent;
