@@ -16,6 +16,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -300,6 +301,7 @@ get_zoneinfo_timezone( void )
     {
         const char*  tz = getenv( "TZ" );
 
+        bool owns_tz = false;
         android_timezone_init = 1;
 
         if ( tz != NULL && !check_timezone_is_zoneinfo(tz) ) {
@@ -397,6 +399,7 @@ get_zoneinfo_timezone( void )
                 scan->path_root = bufprint( scan->path, scan->path_end, "%s", tzdir );
 
                 tz = scan_timezone_dir( scan, scan->path_root, 0 );
+                owns_tz = true;
             }
 
         Exit:
@@ -407,10 +410,14 @@ get_zoneinfo_timezone( void )
 
             if (tz == NULL)
                 return NULL;
-
-            snprintf(android_timezone0, sizeof(android_timezone0), "%s", tz);
-            android_timezone = android_timezone0;
         }
+
+        snprintf(android_timezone0, sizeof(android_timezone0), "%s", tz);
+        android_timezone = android_timezone0;
+        if (owns_tz) {
+            free(tz);
+        }
+
         D( "found timezone %s\n", android_timezone );
     }
     return android_timezone;

@@ -106,6 +106,7 @@ auserConfig_new( AvdInfo*  info )
         if (!inAndroidBuild) {
             derror("Weird: No content path for this AVD: %s", parentPath);
             auserConfig_free(uc);
+            free(parentPath);
             return NULL;
         }
         DD("creating missing directory: %s", parentPath);
@@ -113,9 +114,11 @@ auserConfig_new( AvdInfo*  info )
             derror("Using empty user-config, can't create %s: %s",
                    parentPath, strerror(errno));
             auserConfig_free(uc);
+            free(parentPath);
             return NULL;
         }
     }
+    free(parentPath);
 
     if (path_exists(uc->iniPath)) {
         DD("reading user-config file");
