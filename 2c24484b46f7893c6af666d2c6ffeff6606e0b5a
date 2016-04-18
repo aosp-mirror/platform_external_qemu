@@ -303,6 +303,30 @@
     },
     {
       "key": {
+        "uuid": "08fc147c_922dbcd9",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-18T23:05:21Z",
+      "side": 1,
+      "message": "How is this any more dangerous that stashing away shared_ptrs in callbacks that get called on the event loop / ParallelTask?\n\nIn this case, locking our object across \"the remaining files to push\" turned out to be cleaner than stashing it into a ParallelTask that is pushing just the current file. I had actually done something similar to ScreenCapturer earlier, but that turned out to be more complex.",
+      "parentUuid": "4881acc7_93dd73ff",
+      "range": {
+        "startLine": 115,
+        "startChar": 0,
+        "endLine": 115,
+        "endChar": 17
+      },
+      "revId": "2c24484b46f7893c6af666d2c6ffeff6606e0b5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4881acc7_930ed31a",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 6
