@@ -25,6 +25,53 @@
     },
     {
       "key": {
+        "uuid": "4881acc7_8553ec11",
+        "filename": "android/skin/qt/extended-pages/finger-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-18T17:54:10Z",
+      "side": 1,
+      "message": "http://doc.qt.io/qt-5/i18n-source-translation.html\n\u003eWhen Qt\u0027s translation tool, lupdate, is used to process a set of source files, the text wrapped in tr() calls is stored in a section of the translation file that corresponds to its translation context.\n\nThis means it would capture separate strings in tr() as a completely unrelated things, and the translator later would need to find out that the strings are somehow connected.\nUsing string formatting and having it as a single tr()-ed string fixes it\nAlso, lupdate tool can only capture string literals in the tr() call, so it anything\u0027s not a literal, it won\u0027t appear in the translation file at all",
+      "parentUuid": "4881acc7_6a869f0f",
+      "range": {
+        "startLine": 46,
+        "startChar": 8,
+        "endLine": 53,
+        "endChar": 66
+      },
+      "revId": "391828d9e06084320463998ebf5727bf994b63f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4881acc7_25ea1853",
+        "filename": "android/skin/qt/extended-pages/finger-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-18T17:54:10Z",
+      "side": 1,
+      "message": "we have a \u0027apiVersionString()\u0027 function in help-page.cpp\nCould you please move that into some separate file in andoid/base and add this function there? Otherwise I foresee a version of it in every single ui-related file :)",
+      "range": {
+        "startLine": 82,
+        "startChar": 20,
+        "endLine": 82,
+        "endChar": 30
+      },
+      "revId": "391828d9e06084320463998ebf5727bf994b63f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4881acc7_4a95e32a",
         "filename": "android/skin/qt/extended-pages/finger-page.cpp",
         "patchSetId": 1
