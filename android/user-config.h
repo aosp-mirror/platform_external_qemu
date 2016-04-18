@@ -13,7 +13,10 @@
 #pragma once
 
 #include "android/avd/info.h"
+#include "android/utils/compiler.h"
 #include <stdint.h>
+
+ANDROID_BEGIN_HEADER
 
 /* a structure used to model the user-configuration settings
  *
@@ -46,3 +49,5 @@ void           auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y )
  * has changed.
  */
 void           auserConfig_save( AUserConfig*  uconfig );
+
+ANDROID_END_HEADER

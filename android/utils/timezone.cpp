@@ -12,13 +12,18 @@
 #include "android/utils/timezone.h"
 
 #include "android/android.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include <memory>
+#include <string>
 
 #define  DEBUG  1
 
@@ -300,6 +305,9 @@ get_zoneinfo_timezone( void )
     {
         const char*  tz = getenv( "TZ" );
 
+        // if we ever allocate into tz, this object will take care of it.
+        android::base::ScopedCPtr<const char> tzDeleter;
+
         android_timezone_init = 1;
 
         if ( tz != NULL && !check_timezone_is_zoneinfo(tz) ) {
@@ -309,11 +317,10 @@ get_zoneinfo_timezone( void )
         }
 
         if (tz == NULL) {
-            char*        tzdir     = NULL;
-            int          tzdirlen  = 0;
-            char*        localtime = NULL;
             int          len;
             char         temp[ PATH_MAX ];
+            std::string  tzdir;
+            std::string  localtime;
 
             /* determine the correct timezone directory */
             {
@@ -338,46 +345,43 @@ get_zoneinfo_timezone( void )
             }
 
             /* remove trailing slash, if any */
-            len = strlen(tzdir);
-            if (len > 0 && tzdir[len-1] == '/') {
-                tzdir[len-1] = 0;
-                len         -= 1;
+            if (!tzdir.empty() && tzdir.back() == '/') {
+                tzdir.pop_back();
             }
-            tzdirlen = len;
-            D( "%s: found timezone dir as %s\n", __FUNCTION__, tzdir );
+            D( "%s: found timezone dir as %s\n", __FUNCTION__, tzdir.c_str() );
 
             /* try to find the localtime file */
-            localtime = LOCALTIME_FILE1;
-            if ( access( localtime, R_OK ) != 0 ) {
+            const char* localtimePtr = LOCALTIME_FILE1;
+            if ( access( localtimePtr, R_OK ) != 0 ) {
                 char  *p = temp, *end = p + sizeof(temp);
 
-                p = bufprint( p, end, "%s/%s", tzdir, "localtime" );
+                p = bufprint( p, end, "%s/%s", tzdir.c_str(), "localtime" );
                 if (p >= end || access( temp, R_OK ) != 0 ) {
                     fprintf( stderr, "### WARNING: could not find %s or %s. unable to determine host timezone\n",
                                      LOCALTIME_FILE1, temp );
                     goto Exit;
                 }
-                localtime = temp;
+                localtimePtr = temp;
             }
-            localtime = strdup(localtime);
-            D( "%s: found localtime file as %s\n", __FUNCTION__, localtime );
+            localtime = localtimePtr;
+            D( "%s: found localtime file as %s\n", __FUNCTION__, localtime.c_str() );
 
 #if 1
             /* if the localtime file is a link, make a quick check */
-            len = readlink( localtime, temp, sizeof(temp)-1 );
-            if (len >= 0 && len > tzdirlen + 2) {
+            len = readlink( localtime.c_str(), temp, sizeof(temp)-1 );
+            if (len >= 0 && len > static_cast<int>(tzdir.size()) + 2) {
                 temp[len] = 0;
 
                 /* verify that the link points to tzdir/<something> where <something> is a valid zoneinfo name */
-                if ( !memcmp( temp, tzdir, tzdirlen ) && temp[tzdirlen] == '/' ) {
-                    if ( check_timezone_is_zoneinfo( temp + tzdirlen + 1 ) ) {
+                if ( !memcmp( temp, tzdir.c_str(), tzdir.size() ) && temp[tzdir.size()] == '/' ) {
+                    if ( check_timezone_is_zoneinfo( temp + tzdir.size() + 1 ) ) {
                         /* we have it ! */
-                        tz = temp + tzdirlen + 1;
-                        D( "%s: found zoneinfo timezone %s from %s symlink\n", __FUNCTION__, tz, localtime );
+                        tz = temp + tzdir.size() + 1;
+                        D( "%s: found zoneinfo timezone %s from %s symlink\n", __FUNCTION__, tz, localtime.c_str() );
                         goto Exit;
                     }
                     D( "%s: %s link points to non-zoneinfo filename %s, comparing contents\n",
-                       __FUNCTION__, localtime, temp );
+                       __FUNCTION__, localtime.c_str(), temp );
                 }
             }
 #endif
@@ -386,31 +390,28 @@ get_zoneinfo_timezone( void )
             {
                 ScanDataRec  scan[1];
 
-                if ( stat( localtime, &scan->localtime_st ) < 0 ) {
+                if ( stat( localtime.c_str(), &scan->localtime_st ) < 0 ) {
                     fprintf( stderr, "### WARNING: can't access '%s', unable to determine host timezone\n",
-                             localtime );
+                             localtime.c_str() );
                     goto Exit;
                 }
 
-                scan->localtime = localtime;
+                scan->localtime = localtime.c_str();
                 scan->path_end  = scan->path + sizeof(scan->path);
-                scan->path_root = bufprint( scan->path, scan->path_end, "%s", tzdir );
+                scan->path_root = bufprint( scan->path, scan->path_end, "%s", tzdir.c_str() );
 
                 tz = scan_timezone_dir( scan, scan->path_root, 0 );
+                tzDeleter.reset(tz);
             }
 
         Exit:
-            if (tzdir)
-                free(tzdir);
-            if (localtime)
-                free(localtime);
-
             if (tz == NULL)
                 return NULL;
-
-            snprintf(android_timezone0, sizeof(android_timezone0), "%s", tz);
-            android_timezone = android_timezone0;
         }
+
+        snprintf(android_timezone0, sizeof(android_timezone0), "%s", tz);
+        android_timezone = android_timezone0;
+
         D( "found timezone %s\n", android_timezone );
     }
     return android_timezone;

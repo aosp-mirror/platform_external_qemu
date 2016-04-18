@@ -129,7 +129,7 @@ LOCAL_SRC_FILES := \
     android/utils/system.c \
     android/utils/system_wrapper.cpp \
     android/utils/tempfile.c \
-    android/utils/timezone.c \
+    android/utils/timezone.cpp \
     android/utils/uri.cpp \
     android/utils/utf8_utils.cpp \
     android/utils/vector.c \
@@ -299,7 +299,7 @@ LOCAL_SRC_FILES := \
     android/uncompress.cpp \
     android/update-check/UpdateChecker.cpp \
     android/update-check/VersionExtractor.cpp \
-    android/user-config.c \
+    android/user-config.cpp \
     android/wear-agent/android_wear_agent.cpp \
     android/wear-agent/WearAgent.cpp \
     android/wear-agent/PairUpWearPhone.cpp \
@@ -546,7 +546,6 @@ LOCAL_SRC_FILES += \
     android/emulator-window.c \
     android/main-common-ui.c \
     android/resource.c \
-    android/user-config.c \
 
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)

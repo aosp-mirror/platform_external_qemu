@@ -306,9 +306,9 @@ ABool androidMetrics_readPath(AndroidMetrics* androidMetrics,
 #undef METRICS_STRING
 #undef METRICS_DURATION
 #define METRICS_INT(n, s, d) am->n = iniFile_getInteger(ini, s, d);
-#define METRICS_STRING(n, s, d)                                         \
-    if (iniFile_hasKey(ini, s)) {                                       \
-        ANDROID_METRICS_STRASSIGN(am->n, iniFile_getString(ini, s, d)); \
+#define METRICS_STRING(n, s, d) \
+    if (iniFile_hasKey(ini, s)) { \
+        AFREE(am->n); am->n = iniFile_getString(ini, s, d); \
     }
 #define METRICS_DURATION(n, s, d) am->n = iniFile_getInt64(ini, s, d);
 
