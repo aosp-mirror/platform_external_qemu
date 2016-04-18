@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4881acc7_209be33e",
+        "filename": "android/emulation/control/FilePusher.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-18T20:08:39Z",
+      "side": 1,
+      "message": "Can you make it so that it\u0027s possible to enqueue multiple items at once? Maybe pass in a vector of pairs or a couple of iterators?",
+      "range": {
+        "startLine": 51,
+        "startChar": 4,
+        "endLine": 51,
+        "endChar": 78
+      },
+      "revId": "2c24484b46f7893c6af666d2c6ffeff6606e0b5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4881acc7_c0c0effc",
+        "filename": "android/emulation/control/FilePusher.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-18T20:08:39Z",
+      "side": 1,
+      "message": "I\u0027m not sure this has to be a pass-by-value argument. Since commandLine is captured within the lambda I think it should be ok to pass-by-reference.",
+      "range": {
+        "startLine": 102,
+        "startChar": 34,
+        "endLine": 102,
+        "endChar": 45
+      },
+      "revId": "2c24484b46f7893c6af666d2c6ffeff6606e0b5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4881acc7_308ed8b3",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-18T20:08:39Z",
+      "side": 1,
+      "message": "Can you expand the comment a bit to explain why we\u0027re returning a shared_ptr here? You kind of mention it further down in the file but having it up here is easier for someone looking at this for the first time.",
+      "range": {
+        "startLine": 48,
+        "startChar": 11,
+        "endLine": 48,
+        "endChar": 14
+      },
+      "revId": "2c24484b46f7893c6af666d2c6ffeff6606e0b5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4881acc7_f014e068",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-18T20:08:39Z",
+      "side": 1,
+      "message": "Why typedef struct? Just \"struct SubscriptionInfo {\" should be enough here",
+      "range": {
+        "startLine": 80,
+        "startChar": 4,
+        "endLine": 80,
+        "endChar": 18
+      },
+      "revId": "2c24484b46f7893c6af666d2c6ffeff6606e0b5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4881acc7_90e56c86",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-18T20:08:39Z",
+      "side": 1,
+      "message": "Even though it\u0027s pass-by-value, make it const since the function doesn\u0027t need to change it.",
+      "range": {
+        "startLine": 96,
+        "startChar": 21,
+        "endLine": 96,
+        "endChar": 57
+      },
+      "revId": "2c24484b46f7893c6af666d2c6ffeff6606e0b5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4881acc7_50411418",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-18T20:08:39Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this pointer be available via android::base::System::get()? why are we storing it?",
+      "range": {
+        "startLine": 101,
+        "startChar": 4,
+        "endLine": 101,
+        "endChar": 31
+      },
+      "revId": "2c24484b46f7893c6af666d2c6ffeff6606e0b5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
