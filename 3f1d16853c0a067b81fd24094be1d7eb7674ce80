@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "4881acc7_ea7aaff5",
+        "filename": "android/user-config.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-18T18:39:23Z",
+      "side": 1,
+      "message": "I see from another review that \"ScopeCPtr\" seems to be (at least approximately) the class I had in mind.  Is the reason for not using that here a balance between the advantages that brings vs. the future hassle of a merge with a future version QEMU?",
+      "parentUuid": "4881acc7_4a416318",
+      "range": {
+        "startLine": 109,
+        "startChar": 12,
+        "endLine": 109,
+        "endChar": 29
+      },
+      "revId": "3f1d16853c0a067b81fd24094be1d7eb7674ce80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4881acc7_4a5ac3fc",
         "filename": "android/utils/timezone.c",
         "patchSetId": 1
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "well, here I think it isn\u0027t that much simpler - tz might contain either a static array address (which we shouldn\u0027t free), or a heap-allocated pointer (which has to be freed).\nSo it\u0027s pretty much the same amount of ifs and additional variables, and it would also need .c -\u003e .cpp conversion. I\u0027ll give it a try though",
       "parentUuid": "4881acc7_4a5ac3fc",
+      "range": {
+        "startLine": 304,
+        "startChar": 8,
+        "endLine": 304,
+        "endChar": 29
+      },
+      "revId": "3f1d16853c0a067b81fd24094be1d7eb7674ce80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4881acc7_102e3cd4",
+        "filename": "android/utils/timezone.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-18T18:39:23Z",
+      "side": 1,
+      "message": "I agree on the .c --\u003e .cpp conversion.  I don\u0027t know how well our tools handle such renames when it comes time to merge with qemu -- but if the answer is \"pretty well\", then I think that we ought to be fairly aggressive on such conversions.  If we\u0027re not, then there might be n such mods to a file over time, where none of them individually justify the conversion, but where the sum of them certainly do.\n\nWRT whether it\u0027s actually simpler: I think it is objectively simpler to use ScopedCPtr.  A declaration of that here, replacing \"owns_tz\", a \"reset\" of that where you set owns_tz to true, and you get to eliminate the \"if (owns_tz) free(...)\".  Better, I don\u0027t have to reason about whether that code is reached -- especially given that there\u0027s a label above that\u0027s the target of a goto, and a \"return\".",
+      "parentUuid": "4881acc7_2aaf47c4",
       "range": {
         "startLine": 304,
         "startChar": 8,
