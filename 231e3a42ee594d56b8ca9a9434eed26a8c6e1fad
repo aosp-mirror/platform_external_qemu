@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4881acc7_bf6f1bc5",
+        "filename": "android/base/memory/ScopedPtr.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-18T16:10:16Z",
+      "side": 1,
+      "message": "Could you use std::bind here instead?",
+      "range": {
+        "startLine": 58,
+        "startChar": 18,
+        "endLine": 58,
+        "endChar": 70
+      },
+      "revId": "231e3a42ee594d56b8ca9a9434eed26a8c6e1fad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
