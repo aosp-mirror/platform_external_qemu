@@ -113,6 +113,10 @@ Looper* looper_getForThread(void);
  * have a Looper implementation based on a foreign main loop. */
 void looper_setForThread(Looper* looper);
 
+// This version of the set function passes the looper ownership - so it is
+// deallocated on thread exit.
+void looper_setForThreadToOwn(Looper* looper);
+
 /* Create a new generic looper that can be used in any context / thread. */
 Looper*  looper_newGeneric(void);
 

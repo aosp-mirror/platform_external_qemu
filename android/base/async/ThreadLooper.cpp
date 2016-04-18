@@ -43,9 +43,9 @@ public:
         return ThreadStoreBase::get() != NULL;
     }
 
-    void setLooper(Looper* looper) {
+    void setLooper(Looper* looper, bool own) {
         CHECK(!get());
-        State* state = new State(looper, false);
+        State* state = new State(looper, own);
         set(state);
     }
 
@@ -71,14 +71,14 @@ Looper* ThreadLooper::get() {
 }
 
 // static
-void ThreadLooper::setLooper(Looper* looper) {
+void ThreadLooper::setLooper(Looper* looper, bool own) {
     // Sanity checks
     CHECK(looper) << "NULL looper!";
 
     CHECK(!sStore.hasInstance() || !sStore->hasLooper())
             << "ThreadLooper::get() already called for current thread!";
 
-    sStore->setLooper(looper);
+    sStore->setLooper(looper, own);
 }
 
 }  // namespace base

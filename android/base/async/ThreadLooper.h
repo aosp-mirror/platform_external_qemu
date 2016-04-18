@@ -34,8 +34,8 @@ public:
     // NULL, and will be returned by future calls to get().
     //
     // Note that |looper| will be stored in thread-local storage but will
-    // not be destroyed when the thread exits.
-    static void setLooper(Looper* looper);
+    // not be destroyed when the thread exits (unless |own| is true).
+    static void setLooper(Looper* looper, bool own = false);
 };
 
 }  // namespace base

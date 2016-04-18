@@ -11,6 +11,7 @@
 
 #include "android/base/containers/PodVector.h"
 #include "android/base/Log.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/kernel/kernel_utils.h"
 #include "android/kernel/kernel_utils_testing.h"
@@ -176,6 +177,9 @@ bool android_pathProbeKernelVersionString(const char* kernelPath,
         KERNEL_ERROR << "Could not open kernel file!";
         return false;
     }
+
+    const auto kernelFileDeleter =
+            android::base::makeCustomScopedPtr(&kernelFileData, fileData_done);
 
     return android_imageProbeKernelVersionString(kernelFileData.data,
                                                  kernelFileData.size,

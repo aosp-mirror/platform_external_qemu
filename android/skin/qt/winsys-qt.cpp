@@ -129,7 +129,7 @@ extern void skin_winsys_enter_main_loop(bool no_window, int argc, char** argv) {
     // signal will not be emitted from QProcess.
     enableSigChild();
 
-    android::base::ThreadLooper::setLooper(android::qt::createLooper());
+    android::base::ThreadLooper::setLooper(android::qt::createLooper(), true);
 
     GlobalState* g = globalState();
     g->argc = argc;
