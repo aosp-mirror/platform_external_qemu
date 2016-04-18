@@ -327,6 +327,30 @@
     },
     {
       "key": {
+        "uuid": "08fc147c_f28360f5",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-18T23:06:07Z",
+      "side": 1,
+      "message": "Also, the unittests verify that the object dies at the end of every test.",
+      "parentUuid": "08fc147c_922dbcd9",
+      "range": {
+        "startLine": 115,
+        "startChar": 0,
+        "endLine": 115,
+        "endChar": 17
+      },
+      "revId": "2c24484b46f7893c6af666d2c6ffeff6606e0b5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4881acc7_930ed31a",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 6
