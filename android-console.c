@@ -1387,7 +1387,8 @@ enum {
     CMD_GSM_DATA = 7,
     CMD_GSM_VOICE = 8,
     CMD_GSM_STATUS = 9,
-    CMD_GSM_SIGNAL = 10
+    CMD_GSM_SIGNAL = 10,
+    CMD_GSM_SIGNAL_PROFILE = 11
 };
 
 static const char* gsm_help[] = {
@@ -1409,7 +1410,8 @@ static const char* gsm_help[] = {
         "   gsm data               modify data connection state\n"
         "   gsm voice              modify voice connection state\n"
         "   gsm status             display GSM state\n"
-        "   gsm signal             sets the rssi and ber\n",
+        "   gsm signal             sets the rssi and ber\n"
+        "   gsm signal-profile     sets the signal strength\n",
         /* CMD_GSM_LIST */
         "list current phone calls\n"
         "'gsm list' lists all inbound and outbound calls and their state\n",
@@ -1449,6 +1451,11 @@ static const char* gsm_help[] = {
         "rate on next (15s) update.\n"
         "rssi range is 0..31 and 99 for unknown\n"
         "ber range is 0..7 percent and 99 for unknown\n",
+        /* CMD_GSM_SIGNAL_PROFILE */
+        "sets the signal strength\n"
+        "'gsm signal-profile <strength>' changes the reported signal strength "
+        "on next (15s) update.\n"
+        "strength range is 0..4\n",
 };
 
 void android_console_gsm(Monitor* mon, const QDict* qdict) {
@@ -1477,7 +1484,9 @@ void android_console_gsm(Monitor* mon, const QDict* qdict) {
             cmd = CMD_GSM_VOICE;
         } else if (strstr(helptext, "status")) {
             cmd = CMD_GSM_STATUS;
-        } else if (strstr(helptext, "signal")) {
+        } else if (strstr(helptext, "signal-profile")) {
+            cmd = CMD_GSM_SIGNAL_PROFILE;
+        } else if (strstr(helptext, "signal")) { // Must be after "signal-profile"
             cmd = CMD_GSM_SIGNAL;
         }
     }
@@ -1855,6 +1864,29 @@ void android_console_gsm_signal(Monitor* mon, const QDict* qdict) {
     }
 
     amodem_set_signal_strength(android_modem, rssi, last_ber);
+
+    monitor_printf(mon, "OK\n");
+}
+
+void android_console_gsm_signal_profile(Monitor* mon, const QDict* qdict) {
+    char* args = (char*)qdict_get_try_str(qdict, "arg");
+    char* end;
+    char*   p = args;
+    if (!p)
+        p = "";
+    int  val = strtol( p, &end, 10 );
+
+    if (end == p || (end != NULL && *end != '\0')) {
+        monitor_printf( mon, "KO: argument '%s' is not a number\n", p );
+        return;
+    }
+
+    if (val < 0 || val > 4) {
+        monitor_printf(mon, "KO: invalid signal strength - must be 0..4\n");
+        return;
+    }
+
+    amodem_set_signal_strength_profile( android_modem, val );
 
     monitor_printf(mon, "OK\n");
 }
