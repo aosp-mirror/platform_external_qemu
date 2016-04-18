@@ -23,7 +23,7 @@ extern "C" {
 #include "qemu/main-loop.h"
 }  // extern "C"
 
-extern "C" void qemu2_android_console_setup(AndroidConsoleAgents* agents);
+extern "C" void qemu2_android_console_setup(const AndroidConsoleAgents* agents);
 
 bool qemu_android_emulation_setup() {
     static const AndroidConsoleAgents consoleAgents = {
@@ -39,5 +39,6 @@ bool qemu_android_emulation_setup() {
     android_vm_set_lock_funcs(qemu_mutex_lock_iothread,
                               qemu_mutex_unlock_iothread);
 
+    qemu2_android_console_setup(&consoleAgents);
     return android_emulation_setup(&consoleAgents);
 }
