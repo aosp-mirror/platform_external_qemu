@@ -18,15 +18,15 @@
 #include "android/shaper.h"
 #include "android/telephony/modem_driver.h"
 
-static void cellular_setSignalStrength(int zeroTo31)
+static void cellular_setSignalStrength(int zeroTo4)
 {
     // (See do_gsm_signal() in android-qemu1-glue/console.c)
 
     if (android_modem) {
-        if (zeroTo31 <  0) zeroTo31 =  0;
-        if (zeroTo31 > 31) zeroTo31 = 31;
+        if (zeroTo4 < 0) zeroTo4 =  0;
+        if (zeroTo4 > 4) zeroTo4 =  4;
 
-        amodem_set_signal_strength(android_modem, zeroTo31, 99);
+        amodem_set_signal_strength(android_modem, zeroTo4);
     }
 }
 

@@ -1484,61 +1484,26 @@ do_gsm_accept( ControlClient  client, char*  args )
 static int
 do_gsm_signal( ControlClient  client, char*  args )
 {
-      enum { SIGNAL_RSSI = 0, SIGNAL_BER, NUM_SIGNAL_PARAMS };
-      char*   p = args;
-      int     top_param = -1;
-      int     params[ NUM_SIGNAL_PARAMS ];
+    char* end;
+    char*   p = args;
+    if (!p)
+        p = "";
+    int  val = strtol( p, &end, 10 );
 
-      static  int  last_ber = 99;
+    if (end == p) {
+        control_write( client, "KO: argument '%s' is not a number\r\n", p );
+        return -1;
+    }
 
-      if (!p)
-          p = "";
+    if (val < 0 || val > 4) {
+        control_write( client, "KO: invalid signal strength - must be 0..4\r\n");
+        return -1;
+    }
 
-      /* tokenize */
-      while (*p) {
-          char*   end;
-          int  val = strtol( p, &end, 10 );
+    amodem_set_signal_strength( android_modem, val );
 
-          if (end == p) {
-              control_write( client, "KO: argument '%s' is not a number\n", p );
-              return -1;
-          }
-
-          params[++top_param] = val;
-          if (top_param + 1 == NUM_SIGNAL_PARAMS)
-              break;
-
-          p = end;
-          while (*p && (p[0] == ' ' || p[0] == '\t'))
-              p += 1;
-      }
-
-      /* sanity check */
-      if (top_param < SIGNAL_RSSI) {
-          control_write( client, "KO: not enough arguments: see 'help gsm signal' for details\r\n" );
-          return -1;
-      }
-
-      int rssi = params[SIGNAL_RSSI];
-      if ((rssi < 0 || rssi > 31) && rssi != 99) {
-          control_write( client, "KO: invalid RSSI - must be 0..31 or 99\r\n");
-          return -1;
-      }
-
-      /* check ber is 0..7 or 99 */
-      if (top_param >= SIGNAL_BER) {
-          int ber = params[SIGNAL_BER];
-          if ((ber < 0 || ber > 7) && ber != 99) {
-              control_write( client, "KO: invalid BER - must be 0..7 or 99\r\n");
-              return -1;
-          }
-          last_ber = ber;
-      }
-
-      amodem_set_signal_strength( android_modem, rssi, last_ber );
-
-      return 0;
-  }
+    return 0;
+}
 
 
 #if 0
@@ -1614,10 +1579,9 @@ static const CommandDefRec  gsm_commands[] =
     "'gsm status' displays the current state of the GSM emulation\r\n", NULL,
     do_gsm_status, NULL },
 
-    { "signal", "set sets the rssi and ber",
-    "'gsm signal <rssi> [<ber>]' changes the reported strength and error rate on next (15s) update.\r\n"
-    "rssi range is 0..31 and 99 for unknown\r\n"
-    "ber range is 0..7 percent and 99 for unknown\r\n",
+    { "signal", "set the signal strength",
+    "'gsm signal <quality>' changes the reported strength on next (15s) update.\r\n"
+    "quality range is 0..5\r\n",
     NULL, do_gsm_signal, NULL },
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
