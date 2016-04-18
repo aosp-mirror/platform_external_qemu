@@ -90,10 +90,10 @@ typedef enum {
  *  opts - Options passed to the main()
  *  avd - AVD info containig paths for the hardware configuration.
  *  accel_mode - indicates acceleration mode based on command line
- *  status - a string about cpu acceleration status
+ *  status - a string about cpu acceleration status, must be not null.
  * Return: if cpu acceleration is available
  */
 bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
-                           CpuAccelMode* accel_mode, char* accel_status);
+                           CpuAccelMode* accel_mode, char** accel_status);
 
 ANDROID_END_HEADER

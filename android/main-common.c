@@ -34,6 +34,7 @@
 #include "android/utils/x86_cpuid.h"
 #include "android/version.h"
 
+#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -1080,7 +1081,9 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
 
 
 bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
-                           CpuAccelMode* accel_mode, char* accel_status) {
+                           CpuAccelMode* accel_mode, char** accel_status) {
+    assert(accel_status != NULL);
+
     /* Handle CPU acceleration options. */
     if (opts->no_accel) {
         if (opts->accel) {
@@ -1109,7 +1112,7 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
         }
     }
 
-    AndroidCpuAcceleration accel_capability = androidCpuAcceleration_getStatus(&accel_status);
+    AndroidCpuAcceleration accel_capability = androidCpuAcceleration_getStatus(accel_status);
     bool accel_ok = (accel_capability == ANDROID_CPU_ACCELERATION_READY);
     // Dump CPU acceleration status.
     if (VERBOSE_CHECK(init)) {
@@ -1122,7 +1125,7 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
             }
         }
         dprint("CPU Acceleration: %s", accel_str);
-        dprint("CPU Acceleration status: %s", accel_status);
+        dprint("CPU Acceleration status: %s", *accel_status);
     }
 
     // Special case: x86/x86_64 emulation currently requires hardware
@@ -1135,7 +1138,7 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                 derror("%s emulation currently requires hardware acceleration!\n"
                     "Please ensure %s is properly installed and usable.\n"
                     "CPU acceleration status: %s",
-                    abi, kAccelerator, accel_status);
+                    abi, kAccelerator, *accel_status);
                 exit(1);
             }
             else if (*accel_mode == ACCEL_OFF) {
