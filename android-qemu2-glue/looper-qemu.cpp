@@ -18,6 +18,6 @@
 typedef ::Looper CLooper;
 
 void qemu_looper_setForThread() {
-    looper_setForThread(
+    looper_setForThreadToOwn(
             reinterpret_cast<CLooper*>(::android::qemu::createLooper()));
 }
