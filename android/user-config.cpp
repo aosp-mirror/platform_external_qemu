@@ -11,6 +11,8 @@
 */
 #include "android/user-config.h"
 
+#include "android/base/memory/ScopedPtr.h"
+
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -50,21 +52,20 @@ void auserConfig_free( AUserConfig* uconfig) {
     if (uconfig->iniPath) {
         free(uconfig->iniPath);
     }
-    free(uconfig);
+    delete uconfig;
 }
 
 /* Create a new AUserConfig object from a given AvdInfo */
 AUserConfig*
 auserConfig_new( AvdInfo*  info )
 {
-    AUserConfig*  uc;
     char          inAndroidBuild = avdInfo_inAndroidBuild(info);
     char          needUUID = 1;
     char          temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
-    char*         parentPath;
-    CIniFile* ini = NULL;
+    CIniFile*     ini = NULL;
 
-    ANEW0(uc);
+    std::unique_ptr<AUserConfig> uc(new AUserConfig());
+    memset(uc.get(), 0, sizeof(*uc));
 
     /* If we are in the Android build system, store the configuration
      * in ~/.android/emulator-user.ini. otherwise, store it in the file
@@ -83,7 +84,6 @@ auserConfig_new( AvdInfo*  info )
         p = bufprint_temp_file(temp, end, USER_CONFIG_FILE);
         if (p >= end) {
             derror("Weird: Cannot create temporary user-config file?");
-            auserConfig_free(uc);
             return NULL;
         }
         dwarning("Weird: Content path too long, using temporary user-config.");
@@ -92,28 +92,27 @@ auserConfig_new( AvdInfo*  info )
     uc->iniPath = ASTRDUP(temp);
     DD("looking user-config in: %s", uc->iniPath);
 
-
-    /* ensure that the parent directory exists */
-    parentPath = path_parent(uc->iniPath, 1);
-    if (parentPath == NULL) {
-        derror("Weird: Can't find parent of user-config file: %s",
-               uc->iniPath);
-        auserConfig_free(uc);
-        return NULL;
-    }
-
-    if (!path_exists(parentPath)) {
-        if (!inAndroidBuild) {
-            derror("Weird: No content path for this AVD: %s", parentPath);
-            auserConfig_free(uc);
+    {
+        /* ensure that the parent directory exists */
+        android::base::ScopedCPtr<char> parentPath(path_parent(uc->iniPath, 1));
+        if (parentPath == NULL) {
+            derror("Weird: Can't find parent of user-config file: %s",
+                   uc->iniPath);
             return NULL;
         }
-        DD("creating missing directory: %s", parentPath);
-        if (path_mkdir_if_needed(parentPath, 0755) < 0) {
-            derror("Using empty user-config, can't create %s: %s",
-                   parentPath, strerror(errno));
-            auserConfig_free(uc);
-            return NULL;
+
+        if (!path_exists(parentPath.get())) {
+            if (!inAndroidBuild) {
+                derror("Weird: No content path for this AVD: %s",
+                       parentPath.get());
+                return NULL;
+            }
+            DD("creating missing directory: %s", parentPath.get());
+            if (path_mkdir_if_needed(parentPath.get(), 0755) < 0) {
+                derror("Using empty user-config, can't create %s: %s",
+                       parentPath.get(), strerror(errno));
+                return NULL;
+            }
         }
     }
 
@@ -159,7 +158,7 @@ auserConfig_new( AvdInfo*  info )
         DD("    Generated UUID = %lld", uc->uuid);
     }
 
-    return uc;
+    return uc.release();
 }
 
 

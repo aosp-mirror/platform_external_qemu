@@ -69,6 +69,8 @@ user_config_done( void )
     skin_winsys_get_window_pos(&win_x, &win_y);
     auserConfig_setWindowPos(userConfig, win_x, win_y);
     auserConfig_save(userConfig);
+    auserConfig_free(userConfig);
+    userConfig = NULL;
 }
 
 void
