@@ -303,6 +303,16 @@ path_getAvdTargetArch( const char* avdName )
 }
 
 char*
+path_getAvdSnapshotPresent( const char* avdName )
+{
+    char*  avdPath = _getAvdContentPath(avdName);
+    char*  snapshotPresent = _getAvdConfigValue(avdPath, "snapshot.present", "no");
+    AFREE(avdPath);
+
+    return snapshotPresent;
+}
+
+char*
 path_getAvdSystemPath(const char* avdName,
                       const char* sdkRoot) {
     char* result = NULL;

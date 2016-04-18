@@ -344,6 +344,15 @@ int main(int argc, char** argv)
         RANCHU_OFF,
     } ranchu = RANCHU_AUTODETECT;
 
+    {
+        // only qemu1 can handle snapshoting at this moment
+        char* snapShotPresent = path_getAvdSnapshotPresent(avdName);
+        if (0 == strcmp(snapShotPresent, "true")) {
+            ranchu = RANCHU_OFF;
+        }
+        free(snapShotPresent);
+    }
+
     if (engine) {
         if (!strcmp(engine, "auto")) {
             ranchu = RANCHU_AUTODETECT;
