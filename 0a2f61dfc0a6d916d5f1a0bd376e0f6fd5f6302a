@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4881acc7_568b49e1",
+        "filename": "android/skin/qt/extended-pages/finger-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-18T21:18:45Z",
+      "side": 1,
+      "message": "very nit: tr() already returns a QString",
+      "range": {
+        "startLine": 51,
+        "startChar": 25,
+        "endLine": 51,
+        "endChar": 32
+      },
+      "revId": "0a2f61dfc0a6d916d5f1a0bd376e0f6fd5f6302a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
