@@ -232,14 +232,15 @@ static Pipe* pipe_load_state(Stream* file,
     *force_close = 0;
 
     Pipe* pipe = pipe_new0(hwpipe);
+    // Optional service arguments.
+    if (stream_get_byte(file) != 0) {
+        pipe->args = stream_get_string(file);
+    }
     if (!service) {
         // Pipe being opened.
         pipe->opaque = pipeConnector_new(pipe);
     } else {
-        // Optional service arguments.
-        if (stream_get_byte(file) != 0) {
-            pipe->args = stream_get_string(file);
-        }
+        pipe->service = service;
         pipe->funcs = &service->funcs;
     }
 
