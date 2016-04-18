@@ -49,6 +49,54 @@
     },
     {
       "key": {
+        "uuid": "4881acc7_16e9519a",
+        "filename": "android/skin/qt/extended-pages/finger-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-18T21:15:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4881acc7_8553ec11",
+      "range": {
+        "startLine": 46,
+        "startChar": 8,
+        "endLine": 53,
+        "endChar": 66
+      },
+      "revId": "391828d9e06084320463998ebf5727bf994b63f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4881acc7_36e24dbc",
+        "filename": "android/skin/qt/extended-pages/finger-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-18T21:15:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4881acc7_6a869f0f",
+      "range": {
+        "startLine": 46,
+        "startChar": 8,
+        "endLine": 53,
+        "endChar": 66
+      },
+      "revId": "391828d9e06084320463998ebf5727bf994b63f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4881acc7_25ea1853",
         "filename": "android/skin/qt/extended-pages/finger-page.cpp",
         "patchSetId": 1
@@ -72,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "4881acc7_b6f5fd6e",
+        "filename": "android/skin/qt/extended-pages/finger-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-18T21:15:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4881acc7_25ea1853",
+      "range": {
+        "startLine": 82,
+        "startChar": 20,
+        "endLine": 82,
+        "endChar": 30
+      },
+      "revId": "391828d9e06084320463998ebf5727bf994b63f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4881acc7_4a95e32a",
         "filename": "android/skin/qt/extended-pages/finger-page.cpp",
         "patchSetId": 1
@@ -83,6 +155,24 @@
       "writtenOn": "2016-04-18T16:52:24Z",
       "side": 1,
       "message": "Perhaps add a case for API 24 for now and just call it \"N\"?",
+      "revId": "391828d9e06084320463998ebf5727bf994b63f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4881acc7_7601a52b",
+        "filename": "android/skin/qt/extended-pages/finger-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-18T21:15:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4881acc7_4a95e32a",
       "revId": "391828d9e06084320463998ebf5727bf994b63f8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
