@@ -173,6 +173,11 @@ void looper_setForThread(Looper* looper) {
             reinterpret_cast<BaseLooper*>(looper));
 }
 
+void looper_setForThreadToOwn(Looper* looper) {
+    android::base::ThreadLooper::setLooper(
+            reinterpret_cast<BaseLooper*>(looper), true);
+}
+
 CLooper* looper_newGeneric(void) {
     return reinterpret_cast<CLooper*>(
             ::android::base::Looper::create());
