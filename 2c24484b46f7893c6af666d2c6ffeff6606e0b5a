@@ -210,6 +210,30 @@
     },
     {
       "key": {
+        "uuid": "08fc147c_92765cd9",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-18T23:11:04Z",
+      "side": 1,
+      "message": "Re 2): same, see my other comment in the cpp file",
+      "parentUuid": "08fc147c_d2aaa494",
+      "range": {
+        "startLine": 96,
+        "startChar": 21,
+        "endLine": 96,
+        "endChar": 57
+      },
+      "revId": "2c24484b46f7893c6af666d2c6ffeff6606e0b5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4881acc7_50411418",
         "filename": "android/emulation/control/FilePusher.h",
         "patchSetId": 6
@@ -339,6 +363,30 @@
       "side": 1,
       "message": "Also, the unittests verify that the object dies at the end of every test.",
       "parentUuid": "08fc147c_922dbcd9",
+      "range": {
+        "startLine": 115,
+        "startChar": 0,
+        "endLine": 115,
+        "endChar": 17
+      },
+      "revId": "2c24484b46f7893c6af666d2c6ffeff6606e0b5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08fc147c_b2c6f817",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-18T23:11:04Z",
+      "side": 1,
+      "message": "We\u0027re doing something similar in ApkInstaller I believe. If I understood the explanation correctly, this is meant to prevent a situation when the parent object is destroyed but the spawned tasks are still running. I suppose the alternative is to block in dtor waiting for all tasks to finish?",
+      "parentUuid": "4881acc7_93dd73ff",
       "range": {
         "startLine": 115,
         "startChar": 0,
