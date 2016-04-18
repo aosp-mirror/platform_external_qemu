@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4881acc7_4a416318",
+        "filename": "android/user-config.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-18T17:20:42Z",
+      "side": 1,
+      "message": "As per our conversation as you came in this morning: what would you think about converting this file to a .cpp, and making a class kind of like a std::unique_ptr: it takes a T*, either in a constructor, or via \"reset\", and its destructor calls \"free\" on the T* value if non-null.  (And maybe it acts like a smart pointer, too, if you want to get ambitious.)  Then these mods would just be declaring \"parentPath\" to be of that type...",
+      "range": {
+        "startLine": 109,
+        "startChar": 12,
+        "endLine": 109,
+        "endChar": 29
+      },
+      "revId": "3f1d16853c0a067b81fd24094be1d7eb7674ce80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4881acc7_4a5ac3fc",
+        "filename": "android/utils/timezone.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-18T17:20:42Z",
+      "side": 1,
+      "message": "As per the discussion on the possible \"AutoFree\" class -- this would be another case where such a thing would be simpler, and more reliable.",
+      "range": {
+        "startLine": 304,
+        "startChar": 8,
+        "endLine": 304,
+        "endChar": 29
+      },
+      "revId": "3f1d16853c0a067b81fd24094be1d7eb7674ce80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
