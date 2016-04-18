@@ -399,6 +399,30 @@
     },
     {
       "key": {
+        "uuid": "08fc147c_b24ef83e",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-18T23:17:41Z",
+      "side": 1,
+      "message": "Yeah.\nEvery object that does some work on a separate thread and then waits for it needs to be willing to outlive the client that created the object.\n\nIn most cases, the client is some object on the qemu/qt thread. When that object dies, our worker thread may still be outstanding, and will try to access data from the object when it finishes (even android::base::Thread implementation does that).\n\nOur solution right now is to \n(1) force use of std::shared_ptr with these objects, \n(2) increment reference count internally when we know that the object shouldn\u0027t be deleted, decrement when it\u0027s safe to delete it with a clear comment saying \"may invalidate |this|\" :) \n(3) Write unittests that make sure that the object is clearly cleaned up at the end of all the tested scenarios.\n\n\nWe can\u0027t block in the dtor because there are many such objects (and counting) and not all of them are destroyed only at exit. We\u0027d be blocking in the middle of execution arbitrarily.",
+      "parentUuid": "08fc147c_b2c6f817",
+      "range": {
+        "startLine": 115,
+        "startChar": 0,
+        "endLine": 115,
+        "endChar": 17
+      },
+      "revId": "2c24484b46f7893c6af666d2c6ffeff6606e0b5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4881acc7_930ed31a",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 6
