@@ -12,6 +12,7 @@
 #include "android/base/containers/StringVector.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/StringFormat.h"
 
 #include "android/android.h"
@@ -637,7 +638,7 @@ extern "C" int main(int argc, char **argv) {
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     char* accel_status = NULL;
     CpuAccelMode accel_mode = ACCEL_AUTO;
-    const bool accel_ok = handleCpuAcceleration(opts, avd, &accel_mode, accel_status);
+    const bool accel_ok = handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
 
     if (accel_mode == ACCEL_OFF) {  // 'accel off' is specified'
         args[n++] = "-cpu";
@@ -865,8 +866,9 @@ extern "C" int main(int argc, char **argv) {
      */
     {
         const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
-        CIniFile*    hwIni        = iniFile_newEmpty(NULL);
-        androidHwConfig_write(hw, hwIni);
+        const auto hwIni = android::base::makeCustomScopedPtr(
+                         iniFile_newEmpty(NULL), iniFile_free);
+        androidHwConfig_write(hw, hwIni.get());
 
         if (filelock_create(coreHwIniPath) == NULL) {
             /* The AVD is already in use, we still support this as an
@@ -880,7 +882,7 @@ extern "C" int main(int argc, char **argv) {
          * anything, but will significantly simplify comparing the current HW
          * config with the one that has been associated with a snapshot (in case
          * VM starts from a snapshot for this instance of emulator). */
-        if (iniFile_saveToFileClean(hwIni, coreHwIniPath) < 0) {
+        if (iniFile_saveToFileClean(hwIni.get(), coreHwIniPath) < 0) {
             derror("Could not write hardware.ini to %s: %s", coreHwIniPath, strerror(errno));
             exit(2);
         }
