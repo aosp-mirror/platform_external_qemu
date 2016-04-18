@@ -175,6 +175,9 @@ void EmulatorContainer::closeEvent(QCloseEvent* event) {
 
 void EmulatorContainer::focusInEvent(QFocusEvent* event) {
     mEmulatorWindow->toolWindow()->raise();
+    if (mEmulatorWindow->isInZoomMode()) {
+        mEmulatorWindow->showZoomIfNotUserHidden();
+    }
 }
 
 void EmulatorContainer::keyPressEvent(QKeyEvent* event) {

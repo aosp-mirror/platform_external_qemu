@@ -80,6 +80,10 @@ EmulatorOverlay::~EmulatorOverlay() {}
 void EmulatorOverlay::focusOutEvent(QFocusEvent* event) {
     if (mMode == OverlayMode::Multitouch) {
         hide();
+        mContainer->setFocus();
+        mContainer->activateWindow();
+    } else if (mMode == OverlayMode::Zoom) {
+        hide();
     }
     QFrame::focusOutEvent(event);
 }
@@ -89,12 +93,21 @@ void EmulatorOverlay::hideEvent(QHideEvent* event) {
 }
 
 void EmulatorOverlay::keyPressEvent(QKeyEvent* event) {
-    mEmulatorWindow->keyPressEvent(event);
+    if (event->key() == Qt::Key_Control && mMode == OverlayMode::Zoom) {
+        hide();
+        mMode = OverlayMode::UserHiddenZoom;
+        mContainer->setFocus();
+        mContainer->activateWindow();
+    } else {
+        mEmulatorWindow->keyPressEvent(event);
+    }
 }
 
 void EmulatorOverlay::keyReleaseEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_Control && mMode == OverlayMode::Multitouch) {
         hide();
+        mContainer->setFocus();
+        mContainer->activateWindow();
     } else {
         mEmulatorWindow->keyReleaseEvent(event);
     }
@@ -257,6 +270,8 @@ void EmulatorOverlay::showAsFlash() {
 void EmulatorOverlay::hideForFlash() {
     if (mMode == OverlayMode::Flash) {
         hide();
+        mContainer->setFocus();
+        mContainer->activateWindow();
     }
 }
 
@@ -266,7 +281,6 @@ void EmulatorOverlay::showForMultitouch() {
 
     if (!geometry().contains(QCursor::pos()))
         return;
-
     // Show and render the frame once before the mode is changed.
     // This ensures that the first frame of the overlay that is rendered *does
     // not* show the center point, as this has adverse effects on OSX (it seems
@@ -296,12 +310,22 @@ void EmulatorOverlay::showForZoom() {
     show();
 }
 
+void EmulatorOverlay::showForZoomUserHidden() {
+    if (mMode != OverlayMode::UserHiddenZoom)
+        return;
+
+    mMode = OverlayMode::Hidden;
+    showForZoom();
+}
+
+bool EmulatorOverlay::wasZoomUserHidden() const {
+    return mMode == OverlayMode::UserHiddenZoom;
+}
+
 void EmulatorOverlay::hide() {
     QFrame::hide();
     setMouseTracking(false);
     mMode = OverlayMode::Hidden;
-    mContainer->setFocus();
-    mContainer->activateWindow();
 
     if (mReleaseOnClose) {
         mEmulatorWindow->handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft,

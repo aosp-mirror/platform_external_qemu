@@ -132,6 +132,7 @@ signals:
 public:
     bool isInZoomMode() const;
     ToolWindow* toolWindow() const;
+    void showZoomIfNotUserHidden();
     QSize containerSize() const;
 
     void doResize(const QSize& size,

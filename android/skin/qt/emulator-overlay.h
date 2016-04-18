@@ -46,6 +46,8 @@ public:
     void showForMultitouch();
 
     void showForZoom();
+    void showForZoomUserHidden();
+    bool wasZoomUserHidden() const;
 
 public slots:
     void hide();
@@ -101,5 +103,6 @@ private:
         Flash,
         Multitouch,
         Zoom,
+        UserHiddenZoom,
     } mMode;
 };
