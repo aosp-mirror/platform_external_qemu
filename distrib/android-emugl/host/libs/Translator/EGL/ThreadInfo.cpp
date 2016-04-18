@@ -26,9 +26,12 @@
 #define TRACE_THREADINFO 0
 
 #if TRACE_THREADINFO
+#include <atomic>
 #define LOG_THREADINFO(x...) fprintf(stderr, x)
+using InstanceCounter = std::atomic<size_t>;
 #else
 #define LOG_THREADINFO(x...)
+using InstanceCounter = size_t;
 #endif
 
 namespace {
@@ -37,20 +40,25 @@ class ThreadInfoStore : public ::emugl::ThreadStore {
 public:
     ThreadInfoStore() : ::emugl::ThreadStore(&destructor) {}
 
-    size_t getInstanceCount() const { return mNumInstances; }
+    void set(void* value) {
+        emugl::ThreadStore::set(value);
+        ++mNumInstances;
+    }
+
+    static size_t getInstanceCount() { return mNumInstances; }
 
 private:
     static void destructor(void* value) {
         LOG_THREADINFO("%s: EFL %p (%d instances)\n", __FUNCTION__,
-                       value, mNumInstances);
+                       value, (int)mNumInstances);
         delete static_cast<ThreadInfo*>(value);
         mNumInstances--;
     }
 
-    static size_t mNumInstances;
+    static InstanceCounter mNumInstances;
 };
 
-size_t ThreadInfoStore::mNumInstances = 0;
+InstanceCounter ThreadInfoStore::mNumInstances { 0 };
 
 }  // namespace
 
