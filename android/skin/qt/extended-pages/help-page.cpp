@@ -29,34 +29,6 @@ const char FILE_BUG_URL[] =
 const char SEND_FEEDBACK_URL[] =
     "https://code.google.com/p/android/issues/entry?template=Emulator%20Feature%20Request";
 
-static QString apiVersionString(int apiVersion)
-{
-    // This information was taken from the SDK Manager:
-    // Appearances & Behavior > System Settings > Android SDK > SDK Platforms
-    switch (apiVersion) {
-        case 10: return "2.3.3 (Gingerbread) - API 10 (Rev 2)";
-        case 14: return "4.0 (Ice Cream Sandwich) - API 14 (Rev 4)";
-        case 15: return "4.0.3 (Ice Cream Sandwich) - API 15 (Rev 5)";
-        case 16: return "4.1 (Jelly Bean) - API 16 (Rev 5)";
-        case 17: return "4.2 (Jelly Bean) - API 17 (Rev 3)";
-        case 18: return "4.3 (Jelly Bean) - API 18 (Rev 3)";
-        case 19: return "4.4 (KitKat) - API 19 (Rev 4)";
-        case 20: return "4.4 (KitKat Wear) - API 20 (Rev 2)";
-        case 21: return "5.0 (Lollipop) - API 21 (Rev 2)";
-        case 22: return "5.1 (Lollipop) - API 22 (Rev 2)";
-        case 23: return "6.0 (Marshmallow) - API 23 (Rev 1)";
-
-        case 24: return "N preview - API 24";
-
-        default:
-            if (apiVersion < 0 || apiVersion > 99) {
-                return qApp->tr("Unknown API version");
-            } else {
-                return "API " + QString::number(apiVersion);
-            }
-    }
-}
-
 HelpPage::HelpPage(QWidget *parent) :
     QWidget(parent),
     mUi(new Ui::HelpPage)
@@ -73,7 +45,9 @@ HelpPage::HelpPage(QWidget *parent) :
     mUi->help_versionBox->setPlainText(verStr);
 
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
-    mUi->help_androidVersionBox->setPlainText(apiVersionString(apiLevel));
+    char versionString[128];
+    avdInfo_getFullApiName(apiLevel, versionString, 128);
+    mUi->help_androidVersionBox->setPlainText(versionString);
 
     // Show the "serial number" that can be used to connect ADB
     // to this device

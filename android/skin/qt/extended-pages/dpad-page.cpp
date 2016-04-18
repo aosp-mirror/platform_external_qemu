@@ -11,6 +11,7 @@
 
 #include "android/skin/qt/extended-pages/dpad-page.h"
 
+#include "android/globals.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -30,27 +31,40 @@ DPadPage::DPadPage(QWidget *parent) :
 {
     mUi->setupUi(this);
 
-    const struct {
-        QPushButton* button;
-        SkinKeyCode key_code;
-    } buttons[] = {
-        {mUi->dpad_leftButton, kKeyCodeDpadLeft},
-        {mUi->dpad_upButton, kKeyCodeDpadUp},
-        {mUi->dpad_rightButton, kKeyCodeDpadRight},
-        {mUi->dpad_downButton, kKeyCodeDpadDown},
-        {mUi->dpad_selectButton, kKeyCodeDpadCenter},
-        {mUi->dpad_backButton, kKeyCodeRewind},
-        {mUi->dpad_playButton, kKeyCodePlay},
-        {mUi->dpad_forwardButton, kKeyCodeFastForward},
-    };
+    if (android_hw->hw_dPad) {
+        // This AVD has a D-Pad. Set up the control.
+        const struct {
+            QPushButton* button;
+            SkinKeyCode key_code;
+        } buttons[] = {
+            {mUi->dpad_leftButton, kKeyCodeDpadLeft},
+            {mUi->dpad_upButton, kKeyCodeDpadUp},
+            {mUi->dpad_rightButton, kKeyCodeDpadRight},
+            {mUi->dpad_downButton, kKeyCodeDpadDown},
+            {mUi->dpad_selectButton, kKeyCodeDpadCenter},
+            {mUi->dpad_backButton, kKeyCodeRewind},
+            {mUi->dpad_playButton, kKeyCodePlay},
+            {mUi->dpad_forwardButton, kKeyCodeFastForward},
+        };
 
-    for (const auto& button_info : buttons) {
-        QPushButton* button = button_info.button;
-        const SkinKeyCode key_code = button_info.key_code;
-        connect(button, &QPushButton::pressed,
-                [button, key_code, this]() { toggleButtonPressed(button, key_code, true); });
-        connect(button, &QPushButton::released,
-                [button, key_code, this]() { toggleButtonPressed(button, key_code, false); });
+        for (const auto& button_info : buttons) {
+            QPushButton* button = button_info.button;
+            const SkinKeyCode key_code = button_info.key_code;
+            connect(button, &QPushButton::pressed,
+                    [button, key_code, this]() { toggleButtonPressed(button, key_code, true); });
+            connect(button, &QPushButton::released,
+                    [button, key_code, this]() { toggleButtonPressed(button, key_code, false); });
+        }
+
+        // Don't show the overlay that obscures the buttons.
+        mUi->dpad_noDPad_mask->hide();
+        // Don't show the text saying that the D-Pad is disabled.
+        mUi->dpad_noDPad_message->hide();
+    } else {
+        // This AVD does not have a D-Pad.
+        // Overlay a mask and text saying that the D-Pad is disabled.
+        mUi->dpad_noDPad_mask->raise();
+        mUi->dpad_noDPad_message->raise();
     }
 
     remaskButtons();
