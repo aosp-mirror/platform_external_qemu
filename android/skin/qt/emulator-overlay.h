@@ -47,6 +47,8 @@ public:
     void showForMultitouch();
 
     void showForZoom();
+    void showForZoomUserHidden();
+    bool wasZoomUserHidden() const;
 
 public slots:
     void hide();
@@ -58,6 +60,8 @@ private slots:
     void slot_animationValueChanged(const QVariant& value);
 
 private:
+    void hideAndFocusContainer();
+
     void generateTouchEvents(QMouseEvent* event);
     void updateMultitouchCenter(const QPoint& pos);
     void updateTouchPoints(QMouseEvent* event);
@@ -102,5 +106,6 @@ private:
         Flash,
         Multitouch,
         Zoom,
+        UserHiddenZoom,
     } mMode;
 };

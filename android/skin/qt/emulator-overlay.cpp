@@ -33,12 +33,9 @@ EmulatorOverlay::EmulatorOverlay(EmulatorQtWindow* window,
     setAttribute(Qt::WA_TranslucentBackground);
 
 // Without the hint below, X11 window systems will prevent this window from
-// being moved
-// into a position where they are not fully visible. It is required so that when
-// the
-// emulator container is moved partially offscreen, this overlay is "permitted"
-// to
-// follow it offscreen.
+// being moved into a position where they are not fully visible. It is required
+// so that when the emulator container is moved partially offscreen, this
+// overlay is "permitted" to follow it offscreen.
 #ifdef __linux__
     setWindowFlags(windowFlags() | Qt::X11BypassWindowManagerHint);
 #endif
@@ -79,6 +76,8 @@ EmulatorOverlay::~EmulatorOverlay() {}
 
 void EmulatorOverlay::focusOutEvent(QFocusEvent* event) {
     if (mMode == OverlayMode::Multitouch) {
+        hideAndFocusContainer();
+    } else if (mMode == OverlayMode::Zoom) {
         hide();
     }
     QFrame::focusOutEvent(event);
@@ -89,12 +88,17 @@ void EmulatorOverlay::hideEvent(QHideEvent* event) {
 }
 
 void EmulatorOverlay::keyPressEvent(QKeyEvent* event) {
-    mEmulatorWindow->keyPressEvent(event);
+    if (event->key() == Qt::Key_Control && mMode == OverlayMode::Zoom) {
+        hideAndFocusContainer();
+        mMode = OverlayMode::UserHiddenZoom;
+    } else {
+        mEmulatorWindow->keyPressEvent(event);
+    }
 }
 
 void EmulatorOverlay::keyReleaseEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_Control && mMode == OverlayMode::Multitouch) {
-        hide();
+        hideAndFocusContainer();
     } else {
         mEmulatorWindow->keyReleaseEvent(event);
     }
@@ -138,8 +142,7 @@ void EmulatorOverlay::mouseReleaseEvent(QMouseEvent* event) {
                 mEmulatorWindow->mapFromGlobal(mapToGlobal(geom.center()));
 
         // Assume that very, very small dragged rectangles were actually just
-        // clicks that
-        // slipped a bit
+        // clicks that slipped a bit
         int areaSq =
                 geom.width() * geom.width() + geom.height() * geom.height();
 
@@ -178,19 +181,17 @@ void EmulatorOverlay::mouseReleaseEvent(QMouseEvent* event) {
 
 void EmulatorOverlay::moveEvent(QMoveEvent* event) {
     if (mMode == OverlayMode::Multitouch) {
-        hide();
+        hideAndFocusContainer();
     }
 }
 
 void EmulatorOverlay::paintEvent(QPaintEvent* e) {
     // A frameless and translucent window (AKA a totally invisible one like
-    // this) will
-    // actually not appear at all on some systems. To circumvent this, we draw a
-    // window-sized quad that is basically invisible, forcing the window to be
-    // drawn.
-    // Because this is not strange enough, the alpha value of said quad *must*
-    // be above a
-    // certain threshold else the window will simply not appear.
+    // this) will actually not appear at all on some systems. To circumvent
+    // this, we draw a window-sized quad that is basically invisible, forcing
+    // the window to be drawn. Because this is not strange enough, the alpha
+    // value of said quad *must* be above a certain threshold else the window
+    // will simply not appear.
     int alpha = mFlashValue * 255;
 
 // On OSX, this threshold is 12, so make alpha 13.
@@ -262,7 +263,7 @@ void EmulatorOverlay::showAsFlash() {
 
 void EmulatorOverlay::hideForFlash() {
     if (mMode == OverlayMode::Flash) {
-        hide();
+        hideAndFocusContainer();
     }
 }
 
@@ -302,12 +303,22 @@ void EmulatorOverlay::showForZoom() {
     show();
 }
 
+void EmulatorOverlay::showForZoomUserHidden() {
+    if (mMode != OverlayMode::UserHiddenZoom)
+        return;
+
+    mMode = OverlayMode::Hidden;
+    showForZoom();
+}
+
+bool EmulatorOverlay::wasZoomUserHidden() const {
+    return mMode == OverlayMode::UserHiddenZoom;
+}
+
 void EmulatorOverlay::hide() {
     QFrame::hide();
     setMouseTracking(false);
     mMode = OverlayMode::Hidden;
-    mContainer->setFocus();
-    mContainer->activateWindow();
 
     if (mReleaseOnClose) {
         mEmulatorWindow->handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft,
@@ -332,6 +343,12 @@ void EmulatorOverlay::slot_flashAnimationValueChanged(const QVariant& value) {
 void EmulatorOverlay::slot_animationValueChanged(const QVariant& value) {
     mLerpValue = value.toDouble() / mTouchPointAnimation.endValue().toDouble();
     repaint();
+}
+
+void EmulatorOverlay::hideAndFocusContainer() {
+    hide();
+    mContainer->setFocus();
+    mContainer->activateWindow();
 }
 
 void EmulatorOverlay::generateTouchEvents(QMouseEvent* event) {
