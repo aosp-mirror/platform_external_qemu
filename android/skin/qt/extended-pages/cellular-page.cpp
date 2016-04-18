@@ -47,3 +47,11 @@ void CellularPage::on_cell_dataStatusBox_currentIndexChanged(int index)
         mCellularAgent->setDataStatus(dStatus);
     }
 }
+
+void CellularPage::on_cell_signalStatusBox_currentIndexChanged(int index)
+{
+    if (mCellularAgent && mCellularAgent->setSignalStrength) {
+        CellularSignal signal = (CellularSignal)index;
+        mCellularAgent->setSignalStrength(signal);
+    }
+}
