@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4881acc7_bf0b9b44",
+        "filename": "android/base/async/ThreadLooper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-18T15:56:47Z",
+      "side": 1,
+      "message": "I don\u0027t understand the choice of default here. I don\u0027t see a use case where we want own \u003d\u003d false.\nAll of the following want own set to true:\n\n- Qemu (after this CL) \n- Qt (TODO)\n- RenderThreads? (Is there a looper associated with that thread?)\n- Unittests tend to just grab the \"default\" looper.",
+      "range": {
+        "startLine": 38,
+        "startChar": 53,
+        "endLine": 38,
+        "endChar": 58
+      },
+      "revId": "6247c15d71b1b30b07cbfd19960d342bc46b362a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
