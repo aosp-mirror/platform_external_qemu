@@ -94,6 +94,30 @@
       "revId": "d23c7b569136f773c3b9675435a56340226f09f3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4881acc7_05dd9c58",
+        "filename": "android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1083,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-18T18:05:05Z",
+      "side": 1,
+      "message": "Got it, thanks :)",
+      "parentUuid": "4881acc7_4aade3bf",
+      "range": {
+        "startLine": 1083,
+        "startChar": 53,
+        "endLine": 1083,
+        "endChar": 72
+      },
+      "revId": "d23c7b569136f773c3b9675435a56340226f09f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
