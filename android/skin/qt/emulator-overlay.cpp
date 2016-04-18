@@ -176,6 +176,12 @@ void EmulatorOverlay::mouseReleaseEvent(QMouseEvent* event) {
     }
 }
 
+void EmulatorOverlay::moveEvent(QMoveEvent* event) {
+    if (mMode == OverlayMode::Multitouch) {
+        hide();
+    }
+}
+
 void EmulatorOverlay::paintEvent(QPaintEvent* e) {
     // A frameless and translucent window (AKA a totally invisible one like
     // this) will
@@ -264,8 +270,7 @@ void EmulatorOverlay::showForMultitouch() {
     if (mMode != OverlayMode::Hidden)
         return;
 
-    QPoint mousePosition = mapFromGlobal(QCursor::pos());
-    if (!QRect(QPoint(), size()).contains(mousePosition))
+    if (!geometry().contains(QCursor::pos()))
         return;
 
     // Show and render the frame once before the mode is changed.
@@ -280,6 +285,7 @@ void EmulatorOverlay::showForMultitouch() {
     setCursor(Qt::ArrowCursor);
     setMouseTracking(true);
 
+    QPoint mousePosition = mapFromGlobal(QCursor::pos());
     mPrimaryTouchPoint = mousePosition;
     mSecondaryTouchPoint = mousePosition;
     mLastMousePos = mousePosition;

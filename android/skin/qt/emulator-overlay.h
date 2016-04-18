@@ -37,6 +37,7 @@ public:
     void mouseMoveEvent(QMouseEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
+    void moveEvent(QMoveEvent* event) override;
     void paintEvent(QPaintEvent* e) override;
     void showEvent(QShowEvent* event) override;
 
