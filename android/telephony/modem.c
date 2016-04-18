@@ -210,6 +210,46 @@ typedef struct {
 
 #define  A_MODEM_SELF_SIZE   3
 
+typedef struct _signal {
+    int gsm_rssi;
+    int gsm_ber;
+    int cdma_dbm;
+    int cdma_ecio;
+    int evdo_dbm;
+    int evdo_ecio;
+    int evdo_snr;
+    int lte_rssi;
+    int lte_rsrp;
+    int lte_rsrq;
+    int lte_rssnr;
+    int lte_cqi;
+    int lte_timing;
+} signal_t;
+
+typedef enum {
+    NONE = 0,
+    POOR = 1,
+    MODERATE = 2,
+    GOOD = 3,
+    GREAT = 4,
+} signal_strength;
+
+/*
+ * Values derived from the ranges used in the SignalStrength
+ * class in the frameworks/base telephony framework.
+ */
+static const signal_t NET_PROFILES[5] = {
+    /* NONE */
+    {0, 7, 105, 160, 110, 160, 0, 105, 140, 3, -200, 0, 500},
+    /* POOR (one bar) */
+    {5, 5, 100, 150, 100, 150, 2, 100, 110,  5, 0, 2, 300},
+    /* MODERATE (2 bars) */
+    {12, 4, 90, 120, 80, 120, 4, 90, 100, 10, 30, 7, 200},
+    /* GOOD (3 bars) */
+    {20, 2, 80, 100, 70, 100, 6, 70, 90, 15, 100, 12, 100},
+    /* GREAT (4 bars) */
+    {30, 0, 70, 80, 60, 80, 7, 60, 80, 20, 200, 15, 50},
+};
 
 typedef struct AModemRec_
 {
@@ -222,8 +262,12 @@ typedef struct AModemRec_
     int           cell_id;
     int           base_port;
 
-    int           rssi;
-    int           ber;
+    /* Signal strength variables */
+    int             use_signal_profile;
+    signal_strength quality;
+    int             rssi;
+    int             ber;
+
 
     /* SMS */
     int           wait_sms;
@@ -455,7 +499,9 @@ amodem_reset( AModem  modem )
     modem->radio_state = A_RADIO_STATE_OFF;
     modem->wait_sms    = 0;
 
-    modem->rssi= 7;    // Two signal strength bars
+    modem->use_signal_profile = 1;
+    modem->quality = MODERATE;    // Two signal strength bars
+    modem->rssi = 7;   // Two signal strength bars
     modem->ber = 99;   // Means 'unknown'
 
     modem->oper_name_index     = amodem_nvram_get_int(modem, NV_OPER_NAME_INDEX, 2);
@@ -920,6 +966,16 @@ amodem_set_signal_strength( AModem modem, int rssi, int ber )
 {
     modem->rssi = rssi;
     modem->ber = ber;
+    modem->use_signal_profile = 0;
+}
+
+void
+amodem_set_signal_strength_profile( AModem modem, int quality )
+{
+    if (quality >= NONE && quality <= GREAT) {
+        modem->quality = quality;
+        modem->use_signal_profile = 1;
+    }
 }
 
 static void
@@ -2190,14 +2246,25 @@ handleSignalStrength( const char*  cmd, AModem  modem )
       android_snapshot_update_time_request = 0;
     }
 
-    // rssi = 0 (<-113dBm) 1 (<-111) 2-30 (<-109--53) 31 (>=-51) 99 (?!)
-    // ber (bit error rate) - always 99 (unknown), apparently.
-    // TODO: return 99 if modem->radio_state==A_RADIO_STATE_OFF, once radio_state is in snapshot.
-    int rssi = modem->rssi;
-    int ber = modem->ber;
-    rssi = (0 > rssi && rssi > 31) ? 99 : rssi ;
-    ber = (0 > ber && ber > 7 ) ? 99 : ber;
-    amodem_add_line( modem, "+CSQ: %i,%i,85,130,90,6,4,25,9,50,68,12\r\n", rssi, ber );
+    if (modem->use_signal_profile) {
+        signal_t current_signal = NET_PROFILES[modem->quality];
+        amodem_add_line(modem, "+CSQ: %i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\r\n",
+                        current_signal.gsm_rssi, current_signal.gsm_ber,
+                        current_signal.cdma_dbm, current_signal.cdma_ecio,
+                        current_signal.evdo_dbm, current_signal.evdo_ecio, current_signal.evdo_snr,
+                        current_signal.lte_rssi, current_signal.lte_rsrp, current_signal.lte_rsrq,
+                        current_signal.lte_rssnr, current_signal.lte_cqi, current_signal.lte_timing);
+    }
+    else {
+        // rssi = 0 (<-113dBm) 1 (<-111) 2-30 (<-109--53) 31 (>=-51) 99 (?!)
+        // ber (bit error rate) - always 99 (unknown), apparently.
+        // TODO: return 99 if modem->radio_state==A_RADIO_STATE_OFF, once radio_state is in snapshot.
+        int rssi = modem->rssi;
+        int ber = modem->ber;
+        rssi = (0 > rssi && rssi > 31) ? 99 : rssi;
+        ber = (0 > ber && ber > 7 ) ? 99 : ber;
+        amodem_add_line(modem, "+CSQ: %i,%i,85,130,90,6,4,25,9,50,68,12\r\n", rssi, ber);
+    }
     return amodem_end_line( modem );
 }
 
