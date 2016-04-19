@@ -59,6 +59,8 @@ public:
         const UiEmuAgent* agentPtr,
         const ShortcutKeyStore<QtUICommand>* shortcuts);
 
+    ~ExtendedWindow();
+
     void showPane(ExtendedWindowPane pane);
 
 private slots:
