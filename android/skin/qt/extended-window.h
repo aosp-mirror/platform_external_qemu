@@ -59,6 +59,8 @@ public:
         const UiEmuAgent* agentPtr,
         const ShortcutKeyStore<QtUICommand>* shortcuts);
 
+    ~ExtendedWindow();
+
     void showPane(ExtendedWindowPane pane);
 
 private slots:
@@ -86,6 +88,9 @@ private:
     ToolWindow* mToolWindow;
     std::map<ExtendedWindowPane, QPushButton*> mPaneButtonMap;
     const ShortcutKeyStore<QtUICommand>* mQtUIShortcuts;
+    // What we should really have here is a unique_ptr<>, but it requires
+    // full class, not just a forward declaration. And that won't work easily
+    // as we would have a circular include.
     Ui::ExtendedControls* mExtendedUi;
     bool mFirstShowEvent = true;
     SizeTweaker mSizeTweaker;

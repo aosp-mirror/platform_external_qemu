@@ -105,6 +105,10 @@ ExtendedWindow::ExtendedWindow(
     }
 }
 
+ExtendedWindow::~ExtendedWindow() {
+    delete mExtendedUi;
+}
+
 void ExtendedWindow::showPane(ExtendedWindowPane pane) {
     show();
     adjustTabs(pane);
