@@ -1432,15 +1432,12 @@ GL_APICALL void  GL_APIENTRY glGetShaderSource(GLuint shader, GLsizei bufsize, G
        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(SHADER,shader);
        SET_ERROR_IF(!objData.Ptr(),GL_INVALID_OPERATION);
        SET_ERROR_IF(objData.Ptr()->getDataType()!=SHADER_DATA,GL_INVALID_OPERATION);
-       const char* src = ((ShaderParser*)objData.Ptr())->getOriginalSrc();
-       int srcLength = 0;
-       if (src) {
-            srcLength = strlen(src);
-       }
+       const std::string& src = ((ShaderParser*)objData.Ptr())->getOriginalSrc();
+       int srcLength = static_cast<int>(src.size());
 
        int returnLength = bufsize<srcLength ? bufsize-1 : srcLength;
        if (returnLength) {
-            strncpy(source,src, returnLength);
+            strncpy(source, src.c_str(), returnLength);
             source[returnLength] = '\0';
        }
 
@@ -1856,6 +1853,7 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
             ShaderParser* sp = (ShaderParser*)objData.Ptr();
             sp->setSrc(ctx->glslVersion(),count,string,length);
             ctx->dispatcher().glShaderSource(globalShaderName,1,sp->parsedLines(),NULL);
+            sp->clear();
     }
 }
 

@@ -24,7 +24,6 @@
 
 ShaderParser::ShaderParser():ObjectData(SHADER_DATA),
                              m_type(0),
-                             m_originalSrc(NULL),
                              m_parsedLines(NULL),
                              m_deleteStatus(false),
                              m_program(0) {
@@ -35,7 +34,6 @@ ShaderParser::ShaderParser():ObjectData(SHADER_DATA),
 
 ShaderParser::ShaderParser(GLenum type):ObjectData(SHADER_DATA),
                                         m_type(type),
-                                        m_originalSrc(NULL),
                                         m_parsedLines(NULL),
                                         m_deleteStatus(false),
                                         m_program(0) {
@@ -53,14 +51,14 @@ void ShaderParser::validateGLESKeywords(const char* src) {
 void ShaderParser::setSrc(const Version& ver,GLsizei count,const GLchar* const* strings,const GLint* length){
     m_src.clear();
     for(int i = 0;i<count;i++){
-        m_src.append(strings[i]);
+        const size_t strLen =
+                (length && length[i] >= 0) ? length[i] : strlen(strings[i]);
+        m_src.append(strings[i], strings[i] + strLen);
     }
-    //store original source
-    if (m_originalSrc)
-        free(m_originalSrc);
-    m_originalSrc = strdup(m_src.c_str());
+    // Store original source as some 'parsing' functions actually modify m_src.
+    m_originalSrc = m_src;
 
-    validateGLESKeywords(m_originalSrc);
+    validateGLESKeywords(m_originalSrc.c_str());
 
     clearParsedSrc();
 
@@ -92,7 +90,13 @@ const GLchar** ShaderParser::parsedLines() {
       return const_cast<const GLchar**> (&m_parsedLines);
 };
 
-const char* ShaderParser::getOriginalSrc(){
+void ShaderParser::clear() {
+    m_parsedLines = nullptr;
+    std::string().swap(m_parsedSrc);
+    std::string().swap(m_src);
+}
+
+const std::string& ShaderParser::getOriginalSrc() const {
     return m_originalSrc;
 }
 
@@ -369,8 +373,5 @@ GLchar* ShaderParser::getInfoLog()
 }
 
 ShaderParser::~ShaderParser(){
-    clearParsedSrc();
-    if (m_originalSrc)
-        free(m_originalSrc);
     delete[] m_infoLog;
 }
