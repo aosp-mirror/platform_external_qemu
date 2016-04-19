@@ -106,12 +106,15 @@ extern ABool androidMetrics_write(const AndroidMetrics* androidMetrics);
 extern ABool androidMetrics_keepAlive(Looper* metrics_looper,
                                       int control_console_port);
 
-/* Helper to easily replace string fields */
-#define ANDROID_METRICS_STRASSIGN(name, val) \
+/* Helpers to easily replace string fields */
+#define ANDROID_METRICS_STRASSIGN_MALLOCED(name, val) \
     do {                                     \
         AFREE(name);                         \
-        name = ASTRDUP(val);                 \
+        name = val;                 \
     } while (0)
+
+#define ANDROID_METRICS_STRASSIGN(name, val) \
+    ANDROID_METRICS_STRASSIGN_MALLOCED((name), ASTRDUP((val)))
 
 /* This is the last function any emulator process should call on a metrics file
  * to indicate that the process exited cleanly.
