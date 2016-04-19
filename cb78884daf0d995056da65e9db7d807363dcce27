@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "68a590c6_c28f441d",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-19T18:06:07Z",
+      "side": 1,
+      "message": "In the other case handled by this CL, you made the field in question a std::unique_ptr.  That seemed cleaner, and we ought to work towards a standard way of accomplishing these cleanup tasks.  Is there a reason for doing these two cases differently?",
+      "range": {
+        "startLine": 109,
+        "startChar": 4,
+        "endLine": 109,
+        "endChar": 23
+      },
+      "revId": "cb78884daf0d995056da65e9db7d807363dcce27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
