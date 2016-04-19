@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "6824b0f3_e7c60267",
+        "filename": "android/base/memory/ScopedPtr.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-19T08:41:35Z",
+      "side": 1,
+      "message": "Ok, let\u0027s use typename consistently then. But please add a minimum amount of documentation for this template. Its usage is not obvious.",
+      "parentUuid": "4881acc7_d0f52495",
+      "range": {
+        "startLine": 29,
+        "startChar": 10,
+        "endLine": 29,
+        "endChar": 15
+      },
+      "revId": "231e3a42ee594d56b8ca9a9434eed26a8c6e1fad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4881acc7_bf6f1bc5",
         "filename": "android/base/memory/ScopedPtr.h",
         "patchSetId": 2
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "What would be the type of the ScopedCustomPtr\u0027s second template argument? I tried both bind and lambda, it looks like a custom functor is the simplest here",
       "parentUuid": "4881acc7_bf6f1bc5",
+      "range": {
+        "startLine": 58,
+        "startChar": 18,
+        "endLine": 58,
+        "endChar": 70
+      },
+      "revId": "231e3a42ee594d56b8ca9a9434eed26a8c6e1fad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4877ec0e_46ec52de",
+        "filename": "android/base/memory/ScopedPtr.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-19T08:41:35Z",
+      "side": 1,
+      "message": "This looks like way over-engineered compared to the intended use cases. We don\u0027t want to use too many instances of this, e.g. certainly not in containers, so why not just write a custom class template here instead that doesn\u0027t piggy back on std::unique_ptr and its requirement to create a deleter instance (really?).",
+      "parentUuid": "4881acc7_aa5ef7ba",
       "range": {
         "startLine": 58,
         "startChar": 18,
