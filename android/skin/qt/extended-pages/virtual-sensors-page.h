@@ -11,8 +11,11 @@
 #pragma once
 
 #include "ui_virtual-sensors-page.h"
+
 #include <QDoubleValidator>
+#include <QTimer>
 #include <QWidget>
+
 #include <memory>
 
 struct QAndroidSensorsAgent;
@@ -31,12 +34,29 @@ private slots:
     void on_lightSensorValueWidget_valueChanged(double value);
     void on_pressureSensorValueWidget_valueChanged(double value);
     void on_humiditySensorValueWidget_valueChanged(double value);
+    void on_accelModeRotate_toggled();
+    void on_accelModeMove_toggled();
+
+    void onMagVectorChanged();
+    void updateLinearAcceleration();
     void onPhoneRotationChanged();
-    void updateSlidersFromAccelWidget(const QQuaternion& quat);
+    void onPhonePositionChanged();
+    void onDragStarted() { mAccelerationTimer.start(); }
+    void onDragStopped() {
+        mLinearAcceleration = QVector3D(0, 0, 0);
+        updateAccelerometerValues();
+        mAccelerationTimer.stop();
+    }
 
 private:
+    void updateAccelerometerValues();
+
     std::unique_ptr<Ui::VirtualSensorsPage> mUi;
     QDoubleValidator mMagFieldValidator;
     const QAndroidSensorsAgent* mSensorsAgent;
+    QVector3D mLinearAcceleration;
+    QVector3D mPrevPosition;
+    QVector3D mCurrentPosition;
+    QTimer mAccelerationTimer;
 };
 
