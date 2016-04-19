@@ -1184,11 +1184,9 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
 {
     if (!mForwardShortcutsToDevice && mInZoomMode) {
         if (event->key() == Qt::Key_Control) {
-            if (type == kEventKeyDown) {
-                mOverlay.hide();
-            } else if (type == kEventKeyUp) {
+            if (type == kEventKeyUp) {
                 raise();
-                mOverlay.showForZoom();
+                mOverlay.showForZoomUserHidden();
             }
         }
     }
@@ -1312,6 +1310,12 @@ bool EmulatorQtWindow::isInZoomMode() const {
 
 ToolWindow* EmulatorQtWindow::toolWindow() const {
     return mToolWindow;
+}
+
+void EmulatorQtWindow::showZoomIfNotUserHidden() {
+    if (!mOverlay.wasZoomUserHidden()) {
+        mOverlay.showForZoom();
+    }
 }
 
 QSize EmulatorQtWindow::containerSize() const {
