@@ -12,6 +12,18 @@
 # See below for their documentation. Moreoever, it defines the following
 # variables that can be used outside of this script:
 #
+#   ANDROID_EMU_BASE_INCLUDES
+#       List of include paths to be used by any module that depends on
+#       AndroidEmuBase
+#
+#   ANDROID_EMU_BASE_STATIC_LIBRARIES
+#       List of static libraries to be used by any executable that depends on
+#       AndroidEmuBase.
+#
+#   ANDROID_EMU_BASE_LDLIBS
+#       List of system libraries to be used by any executable or shared library
+#       that depends on AndroidEmuBase.
+#
 #   ANDROID_EMU_INCLUDES
 #       List of include paths to be used by any module that depends on
 #       AndroidEmu
@@ -33,15 +45,18 @@ _ANDROID_EMU_OLD_LOCAL_PATH := $(LOCAL_PATH)
 _ANDROID_EMU_ROOT := $(call my-dir)
 
 # all includes are like 'android/...', so we need to count on that
-ANDROID_EMU_INCLUDES := $(_ANDROID_EMU_ROOT)
+ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
+ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES)
 
 ###############################################################################
 #
 #  android-emu-base
 #
-#  This is a static library containing all the low-level system interfaces
+#  This is a static library containing the low-level system interfaces
 #  provided by android/base/ and android/utils/. It should only depend on
 #  system headers and libraries, and nothing else (including the C++ STL).
+#  Everything that depends on the host implementation, e.g. Looper, shouldn't
+#  be part of this library, but goes into android-emu
 #
 
 $(call start-emulator-library,android-emu-base)
@@ -54,12 +69,6 @@ LOCAL_C_INCLUDES := \
     $(LIBUUID_INCLUDES) \
 
 LOCAL_SRC_FILES := \
-    android/base/async/AsyncReader.cpp \
-    android/base/async/AsyncSocketServer.cpp \
-    android/base/async/AsyncWriter.cpp \
-    android/base/async/Looper.cpp \
-    android/base/async/ScopedSocketWatch.cpp \
-    android/base/async/ThreadLooper.cpp \
     android/base/containers/PodVector.cpp \
     android/base/containers/PointerSet.cpp \
     android/base/containers/HashUtils.cpp \
@@ -72,7 +81,6 @@ LOCAL_SRC_FILES := \
     android/base/misc/Utf8Utils.cpp \
     android/base/StringFormat.cpp \
     android/base/StringView.cpp \
-    android/base/sockets/SocketDrainer.cpp \
     android/base/sockets/SocketUtils.cpp \
     android/base/sockets/SocketWaiter.cpp \
     android/base/synchronization/MessageChannel.cpp \
@@ -81,12 +89,10 @@ LOCAL_SRC_FILES := \
     android/base/system/System.cpp \
     android/base/threads/Async.cpp \
     android/base/threads/FunctorThread.cpp \
-    android/base/threads/internal/ParallelTaskBase.cpp \
     android/base/threads/ThreadStore.cpp \
     android/base/Uri.cpp \
     android/base/Uuid.cpp \
     android/base/Version.cpp \
-    android/error-messages.cpp \
     android/utils/aconfig-file.c \
     android/utils/assert.c \
     android/utils/async.cpp \
@@ -112,7 +118,6 @@ LOCAL_SRC_FILES := \
     android/utils/ipaddr.cpp \
     android/utils/lineinput.c \
     android/utils/lock.cpp \
-    android/utils/looper.cpp \
     android/utils/mapfile.c \
     android/utils/misc.c \
     android/utils/panic.c \
@@ -121,7 +126,6 @@ LOCAL_SRC_FILES := \
     android/utils/property_file.c \
     android/utils/reflist.c \
     android/utils/refset.c \
-    android/utils/socket_drainer.cpp \
     android/utils/sockets.c \
     android/utils/stralloc.c \
     android/utils/stream.cpp \
@@ -196,6 +200,14 @@ LOCAL_SRC_FILES := \
     android/async-socket.c \
     android/async-socket-connector.c \
     android/async-utils.c \
+    android/base/async/AsyncReader.cpp \
+    android/base/async/AsyncSocketServer.cpp \
+    android/base/async/AsyncWriter.cpp \
+    android/base/async/Looper.cpp \
+    android/base/async/ScopedSocketWatch.cpp \
+    android/base/async/ThreadLooper.cpp \
+    android/base/sockets/SocketDrainer.cpp \
+    android/base/threads/internal/ParallelTaskBase.cpp \
     android/boot-properties.c \
     android/camera/camera-service.c \
     android/camera/camera-format-converters.c \
@@ -231,6 +243,7 @@ LOCAL_SRC_FILES := \
     android/emulation/VmLock.cpp \
     android/emulation/vm_lock.cpp \
     android/emulator-window.c \
+    android/error-messages.cpp \
     android/filesystems/ext4_resize.cpp \
     android/filesystems/ext4_utils.cpp \
     android/filesystems/fstab_parser.cpp \
@@ -301,6 +314,8 @@ LOCAL_SRC_FILES := \
     android/update-check/UpdateChecker.cpp \
     android/update-check/VersionExtractor.cpp \
     android/user-config.cpp \
+    android/utils/socket_drainer.cpp \
+    android/utils/looper.cpp \
     android/wear-agent/android_wear_agent.cpp \
     android/wear-agent/WearAgent.cpp \
     android/wear-agent/PairUpWearPhone.cpp \
@@ -326,13 +341,19 @@ endif
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
-# List of static libraries that anything that depends on android-emu
+# List of static libraries that anything that depends on the base libraries
 # should use.
+ANDROID_EMU_BASE_STATIC_LIBRARIES := \
+    android-emu-base \
+    $(LIBUUID_STATIC_LIBRARIES) \
+
+ANDROID_EMU_BASE_LDLIBS := \
+    $(LIBUUID_LDLIBS) \
+
 ANDROID_EMU_STATIC_LIBRARIES := \
     android-emu \
-    android-emu-base \
+    $(ANDROID_EMU_BASE_STATIC_LIBRARIES) \
     $(LIBCURL_STATIC_LIBRARIES) \
-    $(LIBUUID_STATIC_LIBRARIES) \
     $(LIBXML2_STATIC_LIBRARIES) \
     $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
     emulator-libext4_utils \
@@ -343,8 +364,8 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-zlib \
 
 ANDROID_EMU_LDLIBS := \
+    $(ANDROID_EMU_BASE_LDLIBS) \
     $(LIBCURL_LDLIBS) \
-    $(LIBUUID_LDLIBS) \
     $(BREAKPAD_CLIENT_LDLIBS) \
 
 ifeq ($(BUILD_TARGET_OS),windows)
