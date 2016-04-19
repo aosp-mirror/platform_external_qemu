@@ -23,6 +23,8 @@
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/utils/compiler.h"
 
+#include "ui_tools.h"
+
 #include <QDir>
 #include <QErrorMessage>
 #include <QFrame>
@@ -43,10 +45,6 @@
 
 #define REMOTE_DOWNLOADS_DIR "/sdcard/Download"
 #define REMOTE_SCREENSHOT_FILE "/data/local/tmp/screen.png"
-
-namespace Ui {
-    class ToolControls;
-}
 
 class EmulatorQtWindow;
 class ExtendedWindow;
@@ -113,7 +111,7 @@ private:
     EmulatorQtWindow* mEmulatorWindow;
     ExtendedWindow* mExtendedWindow;
     const UiEmuAgent* mUiEmuAgent;
-    Ui::ToolControls* mToolsUi;
+    std::unique_ptr<Ui::ToolControls> mToolsUi;
     QProcess mPushProcess;
     bool mStartedAdbStopProcess = false;
     QProgressDialog mPushDialog;
