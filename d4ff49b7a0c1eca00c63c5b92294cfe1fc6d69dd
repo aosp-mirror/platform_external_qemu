@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08fc147c_27d48164",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-19T14:21:45Z",
+      "side": 1,
+      "message": "why not clear()?",
+      "revId": "d4ff49b7a0c1eca00c63c5b92294cfe1fc6d69dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
