@@ -16,6 +16,24 @@
       "revId": "d4ff49b7a0c1eca00c63c5b92294cfe1fc6d69dd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08fc147c_42741bce",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-19T15:31:17Z",
+      "side": 1,
+      "message": "clear() leaves the allocated capacity, it just resets size to 0. Here we\u0027re creating a new string with no allocated capacity and swapping it with whatever we had. Then that new string would deallocate the original capacity.\n\nNB: I took a look at the std::string::clear() implementation in the GCC\u0027s STL, and it\u0027s horrible. At first it unshares the string (the string might share its memory with some other string) and only after that it deallocates it. This means the first operation during .clear() is memory allocation, then it deallocates it back.",
+      "parentUuid": "08fc147c_27d48164",
+      "revId": "d4ff49b7a0c1eca00c63c5b92294cfe1fc6d69dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
