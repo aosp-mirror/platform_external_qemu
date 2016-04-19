@@ -29,7 +29,6 @@ namespace base {
 // A class that implements a condition variable, which can be used in
 // association with a Lock to blocking-wait for specific conditions.
 // Useful to implement various synchronization data structures.
-// For an example, see ::emugl::MessageChannel.
 class ConditionVariable {
 public:
 #ifdef _WIN32

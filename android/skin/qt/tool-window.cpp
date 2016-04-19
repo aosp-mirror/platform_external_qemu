@@ -57,7 +57,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
       mExtendedWindow(NULL),
       mUiEmuAgent(NULL),
       mToolsUi(new Ui::ToolControls),
-      mPushDialog(this),
       mUIEventRecorder(event_recorder),
       mSizeTweaker(this),
       mAdbWarningBox(QMessageBox::Warning,
@@ -78,13 +77,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 #endif
     setWindowFlags(flag | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
     mToolsUi->setupUi(this);
-
-    mPushDialog.setWindowTitle(tr("File Copy"));
-    mPushDialog.setLabelText(tr("Copying files..."));
-    mPushDialog.setRange(0, 0);
-    mPushDialog.close();
-    QObject::connect(&mPushDialog, SIGNAL(canceled()), this, SLOT(slot_pushCanceled()));
-    QObject::connect(&mPushProcess, SIGNAL(finished(int)), this, SLOT(slot_pushFinished(int)));
 
     // Get the latest user selections from the user-config code.
     QSettings settings;
@@ -178,13 +170,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 }
 
 ToolWindow::~ToolWindow() {
-    // make sure we don't receive any signals while being destroyed
-    mPushProcess.disconnect();
-    mPushDialog.disconnect();
-    if (mPushProcess.state() != QProcess::NotRunning) {
-        mPushProcess.kill();
-    }
-    mPushDialog.close();
 }
 
 void ToolWindow::checkAdbVersionAndWarn() {
@@ -318,24 +303,6 @@ void ToolWindow::adbShellStopRunner() {
                                                 RunOptions::HideAllOutput);
 
     mEmulatorWindow->queueQuitEvent();
-}
-
-void ToolWindow::runAdbPush(const QList<QUrl> &urls)
-{
-    // Queue up the next set of files
-    for (int i = 0; i < urls.length(); i++) {
-        mFilesToPush.enqueue(urls[i]);
-    }
-    mPushDialog.setMaximum(mPushDialog.maximum() + urls.size());
-
-    if (mPushProcess.state() == QProcess::NotRunning) {
-
-        // Show a dialog so the user knows something is happening
-        mPushDialog.show();
-
-        // Begin the cascading push
-        slot_pushFinished(0);
-    }
 }
 
 void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
@@ -671,46 +638,6 @@ void ToolWindow::on_more_button_clicked()
 {
     showOrRaiseExtendedWindow(PANE_IDX_LOCATION);
     mExtendedWindow->activateWindow();
-}
-
-void ToolWindow::slot_pushCanceled()
-{
-    if (mPushProcess.state() != QProcess::NotRunning) {
-        mPushProcess.kill();
-    }
-    mPushDialog.setMaximum(0); // Reset the dialog for next time.
-    mFilesToPush.clear();
-}
-
-void ToolWindow::slot_pushFinished(int exitStatus)
-{
-    if (exitStatus) {
-        QByteArray er = mPushProcess.readAllStandardError();
-        er = er.replace('\n', "<br/>");
-        QString msg = tr("Unable to copy files. Output:<br/><br/>") + QString(er);
-        showErrorDialog(msg, tr("File Copy"));
-    }
-
-    if (mFilesToPush.isEmpty()) {
-        mPushDialog.setMaximum(0); // Reset the dialog for next time.
-        mPushDialog.close();
-    } else {
-        mPushDialog.setValue(mPushDialog.value() + 1);
-
-        // Prepare the base command
-        QStringList args;
-        QString command = getAdbFullPath(&args);
-        if (command.isNull()) {
-            return;
-        }
-        args << "push";
-        args << mFilesToPush.dequeue().toLocalFile();
-        args << REMOTE_DOWNLOADS_DIR;
-
-        // Keep track of this process
-        mPushProcess.start(command, args);
-        mPushProcess.waitForStarted();
-    }
 }
 
 void ToolWindow::slot_adbWarningMessageAccepted() {
