@@ -341,7 +341,7 @@ get_zoneinfo_timezone( void )
                     }
                     return NULL;
                 }
-                tzdir = strdup(env);
+                tzdir = env;
             }
 
             /* remove trailing slash, if any */
