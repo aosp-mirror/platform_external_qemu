@@ -37,6 +37,67 @@ ANDROID_EMU_INCLUDES := $(_ANDROID_EMU_ROOT)
 
 ###############################################################################
 #
+#  android-stdlib
+#
+#  This is a static library containing the most basic C++ interfaces which have
+#  nothing to do with QEMU or emulation or stuff like that. It's just a set
+#  of basic data structures and system interfaces. The goal is to make it usable
+#  in any project from the current tree, including the GPU libraries.
+#  It has to only depend on system headers and libraries, and nothing else
+
+$(call start-emulator-library,android-stdlib)
+
+LOCAL_CFLAGS := $(EMULATOR_COMMON_CFLAGS)
+
+LOCAL_C_INCLUDES := \
+    $(ANDROID_EMU_INCLUDES) \
+    $(LIBUUID_INCLUDES) \
+
+LOCAL_SRC_FILES := \
+    android/base/containers/PodVector.cpp \
+    android/base/containers/PointerSet.cpp \
+    android/base/containers/HashUtils.cpp \
+    android/base/files/PathUtils.cpp \
+    android/base/files/StdioStream.cpp \
+    android/base/files/Stream.cpp \
+    android/base/files/IniFile.cpp \
+    android/base/misc/HttpUtils.cpp \
+    android/base/misc/StringUtils.cpp \
+    android/base/misc/Utf8Utils.cpp \
+    android/base/StringFormat.cpp \
+    android/base/StringView.cpp \
+    android/base/sockets/SocketUtils.cpp \
+    android/base/sockets/SocketWaiter.cpp \
+    android/base/synchronization/MessageChannel.cpp \
+    android/base/Log.cpp \
+    android/base/memory/LazyInstance.cpp \
+    android/base/system/System.cpp \
+    android/base/threads/Async.cpp \
+    android/base/threads/FunctorThread.cpp \
+    android/base/threads/ThreadStore.cpp \
+    android/base/Uri.cpp \
+    android/base/Uuid.cpp \
+    android/base/Version.cpp \
+
+ifeq ($(BUILD_TARGET_OS),windows)
+LOCAL_SRC_FILES += \
+    android/base/synchronization/ConditionVariable_win32.cpp \
+    android/base/threads/Thread_win32.cpp \
+    android/base/system/Win32Utils.cpp \
+    android/base/system/Win32UnicodeString.cpp \
+    android/utils/win32_cmdline_quote.cpp \
+    android/utils/win32_unicode.cpp \
+
+else
+LOCAL_SRC_FILES += \
+    android/base/threads/Thread_pthread.cpp \
+
+endif
+
+$(call end-emulator-library)
+
+###############################################################################
+#
 #  android-emu-base
 #
 #  This is a static library containing all the low-level system interfaces
@@ -60,32 +121,8 @@ LOCAL_SRC_FILES := \
     android/base/async/Looper.cpp \
     android/base/async/ScopedSocketWatch.cpp \
     android/base/async/ThreadLooper.cpp \
-    android/base/containers/PodVector.cpp \
-    android/base/containers/PointerSet.cpp \
-    android/base/containers/HashUtils.cpp \
-    android/base/files/PathUtils.cpp \
-    android/base/files/StdioStream.cpp \
-    android/base/files/Stream.cpp \
-    android/base/files/IniFile.cpp \
-    android/base/misc/HttpUtils.cpp \
-    android/base/misc/StringUtils.cpp \
-    android/base/misc/Utf8Utils.cpp \
-    android/base/StringFormat.cpp \
-    android/base/StringView.cpp \
     android/base/sockets/SocketDrainer.cpp \
-    android/base/sockets/SocketUtils.cpp \
-    android/base/sockets/SocketWaiter.cpp \
-    android/base/synchronization/MessageChannel.cpp \
-    android/base/Log.cpp \
-    android/base/memory/LazyInstance.cpp \
-    android/base/system/System.cpp \
-    android/base/threads/Async.cpp \
-    android/base/threads/FunctorThread.cpp \
     android/base/threads/internal/ParallelTaskBase.cpp \
-    android/base/threads/ThreadStore.cpp \
-    android/base/Uri.cpp \
-    android/base/Uuid.cpp \
-    android/base/Version.cpp \
     android/error-messages.cpp \
     android/utils/aconfig-file.c \
     android/utils/assert.c \
@@ -134,21 +171,6 @@ LOCAL_SRC_FILES := \
     android/utils/utf8_utils.cpp \
     android/utils/vector.c \
     android/utils/x86_cpuid.cpp \
-
-ifeq ($(BUILD_TARGET_OS),windows)
-LOCAL_SRC_FILES += \
-    android/base/synchronization/ConditionVariable_win32.cpp \
-    android/base/threads/Thread_win32.cpp \
-    android/base/system/Win32Utils.cpp \
-    android/base/system/Win32UnicodeString.cpp \
-    android/utils/win32_cmdline_quote.cpp \
-    android/utils/win32_unicode.cpp \
-
-else
-LOCAL_SRC_FILES += \
-    android/base/threads/Thread_pthread.cpp \
-
-endif
 
 $(call end-emulator-library)
 
@@ -326,13 +348,21 @@ endif
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
-# List of static libraries that anything that depends on android-emu
+# List of static libraries that anything that depends on the base libraries
 # should use.
+
+ANDROID_STDLIB_STATIC_LIBRARIES := \
+    android-stdlib \
+    $(LIBUUID_STATIC_LIBRARIES) \
+
+ANDROID_STDLIB_LDLIBS := \
+    $(LIBUUID_LDLIBS) \
+
 ANDROID_EMU_STATIC_LIBRARIES := \
     android-emu \
     android-emu-base \
     $(LIBCURL_STATIC_LIBRARIES) \
-    $(LIBUUID_STATIC_LIBRARIES) \
+    $(ANDROID_STDLIB_STATIC_LIBRARIES) \
     $(LIBXML2_STATIC_LIBRARIES) \
     $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
     emulator-libext4_utils \
@@ -344,7 +374,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
 
 ANDROID_EMU_LDLIBS := \
     $(LIBCURL_LDLIBS) \
-    $(LIBUUID_LDLIBS) \
+    $(ANDROID_STDLIB_LDLIBS) \
     $(BREAKPAD_CLIENT_LDLIBS) \
 
 ifeq ($(BUILD_TARGET_OS),windows)
