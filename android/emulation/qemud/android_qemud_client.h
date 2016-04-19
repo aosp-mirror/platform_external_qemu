@@ -119,6 +119,7 @@ struct QemudClient {
         struct {
             QemudPipe* qemud_pipe;
             QemudPipeMessage* messages;
+            QemudPipeMessage* last_msg;
         } Pipe;
     } ProtocolSelector;
 };

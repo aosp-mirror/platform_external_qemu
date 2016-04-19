@@ -44,11 +44,9 @@ QemudClient* qemud_client_new(QemudService* service,
 }
 
 void _qemud_pipe_cache_buffer(QemudClient* client, const uint8_t* msg, int msglen) {
-    QemudPipeMessage* buf;
-    QemudPipeMessage** ins_at = &client->ProtocolSelector.Pipe.messages;
-
     /* Allocate descriptor big enough to contain message as well. */
-    buf = (QemudPipeMessage*) malloc(msglen + sizeof(QemudPipeMessage));
+    QemudPipeMessage* buf =
+            (QemudPipeMessage*) malloc(msglen + sizeof(QemudPipeMessage));
     if (buf != NULL) {
         /* Message starts right after the descriptor. */
         buf->message = (uint8_t*) buf + sizeof(QemudPipeMessage);
@@ -56,10 +54,13 @@ void _qemud_pipe_cache_buffer(QemudClient* client, const uint8_t* msg, int msgle
         memcpy(buf->message, msg, msglen);
         buf->offset = 0;
         buf->next = NULL;
-        while (*ins_at != NULL) {
-            ins_at = &(*ins_at)->next;
+        if (client->ProtocolSelector.Pipe.last_msg) {
+            client->ProtocolSelector.Pipe.last_msg->next = buf;
+            client->ProtocolSelector.Pipe.last_msg = buf;
+        } else {
+            client->ProtocolSelector.Pipe.last_msg =
+                    client->ProtocolSelector.Pipe.messages = buf;
         }
-        *ins_at = buf;
         /* Notify the pipe that there is data to read. */
         android_pipe_wake(client->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
                           PIPE_WAKE_READ);
@@ -251,6 +252,7 @@ void _qemud_client_free(QemudClient* c) {
                 *msg_list = to_free->next;
                 free(to_free);
             }
+            c->ProtocolSelector.Pipe.last_msg = NULL;
         }
         if (c->param != NULL) {
             free(c->param);
@@ -333,6 +335,7 @@ QemudClient* qemud_client_alloc(int channel_id,
         /* Allocating a pipe client. */
         c->protocol = QEMUD_PROTOCOL_PIPE;
         c->ProtocolSelector.Pipe.messages = NULL;
+        c->ProtocolSelector.Pipe.last_msg = NULL;
         c->ProtocolSelector.Pipe.qemud_pipe = NULL;
     } else {
         /* Allocating a serial client. */
