@@ -22,6 +22,30 @@
       "revId": "cb78884daf0d995056da65e9db7d807363dcce27",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "68a590c6_738de8f1",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-19T19:55:43Z",
+      "side": 1,
+      "message": "unique_ptr requires a full class definition, but the full definition would create circular includes here. That\u0027s why I had to leave it as is and explicitly delete the object here, where full definition is available",
+      "parentUuid": "68a590c6_c28f441d",
+      "range": {
+        "startLine": 109,
+        "startChar": 4,
+        "endLine": 109,
+        "endChar": 23
+      },
+      "revId": "cb78884daf0d995056da65e9db7d807363dcce27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
