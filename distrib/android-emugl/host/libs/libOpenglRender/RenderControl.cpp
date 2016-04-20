@@ -68,7 +68,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
     const char *str = NULL;
     int len = 0;
-    if (tInfo && tInfo->currContext.Ptr()) {
+    if (tInfo && tInfo->currContext.get()) {
         if (tInfo->currContext->isGL2()) {
             str = (const char *)s_gles2.glGetString(name);
         }

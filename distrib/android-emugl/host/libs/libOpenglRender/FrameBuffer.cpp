@@ -635,7 +635,7 @@ HandleType FrameBuffer::createColorBuffer(int p_width, int p_height,
             p_internalFormat,
             getCaps().has_eglimage_texture_2d,
             m_colorBufferHelper));
-    if (cb.Ptr() != NULL) {
+    if (cb.get() != NULL) {
         ret = genHandle();
         m_colorbuffers[ret].cb = cb;
         m_colorbuffers[ret].refcount = 1;
@@ -663,11 +663,11 @@ HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
         share = (*s).second;
     }
     EGLContext sharedContext =
-            share.Ptr() ? share->getEGLContext() : EGL_NO_CONTEXT;
+            share.get() ? share->getEGLContext() : EGL_NO_CONTEXT;
 
     RenderContextPtr rctx(RenderContext::create(
         m_eglDisplay, config->getEglConfig(), sharedContext, p_isGL2));
-    if (rctx.Ptr() != NULL) {
+    if (rctx.get() != NULL) {
         ret = genHandle();
         m_contexts[ret] = rctx;
         RenderThreadInfo *tinfo = RenderThreadInfo::get();
@@ -689,7 +689,7 @@ HandleType FrameBuffer::createWindowSurface(int p_config, int p_width, int p_hei
 
     WindowSurfacePtr win(WindowSurface::create(
             getDisplay(), config->getEglConfig(), p_width, p_height));
-    if (win.Ptr() != NULL) {
+    if (win.get() != NULL) {
         ret = genHandle();
         m_windows[ret] = std::pair<WindowSurfacePtr, HandleType>(win,0);
         RenderThreadInfo *tinfo = RenderThreadInfo::get();
@@ -794,7 +794,7 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface)
         return false;
     }
 
-    WindowSurface* surface = (*w).second.first.Ptr();
+    WindowSurface* surface = (*w).second.first.get();
     surface->flushColorBuffer();
 
     return true;
@@ -935,7 +935,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
     //
     RenderThreadInfo *tinfo = RenderThreadInfo::get();
     WindowSurfacePtr bindDraw, bindRead;
-    if (draw.Ptr() == NULL && read.Ptr() == NULL) {
+    if (draw.get() == NULL && read.get() == NULL) {
         // Unbind the current read and draw surfaces from the context
         bindDraw = tinfo->currDrawSurf;
         bindRead = tinfo->currReadSurf;
@@ -944,8 +944,8 @@ bool FrameBuffer::bindContext(HandleType p_context,
         bindRead = read;
     }
 
-    if (bindDraw.Ptr() != NULL && bindRead.Ptr() != NULL) {
-        if (bindDraw.Ptr() != bindRead.Ptr()) {
+    if (bindDraw.get() != NULL && bindRead.get() != NULL) {
+        if (bindDraw.get() != bindRead.get()) {
             bindDraw->bind(ctx, WindowSurface::BIND_DRAW);
             bindRead->bind(ctx, WindowSurface::BIND_READ);
         }

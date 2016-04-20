@@ -265,7 +265,7 @@ void ColorBuffer::subUpdate(int x,
 bool ColorBuffer::blitFromCurrentReadBuffer()
 {
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
-    if (!tInfo->currContext.Ptr()) {
+    if (!tInfo->currContext.get()) {
         // no Current context
         return false;
     }
@@ -325,7 +325,7 @@ bool ColorBuffer::bindToTexture() {
         return false;
     }
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
-    if (!tInfo->currContext.Ptr()) {
+    if (!tInfo->currContext.get()) {
         return false;
     }
     if (tInfo->currContext->isGL2()) {
@@ -342,7 +342,7 @@ bool ColorBuffer::bindToRenderbuffer() {
         return false;
     }
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
-    if (!tInfo->currContext.Ptr()) {
+    if (!tInfo->currContext.get()) {
         return false;
     }
     if (tInfo->currContext->isGL2()) {

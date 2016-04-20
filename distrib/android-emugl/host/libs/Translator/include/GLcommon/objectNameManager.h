@@ -143,9 +143,8 @@ private:
 class ShareGroup
 {
     friend class ObjectNameManager;
-    friend class emugl::SmartPtr<ShareGroup>;  // to allow destructing when ShareGroupPtr refcount reaches zero
-
 public:
+    ~ShareGroup();
 
     //
     // genName - generates new object name and returns its name value.
@@ -201,7 +200,6 @@ public:
 
 private:
     explicit ShareGroup(GlobalNameSpace *globalNameSpace);
-    ~ShareGroup();
 
 private:
     emugl::Mutex m_lock;

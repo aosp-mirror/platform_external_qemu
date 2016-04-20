@@ -130,13 +130,13 @@ static const int s_eglExtentionsSize =
 
 #define VALIDATE_SURFACE_RETURN(EGLSurface,ret,varName)      \
         SurfacePtr varName = dpy->getSurface(EGLSurface);    \
-        if(!varName.Ptr()) {                                 \
+        if(!varName.get()) {                                 \
             RETURN_ERROR(ret,EGL_BAD_SURFACE);               \
         }
 
 #define VALIDATE_CONTEXT_RETURN(EGLContext,ret)              \
         ContextPtr ctx = dpy->getContext(EGLContext);        \
-        if(!ctx.Ptr()) {                                     \
+        if(!ctx.get()) {                                     \
             RETURN_ERROR(ret,EGL_BAD_CONTEXT);               \
         }
 
@@ -530,7 +530,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreateWindowSurface(EGLDisplay display, EGLConf
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ALLOC);
     }
     SurfacePtr wSurface(new EglWindowSurface(dpy, win,cfg,width,height));
-    if(!wSurface.Ptr()) {
+    if(!wSurface.get()) {
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ALLOC);
     }
     return dpy->addSurface(wSurface);
@@ -547,7 +547,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
     }
 
     SurfacePtr pbSurface(new EglPbufferSurface(dpy,cfg));
-    if(!pbSurface.Ptr()) {
+    if(!pbSurface.get()) {
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ALLOC);
     }
 
@@ -563,7 +563,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
 
     EGLint width, height, largest, texTarget, texFormat;
     EglPbufferSurface* tmpPbSurfacePtr =
-            static_cast<EglPbufferSurface*>(pbSurface.Ptr());
+            static_cast<EglPbufferSurface*>(pbSurface.get());
 
     tmpPbSurfacePtr->getDim(&width, &height, &largest);
     tmpPbSurfacePtr->getTexInfo(&texTarget, &texFormat);
@@ -600,7 +600,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySurface(EGLDisplay display, EGLSurface surface) {
     VALIDATE_DISPLAY(display);
     SurfacePtr srfc = dpy->getSurface(surface);
-    if(!srfc.Ptr()) {
+    if(!srfc.get()) {
         RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
     }
 
@@ -664,7 +664,7 @@ EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig con
     ContextPtr sharedCtxPtr;
     if(share_context != EGL_NO_CONTEXT) {
         sharedCtxPtr = dpy->getContext(share_context);
-        if(!sharedCtxPtr.Ptr()) {
+        if(!sharedCtxPtr.get()) {
             RETURN_ERROR(EGL_NO_CONTEXT,EGL_BAD_CONTEXT);
         }
     }
@@ -706,7 +706,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
     ContextPtr prevCtx = thread->eglContext;
 
     if(releaseContext) { //releasing current context
-       if(prevCtx.Ptr()) {
+       if(prevCtx.get()) {
            g_eglInfo->getIface(prevCtx->version())->flush();
            if(!dpy->nativeType()->makeCurrent(NULL,NULL,NULL)) {
                RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
@@ -718,14 +718,14 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         VALIDATE_SURFACE(draw,newDrawSrfc);
         VALIDATE_SURFACE(read,newReadSrfc);
 
-        EglSurface* newDrawPtr = newDrawSrfc.Ptr();
-        EglSurface* newReadPtr = newReadSrfc.Ptr();
+        EglSurface* newDrawPtr = newDrawSrfc.get();
+        EglSurface* newReadPtr = newReadSrfc.get();
         ContextPtr  newCtx     = ctx;
 
-        if (newCtx.Ptr() && prevCtx.Ptr()) {
-            if (newCtx.Ptr() == prevCtx.Ptr()) {
-                if (newDrawPtr == prevCtx->draw().Ptr() &&
-                    newReadPtr == prevCtx->read().Ptr()) {
+        if (newCtx.get() && prevCtx.get()) {
+            if (newCtx.get() == prevCtx.get()) {
+                if (newDrawPtr == prevCtx->draw().get() &&
+                    newReadPtr == prevCtx->read().get()) {
                     // nothing to do
                     return EGL_TRUE;
                 }
@@ -755,7 +755,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
             RETURN_ERROR(EGL_FALSE,EGL_BAD_NATIVE_WINDOW);
         }
 
-        if(prevCtx.Ptr()) {
+        if(prevCtx.get()) {
             g_eglInfo->getIface(prevCtx->version())->flush();
         }
         if (!dpy->nativeType()->makeCurrent(
@@ -779,7 +779,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
     }
 
     // release previous context surface binding
-    if(prevCtx.Ptr() && releaseContext) {
+    if(prevCtx.get() && releaseContext) {
         prevCtx->setSurfaces(SurfacePtr(NULL),SurfacePtr(NULL));
     }
 
@@ -809,8 +809,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSwapBuffers(EGLDisplay display, EGLSurface surf
         RETURN_ERROR(EGL_TRUE,EGL_SUCCESS);
     }
 
-    if(!currentCtx.Ptr() || !currentCtx->usingSurface(Srfc) ||
-            !dpy->nativeType()->isValidNativeWin(Srfc.Ptr()->native())) {
+    if(!currentCtx.get() || !currentCtx->usingSurface(Srfc) ||
+            !dpy->nativeType()->isValidNativeWin(Srfc.get()->native())) {
         RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
     }
 
@@ -822,11 +822,11 @@ EGLAPI EGLContext EGLAPIENTRY eglGetCurrentContext(void) {
     ThreadInfo* thread = getThreadInfo();
     EglDisplay* dpy    = static_cast<EglDisplay*>(thread->eglDisplay);
     ContextPtr  ctx    = thread->eglContext;
-    if(dpy && ctx.Ptr()){
+    if(dpy && ctx.get()){
         // This double check is required because a context might still be current after it is destroyed - in which case
         // its handle should be invalid, that is EGL_NO_CONTEXT should be returned even though the context is current
         EGLContext c = (EGLContext)SafePointerFromUInt(ctx->getHndl());
-        if(dpy->getContext(c).Ptr())
+        if(dpy->getContext(c).get())
         {
             return c;
         }
@@ -843,9 +843,9 @@ EGLAPI EGLSurface EGLAPIENTRY eglGetCurrentSurface(EGLint readdraw) {
     EglDisplay* dpy    = static_cast<EglDisplay*>(thread->eglDisplay);
     ContextPtr  ctx    = thread->eglContext;
 
-    if(dpy && ctx.Ptr()) {
+    if(dpy && ctx.get()) {
         SurfacePtr surface = readdraw == EGL_READ ? ctx->read() : ctx->draw();
-        if(surface.Ptr())
+        if(surface.get())
         {
             // This double check is required because a surface might still be
             // current after it is destroyed - in which case its handle should
@@ -853,7 +853,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglGetCurrentSurface(EGLint readdraw) {
             // though the surface is current.
             EGLSurface s = (EGLSurface)SafePointerFromUInt(surface->getHndl());
             surface = dpy->getSurface(s);
-            if(surface.Ptr())
+            if(surface.get())
             {
                 return s;
             }
@@ -864,7 +864,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglGetCurrentSurface(EGLint readdraw) {
 
 EGLAPI EGLDisplay EGLAPIENTRY eglGetCurrentDisplay(void) {
     ThreadInfo* thread = getThreadInfo();
-    return (thread->eglContext.Ptr()) ? thread->eglDisplay : EGL_NO_DISPLAY;
+    return (thread->eglContext.get()) ? thread->eglDisplay : EGL_NO_DISPLAY;
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglBindAPI(EGLenum api) {
@@ -915,11 +915,11 @@ EglImage *attachEGLImage(unsigned int imageId)
     ThreadInfo* thread  = getThreadInfo();
     EglDisplay* dpy     = static_cast<EglDisplay*>(thread->eglDisplay);
     ContextPtr  ctx     = thread->eglContext;
-    if (ctx.Ptr()) {
+    if (ctx.get()) {
         ImagePtr img = dpy->getImage(reinterpret_cast<EGLImageKHR>(imageId));
-        if(img.Ptr()) {
+        if(img.get()) {
              ctx->attachImage(imageId,img);
-             return img.Ptr();
+             return img.get();
         }
     }
     return NULL;
@@ -929,7 +929,7 @@ void detachEGLImage(unsigned int imageId)
 {
     ThreadInfo* thread  = getThreadInfo();
     ContextPtr  ctx     = thread->eglContext;
-    if (ctx.Ptr()) {
+    if (ctx.get()) {
         ctx->detachImage(imageId);
     }
 }
@@ -947,17 +947,17 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
 
     ThreadInfo* thread  = getThreadInfo();
     ShareGroupPtr sg = thread->shareGroup;
-    if (sg.Ptr() != NULL) {
+    if (sg.get() != NULL) {
         unsigned int globalTexName = sg->getGlobalName(TEXTURE, SafeUIntFromPointer(buffer));
         if (!globalTexName) return EGL_NO_IMAGE_KHR;
 
         ImagePtr img( new EglImage() );
-        if (img.Ptr() != NULL) {
+        if (img.get() != NULL) {
 
             ObjectDataPtr objData = sg->getObjectData(TEXTURE, SafeUIntFromPointer(buffer));
-            if (!objData.Ptr()) return EGL_NO_IMAGE_KHR;
+            if (!objData.get()) return EGL_NO_IMAGE_KHR;
 
-            TextureData *texData = (TextureData *)objData.Ptr();
+            TextureData *texData = (TextureData *)objData.get();
             if(!texData->width || !texData->height) return EGL_NO_IMAGE_KHR;
             img->width = texData->width;
             img->height = texData->height;
