@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "485feccb_7d490d5c",
+        "filename": "android/multitouch-screen.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-20T23:36:24Z",
+      "side": 1,
+      "message": "See below.",
+      "range": {
+        "startLine": 482,
+        "startChar": 9,
+        "endLine": 482,
+        "endChar": 68
+      },
+      "revId": "b4ed2e0df17a292700c3b4de7d6de8d6597f65d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "485feccb_dde9215f",
+        "filename": "android/multitouch-screen.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-20T23:36:24Z",
+      "side": 1,
+      "message": "This is largely unnecessary right now since we only support 2 fingers through our UI, but this would help if we ever want to do more. Keep or remove?",
+      "range": {
+        "startLine": 494,
+        "startChar": 0,
+        "endLine": 502,
+        "endChar": 1
+      },
+      "revId": "b4ed2e0df17a292700c3b4de7d6de8d6597f65d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "485feccb_9d42c93c",
+        "filename": "android/multitouch-screen.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-20T23:36:24Z",
+      "side": 1,
+      "message": "Worth making this function return a typedef of int so it\u0027s clear that we\u0027re interpreting it in a fancy way?",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 65
+      },
+      "revId": "b4ed2e0df17a292700c3b4de7d6de8d6597f65d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
