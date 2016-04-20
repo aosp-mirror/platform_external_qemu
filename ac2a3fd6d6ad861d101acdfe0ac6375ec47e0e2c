@@ -69,6 +69,41 @@
       "revId": "ac2a3fd6d6ad861d101acdfe0ac6375ec47e0e2c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c87cbc59_8214fa24",
+        "filename": "distrib/android-emugl/shared/emugl/common/thread_store.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-20T15:16:32Z",
+      "side": 1,
+      "message": "Ah, I see, I missed that then.",
+      "parentUuid": "485feccb_f55f62eb",
+      "revId": "ac2a3fd6d6ad861d101acdfe0ac6375ec47e0e2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c87cbc59_a231fed0",
+        "filename": "distrib/android-emugl/shared/emugl/common/thread_store.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-20T15:16:32Z",
+      "side": 1,
+      "message": "I think there is no need to introduce a new type then. New code should just use android::base::ThreadStore\u003cT\u003e instead.",
+      "revId": "ac2a3fd6d6ad861d101acdfe0ac6375ec47e0e2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
