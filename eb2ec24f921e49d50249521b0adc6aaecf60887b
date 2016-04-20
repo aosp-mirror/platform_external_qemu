@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "485feccb_daae07c6",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-20T23:19:08Z",
+      "side": 1,
+      "message": "Please copy the comment from the commit message here -- someone well meaning (read: me) might try to move the trivial destructor to the header and end up scratching their head for hours :)",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 33
+      },
+      "revId": "eb2ec24f921e49d50249521b0adc6aaecf60887b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "485feccb_3a895bab",
         "filename": "android/skin/qt/extended-window.h",
         "patchSetId": 1
