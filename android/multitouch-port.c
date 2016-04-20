@@ -136,35 +136,35 @@ _mts_port_free(AndroidMTSPort* mtsp)
 static void
 _on_action_down(int tracking_id, int x, int y, int pressure)
 {
-    multitouch_update_pointer(MTES_DEVICE, tracking_id, x, y, pressure);
+    multitouch_update_pointer(MTES_DEVICE, tracking_id, x, y, pressure, 0);
 }
 
 /* Last pointer up event handler. */
 static void
 _on_action_up(int tracking_id)
 {
-    multitouch_update_pointer(MTES_DEVICE, tracking_id, 0, 0, 0);
+    multitouch_update_pointer(MTES_DEVICE, tracking_id, 0, 0, 0, 0);
 }
 
 /* Pointer down event handler. */
 static void
 _on_action_pointer_down(int tracking_id, int x, int y, int pressure)
 {
-    multitouch_update_pointer(MTES_DEVICE, tracking_id, x, y, pressure);
+    multitouch_update_pointer(MTES_DEVICE, tracking_id, x, y, pressure, 0);
 }
 
 /* Pointer up event handler. */
 static void
 _on_action_pointer_up(int tracking_id)
 {
-    multitouch_update_pointer(MTES_DEVICE, tracking_id, 0, 0, 0);
+    multitouch_update_pointer(MTES_DEVICE, tracking_id, 0, 0, 0, 0);
 }
 
 /* Pointer move event handler. */
 static void
 _on_action_move(int tracking_id, int x, int y, int pressure)
 {
-    multitouch_update_pointer(MTES_DEVICE, tracking_id, x, y, pressure);
+    multitouch_update_pointer(MTES_DEVICE, tracking_id, x, y, pressure, 0);
 }
 
 /********************************************************************************

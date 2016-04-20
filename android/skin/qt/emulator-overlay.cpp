@@ -377,7 +377,7 @@ void EmulatorOverlay::generateTouchEvents(QMouseEvent* event) {
 
     if (eventType) {
         mEmulatorWindow->handleMouseEvent(eventType, kMouseButtonLeft,
-                                          mPrimaryTouchPoint);
+                                          mPrimaryTouchPoint, true);
         mEmulatorWindow->handleMouseEvent(eventType, kMouseButtonSecondaryTouch,
                                           mSecondaryTouchPoint);
     }
