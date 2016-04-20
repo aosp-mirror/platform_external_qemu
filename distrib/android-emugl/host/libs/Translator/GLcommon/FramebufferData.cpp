@@ -58,7 +58,7 @@ int idx = attachmentPointIndex(attachment);
     }
     if (m_attachPoints[idx].target != target ||
         m_attachPoints[idx].name != name ||
-        m_attachPoints[idx].obj.Ptr() != obj.Ptr() ||
+        m_attachPoints[idx].obj.get() != obj.get() ||
         m_attachPoints[idx].owned != takeOwnership) {
 
         detachObject(idx); 
@@ -68,8 +68,8 @@ int idx = attachmentPointIndex(attachment);
         m_attachPoints[idx].obj = obj;
         m_attachPoints[idx].owned = takeOwnership;
 
-        if (target == GL_RENDERBUFFER_OES && obj.Ptr() != NULL) {
-            RenderbufferData *rbData = (RenderbufferData *)obj.Ptr();
+        if (target == GL_RENDERBUFFER_OES && obj.get() != NULL) {
+            RenderbufferData *rbData = (RenderbufferData *)obj.get();
             rbData->attachedFB = m_fbName;
             rbData->attachedPoint = attachment;
         }
@@ -102,8 +102,8 @@ int FramebufferData::attachmentPointIndex(GLenum attachment)
 }
 
 void FramebufferData::detachObject(int idx) {
-    if (m_attachPoints[idx].target == GL_RENDERBUFFER_OES && m_attachPoints[idx].obj.Ptr() != NULL) {
-        RenderbufferData *rbData = (RenderbufferData *)m_attachPoints[idx].obj.Ptr();
+    if (m_attachPoints[idx].target == GL_RENDERBUFFER_OES && m_attachPoints[idx].obj.get() != NULL) {
+        RenderbufferData *rbData = (RenderbufferData *)m_attachPoints[idx].obj.get();
         rbData->attachedFB = 0;
         rbData->attachedPoint = 0;
     }
