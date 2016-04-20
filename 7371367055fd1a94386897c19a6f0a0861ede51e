@@ -34,6 +34,24 @@
       "revId": "7371367055fd1a94386897c19a6f0a0861ede51e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c87cbc59_2226ce95",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-20T15:22:34Z",
+      "side": 1,
+      "message": "Well, you already have some linking issues with LIBUUID anyway! Maybe move Uuid.cpp to android-emu then :)",
+      "parentUuid": "485feccb_359f3ad9",
+      "revId": "7371367055fd1a94386897c19a6f0a0861ede51e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
