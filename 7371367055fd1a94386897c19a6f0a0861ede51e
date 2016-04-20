@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "485feccb_b559ea08",
+        "filename": "distrib/android-emugl/host/tools/emugen/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-20T15:09:29Z",
+      "side": 0,
+      "message": "well, my new begin-host- macro adds those automatically. but let me use your patch instead",
+      "parentUuid": "c87cbc59_c2e60200",
+      "revId": "7371367055fd1a94386897c19a6f0a0861ede51e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c87cbc59_e2eb06c5",
         "filename": "distrib/android-emugl/host/tools/emugen/Android.mk",
         "patchSetId": 1
