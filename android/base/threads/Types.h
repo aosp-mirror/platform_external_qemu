@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include "android/base/EnumFlags.h"
+
 #include <functional>
 #include <stdint.h>
 
@@ -23,24 +25,15 @@ namespace base {
 // a functor which can run in a separate thread
 using ThreadFunctor = std::function<intptr_t()>;
 
-enum class ThreadFlags {
+enum class ThreadFlags : unsigned char {
     None = 0,
     MaskSignals = 1,
-    // A Detach thread is a launch-and-forget thread.
-    // |wait| and |tryWait| on a Detach thread always fails.
-    // OTOH, you _must_ |wait| on a non Detach thread to ensure proper cleanup.
+    // A Detach-ed thread is a launch-and-forget thread.
+    // wait() and tryWait() on a Detach-ed thread always fails.
+    // OTOH, if you don't wait() on a non Detach-ed thread it would do it
+    // in dtor anyway.
     Detach = 1 << 1
 };
-
-// enum class doesn't allow bit operations unless there's an
-// operator
-inline ThreadFlags operator|(ThreadFlags l, ThreadFlags r) {
-    return static_cast<ThreadFlags>(int(l) | int(r));
-}
-
-inline ThreadFlags operator&(ThreadFlags l, ThreadFlags r) {
-    return static_cast<ThreadFlags>(int(l) & int(r));
-}
 
 }  // namespace base
 }  // namespace android
