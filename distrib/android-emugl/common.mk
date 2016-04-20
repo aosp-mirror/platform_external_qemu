@@ -20,6 +20,15 @@
 #       LOCAL_C_INCLUDES += ....
 #   $(call emugl-end-module)
 #
+emugl-begin-static-library = $(call emugl-begin-module,$1,HOST_STATIC_LIBRARY)
+emugl-begin-shared-library = $(call emugl-begin-module,$1,HOST_SHARED_LIBRARY)
+emugl-begin-executable = $(call emugl-begin-module,$1,HOST_EXECUTABLE)
+
+# Variants of emugl-begin-<module-type> for host binaries, i.e. those generated
+# for the build machine's operating system (which will be different from the
+# target one in case of cross-compilation). This is useful for the 'emugen'
+# tool for example, since it is invoked later by the build system to generate
+# decoder sources.
 emugl-begin-host-static-library = $(call emugl-begin-module,$1,HOST_STATIC_LIBRARY,HOST)
 emugl-begin-host-shared-library = $(call emugl-begin-module,$1,HOST_SHARED_LIBRARY,HOST)
 emugl-begin-host-executable = $(call emugl-begin-module,$1,HOST_EXECUTABLE,HOST)
@@ -32,9 +41,7 @@ _emugl_HOST_modules :=
 emugl-begin-module = \
     $(eval include $(CLEAR_VARS)) \
     $(eval LOCAL_MODULE := $1) \
-    $(eval LOCAL_MODULE_TAGS := $(if $3,,debug)) \
     $(eval LOCAL_MODULE_CLASS := $(patsubst HOST_%,%,$(patsubst %EXECUTABLE,%EXECUTABLES,$(patsubst %LIBRARY,%LIBRARIES,$2)))) \
-    $(eval LOCAL_IS_HOST_MODULE := $(if $3,true,))\
     $(eval LOCAL_C_INCLUDES += $(EMUGL_COMMON_INCLUDES)) \
     $(eval LOCAL_CFLAGS += $(EMUGL_COMMON_CFLAGS)) \
     $(eval LOCAL_LDLIBS += $(CXX_STD_LIB)) \
@@ -43,6 +50,7 @@ emugl-begin-module = \
 
 # Used to end a module definition, see function definitions above
 emugl-end-module = \
+    $(if $(_emugl_HOST),$(eval LOCAL_HOST_BUILD := true))\
     $(eval $(end-emulator-module-ev)) \
     $(eval LOCAL_BUILD_FILE :=) \
     $(eval _emugl_$(_emugl_HOST)modules += $(_emugl_MODULE))\
@@ -120,9 +128,6 @@ _emugl-init-module = \
 emugl-export = \
     $(eval _emugl.$(_emugl_MODULE).export.$1 += $2)\
     $(eval LOCAL_$1 := $(LOCAL_$1) $2)
-
-emugl-export-outer = \
-    $(eval _emugl.$(_emugl_MODULE).export.$1 += $2)
 
 # Called to indicate that a module imports the exports of another module
 # $1: list of modules to import
@@ -228,14 +233,4 @@ $$(call emugl-export,ADDITIONAL_DEPENDENCIES,$$(GEN))
 LOCAL_GENERATED_SOURCES += $$(GEN)
 LOCAL_C_INCLUDES += $$1
 endef
-
-# Call this function when your shared library must be placed in a non-standard
-# library path (i.e. not under /system/lib
-# $1: library sub-path,relative to /system/lib
-# For example: $(call emugl-set-shared-library-subpath,egl)
-emugl-set-shared-library-subpath = \
-    $(eval LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/$1)\
-    $(eval LOCAL_UNSTRIPPED_PATH := $(TARGET_OUT_SHARED_LIBRARIES_UNSTRIPPED)/$1)\
-    $(eval _emugl.$(LOCAL_MODULE).moved := true)\
-    $(call emugl-export-outer,ADDITIONAL_DEPENDENCIES,$(LOCAL_MODULE_PATH)/$(LOCAL_MODULE)$(TARGET_SHLIB_SUFFIX))
 

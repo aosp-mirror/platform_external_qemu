@@ -1,7 +1,7 @@
 LOCAL_PATH := $(call my-dir)
 
 ### host library ##########################################
-$(call emugl-begin-host-static-library,libOpenGLESDispatch)
+$(call emugl-begin-static-library,libOpenGLESDispatch)
 $(call emugl-import,libGLESv2_dec libGLESv1_dec)
 
 # use Translator's egl headers

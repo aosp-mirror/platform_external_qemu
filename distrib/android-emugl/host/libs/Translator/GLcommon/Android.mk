@@ -31,7 +31,7 @@ endif
 
 ### EGL host implementation ########################
 
-$(call emugl-begin-host-static-library,libGLcommon)
+$(call emugl-begin-static-library,libGLcommon)
 
 LOCAL_SRC_FILES := $(host_common_SRC_FILES)
 $(call emugl-export,LDLIBS,$(host_common_LDLIBS))
