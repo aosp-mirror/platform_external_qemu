@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c87cbc59_a233be46",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderWindow.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-20T09:31:34Z",
+      "side": 1,
+      "message": "Why do you need this? the previous code was done to intentionally avoid un-needed header inclusion. It\u0027s good C++ hygiene and ensure that the declarations in this header also do not depend on any declarations imported directly or indirectly from emugl/common/thread.h",
+      "revId": "ac2a3fd6d6ad861d101acdfe0ac6375ec47e0e2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c87cbc59_c238c223",
+        "filename": "distrib/android-emugl/shared/emugl/common/thread_store.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-20T09:31:34Z",
+      "side": 1,
+      "message": "why the change in name, i.e. why not just use ThreadStoreBase / ThreadStore as before? This seems rather liberal.",
+      "revId": "ac2a3fd6d6ad861d101acdfe0ac6375ec47e0e2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
