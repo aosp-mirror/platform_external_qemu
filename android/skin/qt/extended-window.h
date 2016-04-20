@@ -37,8 +37,9 @@
 #include <QDoubleValidator>
 #include <QShowEvent>
 
-#include <vector>
 #include <map>
+#include <memory>
+#include <vector>
 
 class EmulatorQtWindow;
 class ToolWindow;
@@ -88,12 +89,8 @@ private:
     ToolWindow* mToolWindow;
     std::map<ExtendedWindowPane, QPushButton*> mPaneButtonMap;
     const ShortcutKeyStore<QtUICommand>* mQtUIShortcuts;
-    // What we should really have here is a unique_ptr<>, but it requires
-    // full class, not just a forward declaration. And that won't work easily
-    // as we would have a circular include.
-    Ui::ExtendedControls* mExtendedUi;
+    std::unique_ptr<Ui::ExtendedControls> mExtendedUi;
     bool mFirstShowEvent = true;
     SizeTweaker mSizeTweaker;
     QButtonGroup mSidebarButtons;
 };
-
