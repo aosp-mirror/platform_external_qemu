@@ -28,9 +28,13 @@
 namespace android {
 namespace base {
 
+class AutoLock;
+
 // Simple wrapper class for mutexes.
 class Lock {
 public:
+    using AutoLock = android::base::AutoLock;
+
     // Constructor.
     Lock() {
 #ifdef _WIN32
