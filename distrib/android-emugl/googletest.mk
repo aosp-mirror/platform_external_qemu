@@ -18,7 +18,7 @@ ifneq (windows,$(BUILD_TARGET_OS))
     common_LDLIBS += -lpthread
 endif
 
-$(call emugl-begin-host-static-library,libemugl_gtest)
+$(call emugl-begin-static-library,libemugl_gtest)
 LOCAL_SRC_FILES := $(common_SRC_FILES)
 LOCAL_CFLAGS += $(common_CFLAGS)
 LOCAL_CPP_EXTENSION := .cc
@@ -33,5 +33,4 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
 LOCAL_CPP_EXTENSION := .cc
 $(call emugl-export,C_INCLUDES,$(LOCAL_PATH)/include)
 $(call emugl-export,LDLIBS,$(common_LDLIBS) -lpthread)
-LOCAL_HOST_BUILD := true
 $(call emugl-end-module)

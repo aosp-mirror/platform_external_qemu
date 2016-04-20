@@ -34,7 +34,7 @@ else
 
 endif
 
-$(call emugl-begin-host-static-library,libemugl_common)
+$(call emugl-begin-static-library,libemugl_common)
 LOCAL_SRC_FILES := $(host_commonSources)
 $(call emugl-export,C_INCLUDES,$(EMUGL_PATH)/shared)
 $(call emugl-export,LDLIBS,$(host_commonLdLibs))
@@ -56,12 +56,12 @@ host_commonSources := \
     unique_integer_map_unittest.cpp \
     stringparsing_unittest.cpp
 
-$(call emugl-begin-host-executable,emugl$(BUILD_TARGET_SUFFIX)_common_host_unittests)
+$(call emugl-begin-executable,emugl$(BUILD_TARGET_SUFFIX)_common_host_unittests)
 LOCAL_SRC_FILES := $(host_commonSources)
 $(call emugl-import,libemugl_common libemugl_gtest)
 $(call emugl-end-module)
 
-$(call emugl-begin-host-shared-library,lib$(BUILD_TARGET_SUFFIX)emugl_test_shared_library)
+$(call emugl-begin-shared-library,lib$(BUILD_TARGET_SUFFIX)emugl_test_shared_library)
 LOCAL_SRC_FILES := testing/test_shared_library.cpp
 LOCAL_CFLAGS := -fvisibility=default
 $(call emugl-end-module)

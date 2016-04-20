@@ -1,7 +1,7 @@
 LOCAL_PATH := $(call my-dir)
 
 ### host library #########################################
-$(call emugl-begin-host-static-library,libGLESv1_dec)
+$(call emugl-begin-static-library,libGLESv1_dec)
 
 $(call emugl-import, libOpenglCodecCommon)
 $(call emugl-export,C_INCLUDES,$(LOCAL_PATH))
