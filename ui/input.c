@@ -165,7 +165,7 @@ void kbd_put_ledstate(int ledstate)
     }
 }
 
-void kbd_mouse_event(int dx, int dy, int dz, int buttons_state)
+void kbd_mouse_event(int dx, int dy, int is_trackball, int button_state_set)
 {
     QEMUPutMouseEntry *entry;
     QEMUPutMouseEvent *mouse_event;
@@ -191,12 +191,12 @@ void kbd_mouse_event(int dx, int dy, int dz, int buttons_state)
             } else {
                 width = graphic_width - 1;
             }
-            mouse_event(mouse_event_opaque, width - dy, dx, dz, buttons_state);
+            mouse_event(mouse_event_opaque, width - dy, dx, is_trackball, button_state_set);
         } else {
-            mouse_event(mouse_event_opaque, dx, dy, dz, buttons_state);
+            mouse_event(mouse_event_opaque, dx, dy, is_trackball, button_state_set);
         }
 #else
-        mouse_event(mouse_event_opaque, dx, dy, dz, buttons_state);
+        mouse_event(mouse_event_opaque, dx, dy, is_trackball, button_state_set);
 #endif
     }
 }

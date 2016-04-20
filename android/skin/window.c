@@ -13,6 +13,7 @@
 
 #include "android/config/config.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/multitouch-screen.h"
 #include "android/skin/charmap.h"
 #include "android/skin/event.h"
 #include "android/skin/image.h"
@@ -1046,15 +1047,11 @@ struct SkinWindow {
     int           scroll_h; // Needed for OSX
 };
 
-static void
-add_finger_event(SkinWindow* window,
-                 unsigned x,
-                 unsigned y,
-                 unsigned state)
-{
-    //fprintf(stderr, "::: finger %d,%d %d\n", x, y, state);
-
-    window->win_funcs->mouse_event(x, y, state);
+static void add_finger_event(SkinWindow* window,
+                             unsigned x,
+                             unsigned y,
+                             unsigned button_state_set) {
+    window->win_funcs->mouse_event(x, y, button_state_set);
 }
 
 static void
@@ -1823,17 +1820,17 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
     Button*  button;
     int      mx, my;
 
-    FingerState*    finger;
+    // This button state set will still be interpreted correctly for
+    // single-touch, which only uses the first bit.
+    int button_state_set = multitouch_create_button_state_set(
+            ev->type != kEventMouseButtonUp, ev->u.mouse.skip_sync,
+            ev->u.mouse.button);
 
-    // The "button state" contains two flags: the lowest order bit indicates whether or not this is
-    // a press (1) or release (0) event, and the second bit indicates if this is the primary (0) or
-    // secondary (1) finger.
-    unsigned        button_state = (ev->type == kEventMouseButtonUp ? 0 : 1);
-    if (ev->u.mouse.button == kMouseButtonLeft) {
-        finger = &window->finger;
-    } else {
+    FingerState* finger;
+    if (ev->u.mouse.button == kMouseButtonSecondaryTouch) {
         finger = &window->secondary_finger;
-        button_state += 2;
+    } else {
+        finger = &window->finger;
     }
 
     if (!window->surface)
@@ -1858,10 +1855,8 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
 #endif
         if (finger->inside) {
             finger->tracking = 1;
-            add_finger_event(window,
-                             finger->pos.x,
-                             finger->pos.y,
-                             button_state);
+            add_finger_event(window, finger->pos.x, finger->pos.y,
+                             button_state_set);
         } else {
             window->button.pressed = NULL;
             button = window->button.hover;
@@ -1900,10 +1895,8 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         {
             skin_window_move_mouse( window, finger, mx, my );
             finger->tracking = 0;
-            add_finger_event(window,
-                             finger->pos.x,
-                             finger->pos.y,
-                             button_state);
+            add_finger_event(window, finger->pos.x, finger->pos.y,
+                             button_state_set);
         }
         break;
 
@@ -1921,10 +1914,8 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         {
             skin_window_move_mouse( window, finger, mx, my );
             if ( finger->tracking ) {
-                add_finger_event(window,
-                                 finger->pos.x,
-                                 finger->pos.y,
-                                 button_state);
+                add_finger_event(window, finger->pos.x, finger->pos.y,
+                                 button_state_set);
             }
         }
         break;

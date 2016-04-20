@@ -83,12 +83,12 @@ static void emulator_window_keycodes_event(int* keycodes, int count) {
 }
 
 static void emulator_window_window_mouse_event(unsigned x,
-                                         unsigned y,
-                                         unsigned state) {
+                                               unsigned y,
+                                               unsigned button_state_set) {
     /* NOTE: the 0 is used in hw/android/goldfish/events_device.c to
      * differentiate between a touch-screen and a trackball event
      */
-    user_event_agent->sendMouseEvent(x, y, 0, state);
+    user_event_agent->sendMouseEvent(x, y, 0, button_state_set);
 }
 
 static void emulator_window_set_device_orientation(SkinRotation rotation) {

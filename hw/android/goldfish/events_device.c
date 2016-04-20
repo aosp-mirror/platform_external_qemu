@@ -268,23 +268,21 @@ static void events_put_keycode(void *x, int keycode)
     enqueue_event(s, EV_KEY, keycode&0x3ff, (keycode&0x400) ? 1 : 0);
 }
 
-static void events_put_mouse(void *opaque, int dx, int dy, int dz, int buttons_state)
+static void events_put_mouse(void *opaque, int dx, int dy, int is_trackball, int button_state_set)
 {
     events_state *s = (events_state *) opaque;
-    /* in the Android emulator, we use dz == 0 for touchscreen events,
-     * and dz == 1 for trackball events. See the kbd_mouse_event calls
-     * in android/skin/trackball.c and android/skin/window.c
-     */
-    if (dz == 0) {
+
+    if (is_trackball == 0) {
         if (androidHwConfig_isScreenMultiTouch(android_hw)) {
             /* Convert mouse event into multi-touch event */
-            multitouch_update_pointer(MTES_DEVICE, (buttons_state & 2) ? 1 : 0, dx, dy,
-                                      (buttons_state & 1) ? 0x81 : 0);
+            int pressure = multitouch_is_touch_down(button_state_set) ? 0x81 : 0;
+            int finger = multitouch_get_finger_number(button_state_set);
+            multitouch_update_pointer(MTES_DEVICE, finger, dx, dy, pressure,
+                                      multitouch_should_skip_sync(button_state_set));
         } else if (androidHwConfig_isScreenTouch(android_hw)) {
             enqueue_event(s, EV_ABS, ABS_X, dx);
             enqueue_event(s, EV_ABS, ABS_Y, dy);
-            enqueue_event(s, EV_ABS, ABS_Z, dz);
-            enqueue_event(s, EV_KEY, BTN_TOUCH, buttons_state&1);
+            enqueue_event(s, EV_KEY, BTN_TOUCH, button_state_set & 1);
             enqueue_event(s, EV_SYN, 0, 0);
         }
     } else {

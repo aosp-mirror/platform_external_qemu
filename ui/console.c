@@ -47,7 +47,6 @@ void original_qemu_console_resize(DisplayState *ds, int width, int height);
 #define qemu_console_resize original_qemu_console_resize
 #endif
 
-int multitouch_enabled = 0;
 static QEMUDisplayCloseCallback *qemu_display_close_callback = NULL;
 static void *qemu_display_close_callback_opaque = NULL;
 
