@@ -16,6 +16,24 @@
       "revId": "7371367055fd1a94386897c19a6f0a0861ede51e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "485feccb_359f3ad9",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-20T15:14:07Z",
+      "side": 1,
+      "message": "well, it\u0027s already not as simple. The concepts like looper (which requires a separate main loop) and all classes that depend on it make it really hard to plug into some new code.\nI wanted to have something similar to the STL and CRT here - stuff that doesn\u0027t need anything but just an #include + linking, while emu-base has some more complicated things",
+      "parentUuid": "c87cbc59_62ae16ac",
+      "revId": "7371367055fd1a94386897c19a6f0a0861ede51e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
