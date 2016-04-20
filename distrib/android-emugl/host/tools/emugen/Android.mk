@@ -3,7 +3,6 @@
 LOCAL_PATH:=$(call my-dir)
 
 $(call emugl-begin-host-executable,emugen)
-
 LOCAL_SRC_FILES := \
     ApiGen.cpp \
     EntryPoint.cpp \
