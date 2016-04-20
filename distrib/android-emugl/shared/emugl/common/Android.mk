@@ -7,7 +7,6 @@ LOCAL_PATH := $(call my-dir)
 
 commonSources := \
         crash_reporter.cpp \
-        id_to_object_map.cpp \
         logging.cpp \
         shared_library.cpp \
         stringparsing.cpp \
@@ -30,9 +29,7 @@ $(call emugl-end-module)
 ### emugl_common_unittests ##############################################
 
 host_commonSources := \
-    id_to_object_map_unittest.cpp \
     shared_library_unittest.cpp \
-    unique_integer_map_unittest.cpp \
     stringparsing_unittest.cpp
 
 $(call emugl-begin-executable,emugl$(BUILD_TARGET_SUFFIX)_common_host_unittests)
