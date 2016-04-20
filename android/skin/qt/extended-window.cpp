@@ -105,9 +105,15 @@ ExtendedWindow::ExtendedWindow(
     }
 }
 
-ExtendedWindow::~ExtendedWindow() {
-    delete mExtendedUi;
-}
+// std::unique_ptr<T> requires T to be a complete type when compiling
+// code in which its destructor is invoked.  The mExtendedUi field has
+// type std::unique_ptr<Ui::ExtendedControls>.  The referent type
+// Ui::ExtendedControls is incomplete in the .h file -- and including
+// the relevant .h file that defines Ui::ExtendedControls would create
+// an inclusion cycle.  So this definition, while seemingly trivial,
+// must appear here, where that type is complete, rather than in the
+// .h file.
+ExtendedWindow::~ExtendedWindow() = default;
 
 void ExtendedWindow::showPane(ExtendedWindowPane pane) {
     show();
