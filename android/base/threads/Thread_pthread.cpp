@@ -52,6 +52,11 @@ Thread::Thread(ThreadFlags flags) :
 
 Thread::~Thread() {
     assert(!mStarted || mFinished);
+    if ((mFlags & ThreadFlags::Detach) == ThreadFlags::None
+        && mStarted && !mJoined) {
+        // Make sure we reclaim the OS resources.
+        pthread_join(mThread, nullptr);
+    }
     pthread_mutex_destroy(&mLock);
 }
 
@@ -80,9 +85,10 @@ bool Thread::wait(intptr_t *exitStatus) {
     // NOTE: Do not hold the lock when waiting for the thread to ensure
     // it can update mFinished and mExitStatus properly in thread_main
     // without blocking.
-    if (pthread_join(mThread, NULL)) {
+    if (!mJoined && pthread_join(mThread, NULL)) {
         return false;
     }
+    mJoined = true;
 
     if (exitStatus) {
         *exitStatus = mExitStatus;
@@ -96,9 +102,14 @@ bool Thread::tryWait(intptr_t *exitStatus) {
     }
 
     ScopedLocker locker(&mLock);
-    if (!mFinished || pthread_join(mThread, NULL)) {
+    if (!mFinished) {
         return false;
     }
+
+    if (!mJoined && pthread_join(mThread, NULL)) {
+        return false;
+    }
+    mJoined = true;
 
     if (exitStatus) {
         *exitStatus = mExitStatus;
