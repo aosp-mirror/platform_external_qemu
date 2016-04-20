@@ -20,24 +20,37 @@
 #       LOCAL_C_INCLUDES += ....
 #   $(call emugl-end-module)
 #
-emugl-begin-host-static-library = $(call emugl-begin-module,$1,HOST_STATIC_LIBRARY,HOST)
-emugl-begin-host-shared-library = $(call emugl-begin-module,$1,HOST_SHARED_LIBRARY,HOST)
-emugl-begin-host-executable = $(call emugl-begin-module,$1,HOST_EXECUTABLE,HOST)
+emugl-begin-static-library = $(call emugl-begin-module,$1,HOST_STATIC_LIBRARY,HOST,$2)
+emugl-begin-shared-library = $(call emugl-begin-module,$1,HOST_SHARED_LIBRARY,HOST,$2)
+emugl-begin-executable = $(call emugl-begin-module,$1,HOST_EXECUTABLE,HOST,$2)
+
+# These macros define a target which is supposed to run on the current build
+# host machine ("host"). Use it for any tools that will be used later during
+# the build.
+emugl-begin-host-static-library = $(call emugl-begin-static-library,$1,true)
+emugl-begin-host-shared-library = $(call emugl-begin-shared-library,$1,true)
+emugl-begin-host-executable = $(call emugl-begin-executable,$1,true)
 
 # Internal list of all declared modules (used for sanity checking)
 _emugl_modules :=
 _emugl_HOST_modules :=
 
 # do not use directly, see functions above instead
+# $4 is set non-empty for a host build, where we don't support any common
+# libraries - you're on your own here.
+# that's because of the rest of the build system which doesn't support host
+# builds.
 emugl-begin-module = \
     $(eval include $(CLEAR_VARS)) \
+    $(eval LOCAL_HOST_BUILD := $4) \
     $(eval LOCAL_MODULE := $1) \
     $(eval LOCAL_MODULE_TAGS := $(if $3,,debug)) \
     $(eval LOCAL_MODULE_CLASS := $(patsubst HOST_%,%,$(patsubst %EXECUTABLE,%EXECUTABLES,$(patsubst %LIBRARY,%LIBRARIES,$2)))) \
     $(eval LOCAL_IS_HOST_MODULE := $(if $3,true,))\
-    $(eval LOCAL_C_INCLUDES += $(EMUGL_COMMON_INCLUDES)) \
+    $(eval LOCAL_C_INCLUDES += $(if $4,,$(ANDROID_EMU_INCLUDES)) $(EMUGL_COMMON_INCLUDES)) \
     $(eval LOCAL_CFLAGS += $(EMUGL_COMMON_CFLAGS)) \
-    $(eval LOCAL_LDLIBS += $(CXX_STD_LIB)) \
+    $(eval LOCAL_STATIC_LIBRARIES += $(if $4,,$(ANDROID_STDLIB_STATIC_LIBRARIES))) \
+    $(eval LOCAL_LDLIBS += $(if $4,,$(ANDROID_STDLIB_LDLIBS)) $(CXX_STD_LIB)) \
     $(eval LOCAL_BUILD_FILE := $(BUILD_$2)) \
     $(call _emugl-init-module,$1,$2,$3)
 

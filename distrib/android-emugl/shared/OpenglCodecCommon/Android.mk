@@ -13,7 +13,7 @@ host_commonSources := $(commonSources)
 host_commonLdLibs := $(CXX_STD_LIB)
 
 ### OpenglCodecCommon  host ##############################################
-$(call emugl-begin-host-static-library,libOpenglCodecCommon)
+$(call emugl-begin-static-library,libOpenglCodecCommon)
 
 LOCAL_SRC_FILES := $(host_commonSources)
 $(call emugl-import, libemugl_common)
