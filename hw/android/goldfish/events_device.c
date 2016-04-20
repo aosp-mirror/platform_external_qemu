@@ -278,12 +278,13 @@ static void events_put_mouse(void *opaque, int dx, int dy, int dz, int buttons_s
     if (dz == 0) {
         if (androidHwConfig_isScreenMultiTouch(android_hw)) {
             /* Convert mouse event into multi-touch event */
-            multitouch_update_pointer(MTES_DEVICE, (buttons_state & 2) ? 1 : 0, dx, dy,
-                                      (buttons_state & 1) ? 0x81 : 0);
+            int pressure = multitouch_is_touch_down(buttons_state) ? 0x81 : 0;
+            int finger = multitouch_is_second_finger(buttons_state);
+            multitouch_update_pointer(MTES_DEVICE, finger, dx, dy, pressure,
+                                      multitouch_should_skip_sync(buttons_state));
         } else if (androidHwConfig_isScreenTouch(android_hw)) {
             enqueue_event(s, EV_ABS, ABS_X, dx);
             enqueue_event(s, EV_ABS, ABS_Y, dy);
-            enqueue_event(s, EV_ABS, ABS_Z, dz);
             enqueue_event(s, EV_KEY, BTN_TOUCH, buttons_state&1);
             enqueue_event(s, EV_SYN, 0, 0);
         }
