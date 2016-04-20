@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c87cbc59_62ae16ac",
+        "filename": "Makefile.android-emu.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-20T08:31:50Z",
+      "side": 1,
+      "message": "That\u0027s what android-emu-base is already supposed to be (as opposed to android-emu which adds emulation-specific features on top of it). Is there a specific reason why you don\u0027t want to use this instead? If so, what about moving the \"undesired\" stuff from android-emu-base to android-emu then?",
+      "revId": "7371367055fd1a94386897c19a6f0a0861ede51e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
