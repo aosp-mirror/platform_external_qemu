@@ -77,7 +77,7 @@ bool  EglGlobalInfo::removeDisplay(EGLDisplay dpy) {
     for (size_t n = 0; n < m_displays.size(); ++n) {
         if (m_displays[n] == static_cast<EglDisplay*>(dpy)) {
             delete m_displays[n];
-            m_displays.remove(n);
+            m_displays.erase(m_displays.begin() + n);
             return true;
         }
     }
