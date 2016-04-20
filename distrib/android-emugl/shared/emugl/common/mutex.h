@@ -12,84 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef EMUGL_MUTEX_H
-#define EMUGL_MUTEX_H
+#pragma once
 
-#ifdef _WIN32
-#  define WIN32_LEAN_AND_MEAN 1
-#  include <windows.h>
-#else
-#  include <pthread.h>
-#endif
+#include "android/base/synchronization/Lock.h"
 
 namespace emugl {
 
-class ConditionVariable;
-
-// Simple wrapper class for mutexes.
-class Mutex {
-public:
-    // Constructor.
-    Mutex() {
-#ifdef _WIN32
-        ::InitializeCriticalSection(&mLock);
-#else
-        ::pthread_mutex_init(&mLock, NULL);
-#endif
-    }
-
-    // Destructor.
-    ~Mutex() {
-#ifdef _WIN32
-        ::DeleteCriticalSection(&mLock);
-#else
-        ::pthread_mutex_destroy(&mLock);
-#endif
-    }
-
-    // Acquire the mutex.
-    void lock() {
-#ifdef _WIN32
-      ::EnterCriticalSection(&mLock);
-#else
-      ::pthread_mutex_lock(&mLock);
-#endif
-    }
-
-    // Release the mutex.
-    void unlock() {
-#ifdef _WIN32
-       ::LeaveCriticalSection(&mLock);
-#else
-       ::pthread_mutex_unlock(&mLock);
-#endif
-    }
-
-    // Helper class to lock / unlock a mutex automatically on scope
-    // entry and exit.
-    class AutoLock {
-    public:
-        AutoLock(Mutex& mutex) : mMutex(&mutex) {
-            mMutex->lock();
-        }
-
-        ~AutoLock() {
-            mMutex->unlock();
-        }
-    private:
-        Mutex* mMutex;
-    };
-
-private:
-#ifdef _WIN32
-    CRITICAL_SECTION mLock;
-#else
-    friend class ConditionVariable;
-    pthread_mutex_t mLock;
-#endif
-
-};
+using Mutex = android::base::Lock;
 
 }  // namespace emugl
-
-#endif  // EMUGL_MUTEX_H
