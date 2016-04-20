@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "485feccb_d55a66fe",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderWindow.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-20T15:08:05Z",
+      "side": 1,
+      "message": "forward declarations for typedefs look not nice: one has to declare the actual class first (android::base::Thread) and then provide a typedef. That\u0027s why I prefer to just include it here",
+      "parentUuid": "c87cbc59_a233be46",
+      "revId": "ac2a3fd6d6ad861d101acdfe0ac6375ec47e0e2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c87cbc59_c238c223",
         "filename": "distrib/android-emugl/shared/emugl/common/thread_store.h",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2016-04-20T09:31:34Z",
       "side": 1,
       "message": "why the change in name, i.e. why not just use ThreadStoreBase / ThreadStore as before? This seems rather liberal.",
+      "revId": "ac2a3fd6d6ad861d101acdfe0ac6375ec47e0e2c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "485feccb_f55f62eb",
+        "filename": "distrib/android-emugl/shared/emugl/common/thread_store.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-20T15:08:05Z",
+      "side": 1,
+      "message": "ThreadStore in emugl is exactly the ThreadStoreBase from android::base - because emugl doesn\u0027t have the templated version at all",
+      "parentUuid": "c87cbc59_c238c223",
       "revId": "ac2a3fd6d6ad861d101acdfe0ac6375ec47e0e2c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
