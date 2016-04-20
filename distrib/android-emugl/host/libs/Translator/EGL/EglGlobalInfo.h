@@ -22,12 +22,13 @@
 #include "EglOsApi.h"
 
 #include "emugl/common/lazy_instance.h"
-#include "emugl/common/pod_vector.h"
 #include "emugl/common/mutex.h"
 
 #include <GLcommon/TranslatorIfaces.h>
 
 #include <EGL/egl.h>
+
+#include <vector>
 
 class EglDisplay;
 
@@ -97,9 +98,9 @@ private:
     EglGlobalInfo();
     ~EglGlobalInfo();
 
-    friend struct emugl::LazyInstance<EglGlobalInfo>;
+    friend emugl::LazyInstance<EglGlobalInfo>;
 
-    emugl::PodVector<EglDisplay*>  m_displays;
+    std::vector<EglDisplay*>  m_displays;
     EglOS::Engine*                 m_engine;
     EglOS::Display*                m_display;
     const GLESiface*               m_gles_ifaces[MAX_GLES_VERSION];

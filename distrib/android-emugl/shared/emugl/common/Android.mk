@@ -7,31 +7,17 @@ LOCAL_PATH := $(call my-dir)
 
 commonSources := \
         crash_reporter.cpp \
-        id_to_object_map.cpp \
-        lazy_instance.cpp \
         logging.cpp \
-        message_channel.cpp \
-        pod_vector.cpp \
         shared_library.cpp \
-        smart_ptr.cpp \
         stringparsing.cpp \
         sockets.cpp \
-        thread_store.cpp \
 
 host_commonSources := $(commonSources)
 
 host_commonLdLibs := $(CXX_STD_LIB)
 
 ifneq (windows,$(BUILD_TARGET_OS))
-    host_commonSources += \
-        thread_pthread.cpp \
-
     host_commonLdLibs += -ldl -lpthread
-else
-    host_commonSources += \
-        condition_variable_win32.cpp \
-        thread_win32.cpp \
-
 endif
 
 $(call emugl-begin-static-library,libemugl_common)
@@ -43,17 +29,7 @@ $(call emugl-end-module)
 ### emugl_common_unittests ##############################################
 
 host_commonSources := \
-    condition_variable_unittest.cpp \
-    id_to_object_map_unittest.cpp \
-    lazy_instance_unittest.cpp \
-    pod_vector_unittest.cpp \
-    message_channel_unittest.cpp \
-    mutex_unittest.cpp \
     shared_library_unittest.cpp \
-    smart_ptr_unittest.cpp \
-    thread_store_unittest.cpp \
-    thread_unittest.cpp \
-    unique_integer_map_unittest.cpp \
     stringparsing_unittest.cpp
 
 $(call emugl-begin-executable,emugl$(BUILD_TARGET_SUFFIX)_common_host_unittests)

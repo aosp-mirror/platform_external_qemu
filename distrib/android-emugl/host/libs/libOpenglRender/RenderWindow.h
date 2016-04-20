@@ -17,9 +17,7 @@
 
 #include "OpenglRender/render_api.h"
 
-namespace emugl {
-class Thread;
-}  // namespace emugl
+#include "emugl/common/thread.h"
 
 class RenderWindowChannel;
 struct RenderWindowMessage;

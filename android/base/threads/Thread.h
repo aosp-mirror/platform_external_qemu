@@ -114,6 +114,10 @@ private:
     bool mStarted = false;
     // Access guarded by |mLock|.
     bool mFinished = false;
+#ifndef _WIN32
+    // Posix-only, remember if we've joined our non-detached thread already.
+    bool mJoined = false;
+#endif
 };
 
 // Helper function to obtain a printable id for the current thread.

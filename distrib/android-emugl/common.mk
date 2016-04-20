@@ -42,9 +42,10 @@ emugl-begin-module = \
     $(eval include $(CLEAR_VARS)) \
     $(eval LOCAL_MODULE := $1) \
     $(eval LOCAL_MODULE_CLASS := $(patsubst HOST_%,%,$(patsubst %EXECUTABLE,%EXECUTABLES,$(patsubst %LIBRARY,%LIBRARIES,$2)))) \
-    $(eval LOCAL_C_INCLUDES += $(EMUGL_COMMON_INCLUDES)) \
+    $(eval LOCAL_C_INCLUDES += $(if $3,,$(ANDROID_EMU_BASE_INCLUDES)) $(EMUGL_COMMON_INCLUDES)) \
     $(eval LOCAL_CFLAGS += $(EMUGL_COMMON_CFLAGS)) \
-    $(eval LOCAL_LDLIBS += $(CXX_STD_LIB)) \
+    $(eval LOCAL_STATIC_LIBRARIES += $(if $3,,$(ANDROID_EMU_BASE_STATIC_LIBRARIES))) \
+    $(eval LOCAL_LDLIBS += $(if $3,,$(ANDROID_EMU_BASE_LDLIBS)) $(CXX_STD_LIB)) \
     $(eval LOCAL_BUILD_FILE := $(BUILD_$2)) \
     $(call _emugl-init-module,$1,$2,$3)
 

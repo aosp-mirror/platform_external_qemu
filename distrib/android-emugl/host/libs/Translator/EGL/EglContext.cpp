@@ -23,7 +23,7 @@ unsigned int EglContext::s_nextContextHndl = 0;
 extern EglGlobalInfo* g_eglInfo; // defined in EglImp.cpp
 
 bool EglContext::usingSurface(SurfacePtr surface) {
-  return surface.Ptr() == m_read.Ptr() || surface.Ptr() == m_draw.Ptr();
+  return surface.get() == m_read.get() || surface.get() == m_draw.get();
 }
 
 EglContext::EglContext(EglDisplay *dpy,
@@ -41,7 +41,7 @@ EglContext::EglContext(EglDisplay *dpy,
         m_draw(NULL),
         m_version(ver),
         m_mngr(mngr) {
-    m_shareGroup = shared_context.Ptr()?
+    m_shareGroup = shared_context.get()?
                    mngr->attachShareGroup(context,shared_context->nativeType()):
                    mngr->createShareGroup(context);
     m_hndl = ++s_nextContextHndl;
