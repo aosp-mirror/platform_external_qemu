@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c87cbc59_c20fe285",
+        "filename": "distrib/android-emugl/common.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-20T09:22:02Z",
+      "side": 1,
+      "message": "I don\u0027t think you need these anymore.",
+      "revId": "0dda67766d92dfbc95dc1dcb553ad49e7d73f549",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c87cbc59_c2bd22da",
+        "filename": "distrib/android-emugl/common.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-20T09:22:02Z",
+      "side": 1,
+      "message": "This is slightly confusing, because $3 is already set for \"host\" builds, in the deprecated context of the Android platform build. I recommend getting rid of it entirely in a separate cleanup patch instead.",
+      "revId": "0dda67766d92dfbc95dc1dcb553ad49e7d73f549",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c87cbc59_22ffae77",
+        "filename": "distrib/android-emugl/common.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-20T09:22:02Z",
+      "side": 1,
+      "message": "Similarly, LOCAL_MODULE_TAGS and LOCAL_IS_HOST_MODULE are from the Android platform build and are ignored now, so could be removed in a cleanup patch. Note that LOCAL_IS_HOST_MODULE and LOCAL_HOST_MODULE are intentionally different for historical reasons. Yes, I know it *is* confusing :)",
+      "revId": "0dda67766d92dfbc95dc1dcb553ad49e7d73f549",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

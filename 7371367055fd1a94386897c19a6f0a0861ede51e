@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c87cbc59_a20ade76",
+        "filename": "distrib/android-emugl/common.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-20T09:22:02Z",
+      "side": 0,
+      "message": "there is a little history to explain here, the \"-host-\" infix was used because, believe or not, these build files were parsed by the Android *platform* build a very long time ago, and this build generates Android and device-specific (e.g. ARM) by default. I.e. in this context, \"target\" binaries run on an Android device, and \"host\" binaries run on the developer\u0027s machine.\n\nThe emulator build is different now, but supports cross-compilation, in this context, \"target\" binaries run on the developer\u0027s machine (in case of a regular build), or on the targetted cross system (e.g. Windows when buiding on Linux with --mingw).\n\nLOCAL_HOST_MODULE is defined to true to indicate that one needs to generate binaries for the build machine (i.e. the \u0027host\u0027 in this context), but we can rename the functions emugl-begin-xxxx instead of emugl-begin-host-xxxx without worry.",
+      "revId": "7371367055fd1a94386897c19a6f0a0861ede51e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c87cbc59_42fcb280",
+        "filename": "distrib/android-emugl/googletest.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-20T09:22:02Z",
+      "side": 0,
+      "message": "This should not be removed, because it indicates that libemgul_gtest_host is compiled for the build/host operating system, unlike libemugl_gtest which will be compiled for a different system in case of cross-compilation.",
+      "revId": "7371367055fd1a94386897c19a6f0a0861ede51e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c87cbc59_c2e60200",
+        "filename": "distrib/android-emugl/host/tools/emugen/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-20T09:22:02Z",
+      "side": 0,
+      "message": "You *really* need LOCAL_HOST_BUILD for emugen, because the generated executable is used at build time to generate decoder sources. Otherwise, the Windows cross-build might not work.",
+      "revId": "7371367055fd1a94386897c19a6f0a0861ede51e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c87cbc59_e2eb06c5",
+        "filename": "distrib/android-emugl/host/tools/emugen/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-20T09:22:02Z",
+      "side": 0,
+      "message": "same here then",
+      "revId": "7371367055fd1a94386897c19a6f0a0861ede51e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
