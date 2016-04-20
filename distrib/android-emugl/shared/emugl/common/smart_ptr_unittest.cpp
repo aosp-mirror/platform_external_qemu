@@ -62,7 +62,7 @@ public:
 
 TEST_F(SmartPtrTest, Empty) {
     SmartPtr<MyClass> ptr;
-    EXPECT_FALSE(ptr.Ptr());
+    EXPECT_FALSE(ptr.get());
 
     EXPECT_EQ(0, mNewCount);
     EXPECT_EQ(0, mDeleteCount);
@@ -76,7 +76,7 @@ TEST_F(SmartPtrTest, SingleRef) {
 
     {
         SmartPtr<MyClass> ptr(obj);
-        EXPECT_EQ(obj, ptr.Ptr());
+        EXPECT_EQ(obj, ptr.get());
 
         EXPECT_EQ(1, mNewCount);
         EXPECT_EQ(0, mDeleteCount);
@@ -95,8 +95,8 @@ TEST_F(SmartPtrTest, CopyConstructor) {
         SmartPtr<MyClass> ptr1(obj);
         {
             SmartPtr<MyClass> ptr2(ptr1);
-            EXPECT_EQ(2, ptr1.getRefCount());
-            EXPECT_EQ(2, ptr2.getRefCount());
+            EXPECT_EQ(2, ptr1.use_count());
+            EXPECT_EQ(2, ptr2.use_count());
             EXPECT_EQ(1, mNewCount);
             EXPECT_EQ(0, mDeleteCount);
             EXPECT_EQ(0, mDoCount);
@@ -122,9 +122,9 @@ TEST_F(SmartPtrTest, AssignmentOperator) {
     EXPECT_EQ(2, mNewCount);
     EXPECT_EQ(1, mDeleteCount);
 
-    EXPECT_EQ(ptr1.Ptr(), ptr2.Ptr());
-    EXPECT_EQ(2, ptr1.getRefCount());
-    EXPECT_EQ(2, ptr2.getRefCount());
+    EXPECT_EQ(ptr1.get(), ptr2.get());
+    EXPECT_EQ(2, ptr1.use_count());
+    EXPECT_EQ(2, ptr2.use_count());
 }
 
 

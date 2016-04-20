@@ -94,7 +94,7 @@ void initClientFuncs(const GLESiface *iface, int idx)
     static void _egl_ ## fname params \
     { \
         ThreadInfo* thread  = getThreadInfo(); \
-        if (!thread->eglContext.Ptr()) { \
+        if (!thread->eglContext.get()) { \
             return; \
         } \
         int idx = (int)thread->eglContext->version() - 1; \
@@ -108,7 +108,7 @@ void initClientFuncs(const GLESiface *iface, int idx)
     static rtype _egl_ ## fname params \
     { \
         ThreadInfo* thread  = getThreadInfo(); \
-        if (!thread->eglContext.Ptr()) { \
+        if (!thread->eglContext.get()) { \
             return (rtype)0; \
         } \
         int idx = (int)thread->eglContext->version() - 1; \

@@ -14,6 +14,8 @@
 * limitations under the License.
 */
 
+#pragma once
+
 typedef void (*logger_t)(const char* fmt, ...);
 extern logger_t emugl_logger;
 extern logger_t emugl_cxt_logger;

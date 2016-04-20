@@ -198,7 +198,7 @@ ThreadStore::ThreadStore(Destructor* destroy) {
 
 ThreadStore::~ThreadStore() {
     D("Entering this=%p\n", this);
-    GlobalState* state = gGlobalState.ptr();
+    GlobalState* state = gGlobalState.get();
     state->unregisterKey(mKey);
     D("Exiting this=%p\n", this);
 }

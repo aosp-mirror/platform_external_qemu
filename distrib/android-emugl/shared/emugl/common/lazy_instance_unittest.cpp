@@ -62,18 +62,18 @@ TEST(LazyInstance, HasInstance) {
     LazyInstance<Foo> foo_instance = LAZY_INSTANCE_INIT;
     EXPECT_FALSE(foo_instance.hasInstance());
     EXPECT_FALSE(foo_instance.hasInstance());
-    foo_instance.ptr();
+    foo_instance.get();
     EXPECT_TRUE(foo_instance.hasInstance());
 }
 
 TEST(LazyInstance, Simple) {
     LazyInstance<Foo> foo_instance = LAZY_INSTANCE_INIT;
-    Foo* foo1 = foo_instance.ptr();
+    Foo* foo1 = foo_instance.get();
     EXPECT_TRUE(foo1);
     EXPECT_EQ(42, foo_instance->get());
     foo1->set(10);
     EXPECT_EQ(10, foo_instance->get());
-    EXPECT_EQ(foo1, foo_instance.ptr());
+    EXPECT_EQ(foo1, foo_instance.get());
 }
 
 // For the following test, launch 1000 threads that each try to get
@@ -133,7 +133,7 @@ TEST(LazyInstance, MultipleThreads) {
     EXPECT_EQ(1, counter_instance->getValue());
 
     // Now compare all the store values, they should be the same.
-    StaticCounter* expectedValue = counter_instance.ptr();
+    StaticCounter* expectedValue = counter_instance.get();
     for (size_t n = 0; n < kNumThreads; ++n) {
         EXPECT_EQ(expectedValue, state.mValues[n]) << "For thread " << n;
     }

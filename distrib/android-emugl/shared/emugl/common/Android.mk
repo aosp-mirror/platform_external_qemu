@@ -10,7 +10,6 @@ commonSources := \
         id_to_object_map.cpp \
         logging.cpp \
         shared_library.cpp \
-        smart_ptr.cpp \
         stringparsing.cpp \
         sockets.cpp \
 
@@ -33,7 +32,6 @@ $(call emugl-end-module)
 host_commonSources := \
     id_to_object_map_unittest.cpp \
     shared_library_unittest.cpp \
-    smart_ptr_unittest.cpp \
     unique_integer_map_unittest.cpp \
     stringparsing_unittest.cpp
 
