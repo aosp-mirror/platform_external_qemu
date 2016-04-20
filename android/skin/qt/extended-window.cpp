@@ -105,9 +105,7 @@ ExtendedWindow::ExtendedWindow(
     }
 }
 
-ExtendedWindow::~ExtendedWindow() {
-    delete mExtendedUi;
-}
+ExtendedWindow::~ExtendedWindow() = default;
 
 void ExtendedWindow::showPane(ExtendedWindowPane pane) {
     show();
