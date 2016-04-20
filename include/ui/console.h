@@ -10,7 +10,6 @@
 #define MOUSE_EVENT_LBUTTON 0x01
 #define MOUSE_EVENT_RBUTTON 0x02
 #define MOUSE_EVENT_MBUTTON 0x04
-extern int multitouch_enabled;
 
 /* identical to the ps/2 keyboard bits */
 #define QEMU_SCROLL_LOCK_LED (1 << 0)
@@ -30,7 +29,7 @@ int qemu_run_display_close_handler(void);
 
 typedef void QEMUPutKBDEvent(void *opaque, int keycode);
 typedef void QEMUPutLEDEvent(void *opaque, int ledstate);
-typedef void QEMUPutMouseEvent(void *opaque, int dx, int dy, int dz, int buttons_state);
+typedef void QEMUPutMouseEvent(void *opaque, int dx, int dy, int is_trackball, int button_state_set);
 
 typedef struct QEMUPutMouseEntry {
     QEMUPutMouseEvent *qemu_put_mouse_event;
@@ -71,7 +70,7 @@ void qemu_remove_led_event_handler(QEMUPutLEDEntry *entry);
 
 void kbd_put_keycode(int keycode);
 void kbd_put_ledstate(int ledstate);
-void kbd_mouse_event(int dx, int dy, int dz, int buttons_state);
+void kbd_mouse_event(int dx, int dy, int is_trackball, int button_state_set);
 
 /* Does the current mouse generate absolute events */
 int kbd_mouse_is_absolute(void);
