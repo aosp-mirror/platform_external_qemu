@@ -22,6 +22,30 @@
       "revId": "121ed9e5cdc7fbcc87dea497e8378b79c2fd4b37",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "485feccb_1d281933",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-20T23:40:40Z",
+      "side": 1,
+      "message": "Yup!  Thanks.  Done.",
+      "parentUuid": "485feccb_5da21121",
+      "range": {
+        "startLine": 112,
+        "startChar": 7,
+        "endLine": 112,
+        "endChar": 15
+      },
+      "revId": "121ed9e5cdc7fbcc87dea497e8378b79c2fd4b37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
