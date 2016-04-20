@@ -29,10 +29,10 @@ public:
     // Constructor. |capacity| is the buffer capacity in messages.
     MessageChannelBase(size_t capacity);
 
+protected:
     // Destructor.
     ~MessageChannelBase();
 
-protected:
     // Call this method in the sender thread before writing a new message.
     // This returns the position of the available slot in the message array
     // where to copy the new fixed-size message. After the copy, call
