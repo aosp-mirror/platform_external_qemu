@@ -303,17 +303,15 @@ get_zoneinfo_timezone( void )
 {
     if (!android_timezone_init)
     {
-        const char*  tz = getenv( "TZ" );
-
-        // if we ever allocate into tz, this object will take care of it.
-        android::base::ScopedCPtr<const char> tzDeleter;
+        auto tz = android::base::makeCustomScopedPtr<const char>(
+                getenv("TZ"), decltype(&free){});
 
         android_timezone_init = 1;
 
-        if ( tz != NULL && !check_timezone_is_zoneinfo(tz) ) {
+        if ( tz != NULL && !check_timezone_is_zoneinfo(tz.get()) ) {
             D( "%s: ignoring non zoneinfo formatted TZ environment variable: '%s'\n",
-               __FUNCTION__, tz );
-            tz = NULL;
+               __FUNCTION__, tz.get() );
+            tz.reset();
         }
 
         if (tz == NULL) {
@@ -376,8 +374,8 @@ get_zoneinfo_timezone( void )
                 if ( !memcmp( temp, tzdir.c_str(), tzdir.size() ) && temp[tzdir.size()] == '/' ) {
                     if ( check_timezone_is_zoneinfo( temp + tzdir.size() + 1 ) ) {
                         /* we have it ! */
-                        tz = temp + tzdir.size() + 1;
-                        D( "%s: found zoneinfo timezone %s from %s symlink\n", __FUNCTION__, tz, localtime.c_str() );
+                        tz.reset(temp + tzdir.size() + 1);
+                        D( "%s: found zoneinfo timezone %s from %s symlink\n", __FUNCTION__, tz.get(), localtime.c_str() );
                         goto Exit;
                     }
                     D( "%s: %s link points to non-zoneinfo filename %s, comparing contents\n",
@@ -400,8 +398,8 @@ get_zoneinfo_timezone( void )
                 scan->path_end  = scan->path + sizeof(scan->path);
                 scan->path_root = bufprint( scan->path, scan->path_end, "%s", tzdir.c_str() );
 
-                tz = scan_timezone_dir( scan, scan->path_root, 0 );
-                tzDeleter.reset(tz);
+                tz.reset(scan_timezone_dir( scan, scan->path_root, 0 ));
+                tz.get_deleter().reset(free);
             }
 
         Exit:
@@ -409,7 +407,7 @@ get_zoneinfo_timezone( void )
                 return NULL;
         }
 
-        snprintf(android_timezone0, sizeof(android_timezone0), "%s", tz);
+        snprintf(android_timezone0, sizeof(android_timezone0), "%s", tz.get());
         android_timezone = android_timezone0;
 
         D( "found timezone %s\n", android_timezone );

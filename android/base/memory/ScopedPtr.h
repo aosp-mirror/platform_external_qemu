@@ -32,7 +32,16 @@ struct FuncDelete {
 
     template <class T>
     void operator()(T* t) const {
-        mF(t);
+        if (mF) {
+            mF(const_cast<typename std::remove_const<T>::type*>(t));
+        }
+    }
+
+    // Allow a user to update the deleter on the fly, e.g. if one wants to
+    // replace a heap-allocated buffer with a stack-allocated one without having
+    // complicated conditions in the code.
+    void reset(Func f) {
+        mF = f;
     }
 
 private:
@@ -51,9 +60,9 @@ using ScopedCustomPtr = std::unique_ptr<T, FuncDelete<Func>>;
 // A factory function that creates a scoped pointer with |deleter|
 // function used as a deleter - it is called at the scope exit.
 template <class T, class Func>
-ScopedCustomPtr<typename std::decay<T>::type, typename std::decay<Func>::type>
+ScopedCustomPtr<typename std::remove_extent<T>::type, typename std::decay<Func>::type>
 makeCustomScopedPtr(T* data, Func deleter) {
-    return ScopedCustomPtr<typename std::decay<T>::type,
+    return ScopedCustomPtr<typename std::remove_extent<T>::type,
                            typename std::decay<Func>::type>(
             data, FuncDelete<typename std::decay<Func>::type>(deleter));
 }
