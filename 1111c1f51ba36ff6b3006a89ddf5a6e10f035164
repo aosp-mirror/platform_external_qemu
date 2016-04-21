@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08733496_c6dd2428",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 678,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-21T21:29:17Z",
+      "side": 1,
+      "message": "should we just stop deleting the extended window on closing, but instead just hide it?\nRestoring the last pane isn\u0027t the whole deal: we\u0027re still losing all data from the input controls, not resroting subpanes etc",
+      "range": {
+        "startLine": 678,
+        "startChar": 4,
+        "endLine": 678,
+        "endChar": 29
+      },
+      "revId": "1111c1f51ba36ff6b3006a89ddf5a6e10f035164",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
