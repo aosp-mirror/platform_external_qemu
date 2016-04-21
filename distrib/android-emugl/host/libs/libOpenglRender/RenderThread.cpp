@@ -135,7 +135,10 @@ intptr_t RenderThread::main() {
         do {
             progress = false;
 
-            m_lock->lock();
+            // HACK: Disable render thread locks
+            // This increases FPS for Antutu Garden about 2 FPS on
+            // Linux Quadro K2200.
+            // m_lock->lock();
             //
             // try to process some of the command buffer using the GLESv1
             // decoder
@@ -169,7 +172,7 @@ intptr_t RenderThread::main() {
                 progress = true;
             }
 
-            m_lock->unlock();
+            // m_lock->unlock();
 
         } while (progress);
     }
