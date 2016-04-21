@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "485feccb_28afd15c",
+        "filename": "android/multitouch-screen.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-21T00:03:15Z",
+      "side": 1,
+      "message": "prefer to assign these values to the enum constants instead of recomputing them in multiple functions.",
+      "range": {
+        "startLine": 478,
+        "startChar": 18,
+        "endLine": 478,
+        "endChar": 40
+      },
+      "revId": "77c8f1676be7cff159ecb8267cc12133acea08b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "485feccb_a87661a0",
+        "filename": "android/multitouch-screen.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-21T00:03:15Z",
+      "side": 1,
+      "message": "This is a bit weird.\n\n1) At the least, let\u0027s assert above that 2^(kShiftSecondaryFinger + finger_number - 1) \u003c sizeof(int)\n2) Is it an explicit aim to stuff as much information as possible in one int here (to avoid overhead). Otherwise, I\u0027d advice against using the bitmask in this way and just add another int to specify the finger_number.\n3) If the answer to (2) is yes, consider instead allocating say bits 3-\u003e5 for the finger and simply storing the finger number in those bits (now you can suddenly store 8 fingers in 3 bits, yay!) ... unless you can have multiple fingers activated in the same packet.",
+      "range": {
+        "startLine": 482,
+        "startChar": 17,
+        "endLine": 482,
+        "endChar": 66
+      },
+      "revId": "77c8f1676be7cff159ecb8267cc12133acea08b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
