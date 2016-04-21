@@ -119,9 +119,12 @@ void DPadPage::remaskButtons() {
             // to be scaled down.
             double mask_scale = 0.5;
 #ifndef Q_OS_MAC
-            QScreen *scr = QApplication::screens().at(QApplication::desktop()->screenNumber(this));
-            double dpr = scr->logicalDotsPerInch() / SizeTweaker::BaselineDpi;
-            mask_scale *= dpr;
+            int screen_num = QApplication::desktop()->screenNumber(this);
+            if (screen_num >= 0 && screen_num <  QApplication::screens().size()) {
+                QScreen *scr = QApplication::screens().at(screen_num);
+                double dpr = scr->logicalDotsPerInch() / SizeTweaker::BaselineDpi;
+                mask_scale *= dpr;
+            }
 #endif
             button->setMask(mask_pixmap.mask().scaled(mask_pixmap.size() * mask_scale));
             button->setStyleSheet("border: none;");
