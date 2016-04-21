@@ -70,6 +70,7 @@ public:
     void dockMainWindow();
     void raiseMainWindow();
     void extendedIsClosing() { mExtendedWindow = NULL; }
+    void setLastExtendedWindowPane(ExtendedWindowPane pane);
 
     void setToolEmuAgent(const UiEmuAgent* agPtr) { mUiEmuAgent = agPtr; }
     const UiEmuAgent* getUiEmuAgent() const { return mUiEmuAgent; }
@@ -112,6 +113,7 @@ private:
 
     EmulatorQtWindow* mEmulatorWindow;
     ExtendedWindow* mExtendedWindow;
+    ExtendedWindowPane mLastExtendedWindowPane;
     const UiEmuAgent* mUiEmuAgent;
     Ui::ToolControls* mToolsUi;
     QProcess mPushProcess;

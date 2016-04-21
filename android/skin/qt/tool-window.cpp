@@ -56,6 +56,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     : QFrame(parent),
       mEmulatorWindow(window),
       mExtendedWindow(NULL),
+      mLastExtendedWindowPane(PANE_IDX_LOCATION),
       mUiEmuAgent(NULL),
       mToolsUi(new Ui::ToolControls),
       mPushDialog(this),
@@ -545,6 +546,10 @@ void ToolWindow::raiseMainWindow()
     mEmulatorWindow->activateWindow();
 }
 
+void ToolWindow::setLastExtendedWindowPane(ExtendedWindowPane pane) {
+    mLastExtendedWindowPane = pane;
+}
+
 void ToolWindow::on_back_button_pressed()
 {
     mEmulatorWindow->raise();
@@ -670,7 +675,7 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
 
 void ToolWindow::on_more_button_clicked()
 {
-    showOrRaiseExtendedWindow(PANE_IDX_LOCATION);
+    showOrRaiseExtendedWindow(mLastExtendedWindowPane);
     mExtendedWindow->activateWindow();
 }
 

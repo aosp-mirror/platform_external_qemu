@@ -185,6 +185,7 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     thisButton->toggle();
     thisButton->clearFocus(); // It looks better when not highlighted
     mExtendedUi->stackedWidget->setCurrentIndex(static_cast<int>(thisIndex));
+    mToolWindow->setLastExtendedWindowPane(thisIndex);
 }
 
 void ExtendedWindow::switchOnTop(bool isOnTop) {
