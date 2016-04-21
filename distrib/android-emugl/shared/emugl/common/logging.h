@@ -16,7 +16,8 @@
 
 #pragma once
 
-typedef void (*logger_t)(const char* fmt, ...);
+#include "OpenglRender/render_api_types.h"
+
 extern logger_t emugl_logger;
 extern logger_t emugl_cxt_logger;
 void set_emugl_logger(logger_t f);
