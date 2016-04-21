@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "28ef1834_bd365fdd",
+        "filename": "android/multitouch-screen.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-21T00:52:37Z",
+      "side": 1,
+      "message": "Do we foresee any more shifting of bits for these values or will we just be doing ands and ors? If we start filling these up to the point where we use the sign bit we\u0027re approaching the danger zone. If the value is negative then left shift is undefined behavior and right shift is implementation defined. Overall I would strongly suggest that we use unsigned integers for bit fields to avoid potential problems.",
+      "range": {
+        "startLine": 473,
+        "startChar": 0,
+        "endLine": 475,
+        "endChar": 59
+      },
+      "revId": "c5240d04e0c72009f3109f8664a678731eba86f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
