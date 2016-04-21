@@ -65,9 +65,9 @@ public:
     void show();
     void dockMainWindow();
     void raiseMainWindow();
-    void extendedIsClosing() { mExtendedWindow = NULL; }
+    void setLastExtendedWindowPane(ExtendedWindowPane pane);
 
-    void setToolEmuAgent(const UiEmuAgent* agPtr) { mUiEmuAgent = agPtr; }
+    void setToolEmuAgent(const UiEmuAgent* agPtr);
     const UiEmuAgent* getUiEmuAgent() const { return mUiEmuAgent; }
 
     QString getAdbFullPath(QStringList *args);
@@ -111,12 +111,15 @@ private:
     std::unique_ptr<Ui::ToolControls> mToolsUi;
     bool mStartedAdbStopProcess = false;
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
-    bool mIsExtendedWindowActiveOnHide = false;
+    bool mIsExtendedWindowVisibleOnShow = false;
     QString mDetectedAdbPath;
     std::weak_ptr<UIEventRecorder<android::base::CircularBuffer>> mUIEventRecorder;
     SizeTweaker mSizeTweaker;
     QMessageBox mAdbWarningBox;
     android::emulation::AdbInterface mAdbInterface;
+
+signals:
+    void createExtendedWindow();
 
 private slots:
     void on_back_button_pressed();
@@ -140,6 +143,7 @@ private slots:
     void on_zoom_button_clicked();
 
     void slot_adbWarningMessageAccepted();
+    void slot_createExtendedWindow();
 };
 
 typedef void(ToolWindow::*ToolWindowSlot)();
