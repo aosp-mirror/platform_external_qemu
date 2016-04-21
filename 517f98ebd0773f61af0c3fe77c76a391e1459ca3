@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08733496_6fffc376",
+        "filename": "android/skin/qt/accelerometer-3d-widget.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-21T23:11:52Z",
+      "side": 1,
+      "message": "mouse",
+      "range": {
+        "startLine": 61,
+        "startChar": 10,
+        "endLine": 61,
+        "endChar": 14
+      },
+      "revId": "517f98ebd0773f61af0c3fe77c76a391e1459ca3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
