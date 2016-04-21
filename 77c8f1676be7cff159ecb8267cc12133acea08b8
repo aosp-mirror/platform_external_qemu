@@ -45,6 +45,29 @@
       "revId": "77c8f1676be7cff159ecb8267cc12133acea08b8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "485feccb_286031ab",
+        "filename": "android/multitouch-screen.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-21T00:09:06Z",
+      "side": 1,
+      "message": "what\u0027s the range for the finger_number?",
+      "range": {
+        "startLine": 482,
+        "startChar": 24,
+        "endLine": 482,
+        "endChar": 65
+      },
+      "revId": "77c8f1676be7cff159ecb8267cc12133acea08b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
