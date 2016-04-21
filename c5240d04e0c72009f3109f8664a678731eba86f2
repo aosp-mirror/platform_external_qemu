@@ -22,6 +22,30 @@
       "revId": "c5240d04e0c72009f3109f8664a678731eba86f2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28ef1834_fd30e7e2",
+        "filename": "android/multitouch-screen.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-21T01:02:53Z",
+      "side": 1,
+      "message": "Realistically, no: we shouldn\u0027t need more than 12 bits (touch up vs. down, skip sync or not, 1 bit per finger up to a max of 10 if we want to be efficient).\n\nThe reason I\u0027ve used regualar ints vs. unsigned is largely because event codes are regular ints (not unsigned) for whatever reason. But since this bit vector isn\u0027t directly used in events, it could be made unsigned.",
+      "parentUuid": "28ef1834_bd365fdd",
+      "range": {
+        "startLine": 473,
+        "startChar": 0,
+        "endLine": 475,
+        "endChar": 59
+      },
+      "revId": "c5240d04e0c72009f3109f8664a678731eba86f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
