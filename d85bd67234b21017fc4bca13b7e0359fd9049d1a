@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c87cbc59_45cafc6c",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-21T09:19:53Z",
+      "side": 1,
+      "message": "I think that\u0027s a good thing, but we should definitely print a warning to the user explaining that the classic engine was forced due to snapshot support.",
+      "revId": "d85bd67234b21017fc4bca13b7e0359fd9049d1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
