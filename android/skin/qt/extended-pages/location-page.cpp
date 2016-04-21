@@ -266,37 +266,40 @@ void LocationPage::populateTable(GpsFixArray* fixes)
     // Delete all rows in table
     mUi->loc_pathTable->setRowCount(0);
 
-    // Special case, the first row will have delay 0
+    if (fixes->size() > 0) {
+        // Special case, the first row will have delay 0
+        time_t previousTime = fixes->at(0).time;
+        mUi->loc_pathTable->setRowCount(fixes->size());
+        mUi->loc_pathTable->blockSignals(true);
+        for (unsigned i = 0; !mGeoDataLoadingStopRequested && i < fixes->size(); i++) {
+            GpsFix &fix = fixes->at(i);
+            time_t delay = fix.time - previousTime; // In seconds
 
-    time_t previousTime = fixes->at(0).time;
-    mUi->loc_pathTable->setRowCount(fixes->size());
-    mUi->loc_pathTable->blockSignals(true);
-    for (unsigned i = 0; !mGeoDataLoadingStopRequested && i < fixes->size(); i++) {
-        GpsFix &fix = fixes->at(i);
-        time_t delay = fix.time - previousTime; // In seconds
+            // Ensure all other delays are > 0, even if multiple points have the same timestamp
+            if (delay == 0 && i != 0) {
+                delay = 2;
+            }
 
-        // Ensure all other delays are > 0, even if multiple points have the same timestamp
-        if (delay == 0 && i != 0) {
-            delay = 2;
+            mUi->loc_pathTable->setItem(i, 0, itemForTable(QString::number(delay)));
+            mUi->loc_pathTable->setItem(i, 1, itemForTable(QString::fromStdString(fix.latitude)));
+            mUi->loc_pathTable->setItem(i, 2, itemForTable(QString::fromStdString(fix.longitude)));
+            mUi->loc_pathTable->setItem(i, 3, itemForTable(QString::fromStdString(fix.elevation)));
+            mUi->loc_pathTable->setItem(i, 4, itemForTable(QString::fromStdString(fix.name)));
+            mUi->loc_pathTable->setItem(i, 5, itemForTable(QString::fromStdString(fix.description)));
+
+            // If the fixes array contains a lot of elements, this loop can cause
+            // a lag in the UI. Just make sure we let the application handle UI
+            // events for every few rows we add.
+            if (i % 100 == 0) {
+                qApp->processEvents();
+            }
+            previousTime = fix.time;
         }
-
-        mUi->loc_pathTable->setItem(i, 0, itemForTable(QString::number(delay)));
-        mUi->loc_pathTable->setItem(i, 1, itemForTable(QString::fromStdString(fix.latitude)));
-        mUi->loc_pathTable->setItem(i, 2, itemForTable(QString::fromStdString(fix.longitude)));
-        mUi->loc_pathTable->setItem(i, 3, itemForTable(QString::fromStdString(fix.elevation)));
-        mUi->loc_pathTable->setItem(i, 4, itemForTable(QString::fromStdString(fix.name)));
-        mUi->loc_pathTable->setItem(i, 5, itemForTable(QString::fromStdString(fix.description)));
-
-        // If the fixes array contains a lot of elements, this loop can cause
-        // a lag in the UI. Just make sure we let the application handle UI
-        // events for every few rows we add.
-        if (i % 100 == 0) {
-            qApp->processEvents();
-        }
-        previousTime = fix.time;
+        mUi->loc_pathTable->blockSignals(false);
+        setButtonEnabled(mUi->loc_playStopButton, getSelectedTheme(), true);
+    } else {
+        setButtonEnabled(mUi->loc_playStopButton, getSelectedTheme(), false);
     }
-    mUi->loc_pathTable->blockSignals(false);
-    setButtonEnabled(mUi->loc_playStopButton, getSelectedTheme(), true);
 }
 
 void LocationPage::locationPlaybackStart()
