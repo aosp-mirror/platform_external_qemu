@@ -57,7 +57,8 @@ static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
 #define FUNCTION_(ret, name, sig, params) \
     symbol = adynamicLibrary_findSymbol(rendererLib, #name, &error); \
     if (symbol != NULL) { \
-        name = symbol; \
+        using type = ret(sig); \
+        name = (type*)symbol; \
     } else { \
         derror("GLES emulation: Could not find required symbol (%s): %s", #name, error); \
         free(error); \
@@ -70,7 +71,7 @@ static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
 }
 
 /* Defined in android/hw-pipe-net.c */
-extern int android_init_opengles_pipes(void);
+extern "C" int android_init_opengles_pipes(void);
 
 static ADynamicLibrary*  rendererLib;
 static bool              rendererUsesSubWindow;
@@ -108,9 +109,10 @@ android_initOpenglesEmulation(void)
     }
 
     rendererUsesSubWindow = true;
-    const char* env = getenv("ANDROID_GL_SOFTWARE_RENDERER");
-    if (env && env[0] != '\0' && env[0] != '0') {
-        rendererUsesSubWindow = false;
+    if (const char* env = getenv("ANDROID_GL_SOFTWARE_RENDERER")) {
+        if (env[0] != '\0' && env[0] != '0') {
+            rendererUsesSubWindow = false;
+        }
     }
 
     if (android_gles_fast_pipes) {
