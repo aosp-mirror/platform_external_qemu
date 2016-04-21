@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "08733496_c9a2a1d4",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-21T15:16:56Z",
+      "side": 1,
+      "message": "nit: const?",
+      "range": {
+        "startLine": 349,
+        "startChar": 8,
+        "endLine": 349,
+        "endChar": 12
+      },
+      "revId": "d85bd67234b21017fc4bca13b7e0359fd9049d1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c87cbc59_45cafc6c",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 1
@@ -13,6 +36,29 @@
       "writtenOn": "2016-04-21T09:19:53Z",
       "side": 1,
       "message": "I think that\u0027s a good thing, but we should definitely print a warning to the user explaining that the classic engine was forced due to snapshot support.",
+      "revId": "d85bd67234b21017fc4bca13b7e0359fd9049d1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08733496_89c0a96b",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-21T15:16:56Z",
+      "side": 1,
+      "message": "if there\u0027s an engine parameter, we would override your selection in the very next block.\nCould you please add a warning and, maybe, an error if user has selected \u0027ranchu\u0027 explicitly?",
+      "range": {
+        "startLine": 356,
+        "startChar": 8,
+        "endLine": 356,
+        "endChar": 14
+      },
       "revId": "d85bd67234b21017fc4bca13b7e0359fd9049d1a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
