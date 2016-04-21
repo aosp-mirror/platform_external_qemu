@@ -65,9 +65,9 @@ public:
     void show();
     void dockMainWindow();
     void raiseMainWindow();
-    void extendedIsClosing() { mExtendedWindow = NULL; }
+    void setLastExtendedWindowPane(ExtendedWindowPane pane);
 
-    void setToolEmuAgent(const UiEmuAgent* agPtr) { mUiEmuAgent = agPtr; }
+    void setToolEmuAgent(const UiEmuAgent* agPtr);
     const UiEmuAgent* getUiEmuAgent() const { return mUiEmuAgent; }
 
     QString getAdbFullPath(QStringList *args);
@@ -118,6 +118,9 @@ private:
     QMessageBox mAdbWarningBox;
     android::emulation::AdbInterface mAdbInterface;
 
+signals:
+    void createExtendedWindow();
+
 private slots:
     void on_back_button_pressed();
     void on_back_button_released();
@@ -140,6 +143,7 @@ private slots:
     void on_zoom_button_clicked();
 
     void slot_adbWarningMessageAccepted();
+    void slot_createExtendedWindow();
 };
 
 typedef void(ToolWindow::*ToolWindowSlot)();
