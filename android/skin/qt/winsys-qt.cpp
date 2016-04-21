@@ -208,6 +208,18 @@ extern void skin_winsys_get_window_pos(int *x, int *y)
     D("%s: x=%d y=%d", __FUNCTION__, *x, *y);
 }
 
+extern void skin_winsys_set_device_geometry(const SkinRect* rect) {
+    QSemaphore semaphore;
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return;
+    }
+    QRect qrect(rect->pos.x, rect->pos.y, rect->size.w, rect->size.h);
+    window->setDeviceGeometry(&qrect, &semaphore);
+    semaphore.acquire();
+}
+
 extern void skin_winsys_save_window_pos() {
     int x = 0, y = 0;
     skin_winsys_get_window_pos(&x, &y);

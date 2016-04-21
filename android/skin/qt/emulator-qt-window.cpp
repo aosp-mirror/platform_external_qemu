@@ -151,6 +151,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     QObject::connect(this, &EmulatorQtWindow::releaseBitmap, this, &EmulatorQtWindow::slot_releaseBitmap);
     QObject::connect(this, &EmulatorQtWindow::requestClose, this, &EmulatorQtWindow::slot_requestClose);
     QObject::connect(this, &EmulatorQtWindow::requestUpdate, this, &EmulatorQtWindow::slot_requestUpdate);
+    QObject::connect(this, &EmulatorQtWindow::setDeviceGeometry, this, &EmulatorQtWindow::slot_setDeviceGeometry);
     QObject::connect(this, &EmulatorQtWindow::setWindowIcon, this, &EmulatorQtWindow::slot_setWindowIcon);
     QObject::connect(this, &EmulatorQtWindow::setWindowPos, this, &EmulatorQtWindow::slot_setWindowPos);
     QObject::connect(this, &EmulatorQtWindow::setTitle, this, &EmulatorQtWindow::slot_setWindowTitle);
@@ -776,6 +777,12 @@ void EmulatorQtWindow::slot_requestUpdate(const QRect *rect, QSemaphore *semapho
             rect->width() * mBackingSurface->w / mBackingSurface->original_w,
             rect->height() * mBackingSurface->h / mBackingSurface->original_h);
     update(r);
+    if (semaphore != NULL) semaphore->release();
+}
+
+void EmulatorQtWindow::slot_setDeviceGeometry(const QRect *rect, QSemaphore *semaphore) {
+    mDeviceGeometry =
+            QRect(rect->x(), rect->y(), rect->width(), rect->height());
     if (semaphore != NULL) semaphore->release();
 }
 
@@ -1417,6 +1424,10 @@ void EmulatorQtWindow::showZoomIfNotUserHidden() {
 
 QSize EmulatorQtWindow::containerSize() const {
     return mContainer.size();
+}
+
+QRect EmulatorQtWindow::deviceGeometry() const {
+    return mDeviceGeometry;
 }
 
 void EmulatorQtWindow::toggleZoomMode()

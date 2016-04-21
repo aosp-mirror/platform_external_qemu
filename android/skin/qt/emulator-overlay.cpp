@@ -288,10 +288,10 @@ void EmulatorOverlay::showForMultitouch() {
 
     QPoint mousePosition = mapFromGlobal(QCursor::pos());
     mPrimaryTouchPoint = mousePosition;
-    mSecondaryTouchPoint = mousePosition;
+    mMultitouchCenter = mEmulatorWindow->deviceGeometry().center();
+    mSecondaryTouchPoint = secondaryPinchPoint();
     mLastMousePos = mousePosition;
     mIsSwipeGesture = false;
-    updateMultitouchCenter(mousePosition);
 }
 
 void EmulatorOverlay::showForZoom() {
@@ -366,7 +366,6 @@ void EmulatorOverlay::generateTouchEvents(QMouseEvent* event) {
         if (event->button() == Qt::RightButton) {
             mLerpValue = 0.0;
             mIsSwipeGesture = false;
-            mMultitouchCenter = event->pos();
             mTouchPointAnimation.start();
             updateTouchPoints(event);
         }
@@ -380,13 +379,6 @@ void EmulatorOverlay::generateTouchEvents(QMouseEvent* event) {
                                           mPrimaryTouchPoint, true);
         mEmulatorWindow->handleMouseEvent(eventType, kMouseButtonSecondaryTouch,
                                           mSecondaryTouchPoint);
-    }
-}
-
-void EmulatorOverlay::updateMultitouchCenter(const QPoint& pos) {
-    if (QRect(QPoint(), this->size()).contains(pos)) {
-        mMultitouchCenter = pos;
-        update();
     }
 }
 

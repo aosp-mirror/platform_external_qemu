@@ -1476,6 +1476,8 @@ skin_window_recompute_subwindow_rect( SkinWindow* window, SkinRect* subwindow )
     window->subwindow.size.w = result.size.w;
     window->subwindow.size.h = result.size.h;
 
+    skin_winsys_set_device_geometry(&window->subwindow);
+
     return 1;
 }
 

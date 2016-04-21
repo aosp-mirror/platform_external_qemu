@@ -63,7 +63,6 @@ private:
     void hideAndFocusContainer();
 
     void generateTouchEvents(QMouseEvent* event);
-    void updateMultitouchCenter(const QPoint& pos);
     void updateTouchPoints(QMouseEvent* event);
 
     QPoint primaryPinchPoint() const;
@@ -86,6 +85,7 @@ private:
     QPoint mMultitouchCenter;
     QPoint mPrimaryTouchPoint;
     QPoint mSecondaryTouchPoint;
+    QPoint mLastMousePos;
     int mCenterPointRadius;
     int mTouchPointRadius;
     bool mIsSwipeGesture;
@@ -93,7 +93,6 @@ private:
 
     // Multitouch animation values
     QVariantAnimation mTouchPointAnimation;
-    QPoint mLastMousePos;
     double mLerpValue;
 
     // Screenshot-flash related members
