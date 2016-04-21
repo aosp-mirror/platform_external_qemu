@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "485feccb_e3eeba64",
+        "filename": "android/base/memory/ScopedPtr.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-21T00:28:37Z",
+      "side": 1,
+      "message": "free() needs a non-const pointer to delete, and I expect the same bad behavior from some other functions",
+      "range": {
+        "startLine": 36,
+        "startChar": 15,
+        "endLine": 36,
+        "endChar": 62
+      },
+      "revId": "4589b2f67de0c1053f383b1762572bec4a82850c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "485feccb_832b4674",
+        "filename": "android/base/memory/ScopedPtr.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-21T00:28:37Z",
+      "side": 1,
+      "message": "decay\u003c\u003e was also removing the const qualifier, and that\u0027s not good in case of C strings",
+      "range": {
+        "startLine": 63,
+        "startChar": 30,
+        "endLine": 63,
+        "endChar": 43
+      },
+      "revId": "4589b2f67de0c1053f383b1762572bec4a82850c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
