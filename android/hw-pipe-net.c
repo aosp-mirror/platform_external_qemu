@@ -37,6 +37,7 @@
 #include <sys/socket.h>
 #endif
 
+#include <stdio.h>
 #include <stdlib.h>
 
 /* Implement the OpenGL fast-pipe */
@@ -318,6 +319,15 @@ int qemu2_send_all(int fd, const void *_buf, int len1)
     while (len > 0) {
         ret = write(fd, buf, len);
         if (ret < 0) {
+            if (errno == EAGAIN) {
+                if (len != len1) {
+                    fprintf(stderr, "%s: WARNING: This should not happen! "
+                            "EAGAIN with %d of %d bytes remaining. "
+                            "GL command stream may be corrupted\n",
+                            __FUNCTION__,
+                            len, len1);
+                }
+            }
             if (errno != EINTR)
                 return -1;
         } else if (ret == 0) {

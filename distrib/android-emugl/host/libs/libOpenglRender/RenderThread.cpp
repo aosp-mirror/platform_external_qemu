@@ -111,7 +111,14 @@ intptr_t RenderThread::main() {
         do {
             progress = false;
 
-            m_lock->lock();
+            // HACK: Disable render thread locks
+            // If there is too much synchronization, EAGAIN may be issued by the write()
+            // to socket, which is bad if there were previous send's that succeeded,
+            // since the goldfish pipe driver will assume that upon EAGAIN, all the sends
+            // failed, whereas it's possible for some of them to succeed.
+            // If we remove this lock, this seems to greatly decrease the probability
+            // of EAGAIN.
+            // m_lock->lock();
             //
             // try to process some of the command buffer using the GLESv1 decoder
             //
@@ -140,7 +147,7 @@ intptr_t RenderThread::main() {
                 progress = true;
             }
 
-            m_lock->unlock();
+            // m_lock->unlock();
 
         } while( progress );
 
