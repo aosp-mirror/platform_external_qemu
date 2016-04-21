@@ -286,7 +286,7 @@ LOCAL_SRC_FILES := \
     android/opengl/GpuFrameBridge.cpp \
     android/opengl/gpuinfo.cpp \
     android/opengl/logger.cpp \
-    android/opengles.c \
+    android/opengles.cpp \
     android/openssl-support.cpp \
     android/process_setup.cpp \
     android/proxy/proxy_common.c \
