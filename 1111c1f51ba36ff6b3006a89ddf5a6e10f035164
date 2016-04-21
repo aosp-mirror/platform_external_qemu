@@ -22,6 +22,30 @@
       "revId": "1111c1f51ba36ff6b3006a89ddf5a6e10f035164",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08733496_06dd5cfc",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 678,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-21T21:33:33Z",
+      "side": 1,
+      "message": "I always questioned why we did that in the first place. I\u0027ll see if I can turn this CL into that (and also fix this problem).",
+      "parentUuid": "08733496_c6dd2428",
+      "range": {
+        "startLine": 678,
+        "startChar": 4,
+        "endLine": 678,
+        "endChar": 29
+      },
+      "revId": "1111c1f51ba36ff6b3006a89ddf5a6e10f035164",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
