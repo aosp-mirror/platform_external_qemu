@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08733496_f4bd7827",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-21T01:15:25Z",
+      "side": 1,
+      "message": "do we need to delete the existing data first?",
+      "range": {
+        "startLine": 268,
+        "startChar": 0,
+        "endLine": 268,
+        "endChar": 43
+      },
+      "revId": "f2f50f3a097e79b21ea762fd68fa3568de25b5ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08733496_14b3d45c",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-21T01:15:25Z",
+      "side": 1,
+      "message": "what about setButtonEnabled() ?",
+      "range": {
+        "startLine": 299,
+        "startChar": 8,
+        "endLine": 299,
+        "endChar": 24
+      },
+      "revId": "f2f50f3a097e79b21ea762fd68fa3568de25b5ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
