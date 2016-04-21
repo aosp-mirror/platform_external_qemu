@@ -391,6 +391,7 @@ int socketSetOption(int socket, int  domain, int option, int  _flag) {
 #else
     int flag = _flag;
 #endif
+    errno = 0;
     int ret = ::setsockopt(socket,
                            domain,
                            option,
@@ -414,6 +415,7 @@ int socketSetXReuseAddr(int socket) {
 
 #ifdef _WIN32
 int socketTcpConnect(int socket, const SockAddressStorage* addr) {
+    errno = 0;
     int ret = ::connect(socket, &addr->generic, addr->size());
     ON_SOCKET_ERROR_RETURN_M1(ret);
     return ret;
@@ -423,9 +425,11 @@ int socketTcpConnect(int socket, const SockAddressStorage* addr) {
 int socketTcpBindAndListen(int socket, const SockAddressStorage* addr) {
     int kBacklog = 5;
 
+    errno = 0;
     int ret = ::bind(socket, &addr->generic, addr->size());
     ON_SOCKET_ERROR_RETURN_M1(ret);
 
+    errno = 0;
     ret = ::listen(socket, kBacklog);
     ON_SOCKET_ERROR_RETURN_M1(ret);
 
@@ -434,6 +438,7 @@ int socketTcpBindAndListen(int socket, const SockAddressStorage* addr) {
 
 #ifdef _WIN32
 int socketAccept(int socket) {
+    errno = 0;
     int ret = ::accept(socket, NULL, NULL);
     ON_SOCKET_ERROR_RETURN_M1(ret);
     return ret;
@@ -453,12 +458,14 @@ void socketClose(int socket) {
 }
 
 ssize_t socketRecv(int socket, void* buffer, size_t bufferLen) {
+    errno = 0;
     ssize_t ret = ::recv(socket, reinterpret_cast<char*>(buffer), bufferLen, 0);
     ON_SOCKET_ERROR_RETURN_M1(ret);
     return ret;
 }
 
 ssize_t socketSend(int socket, const void* buffer, size_t bufferLen) {
+    errno = 0;
     ssize_t ret = ::send(socket,
                          reinterpret_cast<const char*>(buffer),
                          bufferLen,
@@ -533,6 +540,7 @@ static int socketCreateTcpFor(int domain) {
 #ifdef _WIN32
     socketInitWinsock();
 #endif
+    errno = 0;
     int s = ::socket(domain, SOCK_STREAM, 0);
     ON_SOCKET_ERROR_RETURN_M1(s);
     return s;
@@ -594,6 +602,7 @@ int socketTcp6LoopbackClient(int port) {
 }
 
 int socketAcceptAny(int serverSocket) {
+    errno = 0;
     int s = HANDLE_EINTR(::accept(serverSocket, NULL, NULL));
     ON_SOCKET_ERROR_RETURN_M1(s);
     return s;
