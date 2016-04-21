@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "485feccb_a84c2147",
+        "filename": "android/multitouch-screen.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-21T00:12:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "485feccb_28afd15c",
+      "range": {
+        "startLine": 478,
+        "startChar": 18,
+        "endLine": 478,
+        "endChar": 40
+      },
+      "revId": "77c8f1676be7cff159ecb8267cc12133acea08b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "485feccb_a87661a0",
         "filename": "android/multitouch-screen.c",
         "patchSetId": 3
@@ -64,6 +88,30 @@
         "startChar": 24,
         "endLine": 482,
         "endChar": 65
+      },
+      "revId": "77c8f1676be7cff159ecb8267cc12133acea08b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "485feccb_88ee0513",
+        "filename": "android/multitouch-screen.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-21T00:12:11Z",
+      "side": 1,
+      "message": "1) Better yet, ensure finger_number \u003c MTS_POINTERS_NUM as below (I updated the function below after finishing this one and forgot to come back).\n2) Unfortunately, yes, I am trying to pack as much information into this int as possible because QEMU2 does some odd stuff - see qemu-android/ui/console.c, bottom of the file in a function called kbd_mouse_event. I would much rather just make a struct that includes all this information, but QEMU2 makes doing that a bit more difficult (or perhaps I just don\u0027t understand how doing so would be easy). David might have more thoughts.\n3) You can\u0027t have multiple fingers activated in the same packet (or rather, that\u0027s not how you would do it), but sure, that will at least be a bit clearer.\n\nHeheheh...a \"bit\" clearer....heh.",
+      "parentUuid": "485feccb_a87661a0",
+      "range": {
+        "startLine": 482,
+        "startChar": 17,
+        "endLine": 482,
+        "endChar": 66
       },
       "revId": "77c8f1676be7cff159ecb8267cc12133acea08b8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
