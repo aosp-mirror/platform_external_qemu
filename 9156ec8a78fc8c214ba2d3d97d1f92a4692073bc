@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08733496_80a2331e",
+        "filename": "android/hw-pipe-net.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-21T21:23:26Z",
+      "side": 1,
+      "message": "EAGAIN in the middle of a transaction is expected sometimes. e.g., if the qemu device is communicating with an external entity over a socket in NOBLOCK mode, the socket can return EAGAIN to indicate that the operation would block.\n\nSeems to me that the guest kernel driver is broken in not being able to handle this situation.",
+      "range": {
+        "startLine": 322,
+        "startChar": 25,
+        "endLine": 322,
+        "endChar": 31
+      },
+      "revId": "9156ec8a78fc8c214ba2d3d97d1f92a4692073bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08733496_4081fb77",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-21T21:23:26Z",
+      "side": 1,
+      "message": "Won\u0027t this cause all sorts of other trouble? ;)",
+      "range": {
+        "startLine": 121,
+        "startChar": 15,
+        "endLine": 121,
+        "endChar": 30
+      },
+      "revId": "9156ec8a78fc8c214ba2d3d97d1f92a4692073bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
