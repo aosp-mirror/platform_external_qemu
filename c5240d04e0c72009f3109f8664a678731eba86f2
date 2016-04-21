@@ -66,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "08733496_db2c2449",
+        "filename": "android/multitouch-screen.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-21T16:35:18Z",
+      "side": 1,
+      "message": "Will update to bool for clarity.",
+      "parentUuid": "c87cbc59_45a11cbb",
+      "revId": "c5240d04e0c72009f3109f8664a678731eba86f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c87cbc59_65ae20ac",
         "filename": "android/multitouch-screen.h",
         "patchSetId": 4
@@ -77,6 +95,24 @@
       "writtenOn": "2016-04-21T09:12:15Z",
       "side": 1,
       "message": "nit: \u0027bool skip_sync\u0027 instead?",
+      "revId": "c5240d04e0c72009f3109f8664a678731eba86f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08733496_1b377c91",
+        "filename": "android/multitouch-screen.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-21T16:35:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c87cbc59_65ae20ac",
       "revId": "c5240d04e0c72009f3109f8664a678731eba86f2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
