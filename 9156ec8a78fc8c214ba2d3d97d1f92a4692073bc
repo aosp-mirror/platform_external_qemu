@@ -45,6 +45,30 @@
       "revId": "9156ec8a78fc8c214ba2d3d97d1f92a4692073bc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08733496_40b3bb5b",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-21T21:25:07Z",
+      "side": 1,
+      "message": "We\u0027ll test thoroughly with the locks off.",
+      "parentUuid": "08733496_4081fb77",
+      "range": {
+        "startLine": 121,
+        "startChar": 15,
+        "endLine": 121,
+        "endChar": 30
+      },
+      "revId": "9156ec8a78fc8c214ba2d3d97d1f92a4692073bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
