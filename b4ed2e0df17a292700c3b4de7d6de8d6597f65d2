@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "485feccb_884fe53b",
+        "filename": "android/multitouch-screen.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-21T00:05:13Z",
+      "side": 1,
+      "message": "Ah, so you _are_ thinking about multiple fingers.\n\nMy (rambling) comment notwithstanding, I wouldn\u0027t block this CL one way or another.",
+      "parentUuid": "485feccb_dde9215f",
+      "range": {
+        "startLine": 494,
+        "startChar": 0,
+        "endLine": 502,
+        "endChar": 1
+      },
+      "revId": "b4ed2e0df17a292700c3b4de7d6de8d6597f65d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "485feccb_9d42c93c",
         "filename": "android/multitouch-screen.h",
         "patchSetId": 2
@@ -59,6 +83,30 @@
       "writtenOn": "2016-04-20T23:36:24Z",
       "side": 1,
       "message": "Worth making this function return a typedef of int so it\u0027s clear that we\u0027re interpreting it in a fancy way?",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 65
+      },
+      "revId": "b4ed2e0df17a292700c3b4de7d6de8d6597f65d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "485feccb_e840d917",
+        "filename": "android/multitouch-screen.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-21T00:05:13Z",
+      "side": 1,
+      "message": "I\u0027d.",
+      "parentUuid": "485feccb_9d42c93c",
       "range": {
         "startLine": 54,
         "startChar": 0,
