@@ -40,6 +40,7 @@
 #include <sys/socket.h>
 #endif
 
+#include <stdio.h>
 #include <stdlib.h>
 
 /* Implement the OpenGL fast-pipe */
