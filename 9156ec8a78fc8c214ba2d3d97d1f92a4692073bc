@@ -73,6 +73,29 @@
     },
     {
       "key": {
+        "uuid": "08733496_c672841c",
+        "filename": "android/hw-pipe-net.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2016-04-21T21:59:24Z",
+      "side": 1,
+      "message": "This looks like the cause. The send is abandoned when it got EAGAIN, even if part of the data is already sent. And it forgot how much data it sent.",
+      "range": {
+        "startLine": 415,
+        "startChar": 0,
+        "endLine": 415,
+        "endChar": 54
+      },
+      "revId": "9156ec8a78fc8c214ba2d3d97d1f92a4692073bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08733496_4081fb77",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
         "patchSetId": 1
