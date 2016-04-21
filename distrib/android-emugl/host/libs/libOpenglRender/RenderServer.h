@@ -23,12 +23,14 @@
 class RenderServer : public emugl::Thread
 {
 public:
-    static RenderServer *create(char* addr, size_t addrLen);
+    static RenderServer *create();
     virtual ~RenderServer();
 
     virtual intptr_t main();
 
     bool isExiting() const { return m_exiting; }
+
+    void stop();
 
 private:
     RenderServer();

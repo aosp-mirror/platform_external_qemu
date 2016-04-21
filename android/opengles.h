@@ -66,10 +66,4 @@ void android_stopOpenglesRenderer(void);
  */
 extern int  android_gles_fast_pipes;
 
-/* Get the address of the socket that clients should connect to to access GLES.
- * For TCP this is just the port number (as a string) on the loopback address.
- * For UNIX and Win32 pipes it is the full pathname of the pipe.
- */
-void android_gles_server_path(char* buff, size_t buffsize);
-
 ANDROID_END_HEADER

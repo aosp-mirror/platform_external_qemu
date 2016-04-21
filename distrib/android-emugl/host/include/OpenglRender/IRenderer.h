@@ -14,6 +14,7 @@
 #pragma once
 
 #include "OpenglRender/IRenderingChannel.h"
+#include "OpenglRender/render_api_platform_types.h"
 
 #include <functional>
 #include <memory>
@@ -61,13 +62,13 @@ public:
     // In the first implementation, ydir is always -1 (bottom to top), format
     // and type are always GL_RGBA and GL_UNSIGNED_BYTE, and the width and
     // height will always be the same as the ones used to create the renderer.
-    using OnPostCallback = std::function<void(int width,
+    using OnPostCallback = void(*)(void* context,int width,
                                               int height,
                                               int ydir,
                                               int format,
                                               int type,
-                                              unsigned char* pixels)>;
-    virtual void setPostCallback(OnPostCallback onPost) = 0;
+                                              unsigned char* pixels);
+    virtual void setPostCallback(OnPostCallback onPost, void* context) = 0;
 
     // showOpenGLSubwindow -
     //     Create or modify a native subwindow which is a child of 'window'

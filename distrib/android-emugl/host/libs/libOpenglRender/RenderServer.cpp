@@ -43,22 +43,10 @@ RenderServer::~RenderServer() {
     delete m_listenSock;
 }
 
-extern "C" int gRendererStreamMode;
-
-RenderServer* RenderServer::create(char* addr, size_t addrLen) {
+RenderServer* RenderServer::create() {
     auto server = std::unique_ptr<RenderServer>(new RenderServer());
     if (!server) {
         return nullptr;
-    }
-
-    if (gRendererStreamMode == RENDER_API_STREAM_MODE_TCP) {
-        server->m_listenSock = new TcpStream();
-    } else {
-#ifdef _WIN32
-        server->m_listenSock = new Win32PipeStream();
-#else
-        server->m_listenSock = new UnixStream();
-#endif
     }
 
     if (!server->m_listenSock) {
@@ -72,15 +60,6 @@ RenderServer* RenderServer::create(char* addr, size_t addrLen) {
         return nullptr;
     }
 
-    size_t len = strlen(addrstr) + 1;
-    if (len > addrLen) {
-        ERR("RenderServer address name too big for provided buffer: %zu > "
-            "%zu\n",
-            len, addrLen);
-        return nullptr;
-    }
-    memcpy(addr, addrstr, len);
-
     return server.release();
 }
 
@@ -93,7 +72,7 @@ intptr_t RenderServer::main() {
     pthread_sigmask(SIG_SETMASK, &set, nullptr);
 #endif
 
-    while (1) {
+    while (!m_exiting) {
         std::unique_ptr<SocketStream> stream(m_listenSock->accept());
         if (!stream) {
             fprintf(stderr, "Error accepting connection, skipping\n");
@@ -109,7 +88,7 @@ intptr_t RenderServer::main() {
         DBG("RenderServer: Got new stream!\n");
 
         // check if we have been requested to exit while waiting on accept
-        if ((clientFlags & IOSTREAM_CLIENT_EXIT_SERVER) != 0) {
+        if ((clientFlags & IOSTREAM_CLIENT_EXIT_SERVER) != 0 || m_exiting) {
             m_exiting = true;
             break;
         }
@@ -153,4 +132,10 @@ intptr_t RenderServer::main() {
     }
 
     return 0;
+}
+
+void RenderServer::stop()
+{
+    m_exiting = true;
+    m_listenSock->forceStop();
 }

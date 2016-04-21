@@ -632,7 +632,8 @@ openglesPipe_init( void* hwpipe, void* _looper, const char* args )
     // looper_getForThread() belongs to vcpu
     void* thread_looper = looper_getForThread();
     char server_addr[PATH_MAX];
-    android_gles_server_path(server_addr, sizeof(server_addr));
+    //TODO(zyy): add the channel here
+    //android_gles_server_path(server_addr, sizeof(server_addr));
 #ifndef _WIN32
     if (android_gles_fast_pipes) {
         pipe = (NetPipe *)netPipe_initUnix(hwpipe, thread_looper, server_addr);
