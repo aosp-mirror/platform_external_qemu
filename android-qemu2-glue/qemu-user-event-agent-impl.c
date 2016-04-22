@@ -71,8 +71,10 @@ const QAndroidUserEventAgent* const gQAndroidUserEventAgent =
 static void translate_mouse_event(int x,
                                   int y,
                                   int buttons_state) {
-    multitouch_update_pointer(MTES_DEVICE, (buttons_state & 2) ? 1 : 0,
-                              x, y, (buttons_state & 1) ? 0x81 : 0);
+    int pressure = multitouch_is_touch_down(buttons_state) ? 0x81 : 0;
+    int finger = multitouch_is_second_finger(buttons_state);
+    multitouch_update_pointer(MTES_DEVICE, finger, x, y, pressure,
+                              multitouch_should_skip_sync(buttons_state));
 }
 
 const GoldfishEventMultitouchFuncs qemu2_goldfish_event_multitouch_funcs = {
