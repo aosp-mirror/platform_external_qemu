@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08733496_b8ff5575",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1303,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-22T17:11:23Z",
+      "side": 1,
+      "message": "Grigory, true and false really seem backwards here.\nBut this way works.\nDoes it make sense that this works?",
+      "range": {
+        "startLine": 1303,
+        "startChar": 8,
+        "endLine": 1303,
+        "endChar": 19
+      },
+      "revId": "3ebf4c47e916356087262c6943c74a0fbbc3b257",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
