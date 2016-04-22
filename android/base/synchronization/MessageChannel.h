@@ -17,6 +17,7 @@
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 
+#include <utility>
 #include <stddef.h>
 
 namespace android {
@@ -53,6 +54,9 @@ protected:
     // the corresponding message.
     void afterRead();
 
+    // Get the size of the channel
+    size_t size() const { return mCount; }
+
 private:
     size_t mPos;
     size_t mCount;
@@ -83,11 +87,26 @@ public:
         afterWrite();
     }
 
+    void send(T&& msg) {
+        size_t pos = beforeWrite();
+        mItems[pos] = std::move(msg);
+        afterWrite();
+    }
+
     void receive(T* msg) {
         size_t pos = beforeRead();
-        *msg = mItems[pos];
+        *msg = std::move(mItems[pos]);
         afterRead();
     }
+
+    T receive() {
+        size_t pos = beforeRead();
+        T msg = std::move(mItems[pos]);
+        afterRead();
+        return msg;
+    }
+
+    constexpr size_t capacity() const { return CAPACITY; }
 
 private:
     T mItems[CAPACITY];
