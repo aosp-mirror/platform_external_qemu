@@ -55,6 +55,8 @@ android_gps_send_location(double latitude, double longitude,
                           const struct timeval *time)
 {
     STRALLOC_DEFINE(msgStr);
+    STRALLOC_DEFINE(elevationStr);
+    char* elevStrPtr;
 
     int      deg, min;
     char     hemi;
@@ -111,7 +113,17 @@ android_gps_send_location(double latitude, double longitude,
     stralloc_add_format( msgStr, ",1,6,");
 
     // Altitude (to 0.1 meter precision) + bogus diff
-    stralloc_add_format( msgStr, ",%.1f,M,0.,M", metersElevation );
+    // Make sure elevation is formatted with a decimal point instead of comma.
+    // setlocale isn't used because of thread safety concerns.
+    stralloc_add_format( elevationStr, "%.1f", metersElevation );
+    for (elevStrPtr = elevationStr; elevStrPtr; ++elevStrPtr) {
+        if (*elevStrPtr == ',') {
+            *elevStrPtr = '.';
+            break;
+        }
+    }
+    stralloc_add_format( msgStr, ",%s,M,0.,M", elevationStr );
+    stralloc_reset(elevationStr);
 
     // Bogus rest and checksum
     stralloc_add_str( msgStr, ",,,*47" );
