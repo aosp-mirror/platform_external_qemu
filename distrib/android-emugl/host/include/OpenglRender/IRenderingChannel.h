@@ -36,11 +36,7 @@ public:
     virtual void setOperationReadyCallback(OperationReadyCallback callback) = 0;
 
     virtual bool write(ChannelBuffer&& buffer) = 0;
-    virtual bool write(const ChannelBuffer::value_type* begin,
-                       size_t size) = 0;
     virtual ChannelBuffer read() = 0;
-    virtual size_t read(ChannelBuffer::value_type* buffer,
-                        size_t size) = 0;
 
     virtual void stop() = 0;
 

@@ -27,17 +27,19 @@ public:
     RenderingChannel(std::shared_ptr<Renderer> renderer);
     ~RenderingChannel();
 
+public:
+    // IRenderingChannel implementation, operations provided for a guest system
     virtual void setOperationReadyCallback(
             OperationReadyCallback callback) override final;
 
     virtual bool write(ChannelBuffer&& buffer) override final;
-    virtual bool write(const ChannelBuffer::value_type* begin,
-                       size_t size) override final;
     virtual ChannelBuffer read() override final;
-    virtual size_t read(ChannelBuffer::value_type* buffer,
-                        size_t size) override final;
 
     virtual void stop() override final;
+
+public:
+    bool writeToGuest(const ChannelBuffer::value_type* buf, size_t size);
+    size_t readFromGuest(ChannelBuffer::value_type* buf, size_t size);
 
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RenderingChannel);

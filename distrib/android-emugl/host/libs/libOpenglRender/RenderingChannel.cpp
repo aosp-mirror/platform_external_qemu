@@ -27,19 +27,22 @@ bool RenderingChannel::write(ChannelBuffer&& buffer) {
     return true;
 }
 
-bool RenderingChannel::write(const ChannelBuffer::value_type* begin,
-                             size_t size) {
-    return true;
-}
-
 ChannelBuffer RenderingChannel::read() {
     return {};
 }
 
-size_t RenderingChannel::read(ChannelBuffer::value_type* buffer, size_t size) {
-    return 0;
+void RenderingChannel::stop() {
+    return;
 }
 
-void RenderingChannel::stop() {}
+bool RenderingChannel::writeToGuest(const ChannelBuffer::value_type* buf,
+                                    size_t size) {
+    return true;
+}
+
+size_t RenderingChannel::readFromGuest(ChannelBuffer::value_type* buf,
+                                       size_t size) {
+    return size;
+}
 
 }  // namespace emugl

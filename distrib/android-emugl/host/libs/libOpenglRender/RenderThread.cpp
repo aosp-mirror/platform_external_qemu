@@ -52,8 +52,8 @@ std::unique_ptr<RenderThread> RenderThread::create(
 
 intptr_t RenderThread::main() {
     uint32_t flags = 0;
-    if (mChannel->read(reinterpret_cast<char*>(&flags), sizeof(flags)) !=
-        sizeof(flags)) {
+    if (mChannel->readFromGuest(reinterpret_cast<char*>(&flags),
+                                sizeof(flags)) != sizeof(flags)) {
         return 0;
     }
 
