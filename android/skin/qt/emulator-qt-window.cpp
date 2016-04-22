@@ -416,19 +416,21 @@ void EmulatorQtWindow::dropEvent(QDropEvent *event)
 
 void EmulatorQtWindow::keyPressEvent(QKeyEvent *event)
 {
-    handleKeyEvent(kEventKeyDown, event);
+    bool needsMore = handleKeyEvent(kEventKeyDown, event);
 
-    // If the key event generated any text, we need
-    // to send an additional TextInput event to the emulator.
-    if (event->text().length() > 0) {
-        SkinEvent *skin_event = createSkinEvent(kEventTextInput);
-        skin_event->u.text.down = false;
-        strncpy((char*)skin_event->u.text.text,
-                (const char*)event->text().toUtf8().constData(),
-                sizeof(skin_event->u.text.text) - 1);
-        // Ensure the event's text is 0-terminated
-        skin_event->u.text.text[sizeof(skin_event->u.text.text)-1] = 0;
-        queueSkinEvent(skin_event);
+    if (needsMore) {
+        // If the key event generated any text, we need
+        // to send an additional TextInput event to the emulator.
+        if (event->text().length() > 0) {
+            SkinEvent *skin_event = createSkinEvent(kEventTextInput);
+            skin_event->u.text.down = false;
+            strncpy((char*)skin_event->u.text.text,
+                    (const char*)event->text().toUtf8().constData(),
+                    sizeof(skin_event->u.text.text) - 1);
+            // Ensure the event's text is 0-terminated
+            skin_event->u.text.text[sizeof(skin_event->u.text.text)-1] = 0;
+            queueSkinEvent(skin_event);
+        }
     }
 }
 
@@ -1274,7 +1276,9 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* 
     queueSkinEvent(skin_event);
 }
 
-void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
+// Returns 'true' if the key was forwarded and needs more processing
+// Returns 'false' if no more processing is needed
+bool EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
 {
     if (!mForwardShortcutsToDevice && mInZoomMode) {
         if (event->key() == Qt::Key_Control) {
@@ -1296,7 +1300,10 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
 
     if (mForwardShortcutsToDevice || !mToolWindow->handleQtKeyEvent(event)) {
         forwardKeyEventToEmulator(type, event);
+        return true; // This key needs more processing
     }
+
+    return false; // Done with this key
 }
 
 void EmulatorQtWindow::simulateKeyPress(int keyCode, int modifiers)
