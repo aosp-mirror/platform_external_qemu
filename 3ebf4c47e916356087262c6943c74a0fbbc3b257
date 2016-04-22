@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "08733496_1bc5a359",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 434,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-22T17:59:55Z",
+      "side": 1,
+      "message": "While you\u0027re at it, move this to handleKeyEvent? That way you don\u0027t have to return some boolean, and all of the logic here will be in one place.",
+      "range": {
+        "startLine": 421,
+        "startChar": 4,
+        "endLine": 434,
+        "endChar": 5
+      },
+      "revId": "3ebf4c47e916356087262c6943c74a0fbbc3b257",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08733496_b8ff5575",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
