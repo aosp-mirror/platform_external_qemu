@@ -27,18 +27,23 @@ public:
     RenderingChannel(std::shared_ptr<Renderer> renderer);
     ~RenderingChannel();
 
-    virtual void setOperationReadyCallback(OperationReadyCallback callback) override final;
+    virtual void setOperationReadyCallback(
+            OperationReadyCallback callback) override final;
 
     virtual bool write(ChannelBuffer&& buffer) override final;
-    virtual bool write(ChannelBuffer::value_type* begin, ChannelBuffer::value_type* end) override final;
+    virtual bool write(const ChannelBuffer::value_type* begin,
+                       size_t size) override final;
     virtual ChannelBuffer read() override final;
+    virtual size_t read(ChannelBuffer::value_type* buffer,
+                        size_t size) override final;
+
+    virtual void stop() override final;
 
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RenderingChannel);
 
 private:
     std::shared_ptr<Renderer> mRenderer;
-
 };
 
 }  // namespace emugl

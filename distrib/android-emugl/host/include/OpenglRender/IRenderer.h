@@ -62,12 +62,13 @@ public:
     // In the first implementation, ydir is always -1 (bottom to top), format
     // and type are always GL_RGBA and GL_UNSIGNED_BYTE, and the width and
     // height will always be the same as the ones used to create the renderer.
-    using OnPostCallback = void(*)(void* context,int width,
-                                              int height,
-                                              int ydir,
-                                              int format,
-                                              int type,
-                                              unsigned char* pixels);
+    using OnPostCallback = void (*)(void* context,
+                                    int width,
+                                    int height,
+                                    int ydir,
+                                    int format,
+                                    int type,
+                                    unsigned char* pixels);
     virtual void setPostCallback(OnPostCallback onPost, void* context) = 0;
 
     // showOpenGLSubwindow -
@@ -108,7 +109,8 @@ public:
 
     // setOpenGLDisplayTranslation
     //    change what coordinate of the guest framebuffer will be displayed at
-    //    the corner of the GPU sub-window. Specifically, |px| and |py| = 0 means
+    //    the corner of the GPU sub-window. Specifically, |px| and |py| = 0
+    //    means
     //    align the bottom-left of the framebuffer with the bottom-left of the
     //    sub-window, and |px| and |py| = 1 means align the top right of the
     //    framebuffer with the top right of the sub-window. Intermediate values

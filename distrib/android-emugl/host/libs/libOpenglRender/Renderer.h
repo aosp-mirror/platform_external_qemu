@@ -16,12 +16,15 @@
 #include "OpenglRender/IRenderer.h"
 #include "OpenglRender/IRenderLib.h"
 
-#include "RenderServer.h"
 #include "RenderWindow.h"
 
 #include "android/base/Compiler.h"
+#include "android/base/synchronization/Lock.h"
+
+#include "RenderThread.h"
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 namespace emugl {
@@ -34,9 +37,13 @@ public:
 
     bool initialize(int width, int height, bool useSubWindow);
 
+    void stop();
+
+public:
     virtual IRenderingChannelPtr createRenderingChannel() override final;
     virtual HardwareStrings getHardwareStrings() override final;
-    virtual void setPostCallback(OnPostCallback onPost, void* context) override final;
+    virtual void setPostCallback(OnPostCallback onPost,
+                                 void* context) override final;
     virtual bool showOpenGLSubwindow(FBNativeWindowType window,
                                      int wx,
                                      int wy,
@@ -56,10 +63,15 @@ private:
 
 private:
     IRenderLibPtr mRenderLib;
-    std::vector<std::weak_ptr<IRenderingChannel>> mChannels;
-
-    std::unique_ptr<RenderServer> mRenderServer;
     std::unique_ptr<RenderWindow> mRenderWindow;
+
+    android::base::Lock mThreadRenderingLock;
+    android::base::Lock mThreadVectorLock;
+
+    using ThreadWithChannel = std::pair<std::unique_ptr<RenderThread>,
+                                        std::weak_ptr<IRenderingChannel>>;
+
+    std::vector<ThreadWithChannel> mThreads;
 };
 
 }  // namespace emugl

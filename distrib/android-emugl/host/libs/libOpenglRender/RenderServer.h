@@ -36,7 +36,6 @@ private:
     RenderServer();
 
 private:
-    emugl::Mutex m_lock;
     SocketStream *m_listenSock;
     bool m_exiting;
 };

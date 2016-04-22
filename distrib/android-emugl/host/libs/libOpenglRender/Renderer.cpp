@@ -13,16 +13,19 @@
 // limitations under the License.
 #include "Renderer.h"
 
+#include "RenderingChannel.h"
+
 #include "emugl/common/logging.h"
 #include "IOStream.h"
 
+#include <algorithm>
 #include <utility>
 
 #include <assert.h>
 
 namespace emugl {
 
-// kUseThread is used to determine whether the RenderWindow should use
+// kUseSubwindowThread is used to determine whether the RenderWindow should use
 // a separate thread to manage its subwindow GL/GLES context.
 // For now, this feature is disabled entirely for the following
 // reasons:
@@ -43,18 +46,12 @@ namespace emugl {
 //   dragging the window between monitors, triggering a Qt-specific callback
 //   in the context of RenderWindow thread, which will become blocked on the UI
 //   thread, which may in turn be blocked on something else.
-static const bool kUseThread = false;
+static const bool kUseSubwindowThread = false;
 
 Renderer::Renderer(IRenderLibPtr lib) : mRenderLib(lib) {}
 
 Renderer::~Renderer() {
-    if (!mRenderWindow) {
-        return;
-    }
-
-    mRenderServer->stop();
-    mRenderServer->wait(nullptr);
-    mRenderServer.reset();
+    mThreads.clear();
     mRenderWindow.reset();
 }
 
@@ -64,7 +61,7 @@ bool Renderer::initialize(int width, int height, bool useSubWindow) {
     }
 
     std::unique_ptr<RenderWindow> renderWindow(
-            new RenderWindow(width, height, kUseThread, useSubWindow));
+            new RenderWindow(width, height, kUseSubwindowThread, useSubWindow));
     if (!renderWindow) {
         ERR("Could not create rendering window class");
         GL_LOG("Could not create rendering window class");
@@ -75,24 +72,58 @@ bool Renderer::initialize(int width, int height, bool useSubWindow) {
         return false;
     }
 
-    std::unique_ptr<RenderServer> renderServer(RenderServer::create());
-    if (!renderServer) {
-        ERR("Could not create render server");
-        return false;
-    }
-    if (!renderServer->start()) {
-        ERR("Could not start render server thread");
-        return false;
-    }
-
     mRenderWindow = std::move(renderWindow);
-    mRenderServer = std::move(renderServer);
     GL_LOG("OpenGL renderer initialized successfully");
     return true;
 }
 
-IRenderingChannelPtr Renderer::createRenderingChannel() {
+void Renderer::stop() {
+    android::base::AutoLock lock(mThreadVectorLock);
+    auto threads = std::move(mThreads);
+    mThreads.clear();
+    lock.unlock();
 
+    for (const auto& t : mThreads) {
+        if (const auto channel = t.second.lock()) {
+            channel->stop();
+        }
+    }
+}
+
+IRenderingChannelPtr Renderer::createRenderingChannel() {
+    const auto channel = std::make_shared<RenderingChannel>(shared_from_this());
+
+    std::unique_ptr<RenderThread> rt(RenderThread::create(
+            shared_from_this(), channel, &mThreadRenderingLock));
+    if (!rt) {
+        fprintf(stderr, "Failed to create RenderThread\n");
+        return nullptr;
+    }
+
+    if (!rt->start()) {
+        fprintf(stderr, "Failed to start RenderThread\n");
+        return nullptr;
+    }
+
+    size_t threadCount = 0;
+    {
+        android::base::AutoLock lock(mThreadVectorLock);
+
+        // clean up the threads which are no longer running
+        mThreads.erase(std::remove_if(mThreads.begin(), mThreads.end(),
+                                      [](const ThreadWithChannel& t) {
+                                          return t.second.expired() ||
+                                                 t.first->isFinished();
+                                      }),
+                       mThreads.end());
+
+        mThreads.emplace_back(std::move(rt), channel);
+
+        threadCount = mThreads.size();
+    }
+    DBG("Started new RenderThread (total %d)\n", (int)threadCount);
+
+    return channel;
 }
 
 IRenderer::HardwareStrings Renderer::getHardwareStrings() {
@@ -127,8 +158,8 @@ bool Renderer::showOpenGLSubwindow(FBNativeWindowType window,
                                    float dpr,
                                    float zRot) {
     assert(mRenderWindow);
-    return mRenderWindow->setupSubWindow(window, wx, wy, ww, wh, fbw, fbh,
-                                         dpr, zRot);
+    return mRenderWindow->setupSubWindow(window, wx, wy, ww, wh, fbw, fbh, dpr,
+                                         zRot);
 }
 
 bool Renderer::destroyOpenGLSubwindow() {
