@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08733496_d290680d",
+        "filename": "android/qt/qt_path.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-22T21:26:40Z",
+      "side": 1,
+      "message": "tabs to spaces.",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 6
+      },
+      "revId": "ad9b222753926530d580d3f6394e64d34ec25d89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
