@@ -45,6 +45,30 @@
       "revId": "3ebf4c47e916356087262c6943c74a0fbbc3b257",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08733496_d8aec6a9",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1303,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-22T23:48:04Z",
+      "side": 1,
+      "message": "Yes, it does.\nHere\u0027s what\u0027s happening: when you press Ctrl+\u003d, the QKeyEvent has an associated text (\"\u003d\"), so the caller of this function will always generate a TextInputEvent (for whatever reason we have generate those in addition to key events in order to enter text). But if Ctrl+\u003d has been handled as a shortcut, then there is no need to generate an additional TextInput event.\nHowever, there could be one potential problem. Let\u0027s say an android app running in the emulator has a shortcut like \"Ctrl+S\" and the user has enabled shortuct forwarding. Then Ctrl+S will be forwarded to the device, but also an additionat TextInputEvent will be generated, which is probably not what we want. Perhaps we shouldn\u0027t generate TextInputEvents for events that contain modifier keys?",
+      "parentUuid": "08733496_b8ff5575",
+      "range": {
+        "startLine": 1303,
+        "startChar": 8,
+        "endLine": 1303,
+        "endChar": 19
+      },
+      "revId": "3ebf4c47e916356087262c6943c74a0fbbc3b257",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
