@@ -21,6 +21,7 @@
 #include "android/async-utils.h"
 #include "android/opengles.h"
 #include "android/utils/assert.h"
+#include "android/utils/eintr_wrapper.h"
 #include "android/utils/looper.h"
 #include "android/utils/panic.h"
 #include "android/utils/sockets.h"
@@ -259,7 +260,8 @@ static int netPipeReadySend(NetPipe *pipe)
         return PIPE_ERROR_IO;
 }
 
-#ifdef _WIN32
+#ifdef WIN32
+
 int qemu2_send_all(int fd, const void *buf, int len1)
 {
     int ret, len;
@@ -277,6 +279,7 @@ int qemu2_send_all(int fd, const void *buf, int len1)
         } else {
             buf += ret;
             len -= ret;
+            return len1 - len;
         }
     }
     return len1 - len;
@@ -302,52 +305,7 @@ int qemu2_recv_all(int fd, void *_buf, int len1, bool single_read)
             }
             buf += ret;
             len -= ret;
-        }
-    }
-    return len1 - len;
-}
-
-#else
-
-int qemu2_send_all(int fd, const void *_buf, int len1)
-{
-    int ret, len;
-    const uint8_t *buf = _buf;
-
-    len = len1;
-    while (len > 0) {
-        ret = write(fd, buf, len);
-        if (ret < 0) {
-            if (errno != EINTR)
-                return -1;
-        } else if (ret == 0) {
-            break;
-        } else {
-            buf += ret;
-            len -= ret;
-        }
-    }
-    return len1 - len;
-}
-
-int qemu2_recv_all(int fd, void *_buf, int len1, bool single_read)
-{
-    int ret, len;
-    uint8_t *buf = _buf;
-
-    len = len1;
-    while ((len > 0) && (ret = recv(fd, buf, len, 0)) != 0) {
-        if (ret < 0) {
-            if (errno != EINTR) {
-                return -1;
-            }
-            continue;
-        } else {
-            if (single_read) {
-                return ret;
-            }
-            buf += ret;
-            len -= ret;
+            return len1 - len;
         }
     }
     return len1 - len;
@@ -375,7 +333,11 @@ netPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuff
     buff = buffers;
     while (count > 0) {
         int  avail = buff->size - buffStart;
+#ifndef WIN32
+        int  len = HANDLE_EINTR(send(loopIo_fd(pipe->io), buff->data + buffStart, avail, 0));
+#else
         int  len = qemu2_send_all(loopIo_fd(pipe->io), buff->data + buffStart, avail);
+#endif
 
         /* the write succeeded */
         if (len > 0) {
@@ -429,7 +391,11 @@ netPipe_recvBuffers( void* opaque, AndroidPipeBuffer*  buffers, int  numBuffers 
     buff = buffers;
     while (count > 0) {
         int  avail = buff->size - buffStart;
+#ifndef WIN32
+        int  len = HANDLE_EINTR(recv(loopIo_fd(pipe->io), buff->data + buffStart, avail, 0));
+#else
         int  len = qemu2_recv_all(loopIo_fd(pipe->io), buff->data + buffStart, avail, true);
+#endif
 
         /* the read succeeded */
         if (len > 0) {
