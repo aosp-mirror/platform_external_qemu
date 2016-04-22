@@ -94,6 +94,25 @@ TEST(androidQtGetPluginsDir, Qt64) {
     EXPECT_STREQ(resultPath, androidQtGetPluginsDir(64).c_str());
 }
 
+TEST(androidQtGetPluginsDir, RespectEnv) {
+#if _WIN32
+    const char basePath[] = "\\foo";
+    const std::string resultPath = std::string("\\other\\")
+                                           .append(System::kLibSubDir)
+                                           .append("\\qt_plugins");
+#else
+    const char basePath[]  = "/foo";
+    const std::string resultPath = std::string("/other/")
+                                           .append(System::kLibSubDir)
+                                           .append("/qt_plugins");
+#endif
+
+    TestSystem testSys(basePath, System::kProgramBitness);
+    testSys.envSet("ANDROID_QT_QPA_PLATFORM_PLUGIN_PATH", resultPath);
+
+    EXPECT_STREQ(resultPath.c_str(), androidQtGetPluginsDir(0).c_str());
+}
+
 TEST(androidQtGetPluginsDir, DetectBitness) {
 #if _WIN32
     const char basePath[] = "\\foo";
