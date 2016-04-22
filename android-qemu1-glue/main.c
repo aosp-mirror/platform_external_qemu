@@ -371,7 +371,7 @@ int main(int argc, char **argv) {
 
     /* Read hardware configuration */
     hw = android_hw;
-    if (avdInfo_initHwConfig(avd, hw) < 0) {
+    if (avdInfo_initHwConfig(avd, hw, false /* isQemu2 */) < 0) {
         derror("could not read hardware configuration ?");
         return 1;
     }
