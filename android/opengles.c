@@ -10,18 +10,18 @@
 ** GNU General Public License for more details.
 */
 
-#include "config-host.h"
-#include "android/opengl/logger.h"
 #include "android/opengles.h"
-
-#include "OpenglRender/render_api_functions.h"
 
 #include "android/crashreport/crash-handler.h"
 #include "android/globals.h"
-#include <android/utils/debug.h>
-#include <android/utils/path.h>
-#include <android/utils/bufprint.h>
-#include <android/utils/dll.h>
+#include "android/hw-pipe-net.h"
+#include "android/opengl/logger.h"
+#include "android/utils/debug.h"
+#include "android/utils/path.h"
+#include "android/utils/bufprint.h"
+#include "android/utils/dll.h"
+
+#include "config-host.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -69,9 +69,6 @@ static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
     return 0;
 }
 
-/* Defined in android/hw-pipe-net.c */
-extern int android_init_opengles_pipes(void);
-
 static ADynamicLibrary*  rendererLib;
 static bool              rendererUsesSubWindow;
 static int               rendererStarted;
@@ -94,7 +91,7 @@ android_initOpenglesEmulation(void)
         return -1;
     }
 
-    android_init_opengles_pipes();
+    android_opengles_pipes_init();
 
     /* Resolve the functions */
     if (initOpenglesEmulationFuncs(rendererLib) < 0) {

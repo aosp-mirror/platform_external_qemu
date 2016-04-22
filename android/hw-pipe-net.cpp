@@ -18,6 +18,8 @@
  * guest clients to directly connect to a TCP port through /dev/qemu_pipe.
  */
 
+#include "hw-pipe-net.h"
+
 #include "android/async-utils.h"
 #include "android/opengles.h"
 #include "android/utils/assert.h"
@@ -97,7 +99,7 @@ netPipe_free( NetPipe*  pipe )
     }
 
     /* Release the pipe object */
-    AFREE(pipe);
+    delete pipe;
 }
 
 
@@ -124,7 +126,7 @@ netPipe_resetState( NetPipe* pipe )
 static void
 netPipe_closeFromSocket( void* opaque )
 {
-    NetPipe*  pipe = opaque;
+    auto pipe = static_cast<NetPipe*>(opaque);
 
     D("%s", __FUNCTION__);
 
@@ -152,7 +154,7 @@ netPipe_closeFromSocket( void* opaque )
 static void
 netPipe_io_func( void* opaque, int fd, unsigned events )
 {
-    NetPipe*  pipe = opaque;
+    auto pipe = static_cast<NetPipe*>(opaque);
     int         wakeFlags = 0;
 
     /* Run the connector if we are in the CONNECTING state     */
@@ -198,13 +200,11 @@ netPipe_io_func( void* opaque, int fd, unsigned events )
 }
 
 
-void*
+static void*
 netPipe_initFromAddress( void* hwpipe, const SockAddress*  address, Looper* looper )
 {
-    NetPipe*     pipe;
-
-    ANEW0(pipe);
-
+    auto pipe = new NetPipe();
+    *pipe = {};
     pipe->hwpipe = hwpipe;
     pipe->state  = STATE_INIT;
 
@@ -244,7 +244,7 @@ netPipe_initFromAddress( void* hwpipe, const SockAddress*  address, Looper* loop
 static void
 netPipe_closeFromGuest( void* opaque )
 {
-    NetPipe*  pipe = opaque;
+    auto pipe = static_cast<NetPipe*>(opaque);
     netPipe_free(pipe);
 }
 
@@ -262,9 +262,10 @@ static int netPipeReadySend(NetPipe *pipe)
 
 #ifdef _WIN32
 
-int qemu_windows_send(int fd, const void *buf, int len1)
+int qemu_windows_send(int fd, const void* _buf, int len1)
 {
     int ret, len;
+    auto buf = static_cast<const char*>(_buf);
 
     len = len1;
     while (len > 0) {
@@ -288,7 +289,7 @@ int qemu_windows_send(int fd, const void *buf, int len1)
 int qemu_windows_recv(int fd, void *_buf, int len1, bool single_read)
 {
     int ret, len;
-    char *buf = _buf;
+    auto buf = static_cast<char*>(_buf);
 
     len = len1;
     while (len > 0) {
@@ -316,7 +317,7 @@ int qemu_windows_recv(int fd, void *_buf, int len1, bool single_read)
 static int
 netPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuffers )
 {
-    NetPipe*  pipe = opaque;
+    auto pipe = static_cast<NetPipe*>(opaque);
     int       count = 0;
     int       ret   = 0;
     size_t    buffStart = 0;
@@ -427,7 +428,7 @@ netPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuff
 static int
 netPipe_recvBuffers( void* opaque, AndroidPipeBuffer*  buffers, int  numBuffers )
 {
-    NetPipe*  pipe = opaque;
+    auto pipe = static_cast<NetPipe*>(opaque);
     int       count = 0;
     int       ret   = 0;
     size_t    buffStart = 0;
@@ -494,7 +495,7 @@ netPipe_recvBuffers( void* opaque, AndroidPipeBuffer*  buffers, int  numBuffers 
 static unsigned
 netPipe_poll( void* opaque )
 {
-    NetPipe*  pipe = opaque;
+    auto pipe = static_cast<NetPipe*>(opaque);
     unsigned  mask = loopIo_poll(pipe->io);
     unsigned  ret  = 0;
 
@@ -509,7 +510,7 @@ netPipe_poll( void* opaque )
 static void
 netPipe_wakeOn( void* opaque, int flags )
 {
-    NetPipe*  pipe = opaque;
+    auto pipe = static_cast<NetPipe*>(opaque);
 
     DD("%s: flags=%d", __FUNCTION__, flags);
 
@@ -545,7 +546,8 @@ netPipe_initTcp( void* hwpipe, void* _looper, const char* args )
     }
     sock_address_init_inet(&address, SOCK_ADDRESS_INET_LOOPBACK, port);
 
-    ret = netPipe_initFromAddress(hwpipe, &address, _looper);
+    ret = netPipe_initFromAddress(hwpipe, &address,
+                                  static_cast<Looper*>(_looper));
 
     sock_address_done(&address);
     return ret;
@@ -570,7 +572,8 @@ netPipe_initUnix( void* hwpipe, void* _looper, const char* args )
 
     sock_address_init_unix(&address, args);
 
-    ret = netPipe_initFromAddress(hwpipe, &address, _looper);
+    ret = netPipe_initFromAddress(hwpipe, &address,
+                                  static_cast<Looper*>(_looper));
 
     sock_address_done(&address);
     return ret;
@@ -699,7 +702,7 @@ android_net_pipes_init(void)
 }
 
 int
-android_init_opengles_pipes(void)
+android_opengles_pipes_init(void)
 {
     /* TODO: Check that we can load and initialize the host emulation
      *        libraries, and return -1 in case of error.

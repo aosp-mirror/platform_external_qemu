@@ -16,4 +16,11 @@
 
 #pragma once
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 void android_net_pipes_init(void);
+int android_opengles_pipes_init(void);
+
+ANDROID_END_HEADER
