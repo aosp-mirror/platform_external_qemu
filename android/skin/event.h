@@ -39,7 +39,7 @@ typedef enum {
 } SkinEventType;
 
 typedef enum {
-    kMouseButtonLeft = 1,
+    kMouseButtonLeft,
     kMouseButtonSecondaryTouch,
     kMouseButtonRight
 } SkinMouseButtonType;
@@ -61,6 +61,7 @@ typedef struct {
     int xrel;
     int yrel;
     int button;
+    int skip_sync;
 } SkinEventMouseData;
 
 typedef struct {

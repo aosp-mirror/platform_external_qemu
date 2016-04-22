@@ -144,7 +144,8 @@ public:
                   bool flipDimensions = false);
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
-                          const QPoint& pos);
+                          const QPoint& pos,
+                          bool skipSync = false);
     void panHorizontal(bool left);
     void panVertical(bool up);
     void queueSkinEvent(SkinEvent* event);

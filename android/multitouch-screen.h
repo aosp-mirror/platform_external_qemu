@@ -51,6 +51,15 @@ extern void multitouch_init(AndroidMTSPort* mtsp,
                             const QAndroidUserEventAgent* user_event_agent,
                             const QAndroidDisplayAgent* display_agent);
 
+/* Convenience functions to set and get the button state bit mask */
+extern int multitouch_create_buttons_state(bool is_down,
+                                           bool skip_sync,
+                                           bool secondary_finger);
+
+extern bool multitouch_is_touch_down(int buttons_state);
+extern bool multitouch_should_skip_sync(int buttons_state);
+extern bool multitouch_is_second_finger(int buttons_state);
+
 /* Handles a MT pointer event.
  * Param:
  *  source - Identifies the source of the event (mouse or a device).
@@ -62,7 +71,8 @@ extern void multitouch_update_pointer(MTESource source,
                                       int tracking_id,
                                       int x,
                                       int y,
-                                      int pressure);
+                                      int pressure,
+                                      bool skip_sync);
 
 /* Gets maximum slot index available for the multi-touch emulation. */
 extern int multitouch_get_max_slot();

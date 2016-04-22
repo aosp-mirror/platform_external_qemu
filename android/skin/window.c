@@ -13,6 +13,7 @@
 
 #include "android/config/config.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/multitouch-screen.h"
 #include "android/skin/charmap.h"
 #include "android/skin/event.h"
 #include "android/skin/image.h"
@@ -1052,8 +1053,6 @@ add_finger_event(SkinWindow* window,
                  unsigned y,
                  unsigned state)
 {
-    //fprintf(stderr, "::: finger %d,%d %d\n", x, y, state);
-
     window->win_funcs->mouse_event(x, y, state);
 }
 
@@ -1823,17 +1822,17 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
     Button*  button;
     int      mx, my;
 
-    FingerState*    finger;
+    // This button state set will still be interpreted correctly for
+    // single-touch, which only uses the first bit.
+    int button_state = multitouch_create_buttons_state(
+            ev->type != kEventMouseButtonUp, ev->u.mouse.skip_sync,
+            ev->u.mouse.button);
 
-    // The "button state" contains two flags: the lowest order bit indicates whether or not this is
-    // a press (1) or release (0) event, and the second bit indicates if this is the primary (0) or
-    // secondary (1) finger.
-    unsigned        button_state = (ev->type == kEventMouseButtonUp ? 0 : 1);
-    if (ev->u.mouse.button == kMouseButtonLeft) {
-        finger = &window->finger;
-    } else {
+    FingerState* finger;
+    if (ev->u.mouse.button == kMouseButtonSecondaryTouch) {
         finger = &window->secondary_finger;
-        button_state += 2;
+    } else {
+        finger = &window->finger;
     }
 
     if (!window->surface)

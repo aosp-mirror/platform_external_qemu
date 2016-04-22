@@ -160,7 +160,6 @@ _mts_pointer_down(MTSState* mts_state, int tracking_id, int x, int y, int pressu
         _push_event(EV_ABS, ABS_MT_PRESSURE, pressure);
         _push_event(EV_ABS, ABS_MT_POSITION_X, x);
         _push_event(EV_ABS, ABS_MT_POSITION_Y, y);
-        _push_event(EV_SYN, SYN_REPORT, 0);
         mts_state->current_slot = slot_index;
     } else {
         D("MTS pointer count is exceeded.");
@@ -184,7 +183,6 @@ _mts_pointer_up(MTSState* mts_state, int slot_index)
     /* Send event indicating "pointer up" to the EventHub. */
     _push_event(EV_ABS, ABS_MT_TRACKING_ID, -1);
     _push_event(EV_ABS, ABS_MT_PRESSURE, 0);
-    _push_event(EV_SYN, SYN_REPORT, 0);
 
     /* Update MTS descriptor, removing the tracked pointer. */
     mts_state->tracked_pointers[slot_index].tracking_id = MTS_POINTER_UP;
@@ -236,7 +234,6 @@ _mts_pointer_move(MTSState* mts_state, int slot_index, int x, int y, int pressur
         _push_event(EV_ABS, ABS_MT_POSITION_Y, y);
         ptr_state->y = y;
     }
-    _push_event(EV_SYN, SYN_REPORT, 0);
 }
 
 /********************************************************************************
@@ -466,13 +463,44 @@ void multitouch_init(AndroidMTSPort* mtsp,
     }
 }
 
-void
-multitouch_update_pointer(MTESource source,
-                          int tracking_id,
-                          int x,
-                          int y,
-                          int pressure)
-{
+/* Convenience functions to set and get the button state bit mask */
+typedef enum {
+    kShiftIsTouchDown = 1,
+    kShiftShouldSkipSync = 1 << 1,
+    kShiftSecondaryTouch = 1 << 2,
+} ButtonStateShiftMask;
+
+int multitouch_create_buttons_state(bool is_down,
+                                    bool skip_sync,
+                                    bool secondary_finger) {
+    int state = 0;
+    if (is_down)
+        state |= kShiftIsTouchDown;
+    if (skip_sync)
+        state |= kShiftShouldSkipSync;
+    if (secondary_finger)
+        state |= kShiftSecondaryTouch;
+    return state;
+}
+
+bool multitouch_is_touch_down(int buttons_state) {
+    return buttons_state & kShiftIsTouchDown;
+}
+
+bool multitouch_should_skip_sync(int buttons_state) {
+    return buttons_state & kShiftShouldSkipSync;
+}
+
+bool multitouch_is_second_finger(int buttons_state) {
+    return buttons_state & kShiftSecondaryTouch;
+}
+
+void multitouch_update_pointer(MTESource source,
+                               int tracking_id,
+                               int x,
+                               int y,
+                               int pressure,
+                               bool skip_sync) {
     MTSState* const mts_state = &_MTSState;
 
     /* Assign a fixed tracking ID to the mouse pointer. */
@@ -501,6 +529,13 @@ multitouch_update_pointer(MTESource source,
     } else {
         /* This is a "pointer move" event */
         _mts_pointer_move(mts_state, slot_index, x, y, pressure);
+    }
+
+    /* The EV_SYN can be skipped if multitouch events were intended to be
+     * delivered at the same time, which is how real devices report events
+     * that occur simultaneously. */
+    if (!skip_sync) {
+        _push_event(EV_SYN, SYN_REPORT, 0);
     }
 }
 

@@ -1247,10 +1247,13 @@ SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(QMouseEvent *event) con
     return (event->button() == Qt::RightButton) ? kMouseButtonRight : kMouseButtonLeft;
 }
 
-void EmulatorQtWindow::handleMouseEvent(SkinEventType type, SkinMouseButtonType button, const QPoint &pos)
-{
+void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
+                                        SkinMouseButtonType button,
+                                        const QPoint& pos,
+                                        bool skipSync) {
     SkinEvent *skin_event = createSkinEvent(type);
     skin_event->u.mouse.button = button;
+    skin_event->u.mouse.skip_sync = skipSync;
     skin_event->u.mouse.x = pos.x();
     skin_event->u.mouse.y = pos.y();
 
