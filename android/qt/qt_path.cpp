@@ -46,10 +46,17 @@ std::string androidQtGetLibraryDir(int bitness) {
 }
 
 std::string androidQtGetPluginsDir(int bitness) {
+    System* system = System::get();
+    std::string qtPluginsDir =
+            system->envGet("ANDROID_QT_QPA_PLATFORM_PLUGIN_PATH");
+    if (!qtPluginsDir.empty()) {
+        return qtPluginsDir;
+    }
+
     std::vector<std::string> subDirVector;
     subDirVector.push_back(androidQtGetBaseDir(bitness));
     subDirVector.push_back(std::string("plugins"));
-    std::string qtPluginsDir = PathUtils::recompose(subDirVector);
+    qtPluginsDir = PathUtils::recompose(subDirVector);
 
     return qtPluginsDir;
 }
