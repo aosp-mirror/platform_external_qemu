@@ -256,9 +256,9 @@ void EmulatorOverlay::showEvent(QShowEvent* event) {
 void EmulatorOverlay::showAsFlash() {
     if (mMode == OverlayMode::Hidden) {
         mMode = OverlayMode::Flash;
-        mFlashAnimation.start();
-        show();
     }
+    mFlashAnimation.start();
+    show();
 }
 
 void EmulatorOverlay::hideForFlash() {
