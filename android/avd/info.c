@@ -1181,7 +1181,7 @@ avdInfo_getDataInitImagePath( const AvdInfo* i )
 }
 
 int
-avdInfo_initHwConfig( const AvdInfo*  i, AndroidHwConfig*  hw )
+avdInfo_initHwConfig(const AvdInfo* i, AndroidHwConfig*  hw, bool isQemu2)
 {
     int  ret = 0;
 
@@ -1207,21 +1207,22 @@ avdInfo_initHwConfig( const AvdInfo*  i, AndroidHwConfig*  hw )
         }
     }
 
-    // for api <= 10, there is no multi-touch support
-    // and GUI won't respond as a result;
+    // for api <= 10 there is no multi-touch support in any of the ranchu
+    // or goldfish kernels and GUI won't respond as a result;
     // force it to be "touch"
-    // for api <= 21, the kernel is not updated to
+    //
+    // for api <= 21 the goldfish kernel is not updated to
     // support multi-touch yet; so just force touch
     // bug: https://code.google.com/p/android/issues/detail?id=199289
     //
-    // TODO: once system images for api 21 and api 19
-    // are updated to support multitouch, revert this
-    // change
-    // tracking bug to revert this change:
-    // https://code.google.com/p/android/issues/detail?id=200332
+    // System images above 10 support multi-touch if they have a ranchu kernel
+    // and we're using QEMU2 as indicated by the isQemu2 flag.
     //
-    if (i->apiLevel <= 21) {
-        str_reset(&hw->hw_screen, "touch");
+    // TODO: There is currently an issue related to this to track the release of
+    // system images with ranchu kernels for API 21 and below at:
+    // https://code.google.com/p/android/issues/detail?id=200332
+    if (i->apiLevel <= 10 || (!isQemu2 && i->apiLevel <= 21)) {
+            str_reset(&hw->hw_screen, "touch");
     }
 
     return ret;

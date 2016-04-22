@@ -1421,7 +1421,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     /* update the avd hw config from this new skin */
     avdInfo_getSkinHardwareIni(avd, opts->skin, opts->skindir);
 
-    if (avdInfo_initHwConfig(avd, hw) < 0) {
+    if (avdInfo_initHwConfig(avd, hw, is_qemu2) < 0) {
         derror("could not read hardware configuration ?");
         return false;
     }
