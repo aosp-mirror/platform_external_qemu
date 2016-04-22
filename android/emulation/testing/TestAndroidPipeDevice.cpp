@@ -57,7 +57,7 @@ public:
             return 0;
         }
         AndroidPipeBuffer buf = { static_cast<uint8_t*>(buffer), len };
-        return android_pipe_recv(mPipe, &buf, 1);
+        return android_pipe_recv(mPipe, &buf, 1, NULL);
     }
 
     virtual ssize_t write(const void* buffer, size_t len) override {
@@ -66,7 +66,7 @@ public:
         }
         AndroidPipeBuffer buf = {
                 (uint8_t*)buffer, len };
-        return android_pipe_send(mPipe, &buf, 1);
+        return android_pipe_send(mPipe, &buf, 1, NULL);
     }
 
     virtual unsigned poll() const override {

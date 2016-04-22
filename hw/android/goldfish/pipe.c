@@ -314,7 +314,8 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
             break;
         }
         buffer.size = dev->size;
-        dev->status = android_pipe_recv(pipe->pipe, &buffer, 1);
+        uint32_t partial_sent;
+        dev->status = android_pipe_recv(pipe->pipe, &buffer, 1, &partial_sent);
         DD("%s: CMD_READ_BUFFER channel=0x%llx address=0x%llx size=%d > status=%d",
            __FUNCTION__, (unsigned long long)dev->channel, (unsigned long long)dev->address,
            dev->size, dev->status);
@@ -334,7 +335,8 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
             break;
         }
         buffer.size = dev->size;
-        dev->status = android_pipe_send(pipe->pipe, &buffer, 1);
+        uint32_t partial_sent;
+        dev->status = android_pipe_send(pipe->pipe, &buffer, 1, &partial_sent);
         DD("%s: CMD_WRITE_BUFFER channel=0x%llx address=0x%llx size=%d > status=%d",
            __FUNCTION__, (unsigned long long)dev->channel,
            (unsigned long long)dev->address,

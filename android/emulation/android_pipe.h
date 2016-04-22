@@ -261,11 +261,13 @@ extern unsigned android_pipe_poll(void* pipe);
 
 // Call the recvBuffers() callback of the client associated with |pipe|.
 extern int android_pipe_recv(void* pipe, AndroidPipeBuffer* buffers,
-                             int numBuffers);
+                             int numBuffers,
+                             uint32_t* partialSent);
 
 // Call the sendBuffers() callback of the client associated with |pipe|.
 extern int android_pipe_send(void* pipe, const AndroidPipeBuffer* buffer,
-                             int numBuffer);
+                             int numBuffer,
+                             uint32_t* partialSent);
 
 // Call the wakeOn() callback of the client associated with |pipe|.
 extern void android_pipe_wake_on(void* pipe_, unsigned wakes);

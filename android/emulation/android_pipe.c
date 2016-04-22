@@ -287,12 +287,12 @@ unsigned android_pipe_poll(void* pipe_) {
     return pipe->funcs->poll(pipe->opaque);
 }
 
-int android_pipe_recv(void* pipe_, AndroidPipeBuffer* buffers, int numBuffers) {
+int android_pipe_recv(void* pipe_, AndroidPipeBuffer* buffers, int numBuffers, uint32_t* partial_sent) {
     Pipe* pipe = pipe_;
     return pipe->funcs->recvBuffers(pipe->opaque, buffers, numBuffers);
 }
 
-int android_pipe_send(void* pipe_, const AndroidPipeBuffer* buffers, int numBuffers) {
+int android_pipe_send(void* pipe_, const AndroidPipeBuffer* buffers, int numBuffers, uint32_t* partial_sent) {
     Pipe* pipe = pipe_;
     return pipe->funcs->sendBuffers(pipe->opaque, buffers, numBuffers);
 }
