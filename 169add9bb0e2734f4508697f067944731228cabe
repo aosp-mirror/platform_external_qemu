@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08733496_526ff8fb",
+        "filename": "android/qt/qt_path.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-22T21:20:26Z",
+      "side": 1,
+      "message": "This has the potential of overriding our path with something else because of a leaked env variable from the user\n(If he runs it from some environment that has Qt, this will end up using that when we don\u0027t want it to)\n\nIf at all, we\u0027ll need a custom env variable that users can set (ANDROID_QT_QPA_PLATFORM_PLUGIN_PATH?).",
+      "range": {
+        "startLine": 50,
+        "startChar": 47,
+        "endLine": 50,
+        "endChar": 74
+      },
+      "revId": "169add9bb0e2734f4508697f067944731228cabe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
