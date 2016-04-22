@@ -151,7 +151,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     QObject::connect(this, &EmulatorQtWindow::releaseBitmap, this, &EmulatorQtWindow::slot_releaseBitmap);
     QObject::connect(this, &EmulatorQtWindow::requestClose, this, &EmulatorQtWindow::slot_requestClose);
     QObject::connect(this, &EmulatorQtWindow::requestUpdate, this, &EmulatorQtWindow::slot_requestUpdate);
-    QObject::connect(this, &EmulatorQtWindow::setDeviceGeometry, this, &EmulatorQtWindow::slot_setDeviceGeometry);
     QObject::connect(this, &EmulatorQtWindow::setWindowIcon, this, &EmulatorQtWindow::slot_setWindowIcon);
     QObject::connect(this, &EmulatorQtWindow::setWindowPos, this, &EmulatorQtWindow::slot_setWindowPos);
     QObject::connect(this, &EmulatorQtWindow::setTitle, this, &EmulatorQtWindow::slot_setWindowTitle);
@@ -204,13 +203,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                 ->attachData("recent-ui-actions.txt",
                              serializeEvents(event_logger->container()));
         });
-
-    mWheelScrollTimer.setInterval(100);
-    mWheelScrollTimer.setSingleShot(true);
-    connect(&mWheelScrollTimer,
-            SIGNAL(timeout()),
-            this,
-            SLOT(wheelScrollTimeout()));
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr()
@@ -425,19 +417,6 @@ void EmulatorQtWindow::dropEvent(QDropEvent *event)
 void EmulatorQtWindow::keyPressEvent(QKeyEvent *event)
 {
     handleKeyEvent(kEventKeyDown, event);
-
-    // If the key event generated any text, we need
-    // to send an additional TextInput event to the emulator.
-    if (event->text().length() > 0) {
-        SkinEvent *skin_event = createSkinEvent(kEventTextInput);
-        skin_event->u.text.down = false;
-        strncpy((char*)skin_event->u.text.text,
-                (const char*)event->text().toUtf8().constData(),
-                sizeof(skin_event->u.text.text) - 1);
-        // Ensure the event's text is 0-terminated
-        skin_event->u.text.text[sizeof(skin_event->u.text.text)-1] = 0;
-        queueSkinEvent(skin_event);
-    }
 }
 
 void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
@@ -784,12 +763,6 @@ void EmulatorQtWindow::slot_requestUpdate(const QRect *rect, QSemaphore *semapho
             rect->width() * mBackingSurface->w / mBackingSurface->original_w,
             rect->height() * mBackingSurface->h / mBackingSurface->original_h);
     update(r);
-    if (semaphore != NULL) semaphore->release();
-}
-
-void EmulatorQtWindow::slot_setDeviceGeometry(const QRect *rect, QSemaphore *semaphore) {
-    mDeviceGeometry =
-            QRect(rect->x(), rect->y(), rect->width(), rect->height());
     if (semaphore != NULL) semaphore->release();
 }
 
@@ -1313,6 +1286,22 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
 
     if (mForwardShortcutsToDevice || !mToolWindow->handleQtKeyEvent(event)) {
         forwardKeyEventToEmulator(type, event);
+        if (type == kEventKeyDown && event->text().length() > 0) {
+            Qt::KeyboardModifiers mods = event->modifiers();
+            mods &= ~(Qt::ShiftModifier | Qt::KeypadModifier);
+            if (mods == 0) {
+                // The key event generated text without Ctrl, Alt, etc.
+                // Send an additional TextInput event to the emulator.
+                SkinEvent *skin_event = createSkinEvent(kEventTextInput);
+                skin_event->u.text.down = false;
+                strncpy((char*)skin_event->u.text.text,
+                        (const char*)event->text().toUtf8().constData(),
+                        sizeof(skin_event->u.text.text) - 1);
+                // Ensure the event's text is 0-terminated
+                skin_event->u.text.text[sizeof(skin_event->u.text.text)-1] = 0;
+                queueSkinEvent(skin_event);
+            }
+        }
     }
 }
 
@@ -1431,10 +1420,6 @@ void EmulatorQtWindow::showZoomIfNotUserHidden() {
 
 QSize EmulatorQtWindow::containerSize() const {
     return mContainer.size();
-}
-
-QRect EmulatorQtWindow::deviceGeometry() const {
-    return mDeviceGeometry;
 }
 
 void EmulatorQtWindow::toggleZoomMode()
@@ -1575,23 +1560,4 @@ bool EmulatorQtWindow::mouseInside() {
            widget_cursor_coords.x() < width() &&
            widget_cursor_coords.y() >= 0 &&
            widget_cursor_coords.y() < height();
-}
-
-void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
-    if (!mWheelScrollTimer.isActive()) {
-        handleMouseEvent(kEventMouseButtonDown,
-                         kMouseButtonLeft,
-                         event->pos());
-        mWheelScrollPos = event->pos();
-    }
-
-    mWheelScrollTimer.start();
-    mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
-    handleMouseEvent(kEventMouseMotion,
-                     kMouseButtonLeft,
-                     mWheelScrollPos);
-}
-
-void EmulatorQtWindow::wheelScrollTimeout() {
-    handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, mWheelScrollPos);
 }

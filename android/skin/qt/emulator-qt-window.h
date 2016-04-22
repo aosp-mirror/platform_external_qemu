@@ -92,7 +92,6 @@ public:
     void mouseMoveEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
-    void wheelEvent(QWheelEvent* event) override;
     void startThread(StartFunction f, int argc, char **argv);
 
     /*
@@ -123,7 +122,6 @@ signals:
     void releaseBitmap(SkinSurface *s, QSemaphore *sempahore = NULL);
     void requestClose(QSemaphore *semaphore = NULL);
     void requestUpdate(const QRect *rect, QSemaphore *semaphore = NULL);
-    void setDeviceGeometry(const QRect *rect, QSemaphore *sempahore = NULL);
     void setWindowIcon(const unsigned char *data, int size, QSemaphore *semaphore = NULL);
     void setWindowPos(int x, int y, QSemaphore *semaphore = NULL);
     void setTitle(const QString *title, QSemaphore *semaphore = NULL);
@@ -140,7 +138,6 @@ public:
     ToolWindow* toolWindow() const;
     void showZoomIfNotUserHidden();
     QSize containerSize() const;
-    QRect deviceGeometry() const;
 
     void doResize(const QSize& size,
                   bool isKbdShortcut = false,
@@ -187,7 +184,6 @@ private slots:
     void slot_releaseBitmap(SkinSurface *s, QSemaphore *sempahore = NULL);
     void slot_requestClose(QSemaphore *semaphore = NULL);
     void slot_requestUpdate(const QRect *rect, QSemaphore *semaphore = NULL);
-    void slot_setDeviceGeometry(const QRect *rect, QSemaphore *semaphore = NULL);
     void slot_setWindowIcon(const unsigned char *data, int size, QSemaphore *semaphore = NULL);
     void slot_setWindowPos(int x, int y, QSemaphore *semaphore = NULL);
     void slot_setWindowTitle(const QString *title, QSemaphore *semaphore = NULL);
@@ -218,7 +214,6 @@ public slots:
     void setForwardShortcutsToDevice(int index);
     void show();
     void showMinimized();
-    void wheelScrollTimeout();
 
     void slot_screenChanged();
 
@@ -264,7 +259,6 @@ private:
     ToolWindow* mToolWindow;
     EmulatorContainer mContainer;
     EmulatorOverlay mOverlay;
-    QRect mDeviceGeometry;
 
     QPointF mFocus;
     QPoint mViewportFocus;
@@ -291,9 +285,6 @@ private:
     android::emulation::FilePusher::Ptr mFilePusher;
     android::emulation::FilePusher::SubscriptionToken mFilePusherSubscription;
     QProgressDialog mPushDialog;
-
-    QTimer mWheelScrollTimer;
-    QPoint mWheelScrollPos;
 };
 
 struct SkinSurface {
