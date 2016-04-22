@@ -305,6 +305,24 @@ _hwSensorClient_enabled( HwSensorClient*  cl, int  sensorId )
     return (cl->enabledMask & (1 << sensorId)) != 0;
 }
 
+
+/* a helper function that replaces commas (,) with points (.).
+ * Each sensor string must be processed this way before being
+ * sent into the guest. This is because the system locale may
+ * cause decimal values to be formatted with a comma instead of
+ * a decimal point, but that would not be parsed correctly
+ * within the guest.
+ */
+static void
+_hwSensorClient_sanitizeSensorString(char* string, int maxlen) {
+    int i;
+    for (i = 0;  i < maxlen && string[i] != '\0' ; i++) {
+        if (string[i] == ',') {
+            string[i] = '.';
+        }
+    }
+}
+
 /* this function is called periodically to send sensor reports
  * to the HAL module, and re-arm the timer if necessary
  */
@@ -327,6 +345,7 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
                  sensor->u.acceleration.x,
                  sensor->u.acceleration.y,
                  sensor->u.acceleration.z);
+        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
         _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
 
         // TODO(grigoryj): debug output for investigating rotation bug
@@ -348,6 +367,7 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
                  sensor->u.magnetic.x,
                  sensor->u.magnetic.y,
                  sensor->u.magnetic.z);
+        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
         _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
     }
 
@@ -357,6 +377,7 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
                  sensor->u.orientation.azimuth,
                  sensor->u.orientation.pitch,
                  sensor->u.orientation.roll);
+        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
         _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
     }
 
@@ -364,6 +385,7 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
         sensor = &hw->sensors[ANDROID_SENSOR_TEMPERATURE];
         snprintf(buffer, sizeof buffer, "temperature:%g",
                  sensor->u.temperature.celsius);
+        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
         _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
     }
 
@@ -371,6 +393,7 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
         sensor = &hw->sensors[ANDROID_SENSOR_PROXIMITY];
         snprintf(buffer, sizeof buffer, "proximity:%g",
                  sensor->u.proximity.value);
+        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
         _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
     }
 
@@ -378,6 +401,7 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
         sensor = &hw->sensors[ANDROID_SENSOR_LIGHT];
         snprintf(buffer, sizeof buffer, "light:%g",
                  sensor->u.light.value);
+        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
         _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
     }
 
@@ -385,6 +409,7 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
         sensor = &hw->sensors[ANDROID_SENSOR_PRESSURE];
         snprintf(buffer, sizeof buffer, "pressure:%g",
                  sensor->u.pressure.value);
+        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
         _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
     }
 
@@ -392,6 +417,7 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
         sensor = &hw->sensors[ANDROID_SENSOR_HUMIDITY];
         snprintf(buffer, sizeof buffer, "humidity:%g",
                  sensor->u.humidity.value);
+        _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
         _hwSensorClient_send(cl, (uint8_t*) buffer, strlen(buffer));
     }
 
@@ -399,6 +425,7 @@ _hwSensorClient_tick(void* opaque, LoopTimer* unused)
             looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
 
     snprintf(buffer, sizeof buffer, "sync:%" PRId64, now_ns / 1000);
+    _hwSensorClient_sanitizeSensorString(buffer, sizeof buffer);
     _hwSensorClient_send(cl, (uint8_t*)buffer, strlen(buffer));
 
     /* rearm timer, use a minimum delay of 8 ms, just to
