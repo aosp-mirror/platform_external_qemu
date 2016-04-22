@@ -16,6 +16,10 @@
 
 #include "android/utils/compiler.h"
 
+#ifdef __cplusplus
+#include "OpenglRender/IRenderer.h"
+#endif
+
 ANDROID_BEGIN_HEADER
 
 /* Call this function to initialize the hardware opengles emulation.
@@ -65,5 +69,9 @@ void android_stopOpenglesRenderer(void);
  * fallback to local TCP ones
  */
 extern int  android_gles_fast_pipes;
+
+#ifdef __cplusplus
+const emugl::IRendererPtr& android_getOpenglesRenderer();
+#endif
 
 ANDROID_END_HEADER

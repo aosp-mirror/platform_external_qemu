@@ -263,3 +263,8 @@ android_redrawOpenglesWindow(void)
         renderer->repaintOpenGLDisplay();
     }
 }
+
+const emugl::IRendererPtr& android_getOpenglesRenderer()
+{
+    return renderer;
+}
