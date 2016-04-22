@@ -29,8 +29,7 @@ public:
 
 public:
     // IRenderingChannel implementation, operations provided for a guest system
-    virtual void setOperationReadyCallback(
-            OperationReadyCallback callback) override final;
+    virtual void setEventCallback(EventCallback callback) override final;
 
     virtual bool write(ChannelBuffer&& buffer) override final;
     virtual ChannelBuffer read() override final;

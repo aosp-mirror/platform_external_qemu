@@ -20,8 +20,7 @@ RenderingChannel::RenderingChannel(std::shared_ptr<Renderer> renderer)
 
 RenderingChannel::~RenderingChannel() {}
 
-void RenderingChannel::setOperationReadyCallback(
-        IRenderingChannel::OperationReadyCallback callback) {}
+void RenderingChannel::setEventCallback(IRenderingChannel::EventCallback callback) {}
 
 bool RenderingChannel::write(ChannelBuffer&& buffer) {
     return true;

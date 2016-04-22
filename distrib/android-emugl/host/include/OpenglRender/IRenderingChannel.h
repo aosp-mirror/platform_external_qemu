@@ -27,13 +27,15 @@ using ChannelBuffer = std::vector<char>;
 
 class IRenderingChannel {
 public:
-    enum class Operation {
+    enum class Event {
+        Empty = 0,
         Read = 1 << 0,
-        Write = 1 << 1
+        Write = 1 << 1,
+        Stopped = 1 << 2,
     };
-    using OperationReadyCallback = std::function<void(Operation)>;
+    using EventCallback = std::function<void(Event)>;
 
-    virtual void setOperationReadyCallback(OperationReadyCallback callback) = 0;
+    virtual void setEventCallback(EventCallback callback) = 0;
 
     virtual bool write(ChannelBuffer&& buffer) = 0;
     virtual ChannelBuffer read() = 0;
