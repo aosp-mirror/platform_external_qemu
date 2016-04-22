@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08733496_b75f65b7",
+        "filename": "android/skin/qt/extended-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-22T17:13:27Z",
+      "side": 1,
+      "message": "We\u0027re now doing this every time \u0027...\u0027 is pressed, which re-positions the extended window even if it was already on screen.\n\nShould we do this only if the window was previously hidden?",
+      "range": {
+        "startLine": 117,
+        "startChar": 4,
+        "endLine": 118,
+        "endChar": 40
+      },
+      "revId": "9ccf691cad2ffcfe6bf2f4355ee24abd65276db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
