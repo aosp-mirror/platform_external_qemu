@@ -163,7 +163,9 @@ RENDER_APICALL void RENDER_APIENTRY getHardwareStrings(
 
 RENDER_APICALL int RENDER_APIENTRY stopOpenGLRenderer(void)
 {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     bool ret = false;
+    return false;
 
     // open a dummy connection to the renderer to make it
     // realize the exit request.
