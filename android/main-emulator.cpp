@@ -344,13 +344,33 @@ int main(int argc, char** argv)
         RANCHU_OFF,
     } ranchu = RANCHU_AUTODETECT;
 
+    bool isSnapshotPresent = false;
+    {
+        // only qemu1 can handle snapshoting at this moment
+        char* snapShotPresent = path_getAvdSnapshotPresent(avdName);
+        if (0 == strcmp(snapShotPresent, "true")) {
+            fprintf(stderr, "WARNING: Force to use classic engine to support snapshot.\n");
+            ranchu = RANCHU_OFF;
+            isSnapshotPresent = true;
+        }
+        free(snapShotPresent);
+    }
+
     if (engine) {
         if (!strcmp(engine, "auto")) {
-            ranchu = RANCHU_AUTODETECT;
+            if (isSnapshotPresent) {
+                fprintf(stderr, "WARNING: only classic engine supports snapshot, option 'auto' ignored.\n");
+            } else {
+                ranchu = RANCHU_AUTODETECT;
+            }
         } else if (!strcmp(engine, "classic")) {
             ranchu = RANCHU_OFF;
         } else if (!strcmp(engine, "qemu2")) {
-            ranchu = RANCHU_ON;
+            if (isSnapshotPresent) {
+                fprintf(stderr, "WARNING: qemu2 does not support snapshot, option 'qemu2' ignored.\n");
+            } else {
+                ranchu = RANCHU_ON;
+            }
         } else {
             APANIC("Invalid -engine value '%s', please use one of: auto, classic, qemu2",
                    engine);
