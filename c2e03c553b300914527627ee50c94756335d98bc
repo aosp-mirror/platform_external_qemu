@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08733496_84b867e8",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1184,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-04-23T15:05:50Z",
+      "side": 1,
+      "message": "Maybe\ns/isQemu2/hasRanchuKernel/\nAnd then, up the stack from this routine the variable is also named is_qemu2, but if it really means hasRanchuKernel, maybe it should be renamed as well?",
+      "revId": "c2e03c553b300914527627ee50c94756335d98bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08733496_64b34b0e",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1224,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-04-23T15:05:50Z",
+      "side": 1,
+      "message": "I think you can remove the (i-\u003eapiLevel \u003c\u003d 21)\n\nIt\u0027s at least theoretically possible to run the emulator with a API 22+ non-ranchu system image",
+      "revId": "c2e03c553b300914527627ee50c94756335d98bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
