@@ -21,6 +21,34 @@
 #include "emugl/common/mutex.h"
 #include "emugl/common/thread.h"
 
+#ifndef _WIN32
+#include <pthread.h>
+
+typedef struct {
+    unsigned char* buffer;
+    uint32_t ready_start;
+    uint32_t ready_end;
+    uint32_t valid_start;
+    uint32_t valid_end;
+    pthread_mutex_t lock;
+    pthread_cond_t cv_ready;
+    pthread_cond_t cv_valid;
+} NetPipe_SharedMemState;
+#else
+#include "emugl/common/aemu_lock.h"
+typedef struct {
+    unsigned char* buffer;
+    uint32_t ready_start;
+    uint32_t ready_end;
+    uint32_t valid_start;
+    uint32_t valid_end;
+    void* lock;
+    void* cv_ready;
+    void* cv_valid;
+} NetPipe_SharedMemState;
+
+#endif
+
 // A class used to model a thread of the RenderServer. Each one of them
 // handles a single guest client / protocol byte stream.
 class RenderThread : public emugl::Thread {
@@ -32,7 +60,8 @@ public:
     // decoding operations between all threads.
     // TODO(digit): Why is this needed here? Shouldn't this be handled
     //              by the decoders themselves or at a lower-level?
-    static RenderThread* create(IOStream* stream, emugl::Mutex* mutex);
+    static RenderThread* create(IOStream* stream, emugl::Mutex* mutex,
+            NetPipe_SharedMemState* msptr);
 
     // Destructor.
     virtual ~RenderThread();
@@ -47,12 +76,14 @@ public:
 private:
     RenderThread();  // No default constructor
 
-    RenderThread(IOStream* stream, emugl::Mutex* mutex);
+    RenderThread(IOStream* stream, emugl::Mutex* mutex,
+            NetPipe_SharedMemState* msptr);
 
     virtual intptr_t main();
 
     emugl::Mutex* m_lock;
     IOStream* m_stream;
+    NetPipe_SharedMemState* m_shared;
 };
 
 #endif

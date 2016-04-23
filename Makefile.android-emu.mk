@@ -83,6 +83,7 @@ LOCAL_SRC_FILES := \
     android/base/StringView.cpp \
     android/base/sockets/SocketUtils.cpp \
     android/base/sockets/SocketWaiter.cpp \
+    android/base/synchronization/aemu_lock.cpp \
     android/base/synchronization/MessageChannel.cpp \
     android/base/Log.cpp \
     android/base/memory/LazyInstance.cpp \
