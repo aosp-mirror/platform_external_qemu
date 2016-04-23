@@ -21,7 +21,6 @@
 #include "android/async-utils.h"
 #include "android/opengles.h"
 #include "android/utils/assert.h"
-#include "android/utils/eintr_wrapper.h"
 #include "android/utils/looper.h"
 #include "android/utils/panic.h"
 #include "android/utils/sockets.h"
@@ -36,6 +35,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <pthread.h>
 #endif
 
 #include <stdlib.h>
@@ -76,13 +76,128 @@ enum {
     STATE_CLOSING_SOCKET
 };
 
+#define NET_PIPE_BUF_SIZE 1024 * 1024 * 32
+typedef struct {
+    unsigned char* buffer;
+
+    uint32_t ready_start;
+    uint32_t ready_end;
+    uint32_t valid_start;
+    uint32_t valid_end;
+    pthread_mutex_t lock;
+    pthread_cond_t cv_ready;
+    pthread_cond_t cv_valid;
+} NetPipe_SharedMemState;
+
 typedef struct {
     void*           hwpipe;
     int             state;
     int             wakeWanted;
     LoopIo*         io;
     AsyncConnector  connector[1];
+
+    NetPipe_SharedMemState* shared_mem;
 } NetPipe;
+
+
+#ifdef _WIN32
+int qemu2_send_all(int fd, const void *buf, int len1)
+{
+    int ret, len;
+
+    len = len1;
+    while (len > 0) {
+        ret = send(fd, buf, len, 0);
+        if (ret < 0) {
+            errno = WSAGetLastError();
+            if (errno != WSAEWOULDBLOCK) {
+                return -1;
+            }
+        } else if (ret == 0) {
+            break;
+        } else {
+            buf += ret;
+            len -= ret;
+        }
+    }
+    return len1 - len;
+}
+
+int qemu2_recv_all(int fd, void *_buf, int len1, bool single_read)
+{
+    int ret, len;
+    char *buf = _buf;
+
+    len = len1;
+    while (len > 0) {
+        ret = recv(fd, buf, len, 0);
+        if (ret < 0) {
+            errno = WSAGetLastError();
+            if (errno != WSAEWOULDBLOCK) {
+                return -1;
+            }
+            continue;
+        } else {
+            if (single_read) {
+                return ret;
+            }
+            buf += ret;
+            len -= ret;
+        }
+    }
+    return len1 - len;
+}
+
+#else
+
+#include <stdio.h>
+int qemu2_send_all(int fd, const void *_buf, int len1)
+{
+    int ret, len;
+    const uint8_t *buf = _buf;
+
+    len = len1;
+    while (len > 0) {
+        ret = write(fd, buf, len);
+        if (ret < 0) {
+            if (errno != EINTR && errno != EAGAIN) {
+                fprintf(stderr, "errno=%d\n", errno);
+                return -1;
+            }
+        } else if (ret == 0) {
+            break;
+        } else {
+            buf += ret;
+            len -= ret;
+        }
+    }
+    return len1 - len;
+}
+
+int qemu2_recv_all(int fd, void *_buf, int len1, bool single_read)
+{
+    int ret, len;
+    uint8_t *buf = _buf;
+
+    len = len1;
+    while ((len > 0) && (ret = recv(fd, buf, len, 0)) != 0) {
+        if (ret < 0) {
+            if (errno != EINTR) {
+                return -1;
+            }
+            continue;
+        } else {
+            if (single_read) {
+                return ret;
+            }
+            buf += ret;
+            len -= ret;
+        }
+    }
+    return len1 - len;
+}
+
+#endif
 
 static void
 netPipe_free( NetPipe*  pipe )
@@ -97,6 +212,7 @@ netPipe_free( NetPipe*  pipe )
     }
 
     /* Release the pipe object */
+    free(pipe->shared_mem->buffer);
     AFREE(pipe);
 }
 
@@ -118,12 +234,27 @@ netPipe_resetState( NetPipe* pipe )
 }
 
 
+#include <stdio.h>
+
+static int netPipeReadySend(NetPipe *pipe)
+{
+    if (pipe->state == STATE_CONNECTED)
+        return 0;
+    else if (pipe->state == STATE_CONNECTING)
+        return PIPE_ERROR_AGAIN;
+    else if (pipe->hwpipe == NULL)
+        return PIPE_ERROR_INVAL;
+    else
+        return PIPE_ERROR_IO;
+}
 /* This function is only called when the socket is disconnected.
  * See netPipe_closeFromGuest() for the case when the guest requires
  * the disconnection. */
 static void
 netPipe_closeFromSocket( void* opaque )
 {
+
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     NetPipe*  pipe = opaque;
 
     D("%s", __FUNCTION__);
@@ -204,6 +335,26 @@ netPipe_initFromAddress( void* hwpipe, const SockAddress*  address, Looper* loop
     NetPipe*     pipe;
 
     ANEW0(pipe);
+    fprintf(stderr, "%s: call. create new shared mem\n", __FUNCTION__);
+    pipe->shared_mem = malloc(sizeof(NetPipe_SharedMemState));
+    pipe->shared_mem->buffer = malloc(NET_PIPE_BUF_SIZE);
+
+    pipe->shared_mem->ready_start = 0;
+    pipe->shared_mem->ready_end = NET_PIPE_BUF_SIZE;
+    pipe->shared_mem->valid_start = 0;
+    pipe->shared_mem->valid_end = 0;
+
+    fprintf(stderr, "%s: lockaddr=0x%lx\n", __FUNCTION__, &pipe->shared_mem->lock);
+
+    int lr = pthread_mutex_init(&pipe->shared_mem->lock, NULL);
+    if (!lr) {
+        fprintf(stderr, "%s: success init mutex\n", __FUNCTION__);
+    } else {
+        fprintf(stderr, "%s: fail init mutex errno=%d\n", __FUNCTION__, errno);
+
+    }
+    pthread_cond_init(&pipe->shared_mem->cv_ready, NULL);
+    pthread_cond_init(&pipe->shared_mem->cv_valid, NULL);
 
     pipe->hwpipe = hwpipe;
     pipe->state  = STATE_INIT;
@@ -238,84 +389,56 @@ netPipe_initFromAddress( void* hwpipe, const SockAddress*  address, Looper* loop
 }
 
 
+
 /* Called when the guest wants to close the channel. This is different
  * from netPipe_closeFromSocket() which is called when the socket is
  * disconnected. */
 static void
 netPipe_closeFromGuest( void* opaque )
 {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
+
     NetPipe*  pipe = opaque;
     netPipe_free(pipe);
 }
 
-static int netPipeReadySend(NetPipe *pipe)
-{
-    if (pipe->state == STATE_CONNECTED)
-        return 0;
-    else if (pipe->state == STATE_CONNECTING)
-        return PIPE_ERROR_AGAIN;
-    else if (pipe->hwpipe == NULL)
-        return PIPE_ERROR_INVAL;
-    else
-        return PIPE_ERROR_IO;
-}
-
-#ifdef WIN32
-
-int qemu2_send_all(int fd, const void *buf, int len1)
-{
-    int ret, len;
-
-    len = len1;
-    while (len > 0) {
-        ret = send(fd, buf, len, 0);
-        if (ret < 0) {
-            errno = WSAGetLastError();
-            if (errno != WSAEWOULDBLOCK) {
-                return -1;
-            }
-        } else if (ret == 0) {
-            break;
-        } else {
-            buf += ret;
-            len -= ret;
-            return len1 - len;
-        }
+static int shared_mem_write(NetPipe_SharedMemState* sm, 
+                             void* buf, 
+                             int len) {
+    bool wrap = false;
+    int wrap_frag0_size;
+    int wrap_frag1_size;
+    // fprintf(stderr, "%s: waiting for lock. val=%d\n", __FUNCTION__, (int)((int*)buf));
+    pthread_mutex_lock(&sm->lock);
+    // fprintf(stderr, "%s: call. valid = [0x%lx 0x%lx] len=0x%lx, SZ=0x%lx\n", __FUNCTION__, sm->valid_start, sm->valid_end,len, NET_PIPE_BUF_SIZE);
+    if (sm->valid_end + len > NET_PIPE_BUF_SIZE) { 
+        fprintf(stderr, "%s: wrapped!\n", __FUNCTION__);
+        wrap = true; }
+    if (wrap) {
+        // fprintf(stderr, "%s: WRAPPED\n", __FUNCTION__);
+        wrap_frag0_size = NET_PIPE_BUF_SIZE - sm->valid_end;
+        memcpy(sm->buffer + sm->valid_end, buf, wrap_frag0_size);
+        wrap_frag1_size = len - wrap_frag0_size;
+        memcpy(sm->buffer, buf, wrap_frag1_size);
+        sm->valid_end = wrap_frag1_size;
+    } else {
+        // fprintf(stderr, "%s: memcpy...", __FUNCTION__);
+        memcpy(sm->buffer + sm->valid_end, buf, len);
+        // fprintf(stderr, "%s: done\n", __FUNCTION__);
+        sm->valid_end += len;
     }
-    return len1 - len;
+
+    if (len > 0) { pthread_cond_signal(&sm->cv_valid); }
+    // fprintf(stderr, "%s: done. len=%d\n", __FUNCTION__, len);
+    pthread_mutex_unlock(&sm->lock);
+    return len;
 }
 
-int qemu2_recv_all(int fd, void *_buf, int len1, bool single_read)
-{
-    int ret, len;
-    char *buf = _buf;
-
-    len = len1;
-    while (len > 0) {
-        ret = recv(fd, buf, len, 0);
-        if (ret < 0) {
-            errno = WSAGetLastError();
-            if (errno != WSAEWOULDBLOCK) {
-                return -1;
-            }
-            continue;
-        } else {
-            if (single_read) {
-                return ret;
-            }
-            buf += ret;
-            len -= ret;
-            return len1 - len;
-        }
-    }
-    return len1 - len;
-}
-
-#endif
 
 static int
 netPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuffers )
 {
+    // fprintf(stderr, "%s: call\n", __FUNCTION__);
     NetPipe*  pipe = opaque;
     int       count = 0;
     int       ret   = 0;
@@ -331,13 +454,11 @@ netPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuff
         count += buff->size;
 
     buff = buffers;
+
     while (count > 0) {
         int  avail = buff->size - buffStart;
-#ifndef WIN32
-        int  len = HANDLE_EINTR(send(loopIo_fd(pipe->io), buff->data + buffStart, avail, 0));
-#else
-        int  len = qemu2_send_all(loopIo_fd(pipe->io), buff->data + buffStart, avail);
-#endif
+        int len = shared_mem_write(pipe->shared_mem, buff->data + buffStart, avail);
+        // int  len = qemu2_send_all(loopIo_fd(pipe->io), buff->data + buffStart, avail);
 
         /* the write succeeded */
         if (len > 0) {
@@ -378,6 +499,7 @@ netPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuff
 static int
 netPipe_recvBuffers( void* opaque, AndroidPipeBuffer*  buffers, int  numBuffers )
 {
+    // fprintf(stderr, "%s: call\n", __FUNCTION__);
     NetPipe*  pipe = opaque;
     int       count = 0;
     int       ret   = 0;
@@ -391,11 +513,7 @@ netPipe_recvBuffers( void* opaque, AndroidPipeBuffer*  buffers, int  numBuffers 
     buff = buffers;
     while (count > 0) {
         int  avail = buff->size - buffStart;
-#ifndef WIN32
-        int  len = HANDLE_EINTR(recv(loopIo_fd(pipe->io), buff->data + buffStart, avail, 0));
-#else
         int  len = qemu2_recv_all(loopIo_fd(pipe->io), buff->data + buffStart, avail, true);
-#endif
 
         /* the read succeeded */
         if (len > 0) {
@@ -493,6 +611,8 @@ netPipe_initTcp( void* hwpipe, void* _looper, const char* args )
 }
 
 #ifndef _WIN32
+#include <stdio.h>
+
 void*
 netPipe_initUnix( void* hwpipe, void* _looper, const char* args )
 {
@@ -510,10 +630,9 @@ netPipe_initUnix( void* hwpipe, void* _looper, const char* args )
     D("%s: Address is '%s'", __FUNCTION__, args);
 
     sock_address_init_unix(&address, args);
-
     ret = netPipe_initFromAddress(hwpipe, &address, _looper);
-
     sock_address_done(&address);
+
     return ret;
 }
 #endif
@@ -612,6 +731,20 @@ openglesPipe_init( void* hwpipe, void* _looper, const char* args )
         }
 #endif /* !_WIN32 */
     }
+
+    int fd, write_ret;
+    NetPipe* netpipe;
+    netpipe = (NetPipe*)pipe;
+    fd = loopIo_fd(netpipe->io);
+
+    fprintf(stderr, "%s: pipe=0x%lx fd=%d\n", __FUNCTION__, pipe, fd);
+
+    write_ret = netPipeReadySend(netpipe);
+    fprintf(stderr, "%s: netPipeReadySend -> %d\n", __FUNCTION__, write_ret);
+
+    write_ret = qemu2_send_all(fd, &netpipe->shared_mem, sizeof(NetPipe_SharedMemState*));
+    fprintf(stderr, "%s: pipe=0x%lx wrote memstateptr. write_ret=%d\n",
+            __FUNCTION__, pipe, write_ret);
 
     return pipe;
 }

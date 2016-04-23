@@ -163,7 +163,9 @@ RENDER_APICALL void RENDER_APIENTRY getHardwareStrings(
 
 RENDER_APICALL int RENDER_APIENTRY stopOpenGLRenderer(void)
 {
+    fprintf(stderr, "%s: call\n", __FUNCTION__);
     bool ret = false;
+    return false;
 
     // open a dummy connection to the renderer to make it
     // realize the exit request.
@@ -304,9 +306,9 @@ IOStream *createRenderThread(int p_stream_buffer_size, unsigned int clientFlags)
     //
     // send clientFlags to the renderer
     //
-    unsigned int *pClientFlags =
-                (unsigned int *)stream->allocBuffer(sizeof(unsigned int));
-    *pClientFlags = clientFlags;
+    char *pBuf =
+                (char *)stream->allocBuffer(sizeof(char*));
+    memset(pBuf, 0, sizeof(char*));
     stream->commitBuffer(sizeof(unsigned int));
 
     return stream;
