@@ -34,6 +34,7 @@
 
 #include <string.h>
 
+
 using RenderThreadPtr = std::unique_ptr<RenderThread>;
 using RenderThreadsSet = std::vector<RenderThreadPtr>;
 
@@ -95,26 +96,55 @@ intptr_t RenderServer::main() {
 
     while (1) {
         std::unique_ptr<SocketStream> stream(m_listenSock->accept());
+        NetPipe_SharedMemState* msptr;
         if (!stream) {
             fprintf(stderr, "Error accepting connection, skipping\n");
             continue;
         }
 
-        unsigned int clientFlags;
-        if (!stream->readFully(&clientFlags, sizeof(clientFlags))) {
-            fprintf(stderr, "Error reading clientFlags\n");
+        if (!stream->readFully(&msptr, sizeof(NetPipe_SharedMemState*))) {
+            fprintf(stderr, "Error reading memstate\n");
             continue;
+        } else {
+
+            fprintf(stderr, "read shared mem state\n");
+            fprintf(stderr, "buffer addr=0x%lx\n", msptr->buffer);
+            fprintf(stderr, "ready = [0x%lx 0x%lx]\n", msptr->ready_start, msptr->ready_end);
+            fprintf(stderr, "valid = [0x%lx 0x%lx]\n", msptr->valid_start, msptr->valid_end);
+            fprintf(stderr, "lockaddr = 0x%lx\n", &msptr->lock);
+            fprintf(stderr, "cvreadyaddr = 0x%lx\n", &msptr->cv_ready);
+            fprintf(stderr, "cvvalidaddr = 0x%lx\n", &msptr->cv_valid);
         }
+
+
+        // read client flags
+        fprintf(stderr, "%s: read clientflags\n", __FUNCTION__);
+        unsigned int clientFlags = 666;
+        while (!(msptr->valid_end - msptr->valid_start)) { fprintf(stderr, "%s: spin\n",__FUNCTION__); }
+        pthread_mutex_lock(&msptr->lock);
+        memcpy(&clientFlags, msptr->buffer, sizeof(clientFlags));
+        msptr->valid_start += sizeof(clientFlags);
+        pthread_mutex_unlock(&msptr->lock);
+        fprintf(stderr, "%s: readed clientflags\n", __FUNCTION__);
+
+        //if (*((int*)(((void*)&msptr))) == 1) { clientFlags = 1; }
+        //else {
+            //if (!stream->readFully(&clientFlags, sizeof(clientFlags))) {
+                //fprintf(stderr, "Error reading clientFlags\n");
+                //continue;
+            //}
+        //}
+        fprintf(stderr, "RenderServer::%s: clientFlags=%d\n", __FUNCTION__, clientFlags);
 
         DBG("RenderServer: Got new stream!\n");
 
         // check if we have been requested to exit while waiting on accept
-        if ((clientFlags & IOSTREAM_CLIENT_EXIT_SERVER) != 0) {
-            m_exiting = true;
-            break;
-        }
+        // if ((clientFlags & IOSTREAM_CLIENT_EXIT_SERVER) != 0) {
+        //     m_exiting = true;
+        //     break;
+        // }
 
-        RenderThreadPtr rt(RenderThread::create(stream.get(), &m_lock));
+        RenderThreadPtr rt(RenderThread::create(stream.get(), &m_lock, msptr));
         if (!rt) {
             fprintf(stderr, "Failed to create RenderThread\n");
         } else {
