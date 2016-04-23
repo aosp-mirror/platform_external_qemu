@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "08733496_c9127a7a",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-04-23T04:31:27Z",
+      "side": 1,
+      "message": "osx compiler will error out at free(snapShotPresent)",
+      "parentUuid": "08733496_c9a2a1d4",
+      "range": {
+        "startLine": 349,
+        "startChar": 8,
+        "endLine": 349,
+        "endChar": 12
+      },
+      "revId": "d85bd67234b21017fc4bca13b7e0359fd9049d1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c87cbc59_45cafc6c",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 1
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "08733496_69fb265d",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-04-23T04:31:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c87cbc59_45cafc6c",
+      "revId": "d85bd67234b21017fc4bca13b7e0359fd9049d1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08733496_89c0a96b",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 1
@@ -53,6 +95,30 @@
       "writtenOn": "2016-04-21T15:16:56Z",
       "side": 1,
       "message": "if there\u0027s an engine parameter, we would override your selection in the very next block.\nCould you please add a warning and, maybe, an error if user has selected \u0027ranchu\u0027 explicitly?",
+      "range": {
+        "startLine": 356,
+        "startChar": 8,
+        "endLine": 356,
+        "endChar": 14
+      },
+      "revId": "d85bd67234b21017fc4bca13b7e0359fd9049d1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08733496_89008227",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-04-23T04:31:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08733496_89c0a96b",
       "range": {
         "startLine": 356,
         "startChar": 8,
