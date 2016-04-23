@@ -203,6 +203,13 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                 ->attachData("recent-ui-actions.txt",
                              serializeEvents(event_logger->container()));
         });
+
+    mWheelScrollTimer.setInterval(100);
+    mWheelScrollTimer.setSingleShot(true);
+    connect(&mWheelScrollTimer,
+            SIGNAL(timeout()),
+            this,
+            SLOT(wheelScrollTimeout()));
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr()
@@ -1554,4 +1561,23 @@ bool EmulatorQtWindow::mouseInside() {
            widget_cursor_coords.x() < width() &&
            widget_cursor_coords.y() >= 0 &&
            widget_cursor_coords.y() < height();
+}
+
+void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
+    if (!mWheelScrollTimer.isActive()) {
+        handleMouseEvent(kEventMouseButtonDown,
+                         kMouseButtonLeft,
+                         event->pos());
+        mWheelScrollPos = event->pos();
+    }
+
+    mWheelScrollTimer.start();
+    mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
+    handleMouseEvent(kEventMouseMotion,
+                     kMouseButtonLeft,
+                     mWheelScrollPos);
+}
+
+void EmulatorQtWindow::wheelScrollTimeout() {
+    handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, mWheelScrollPos);
 }
