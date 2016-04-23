@@ -92,6 +92,7 @@ public:
     void mouseMoveEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
+    void wheelEvent(QWheelEvent* event) override;
     void startThread(StartFunction f, int argc, char **argv);
 
     /*
@@ -214,6 +215,7 @@ public slots:
     void setForwardShortcutsToDevice(int index);
     void show();
     void showMinimized();
+    void wheelScrollTimeout();
 
     void slot_screenChanged();
 
@@ -285,6 +287,9 @@ private:
     android::emulation::FilePusher::Ptr mFilePusher;
     android::emulation::FilePusher::SubscriptionToken mFilePusherSubscription;
     QProgressDialog mPushDialog;
+
+    QTimer mWheelScrollTimer;
+    QPoint mWheelScrollPos;
 };
 
 struct SkinSurface {
