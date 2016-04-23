@@ -810,8 +810,8 @@ static int openglesPipe_recvBuffers(void* opaque, AndroidPipeBuffer*  buffers, i
         return PIPE_ERROR_AGAIN;
     }
 
-    // the algorithm is quite simple: consume the pipe's dataForReading, then
-    // put the next received data piece there. repeat until the buffers are full
+    // consume the pipe's dataForReading, then put the next received data piece
+    // there. repeat until the buffers are full
     int len = 0;
     size_t buffOffset = 0;
     auto buff = buffers;
@@ -832,7 +832,7 @@ static int openglesPipe_recvBuffers(void* opaque, AndroidPipeBuffer*  buffers, i
         }
 
         const size_t curSize = std::min(buff->size - buffOffset, pipe->dataForReading.size() - pipe->readingOffset);
-        memcpy(buff->data + buffOffset, pipe->dataForReading.data(), curSize);
+        memcpy(buff->data + buffOffset, pipe->dataForReading.data() + pipe->readingOffset, curSize);
 
         len += curSize;
         pipe->readingOffset += curSize;
