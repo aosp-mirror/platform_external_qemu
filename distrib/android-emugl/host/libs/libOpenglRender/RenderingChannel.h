@@ -17,6 +17,7 @@
 #include "Renderer.h"
 
 #include "android/base/Compiler.h"
+#include "android/base/synchronization/MessageChannel.h"
 
 #include <memory>
 
@@ -38,13 +39,27 @@ public:
 
 public:
     bool writeToGuest(const ChannelBuffer::value_type* buf, size_t size);
-    size_t readFromGuest(ChannelBuffer::value_type* buf, size_t size);
+    size_t readFromGuest(ChannelBuffer::value_type* buf, size_t size, bool blocking);
 
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RenderingChannel);
 
 private:
+    void onEvent();
+    Event calcEvents() const;
+
+    static const size_t kChannelCapacity = 1024;
+
     std::shared_ptr<Renderer> mRenderer;
+    EventCallback mOnEvent;
+    Event mCurrentEvents = Event::Empty;
+    bool mStopped = false;
+
+    android::base::MessageChannel<ChannelBuffer, kChannelCapacity> mFromGuest;
+    android::base::MessageChannel<ChannelBuffer, kChannelCapacity> mToGuest;
+
+    ChannelBuffer mFromGuestBuffer;
+    size_t mFromGuestBufferStart = 0;
 };
 
 }  // namespace emugl

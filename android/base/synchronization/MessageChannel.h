@@ -30,6 +30,13 @@ public:
     // Constructor. |capacity| is the buffer capacity in messages.
     MessageChannelBase(size_t capacity);
 
+    // Get the current channel size
+    size_t size() const { return mCount; }
+
+    // Abort the currently pending operations and don't allow any other ones
+    void stop();
+    const bool isStopped() const { return mStopped; }
+
 protected:
     // Destructor.
     ~MessageChannelBase();
@@ -54,13 +61,11 @@ protected:
     // the corresponding message.
     void afterRead();
 
-    // Get the size of the channel
-    size_t size() const { return mCount; }
-
 private:
-    size_t mPos;
-    size_t mCount;
+    size_t mPos = 0;
+    size_t mCount = 0;
     size_t mCapacity;
+    bool mStopped = false;
     Lock mLock;
     ConditionVariable mCanRead;
     ConditionVariable mCanWrite;
@@ -83,27 +88,38 @@ public:
 
     void send(const T& msg) {
         size_t pos = beforeWrite();
-        mItems[pos] = msg;
+        if (pos != -1) {
+            mItems[pos] = msg;
+        }
         afterWrite();
     }
 
     void send(T&& msg) {
         size_t pos = beforeWrite();
-        mItems[pos] = std::move(msg);
+        if (pos != -1) {
+            mItems[pos] = std::move(msg);
+        }
         afterWrite();
     }
 
     void receive(T* msg) {
         size_t pos = beforeRead();
-        *msg = std::move(mItems[pos]);
+        if (pos != -1) {
+            *msg = std::move(mItems[pos]);
+        }
         afterRead();
     }
 
     T receive() {
         size_t pos = beforeRead();
-        T msg = std::move(mItems[pos]);
-        afterRead();
-        return msg;
+        if (pos != -1) {
+            T msg = std::move(mItems[pos]);
+            afterRead();
+            return msg;
+        } else {
+            afterRead();
+            return {};
+        }
     }
 
     constexpr size_t capacity() const { return CAPACITY; }

@@ -53,7 +53,7 @@ std::unique_ptr<RenderThread> RenderThread::create(
 intptr_t RenderThread::main() {
     uint32_t flags = 0;
     if (mChannel->readFromGuest(reinterpret_cast<char*>(&flags),
-                                sizeof(flags)) != sizeof(flags)) {
+                                sizeof(flags), true) != sizeof(flags)) {
         return 0;
     }
 
@@ -67,7 +67,7 @@ intptr_t RenderThread::main() {
     }
 
     std::unique_ptr<IOStream> stream(new ChannelStream(mChannel, 1024 * 1024));
-    if (stream) {
+    if (!stream) {
         return 0;
     }
 

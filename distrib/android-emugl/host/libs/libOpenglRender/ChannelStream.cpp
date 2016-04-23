@@ -29,7 +29,7 @@ int ChannelStream::commitBuffer(size_t size) {
 }
 
 const unsigned char* ChannelStream::readFully(void* buf, size_t len) {
-    size_t size = mChannel->readFromGuest((char*)buf, len);
+    size_t size = mChannel->readFromGuest((char*)buf, len, true);
     if (size < len) {
         return nullptr;
     }
@@ -37,7 +37,7 @@ const unsigned char* ChannelStream::readFully(void* buf, size_t len) {
 }
 
 const unsigned char* ChannelStream::read(void* buf, size_t* inout_len) {
-    size_t size = mChannel->readFromGuest((char*)buf, *inout_len);
+    size_t size = mChannel->readFromGuest((char*)buf, *inout_len, true);
     if (size == 0) {
         return nullptr;
     }

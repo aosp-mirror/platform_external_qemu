@@ -638,10 +638,29 @@ struct OpenglesPipe {
     }
 };
 
+static void openglesPipe_processIoEvents(OpenglesPipe* pipe) {
+    int wakeFlags = 0;
+
+    if (pipe->canReadAny() && pipe->careAboutRead && (pipe->wakeFlags & PIPE_WAKE_READ) != 0) {
+        wakeFlags |= PIPE_WAKE_READ;
+    }
+    if (pipe->canWrite && pipe->careAboutWrite && (pipe->wakeFlags & PIPE_WAKE_WRITE) != 0) {
+        wakeFlags |= PIPE_WAKE_WRITE;
+    }
+
+    /* Send wake signal to the guest if needed */
+    if (wakeFlags != 0) {
+        android_pipe_wake(pipe->hwpipe, wakeFlags);
+        pipe->wakeFlags &= ~wakeFlags;
+    }
+}
+
 static void openglesPipe_resetState(OpenglesPipe* pipe)
 {
     pipe->careAboutWrite = (pipe->wakeFlags & PIPE_WAKE_WRITE) != 0;
     pipe->careAboutRead = (pipe->wakeFlags & PIPE_WAKE_READ) != 0;
+
+    openglesPipe_processIoEvents(pipe);
 }
 
 static void openglesPipe_closeFromHost(OpenglesPipe* pipe)
@@ -676,21 +695,7 @@ static void openglesPipe_ioEvent(OpenglesPipe* pipe, emugl::IRenderingChannel::E
     pipe->canRead = (event & Event::Read) != Event::Empty;
     pipe->canWrite = (event & Event::Write) != Event::Empty;
 
-    int wakeFlags = 0;
-
-    /* Otherwise, accept incoming data */
-    if (pipe->canReadAny() && pipe->careAboutRead && (pipe->wakeFlags & PIPE_WAKE_READ) != 0) {
-        wakeFlags |= PIPE_WAKE_READ;
-    }
-    if (pipe->canWrite && pipe->careAboutWrite && (pipe->wakeFlags & PIPE_WAKE_WRITE) != 0) {
-        wakeFlags |= PIPE_WAKE_WRITE;
-    }
-
-    /* Send wake signal to the guest if needed */
-    if (wakeFlags != 0) {
-        android_pipe_wake(pipe->hwpipe, wakeFlags);
-        pipe->wakeFlags &= ~wakeFlags;
-    }
+    openglesPipe_processIoEvents(pipe);
 
     /* Reset state */
     openglesPipe_resetState(pipe);
@@ -834,6 +839,7 @@ static int openglesPipe_recvBuffers(void* opaque, AndroidPipeBuffer*  buffers, i
         buffOffset += curSize;
         if (buffOffset == buff->size) {
             ++buff;
+            buffOffset = 0;
         }
     }
 
