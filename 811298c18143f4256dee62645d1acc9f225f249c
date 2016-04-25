@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "08733496_5998f12e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-25T14:10:36Z",
+      "side": 1,
+      "message": "Oops, that was a logic mistake. Fix inc",
+      "parentUuid": "c87cbc59_28f4ef31",
+      "revId": "811298c18143f4256dee62645d1acc9f225f249c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "288b98a4_832882c6",
         "filename": "android/hw-pipe-net.c",
         "patchSetId": 3
