@@ -26,7 +26,7 @@ namespace android {
 namespace base {
 
 namespace {
-
+/*
 // Helper class which implements a free list of event handles.
 class WaitEventStorage {
 public:
@@ -65,51 +65,21 @@ private:
 };
 
 LazyInstance<WaitEventStorage> sWaitEvents = LAZY_INSTANCE_INIT;
-
+*/
 }  // namespace
 
-ConditionVariable::ConditionVariable() : mWaiters(), mLock() {}
-
-ConditionVariable::~ConditionVariable() {
-    mLock.lock();
-    for (size_t n = 0; n < mWaiters.size(); ++n) {
-        CloseHandle(mWaiters[n]);
-    }
-    mWaiters.resize(0U);
-    mLock.unlock();
+ConditionVariable::ConditionVariable() {
+    InitializeConditionVariable(&mCv);
 }
 
-void ConditionVariable::wait(Lock* userLock) {
-    // Grab new waiter event handle.
-    mLock.lock();
-    HANDLE handle = sWaitEvents->alloc();
-    mWaiters.push_back(handle);
-    mLock.unlock();
+ConditionVariable::~ConditionVariable() {}
 
-    // Unlock user lock then wait for event.
-    userLock->unlock();
-    WaitForSingleObject(handle, INFINITE);
-    // NOTE: The handle has been removed from mWaiters here,
-    // see signal() below. Close/recycle the event.
-    sWaitEvents->free(handle);
-    userLock->lock();
+void ConditionVariable::wait(Lock* userLock) {
+    SleepConditionVariableCS(&mCv, &userLock->mLock, INFINITE);
 }
 
 void ConditionVariable::signal() {
-    mLock.lock();
-    size_t size = mWaiters.size();
-    if (size > 0U) {
-        // NOTE: This wakes up the thread that went to sleep most
-        //       recently (LIFO) for performance reason. For better
-        //       fairness, using (FIFO) would be appropriate.
-        HANDLE handle = mWaiters[size - 1U];
-        mWaiters.remove(size - 1U);
-        SetEvent(handle);
-        // NOTE: The handle will be closed/recycled by the waiter.
-    } else {
-        // Nothing to signal.
-    }
-    mLock.unlock();
+    WakeConditionVariable(&mCv);
 }
 
 }  // namespace base

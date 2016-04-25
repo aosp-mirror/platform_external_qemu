@@ -56,8 +56,7 @@ public:
     void signal();
 
 private:
-    PodVector<HANDLE> mWaiters;
-    Lock mLock;
+    CONDITION_VARIABLE mCv;
 
 #else  // !_WIN32
 
