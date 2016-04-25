@@ -33,14 +33,16 @@ public:
         Write = 1 << 1,
         Stopped = 1 << 2,
     };
-    using EventCallback = std::function<void(Event)>;
+    using EventCallback = std::function<void(Event, bool)>;
 
     virtual void setEventCallback(EventCallback callback) = 0;
 
     virtual bool write(ChannelBuffer&& buffer) = 0;
-    virtual ChannelBuffer read() = 0;
+    virtual ChannelBuffer read(bool blocking) = 0;
 
     virtual void stop() = 0;
+
+    virtual bool isStopped() const = 0;
 
 protected:
     ~IRenderingChannel() = default;

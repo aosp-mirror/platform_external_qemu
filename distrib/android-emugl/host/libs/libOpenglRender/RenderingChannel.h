@@ -33,9 +33,11 @@ public:
     virtual void setEventCallback(EventCallback callback) override final;
 
     virtual bool write(ChannelBuffer&& buffer) override final;
-    virtual ChannelBuffer read() override final;
+    virtual ChannelBuffer read(bool blocking) override final;
 
     virtual void stop() override final;
+
+    virtual bool isStopped() const override final;
 
 public:
     bool writeToGuest(const ChannelBuffer::value_type* buf, size_t size);
@@ -45,7 +47,7 @@ private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RenderingChannel);
 
 private:
-    void onEvent();
+    void onEvent(bool lock);
     Event calcEvents() const;
 
     static const size_t kChannelCapacity = 1024;
@@ -59,7 +61,7 @@ private:
     android::base::MessageChannel<ChannelBuffer, kChannelCapacity> mToGuest;
 
     ChannelBuffer mFromGuestBuffer;
-    size_t mFromGuestBufferStart = 0;
+    size_t mFromGuestBufferLeft = 0;
 };
 
 }  // namespace emugl

@@ -30,18 +30,21 @@ void RenderingChannel::setEventCallback(
     // Reset the current events state to make sure the new subscriber gets the
     // existing state
     mCurrentEvents = Event::Empty;
-    onEvent();
+    onEvent(false);
 }
 
 bool RenderingChannel::write(ChannelBuffer&& buffer) {
     mFromGuest.send(std::move(buffer));
-    onEvent();
+    onEvent(false);
     return true;
 }
 
-ChannelBuffer RenderingChannel::read() {
+ChannelBuffer RenderingChannel::read(bool blocking) {
+    if (!blocking && mToGuest.size() == 0) {
+        return {};
+    }
     ChannelBuffer buf = mToGuest.receive();
-    onEvent();
+    onEvent(false);
     return buf;
 }
 
@@ -52,19 +55,25 @@ void RenderingChannel::stop() {
     mStopped = true;
     mFromGuest.stop();
     mToGuest.stop();
-    onEvent();
+    onEvent(false);
+}
+
+bool RenderingChannel::isStopped() const {
+    return mStopped;
 }
 
 bool RenderingChannel::writeToGuest(const ChannelBuffer::value_type* buf,
                                     size_t size) {
     ChannelBuffer buffer(buf, buf + size);
+
     mToGuest.send(std::move(buffer));
-    onEvent();
+    onEvent(true);
     return true;
 }
 
 size_t RenderingChannel::readFromGuest(ChannelBuffer::value_type* buf,
-                                       size_t size, bool blocking) {
+                                       size_t size,
+                                       bool blocking) {
     if (!buf || size == 0) {
         return 0;
     }
@@ -72,34 +81,36 @@ size_t RenderingChannel::readFromGuest(ChannelBuffer::value_type* buf,
     size_t read = 0;
     const auto bufEnd = buf + size;
     while (buf != bufEnd && !mStopped) {
-        if (mFromGuestBufferStart == mFromGuestBuffer.size()) {
+        if (mFromGuestBufferLeft == 0) {
             if (mFromGuest.size() == 0 && (read > 0 || !blocking)) {
-                return read;
+                break;
             }
             mFromGuestBuffer = mFromGuest.receive();
-            mFromGuestBufferStart = 0;
+            mFromGuestBufferLeft = mFromGuestBuffer.size();
         }
 
-        const size_t curSize = std::min<size_t>(
-                bufEnd - buf, mFromGuestBuffer.size() - mFromGuestBufferStart);
-        memcpy(buf, mFromGuestBuffer.data() + mFromGuestBufferStart, curSize);
+        const size_t curSize =
+                std::min<size_t>(bufEnd - buf, mFromGuestBufferLeft);
+        memcpy(buf, mFromGuestBuffer.data() +
+                            (mFromGuestBuffer.size() - mFromGuestBufferLeft),
+               curSize);
 
         read += curSize;
         buf += curSize;
-        mFromGuestBufferStart += curSize;
+        mFromGuestBufferLeft -= curSize;
     }
-    onEvent();
+    onEvent(true);
     return read;
 }
 
-void RenderingChannel::onEvent() {
+void RenderingChannel::onEvent(bool lock) {
     if (!mOnEvent) {
         return;
     }
     Event newEvent = calcEvents();
     if (newEvent != mCurrentEvents) {
         mCurrentEvents = newEvent;
-        mOnEvent(newEvent);
+        mOnEvent(newEvent, lock);
     }
 }
 
@@ -108,7 +119,8 @@ IRenderingChannel::Event RenderingChannel::calcEvents() const {
     if (mStopped) {
         event = Event::Stopped;
     } else {
-        if (mFromGuest.size() < mFromGuest.capacity()) {
+        if (mFromGuest.size() < mFromGuest.capacity() ||
+            mFromGuestBufferLeft > 0) {
             event |= Event::Write;
         }
         if (mToGuest.size() > 0) {

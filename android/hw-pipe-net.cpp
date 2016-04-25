@@ -21,6 +21,7 @@
 #include "android/hw-pipe-net.h"
 
 #include "android/async-utils.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/opengles.h"
 #include "android/utils/assert.h"
 #include "android/utils/eintr_wrapper.h"
@@ -30,7 +31,6 @@
 #include "android/utils/system.h"
 
 #include "android/emulation/android_pipe.h"
-
 
 #include "OpenglRender/IRenderingChannel.h"
 
@@ -48,30 +48,31 @@
 /* Implement the OpenGL fast-pipe */
 
 /* Set to 1 or 2 for debug traces */
-// #define  DEBUG  1
+#define DEBUG 0
 
 #if DEBUG >= 1
-#  define D(...)   printf(__VA_ARGS__), printf("\n")
+#define DO(...) printf(__VA_ARGS__), printf("\n")
 #else
-#  define D(...)   ((void)0)
+#define DO(...) ((void)0)
 #endif
+#define D(...) ((void)0)
 
 #if DEBUG >= 2
-#  define DD(...)                       printf(__VA_ARGS__), printf("\n")
-#  define DDASSERT(cond)                _ANDROID_ASSERT(cond, "Assertion failure: ", #cond)
-#  define DDASSERT_INT_OP(cond,val,op)  _ANDROID_ASSERT_INT_OP(cond,val,op)
+#define DD(...) printf(__VA_ARGS__), printf("\n")
+#define DDASSERT(cond) _ANDROID_ASSERT(cond, "Assertion failure: ", #cond)
+#define DDASSERT_INT_OP(cond, val, op) _ANDROID_ASSERT_INT_OP(cond, val, op)
 #else
-#  define DD(...)                       ((void)0)
-#  define DDASSERT(cond)                ((void)0)
-#  define DDASSERT_INT_OP(cond,val,op)  ((void)0)
+#define DD(...) ((void)0)
+#define DDASSERT(cond) ((void)0)
+#define DDASSERT_INT_OP(cond, val, op) ((void)0)
 #endif
 
-#define DDASSERT_INT_LT(cond,val)  DDASSERT_INT_OP(cond,val,<)
-#define DDASSERT_INT_LTE(cond,val)  DDASSERT_INT_OP(cond,val,<=)
-#define DDASSERT_INT_GT(cond,val)  DDASSERT_INT_OP(cond,val,>)
-#define DDASSERT_INT_GTE(cond,val)  DDASSERT_INT_OP(cond,val,>=)
-#define DDASSERT_INT_EQ(cond,val)  DDASSERT_INT_OP(cond,val,==)
-#define DDASSERT_INT_NEQ(cond,val)  DDASSERT_INT_OP(cond,val,!=)
+#define DDASSERT_INT_LT(cond, val) DDASSERT_INT_OP(cond, val, <)
+#define DDASSERT_INT_LTE(cond, val) DDASSERT_INT_OP(cond, val, <=)
+#define DDASSERT_INT_GT(cond, val) DDASSERT_INT_OP(cond, val, >)
+#define DDASSERT_INT_GTE(cond, val) DDASSERT_INT_OP(cond, val, >=)
+#define DDASSERT_INT_EQ(cond, val) DDASSERT_INT_OP(cond, val, ==)
+#define DDASSERT_INT_NEQ(cond, val) DDASSERT_INT_OP(cond, val, !=)
 
 enum State {
     STATE_INIT,
@@ -82,17 +83,15 @@ enum State {
 };
 
 typedef struct {
-    void*           hwpipe;
-    State           state;
-    int             wakeWanted;
-    LoopIo*         io;
-    AsyncConnector  connector[1];
+    void* hwpipe;
+    State state;
+    int wakeWanted;
+    LoopIo* io;
+    AsyncConnector connector[1];
 } NetPipe;
 
-static void
-netPipe_free( NetPipe*  pipe )
-{
-    int  fd;
+static void netPipe_free(NetPipe* pipe) {
+    int fd;
 
     /* Close the socket */
     if (pipe->io) {
@@ -105,30 +104,25 @@ netPipe_free( NetPipe*  pipe )
     delete pipe;
 }
 
-
-static void
-netPipe_resetState( NetPipe* pipe )
-{
+static void netPipe_resetState(NetPipe* pipe) {
     if ((pipe->wakeWanted & PIPE_WAKE_WRITE) != 0) {
         loopIo_wantWrite(pipe->io);
     } else {
         loopIo_dontWantWrite(pipe->io);
     }
 
-   if (pipe->state == STATE_CONNECTED && (pipe->wakeWanted & PIPE_WAKE_READ) != 0) {
+    if (pipe->state == STATE_CONNECTED &&
+        (pipe->wakeWanted & PIPE_WAKE_READ) != 0) {
         loopIo_wantRead(pipe->io);
     } else {
         loopIo_dontWantRead(pipe->io);
     }
 }
 
-
 /* This function is only called when the socket is disconnected.
  * See netPipe_closeFromGuest() for the case when the guest requires
  * the disconnection. */
-static void
-netPipe_closeFromSocket( void* opaque )
-{
+static void netPipe_closeFromSocket(void* opaque) {
     auto pipe = static_cast<NetPipe*>(opaque);
 
     D("%s", __FUNCTION__);
@@ -150,25 +144,21 @@ netPipe_closeFromSocket( void* opaque )
     netPipe_resetState(pipe);
 }
 
-
 /* This is the function that gets called each time there is an asynchronous
  * event on the network pipe.
  */
-static void
-netPipe_io_func( void* opaque, int fd, unsigned events )
-{
+static void netPipe_io_func(void* opaque, int fd, unsigned events) {
     auto pipe = static_cast<NetPipe*>(opaque);
-    int         wakeFlags = 0;
+    int wakeFlags = 0;
 
     /* Run the connector if we are in the CONNECTING state     */
     /* TODO: Add some sort of time-out, to deal with the case */
     /*        when the server is wedged.                      */
     if (pipe->state == STATE_CONNECTING) {
-        AsyncStatus  status = asyncConnector_run(pipe->connector);
+        AsyncStatus status = asyncConnector_run(pipe->connector);
         if (status == ASYNC_NEED_MORE) {
             return;
-        }
-        else if (status == ASYNC_ERROR) {
+        } else if (status == ASYNC_ERROR) {
             /* Could not connect, tell our client by closing the channel. */
 
             netPipe_closeFromSocket(pipe);
@@ -202,21 +192,19 @@ netPipe_io_func( void* opaque, int fd, unsigned events )
     netPipe_resetState(pipe);
 }
 
-
-void*
-netPipe_initFromAddress( void* hwpipe, const SockAddress*  address, Looper* looper )
-{
-    NetPipe*     pipe;
-
-    ANEW0(pipe);
+void* netPipe_initFromAddress(void* hwpipe,
+                              const SockAddress* address,
+                              Looper* looper) {
+    NetPipe* pipe = new NetPipe();
+    memset(pipe, 0, sizeof(*pipe));
 
     pipe->hwpipe = hwpipe;
-    pipe->state  = STATE_INIT;
+    pipe->state = STATE_INIT;
 
     {
-        AsyncStatus  status;
+        AsyncStatus status;
 
-        int  fd = socket_create( sock_address_get_family(address), SOCKET_STREAM );
+        int fd = socket_create(sock_address_get_family(address), SOCKET_STREAM);
         if (fd < 0) {
             D("%s: Could create socket from address family!", __FUNCTION__);
             netPipe_free(pipe);
@@ -228,8 +216,7 @@ netPipe_initFromAddress( void* hwpipe, const SockAddress*  address, Looper* loop
         pipe->state = STATE_CONNECTING;
 
         if (status == ASYNC_ERROR) {
-            D("%s: Could not connect to socket: %s",
-              __FUNCTION__, errno_str);
+            D("%s: Could not connect to socket: %s", __FUNCTION__, errno_str);
             netPipe_free(pipe);
             return NULL;
         }
@@ -242,19 +229,15 @@ netPipe_initFromAddress( void* hwpipe, const SockAddress*  address, Looper* loop
     return pipe;
 }
 
-
 /* Called when the guest wants to close the channel. This is different
  * from netPipe_closeFromSocket() which is called when the socket is
  * disconnected. */
-static void
-netPipe_closeFromGuest( void* opaque )
-{
+static void netPipe_closeFromGuest(void* opaque) {
     auto pipe = static_cast<NetPipe*>(opaque);
     netPipe_free(pipe);
 }
 
-static int netPipeReadySend(NetPipe *pipe)
-{
+static int netPipeReadySend(NetPipe* pipe) {
     if (pipe->state == STATE_CONNECTED)
         return 0;
     else if (pipe->state == STATE_CONNECTING)
@@ -266,9 +249,7 @@ static int netPipeReadySend(NetPipe *pipe)
 }
 
 #ifdef _WIN32
-
-int qemu_windows_send(int fd, const void *_buf, int len1)
-{
+int qemu2_send_all(int fd, const void* _buf, int len1) {
     int ret, len;
     auto buf = (const char*)_buf;
 
@@ -291,10 +272,9 @@ int qemu_windows_send(int fd, const void *_buf, int len1)
     return len1 - len;
 }
 
-int qemu_windows_recv(int fd, void *_buf, int len1, bool single_read)
-{
+int qemu2_recv_all(int fd, void* _buf, int len1, bool single_read) {
     int ret, len;
-    char *buf = (char*)_buf;
+    char* buf = (char*)_buf;
 
     len = len1;
     while (len > 0) {
@@ -319,13 +299,13 @@ int qemu_windows_recv(int fd, void *_buf, int len1, bool single_read)
 
 #endif
 
-static int
-netPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuffers )
-{
+static int netPipe_sendBuffers(void* opaque,
+                               const AndroidPipeBuffer* buffers,
+                               int numBuffers) {
     auto pipe = static_cast<NetPipe*>(opaque);
-    int       count = 0;
-    int       ret   = 0;
-    size_t    buffStart = 0;
+    int count = 0;
+    int ret = 0;
+    size_t buffStart = 0;
     const AndroidPipeBuffer* buff = buffers;
     const AndroidPipeBuffer* buffEnd = buff + numBuffers;
 
@@ -391,7 +371,7 @@ netPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuff
         // Solution #1: Spin on EAGAIN (WSAEWOULDBLOCK)
         int  len = qemu_windows_send(loopIo_fd(pipe->io),
                                      buff->data + buffStart,
-                                     avail);
+                                 avail);
 #endif
 
         /* the write succeeded */
@@ -402,7 +382,7 @@ netPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuff
                 buffStart = 0;
             }
             count -= len;
-            ret   += len;
+            ret += len;
             continue;
         }
 
@@ -430,13 +410,13 @@ netPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuff
     return ret;
 }
 
-static int
-netPipe_recvBuffers( void* opaque, AndroidPipeBuffer*  buffers, int  numBuffers )
-{
+static int netPipe_recvBuffers(void* opaque,
+                               AndroidPipeBuffer* buffers,
+                               int numBuffers) {
     auto pipe = static_cast<NetPipe*>(opaque);
-    int       count = 0;
-    int       ret   = 0;
-    size_t    buffStart = 0;
+    int count = 0;
+    int ret = 0;
+    size_t buffStart = 0;
     AndroidPipeBuffer* buff = buffers;
     AndroidPipeBuffer* buffEnd = buff + numBuffers;
 
@@ -470,7 +450,7 @@ netPipe_recvBuffers( void* opaque, AndroidPipeBuffer*  buffers, int  numBuffers 
                 buffStart = 0;
             }
             count -= len;
-            ret   += len;
+            ret += len;
             continue;
         }
 
@@ -497,12 +477,10 @@ netPipe_recvBuffers( void* opaque, AndroidPipeBuffer*  buffers, int  numBuffers 
     return ret;
 }
 
-static unsigned
-netPipe_poll( void* opaque )
-{
+static unsigned netPipe_poll(void* opaque) {
     auto pipe = static_cast<NetPipe*>(opaque);
-    unsigned  mask = loopIo_poll(pipe->io);
-    unsigned  ret  = 0;
+    unsigned mask = loopIo_poll(pipe->io);
+    unsigned ret = 0;
 
     if (mask & LOOP_IO_READ)
         ret |= PIPE_POLL_IN;
@@ -512,9 +490,7 @@ netPipe_poll( void* opaque )
     return ret;
 }
 
-static void
-netPipe_wakeOn( void* opaque, int flags )
-{
+static void netPipe_wakeOn(void* opaque, int flags) {
     auto pipe = static_cast<NetPipe*>(opaque);
 
     DD("%s: flags=%d", __FUNCTION__, flags);
@@ -523,16 +499,13 @@ netPipe_wakeOn( void* opaque, int flags )
     netPipe_resetState(pipe);
 }
 
-
-void*
-netPipe_initTcp( void* hwpipe, void* _looper, const char* args )
-{
+void* netPipe_initTcp(void* hwpipe, void* _looper, const char* args) {
     /* Build SockAddress from arguments. Acceptable formats are:
      *   <port>
      */
-    SockAddress  address;
-    uint16_t     port;
-    void*        ret;
+    SockAddress address;
+    uint16_t port;
+    void* ret;
 
     if (args == NULL) {
         D("%s: Missing address!", __FUNCTION__);
@@ -543,7 +516,7 @@ netPipe_initTcp( void* hwpipe, void* _looper, const char* args )
     /* Now, look at the port number */
     {
         char* end;
-        long  val = strtol(args, &end, 10);
+        long val = strtol(args, &end, 10);
         if (end == NULL || *end != '\0' || val <= 0 || val > 65535) {
             D("%s: Invalid port number: '%s'", __FUNCTION__, args);
         }
@@ -551,22 +524,21 @@ netPipe_initTcp( void* hwpipe, void* _looper, const char* args )
     }
     sock_address_init_inet(&address, SOCK_ADDRESS_INET_LOOPBACK, port);
 
-    ret = netPipe_initFromAddress(hwpipe, &address, static_cast<Looper*>(_looper));
+    ret = netPipe_initFromAddress(hwpipe, &address,
+                                  static_cast<Looper*>(_looper));
 
     sock_address_done(&address);
     return ret;
 }
 
 #ifndef _WIN32
-void*
-netPipe_initUnix( void* hwpipe, void* _looper, const char* args )
-{
+void* netPipe_initUnix(void* hwpipe, void* _looper, const char* args) {
     /* Build SockAddress from arguments. Acceptable formats are:
      *
      *   <path>
      */
-    SockAddress  address;
-    void*        ret;
+    SockAddress address;
+    void* ret;
 
     if (args == NULL || args[0] == '\0') {
         D("%s: Missing address!", __FUNCTION__);
@@ -576,7 +548,8 @@ netPipe_initUnix( void* hwpipe, void* _looper, const char* args )
 
     sock_address_init_unix(&address, args);
 
-    ret = netPipe_initFromAddress(hwpipe, &address, static_cast<Looper*>(_looper));
+    ret = netPipe_initFromAddress(hwpipe, &address,
+                                  static_cast<Looper*>(_looper));
 
     sock_address_done(&address);
     return ret;
@@ -590,27 +563,27 @@ netPipe_initUnix( void* hwpipe, void* _looper, const char* args )
  *****
  *****/
 
-static const AndroidPipeFuncs  netPipeTcp_funcs = {
-    netPipe_initTcp,
-    netPipe_closeFromGuest,
-    netPipe_sendBuffers,
-    netPipe_recvBuffers,
-    netPipe_poll,
-    netPipe_wakeOn,
-    NULL,  /* we can't save these */
-    NULL,  /* we can't load these */
+static const AndroidPipeFuncs netPipeTcp_funcs = {
+        netPipe_initTcp,
+        netPipe_closeFromGuest,
+        netPipe_sendBuffers,
+        netPipe_recvBuffers,
+        netPipe_poll,
+        netPipe_wakeOn,
+        NULL, /* we can't save these */
+        NULL, /* we can't load these */
 };
 
 #ifndef _WIN32
-static const AndroidPipeFuncs  netPipeUnix_funcs = {
-    netPipe_initUnix,
-    netPipe_closeFromGuest,
-    netPipe_sendBuffers,
-    netPipe_recvBuffers,
-    netPipe_poll,
-    netPipe_wakeOn,
-    NULL,  /* we can't save these */
-    NULL,  /* we can't load these */
+static const AndroidPipeFuncs netPipeUnix_funcs = {
+        netPipe_initUnix,
+        netPipe_closeFromGuest,
+        netPipe_sendBuffers,
+        netPipe_recvBuffers,
+        netPipe_poll,
+        netPipe_wakeOn,
+        NULL, /* we can't save these */
+        NULL, /* we can't load these */
 };
 #endif
 
@@ -618,54 +591,52 @@ static const AndroidPipeFuncs  netPipeUnix_funcs = {
  * by openglesPipe_init() to refuse a pipe connection if the function
  * was never called.
  */
-static int  _opengles_init;
+static int _opengles_init;
 
 struct OpenglesPipe {
-    void* hwpipe;
-    State state;
-    int wakeFlags;
-    bool canRead;
-    bool canWrite;
-    bool careAboutRead;
-    bool careAboutWrite;
+    void* hwpipe = nullptr;
+    State state = STATE_INIT;
+    bool canRead = false;
+    bool canWrite = false;
+    bool careAboutRead = false;
+    bool careAboutWrite = false;
     emugl::IRenderingChannelPtr channel;
 
     emugl::ChannelBuffer dataForReading;
-    size_t readingOffset;
+    size_t dataForReadingLeft = 0;
 
-    bool canReadAny() const {
-        return this->canRead || readingOffset < dataForReading.size();
-    }
+    bool canReadAny() const { return this->canRead || dataForReadingLeft > 0; }
 };
 
-static void openglesPipe_processIoEvents(OpenglesPipe* pipe) {
+extern "C" {
+void qemu_mutex_lock_iothread();
+void qemu_mutex_unlock_iothread();
+}
+
+static void openglesPipe_processIoEvents(OpenglesPipe* pipe, bool lock) {
     int wakeFlags = 0;
 
-    if (pipe->canReadAny() && pipe->careAboutRead && (pipe->wakeFlags & PIPE_WAKE_READ) != 0) {
+    if (pipe->careAboutRead && pipe->canReadAny()) {
         wakeFlags |= PIPE_WAKE_READ;
+        pipe->careAboutRead = false;
     }
-    if (pipe->canWrite && pipe->careAboutWrite && (pipe->wakeFlags & PIPE_WAKE_WRITE) != 0) {
+    if (pipe->careAboutWrite && pipe->canWrite) {
         wakeFlags |= PIPE_WAKE_WRITE;
+        pipe->careAboutWrite = false;
     }
 
     /* Send wake signal to the guest if needed */
     if (wakeFlags != 0) {
+        if (lock)
+            qemu_mutex_lock_iothread();
         android_pipe_wake(pipe->hwpipe, wakeFlags);
-        pipe->wakeFlags &= ~wakeFlags;
+        if (lock)
+            qemu_mutex_unlock_iothread();
     }
 }
 
-static void openglesPipe_resetState(OpenglesPipe* pipe)
-{
-    pipe->careAboutWrite = (pipe->wakeFlags & PIPE_WAKE_WRITE) != 0;
-    pipe->careAboutRead = (pipe->wakeFlags & PIPE_WAKE_READ) != 0;
-
-    openglesPipe_processIoEvents(pipe);
-}
-
-static void openglesPipe_closeFromHost(OpenglesPipe* pipe)
-{
-    D("%s", __FUNCTION__);
+static void openglesPipe_closeFromHost(OpenglesPipe* pipe, bool lock) {
+    DO("%s", __FUNCTION__);
 
     /* If the pipe isn't in a working state, delete immediately */
     if (pipe->state != STATE_CONNECTED) {
@@ -677,32 +648,33 @@ static void openglesPipe_closeFromHost(OpenglesPipe* pipe)
     /* Force the closure of the channel - if a guest is blocked
      * waiting for a wake signal, it will receive an error. */
     if (pipe->hwpipe != NULL) {
+        if (lock)
+            qemu_mutex_lock_iothread();
         android_pipe_close(pipe->hwpipe);
+        if (lock)
+            qemu_mutex_unlock_iothread();
         pipe->hwpipe = NULL;
     }
 
     pipe->state = STATE_CLOSING_SOCKET;
-    openglesPipe_resetState(pipe);
 }
 
-static void openglesPipe_ioEvent(OpenglesPipe* pipe, emugl::IRenderingChannel::Event event) {
+static void openglesPipe_ioEvent(OpenglesPipe* pipe,
+                                 emugl::IRenderingChannel::Event event,
+                                 bool lock) {
     using Event = emugl::IRenderingChannel::Event;
     if ((event & Event::Stopped) != Event::Empty) {
-        openglesPipe_closeFromHost(pipe);
+        openglesPipe_closeFromHost(pipe, lock);
         return;
     }
 
-    pipe->canRead = (event & Event::Read) != Event::Empty;
-    pipe->canWrite = (event & Event::Write) != Event::Empty;
+    pipe->canRead |= (event & Event::Read) != Event::Empty;
+    pipe->canWrite |= (event & Event::Write) != Event::Empty;
 
-    openglesPipe_processIoEvents(pipe);
-
-    /* Reset state */
-    openglesPipe_resetState(pipe);
+    openglesPipe_processIoEvents(pipe, lock);
 }
 
-static void* openglesPipe_init( void* hwpipe, void* dummy, const char* args )
-{
+static void* openglesPipe_init(void* hwpipe, void* dummy, const char* args) {
     if (!_opengles_init || !android_getOpenglesRenderer()) {
         /* This should never happen, unless there is a bug in the
          * emulator's initialization, or the system image. */
@@ -715,7 +687,6 @@ static void* openglesPipe_init( void* hwpipe, void* dummy, const char* args )
         D("Out of memory when creating an OpenGLES pipe!");
         return nullptr;
     }
-    *pipe = {};
     pipe->hwpipe = hwpipe;
     pipe->channel = android_getOpenglesRenderer()->createRenderingChannel();
     if (!pipe->channel) {
@@ -725,32 +696,36 @@ static void* openglesPipe_init( void* hwpipe, void* dummy, const char* args )
     pipe->state = STATE_CONNECTED;
 
     auto pipeRaw = pipe.get();
-    pipe->channel->setEventCallback([pipeRaw](emugl::IRenderingChannel::Event event) {
-        openglesPipe_ioEvent(pipeRaw, event);
-    });
+    pipe->channel->setEventCallback(
+            [pipeRaw](emugl::IRenderingChannel::Event event, bool lock) {
+                openglesPipe_ioEvent(pipeRaw, event, lock);
+            });
 
     return pipe.release();
 }
 
-static void openglesPipe_closeFromGuest( void* opaque )
-{
+static void openglesPipe_closeFromGuest(void* opaque) {
     auto pipe = static_cast<OpenglesPipe*>(opaque);
+    DO("%s", __func__);
+    pipe->state = STATE_CLOSING_GUEST;
     pipe->channel->stop();
-    delete pipe;
+    // stop callback will call closeFromHost() which deletes the pipe
 }
 
-static void openglesPipe_wakeOn(void* opaque, int flags)
-{
+static void openglesPipe_wakeOn(void* opaque, int flags) {
     auto pipe = static_cast<OpenglesPipe*>(opaque);
 
     DD("%s: flags=%d", __FUNCTION__, flags);
 
-    pipe->wakeFlags |= flags;
-    openglesPipe_resetState(pipe);
+    // android::base::AutoLock lock(pipe->lock3);
+
+    pipe->careAboutRead |= (flags & PIPE_WAKE_READ) != 0;
+    pipe->careAboutWrite |= (flags & PIPE_WAKE_WRITE) != 0;
+
+    openglesPipe_processIoEvents(pipe, false);
 }
 
-static unsigned openglesPipe_poll(void* opaque)
-{
+static unsigned openglesPipe_poll(void* opaque) {
     auto pipe = static_cast<OpenglesPipe*>(opaque);
     unsigned ret = 0;
     if (pipe->canReadAny()) {
@@ -762,8 +737,7 @@ static unsigned openglesPipe_poll(void* opaque)
     return ret;
 }
 
-static int openglesPipeReadySend(OpenglesPipe *pipe)
-{
+static int openglesPipeReadySend(OpenglesPipe* pipe) {
     if (pipe->state == STATE_CONNECTED) {
         if (pipe->canWrite) {
             return 0;
@@ -776,8 +750,9 @@ static int openglesPipeReadySend(OpenglesPipe *pipe)
     }
 }
 
-static int openglesPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuffers )
-{
+static int openglesPipe_sendBuffers(void* opaque,
+                                    const AndroidPipeBuffer* buffers,
+                                    int numBuffers) {
     auto pipe = static_cast<OpenglesPipe*>(opaque);
 
     if (int ret = openglesPipeReadySend(pipe)) {
@@ -803,12 +778,10 @@ static int openglesPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buff
     return count;
 }
 
-static int openglesPipe_recvBuffers(void* opaque, AndroidPipeBuffer*  buffers, int numBuffers)
-{
+static int openglesPipe_recvBuffers(void* opaque,
+                                    AndroidPipeBuffer* buffers,
+                                    int numBuffers) {
     auto pipe = static_cast<OpenglesPipe*>(opaque);
-    if (!pipe->canReadAny()) {
-        return PIPE_ERROR_AGAIN;
-    }
 
     // consume the pipe's dataForReading, then put the next received data piece
     // there. repeat until the buffers are full
@@ -816,26 +789,40 @@ static int openglesPipe_recvBuffers(void* opaque, AndroidPipeBuffer*  buffers, i
     size_t buffOffset = 0;
     auto buff = buffers;
     const auto buffEnd = buff + numBuffers;
+
+    if (!pipe->canReadAny()) {
+        return PIPE_ERROR_AGAIN;
+    }
+
     while (buff != buffEnd) {
-        if (pipe->readingOffset == pipe->dataForReading.size()) {
+        if (pipe->dataForReadingLeft == 0) {
             // no data left, read a new chunk from the channel
-            pipe->dataForReading = pipe->channel->read();
-            pipe->readingOffset = 0;
-            if (pipe->dataForReading.empty()) {
+            auto buf = pipe->channel->read(false);
+
+            if (buf.empty()) {
                 // reading failed
-                if (len == 0) {
+                if (pipe->channel->isStopped()) {
                     return PIPE_ERROR_IO;
+                } else if (len == 0) {
+                    return PIPE_ERROR_AGAIN;
                 } else {
                     return len;
                 }
             }
+
+            pipe->dataForReadingLeft = buf.size();
+            pipe->dataForReading = std::move(buf);
         }
 
-        const size_t curSize = std::min(buff->size - buffOffset, pipe->dataForReading.size() - pipe->readingOffset);
-        memcpy(buff->data + buffOffset, pipe->dataForReading.data() + pipe->readingOffset, curSize);
+        const size_t curSize =
+                std::min(buff->size - buffOffset, pipe->dataForReadingLeft);
+        memcpy(buff->data + buffOffset,
+               pipe->dataForReading.data() +
+                       (pipe->dataForReading.size() - pipe->dataForReadingLeft),
+               curSize);
 
         len += curSize;
-        pipe->readingOffset += curSize;
+        pipe->dataForReadingLeft -= curSize;
         buffOffset += curSize;
         if (buffOffset == buff->size) {
             ++buff;
@@ -846,31 +833,28 @@ static int openglesPipe_recvBuffers(void* opaque, AndroidPipeBuffer*  buffers, i
     return len;
 }
 
-static const AndroidPipeFuncs  openglesPipe_funcs = {
-    openglesPipe_init,
-    openglesPipe_closeFromGuest,
-    openglesPipe_sendBuffers,
-    openglesPipe_recvBuffers,
-    openglesPipe_poll,
-    openglesPipe_wakeOn,
-    NULL,  /* we can't save these */
-    NULL,  /* we can't load these */
+static const AndroidPipeFuncs openglesPipe_funcs = {
+        openglesPipe_init,
+        openglesPipe_closeFromGuest,
+        openglesPipe_sendBuffers,
+        openglesPipe_recvBuffers,
+        openglesPipe_poll,
+        openglesPipe_wakeOn,
+        NULL, /* we can't save these */
+        NULL, /* we can't load these */
 };
 
-void
-android_net_pipes_init(void)
-{
-    Looper*  looper = looper_getForThread();
+void android_net_pipes_init(void) {
+    Looper* looper = looper_getForThread();
 
-    android_pipe_add_type( "tcp", looper, &netPipeTcp_funcs );
+    android_pipe_add_type("tcp", looper, &netPipeTcp_funcs);
 #ifndef _WIN32
-    android_pipe_add_type( "unix", looper, &netPipeUnix_funcs );
+    android_pipe_add_type("unix", looper, &netPipeUnix_funcs);
 #endif
-    android_pipe_add_type( "opengles", nullptr, &openglesPipe_funcs );
+    android_pipe_add_type("opengles", looper, &openglesPipe_funcs);
 }
 
-extern "C" int android_init_opengles_pipes(void)
-{
+extern "C" int android_init_opengles_pipes(void) {
     /* TODO: Check that we can load and initialize the host emulation
      *        libraries, and return -1 in case of error.
      */
