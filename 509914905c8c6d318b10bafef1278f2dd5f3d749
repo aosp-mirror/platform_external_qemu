@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08733496_1bc82671",
+        "filename": "android/emulation/control/location_agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-25T21:14:40Z",
+      "side": 1,
+      "message": "Nit: usually preferable to name your output variables as such. outLatitude, outLongitude, etc...",
+      "range": {
+        "startLine": 43,
+        "startChar": 4,
+        "endLine": 44,
+        "endChar": 61
+      },
+      "revId": "509914905c8c6d318b10bafef1278f2dd5f3d749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08733496_5b345e2e",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-25T21:14:40Z",
+      "side": 1,
+      "message": "I think for constants we usually do something like kGplexLongitude and kGplexLatitude? Not quite sure why though...",
+      "range": {
+        "startLine": 26,
+        "startChar": 20,
+        "endLine": 27,
+        "endChar": 29
+      },
+      "revId": "509914905c8c6d318b10bafef1278f2dd5f3d749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08733496_5be29eee",
+        "filename": "android/skin/qt/extended-pages/location-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-25T21:14:40Z",
+      "side": 1,
+      "message": "Nit: same thing",
+      "range": {
+        "startLine": 35,
+        "startChar": 34,
+        "endLine": 37,
+        "endChar": 51
+      },
+      "revId": "509914905c8c6d318b10bafef1278f2dd5f3d749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
