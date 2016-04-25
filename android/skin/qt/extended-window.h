@@ -62,6 +62,7 @@ public:
 
     ~ExtendedWindow();
 
+    void show();
     void showPane(ExtendedWindowPane pane);
 
 private slots:

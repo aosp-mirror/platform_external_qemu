@@ -47,7 +47,6 @@ ExtendedWindow::ExtendedWindow(
 #endif
 
     setWindowFlags(flag | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
-    setAttribute(Qt::WA_DeleteOnClose);
 
     mExtendedUi->setupUi(this);
     mExtendedUi->cellular_page->setCellularAgent(agentPtr->cellular);
@@ -83,11 +82,6 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_HELP,      mExtendedUi->helpButton},
     };
 
-    // There is a gap between the main window and the
-    // tool bar. Use the same gap between the tool bar
-    // and the extended windown.
-    move(mToolWindow->geometry().right() + ToolWindow::toolGap,
-         mToolWindow->geometry().top()       );
     setObjectName("ExtendedControls");
 
     mSidebarButtons.addButton(mExtendedUi->locationButton);
@@ -115,16 +109,14 @@ ExtendedWindow::ExtendedWindow(
 // .h file.
 ExtendedWindow::~ExtendedWindow() = default;
 
-void ExtendedWindow::showPane(ExtendedWindowPane pane) {
-    show();
-    adjustTabs(pane);
+void ExtendedWindow::show() {
+    QFrame::show();
 
-    // Verify that the extended pane is fully visible
-    // (otherwise it may be impossible for the user to
-    // move it)
+    // Verify that the extended pane is fully visible (otherwise it may be
+    // impossible for the user to move it)
     QDesktopWidget *desktop = static_cast<QApplication*>(
                                      QApplication::instance() )->desktop();
-    int   screenNum = desktop->screenNumber(this); // Screen holding most of this
+    int screenNum = desktop->screenNumber(this); // Screen holding most of this
 
     QRect screenGeo = desktop->screenGeometry(screenNum);
     QRect myGeo = geometry();
@@ -159,14 +151,16 @@ void ExtendedWindow::showPane(ExtendedWindowPane pane) {
     }
 }
 
+void ExtendedWindow::showPane(ExtendedWindowPane pane) {
+    show();
+    adjustTabs(pane);
+}
+
 void ExtendedWindow::closeEvent(QCloseEvent *ce) {
     if (mExtendedUi->location_page->isLoadingGeoData()) {
         mExtendedUi->location_page->requestStopLoadingGeoData();
         connect(mExtendedUi->location_page, SIGNAL(geoDataLoadingFinished()), this, SLOT(close()));
         ce->ignore();
-    } else {
-        mToolWindow->extendedIsClosing();
-        ce->accept();
     }
 }
 
@@ -244,6 +238,11 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
         on_locationButton_clicked();
 
         mFirstShowEvent = false;
+
+        // There is a gap between the main window and the tool bar. Use the same
+        // gap between the tool bar and the extended window.
+        move(mToolWindow->geometry().right() + ToolWindow::toolGap,
+             mToolWindow->geometry().top());
     }
     QFrame::showEvent(e);
 }
