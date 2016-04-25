@@ -123,6 +123,7 @@ signals:
     void releaseBitmap(SkinSurface *s, QSemaphore *sempahore = NULL);
     void requestClose(QSemaphore *semaphore = NULL);
     void requestUpdate(const QRect *rect, QSemaphore *semaphore = NULL);
+    void setDeviceGeometry(const QRect *rect, QSemaphore *sempahore = NULL);
     void setWindowIcon(const unsigned char *data, int size, QSemaphore *semaphore = NULL);
     void setWindowPos(int x, int y, QSemaphore *semaphore = NULL);
     void setTitle(const QString *title, QSemaphore *semaphore = NULL);
@@ -139,6 +140,7 @@ public:
     ToolWindow* toolWindow() const;
     void showZoomIfNotUserHidden();
     QSize containerSize() const;
+    QRect deviceGeometry() const;
 
     void doResize(const QSize& size,
                   bool isKbdShortcut = false,
@@ -185,6 +187,7 @@ private slots:
     void slot_releaseBitmap(SkinSurface *s, QSemaphore *sempahore = NULL);
     void slot_requestClose(QSemaphore *semaphore = NULL);
     void slot_requestUpdate(const QRect *rect, QSemaphore *semaphore = NULL);
+    void slot_setDeviceGeometry(const QRect *rect, QSemaphore *semaphore = NULL);
     void slot_setWindowIcon(const unsigned char *data, int size, QSemaphore *semaphore = NULL);
     void slot_setWindowPos(int x, int y, QSemaphore *semaphore = NULL);
     void slot_setWindowTitle(const QString *title, QSemaphore *semaphore = NULL);
@@ -261,6 +264,7 @@ private:
     ToolWindow* mToolWindow;
     EmulatorContainer mContainer;
     EmulatorOverlay mOverlay;
+    QRect mDeviceGeometry;
 
     QPointF mFocus;
     QPoint mViewportFocus;
