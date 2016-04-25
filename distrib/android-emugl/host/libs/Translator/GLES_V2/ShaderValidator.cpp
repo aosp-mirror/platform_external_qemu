@@ -13,6 +13,8 @@
 
 #include "ShaderValidator.h"
 
+#include <glslang/ShaderLang.h>
+
 // TODO: Improve parsing/analysis
 // https://code.google.com/p/android/issues/detail?id=206951
 
