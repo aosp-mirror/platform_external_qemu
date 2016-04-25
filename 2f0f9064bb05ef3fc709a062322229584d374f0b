@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08733496_f190f10c",
+        "filename": "android/qt/qt_path_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-25T17:32:14Z",
+      "side": 1,
+      "message": "fyi: It\u0027s wasteful to create std::string just to set expectations.\nAs above, const char[] is preferred.",
+      "range": {
+        "startLine": 100,
+        "startChar": 4,
+        "endLine": 100,
+        "endChar": 32
+      },
+      "revId": "2f0f9064bb05ef3fc709a062322229584d374f0b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
