@@ -69,6 +69,24 @@
       "revId": "c2e03c553b300914527627ee50c94756335d98bc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08733496_ca089e0f",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1224,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-25T19:53:04Z",
+      "side": 1,
+      "message": "Oh wait, there\u0027s still the issue mentioned in the comment above about 21 and lower having problems in the classic emulator. Either way, multitouch in 22+ seems to be working fine so we should probably leave this.",
+      "parentUuid": "08733496_0a8e16ef",
+      "revId": "c2e03c553b300914527627ee50c94756335d98bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
