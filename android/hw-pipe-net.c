@@ -260,9 +260,9 @@ static int netPipeReadySend(NetPipe *pipe)
         return PIPE_ERROR_IO;
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 
-int qemu2_send_all(int fd, const void *buf, int len1)
+int qemu_windows_send(int fd, const void *buf, int len1)
 {
     int ret, len;
 
@@ -279,13 +279,13 @@ int qemu2_send_all(int fd, const void *buf, int len1)
         } else {
             buf += ret;
             len -= ret;
-            return len1 - len;
+            break;
         }
     }
     return len1 - len;
 }
 
-int qemu2_recv_all(int fd, void *_buf, int len1, bool single_read)
+int qemu_windows_recv(int fd, void *_buf, int len1, bool single_read)
 {
     int ret, len;
     char *buf = _buf;
@@ -305,7 +305,7 @@ int qemu2_recv_all(int fd, void *_buf, int len1, bool single_read)
             }
             buf += ret;
             len -= ret;
-            return len1 - len;
+            break;
         }
     }
     return len1 - len;
@@ -333,10 +333,57 @@ netPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuff
     buff = buffers;
     while (count > 0) {
         int  avail = buff->size - buffStart;
-#ifndef WIN32
-        int  len = HANDLE_EINTR(send(loopIo_fd(pipe->io), buff->data + buffStart, avail, 0));
+        // NOTE:
+        // Please take care to send data in a way that does not cause
+        // pipe corruption.
+        //
+        // For instance:
+        // One may want to call send() multiple times here, but the important
+        // thing to notice is, what happens when multiple send()'s are issued,
+        // especially when the last send() results in an error (e.g., EAGAIN)?
+        //
+        // If the last send() results in EAGAIN, we need to ensure that no
+        // data was sent, otherwise the pipe driver will believe there has
+        // really not been any data sent, which in turn will cause
+        // retransmission of actually-sent data, corrupting the pipe.
+        //
+        // Otherwise, we need to retry when getting EAGAIN signal,
+        // until the transfer completely goes through. Only the following
+        // three situations are correct:
+        //
+        // a) transfer completely or partially succeeds,
+        // returning # bytes written
+        // b) nothing is transferred + error code
+        //
+        // We currently employ two solutions depending on platform:
+        // 1. Spin on EAGAIN, with multiple send() calls. 
+        // 2. Only allow one possible send() success, which makes it easier
+        // to deal with EAGAIN.
+        //
+        // We cannot use #1 on POSIX hosts at least, because if we keep
+        // retrying on EAGAIN, it's possible to lock up the emulator.
+        // This is because currently, there is a global lock
+        // for all render threads.
+        // If the wrong thread is waiting for the lock at the same time
+        // we are retrying on the EAGAIN signal, no progress will be made.
+        // So we just use #2: HANDLE_EINTR(send(...)), allowing only
+        // one successful send() and returning EAGAIN without the possibility
+        // of previous successful sends.
+        //
+        // Curiously, on Windows hosts, solution #2 will cause the emulator
+        // to not be able to boot up, with repeated surfaceflinger failures.
+        // On Windows hosts, solution #1 (spin on EAGAIN) must be used.
+#ifndef _WIN32
+        // Solution #2: Allow only one successful send()
+        int  len = HANDLE_EINTR(send(loopIo_fd(pipe->io),
+                                     buff->data + buffStart,
+                                     avail,
+                                     0));
 #else
-        int  len = qemu2_send_all(loopIo_fd(pipe->io), buff->data + buffStart, avail);
+        // Solution #1: Spin on EAGAIN (WSAEWOULDBLOCK)
+        int  len = qemu_windows_send(loopIo_fd(pipe->io),
+                                     buff->data + buffStart,
+                                     avail);
 #endif
 
         /* the write succeeded */
@@ -391,10 +438,20 @@ netPipe_recvBuffers( void* opaque, AndroidPipeBuffer*  buffers, int  numBuffers 
     buff = buffers;
     while (count > 0) {
         int  avail = buff->size - buffStart;
+        // See comment in netPipe_sendBuffers.
+        // Although we have not observed it yet,
+        // pipe corruption can potentially happen here too.
+        // We use the same solutions to be safe.
 #ifndef WIN32
-        int  len = HANDLE_EINTR(recv(loopIo_fd(pipe->io), buff->data + buffStart, avail, 0));
+        int  len = HANDLE_EINTR(recv(loopIo_fd(pipe->io),
+                                buff->data + buffStart,
+                                avail,
+                                0));
 #else
-        int  len = qemu2_recv_all(loopIo_fd(pipe->io), buff->data + buffStart, avail, true);
+        int  len = qemu_windows_recv(loopIo_fd(pipe->io),
+                                     buff->data + buffStart,
+                                     avail,
+                                     true);
 #endif
 
         /* the read succeeded */
