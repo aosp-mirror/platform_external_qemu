@@ -343,20 +343,22 @@ netPipe_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuff
         // especially when the last send() results in an error (e.g., EAGAIN)?
         //
         // If the last send() results in EAGAIN, we need to ensure that no
-        // data was sent, otherwise the pipe driver will believe there has
-        // really not been any data sent, which in turn will cause
-        // retransmission of actually-sent data, corrupting the pipe.
+        // data was sent. If we end up sending data successfully through
+        // send and then get EAGAIN on the last send() call, the pipe driver
+        // will believe there has really not been any data sent,
+        // which in turn will cause retransmission of actually-sent data,
+        // corrupting the pipe.
         //
-        // Otherwise, we need to retry when getting EAGAIN signal,
-        // until the transfer completely goes through. Only the following
-        // three situations are correct:
+        // Otherwise, we need to retry when getting EAGAIN,
+        // until the transfer completely goes through.
+        // Only the following two situations are correct:
         //
         // a) transfer completely or partially succeeds,
         // returning # bytes written
         // b) nothing is transferred + error code
         //
         // We currently employ two solutions depending on platform:
-        // 1. Spin on EAGAIN, with multiple send() calls. 
+        // 1. Spin on EAGAIN, with multiple send() calls.
         // 2. Only allow one possible send() success, which makes it easier
         // to deal with EAGAIN.
         //
