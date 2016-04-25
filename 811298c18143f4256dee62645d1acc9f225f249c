@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c87cbc59_28f4ef31",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-25T12:25:17Z",
+      "side": 1,
+      "message": "I\u0027m a bit puzzled, it looks like the functions were modified to allow partial sends since they won\u0027t loop anymore, in case send() or recv() don\u0027t send/receive all bytes requested by the call? This seems to contradict the text above.",
+      "revId": "811298c18143f4256dee62645d1acc9f225f249c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "288b98a4_832882c6",
+        "filename": "android/hw-pipe-net.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-25T12:25:17Z",
+      "side": 1,
+      "message": "I think using _WIN32 is safer, WIN32 is SDK-dependent and I think we had problems with it in the past. Also see http://stackoverflow.com/questions/662084/whats-the-difference-between-the-win32-and-win32-defines-in-c",
+      "revId": "811298c18143f4256dee62645d1acc9f225f249c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a87f884b_cada9795",
+        "filename": "android/hw-pipe-net.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-25T12:25:17Z",
+      "side": 1,
+      "message": "nit: using break here would have been better. Also it\u0027s probably a good idea to rename this to qemu2_send() since it does not send all data anymore.",
+      "revId": "811298c18143f4256dee62645d1acc9f225f249c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "288b98a4_a3857e02",
+        "filename": "android/hw-pipe-net.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-25T12:25:17Z",
+      "side": 1,
+      "message": "Given how subtle the issue addressed here, I strongly recommend to add a comment that explains why this difference in code paths exist.",
+      "revId": "811298c18143f4256dee62645d1acc9f225f249c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
