@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "08733496_078e0fef",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1184,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-25T19:49:07Z",
+      "side": 1,
+      "message": "I\u0027m a little worried about the implications of indicating specifically that it\u0027s a ranchu kernel. In the future when we have some new type of fish a hasRanchuKernel flag would have to be false and this behavior might regress. On the other hand that could be true for isQemu2 as well, although in that case I think it would not be entirely wrong to say that our new fish supports all the functionality of QEMU2 and so it can safely say that it is QEMU2 too.\n\nThat seems like it might take the assumption too far though. Ideally we would have an enum that indicates which emulator is running and then we could just pass that. That way in the future it would probably be easier to find usages of that enum type and update the behavior for a new fish type.\n\nI\u0027ll change this flag for now so that this change can be easily cherry picked and then add an enum like that and update the code in another CL.",
+      "parentUuid": "08733496_84b867e8",
+      "revId": "c2e03c553b300914527627ee50c94756335d98bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08733496_64b34b0e",
         "filename": "android/avd/info.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2016-04-23T15:05:50Z",
       "side": 1,
       "message": "I think you can remove the (i-\u003eapiLevel \u003c\u003d 21)\n\nIt\u0027s at least theoretically possible to run the emulator with a API 22+ non-ranchu system image",
+      "revId": "c2e03c553b300914527627ee50c94756335d98bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08733496_0a8e16ef",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1224,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-25T19:49:07Z",
+      "side": 1,
+      "message": "I just did some experiments with the classic emulator and multitouch and it seems to be working fine on all API levels except 10 with public system images. I guess that means we don\u0027t actually need the flag or the double API level check, it can just be \u003c\u003d 10.",
+      "parentUuid": "08733496_64b34b0e",
       "revId": "c2e03c553b300914527627ee50c94756335d98bc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
