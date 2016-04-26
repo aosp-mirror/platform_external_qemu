@@ -37,24 +37,47 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget *parent) :
     mUi->magVerticalWidget->setValidator(&mMagFieldValidator);
     mUi->magVerticalWidget->setTextMargins(0, 0, 0, 4);
 
-    onPhoneRotationChanged();
+    updateAccelerometerValues();
 
-    connect(mUi->magNorthWidget, SIGNAL(editingFinished()), this, SLOT(onPhoneRotationChanged()));
-    connect(mUi->magEastWidget, SIGNAL(editingFinished()), this, SLOT(onPhoneRotationChanged()));
-    connect(mUi->magVerticalWidget, SIGNAL(editingFinished()), this, SLOT(onPhoneRotationChanged()));
-    connect(mUi->accelWidget, SIGNAL(rotationChanged(const QQuaternion&)),
-            this, SLOT(updateSlidersFromAccelWidget(const QQuaternion&)));
-}
+    connect(mUi->magNorthWidget,
+            SIGNAL(editingFinished()),
+            this,
+            SLOT(onMagVectorChanged()));
+    connect(mUi->magEastWidget,
+            SIGNAL(editingFinished()),
+            this,
+            SLOT(onMagVectorChanged()));
+    connect(mUi->magVerticalWidget,
+            SIGNAL(editingFinished()),
+            this,
+            SLOT(onMagVectorChanged()));
+    connect(mUi->accelWidget,
+            SIGNAL(rotationChanged()),
+            this,
+            SLOT(onPhoneRotationChanged()));
+    connect(mUi->accelWidget,
+            SIGNAL(positionChanged()),
+            this,
+            SLOT(onPhonePositionChanged()));
+    connect(mUi->accelWidget,
+            SIGNAL(dragStopped()),
+            this,
+            SLOT(onDragStopped()));
+    connect(mUi->accelWidget,
+            SIGNAL(dragStarted()),
+            this,
+            SLOT(onDragStarted()));
 
-void VirtualSensorsPage::updateSlidersFromAccelWidget(const QQuaternion& quat) {
-    onPhoneRotationChanged();
+    connect(&mAccelerationTimer, SIGNAL(timeout()), this, SLOT(updateLinearAcceleration()));
+    mAccelerationTimer.setInterval(100);
+    mAccelerationTimer.stop();
 }
 
 void VirtualSensorsPage::setSensorsAgent(const QAndroidSensorsAgent* agent) {
     mSensorsAgent = agent;
 
     // Update the agent with current values.
-    onPhoneRotationChanged();
+    updateAccelerometerValues();
 }
 
 // Helper function
@@ -92,14 +115,20 @@ void VirtualSensorsPage::on_humiditySensorValueWidget_valueChanged(double value)
     setSensorValue(mSensorsAgent, ANDROID_SENSOR_HUMIDITY, value);
 }
 
+void VirtualSensorsPage::onMagVectorChanged() {
+    updateAccelerometerValues();
+}
+
+void VirtualSensorsPage::onPhoneRotationChanged() {
+    updateAccelerometerValues();
+}
+
 // Helper function.
 static QString formatSensorValue(double value) {
     return QString("%1").arg(value, 8, 'f', 2, ' ');
 }
 
-void VirtualSensorsPage::onPhoneRotationChanged() {
-    QQuaternion device_rotation_quat = mUi->accelWidget->rotation();
-
+void VirtualSensorsPage::updateAccelerometerValues() {
     // Gravity and magnetic vector in the device's frame of
     // reference.
     QVector3D gravity_vector(0.0, 9.8, 0.0);
@@ -107,6 +136,8 @@ void VirtualSensorsPage::onPhoneRotationChanged() {
             mUi->magNorthWidget->text().toDouble(),
             mUi->magEastWidget->text().toDouble(),
             mUi->magVerticalWidget->text().toDouble());
+
+    QQuaternion device_rotation_quat = mUi->accelWidget->rotation();
 
     // Gravity and magnetic vectors as observed by the device.
     // Note how we're applying the *inverse* of the transformation
@@ -117,13 +148,15 @@ void VirtualSensorsPage::onPhoneRotationChanged() {
     QVector3D device_magnetic_vector =
         device_rotation_quat.conjugate().rotatedVector(magnetic_vector);
 
+    QVector3D acceleration = device_gravity_vector - mLinearAcceleration;
+
     // Acceleration is affected both by the gravity and linear movement of the device.
     // For now, we don't have a linear component, so just account for gravity.
     setSensorValue(mSensorsAgent,
                    ANDROID_SENSOR_ACCELERATION,
-                   device_gravity_vector.x(),
-                   device_gravity_vector.y(),
-                   device_gravity_vector.z());
+                   acceleration.x(),
+                   acceleration.y(),
+                   acceleration.z());
 
     setSensorValue(mSensorsAgent,
                    ANDROID_SENSOR_MAGNETIC_FIELD,
@@ -132,11 +165,42 @@ void VirtualSensorsPage::onPhoneRotationChanged() {
                    device_magnetic_vector.z());
 
     // Update labels with new values.
-    mUi->accelerometerXLabel->setText(formatSensorValue(device_gravity_vector.x()));
-    mUi->accelerometerYLabel->setText(formatSensorValue(device_gravity_vector.y()));
-    mUi->accelerometerZLabel->setText(formatSensorValue(device_gravity_vector.z()));
+    mUi->accelerometerXLabel->setText(formatSensorValue(acceleration.x()));
+    mUi->accelerometerYLabel->setText(formatSensorValue(acceleration.y()));
+    mUi->accelerometerZLabel->setText(formatSensorValue(acceleration.z()));
     mUi->magnetometerNorthLabel->setText(formatSensorValue(device_magnetic_vector.x()));
     mUi->magnetometerEastLabel->setText(formatSensorValue(device_magnetic_vector.y()));
     mUi->magnetometerVerticalLabel->setText(formatSensorValue(device_magnetic_vector.z()));
 }
 
+void VirtualSensorsPage::onPhonePositionChanged() {
+    const QVector2D& pos = mUi->accelWidget->position();
+    mCurrentPosition = QVector3D(pos.x(), pos.y(), 0.0);
+}
+
+void VirtualSensorsPage::updateLinearAcceleration() {
+    static const float k = 100.0;
+    static const float mass = 1.0;
+    static const float meters_per_unit = 0.0254;
+
+    QVector3D delta =
+        mUi->accelWidget->rotation().conjugate().rotatedVector(
+            meters_per_unit * (mCurrentPosition - mPrevPosition));
+    mLinearAcceleration = delta * k / mass;
+    mPrevPosition = mCurrentPosition;
+    updateAccelerometerValues();
+}
+
+void VirtualSensorsPage::on_accelModeRotate_toggled() {
+    if (mUi->accelModeRotate->isChecked()) {
+        mUi->accelWidget->setOperationMode(
+            Accelerometer3DWidget::OperationMode::Rotate);
+    }
+}
+
+void VirtualSensorsPage::on_accelModeMove_toggled() {
+    if (mUi->accelModeMove->isChecked()) {
+        mUi->accelWidget->setOperationMode(
+            Accelerometer3DWidget::OperationMode::Move);
+    }
+}

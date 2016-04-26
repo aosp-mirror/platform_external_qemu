@@ -15,7 +15,8 @@
 
 Accelerometer3DWidget::Accelerometer3DWidget(QWidget* parent) :
     GLWidget(parent),
-    mTracking(false) {
+    mTracking(false),
+    mOperationMode(OperationMode::Rotate) {
     toggleAA();
 }
 
@@ -254,6 +255,10 @@ void Accelerometer3DWidget::resizeGL(int w, int h) {
             45.0, // FOV
             static_cast<double>(w) / static_cast<double>(h), // Aspect ratio
             0.5, 100.0); // near and far clipping planes
+
+    // Calculate the depth of the world's XY plane.
+    QVector3D vec = mPerspective * mCameraTransform * QVector3D(0.0f, 0.0f, 0.0f);
+    mXYPlaneDepth = vec.z();
 }
 
 void Accelerometer3DWidget::repaintGL() {
@@ -265,6 +270,7 @@ void Accelerometer3DWidget::repaintGL() {
     // Recompute the model transformation matrix using the given rotations.
     QMatrix4x4 model_view_transform;
     model_view_transform.setToIdentity();
+    model_view_transform.translate(mTranslation.x(), mTranslation.y());
     model_view_transform.rotate(mQuat);
     model_view_transform = mCameraTransform * model_view_transform;
 
@@ -337,15 +343,56 @@ void Accelerometer3DWidget::repaintGL() {
 }
 
 void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent *event) {
-    if (mTracking) {
+    if (mTracking && mOperationMode == OperationMode::Rotate) {
         int diff_x = event->x() - mPrevMouseX,
             diff_y = event->y() - mPrevMouseY;
         QQuaternion q = QQuaternion::fromAxisAndAngle(1.0, 0.0, 0.0, diff_y) *
                         QQuaternion::fromAxisAndAngle(0.0, 1.0, 0.0, diff_x);
         mQuat = q * mQuat;
+        renderFrame();
+        emit(rotationChanged());
         mPrevMouseX = event->x();
         mPrevMouseY = event->y();
+    } else if (mTracking && mOperationMode == OperationMode::Move) {
+        QVector2D vec = screenToXYPlane(event->x(), event->y());
+        mTranslation += vec - mPrevDragOrigin;
         renderFrame();
-        emit(rotationChanged(mQuat));
+        emit(positionChanged());
+        mPrevDragOrigin = vec;
+    }
+}
+
+QVector2D Accelerometer3DWidget::screenToXYPlane(int x, int y) const {
+    QVector3D vec; // Normalized device coordinates of the point.
+
+    // Convert x and y from Qt coordinate system into NDC
+    vec.setX(2.0 * x / static_cast<float>(width()) - 1.0);
+    vec.setY(1.0 - 2.0 * y / static_cast<float>(height()));
+
+    // Make sure the point lies on the world's XY plane.
+    vec.setZ(mXYPlaneDepth);
+
+    // Now, by applying the inverse perspective and camera transform,
+    // turn vec into world coordinates.
+    vec = (mPerspective * mCameraTransform).inverted() * vec;
+    return QVector2D(vec.x(), vec.y());
+}
+
+void Accelerometer3DWidget::mousePressEvent(QMouseEvent *event) {
+    mPrevMouseX = event->x();
+    mPrevMouseY = event->y();
+    mPrevDragOrigin = screenToXYPlane(event->x(), event->y());
+    mTracking = true;
+    if (mOperationMode == OperationMode::Move) {
+        mDragging = true;
+        emit(dragStarted());
+    }
+}
+
+void Accelerometer3DWidget::mouseReleaseEvent(QMouseEvent* event) {
+    mTracking = false;
+    if (mDragging) {
+        mDragging = false;
+        emit(dragStopped());
     }
 }
