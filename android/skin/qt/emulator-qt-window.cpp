@@ -120,6 +120,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mEventLogger(new UIEventRecorder<android::base::CircularBuffer>(
               &mEventCapturer,
               android::base::CircularBuffer<EventRecord>(1000))),
+      mUserActionsCounter(new android::qt::UserActionsCounter(&mEventCapturer)),
       mInstallDialog(this),
       mPushDialog(this) {
     // Start a timer. If the main window doesn't
@@ -134,7 +135,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     mBackingSurface = NULL;
 
-    mToolWindow = new ToolWindow(this, &mContainer, mEventLogger);
+    mToolWindow = new ToolWindow(this, &mContainer, mEventLogger,
+                                 mUserActionsCounter);
 
     this->setAcceptDrops(true);
 
@@ -191,6 +193,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     setObjectName("MainWindow");
     mEventLogger->startRecording(this);
     mEventLogger->startRecording(mToolWindow);
+    mUserActionsCounter->startCountingForMainWindow(this);
+    mUserActionsCounter->startCountingForToolWindow(mToolWindow);
 
     // The crash reporter will dump the last 1000 UI events.
     // mEventLogger is a shared pointer, capturing its copy
