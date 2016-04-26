@@ -25,7 +25,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <iostream>
 #include <fstream>
 #include <streambuf>
 
@@ -50,6 +49,10 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/win32_cmdline_quote.h"
 #include "android/version.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 using android::base::PathUtils;
 using android::base::RunOptions;
@@ -208,6 +211,28 @@ int main(int argc, char** argv)
     if (debug != NULL && *debug && *debug != '0') {
         android_verbose = 1;
     }
+
+#ifdef _WIN32
+    // Make sure OS is Win7+ - otherwise the emulation engine just won't start.
+    OSVERSIONINFOW ver = {sizeof(ver)};
+    if (!::GetVersionExW(&ver)) {
+        const auto err = (unsigned)::GetLastError();
+        fprintf(stderr,
+           "WARNING: failed to get the operating system version. Emulator\n"
+           "may not run properly on Windows Vista and won't run on Windows XP\n"
+           "(error code %d [0x%x])\n",
+           err, err);
+    } else {
+        // Windows 7 is 6.1
+        if (ver.dwMajorVersion < 6 ||
+            (ver.dwMajorVersion == 6 && ver.dwMinorVersion < 1)) {
+            fprintf(stderr,
+                "ERROR: Emulator requires Windows 7 or newer. Please upgrade\n"
+                "an operating system to run Android Emulator\n");
+            return 1;
+        }
+    }
+#endif
 
 #ifdef __linux__
     /* Define ANDROID_EMULATOR_USE_SYSTEM_LIBS to 1 in your environment if you
