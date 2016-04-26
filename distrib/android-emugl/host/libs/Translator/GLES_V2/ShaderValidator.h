@@ -11,4 +11,6 @@
 
 #pragma once
 
-bool validate_glsles_keywords(const char* src);
+#include <GLES2/gl2.h>
+
+bool validate_glsles_keywords(const char* src, GLenum type, const char* *infoLog);

@@ -37,10 +37,6 @@ public:
     // Query whether the shader parsed is valid.
     // Don't trust the value if we did not call setSrc
     bool validShader() const;
-    // If validation fails, add proper error messages
-    // to the parser's info log, which is treated
-    // as the actual info log from guest POV.
-    void setInvalidInfoLog();
 
     GLchar* getInfoLog();
 

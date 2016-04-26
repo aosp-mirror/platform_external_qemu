@@ -45,7 +45,15 @@ ShaderParser::ShaderParser(GLenum type):ObjectData(SHADER_DATA),
 
 
 void ShaderParser::validateGLESKeywords(const char* src) {
-    m_valid = validate_glsles_keywords(src);
+    const char *infoLog = nullptr;
+    m_valid = validate_glsles_keywords(src, m_type, &infoLog);
+
+    if (!m_valid) {
+        unsigned length = strlen(infoLog);
+        GLchar* log = new GLchar[length];
+        memcpy(log, infoLog, length);
+        setInfoLog(log);
+    }
 }
 
 void ShaderParser::setSrc(const Version& ver,GLsizei count,const GLchar* const* strings,const GLint* length){
@@ -356,15 +364,6 @@ void ShaderParser::setInfoLog(GLchar* infoLog)
 
 bool ShaderParser::validShader() const {
     return m_valid;
-}
-
-static const GLchar glsles_invalid[] =
-    { "ERROR: Valid GLSL but not GLSL ES" };
-
-void ShaderParser::setInvalidInfoLog() {
-    GLchar* glsles_invalid_here = new GLchar[2048];
-    memcpy(glsles_invalid_here, glsles_invalid, 2048);
-    setInfoLog(glsles_invalid_here);
 }
 
 GLchar* ShaderParser::getInfoLog()
