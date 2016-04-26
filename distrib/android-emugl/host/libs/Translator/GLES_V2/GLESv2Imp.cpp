@@ -33,6 +33,8 @@
 #include <GLcommon/TextureUtils.h>
 #include <GLcommon/FramebufferData.h>
 
+#include <glslang/Public/ShaderLang.h>
+
 #include <stdio.h>
 
 extern "C" {
@@ -70,8 +72,7 @@ static GLESiface  s_glesIface = {
 extern "C" {
 
 static void initGLESx() {
-    DBG("No special initialization necessary for GLES_V2\n");
-    return;
+    glslang::InitializeProcess();
 }
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
@@ -398,8 +399,6 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
             infoLog = new GLchar[infoLogLength+1];
             ctx->dispatcher().glGetShaderInfoLog(globalShaderName,infoLogLength,NULL,infoLog);
             sp->setInfoLog(infoLog);
-        } else {
-            sp->setInvalidInfoLog();
         }
     }
 }

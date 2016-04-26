@@ -13,166 +13,130 @@
 
 #include "ShaderValidator.h"
 
-// TODO: Improve parsing/analysis
-// https://code.google.com/p/android/issues/detail?id=206951
+#include <glslang/Public/ShaderLang.h>
 
-static std::vector<std::string> parse_raw_declarations(std::string text) {
-    std::string emp("");
-    std::string sp(" ");
+static const TBuiltInResource kDefaultTBuiltInResource = {
+    /* .MaxLights = */ 32,
+    /* .MaxClipPlanes = */ 6,
+    /* .MaxTextureUnits = */ 32,
+    /* .MaxTextureCoords = */ 32,
+    /* .MaxVertexAttribs = */ 64,
+    /* .MaxVertexUniformComponents = */ 4096,
+    /* .MaxVaryingFloats = */ 64,
+    /* .MaxVertexTextureImageUnits = */ 32,
+    /* .MaxCombinedTextureImageUnits = */ 80,
+    /* .MaxTextureImageUnits = */ 32,
+    /* .MaxFragmentUniformComponents = */ 4096,
+    /* .MaxDrawBuffers = */ 32,
+    /* .MaxVertexUniformVectors = */ 128,
+    /* .MaxVaryingVectors = */ 8,
+    /* .MaxFragmentUniformVectors = */ 16,
+    /* .MaxVertexOutputVectors = */ 16,
+    /* .MaxFragmentInputVectors = */ 15,
+    /* .MinProgramTexelOffset = */ -8,
+    /* .MaxProgramTexelOffset = */ 7,
+    /* .MaxClipDistances = */ 8,
+    /* .MaxComputeWorkGroupCountX = */ 65535,
+    /* .MaxComputeWorkGroupCountY = */ 65535,
+    /* .MaxComputeWorkGroupCountZ = */ 65535,
+    /* .MaxComputeWorkGroupSizeX = */ 1024,
+    /* .MaxComputeWorkGroupSizeY = */ 1024,
+    /* .MaxComputeWorkGroupSizeZ = */ 64,
+    /* .MaxComputeUniformComponents = */ 1024,
+    /* .MaxComputeTextureImageUnits = */ 16,
+    /* .MaxComputeImageUniforms = */ 8,
+    /* .MaxComputeAtomicCounters = */ 8,
+    /* .MaxComputeAtomicCounterBuffers = */ 1,
+    /* .MaxVaryingComponents = */ 60,
+    /* .MaxVertexOutputComponents = */ 64,
+    /* .MaxGeometryInputComponents = */ 64,
+    /* .MaxGeometryOutputComponents = */ 128,
+    /* .MaxFragmentInputComponents = */ 128,
+    /* .MaxImageUnits = */ 8,
+    /* .MaxCombinedImageUnitsAndFragmentOutputs = */ 8,
+    /* .MaxCombinedShaderOutputResources = */ 8,
+    /* .MaxImageSamples = */ 0,
+    /* .MaxVertexImageUniforms = */ 0,
+    /* .MaxTessControlImageUniforms = */ 0,
+    /* .MaxTessEvaluationImageUniforms = */ 0,
+    /* .MaxGeometryImageUniforms = */ 0,
+    /* .MaxFragmentImageUniforms = */ 8,
+    /* .MaxCombinedImageUniforms = */ 8,
+    /* .MaxGeometryTextureImageUnits = */ 16,
+    /* .MaxGeometryOutputVertices = */ 256,
+    /* .MaxGeometryTotalOutputComponents = */ 1024,
+    /* .MaxGeometryUniformComponents = */ 1024,
+    /* .MaxGeometryVaryingComponents = */ 64,
+    /* .MaxTessControlInputComponents = */ 128,
+    /* .MaxTessControlOutputComponents = */ 128,
+    /* .MaxTessControlTextureImageUnits = */ 16,
+    /* .MaxTessControlUniformComponents = */ 1024,
+    /* .MaxTessControlTotalOutputComponents = */ 4096,
+    /* .MaxTessEvaluationInputComponents = */ 128,
+    /* .MaxTessEvaluationOutputComponents = */ 128,
+    /* .MaxTessEvaluationTextureImageUnits = */ 16,
+    /* .MaxTessEvaluationUniformComponents = */ 1024,
+    /* .MaxTessPatchComponents = */ 120,
+    /* .MaxPatchVertices = */ 32,
+    /* .MaxTessGenLevel = */ 64,
+    /* .MaxViewports = */ 16,
+    /* .MaxVertexAtomicCounters = */ 0,
+    /* .MaxTessControlAtomicCounters = */ 0,
+    /* .MaxTessEvaluationAtomicCounters = */ 0,
+    /* .MaxGeometryAtomicCounters = */ 0,
+    /* .MaxFragmentAtomicCounters = */ 8,
+    /* .MaxCombinedAtomicCounters = */ 8,
+    /* .MaxAtomicCounterBindings = */ 1,
+    /* .MaxVertexAtomicCounterBuffers = */ 0,
+    /* .MaxTessControlAtomicCounterBuffers = */ 0,
+    /* .MaxTessEvaluationAtomicCounterBuffers = */ 0,
+    /* .MaxGeometryAtomicCounterBuffers = */ 0,
+    /* .MaxFragmentAtomicCounterBuffers = */ 1,
+    /* .MaxCombinedAtomicCounterBuffers = */ 1,
+    /* .MaxAtomicCounterBufferSize = */ 16384,
+    /* .MaxTransformFeedbackBuffers = */ 4,
+    /* .MaxTransformFeedbackInterleavedComponents = */ 64,
+    /* .MaxCullDistances = */ 8,
+    /* .MaxCombinedClipAndCullDistances = */ 8,
+    /* .MaxSamples = */ 4,
+    /* .limits = */ {
+    /* .nonInductiveForLoops = */ 1,
+    /* .whileLoops = */ 1,
+    /* .doWhileLoops = */ 1,
+    /* .generalUniformIndexing = */ 1,
+    /* .generalAttributeMatrixVectorIndexing = */ 1,
+    /* .generalVaryingIndexing = */ 1,
+    /* .generalSamplerIndexing = */ 1,
+    /* .generalVariableIndexing = */ 1,
+    /* .generalConstantMatrixVectorIndexing = */ 1,
+}};
 
-    std::string newline("\n");
-    std::string scol(";");
+bool validate_glsles(const char* src, GLenum type, const char* *infoLog) {
 
-    std::string openpar("(");
-    std::string openparsp("( ");
-    std::string closepar(")");
-    std::string openbr("{");
-    std::string closebr("}");
-    std::string brscol("};");
-
-    std::string linecomment("//");
-    std::string multilinecomment_begin("/*");
-    std::string multilinecomment_end("*/");
-
-    text.insert(0, sp);
-
-    bool err = false;
-    std::string preprocessed = replace_with(newline, sp,
-                               replace_with(openpar, openparsp,
-                               replace_with(closebr, brscol,
-                               remove_in_out(
-                               remove_in_out(
-                                   text,
-                                   multilinecomment_begin,
-                                   multilinecomment_end,
-                                   &err),
-                                   linecomment,
-                                   newline,
-                                   &err))));
-
-    // Comment parsing is allowed to fail
-    err = false;
-
-    std::vector<std::string> decls;
-    std::string no_func_impls = remove_in_out(preprocessed,
-            openbr,
-            closebr,
-            &err);
-
-    if (!err) {
-        decls = split(scol, no_func_impls);
+    EShLanguage language;
+    switch (type) {
+    case GL_VERTEX_SHADER:
+        language = EShLangVertex;
+        break;
+    case GL_FRAGMENT_SHADER:
+        language = EShLangFragment;
+        break;
+    default:
+        return true;
     }
-    return decls;
-}
 
-// Validates arrangement of keywords in
-// a GLSL ES variable declaration or function parameter.
-// With the given parsing functions, this is only designed to pass
-// dEQP-GLES2.shaders.qualification_order.*
-static void validate_keywords_in_decls(const std::vector<std::string>& decls,
-                                       bool* err) {
-    std::vector<std::string> variance_keywords;
+    glslang::TShader shader(language);
+    shader.setStrings(&src, 1);
 
-    variance_keywords.push_back(std::string("invariant"));
+    // Run parse() on the shader
+    bool res = shader.parse(&kDefaultTBuiltInResource, 100, false, EShMsgDefault);
 
-    std::vector<std::string> storage_keywords;
-
-    storage_keywords.push_back(std::string(" const "));
-    storage_keywords.push_back(std::string(" uniform "));
-    storage_keywords.push_back(std::string(" attribute "));
-    storage_keywords.push_back(std::string(" varying "));
-    storage_keywords.push_back(std::string(" sampler "));
-
-    std::vector<std::string> precision_keywords;
-
-    precision_keywords.push_back(std::string(" lowp "));
-    precision_keywords.push_back(std::string(" mediump "));
-    precision_keywords.push_back(std::string(" highp "));
-    precision_keywords.push_back(std::string(" superp "));
-
-    std::vector<std::string> parameter_keywords;
-
-    parameter_keywords.push_back(std::string(" in ")); // c.f., "int"
-    parameter_keywords.push_back(std::string(" out "));
-    parameter_keywords.push_back(std::string(" inout "));
-
-    for (size_t i = 0; i < decls.size(); i++) {
-        std::string variance, storage, precision, parameter;
-        size_t storage_pos, precision_pos, parameter_pos;
-
-        storage_pos = multi_find(decls[i], storage_keywords);
-        precision_pos = multi_find(decls[i], precision_keywords);
-        parameter_pos = multi_find(decls[i], parameter_keywords);
-
-        if (storage_pos != std::string::npos &&
-                precision_pos != std::string::npos) {
-            if (storage_pos < precision_pos) {
-                if (parameter_pos != std::string::npos) {
-                    if (parameter_pos > precision_pos) {
-                        *err = true;
-                    }
-                }
-            } else {
-                *err = true;
-            }
-        } else if (precision_pos != std::string::npos &&
-                parameter_pos != std::string::npos) {
-            if (parameter_pos > precision_pos) {
-                *err = true;
-            }
-        }
-    }
-}
-
-static void validate_glsles_variable_decls(
-        const std::vector<std::string>& raw_decls,
-        bool* err) {
-    std::string openpar("(");
-    std::vector<std::string> non_function_decls;
-    for (size_t i = 0; i < raw_decls.size(); i++) {
-        if (raw_decls[i].find(openpar) == std::string::npos) {
-            non_function_decls.push_back(raw_decls[i]);
-        }
-    }
-    validate_keywords_in_decls(non_function_decls, err);
-}
-
-static void validate_glsles_function_parameters(
-        const std::vector<std::string>& raw_decls,
-        bool* err) {
-
-    bool parse_err = false;
-    std::string openpar("(");
-    std::string closepar(")");
-    std::string comma(",");
-    std::vector<std::string> func_param_decls;
-    for (size_t i = 0; i < raw_decls.size(); i++) {
-        if (raw_decls[i].find(openpar) != std::string::npos) {
-            std::vector<std::string> func_params =
-                isolate_in_out(raw_decls[i], openpar, closepar, &parse_err);
-            if (func_params.size() > 0) {
-                // Just use the first set of parens
-                std::vector<std::string> these_params =
-                    split(comma, func_params[0]);
-                func_param_decls.insert(func_param_decls.end(),
-                                        these_params.begin(),
-                                        these_params.end());
-            }
+    if (!res) {
+        const char* log = shader.getInfoLog();
+        if (log && log[0]) {
+            *infoLog = log;
         }
     }
 
-    validate_keywords_in_decls(func_param_decls, err);
-}
-
-bool validate_glsles_keywords(const char* src) {
-    bool err = false;
-
-    std::vector<std::string> raw_decls = parse_raw_declarations(src);
-
-    // Liberal validation if parsing fails
-    if (raw_decls.empty()) { return true; }
-
-    validate_glsles_variable_decls(raw_decls, &err);
-    validate_glsles_function_parameters(raw_decls, &err);
-    return !err;
+    return res;
 }
