@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "888725d1_f60b8619",
+        "filename": "android-qemu1-glue/qemu-location-agent-impl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-26T21:01:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08733496_1b4d8669",
+      "range": {
+        "startLine": 26,
+        "startChar": 9,
+        "endLine": 26,
+        "endChar": 15
+      },
+      "revId": "509914905c8c6d318b10bafef1278f2dd5f3d749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08733496_1bc82671",
         "filename": "android/emulation/control/location_agent.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-25T21:14:40Z",
       "side": 1,
       "message": "Nit: usually preferable to name your output variables as such. outLatitude, outLongitude, etc...",
+      "range": {
+        "startLine": 43,
+        "startChar": 4,
+        "endLine": 44,
+        "endChar": 61
+      },
+      "revId": "509914905c8c6d318b10bafef1278f2dd5f3d749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "888725d1_96047a06",
+        "filename": "android/emulation/control/location_agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-26T21:01:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08733496_1bc82671",
       "range": {
         "startLine": 43,
         "startChar": 4,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "888725d1_d630c2da",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-26T21:01:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08733496_5b345e2e",
+      "range": {
+        "startLine": 26,
+        "startChar": 20,
+        "endLine": 27,
+        "endChar": 29
+      },
+      "revId": "509914905c8c6d318b10bafef1278f2dd5f3d749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08733496_7b53da12",
         "filename": "android/skin/qt/extended-pages/location-page.cpp",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2016-04-25T22:18:17Z",
       "side": 1,
       "message": "I think the label should display the actual location reported by the emulated device not the location that we\u0027re sending.\nIt\u0027s better for debugging.",
+      "range": {
+        "startLine": 408,
+        "startChar": 0,
+        "endLine": 408,
+        "endChar": 43
+      },
+      "revId": "509914905c8c6d318b10bafef1278f2dd5f3d749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "888725d1_b68f3e85",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-26T21:01:17Z",
+      "side": 1,
+      "message": "I thought about that. I agree it\u0027s better for debugging, but I am worried about it being too heavy (issuing an adb command and waiting for the response) and whether there could be a race where we send the new location but the system reports the old location.",
+      "parentUuid": "08733496_7b53da12",
       "range": {
         "startLine": 408,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "888725d1_d68c4292",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-26T21:01:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08733496_9b86f6d9",
+      "range": {
+        "startLine": 483,
+        "startChar": 8,
+        "endLine": 483,
+        "endChar": 32
+      },
+      "revId": "509914905c8c6d318b10bafef1278f2dd5f3d749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08733496_5be29eee",
         "filename": "android/skin/qt/extended-pages/location-page.h",
         "patchSetId": 1
@@ -128,6 +248,30 @@
       "writtenOn": "2016-04-25T21:14:40Z",
       "side": 1,
       "message": "Nit: same thing",
+      "range": {
+        "startLine": 35,
+        "startChar": 34,
+        "endLine": 37,
+        "endChar": 51
+      },
+      "revId": "509914905c8c6d318b10bafef1278f2dd5f3d749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "888725d1_962b1a72",
+        "filename": "android/skin/qt/extended-pages/location-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-26T21:01:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08733496_5be29eee",
       "range": {
         "startLine": 35,
         "startChar": 34,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "888725d1_16c14a90",
+        "filename": "android/skin/qt/extended-pages/location-page.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-26T21:01:17Z",
+      "side": 1,
+      "message": "I\u0027ve passed this on to J.\nI can see it either way. Your suggestion is more balanced. The current way the pull-down is above what it controls.",
+      "parentUuid": "08733496_56e0b374",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 11
+      },
+      "revId": "509914905c8c6d318b10bafef1278f2dd5f3d749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08733496_fb952aba",
         "filename": "android/skin/qt/tool-window.cpp",
         "patchSetId": 1
@@ -174,6 +342,30 @@
       "writtenOn": "2016-04-25T22:18:17Z",
       "side": 1,
       "message": "We already have this function (see line 524)",
+      "range": {
+        "startLine": 181,
+        "startChar": 5,
+        "endLine": 186,
+        "endChar": 64
+      },
+      "revId": "509914905c8c6d318b10bafef1278f2dd5f3d749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "888725d1_5646f214",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-26T21:01:17Z",
+      "side": 1,
+      "message": "Merge problem.\nFixed.",
+      "parentUuid": "08733496_fb952aba",
       "range": {
         "startLine": 181,
         "startChar": 5,
