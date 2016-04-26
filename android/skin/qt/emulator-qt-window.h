@@ -26,6 +26,7 @@
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/skin/qt/ui-event-recorder.h"
+#include "android/skin/qt/user-actions-counter.h"
 
 #include <QtCore>
 #include <QApplication>
@@ -284,6 +285,7 @@ private:
     std::shared_ptr<android::emulation::ScreenCapturer> mScreenCapturer;
     std::shared_ptr<UIEventRecorder<android::base::CircularBuffer>>
         mEventLogger;
+    std::shared_ptr<android::qt::UserActionsCounter> mUserActionsCounter;
 
     std::shared_ptr<android::emulation::ApkInstaller> mApkInstaller;
     QProgressDialog mInstallDialog;

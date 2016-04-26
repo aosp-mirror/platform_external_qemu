@@ -61,7 +61,7 @@ font-family: &quot;Roboto&quot;</string>
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="currentIndex">
-    <number>4</number>
+    <number>0</number>
    </property>
    <widget class="LocationPage" name="location_page"/>
    <widget class="CellularPage" name="cellular_page"/>
@@ -167,6 +167,9 @@ font-family: &quot;Roboto&quot;</string>
      <property name="currentIndex">
       <number>0</number>
      </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
      <item>
       <property name="text">
        <string>0</string>
@@ -232,6 +235,9 @@ font-family: &quot;Roboto&quot;</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Toggle</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
      </property>
     </widget>
     <widget class="QGroupBox" name="locationGroup_6">
@@ -303,6 +309,9 @@ font-family: &quot;Roboto&quot;</string>
    <property name="flat">
     <bool>true</bool>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <property name="themeIconName" stdset="0">
     <string>phone</string>
    </property>
@@ -352,6 +361,9 @@ font-family: &quot;Roboto&quot;</string>
    <property name="flat">
     <bool>true</bool>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <property name="themeIconName" stdset="0">
     <string>battery</string>
    </property>
@@ -398,6 +410,9 @@ font-family: &quot;Roboto&quot;</string>
    </property>
    <property name="flat">
     <bool>true</bool>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
    <property name="themeIconName" stdset="0">
     <string>location</string>
@@ -446,6 +461,9 @@ font-family: &quot;Roboto&quot;</string>
    <property name="flat">
     <bool>true</bool>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <property name="themeIconName" stdset="0">
     <string>signal_cellular_3_bar</string>
    </property>
@@ -493,6 +511,9 @@ font-family: &quot;Roboto&quot;</string>
    <property name="flat">
     <bool>true</bool>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <property name="themeIconName" stdset="0">
     <string>fingerprint</string>
    </property>
@@ -539,6 +560,9 @@ font-family: &quot;Roboto&quot;</string>
    </property>
    <property name="flat">
     <bool>true</bool>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
    <property name="themeIconName" stdset="0">
     <string>dpad</string>
@@ -611,6 +635,9 @@ font-family: &quot;Roboto&quot;</string>
    </property>
    <property name="flat">
     <bool>true</bool>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
    <property name="themeIconName" stdset="0">
     <string>settings</string>
@@ -698,6 +725,9 @@ font-family: &quot;Roboto&quot;</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>MajorTab</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="spacer1Button">
@@ -801,6 +831,9 @@ font-family: &quot;Roboto&quot;</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>MajorTab</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
   </widget>
   <zorder>spacer2Button</zorder>

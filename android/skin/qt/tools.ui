@@ -44,6 +44,9 @@ color: #f0f0f0</string>
      <height>36</height>
     </rect>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <property name="toolTip">
     <string>Power</string>
    </property>
@@ -81,6 +84,9 @@ color: #f0f0f0</string>
      <width>36</width>
      <height>36</height>
     </rect>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
    <property name="toolTip">
     <string>Volume up</string>
@@ -120,6 +126,9 @@ color: #f0f0f0</string>
      <height>36</height>
     </rect>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <property name="toolTip">
     <string>Volume down</string>
    </property>
@@ -157,6 +166,9 @@ color: #f0f0f0</string>
      <width>36</width>
      <height>36</height>
     </rect>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
    <property name="toolTip">
     <string>Rotate</string>
@@ -196,6 +208,9 @@ color: #f0f0f0</string>
      <height>36</height>
     </rect>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <property name="toolTip">
     <string>Back</string>
    </property>
@@ -233,6 +248,9 @@ color: #f0f0f0</string>
      <width>36</width>
      <height>36</height>
     </rect>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
    <property name="toolTip">
     <string>Zoom</string>
@@ -275,6 +293,9 @@ color: #f0f0f0</string>
      <height>36</height>
     </rect>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <property name="toolTip">
     <string>More</string>
    </property>
@@ -309,6 +330,9 @@ color: #f0f0f0</string>
      <width>36</width>
      <height>36</height>
     </rect>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
    <property name="toolTip">
     <string>Screen shot</string>
@@ -348,6 +372,9 @@ color: #f0f0f0</string>
      <height>36</height>
     </rect>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <property name="toolTip">
     <string>Home</string>
    </property>
@@ -385,6 +412,9 @@ color: #f0f0f0</string>
      <width>36</width>
      <height>36</height>
     </rect>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
    <property name="toolTip">
     <string>Overview</string>
@@ -424,6 +454,9 @@ color: #f0f0f0</string>
      <height>16</height>
     </rect>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <property name="toolTip">
     <string>Close</string>
    </property>
@@ -459,6 +492,9 @@ color: #f0f0f0</string>
      <height>16</height>
     </rect>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <property name="toolTip">
     <string>Minimize</string>
    </property>
@@ -493,6 +529,9 @@ color: #f0f0f0</string>
      <width>36</width>
      <height>36</height>
     </rect>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
    <property name="toolTip">
     <string>Rotate</string>
