@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a87f884b_d5d79cc4",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/Android.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-26T09:03:48Z",
+      "side": 1,
+      "message": "It\u0027s actually a bad idea to put this include here, in the middle of an emugl module declaration. I suspect this will not work as you expect it will.\n\nIt\u0027s better to list this in Makefile.top.mk instead and just reference the libraries here.",
+      "revId": "3eb33af36fdb13faaead04a1eaf8ec51afa4d5b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e89420c3_a131fad0",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/Android.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-26T09:03:48Z",
+      "side": 1,
+      "message": "This list should be $(GLSLANG_STATIC_LIBRARIES), client code should not have to worry about which exact internal libraries are required, so a variable expansion is much better.",
+      "revId": "3eb33af36fdb13faaead04a1eaf8ec51afa4d5b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
