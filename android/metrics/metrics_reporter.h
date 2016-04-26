@@ -59,9 +59,11 @@ ANDROID_BEGIN_HEADER
 
 /* These macros are used to define the fields of AndroidMetrics */
 #undef METRICS_INT
+#undef METRICS_INT
 #undef METRICS_STRING
 #undef METRICS_DURATION
 #define METRICS_INT(n, s, d) int n;
+#define METRICS_INT64(n, s, d) int64_t n;
 #define METRICS_STRING(n, s, d) char* n;
 #define METRICS_DURATION(n, s, d) int64_t n;
 
@@ -113,6 +115,9 @@ extern ABool androidMetrics_keepAlive(Looper* metrics_looper,
         name = ASTRDUP(val);                 \
     } while (0)
 
+/* Set an object to obtain agregate user actions in this run of the emulator. */
+extern void androidMetrics_setUserActionsCount(int64_t count);
+
 /* This is the last function any emulator process should call on a metrics file
  * to indicate that the process exited cleanly.
  * Calling this before initializing the module trivially succeeds.
@@ -143,6 +148,7 @@ extern void androidMetrics_populateGpuProps(AndroidMetrics* metrics,
                                             emugl_host_gpu_prop_list* props);
 
 #undef METRICS_INT
+#undef METRICS_INT64
 #undef METRICS_STRING
 #undef METRICS_DURATION
 

@@ -80,9 +80,11 @@ void assertAndroidMetricsEq(const AndroidMetrics& lhs,
                             const AndroidMetrics& rhs) {
 // Use the magic of macros to compare fields.
 #undef METRICS_INT
+#undef METRICS_INT64
 #undef METRICS_STRING
 #undef METRICS_DURATION
 #define METRICS_INT(n, s, d) ASSERT_EQ(lhs.n, rhs.n);
+#define METRICS_INT64(n, s, d) ASSERT_EQ(lhs.n, rhs.n);
 #define METRICS_STRING(n, s, d) ASSERT_EQ(0, strcmp(lhs.n, rhs.n));
 #define METRICS_DURATION(n, s, d) ASSERT_EQ(lhs.n, rhs.n);
 
