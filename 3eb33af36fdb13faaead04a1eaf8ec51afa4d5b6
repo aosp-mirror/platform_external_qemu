@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "888725d1_c1d7a2fc",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/Android.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-26T17:00:21Z",
+      "side": 1,
+      "message": "I wasn\u0027t sure how the location of the include statement affects where the libraries get included (specifically, if that would add them as a dependency to libraries other than lib64GLES_translator). Will move.",
+      "parentUuid": "a87f884b_d5d79cc4",
+      "revId": "3eb33af36fdb13faaead04a1eaf8ec51afa4d5b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e89420c3_a131fad0",
         "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/Android.mk",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-04-26T09:03:48Z",
       "side": 1,
       "message": "This list should be $(GLSLANG_STATIC_LIBRARIES), client code should not have to worry about which exact internal libraries are required, so a variable expansion is much better.",
+      "revId": "3eb33af36fdb13faaead04a1eaf8ec51afa4d5b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "888725d1_6104966e",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/Android.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-26T17:00:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e89420c3_a131fad0",
       "revId": "3eb33af36fdb13faaead04a1eaf8ec51afa4d5b6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
