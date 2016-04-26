@@ -35,6 +35,10 @@ bool androidEmuglConfigInit(EmuglConfig* config,
     if (avdName) {
         gpuMode.reset(path_getAvdGpuMode(avdName));
         gpuEnabled = (gpuMode.get() != nullptr);
+    } else if (!gpuOption) {
+        // In the case of a platform build, use the 'auto' mode by default.
+        gpuMode.reset(::strdup("auto"));
+        gpuEnabled = true;
     }
 
     // Detect if this is google API's
