@@ -26,7 +26,7 @@
     <cursorShape>ArrowCursor</cursorShape>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="tab_3">
     <attribute name="title">
@@ -79,7 +79,7 @@
        <string>Command</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeading|AlignVCenter</set>
+       <set>AlignLeft|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -87,7 +87,7 @@
        <string>Key</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeading|AlignVCenter</set>
+       <set>AlignLeft|AlignVCenter</set>
       </property>
      </column>
     </widget>
@@ -128,6 +128,9 @@
      <property name="ColorGroup" stdset="0">
       <string>Tool</string>
      </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
     </widget>
     <widget class="QPushButton" name="help_fileBug">
      <property name="geometry">
@@ -161,6 +164,9 @@
      <property name="ColorGroup" stdset="0">
       <string>Tool</string>
      </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
     </widget>
     <widget class="QPushButton" name="help_sendFeedback">
      <property name="geometry">
@@ -193,6 +199,9 @@
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Tool</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
      </property>
     </widget>
    </widget>

@@ -55,6 +55,9 @@
    <property name="styleSheet">
     <string notr="true">padding: 3px 3px 3px 3px;</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <item>
     <property name="text">
      <string>Good</string>
@@ -130,6 +133,9 @@
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
     </property>
+    <property name="report_metrics" stdset="0">
+     <bool>false</bool>
+    </property>
    </widget>
    <widget class="QLineEdit" name="bat_chargeLevelText">
     <property name="enabled">
@@ -169,6 +175,9 @@
     </property>
     <property name="alignment">
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>false</bool>
     </property>
    </widget>
   </widget>
@@ -216,6 +225,9 @@
    </property>
    <property name="currentIndex">
     <number>1</number>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
    <item>
     <property name="text">
@@ -266,6 +278,9 @@
    </property>
    <property name="maxVisibleItems">
     <number>4</number>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
    <item>
     <property name="text">

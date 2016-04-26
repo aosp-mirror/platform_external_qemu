@@ -31,6 +31,9 @@
    <property name="ColorGroup" stdset="0">
     <string>SmsBox</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QGroupBox" name="tel_fromGroup">
    <property name="geometry">
@@ -90,6 +93,9 @@
    <property name="themeIconName_disabled" stdset="0">
     <string>phone_disabled</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QComboBox" name="tel_numberBox">
    <property name="geometry">
@@ -111,6 +117,9 @@
    </property>
    <property name="insertPolicy">
     <enum>QComboBox::InsertAtTop</enum>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
    <item>
     <property name="text">
@@ -156,6 +165,9 @@
    <property name="ColorGroup" stdset="0">
     <string>Tool</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="RaisedMaterialButton" name="tel_holdCallButton">
    <property name="enabled">
@@ -199,6 +211,9 @@
    </property>
    <property name="ColorGroup" stdset="0">
     <string>Tool</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QGroupBox" name="tel_SmsGroup">
