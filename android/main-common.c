@@ -18,6 +18,7 @@
 #include "android/globals.h"
 #include "android/kernel/kernel_utils.h"
 #include "android/help.h"
+#include "android/main-emugl.h"
 #include "android/opengl/emugl_config.h"
 #include "android/resource.h"
 #include "android/snapshot.h"
@@ -1570,7 +1571,22 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
     {
         EmuglConfig config;
+
         int api_level = avdInfo_getApiLevel(avd);
+        char* api_arch = avdInfo_getTargetAbi(avd);
+        bool isGoogle = avdInfo_isGoogleApis(avd);
+
+        if (!androidEmuglConfigInit(&config,
+                                    opts->avd,
+                                    api_arch,
+                                    api_level,
+                                    isGoogle,
+                                    opts->gpu,
+                                    0,
+                                    opts->no_window)) {
+            derror("%s", config.status);
+            return false;
+        }
 
         // If the user is using -gpu off (not -gpu guest),
         // or if the API level is lower than 14 (Ice Cream Sandwich)
@@ -1578,52 +1594,6 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
         if (api_level < 14 || (opts->gpu && !strcmp(opts->gpu, "off"))) {
             hw->hw_lcd_depth = 16;
-        }
-
-        bool blacklisted = false;
-        bool on_blacklist = false;
-
-        // If the user has specified a renderer
-        // that is neither "auto" nor "host",
-        // don't check the blacklist.
-        if (!((!opts->gpu &&
-               strcmp(hw->hw_gpu_mode, "auto") &&
-               strcmp(hw->hw_gpu_mode, "host")) ||
-              (opts->gpu && strcmp(opts->gpu, "auto") &&
-               strcmp(opts->gpu, "host") &&
-               strcmp(opts->gpu, "on")))) {
-            on_blacklist = isHostGpuBlacklisted();
-        }
-
-        // For testing purposes only.
-        if (hw->hw_gpu_blacklisted) {
-            on_blacklist = !strcmp(hw->hw_gpu_blacklisted, "yes");
-        }
-
-        if ((!opts->gpu && !strcmp(hw->hw_gpu_mode, "auto")) ||
-            (opts->gpu && !strcmp(opts->gpu, "auto"))) {
-            blacklisted = on_blacklist;
-            setGpuBlacklistStatus(blacklisted);
-        }
-
-        char* api_arch = avdInfo_getTargetAbi(avd);
-        bool isGoogle = avdInfo_isGoogleApis(avd);
-
-        bool has_guest_renderer = isGoogle &&
-                                  (api_level >= 23) &&
-                                  (!strcmp(api_arch, "x86") ||
-                                   !strcmp(api_arch, "x86_64"));
-
-        if (!emuglConfig_init(&config,
-                              hw->hw_gpu_enabled,
-                              hw->hw_gpu_mode,
-                              opts->gpu,
-                              0,
-                              opts->no_window,
-                              blacklisted,
-                              has_guest_renderer)) {
-            derror("%s", config.status);
-            return false;
         }
 
         hw->hw_gpu_enabled = config.enabled;
