@@ -67,7 +67,7 @@ public:
     void raiseMainWindow();
     void setLastExtendedWindowPane(ExtendedWindowPane pane);
 
-    void setToolEmuAgent(const UiEmuAgent* agPtr);
+    void setToolEmuAgent(const UiEmuAgent* agPtr) { mUiEmuAgent = agPtr; }
     const UiEmuAgent* getUiEmuAgent() const { return mUiEmuAgent; }
 
     QString getAdbFullPath(QStringList *args);
@@ -82,6 +82,7 @@ public:
     static const int toolGap = 10;
 
 private:
+    void createExtendedWindow();
     void showAdbWarning();
     void adbShellStopRunner();
     void handleUICommand(QtUICommand cmd, bool down);
@@ -118,9 +119,6 @@ private:
     QMessageBox mAdbWarningBox;
     android::emulation::AdbInterface mAdbInterface;
 
-signals:
-    void createExtendedWindow();
-
 private slots:
     void on_back_button_pressed();
     void on_back_button_released();
@@ -143,7 +141,6 @@ private slots:
     void on_zoom_button_clicked();
 
     void slot_adbWarningMessageAccepted();
-    void slot_createExtendedWindow();
 };
 
 typedef void(ToolWindow::*ToolWindowSlot)();

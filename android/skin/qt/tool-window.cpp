@@ -167,8 +167,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
                                  mToolsUi->close_button->y());
     mToolsUi->minimize_button->move(tmp_x, mToolsUi->minimize_button->y());
 #endif
-
-    QObject::connect(this, SIGNAL(createExtendedWindow()), this, SLOT(slot_createExtendedWindow()));
 }
 
 ToolWindow::~ToolWindow() {
@@ -509,15 +507,6 @@ void ToolWindow::raiseMainWindow()
     mEmulatorWindow->activateWindow();
 }
 
-void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
-    mUiEmuAgent = agPtr;
-
-    // The extended window requires the UiEmuAgent to be created and
-    // initialized properly, but that needs to happen on the UI thread, so
-    // we make it happen via a signal.
-    this->createExtendedWindow();
-}
-
 void ToolWindow::on_back_button_pressed()
 {
     mEmulatorWindow->raise();
@@ -623,6 +612,9 @@ void ToolWindow::on_zoom_button_clicked()
 }
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
+    if (!mExtendedWindow) {
+        createExtendedWindow();
+    }
     // Show the tabbed pane
     if (mExtendedWindow) {
         mExtendedWindow->showPane(pane);
@@ -634,6 +626,9 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
 
 void ToolWindow::on_more_button_clicked()
 {
+    if (!mExtendedWindow) {
+        createExtendedWindow();
+    }
     if (mExtendedWindow) {
         mExtendedWindow->show();
         mExtendedWindow->raise();
@@ -649,7 +644,7 @@ void ToolWindow::slot_adbWarningMessageAccepted() {
     }
 }
 
-void ToolWindow::slot_createExtendedWindow() {
+void ToolWindow::createExtendedWindow() {
     mExtendedWindow = new ExtendedWindow(mEmulatorWindow, this, mUiEmuAgent,
                                          &mShortcutKeyStore);
     if (auto recorder_ptr = mUIEventRecorder.lock()) {
