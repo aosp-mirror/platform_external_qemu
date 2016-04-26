@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
 
     char* kernelParameters = emulator_getKernelParameters(
             opts, kTargetArch, serialPrefix, hw->kernel_parameters,
-            glesMode, false);
+            glesMode, 0ULL, false);
 
     if (hw->hw_cpu_ncore > 1) {
         dwarning("Classic qemu does not support SMP. "
