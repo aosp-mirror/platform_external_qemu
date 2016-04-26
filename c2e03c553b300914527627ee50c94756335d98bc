@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "888725d1_0a1d9fff",
+        "filename": "android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1184,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-26T18:15:15Z",
+      "side": 1,
+      "message": "Talked offline about this and decided to leave it as isQemu2 for now. I\u0027ll look into the enum solution later on so we can keep this change small and get it released without problems.",
+      "parentUuid": "08733496_078e0fef",
+      "revId": "c2e03c553b300914527627ee50c94756335d98bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08733496_64b34b0e",
         "filename": "android/avd/info.c",
         "patchSetId": 1
