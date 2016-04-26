@@ -51,13 +51,15 @@ extern "C" void setUiEmuAgent(const UiEmuAgent *agentPtr) {
 
 ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        QWidget* parent,
-                       ToolWindow::UIEventRecorderPtr event_recorder)
+                       ToolWindow::UIEventRecorderPtr event_recorder,
+                       ToolWindow::UserActionsCounterPtr user_actions_counter)
     : QFrame(parent),
       mEmulatorWindow(window),
       mExtendedWindow(nullptr),
       mUiEmuAgent(nullptr),
       mToolsUi(new Ui::ToolControls),
       mUIEventRecorder(event_recorder),
+      mUserActionsCounter(user_actions_counter),
       mSizeTweaker(this),
       mAdbWarningBox(QMessageBox::Warning,
                      tr("Detected ADB"),
@@ -649,6 +651,9 @@ void ToolWindow::createExtendedWindow() {
                                          &mShortcutKeyStore);
     if (auto recorder_ptr = mUIEventRecorder.lock()) {
         recorder_ptr->startRecording(mExtendedWindow);
+    }
+    if (auto user_actions_counter = mUserActionsCounter.lock()) {
+        user_actions_counter->startCountingForExtendedWindow(mExtendedWindow);
     }
 
     // The extended window is created before the "..." button is pressed, so it

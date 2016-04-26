@@ -26,7 +26,7 @@
     <string notr="true"/>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -169,6 +169,9 @@
        <height>291</height>
       </rect>
      </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
     </widget>
     <widget class="QRadioButton" name="accelModeRotate">
      <property name="geometry">
@@ -226,6 +229,9 @@
        <height>80</height>
       </rect>
      </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
     </widget>
     <widget class="QLabel" name="label_5">
      <property name="geometry">
@@ -248,6 +254,9 @@
        <width>250</width>
        <height>80</height>
       </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
      </property>
     </widget>
     <widget class="QLabel" name="label_7">
@@ -295,6 +304,9 @@
         <property name="class" stdset="0">
          <string>EditableValue</string>
         </property>
+        <property name="report_metrics" stdset="0">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
       <item>
@@ -315,6 +327,9 @@
         </property>
         <property name="class" stdset="0">
          <string>EditableValue</string>
+        </property>
+        <property name="report_metrics" stdset="0">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -337,6 +352,9 @@
         <property name="class" stdset="0">
          <string>EditableValue</string>
         </property>
+        <property name="report_metrics" stdset="0">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
      </layout>
@@ -349,6 +367,9 @@
        <width>250</width>
        <height>80</height>
       </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
      </property>
     </widget>
     <widget class="QLabel" name="label_9">
@@ -373,6 +394,9 @@
        <height>80</height>
       </rect>
      </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
     </widget>
     <widget class="QLabel" name="label_10">
      <property name="geometry">
@@ -395,6 +419,9 @@
        <width>250</width>
        <height>80</height>
       </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
      </property>
     </widget>
     <widget class="QLabel" name="label_11">

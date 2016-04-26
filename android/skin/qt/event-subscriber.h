@@ -10,10 +10,10 @@
 
 #pragma once
 
+#include "android/skin/qt/event-capturer.h"
+
 #include <QObject>
 #include <QPointer>
-
-#include "android/skin/qt/event-capturer.h"
 
 #include <unordered_map>
 

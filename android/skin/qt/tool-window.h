@@ -21,6 +21,7 @@
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/qt/shortcut-key-store.h"
 #include "android/skin/qt/ui-event-recorder.h"
+#include "android/skin/qt/user-actions-counter.h"
 #include "android/utils/compiler.h"
 
 #include "ui_tools.h"
@@ -54,11 +55,14 @@ class ToolWindow : public QFrame
     Q_OBJECT
     using UIEventRecorderPtr =
         std::weak_ptr<UIEventRecorder<android::base::CircularBuffer>>;
+    using UserActionsCounterPtr =
+            std::weak_ptr<android::qt::UserActionsCounter>;
+
 public:
-    ToolWindow(
-            EmulatorQtWindow *emulatorWindow,
-            QWidget *parent,
-            UIEventRecorderPtr event_recorder);
+    ToolWindow(EmulatorQtWindow* emulatorWindow,
+               QWidget* parent,
+               UIEventRecorderPtr event_recorder,
+               UserActionsCounterPtr user_actions_counter);
     ~ToolWindow();
 
     void hide();
@@ -114,7 +118,8 @@ private:
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
     bool mIsExtendedWindowVisibleOnShow = false;
     QString mDetectedAdbPath;
-    std::weak_ptr<UIEventRecorder<android::base::CircularBuffer>> mUIEventRecorder;
+    UIEventRecorderPtr mUIEventRecorder;
+    UserActionsCounterPtr mUserActionsCounter;
     SizeTweaker mSizeTweaker;
     QMessageBox mAdbWarningBox;
     android::emulation::AdbInterface mAdbInterface;
