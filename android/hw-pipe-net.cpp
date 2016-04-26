@@ -249,7 +249,7 @@ static int netPipeReadySend(NetPipe* pipe) {
 }
 
 #ifdef _WIN32
-int qemu2_send_all(int fd, const void* _buf, int len1) {
+int qemu_windows_send(int fd, const void* _buf, int len1) {
     int ret, len;
     auto buf = (const char*)_buf;
 
@@ -272,7 +272,7 @@ int qemu2_send_all(int fd, const void* _buf, int len1) {
     return len1 - len;
 }
 
-int qemu2_recv_all(int fd, void* _buf, int len1, bool single_read) {
+int qemu_windows_recv(int fd, void* _buf, int len1, bool single_read) {
     int ret, len;
     char* buf = (char*)_buf;
 
@@ -430,7 +430,7 @@ static int netPipe_recvBuffers(void* opaque,
         // Although we have not observed it yet,
         // pipe corruption can potentially happen here too.
         // We use the same solutions to be safe.
-#ifndef WIN32
+#ifndef _WIN32
         int  len = HANDLE_EINTR(recv(loopIo_fd(pipe->io),
                                 buff->data + buffStart,
                                 avail,
