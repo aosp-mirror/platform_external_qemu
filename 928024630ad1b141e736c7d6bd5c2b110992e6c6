@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "888725d1_c1c0023d",
+        "filename": "android/skin/qt/emulator-container.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-26T16:01:19Z",
+      "side": 1,
+      "message": "I would prefer to make this value a bit larger on Linux if this works.",
+      "range": {
+        "startLine": 208,
+        "startChar": 22,
+        "endLine": 208,
+        "endChar": 27
+      },
+      "revId": "928024630ad1b141e736c7d6bd5c2b110992e6c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
