@@ -19,6 +19,7 @@
 #include "android/cpu_accelerator.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulator-window.h"
+#include "android/metrics/metrics_reporter_callbacks.h"
 #include "android/opengl/gpuinfo.h"
 
 #include "android/skin/event.h"
@@ -217,6 +218,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         "num-user-actions.txt",
                         std::to_string(user_actions->count()));
             });
+    android::metrics::addTickCallback([user_actions](AndroidMetrics* am) {
+        am->user_actions = user_actions->count();
+    });
 
     mWheelScrollTimer.setInterval(100);
     mWheelScrollTimer.setSingleShot(true);
