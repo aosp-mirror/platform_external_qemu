@@ -25,7 +25,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <iostream>
 #include <fstream>
 #include <streambuf>
 
@@ -50,6 +49,10 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/win32_cmdline_quote.h"
 #include "android/version.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 using android::base::PathUtils;
 using android::base::RunOptions;
@@ -183,6 +186,33 @@ static void clean_up_android_out(const char* android_out) {
     delete_files(android_out, files_to_delete, ARRAY_SIZE(files_to_delete));
 }
 
+static bool checkOsVersion() {
+#ifndef _WIN32
+    return true;
+#else  // _WIN32
+    // Make sure OS is Win7+ - otherwise the emulation engine just won't start.
+    OSVERSIONINFOW ver = {sizeof(ver)};
+    if (!::GetVersionExW(&ver)) {
+        const auto err = (unsigned)::GetLastError();
+        dwarning(
+           "failed to get operating system version.\n"
+           "The Android Emulator may not run properly on Windows Vista and\n"
+           "won't run on Windows XP (error code %d [0x%x]).",
+           err, err);
+    } else {
+        // Windows 7 is 6.1
+        if (ver.dwMajorVersion < 6 ||
+            (ver.dwMajorVersion == 6 && ver.dwMinorVersion < 1)) {
+            derror(
+                "Windows 7 or newer is required to run the Android Emulator.\n"
+                "Please upgrade your operating system.");
+            return false;
+        }
+    }
+    return true;
+#endif  // _WIN32
+}
+
 /* Main routine */
 int main(int argc, char** argv)
 {
@@ -207,6 +237,10 @@ int main(int argc, char** argv)
 
     if (debug != NULL && *debug && *debug != '0') {
         android_verbose = 1;
+    }
+
+    if (!checkOsVersion()) {
+        return 1;
     }
 
 #ifdef __linux__
