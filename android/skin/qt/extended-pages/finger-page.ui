@@ -63,6 +63,9 @@
    <property name="ColorGroup" stdset="0">
     <string notr="true">Tool</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QGroupBox" name="finger_IdGroup">
    <property name="geometry">
@@ -106,6 +109,9 @@
    </property>
    <property name="maxVisibleItems">
     <number>10</number>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
   </widget>
  </widget>
