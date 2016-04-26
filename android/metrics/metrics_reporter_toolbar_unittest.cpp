@@ -50,6 +50,7 @@ TEST_F(MetricsReporterToolbarTest, defaultMetrics) {
             "&os=unknown&id=00000000-0000-0000-0000-000000000000"
             "&guest_arch=unknown&guest_api_level=-1&exf=1&opengl_alive=0"
             "&system_time=0&user_time=0&adb_liveness=0&wall_time=0"
+            "&user_actions=0"
             "&exit_started=0"
             "&gpu0_make=unknown"
             "&gpu0_model=unknown"
@@ -93,7 +94,8 @@ TEST_F(MetricsReporterToolbarTest, cleanRun) {
             "as=androidsdk_emu_crash&version=standalone&core_version=qemu15"
             "&os=lynx&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&guest_api_level=100500&exf=0&opengl_alive=1&system_time=1170"
-            "&user_time=220&adb_liveness=0&wall_time=10&exit_started=1"
+            "&user_time=220&adb_liveness=0&wall_time=10&user_actions=10"
+            "&exit_started=1"
             "&gpu0_make=unknown"
             "&gpu0_model=unknown"
             "&gpu0_device_id=unknown"
@@ -132,6 +134,7 @@ TEST_F(MetricsReporterToolbarTest, cleanRun) {
     metrics.system_time = 1170;
     metrics.user_time = 220;
     metrics.wallclock_time = 10;
+    metrics.user_actions = 10;
     metrics.is_dirty = 0;
     metrics.num_failed_reports = 7;
     metrics.exit_started = 1;
@@ -152,7 +155,7 @@ TEST_F(MetricsReporterToolbarTest, dirtyRun) {
             "&os=lynx&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&guest_api_level=-1"
             "&exf=1&opengl_alive=1&system_time=1080&user_time=180"
-            "&adb_liveness=0&wall_time=101&exit_started=0"
+            "&adb_liveness=0&wall_time=101&user_actions=432&exit_started=0"
             "&gpu0_make=unknown"
             "&gpu0_model=unknown"
             "&gpu0_device_id=unknown"
@@ -189,6 +192,7 @@ TEST_F(MetricsReporterToolbarTest, dirtyRun) {
     metrics.system_time = 1080;
     metrics.user_time = 180;
     metrics.wallclock_time = 101;
+    metrics.user_actions = 432;
     metrics.is_dirty = 1;
     metrics.num_failed_reports = 9;
     metrics.exit_started = 0;
@@ -209,7 +213,7 @@ TEST_F(MetricsReporterToolbarTest, openGLErrorRun) {
             "&os=lynx&id=00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&guest_api_level=-1"
             "&exf=1&opengl_alive=0&system_time=1080&user_time=180"
-            "&adb_liveness=0&wall_time=0&exit_started=0"
+            "&adb_liveness=0&wall_time=0&user_actions=0&exit_started=0"
             "&gpu0_make=unknown"
             "&gpu0_model=unknown"
             "&gpu0_device_id=unknown"
@@ -264,7 +268,7 @@ TEST_F(MetricsReporterToolbarTest, guestGpuStrings) {
             "00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&guest_api_level=-1"
             "&exf=0&opengl_alive=1&system_time=1170&user_time=220"
-            "&adb_liveness=0&wall_time=0&exit_started=0"
+            "&adb_liveness=0&wall_time=0&user_actions=0&exit_started=0"
             "&ggl_vendor=Some_Vendor&ggl_renderer=&ggl_version=1%20.%200"
             "&gpu0_make=unknown"
             "&gpu0_model=unknown"
@@ -323,7 +327,7 @@ TEST_F(MetricsReporterToolbarTest, gpuStrings) {
             "00000000-0000-0000-0000-000000000000&guest_arch=x86_64"
             "&guest_api_level=-1"
             "&exf=0&opengl_alive=1&system_time=1170&user_time=220"
-            "&adb_liveness=0&wall_time=0&exit_started=0"
+            "&adb_liveness=0&wall_time=0&user_actions=0&exit_started=0"
             "&gpu0_make=Advanced%20Micro%20Devices%2C%20Inc."
             "&gpu0_model=AMD%20Radeon%20%28TM%29%20R5%20M335"
             "&gpu0_device_id=0x0166"

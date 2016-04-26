@@ -17,6 +17,9 @@
 #ifndef METRICS_INT
 #error METRICS_INT not defined
 #endif
+#ifndef METRICS_INT64
+#error METRICS_INT64 not defined
+#endif
 #ifndef METRICS_STRING
 #error METRICS_STRING not defined
 #endif
@@ -39,6 +42,7 @@ METRICS_INT(opengl_alive, "opengl_alive", 0)
 METRICS_INT(num_failed_reports, "num_failed_reports", 0)
 METRICS_INT(adb_liveness, "adb_liveness", 0)
 METRICS_INT(exit_started, "exit_started", 0)
+METRICS_INT64(user_actions, "user_actions", 0);
 
 // Guest GPU OpenGL strings
 METRICS_STRING(guest_gl_vendor, "guest_gl_vendor", "NotApplicable")
