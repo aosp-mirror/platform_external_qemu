@@ -123,6 +123,9 @@ bool EmulatorContainer::event(QEvent* e) {
                 mEventBuffer[i + 3] == QEvent::InputMethodQuery) {
                 mEventBuffer.clear();
                 mEmulatorWindow->doResize(this->size());
+
+                // Kill the resize timer to avoid double resizes.
+                stopResizeTimer();
                 break;
             }
         }
@@ -199,10 +202,14 @@ void EmulatorContainer::resizeEvent(QResizeEvent* event) {
     mEmulatorWindow->toolWindow()->dockMainWindow();
     mEmulatorWindow->simulateZoomedWindowResized(this->viewportSize());
 
-// To solve some resizing edge cases on OSX/Windows, start a short timer that
-// will attempt to trigger a resize in case the user's mouse has not entered
-// the window again.
-#if defined(__APPLE__) || defined(_WIN32)
+    // To solve some resizing edge cases on OSX/Windows/KDE, start a short
+    // timer that will attempt to trigger a resize in case the user's mouse has
+    // not entered the window again. We use a longer timer on Linux because
+    // the timer is not needed on non-KDE systems, so we want it to be less
+    // noticeable.
+#ifdef __linux__
+    mResizeTimer.start(1000);
+#else
     mResizeTimer.start(500);
 #endif
 }
@@ -276,8 +283,8 @@ QSize EmulatorContainer::viewportSize() const {
 }
 
 void EmulatorContainer::slot_resizeDone() {
-// This function should never actually be called on Linux, since the timer is
-// never started on those systems.
+// Windows and Apple have convenient ways of checking global mouse state, so
+// we'll only do a resize if no mouse buttons are held down.
 #if defined(__APPLE__) || defined(_WIN32)
 
     if (mEmulatorWindow->isInZoomMode()) {
@@ -294,5 +301,11 @@ void EmulatorContainer::slot_resizeDone() {
     } else {
         mResizeTimer.start(500);
     }
+#endif
+
+// X11 doesn't. Hope that the user isn't still holding down a mouse button, and
+// if they are, oh well.
+#ifdef __linux__
+    mEmulatorWindow->doResize(this->size());
 #endif
 }
