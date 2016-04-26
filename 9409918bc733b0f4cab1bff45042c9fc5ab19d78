@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "882d6479_0bff4177",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-26T15:57:52Z",
+      "side": 1,
+      "message": "In newer versions of Windows this function does not actually return the version of the OS but the version in the manifest of the program. I don\u0027t know if that\u0027s going to be a problem here but regardless it seems to me that it would be better to use the version helper functions if possible. See: https://msdn.microsoft.com/en-us/library/windows/desktop/dn424972(v\u003dvs.85).aspx\n\nThis would make the check safer and look a lot cleaner too.",
+      "revId": "9409918bc733b0f4cab1bff45042c9fc5ab19d78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88864495_46c766bc",
         "filename": "android/main-emulator.cpp",
         "patchSetId": 1
