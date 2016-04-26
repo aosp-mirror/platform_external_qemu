@@ -59,15 +59,27 @@ ANDROID_BEGIN_HEADER
 
 /* These macros are used to define the fields of AndroidMetrics */
 #undef METRICS_INT
+#undef METRICS_INT
 #undef METRICS_STRING
 #undef METRICS_DURATION
 #define METRICS_INT(n, s, d) int n;
+#define METRICS_INT64(n, s, d) int64_t n;
 #define METRICS_STRING(n, s, d) char* n;
 #define METRICS_DURATION(n, s, d) int64_t n;
 
 typedef struct {
 #include "android/metrics/metrics_fields.h"
 } AndroidMetrics;
+
+/* Helpers to easily replace string fields */
+#define ANDROID_METRICS_STRASSIGN_MALLOCED(name, val) \
+    do {                                              \
+        AFREE(name);                                  \
+        name = val;                                   \
+    } while (0)
+
+#define ANDROID_METRICS_STRASSIGN(name, val) \
+    ANDROID_METRICS_STRASSIGN_MALLOCED((name), ASTRDUP((val)))
 
 /* Module initialization and finalization functions. */
 extern ABool androidMetrics_moduleInit(const char* avdHome);
@@ -106,15 +118,8 @@ extern ABool androidMetrics_write(const AndroidMetrics* androidMetrics);
 extern ABool androidMetrics_keepAlive(Looper* metrics_looper,
                                       int control_console_port);
 
-/* Helpers to easily replace string fields */
-#define ANDROID_METRICS_STRASSIGN_MALLOCED(name, val) \
-    do {                                     \
-        AFREE(name);                         \
-        name = val;                 \
-    } while (0)
-
-#define ANDROID_METRICS_STRASSIGN(name, val) \
-    ANDROID_METRICS_STRASSIGN_MALLOCED((name), ASTRDUP((val)))
+/* Set an object to obtain agregate user actions in this run of the emulator. */
+extern void androidMetrics_setUserActionsCount(int64_t count);
 
 /* This is the last function any emulator process should call on a metrics file
  * to indicate that the process exited cleanly.
@@ -146,6 +151,7 @@ extern void androidMetrics_populateGpuProps(AndroidMetrics* metrics,
                                             emugl_host_gpu_prop_list* props);
 
 #undef METRICS_INT
+#undef METRICS_INT64
 #undef METRICS_STRING
 #undef METRICS_DURATION
 
