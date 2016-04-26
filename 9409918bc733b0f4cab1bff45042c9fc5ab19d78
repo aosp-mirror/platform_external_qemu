@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4879ac72_3f950bba",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-26T08:09:15Z",
+      "side": 1,
+      "message": "nit: I would put all this in its own block, to indicate that the scope of |ver| is limited to this section only.",
+      "revId": "9409918bc733b0f4cab1bff45042c9fc5ab19d78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88864495_46c766bc",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-26T08:09:15Z",
+      "side": 1,
+      "message": "nit: Please use dwarning() here.",
+      "revId": "9409918bc733b0f4cab1bff45042c9fc5ab19d78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a87f884b_750fb052",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-26T08:09:15Z",
+      "side": 1,
+      "message": "nit: s/Emulator/The Android Emulator/",
+      "revId": "9409918bc733b0f4cab1bff45042c9fc5ab19d78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8659cc5_c30d1c20",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-26T08:09:15Z",
+      "side": 1,
+      "message": "And use derror() here.",
+      "revId": "9409918bc733b0f4cab1bff45042c9fc5ab19d78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e89420c3_81fb1e1f",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-26T08:09:15Z",
+      "side": 1,
+      "message": "nit: s/an/your/\n\nnit2: Also avoid duplicate word use in short sentences, e.g.\n\n   Windows 7 or newer is required to run the Android Emulator.\n   Please upgrade your operating system.",
+      "revId": "9409918bc733b0f4cab1bff45042c9fc5ab19d78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
