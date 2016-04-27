@@ -18,10 +18,10 @@
 
 void default_logger(const char* fmt, ...) { }
 
-logger_t emugl_logger = default_logger;
-logger_t emugl_cxt_logger = default_logger;
+emugl_logger_t emugl_logger = default_logger;
+emugl_logger_t emugl_cxt_logger = default_logger;
 
-void set_emugl_logger(logger_t f) {
+void set_emugl_logger(emugl_logger_t f) {
     if (!f) {
         emugl_logger = default_logger;
     } else {
@@ -29,7 +29,7 @@ void set_emugl_logger(logger_t f) {
     }
 }
 
-void set_emugl_cxt_logger(logger_t f) {
+void set_emugl_cxt_logger(emugl_logger_t f) {
     if (!f) {
         emugl_cxt_logger = default_logger;
     } else {

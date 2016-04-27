@@ -23,7 +23,6 @@
 
 class IOStream {
 public:
-
     IOStream(size_t bufSize) {
         m_buf = NULL;
         m_bufsize = bufSize;
