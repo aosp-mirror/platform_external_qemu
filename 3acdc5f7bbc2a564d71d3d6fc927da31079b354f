@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48560d47_d23bb8d9",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T20:22:13Z",
+      "side": 1,
+      "message": "classess --\u003e classes",
+      "range": {
+        "startLine": 105,
+        "startChar": 10,
+        "endLine": 105,
+        "endChar": 18
+      },
+      "revId": "3acdc5f7bbc2a564d71d3d6fc927da31079b354f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_b225649d",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T20:22:13Z",
+      "side": 1,
+      "message": "the first",
+      "range": {
+        "startLine": 123,
+        "startChar": 65,
+        "endLine": 123,
+        "endChar": 70
+      },
+      "revId": "3acdc5f7bbc2a564d71d3d6fc927da31079b354f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_32b6744e",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T20:22:13Z",
+      "side": 1,
+      "message": "It would be good if this comment mentioned that the legal values for the second Align arg are 1, 2, 4, or 8.",
+      "range": {
+        "startLine": 123,
+        "startChar": 66,
+        "endLine": 123,
+        "endChar": 79
+      },
+      "revId": "3acdc5f7bbc2a564d71d3d6fc927da31079b354f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_b273a4a0",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T20:22:13Z",
+      "side": 1,
+      "message": "the dtor.",
+      "range": {
+        "startLine": 126,
+        "startChar": 57,
+        "endLine": 126,
+        "endChar": 61
+      },
+      "revId": "3acdc5f7bbc2a564d71d3d6fc927da31079b354f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_72790c83",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T20:22:13Z",
+      "side": 1,
+      "message": "an aligned copy is",
+      "range": {
+        "startLine": 126,
+        "startChar": 3,
+        "endLine": 126,
+        "endChar": 21
+      },
+      "revId": "3acdc5f7bbc2a564d71d3d6fc927da31079b354f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_723c6c84",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T20:22:13Z",
+      "side": 1,
+      "message": "It would be good if the name of this and mOrigBuff in InputBuffer were the same.",
+      "range": {
+        "startLine": 172,
+        "startChar": 12,
+        "endLine": 172,
+        "endChar": 20
+      },
+      "revId": "3acdc5f7bbc2a564d71d3d6fc927da31079b354f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
