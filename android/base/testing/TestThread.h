@@ -21,6 +21,8 @@
 #  include <pthread.h>
 #endif
 
+#include <stdint.h>
+
 namespace android {
 namespace base {
 
@@ -56,13 +58,16 @@ public:
 #endif
     }
 
-    void join() {
+    intptr_t join() {
 #ifdef _WIN32
         WaitForSingleObject(mThread, INFINITE);
+        DWORD ret = 0;
+        ::GetExitCodeThread(mThread, &ret);
 #else
         void* ret = NULL;
         pthread_join(mThread, &ret);
 #endif
+        return (intptr_t)ret;
     }
 
 private:
