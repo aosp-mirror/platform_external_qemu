@@ -11,6 +11,8 @@
 
 #include "android/utils/compiler.h"
 
+#include "OpenglRender/render_api_types.h"
+
 ANDROID_BEGIN_HEADER
 
 // The purpose of the OpenGL logger is to log
@@ -28,12 +30,5 @@ void android_stop_opengl_logger();
 // contexts (cxts). Only called when emugl is compiled
 // with -DOPENGL_DEBUG_PRINTOUT.
 void android_opengl_cxt_logger_write(const char* fmt, ...);
-
-typedef void (*android_opengl_logger_t)(const char* fmt, ...);
-
-typedef struct {
-    android_opengl_logger_t coarse;
-    android_opengl_logger_t fine;
-} emugl_logger_struct;
 
 ANDROID_END_HEADER
