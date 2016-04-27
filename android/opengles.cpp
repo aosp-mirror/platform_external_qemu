@@ -91,8 +91,6 @@ int android_initOpenglesEmulation() {
         return -1;
     }
 
-    android_opengles_pipes_init();
-
     /* Resolve the functions */
     if (initOpenglesEmulationFuncs(rendererSo) < 0) {
         derror("OpenGLES emulation library mismatch. Be sure to use the correct version!");
