@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8b5c9db_1a045d6d",
+        "filename": "android/utils/exec.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:20:12Z",
+      "side": 1,
+      "message": "nit: If it\u0027s a global, I prefer the use of an s prefix, as in sChildHandle. Also sChildProcessHandle is a little more clear about what this variable is about.",
+      "revId": "61fae35e83048a617bd313807e3f07831d0977f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28e0f9df_7eed519b",
+        "filename": "android/utils/exec.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:20:12Z",
+      "side": 1,
+      "message": "do you need to unset the SetConsoleCtrlHandler here?\nAlso shouldn\u0027t you return -1 as the original code in this case?",
+      "revId": "61fae35e83048a617bd313807e3f07831d0977f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
