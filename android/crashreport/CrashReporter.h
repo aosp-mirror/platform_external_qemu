@@ -106,8 +106,8 @@ public:
     void SetExitMode(const char* message);
     bool isInExitMode() const;
 
-    void setCrashCallback(const CrashCallback& cb) {
-        mCrashCallback = cb;
+    void addCrashCallback(CrashCallback cb) {
+        mCrashCallbacks.push_back(std::move(cb));
     }
 
     bool onCrash();
@@ -121,7 +121,7 @@ private:
 private:
     DISALLOW_COPY_AND_ASSIGN(CrashReporter);
 
-    CrashCallback mCrashCallback;
+    std::vector<CrashCallback> mCrashCallbacks;
     const std::string mDumpDir;
     const std::string mDataExchangeDir;
     bool mIsInExitMode = false;

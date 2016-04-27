@@ -198,12 +198,12 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     // CrashReporter needs it, even if EmulatorQtWindow is
     // destroyed.
     auto event_logger = mEventLogger;
-    android::crashreport::CrashReporter::get()->setCrashCallback(
-        [event_logger]() {
-            android::crashreport::CrashReporter::get()
-                ->attachData("recent-ui-actions.txt",
-                             serializeEvents(event_logger->container()));
-        });
+    android::crashreport::CrashReporter::get()->addCrashCallback(
+            [event_logger]() {
+                android::crashreport::CrashReporter::get()->attachData(
+                        "recent-ui-actions.txt",
+                        serializeEvents(event_logger->container()));
+            });
 
     mWheelScrollTimer.setInterval(100);
     mWheelScrollTimer.setSingleShot(true);

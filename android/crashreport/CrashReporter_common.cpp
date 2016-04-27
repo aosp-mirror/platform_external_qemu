@@ -202,8 +202,8 @@ bool CrashReporter::onCrash() {
     // store the uptime first - as Breakpad doesn't do it sometimes
     attachUptime();
 
-    if (CrashReporter::get()->mCrashCallback) {
-        CrashReporter::get()->mCrashCallback();
+    for (const auto& callback : CrashReporter::get()->mCrashCallbacks) {
+        callback();
     }
 
     return CrashReporter::get()->onCrashPlatformSpecific();
