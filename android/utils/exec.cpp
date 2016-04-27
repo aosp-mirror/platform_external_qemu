@@ -21,6 +21,34 @@
 
 #ifdef _WIN32
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+// Console control handler has no way of passing data, so let's have
+// a global variable here.
+static HANDLE sChildProcessHandle = nullptr;
+
+static BOOL WINAPI ctrlHandler(DWORD type)
+{
+    fflush(stdout);
+    fflush(stderr);
+
+    if (!sChildProcessHandle) {
+        // Just invoke the next handler - this one has nothing to do.
+        return FALSE;
+    }
+
+    // Windows 7 kills application when the function returns.
+    // Sleep here to give QEMU engine a chance for closing.
+    // Windows also kills the program after 10 seconds anyway.
+    if (::WaitForSingleObject(sChildProcessHandle, 9000) != WAIT_OBJECT_0) {
+        ::TerminateProcess(sChildProcessHandle, 100);
+    }
+    exit(1);
+
+    return TRUE;
+}
+
 using android::base::Win32UnicodeString;
 
 int safe_execv(const char* path, char* const* argv) {
@@ -35,14 +63,22 @@ int safe_execv(const char* path, char* const* argv) {
       argumentPointers.push_back(arg.c_str());
    }
    argumentPointers.push_back(nullptr);
-
    Win32UnicodeString program(path);
-   const int res = _wspawnv(_P_WAIT, program.c_str(), &argumentPointers[0]);
-   if (res == -1) {
-       return -1;
-   }
 
-   exit(res);
+   ::SetConsoleCtrlHandler(ctrlHandler, TRUE);
+
+   sChildProcessHandle = (HANDLE)_wspawnv(_P_NOWAIT, program.c_str(),
+                                  &argumentPointers[0]);
+   if (sChildProcessHandle == nullptr) {
+       ::SetConsoleCtrlHandler(ctrlHandler, FALSE);
+       return 1;
+   }
+   ::WaitForSingleObject(sChildProcessHandle, INFINITE);
+   DWORD exitCode;
+   if (!::GetExitCodeProcess(sChildProcessHandle, &exitCode)) {
+       exitCode = 2;
+   }
+   exit(exitCode);
 }
 
 #else
