@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48560d47_0a7e9e9e",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-27T17:27:30Z",
+      "side": 1,
+      "message": "Again, prefer a single tr() and use QString::arg() to insert additional text instead of appending.",
+      "range": {
+        "startLine": 160,
+        "startChar": 4,
+        "endLine": 165,
+        "endChar": 43
+      },
+      "revId": "ecdf50eab86b642b760512c819e47b5491a309cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_8a40ee47",
+        "filename": "android/skin/qt/qt-settings.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-27T17:27:30Z",
+      "side": 1,
+      "message": "Rename this to LOCATION_SAVED_* perhaps?",
+      "range": {
+        "startLine": 52,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 50
+      },
+      "revId": "ecdf50eab86b642b760512c819e47b5491a309cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
