@@ -39,6 +39,30 @@
       "revId": "874ae02b764283d59bded2aeb3343758073254e0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_c51c9906",
+        "filename": "android/opengles.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T18:22:14Z",
+      "side": 1,
+      "message": "Yurii and I discussed this in person.  We decided to let the Google C++ style guide be the arbiter, and, sure enough, it contains an example almost precisely like Yurii\u0027s proposed change (albeit with a while rather than an if).  So, 1 point for Yurii :-).",
+      "parentUuid": "48560d47_45a08904",
+      "range": {
+        "startLine": 112,
+        "startChar": 1,
+        "endLine": 112,
+        "endChar": 67
+      },
+      "revId": "874ae02b764283d59bded2aeb3343758073254e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
