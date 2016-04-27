@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "68af5190_d8daed26",
+        "filename": "android/hw-pipe-net.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:15:41Z",
+      "side": 1,
+      "message": "nit: can you make this static? It used to be exposed in a previous implementation, but that\u0027s no longer the case.",
+      "revId": "368c90d83356d52e7367fbf1a8b75417cce89894",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28c9d979_36305846",
+        "filename": "android/hw-pipe-net.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:15:41Z",
+      "side": 1,
+      "message": "Why?",
+      "revId": "368c90d83356d52e7367fbf1a8b75417cce89894",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48b28df7_37e218e6",
+        "filename": "android/hw-pipe-net.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:15:41Z",
+      "side": 1,
+      "message": "what about android_opengles_pipes_init() instead?",
+      "revId": "368c90d83356d52e7367fbf1a8b75417cce89894",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
