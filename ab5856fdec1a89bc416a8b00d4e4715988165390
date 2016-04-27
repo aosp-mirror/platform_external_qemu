@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "48560d47_7a3bb5db",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T00:16:43Z",
+      "side": 1,
+      "message": "I highly doubt that the compiler is able to use runtime constants for alignment attribute value",
+      "parentUuid": "48560d47_d75e1c02",
+      "range": {
+        "startLine": 120,
+        "startChar": 35,
+        "endLine": 120,
+        "endChar": 51
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "48560d47_373798a2",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
         "patchSetId": 1
@@ -59,6 +83,30 @@
       "writtenOn": "2016-04-27T00:04:52Z",
       "side": 1,
       "message": "This doesn\u0027t work -- but neither, AFAICT, did the old code.  It works for Align \u003d 1,2,4,8, but not higher -- malloc gives 8-byte alignment.  To do this properly for arbitrary alignments, you need to allocate a buffer whose size is something like \"size + Align - 1\", save the pointer to the start, but have \"get()\" return the interior pointer to the proper alignment.\n\nSame applies to the StackSize case.  You\u0027d need to make mArray larger by Align to ensure you could handle arbitrary alignment.",
+      "range": {
+        "startLine": 130,
+        "startChar": 16,
+        "endLine": 130,
+        "endChar": 40
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_da2be182",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T00:16:43Z",
+      "side": 1,
+      "message": "Yes, you\u0027re totally right. I\u0027ll add a static_assert to make sure the alignment is \u003c\u003d8",
+      "parentUuid": "48560d47_373798a2",
       "range": {
         "startLine": 130,
         "startChar": 16,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "48560d47_5a49917a",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T00:16:43Z",
+      "side": 1,
+      "message": "Original means \u0027the very same thing that was passed in, and we\u0027re sure it\u0027s aligned as we need\u0027",
+      "parentUuid": "48560d47_575decd8",
+      "range": {
+        "startLine": 149,
+        "startChar": 8,
+        "endLine": 149,
+        "endChar": 16
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "48560d47_b71f28f9",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
         "patchSetId": 1
@@ -105,6 +177,30 @@
       "writtenOn": "2016-04-27T00:04:52Z",
       "side": 1,
       "message": "Could I suggest \"Stack\" for this?",
+      "range": {
+        "startLine": 150,
+        "startChar": 8,
+        "endLine": 150,
+        "endChar": 15
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_3a4add73",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T00:16:43Z",
+      "side": 1,
+      "message": "Well, I thought about that at first. But if you allocate this whole object on the heap, it would be misleading :)\nThat\u0027s why InPlace IMO is better here",
+      "parentUuid": "48560d47_b71f28f9",
       "range": {
         "startLine": 150,
         "startChar": 8,
