@@ -1079,7 +1079,9 @@ int slirp_redir(int is_udp, int host_port,
                         guest_port, 0))
             return -1;
     } else {
-        if (!solisten(host_port, guest_ip, guest_port, 0))
+        struct socket* s4 = solisten(host_port, guest_ip, guest_port, 0);
+        struct socket* s6 = solisten(host_port, guest_ip, guest_port, SS_IPV6);
+        if (!s4 && !s6)
             return -1;
     }
     return 0;
@@ -1089,8 +1091,14 @@ int  slirp_unredir(int  is_udp, int  host_port)
 {
     if (is_udp)
         return udp_unlisten( host_port );
-    else
-        return sounlisten( host_port );
+    else {
+        if (sounlisten( host_port ))
+            return -1;
+        // It's possible we are listening on both ipv4/ipv6 ports.
+        // Just try unlisten again.
+        sounlisten( host_port );
+        return 0;
+    }
 }
 
 int slirp_add_exec(int do_pty, const void *args, int addr_low_byte,
