@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "48560d47_c6014c2b",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T03:19:32Z",
+      "side": 1,
+      "message": "I\u0027m sorry, I wasn\u0027t clear in my response, my bad.\nOld code needed the Align value for a single purpose: to check if the passed buffer is aligned. The new code uses it in one more place:\n char __attribute__((__aligned__(Align))) mArray[StackSize];\nhere it can\u0027t be a constructor parameter, I have to make it a template argument to be compile-time constant.\n\nI\u0027d love to make it ctor argument, it just doesn\u0027t compile.",
+      "parentUuid": "48560d47_da5121ca",
+      "range": {
+        "startLine": 120,
+        "startChar": 35,
+        "endLine": 120,
+        "endChar": 51
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "48560d47_373798a2",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
         "patchSetId": 1
@@ -155,6 +179,30 @@
       "side": 1,
       "message": "And make sure you update the documentation, as well.",
       "parentUuid": "48560d47_da2be182",
+      "range": {
+        "startLine": 130,
+        "startChar": 16,
+        "endLine": 130,
+        "endChar": 40
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_06fce44d",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T03:19:32Z",
+      "side": 1,
+      "message": "oops :)",
+      "parentUuid": "48560d47_baaeedf5",
       "range": {
         "startLine": 130,
         "startChar": 16,
