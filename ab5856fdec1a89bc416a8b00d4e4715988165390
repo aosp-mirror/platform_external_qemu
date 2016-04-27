@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48560d47_f74a4044",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T00:04:52Z",
+      "side": 1,
+      "message": "Need to update this comment.",
+      "range": {
+        "startLine": 116,
+        "startChar": 14,
+        "endLine": 116,
+        "endChar": 32
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_d75e1c02",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T00:04:52Z",
+      "side": 1,
+      "message": "May I assume that the uses of this are going to be essentially universally with Align\u003d8?  If not, I would be concerned about creating multiple copies of the code for a small increment in speed at most (by making these template parameters rather than constructor arguments).",
+      "range": {
+        "startLine": 120,
+        "startChar": 35,
+        "endLine": 120,
+        "endChar": 51
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_373798a2",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T00:04:52Z",
+      "side": 1,
+      "message": "This doesn\u0027t work -- but neither, AFAICT, did the old code.  It works for Align \u003d 1,2,4,8, but not higher -- malloc gives 8-byte alignment.  To do this properly for arbitrary alignments, you need to allocate a buffer whose size is something like \"size + Align - 1\", save the pointer to the start, but have \"get()\" return the interior pointer to the proper alignment.\n\nSame applies to the StackSize case.  You\u0027d need to make mArray larger by Align to ensure you could handle arbitrary alignment.",
+      "range": {
+        "startLine": 130,
+        "startChar": 16,
+        "endLine": 130,
+        "endChar": 40
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_575decd8",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T00:04:52Z",
+      "side": 1,
+      "message": "Could I suggest \"Undefined\" for this?",
+      "range": {
+        "startLine": 149,
+        "startChar": 8,
+        "endLine": 149,
+        "endChar": 16
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_b71f28f9",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T00:04:52Z",
+      "side": 1,
+      "message": "Could I suggest \"Stack\" for this?",
+      "range": {
+        "startLine": 150,
+        "startChar": 8,
+        "endLine": 150,
+        "endChar": 15
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_17d89462",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T00:04:52Z",
+      "side": 1,
+      "message": "Same comments about Align as above.",
+      "range": {
+        "startLine": 176,
+        "startChar": 42,
+        "endLine": 176,
+        "endChar": 50
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
