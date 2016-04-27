@@ -101,6 +101,24 @@
       "revId": "d6b467234b124072e05820eec0a65001e21d36e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_b9d9d295",
+        "filename": "android/base/testing/TestThread.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T20:08:32Z",
+      "side": 1,
+      "message": "It\u0027s a test thread, so I doubt separate patch adds a lot of value here",
+      "parentUuid": "28c9d979_9625acfc",
+      "revId": "d6b467234b124072e05820eec0a65001e21d36e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
