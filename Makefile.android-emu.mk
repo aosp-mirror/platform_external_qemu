@@ -264,6 +264,7 @@ LOCAL_SRC_FILES := \
     android/hw-kmsg.c \
     android/hw-lcd.c \
     android/hw-pipe-net.cpp \
+    android/hw-pipe-opengles.cpp \
     android/hw-qemud.cpp \
     android/hw-sensors.c \
     android/jpeg-compress.c \
