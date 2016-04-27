@@ -74,6 +74,8 @@ struct socket {
 #define SS_PROXIFIED            0x400   /* Socket is trying to connect through a proxy, only makes sense
                                            when SS_ISFCONNECTING is also set */
 
+#define SS_IPV6                 0x800   /* Listen on IPV6 address */
+
 extern struct socket tcb;
 
 void so_init _P((void));
