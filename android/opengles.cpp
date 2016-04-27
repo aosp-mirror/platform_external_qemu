@@ -71,23 +71,21 @@ static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
     return 0;
 }
 
-static ADynamicLibrary*  rendererLib;
-static bool              rendererUsesSubWindow;
-static int               rendererStarted;
-static char              rendererAddress[256];
+static bool rendererUsesSubWindow;
+static emugl::RenderLibPtr renderLib = nullptr;
+static emugl::RendererPtr renderer = nullptr;
 
-int
-android_initOpenglesEmulation(void)
-{
+int android_initOpenglesEmulation() {
     char* error = NULL;
 
-    if (rendererLib != NULL)
+    if (renderLib != NULL)
         return 0;
 
     D("Initializing hardware OpenGLES emulation support");
 
-    rendererLib = adynamicLibrary_open(RENDERER_LIB_NAME, &error);
-    if (rendererLib == NULL) {
+    ADynamicLibrary* const rendererSo =
+            adynamicLibrary_open(RENDERER_LIB_NAME, &error);
+    if (rendererSo == NULL) {
         derror("Could not load OpenGLES emulation library [%s]: %s",
                RENDERER_LIB_NAME, error);
         return -1;
@@ -96,12 +94,13 @@ android_initOpenglesEmulation(void)
     android_opengles_pipes_init();
 
     /* Resolve the functions */
-    if (initOpenglesEmulationFuncs(rendererLib) < 0) {
+    if (initOpenglesEmulationFuncs(rendererSo) < 0) {
         derror("OpenGLES emulation library mismatch. Be sure to use the correct version!");
         goto BAD_EXIT;
     }
 
-    if (!initLibrary()) {
+    renderLib = initLibrary();
+    if (!renderLib) {
         derror("OpenGLES initialization failed!");
         goto BAD_EXIT;
     }
@@ -113,70 +112,49 @@ android_initOpenglesEmulation(void)
         }
     }
 
-    if (android_gles_fast_pipes) {
-#ifdef _WIN32
-        /* XXX: NEED Win32 pipe implementation */
-        setStreamMode(RENDER_API_STREAM_MODE_TCP);
-#else
-        setStreamMode(RENDER_API_STREAM_MODE_UNIX);
-#endif
-    } else {
-        setStreamMode(RENDER_API_STREAM_MODE_TCP);
-    }
     return 0;
 
 BAD_EXIT:
     derror("OpenGLES emulation library could not be initialized!");
-    adynamicLibrary_close(rendererLib);
-    rendererLib = NULL;
+    adynamicLibrary_close(rendererSo);
     return -1;
 }
 
 int
 android_startOpenglesRenderer(int width, int height)
 {
-    if (!rendererLib) {
+    if (!renderLib) {
         D("Can't start OpenGLES renderer without support libraries");
         return -1;
     }
 
-    if (rendererStarted) {
+    if (renderer) {
         return 0;
     }
 
     android_init_opengl_logger();
 
+    renderLib->setCrashReporter(&crashhandler_die_format);
+
     emugl_logger_struct logfuncs;
     logfuncs.coarse = android_opengl_logger_write;
     logfuncs.fine = android_opengl_cxt_logger_write;
+    renderLib->setLogger(logfuncs);
 
-    if (!initOpenGLRenderer(width,
-                            height,
-                            rendererUsesSubWindow,
-                            rendererAddress,
-                            sizeof(rendererAddress),
-                            logfuncs,
-                            crashhandler_die_format)) {
+    renderer = renderLib->initRenderer(width, height, rendererUsesSubWindow);
+    if (!renderer) {
         D("Can't start OpenGLES renderer?");
         return -1;
     }
-
-    rendererStarted = 1;
     return 0;
 }
 
 void
 android_setPostCallback(OnPostFunc onPost, void* onPostContext)
 {
-    if (rendererLib) {
-        setPostCallback(onPost, onPostContext);
+    if (renderer) {
+        renderer->setPostCallback(onPost, onPostContext);
     }
-}
-
-static void strncpy_safe(char* dst, const char* src, size_t n)
-{
-    strncpy(dst, src, n);
-    dst[n-1] = '\0';
 }
 
 static char* strdupBaseString(const char* src) {
@@ -209,45 +187,39 @@ static char* strdupBaseString(const char* src) {
 void android_getOpenglesHardwareStrings(char** vendor,
                                         char** renderer,
                                         char** version) {
-    const char *vendorSrc, *rendererSrc, *versionSrc;
-
     assert(vendor != NULL && renderer != NULL && version != NULL);
     assert(*vendor == NULL && *renderer == NULL && *version == NULL);
-    if (!rendererStarted) {
+    if (!renderer) {
         D("Can't get OpenGL ES hardware strings when renderer not started");
         return;
     }
 
-    getHardwareStrings(&vendorSrc, &rendererSrc, &versionSrc);
-    if (!vendorSrc) vendorSrc = "";
-    if (!rendererSrc) rendererSrc = "";
-    if (!versionSrc) versionSrc = "";
-
-    D("OpenGL Vendor=[%s]", vendorSrc);
-    D("OpenGL Renderer=[%s]", rendererSrc);
-    D("OpenGL Version=[%s]", versionSrc);
+    const emugl::Renderer::HardwareStrings strings =
+            ::renderer->getHardwareStrings();
+    D("OpenGL Vendor=[%s]", strings.vendor.c_str());
+    D("OpenGL Renderer=[%s]", strings.renderer.c_str());
+    D("OpenGL Version=[%s]", strings.version.c_str());
 
     /* Special case for the default ES to GL translators: extract the strings
      * of the underlying OpenGL implementation. */
-    if (strncmp(vendorSrc, "Google", 6) == 0 &&
-            strncmp(rendererSrc, "Android Emulator OpenGL ES Translator", 37) == 0) {
-        *vendor = strdupBaseString(vendorSrc);
-        *renderer = strdupBaseString(rendererSrc);
-        *version = strdupBaseString(versionSrc);
+    if (strncmp(strings.vendor.c_str(), "Google", 6) == 0 &&
+            strncmp(strings.renderer.c_str(), "Android Emulator OpenGL ES Translator", 37) == 0) {
+        *vendor = strdupBaseString(strings.vendor.c_str());
+        *renderer = strdupBaseString(strings.renderer.c_str());
+        *version = strdupBaseString(strings.version.c_str());
     } else {
-        *vendor = strdup(vendorSrc);
-        *renderer = strdup(rendererSrc);
-        *version = strdup(versionSrc);
+        *vendor = strdup(strings.vendor.c_str());
+        *renderer = strdup(strings.renderer.c_str());
+        *version = strdup(strings.version.c_str());
     }
 }
 
 void
 android_stopOpenglesRenderer(void)
 {
-    if (rendererStarted) {
+    if (renderer) {
+        renderer.reset();
         android_stop_opengl_logger();
-        stopOpenGLRenderer();
-        rendererStarted = 0;
     }
 }
 
@@ -255,11 +227,11 @@ int
 android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
                            int fbw, int fbh, float dpr, float rotation)
 {
-    if (!rendererStarted) {
+    if (!renderer) {
         return -1;
     }
     FBNativeWindowType win = (FBNativeWindowType)(uintptr_t)window;
-    bool success = showOpenGLSubwindow(
+    bool success = renderer->showOpenGLSubwindow(
             win, wx, wy, ww, wh, fbw, fbh, dpr, rotation);
     return success ? 0 : -1;
 }
@@ -267,31 +239,30 @@ android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
 void
 android_setOpenglesTranslation(float px, float py)
 {
-    if (rendererStarted) {
-        setOpenGLDisplayTranslation(px, py);
+    if (renderer) {
+        renderer->setOpenGLDisplayTranslation(px, py);
     }
 }
 
 int
 android_hideOpenglesWindow(void)
 {
-    if (!rendererStarted) {
+    if (!renderer) {
         return -1;
     }
-    bool success = destroyOpenGLSubwindow();
+    bool success = renderer->destroyOpenGLSubwindow();
     return success ? 0 : -1;
 }
 
 void
 android_redrawOpenglesWindow(void)
 {
-    if (rendererStarted) {
-        repaintOpenGLDisplay();
+    if (renderer) {
+        renderer->repaintOpenGLDisplay();
     }
 }
 
-void
-android_gles_server_path(char* buff, size_t buffsize)
+const emugl::RendererPtr& android_getOpenglesRenderer()
 {
-    strncpy_safe(buff, rendererAddress, buffsize);
+    return renderer;
 }
