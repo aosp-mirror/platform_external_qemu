@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "48560d47_e5d0bd09",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T17:56:54Z",
+      "side": 1,
+      "message": "this actually overrides previous callback, it doesn\u0027t _add_ to it. Please make sure the previous one is not important - or add a vector there.",
+      "range": {
+        "startLine": 214,
+        "startChar": 48,
+        "endLine": 214,
+        "endChar": 64
+      },
+      "revId": "196bf186af8b7f1bb1cc58f1ae08900e4d82e7c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a8cce97d_02c14a3e",
         "filename": "android/skin/qt/user-actions-counter.cpp",
         "patchSetId": 2
@@ -18,6 +41,29 @@
         "startChar": 50,
         "endLine": 1,
         "endChar": 53
+      },
+      "revId": "196bf186af8b7f1bb1cc58f1ae08900e4d82e7c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_051df1ad",
+        "filename": "android/skin/qt/user-actions-counter.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T17:56:54Z",
+      "side": 1,
+      "message": "can you have it once in ctor?",
+      "range": {
+        "startLine": 24,
+        "startChar": 4,
+        "endLine": 24,
+        "endChar": 27
       },
       "revId": "196bf186af8b7f1bb1cc58f1ae08900e4d82e7c1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -65,6 +111,29 @@
     },
     {
       "key": {
+        "uuid": "48560d47_e5255dfb",
+        "filename": "android/skin/qt/user-actions-counter.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T17:56:54Z",
+      "side": 1,
+      "message": "I\u0027m not sure if this even is generated for a long key press - when the OS starts repeating",
+      "range": {
+        "startLine": 25,
+        "startChar": 51,
+        "endLine": 25,
+        "endChar": 69
+      },
+      "revId": "196bf186af8b7f1bb1cc58f1ae08900e4d82e7c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a8cce97d_e2c38646",
         "filename": "android/skin/qt/user-actions-counter.h",
         "patchSetId": 2
@@ -81,6 +150,52 @@
         "startChar": 7,
         "endLine": 51,
         "endChar": 42
+      },
+      "revId": "196bf186af8b7f1bb1cc58f1ae08900e4d82e7c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_853aa124",
+        "filename": "android/skin/qt/user-actions-counter.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T17:56:54Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 58,
+        "startChar": 20,
+        "endLine": 58,
+        "endChar": 21
+      },
+      "revId": "196bf186af8b7f1bb1cc58f1ae08900e4d82e7c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_e5539d5a",
+        "filename": "android/skin/qt/user-actions-counter.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T17:56:54Z",
+      "side": 1,
+      "message": "std::atomic\u003c\u003e ? just in case",
+      "range": {
+        "startLine": 70,
+        "startChar": 4,
+        "endLine": 70,
+        "endChar": 12
       },
       "revId": "196bf186af8b7f1bb1cc58f1ae08900e4d82e7c1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
