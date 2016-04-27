@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48560d47_6ff3e783",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 3
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T19:43:29Z",
+      "side": 1,
+      "message": "do we need this for the two new radio buttons? (accelModeRotate/accelModeMove)",
+      "range": {
+        "startLine": 172,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 16
+      },
+      "revId": "9298e496eb8ed6956e9b755c8856d978a4dd6d13",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
