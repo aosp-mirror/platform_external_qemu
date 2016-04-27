@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "48560d47_da5121ca",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T00:26:15Z",
+      "side": 1,
+      "message": "Let me be more explicit: how about if the align template param goes back to being a constructor arg with a default?\nAFAICT, that\u0027s a pure win -- only one copy of the code, same code generated for a given alignment value.",
+      "parentUuid": "48560d47_7a3bb5db",
+      "range": {
+        "startLine": 120,
+        "startChar": 35,
+        "endLine": 120,
+        "endChar": 51
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "48560d47_373798a2",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
         "patchSetId": 1
@@ -107,6 +131,30 @@
       "side": 1,
       "message": "Yes, you\u0027re totally right. I\u0027ll add a static_assert to make sure the alignment is \u003c\u003d8",
       "parentUuid": "48560d47_373798a2",
+      "range": {
+        "startLine": 130,
+        "startChar": 16,
+        "endLine": 130,
+        "endChar": 40
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_baaeedf5",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T00:26:15Z",
+      "side": 1,
+      "message": "And make sure you update the documentation, as well.",
+      "parentUuid": "48560d47_da2be182",
       "range": {
         "startLine": 130,
         "startChar": 16,
@@ -166,6 +214,30 @@
     },
     {
       "key": {
+        "uuid": "48560d47_7a5735f3",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T00:26:15Z",
+      "side": 1,
+      "message": "Sorry, I meant to delete this comment.  Original sounds good.",
+      "parentUuid": "48560d47_5a49917a",
+      "range": {
+        "startLine": 149,
+        "startChar": 8,
+        "endLine": 149,
+        "endChar": 16
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "48560d47_b71f28f9",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
         "patchSetId": 1
@@ -201,6 +273,30 @@
       "side": 1,
       "message": "Well, I thought about that at first. But if you allocate this whole object on the heap, it would be misleading :)\nThat\u0027s why InPlace IMO is better here",
       "parentUuid": "48560d47_b71f28f9",
+      "range": {
+        "startLine": 150,
+        "startChar": 8,
+        "endLine": 150,
+        "endChar": 15
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_9a3de9ae",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T00:26:15Z",
+      "side": 1,
+      "message": "Good point.  Sounds good.",
+      "parentUuid": "48560d47_3a4add73",
       "range": {
         "startLine": 150,
         "startChar": 8,
