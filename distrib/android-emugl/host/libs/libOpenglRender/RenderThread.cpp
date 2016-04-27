@@ -15,10 +15,13 @@
 */
 #include "RenderThread.h"
 
+#include "ChannelStream.h"
 #include "ErrorLog.h"
 #include "FrameBuffer.h"
 #include "ReadBuffer.h"
 #include "RenderControl.h"
+#include "RendererImpl.h"
+#include "RenderChannelImpl.h"
 #include "RenderThreadInfo.h"
 #include "TimeUtils.h"
 
@@ -27,27 +30,47 @@
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 #include "../../../shared/OpenglCodecCommon/ChecksumCalculatorThreadInfo.h"
 
-#define STREAM_BUFFER_SIZE 4*1024*1024
+#include <memory>
 
-RenderThread::RenderThread(IOStream *stream, emugl::Mutex *lock) :
-        emugl::Thread(),
-        m_lock(lock),
-        m_stream(stream) {}
+#define STREAM_BUFFER_SIZE 4 * 1024 * 1024
 
-RenderThread::~RenderThread() {
-    delete m_stream;
-}
+RenderThread::RenderThread(std::weak_ptr<emugl::RendererImpl> renderer,
+                           std::shared_ptr<emugl::RenderChannelImpl> channel,
+                           emugl::Mutex* lock)
+    : m_lock(lock), mChannel(channel), mRenderer(renderer) {}
+
+RenderThread::~RenderThread() = default;
 
 // static
-RenderThread* RenderThread::create(IOStream *stream, emugl::Mutex *lock) {
-    return new RenderThread(stream, lock);
-}
-
-void RenderThread::forceStop() {
-    m_stream->forceStop();
+std::unique_ptr<RenderThread> RenderThread::create(
+        std::weak_ptr<emugl::RendererImpl> renderer,
+        std::shared_ptr<emugl::RenderChannelImpl> channel,
+        emugl::Mutex* lock) {
+    return std::unique_ptr<RenderThread>(
+            new RenderThread(renderer, channel, lock));
 }
 
 intptr_t RenderThread::main() {
+    uint32_t flags = 0;
+    if (mChannel->readFromGuest(reinterpret_cast<char*>(&flags),
+                                sizeof(flags), true) != sizeof(flags)) {
+        return 0;
+    }
+
+    if ((flags & IOSTREAM_CLIENT_EXIT_SERVER) == IOSTREAM_CLIENT_EXIT_SERVER) {
+        // The old code had a separate server thread, this flag meant 'exit the
+        // server thread'. It's not used anymore, but let's just make sure...
+        if (auto renderer = mRenderer.lock()) {
+            renderer->stop();
+        }
+        return 0;
+    }
+
+    std::unique_ptr<IOStream> stream(new ChannelStream(mChannel, 384));
+    if (!stream) {
+        return 0;
+    }
+
     RenderThreadInfo tInfo;
     ChecksumCalculatorThreadInfo tChecksumInfo;
 
@@ -66,22 +89,22 @@ intptr_t RenderThread::main() {
     //
     // open dump file if RENDER_DUMP_DIR is defined
     //
-    const char *dump_dir = getenv("RENDERER_DUMP_DIR");
-    FILE *dumpFP = NULL;
+    const char* dump_dir = getenv("RENDERER_DUMP_DIR");
+    FILE* dumpFP = NULL;
     if (dump_dir) {
         size_t bsize = strlen(dump_dir) + 32;
-        char *fname = new char[bsize];
-        snprintf(fname,bsize,"%s/stream_%p", dump_dir, this);
+        char* fname = new char[bsize];
+        snprintf(fname, bsize, "%s/stream_%p", dump_dir, this);
         dumpFP = fopen(fname, "wb");
         if (!dumpFP) {
-            fprintf(stderr,"Warning: stream dump failed to open file %s\n",fname);
+            fprintf(stderr, "Warning: stream dump failed to open file %s\n",
+                    fname);
         }
-        delete [] fname;
+        delete[] fname;
     }
 
     while (1) {
-
-        int stat = readBuf.getData(m_stream);
+        int stat = readBuf.getData(stream.get());
         if (stat <= 0) {
             break;
         }
@@ -92,8 +115,9 @@ intptr_t RenderThread::main() {
         stats_totalBytes += readBuf.validData();
         long long dt = GetCurrentTimeMS() - stats_t0;
         if (dt > 1000) {
-            //float dts = (float)dt / 1000.0f;
-            //printf("Used Bandwidth %5.3f MB/s\n", ((float)stats_totalBytes / dts) / (1024.0f*1024.0f));
+            // float dts = (float)dt / 1000.0f;
+            // printf("Used Bandwidth %5.3f MB/s\n", ((float)stats_totalBytes /
+            // dts) / (1024.0f*1024.0f));
             stats_totalBytes = 0;
             stats_t0 = GetCurrentTimeMS();
         }
@@ -103,7 +127,7 @@ intptr_t RenderThread::main() {
         //
         if (dumpFP) {
             int skip = readBuf.validData() - stat;
-            fwrite(readBuf.buf()+skip, 1, readBuf.validData()-skip, dumpFP);
+            fwrite(readBuf.buf() + skip, 1, readBuf.validData() - skip, dumpFP);
             fflush(dumpFP);
         }
 
@@ -113,18 +137,22 @@ intptr_t RenderThread::main() {
 
             m_lock->lock();
             //
-            // try to process some of the command buffer using the GLESv1 decoder
+            // try to process some of the command buffer using the GLESv1
+            // decoder
             //
-            size_t last = tInfo.m_glDec.decode(readBuf.buf(), readBuf.validData(), m_stream);
+            size_t last = tInfo.m_glDec.decode(
+                    readBuf.buf(), readBuf.validData(), stream.get());
             if (last > 0) {
                 progress = true;
                 readBuf.consume(last);
             }
 
             //
-            // try to process some of the command buffer using the GLESv2 decoder
+            // try to process some of the command buffer using the GLESv2
+            // decoder
             //
-            last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(), m_stream);
+            last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(),
+                                         stream.get());
             if (last > 0) {
                 progress = true;
                 readBuf.consume(last);
@@ -134,7 +162,8 @@ intptr_t RenderThread::main() {
             // try to process some of the command buffer using the
             // renderControl decoder
             //
-            last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(), m_stream);
+            last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(),
+                                        stream.get());
             if (last > 0) {
                 readBuf.consume(last);
                 progress = true;
@@ -142,8 +171,7 @@ intptr_t RenderThread::main() {
 
             m_lock->unlock();
 
-        } while( progress );
-
+        } while (progress);
     }
 
     if (dumpFP) {
@@ -155,7 +183,8 @@ intptr_t RenderThread::main() {
     //
     FrameBuffer::getFB()->bindContext(0, 0, 0);
     if (tInfo.currContext || tInfo.currDrawSurf || tInfo.currReadSurf) {
-        fprintf(stderr, "ERROR: RenderThread exiting with current context/surfaces\n");
+        fprintf(stderr,
+                "ERROR: RenderThread exiting with current context/surfaces\n");
     }
 
     FrameBuffer::getFB()->drainWindowSurface();
