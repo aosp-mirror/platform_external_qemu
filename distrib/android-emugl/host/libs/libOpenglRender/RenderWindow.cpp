@@ -79,7 +79,7 @@ struct RenderWindowMessage {
 
         // CMD_SET_POST_CALLBACK
         struct {
-            OnPostFn on_post;
+            emugl::Renderer::OnPostCallback on_post;
             void* on_post_context;
         } set_post_callback;
 
@@ -366,7 +366,7 @@ bool RenderWindow::getHardwareStrings(const char** vendor,
     return true;
 }
 
-void RenderWindow::setPostCallback(OnPostFn onPost, void* onPostContext) {
+void RenderWindow::setPostCallback(emugl::Renderer::OnPostCallback onPost, void* onPostContext) {
     D("Entering\n");
     RenderWindowMessage msg;
     msg.cmd = CMD_SET_POST_CALLBACK;
