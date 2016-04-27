@@ -20,13 +20,13 @@ endif
 
 host_common_SRC_FILES := \
     $(host_OS_SRCS) \
+    ChannelStream.cpp \
     ColorBuffer.cpp \
     FbConfig.cpp \
     FrameBuffer.cpp \
     ReadBuffer.cpp \
     RenderContext.cpp \
     RenderControl.cpp \
-    RenderServer.cpp \
     RenderThread.cpp \
     RenderThreadInfo.cpp \
     render_api.cpp \
@@ -37,6 +37,9 @@ host_common_SRC_FILES := \
     TextureResize.cpp \
     TimeUtils.cpp \
     WindowSurface.cpp \
+    RenderLib.cpp \
+    Renderer.cpp \
+    RenderingChannel.cpp \
 
 ifeq ($(BUILD_TARGET_OS),windows)
     host_common_SRC_FILES += Win32PipeStream.cpp
