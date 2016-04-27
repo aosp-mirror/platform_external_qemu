@@ -16,11 +16,11 @@
 
 #pragma once
 
-typedef void (*logger_t)(const char* fmt, ...);
-extern logger_t emugl_logger;
-extern logger_t emugl_cxt_logger;
-void set_emugl_logger(logger_t f);
-void set_emugl_cxt_logger(logger_t f);
+typedef void (*emugl_logger_t)(const char* fmt, ...);
+extern emugl_logger_t emugl_logger;
+extern emugl_logger_t emugl_cxt_logger;
+void set_emugl_logger(emugl_logger_t f);
+void set_emugl_cxt_logger(emugl_logger_t f);
 
 #define GL_LOGGING 1
 

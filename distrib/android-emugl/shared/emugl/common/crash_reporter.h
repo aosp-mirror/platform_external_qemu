@@ -16,7 +16,7 @@
 
 #pragma once
 
-typedef void (*crash_reporter_t)(const char* format, ...);
+typedef void (*emugl_crash_reporter_t)(const char* format, ...);
 
-extern crash_reporter_t emugl_crash_reporter;
-void set_emugl_crash_reporter(crash_reporter_t crash_reporter);
+extern emugl_crash_reporter_t emugl_crash_reporter;
+void set_emugl_crash_reporter(emugl_crash_reporter_t crash_reporter);
