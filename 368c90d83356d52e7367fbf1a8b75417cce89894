@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "48560d47_4fdb832b",
+        "filename": "android/hw-pipe-net.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T19:34:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "68af5190_d8daed26",
+      "revId": "368c90d83356d52e7367fbf1a8b75417cce89894",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "28c9d979_36305846",
         "filename": "android/hw-pipe-net.cpp",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2016-04-27T09:15:41Z",
       "side": 1,
       "message": "Why?",
+      "revId": "368c90d83356d52e7367fbf1a8b75417cce89894",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_afecdfd8",
+        "filename": "android/hw-pipe-net.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T19:34:46Z",
+      "side": 1,
+      "message": "ANEW has an implicit cast from void* inside. C++ doesn\u0027t allow that. It\u0027s easier to just replace it with new/delete than fix the macro.",
+      "parentUuid": "28c9d979_36305846",
       "revId": "368c90d83356d52e7367fbf1a8b75417cce89894",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
