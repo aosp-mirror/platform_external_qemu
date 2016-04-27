@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "28c9d979_560cf484",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:44:35Z",
+      "side": 1,
+      "message": "I don\u0027t see this used anywhere? Is this a left-over? What about putting this in a different patch?",
+      "revId": "d6b467234b124072e05820eec0a65001e21d36e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "889d6572_51fed47c",
+        "filename": "android/base/synchronization/MessageChannel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:44:35Z",
+      "side": 1,
+      "message": "that\u0027s a huge change that should be documented! Especially since the result is an unsigned size_t !",
+      "revId": "d6b467234b124072e05820eec0a65001e21d36e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88b805d6_39092f86",
+        "filename": "android/base/synchronization/MessageChannel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:44:35Z",
+      "side": 1,
+      "message": "same here.",
+      "revId": "d6b467234b124072e05820eec0a65001e21d36e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28e0f9df_de058505",
+        "filename": "android/base/synchronization/MessageChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:44:35Z",
+      "side": 1,
+      "message": "what happens if |pos \u003d\u003d -1|, i.e. the |msg| object will never be moved. Does that affect the caller?",
+      "revId": "d6b467234b124072e05820eec0a65001e21d36e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8b5c9db_9af78d9c",
+        "filename": "android/base/synchronization/MessageChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:44:35Z",
+      "side": 1,
+      "message": "same concern here.",
+      "revId": "d6b467234b124072e05820eec0a65001e21d36e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28c9d979_9625acfc",
+        "filename": "android/base/testing/TestThread.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:44:35Z",
+      "side": 1,
+      "message": "ouch, good catch. Can I ask you to put that in an independent patch?",
+      "revId": "d6b467234b124072e05820eec0a65001e21d36e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
