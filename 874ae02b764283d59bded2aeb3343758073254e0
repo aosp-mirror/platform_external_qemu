@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "68af5190_78ec81d8",
+        "filename": "android/opengles.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:03:45Z",
+      "side": 1,
+      "message": "oh nice ! :)",
+      "revId": "874ae02b764283d59bded2aeb3343758073254e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
