@@ -17,21 +17,27 @@
 namespace android {
 namespace base {
 
-MessageChannelBase::MessageChannelBase(size_t capacity) :
-        mPos(0U),
-        mCount(0U),
-        mCapacity(capacity),
-        mLock(),
-        mCanRead(),
-        mCanWrite() {}
+MessageChannelBase::MessageChannelBase(size_t capacity) : mCapacity(capacity) {}
 
-MessageChannelBase::~MessageChannelBase() {}
+MessageChannelBase::~MessageChannelBase() = default;
+
+void MessageChannelBase::stop() {
+    android::base::AutoLock lock(mLock);
+    mStopped = true;
+    mCount = 0;
+    mCanRead.signal();
+    mCanWrite.signal();
+}
 
 size_t MessageChannelBase::beforeWrite() {
     mLock.lock();
-    while (mCount >= mCapacity) {
+    while (mCount >= mCapacity && !mStopped) {
         mCanWrite.wait(&mLock);
     }
+    if (mStopped) {
+        return -1;
+    }
+
     size_t result = mPos + mCount;
     if (result >= mCapacity) {
         result -= mCapacity;
@@ -40,25 +46,29 @@ size_t MessageChannelBase::beforeWrite() {
 }
 
 void MessageChannelBase::afterWrite() {
-    mCount++;
-    mCanRead.signal();
+    if (!mStopped) {
+        mCount++;
+        mCanRead.signal();
+    }
     mLock.unlock();
 }
 
 size_t MessageChannelBase::beforeRead() {
     mLock.lock();
-    while (mCount == 0) {
+    while (mCount == 0 && !mStopped) {
         mCanRead.wait(&mLock);
     }
-    return mPos;
+    return mStopped ? -1 : mPos;
 }
 
 void MessageChannelBase::afterRead() {
-    if (++mPos == mCapacity) {
-        mPos = 0U;
+    if (!mStopped) {
+        if (++mPos == mCapacity) {
+            mPos = 0U;
+        }
+        mCount--;
+        mCanWrite.signal();
     }
-    mCount--;
-    mCanWrite.signal();
     mLock.unlock();
 }
 

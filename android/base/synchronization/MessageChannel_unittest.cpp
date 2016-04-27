@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 
+#include <memory>
 #include <string>
 
 namespace android {
@@ -35,12 +36,17 @@ void* pingPongFunction(void* param) {
         PingPongState* s = static_cast<PingPongState*>(param);
         std::string str;
         s->in.receive(&str);
+        if (s->in.isStopped()) {
+            return (void*)-1;
+        }
         s->out.send(str);
+        if (s->out.isStopped()) {
+            return (void*)-1;
+        }
         if (str == "quit") {
-            break;
+            return 0;
         }
     }
-    return 0;
 }
 
 }  // namespace
@@ -77,7 +83,8 @@ TEST(MessageChannel, SingleThreadWithStdString) {
 
 TEST(MessageChannel, TwoThreadsPingPong) {
     PingPongState state;
-    TestThread* thread = new TestThread(pingPongFunction, &state);
+    auto thread = std::unique_ptr<TestThread>(
+            new TestThread(pingPongFunction, &state));
 
     std::string str;
     const size_t kCount = 100;
@@ -97,6 +104,37 @@ TEST(MessageChannel, TwoThreadsPingPong) {
     EXPECT_STREQ("quit", str.c_str());
 
     thread->join();
+}
+
+TEST(MessageChannel, Stop) {
+    {
+        PingPongState state;
+        auto thread = std::unique_ptr<TestThread>(
+                new TestThread(pingPongFunction, &state));
+
+        // the thread has to be blocked on in.receive(), let's stop it
+        state.in.stop();
+        EXPECT_NE(0, thread->join());
+        EXPECT_EQ(std::string(), state.in.receive());
+        state.in.send("1");
+        EXPECT_EQ(0, state.in.size());
+    }
+
+    {
+        PingPongState state;
+        auto thread = std::unique_ptr<TestThread>(
+                new TestThread(pingPongFunction, &state));
+
+        // fill in the receiving message channel
+        while (state.out.size() < state.out.capacity()) {
+            state.in.send("1");
+        }
+
+        // not the thread is blocked on out.send()
+        state.out.stop();
+
+        EXPECT_NE(0, thread->join());
+    }
 }
 
 }  // namespace base
