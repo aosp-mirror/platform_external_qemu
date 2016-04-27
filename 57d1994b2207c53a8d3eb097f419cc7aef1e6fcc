@@ -19,6 +19,29 @@
     },
     {
       "key": {
+        "uuid": "48560d47_8ca129bc",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderLib.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-27T19:28:16Z",
+      "side": 1,
+      "message": "Do we expect to be changing these at runtime or to sometimes not set them at all? If not, should they be part of the initRenderer call or a (probably protected) constructor that just stores these in this interface class (changing it from interface to abstract class)?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 65
+      },
+      "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "68d6710e_e07622f6",
         "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderLib.h",
         "patchSetId": 1
@@ -53,6 +76,92 @@
     },
     {
       "key": {
+        "uuid": "a8cce97d_c22202f1",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-27T19:28:16Z",
+      "side": 1,
+      "message": "This seems to indicate that a copy is made but a little bit further down it says that the callback needs to make a copy of the pixels if it needs to hold on to them. Could you clarify if this is a copy or just pointing to the pixels about to be displayed?",
+      "range": {
+        "startLine": 41,
+        "startChar": 73,
+        "endLine": 42,
+        "endChar": 32
+      },
+      "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8cce97d_e21f06a6",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-27T19:28:16Z",
+      "side": 1,
+      "message": "Could this be an enum instead to make it easier to read?",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 50
+      },
+      "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_c578191e",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-27T19:28:16Z",
+      "side": 1,
+      "message": "These parameter seem like they could have clearer names. Right now I have to read the comment to decode them.",
+      "range": {
+        "startLine": 78,
+        "startChar": 11,
+        "endLine": 82,
+        "endChar": 32
+      },
+      "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_69bbe7d4",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-27T19:28:16Z",
+      "side": 1,
+      "message": "For sestOpenGLDisplayRotation you mention that zRot is in degrees, there is no mention of that here, could you please add that?",
+      "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a89a2976_3265d035",
         "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderingChannel.h",
         "patchSetId": 1
@@ -81,6 +190,24 @@
       "writtenOn": "2016-04-27T09:59:22Z",
       "side": 1,
       "message": "I fear that passing std::vector\u003cchar\u003e instances directly is going to be inefficient, are you sure you want to do that?",
+      "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_0954eb42",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderingChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-04-27T19:28:16Z",
+      "side": 1,
+      "message": "+1 on that.\n\nAlso, as someone who\u0027s not familiar with the GL code, what does blocking do? My guess is it indicates if the read call should be blocking or not but could you add a comment to clarify that? I also think an enum would be a better choice than a bool here to increase readability.",
+      "parentUuid": "889d6572_913e7c18",
       "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
