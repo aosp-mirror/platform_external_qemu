@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48b28df7_5735cc34",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderLib.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:59:22Z",
+      "side": 1,
+      "message": "Please don\u0027t use the I prefix for interfaces. Proper documentation beats this kind of coding style, imho.\n\nAlso documentation, documentation, documentation, please!",
+      "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "68d6710e_e07622f6",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderLib.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:59:22Z",
+      "side": 1,
+      "message": "I don\u0027t think we want to encourage the use of std::shared_ptr\u003c\u003e in our code base, since it\u0027s very inefficient. I\u0027d prefer using a std::unique_ptr\u003c\u003e instead if you insist on providing convenience pointer wrappers.\n\nI know EmuGL only implemented the equivalent of std::shared_ptr\u003c\u003e in the past, but there is no reason to pursue this anymore, especially in its public interface, instead of the actual implementation.",
+      "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8b5c9db_1a2b7ddc",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:59:22Z",
+      "side": 1,
+      "message": "please rename this to emugl::Rendere and add a little bit of documentation above describing what the interface is about (especially with regards to RenderLib).",
+      "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a89a2976_3265d035",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderingChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:59:22Z",
+      "side": 1,
+      "message": "Please rename this to RenderingChannel (or even RenderChannel?), and provide documentation + usage example.",
+      "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "889d6572_913e7c18",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderingChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:59:22Z",
+      "side": 1,
+      "message": "I fear that passing std::vector\u003cchar\u003e instances directly is going to be inefficient, are you sure you want to do that?",
+      "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "889d6572_713af827",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderingChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:59:22Z",
+      "side": 1,
+      "message": "Please replace this with std::unique_ptr\u003c\u003e",
+      "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "68d6710e_a025fafb",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/render_api_types.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:59:22Z",
+      "side": 1,
+      "message": "please use emugl_ prefix here, as in emugl_crash_reporter_t and emugl_logger_t, if you want to keep this C-compatible.\n\nOtherwise I would suggest using the emugl:: namespace and names like emugl::CrashReportPrinter and emugl::LogPrinter instead.\n\nAlso add proper documentation",
+      "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "68d6710e_c022fef0",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/render_api.entries",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:59:22Z",
+      "side": 1,
+      "message": "If this is a C++ interface, please use the emugl:: namespace",
+      "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
