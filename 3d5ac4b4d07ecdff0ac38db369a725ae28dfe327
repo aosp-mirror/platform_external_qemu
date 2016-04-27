@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88b805d6_99d07b09",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:12:17Z",
+      "side": 1,
+      "message": "nit: You want to update this comment!",
+      "revId": "3d5ac4b4d07ecdff0ac38db369a725ae28dfe327",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8b5c9db_9ad06d09",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:12:17Z",
+      "side": 1,
+      "message": "I fear this check is inefficient, it\u0027s probably simpler to have a dedicated mBuff member that may or may not point into mArray, as in:\n\n    const void* get() const { return mBuff; }\n\n    ~GenericInputBuffer() {\n         if (mBuffer !\u003d mArray) {\n             ::free(mBuff);\n         }\n    }\n\n    ....\n\n    char __attribute__((__aligned__(Align))) mArray[StackSize];\n    void* mBuff;",
+      "revId": "3d5ac4b4d07ecdff0ac38db369a725ae28dfe327",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28e0f9df_7ed631d7",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:12:17Z",
+      "side": 1,
+      "message": "nit: I would put mStorage after the union to reduce the foot print of this class. (it\u0027s likely to have padding between the enum and the actual buffer).",
+      "revId": "3d5ac4b4d07ecdff0ac38db369a725ae28dfe327",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48b28df7_f7c0a03c",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:12:17Z",
+      "side": 1,
+      "message": "nit: I don\u0027t see a good reason to make this const void*, a void* is pretty adequate given the usage, as long as get() returns a const void*.",
+      "revId": "3d5ac4b4d07ecdff0ac38db369a725ae28dfe327",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88b805d6_b9cd3f70",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:12:17Z",
+      "side": 1,
+      "message": "also update the comment here.",
+      "revId": "3d5ac4b4d07ecdff0ac38db369a725ae28dfe327",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28e0f9df_9eda1df8",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-27T09:12:17Z",
+      "side": 1,
+      "message": "I feel this is also too complex (especially if get() is going to be called often), it\u0027s better to have mBuff, mArray and mOrgBuff as separate members and no mStorage I think.",
+      "revId": "3d5ac4b4d07ecdff0ac38db369a725ae28dfe327",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
