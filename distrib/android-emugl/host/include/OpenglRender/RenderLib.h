@@ -36,6 +36,8 @@ public:
     // |useSubWindow| is true to indicate that renderer has to support an
     // OpenGL subwindow. If false, it only supports setPostCallback().
     // See Renderer.h for more info.
+    //
+    // There might be only one renderer.
     virtual RendererPtr initRenderer(int width, int height,
                                      bool useSubWindow) = 0;
 

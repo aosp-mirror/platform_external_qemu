@@ -470,7 +470,7 @@ FrameBuffer::~FrameBuffer() {
     free(m_fbImage);
 }
 
-void FrameBuffer::setPostCallback(OnPostFn onPost, void* onPostContext)
+void FrameBuffer::setPostCallback(emugl::Renderer::OnPostCallback onPost, void* onPostContext)
 {
     emugl::Mutex::AutoLock mutex(m_lock);
     m_onPost = onPost;

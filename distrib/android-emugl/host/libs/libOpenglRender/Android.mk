@@ -20,13 +20,16 @@ endif
 
 host_common_SRC_FILES := \
     $(host_OS_SRCS) \
+    ChannelStream.cpp \
     ColorBuffer.cpp \
     FbConfig.cpp \
     FrameBuffer.cpp \
     ReadBuffer.cpp \
+    RenderChannelImpl.cpp \
     RenderContext.cpp \
     RenderControl.cpp \
-    RenderServer.cpp \
+    RendererImpl.cpp \
+    RenderLibImpl.cpp \
     RenderThread.cpp \
     RenderThreadInfo.cpp \
     render_api.cpp \
