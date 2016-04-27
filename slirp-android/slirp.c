@@ -1079,7 +1079,9 @@ int slirp_redir(int is_udp, int host_port,
                         guest_port, 0))
             return -1;
     } else {
-        if (!solisten(host_port, guest_ip, guest_port, 0))
+        struct socket* s4 = solisten(host_port, guest_ip, guest_port, 0);
+        struct socket* s6 = solisten(host_port, guest_ip, guest_port, SS_IPV6);
+        if (!s4 && !s6)
             return -1;
     }
     return 0;
