@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8cce97d_62e776f5",
+        "filename": "android/metrics/metrics_fields.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-27T14:49:09Z",
+      "side": 1,
+      "message": "Did you want \u002764\u0027 here?",
+      "revId": "fe6742aa3f3447120cbdf7573f1080c26dd189d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
