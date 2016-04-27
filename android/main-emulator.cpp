@@ -34,6 +34,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/main-emugl.h"
 #include "android/opengl/emugl_config.h"
 #include "android/qt/qt_setup.h"
 #include "android/utils/compiler.h"
@@ -464,68 +465,20 @@ int main(int argc, char** argv)
     /* We need to find the location of the GLES emulation shared libraries
      * and modify either LD_LIBRARY_PATH or PATH accordingly
      */
-    bool gpuEnabled = false;
-    const char* gpuMode = NULL;
-
-    if (avdName) {
-        gpuMode = path_getAvdGpuMode(avdName);
-        gpuEnabled = (gpuMode != NULL);
-    }
 
     // Detect if this is google API's
-
-    bool google_apis = checkForGoogleAPIs(avdName);
-    int api_level = getApiLevel(avdName);
-
-    bool has_guest_renderer = (!strcmp(avdArch, "x86") ||
-                               !strcmp(avdArch, "x86_64")) &&
-                               (api_level >= 23) &&
-                               google_apis;
-
-    bool blacklisted = false;
-    bool on_blacklist = false;
-
-    // If the user has specified a renderer
-    // that is neither "auto" nor "host",
-    // don't check the blacklist.
-    if (!((!gpu && gpuMode && strcmp(gpuMode, "auto") &&
-                    strcmp(gpuMode, "host")) ||
-                (gpu && strcmp(gpu, "auto") &&
-                 strcmp(gpu, "host") &&
-                 strcmp(gpu, "on")))) {
-         on_blacklist = isHostGpuBlacklisted();
-    }
-
-    if (avdName) {
-        // This is for testing purposes only.
-        android::base::ScopedCPtr<const char> testGpuBlacklist(
-                path_getAvdGpuBlacklisted(avdName));
-        if (testGpuBlacklist.get()) {
-            on_blacklist = !strcmp(testGpuBlacklist.get(), "yes");
-        }
-    }
-
-    if ((!gpu && gpuMode && !strcmp(gpuMode, "auto")) ||
-        (gpu && !strcmp(gpu, "auto"))) {
-        if (on_blacklist) {
-            fprintf(stderr, "Your GPU drivers may have a bug. "
-                    "Switching to software rendering.\n");
-        }
-        blacklisted = on_blacklist;
-        setGpuBlacklistStatus(blacklisted);
-    } else if (on_blacklist &&
-               ((!gpu && gpuMode && !strcmp(gpuMode, "host"))  ||
-                (gpu && !strcmp(gpu, "host")) ||
-                (gpu && !strcmp(gpu, "on")))) {
-        fprintf(stderr, "Your GPU drivers may have a bug. "
-                        "If you experience graphical issues, "
-                        "please consider switching to software rendering.\n");
-    }
-
+    bool googleApis = checkForGoogleAPIs(avdName);
+    int apiLevel = getApiLevel(avdName);
     EmuglConfig config;
-    if (!emuglConfig_init(
-                &config, gpuEnabled, gpuMode, gpu, wantedBitness, no_window,
-                blacklisted, has_guest_renderer)) {
+
+    if (!androidEmuglConfigInit(&config,
+                                avdName,
+                                avdArch,
+                                apiLevel,
+                                googleApis,
+                                gpu,
+                                wantedBitness,
+                                no_window)) {
         fprintf(stderr, "ERROR: %s\n", config.status);
         exit(1);
     }
