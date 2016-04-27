@@ -16,6 +16,29 @@
       "revId": "874ae02b764283d59bded2aeb3343758073254e0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_45a08904",
+        "filename": "android/opengles.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T18:14:02Z",
+      "side": 1,
+      "message": "I like the original code better.  Yes, it\u0027s legal to have declarations in expression context -- but I think it\u0027s seldom a good idea.  IMHO, predicates should be side-effect free whenever possible.",
+      "range": {
+        "startLine": 112,
+        "startChar": 1,
+        "endLine": 112,
+        "endChar": 67
+      },
+      "revId": "874ae02b764283d59bded2aeb3343758073254e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
