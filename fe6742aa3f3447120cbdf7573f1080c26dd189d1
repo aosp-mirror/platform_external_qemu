@@ -16,6 +16,29 @@
       "revId": "fe6742aa3f3447120cbdf7573f1080c26dd189d1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_0ab69e4d",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T17:35:48Z",
+      "side": 1,
+      "message": "just making sure this won\u0027t be called when *user_actions is already deleted\nif that\u0027s a shared_ptr then it\u0027s even worse - this callback would keep it alive until the callback is unregistered (mmm, never?). So for shared_ptr it\u0027s better to pass a weak_ptr and lock it on every call.",
+      "range": {
+        "startLine": 221,
+        "startChar": 0,
+        "endLine": 223,
+        "endChar": 7
+      },
+      "revId": "fe6742aa3f3447120cbdf7573f1080c26dd189d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
