@@ -120,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "48560d47_1469a57b",
+        "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-27T16:19:58Z",
+      "side": 1,
+      "message": "Ah!  I missed that, thanks.\n\n(Though you could declare a max alignment of 8, declare mArray[StackSize+MaxAlign], and have the constructor init a pointer to the properly-aligned interior pointer, so you don\u0027t care about the alignment of mArray.  Not sure it\u0027s better, just pointing out the option.)",
+      "parentUuid": "48560d47_c6014c2b",
+      "range": {
+        "startLine": 120,
+        "startChar": 35,
+        "endLine": 120,
+        "endChar": 51
+      },
+      "revId": "ab5856fdec1a89bc416a8b00d4e4715988165390",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "48560d47_373798a2",
         "filename": "distrib/android-emugl/shared/OpenglCodecCommon/ProtocolUtils.h",
         "patchSetId": 1
