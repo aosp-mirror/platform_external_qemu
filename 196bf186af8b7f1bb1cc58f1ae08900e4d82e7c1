@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8cce97d_02c14a3e",
+        "filename": "android/skin/qt/user-actions-counter.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-27T14:42:28Z",
+      "side": 1,
+      "message": "Missing newline",
+      "range": {
+        "startLine": 1,
+        "startChar": 50,
+        "endLine": 1,
+        "endChar": 53
+      },
+      "revId": "196bf186af8b7f1bb1cc58f1ae08900e4d82e7c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8cce97d_22dd6e25",
+        "filename": "android/skin/qt/user-actions-counter.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-27T14:42:28Z",
+      "side": 1,
+      "message": "Nice",
+      "revId": "196bf186af8b7f1bb1cc58f1ae08900e4d82e7c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8cce97d_a2c97e6c",
+        "filename": "android/skin/qt/user-actions-counter.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-27T14:42:28Z",
+      "side": 1,
+      "message": "Lost a newline",
+      "range": {
+        "startLine": 1,
+        "startChar": 50,
+        "endLine": 1,
+        "endChar": 57
+      },
+      "revId": "196bf186af8b7f1bb1cc58f1ae08900e4d82e7c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8cce97d_e2c38646",
+        "filename": "android/skin/qt/user-actions-counter.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-27T14:42:28Z",
+      "side": 1,
+      "message": "Perhaps expand this a little--it only works when called ... when?\nMust this be public?",
+      "range": {
+        "startLine": 51,
+        "startChar": 7,
+        "endLine": 51,
+        "endChar": 42
+      },
+      "revId": "196bf186af8b7f1bb1cc58f1ae08900e4d82e7c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
