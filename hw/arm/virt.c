@@ -1382,6 +1382,14 @@ static void machvirt_init(MachineState *machine)
 
     create_pcie(vms, pic);
 
+    if (machine_usb(machine)) {
+        PCIBus *pci_bus = (PCIBus*)object_resolve_path_type("", TYPE_PCI_BUS, NULL);
+        if (!pci_bus)
+            error_report("No PCI bus available to add USB OHCI controller to.");
+        else
+            pci_create_simple(pci_bus, -1, "pci-ohci");
+    }
+
     create_gpio(vms, pic);
 
     /* Create mmio transports, so the user can create virtio backends
