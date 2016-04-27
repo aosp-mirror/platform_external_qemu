@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "android/base/Optional.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 
@@ -27,17 +28,27 @@ namespace base {
 // specialization.
 class MessageChannelBase {
 public:
+    // Get the current channel size
+    size_t size() const { return mCount; }
+
+    // Abort the currently pending operations and don't allow any other ones
+    void stop();
+
+    // Check if the channel is stopped.
+    bool isStopped() const { return mStopped; }
+
+protected:
     // Constructor. |capacity| is the buffer capacity in messages.
     MessageChannelBase(size_t capacity);
 
-protected:
     // Destructor.
-    ~MessageChannelBase();
+    ~MessageChannelBase() = default;
 
     // Call this method in the sender thread before writing a new message.
     // This returns the position of the available slot in the message array
     // where to copy the new fixed-size message. After the copy, call
     // afterWrite().
+    // If the channel is stopped, return value is undefined.
     size_t beforeWrite();
 
     // To be called after beforeWrite() and copying a new fixed-size message
@@ -48,19 +59,18 @@ protected:
     // Call this method in the receiver thread before reading a new message.
     // This returns the position in the message array where the new message
     // can be read. Caller must process the message, then call afterRead().
+    // If the channel is stopped, return value is undefined.
     size_t beforeRead();
 
     // To be called in the receiver thread after beforeRead() and processing
     // the corresponding message.
     void afterRead();
 
-    // Get the size of the channel
-    size_t size() const { return mCount; }
-
 private:
-    size_t mPos;
-    size_t mCount;
+    size_t mPos = 0;
+    size_t mCount = 0;
     size_t mCapacity;
+    bool mStopped = false;
     Lock mLock;
     ConditionVariable mCanRead;
     ConditionVariable mCanWrite;
@@ -75,35 +85,49 @@ private:
 //
 //   - From the sender thread, call send(msg);
 //   - From the receiver thread, call receive(&msg);
-//
+//   - If you want to stop the IPC, call stop();
 template <typename T, size_t CAPACITY>
 class MessageChannel : public MessageChannelBase {
 public:
     MessageChannel() : MessageChannelBase(CAPACITY) {}
 
-    void send(const T& msg) {
+    bool send(const T& msg) {
         size_t pos = beforeWrite();
-        mItems[pos] = msg;
+        if (!isStopped()) {
+            mItems[pos] = msg;
+        }
         afterWrite();
+        return !isStopped();
     }
 
-    void send(T&& msg) {
+    bool send(T&& msg) {
         size_t pos = beforeWrite();
-        mItems[pos] = std::move(msg);
+        if (!isStopped()) {
+            mItems[pos] = std::move(msg);
+        }
         afterWrite();
+        return !isStopped();
     }
 
-    void receive(T* msg) {
+    bool receive(T* msg) {
         size_t pos = beforeRead();
-        *msg = std::move(mItems[pos]);
+        if (!isStopped()) {
+            *msg = std::move(mItems[pos]);
+        }
         afterRead();
+        return !isStopped();
     }
 
-    T receive() {
+    Optional<T> receive() {
         size_t pos = beforeRead();
-        T msg = std::move(mItems[pos]);
-        afterRead();
-        return msg;
+        if (!isStopped()) {
+            Optional<T> msg(std::move(mItems[pos]));
+            afterRead();
+            return msg;
+        } else {
+            afterRead();
+            return {};
+        }
     }
 
     constexpr size_t capacity() const { return CAPACITY; }
