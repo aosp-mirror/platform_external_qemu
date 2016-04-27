@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48560d47_6f65a734",
+        "filename": "android/crashreport/CrashReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-27T19:40:47Z",
+      "side": 1,
+      "message": "nit: checking for an empty function could possibly catch some future bug here",
+      "range": {
+        "startLine": 110,
+        "startChar": 8,
+        "endLine": 110,
+        "endChar": 49
+      },
+      "revId": "ee40f0b95c318cbe24f43e26631964ca8e42116d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
