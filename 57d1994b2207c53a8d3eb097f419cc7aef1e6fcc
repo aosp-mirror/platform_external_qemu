@@ -322,6 +322,24 @@
     },
     {
       "key": {
+        "uuid": "88e9e5fc_da62799d",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderingChannel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-28T21:15:46Z",
+      "side": 1,
+      "message": "Since C++11 STL containers support move semantics, returning them by value doesn\u0027t necessarily mean executing extra work. \n\nI.e.\nstd::vector\u003cint\u003e result(0,1,2);\nreturn result;\n\nwill not result in any extraneous copying, since a move constructor (rather than copy ctor) will be invoked and the internal state of \"result\" will be transferred to the new object",
+      "parentUuid": "889d6572_913e7c18",
+      "revId": "57d1994b2207c53a8d3eb097f419cc7aef1e6fcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "889d6572_713af827",
         "filename": "distrib/android-emugl/host/include/OpenglRender/IRenderingChannel.h",
         "patchSetId": 1
