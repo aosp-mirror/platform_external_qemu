@@ -58,6 +58,7 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
 
                 GLsizei compressedSize = etc1_get_encoded_data_size(width, height);
                 SET_ERROR_IF((compressedSize > imageSize), GL_INVALID_VALUE);
+                SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
                 const int32_t align = ctx->getUnpackAlignment()-1;
                 const int32_t bpr = ((width * 3) + align) & ~align;
@@ -85,6 +86,7 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
                 SET_ERROR_IF(level > log2(ctx->getMaxTexSize()) || 
                              border !=0 || level > 0 || 
                              !GLESvalidate::texImgDim(width,height,ctx->getMaxTexSize()+2),GL_INVALID_VALUE)
+                SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
                 int nMipmaps = -level + 1;
                 GLsizei tmpWidth  = width;
