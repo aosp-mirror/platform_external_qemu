@@ -290,6 +290,7 @@ TEST(Optional, Emplace) {
 
     o.clear();
     o.emplace({1,2});
+    EXPECT_TRUE(o);
     EXPECT_EQ((std::vector<int>{1,2}), *o);
     EXPECT_EQ(2, o->capacity());
 }
@@ -365,6 +366,9 @@ TEST(Optional, Destruction) {
         Track(int& val) : mVal(val) {
             ++mVal.get();
         }
+        Track(std::initializer_list<int*> vals) : mVal(**vals.begin()) {
+            ++mVal.get();
+        }
         Track(const Track& other) : mVal(other.mVal) {
             ++mVal.get();
         }
@@ -431,6 +435,32 @@ TEST(Optional, Destruction) {
         EXPECT_EQ(2, counter);
     }
     EXPECT_EQ(0, counter);
+
+    int counter2 = 0;
+    {
+        Optional<Track> o;
+        o.emplace(counter);
+        EXPECT_EQ(1, counter);
+
+        o.emplace(counter2);
+        EXPECT_EQ(0, counter);
+        EXPECT_EQ(1, counter2);
+    }
+    EXPECT_EQ(0, counter);
+    EXPECT_EQ(0, counter2);
+
+    {
+        Optional<Track> o;
+        o.emplace({&counter});
+        EXPECT_EQ(1, counter);
+
+        counter2 = 0;
+        o.emplace({&counter2});
+        EXPECT_EQ(0, counter);
+        EXPECT_EQ(1, counter2);
+    }
+    EXPECT_EQ(0, counter);
+    EXPECT_EQ(0, counter2);
 }
 
 }  // namespace base

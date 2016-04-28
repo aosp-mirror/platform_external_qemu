@@ -340,6 +340,7 @@ public:
             destruct();
         }
         new (&get()) T(std::forward<Args>(args)...);
+        this->setConstructed(true);
     }
 
     // In-place construction with possible destruction of the old value
@@ -351,6 +352,7 @@ public:
             destruct();
         }
         new (&get()) T(il);
+        this->setConstructed(true);
     }
 
 private:
