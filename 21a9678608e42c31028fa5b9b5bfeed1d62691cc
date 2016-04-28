@@ -16,6 +16,24 @@
       "revId": "21a9678608e42c31028fa5b9b5bfeed1d62691cc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48560d47_fec9636b",
+        "filename": "android/opengl/logger.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-28T22:05:13Z",
+      "side": 1,
+      "message": "this file was used as the emulator\u0027s interface for the opengl logging, but now that\u0027s not true. I\u0027ll update the includes",
+      "parentUuid": "28c9d979_f919736a",
+      "revId": "21a9678608e42c31028fa5b9b5bfeed1d62691cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
