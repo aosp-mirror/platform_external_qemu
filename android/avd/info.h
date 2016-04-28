@@ -261,7 +261,9 @@ char*        avdInfo_getTargetCpuArch(AvdInfo* i);
 char*        avdInfo_getTargetAbi( AvdInfo*  i );
 
 /* Reads the AVD's hardware configuration into 'hw'. returns -1 on error, 0 otherwise */
-int          avdInfo_initHwConfig( AvdInfo*  i, AndroidHwConfig*  hw );
+int          avdInfo_initHwConfig(AvdInfo* i,
+                                  AndroidHwConfig* hw,
+                                  bool isQemu2);
 
 /* Returns a *copy* of the path used to store profile 'foo'. result must be freed by caller */
 char*        avdInfo_getCodeProfilePath( AvdInfo*  i, const char*  profileName );
