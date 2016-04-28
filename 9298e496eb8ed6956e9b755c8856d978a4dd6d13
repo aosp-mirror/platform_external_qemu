@@ -22,6 +22,30 @@
       "revId": "9298e496eb8ed6956e9b755c8856d978a4dd6d13",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88e9e5fc_d10944cf",
+        "filename": "android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 3
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-04-28T20:55:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "48560d47_6ff3e783",
+      "range": {
+        "startLine": 172,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 16
+      },
+      "revId": "9298e496eb8ed6956e9b755c8856d978a4dd6d13",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
