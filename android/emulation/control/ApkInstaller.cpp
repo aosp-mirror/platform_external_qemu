@@ -22,6 +22,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 namespace android {
 namespace emulation {
@@ -42,129 +43,18 @@ using std::vector;
 // the new process besides using the out PID argument and killing that process
 // when the user presses cancel (yikes).
 const System::Duration ApkInstaller::kInstallTimeoutMs = System::kInfinite;
-const char ApkInstaller::kInstallOutputFileBase[] = "install-";
 const char ApkInstaller::kDefaultErrorString[] = "Could not parse error string";
 
-// static
-std::shared_ptr<ApkInstaller> ApkInstaller::create(
-        Looper* looper,
-        const vector<string>& adbCommandArgs,
-        StringView apkFilePath,
-        ResultCallback resultCallback) {
-    auto inst = new ApkInstaller(looper, adbCommandArgs, apkFilePath,
-                                 resultCallback);
-    return std::shared_ptr<ApkInstaller>(inst);
-}
-
-ApkInstaller::ApkInstaller(Looper* looper,
-                           const vector<string>& adbCommandArgs,
-                           StringView apkFilePath,
-                           ResultCallback resultCallback)
-    : mLooper(looper),
-      mResultCallback(resultCallback),
-      mApkFilePath(apkFilePath),
-      mOutputFilePath(
-              PathUtils::join(System::get()->getTempDir(),
-                              string(kInstallOutputFileBase)
-                                      .append(Uuid::generate().toString()))) {
-    setAdbCommandArgs(adbCommandArgs);
-}
-
-bool ApkInstaller::setAdbCommandArgs(const vector<string>& adbCommandArgs) {
-    if (inFlight()) {
-        return false;
-    }
-
-    mInstallCommand = adbCommandArgs;
-
-    mInstallCommand.push_back("install");
-    mInstallCommand.push_back("-r");
-
-    return true;
-}
-
-bool ApkInstaller::setApkFilePath(base::StringView apkFilePath) {
-    if (inFlight()) {
-        return false;
-    }
-
-    mApkFilePath = apkFilePath;
-    return true;
-}
-
-void ApkInstaller::cancel() {
-    mCancelled = true;
-}
-
-void ApkInstaller::start() {
-    if (inFlight()) {
-        mResultCallback(ApkInstaller::Result::kOperationInProgress, "");
-        return;
-    }
-    mCancelled = false;
-
-    auto shared_this = shared_from_this();
-    mParallelTask.reset(new ParallelTask<ApkInstaller::Result>(
-            mLooper,
-            [shared_this](Result* outResult) {
-                shared_this->taskFunction(outResult);
-            },
-            [shared_this](const Result& result) {
-                shared_this->taskDoneFunction(result);
-            }));
-    mParallelTask->start();
-
-    if (!mParallelTask->inFlight()) {
-        mResultCallback(ApkInstaller::Result::kUnknownError, "");
+ApkInstaller::ApkInstaller(AdbInterface* adb) : mAdb(adb) {}
+ApkInstaller::~ApkInstaller() {
+    if (mInstallCommand) {
+        mInstallCommand->cancel();
     }
 }
 
-intptr_t ApkInstaller::taskFunction(ApkInstaller::Result* outResult) {
-    *outResult = Result::kUnknownError;
-
-    auto sys = System::get();
-
-    if (!sys->pathCanRead(mApkFilePath)) {
-        *outResult = Result::kApkPermissionsError;
-        return 0;
-    }
-
-    System::ProcessExitCode exitCode;
-    System::Pid pid;
-
-    auto command = mInstallCommand;
-    command.push_back(mApkFilePath);
-
-    if (!sys->runCommand(command,
-                         System::RunOptions::WaitForCompletion |
-                                 System::RunOptions::DumpOutputToFile |
-                                 System::RunOptions::TerminateOnTimeout,
-                         kInstallTimeoutMs, &exitCode, &pid, mOutputFilePath) ||
-        exitCode != 0) {
-        // If the device is full, we may be able to get some information from
-        // the output (if it exists).
-        string errorString;
-        if (!parseOutputForFailure(mOutputFilePath, &errorString)) {
-            *outResult = Result::kDeviceStorageFull;
-        } else {
-            *outResult = Result::kAdbConnectionFailed;
-        }
-        return 0;
-    }
-
-    string errorCode;
-    if (!parseOutputForFailure(mOutputFilePath, &errorCode)) {
-        mErrorCode = errorCode;
-        *outResult = Result::kInstallFailed;
-        return 0;
-    }
-
-    *outResult = Result::kSuccess;
-    return 0;
-}
 
 // static
-bool ApkInstaller::parseOutputForFailure(const string& outputFilePath,
+bool ApkInstaller::parseOutputForFailure(const string& output,
                                          string* outErrorString) {
     // "adb install" does not return a helpful exit status, so instead we parse
     // the output of the process looking for:
@@ -172,14 +62,10 @@ bool ApkInstaller::parseOutputForFailure(const string& outputFilePath,
     //   copied because the device is full
     // - "Failure [<some error code>]", in the case that the apk could not be
     //   installed because of a specific error
-    std::ifstream file(outputFilePath);
-    if (!file.is_open()) {
-        *outErrorString = kDefaultErrorString;
-        return false;
-    }
+    std::istringstream stream(output);
 
     string line;
-    while (getline(file, line)) {
+    while (getline(stream, line)) {
         if (!line.compare(0, 7, "Failure")) {
             auto openBrace = line.find("[");
             auto closeBrace = line.find("]", openBrace + 1);
@@ -198,13 +84,34 @@ bool ApkInstaller::parseOutputForFailure(const string& outputFilePath,
     return true;
 }
 
-void ApkInstaller::taskDoneFunction(const Result& result) {
-    if (!mCancelled) {
-        mResultCallback(result, mErrorCode);
+AdbCommandPtr ApkInstaller::install(android::base::StringView apkFilePath,
+                                    ApkInstaller::ResultCallback resultCallback) {
+    if (!base::System::get()->pathCanRead(apkFilePath)) {
+        resultCallback(Result::kApkPermissionsError, "");
+        return nullptr;
     }
-    // Ensure no shared_ptr's linger beyond this in the task.
-    // NOTE: May invalidate |this|.
-    mParallelTask.reset();
+    std::vector<std::string> installCommand {"install", "-r", apkFilePath};
+    mInstallCommand = mAdb->runAdbCommand(
+        installCommand,
+        [resultCallback, this] (const AdbCommandResult& result) {
+            std::string errorString;
+            const bool parseResult =
+                parseOutputForFailure(result.output, &errorString);
+            if (!result.command_ran || result.exit_code) {
+                resultCallback(parseResult
+                                    ? Result::kDeviceStorageFull
+                                    : Result::kAdbConnectionFailed,
+                                "");
+            } else if (!parseResult) {
+                resultCallback(Result::kInstallFailed, errorString);
+            } else {
+                resultCallback(Result::kSuccess, "");
+            }
+            mInstallCommand.reset();
+        },
+        kInstallTimeoutMs,
+        true);
+    return mInstallCommand;
 }
 
 }  // namespace emulation

@@ -13,7 +13,6 @@
 #pragma once
 
 #include "android/base/containers/CircularBuffer.h"
-#include "android/emulation/control/AdbInterface.h"
 #include "android/skin/event.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/size-tweaker.h"
@@ -70,11 +69,6 @@ public:
     void setToolEmuAgent(const UiEmuAgent* agPtr) { mUiEmuAgent = agPtr; }
     const UiEmuAgent* getUiEmuAgent() const { return mUiEmuAgent; }
 
-    QString getAdbFullPath(QStringList *args);
-
-    void runAdbShellStopAndQuit();
-    void checkAdbVersionAndWarn();
-
     bool handleQtKeyEvent(QKeyEvent* event);
 
     // The designers want a gap between the main emulator
@@ -83,11 +77,8 @@ public:
 
 private:
     void createExtendedWindow();
-    void showAdbWarning();
-    void adbShellStopRunner();
     void handleUICommand(QtUICommand cmd, bool down);
     void forwardKeyToEmulator(uint32_t keycode, bool down);
-
 
     // Helper method, calls handleUICommand with
     // down equal to true and down equal to false.
@@ -116,8 +107,6 @@ private:
     QString mDetectedAdbPath;
     std::weak_ptr<UIEventRecorder<android::base::CircularBuffer>> mUIEventRecorder;
     SizeTweaker mSizeTweaker;
-    QMessageBox mAdbWarningBox;
-    android::emulation::AdbInterface mAdbInterface;
 
 private slots:
     void on_back_button_pressed();
@@ -140,7 +129,11 @@ private slots:
     void on_volume_up_button_released();
     void on_zoom_button_clicked();
 
+<<<<<<< 20967bc1e15efc3a917d8ce7d33e951a55a0a7a7
     void slot_adbWarningMessageAccepted();
+=======
+    void slot_createExtendedWindow();
+>>>>>>> ADB machinery refactoring, part I
 };
 
 typedef void(ToolWindow::*ToolWindowSlot)();

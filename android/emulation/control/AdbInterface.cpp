@@ -17,6 +17,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
+#include "android/base/Uuid.h"
 #include "android/emulation/ConfigDirs.h"
 
 #include <cstdio>
@@ -67,7 +68,9 @@ static bool checkAdbVersion(const std::string& sdk_root_directory) {
     return false;
 }
 
-AdbInterface::AdbInterface() : mAdbVersionCurrent(false) {
+AdbInterface::AdbInterface(android::base::Looper* looper) :
+        mLooper(looper),
+        mAdbVersionCurrent(false) {
     // First try finding ADB by the environment variable.
     auto sdk_root_by_env = android::ConfigDirs::getSdkRootDirectoryByEnv();
     if (!sdk_root_by_env.empty()) {
@@ -98,6 +101,87 @@ AdbInterface::AdbInterface() : mAdbVersionCurrent(false) {
             mAdbPath =
                 PathUtils::join(sdk_root_by_path, "platform-tools", "adb");
         }
+    }
+}
+
+AdbCommandPtr AdbInterface::runAdbCommand(
+        const std::vector<std::string> args,
+        std::function<void(const AdbCommandResult&)> result_callback,
+        base::System::Duration timeout_ms,
+        bool want_output) {
+    auto command = AdbCommandPtr(new AdbCommand(
+        mLooper,
+        mAdbPath,
+        args,
+        want_output,
+        timeout_ms,
+        result_callback));
+    command->start();
+    return command;
+}
+
+AdbCommand::AdbCommand(android::base::Looper* looper,
+                       const std::string& adb_path,
+                       const std::vector<std::string>& command,
+                       bool want_output,
+                       base::System::Duration timeout,
+                       AdbCommand::ResultCallback callback) :
+    mLooper(looper),
+    mResultCallback(callback),
+    mOutputFilePath(PathUtils::join(System::get()->getTempDir(),
+                                    std::string("adbcommand")
+                                      .append(Uuid::generate().toString()))),
+    mWantOutput(want_output),
+    mTimeout(timeout) {
+    mCommand.push_back(adb_path);
+    mCommand.insert(mCommand.end(), command.begin(), command.end());
+}
+
+void AdbCommand::start() {
+    if (!mTask) {
+        auto shared = shared_from_this();
+        mTask.reset(new ParallelTask<AdbCommandResult>(
+            mLooper,
+            [shared](AdbCommandResult* result) {
+                shared->taskFunction(result);
+            },
+            [shared](const AdbCommandResult& result) {
+                shared->taskDoneFunction(result);
+            }));
+        mTask->start();
+    }
+}
+
+void AdbCommand::taskDoneFunction(const AdbCommandResult& result) {
+    if (!mCancelled) {
+        mResultCallback(result);
+    }
+    mTask.reset();
+}
+
+void AdbCommand::taskFunction(AdbCommandResult* result) {
+    System::Pid pid;
+    RunOptions run_flags =
+        System::RunOptions::WaitForCompletion |
+        System::RunOptions::TerminateOnTimeout;
+    if (mWantOutput) {
+        run_flags |= System::RunOptions::DumpOutputToFile;
+    } else {
+        run_flags |= System::RunOptions::HideAllOutput;
+    }
+    result->command_ran = System::get()->runCommand(
+        mCommand,
+        run_flags,
+        mTimeout,
+        &result->exit_code,
+        &pid,
+        mOutputFilePath);
+    if (mWantOutput) {
+        std::ifstream output_file(mOutputFilePath);
+        output_file.seekg(0, std::ios::end);
+        std::streamsize size = output_file.tellg();
+        result->output.resize(size);
+        output_file.read(&result->output[0], size);
     }
 }
 
