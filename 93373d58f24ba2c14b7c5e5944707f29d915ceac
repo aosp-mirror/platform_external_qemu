@@ -25,6 +25,23 @@
     },
     {
       "key": {
+        "uuid": "68a4b1ba_171a735e",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-28T19:02:52Z",
+      "side": 1,
+      "message": "Probably take off keywords from this and make it sound more general.",
+      "revId": "93373d58f24ba2c14b7c5e5944707f29d915ceac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "682111e2_d2af313a",
         "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
         "patchSetId": 1
