@@ -1368,10 +1368,6 @@ help_tcpdump(stralloc_t  *out)
 
     "  note that this captures all Ethernet packets, and is not limited to TCP\n"
     "  connections.\n\n"
-
-    "  you can also start/stop the packet capture dynamically through the console;\n"
-    "  see the 'network capture start' and 'network capture stop' commands for\n"
-    "  details.\n\n"
     );
 }
 

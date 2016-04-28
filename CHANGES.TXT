@@ -315,10 +315,8 @@ IMPORTANT CHANGES:
   are enabled by default, so this only affects "normal" virtual devices
   created with the 'android' tool.
 
-- The emulator now supports capturing network packets to a file.
-  You can either use the new -tcpdump <file> command-line option, or use
-  the new console 'network capture start <file>' command (then use
-  'network capture stop' to stop it).
+- The emulator now supports capturing network packets to a file via the
+  -tcpdump <file> command-line option
 
   This captures all ethernet packets on the virtual LAN, so this includes
   ARP, UDP, TCP, etc... The file is in libpcap format and can be opened with

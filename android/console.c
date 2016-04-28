@@ -768,46 +768,6 @@ describe_network_delay( ControlClient  client )
     /* XXX: TODO */
 }
 
-static int
-do_network_capture_start( ControlClient  client, char*  args )
-{
-    if ( !args ) {
-        control_write( client, "KO: missing <file> argument, see 'help network capture start'\r\n" );
-        return -1;
-    }
-    if ( qemu_tcpdump_start(args) < 0) {
-        control_write( client, "KO: could not start capture: %s", strerror(errno) );
-        return -1;
-    }
-    return 0;
-}
-
-static int
-do_network_capture_stop( ControlClient  client, char*  args )
-{
-    /* no need to return an error here */
-    qemu_tcpdump_stop();
-    return 0;
-}
-
-static const CommandDefRec  network_capture_commands[] =
-{
-    { "start", "start network capture",
-      "'network capture start <file>' starts a new capture of network packets\r\n"
-      "into a specific <file>. This will stop any capture already in progress.\r\n"
-      "the capture file can later be analyzed by tools like WireShark. It uses\r\n"
-      "the libpcap file format.\r\n\r\n"
-      "you can stop the capture anytime with 'network capture stop'\r\n", NULL,
-      do_network_capture_start, NULL },
-
-    { "stop", "stop network capture",
-      "'network capture stop' stops a currently running packet capture, if any.\r\n"
-      "you can start one with 'network capture start <file>'\r\n", NULL,
-      do_network_capture_stop, NULL },
-
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
-
 static const CommandDefRec  network_commands[] =
 {
     { "status", "dump network status", NULL, NULL,
@@ -818,10 +778,6 @@ static const CommandDefRec  network_commands[] =
 
     { "delay", "change network latency", NULL, describe_network_delay,
        do_network_delay, NULL },
-
-    { "capture", "dump network packets to file",
-      "allows to start/stop capture of network packets to a file for later analysis\r\n", NULL,
-      NULL, network_capture_commands },
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
