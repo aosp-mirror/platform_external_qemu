@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8594975_49638d0a",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-28T00:13:55Z",
+      "side": 1,
+      "message": "Do you have a concrete use case in mind, or is this just for API completeness/symmetry?\n\nIn either case, Should we consider an \"AutoUnlock\" class, which requires the lock to be locked, and whose lifetime defines a region in which the lock is unlocked, then relocked.  So you could have\n\n{\n  AutoLock l(lock);\n  ... locked\n  {\n     AutoUnlock u(lock);\n     ... unlocked\n  }\n  ... locked\n}",
+      "range": {
+        "startLine": 94,
+        "startChar": 4,
+        "endLine": 94,
+        "endChar": 17
+      },
+      "revId": "eb1234c85f4949636d7c279e6a68d9053c7c144c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
