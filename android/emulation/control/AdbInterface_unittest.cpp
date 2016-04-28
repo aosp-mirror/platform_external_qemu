@@ -35,18 +35,20 @@ TEST(AdbInterface, freshAdbVersion) {
     ASSERT_TRUE(dir->makeSubDir("Sdk"));
     ASSERT_TRUE(dir->makeSubDir("Sdk/platform-tools"));
     std::string output_file =
-        dir->makeSubPath("Sdk/platform-tools/source.properties");
+            dir->makeSubPath("Sdk/platform-tools/source.properties");
     std::ofstream ofs(output_file);
     ASSERT_TRUE(ofs.is_open());
     ofs << "### Comment\nArchive.HostOs=linux\nPkg.License=\\nNoliense\n"
            "Pkg.LicenseRef=android-sdk-license\nPkg.Revision=23.1.0\n"
-           "Pkg.SourceUrl=https\\://dl.google.com/android/repository/repository-12.xml\n";
+           "Pkg.SourceUrl=https\\://dl.google.com/android/repository/"
+           "repository-12.xml\n";
     ofs.close();
     std::string sdkRoot = PathUtils::join(dir->path(), "Sdk");
     system.envSet("ANDROID_SDK_ROOT", sdkRoot);
-    AdbInterface adb;
+    AdbInterface adb(nullptr);
     EXPECT_TRUE(adb.isAdbVersionCurrent());
-    std::string expectedAdbPath = PathUtils::join(sdkRoot, "platform-tools", "adb");
+    std::string expectedAdbPath =
+            PathUtils::join(sdkRoot, "platform-tools", "adb");
     EXPECT_EQ(expectedAdbPath, adb.detectedAdbPath());
 }
 
@@ -57,18 +59,20 @@ TEST(AdbInterface, freshAdbVersionNoMinor) {
     ASSERT_TRUE(dir->makeSubDir("Sdk"));
     ASSERT_TRUE(dir->makeSubDir("Sdk/platform-tools"));
     std::string output_file =
-        dir->makeSubPath("Sdk/platform-tools/source.properties");
+            dir->makeSubPath("Sdk/platform-tools/source.properties");
     std::ofstream ofs(output_file);
     ASSERT_TRUE(ofs.is_open());
     ofs << "### Comment\nArchive.HostOs=linux\nPkg.License=\\nNoliense\n"
            "Pkg.LicenseRef=android-sdk-license\nPkg.Revision=24 rc1\n"
-           "Pkg.SourceUrl=https\\://dl.google.com/android/repository/repository-12.xml\n";
+           "Pkg.SourceUrl=https\\://dl.google.com/android/repository/"
+           "repository-12.xml\n";
     ofs.close();
     std::string sdkRoot = PathUtils::join(dir->path(), "Sdk");
     system.envSet("ANDROID_SDK_ROOT", sdkRoot);
-    AdbInterface adb;
+    AdbInterface adb(nullptr);
     EXPECT_TRUE(adb.isAdbVersionCurrent());
-    std::string expectedAdbPath = PathUtils::join(sdkRoot, "platform-tools", "adb");
+    std::string expectedAdbPath =
+            PathUtils::join(sdkRoot, "platform-tools", "adb");
     EXPECT_EQ(expectedAdbPath, adb.detectedAdbPath());
 }
 
@@ -79,18 +83,20 @@ TEST(AdbInterface, staleAdbMinorVersion) {
     ASSERT_TRUE(dir->makeSubDir("Sdk"));
     ASSERT_TRUE(dir->makeSubDir("Sdk/platform-tools"));
     std::string output_file =
-        dir->makeSubPath("Sdk/platform-tools/source.properties");
+            dir->makeSubPath("Sdk/platform-tools/source.properties");
     std::ofstream ofs(output_file);
     ASSERT_TRUE(ofs.is_open());
     ofs << "### Comment\nArchive.HostOs=linux\nPkg.License=\\nNoliense\n"
            "Pkg.LicenseRef=android-sdk-license\nPkg.Revision=23.0.0\n"
-           "Pkg.SourceUrl=https\\://dl.google.com/android/repository/repository-12.xml\n";
+           "Pkg.SourceUrl=https\\://dl.google.com/android/repository/"
+           "repository-12.xml\n";
     ofs.close();
     std::string sdkRoot = PathUtils::join(dir->path(), "Sdk");
     system.envSet("ANDROID_SDK_ROOT", sdkRoot);
-    AdbInterface adb;
+    AdbInterface adb(nullptr);
     EXPECT_FALSE(adb.isAdbVersionCurrent());
-    std::string expectedAdbPath = PathUtils::join(sdkRoot, "platform-tools", "adb");
+    std::string expectedAdbPath =
+            PathUtils::join(sdkRoot, "platform-tools", "adb");
     EXPECT_EQ(expectedAdbPath, adb.detectedAdbPath());
 }
 
@@ -101,18 +107,19 @@ TEST(AdbInterface, staleAdbMajorVersion) {
     ASSERT_TRUE(dir->makeSubDir("Sdk"));
     ASSERT_TRUE(dir->makeSubDir("Sdk/platform-tools"));
     std::string output_file =
-        dir->makeSubPath("Sdk/platform-tools/source.properties");
+            dir->makeSubPath("Sdk/platform-tools/source.properties");
     std::ofstream ofs(output_file);
     ASSERT_TRUE(ofs.is_open());
     ofs << "### Comment\nArchive.HostOs=linux\nPkg.License=\\nNoliense\n"
            "Pkg.LicenseRef=android-sdk-license\nPkg.Revision=22.1.0\n"
-           "Pkg.SourceUrl=https\\://dl.google.com/android/repository/repository-12.xml\n";
+           "Pkg.SourceUrl=https\\://dl.google.com/android/repository/"
+           "repository-12.xml\n";
     ofs.close();
     std::string sdkRoot = PathUtils::join(dir->path(), "Sdk");
     system.envSet("ANDROID_SDK_ROOT", sdkRoot);
-    AdbInterface adb;
+    AdbInterface adb(nullptr);
     EXPECT_FALSE(adb.isAdbVersionCurrent());
-    std::string expectedAdbPath = PathUtils::join(sdkRoot, "platform-tools", "adb");
+    std::string expectedAdbPath =
+            PathUtils::join(sdkRoot, "platform-tools", "adb");
     EXPECT_EQ(expectedAdbPath, adb.detectedAdbPath());
 }
-
