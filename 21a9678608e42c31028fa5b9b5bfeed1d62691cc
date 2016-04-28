@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "28c9d979_f919736a",
+        "filename": "android/opengl/logger.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-28T16:02:27Z",
+      "side": 1,
+      "message": "I don\u0027t think this should appear in this header, since none of its declarations are used here.",
+      "revId": "21a9678608e42c31028fa5b9b5bfeed1d62691cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
