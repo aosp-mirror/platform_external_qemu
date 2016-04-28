@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "28c9d979_790e4326",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-28T16:00:08Z",
+      "side": 1,
+      "message": "nit: It would be valuable to better document the class\u0027 purpose, in particular that it is used to receive streams of wire protocol bytes from the guest-side of EmuGL system libraries.",
+      "revId": "1c87f2d7543d0f50238a55a3639a72b2ddda2b55",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
