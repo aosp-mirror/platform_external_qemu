@@ -19,7 +19,6 @@
 #include "android/android.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/Async.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/globals.h"
 #include "android/main-common.h"
@@ -58,12 +57,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
       mUiEmuAgent(nullptr),
       mToolsUi(new Ui::ToolControls),
       mUIEventRecorder(event_recorder),
-      mSizeTweaker(this),
-      mAdbWarningBox(QMessageBox::Warning,
-                     tr("Detected ADB"),
-                     tr(""),
-                     QMessageBox::Ok,
-                     this) {
+      mSizeTweaker(this) {
     twInstance = this;
 
     // "Tool" type windows live in another layer on top of everything in OSX, which is undesirable
@@ -172,35 +166,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 ToolWindow::~ToolWindow() {
 }
 
-void ToolWindow::checkAdbVersionAndWarn() {
-    QSettings settings;
-    if (!mAdbInterface.isAdbVersionCurrent() &&
-        settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
-        mAdbWarningBox.setText(tr("The ADB binary found at ") +
-                               mDetectedAdbPath +
-                               tr(" is obsolete and has serious performance "
-                                  "problems with the Android Emulator. "
-                                  "Please update to a newer version to get "
-                                  "significantly faster app/file transfer."));
-        showAdbWarning();
-    }
-}
-
-void ToolWindow::showAdbWarning() {
-    QSettings settings;
-    if (settings.value(Ui::Settings::SHOW_ADB_WARNING, true).toBool()) {
-        QObject::connect(&mAdbWarningBox,
-                         SIGNAL(buttonClicked(QAbstractButton*)), this,
-                         SLOT(slot_adbWarningMessageAccepted()));
-
-        QCheckBox* checkbox = new QCheckBox(tr("Never show this again."));
-        checkbox->setCheckState(Qt::Unchecked);
-        mAdbWarningBox.setWindowModality(Qt::NonModal);
-        mAdbWarningBox.setCheckBox(checkbox);
-        mAdbWarningBox.show();
-    }
-}
-
 void ToolWindow::hide()
 {
     QFrame::hide();
@@ -235,70 +200,6 @@ void ToolWindow::show()
     if (mExtendedWindow && mIsExtendedWindowVisibleOnShow) {
         mExtendedWindow->show();
     }
-}
-
-QString ToolWindow::getAdbFullPath(QStringList* args) {
-    QString adbPath = QString::null;
-    QSettings settings;
-
-    if (settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
-        if (!mAdbInterface.detectedAdbPath().empty()) {
-            adbPath = QString::fromStdString(mAdbInterface.detectedAdbPath());
-        } else {
-            showErrorDialog(tr("Could not automatically find ADB.<br>"
-                               "Please use the settings page to manually set "
-                               "an ADB path."),
-                            tr("ADB"));
-        }
-    } else {
-        adbPath = settings.value(Ui::Settings::ADB_PATH, "").toString();
-    }
-
-    if (adbPath.isNull()) {
-        return QString::null;
-    }
-
-    // Enqueue arguments for adb to ensure it finds the right emulator.
-    *args << "-s";
-    *args << "emulator-" + QString::number(android_base_port);
-    return adbPath;
-}
-
-void ToolWindow::runAdbShellStopAndQuit()
-{
-    // we need to run it only once, so don't ever reset this
-    if (mStartedAdbStopProcess) {
-        return;
-    }
-
-    if (async([this] { this->adbShellStopRunner(); })) {
-        mStartedAdbStopProcess = true;
-    } else {
-        mEmulatorWindow->queueQuitEvent();
-    }
-}
-
-void ToolWindow::adbShellStopRunner() {
-    QStringList args;
-    const auto command = getAdbFullPath(&args);
-    if (command.isNull()) {
-        mEmulatorWindow->queueQuitEvent();
-        return;
-    }
-
-    // convert the command + arguments to the format needed in System class call
-    std::vector<std::string> fullArgs;
-    fullArgs.push_back(command.toUtf8().constData());
-    for (const auto& arg : args) {
-        fullArgs.push_back(arg.toUtf8().constData());
-    }
-    fullArgs.push_back("shell");
-    fullArgs.push_back("stop");
-
-    System::get()->runCommand(fullArgs, RunOptions::WaitForCompletion |
-                                                RunOptions::HideAllOutput);
-
-    mEmulatorWindow->queueQuitEvent();
 }
 
 void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
@@ -633,14 +534,6 @@ void ToolWindow::on_more_button_clicked()
         mExtendedWindow->show();
         mExtendedWindow->raise();
         mExtendedWindow->activateWindow();
-    }
-}
-
-void ToolWindow::slot_adbWarningMessageAccepted() {
-    QCheckBox* checkbox = mAdbWarningBox.checkBox();
-    if (checkbox->checkState() == Qt::Checked) {
-        QSettings settings;
-        settings.setValue(Ui::Settings::SHOW_ADB_WARNING, false);
     }
 }
 

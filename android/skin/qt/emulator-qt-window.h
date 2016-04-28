@@ -173,6 +173,7 @@ public:
     void zoomTo(const QPoint &focus, const QSize &rectSize);
 
 private slots:
+    void slot_adbWarningMessageAccepted();
     void slot_blit(QImage *src, QRect *srcRect, QImage *dst, QPoint *dstPos, QPainter::CompositionMode *op, QSemaphore *semaphore = NULL);
     void slot_clearInstance();
     void slot_createBitmap(SkinSurface *s, int w, int h, QSemaphore *semaphore = NULL);
@@ -232,6 +233,7 @@ private:
         mStartupDialog.close();
     }
 
+    void checkAdbVersionAndWarn();
     void showAvdArchWarning();
     void showGpuWarning();
 
@@ -256,6 +258,10 @@ private:
     void adbPushDone(android::base::StringView filePath,
                      android::emulation::FilePusher::Result result);
 
+    void runAdbShellStopAndQuit();
+    void adbShellStopRunner();
+
+    android::base::Looper* mLooper;
     QTimer          mStartupTimer;
     QProgressDialog mStartupDialog;
 
@@ -278,6 +284,7 @@ private:
 
     QMessageBox mAvdWarningBox;
     QMessageBox mGpuWarningBox;
+    QMessageBox mAdbWarningBox;
     bool mFirstShowEvent;
 
     EventCapturer mEventCapturer;
@@ -285,7 +292,10 @@ private:
     std::shared_ptr<UIEventRecorder<android::base::CircularBuffer>>
         mEventLogger;
 
-    std::shared_ptr<android::emulation::ApkInstaller> mApkInstaller;
+    android::emulation::AdbInterface mAdbInterface;
+
+    android::emulation::AdbCommandPtr mApkInstallCommand;
+    android::emulation::ApkInstaller mApkInstaller;
     QProgressDialog mInstallDialog;
 
     android::emulation::FilePusher::Ptr mFilePusher;
@@ -294,6 +304,7 @@ private:
 
     QTimer mWheelScrollTimer;
     QPoint mWheelScrollPos;
+    bool mStartedAdbStopProcess;
 };
 
 struct SkinSurface {
