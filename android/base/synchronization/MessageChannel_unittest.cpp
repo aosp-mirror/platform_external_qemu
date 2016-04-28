@@ -115,7 +115,7 @@ TEST(MessageChannel, Stop) {
         // the thread has to be blocked on in.receive(), let's stop it
         state.in.stop();
         EXPECT_NE(0, thread->join());
-        EXPECT_EQ(std::string(), state.in.receive());
+        EXPECT_EQ(android::base::kNullopt, state.in.receive());
         state.in.send("1");
         EXPECT_EQ(0, state.in.size());
     }
