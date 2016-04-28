@@ -14,6 +14,13 @@
 
 #pragma once
 
+#include "android/base/async/Looper.h"
+#include "android/base/StringView.h"
+#include "android/base/system/System.h"
+#include "android/base/threads/ParallelTask.h"
+
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -33,9 +40,17 @@
 namespace android {
 namespace emulation {
 
+class AdbCommand;
+using AdbCommandPtr = std::shared_ptr<AdbCommand>;
+struct AdbCommandResult {
+    bool command_ran;
+    int exit_code;
+    std::string output;
+};
+
 class AdbInterface {
 public:
-    AdbInterface();
+    explicit AdbInterface(android::base::Looper* looper);
 
     // Returns true is the ADB version is fresh enough.
     bool isAdbVersionCurrent() const { return mAdbVersionCurrent; }
@@ -43,9 +58,53 @@ public:
     // Returns the automatically detected path to adb
     const std::string& detectedAdbPath() const { return mAdbPath; }
 
+    // Runs an adb command asynchronously.
+    // |args| - the arguments to pass to adb, i.e. "shell dumpsys battery"
+    // |result_callback| - the callback function that will be invoked on the calling
+    //                     thread after the command completes.
+    // |timeout_ms| - how long to wait for the command to complete, in milliseconds.
+    // |want_output| - if set to true, the argument passed to the callback will contain the
+    //                 output of the command.
+    AdbCommandPtr runAdbCommand(
+        const std::vector<std::string> args,
+        std::function<void(const AdbCommandResult&)> result_callback,
+        base::System::Duration timeout_ms,
+        bool want_output = true);
+ 
 private:
+    android::base::Looper* mLooper;
     std::string mAdbPath;
     bool mAdbVersionCurrent;
+};
+
+class AdbCommand : public std::enable_shared_from_this<AdbCommand> {
+    friend class ::android::emulation::AdbInterface;
+public:
+    using ResultCallback = std::function<void(const AdbCommandResult&)>;
+
+    bool inFlight() const { return static_cast<bool>(mTask); }
+    void cancel() { mCancelled = true; }
+
+private:
+    AdbCommand(android::base::Looper* looper,
+               const std::string& adb_path,
+               const std::vector<std::string>& command,
+               bool want_output,
+               base::System::Duration timeout,
+               ResultCallback callback);
+    void start();
+
+    void taskFunction(AdbCommandResult* result);
+    void taskDoneFunction(const AdbCommandResult& result);
+
+    android::base::Looper* mLooper;
+    std::unique_ptr<android::base::ParallelTask<AdbCommandResult>> mTask;
+    ResultCallback mResultCallback;
+    bool mCancelled = false;
+    std::string mOutputFilePath;
+    std::vector<std::string> mCommand;
+    bool mWantOutput;
+    int mTimeout;
 };
 
 }

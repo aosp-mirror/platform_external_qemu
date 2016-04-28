@@ -21,6 +21,7 @@
 
 #include <gtest/gtest.h>
 
+#include <sstream>
 #include <fstream>
 #include <istream>
 #include <ostream>
@@ -32,84 +33,44 @@ using android::base::TestSystem;
 using android::base::TestTempDir;
 using android::emulation::ApkInstaller;
 
+using std::ostringstream;
 using std::ofstream;
 using std::string;
 
-TEST(ApkInstaller, parseOutputForFailureNoFile) {
-    string errorString;
-
-    EXPECT_FALSE(ApkInstaller::parseOutputForFailure("i-dont-exist.txt",
-                                                     &errorString));
-    EXPECT_STREQ(errorString.c_str(), ApkInstaller::kDefaultErrorString);
-}
-
 TEST(ApkInstaller, parseOutputForFailureBadOutput) {
-    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
-                      "/appdir");
-    TestTempDir* dir = system.getTempRoot();
-    string outputFile = dir->makeSubPath("output.txt");
-
-    ofstream ofs(outputFile);
-    EXPECT_TRUE(ofs.is_open());
+    ostringstream ofs;
     ofs << "I'm incorrectly formatted!\n"
            "Failure....\n";
-    ofs.close();
-
     string errorString;
-    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(outputFile, &errorString));
+    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(ofs.str(), &errorString));
     EXPECT_STREQ(errorString.c_str(), ApkInstaller::kDefaultErrorString);
 }
 
 TEST(ApkInstaller, parseOutputForFailureDeviceFull) {
-    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
-                      "/appdir");
-    TestTempDir* dir = system.getTempRoot();
-    string outputFile = dir->makeSubPath("output.txt");
-
-    ofstream ofs(outputFile);
-    EXPECT_TRUE(ofs.is_open());
+    ostringstream ofs;
     ofs << "[ 92%] /data/local/tmp/a-big-apk.apk\n"
            "[ 92%] /data/local/tmp/a-big-apk.apk\n"
            "[ 92%] /data/local/tmp/a-big-apk.apk\n"
            "adb: error: failed to copy 'a-big-apk.apk' to '/data/local/tmp/a-big-apk.apk': No space left on device\n";
-
-    ofs.close();
-
     string errorString;
-    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(outputFile, &errorString));
+    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(ofs.str(), &errorString));
 }
 
 TEST(ApkInstaller, parseOutputForFailureInstallFailed) {
-    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
-                      "/appdir");
-    TestTempDir* dir = system.getTempRoot();
-    string outputFile = dir->makeSubPath("output.txt");
-
-    ofstream ofs(outputFile);
-    EXPECT_TRUE(ofs.is_open());
+    ostringstream ofs;
     ofs << "542 KB/s (25370 bytes in 0.045s)\n"
            "        pkg: /data/local/tmp/an-apk-that-failed.apk\n"
            "Failure [INSTALL_FAILED_OLDER_SDK]\n";
-    ofs.close();
-
     string errorString;
-    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(outputFile, &errorString));
+    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(ofs.str(), &errorString));
     EXPECT_STREQ(errorString.c_str(), "INSTALL_FAILED_OLDER_SDK");
 }
 
 TEST(ApkInstaller, parseOutputForFailureInstallSuccess) {
-    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
-                      "/appdir");
-    TestTempDir* dir = system.getTempRoot();
-    string outputFile = dir->makeSubPath("output.txt");
-
-    ofstream ofs(outputFile);
-    EXPECT_TRUE(ofs.is_open());
+    ostringstream ofs;
     ofs << "5196 KB/s (1097196 bytes in 0.206s)\n"
            "         pkg: /data/local/tmp/an-apk-that-installed.apk\n"
            "Success\n";
-    ofs.close();
-
-    string errorString;
-    EXPECT_TRUE(ApkInstaller::parseOutputForFailure(outputFile, &errorString));
+   string errorString;
+    EXPECT_TRUE(ApkInstaller::parseOutputForFailure(ofs.str(), &errorString));
 }
