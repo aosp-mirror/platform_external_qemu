@@ -16,6 +16,29 @@
       "revId": "1c87f2d7543d0f50238a55a3639a72b2ddda2b55",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88e9e5fc_3ab9853f",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-28T21:15:46Z",
+      "side": 1,
+      "message": "Can you clarify whether this sort of modification requires synchronization?",
+      "range": {
+        "startLine": 56,
+        "startChar": 53,
+        "endLine": 58,
+        "endChar": 47
+      },
+      "revId": "1c87f2d7543d0f50238a55a3639a72b2ddda2b55",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
