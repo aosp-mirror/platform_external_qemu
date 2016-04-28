@@ -1,15 +1,12 @@
-#ifndef EMUGL_PROTOCOL_UTILS_H
-#define EMUGL_PROTOCOL_UTILS_H
+#pragma once
 
+#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 namespace emugl {
-
-// Helper macro
-#define COMPILE_ASSERT(cond)  static char kAssert##__LINE__[1 - 2 * !(cond)] __attribute__((unused)) = { 0 }
 
 // Helper template: is_pointer.
 // is_pointer<T>::value is true iff |T| is a pointer type.
@@ -56,7 +53,8 @@ struct UnpackerT {};
 template <typename T, typename S>
 struct UnpackerT<T,S,false> {
     static inline T unpack(const void* ptr) {
-        COMPILE_ASSERT(sizeof(T) == sizeof(S));
+        static_assert(sizeof(T) == sizeof(S),
+                      "Bad input arguments, have to be of the same size");
         return (T)(*(S*)(ptr));
     }
 };
@@ -104,90 +102,115 @@ inline T Unpack(const void* ptr) {
     return UnpackerT<T, S, is_pointer<T>::value>::unpack(ptr);
 }
 
-// Helper class used to ensure input buffers passed to EGL/GL functions
-// are properly aligned (preventing crashes with some backends).
+// Helper classes GenericInputBuffer and GenericOutputBuffer used to ensure
+// input and output buffers passed to EGL/GL functions are properly aligned
+// (preventing crashes with some backends).
+//
 // Usage example:
 //
-//    InputBuffer inputBuffer(ptr, size);
-//    glDoStuff(inputBuffer.get());
-//
-// inputBuffer.get() will return the original value of |ptr| if it was
-// aligned on an 8-byte boundary. Otherwise, it will return the address
-// of an aligned heap-allocated copy of the original |size| bytes starting
-// from |ptr|. The heap block is released at scope exit.
-class InputBuffer {
-public:
-    InputBuffer(const void* input, size_t size, size_t align = 8) :
-            mBuff(input), mIsCopy(false) {
-        if (((uintptr_t)input & (align - 1U)) != 0) {
-            void* newBuff = malloc(size);
-            memcpy(newBuff, input, size);
-            mBuff = newBuff;
-            mIsCopy = true;
-        }
-    }
-
-    ~InputBuffer() {
-        if (mIsCopy) {
-            free((void*)mBuff);
-        }
-    }
-
-    const void* get() const {
-        return mBuff;
-    }
-
-private:
-    const void* mBuff;
-    bool mIsCopy;
-};
-
-// Helper class used to ensure that output buffers passed to EGL/GL functions
-// are aligned on 8-byte addresses.
-// Usage example:
-//
-//    ptr = stream->alloc(size);
-//    OutputBuffer outputBuffer(ptr, size);
-//    glGetStuff(outputBuffer.get());
+//    GenericInputBuffer<> inputBuffer(ptrIn, sizeIn);
+//    GenericOutputBuffer<> outputBuffer(ptrOut, sizeOut);
+//    glDoGetStuff(inputBuffer.get(), outputBuffer.get());
 //    outputBuffer.flush();
 //
-// outputBuffer.get() returns the original value of |ptr| if it was already
-// aligned on an 8=byte boundary. Otherwise, it returns the size of an heap
-// allocated zeroed buffer of |size| bytes.
+// get() will return the original value of |ptr| if it was aligned on the
+// configured boundary (8 bytes by default). Otherwise, it will return the
+// address of an aligned copy of the original |size| bytes starting from |ptr|.
 //
-// outputBuffer.flush() copies the content of the heap allocated buffer back
-// to |ptr| explictly, if needed. If a no-op if |ptr| was aligned.
-class OutputBuffer {
+// Allowed alignment values are 1, 2, 4, 8.
+//
+// outputBuffer.flush() copies the content of the copy back to |ptr| explictly,
+// if needed. It is a no-op if |ptr| was aligned.
+//
+// Both classes try to minimize heap usage as much as possible - the first
+// template argument defines the size of an internal array Generic*Buffer-s use
+// if the |ptr|'s |size| is small enough. If it doesn't fit into the internal
+// array, an aligned copy is allocated on the heap and freed in the dtor.
+
+template <size_t StackSize = 1024, size_t Align = 8>
+class GenericInputBuffer {
+    static_assert(Align == 1 || Align == 2 || Align == 4 || Align == 8,
+                  "Bad alignment parameter");
+
 public:
-    OutputBuffer(unsigned char* ptr, size_t size, size_t align = 8) :
-            mOrgBuff(ptr), mBuff(ptr), mSize(size) {
-        if (((uintptr_t)ptr & (align - 1U)) != 0) {
-            void* newBuff = calloc(1, size);
-            mBuff = newBuff;
+    GenericInputBuffer(const void* input, size_t size) : mOrigBuff(input) {
+        if (((uintptr_t)input & (Align - 1U)) == 0) {
+            mPtr = const_cast<void*>(input);
+        } else {
+            if (size <= StackSize) {
+                mPtr = &mArray[0];
+            } else {
+                mPtr = malloc(size);
+            }
+            memcpy(mPtr, input, size);
         }
     }
 
-    ~OutputBuffer() {
-        if (mBuff != mOrgBuff) {
-            free(mBuff);
+    ~GenericInputBuffer() {
+        if (mPtr != mOrigBuff && mPtr != &mArray[0]) {
+            free(mPtr);
         }
     }
 
-    void* get() const {
-        return mBuff;
-    }
+    const void* get() const { return mPtr; }
 
-    void flush() {
-        if (mBuff != mOrgBuff) {
-            memcpy(mOrgBuff, mBuff, mSize);
-        }
-    }
 private:
-    unsigned char* mOrgBuff;
-    void* mBuff;
-    size_t mSize;
+    // A pointer to the aligned buffer, might point either to mOrgBuf, to mArray
+    // start or to a heap-allocated chunk of data.
+    void* mPtr;
+    // Original buffer.
+    const void* mOrigBuff;
+    // Inplace aligned array for small enough buffers.
+    char __attribute__((__aligned__(Align))) mArray[StackSize];
 };
 
-}  // namespace emugl
+template <size_t StackSize = 1024, size_t Align = 8>
+class GenericOutputBuffer {
+    static_assert(Align == 1 || Align == 2 || Align == 4 || Align == 8,
+                  "Bad alignment parameter");
 
-#endif  // EMUGL_PROTOCOL_UTILS_H
+public:
+    GenericOutputBuffer(unsigned char* ptr, size_t size) :
+            mOrigBuff(ptr), mSize(size) {
+        if (((uintptr_t)ptr & (Align - 1U)) == 0) {
+            mPtr = ptr;
+        } else {
+            if (StackSize <= size) {
+                mPtr = &mArray[0];
+            } else {
+                mPtr = calloc(1, size);
+            }
+        }
+    }
+
+    ~GenericOutputBuffer() {
+        if (mPtr != mOrigBuff && mPtr != &mArray[0]) {
+            free(mPtr);
+        }
+    }
+
+    void* get() const { return mPtr; }
+
+    void flush() {
+        if (mPtr != mOrigBuff) {
+            memcpy(mOrigBuff, mPtr, mSize);
+        }
+    }
+
+private:
+    // A pointer to the aligned buffer, might point either to mOrgBuf, to mArray
+    // start or to a heap-allocated chunk of data.
+    void* mPtr;
+    // Original buffer.
+    unsigned char* mOrigBuff;
+    // Original buffer size.
+    size_t mSize;
+    // Inplace array for small enough buffers.
+    unsigned char __attribute__((__aligned__(Align))) mArray[StackSize];
+};
+
+// Pin the defaults for the commonly used type names
+using InputBuffer = GenericInputBuffer<>;
+using OutputBuffer = GenericOutputBuffer<>;
+
+}  // namespace emugl

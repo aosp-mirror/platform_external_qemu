@@ -91,6 +91,12 @@ public:
         mLock.lock();
     }
 
+    void lock() {
+        assert(!mLocked);
+        mLock.lock();
+        mLocked = true;
+    }
+
     void unlock() {
         assert(mLocked);
         mLock.unlock();
