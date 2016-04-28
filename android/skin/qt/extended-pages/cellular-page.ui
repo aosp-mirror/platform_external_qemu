@@ -34,6 +34,9 @@
    <property name="currentIndex">
     <number>6</number>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <item>
     <property name="text">
      <string>GSM</string>
@@ -145,6 +148,9 @@
    <property name="styleSheet">
     <string notr="true">padding: 3px 3px 3px 3px;</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <item>
     <property name="text">
      <string>Home</string>
@@ -188,6 +194,9 @@
    </property>
    <property name="styleSheet">
     <string notr="true">padding: 3px 3px 3px 3px;</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
    <item>
     <property name="text">

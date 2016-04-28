@@ -19,6 +19,7 @@
 #include "android/cpu_accelerator.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulator-window.h"
+#include "android/metrics/metrics_reporter_callbacks.h"
 #include "android/opengl/gpuinfo.h"
 
 #include "android/skin/event.h"
@@ -120,6 +121,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mEventLogger(new UIEventRecorder<android::base::CircularBuffer>(
               &mEventCapturer,
               android::base::CircularBuffer<EventRecord>(1000))),
+      mUserActionsCounter(new android::qt::UserActionsCounter(&mEventCapturer)),
       mInstallDialog(this),
       mPushDialog(this) {
     // Start a timer. If the main window doesn't
@@ -134,7 +136,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     mBackingSurface = NULL;
 
-    mToolWindow = new ToolWindow(this, &mContainer, mEventLogger);
+    mToolWindow = new ToolWindow(this, &mContainer, mEventLogger,
+                                 mUserActionsCounter);
 
     this->setAcceptDrops(true);
 
@@ -191,6 +194,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     setObjectName("MainWindow");
     mEventLogger->startRecording(this);
     mEventLogger->startRecording(mToolWindow);
+    mUserActionsCounter->startCountingForMainWindow(this);
+    mUserActionsCounter->startCountingForToolWindow(mToolWindow);
+    mUserActionsCounter->startCountingForOverlayWindow(&mOverlay);
 
     // The crash reporter will dump the last 1000 UI events.
     // mEventLogger is a shared pointer, capturing its copy
@@ -198,12 +204,27 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     // CrashReporter needs it, even if EmulatorQtWindow is
     // destroyed.
     auto event_logger = mEventLogger;
-    android::crashreport::CrashReporter::get()->setCrashCallback(
-        [event_logger]() {
-            android::crashreport::CrashReporter::get()
-                ->attachData("recent-ui-actions.txt",
-                             serializeEvents(event_logger->container()));
-        });
+    android::crashreport::CrashReporter::get()->addCrashCallback(
+            [event_logger]() {
+                android::crashreport::CrashReporter::get()->attachData(
+                        "recent-ui-actions.txt",
+                        serializeEvents(event_logger->container()));
+            });
+
+    auto user_actions = mUserActionsCounter;
+    android::crashreport::CrashReporter::get()->addCrashCallback(
+            [user_actions]() {
+                android::crashreport::CrashReporter::get()->attachData(
+                        "num-user-actions.txt",
+                        std::to_string(user_actions->count()));
+            });
+    std::weak_ptr<android::qt::UserActionsCounter>
+        user_actions_weak(mUserActionsCounter);
+    android::metrics::addTickCallback([user_actions_weak](AndroidMetrics* am) {
+        if (auto user_actions = user_actions_weak.lock()) {
+            am->user_actions = user_actions->count();
+        }
+    });
 
     mWheelScrollTimer.setInterval(100);
     mWheelScrollTimer.setSingleShot(true);

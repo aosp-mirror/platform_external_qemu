@@ -49,6 +49,9 @@
      <height>27</height>
     </rect>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
    <item>
     <property name="text">
      <string>Speed 1X</string>
@@ -101,6 +104,9 @@
    <property name="ColorGroup" stdset="0">
     <string>Tool</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QLabel" name="label_12">
    <property name="geometry">
@@ -152,6 +158,9 @@
    <property name="ColorGroup" stdset="0">
     <string>Tool</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QLabel" name="label_13">
    <property name="geometry">
@@ -201,6 +210,9 @@
    <property name="ColorGroup" stdset="0">
     <string>Tool</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="AngleInputWidget" name="loc_longitudeInput" native="true">
    <property name="geometry">
@@ -210,6 +222,9 @@
      <width>280</width>
      <height>21</height>
     </rect>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QRadioButton" name="loc_sexagesimalModeSwitch">
@@ -236,6 +251,9 @@
      <height>24</height>
     </size>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="AngleInputWidget" name="loc_latitudeInput" native="true">
    <property name="geometry">
@@ -245,6 +263,9 @@
      <width>280</width>
      <height>21</height>
     </rect>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QGroupBox" name="locationGroup_2">
@@ -331,7 +352,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignTrailing|AlignVCenter</set>
+     <set>AlignRight|AlignVCenter</set>
     </property>
    </column>
    <column>
@@ -346,7 +367,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignTrailing|AlignVCenter</set>
+     <set>AlignRight|AlignVCenter</set>
     </property>
    </column>
    <column>
@@ -361,7 +382,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignTrailing|AlignVCenter</set>
+     <set>AlignRight|AlignVCenter</set>
     </property>
    </column>
    <column>
@@ -376,7 +397,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignTrailing|AlignVCenter</set>
+     <set>AlignRight|AlignVCenter</set>
     </property>
    </column>
    <column>
@@ -391,7 +412,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignTrailing|AlignVCenter</set>
+     <set>AlignRight|AlignVCenter</set>
     </property>
    </column>
    <column>
@@ -406,7 +427,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignTrailing|AlignVCenter</set>
+     <set>AlignRight|AlignVCenter</set>
     </property>
    </column>
   </widget>
@@ -424,6 +445,9 @@
    </property>
    <property name="class" stdset="0">
     <string>EditableValue</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QRadioButton" name="loc_decimalModeSwitch">
@@ -455,6 +479,9 @@
    <property name="checked">
     <bool>true</bool>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QLabel" name="label_14">
    <property name="geometry">
@@ -475,15 +502,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>RaisedMaterialButton</class>
+   <extends>QPushButton</extends>
+   <header>android/skin/qt/raised-material-button.h</header>
+  </customwidget>
+  <customwidget>
    <class>AngleInputWidget</class>
    <extends>QWidget</extends>
    <header>android/skin/qt/angle-input-widget.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>RaisedMaterialButton</class>
-   <extends>QPushButton</extends>
-   <header>android/skin/qt/raised-material-button.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

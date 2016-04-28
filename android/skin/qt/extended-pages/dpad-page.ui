@@ -87,6 +87,9 @@
    <property name="themeIconNamePressed" stdset="0">
     <string>dpad_down_pressed</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="dpad_leftButton">
    <property name="geometry">
@@ -118,6 +121,9 @@
    </property>
    <property name="themeIconNamePressed" stdset="0">
     <string>dpad_left_pressed</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="dpad_forwardButton">
@@ -151,6 +157,9 @@
    <property name="themeIconNamePressed" stdset="0">
     <string>dpad_forward_pressed</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="dpad_playButton">
    <property name="geometry">
@@ -182,6 +191,9 @@
    </property>
    <property name="themeIconNamePressed" stdset="0">
     <string>dpad_play_pressed</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="dpad_upButton">
@@ -215,6 +227,9 @@
    <property name="themeIconNamePressed" stdset="0">
     <string>dpad_up_pressed</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="dpad_rightButton">
    <property name="geometry">
@@ -246,6 +261,9 @@
    </property>
    <property name="themeIconNamePressed" stdset="0">
     <string>dpad_right_pressed</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="dpad_backButton">
@@ -279,6 +297,9 @@
    <property name="themeIconNamePressed" stdset="0">
     <string>dpad_back_pressed</string>
    </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="dpad_selectButton">
    <property name="geometry">
@@ -310,6 +331,9 @@
    </property>
    <property name="themeIconNamePressed" stdset="0">
     <string>dpad_select_pressed</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
    </property>
   </widget>
  </widget>
