@@ -22,6 +22,30 @@
       "revId": "eb1234c85f4949636d7c279e6a68d9053c7c144c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8594975_ef8c2192",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-28T04:01:00Z",
+      "side": 1,
+      "message": "I used to have a use case, but now it\u0027s just for a symmetry :)\nin case of unlock/lock pair AutoUnlocker isn\u0027t that critical - even if you have a return before the following lock(), AutoLocker knows the state and won\u0027t do bad things. This isn\u0027t even close to the case when one manually lock()-ed and forgot to unlock() a mutex",
+      "parentUuid": "a8594975_49638d0a",
+      "range": {
+        "startLine": 94,
+        "startChar": 4,
+        "endLine": 94,
+        "endChar": 17
+      },
+      "revId": "eb1234c85f4949636d7c279e6a68d9053c7c144c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
