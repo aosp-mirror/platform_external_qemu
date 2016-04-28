@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "88e9e5fc_5a6fa982",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-28T21:19:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08edf5c9_62aafce5",
+      "range": {
+        "startLine": 76,
+        "startChar": 0,
+        "endLine": 76,
+        "endChar": 11
+      },
+      "revId": "93373d58f24ba2c14b7c5e5944707f29d915ceac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "68a4b1ba_171a735e",
         "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2016-04-28T19:02:52Z",
       "side": 1,
       "message": "Probably take off keywords from this and make it sound more general.",
+      "revId": "93373d58f24ba2c14b7c5e5944707f29d915ceac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88e9e5fc_fa041db7",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-28T21:19:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "68a4b1ba_171a735e",
       "revId": "93373d58f24ba2c14b7c5e5944707f29d915ceac",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "88e9e5fc_5a1d69fe",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-28T21:19:34Z",
+      "side": 1,
+      "message": "So this is really curious. Based on the test results, this memory DEFINITELY does not go out of scope, otherwise this should totally break....a lot of things.\n\nI think glslang has some global state created in InitializeProcess() that\u0027s doing some funky stuff. Will look into it...",
+      "parentUuid": "682111e2_d2af313a",
+      "range": {
+        "startLine": 137,
+        "startChar": 12,
+        "endLine": 137,
+        "endChar": 27
+      },
+      "revId": "93373d58f24ba2c14b7c5e5944707f29d915ceac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8801e53f_c6714069",
         "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.h",
         "patchSetId": 1
@@ -76,6 +142,30 @@
       "writtenOn": "2016-04-28T19:00:09Z",
       "side": 1,
       "message": "who owns this memory?",
+      "range": {
+        "startLine": 16,
+        "startChar": 72,
+        "endLine": 16,
+        "endChar": 80
+      },
+      "revId": "93373d58f24ba2c14b7c5e5944707f29d915ceac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88e9e5fc_ba0e95d3",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-28T21:19:34Z",
+      "side": 1,
+      "message": "More on the other comment.",
+      "parentUuid": "8801e53f_c6714069",
       "range": {
         "startLine": 16,
         "startChar": 72,
