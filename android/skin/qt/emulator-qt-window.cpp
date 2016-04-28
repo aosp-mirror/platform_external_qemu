@@ -10,10 +10,12 @@
  ** GNU General Public License for more details.
  */
 
+#include "android/android.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/threads/Async.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/cpu_accelerator.h"
@@ -21,13 +23,13 @@
 #include "android/emulator-window.h"
 #include "android/metrics/metrics_reporter_callbacks.h"
 #include "android/opengl/gpuinfo.h"
-
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/event-serializer.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/QtLooper.h"
 #include "android/skin/qt/winsys-qt.h"
 #include "android/ui-emu-agent.h"
 
@@ -86,6 +88,7 @@ void EmulatorQtWindow::create()
 
 EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     : QFrame(parent),
+      mLooper(android::qt::createLooper()),
       mStartupDialog(this),
       mContainer(this),
       mOverlay(this, &mContainer),
@@ -117,13 +120,23 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                                            : "")),
                      QMessageBox::Ok,
                      this),
+      mAdbWarningBox(QMessageBox::Warning,
+                     tr("Detected ADB"),
+                     tr(""),
+                     QMessageBox::Ok,
+                     this),
       mFirstShowEvent(true),
       mEventLogger(new UIEventRecorder<android::base::CircularBuffer>(
               &mEventCapturer,
               android::base::CircularBuffer<EventRecord>(1000))),
       mUserActionsCounter(new android::qt::UserActionsCounter(&mEventCapturer)),
+      mAdbInterface(mLooper),
+      mApkInstaller(&mAdbInterface),
       mInstallDialog(this),
-      mPushDialog(this) {
+      mPushDialog(this),
+      mStartedAdbStopProcess(false) {
+    android::base::ThreadLooper::setLooper(mLooper, true);
+
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
     // pop-up to let the user know we're still
@@ -166,6 +179,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mInstallDialog.setWindowTitle(tr("APK Installer"));
     mInstallDialog.setLabelText(tr("Installing APK..."));
     mInstallDialog.setRange(0, 0);  // Makes it a "busy" dialog
+    mInstallDialog.setModal(true);
     mInstallDialog.close();
     QObject::connect(&mInstallDialog, SIGNAL(canceled()), this,
                      SLOT(slot_installCanceled()));
@@ -250,8 +264,8 @@ EmulatorQtWindow::~EmulatorQtWindow()
         mScreenCapturer->cancel();
     }
 
-    if (mApkInstaller) {
-        mApkInstaller->cancel();
+    if (mApkInstallCommand) {
+        mApkInstallCommand->cancel();
     }
     mInstallDialog.disconnect();
     mInstallDialog.close();
@@ -389,7 +403,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent *event)
         if (savevm_on_exit) {
             queueQuitEvent();
         } else {
-            mToolWindow->runAdbShellStopAndQuit();
+            runAdbShellStopAndQuit();
         }
         event->ignore();
     } else {
@@ -861,7 +875,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
     if (mFirstShowEvent) {
         showAvdArchWarning();
         showGpuWarning();
-        mToolWindow->checkAdbVersionAndWarn();
+        checkAdbVersionAndWarn();
     }
     mFirstShowEvent = false;
 
@@ -923,7 +937,7 @@ void EmulatorQtWindow::screenshot()
 
     if (!mScreenCapturer) {
         mScreenCapturer = ScreenCapturer::create(
-                android::base::ThreadLooper::get(), args,
+                mLooper, args,
                 savePath.toStdString(), [this](ScreenCapturer::Result result) {
                     EmulatorQtWindow::screenshotDone(result);
                 });
@@ -970,41 +984,25 @@ void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result) {
 }
 
 void EmulatorQtWindow::slot_installCanceled() {
-    if (mApkInstaller && mApkInstaller->inFlight()) {
-        mApkInstaller->cancel();
+    if (mApkInstallCommand && mApkInstallCommand->inFlight()) {
+        mApkInstallCommand->cancel();
     }
 }
 
 void EmulatorQtWindow::runAdbInstall(const QString& path) {
-    if (mApkInstaller && mApkInstaller->inFlight()) {
+    if (mApkInstallCommand && mApkInstallCommand->inFlight()) {
         // Modal dialogs should prevent this.
         return;
     }
 
-    auto args = getAdbFullPathStd();
-    if (args.empty()) {
-        showErrorDialog(
-                tr("Could not locate 'adb'<br/>"
-                   "Check settings to verify that your chosen adb path is "
-                   "valid."),
-                tr("APK Installer"));
-        return;
-    }
-
-    if (!mApkInstaller) {
-        mApkInstaller = ApkInstaller::create(
-                android::base::ThreadLooper::get(), args, path.toStdString(),
-                [this](ApkInstaller::Result result, StringView errorString) {
-                    EmulatorQtWindow::installDone(result, errorString);
-                });
-    } else {
-        mApkInstaller->setApkFilePath(path.toStdString());
-        mApkInstaller->setAdbCommandArgs(args);
-    }
-
     // Show a dialog so the user knows something is happening
     mInstallDialog.show();
-    mApkInstaller->start();
+
+    mApkInstallCommand = mApkInstaller.install(
+        path.toStdString(),
+        [this](ApkInstaller::Result result, StringView errorString) {
+            installDone(result, errorString);
+        });
 }
 
 void EmulatorQtWindow::installDone(ApkInstaller::Result result,
@@ -1032,11 +1030,6 @@ void EmulatorQtWindow::installDone(ApkInstaller::Result result,
                      "valid.");
             break;
 
-        case ApkInstaller::Result::kDeviceStorageFull:
-            msg = tr("The virtual device storage is full.<br/>"
-                     "Clear space and try again.");
-            break;
-
         case ApkInstaller::Result::kInstallFailed:
             msg = tr("The APK failed to install.<br/> Error: %1")
                           .arg(errorString.c_str());
@@ -1062,7 +1055,7 @@ void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
 
     if (!mFilePusher) {
         mFilePusher = android::emulation::FilePusher::create(
-                android::base::ThreadLooper::get());
+                mLooper);
     }
     mFilePusher->setAdbCommandArgs(adbCommandArgs);
     if (!mFilePusherSubscription) {
@@ -1121,16 +1114,23 @@ void EmulatorQtWindow::adbPushDone(StringView filePath,
 }
 
 vector<string> EmulatorQtWindow::getAdbFullPathStd() {
-    QStringList qargs;
-    QString command = mToolWindow->getAdbFullPath(&qargs);
-    if (command.isNull()) {
-        return {};
+    std::string adbPath;
+    QSettings settings;
+    if (settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
+        if (!mAdbInterface.detectedAdbPath().empty()) {
+            adbPath = mAdbInterface.detectedAdbPath();
+        } else {
+            showErrorDialog(tr("Could not automatically find ADB.<br>"
+                               "Please use the settings page to manually set "
+                               "an ADB path."),
+                            tr("ADB"));
+            return {};
+        }
+    } else {
+        adbPath = settings.value(Ui::Settings::ADB_PATH, "").toString().toStdString();
     }
 
-    vector<string> args = {command.toStdString()};
-    for (const auto arg : qargs) {
-        args.push_back(arg.toStdString());
-    }
+    vector<string> args { adbPath, "-s", android::base::StringFormat("emulator-%d", android_base_port) };
     return args;
 }
 
@@ -1618,4 +1618,62 @@ void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
 
 void EmulatorQtWindow::wheelScrollTimeout() {
     handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, mWheelScrollPos);
+}
+
+void EmulatorQtWindow::checkAdbVersionAndWarn() {
+    QSettings settings;
+    if (!mAdbInterface.isAdbVersionCurrent() &&
+        settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
+        mAdbWarningBox.setText(tr("The ADB binary found at ") +
+                               QString::fromStdString(mAdbInterface.detectedAdbPath()) +
+                               tr(" is obsolete and has serious performance "
+                                  "problems with the Android Emulator. "
+                                  "Please update to a newer version to get "
+                                  "significantly faster app/file transfer."));
+        QSettings settings;
+        if (settings.value(Ui::Settings::SHOW_ADB_WARNING, true).toBool()) {
+            QObject::connect(&mAdbWarningBox,
+                            SIGNAL(buttonClicked(QAbstractButton*)), this,
+                            SLOT(slot_adbWarningMessageAccepted()));
+
+            QCheckBox* checkbox = new QCheckBox(tr("Never show this again."));
+            checkbox->setCheckState(Qt::Unchecked);
+            mAdbWarningBox.setWindowModality(Qt::NonModal);
+            mAdbWarningBox.setCheckBox(checkbox);
+            mAdbWarningBox.show();
+        }
+    }
+}
+
+void EmulatorQtWindow::slot_adbWarningMessageAccepted() {
+    QCheckBox* checkbox = mAdbWarningBox.checkBox();
+    if (checkbox->checkState() == Qt::Checked) {
+        QSettings settings;
+        settings.setValue(Ui::Settings::SHOW_ADB_WARNING, false);
+    }
+}
+
+void EmulatorQtWindow::adbShellStopRunner() {
+    // convert the command + arguments to the format needed in System class call
+    std::vector<std::string> fullArgs = getAdbFullPathStd();
+    fullArgs.push_back("shell");
+    fullArgs.push_back("stop");
+    System::get()->runCommand(
+        fullArgs,
+        RunOptions::WaitForCompletion | RunOptions::HideAllOutput);
+    queueQuitEvent();
+}
+
+void EmulatorQtWindow::runAdbShellStopAndQuit()
+{
+    // we need to run it only once, so don't ever reset this
+    if (mStartedAdbStopProcess) {
+        return;
+    }
+
+    if (async([this] { this->adbShellStopRunner(); })) {
+        mStartedAdbStopProcess = true;
+    } else {
+        queueQuitEvent();
+    }
 }

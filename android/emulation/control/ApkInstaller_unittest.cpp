@@ -37,8 +37,8 @@ using std::string;
 
 TEST(ApkInstaller, parseOutputForFailureNoFile) {
     string errorString;
-
-    EXPECT_FALSE(ApkInstaller::parseOutputForFailure("i-dont-exist.txt",
+    std::ifstream f("i-dont-exist.txt");
+    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(f,
                                                      &errorString));
     EXPECT_STREQ(errorString.c_str(), ApkInstaller::kDefaultErrorString);
 }
@@ -56,7 +56,8 @@ TEST(ApkInstaller, parseOutputForFailureBadOutput) {
     ofs.close();
 
     string errorString;
-    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(outputFile, &errorString));
+    std::ifstream f(outputFile.c_str());
+    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(f, &errorString));
     EXPECT_STREQ(errorString.c_str(), ApkInstaller::kDefaultErrorString);
 }
 
@@ -76,7 +77,8 @@ TEST(ApkInstaller, parseOutputForFailureDeviceFull) {
     ofs.close();
 
     string errorString;
-    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(outputFile, &errorString));
+    std::ifstream f(outputFile.c_str());
+    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(f, &errorString));
 }
 
 TEST(ApkInstaller, parseOutputForFailureInstallFailed) {
@@ -93,7 +95,8 @@ TEST(ApkInstaller, parseOutputForFailureInstallFailed) {
     ofs.close();
 
     string errorString;
-    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(outputFile, &errorString));
+    std::ifstream f(outputFile.c_str());
+    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(f, &errorString));
     EXPECT_STREQ(errorString.c_str(), "INSTALL_FAILED_OLDER_SDK");
 }
 
@@ -111,5 +114,6 @@ TEST(ApkInstaller, parseOutputForFailureInstallSuccess) {
     ofs.close();
 
     string errorString;
-    EXPECT_TRUE(ApkInstaller::parseOutputForFailure(outputFile, &errorString));
+    std::ifstream f(outputFile.c_str());
+    EXPECT_TRUE(ApkInstaller::parseOutputForFailure(f, &errorString));
 }
