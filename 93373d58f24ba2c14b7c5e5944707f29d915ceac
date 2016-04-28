@@ -175,6 +175,30 @@
       "revId": "93373d58f24ba2c14b7c5e5944707f29d915ceac",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88e9e5fc_e07d8cd8",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderValidator.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-28T21:56:48Z",
+      "side": 1,
+      "message": "The simplest thing here is to explicitly state that the caller has to free() this and just strdup it inside of the function. This would make it completely isolated from any weird tricks glsl compiler might do in future",
+      "parentUuid": "88e9e5fc_ba0e95d3",
+      "range": {
+        "startLine": 16,
+        "startChar": 72,
+        "endLine": 16,
+        "endChar": 80
+      },
+      "revId": "93373d58f24ba2c14b7c5e5944707f29d915ceac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
