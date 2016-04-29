@@ -93,6 +93,30 @@
       "revId": "04737750cf878dc523190e3a97c48d6596de199f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a834e966_bc7b216b",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1005930
+      },
+      "writtenOn": "2016-04-29T22:03:57Z",
+      "side": 1,
+      "message": "In practice, I don\u0027t know, but buffer overflows should always be avoided.",
+      "parentUuid": "a834e966_9148861f",
+      "range": {
+        "startLine": 367,
+        "startChar": 11,
+        "endLine": 367,
+        "endChar": 17
+      },
+      "revId": "04737750cf878dc523190e3a97c48d6596de199f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
