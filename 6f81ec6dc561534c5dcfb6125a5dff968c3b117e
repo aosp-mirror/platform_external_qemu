@@ -16,6 +16,24 @@
       "revId": "6f81ec6dc561534c5dcfb6125a5dff968c3b117e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a834e966_22492ec1",
+        "filename": "slirp-android/slirp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1084,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-04-29T17:39:16Z",
+      "side": 1,
+      "message": "Why S4 needs to be closed when s6 is not null? I think we can listen ipv4/ipv6 at same time. This is consistent with control port. Now we listen on both ipv4/ipv6.\n\nBTW, now we only need we can listen on ipv4 or ipv6 port. we only fail when we can\u0027t listen on both ipv4/ipv6.",
+      "parentUuid": "28c9d979_bc8529bf",
+      "revId": "6f81ec6dc561534c5dcfb6125a5dff968c3b117e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
