@@ -17,21 +17,14 @@
 
 #include "OpenglRender/render_api_functions.h"
 
+#include "android/utils/compiler.h"
+
 #include <KHR/khrplatform.h>
 
-/* This header and its declarations must be usable from C code.
- *
- * If RENDER_API_NO_PROTOTYPES is #defined before including this header, only
- * the interface function pointer types will be declared, not the prototypes.
- * This allows the client to use those names for its function pointer variables.
- *
- * All interfaces which can fail return an int, with zero indicating failure
- * and anything else indicating success.
- */
+// All interfaces which can fail return an int, with zero indicating failure
+// and anything else indicating success.
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+ANDROID_BEGIN_HEADER
 
 // Use KHRONOS_APICALL to control visibility, but do not use KHRONOS_APIENTRY
 // because we don't need the functions to be __stdcall on Win32.
@@ -42,15 +35,6 @@ extern "C" {
     typedef return_type (RENDER_APIENTRY *func_name ## Fn) signature; \
     RENDER_APICALL return_type RENDER_APIENTRY func_name signature;
 
-typedef void (*emugl_logger_func_t)(const char* fmt, ...);
-
-typedef struct {
-    emugl_logger_func_t coarse;
-    emugl_logger_func_t fine;
-} emugl_logger_struct;
-
 LIST_RENDER_API_FUNCTIONS(RENDER_API_DECLARE)
 
-#ifdef __cplusplus
-}
-#endif
+ANDROID_END_HEADER

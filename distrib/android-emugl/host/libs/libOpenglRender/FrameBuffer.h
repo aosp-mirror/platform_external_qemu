@@ -24,6 +24,7 @@
 #include "WindowSurface.h"
 
 #include "OpenglRender/render_api.h"
+#include "OpenglRender/Renderer.h"
 
 #include <EGL/egl.h>
 
@@ -125,7 +126,7 @@ public:
     // Set a callback that will be called each time the emulated GPU content
     // is updated. This can be relatively slow with host-based GPU emulation,
     // so only do this when you need to.
-    void setPostCallback(OnPostFn onPost, void* onPostContext);
+    void setPostCallback(emugl::Renderer::OnPostCallback onPost, void* onPostContext);
 
     // Retrieve the GL strings of the underlying EGL/GLES implementation.
     // On return, |*vendor|, |*renderer| and |*version| will point to strings
@@ -349,7 +350,7 @@ private:
     long long m_statsStartTime;
     bool m_fpsStats;
 
-    OnPostFn m_onPost;
+    emugl::Renderer::OnPostCallback m_onPost;
     void* m_onPostContext;
     unsigned char* m_fbImage;
 

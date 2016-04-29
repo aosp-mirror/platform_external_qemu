@@ -29,11 +29,4 @@ void android_stop_opengl_logger();
 // with -DOPENGL_DEBUG_PRINTOUT.
 void android_opengl_cxt_logger_write(const char* fmt, ...);
 
-typedef void (*android_opengl_logger_t)(const char* fmt, ...);
-
-typedef struct {
-    android_opengl_logger_t coarse;
-    android_opengl_logger_t fine;
-} emugl_logger_struct;
-
 ANDROID_END_HEADER
