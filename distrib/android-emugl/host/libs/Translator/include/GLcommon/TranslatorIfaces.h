@@ -19,6 +19,8 @@
 #include "GLcommon/objectNameManager.h"
 
 #include <GLES/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 #include <string.h>
 
 #include <unordered_map>
@@ -90,6 +92,8 @@ typedef struct {
     void                                            (*finish)();
     void                                            (*setShareGroup)(GLEScontext*,ShareGroupPtr);
     __translatorMustCastToProperFunctionPointerType (*getProcAddress)(const char*);
+    GLsync                                          (*fenceSync)(GLenum, GLbitfield);
+    GLenum                                          (*clientWaitSync)(GLsync, GLbitfield, GLuint64);
 }GLESiface;
 
 class GlLibrary;
