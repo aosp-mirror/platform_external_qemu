@@ -16,6 +16,24 @@
       "revId": "33aaefeb2a393ee5608eedb88c1ebcbe30cf43fd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88e9e5fc_2e825e63",
+        "filename": "android/gps.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-29T05:59:47Z",
+      "side": 1,
+      "message": "1) Yes it is. I didn\u0027t realize at the time of writing that the STRALLOC_DEFINE macro defines an object with type different from char*\n\n2) I think it\u0027s fine",
+      "parentUuid": "88e9e5fc_f064393a",
+      "revId": "33aaefeb2a393ee5608eedb88c1ebcbe30cf43fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
