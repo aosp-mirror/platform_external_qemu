@@ -190,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "a834e966_eceb34bf",
+        "filename": "android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-04-29T23:35:47Z",
+      "side": 1,
+      "message": "Ok, scratch that, adb commands should be launched asynchronously to avoid blocking the ui thread, so it will be a more complicated change than simply calling a function I suppose.",
+      "parentUuid": "888725d1_b68f3e85",
+      "range": {
+        "startLine": 408,
+        "startChar": 0,
+        "endLine": 408,
+        "endChar": 43
+      },
+      "revId": "509914905c8c6d318b10bafef1278f2dd5f3d749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08733496_9b86f6d9",
         "filename": "android/skin/qt/extended-pages/location-page.cpp",
         "patchSetId": 1
