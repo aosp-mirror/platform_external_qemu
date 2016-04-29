@@ -27,6 +27,12 @@
 
 namespace {
 
+// Time taken to wait for blitFromCurrentReadBuffer
+// to finish. 1 second seems to cover most cases.
+// If we set this to 16ms or something close to a frame time,
+// we can get out of order frames.
+static const uint64_t kFenceSyncWaitTime = 1 * 1000 * 1000 * 1000;
+
 // Lazily create and bind a framebuffer object to the current host context.
 // |fbo| is the address of the framebuffer object name.
 // |tex| is the name of a texture that is attached to the framebuffer object
