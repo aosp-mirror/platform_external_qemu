@@ -25,6 +25,7 @@
 
 //#include "sysemu/char.h"
 
+#include <assert.h>
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -344,19 +345,6 @@ format_unsigned( char*  buf, char*  end, unsigned  val )
 }
 
 static char*
-format_hex( char*  buf, char*  end, unsigned  val, int  ndigits )
-{
-    int   shift = 4*ndigits;
-    static const char   hex[16] = "0123456789abcdef";
-
-    while (shift >= 0) {
-        buf = format_char(buf, end, hex[(val >> shift) & 15]);
-        shift -= 4;
-    }
-    return buf;
-}
-
-static char*
 format_ip4( char*  buf, char*  end, uint32_t  ip )
 {
     buf = format_unsigned( buf, end, (unsigned)(ip >> 24) );
@@ -372,17 +360,15 @@ format_ip4( char*  buf, char*  end, uint32_t  ip )
 static char*
 format_ip6( char*  buf, char*  end, const uint8_t*  ip6 )
 {
-    int  nn;
-    for (nn = 0; nn < 8; nn++) {
-        int  val = (ip6[0] << 16) | ip6[1];
-        ip6 += 2;
-        if (nn > 0)
-            buf = format_char(buf, end, ':');
-        if (val == 0)
-            continue;
-        buf  = format_hex(buf, end, val, 4);
-    }
-    return buf;
+    struct sockaddr_in6 sa[1];
+    memset(sa, 0, sizeof(sa));
+    sa->sin6_family = AF_INET6;
+    memcpy(sa->sin6_addr.s6_addr, ip6, 16);
+    if (getnameinfo(sa, sizeof(sa), buf, end - buf, NULL, 0, NI_NUMERICHOST))
+        return buf;
+    char* ptr = memchr(buf, 0, end - buf);
+    assert(ptr != NULL);
+    return ptr;
 }
 
 const char*
@@ -399,7 +385,9 @@ sock_address_to_string( const SockAddress*  a )
         break;
 
     case SOCKET_IN6:
+        buf = format_char( buf, end, '[');
         buf = format_ip6( buf, end, a->u.in6.address );
+        buf = format_char( buf, end, ']');
         buf = format_char( buf, end, ':' );
         buf = format_unsigned( buf, end, (unsigned) a->u.in6.port );
         break;
