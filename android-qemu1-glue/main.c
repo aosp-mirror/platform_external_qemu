@@ -10,11 +10,13 @@
 ** GNU General Public License for more details.
 */
 
+#include "android-qemu1-glue/qemu-control-impl.h"
 #include "android/android.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/globals.h"
-#include "android/main-common.h"
+#include "android/hw-kmsg.h"
 #include "android/main-common-ui.h"
+#include "android/main-common.h"
 #include "android/main-kernel-parameters.h"
 #include "android/main-qemu-parameters.h"
 #include "android/process_setup.h"
@@ -24,7 +26,6 @@
 #include "android/utils/filelock.h"
 #include "android/utils/lineinput.h"
 #include "android/utils/tempfile.h"
-#include "android-qemu1-glue/qemu-control-impl.h"
 
 #ifdef __APPLE__
 #include "android-qemu1-glue/skin_qt.h"
@@ -122,6 +123,11 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    if (opts->show_kernel) {
+      // Ensure kernel messages are printed to stdout.
+      android_kmsg_init(ANDROID_KMSG_PRINT_MESSAGES);
+    }
+
     const char* serialPrefix = androidHwConfig_getKernelSerialPrefix(hw);
     AndroidGlesEmulationMode glesMode = kAndroidGlesEmulationOff;
     if (android_hw->hw_gpu_enabled) {
@@ -132,9 +138,11 @@ int main(int argc, char **argv) {
         }
     }
 
+    int apiLevel = avdInfo_getApiLevel(avd);
+
     char* kernelParameters = emulator_getKernelParameters(
-            opts, kTargetArch, serialPrefix, hw->kernel_parameters,
-            glesMode, 0ULL, false);
+        opts, kTargetArch, apiLevel, serialPrefix, hw->kernel_parameters,
+        glesMode, 0ULL, false);
 
     if (hw->hw_cpu_ncore > 1) {
         dwarning("Classic qemu does not support SMP. "
