@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88e9e5fc_1f2c6639",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1982,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-29T16:28:34Z",
+      "side": 1,
+      "message": "this call is quite expensive, it performs several lookups and even potentially creates new TextureData object if it didn\u0027t exist. Is it really what you wanted?",
+      "range": {
+        "startLine": 1982,
+        "startChar": 31,
+        "endLine": 1982,
+        "endChar": 51
+      },
+      "revId": "3b9ea2d558863366b5a23dcf7c18c8bdd143fc5b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
