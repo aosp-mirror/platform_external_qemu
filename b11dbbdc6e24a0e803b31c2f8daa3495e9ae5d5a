@@ -22,6 +22,30 @@
       "revId": "b11dbbdc6e24a0e803b31c2f8daa3495e9ae5d5a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a834e966_a8e67ff6",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-29T18:48:27Z",
+      "side": 1,
+      "message": "Out of order frames are completely eliminated. FPS doesn\u0027t seem to drop very much.",
+      "parentUuid": "a834e966_657740c5",
+      "range": {
+        "startLine": 303,
+        "startChar": 0,
+        "endLine": 303,
+        "endChar": 27
+      },
+      "revId": "b11dbbdc6e24a0e803b31c2f8daa3495e9ae5d5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
