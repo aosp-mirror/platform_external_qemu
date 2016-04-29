@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "28c9d979_b991bb64",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-29T10:14:07Z",
+      "side": 1,
+      "message": "nit: indentation / formatting :)",
+      "revId": "4d6e6734423d4182963be087ab1957f64196cfd5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
