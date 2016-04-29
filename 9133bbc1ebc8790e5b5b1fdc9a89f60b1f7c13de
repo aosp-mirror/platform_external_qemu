@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a834e966_3c063111",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1005930
+      },
+      "writtenOn": "2016-04-29T22:03:57Z",
+      "side": 1,
+      "message": "Why is this an array?  It seems like a confusing way to avoid the \u0026 operator.",
+      "range": {
+        "startLine": 362,
+        "startChar": 26,
+        "endLine": 362,
+        "endChar": 29
+      },
+      "revId": "9133bbc1ebc8790e5b5b1fdc9a89f60b1f7c13de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
