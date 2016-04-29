@@ -43,6 +43,9 @@ public:
 
 protected:
     ~RenderLib() = default;
+
+    // To allow unique_ptr<RenderLib> access a protected destructor.
+    friend std::default_delete<RenderLib>;
 };
 
 using RenderLibPtr = std::unique_ptr<RenderLib>;
