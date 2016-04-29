@@ -240,6 +240,7 @@ LOCAL_SRC_FILES := \
     android/emulation/qemud/android_qemud_service.cpp \
     android/emulation/qemud/android_qemud_sink.cpp \
     android/emulation/serial_line.cpp \
+    android/emulation/SetupParameters.cpp \
     android/emulation/VmLock.cpp \
     android/emulation/vm_lock.cpp \
     android/emulator-window.c \
@@ -453,6 +454,7 @@ LOCAL_SRC_FILES := \
   android/emulation/CpuAccelerator_unittest.cpp \
   android/emulation/ParameterList_unittest.cpp \
   android/emulation/serial_line_unittest.cpp \
+  android/emulation/SetupParameters_unittest.cpp \
   android/emulation/testing/TestAndroidPipeDevice.cpp \
   android/emulation/VmLock_unittest.cpp \
   android/emulation/vm_lock_unittest.cpp \

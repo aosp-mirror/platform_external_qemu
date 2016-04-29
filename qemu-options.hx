@@ -1747,9 +1747,6 @@ DEF("audio", HAS_ARG, QEMU_OPTION_audio, \
 DEF("cpu-delay", HAS_ARG, QEMU_OPTION_cpu_delay, \
     "-cpu-delay <cpudelay> throttle CPU emulation\n")
 
-DEF("show-kernel", 0, QEMU_OPTION_show_kernel, \
-    "-show-kernel display kernel messages\n")
-
 #ifdef CONFIG_NAND_LIMITS
 DEF("nand-limits", HAS_ARG, QEMU_OPTION_nand_limits, \
     "-nand-limits <nlimits> enforce NAND/Flash read/write thresholds\n")

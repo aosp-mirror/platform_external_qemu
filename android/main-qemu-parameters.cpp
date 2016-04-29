@@ -14,6 +14,7 @@
 
 #include "android/base/StringFormat.h"
 #include "android/emulation/ParameterList.h"
+#include "android/emulation/SetupParameters.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_data.h"
 #include "android/utils/property_file.h"
@@ -101,11 +102,14 @@ QemuParameters* qemu_parameters_create(const char* argv0,
         }
     }
 
-    params.addIf("-show-kernel", opts->show_kernel);
-
-    if (opts->shell || opts->logcat) {
-        params.add2("-serial", opts->shell_serial);
-    }
+    // Virtual tty setup. Note: this must be synced with the code in
+    // android/main-kernel-parameters.cpp. See technical note in this file.
+    int apiLevel = avdInfo_getApiLevel(avd);
+    android::setupVirtualSerialPorts(nullptr, &params, apiLevel, targetArch,
+                                     "",  // kernelSerialPrefix
+                                     isQemu2, opts->show_kernel,
+                                     opts->logcat || opts->shell,
+                                     opts->shell_serial);
 
     params.add2If("-radio", opts->radio);
     params.add2If("-gps", opts->gps);
