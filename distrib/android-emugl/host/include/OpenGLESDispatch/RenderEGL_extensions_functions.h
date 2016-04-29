@@ -10,6 +10,8 @@
 #define LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(X) \
   X(EGLImageKHR, eglCreateImageKHR, (EGLDisplay display, EGLContext context, EGLenum target, EGLClientBuffer buffer, const EGLint* attrib_list)) \
   X(EGLBoolean, eglDestroyImageKHR, (EGLDisplay display, EGLImageKHR image)) \
+  X(EGLSyncKHR, eglCreateSyncKHR, (EGLDisplay display, EGLenum type, const EGLint* attribs)) \
+  X(EGLint, eglClientWaitSyncKHR, (EGLDisplay display, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout)) \
 
 
 #endif  // RENDER_EGL_EXTENSIONS_FUNCTIONS_H
