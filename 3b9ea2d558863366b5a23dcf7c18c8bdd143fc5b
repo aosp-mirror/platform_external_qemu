@@ -22,6 +22,30 @@
       "revId": "3b9ea2d558863366b5a23dcf7c18c8bdd143fc5b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88e9e5fc_bfb8baf6",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1982,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-04-29T16:34:03Z",
+      "side": 1,
+      "message": "My 2 cents:\n\nI guess that doesn\u0027t strike me as that expensive, atleast if the texture data exists. If the texturedata target doesn\u0027t exist, I believe there would be more serious problems going on.\n\nThinking about this some more, it\u0027s possible to obtain texture sizes through TexImage*** on the guest encoder. Then a) sizes are obtained directly b) no need to deal with share groups. Any thoughts?",
+      "parentUuid": "88e9e5fc_1f2c6639",
+      "range": {
+        "startLine": 1982,
+        "startChar": 31,
+        "endLine": 1982,
+        "endChar": 51
+      },
+      "revId": "3b9ea2d558863366b5a23dcf7c18c8bdd143fc5b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
