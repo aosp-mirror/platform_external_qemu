@@ -22,6 +22,30 @@
       "revId": "5c6cc42d3d1aff7a55c810059c3bd29ed71a61ed",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a834e966_56e4344a",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderLib.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-29T20:57:16Z",
+      "side": 1,
+      "message": "oops, thanks a lot! I was way too in hurry",
+      "parentUuid": "a834e966_561af45f",
+      "range": {
+        "startLine": 47,
+        "startChar": 4,
+        "endLine": 47,
+        "endChar": 68
+      },
+      "revId": "5c6cc42d3d1aff7a55c810059c3bd29ed71a61ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
