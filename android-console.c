@@ -2007,7 +2007,7 @@ void android_console_geo_fix(Monitor* mon, const QDict* qdict) {
     memset(&tVal, 0, sizeof(tVal));
     gettimeofday(&tVal, NULL);
 
-    _g_global.location_agent.gpsCmd(
+    _g_global.location_agent.gpsSendLoc(
             params[GEO_LAT], params[GEO_LONG], altitude, n_satellites, &tVal);
     monitor_printf(mon, "OK\n");
 }
