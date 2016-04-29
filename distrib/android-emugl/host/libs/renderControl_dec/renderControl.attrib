@@ -1,3 +1,6 @@
+# For documentation on the .attrib file format, see:
+# distrib/android-emugl/host/tools/emugen/README
+
 GLOBAL
 	base_opcode 10000
 	encoder_headers <stdint.h> <EGL/egl.h> "glUtils.h"
@@ -45,3 +48,11 @@ rcCloseColorBuffer
 
 rcCloseColorBufferPuid
     flag flushOnEncode
+
+rcCreateSyncKHR
+    dir attribs in
+    len attribs num_attribs
+    dir glsync_out out
+    len glsync_out sizeof(uint64_t)
+    dir syncthread_out out
+    len syncthread_out sizeof(uint64_t)

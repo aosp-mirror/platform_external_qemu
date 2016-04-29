@@ -18,6 +18,7 @@
 
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 
 #include "OpenGLESDispatch/gldefs.h"
 #include "OpenGLESDispatch/gles_functions.h"
@@ -26,7 +27,9 @@
 #include "emugl/common/mutex.h"
 
 #define GLAPIENTRY GL_APIENTRY
-typedef void(*FUNCPTR)();
+typedef void (*FUNCPTR_NO_ARGS_RET_VOID)();
+typedef GLsync (*FUNCPTR_FENCE_SYNC)(GLenum, GLbitfield);
+typedef GLenum (*FUNCPTR_CLIENT_WAIT_SYNC)(GLsync, GLbitfield, GLuint64);
 
 class GlLibrary;
 
