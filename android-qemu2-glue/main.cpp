@@ -466,9 +466,16 @@ extern "C" int main(int argc, char **argv) {
 #endif  // QEMU2_SNAPSHOT_SUPPORT
     }
 
-    if (opts->shell || opts->logcat || opts->show_kernel) {
+    {
+        // Always setup a single serial port, that can be connected
+        // either to the 'null' chardev, or the -shell-serial one,
+        // which by default will be either 'stdout' (Posix) or 'con:'
+        // (Windows).
+        const char* serial =
+                (opts->shell || opts->logcat || opts->show_kernel)
+                ? opts->shell_serial : "null";
         args[n++] = "-serial";
-        args[n++] = opts->shell_serial;
+        args[n++] = serial;
     }
 
     if (opts->radio) {
@@ -696,8 +703,10 @@ extern "C" int main(int argc, char **argv) {
                       glesCMA);
     }
 
+    int apiLevel = avd ? avdInfo_getApiLevel(avd) : 1000;
+
     char* kernel_parameters = emulator_getKernelParameters(
-            opts, kTarget.androidArch, kTarget.ttyPrefix,
+            opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
             hw->kernel_parameters, glesMode, glesCMA,
             true  // isQemu2
             );
@@ -730,17 +739,11 @@ extern "C" int main(int argc, char **argv) {
      */
     int s;
     int drvIndex = 0;
-    int api_level;
-    if (avd)  {
-        api_level = avdInfo_getApiLevel(avd);
-    } else {
-        api_level = 1000;
-    }
     for (s = 0; s < kMaxPartitions; s++) {
         bool writable = (kTarget.imagePartitionTypes[s] == IMAGE_TYPE_SYSTEM) ?
                     android_op_writable_system : true;
         makePartitionCmd(args, &n, &drvIndex, hw,
-                         kTarget.imagePartitionTypes[s], writable, api_level);
+                         kTarget.imagePartitionTypes[s], writable, apiLevel);
     }
 
     // Network

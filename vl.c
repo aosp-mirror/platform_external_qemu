@@ -136,7 +136,6 @@
 #include "android/gps.h"
 #include "android/telephony/modem_driver.h"
 #include "android/hw-control.h"
-#include "android/hw-kmsg.h"
 #include "android/hw-qemud.h"
 #include "android/utils/socket_drainer.h"
 #include "android/wear-agent/android_wear_agent.h"
