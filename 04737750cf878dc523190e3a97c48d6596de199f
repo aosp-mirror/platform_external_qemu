@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a834e966_51bbde1e",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-04-29T21:40:34Z",
+      "side": 1,
+      "message": "I did a quick search and it seems there is getnameinfo on windows while no inet_ntop on windows. So I just use getnameinfo to make sure it can compile on windows.",
+      "parentUuid": "a834e966_31fc1a4e",
+      "range": {
+        "startLine": 366,
+        "startChar": 4,
+        "endLine": 366,
+        "endChar": 15
+      },
+      "revId": "04737750cf878dc523190e3a97c48d6596de199f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a834e966_f1bb1284",
         "filename": "android/utils/sockets.c",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-29T21:18:06Z",
       "side": 1,
       "message": "I think this is only guaranteed to be NUL-terminated if getnameinfo/inet_ntop returns success.",
+      "range": {
+        "startLine": 367,
+        "startChar": 11,
+        "endLine": 367,
+        "endChar": 17
+      },
+      "revId": "04737750cf878dc523190e3a97c48d6596de199f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a834e966_9148861f",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-04-29T21:40:34Z",
+      "side": 1,
+      "message": "I add a check. But in what case will getnaminfo fail?",
+      "parentUuid": "a834e966_f1bb1284",
       "range": {
         "startLine": 367,
         "startChar": 11,
