@@ -5,14 +5,15 @@
 # in order to deal with the fact that glGetString(GL_EXTENSIONS) is obsolete
 # in OpenGL 3.0, and some drivers don't implement it anymore (i.e. the
 # function just returns NULL).
+# Also, to use synchronization primitives from host OpenGL.
 
 %#include <GLES/gl.h>
-%
-%// Used to avoid adding GLES3/gl3.h to our headers.
-%#ifndef GL_NUM_EXTENSIONS
-%#define GL_NUM_EXTENSIONS  0x821D
-%#endif
+%#include <GLES3/gl3.h>
 
-%typedef const GLubyte* GLconstubyteptr;
-
+# New version of glGetString
 GLconstubyteptr glGetStringi(GLenum name, GLint index);
+
+# OpenGL ES 3+ sync commands
+GLsync glFenceSync(GLenum condition, GLbitfield flags);
+GLenum glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
+void glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
