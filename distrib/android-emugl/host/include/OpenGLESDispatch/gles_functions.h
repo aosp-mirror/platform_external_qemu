@@ -27,6 +27,8 @@
 // optional extensions. This is only because currently, the only GLESv3
 // API we support is glGetStringi(), which is not always provided by
 // host desktop GL drivers (though most do).
+// If there are any more GLES3 functions on top of that, they're assumed
+// to extend the GLES2 driver.
 #define LIST_GLES_FUNCTIONS(X,Y) \
     LIST_GLES_COMMON_FUNCTIONS(X) \
     LIST_GLES_EXTENSIONS_FUNCTIONS(Y) \
@@ -47,4 +49,5 @@
     LIST_GLES_EXTENSIONS_FUNCTIONS(Y) \
     LIST_GLES2_ONLY_FUNCTIONS(X) \
     LIST_GLES2_EXTENSIONS_FUNCTIONS(Y) \
+    LIST_GLES3_ONLY_FUNCTIONS(Y) \
 
