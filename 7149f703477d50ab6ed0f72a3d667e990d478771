@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a834e966_37e5eab7",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-29T22:29:05Z",
+      "side": 1,
+      "message": "This is a hack for now, and may not be necessary with the define the line below.",
+      "range": {
+        "startLine": 218,
+        "startChar": 19,
+        "endLine": 218,
+        "endChar": 69
+      },
+      "revId": "7149f703477d50ab6ed0f72a3d667e990d478771",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
