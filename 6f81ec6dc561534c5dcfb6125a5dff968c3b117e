@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "28c9d979_bc8529bf",
+        "filename": "slirp-android/slirp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1084,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-29T17:29:50Z",
+      "side": 1,
+      "message": "Two things here: first |s4| needs to be closed if |s6| is NULL. Second, shall we accept |s6 \u003d\u003d NULL| has a valid use-case, when the system doesn\u0027t support IPv6 (though it\u0027s unlikely).",
+      "revId": "6f81ec6dc561534c5dcfb6125a5dff968c3b117e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
