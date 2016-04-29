@@ -36,6 +36,7 @@
 #include "ClientAPIExts.h"
 
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -83,12 +84,14 @@ static void initGLESx(GLESVersion version) {
 /*****************************************  supported extentions  ***********************************************************************/
 
 //extentions
-#define EGL_EXTENTIONS 2
+#define EGL_EXTENTIONS 4
 
 //decleration
 extern "C" {
 EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext context, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list);
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image);
+EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay display, EGLenum type, const EGLint* attribs);
+EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout);
 }  // extern "C"
 
 // extentions descriptors
@@ -97,6 +100,10 @@ static const ExtentionDescriptor s_eglExtentions[] = {
                 (__eglMustCastToProperFunctionPointerType)eglCreateImageKHR },
         {"eglDestroyImageKHR",
                 (__eglMustCastToProperFunctionPointerType)eglDestroyImageKHR },
+        {"eglCreateSyncKHR" ,
+                (__eglMustCastToProperFunctionPointerType)eglCreateSyncKHR },
+        {"eglClientWaitSyncKHR",
+                (__eglMustCastToProperFunctionPointerType)eglClientWaitSyncKHR },
 };
 
 static const int s_eglExtentionsSize =
@@ -992,6 +999,38 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR
         sg->decTexRefCounterAndReleaseIf0(globalTexName);
     }
     return dpy->destroyImageKHR(image) ? EGL_TRUE:EGL_FALSE;
+}
+
+
+EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint* attrib_list) {
+
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    GLsync res = iface->fenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    return (EGLSyncKHR)res;
+}
+
+EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout) {
+
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    GLenum gl_wait_result =
+        iface->clientWaitSync((GLsync)sync, GL_SYNC_FLUSH_COMMANDS_BIT, timeout);
+    EGLint egl_wait_result;
+
+    switch (gl_wait_result) {
+    case GL_ALREADY_SIGNALED:
+    case GL_CONDITION_SATISFIED:
+        egl_wait_result = EGL_CONDITION_SATISFIED_KHR;
+        break;
+    case GL_TIMEOUT_EXPIRED:
+        egl_wait_result = EGL_TIMEOUT_EXPIRED_KHR;
+        break;
+    case GL_WAIT_FAILED:
+        egl_wait_result = EGL_FALSE;
+        break;
+    default:
+        egl_wait_result = EGL_CONDITION_SATISFIED_KHR;
+    }
+    return egl_wait_result;
 }
 
 /*********************************************************************************/
