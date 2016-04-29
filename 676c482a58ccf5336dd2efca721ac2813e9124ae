@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "28c9d979_59ab4799",
+        "filename": "android/hw-pipe-opengles.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-29T10:11:36Z",
+      "side": 1,
+      "message": "nit: probably no need for so many \u0027private:\u0027 lines above :)",
+      "revId": "676c482a58ccf5336dd2efca721ac2813e9124ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
