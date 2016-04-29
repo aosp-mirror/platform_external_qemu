@@ -28,9 +28,21 @@ typedef struct QAndroidLocationAgent {
     //   |metersElevation| is meters above sea level
     //   |nSatellites| is the number of satellites used
     //   |time| is UTC, in the format provided by gettimeofday()
-    void (*gpsCmd)(double latitude, double longitude,
-                   double metersElevation, int nSatellites,
-                   const struct timeval *time);
+    void (*gpsSendLoc)(double latitude, double longitude,
+                       double metersElevation, int nSatellites,
+                       const struct timeval *time);
+
+    // Get the current device location
+    //
+    // Returns 1 if the device location was successfully
+    //   received from the device, 0 if unsuccessful
+    // If the return is 1, the output values are set:
+    //   |outLatitude| and |outLongitude| are in degrees
+    //   |outMetersElevation| is meters above sea level
+    //   |outNSatellites| is the number of satellites used
+    // Null 'out' pointers are safely ignored.
+    int (*gpsGetLoc)(double* outLatitude, double* outLongitude,
+                     double* outMetersElevation, int* outNSatellites);
 
     // Send an NMEA fix sentence to the device.
     void (*gpsSendNmea)(const char* sentence);

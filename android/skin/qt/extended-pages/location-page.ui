@@ -112,7 +112,7 @@
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>50</y>
+     <y>110</y>
      <width>140</width>
      <height>16</height>
     </rect>
@@ -166,7 +166,7 @@
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>110</y>
+     <y>50</y>
      <width>140</width>
      <height>16</height>
     </rect>
@@ -218,38 +218,10 @@
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>130</y>
+     <y>70</y>
      <width>280</width>
      <height>21</height>
     </rect>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QRadioButton" name="loc_sexagesimalModeSwitch">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>84</y>
-     <width>130</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-     <pointsize>10</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Sexagesimal</string>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>24</width>
-     <height>24</height>
-    </size>
    </property>
    <property name="report_metrics" stdset="0">
     <bool>false</bool>
@@ -259,7 +231,7 @@
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>70</y>
+     <y>130</y>
      <width>280</width>
      <height>21</height>
     </rect>
@@ -450,39 +422,6 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QRadioButton" name="loc_decimalModeSwitch">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>60</y>
-     <width>109</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-     <pointsize>10</pointsize>
-     <weight>50</weight>
-     <bold>false</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>Decimal</string>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>24</width>
-     <height>24</height>
-    </size>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_14">
    <property name="geometry">
     <rect>
@@ -497,6 +436,88 @@
    </property>
    <property name="ColorGroup" stdset="0">
     <string>Title</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="loc_modeSwitch">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>50</y>
+     <width>140</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+   <item>
+    <property name="text">
+     <string>Decimal</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Sexigesimal</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_15">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>50</y>
+     <width>140</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Coordinate system</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Title</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="loc_currentLocLabel">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>110</y>
+     <width>180</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>10</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+   </property>
+   <property name="title">
+    <string>Currently reported location</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Title</string>
+   </property>
+  </widget>
+  <widget class="QTextBrowser" name="loc_currentLoc">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>128</y>
+     <width>280</width>
+     <height>60</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <pointsize>10</pointsize>
+    </font>
    </property>
   </widget>
  </widget>
@@ -514,11 +535,9 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>loc_decimalModeSwitch</tabstop>
-  <tabstop>loc_sexagesimalModeSwitch</tabstop>
+  <tabstop>loc_modeSwitch</tabstop>
   <tabstop>loc_altitudeInput</tabstop>
   <tabstop>loc_sendPointButton</tabstop>
-  <tabstop>loc_pathTable</tabstop>
   <tabstop>loc_playStopButton</tabstop>
   <tabstop>loc_playbackSpeed</tabstop>
   <tabstop>loc_GpxKmlButton</tabstop>

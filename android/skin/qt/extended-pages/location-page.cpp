@@ -23,6 +23,9 @@
 #include <QSettings>
 #include <unistd.h>
 
+static const double kGplexLon = -122.084;
+static const double kGplexLat =   37.422;
+
 LocationPage::LocationPage(QWidget *parent) :
     QWidget(parent),
     mUi(new Ui::LocationPage),
@@ -46,12 +49,12 @@ LocationPage::LocationPage(QWidget *parent) :
     // Restore previous values. If there are no previous values, use the
     // Googleplex's longitude and latitude.
     QSettings settings;
-    mUi->loc_altitudeInput->setText(
-            settings.value(Ui::Settings::LOCATION_ALTITUDE, "0.0").toString());
+    double altValue = settings.value(Ui::Settings::LOCATION_ENTERED_ALTITUDE, 0.0).toDouble();
+    mUi->loc_altitudeInput->setText( QString::number(altValue, 'f', 1) );
     mUi->loc_longitudeInput->setValue(
-            settings.value(Ui::Settings::LOCATION_LONGITUDE, -122.084).toDouble());
+            settings.value(Ui::Settings::LOCATION_ENTERED_LONGITUDE, kGplexLon).toDouble());
     mUi->loc_latitudeInput->setValue(
-            settings.value(Ui::Settings::LOCATION_LATITUDE, 37.422).toDouble());
+            settings.value(Ui::Settings::LOCATION_ENTERED_LATITUDE, kGplexLat).toDouble());
     mUi->loc_playbackSpeed->setCurrentIndex(
             settings.value(Ui::Settings::LOCATION_PLAYBACK_SPEED, 0).toInt());
     QString location_data_file =
@@ -75,6 +78,13 @@ LocationPage::~LocationPage() {
 
 void LocationPage::setLocationAgent(const QAndroidLocationAgent* agent) {
     mLocationAgent = agent;
+
+    // Show the user the device's current location.
+    double curLat, curLon, curAlt;
+    getDeviceLocation(mLocationAgent, &curLat, &curLon, &curAlt);
+
+    updateDisplayedLocation(curLat, curLon, curAlt);
+    sendLocationToDevice(mLocationAgent, curLat, curLon, curAlt);
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()
@@ -113,35 +123,17 @@ void LocationPage::on_loc_playStopButton_clicked() {
     }
 }
 
-void LocationPage::on_loc_decimalModeSwitch_clicked() {
-    // It looks better when not highlighted
-    mUi->loc_decimalModeSwitch->clearFocus();
-}
-
-void LocationPage::on_loc_decimalModeSwitch_toggled(bool checked) {
-    if (checked) {
+void LocationPage::on_loc_modeSwitch_currentIndexChanged(int index) {
+    if (index == 1) {
+        mUi->loc_latitudeInput->setInputMode(AngleInputWidget::InputMode::Sexagesimal);
+        mUi->loc_longitudeInput->setInputMode(AngleInputWidget::InputMode::Sexagesimal);
+    } else {
         mUi->loc_latitudeInput->setInputMode(AngleInputWidget::InputMode::Decimal);
         mUi->loc_longitudeInput->setInputMode(AngleInputWidget::InputMode::Decimal);
     }
 }
 
-void LocationPage::on_loc_sexagesimalModeSwitch_clicked() {
-    // It looks better when not highlighted
-    mUi->loc_sexagesimalModeSwitch->clearFocus();
-}
-
-void LocationPage::on_loc_sexagesimalModeSwitch_toggled(bool checked) {
-    if (checked) {
-        mUi->loc_latitudeInput->setInputMode(AngleInputWidget::InputMode::Sexagesimal);
-        mUi->loc_longitudeInput->setInputMode(AngleInputWidget::InputMode::Sexagesimal);
-    }
-}
-
 void LocationPage::on_loc_sendPointButton_clicked() {
-    if (mLocationAgent == nullptr || mLocationAgent->gpsCmd == nullptr) {
-        return;
-    }
-
     mUi->loc_latitudeInput->forceUpdate();
     mUi->loc_longitudeInput->forceUpdate();
 
@@ -149,32 +141,40 @@ void LocationPage::on_loc_sendPointButton_clicked() {
     if (altitude < -1000.0 || altitude > 10000.0) {
         QSettings settings;
         mUi->loc_altitudeInput->setText(QString::number(
-                settings.value(Ui::Settings::LOCATION_ALTITUDE, 0.0)
+                settings.value(Ui::Settings::LOCATION_ENTERED_ALTITUDE, 0.0)
                         .toDouble()));
     }
 
-    timeval timeVal = {};
-    gettimeofday(&timeVal, nullptr);
-    mLocationAgent->gpsCmd(mUi->loc_latitudeInput->value(),
-                           mUi->loc_longitudeInput->value(),
-                           mUi->loc_altitudeInput->text().toDouble(),
-                           4,
-                           &timeVal);
+    updateDisplayedLocation(mUi->loc_latitudeInput->value(),
+                            mUi->loc_longitudeInput->value(),
+                            mUi->loc_altitudeInput->text().toDouble());
+
+    sendLocationToDevice(mLocationAgent,
+                         mUi->loc_latitudeInput->value(),
+                         mUi->loc_longitudeInput->value(),
+                         mUi->loc_altitudeInput->text().toDouble());
+}
+
+void LocationPage::updateDisplayedLocation(double lat, double lon, double alt) {
+    QString curLoc = tr("Longitude: %1\nLatitude: %2\nAltitude: %3")
+                     .arg(lon, 0, 'f', 4).arg(lat, 0, 'f', 4).arg(alt, 0, 'f', 1);
+    mUi->loc_currentLoc->setPlainText(curLoc);
 }
 
 void LocationPage::on_loc_longitudeInput_valueChanged(double value) {
     QSettings settings;
-    settings.setValue(Ui::Settings::LOCATION_LONGITUDE, value);
+    settings.setValue(Ui::Settings::LOCATION_ENTERED_LONGITUDE, value);
 }
 
 void LocationPage::on_loc_latitudeInput_valueChanged(double value) {
     QSettings settings;
-    settings.setValue(Ui::Settings::LOCATION_LATITUDE, value);
+    settings.setValue(Ui::Settings::LOCATION_ENTERED_LATITUDE, value);
 }
 
 void LocationPage::on_loc_altitudeInput_editingFinished() {
     QSettings settings;
-    settings.setValue(Ui::Settings::LOCATION_ALTITUDE, mUi->loc_altitudeInput->text());
+    settings.setValue(Ui::Settings::LOCATION_ENTERED_ALTITUDE,
+                      mUi->loc_altitudeInput->text().toDouble());
 }
 
 void LocationPage::on_loc_playbackSpeed_currentIndexChanged(int index) {
@@ -386,9 +386,6 @@ void LocationPage::timeout() {
     double lon = theItem->text().toDouble(&cellOK);
     theItem = mUi->loc_pathTable->item(mRowToSend, 3);
     double alt = theItem->text().toDouble(&cellOK);
-    int nSats = 4;  // Just say that we see 4 GPS satellites
-    timeval timeVal = {};
-    gettimeofday(&timeVal, nullptr);
 
     // Update the appearance of the table:
     // 1. Clear the "play arrow" icon from the previous point, if necessary.
@@ -403,10 +400,10 @@ void LocationPage::timeout() {
     mUi->loc_pathTable->scrollToItem(currentItem);
     mUi->loc_pathTable->setCurrentItem(currentItem);
 
+    updateDisplayedLocation(lat, lon, alt);
+
     // Send the command.
-    if (mLocationAgent  && mLocationAgent->gpsCmd) {
-        mLocationAgent->gpsCmd(lat, lon, alt, nSats, &timeVal);
-    }
+    sendLocationToDevice(mLocationAgent, lat, lon, alt);
 
     // Go on to the next row
     mRowToSend++;
@@ -464,6 +461,53 @@ void LocationPage::startupGeoDataThreadFinished(QString file_name, bool ok, QStr
 
 void LocationPage::geoDataThreadFinished(QString file_name, bool ok, QString error_message) {
     finishGeoDataLoading(file_name, ok, error_message, false);
+}
+
+// Get the current location from the device. If that fails, use
+// the saved location from this UI.
+// (static function)
+void LocationPage::getDeviceLocation(const QAndroidLocationAgent* locAgent,
+                                     double* pLatitude,
+                                     double* pLongitude,
+                                     double* pAltitude)
+{
+    bool gotDeviceLoc = false;
+
+    if (locAgent && locAgent->gpsGetLoc) {
+        // Query the device
+        gotDeviceLoc = locAgent->gpsGetLoc(pLatitude, pLongitude, pAltitude, nullptr);
+    }
+
+    if (!gotDeviceLoc) {
+        // Use the saved settings
+        QSettings settings;
+        *pLatitude  = settings.value(Ui::Settings::LOCATION_RECENT_LATITUDE,
+                                     kGplexLat).toDouble();
+        *pLongitude = settings.value(Ui::Settings::LOCATION_RECENT_LONGITUDE,
+                                     kGplexLon).toDouble();
+        *pAltitude  = settings.value(Ui::Settings::LOCATION_RECENT_ALTITUDE,
+                                     0.0).toDouble();
+    }
+}
+
+// Send a GPS location to the device
+// (static function)
+void LocationPage::sendLocationToDevice(const QAndroidLocationAgent* locAgent,
+                                        double latitude,
+                                        double longitude,
+                                        double altitude)
+{
+    QSettings settings;
+    settings.setValue(Ui::Settings::LOCATION_RECENT_LATITUDE, latitude);
+    settings.setValue(Ui::Settings::LOCATION_RECENT_LONGITUDE, longitude);
+    settings.setValue(Ui::Settings::LOCATION_RECENT_ALTITUDE, altitude);
+
+    if (locAgent && locAgent->gpsSendLoc) {
+        // Send these to the device
+        timeval timeVal = {};
+        gettimeofday(&timeVal, nullptr);
+        locAgent->gpsSendLoc(latitude, longitude, altitude, 4, &timeVal);
+    }
 }
 
 void GeoDataLoaderThread::loadGeoDataFromFile(const QString& file_name, GpsFixArray* fixes) {
