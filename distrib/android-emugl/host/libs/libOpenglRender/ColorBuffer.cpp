@@ -27,6 +27,12 @@
 
 namespace {
 
+// Time taken to wait for blitFromCurrentReadBuffer
+// to finish. 1 second seems to cover most cases.
+// If we set this to 16ms or something close to a frame time,
+// we can get out of order frames.
+static const uint64_t kFenceSyncWaitTime = 1 * 1000 * 1000 * 1000;
+
 // Lazily create and bind a framebuffer object to the current host context.
 // |fbo| is the address of the framebuffer object name.
 // |tex| is the name of a texture that is attached to the framebuffer object
@@ -278,24 +284,17 @@ bool ColorBuffer::blitFromCurrentReadBuffer()
                                   m_width, m_height);
         s_gles2.glDeleteTextures(1, &tmpTex);
         s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
-#ifdef _WIN32
-        // HACK:
-        // Fix out of order posting on Windows
-        // If we don't Finish() these commands,
-        // the texture will not actually be updated,
-        // but rcFlushWindowColorBuffer (which calls this)
-        // will return anyway, and happily give surfaceflinger
-        // an old frame.
-        // Windows only for now because this is not good for performance.
-        // Ideally we want to find a different synchronization setup,
-        // perhaps one that involves the guest as well:
-        // Queues the buffer on the guest at the same time like before,
-        // but give it a fence that is not signaled until we know
-        // on the host that the frame is done.
-        // E.g., with this hack, we still "max out" score in
-        // 3DMark Ice Storm Extreme, but the FPS dips in parts.
-        s_gles2.glFinish();
-#endif
+        // TODO:  glClientWaitSync on a different thread
+        // At the moment, is equivalent to glFinish() from before
+        GLsync wait_here = s_gles2.glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+        // Wait up to 1 second for the texture copy to finish.
+        // This needs to be > any reasonable frame time.
+        // 1 second seems to cover most cases.
+        // Generally, if we set this to 16ms or otherwise close to a frame time,
+        // we can get out of order frames again.
+        GLenum wait_res = s_gles2.glClientWaitSync(wait_here,
+                                                   GL_SYNC_FLUSH_COMMANDS_BIT,
+                                                   kFenceSyncWaitTime);
     }
     else {
         s_gles1.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
