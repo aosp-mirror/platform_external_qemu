@@ -5,14 +5,12 @@
 #define GLES3_ONLY_FUNCTIONS_H
 
 #include <GLES/gl.h>
-
-// Used to avoid adding GLES3/gl3.h to our headers.
-#ifndef GL_NUM_EXTENSIONS
-#define GL_NUM_EXTENSIONS  0x821D
-#endif
-typedef const GLubyte* GLconstubyteptr;
+#include <GLES3/gl3.h>
 #define LIST_GLES3_ONLY_FUNCTIONS(X) \
   X(GLconstubyteptr, glGetStringi, (GLenum name, GLint index), (name, index)) \
+  X(GLsync, glFenceSync, (GLenum condition, GLbitfield flags), (condition, flags)) \
+  X(GLenum, glClientWaitSync, (GLsync wait_on, GLbitfield flags, GLuint64 timeout), (wait_on, flags, timeout)) \
+  X(void, glWaitSync, (GLsync wait_on, GLbitfield flags, GLuint64 timeout), (wait_on, flags, timeout)) \
 
 
 #endif  // GLES3_ONLY_FUNCTIONS_H

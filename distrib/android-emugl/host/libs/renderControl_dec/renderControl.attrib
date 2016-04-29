@@ -42,3 +42,11 @@ rcUpdateColorBuffer
 
 rcCloseColorBuffer
     flag flushOnEncode
+
+rcCreateSyncKHR
+    dir attribs in
+    len attribs num_attribs
+    dir glsync_out out
+    len glsync_out sizeof(uint64_t)
+    dir syncthread_out out
+    len syncthread_out sizeof(uint64_t)
