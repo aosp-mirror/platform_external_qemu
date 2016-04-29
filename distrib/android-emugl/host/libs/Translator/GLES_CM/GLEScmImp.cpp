@@ -1469,7 +1469,7 @@ GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint interna
 
     bool needAutoMipmap = false;
 
-    if (ctx->shareGroup().get()){
+    if (ctx->shareGroup().get() && level == 0){
         TextureData *texData = getTextureTargetData(target);
         SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);
         if(texData) {

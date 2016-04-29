@@ -1922,7 +1922,7 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
     SET_ERROR_IF(!(GLESv2Validate::pixelOp(format,type) && internalformat == ((GLint)format)),GL_INVALID_OPERATION);
     SET_ERROR_IF(border != 0,GL_INVALID_VALUE);
 
-    if (ctx->shareGroup().get()){
+    if (ctx->shareGroup().get() && level == 0){
         TextureData *texData = getTextureTargetData(target);
         if(texData) {
             texData->width = width;
