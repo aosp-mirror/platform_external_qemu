@@ -23,6 +23,7 @@
 #define GL_GLEXT_PROTOTYPES
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#include <GLES3/gl3.h>
 
 #include <OpenglCodecCommon/ErrorLog.h>
 #include <GLcommon/TranslatorIfaces.h>
@@ -2291,4 +2292,16 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
                                                    prevFB);
         }
     }
+}
+
+GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags)
+{
+    GET_CTX_RET(NULL);
+    return ctx->dispatcher().glFenceSync(condition, flags);
+}
+
+GL_APICALL GLenum GL_APIENTRY glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout)
+{
+    GET_CTX_RET(GL_WAIT_FAILED);
+    return ctx->dispatcher().glClientWaitSync(wait_on, flags, timeout);
 }
