@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a834e966_561af45f",
+        "filename": "distrib/android-emugl/host/include/OpenglRender/RenderLib.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-04-29T20:49:26Z",
+      "side": 1,
+      "message": "Presumably the purpose of the destructor being protected is to prevent this class from being instantiated.  But the presence of abstract virtual methods already prevents that.  Why not just make the dtor public?",
+      "range": {
+        "startLine": 47,
+        "startChar": 4,
+        "endLine": 47,
+        "endChar": 68
+      },
+      "revId": "5c6cc42d3d1aff7a55c810059c3bd29ed71a61ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
