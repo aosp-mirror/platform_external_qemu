@@ -99,8 +99,8 @@ void error_free(Error *err);
  */
 
 extern Error *error_abort;
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 extern Error *android_init_error_with_message;
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 
 #endif

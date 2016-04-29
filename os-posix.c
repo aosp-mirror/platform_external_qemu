@@ -40,7 +40,7 @@
 #include "net/slirp.h"
 #include "qemu-options.h"
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 #include "android/skin/winsys.h"
 #endif
 
@@ -64,14 +64,14 @@ void os_setup_early_signal_handling(void)
 
 static void termsig_handler(int signal, siginfo_t *info, void *c)
 {
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
     // In android, request closing the UI, instead of short-circuting down to
     // qemu. This will eventually call qemu_system_shutdown_request via a skin
     // event.
     skin_winsys_quit_request();
 #else
     qemu_system_killed(info->si_signo, info->si_pid);
-#endif  // !USE_ANDROID_EMU
+#endif  // !CONFIG_ANDROID
 }
 
 void os_setup_signal_handling(void)

@@ -20,9 +20,7 @@
 #include "hw/irq.h"
 
 #ifdef CONFIG_ANDROID
-#ifdef USE_ANDROID_EMU
 #include "android/android.h"
-#endif  // USE_ANDROID_EMU
 #include "android-console.h"
 #endif  // CONFIG_ANDROID
 

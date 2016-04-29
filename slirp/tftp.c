@@ -24,9 +24,9 @@
 
 #include <slirp.h>
 #include "qemu-common.h"
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 #include "android/utils/file_io.h"
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 
 static inline int tftp_session_in_use(struct tftp_session *spt)
 {
@@ -363,11 +363,11 @@ static void tftp_handle_rrq(Slirp *slirp, struct tftp_t *tp, int pktlen)
 	  struct stat stat_p;
 
 	  if (tsize == 0) {
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 	      if (android_stat(spt->filename, &stat_p) == 0)
-#else  // !USE_ANDROID_EMU
+#else  // !CONFIG_ANDROID
 	      if (stat(spt->filename, &stat_p) == 0)
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 		  tsize = stat_p.st_size;
 	      else {
 		  tftp_send_error(spt, 1, "File not found", tp);

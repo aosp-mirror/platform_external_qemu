@@ -80,7 +80,6 @@ QEMU2_CFLAGS := \
     -D_GNU_SOURCE \
     -D_FILE_OFFSET_BITS=64 \
     -DCONFIG_ANDROID \
-    -DUSE_ANDROID_EMU \
 
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 

@@ -74,7 +74,6 @@ LOCAL_SRC_FILES += \
     hw/intc/goldfish_pic.c \
     hw/misc/android_adb.c \
     hw/misc/android_adb_dbg.c \
-    hw/misc/android_boot_properties.c \
     hw/misc/android_pipe.c \
     hw/misc/android_pipe_test.c \
     hw/misc/android_qemud.c\

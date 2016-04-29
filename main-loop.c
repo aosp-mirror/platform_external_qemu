@@ -30,7 +30,7 @@
 #include "qemu/main-loop.h"
 #include "block/aio.h"
 
-#if defined(USE_ANDROID_EMU)
+#if defined(CONFIG_ANDROID)
 #include "android-qemu2-glue/emulation/charpipe.h"
 #endif
 
@@ -501,7 +501,7 @@ int main_loop_wait(int nonblocking)
     slirp_pollfds_poll(gpollfds, (ret < 0));
 #endif
 
-#if defined(USE_ANDROID_EMU)
+#if defined(CONFIG_ANDROID)
     charpipe_poll();
 #endif
 

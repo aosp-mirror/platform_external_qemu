@@ -37,9 +37,9 @@
 #include "hw/pci/pci.h"
 #include "hw/pci/msi.h"
 #include "kvm_i386.h"
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 #include "android/utils/file_io.h"
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 
 #define MSIX_PAGE_SIZE 0x1000
 
@@ -1925,11 +1925,11 @@ static void assigned_dev_load_option_rom(AssignedDevice *dev)
              dev->host.domain, dev->host.bus, dev->host.slot,
              dev->host.function);
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
     if (android_stat(rom_file, &st)) {
-#else  // !USE_ANDROID_EMU
+#else  // !CONFIG_ANDROID
     if (stat(rom_file, &st)) {
-#endif  // USE_ANDROID_EMU
+#endif  // !CONFIG_ANDROID
         return;
     }
 

@@ -54,7 +54,7 @@
 
 #include "qemu/range.h"
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 #include "android/error-messages.h"
 #endif
 
@@ -1335,15 +1335,15 @@ static ram_addr_t ram_block_add(RAMBlock *new_block, Error **errp)
             }
 #endif
             if (!new_block->host) {
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
                 error_setg_errno(errp, errno, kNotEnoughMemForGuestError,
                                  new_block->length / (1024.0 * 1024.0 * 1024.0),
                                  memory_region_name(new_block->mr));
-#else  // !USE_ANDROID_EMU
+#else  // !CONFIG_ANDROID
                 error_setg_errno(errp, errno,
                                  "cannot set up guest memory '%s'",
                                  memory_region_name(new_block->mr));
-#endif  // USE_ANDROID_EMU
+#endif  // !CONFIG_ANDROID
                 qemu_mutex_unlock_ramlist();
                 return -1;
             }

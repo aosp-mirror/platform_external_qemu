@@ -41,7 +41,7 @@
 #include "sysemu/sysemu.h"
 #include "hw/misc/vfio.h"
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 #include "android/utils/file_io.h"
 #endif
 
@@ -4178,11 +4178,11 @@ static int vfio_initfn(PCIDevice *pdev)
              "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/",
              vdev->host.domain, vdev->host.bus, vdev->host.slot,
              vdev->host.function);
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
     if (android_stat(path, &st) < 0) {
-#else  // !USE_ANDROID_EMU
+#else  // !CONFIG_ANDROID
     if (stat(path, &st) < 0) {
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
         error_report("vfio: error: no such host device: %s", path);
         return -errno;
     }

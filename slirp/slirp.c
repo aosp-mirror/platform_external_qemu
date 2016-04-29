@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 #include "android/utils/dns.h"
 #include "android/utils/ipaddr.h"
 #include "android/utils/sockets.h"
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 
 #include "qemu-common.h"
 #include "qemu/timer.h"
@@ -48,7 +48,7 @@ u_int curtime;
 static QTAILQ_HEAD(slirp_instances, Slirp) slirp_instances =
     QTAILQ_HEAD_INITIALIZER(slirp_instances);
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 #define SPECIAL_ADDRESS_IP "10.0.2.0"
 #define DNS_ADDR_MAX 4
 #define DNS_ADDR_BASE 3
@@ -56,10 +56,10 @@ static QTAILQ_HEAD(slirp_instances, Slirp) slirp_instances =
 static uint32_t dns_addr[DNS_ADDR_MAX];
 static size_t dns_addr_count = 0;
 static struct in_addr special_addr_ip;
-#else  // !(USE_ANDROID_EMU)
+#else  // !(CONFIG_ANDROID)
 static struct in_addr dns_addr;
 static u_int dns_addr_time;
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 
 #define TIMEOUT_FAST 2  /* milliseconds */
 #define TIMEOUT_SLOW 499  /* milliseconds */
@@ -73,7 +73,7 @@ static void winsock_cleanup(void)
 }
 #endif
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 static size_t get_dns_index(uint32_t addr) {
     /* Use unsigned underflow so that values less than DNS_BASE_ADDR become
      * huge and invalid */
@@ -122,7 +122,7 @@ int slirp_get_max_dns_servers(void) {
     return DNS_ADDR_MAX;
 }
 
-#else  // !(USE_ANDROID_EMU)
+#else  // !(CONFIG_ANDROID)
 
 int is_dns_addr(Slirp* slirp, const struct in_addr* address)  {
     return address->s_addr == slirp->vnameserver_addr.s_addr;
@@ -247,7 +247,7 @@ int get_dns_addr(const struct in_addr* guest_addr,
     return 0;
 }
 #endif  // _WIN32
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 
 static void slirp_init_once(void)
 {
@@ -310,7 +310,7 @@ Slirp *slirp_init(int restricted, struct in_addr vnetwork,
 
     slirp->opaque = opaque;
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
     inet_strtoip(SPECIAL_ADDRESS_IP, &special_addr_ip.s_addr);
 #endif
 

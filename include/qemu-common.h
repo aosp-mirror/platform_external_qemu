@@ -98,20 +98,20 @@ int qemu_ftruncate64(int, int64_t);
 # define ftruncate qemu_ftruncate64
 #endif
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 char *realpath_with_length(const char *path, char *resolved_path, int length);
 static inline char *realpath(const char *path, char *resolved_path)
 {
     realpath_with_length(path, resolved_path, _MAX_PATH);
     return resolved_path;
 }
-#else  // !USE_ANDROID_EMU
+#else  // !CONFIG_ANDROID
 static inline char *realpath(const char *path, char *resolved_path)
 {
     _fullpath(resolved_path, path, _MAX_PATH);
     return resolved_path;
 }
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 #endif
 
 void cpu_ticks_init(void);

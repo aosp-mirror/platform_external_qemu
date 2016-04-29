@@ -18,10 +18,9 @@
 
 #ifndef ANDROID_CONSOLE_H
 #define ANDROID_CONSOLE_H
-#ifdef USE_ANDROID_EMU
+
 #include "android/console.h"
 #include "android/telephony/modem_driver.h"
-#endif
 #include "qemu-common.h"
 
 extern int android_base_port;
@@ -93,7 +92,6 @@ void android_monitor_print_error(Monitor *mon, const char *fmt, ...);
 
 bool android_initialize_console_and_adb();
 
-#ifdef USE_ANDROID_EMU
 void qemu2_android_console_setup(const AndroidConsoleAgents* agents);
-#endif
+
 #endif

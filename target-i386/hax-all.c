@@ -31,7 +31,7 @@
 #include "qemu/main-loop.h"
 #include "hax-slot.h"
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 #include "android/error-messages.h"
 #include "android/utils/debug.h"
 #else

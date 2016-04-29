@@ -41,9 +41,7 @@
 #include "hw/misc/android_pipe.h"
 
 #include "android-console.h"
-#ifdef USE_ANDROID_EMU
 #include "android/android.h"
-#endif // USE_ANDROID_EMU
 
 #define NUM_VIRTIO_TRANSPORTS 32
 

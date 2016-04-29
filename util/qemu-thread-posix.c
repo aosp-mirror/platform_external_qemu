@@ -27,7 +27,7 @@
 #include "qemu/thread.h"
 #include "qemu/atomic.h"
 
-#if defined(CONFIG_ANDROID) && defined(USE_ANDROID_EMU)
+#if defined(CONFIG_ANDROID)
 #include "android-qemu2-glue/looper-qemu.h"
 #include "android/crashreport/crash-handler.h"
 #endif
@@ -49,7 +49,7 @@ void qemu_thread_naming(bool enable)
 static void error_exit(int err, const char *msg)
 {
     fprintf(stderr, "qemu: %s: %s\n", msg, strerror(err));
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
     crashhandler_die_format(
                 "Internal error in %s: %s (%d)",
                 msg, strerror(err), err);
@@ -422,7 +422,7 @@ static void qemu_thread_set_name(QemuThread *thread, const char *name)
 #endif
 }
 
-#if defined(CONFIG_ANDROID) && defined(USE_ANDROID_EMU)
+#if defined(CONFIG_ANDROID)
 /* A small data structure to group the thread startup parameters.
  * This is passed to the trampoline function below which will first
  * setup AndroidEmu to use the QEMU-based looper implementation before
@@ -451,7 +451,7 @@ static void* qemu_thread_trampoline(void* data_) {
     /* Start the thread. */
     return (*data.start_routine)(data.arg);
 }
-#endif  // CONFIG_ANDROID_USE_ANDROIDEMU
+#endif  // CONFIG_ANDROID
 
 void qemu_thread_create(QemuThread *thread, const char *name,
                        void *(*start_routine)(void*),
@@ -475,7 +475,7 @@ void qemu_thread_create(QemuThread *thread, const char *name,
     /* Leave signal handling to the iothread.  */
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, &oldset);
-#if defined(CONFIG_ANDROID) && defined(USE_ANDROID_EMU)
+#if defined(CONFIG_ANDROID)
     /* Create heap-allocated ThreadStartData object and pass its ownership
      * to the trampoline. */
     ThreadStartData* data = malloc(sizeof(*data));
@@ -487,11 +487,11 @@ void qemu_thread_create(QemuThread *thread, const char *name,
         free(data);
         error_exit(err, __func__);
     }
-#else  /* !CONFIG_ANDROID || !USE_ANDROID_EMU */
+#else  /* !CONFIG_ANDROID */
     err = pthread_create(&thread->thread, &attr, start_routine, arg);
     if (err)
         error_exit(err, __func__);
-#endif  /* !CONFIG_ANDROID || !USE_ANDROID_EMU */
+#endif  /* !CONFIG_ANDROID */
 
     if (name_threads) {
         qemu_thread_set_name(thread, name);

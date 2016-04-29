@@ -38,7 +38,7 @@
  * terms and conditions of the copyright.
  */
 
-#if defined(CONFIG_ANDROID) && defined(USE_ANDROID_EMU)
+#if defined(CONFIG_ANDROID)
 #include "android/crashreport/crash-handler.h"
 #endif
 
@@ -69,13 +69,13 @@ tcp_output(struct tcpcb *tp)
 	unsigned optlen, hdrlen;
 	int idle, sendalot;
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 	if (tp == NULL) {
 		crashhandler_die("QEMU-2 tcp_output() invoked with tp==NULL");
 	}
 #endif
 	so = tp->t_socket;
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 	if (so == NULL) {
 		crashhandler_die("QEMU-2 tcp_output() invoked "
 		                 "with tp->t_socket==NULL");

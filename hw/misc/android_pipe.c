@@ -32,7 +32,6 @@
 #include "hw/hw.h"
 #include "hw/sysbus.h"
 #include "hw/misc/android_pipe.h"
-#include "hw/misc/android_boot_properties.h"
 #include "qemu-common.h"
 #include "qemu/timer.h"
 #include "qemu/error-report.h"
@@ -137,16 +136,6 @@ static void set_pipe_wanted_bits(HwPipe* pipe, unsigned char val) {
     qemu_mutex_unlock(&pipe->lock);
 }
 
-#ifndef USE_ANDROID_EMU
-
-typedef struct PipeInternal PipeInternal;
-
-PipeInternal* android_pipe_new(HwPipe* pipe);
-void android_pipe_free(void* pipe);
-
-#endif
-
-
 static HwPipe*
 pipe_new0(PipeDevice* dev)
 {
@@ -191,319 +180,6 @@ static void pipe_free(HwPipe* pipe)
     qemu_mutex_destroy(&pipe->lock);
     g_free(pipe);
 }
-
-#ifndef USE_ANDROID_EMU
-
-// create a compatibility layer with the AndroidEmu implementation
-
-typedef struct PipeService PipeService;
-typedef struct HwPipe HwPipe;
-
-typedef struct PipeInternal {
-    void                        *opaque;
-    const AndroidPipeFuncs      *funcs;
-    const PipeService           *service;
-    char*                       args;
-    HwPipe*                     hwPipe;
-} PipeInternal;
-
-static void* pipeConnector_new(HwPipe* pipe);
-
-PipeInternal* android_pipe_new(HwPipe* pipe) {
-    PipeInternal* res = pipe->pipe = g_malloc0(sizeof(PipeInternal));
-    res->opaque = pipeConnector_new(pipe);
-    res->hwPipe = pipe;
-    return res;
-}
-
-void android_pipe_free(void* pipe_) {
-    if (!pipe_) {
-        return;
-    }
-
-    PipeInternal* pipe = pipe_;
-    /* Call close callback */
-    if (pipe->funcs->close) {
-        pipe->funcs->close(pipe->opaque);
-    }
-    /* Free stuff */
-    free(pipe->args);
-    free(pipe);
-}
-
-static unsigned android_pipe_poll(void* pipe_) {
-    PipeInternal* pipe = pipe_;
-    return pipe->funcs->poll(pipe->opaque);
-}
-
-static int android_pipe_recv(void* pipe_, AndroidPipeBuffer* buffers, int numBuffers) {
-    PipeInternal* pipe = pipe_;
-    return pipe->funcs->recvBuffers(pipe->opaque, buffers, numBuffers);
-}
-
-static int android_pipe_send(void* pipe_, const AndroidPipeBuffer* buffers, int numBuffers) {
-    PipeInternal* pipe = pipe_;
-    return pipe->funcs->sendBuffers(pipe->opaque, buffers, numBuffers);
-}
-
-static void android_pipe_wake_on(void* pipe_, unsigned wakes) {
-    PipeInternal* pipe = pipe_;
-    pipe->funcs->wakeOn(pipe->opaque, wakes);
-}
-
-/***********************************************************************
- ***********************************************************************
- *****
- *****   P I P E   S E R V I C E   R E G I S T R A T I O N
- *****
- *****/
-
-#define MAX_PIPE_SERVICES  8
-typedef struct PipeService {
-    const char          *name;
-    void                *opaque;        /* pipe specific data */
-    AndroidPipeFuncs    funcs;
-} PipeService;
-
-typedef struct {
-    int          count;
-    PipeService  services[MAX_PIPE_SERVICES];
-} PipeServices;
-
-static PipeServices  _pipeServices[1];
-
-void
-android_pipe_add_type(const char *pipeName,
-                      void *pipeOpaque,
-                      const AndroidPipeFuncs *pipeFuncs)
-{
-    PipeServices *list = _pipeServices;
-    int          count = list->count;
-
-    if (count >= MAX_PIPE_SERVICES) {
-        APANIC("Too many goldfish pipe services (%d)", count);
-    }
-
-    if (strlen(pipeName) > MAX_PIPE_SERVICE_NAME_SIZE) {
-        APANIC("HwPipe service name too long: '%s'", pipeName);
-    }
-
-    list->services[count].name   = pipeName;
-    list->services[count].opaque = pipeOpaque;
-    list->services[count].funcs  = pipeFuncs[0];
-
-    list->count++;
-}
-
-static const PipeService* android_pipe_find_type(const char *pipeName)
-{
-    PipeServices* list = _pipeServices;
-    int           count = list->count;
-    int           nn;
-
-    for (nn = 0; nn < count; nn++) {
-        if (!strcmp(list->services[nn].name, pipeName)) {
-            return &list->services[nn];
-        }
-    }
-    return NULL;
-}
-
-/***********************************************************************
- ***********************************************************************
- *****
- *****    P I P E   C O N N E C T O R S
- *****
- *****/
-
-/* These are used to handle the initial connection attempt, where the
- * client is going to write the name of the pipe service it wants to
- * connect to, followed by a terminating zero.
- */
-typedef struct {
-    HwPipe*  pipe;
-    char   buffer[128];
-    int    buffpos;
-} PipeConnector;
-
-static const AndroidPipeFuncs  pipeConnector_funcs;  // forward
-
-void*
-pipeConnector_new(HwPipe* pipe)
-{
-    PipeConnector*  pcon;
-
-    pcon = g_malloc0(sizeof(PipeConnector));
-    pcon->pipe  = pipe;
-    PipeInternal* pi = pipe->pipe;
-    assert(pi);
-    pi->funcs = &pipeConnector_funcs;
-    return pcon;
-}
-
-static void
-pipeConnector_close( void* opaque )
-{
-    PipeConnector*  pcon = opaque;
-    g_free(pcon);
-}
-
-static int
-pipeConnector_sendBuffers( void* opaque, const AndroidPipeBuffer* buffers, int numBuffers )
-{
-    PipeConnector* pcon = opaque;
-    const AndroidPipeBuffer*  buffers_limit = buffers + numBuffers;
-    int ret = 0;
-
-    DD("%s: channel=0x%llx numBuffers=%d", __FUNCTION__,
-       (unsigned long long)pcon->pipe->channel,
-       numBuffers);
-
-    while (buffers < buffers_limit) {
-        int  avail;
-
-        DD("%s: buffer data (%3zd bytes): '%.*s'", __FUNCTION__,
-           buffers[0].size, (int) buffers[0].size, buffers[0].data);
-
-        if (buffers[0].size == 0) {
-            buffers++;
-            continue;
-        }
-
-        avail = sizeof(pcon->buffer) - pcon->buffpos;
-        if (avail > buffers[0].size)
-            avail = buffers[0].size;
-
-        if (avail > 0) {
-            memcpy(pcon->buffer + pcon->buffpos, buffers[0].data, avail);
-            pcon->buffpos += avail;
-            ret += avail;
-        }
-        buffers++;
-    }
-
-    /* Now check that our buffer contains a zero-terminated string */
-    if (memchr(pcon->buffer, '\0', pcon->buffpos) != NULL) {
-        /* Acceptable formats for the connection string are:
-         *
-         *   pipe:<name>
-         *   pipe:<name>:<arguments>
-         */
-        char* pipeName;
-        char* pipeArgs;
-
-        D("%s: connector: '%s'", __FUNCTION__, pcon->buffer);
-
-        if (memcmp(pcon->buffer, "pipe:", 5) != 0) {
-            /* Nope, we don't handle these for now. */
-            qemu_log_mask(LOG_UNIMP, "%s: Unknown pipe connection: '%s'\n",
-                          __func__, pcon->buffer);
-            return PIPE_ERROR_INVAL;
-        }
-
-        pipeName = pcon->buffer + 5;
-        pipeArgs = strchr(pipeName, ':');
-
-        /* Directly connect qemud:adb pipes to their adb backends without
-         * going through the qemud multiplexer.  All other uses of the ':'
-         * char than an initial "qemud:" will be parsed as arguments to the
-         * pipe name preceeding the colon.
-         */
-        if (pipeArgs && pipeArgs - pipeName == 5
-                && strncmp(pipeName, "qemud", 5) == 0) {
-            pipeArgs = strchr(pipeArgs + 1, ':');
-        }
-
-        if (pipeArgs != NULL) {
-            *pipeArgs++ = '\0';
-            if (!*pipeArgs)
-                pipeArgs = NULL;
-        }
-
-        HwPipe* pipe = pcon->pipe;
-        const PipeService* svc = android_pipe_find_type(pipeName);
-        if (svc == NULL) {
-            qemu_log_mask(LOG_UNIMP, "%s: Couldn't find service: '%s'\n",
-                          __func__, pipeName);
-            return PIPE_ERROR_INVAL;
-        }
-
-        void*  peer = svc->funcs.init(pipe, svc->opaque, pipeArgs);
-        if (peer == NULL) {
-            fprintf(stderr,"%s: error initialising pipe:'%s' with args '%s'\n",
-                    __func__, pipeName, pipeArgs);
-            return PIPE_ERROR_INVAL;
-        }
-
-        /* Do the evil switch now */
-        PipeInternal* pi = pipe->pipe;
-        pi->opaque = peer;
-        pi->service = svc;
-        pi->funcs  = &svc->funcs;
-        pi->args   = g_strdup(pipeArgs);
-        g_free(pcon);
-    }
-
-    return ret;
-}
-
-static int
-pipeConnector_recvBuffers( void* opaque, AndroidPipeBuffer* buffers, int numBuffers )
-{
-    return PIPE_ERROR_IO;
-}
-
-static unsigned
-pipeConnector_poll( void* opaque )
-{
-    return PIPE_POLL_OUT;
-}
-
-static void
-pipeConnector_wakeOn( void* opaque, int flags )
-{
-    /* nothing, really should never happen */
-}
-
-static void
-pipeConnector_save( void* pipe, QEMUFile* file )
-{
-    PipeConnector*  pcon = pipe;
-    qemu_put_sbe32(file, pcon->buffpos);
-    qemu_put_sbuffer(file, (const int8_t*)pcon->buffer, pcon->buffpos);
-}
-
-static void*
-pipeConnector_load( void* hwpipe, void* pipeOpaque, const char* args, QEMUFile* file )
-{
-    PipeConnector*  pcon;
-
-    int len = qemu_get_sbe32(file);
-    if (len < 0 || len > sizeof(pcon->buffer)) {
-        return NULL;
-    }
-    pcon = pipeConnector_new(hwpipe);
-    pcon->buffpos = len;
-    if (qemu_get_buffer(file, (uint8_t*)pcon->buffer, pcon->buffpos) != pcon->buffpos) {
-        g_free(pcon);
-        return NULL;
-    }
-    return pcon;
-}
-
-static const AndroidPipeFuncs  pipeConnector_funcs = {
-    NULL,  /* init */
-    pipeConnector_close,        /* should rarely happen */
-    pipeConnector_sendBuffers,  /* the interesting stuff */
-    pipeConnector_recvBuffers,  /* should not happen */
-    pipeConnector_poll,         /* should not happen */
-    pipeConnector_wakeOn,       /* should not happen */
-    pipeConnector_save,
-    pipeConnector_load,
-};
-
-#endif // USE_ANDROID_EMU
-
 
 /***********************************************************************
  ***********************************************************************
@@ -877,20 +553,10 @@ static const MemoryRegionOps android_pipe_iomem_ops = {
 static void qemu2_android_pipe_wake(void* hwpipe, unsigned flags);
 static void qemu2_android_pipe_close(void* hwpipe);
 
-#if defined(USE_ANDROID_EMU)
 static const AndroidPipeHwFuncs qemu2_android_pipe_hw_funcs = {
     .closeFromHost = qemu2_android_pipe_close,
     .signalWake = qemu2_android_pipe_wake,
 };
-#else  // !USE_ANDROID_EMU
-void android_pipe_close(void* hwpipe) {
-    qemu2_android_pipe_close(hwpipe);
-}
-
-void android_pipe_wake(void* hwpipe, unsigned flags) {
-    qemu2_android_pipe_wake(hwpipe, flags);
-}
-#endif  // !USE_ANDROID_EMU
 
 static void android_pipe_realize(DeviceState *dev, Error **errp)
 {
@@ -913,12 +579,8 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
     android_throttle_init();
     android_net_pipes_init();
 
-#ifdef USE_ANDROID_EMU
     android_pipe_set_hw_funcs(&qemu2_android_pipe_hw_funcs);
-#else
-    android_sensors_init();
-    android_boot_properties_init();
-#endif
+
     /* TODO: This may be a complete hack and there may be beautiful QOM ways
      * to accomplish this.
      *

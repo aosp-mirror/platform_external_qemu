@@ -106,7 +106,6 @@
 #ifdef CONFIG_ANDROID
 
 
-#ifdef USE_ANDROID_EMU
 #include "config.h"
 
 #include "android/boot-properties.h"
@@ -146,9 +145,12 @@
 #include "android/snaphost-android.h"
 #include "android/android.h"
 #include "android/camera/camera-service.h"
-#include "android/opengles.h"
 #include "android/version.h"
 #include "hw/input/goldfish_events.h"
+
+// this path has to be relative as AndroidEmu include paths go after the qemu2
+// ones, and android/opengles.h resolves to the very same this file
+#include "../qemu/android/opengles.h"
 
 #define QEMU_CORE_VERSION "qemu2 " QEMU_VERSION
 
@@ -156,11 +158,6 @@ int android_display_width  = 640;
 int android_display_height = 480;
 
 /////////////////////////////////////////////////////////////
-#else  /* !USE_ANDROID_EMU */
-
-#include "hw/misc/android_boot_properties.h"
-
-#endif  /* !USE_ANDROID_EMU */
 
 #define  LCD_DENSITY_LDPI      120
 #define  LCD_DENSITY_MDPI      160
@@ -234,13 +231,11 @@ int android_op_netfast = 0;
 char* android_op_dns_server = NULL;
 int lcd_density = LCD_DENSITY_MDPI;
 char* additional_kernel_params = NULL;
-#ifdef USE_ANDROID_EMU
 extern char* op_http_proxy;
 extern char* android_op_ports;
 extern int android_op_ports_numbers[2];
 extern char* android_op_report_console;
 static const char* android_hw_file = NULL;
-#endif  // USE_ANDROID_EMU
 #endif  // CONFIG_ANDROID
 const char *watchdog;
 QEMUOptionRom option_rom[MAX_OPTION_ROMS];
@@ -653,13 +648,8 @@ static void process_cmd_properties(void) {
         const char* peq = strchr(pkey, '=');
         if (peq) {
             // Pass ptr and length for both parts
-#ifdef USE_ANDROID_EMU
             boot_property_add2(pkey, (peq - pkey),
                                peq + 1, strlen(peq + 1));
-#else  // !USE_ANDROID_EMU
-            android_boot_property_add2(pkey, (peq - pkey),
-                                       peq + 1, strlen(peq + 1));
-#endif  // !USE_ANDROID_EMU
         }
     }
 }
@@ -2164,7 +2154,7 @@ static DisplayType select_display(const char *p)
     DisplayType display = DT_DEFAULT;
 
     if (strstart(p, "sdl", &opts)) {
-#if defined(CONFIG_SDL) || defined(USE_ANDROID_EMU)
+#if defined(CONFIG_SDL) || defined(CONFIG_ANDROID)
         display = DT_SDL;
         while (*opts) {
             const char *nextopt;
@@ -2870,13 +2860,12 @@ out:
     return 0;
 }
 
-#if !defined(CONFIG_ANDROID) || !defined(USE_ANDROID_EMU)
+#if !defined(CONFIG_ANDROID)
 // We don't use the AndroidEmu library in the original qemu2 build,
 // so let's return their main function back
 #define run_qemu_main main
-#endif
 
-#if defined(USE_ANDROID_EMU)
+#else  /* CONFIG_ANDROID */
 
 static int is_opengl_alive = 1;
 
@@ -2965,18 +2954,7 @@ static void android_reporting_teardown(void)
     android_teardown_metrics();
 }
 
-#else
-
-static bool android_reporting_setup(void)
-{
-    return true;
-}
-
-static void android_reporting_teardown(void)
-{
-}
-
-#endif
+#endif  /* CONFIG_ANDROID */
 
 int run_qemu_main(int argc, const char **argv)
 {
@@ -3722,7 +3700,7 @@ int run_qemu_main(int argc, const char **argv)
                 no_quit = 1;
                 break;
             case QEMU_OPTION_sdl:
-#if defined(CONFIG_SDL) || defined(USE_ANDROID_EMU)
+#if defined(CONFIG_SDL) || defined(CONFIG_ANDROID)
                 display_type = DT_SDL;
 #else
                 fprintf(stderr, "SDL support is disabled\n");
@@ -4113,7 +4091,6 @@ int run_qemu_main(int argc, const char **argv)
                 android_op_dns_server = (char*)optarg;
                 break;
 
-#ifdef USE_ANDROID_EMU
             case QEMU_OPTION_list_webcam:
               android_list_web_cameras();
               return 0;
@@ -4137,7 +4114,6 @@ int run_qemu_main(int argc, const char **argv)
                 android_op_report_console = (char*)optarg;
                 break;
 
-#endif  // USE_ANDROID_EMU
 #endif  // CONFIG_ANDROID
             default:
                 os_parse_cmd_args(popt->index, optarg);
@@ -4156,7 +4132,6 @@ int run_qemu_main(int argc, const char **argv)
 
 #ifdef CONFIG_ANDROID
 
-#ifdef USE_ANDROID_EMU
     /* Ensure Looper implementation for this thread is based on the QEMU
      * main loop. */
     qemu_looper_setForThread();
@@ -4337,8 +4312,6 @@ int run_qemu_main(int argc, const char **argv)
     if (dns_count > 1) {
         additional_kernel_params = g_strdup_printf("ndns=%d", dns_count);
     }
-
-#endif // USE_ANDROID_EMU
 
 #endif // CONFIG_ANDROID
 
@@ -4547,7 +4520,7 @@ int run_qemu_main(int argc, const char **argv)
     if (display_type == DT_DEFAULT && !display_remote) {
 #if defined(CONFIG_GTK)
         display_type = DT_GTK;
-#elif defined(CONFIG_SDL) || defined(CONFIG_COCOA) || defined(USE_ANDROID_EMU)
+#elif defined(CONFIG_SDL) || defined(CONFIG_COCOA) || defined(CONFIG_ANDROID)
         display_type = DT_SDL;
 #elif defined(CONFIG_VNC)
         vnc_display = "localhost:0,to=99";
@@ -4572,7 +4545,7 @@ int run_qemu_main(int argc, const char **argv)
     }
 #endif
 
-#ifndef USE_ANDROID_EMU
+#ifndef CONFIG_ANDROID
     // When using AndroidEmu, this "main" is no longer the entry point on the
     // main thread. It is in fact called on a secondary thread, and socket
     // initialization is long finished (See android-qemu2-glue/main.cpp).
@@ -4594,7 +4567,7 @@ int run_qemu_main(int argc, const char **argv)
 #if defined(CONFIG_HAX)
     uint64_t hax_max_ram = 0;
     if (hax_get_max_ram(&hax_max_ram) == 0 && hax_max_ram > 0) {
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
         char str[32] = {0};
         snprintf(str, sizeof(str) - 1, "%"PRIu64, hax_max_ram);
         crashhandler_add_string("hax_max_ram.txt", str);
@@ -4828,7 +4801,7 @@ int run_qemu_main(int argc, const char **argv)
         qdev_prop_register_global_list(machine_class->compat_props);
     }
 
-#if defined(USE_ANDROID_EMU)
+#if defined(CONFIG_ANDROID)
     /* Configure goldfish events device */
     {
         bool have_multitouch = androidHwConfig_isScreenMultiTouch(android_hw);
@@ -4893,7 +4866,7 @@ int run_qemu_main(int argc, const char **argv)
                     &qemu2_goldfish_event_multitouch_funcs);
         }
     }
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 
     qemu_add_globals();
 
@@ -4906,7 +4879,7 @@ int run_qemu_main(int argc, const char **argv)
     current_machine->cpu_model = cpu_model;
 
     machine_class->init(current_machine);
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
     if (android_init_error_occurred()) {
         // Something went wrong when initializing the virtual machine
         return 1;
@@ -4959,7 +4932,7 @@ int run_qemu_main(int argc, const char **argv)
         curses_display_init(ds, full_screen);
         break;
 #endif
-#if defined(CONFIG_SDL) || defined(USE_ANDROID_EMU)
+#if defined(CONFIG_SDL) || defined(CONFIG_ANDROID)
     case DT_SDL:
         if (!sdl_display_init(ds, full_screen, no_frame)) {
             return 1;
@@ -5017,7 +4990,7 @@ int run_qemu_main(int argc, const char **argv)
         return 1;
     }
 
-#if defined(USE_ANDROID_EMU)
+#if defined(CONFIG_ANDROID)
     /* call android-specific setup function */
     if (!qemu_android_emulation_setup()) {
         return 1;
@@ -5025,7 +4998,7 @@ int run_qemu_main(int argc, const char **argv)
 
     extern void android_emulator_set_base_port(int);
     android_emulator_set_base_port(android_base_port);
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 
     if (qemu_opts_foreach(qemu_find_opts("mon"), mon_init_func, NULL, 1) != 0) {
         return 1;
@@ -5080,15 +5053,18 @@ int run_qemu_main(int argc, const char **argv)
         }
     }
 
+#ifdef CONFIG_ANDROID
     // Initialize reporting right before entering main loop.
     // We want to track performance of a running emulator, ignoring any early
     // exits as a result of incorrect setup.
     if (!android_reporting_setup()) {
         return 1;
     }
+#endif
 
     main_loop();
-#ifdef USE_ANDROID_EMU
+
+#ifdef CONFIG_ANDROID
     crashhandler_exitmode("after main_loop");
 #endif
     bdrv_close_all();
@@ -5098,7 +5074,9 @@ int run_qemu_main(int argc, const char **argv)
     tpm_cleanup();
 #endif
 
+#ifdef CONFIG_ANDROID
     android_reporting_teardown();
+#endif
 
     return 0;
 }

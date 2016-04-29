@@ -53,7 +53,7 @@ static bool fips_enabled = false;
 
 static const char *qemu_version = QEMU_VERSION;
 
-#if !defined(USE_ANDROID_EMU)
+#if !defined(CONFIG_ANDROID)
 int socket_set_cork(int fd, int v)
 {
 #if defined(SOL_TCP) && defined(TCP_CORK)

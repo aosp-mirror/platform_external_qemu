@@ -34,7 +34,7 @@
 #include "sysemu/sysemu.h"
 #include "qemu-options.h"
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 #include "android/skin/winsys.h"
 #endif
 
@@ -62,14 +62,14 @@ int setenv(const char *name, const char *value, int overwrite)
 
 static BOOL WINAPI qemu_ctrl_handler(DWORD type)
 {
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
     // In android, request closing the UI, instead of short-circuting down to
     // qemu. This will eventually call qemu_system_shutdown_request via a skin
     // event.
     skin_winsys_quit_request();
 #else
     qemu_system_shutdown_request();
-#endif  // !USE_ANDROID_EMU
+#endif  // !CONFIG_ANDROID
     /* Windows 7 kills application when the function returns.
        Sleep here to give QEMU a try for closing.
        Sleep period is 10000ms because Windows kills the program

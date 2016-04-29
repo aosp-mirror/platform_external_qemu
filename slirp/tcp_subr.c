@@ -40,9 +40,9 @@
 
 #include <slirp.h>
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 #include "android/proxy/proxy_common.h"
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 
 /* patchable/settable parameters for tcp */
 /* Don't do rfc1323 performance enhancements */
@@ -318,7 +318,7 @@ tcp_sockclosed(struct tcpcb *tp)
 		tcp_output(tp);
 }
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 static void
 tcp_proxy_event(struct socket*  so, int s, ProxyEvent event) {
     so->so_state &= ~SS_PROXIFIED;
@@ -333,7 +333,7 @@ tcp_proxy_event(struct socket*  so, int s, ProxyEvent event) {
     /* continue the connect */
     tcp_input(NULL, sizeof(struct ip), so);
 }
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 
 /*
  * Connect to a host on the Internet
@@ -383,7 +383,7 @@ int tcp_fconnect(struct socket *so)
         "addr.sin_addr.s_addr=%.16s, proxy=%d\n",
         ntohs(addr.sin_port), inet_ntoa(addr.sin_addr), try_proxy));
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
     if (try_proxy) {
         SockAddress sockaddr;
         sock_address_init_inet(&sockaddr,
@@ -397,7 +397,9 @@ int tcp_fconnect(struct socket *so)
             return 0;
         }
     }
-#endif  // USE_ANDROID_EMU
+#else
+    (void)try_proxy;  /* make compiler happy */
+#endif  // CONFIG_ANDROID
 
     /* We don't care what port we get */
     ret = connect(s,(struct sockaddr *)&addr,sizeof (addr));

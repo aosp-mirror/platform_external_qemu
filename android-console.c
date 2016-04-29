@@ -35,8 +35,6 @@
 
 #include "android/error-messages.h"
 
-#ifdef USE_ANDROID_EMU
-
 #include "android/globals.h"
 
 typedef struct AndroidConsoleRec_ {
@@ -55,11 +53,6 @@ void qemu2_android_console_setup(const AndroidConsoleAgents* agents) {
 #define COPY_AGENT(type,name)  global->name ## _agent = agents->name [0];
     ANDROID_CONSOLE_AGENTS_LIST(COPY_AGENT)
 }
-#endif
-
-#ifndef USE_ANDROID_EMU
-int android_base_port;
-#endif
 
 #ifdef CONFIG_ANDROID
 extern int android_op_ports_numbers[2];
@@ -977,12 +970,7 @@ void android_console_avd_status(Monitor* mon, const QDict* qdict) {
 }
 
 void android_console_avd_name(Monitor* mon, const QDict* qdict) {
-#ifdef USE_ANDROID_EMU
-    monitor_printf(mon, "%s\n", android_hw->avd_name);
-#else
-    monitor_printf(mon, "%s\n", "android");
-#endif
-    monitor_printf(mon, "OK\n");
+    monitor_printf(mon, "%s\nOK\n", android_hw->avd_name);
 }
 
 void android_console_avd_snapshot(Monitor* mon, const QDict* qdict) {
@@ -1090,7 +1078,6 @@ void android_console_finger(Monitor* mon, const QDict* qdict) {
                    helptext ? "OK" : "KO: missing sub-command");
 }
 
-#ifdef USE_ANDROID_EMU
 void android_console_finger_touch(Monitor* mon, const QDict* qdict) {
     const char* arg = qdict_get_try_str(qdict, "arg");
 
@@ -1112,14 +1099,6 @@ void android_console_finger_remove(Monitor* mon, const QDict* qdict) {
     _g_global.finger_agent.setTouch(false, -1);
     monitor_printf(mon, "OK\n");
 }
-#else /* not USE_ANDROID_EMU */
-void android_console_finger_touch(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-void android_console_finger_remove(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-#endif
 
 enum { CMD_SMS = 0, CMD_SMS_SEND = 1, CMD_SMS_PDU = 2 };
 
@@ -1163,7 +1142,6 @@ void android_console_sms(Monitor* mon, const QDict* qdict) {
                    helptext ? "OK" : "KO: missing sub-command");
 }
 
-#ifdef USE_ANDROID_EMU
 void android_console_sms_send(Monitor* mon, const QDict* qdict) {
     char* args = (char*)qdict_get_try_str(qdict, "arg");
     char* p;
@@ -1256,14 +1234,6 @@ void android_console_sms_pdu(Monitor* mon, const QDict* qdict) {
     smspdu_free(pdu);
     monitor_printf(mon, "OK\n");
 }
-#else
-void android_console_sms_send(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-void android_console_sms_pdu(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-#endif
 
 enum { CMD_CDMA = 0, CMD_CDMA_SSOURCE = 1, CMD_CDMA_PRL_VERSION = 2 };
 
@@ -1305,7 +1275,6 @@ void android_console_cdma(Monitor* mon, const QDict* qdict) {
                    helptext ? "OK" : "KO: missing sub-command");
 }
 
-#ifdef USE_ANDROID_EMU
 static const struct {
     const char* name;
     const char* display;
@@ -1362,16 +1331,6 @@ void android_console_cdma_prl_version(Monitor* mon, const QDict* qdict) {
     }
     monitor_printf(mon, "OK\n");
 }
-#else
-void android_console_cdma_ssource(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-
-void android_console_cdma_prl_version(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-
-#endif
 
 enum {
     CMD_GSM = 0,
@@ -1486,7 +1445,6 @@ void android_console_gsm(Monitor* mon, const QDict* qdict) {
                    helptext ? "OK" : "KO: missing sub-command");
 }
 
-#ifdef USE_ANDROID_EMU
 static const struct {
     const char* name;
     const char* display;
@@ -1805,48 +1763,6 @@ void android_console_gsm_signal(Monitor* mon, const QDict* qdict) {
     monitor_printf(mon, "OK\n");
 }
 
-#else
-void android_console_gsm_list(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-
-void android_console_gsm_call(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-
-void android_console_gsm_busy(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-
-void android_console_gsm_hold(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-
-void android_console_gsm_accept(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-
-void android_console_gsm_cancel(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-
-void android_console_gsm_data(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-
-void android_console_gsm_voice(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-
-void android_console_gsm_status(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-
-void android_console_gsm_signal(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-#endif
-
 enum { CMD_GEO = 0, CMD_GEO_NMEA = 1, CMD_GEO_FIX = 2 };
 
 static const char* geo_help[] = {
@@ -1929,7 +1845,6 @@ void android_console_rotate_screen(Monitor *mon, const QDict *qdict)
     }
 }
 
-#ifdef USE_ANDROID_EMU
 void android_console_geo_nmea(Monitor* mon, const QDict* qdict) {
     const char* arg = qdict_get_try_str(qdict, "arg");
 
@@ -2011,11 +1926,3 @@ void android_console_geo_fix(Monitor* mon, const QDict* qdict) {
             params[GEO_LAT], params[GEO_LONG], altitude, n_satellites, &tVal);
     monitor_printf(mon, "OK\n");
 }
-#else /* not USE_ANDROID_EMU */
-void android_console_geo_nmea(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-void android_console_geo_fix(Monitor* mon, const QDict* qdict) {
-    monitor_printf(mon, "KO: emulator not built with USE_ANDROID_EMU\n");
-}
-#endif

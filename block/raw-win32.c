@@ -31,9 +31,9 @@
 #include "qemu/iov.h"
 #include <windows.h>
 #include <winioctl.h>
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 #include "android/utils/win32_unicode.h"
-#endif  // USE_ANDROID_EMU
+#endif
 
 #define FTYPE_FILE 0
 #define FTYPE_CD     1
@@ -331,7 +331,7 @@ static int raw_open(BlockDriverState *bs, QDict *options, int flags,
         snprintf(s->drive_path, sizeof(s->drive_path), "%c:\\", buf[0]);
     }
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
     wchar_t* wideName = win32_utf8_to_utf16_str(filename);
     if (wideName == NULL) {
         ret = -EINVAL;

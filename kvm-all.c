@@ -60,7 +60,7 @@
 
 #define KVM_MSI_HASHTAB_SIZE    256
 
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 #include "android/crashreport/crash-handler.h"
 
 static void __attribute__((noreturn)) die(const char* message,

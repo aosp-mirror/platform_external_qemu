@@ -58,10 +58,8 @@
 #include "hw/acpi/goldfish_defs.h"
 
 #include "android/constants.h"
-#ifdef USE_ANDROID_EMU
 #include "android/android.h"
 #include "android/error-messages.h"
-#endif  // USE_ANDROID_EMU
 #include "android-console.h"
 #endif  // CONFIG_ANDROID
 
@@ -203,11 +201,11 @@ static void pc_init1(MachineState *machine,
                                 below_4g_mem_size,
                                 guest_info);
     }
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
     if (android_init_error_occurred()) {
         return;
     }
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 
     gsi_state = g_malloc0(sizeof(*gsi_state));
     if (kvm_irqchip_in_kernel()) {

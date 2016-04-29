@@ -46,17 +46,6 @@
 #define D(...)  ((void)0)
 #endif
 
-#ifdef CONFIG_ANDROID
-#include "android/gpu-frame-bridge.h"
-#include "android/opengles.h"
-#include "hw/misc/android_boot_properties.h"
-#include "qemu/config-file.h"
-#if DEBUG
-#include "qemu/crc32c.h"
-#endif
-#include "qemu/option.h"
-#endif  // CONFIG_ANDROID
-
 static int sdl2_num_outputs;
 static struct sdl2_state {
     DisplayChangeListener dcl;
@@ -93,101 +82,6 @@ static int scaling_active;
 static Notifier mouse_mode_notifier;
 
 static void sdl_update_caption(struct sdl2_state *scon);
-
-#ifdef CONFIG_ANDROID
-
-static int android_gpu_emulation;  // 1 if GPU emulation should be used.
-static int android_gpu_started;    // 1 if GPU emulation was started.
-static int android_gpu_use_subwindow;  // 1 if GPU emulation uses sub-window.
-
-// Return window handle of main UI.
-static void* sdl_window_get_handle(SDL_Window* window)
-{
-    if (!window) {
-        return NULL;
-    }
-
-    SDL_SysWMinfo info;
-    SDL_VERSION(&info.version);
-    if (!SDL_GetWindowWMInfo(window, &info)) {
-        return NULL;
-    }
-
-    switch (info.subsystem) {
-#ifdef _WIN32
-    case SDL_SYSWM_WINDOWS:
-        return (void*)info.info.win.window;
-#elif defined(__APPLE__)
-    case SDL_SYSWM_COCOA:
-        return (void*)info.info.cocoa.window;
-#else
-    case SDL_SYSWM_X11:
-        return (void*)info.info.x11.window;
-#endif
-    default: return NULL;
-    }
-}
-
-// Called from EmuGL whenever a new GPU frame is available for display.
-// This is only used with software-based renderers, since this happens
-// through glReadPixels() which can be very slow with a real GPU.
-static void android_on_gpu_frame(void *context,
-                                 int width,
-                                 int height,
-                                 const void *pixels)
-{
-    struct sdl2_state *state = context;
-
-#if DEBUG
-    uint32_t crc = crc32c(0, (const uint8_t*)pixels, width * height * 4);
-    D("GPU Frame %dx%d crc32=0x%08x scon=%p texture=%p renderer=%p\n", width, height, crc, state, state->texture, state->real_renderer);
-#endif
-    if (state->texture) {
-        if (state->real_renderer) {
-            SDL_UpdateTexture(state->texture, NULL, pixels, width * 4);
-        } else {
-            D("GPU Texture update without renderer!\n");
-        }
-    } else {
-        D("GPU Frame update without texture!\n");
-    }
-}
-
-// Called from android_has_gpu_emulation() below.
-static int android_scan_kernel_for_gpu(const char* name, const char* value,
-                                       void* opaque)
-{
-    if (!strcmp(name, "append")) {
-        if (value && strstr(value, "qemu.gles=1") != NULL) {
-            *(bool *)opaque = true;
-        }
-    }
-    return 0;
-}
-
-// Determine wether GPU emulation is enabled by looking at the
-// kernel command-line and looking for 'qemu.gles=1' in it.
-static bool android_has_gpu_emulation(void) {
-    bool result = false;
-    qemu_opt_foreach(qemu_find_opts_singleton("machine"),
-                     android_scan_kernel_for_gpu, &result, 0);
-    return result;
-}
-
-// Called from graphics_hw_update() when software-based GPU emulation is
-// enabled. This blits the content of the GPU frame to the window.
-static void android_gpu_update(void* opaque) {
-    struct sdl2_state *scon = opaque;
-
-    D("%s: GPU update scon=%p texture=%p\n", __FUNCTION__, scon, scon->texture);
-
-    if (scon->texture) {
-        SDL_RenderCopy(scon->real_renderer, scon->texture, NULL, NULL);
-        SDL_RenderPresent(scon->real_renderer);
-    }
-}
-
-#endif  // CONFIG_ANDROID
 
 static struct sdl2_state *get_scon_from_window(uint32_t window_id)
 {
@@ -236,23 +130,7 @@ static void do_sdl_resize(struct sdl2_state *scon, int width, int height,
         if (width && height) {
             SDL_RenderSetLogicalSize(scon->real_renderer, width, height);
             SDL_SetWindowSize(scon->real_window, width, height);
-#ifdef CONFIG_ANDROID
-            D("%s: resize to %dx%d\n", __FUNCTION__, width, height);
-            if (qemu_console_is_graphic(scon->dcl.con) &&
-                    android_gpu_started && android_gpu_use_subwindow) {
-                // TODO(digit): Set rotation?
-                void* window = sdl_window_get_handle(scon->real_window);
-                android_showOpenglesWindow(window, 0, 0, width, height, width, height, 1.0, 0.);
-            }
-#endif  // CONFIG_ANDROID
         } else {
-#ifdef CONFIG_ANDROID
-            D("%s: destroying window\n", __FUNCTION__);
-            if (qemu_console_is_graphic(scon->dcl.con) &&
-                    android_gpu_started && android_gpu_use_subwindow) {
-                android_hideOpenglesWindow();
-            }
-#endif  // CONFIG_ANDROID
             SDL_DestroyRenderer(scon->real_renderer);
             SDL_DestroyWindow(scon->real_window);
             scon->real_renderer = NULL;
@@ -276,41 +154,6 @@ static void do_sdl_resize(struct sdl2_state *scon, int width, int height,
                                              SDL_WINDOWPOS_UNDEFINED,
                                              width, height, flags);
         scon->real_renderer = SDL_CreateRenderer(scon->real_window, -1, 0);
-
-#ifdef CONFIG_ANDROID
-        if (android_gpu_started) {
-            if (qemu_console_is_graphic(scon->dcl.con)) {
-                if (android_gpu_use_subwindow) {
-                    // TODO(digit): Get rotation?
-                    D("Initializing GPU sub-window %dx%d\n", width, height);
-                    android_showOpenglesWindow(
-                            sdl_window_get_handle(scon->real_window),
-                            0, 0, width, height, width, height, 1.0, 0.);
-
-                    // Disable sending framebuffer updates to the window
-                    // since everything will appear in the native sub-window
-                    // on top of it anyway.
-                    static const GraphicHwOps null_ops = {
-                        .invalidate = NULL,
-                        .gfx_update = NULL,
-                    };
-                    graphic_console_set_hwops(scon->dcl.con, &null_ops, scon);
-                } else {
-                    D("Initializing GPU frame bridge %dx%d scond=%p\n", width, height, scon);
-                    android_gpu_frame_bridge_init(android_on_gpu_frame, scon);
-
-                    // Change console's hw_ops to avoid receiving framebuffer
-                    // updates entirely. Instead the GPU frames coming from
-                    // EmuGL will be displayed.
-                    static const GraphicHwOps soft_gpu_ops = {
-                        .invalidate = NULL,
-                        .gfx_update = android_gpu_update,
-                    };
-                    graphic_console_set_hwops(scon->dcl.con, &soft_gpu_ops, scon);
-                }
-            }
-        }
-#endif  // CONFIG_ANDROID
 
         sdl_update_caption(scon);
     }
@@ -340,19 +183,6 @@ static void sdl_switch(DisplayChangeListener *dcl,
     if (new_surface == NULL) {
         do_sdl_resize(scon, 0, 0, 0);
     } else {
-#ifdef CONFIG_ANDROID
-        if (android_gpu_emulation && !android_gpu_started) {
-            if (android_startOpenglesRenderer(
-                    surface_width(new_surface),
-                    surface_height(new_surface)) < 0) {
-                fprintf(stderr, "Could not start GPU emulation!\n");
-                android_gpu_emulation = 0;
-            } else {
-                android_gpu_started = 1;
-            }
-        }
-#endif  // CONFIG_ANDROID
-
         do_sdl_resize(scon, surface_width(scon->surface),
                       surface_height(scon->surface), 0);
     }
@@ -368,12 +198,6 @@ static void sdl_switch(DisplayChangeListener *dcl,
                 format = SDL_PIXELFORMAT_RGB565;
             } else if (surface_bits_per_pixel(scon->surface) == 32) {
                 format = SDL_PIXELFORMAT_ARGB8888;
-#ifdef CONFIG_ANDROID
-                if (android_gpu_started && !android_gpu_use_subwindow) {
-                    // Mesa uses a different pixel format.
-                    format = SDL_PIXELFORMAT_ABGR8888;
-                }
-#endif  // CONFIG_ANDROID
             }
 
             scon->texture = SDL_CreateTexture(scon->real_renderer, format,
@@ -689,7 +513,6 @@ static void handle_keydown(SDL_Event *ev)
 
     if (gui_key_modifier_pressed) {
         switch (ev->key.keysym.scancode) {
-#ifndef CONFIG_ANDROID
         case SDL_SCANCODE_2:
         case SDL_SCANCODE_3:
         case SDL_SCANCODE_4:
@@ -742,7 +565,6 @@ static void handle_keydown(SDL_Event *ev)
                 graphic_hw_update(NULL);
                 gui_keysym = 1;
             }
-#endif  // !CONFIG_ANDROID
         default:
             break;
         }
@@ -1078,29 +900,6 @@ bool sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
     setenv("SDL_VIDEODRIVER", "x11", 0);
 #endif
 
-#ifdef CONFIG_ANDROID
-    android_gpu_emulation = android_has_gpu_emulation();
-    // ANDROID_GL_SOFTWARE_RENDERER is set to '1' when using a
-    // software-based renderer. This requires displaying the GPU
-    // content through the GPU frame bridge, instead of a native
-    // Desktop GL sub-window.
-    const char *env = getenv("ANDROID_GL_SOFTWARE_RENDERER");
-    android_gpu_use_subwindow = !env || !env[0] || env[0] == '0';
-    if (android_gpu_use_subwindow) {
-        D("Using EmuGL sub-window for GPU display\n");
-    } else {
-        D("Using glReadPixels() for GPU display\n");
-    }
-
-    SDL_SetHint(SDL_HINT_VIDEO_ALLOW_SCREENSAVER, "1");
-
-    if (!android_gpu_use_subwindow) {
-        // Required to avoid crashes when SDL2 ends up calling Mesa's
-        // glEnable() and crash for some odd reason that is hard to debug.
-        SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
-    }
-#endif  // CONFIG_ANDROID
-
     flags = SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE;
     if (SDL_Init(flags)) {
         fprintf(stderr, "Could not initialize SDL(%s) - exiting\n",
@@ -1114,24 +913,6 @@ bool sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
             break;
         }
     }
-
-#ifdef CONFIG_ANDROID
-    if (android_gpu_emulation) {
-        if (android_initOpenglesEmulation() < 0) {
-            fprintf(stderr, "Could not initialize GPU emulation\n");
-            android_gpu_emulation = 0;
-        } else {
-            android_gpu_started = 0;
-
-            // This boot property is required by the guest system.
-            char hexversion[32];
-            snprintf(hexversion, sizeof(hexversion), "%d", 0x20000);
-            android_boot_property_add("ro.opengles.version", hexversion);
-        }
-    } else {
-        D("GPU emulation disabled\n");
-    }
-#endif  // CONFIG_ANDROID
 
     sdl2_num_outputs = i;
     sdl2_console = g_new0(struct sdl2_state, sdl2_num_outputs);

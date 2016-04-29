@@ -13,9 +13,9 @@
 #include "qemu-common.h"
 #include "qapi/error.h"
 #include "qemu/error-report.h"
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 #include "android/error-messages.h"
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 
 struct Error
 {
@@ -24,9 +24,9 @@ struct Error
 };
 
 Error *error_abort;
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
 Error *android_init_error_with_message;
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
 
 void error_set(Error **errp, ErrorClass err_class, const char *fmt, ...)
 {
@@ -168,14 +168,14 @@ void error_free(Error *err)
 
 void error_propagate(Error **dst_errp, Error *local_err)
 {
-#ifdef USE_ANDROID_EMU
+#ifdef CONFIG_ANDROID
     if (local_err && dst_errp == &android_init_error_with_message) {
         android_init_error_set(local_err->err_class,
                                error_get_pretty(local_err));
         error_free(local_err);
         return;
     }
-#endif  // USE_ANDROID_EMU
+#endif  // CONFIG_ANDROID
     if (local_err && dst_errp == &error_abort) {
         error_report("%s", error_get_pretty(local_err));
         abort();

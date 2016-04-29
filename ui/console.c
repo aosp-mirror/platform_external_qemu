@@ -1720,7 +1720,7 @@ void graphic_console_set_hwops(QemuConsole *con,
     con->hw = opaque;
 }
 
-#if defined(USE_ANDROID_EMU)
+#if defined(CONFIG_ANDROID)
 extern int android_display_width;
 extern int android_display_height;
 #endif
@@ -1731,7 +1731,7 @@ QemuConsole *graphic_console_init(DeviceState *dev, uint32_t head,
 {
     static const char noinit[] =
         "Guest has not initialized the display (yet).";
-#if defined(USE_ANDROID_EMU)
+#if defined(CONFIG_ANDROID)
     int width = android_display_width;
     int height = android_display_height;
 #else
@@ -2090,7 +2090,7 @@ static void register_types(void)
     register_char_driver("vc", CHARDEV_BACKEND_KIND_VC, qemu_chr_parse_vc);
 }
 
-#if defined(USE_ANDROID_EMU)
+#if defined(CONFIG_ANDROID)
 
 extern int graphic_rotate;
 extern int graphic_width;
@@ -2134,6 +2134,6 @@ void kbd_mouse_event(int dx, int dy, int dz, int buttonsState) {
     qemu_input_event_sync();
 }
 
-#endif // USE_ANDROID_EMU
+#endif // CONFIG_ANDROID
 
 type_init(register_types);
