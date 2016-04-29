@@ -116,7 +116,7 @@ void ShaderParser::parseGLSLversion() {
     // That token should be the first non-comment or blank token
     //
     const char *src = m_src.c_str();
-    const int minGLSLVersion = 120;
+    const int minGLSLVersion = 420;
     int glslVersion = minGLSLVersion;
     enum {
         PARSE_NONE,
@@ -214,7 +214,11 @@ void ShaderParser::parseBuiltinConstants()
                    "const int _translator_gl_MaxVaryingVectors = 15;\n"
                    "#define gl_MaxVertexUniformVectors _translator_gl_MaxVertexUniformVectors\n"
                    "#define gl_MaxFragmentUniformVectors _translator_gl_MaxFragmentUniformVectors\n"
-                   "#define gl_MaxVaryingVectors _translator_gl_MaxVaryingVectors\n";
+                   "#define gl_MaxVaryingVectors _translator_gl_MaxVaryingVectors\n"
+                   "#define textureCube texture\n"
+                   "#define textureCubeLod texture\n"
+                   "#define texture2DLod texture2D\n"
+                   "#define texture2DProjLod texture2DProj\n";
 
 }
 
