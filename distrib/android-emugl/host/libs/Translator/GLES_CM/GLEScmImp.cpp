@@ -1620,6 +1620,17 @@ GL_API void GL_APIENTRY  glTexSubImage2D( GLenum target, GLint level, GLint xoff
                    GLEScmValidate::pixelFrmt(ctx,format)&&
                    GLEScmValidate::pixelType(ctx,type)),GL_INVALID_ENUM);
     SET_ERROR_IF(!GLEScmValidate::pixelOp(format,type),GL_INVALID_OPERATION);
+    // set an error if level < 0 or level > log 2 max
+    SET_ERROR_IF(level < 0 || 1<<level > ctx->getMaxTexSize(), GL_INVALID_VALUE);
+    SET_ERROR_IF(xoffset < 0 || yoffset < 0 || width < 0 || height < 0, GL_INVALID_VALUE);
+    if (ctx->shareGroup().get()) {
+        TextureData *texData = getTextureTargetData(target);
+        if (texData) {
+            SET_ERROR_IF(xoffset + width > (GLint)texData->width ||
+                     yoffset + height > (GLint)texData->height,
+                     GL_INVALID_VALUE);
+        }
+    }
     SET_ERROR_IF(!pixels,GL_INVALID_OPERATION);
 
     ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
