@@ -22,6 +22,30 @@
       "revId": "1902b9d584eb48300921adfb93ea23c37e964775",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a834e966_569c3479",
+        "filename": "android/utils/sockets_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-04-29T21:05:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a834e966_b656e0f4",
+      "range": {
+        "startLine": 24,
+        "startChar": 17,
+        "endLine": 24,
+        "endChar": 40
+      },
+      "revId": "1902b9d584eb48300921adfb93ea23c37e964775",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
