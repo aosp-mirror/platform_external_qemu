@@ -25,6 +25,8 @@ namespace emugl {
 //  create indivudual renderers that take care of drawing windows.
 class RenderLib {
 public:
+    virtual ~RenderLib() = default;
+
     virtual void setLogger(emugl_logger_struct logger) = 0;
     virtual void setCrashReporter(emugl_crash_reporter_t reporter) = 0;
 
@@ -40,12 +42,6 @@ public:
     // There might be only one renderer.
     virtual RendererPtr initRenderer(int width, int height,
                                      bool useSubWindow) = 0;
-
-protected:
-    ~RenderLib() = default;
-
-    // To allow unique_ptr<RenderLib> access a protected destructor.
-    friend std::default_delete<RenderLib>;
 };
 
 using RenderLibPtr = std::unique_ptr<RenderLib>;
