@@ -44,6 +44,7 @@ typedef enum {
 // |opts| corresponds to the command-line options after they have been
 // processed by emulator_parseCommonCommandLineOptions().
 // |targetArch| is the target architecture. (e.g. 'arm64')
+// |apiLevel| is the AVD's API level.
 // |kernelSerialPrefix| is the guest tty device prefix (e.g. 'ttyS')
 // |avdKernelParameters| are the optional extra kernel parameters stored
 // in the AVD's kernel.parameters hardware property, if any. They will
@@ -56,6 +57,7 @@ typedef enum {
 // QEMU1 is assumed.
 char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    const char* targetArch,
+                                   int apiLevel,
                                    const char* kernelSerialPrefix,
                                    const char* avdKernelParameters,
                                    AndroidGlesEmulationMode glesMode,

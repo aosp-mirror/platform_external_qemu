@@ -55,7 +55,6 @@
 #include "android/filesystems/partition_config.h"
 #include "android/globals.h"
 #include "android/gps.h"
-#include "android/hw-kmsg.h"
 #include "android-qemu1-glue/emulation/serial_line.h"
 #include "android/hw-pipe-net.h"
 #include "android/hw-qemud.h"
@@ -2775,11 +2774,6 @@ int main(int argc, char **argv, char **envp)
                 android_op_cpu_delay = (char*)optarg;
                 break;
 
-            case QEMU_OPTION_show_kernel:
-                if(!android_kmsg_init(ANDROID_KMSG_PRINT_MESSAGES)) {
-                    return 1;
-                }
-
 #ifdef CONFIG_NAND_LIMITS
             case QEMU_OPTION_nand_limits:
                 android_op_nand_limits = (char*)optarg;
@@ -3175,18 +3169,6 @@ int main(int argc, char **argv, char **envp)
         {
             opengl_broken = true;
         }
-    }
-
-    /* We always initialize the first serial port for the android-kmsg
-     * character device (used to send kernel messages) */
-    if (!serial_hds_add_at(0, "android-kmsg")) {
-        return 1;
-    }
-
-    /* We always initialize the second serial port for the android-qemud
-     * character device as well */
-    if (!serial_hds_add_at(1, "android-qemud")) {
-        return 1;
     }
 
     if (pid_file && qemu_create_pidfile(pid_file) != 0) {
