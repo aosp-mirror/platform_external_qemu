@@ -46,6 +46,30 @@
       "revId": "3b9ea2d558863366b5a23dcf7c18c8bdd143fc5b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88e9e5fc_7f79321f",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1982,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-04-29T16:36:51Z",
+      "side": 1,
+      "message": "I don\u0027t think it\u0027s _that_ expensive so we have to work around it in the guest (all guest APIs).",
+      "parentUuid": "88e9e5fc_bfb8baf6",
+      "range": {
+        "startLine": 1982,
+        "startChar": 31,
+        "endLine": 1982,
+        "endChar": 51
+      },
+      "revId": "3b9ea2d558863366b5a23dcf7c18c8bdd143fc5b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
