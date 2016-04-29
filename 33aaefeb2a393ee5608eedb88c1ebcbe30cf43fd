@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88e9e5fc_f064393a",
+        "filename": "android/gps.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-04-29T00:53:44Z",
+      "side": 1,
+      "message": "1) Is this the right way to get a pointer to the underlying C-style string?\n2) Should we have a function to do char substitution? It seems risky to directly manipulate the underlying character string here.",
+      "revId": "33aaefeb2a393ee5608eedb88c1ebcbe30cf43fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
