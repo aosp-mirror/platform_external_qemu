@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "28c9d979_5920a78b",
+        "filename": "android/hw-pipe-opengles.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-29T10:09:38Z",
+      "side": 1,
+      "message": "This is seriously lacking in documentation :-/",
+      "revId": "54244324ddd252cd98bafd1cf4d1a50e4753019b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28c9d979_392beb73",
+        "filename": "android/hw-pipe-opengles.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-29T10:09:38Z",
+      "side": 1,
+      "message": "coding style: Please use mHwPipe, mCareAboutRead, mCareAboutWrite, etc... for member names.",
+      "revId": "54244324ddd252cd98bafd1cf4d1a50e4753019b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
