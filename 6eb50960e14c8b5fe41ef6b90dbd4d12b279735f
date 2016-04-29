@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88e9e5fc_5fb9ce3d",
+        "filename": "android/skin/qt/emulator-container.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-04-29T16:14:01Z",
+      "side": 1,
+      "message": "500ms works well for Gnome, right?  Why not choose the timeout based on Window manager rather than use 1000ms for all Linux window managers?",
+      "revId": "6eb50960e14c8b5fe41ef6b90dbd4d12b279735f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88e9e5fc_bfa9daf1",
+        "filename": "android/skin/qt/emulator-container.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-04-29T16:14:01Z",
+      "side": 1,
+      "message": "Why not choose the time based on the Window manager rather than the OS.  This seems pretty fragile.  Yurii recently added code for detecting the Window manager.",
+      "revId": "6eb50960e14c8b5fe41ef6b90dbd4d12b279735f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
