@@ -33,6 +33,24 @@
       "revId": "6eb50960e14c8b5fe41ef6b90dbd4d12b279735f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88e9e5fc_1f17c594",
+        "filename": "android/skin/qt/emulator-container.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-04-29T16:44:01Z",
+      "side": 1,
+      "message": "If we\u0027re going to do that, we should just not use the resize timer at all on window managers that don\u0027t need (for example, our Cinnamon desktop environments use \"Muffin\" and our Ubuntu desktop environments use \"Compiz\", neither of which need it). We just don\u0027t know which ones do or don\u0027t without trying them, and different KDE-based systems might still have different window managers (whose names may not indicate that they\u0027re KDE based).",
+      "parentUuid": "88e9e5fc_bfa9daf1",
+      "revId": "6eb50960e14c8b5fe41ef6b90dbd4d12b279735f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
