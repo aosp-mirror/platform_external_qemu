@@ -580,37 +580,6 @@ netPipe_initUnix( void* hwpipe, void* _looper, const char* args )
 }
 #endif
 
-/**********************************************************************
- **********************************************************************
- *****
- *****  N E T W O R K   P I P E   M E S S A G E S
- *****
- *****/
-
-static const AndroidPipeFuncs  netPipeTcp_funcs = {
-    netPipe_initTcp,
-    netPipe_closeFromGuest,
-    netPipe_sendBuffers,
-    netPipe_recvBuffers,
-    netPipe_poll,
-    netPipe_wakeOn,
-    NULL,  /* we can't save these */
-    NULL,  /* we can't load these */
-};
-
-#ifndef _WIN32
-static const AndroidPipeFuncs  netPipeUnix_funcs = {
-    netPipe_initUnix,
-    netPipe_closeFromGuest,
-    netPipe_sendBuffers,
-    netPipe_recvBuffers,
-    netPipe_poll,
-    netPipe_wakeOn,
-    NULL,  /* we can't save these */
-    NULL,  /* we can't load these */
-};
-#endif
-
 /* This is set to 1 in android_init_opengles() below, and tested
  * by openglesPipe_init() to refuse a pipe connection if the function
  * was never called.
@@ -694,10 +663,6 @@ android_net_pipes_init(void)
 {
     Looper*  looper = looper_getForThread();
 
-    android_pipe_add_type( "tcp", looper, &netPipeTcp_funcs );
-#ifndef _WIN32
-    android_pipe_add_type( "unix", looper, &netPipeUnix_funcs );
-#endif
     android_pipe_add_type( "opengles", looper, &openglesPipe_funcs );
 }
 
