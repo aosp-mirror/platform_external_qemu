@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "28c9d979_bcfe0947",
+        "filename": "android/emulation/SetupParameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-29T17:04:12Z",
+      "side": 1,
+      "message": "yes, I meant unable, will fix.",
+      "parentUuid": "88e9e5fc_5f81ce9e",
+      "range": {
+        "startLine": 48,
+        "startChar": 53,
+        "endLine": 48,
+        "endChar": 59
+      },
+      "revId": "af61470369ae611f989879ab4ab1be1a19ca5787",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88e9e5fc_bf243a9f",
         "filename": "android/emulation/SetupParameters_unittest.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-29T16:05:27Z",
       "side": 1,
       "message": "just curious, why not on a stack?",
+      "range": {
+        "startLine": 245,
+        "startChar": 7,
+        "endLine": 246,
+        "endChar": 71
+      },
+      "revId": "af61470369ae611f989879ab4ab1be1a19ca5787",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28c9d979_dcfbc555",
+        "filename": "android/emulation/SetupParameters_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-04-29T17:04:12Z",
+      "side": 1,
+      "message": "Oh right, I\u0027m being confused lately. :)",
+      "parentUuid": "88e9e5fc_bf243a9f",
       "range": {
         "startLine": 245,
         "startChar": 7,
