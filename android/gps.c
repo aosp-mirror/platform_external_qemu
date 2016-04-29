@@ -116,13 +116,13 @@ android_gps_send_location(double latitude, double longitude,
     // Make sure elevation is formatted with a decimal point instead of comma.
     // setlocale isn't used because of thread safety concerns.
     stralloc_add_format( elevationStr, "%.1f", metersElevation );
-    for (elevStrPtr = elevationStr; *elevStrPtr; ++elevStrPtr) {
+    for (elevStrPtr = stralloc_cstr(elevationStr); *elevStrPtr; ++elevStrPtr) {
         if (*elevStrPtr == ',') {
             *elevStrPtr = '.';
             break;
         }
     }
-    stralloc_add_format( msgStr, ",%s,M,0.,M", elevationStr );
+    stralloc_add_format( msgStr, ",%s,M,0.,M", stralloc_cstr(elevationStr) );
     stralloc_reset(elevationStr);
 
     // Bogus rest and checksum
