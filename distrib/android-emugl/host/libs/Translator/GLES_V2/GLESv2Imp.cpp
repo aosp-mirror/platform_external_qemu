@@ -1975,7 +1975,17 @@ GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const
 GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels){
     GET_CTX();
     SET_ERROR_IF(!(GLESv2Validate::textureTargetEx(target)), GL_INVALID_ENUM);
-    SET_ERROR_IF(width < 0 || height < 0, GL_INVALID_VALUE);
+    // set an error if level < 0 or level > log 2 max
+    SET_ERROR_IF(level < 0 || 1<<level > ctx->getMaxTexSize(), GL_INVALID_VALUE);
+    SET_ERROR_IF(xoffset < 0 || yoffset < 0 || width < 0 || height < 0, GL_INVALID_VALUE);
+    if (ctx->shareGroup().get()) {
+        TextureData *texData = getTextureTargetData(target);
+        if (texData) {
+            SET_ERROR_IF(xoffset + width > (GLint)texData->width ||
+                     yoffset + height > (GLint)texData->height,
+                     GL_INVALID_VALUE);
+        }
+    }
     SET_ERROR_IF(!(GLESv2Validate::pixelFrmt(ctx,format)&&
                    GLESv2Validate::pixelType(ctx,type)),GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelOp(format,type),GL_INVALID_OPERATION);
