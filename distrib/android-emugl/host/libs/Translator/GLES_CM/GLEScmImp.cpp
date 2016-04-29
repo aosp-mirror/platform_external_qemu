@@ -60,10 +60,12 @@ static GLESiface  s_glesIface = {
     .createGLESContext = createGLESContext,
     .initContext       = initContext,
     .deleteGLESContext = deleteGLESContext,
-    .flush             = (FUNCPTR)glFlush,
-    .finish            = (FUNCPTR)glFinish,
+    .flush             = (FUNCPTR_FLUSH_FINISH)glFlush,
+    .finish            = (FUNCPTR_FLUSH_FINISH)glFinish,
     .setShareGroup     = setShareGroup,
-    .getProcAddress    = getProcAddress
+    .getProcAddress    = getProcAddress,
+    .fenceSync         = NULL,
+    .clientWaitSync    = NULL,
 };
 
 #include <GLcommon/GLESmacros.h>

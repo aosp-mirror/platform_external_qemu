@@ -9,3 +9,5 @@
 
 EGLImageKHR eglCreateImageKHR(EGLDisplay display, EGLContext context, EGLenum target, EGLClientBuffer buffer, const EGLint* attrib_list);
 EGLBoolean eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image);
+EGLSyncKHR eglCreateSyncKHR(EGLDisplay display, EGLenum type, const EGLint* attribs);
+EGLint eglClientWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout);
