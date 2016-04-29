@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a834e966_31fc1a4e",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1005930
+      },
+      "writtenOn": "2016-04-29T21:18:06Z",
+      "side": 1,
+      "message": "inet_ntop(AF_INET6, ip6, ...) can format an IP address without building a complete sockaddr first.",
+      "range": {
+        "startLine": 366,
+        "startChar": 4,
+        "endLine": 366,
+        "endChar": 15
+      },
+      "revId": "04737750cf878dc523190e3a97c48d6596de199f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a834e966_f1bb1284",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1005930
+      },
+      "writtenOn": "2016-04-29T21:18:06Z",
+      "side": 1,
+      "message": "I think this is only guaranteed to be NUL-terminated if getnameinfo/inet_ntop returns success.",
+      "range": {
+        "startLine": 367,
+        "startChar": 11,
+        "endLine": 367,
+        "endChar": 17
+      },
+      "revId": "04737750cf878dc523190e3a97c48d6596de199f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
