@@ -175,7 +175,7 @@ public:
         if (((uintptr_t)ptr & (Align - 1U)) == 0) {
             mPtr = ptr;
         } else {
-            if (StackSize <= size) {
+            if (size <= StackSize) {
                 mPtr = &mArray[0];
             } else {
                 mPtr = calloc(1, size);
