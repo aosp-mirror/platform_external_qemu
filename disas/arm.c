@@ -23,6 +23,7 @@
    for things we don't care about.  */
 
 #include "disas/bfd.h"
+
 #define ATTRIBUTE_UNUSED __attribute__((unused))
 #define ISSPACE(x) ((x) == ' ' || (x) == '\t' || (x) == '\n')
 

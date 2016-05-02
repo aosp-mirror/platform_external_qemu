@@ -9,7 +9,11 @@
 #ifndef DIS_ASM_H
 #define DIS_ASM_H
 
-#include "qemu-common.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef void *PTR;
 typedef uint64_t bfd_vma;
@@ -17,6 +21,12 @@ typedef int64_t bfd_signed_vma;
 typedef uint8_t bfd_byte;
 #define sprintf_vma(s,x) sprintf (s, "%0" PRIx64, x)
 #define snprintf_vma(s,ss,x) snprintf (s, ss, "%0" PRIx64, x)
+
+typedef int (*fprintf_function)(FILE *f, const char *fmt, ...);
+
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#endif
 
 #define BFD64
 
