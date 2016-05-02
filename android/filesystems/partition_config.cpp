@@ -280,7 +280,7 @@ static bool addNandImage(PartitionConfigState* state,
                 return partition_config_error(state,
                                               "Could not create temp file for "
                                               "%s partition image: %s\n",
-                                              part_name);
+                                              part_name, strerror(errno));
             }
             part_file = tempFile.c_str();
             VERBOSE_PRINT(init, "Mapping '%s' partition image to %s", part_name,
