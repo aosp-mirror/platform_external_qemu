@@ -80,16 +80,6 @@
 #define TRACE_DEV_PIPE_SIZE             (TRACE_DEV_PIPE_BASE + 2)
 #define TRACE_DEV_PIPE_CHANNEL          (TRACE_DEV_PIPE_BASE + 3)
 
-/* These entries are reserved for libc instrumentation, i.e. memcheck */
-#if 0  /* see memcheck_common.h */
-#define TRACE_DEV_REG_MEMCHECK              1536  /* 1024 + (128*4) */
-#define TRACE_DEV_REG_LIBC_INIT             (TRACE_DEV_REG_MEMCHECK + MEMCHECK_EVENT_LIBC_INIT)
-#define TRACE_DEV_REG_MALLOC                (TRACE_DEV_REG_MEMCHECK + MEMCHECK_EVENT_MALLOC)
-#define TRACE_DEV_REG_FREE_PTR              (TRACE_DEV_REG_MEMCHECK + MEMCHECK_EVENT_FREE_PTR)
-#define TRACE_DEV_REG_QUERY_MALLOC          (TRACE_DEV_REG_MEMCHECK + MEMCHECK_EVENT_QUERY_MALLOC)
-#define TRACE_DEV_REG_PRINT_USER_STR        (TRACE_DEV_REG_MEMCHECK + MEMCHECK_EVENT_PRINT_USER_STR)
-#endif
-
 /* the virtual trace device state */
 typedef struct {
     struct goldfish_device dev;

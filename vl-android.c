@@ -346,9 +346,6 @@ char* op_charmap_file = NULL;
 /* Path to hardware initialization file passed with -android-hw option. */
 char* android_op_hwini = NULL;
 
-/* Memory checker options. */
-char* android_op_memcheck = NULL;
-
 /* -dns-server option value. */
 char* android_op_dns_server = NULL;
 
@@ -393,9 +390,6 @@ char* android_op_ui_port = NULL;
  * process is attaching to the core.
  */
 char* android_op_ui_settings = NULL;
-
-/* -android-avdname option value. */
-char* android_op_avd_name = "unknown";
 
 // TODO(digit): Remove this
 extern bool android_op_wipe_data;
@@ -2746,10 +2740,6 @@ int main(int argc, char **argv, char **envp)
                 op_http_proxy = (char*)optarg;
                 break;
 
-            case QEMU_OPTION_charmap:
-                op_charmap_file = (char*)optarg;
-                break;
-
             case QEMU_OPTION_android_hw:
                 android_op_hwini = (char*)optarg;
                 break;
@@ -2816,10 +2806,6 @@ int main(int argc, char **argv, char **envp)
                 android_audio_test_start_out();
                 break;
 
-            case QEMU_OPTION_android_avdname:
-                android_op_avd_name = (char*)optarg;
-                break;
-
             case QEMU_OPTION_timezone:
                 if (timezone_set((char*)optarg)) {
                     fprintf(stderr, "emulator: it seems the timezone '%s' is not in zoneinfo format\n",
@@ -2842,17 +2828,10 @@ int main(int argc, char **argv, char **envp)
     }
 
     /* Initialize character map. */
-    if (skin_charmap_setup(op_charmap_file)) {
-        if (op_charmap_file) {
-            PANIC(
-                    "Unable to initialize character map from file %s.",
-                    op_charmap_file);
-            return 1;
-        } else {
-            PANIC(
-                    "Unable to initialize default character map.");
-            return 1;
-        }
+    if (skin_charmap_setup(NULL)) {
+        PANIC(
+                "Unable to initialize default character map.");
+        return 1;
     }
 
     /* If no data_dir is specified then try to find it relative to the
@@ -2917,13 +2896,7 @@ int main(int argc, char **argv, char **envp)
     }
 #endif  // CONFIG_NAND_LIMITS
 
-    /* Initialize AVD name from hardware configuration if needed */
-    if (!android_op_avd_name) {
-        if (android_hw->avd_name && *android_hw->avd_name) {
-            android_op_avd_name = android_hw->avd_name;
-            VERBOSE_PRINT(init,"AVD Name: %s", android_op_avd_name);
-        }
-    }
+    VERBOSE_PRINT(init,"AVD Name: %s", android_hw->avd_name);
 
     // Setup emulated NAND partitions.
     {
