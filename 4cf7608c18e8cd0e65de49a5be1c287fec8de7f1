@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8aea9f7_b2995532",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-02T23:08:37Z",
+      "side": 1,
+      "message": "if it\u0027s so simple change, why can\u0027t we determine the supported version at runtime and use the higher one? I mean, it looks like a straightforward check to me.",
+      "range": {
+        "startLine": 218,
+        "startChar": 0,
+        "endLine": 221,
+        "endChar": 62
+      },
+      "revId": "4cf7608c18e8cd0e65de49a5be1c287fec8de7f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
