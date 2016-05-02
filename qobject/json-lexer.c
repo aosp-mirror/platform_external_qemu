@@ -105,10 +105,12 @@ static const uint8_t json_lexer[][256] =  {
         ['u'] = IN_DQ_UCODE0,
     },
     [IN_DQ_STRING] = {
-        [1 ... 0xBF] = IN_DQ_STRING,
-        [0xC2 ... 0xF4] = IN_DQ_STRING,
-        ['\\'] = IN_DQ_STRING_ESCAPE,
+        [1 ... 0x21] = IN_DQ_STRING,
         ['"'] = JSON_STRING,
+        [0x23 ... 0x5B] = IN_DQ_STRING,
+        ['\\'] = IN_DQ_STRING_ESCAPE,
+        [0x5D ... 0xBF] = IN_DQ_STRING,
+        [0xC2 ... 0xF4] = IN_DQ_STRING,
     },
 
     /* single quote string */
@@ -145,23 +147,28 @@ static const uint8_t json_lexer[][256] =  {
         ['u'] = IN_SQ_UCODE0,
     },
     [IN_SQ_STRING] = {
-        [1 ... 0xBF] = IN_SQ_STRING,
-        [0xC2 ... 0xF4] = IN_SQ_STRING,
-        ['\\'] = IN_SQ_STRING_ESCAPE,
+        [1 ... 0x26] = IN_SQ_STRING,
         ['\''] = JSON_STRING,
+        [0x28 ... 0x5B] = IN_SQ_STRING,
+        ['\\'] = IN_SQ_STRING_ESCAPE,
+        [0x5D ... 0xBF] = IN_SQ_STRING,
+        [0xC2 ... 0xF4] = IN_SQ_STRING,
     },
 
     /* Zero */
     [IN_ZERO] = {
-        TERMINAL(JSON_INTEGER),
-        ['0' ... '9'] = IN_ERROR,
+        [1 ... 0x2D] = JSON_INTEGER,
         ['.'] = IN_MANTISSA,
+        [0x2F] = JSON_INTEGER,
+        ['0' ... '9'] = IN_ERROR,
+        [0x3A ... 0x7F] = JSON_INTEGER,
     },
 
     /* Float */
     [IN_DIGITS] = {
-        TERMINAL(JSON_FLOAT),
+        [1 ... 0x2F] = JSON_FLOAT,
         ['0' ... '9'] = IN_DIGITS,
+        [0x3A ... 0x7F] = JSON_FLOAT,
     },
 
     [IN_DIGIT] = {
@@ -175,10 +182,13 @@ static const uint8_t json_lexer[][256] =  {
     },
 
     [IN_MANTISSA_DIGITS] = {
-        TERMINAL(JSON_FLOAT),
+        [1 ... 0x2F] = JSON_FLOAT,
         ['0' ... '9'] = IN_MANTISSA_DIGITS,
-        ['e'] = IN_EXP_E,
+        [0x3A ... 'D'] = JSON_FLOAT,
         ['E'] = IN_EXP_E,
+        ['F' ... 'd'] = JSON_FLOAT,
+        ['e'] = IN_EXP_E,
+        ['f' ... 0x7F] = JSON_FLOAT,
     },
 
     [IN_MANTISSA] = {
@@ -187,11 +197,15 @@ static const uint8_t json_lexer[][256] =  {
 
     /* Number */
     [IN_NONZERO_NUMBER] = {
-        TERMINAL(JSON_INTEGER),
-        ['0' ... '9'] = IN_NONZERO_NUMBER,
-        ['e'] = IN_EXP_E,
-        ['E'] = IN_EXP_E,
+        [1 ... 0x2D] = JSON_INTEGER,
         ['.'] = IN_MANTISSA,
+        [0x2F] = JSON_INTEGER,
+        ['0' ... '9'] = IN_NONZERO_NUMBER,
+        [0x3A ... 'D'] = JSON_INTEGER,
+        ['E'] = IN_EXP_E,
+        ['F' ... 'd'] = JSON_INTEGER,
+        ['e'] = IN_EXP_E,
+        ['f' ... 0x7F] = JSON_INTEGER,
     },
 
     [IN_NEG_NONZERO_NUMBER] = {
@@ -201,17 +215,21 @@ static const uint8_t json_lexer[][256] =  {
 
     /* keywords */
     [IN_KEYWORD] = {
-        TERMINAL(JSON_KEYWORD),
+        [1 ... 0x60] = JSON_KEYWORD,
         ['a' ... 'z'] = IN_KEYWORD,
+        [0x7B ... 0x7F] = JSON_KEYWORD,
     },
 
     /* whitespace */
     [IN_WHITESPACE] = {
-        TERMINAL(JSON_SKIP),
-        [' '] = IN_WHITESPACE,
+        [1 ... 0x8] = JSON_SKIP,
         ['\t'] = IN_WHITESPACE,
-        ['\r'] = IN_WHITESPACE,
         ['\n'] = IN_WHITESPACE,
+        [0xB ... 0xC] = JSON_SKIP,
+        ['\r'] = IN_WHITESPACE,
+        [0xE ... 0x1F] = JSON_SKIP,
+        [' '] = IN_WHITESPACE,
+        [0x21 ... 0x7F] = JSON_SKIP,
     },
 
     /* escape */
