@@ -289,7 +289,7 @@ public:
 #endif
         bool running = true;
         while (running) {
-            RenderWindowMessage msg;
+            RenderWindowMessage msg = {};
 
             D("Waiting for message from main thread\n");
             mChannel->receiveMessage(&msg);
@@ -326,7 +326,7 @@ RenderWindow::RenderWindow(int width,
         mThread->start();
     }
 
-    RenderWindowMessage msg;
+    RenderWindowMessage msg = {};
     msg.cmd = CMD_INITIALIZE;
     msg.init.width = width;
     msg.init.height = height;
@@ -338,7 +338,7 @@ RenderWindow::~RenderWindow() {
     D("Entering\n");
     removeSubWindow();
     D("Sending CMD_FINALIZE\n");
-    RenderWindowMessage msg;
+    RenderWindowMessage msg = {};
     msg.cmd = CMD_FINALIZE;
     (void) processMessage(msg);
 
@@ -368,7 +368,7 @@ bool RenderWindow::getHardwareStrings(const char** vendor,
 
 void RenderWindow::setPostCallback(emugl::Renderer::OnPostCallback onPost, void* onPostContext) {
     D("Entering\n");
-    RenderWindowMessage msg;
+    RenderWindowMessage msg = {};
     msg.cmd = CMD_SET_POST_CALLBACK;
     msg.set_post_callback.on_post = onPost;
     msg.set_post_callback.on_post_context = onPostContext;
@@ -387,7 +387,7 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
                                   float zRot) {
     D("Entering mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
 
-    RenderWindowMessage msg;
+    RenderWindowMessage msg = {};
     msg.cmd = CMD_SETUP_SUBWINDOW;
     msg.subwindow.parent = window;
     msg.subwindow.wx = wx;
@@ -411,7 +411,7 @@ bool RenderWindow::removeSubWindow() {
     }
     mHasSubWindow = false;
 
-    RenderWindowMessage msg;
+    RenderWindowMessage msg = {};
     msg.cmd = CMD_REMOVE_SUBWINDOW;
     bool result = processMessage(msg);
     D("Exiting result=%s\n", result ? "success" : "failure");
@@ -420,7 +420,7 @@ bool RenderWindow::removeSubWindow() {
 
 void RenderWindow::setRotation(float zRot) {
     D("Entering rotation=%f\n", zRot);
-    RenderWindowMessage msg;
+    RenderWindowMessage msg = {};
     msg.cmd = CMD_SET_ROTATION;
     msg.rotation = zRot;
     (void) processMessage(msg);
@@ -429,7 +429,7 @@ void RenderWindow::setRotation(float zRot) {
 
 void RenderWindow::setTranslation(float px, float py) {
     D("Entering translation=%f,%f\n", px, py);
-    RenderWindowMessage msg;
+    RenderWindowMessage msg = {};
     msg.cmd = CMD_SET_TRANSLATION;
     msg.trans.px = px;
     msg.trans.py = py;
@@ -439,7 +439,7 @@ void RenderWindow::setTranslation(float px, float py) {
 
 void RenderWindow::repaint() {
     D("Entering\n");
-    RenderWindowMessage msg;
+    RenderWindowMessage msg = {};
     msg.cmd = CMD_REPAINT;
     (void) processMessage(msg);
     D("Exiting\n");
