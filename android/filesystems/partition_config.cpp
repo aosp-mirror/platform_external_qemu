@@ -144,7 +144,8 @@ static bool addNandImage(PartitionConfigState* state,
     // Sanity checks.
     if (part_size == 0) {
         return partition_config_error(
-                state, "Invalid %s partition size 0x%" PRIx64, part_size);
+                state, "Invalid %s partition size 0x%" PRIx64,
+                part_name, part_size);
     }
 
     if (part_init_file && !state->backend->pathExists(part_init_file)) {
