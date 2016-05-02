@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a8aea9f7_d5ce8ec3",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "AdbCommand ctor is private so it won\u0027t work.",
+      "parentUuid": "a834e966_3fbe2010",
+      "range": {
+        "startLine": 112,
+        "startChar": 19,
+        "endLine": 112,
+        "endChar": 47
+      },
+      "revId": "bc5a167cb21d32900a0718431761fd291efc3bc6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a834e966_fc03e964",
         "filename": "android/emulation/control/AdbInterface.h",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-30T00:42:27Z",
       "side": 1,
       "message": "typo. also, please use the whole 80 characters line limit - most of the comments easily fit.",
+      "range": {
+        "startLine": 43,
+        "startChar": 7,
+        "endLine": 43,
+        "endChar": 15
+      },
+      "revId": "bc5a167cb21d32900a0718431761fd291efc3bc6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8aea9f7_75bec210",
+        "filename": "android/emulation/control/AdbInterface.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a834e966_fc03e964",
       "range": {
         "startLine": 43,
         "startChar": 7,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "a8aea9f7_953b668c",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1133,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a834e966_3fb9403f",
+      "range": {
+        "startLine": 1133,
+        "startChar": 80,
+        "endLine": 1133,
+        "endChar": 105
+      },
+      "revId": "bc5a167cb21d32900a0718431761fd291efc3bc6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a834e966_7f96e8a5",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 4
@@ -82,6 +154,30 @@
       "writtenOn": "2016-04-30T00:42:27Z",
       "side": 1,
       "message": "nit: could you please change this to a single tr()-ed format string and Qt\u0027s formatting with .arg() ?\nwe should never concatenate tr()-ed strings if we want to actually make it translatable.\nAlso, it\u0027s a good practice to quote paths in messages - otherwise it is very hard to understand where it ends",
+      "range": {
+        "startLine": 1627,
+        "startChar": 31,
+        "endLine": 1632,
+        "endChar": 77
+      },
+      "revId": "bc5a167cb21d32900a0718431761fd291efc3bc6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8aea9f7_98ba7dcf",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1632,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a834e966_7f96e8a5",
       "range": {
         "startLine": 1627,
         "startChar": 31,
