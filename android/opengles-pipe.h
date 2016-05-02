@@ -20,6 +20,6 @@
 
 ANDROID_BEGIN_HEADER
 
-void android_net_pipes_init(void);
+void android_init_opengles_pipe(void);
 
 ANDROID_END_HEADER
