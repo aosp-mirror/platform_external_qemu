@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8aea9f7_0dec82d6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-05-02T23:28:10Z",
+      "side": 1,
+      "message": "please remove the \u0027HACK\u0027\nwith deqp passing, it does not seem a hack anymore :)",
+      "revId": "99d5487c476d87d252e59dc86cf3cc2b3aa51c34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
