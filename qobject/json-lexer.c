@@ -62,6 +62,12 @@ enum json_lexer_state {
     IN_START,
 };
 
+/* Ensure GCC doesn't complain when parsing the initialization values below. */
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverride-init"
+#endif  // __GNUC__
+
 #define TERMINAL(state) [0 ... 0x7F] = (state)
 
 /* Return whether TERMINAL is a terminal state and the transition to it
@@ -267,6 +273,10 @@ static const uint8_t json_lexer[][256] =  {
         ['\n'] = IN_WHITESPACE,
     },
 };
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif  // __GNUC__
 
 void json_lexer_init(JSONLexer *lexer, JSONLexerEmitter func)
 {
