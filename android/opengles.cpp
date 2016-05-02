@@ -14,7 +14,6 @@
 
 #include "android/crashreport/crash-handler.h"
 #include "android/globals.h"
-#include "android/hw-pipe-net.h"
 #include "android/opengl/logger.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"

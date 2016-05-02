@@ -263,8 +263,6 @@ LOCAL_SRC_FILES := \
     android/hw-fingerprint.c \
     android/hw-kmsg.c \
     android/hw-lcd.c \
-    android/hw-pipe-net.cpp \
-    android/hw-pipe-opengles.cpp \
     android/hw-qemud.cpp \
     android/hw-sensors.c \
     android/jpeg-compress.c \
@@ -288,6 +286,7 @@ LOCAL_SRC_FILES := \
     android/opengl/GpuFrameBridge.cpp \
     android/opengl/gpuinfo.cpp \
     android/opengl/logger.cpp \
+    android/opengl/OpenglEsPipe.cpp \
     android/opengles.cpp \
     android/openssl-support.cpp \
     android/process_setup.cpp \

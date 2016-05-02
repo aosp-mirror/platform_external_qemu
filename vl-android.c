@@ -56,7 +56,6 @@
 #include "android/globals.h"
 #include "android/gps.h"
 #include "android-qemu1-glue/emulation/serial_line.h"
-#include "android/hw-pipe-net.h"
 #include "android/hw-qemud.h"
 #include "android-qemu1-glue/android_qemud.h"
 #include "android/hw-sensors.h"
@@ -67,6 +66,7 @@
 #include "android/multitouch-port.h"
 #include "android/multitouch-screen.h"
 #include "android/opengles.h"
+#include "android/opengles-pipe.h"
 #include "android/opengl/emugl_config.h"
 #include "android-qemu1-glue/qemu-control-impl.h"
 #include "android/skin/charmap.h"
@@ -2013,7 +2013,7 @@ int main(int argc, char **argv, char **envp)
     /* Initialize boot properties. */
     boot_property_init_service();
     android_hw_control_init();
-    android_net_pipes_init();
+    android_init_opengles_pipe();
 
     socket_drainer_start(looper_getForThread());
     android_wear_agent_start(looper_getForThread());

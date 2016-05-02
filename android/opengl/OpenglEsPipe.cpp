@@ -8,11 +8,12 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/hw-pipe-opengles.h"
+#include "android/opengl/OpenglEsPipe.h"
 
 #include "android/base/Optional.h"
 #include "android/emulation/VmLock.h"
 #include "android/opengles.h"
+#include "android/opengles-pipe.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -323,3 +324,7 @@ void OpenglEsPipe::close(bool lock) {
 }
 
 }  // namespace android
+
+void android_init_opengles_pipe() {
+    android::OpenglEsPipe::registerPipeType();
+}
