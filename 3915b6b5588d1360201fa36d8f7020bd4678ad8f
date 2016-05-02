@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a834e966_0bcc4544",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "88e9e5fc_7a4b8d1c",
+      "range": {
+        "startLine": 140,
+        "startChar": 17,
+        "endLine": 140,
+        "endChar": 22
+      },
+      "revId": "3915b6b5588d1360201fa36d8f7020bd4678ad8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88e9e5fc_e516be96",
         "filename": "android/emulation/control/AdbInterface.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-28T21:39:46Z",
       "side": 1,
       "message": "output is potentially huge. What about having an open ifstream in the resulting structure instead of the string.",
+      "range": {
+        "startLine": 180,
+        "startChar": 0,
+        "endLine": 180,
+        "endChar": 51
+      },
+      "revId": "3915b6b5588d1360201fa36d8f7020bd4678ad8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a834e966_4befadc0",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "88e9e5fc_e516be96",
       "range": {
         "startLine": 180,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "a834e966_eb2a41d7",
+        "filename": "android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "88e9e5fc_fa5d3ddd",
+      "range": {
+        "startLine": 181,
+        "startChar": 0,
+        "endLine": 181,
+        "endChar": 44
+      },
+      "revId": "3915b6b5588d1360201fa36d8f7020bd4678ad8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88e9e5fc_a510b699",
         "filename": "android/emulation/control/AdbInterface.h",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2016-04-28T21:39:46Z",
       "side": 1,
       "message": "std::ifstream? (see another comment in the .cpp)",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 23
+      },
+      "revId": "3915b6b5588d1360201fa36d8f7020bd4678ad8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a834e966_e55d90dd",
+        "filename": "android/emulation/control/AdbInterface.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "Done after much trouble. g++ fstreams aren\u0027t movable :\u0027(",
+      "parentUuid": "88e9e5fc_a510b699",
       "range": {
         "startLine": 41,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "88e9e5fc_bf4b191b",
+        "filename": "android/emulation/control/AdbInterface.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "Good idea, I forgot we had Optional.",
+      "parentUuid": "88e9e5fc_da64b93a",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 43,
+        "endChar": 2
+      },
+      "revId": "3915b6b5588d1360201fa36d8f7020bd4678ad8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88e9e5fc_1a4b61a2",
         "filename": "android/emulation/control/AdbInterface.h",
         "patchSetId": 2
@@ -128,6 +248,30 @@
       "writtenOn": "2016-04-28T21:39:46Z",
       "side": 1,
       "message": "\u0026",
+      "range": {
+        "startLine": 65,
+        "startChar": 38,
+        "endLine": 65,
+        "endChar": 39
+      },
+      "revId": "3915b6b5588d1360201fa36d8f7020bd4678ad8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a834e966_050af4c2",
+        "filename": "android/emulation/control/AdbInterface.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "Oops",
+      "parentUuid": "88e9e5fc_1a4b61a2",
       "range": {
         "startLine": 65,
         "startChar": 38,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "a834e966_cbec1da2",
+        "filename": "android/emulation/control/ApkInstaller.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "I don\u0027t see a reason to use weak_ptr here. We\u0027re not using shared_ptr with AdbInterface.",
+      "parentUuid": "88e9e5fc_a55c36de",
+      "range": {
+        "startLine": 71,
+        "startChar": 0,
+        "endLine": 71,
+        "endChar": 23
+      },
+      "revId": "3915b6b5588d1360201fa36d8f7020bd4678ad8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88e9e5fc_65376ed4",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 2
@@ -174,6 +342,30 @@
       "writtenOn": "2016-04-28T21:39:46Z",
       "side": 1,
       "message": "true here means that ThreadLooper owns it and will delete the looper on thread exit.\n(1) are you sure EmulatorQtWindow or anything else won\u0027t have access to a dangling pointer at that time?\n(2) please make sure the EmulatorQtWindow object is created on the same thread as it will be running. otherwise that other thread would get no Qt looper",
+      "range": {
+        "startLine": 136,
+        "startChar": 52,
+        "endLine": 136,
+        "endChar": 56
+      },
+      "revId": "3915b6b5588d1360201fa36d8f7020bd4678ad8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a834e966_ab08b919",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "1) Yes, that\u0027s fine. The situation is exactly the same as before, the only thing that changed is the place where the looper is created. The looper used to be created withing winsys-qt, but I had to move it here because now EmulatorQtWindow needs it in order to be created, and EmulatorQtWidow::getInstance is invoked by winsys-qt a bit earlier.\n2) EmulatorQtWindow is effectively created within winsys-qt, it\u0027s the UI thread",
+      "parentUuid": "88e9e5fc_65376ed4",
       "range": {
         "startLine": 136,
         "startChar": 52,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "a834e966_8b1db501",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 972,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "It is now :)",
+      "parentUuid": "88e9e5fc_856812ac",
+      "range": {
+        "startLine": 972,
+        "startChar": 8,
+        "endLine": 972,
+        "endChar": 45
+      },
+      "revId": "3915b6b5588d1360201fa36d8f7020bd4678ad8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88e9e5fc_c57bba6a",
         "filename": "android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 2
@@ -220,6 +436,30 @@
       "writtenOn": "2016-04-28T21:39:46Z",
       "side": 1,
       "message": "should we return here?",
+      "range": {
+        "startLine": 1106,
+        "startChar": 0,
+        "endLine": 1109,
+        "endChar": 39
+      },
+      "revId": "3915b6b5588d1360201fa36d8f7020bd4678ad8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a834e966_3693b00c",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1109,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "88e9e5fc_c57bba6a",
       "range": {
         "startLine": 1106,
         "startChar": 0,
@@ -278,6 +518,30 @@
     },
     {
       "key": {
+        "uuid": "a834e966_cbb89df8",
+        "filename": "android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "leftover code...",
+      "parentUuid": "88e9e5fc_65488e1e",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 44
+      },
+      "revId": "3915b6b5588d1360201fa36d8f7020bd4678ad8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88e9e5fc_854b721b",
         "filename": "android/skin/qt/tool-window.h",
         "patchSetId": 2
@@ -289,6 +553,30 @@
       "writtenOn": "2016-04-28T21:39:46Z",
       "side": 1,
       "message": "oops",
+      "range": {
+        "startLine": 132,
+        "startChar": 0,
+        "endLine": 136,
+        "endChar": 41
+      },
+      "revId": "3915b6b5588d1360201fa36d8f7020bd4678ad8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a834e966_ebb9e1fd",
+        "filename": "android/skin/qt/tool-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-02T18:03:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "88e9e5fc_854b721b",
       "range": {
         "startLine": 132,
         "startChar": 0,
