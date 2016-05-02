@@ -212,6 +212,30 @@
       "revId": "9156ec8a78fc8c214ba2d3d97d1f92a4692073bc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8aea9f7_c749bc80",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-02T21:08:43Z",
+      "side": 1,
+      "message": "there also seems to be an increase in fps, ~2 Hz",
+      "parentUuid": "48560d47_4026c4ab",
+      "range": {
+        "startLine": 121,
+        "startChar": 15,
+        "endLine": 121,
+        "endChar": 30
+      },
+      "revId": "9156ec8a78fc8c214ba2d3d97d1f92a4692073bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
