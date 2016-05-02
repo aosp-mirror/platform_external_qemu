@@ -697,7 +697,7 @@ static inline GQueueNode* _g_queue_node_alloc(void) {
   return g_new0(GQueueNode, 1);
 }
 
-static void inline _g_queue_node_free(GQueueNode* node) {
+static inline void _g_queue_node_free(GQueueNode* node) {
   g_free(node);
 }
 
