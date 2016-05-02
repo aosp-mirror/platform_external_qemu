@@ -24,7 +24,7 @@ unsigned sNumLocks = 0;
 Lock* sOpenSslLocks = nullptr;
 
 static void locking_callback(int mode, int n,  const char* file, int line) {
-    assert(n >= 0 && n < sNumLocks);
+    assert(n >= 0 && (unsigned)n < sNumLocks);
     if (mode & CRYPTO_LOCK) {
         sOpenSslLocks[n].lock();
     } else {
