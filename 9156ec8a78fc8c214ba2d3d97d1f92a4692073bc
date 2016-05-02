@@ -260,6 +260,30 @@
       "revId": "9156ec8a78fc8c214ba2d3d97d1f92a4692073bc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8aea9f7_a7d75832",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2016-05-02T21:22:50Z",
+      "side": 1,
+      "message": "if deqp test can run without regression, I think it is pretty solid proof that removing it is ok",
+      "parentUuid": "a8aea9f7_272248aa",
+      "range": {
+        "startLine": 121,
+        "startChar": 15,
+        "endLine": 121,
+        "endChar": 30
+      },
+      "revId": "9156ec8a78fc8c214ba2d3d97d1f92a4692073bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
