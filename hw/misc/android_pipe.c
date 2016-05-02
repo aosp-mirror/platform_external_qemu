@@ -577,7 +577,7 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
     android_zero_pipe_init();
     android_pingpong_init();
     android_throttle_init();
-    android_net_pipes_init();
+    android_init_opengles_pipe();
 
     android_pipe_set_hw_funcs(&qemu2_android_pipe_hw_funcs);
 

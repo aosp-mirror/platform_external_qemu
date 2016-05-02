@@ -19,6 +19,7 @@
 extern bool qemu2_adb_server_init(int port);
 
 #include "android/emulation/android_pipe.h"
+#include "android/opengles-pipe.h"
 
 /* The following definitions must match those in the kernel driver:
  *
@@ -112,6 +113,5 @@ extern void android_throttle_init(void);
 extern void android_adb_dbg_backend_init(void);
 extern void android_adb_backend_init(void);
 extern void android_sensors_init(void);
-extern void android_net_pipes_init(void);
 
 #endif /* _HW_ANDROID_PIPE_H */
