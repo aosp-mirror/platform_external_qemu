@@ -77,7 +77,7 @@ CFG_PARAM( cache,    "<file>", "cache partition image (default is temporary file
 OPT_PARAM( cache_size, "<size>", "cache partition size in MBs" )
 CFG_FLAG ( no_cache, "disable the cache partition" )
 CFG_FLAG ( nocache,  "same as -no-cache" )
-OPT_PARAM( sdcard, "<file>", "SD card image (default <system>/sdcard.img")
+OPT_PARAM( sdcard, "<file>", "SD card image (default <datadir>/sdcard.img")
 OPT_PARAM( snapstorage,    "<file>", "file that contains all state snapshots (default <datadir>/snapshots.img)")
 OPT_FLAG ( no_snapstorage, "do not mount a snapshot storage file (this disables all snapshot functionality)" )
 OPT_PARAM( snapshot,       "<name>", "name of snapshot within storage file for auto-start and auto-save (default 'default-boot')" )
