@@ -120,6 +120,7 @@ RenderChannelPtr RendererImpl::createRenderChannel() {
         threadCount = mThreads.size();
     }
     DBG("Started new RenderThread (total %d)\n", (int)threadCount);
+    (void)threadCount;  // Make compiler happy.
 
     return channel;
 }
