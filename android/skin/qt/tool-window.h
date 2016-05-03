@@ -13,13 +13,12 @@
 #pragma once
 
 #include "android/base/containers/CircularBuffer.h"
-#include "android/emulation/control/AdbInterface.h"
 #include "android/skin/event.h"
 #include "android/skin/qt/extended-window-styles.h"
-#include "android/skin/qt/size-tweaker.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/qt/shortcut-key-store.h"
+#include "android/skin/qt/size-tweaker.h"
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/skin/qt/user-actions-counter.h"
 #include "android/utils/compiler.h"
@@ -29,6 +28,7 @@
 #include <QDir>
 #include <QErrorMessage>
 #include <QFrame>
+#include <QFrame>
 #include <QGridLayout>
 #include <QHash>
 #include <QKeyEvent>
@@ -36,10 +36,9 @@
 #include <QMessageBox>
 #include <QPair>
 #include <QProcess>
+#include <QQueue>
 #include <QToolButton>
 #include <QUrl>
-#include <QFrame>
-#include <QQueue>
 
 #include <memory>
 
@@ -48,13 +47,12 @@
 class EmulatorQtWindow;
 class ExtendedWindow;
 
-typedef void(EmulatorQtWindow::*EmulatorQtWindowSlot)();
+typedef void (EmulatorQtWindow::*EmulatorQtWindowSlot)();
 
-class ToolWindow : public QFrame
-{
+class ToolWindow : public QFrame {
     Q_OBJECT
     using UIEventRecorderPtr =
-        std::weak_ptr<UIEventRecorder<android::base::CircularBuffer>>;
+            std::weak_ptr<UIEventRecorder<android::base::CircularBuffer>>;
     using UserActionsCounterPtr =
             std::weak_ptr<android::qt::UserActionsCounter>;
 
@@ -74,11 +72,6 @@ public:
     void setToolEmuAgent(const UiEmuAgent* agPtr);
     const UiEmuAgent* getUiEmuAgent() const { return mUiEmuAgent; }
 
-    QString getAdbFullPath(QStringList *args);
-
-    void runAdbShellStopAndQuit();
-    void checkAdbVersionAndWarn();
-
     bool handleQtKeyEvent(QKeyEvent* event);
 
     // The designers want a gap between the main emulator
@@ -87,11 +80,8 @@ public:
 
 private:
     void createExtendedWindow();
-    void showAdbWarning();
-    void adbShellStopRunner();
     void handleUICommand(QtUICommand cmd, bool down);
     void forwardKeyToEmulator(uint32_t keycode, bool down);
-
 
     // Helper method, calls handleUICommand with
     // down equal to true and down equal to false.
@@ -100,13 +90,16 @@ private:
         handleUICommand(cmd, false);
     }
 
-    QToolButton *addButton(QGridLayout *layout, int row, int col,
-                           const char *iconPath, QString tip,
+    QToolButton* addButton(QGridLayout* layout,
+                           int row,
+                           int col,
+                           const char* iconPath,
+                           QString tip,
                            EmulatorQtWindowSlot slot);
     void showOrRaiseExtendedWindow(ExtendedWindowPane pane);
 
     virtual void closeEvent(QCloseEvent* ce) override;
-    virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void mousePressEvent(QMouseEvent* event) override;
     virtual void paintEvent(QPaintEvent*) override;
     virtual void hideEvent(QHideEvent* event) override;
 
@@ -121,8 +114,6 @@ private:
     UIEventRecorderPtr mUIEventRecorder;
     UserActionsCounterPtr mUserActionsCounter;
     SizeTweaker mSizeTweaker;
-    QMessageBox mAdbWarningBox;
-    android::emulation::AdbInterface mAdbInterface;
 
 private slots:
     void on_back_button_pressed();
@@ -144,8 +135,6 @@ private slots:
     void on_volume_up_button_pressed();
     void on_volume_up_button_released();
     void on_zoom_button_clicked();
-
-    void slot_adbWarningMessageAccepted();
 };
 
-typedef void(ToolWindow::*ToolWindowSlot)();
+typedef void (ToolWindow::*ToolWindowSlot)();

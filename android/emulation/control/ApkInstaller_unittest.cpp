@@ -15,8 +15,8 @@
 #include "android/emulation/control/ApkInstaller.h"
 
 #include "android/base/Compiler.h"
-#include "android/base/system/System.h"
 #include "android/base/StringView.h"
+#include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 
 #include <gtest/gtest.h>
@@ -37,9 +37,8 @@ using std::string;
 
 TEST(ApkInstaller, parseOutputForFailureNoFile) {
     string errorString;
-
-    EXPECT_FALSE(ApkInstaller::parseOutputForFailure("i-dont-exist.txt",
-                                                     &errorString));
+    std::ifstream f("i-dont-exist.txt");
+    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(f, &errorString));
     EXPECT_STREQ(errorString.c_str(), ApkInstaller::kDefaultErrorString);
 }
 
@@ -56,7 +55,8 @@ TEST(ApkInstaller, parseOutputForFailureBadOutput) {
     ofs.close();
 
     string errorString;
-    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(outputFile, &errorString));
+    std::ifstream f(outputFile.c_str());
+    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(f, &errorString));
     EXPECT_STREQ(errorString.c_str(), ApkInstaller::kDefaultErrorString);
 }
 
@@ -71,12 +71,14 @@ TEST(ApkInstaller, parseOutputForFailureDeviceFull) {
     ofs << "[ 92%] /data/local/tmp/a-big-apk.apk\n"
            "[ 92%] /data/local/tmp/a-big-apk.apk\n"
            "[ 92%] /data/local/tmp/a-big-apk.apk\n"
-           "adb: error: failed to copy 'a-big-apk.apk' to '/data/local/tmp/a-big-apk.apk': No space left on device\n";
+           "adb: error: failed to copy 'a-big-apk.apk' to "
+           "'/data/local/tmp/a-big-apk.apk': No space left on device\n";
 
     ofs.close();
 
     string errorString;
-    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(outputFile, &errorString));
+    std::ifstream f(outputFile.c_str());
+    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(f, &errorString));
 }
 
 TEST(ApkInstaller, parseOutputForFailureInstallFailed) {
@@ -93,7 +95,8 @@ TEST(ApkInstaller, parseOutputForFailureInstallFailed) {
     ofs.close();
 
     string errorString;
-    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(outputFile, &errorString));
+    std::ifstream f(outputFile.c_str());
+    EXPECT_FALSE(ApkInstaller::parseOutputForFailure(f, &errorString));
     EXPECT_STREQ(errorString.c_str(), "INSTALL_FAILED_OLDER_SDK");
 }
 
@@ -111,5 +114,6 @@ TEST(ApkInstaller, parseOutputForFailureInstallSuccess) {
     ofs.close();
 
     string errorString;
-    EXPECT_TRUE(ApkInstaller::parseOutputForFailure(outputFile, &errorString));
+    std::ifstream f(outputFile.c_str());
+    EXPECT_TRUE(ApkInstaller::parseOutputForFailure(f, &errorString));
 }

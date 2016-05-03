@@ -14,27 +14,27 @@
 
 #pragma once
 
-#include "android/base/async/Looper.h"
 #include "android/base/Compiler.h"
+#include "android/base/async/Looper.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/ParallelTask.h"
+#include "android/emulation/control/AdbInterface.h"
 
 #include <functional>
-#include <string>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace android {
 namespace emulation {
 
-class ApkInstaller : public std::enable_shared_from_this<ApkInstaller> {
+class ApkInstaller {
 public:
     enum class Result {
         kSuccess,
         kOperationInProgress,
         kApkPermissionsError,
         kAdbConnectionFailed,
-        kDeviceStorageFull,
         kInstallFailed,
         kUnknownError
     };
@@ -43,70 +43,31 @@ public:
             std::function<void(Result result,
                                android::base::StringView errorString)>;
 
-    // Entry point to ApkInstaller.
-    // Objects of this type are managed via std::shared_ptr
-    // Args:
-    //     adbCommandArgs: The command line prefix for use with adb. Usually,
-    //             'adb -s "emulator_name"'
-    static std::shared_ptr<ApkInstaller> create(
-            android::base::Looper* looper,
-            const std::vector<std::string>& adbCommandArgs,
-            android::base::StringView apkFilePath,
-            ResultCallback resultCallback);
+    explicit ApkInstaller(AdbInterface* adb);
+    ~ApkInstaller();
 
-    // In case of synchronous failures, this will call |resultCallback| before
-    // returning.
-    void start();
+    // Asynchronously installs the apk at |apkFilePath| on the device
+    // and invokes |resultCallback| on the calling thread when done.
+    // Returns a shared pointer to the AdbCommand that handles the install
+    // process.
+    AdbCommandPtr install(android::base::StringView apkFilePath,
+                          ApkInstaller::ResultCallback resultCallback);
 
-    // Cancel an ongoing install. This DOES NOT guarantee that the operation
-    // will be cancelled. But it ensures that the resultCallback is not called
-    // in the future.
-    void cancel();
-
-    // Is an install being done currently?
-    // The task may be complete but awaiting the return of mResultCallback
-    // in taskDoneFunction. So don't check if we're in flight, just check if
-    // the task exists at all. If it does, we're still in flight.
-    bool inFlight() const { return bool(mParallelTask); }
-
-    // Update various paths.
-    // Fails if an install is in progress, indicated by the return value.
-    bool setAdbCommandArgs(const std::vector<std::string>& adbCommandArgs);
-    bool setApkFilePath(android::base::StringView apkFilePath);
-
-    // Parses the file at |outputFilePath| as if it was the output from running
-    // "adb install" to see if the install succeeded. Returns true if the
-    // install succeeded, false otherwise. If the install failed,
+    // Parses the contents of |output| stream as if it was the output from
+    // running "adb install" to see if the install succeeded. Returns true
+    // if the install succeeded, false otherwise. If the install failed,
     // |outErrorString| is populated with the error from "adb install".
-    static bool parseOutputForFailure(const std::string& outputFilePath,
+    static bool parseOutputForFailure(std::ifstream& output,
                                       std::string* outErrorString);
 
     static const char kDefaultErrorString[];
 
 private:
     static const android::base::System::Duration kInstallTimeoutMs;
-    static const char kInstallOutputFileBase[];
-
-    ApkInstaller(android::base::Looper* looper,
-                 const std::vector<std::string>& adbCommandArgs,
-                 android::base::StringView apkFilePath,
-                 ResultCallback resultCallback);
-
-    intptr_t taskFunction(Result* outResult);
-    void taskDoneFunction(const Result& result);
-
 
 private:
-    android::base::Looper* const mLooper;
-    const ResultCallback mResultCallback;
-    std::string mApkFilePath;
-    std::vector<std::string> mInstallCommand;
-
-    bool mCancelled = false;
-    std::unique_ptr<android::base::ParallelTask<ApkInstaller::Result>>
-            mParallelTask;
-    const std::string mOutputFilePath;
-    std::string mErrorCode;
+    AdbCommandPtr mInstallCommand;
+    AdbInterface* mAdb;
 
     DISALLOW_COPY_AND_ASSIGN(ApkInstaller);
 };
