@@ -34,19 +34,10 @@ host_common_SRC_FILES := \
     RenderThreadInfo.cpp \
     render_api.cpp \
     RenderWindow.cpp \
-    SocketStream.cpp \
-    TcpStream.cpp \
     TextureDraw.cpp \
     TextureResize.cpp \
     TimeUtils.cpp \
     WindowSurface.cpp \
-
-ifeq ($(BUILD_TARGET_OS),windows)
-    host_common_SRC_FILES += Win32PipeStream.cpp
-    host_common_LDLIBS += -lws2_32 -lpsapi
-else
-    host_common_SRC_FILES += UnixStream.cpp
-endif
 
 ### host libOpenglRender #################################################
 $(call emugl-begin-shared-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender)
