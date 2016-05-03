@@ -60,12 +60,12 @@ bool RendererImpl::initialize(int width, int height, bool useSubWindow) {
     std::unique_ptr<RenderWindow> renderWindow(
             new RenderWindow(width, height, kUseSubwindowThread, useSubWindow));
     if (!renderWindow) {
-        ERR("Could not create rendering window class");
+        ERR("Could not create rendering window class\n");
         GL_LOG("Could not create rendering window class");
         return false;
     }
     if (!renderWindow->isValid()) {
-        ERR("Could not initialize emulated framebuffer");
+        ERR("Could not initialize emulated framebuffer\n");
         return false;
     }
 
