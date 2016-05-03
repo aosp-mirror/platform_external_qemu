@@ -215,6 +215,7 @@ LOCAL_SRC_FILES := \
     android/camera/camera-format-converters.c \
     android/cmdline-option.c \
     android/console.c \
+    android/console-auth.cpp \
     android/core-init-utils.c \
     android/cpu_accelerator.cpp \
     android/crashreport/CrashSystem.cpp \
