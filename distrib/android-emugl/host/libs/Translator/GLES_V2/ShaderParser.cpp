@@ -56,7 +56,7 @@ void ShaderParser::setSrc(const Version& ver,GLsizei count,const GLchar* const* 
         m_src.append(strings[i], strings[i] + strLen);
     }
     // Store original source as some 'parsing' functions actually modify m_src.
-    m_originalSrc = m_src;
+    m_originalSrc = m_src.c_str();
 
     validateGLESKeywords(m_originalSrc.c_str());
 
