@@ -24,6 +24,7 @@
 #include "android/console.h"
 
 #include "android/android.h"
+#include "android/console-auth.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
 #include "android/hw-sensors.h"
@@ -90,12 +91,14 @@ typedef struct ControlClientRec_
     // lifetime of a ControlClient.
     LoopIo* loopIo;
     ControlGlobal              global;
-    char                       finished;
+    bool                       authenticated;
+    bool                       finished;
     char                       buff[ 4096 ];
     int                        buff_len;
 
 } ControlClientRec;
 
+#define AUTH_TOKEN_SIZE  16
 
 typedef struct ControlGlobalRec_
 {
@@ -299,7 +302,7 @@ control_client_create( Socket         socket,
     if (client) {
         socket_set_nodelay( socket );
         socket_set_nonblock( socket );
-        client->finished = 0;
+        client->finished = false;
         client->global  = global;
         client->sock    = socket;
         client->loopIo =
@@ -394,15 +397,32 @@ dump_help( ControlClient  client,
 }
 
 static int do_quit(ControlClient client, char* args);  // forward
+static int do_auth(ControlClient client, char* args);  // forward
+static int do_help(ControlClient client, char* args);  // forward
 
 static void
 control_client_do_command( ControlClient  client )
 {
     char*       line     = client->buff;
     char*       args     = NULL;
+
     CommandDef  commands = main_commands;
     char*       cmdend   = client->buff;
     CommandDef  cmd      = find_command( line, commands, &cmdend, &args );
+
+    bool allowCommand = client->authenticated;
+    if (!client->authenticated) {
+        // Only allow the following commands when the client is not
+        // authenticated: help, auth and quit
+        if (cmd && (cmd->handler == do_help || cmd->handler == do_auth ||
+                cmd->handler == do_quit)) {
+            allowCommand = true;
+        }
+    }
+    if (!allowCommand) {
+        control_write( client, "KO: client is not authenticated, try 'help auth'\r\n");
+        return;
+    }
 
     if (cmd == NULL) {
         size_t line_len = strlen(line);
@@ -666,12 +686,20 @@ int android_console_start(int control_port,
     return 0;
 }
 
-
+static int do_auth(ControlClient client, char* args) {
+    // Argument must match the auth token.
+    client->authenticated = android_console_auth_check(args);
+    if (!client->authenticated) {
+        control_write(client, "KO: Invalid auth token\r\n");
+        return -1;
+    }
+    return 0;
+}
 
 static int
 do_quit( ControlClient  client, char*  args )
 {
-    client->finished = 1;
+    client->finished = true;
     return -1;
 }
 
@@ -2608,6 +2636,12 @@ do_kill( ControlClient  client, char*  args )
 static const CommandDefRec   main_commands[] =
 {
     { "help|h|?", "print a list of commands", NULL, NULL, do_help, NULL },
+
+    { "auth", "authenticate user",
+      "unlock the console to allow the user to modify the emulator's state\r\n"
+      "type 'auth <token>', where <token> is an hexadecimal string specific\r\n"
+      "to the AVD, which you can get with 'emulator -console-auth-token'\r\n",
+      NULL, do_auth, NULL },
 
     { "event", "simulate hardware events",
     "allows you to send fake hardware events to the kernel\r\n", NULL,
