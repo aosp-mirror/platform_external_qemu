@@ -85,6 +85,7 @@ LOCAL_SRC_FILES := \
     android/base/synchronization/MessageChannel.cpp \
     android/base/Log.cpp \
     android/base/memory/LazyInstance.cpp \
+    android/base/misc/Random.cpp \
     android/base/system/System.cpp \
     android/base/threads/Async.cpp \
     android/base/threads/FunctorThread.cpp \
@@ -419,6 +420,7 @@ LOCAL_SRC_FILES := \
   android/base/memory/MallocUsableSize_unittest.cpp \
   android/base/memory/QSort_unittest.cpp \
   android/base/misc/HttpUtils_unittest.cpp \
+  android/base/misc/Random_unittest.cpp \
   android/base/misc/StringUtils_unittest.cpp \
   android/base/misc/Utf8Utils_unittest.cpp \
   android/base/Optional_unittest.cpp \
