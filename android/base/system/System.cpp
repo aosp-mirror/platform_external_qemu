@@ -58,7 +58,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 // This variable is a pointer to a zero-terminated array of all environment
@@ -403,6 +402,18 @@ public:
 #endif
     }
 
+    virtual int pathFileStat(StringView path, PathStat* stat) const override {
+        return pathFileStatInternal(path, stat);
+    }
+
+    virtual int pathFileLStat(StringView path, PathStat* stat) const override {
+        return pathFileLStatInternal(path, stat);
+    }
+
+    virtual int pathFileAccess(StringView path, int mode) const override {
+        return pathFileAccessInternal(path, mode);
+    }
+
     virtual std::vector<std::string> scanDirEntries(
             StringView dirPath,
             bool fullPath = false) const {
@@ -495,33 +506,27 @@ public:
         return false;
     }
 
-    virtual bool pathExists(StringView path) const {
-        return pathExistsInternal(path);
+    virtual FILE* pathFileOpenStdio(StringView path,
+                                    StringView mode) const override {
+        return pathFileOpenStdioInternal(path, mode);
     }
 
-    virtual bool pathIsFile(StringView path) const {
-        return pathIsFileInternal(path);
+    virtual int pathFileOpen(StringView path, int flags) const override {
+        return pathFileOpenInternal(path, flags);
     }
 
-    virtual bool pathIsDir(StringView path) const {
-        return pathIsDirInternal(path);
+    virtual int pathFileOpen(StringView path,
+                             int flags,
+                             mode_t mode) const override {
+        return pathFileOpenInternal(path, flags, mode);
     }
 
-    virtual bool pathCanRead(StringView path) const override {
-        return pathCanReadInternal(path);
+    virtual int pathFileCreate(StringView path, mode_t mode) const override {
+        return pathFileCreateInternal(path, mode);
     }
 
-    virtual bool pathCanWrite(StringView path) const override {
-        return pathCanWriteInternal(path);
-    }
-
-    virtual bool pathCanExec(StringView path) const override {
-        return pathCanExecInternal(path);
-    }
-
-    virtual bool pathFileSize(StringView path,
-                              FileSize* outFileSize) const override {
-        return pathFileSizeInternal(path, outFileSize);
+    virtual bool pathFileMkDir(StringView path, mode_t mode) const override {
+        return pathFileMkDirInternal(path, mode);
     }
 
     Times getProcessTimes() const {
@@ -1028,30 +1033,7 @@ Win32UnicodeString win32Path(StringView path) {
     }
     return wpath;
 }
-
-using PathStat = struct _stat;
-
-#else  // _WIN32
-
-using PathStat = struct stat;
-
 #endif  // _WIN32
-
-int pathStat(StringView path, PathStat* st) {
-#ifdef _WIN32
-    return _wstat(win32Path(path).c_str(), st);
-#else   // !_WIN32
-    return HANDLE_EINTR(stat(path.c_str(), st));
-#endif  // !_WIN32
-}
-
-int pathAccess(StringView path, int mode) {
-#ifdef _WIN32
-    return _waccess(win32Path(path).c_str(), mode);
-#else   // !_WIN32
-    return HANDLE_EINTR(access(path.c_str(), mode));
-#endif  // !_WIN32
-}
 
 }  // namespace
 
@@ -1100,6 +1082,75 @@ System* System::setForTesting(System* system) {
     return result;
 }
 
+bool System::pathExists(StringView path) const {
+    if (path.empty()) {
+        return false;
+    }
+    int ret = pathFileAccess(path, F_OK);
+    return (ret == 0) || (errno != ENOENT);
+}
+
+bool System::pathIsFile(StringView path) const {
+    if (path.empty()) {
+        return false;
+    }
+    PathStat st;
+    int ret = pathFileStat(path, &st);
+    if (ret < 0) {
+        return false;
+    }
+    return S_ISREG(st.st_mode);
+}
+
+bool System::pathIsDir(StringView path) const {
+    if (path.empty()) {
+        return false;
+    }
+    PathStat st = {};
+    int ret = pathFileStat(path, &st);
+    if (ret < 0) {
+        return false;
+    }
+    return S_ISDIR(st.st_mode);
+}
+
+bool System::pathCanRead(StringView path) const {
+    if (path.empty()) {
+        return false;
+    }
+    return pathFileAccess(path, R_OK) == 0;
+}
+
+bool System::pathCanWrite(StringView path) const {
+    if (path.empty()) {
+        return false;
+    }
+    return pathFileAccess(path, W_OK) == 0;
+}
+
+bool System::pathCanExec(StringView path) const {
+    if (path.empty()) {
+        return false;
+    }
+    return pathFileAccess(path, X_OK) == 0;
+}
+
+bool System::pathFileSize(StringView path, FileSize* outFileSize) const {
+    if (path.empty() || !outFileSize) {
+        return false;
+    }
+    PathStat st = {};
+    int ret = pathFileStat(path, &st);
+    if (ret < 0 || !S_ISREG(st.st_mode)) {
+        return false;
+    }
+    // This is off_t on POSIX and a 32/64 bit integral type on windows based on
+    // the host / compiler combination. We cast everything to 64 bit unsigned to
+    // play safe.
+    *outFileSize = static_cast<FileSize>(st.st_size);
+    return true;
+}
+
 // static
 std::vector<std::string> System::scanDirInternal(StringView dirPath) {
     std::vector<std::string> result;
@@ -1143,79 +1194,75 @@ std::vector<std::string> System::scanDirInternal(StringView dirPath) {
 }
 
 // static
-bool System::pathExistsInternal(StringView path) {
-    if (path.empty()) {
-        return false;
-    }
-    int ret = pathAccess(path, F_OK);
-    return (ret == 0) || (errno != ENOENT);
+FILE* System::pathFileOpenStdioInternal(StringView path, StringView mode) {
+#ifdef _WIN32
+    return ::_wfopen(win32Path(path).c_str(), win32Path(mode).c_str());
+#else
+    return ::fopen(path.c_str(), mode.c_str());
+#endif
 }
 
 // static
-bool System::pathIsFileInternal(StringView path) {
-    if (path.empty()) {
-        return false;
-    }
-    PathStat st;
-    int ret = pathStat(path, &st);
-    if (ret < 0) {
-        return false;
-    }
-    return S_ISREG(st.st_mode);
+int System::pathFileOpenInternal(StringView path, int flags) {
+#ifdef _WIN32
+    return ::_wopen(win32Path(path).c_str(), flags);
+#else
+    return HANDLE_EINTR(::open(path.c_str(), flags));
+#endif
 }
 
 // static
-bool System::pathIsDirInternal(StringView path) {
-    if (path.empty()) {
-        return false;
-    }
-    PathStat st;
-    int ret = pathStat(path, &st);
-    if (ret < 0) {
-        return false;
-    }
-    return S_ISDIR(st.st_mode);
+int System::pathFileOpenInternal(StringView path, int flags, mode_t mode) {
+#ifdef _WIN32
+    return ::_wopen(win32Path(path).c_str(), flags, mode);
+#else
+    return HANDLE_EINTR(::open(path.c_str(), flags, mode));
+#endif
 }
 
 // static
-bool System::pathCanReadInternal(StringView path) {
-    if (path.empty()) {
-        return false;
-    }
-    return pathAccess(path, R_OK) == 0;
+int System::pathFileCreateInternal(StringView path, mode_t mode) {
+#ifdef _WIN32
+    return ::_wcreat(win32Path(path).c_str(), mode);
+#else
+    return HANDLE_EINTR(::creat(path.c_str(), mode));
+#endif
 }
 
+#ifdef _WIN32
 // static
-bool System::pathCanWriteInternal(StringView path) {
-    if (path.empty()) {
-        return false;
-    }
-    return pathAccess(path, W_OK) == 0;
+bool System::pathFileMkDirInternal(StringView path, mode_t) {
+    return ::_wmkdir(win32Path(path).c_str()) == 0;
+}
+#else   // !_WIN32
+// static
+bool System::pathFileMkDirInternal(StringView path, mode_t mode) {
+    return HANDLE_EINTR(::mkdir(path.c_str(), mode)) == 0;
+}
+#endif  // !_WIN32
+
+int System::pathFileStatInternal(StringView path, PathStat* st) {
+#ifdef _WIN32
+    return _wstat(win32Path(path).c_str(), st);
+#else   // !_WIN32
+    return HANDLE_EINTR(stat(path.c_str(), st));
+#endif  // !_WIN32
 }
 
-// static
-bool System::pathCanExecInternal(StringView path) {
-    if (path.empty()) {
-        return false;
-    }
-    return pathAccess(path, X_OK) == 0;
+int System::pathFileLStatInternal(StringView path, PathStat* st) {
+#ifdef _WIN32
+    return _wstat(win32Path(path).c_str(), st);
+#else   // !_WIN32
+    return HANDLE_EINTR(lstat(path.c_str(), st));
+#endif  // !_WIN32
 }
 
-// static
-bool System::pathFileSizeInternal(StringView path, FileSize* outFileSize) {
-    if (path.empty() || !outFileSize) {
-        return false;
-    }
-    PathStat st;
-    int ret = pathStat(path, &st);
-    if (ret < 0 || !S_ISREG(st.st_mode)) {
-        return false;
-    }
-    // This is off_t on POSIX and a 32/64 bit integral type on windows based on
-    // the host / compiler combination. We cast everything to 64 bit unsigned to
-    // play safe.
-    *outFileSize = static_cast<FileSize>(st.st_size);
-    return true;
+int System::pathFileAccessInternal(StringView path, int mode) {
+#ifdef _WIN32
+    return _waccess(win32Path(path).c_str(), mode);
+#else   // !_WIN32
+    return HANDLE_EINTR(access(path.c_str(), mode));
+#endif  // !_WIN32
 }
 
 // static

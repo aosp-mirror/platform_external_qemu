@@ -36,9 +36,9 @@ void genRandomBytes(uint8_t* buffer, size_t bufferLen) {
     }
 #else   // !_WIN32
     {
-        FILE* file = fopen("/dev/random", "rb");
+        FILE* file = fopen("/dev/urandom", "rb");
         if (file) {
-            failure = (fread(buffer, bufferLen, 1, file) == 1);
+            failure = (fread(buffer, bufferLen, 1, file) != 1);
             fclose(file);
         }
     }
@@ -46,7 +46,7 @@ void genRandomBytes(uint8_t* buffer, size_t bufferLen) {
     if (failure) {
         // Backup scheme: use rand() to initialize individual values.
         for (size_t n = 0; n < bufferLen; ++n) {
-            buffer[n] = static_cast<uint8_t>(rand());
+            buffer[n] = static_cast<uint8_t>(::rand());
         }
     }
 }
