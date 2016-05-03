@@ -129,6 +129,16 @@ public:
     }
 };
 
+#ifdef _WIN32
+// Convert a FILETIME value into a 64-bit Duration in micro-seconds.
+System::Duration win32FileTimeToDurationUsec(FILETIME* ft) {
+    ULARGE_INTEGER result;
+    result.LowPart = ft->dwLowDateTime;
+    result.HighPart = ft->dwHighDateTime;
+    return static_cast<System::Duration>(result.QuadPart / 10);
+}
+#endif  // _WIN32
+
 // This is, maybe, the only static variable that may not be a LazyInstance:
 // it holds the actual timestamp at startup, and has to be initialized as
 // soon as possible after the application launch.
@@ -483,6 +493,18 @@ public:
 #endif
     }
 
+    virtual int pathFileStat(StringView path, PathStat* stat) const override {
+        return pathFileStatInternal(path, stat);
+    }
+
+    virtual int pathFileLStat(StringView path, PathStat* stat) const override {
+        return pathFileLStatInternal(path, stat);
+    }
+
+    virtual int pathFileAccess(StringView path, int mode) const override {
+        return pathFileAccessInternal(path, mode);
+    }
+
     virtual std::vector<std::string> scanDirEntries(
             StringView dirPath,
             bool fullPath = false) const {
@@ -575,38 +597,33 @@ public:
         return false;
     }
 
-    virtual bool pathExists(StringView path) const {
-        return pathExistsInternal(path);
+    virtual FILE* pathFileOpenStdio(StringView path,
+                                    StringView mode) const override {
+        return pathFileOpenStdioInternal(path, mode);
     }
 
-    virtual bool pathIsFile(StringView path) const {
-        return pathIsFileInternal(path);
+    virtual int pathFileOpen(StringView path, int flags) const override {
+        return pathFileOpenInternal(path, flags);
     }
 
-    virtual bool pathIsDir(StringView path) const {
-        return pathIsDirInternal(path);
+    virtual int pathFileOpen(StringView path,
+                             int flags,
+                             mode_t mode) const override {
+        return pathFileOpenInternal(path, flags, mode);
     }
 
-    virtual bool pathCanRead(StringView path) const override {
-        return pathCanReadInternal(path);
+    virtual int pathFileCreate(StringView path, mode_t mode) const override {
+        return pathFileCreateInternal(path, mode);
     }
 
-    virtual bool pathCanWrite(StringView path) const override {
-        return pathCanWriteInternal(path);
-    }
-
-    virtual bool pathCanExec(StringView path) const override {
-        return pathCanExecInternal(path);
+    virtual bool pathFileMkDir(StringView path, mode_t mode) const override {
+        return pathFileMkDirInternal(path, mode);
     }
 
     virtual bool deleteFile(StringView path) const override {
         return deleteFileInternal(path);
     }
 
-    virtual bool pathFileSize(StringView path,
-                              FileSize* outFileSize) const override {
-        return pathFileSizeInternal(path, outFileSize);
-    }
 
     virtual Optional<Duration> pathCreationTime(StringView path) const override {
         return pathCreationTimeInternal(path);
@@ -624,15 +641,8 @@ public:
                           &kernelTime, &userTime);
 
         // convert 100-ns intervals from a struct to int64_t milliseconds
-        ULARGE_INTEGER kernelInt64;
-        kernelInt64.LowPart = kernelTime.dwLowDateTime;
-        kernelInt64.HighPart = kernelTime.dwHighDateTime;
-        res.systemMs = static_cast<Duration>(kernelInt64.QuadPart / 10000);
-
-        ULARGE_INTEGER userInt64;
-        userInt64.LowPart = userTime.dwLowDateTime;
-        userInt64.HighPart = userTime.dwHighDateTime;
-        res.userMs = static_cast<Duration>(userInt64.QuadPart / 10000);
+        res.systemMs = win32FileTimeToDurationUsec(&kernelTime) / 1000;
+        res.userMs = win32FileTimeToDurationUsec(&userTime) / 1000;
 #else
         tms times = {};
         ::times(&times);
@@ -1112,38 +1122,7 @@ Win32UnicodeString win32Path(StringView path) {
     }
     return wpath;
 }
-
-using PathStat = struct _stat;
-
-#else  // _WIN32
-
-using PathStat = struct stat;
-
 #endif  // _WIN32
-
-int pathStat(StringView path, PathStat* st) {
-#ifdef _WIN32
-    return _wstat(win32Path(path).c_str(), st);
-#else   // !_WIN32
-    return HANDLE_EINTR(stat(path.c_str(), st));
-#endif  // !_WIN32
-}
-
-int pathAccess(StringView path, int mode) {
-#ifdef _WIN32
-    // Convert |mode| to win32 permission bits.
-    int win32mode = 0x0;
-    if ((mode & R_OK) || (mode & X_OK)) {
-        win32mode |= 0x4;
-    }
-    if (mode & W_OK) {
-        win32mode |= 0x2;
-    }
-    return _waccess(win32Path(path).c_str(), win32mode);
-#else   // !_WIN32
-    return HANDLE_EINTR(access(path.c_str(), mode));
-#endif  // !_WIN32
-}
 
 }  // namespace
 
@@ -1192,6 +1171,57 @@ System* System::setForTesting(System* system) {
     return result;
 }
 
+bool System::pathExists(StringView path) const {
+    int ret = pathFileAccess(path, F_OK);
+    return (ret == 0) || (errno != ENOENT);
+}
+
+bool System::pathIsFile(StringView path) const {
+    PathStat st = {};
+    int ret = pathFileStat(path, &st);
+    if (ret < 0) {
+        return false;
+    }
+    return st.isRegular();
+}
+
+bool System::pathIsDir(StringView path) const {
+    PathStat st = {};
+    int ret = pathFileStat(path, &st);
+    if (ret < 0) {
+        return false;
+    }
+    return st.isDirectory();
+}
+
+bool System::pathCanRead(StringView path) const {
+    return pathFileAccess(path, R_OK) == 0;
+}
+
+bool System::pathCanWrite(StringView path) const {
+    return pathFileAccess(path, W_OK) == 0;
+}
+
+bool System::pathCanExec(StringView path) const {
+    return pathFileAccess(path, X_OK) == 0;
+}
+
+bool System::pathFileSize(StringView path, FileSize* outFileSize) const {
+    if (path.empty() || !outFileSize) {
+        return false;
+    }
+    PathStat st = {};
+    int ret = pathFileStat(path, &st);
+    if (ret < 0 || !st.isRegular()) {
+        return false;
+    }
+    // This is off_t on POSIX and a 32/64 bit integral type on windows based on
+    // the host / compiler combination. We cast everything to 64 bit unsigned to
+    // play safe.
+    *outFileSize = st.size();
+    return true;
+}
+
 // static
 std::vector<std::string> System::scanDirInternal(StringView dirPath) {
     std::vector<std::string> result;
@@ -1235,66 +1265,57 @@ std::vector<std::string> System::scanDirInternal(StringView dirPath) {
 }
 
 // static
-bool System::pathExistsInternal(StringView path) {
-    if (path.empty()) {
-        return false;
-    }
-    int ret = pathAccess(path, F_OK);
-    return (ret == 0) || (errno != ENOENT);
+FILE* System::pathFileOpenStdioInternal(StringView path, StringView mode) {
+#ifdef _WIN32
+    return ::_wfopen(win32Path(path).c_str(), Win32UnicodeString(mode).c_str());
+#else
+    return ::fopen(path.c_str(), mode.c_str());
+#endif
 }
 
 // static
-bool System::pathIsFileInternal(StringView path) {
-    if (path.empty()) {
-        return false;
-    }
-    PathStat st;
-    int ret = pathStat(path, &st);
-    if (ret < 0) {
-        return false;
-    }
-    return S_ISREG(st.st_mode);
+int System::pathFileOpenInternal(StringView path, int flags) {
+#ifdef _WIN32
+    return ::_wopen(win32Path(path).c_str(), flags);
+#else
+    return HANDLE_EINTR(::open(path.c_str(), flags));
+#endif
 }
 
 // static
-bool System::pathIsDirInternal(StringView path) {
-    if (path.empty()) {
-        return false;
-    }
-    PathStat st;
-    int ret = pathStat(path, &st);
-    if (ret < 0) {
-        return false;
-    }
-    return S_ISDIR(st.st_mode);
+int System::pathFileOpenInternal(StringView path, int flags, mode_t mode) {
+#ifdef _WIN32
+    return ::_wopen(win32Path(path).c_str(), flags, mode);
+#else
+    return HANDLE_EINTR(::open(path.c_str(), flags, mode));
+#endif
 }
 
 // static
-bool System::pathCanReadInternal(StringView path) {
-    if (path.empty()) {
-        return false;
-    }
-    return pathAccess(path, R_OK) == 0;
+int System::pathFileCreateInternal(StringView path, mode_t mode) {
+#ifdef _WIN32
+    return ::_wcreat(win32Path(path).c_str(), mode);
+#else
+    return HANDLE_EINTR(::creat(path.c_str(), mode));
+#endif
 }
 
+#ifdef _WIN32
 // static
-bool System::pathCanWriteInternal(StringView path) {
-    if (path.empty()) {
-        return false;
-    }
-    return pathAccess(path, W_OK) == 0;
+bool System::pathFileMkDirInternal(StringView path, mode_t) {
+    return ::_wmkdir(win32Path(path).c_str()) == 0;
 }
-
+#else   // !_WIN32
 // static
-bool System::pathCanExecInternal(StringView path) {
-    if (path.empty()) {
-        return false;
-    }
-    return pathAccess(path, X_OK) == 0;
+bool System::pathFileMkDirInternal(StringView path, mode_t mode) {
+    return HANDLE_EINTR(::mkdir(path.c_str(), mode)) == 0;
 }
+#endif  // !_WIN32
 
 bool System::deleteFileInternal(StringView path) {
-    if (!pathIsFileInternal(path)) {
+    PathStat st = {};
+    if (path.empty() || pathFileStatInternal(path, &st) < 0 ||
+        !st.isRegular()) {
         return false;
     }
 
@@ -1320,41 +1341,102 @@ bool System::deleteFileInternal(StringView path) {
     return remove_res == 0;
 }
 
-// static
-bool System::pathFileSizeInternal(StringView path, FileSize* outFileSize) {
-    if (path.empty() || !outFileSize) {
-        return false;
+int System::PathStat::initFromPath(StringView path, bool followLinks) {
+    if (path.empty()) {
+        errno = EINVAL;
+        return -1;
     }
-    PathStat st;
-    int ret = pathStat(path, &st);
-    if (ret < 0 || !S_ISREG(st.st_mode)) {
-        return false;
+#ifdef _WIN32
+    // Don't use _wstat() because it doesn't support symbolic links, which
+    // are pretty common in user directories. _stat() does support them but
+    // converting an UTF-8 path into MBCS is not guaranteed to work with all
+    // codepages.
+    WIN32_FILE_ATTRIBUTE_DATA data = {};
+    if (!GetFileAttributesExW(win32Path(path).c_str(),
+                              GetFileExInfoStandard,
+                              &data)) {
+        // TODO(digit): Convert GetLastError() to errno?
+        return -1;
     }
-    // This is off_t on POSIX and a 32/64 bit integral type on windows based on
-    // the host / compiler combination. We cast everything to 64 bit unsigned to
-    // play safe.
-    *outFileSize = static_cast<FileSize>(st.st_size);
-    return true;
+
+    mMode = 0;
+    mSize = 0;
+
+    // number of seconds between the FILETIME epoch and the Unix one.
+    const Duration kSecsToUnixEpoch = 11644473600LL;
+    const Duration kUsecsToUnixEpoch = kSecsToUnixEpoch * 1000000LL;
+    mCreationTimeUs = win32FileTimeToDurationUsec(&data.ftCreationTime) -
+            kUsecsToUnixEpoch;
+
+    // TODO(digit): Support symbolic links and mount points.
+    if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        mMode |= kFlagDirectory;
+    } else {
+        // NOTE: nFileSizeHigh/Low don't make sense for directories.
+        mMode |= kFlagRegular;
+        mSize = ((FileSize)data.nFileSizeHigh << 32) |
+                (FileSize)data.nFileSizeLow;
+    }
+    return 0;
+#else   // !_WIN32
+    struct stat st = {};
+    int ret = followLinks ? HANDLE_EINTR(stat(path.c_str(), &st))
+                          : HANDLE_EINTR(lstat(path.c_str(), &st));
+    if (ret < 0) {
+        return -1;
+    }
+    mMode = 0;
+    mSize = 0;
+    mCreationTimeUs = 0;
+
+    // TODO(zyy@): Read mCreationTimeUs on Linux using the ext4 attribute?
+#ifdef __APPLE__
+    mCreationTimeUs = static_cast<Duration>(
+            st.st_birthtimespec.tv_sec * 1000000LL +
+            st.st_birthtimespec.tv_nsec / 1000);
+#endif
+    if (S_ISDIR(st.st_mode)) {
+        mMode |= kFlagDirectory;
+    } else if (S_ISREG(st.st_mode)) {
+        mMode |= kFlagRegular;
+        mSize = static_cast<FileSize>(st.st_size);
+    } else if (S_ISLNK(st.st_mode)) {
+        mMode |= kFlagSymlink;
+    }
+    return 0;
+#endif  // !_WIN32
+}
+
+int System::pathFileStatInternal(StringView path, PathStat* st) {
+    return st->initFromPath(path, true);
+}
+
+int System::pathFileLStatInternal(StringView path, PathStat* st) {
+    return st->initFromPath(path, false);
+}
+
+int System::pathFileAccessInternal(StringView path, int mode) {
+    if (path.empty()) {
+        errno = EINVAL;
+        return -1;
+    }
+#ifdef _WIN32
+    return _waccess(win32Path(path).c_str(), mode);
+#else   // !_WIN32
+    return HANDLE_EINTR(access(path.c_str(), mode));
+#endif  // !_WIN32
 }
 
 // static
 Optional<System::Duration> System::pathCreationTimeInternal(StringView path) {
-#if defined(__linux__) || (defined(__APPLE__) && !defined(_DARWIN_FEATURE_64_BIT_INODE))
-    // TODO(zyy@): read the creation time directly from the ext4 attribute
-    // on Linux.
-    return {};
-#else
-    PathStat st;
-    if (pathStat(path, &st)) {
+    PathStat st = {};
+    if (pathFileStatInternal(path, &st)) {
         return {};
     }
-#ifdef _WIN32
-    return st.st_ctime * 1000000ll;
-#else  // APPLE
-    return st.st_birthtimespec.tv_sec * 1000000ll +
-            st.st_birthtimespec.tv_nsec / 1000;
-#endif  // WIN32 && APPLE
-#endif  // Linux
+    if (st.mCreationTimeUs == 0LL) {
+        return {};
+    }
+    return st.mCreationTimeUs;
 }
 
 // static
