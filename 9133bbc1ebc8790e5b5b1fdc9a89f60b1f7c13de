@@ -46,6 +46,29 @@
       "revId": "9133bbc1ebc8790e5b5b1fdc9a89f60b1f7c13de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d3fc7e9_3dfe4f15",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-03T19:58:40Z",
+      "side": 1,
+      "message": "could you please at least assert() on a non-null return from memchr()?\nI see that the users of format_ip6() never check for a null return",
+      "range": {
+        "startLine": 368,
+        "startChar": 0,
+        "endLine": 368,
+        "endChar": 37
+      },
+      "revId": "9133bbc1ebc8790e5b5b1fdc9a89f60b1f7c13de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
