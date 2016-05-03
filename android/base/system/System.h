@@ -23,7 +23,9 @@
 
 #include <limits.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <time.h>
+#include <sys/stat.h>
 
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -197,28 +199,83 @@ public:
     // /////////////////////////////////////////////////////////////////////////
 
     // Return true iff |path| exists on the file system.
-    virtual bool pathExists(StringView path) const = 0;
+    bool pathExists(StringView path) const;
 
     // Return true iff |path| exists and is a regular file on the file system.
-    virtual bool pathIsFile(StringView path) const = 0;
+    bool pathIsFile(StringView path) const;
 
     // Return true iff |path| exists and is a directory on the file system.
-    virtual bool pathIsDir(StringView path) const = 0;
+    bool pathIsDir(StringView path) const;
 
     // Return true iff |path| exists and can be read by the current user.
-    virtual bool pathCanRead(StringView path) const = 0;
+    bool pathCanRead(StringView path) const;
 
     // Return true iff |path| exists and can be written to by the current
     // user.
-    virtual bool pathCanWrite(StringView path) const = 0;
+    bool pathCanWrite(StringView path) const;
 
     // Return true iff |path| exists and can be executed to by the current
     // user.
-    virtual bool pathCanExec(StringView path) const = 0;
+    bool pathCanExec(StringView path) const;
 
     // Get the size of file at |path|.
     // Fails if path is not a file or not readable, and in case of other errors.
-    virtual bool pathFileSize(StringView path, FileSize* outFileSize) const = 0;
+    bool pathFileSize(StringView path, FileSize* outFileSize) const;
+
+    // Equivalent of fopen(), but takes care of Win32 paths properly and
+    // supports mocking through TestSystem's temporary root. |path| is an
+    // UTF-8 encoded file path, and |mode| a stdio fopen-mode string.
+    virtual FILE* pathFileOpenStdio(StringView path, StringView mode) const = 0;
+
+    // Equivalent of open(), but takes care of Win32 paths properly, handles
+    // EINTR, and supports mocking through TestSystem's temporary root. |path|
+    // is an UTF-8 encoded file path, and |flags| an open()-specific flags
+    // value.
+    virtual int pathFileOpen(StringView path, int flags) const = 0;
+
+    // Equivalent of open(), but takes care of Win32 paths properly, handles
+    // EINTR, and supports mocking through TestSystem's temporary root. |path|
+    // is an UTF-8 encoded file path, and |flags| an open()-specific flags
+    // value, and |mode| an open()-specific mode value.
+    virtual int pathFileOpen(StringView path, int flags, mode_t mode) const = 0;
+
+    // Equivalent of creat(), but takes care of Win32 paths properly, handles
+    // EINTR and supports mocking through TestSystem's temporary root. |path|
+    // is an UTF-8 encoded file path, and |mode| an open()-specific mode value.
+    virtual int pathFileCreate(StringView path, mode_t mode) const = 0;
+
+    // Equivalent of mkdir(), but takes care of Win32 paths properly, handles
+    // EINTR and supports mocking through TestSystem's temporary root. |path|
+    // is an UTF-8 encoded file path, and |mode| an open()-specific mode value.
+    // NOTE: |mode| is always ignored on Win32 due to system limitations,
+    // so don't count on it during unit-testing on this platform.
+    virtual bool pathFileMkDir(StringView path, mode_t mode) const = 0;
+
+// PathStat is the structure used to return information about a file
+// i-node, for the pathFileStat() and pathFileLStat() calls.
+#ifdef _WIN32
+    using PathStat = struct _stat;
+#else
+    using PathStat = struct stat;
+#endif
+
+    // Equivalent of stat(), but takes care of Win32 paths properly, and
+    // handles EINTR. |path| is an UTF-8 encoded file path. On success,
+    // return 0 and sets |*stat|, on failure return -1/errno.
+    virtual int pathFileStat(StringView path, PathStat* stat) const = 0;
+
+    // Equivalent of lstat(), but takes care of Win32 paths properly, and
+    // handles EINTR. |path| is an UTF-8 encoded file path. On success,
+    // return 0 and sets |*stat|, on failure return -1/errno.
+    virtual int pathFileLStat(StringView path, PathStat* stat) const = 0;
+
+    // Equivalent of access(), but takes care of Win32 paths properly, and
+    // handles EINTR. |path| is an UTF-8 encoded file path and |mode| is
+    // an access()-style mode value. On success return access flags, on
+    // failure return -1/errno. Users are encouraged to use pathExists(),
+    // pathIsXXX() and pathCanXXX() methods instead.
+    virtual int pathFileAccess(StringView path, int mode) const = 0;
+
     // Scan directory |dirPath| for entries, and return them as a sorted
     // vector or entries. If |fullPath| is true, then each item of the
     // result vector contains a full path.
@@ -314,13 +371,14 @@ protected:
     // directory or something like that. Always returns short paths.
     static std::vector<std::string> scanDirInternal(StringView dirPath);
 
-    static bool pathExistsInternal(StringView path);
-    static bool pathIsFileInternal(StringView path);
-    static bool pathIsDirInternal(StringView path);
-    static bool pathCanReadInternal(StringView path);
-    static bool pathCanWriteInternal(StringView path);
-    static bool pathCanExecInternal(StringView path);
-    static bool pathFileSizeInternal(StringView path, FileSize* outFileSize);
+    static FILE* pathFileOpenStdioInternal(StringView path, StringView mode);
+    static int pathFileOpenInternal(StringView path, int flags);
+    static int pathFileOpenInternal(StringView path, int flags, mode_t mode);
+    static int pathFileCreateInternal(StringView path, mode_t mode);
+    static bool pathFileMkDirInternal(StringView path, mode_t mode);
+    static int pathFileStatInternal(StringView path, PathStat* stat);
+    static int pathFileLStatInternal(StringView path, PathStat* stat);
+    static int pathFileAccessInternal(StringView path, int mode);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(System);

@@ -176,33 +176,39 @@ public:
         return false;
     }
 
-    virtual bool pathExists(StringView path) const {
-        return pathExistsInternal(toTempRoot(path));
+    virtual FILE* pathFileOpenStdio(StringView path,
+                                    StringView mode) const override {
+        return pathFileOpenStdioInternal(toTempRoot(path), mode);
     }
 
-    virtual bool pathIsFile(StringView path) const {
-        return pathIsFileInternal(toTempRoot(path));
+    virtual int pathFileOpen(StringView path, int flags) const override {
+        return pathFileOpenInternal(toTempRoot(path), flags);
     }
 
-    virtual bool pathIsDir(StringView path) const {
-        return pathIsDirInternal(toTempRoot(path));
+    virtual int pathFileOpen(StringView path,
+                             int flags,
+                             mode_t mode) const override {
+        return pathFileOpenInternal(toTempRoot(path), flags, mode);
     }
 
-    virtual bool pathCanRead(StringView path) const override {
-        return pathCanReadInternal(toTempRoot(path));
+    virtual int pathFileCreate(StringView path, mode_t mode) const override {
+        return pathFileCreateInternal(toTempRoot(path), mode);
     }
 
-    virtual bool pathCanWrite(StringView path) const override {
-        return pathCanWriteInternal(toTempRoot(path));
+    virtual bool pathFileMkDir(StringView path, mode_t mode) const override {
+        return pathFileMkDirInternal(toTempRoot(path), mode);
     }
 
-    virtual bool pathCanExec(StringView path) const override {
-        return pathCanExecInternal(toTempRoot(path));
+    virtual int pathFileStat(StringView path, PathStat* stat) const override {
+        return pathFileStatInternal(toTempRoot(path), stat);
     }
 
-    virtual bool pathFileSize(StringView path,
-                              FileSize* outFileSize) const override {
-        return pathFileSizeInternal(toTempRoot(path), outFileSize);
+    virtual int pathFileLStat(StringView path, PathStat* stat) const override {
+        return pathFileLStatInternal(toTempRoot(path), stat);
+    }
+
+    virtual int pathFileAccess(StringView path, int mode) const override {
+        return pathFileAccessInternal(toTempRoot(path), mode);
     }
 
     virtual std::vector<std::string> scanDirEntries(
