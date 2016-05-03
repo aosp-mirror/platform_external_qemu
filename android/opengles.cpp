@@ -70,14 +70,14 @@ static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
     return 0;
 }
 
-static bool rendererUsesSubWindow;
-static emugl::RenderLibPtr renderLib = nullptr;
-static emugl::RendererPtr renderer = nullptr;
+static bool sRendererUsesSubWindow;
+static emugl::RenderLibPtr sRenderLib = nullptr;
+static emugl::RendererPtr sRenderer = nullptr;
 
 int android_initOpenglesEmulation() {
     char* error = NULL;
 
-    if (renderLib != NULL)
+    if (sRenderLib != NULL)
         return 0;
 
     D("Initializing hardware OpenGLES emulation support");
@@ -96,16 +96,16 @@ int android_initOpenglesEmulation() {
         goto BAD_EXIT;
     }
 
-    renderLib = initLibrary();
-    if (!renderLib) {
+    sRenderLib = initLibrary();
+    if (!sRenderLib) {
         derror("OpenGLES initialization failed!");
         goto BAD_EXIT;
     }
 
-    rendererUsesSubWindow = true;
+    sRendererUsesSubWindow = true;
     if (const char* env = getenv("ANDROID_GL_SOFTWARE_RENDERER")) {
         if (env[0] != '\0' && env[0] != '0') {
-            rendererUsesSubWindow = false;
+            sRendererUsesSubWindow = false;
         }
     }
 
@@ -120,26 +120,26 @@ BAD_EXIT:
 int
 android_startOpenglesRenderer(int width, int height)
 {
-    if (!renderLib) {
+    if (!sRenderLib) {
         D("Can't start OpenGLES renderer without support libraries");
         return -1;
     }
 
-    if (renderer) {
+    if (sRenderer) {
         return 0;
     }
 
     android_init_opengl_logger();
 
-    renderLib->setCrashReporter(&crashhandler_die_format);
+    sRenderLib->setCrashReporter(&crashhandler_die_format);
 
     emugl_logger_struct logfuncs;
     logfuncs.coarse = android_opengl_logger_write;
     logfuncs.fine = android_opengl_cxt_logger_write;
-    renderLib->setLogger(logfuncs);
+    sRenderLib->setLogger(logfuncs);
 
-    renderer = renderLib->initRenderer(width, height, rendererUsesSubWindow);
-    if (!renderer) {
+    sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow);
+    if (!sRenderer) {
         D("Can't start OpenGLES renderer?");
         return -1;
     }
@@ -149,8 +149,8 @@ android_startOpenglesRenderer(int width, int height)
 void
 android_setPostCallback(OnPostFunc onPost, void* onPostContext)
 {
-    if (renderer) {
-        renderer->setPostCallback(onPost, onPostContext);
+    if (sRenderer) {
+        sRenderer->setPostCallback(onPost, onPostContext);
     }
 }
 
@@ -186,13 +186,13 @@ void android_getOpenglesHardwareStrings(char** vendor,
                                         char** version) {
     assert(vendor != NULL && renderer != NULL && version != NULL);
     assert(*vendor == NULL && *renderer == NULL && *version == NULL);
-    if (!renderer) {
+    if (!sRenderer) {
         D("Can't get OpenGL ES hardware strings when renderer not started");
         return;
     }
 
     const emugl::Renderer::HardwareStrings strings =
-            ::renderer->getHardwareStrings();
+            sRenderer->getHardwareStrings();
     D("OpenGL Vendor=[%s]", strings.vendor.c_str());
     D("OpenGL Renderer=[%s]", strings.renderer.c_str());
     D("OpenGL Version=[%s]", strings.version.c_str());
@@ -214,8 +214,8 @@ void android_getOpenglesHardwareStrings(char** vendor,
 void
 android_stopOpenglesRenderer(void)
 {
-    if (renderer) {
-        renderer.reset();
+    if (sRenderer) {
+        sRenderer.reset();
         android_stop_opengl_logger();
     }
 }
@@ -224,11 +224,11 @@ int
 android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
                            int fbw, int fbh, float dpr, float rotation)
 {
-    if (!renderer) {
+    if (!sRenderer) {
         return -1;
     }
     FBNativeWindowType win = (FBNativeWindowType)(uintptr_t)window;
-    bool success = renderer->showOpenGLSubwindow(
+    bool success = sRenderer->showOpenGLSubwindow(
             win, wx, wy, ww, wh, fbw, fbh, dpr, rotation);
     return success ? 0 : -1;
 }
@@ -236,30 +236,30 @@ android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
 void
 android_setOpenglesTranslation(float px, float py)
 {
-    if (renderer) {
-        renderer->setOpenGLDisplayTranslation(px, py);
+    if (sRenderer) {
+        sRenderer->setOpenGLDisplayTranslation(px, py);
     }
 }
 
 int
 android_hideOpenglesWindow(void)
 {
-    if (!renderer) {
+    if (!sRenderer) {
         return -1;
     }
-    bool success = renderer->destroyOpenGLSubwindow();
+    bool success = sRenderer->destroyOpenGLSubwindow();
     return success ? 0 : -1;
 }
 
 void
 android_redrawOpenglesWindow(void)
 {
-    if (renderer) {
-        renderer->repaintOpenGLDisplay();
+    if (sRenderer) {
+        sRenderer->repaintOpenGLDisplay();
     }
 }
 
 const emugl::RendererPtr& android_getOpenglesRenderer()
 {
-    return renderer;
+    return sRenderer;
 }
