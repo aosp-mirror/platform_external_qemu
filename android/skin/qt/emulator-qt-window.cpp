@@ -131,6 +131,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mUserActionsCounter(new android::qt::UserActionsCounter(&mEventCapturer)),
       mAdbInterface(mLooper),
       mApkInstaller(&mAdbInterface),
+      mScreenCapturer(&mAdbInterface),
       mInstallDialog(this),
       mPushDialog(this),
       mStartedAdbStopProcess(false) {
@@ -282,10 +283,6 @@ EmulatorQtWindow* EmulatorQtWindow::getInstance() {
 }
 
 EmulatorQtWindow::~EmulatorQtWindow() {
-    if (mScreenCapturer) {
-        mScreenCapturer->cancel();
-    }
-
     if (mApkInstallCommand) {
         mApkInstallCommand->cancel();
     }
@@ -951,10 +948,6 @@ void EmulatorQtWindow::slot_scrollRangeChanged(int min, int max) {
 }
 
 void EmulatorQtWindow::screenshot() {
-    if (mScreenCapturer && mScreenCapturer->inFlight()) {
-        return;
-    }
-
     static const int MIN_SCREENSHOT_API = 14;
     if (avdInfo_getApiLevel(android_avdInfo) < MIN_SCREENSHOT_API) {
         showErrorDialog(tr("Screenshot is not supported below API 14."),
@@ -981,21 +974,15 @@ void EmulatorQtWindow::screenshot() {
         return;
     }
 
-    if (!mScreenCapturer) {
-        mScreenCapturer = ScreenCapturer::create(
-                mLooper, args, savePath.toStdString(),
-                [this](ScreenCapturer::Result result) {
-                    EmulatorQtWindow::screenshotDone(result);
-                });
-    } else {
-        mScreenCapturer->setAdbCommandArgs(args);
-        mScreenCapturer->setOutputDirectoryPath(savePath.toStdString());
-    }
+    mScreenCapturer.capture(
+        savePath.toStdString(),
+        [this](ScreenCapturer::Result result) {
+            EmulatorQtWindow::screenshotDone(result);
+        });
 
     // Display the flash animation immediately as feedback - if it fails, an
     // error dialog will indicate as such.
     mOverlay.showAsFlash();
-    mScreenCapturer->start();
 }
 
 void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result) {
@@ -1029,7 +1016,6 @@ void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result) {
                     tr("There was an unknown error while capturing the "
                        "screenshot.");
     }
-
     showErrorDialog(msg, tr("Screenshot"));
 }
 

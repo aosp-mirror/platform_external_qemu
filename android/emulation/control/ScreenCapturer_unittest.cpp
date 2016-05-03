@@ -18,8 +18,8 @@
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/Compiler.h"
 #include "android/base/system/System.h"
-#include "android/base/StringView.h"
 #include "android/base/testing/TestSystem.h"
+#include "android/emulation/control/AdbInterface.h"
 
 #include <gtest/gtest.h>
 
@@ -29,10 +29,9 @@
 #include <string>
 #include <vector>
 
-using android::base::StringView;
 using android::base::System;
 using android::emulation::ScreenCapturer;
-using std::shared_ptr;
+using android::emulation::AdbInterface;
 using std::string;
 using std::vector;
 
@@ -48,227 +47,119 @@ public:
                       "/appdir") {}
 
     void SetUp() override {
-        mShellMayProceed = false;
-        mTestSystem.setShellCommand(&ScreenCapturerTest::obsequiousShellCommand,
+        mInvalidShellCommand = false;
+        mHaveResult = false;
+        mTestSystem.setShellCommand(&ScreenCapturerTest::shellCmdHandler,
                                     this);
         mLooper = android::base::ThreadLooper::get();
+        mAdb.reset(new AdbInterface(mLooper));
+        mCapturer.reset(new ScreenCapturer(mAdb.get()));
         mTestSystem.getTempRoot()->makeSubDir("ScreencapOut");
-        mCapturer = ScreenCapturer::create(
-                mLooper, {"adb"}, "ScreencapOut",
-                [this](Result result) { this->resultSaver(result); }, 10);
-        mCapturerWeak = mCapturer;
     }
 
     void TearDown() override {
         // Ensure that no hanging thread makes the object undead at the end of
         // the test.
         mCapturer.reset();
-        expectCapturerAlive(false);
     }
 
     void looperAdvance() { mLooper->runWithTimeoutMs(100); }
 
-    // It is an error to call this when no shell is waiting to proceed.
-    void shellCommandAdvance() {
-        // Default initialization of values set by the shell.
-        // You may check that these values are changed in your
-        // post-expectations.
-        mShellCommandLine.clear();
-
-        mShellMayProceed = true;
-        // This has the potential to leave the test hanging, but in that case
-        // the
-        // test _is failing_.
-        while (mShellMayProceed) {
-            System::get()->sleepMs(10);
-        }
-    }
-
-    void expectCapturerAlive(bool alive) {
-        EXPECT_EQ(!alive, mCapturerWeak.expired());
-    }
-
-    void expectStringInVector(const string& item,
-                              const vector<string>& vec) {
-        EXPECT_TRUE(std::any_of(vec.begin(), vec.end(),
-                                [item](const string& x) { return x == item; }))
-                << "Failed to find \"" << item << "\" in \""
-                << vectorToString(vec) << "\"";
-    }
-
-    string vectorToString(const vector<string>& vec) {
-        string res;
-        for (const auto& item : vec) {
-            if (!res.empty()) {
-                res += " ";
-            }
-            res += item;
-        }
-        return res;
-    }
-
-    // This function will be called on a separate thread (than the test
-    // main-thread).
-    // A shell function that busy loops on the atomic variable
-    // |mShellMayProceed|.
-    // Once unblocked, it reads the values of |mShell*| variables to dictate the
-    // result. Finally, it resets |mShellMayProceed|.
-    // It is not safe to have two instances of |obsequiousShellCommand| running
-    // concurrently.
-    static bool obsequiousShellCommand(void* opaque,
-                                       const vector<string>& commandLine,
-                                       System::Duration timeoutMs,
-                                       System::ProcessExitCode* outExitCode,
-                                       System::Pid* outChildPid,
-                                       const string& outputFile) {
+    static bool shellCmdHandler(void* opaque,
+                                const vector<string>& commandLine,
+                                System::Duration timeoutMs,
+                                System::ProcessExitCode* outExitCode,
+                                System::Pid* outChildPid,
+                                const string& outputFile) {
         return static_cast<ScreenCapturerTest*>(opaque)
-                ->obsequiousShellCommandImpl(commandLine, timeoutMs,
-                                             outExitCode, outChildPid,
-                                             outputFile);
+                ->shellCmdHandlerImpl(commandLine, timeoutMs,
+                                      outExitCode, outChildPid,
+                                      outputFile);
     }
 
-    bool obsequiousShellCommandImpl(const vector<string>& commandLine,
-                                    System::Duration,
-                                    System::ProcessExitCode* outExitCode,
-                                    System::Pid*,
-                                    const string&) {
-        while (!mShellMayProceed) {
-            System::get()->sleepMs(20);
-        }
-
-        mShellCommandLine = commandLine;
+    bool shellCmdHandlerImpl(const vector<string>& commandLine,
+                             System::Duration,
+                             System::ProcessExitCode* outExitCode,
+                             System::Pid*,
+                             const string&) {
+        bool isScreencap =
+            std::find(commandLine.begin(), commandLine.end(), "screencap") != commandLine.end();
+        bool isPull =
+            std::find(commandLine.begin(), commandLine.end(), "pull") != commandLine.end();
         // Always play nice with the exit code.
         if (outExitCode) {
             *outExitCode = 0;
         }
-        auto myResult = mShellResult;
-
-        mShellMayProceed = false;
-        return myResult;
+        if (isScreencap && !isPull) {
+            return mCaptureMustSucceed;
+        } else if (isPull && !isScreencap) {
+            return mPullMustSucceed;
+        } else {
+            mInvalidShellCommand = true;
+            return false;
+        }
     }
 
-    void resultSaver(Result result) { mResult = result; }
+    void resultSaver(Result result) {
+        mResult = result;
+        mHaveResult = true;
+    }
 
 protected:
     android::base::TestSystem mTestSystem;
-
     android::base::Looper* mLooper;
-    shared_ptr<ScreenCapturer> mCapturer;
-    std::weak_ptr<ScreenCapturer> mCapturerWeak;
-
-    // Control the behaviour of shell commmands.
-    std::atomic_bool mShellMayProceed;
-    bool mShellResult = false;
-    // Set by the shell command on a separate thread.
-    vector<string> mShellCommandLine;
-
+    std::unique_ptr<AdbInterface> mAdb;
+    std::unique_ptr<ScreenCapturer> mCapturer;
+    bool mCaptureMustSucceed;
+    bool mPullMustSucceed;
+    bool mInvalidShellCommand;
     // Result from the ScreenCapturer callback is saved here.
     Result mResult = Result::kUnknownError;
+    std::atomic_bool mHaveResult;
 
     DISALLOW_COPY_AND_ASSIGN(ScreenCapturerTest);
 };
 
 TEST_F(ScreenCapturerTest, screenshotCaptureFailure) {
-    mCapturer->start();
-    EXPECT_TRUE(mCapturer->inFlight());
-
-    // Screencapture failes.
-    mShellResult = false;
-    shellCommandAdvance();
-    looperAdvance();
-    expectStringInVector("screencap", mShellCommandLine);
+    mCaptureMustSucceed = false;
+    mPullMustSucceed = false;
+    mCapturer->capture("ScreencapOut",
+                       [this] (ScreenCapturer::Result result) { resultSaver(result); });
+    while (!mHaveResult) {
+        looperAdvance();
+    }
+    EXPECT_FALSE(mInvalidShellCommand);
     EXPECT_EQ(Result::kCaptureFailed, mResult);
-    EXPECT_FALSE(mCapturer->inFlight());
 }
 
 TEST_F(ScreenCapturerTest, adbPullFailure) {
-    mCapturer->start();
-    EXPECT_TRUE(mCapturer->inFlight());
-
-    // Screencapture succeeds.
-    mShellResult = true;
-    shellCommandAdvance();
-    // Don't |looperAdvance| as the screencapture thread is still in the process
-    // of screen-capturing. ;)
-    // Calling looperAdvance here will simply timeout.
-    expectStringInVector("screencap", mShellCommandLine);
-    EXPECT_TRUE(mCapturer->inFlight());
-
-    // Adb pull fails.
-    mShellResult = false;
-    shellCommandAdvance();
-    looperAdvance();
-    // EXPECT_NE(mShellCommandLine.end(), mShellCommandLine.find("pull"));
+    mCaptureMustSucceed = true;
+    mPullMustSucceed = false;
+    mCapturer->capture("ScreencapOut",
+                       [this] (ScreenCapturer::Result result) { resultSaver(result); });
+    while (!mHaveResult) {
+        looperAdvance();
+    }
+    EXPECT_FALSE(mInvalidShellCommand);
     EXPECT_EQ(Result::kPullFailed, mResult);
-    EXPECT_FALSE(mCapturer->inFlight());
 }
 
 TEST_F(ScreenCapturerTest, success) {
-    mCapturer->start();
-    EXPECT_TRUE(mCapturer->inFlight());
-
-    // Screencapture succeeds.
-    mShellResult = true;
-    shellCommandAdvance();
-    // Don't |looperAdvance| as the screencapture thread is still in the process
-    // of screen-capturing. ;)
-    // Calling looperAdvance here will simply timeout.
-    expectStringInVector("screencap", mShellCommandLine);
-    EXPECT_TRUE(mCapturer->inFlight());
-
-    // Adb pull succeeds.
-    mShellResult = true;
-    shellCommandAdvance();
-    looperAdvance();
-    expectStringInVector("pull", mShellCommandLine);
+    mCaptureMustSucceed = true;
+    mPullMustSucceed = true;
+    mCapturer->capture("ScreencapOut",
+                       [this] (ScreenCapturer::Result result) { resultSaver(result); });
+    while (!mHaveResult) {
+        looperAdvance();
+    }
+    EXPECT_FALSE(mInvalidShellCommand);
     EXPECT_EQ(Result::kSuccess, mResult);
-    EXPECT_FALSE(mCapturer->inFlight());
 }
 
 TEST_F(ScreenCapturerTest, synchronousFailures) {
-    mCapturer->start();
-    EXPECT_TRUE(mCapturer->inFlight());
-
-    // Stating again should fail synchronously.
-    mCapturer->start();
+    mCapturer->capture("ScreencapOut",
+                       [this] (ScreenCapturer::Result result) { resultSaver(result); });
+    mCapturer->capture("ScreencapOut",
+                       [this] (ScreenCapturer::Result result) { resultSaver(result); });
     EXPECT_EQ(Result::kOperationInProgress, mResult);
-
-    // Unblock the command we'd blocked at first.
-    mShellResult = false;
-    shellCommandAdvance();
-    looperAdvance();
-    EXPECT_FALSE(mCapturer->inFlight());
-}
-
-TEST_F(ScreenCapturerTest, cancelCancelsCallback) {
-    mCapturer->start();
-    EXPECT_TRUE(mCapturer->inFlight());
-
-    mCapturer->cancel();
-    EXPECT_TRUE(mCapturer->inFlight());
-
-    // Screencapture failes.
-    mShellResult = false;
-    shellCommandAdvance();
-    looperAdvance();
-    // Since the callback is not called, the result is not updated.
-    EXPECT_EQ(Result::kUnknownError, mResult);
-    EXPECT_FALSE(mCapturer->inFlight());
-}
-
-TEST_F(ScreenCapturerTest, objectOutlivesCallingThread) {
-    mCapturer->start();
-    EXPECT_TRUE(mCapturer->inFlight());
-
-    mCapturer->cancel();
-    mCapturer.reset();
-    // Worker thread is still blocked, so the object must remain alive.
-    expectCapturerAlive(true);
-
-    mShellResult = false;
-    shellCommandAdvance();
-    looperAdvance();
-
-    // Worker thread has finished, so the object must be cleaned up.
-    expectCapturerAlive(false);
 }
