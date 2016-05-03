@@ -61,7 +61,7 @@ class OptionalBase {
 protected:
     using StoreT = typename std::aligned_storage<Size, Align>::type;
 
-    StoreT mStorage;
+    StoreT mStorage = {};
 
     void setConstructed(bool constructed) { mConstructed = constructed; }
     constexpr bool constructed() const { return mConstructed; }
@@ -71,7 +71,7 @@ protected:
         : mConstructed(constructed) {}
 
 private:
-    bool mConstructed;
+    bool mConstructed = false;
 };
 
 }  // namespace details
