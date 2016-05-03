@@ -22,6 +22,30 @@
       "revId": "4cf7608c18e8cd0e65de49a5be1c287fec8de7f1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0df7c748_f1905061",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-05-03T15:57:04Z",
+      "side": 1,
+      "message": "Let\u0027s just switch to ANGLE and work together with them on a solution to this problem.",
+      "parentUuid": "a8aea9f7_b2995532",
+      "range": {
+        "startLine": 218,
+        "startChar": 0,
+        "endLine": 221,
+        "endChar": 62
+      },
+      "revId": "4cf7608c18e8cd0e65de49a5be1c287fec8de7f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
