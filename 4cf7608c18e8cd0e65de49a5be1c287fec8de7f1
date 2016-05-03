@@ -46,6 +46,30 @@
       "revId": "4cf7608c18e8cd0e65de49a5be1c287fec8de7f1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0df7c748_0ca27fab",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-05-03T16:00:13Z",
+      "side": 1,
+      "message": "After a chat with Nicolas yesterday, sounds like thats the way to go.",
+      "parentUuid": "0df7c748_f1905061",
+      "range": {
+        "startLine": 218,
+        "startChar": 0,
+        "endLine": 221,
+        "endChar": 62
+      },
+      "revId": "4cf7608c18e8cd0e65de49a5be1c287fec8de7f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
