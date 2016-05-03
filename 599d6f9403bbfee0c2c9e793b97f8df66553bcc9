@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0df7c748_63a596c5",
+        "filename": "android/opengles.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-03T04:45:28Z",
+      "side": 1,
+      "message": "this is where I checked the wrong |renderer| - an input argument instead of the global object",
+      "range": {
+        "startLine": 189,
+        "startChar": 9,
+        "endLine": 189,
+        "endChar": 18
+      },
+      "revId": "599d6f9403bbfee0c2c9e793b97f8df66553bcc9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
