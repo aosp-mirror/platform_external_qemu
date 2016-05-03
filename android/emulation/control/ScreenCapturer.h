@@ -18,6 +18,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/ParallelTask.h"
+#include "android/emulation/control/AdbInterface.h"
 
 #include <functional>
 #include <string>
@@ -27,7 +28,7 @@
 namespace android {
 namespace emulation {
 
-class ScreenCapturer : public std::enable_shared_from_this<ScreenCapturer> {
+class ScreenCapturer {
 public:
     enum class Result {
         kSuccess,
@@ -40,65 +41,28 @@ public:
 
     using ResultCallback = std::function<void(Result result)>;
 
-    // Entry point to ScreenCapturer.
-    // Objects of this type are managed via std::shared_ptr
-    // Args:
-    //     adbCommandArgs: The command line prefix for use with adb. Usually,
-    //             'adb -s "emulator_name"'
-    //     pollingHintMs: Used _only_ by unittests to speed up the polling by
-    //             ParallelTask on the event loop. Yes, this is an
-    //             implementation detail, and you can forget it already.
-    static std::shared_ptr<ScreenCapturer> create(
-            android::base::Looper* looper,
-            const std::vector<std::string>& adbCommandArgs,
-            android::base::StringView outputDirectoryPath,
-            ResultCallback resultCallback,
-            unsigned pollingHintMs = 0);
+    explicit ScreenCapturer(AdbInterface* adb) : mAdb(adb) {}
+    ~ScreenCapturer();
 
-    // In case of synchronous failures, this will call |resultCallback| before
-    // returning.
-    void start();
-
-    // Cancel an ongoing screenshot. This DOES NOT guarantee that the operation
-    // will be cancelled. But it ensures that the resultCallback is not called
-    // in the future.
-    void cancel();
-
-    // Is a screenshot being taken currently?
-    // Qt can ask us this question from multiple threads (e.g. drag-and-drop
-    // creates a new thread). |ParallelTask| is not thread-safe.
-    // Luckily, if |mParallelTask| exists at all, we're currently serving a
-    // previous request.
-    bool inFlight() const { return bool(mParallelTask); }
-
-    // Update various paths.
-    // Fails if a screen capture is in progress, indicated by the return value.
-    bool setAdbCommandArgs(const std::vector<std::string>& adbCommandArgs);
-    bool setOutputDirectoryPath(android::base::StringView outputDirectoryPath);
+    // Runs adb commands to capture the screen and pull the screenshot from
+    // the device.
+    // |outputDirectoryPath| should specify the path to the directory
+    // to which the screenshot will be written. |resultCallback| will
+    // be invoked upon completion.
+    void capture(android::base::StringView outputDirectoryPath,
+                 ResultCallback resultCallback);
 
 private:
+    void pullScreencap(ResultCallback resultCallback,
+                       android::base::StringView outputDirectoryPath);
     static const android::base::System::Duration kPullTimeoutMs;
     static const char kRemoteScreenshotFilePath[];
     static const android::base::System::Duration kScreenCaptureTimeoutMs;
 
-    ScreenCapturer(android::base::Looper* looper,
-                   const std::vector<std::string>& adbCommandArgs,
-                   android::base::StringView outputDirectoryPath,
-                   ResultCallback resultCallback, unsigned pollingHintMs);
-
-    intptr_t taskFunction(Result* outResult);
-    void taskDoneFunction(const Result& result);
-
-    android::base::Looper* const mLooper;
+    AdbInterface* mAdb;
+    AdbCommandPtr mCaptureCommand;
+    AdbCommandPtr mPullCommand;
     const ResultCallback mResultCallback;
-    std::string mOutputDirectoryPath;
-    std::vector<std::string> mCaptureCommand;
-    std::vector<std::string> mPullCommandPrefix;
-
-    bool mCancelled = false;
-    std::unique_ptr<android::base::ParallelTask<ScreenCapturer::Result>>
-            mParallelTask;
-    std::string mFilePath;
 
     unsigned mNonDefaultCheckTimeoutForTestMs = 0;
 
