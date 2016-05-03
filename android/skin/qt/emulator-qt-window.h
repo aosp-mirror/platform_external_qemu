@@ -356,7 +356,6 @@ private:
     bool mFirstShowEvent;
 
     EventCapturer mEventCapturer;
-    std::shared_ptr<android::emulation::ScreenCapturer> mScreenCapturer;
     std::shared_ptr<UIEventRecorder<android::base::CircularBuffer>>
             mEventLogger;
 
@@ -364,6 +363,7 @@ private:
     android::emulation::AdbInterface mAdbInterface;
     android::emulation::AdbCommandPtr mApkInstallCommand;
     android::emulation::ApkInstaller mApkInstaller;
+    android::emulation::ScreenCapturer mScreenCapturer;
     QProgressDialog mInstallDialog;
     android::emulation::FilePusher::Ptr mFilePusher;
     android::emulation::FilePusher::SubscriptionToken mFilePusherSubscription;
