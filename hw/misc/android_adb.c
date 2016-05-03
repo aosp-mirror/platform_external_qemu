@@ -253,6 +253,8 @@ static void tcp_adb_server_close(adb_backend_state *bs)
 static gboolean tcp_adb_server_data(GIOChannel *channel, GIOCondition cond,
                                     void *opaque)
 {
+    DPRINTF("%s: called with 0x%x\n", __func__, (int)cond);
+
     adb_backend_state *bs = (adb_backend_state *) opaque;
     if (cond & G_IO_IN) {
         qemu_mutex_lock(bs->mutex);
@@ -297,6 +299,7 @@ static gboolean tcp_adb_server_timer(void *opaque) {
 
     qemu_mutex_lock(bs->mutex);
     if (bs->chan && bs->connected_pipe && bs->connected_pipe->state == ADB_CONNECTION_STATE_CONNECTED) {
+        DPRINTF("%s: setting up watch\n", __func__);
         g_io_add_watch(bs->chan, G_IO_IN|G_IO_ERR|G_IO_HUP,
                            tcp_adb_server_data, bs);
     }
@@ -378,6 +381,10 @@ static gboolean tcp_adb_accept(GIOChannel *channel, GIOCondition cond,
             DPRINTF("%s: failed to accept %d/%d\n", __func__, fd, errno);
             return TRUE; // couldn't add a connection, let's try again
         } else if (fd >= 0) {
+            int res = socket_set_nodelay(fd);
+            DPRINTF("%s: disabled Nagle algorithm (res = %d (%d))\n",
+                    __func__, res, errno);
+            (void)res; // get rid of the warning.
             break;
         }
     }
@@ -574,7 +581,8 @@ static int adb_pipe_proxy_send(adb_pipe *apipe, const AndroidPipeBuffer *buffers
 
     g_io_channel_ref(chan);
 
-    DPRINTF("%s: %p/%d\n", __func__, buffers, cnt);
+    DPRINTF("%s: %p[%d]/%d\n", __func__, buffers,
+            cnt ? (int)buffers->size : 0, cnt);
     do {
         GError *error = NULL;
         gchar *bptr = (gchar *) buffers[0].data;
@@ -695,7 +703,8 @@ static int adb_pipe_proxy_recv(adb_pipe *apipe, AndroidPipeBuffer *buffers,
     g_assert(bs->chan == chan);
     g_io_channel_ref(chan);
 
-    DPRINTF("%s: hwpipe=%p (buffers %p/%d)\n", __func__, apipe->hwpipe, buffers, cnt);
+    DPRINTF("%s: hwpipe=%p (buffers %p[%d]/%d)\n", __func__, apipe->hwpipe,
+            buffers, cnt ? (int)buffers->size : 0, cnt);
     do {
         GError *error = NULL;
         gchar *bptr = (gchar *) buffers[0].data;
@@ -785,6 +794,7 @@ static int adb_pipe_recv(void *opaque, AndroidPipeBuffer *buffers,
     if (apipe->out_cnt == 0) {
         apipe->out_next = NULL;
         // ready for adbserver to connect now
+        DPRINTF("%s: waiting for data, setting up watch\n", __func__);
         g_io_add_watch(bs->chan, G_IO_IN|G_IO_ERR|G_IO_HUP, tcp_adb_server_data, bs);
     } else {
         apipe->out_next += ret;
