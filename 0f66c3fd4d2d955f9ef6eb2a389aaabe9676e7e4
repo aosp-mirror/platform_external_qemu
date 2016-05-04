@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d3fc7e9_327af677",
+        "filename": "android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-04T00:13:34Z",
+      "side": 1,
+      "message": "If this object dies, it\u0027ll drop reference to mPullCommand. But, internally, mPullCommand holds a reference to itself in the parallel task it launches.\n\nEventually, it\u0027ll finish the task and then end up calling the callback created here, which will crash.\n\nInstead of a shared_ptr, we really need something that has dual purpose: \n - shared memory management, as it is doing now, with the running parallel task.\n - RAII semantics. If I dropped the token you\u0027d returned, I\u0027ve called cancel() on you, so please don\u0027t call my callbacks anymore.",
+      "range": {
+        "startLine": 83,
+        "startChar": 8,
+        "endLine": 83,
+        "endChar": 20
+      },
+      "revId": "0f66c3fd4d2d955f9ef6eb2a389aaabe9676e7e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
