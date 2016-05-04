@@ -86,6 +86,7 @@ LOCAL_SRC_FILES := \
     android/base/synchronization/MessageChannel.cpp \
     android/base/Log.cpp \
     android/base/memory/LazyInstance.cpp \
+    android/base/sockets/SocketDrainer.cpp \
     android/base/system/System.cpp \
     android/base/threads/Async.cpp \
     android/base/threads/FunctorThread.cpp \
@@ -127,6 +128,7 @@ LOCAL_SRC_FILES := \
     android/utils/reflist.c \
     android/utils/refset.c \
     android/utils/sockets.c \
+    android/utils/socket_drainer.cpp \
     android/utils/stralloc.c \
     android/utils/stream.cpp \
     android/utils/string.cpp \
@@ -206,12 +208,12 @@ LOCAL_SRC_FILES := \
     android/base/async/Looper.cpp \
     android/base/async/ScopedSocketWatch.cpp \
     android/base/async/ThreadLooper.cpp \
-    android/base/sockets/SocketDrainer.cpp \
     android/base/threads/internal/ParallelTaskBase.cpp \
     android/boot-properties.c \
     android/camera/camera-service.c \
     android/camera/camera-format-converters.c \
     android/cmdline-option.c \
+    android/console_auth.cpp \
     android/console.c \
     android/core-init-utils.c \
     android/cpu_accelerator.cpp \
@@ -315,7 +317,6 @@ LOCAL_SRC_FILES := \
     android/update-check/UpdateChecker.cpp \
     android/update-check/VersionExtractor.cpp \
     android/user-config.cpp \
-    android/utils/socket_drainer.cpp \
     android/utils/looper.cpp \
     android/wear-agent/android_wear_agent.cpp \
     android/wear-agent/WearAgent.cpp \
@@ -441,6 +442,7 @@ LOCAL_SRC_FILES := \
   android/base/Uuid_unittest.cpp \
   android/base/Version_unittest.cpp \
   android/cmdline-option_unittest.cpp \
+  android/console_auth_unittest.cpp \
   android/emulation/android_pipe_pingpong_unittest.cpp \
   android/emulation/android_pipe_zero_unittest.cpp \
   android/emulation/bufprint_config_dirs_unittest.cpp \
@@ -478,6 +480,7 @@ LOCAL_SRC_FILES := \
   android/opengl/emugl_config_unittest.cpp \
   android/opengl/GpuFrameBridge_unittest.cpp \
   android/opengl/gpuinfo_unittest.cpp \
+  android/proxy/proxy_common_unittest.cpp \
   android/qt/qt_path_unittest.cpp \
   android/qt/qt_setup_unittest.cpp \
   android/telephony/gsm_unittest.cpp \

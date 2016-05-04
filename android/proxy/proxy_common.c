@@ -380,10 +380,8 @@ proxy_manager_del( void*  ev_opaque )
     }
 }
 
-int
-proxy_base64_encode( const char*  src, int  srclen,
-                     char*        dst, int  dstlen )
-{
+int proxy_base64_encode(const char* srcx, int srclen, char* dst, int dstlen) {
+    const unsigned char* src = (const unsigned char*)srcx;
     static const char cb64[64]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     const char*       srcend = src + srclen;
     int               result = 0;
