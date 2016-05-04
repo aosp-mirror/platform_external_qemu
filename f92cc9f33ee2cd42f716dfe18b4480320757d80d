@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "6d7da3ec_1d9a9fd4",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-04T18:10:01Z",
+      "side": 1,
+      "message": "\u003e This object needs to support adding more files while some files are already being pushed.\n\nWhy? Is it possible to drop more files while another push is in progress?",
+      "parentUuid": "6d7da3ec_a27c1211",
+      "range": {
+        "startLine": 63,
+        "startChar": 8,
+        "endLine": 65,
+        "endChar": 9
+      },
+      "revId": "f92cc9f33ee2cd42f716dfe18b4480320757d80d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6d7da3ec_62277a56",
         "filename": "android/emulation/control/FilePusher.h",
         "patchSetId": 2
@@ -59,6 +83,30 @@
       "writtenOn": "2016-05-04T17:54:26Z",
       "side": 1,
       "message": "does it mean we will use the new callbacks on all items, even the remaining ones from the previous pushFiles() call? What about just adding the callbacks to the ctor arguments list?",
+      "range": {
+        "startLine": 66,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 45
+      },
+      "revId": "f92cc9f33ee2cd42f716dfe18b4480320757d80d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d7da3ec_dd7567ec",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-04T18:10:01Z",
+      "side": 1,
+      "message": "I have changed the semantics of this class a little bit. Now it is not possible to enqueue files while a push is in progress. That is, you can enqueue a large group of files, using a pair of callbacks, but you must wait until the push completes to enqueue more. So if a file was enqueued with a certain pair of callbacks, that pair is guaranteed to be used with it.",
+      "parentUuid": "6d7da3ec_62277a56",
       "range": {
         "startLine": 66,
         "startChar": 0,
