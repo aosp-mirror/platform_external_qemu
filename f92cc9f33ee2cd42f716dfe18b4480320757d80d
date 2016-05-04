@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6d7da3ec_62277a56",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-04T17:54:26Z",
+      "side": 1,
+      "message": "does it mean we will use the new callbacks on all items, even the remaining ones from the previous pushFiles() call? What about just adding the callbacks to the ctor arguments list?",
+      "range": {
+        "startLine": 66,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 45
+      },
+      "revId": "f92cc9f33ee2cd42f716dfe18b4480320757d80d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
