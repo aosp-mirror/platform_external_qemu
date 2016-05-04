@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "6d7da3ec_4f0a9e7a",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-04T18:21:22Z",
+      "side": 1,
+      "message": "Yep, pushes are triggered by drag and drop, and we explicitly wanted to support adding to copy-in-progress, as that\u0027s what users expect for any copy operation.\n\neasonj/birenbaum can say more on this.",
+      "parentUuid": "6d7da3ec_1d9a9fd4",
+      "range": {
+        "startLine": 63,
+        "startChar": 8,
+        "endLine": 65,
+        "endChar": 9
+      },
+      "revId": "f92cc9f33ee2cd42f716dfe18b4480320757d80d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6d7da3ec_62277a56",
         "filename": "android/emulation/control/FilePusher.h",
         "patchSetId": 2
