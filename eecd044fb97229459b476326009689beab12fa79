@@ -2,6 +2,91 @@
   "comments": [
     {
       "key": {
+        "uuid": "0d3fc7e9_95880f30",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-05-04T15:21:58Z",
+      "side": 1,
+      "message": "Any reason this is done with separate calls?",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d3fc7e9_10a9ad8a",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 644,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-05-04T15:21:58Z",
+      "side": 1,
+      "message": "\u0027new client %p\u0027 should be \u0027auth required\u0027",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d3fc7e9_f0ca415d",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 685,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-05-04T15:21:58Z",
+      "side": 1,
+      "message": "nit: extra newline",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d3fc7e9_507df5d5",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 692,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-05-04T15:21:58Z",
+      "side": 1,
+      "message": "Maybe add a colon after \u0027%s\u0027?",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d3fc7e9_90877de8",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2749,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-05-04T15:21:58Z",
+      "side": 1,
+      "message": "Most \"OK\"s have a trailing \\n. Is one needed here?",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6d084364_b05ef832",
         "filename": "android/console_auth.cpp",
         "patchSetId": 1
@@ -87,6 +172,40 @@
     },
     {
       "key": {
+        "uuid": "0d3fc7e9_90601d25",
+        "filename": "android/console_auth.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-05-04T15:21:58Z",
+      "side": 1,
+      "message": "assert() and test?",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d3fc7e9_70c63129",
+        "filename": "android/console_auth.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-05-04T15:21:58Z",
+      "side": 1,
+      "message": "This may be the first time I\u0027ve actually seen octal used on purpose!",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6d084364_f02d2099",
         "filename": "android/console_auth.cpp",
         "patchSetId": 1
@@ -115,6 +234,23 @@
       "writtenOn": "2016-05-04T15:20:45Z",
       "side": 1,
       "message": "nit: use android::base::PathUtils::join(sys-\u003egetHomeDirectory(), \".emulator_console_auth_token\");\n\nAlso I\u0027d prefer to put the file under .android/",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d3fc7e9_d0d625d4",
+        "filename": "android/console_auth.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-05-04T15:21:58Z",
+      "side": 1,
+      "message": "Do we expect a delimiter after \"auth\"? Maybe check for \"auth \" and\npos +\u003d 5 below?",
       "revId": "eecd044fb97229459b476326009689beab12fa79",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -166,6 +302,40 @@
       "writtenOn": "2016-05-04T15:20:45Z",
       "side": 1,
       "message": "use android/utils/eintr_wrapper.h instead :)",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d3fc7e9_30fdc94a",
+        "filename": "android/console_auth_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-05-04T15:21:58Z",
+      "side": 1,
+      "message": "Educate me. What does this line do?",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d3fc7e9_10fa4d51",
+        "filename": "android/console_auth_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-05-04T15:21:58Z",
+      "side": 1,
+      "message": "\u0027is\u0027 should be \u0027if\u0027\nCopy/pasted below, too",
       "revId": "eecd044fb97229459b476326009689beab12fa79",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -240,6 +410,23 @@
     },
     {
       "key": {
+        "uuid": "0d3fc7e9_5099752d",
+        "filename": "android/console_auth_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-05-04T15:21:58Z",
+      "side": 1,
+      "message": "extra newline",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6d084364_d003bcfe",
         "filename": "android/console_auth_internal.h",
         "patchSetId": 1
@@ -268,6 +455,23 @@
       "writtenOn": "2016-05-04T15:20:45Z",
       "side": 1,
       "message": "nit: exposing mutable global variables is a bad idea. Are you sure you want to do this?",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d3fc7e9_1056cd1a",
+        "filename": "android/console_auth_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2016-05-04T15:21:58Z",
+      "side": 1,
+      "message": "For 16 binary bytes, I think we also know there will be exactly two \u0027\u003d\u0027 at the end, and none elsewhere.",
       "revId": "eecd044fb97229459b476326009689beab12fa79",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
