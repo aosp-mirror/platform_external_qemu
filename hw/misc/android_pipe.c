@@ -28,14 +28,16 @@
 ** should give some thought to if this needs re-writing to take
 ** advantage of that infrastructure to create the pipes.
 */
+#include "hw/misc/android_pipe.h"
 
 #include "hw/hw.h"
 #include "hw/sysbus.h"
-#include "hw/misc/android_pipe.h"
 #include "qemu-common.h"
 #include "qemu/timer.h"
 #include "qemu/error-report.h"
 #include "qemu/thread.h"
+
+#include <glib.h>
 
 /* Set to > 0 for debug output */
 #define PIPE_DEBUG 0
@@ -155,20 +157,6 @@ pipe_new(uint64_t channel, PipeDevice* dev)
     return pipe;
 }
 
-static HwPipe**
-pipe_list_findp_channel(HwPipe **list, uint64_t channel)
-{
-    HwPipe** pnode = list;
-    for (;;) {
-        HwPipe* node = *pnode;
-        if (node == NULL || node->channel == channel) {
-            break;
-        }
-        pnode = &node->next;
-    }
-    return pnode;
-}
-
 static void pipe_free(HwPipe* pipe)
 {
     android_pipe_free(pipe->pipe);
@@ -189,18 +177,20 @@ static void pipe_free(HwPipe* pipe)
  *****/
 
 struct PipeDevice {
-    AndroidPipeState *ps;       /* FIXME: backlink to instance state */
+    AndroidPipeState *ps;       // FIXME: backlink to instance state
 
-    /* the list of all pipes */
+    // the list of all pipes
     HwPipe*  pipes;
     HwPipe*  save_pipes;
     HwPipe*  cache_pipe;
     HwPipe*  cache_pipe_64bit;
 
+    // cache of the pipes by channel for a faster lookup
+    GHashTable* pipes_by_channel;
+
     QemuMutex lock;
 
-
-    /* i/o registers */
+    // i/o registers
     uint64_t  address;
     uint32_t  size;
     uint32_t  status;
@@ -209,6 +199,60 @@ struct PipeDevice {
     uint64_t  params_addr;
 };
 
+// hashtable-related functions
+// 64-bit emulator just casts uint64_t to gpointer to get a key for the
+// GLib's hash table. 32-bit one has to dynamically allocate an 8-byte chunk
+// of memory and copy the channel value there, storing pointer as a key.
+static uint64_t hash_channel_from_key(gconstpointer key) {
+#ifdef __x86_64__
+    // keys are just channels
+    return (uint64_t)key;
+#else
+    // keys are pointers to channels
+    return *(uint64_t*)key;
+#endif
+}
+
+static gpointer hash_create_key_from_channel(uint64_t channel) {
+#ifdef __x86_64__
+    return (gpointer)channel;
+#else
+    uint64_t* on_heap = (uint64_t*)malloc(sizeof(channel));
+    if (!on_heap) {
+        APANIC("%s: failed to allocate RAM for a channel value\n", __func__);
+    }
+    *on_heap = channel;
+    return on_heap;
+#endif
+}
+
+static gconstpointer hash_cast_key_from_channel(const uint64_t* channel) {
+#ifdef __x86_64__
+    return (gconstpointer)*channel;
+#else
+    return (gconstpointer)channel;
+#endif
+}
+
+static guint hash_channel(gconstpointer key) {
+    uint64_t channel = hash_channel_from_key(key);
+    return (guint)(channel ^ (channel >> 6));
+}
+
+static gboolean hash_channel_equal(gconstpointer a, gconstpointer b) {
+    return hash_channel_from_key(a) == hash_channel_from_key(b);
+}
+
+#ifdef __x86_64__
+// we don't need to free channels in 64-bit emulator as we store them in-place
+static void (*hash_channel_destroy)(gpointer a) = NULL;
+#else
+static void hash_channel_destroy(gpointer a) {
+    free((uint64_t*)a);
+}
+#endif
+
+// Cache pipe operations
 static HwPipe* get_and_clear_cache_pipe(PipeDevice* dev) {
     if (dev->cache_pipe_64bit) {
         HwPipe* val = dev->cache_pipe_64bit;
@@ -260,11 +304,9 @@ static void *map_guest_buffer(hwaddr phys, size_t size, int is_write)
     return ptr;
 }
 
-static void
-pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
-{
-    HwPipe** lookup = pipe_list_findp_channel(&dev->pipes, dev->channel);
-    HwPipe*  pipe   = *lookup;
+static void pipeDevice_doCommand(PipeDevice* dev, uint32_t command) {
+    HwPipe* pipe = (HwPipe*)g_hash_table_lookup(
+            dev->pipes_by_channel, hash_cast_key_from_channel(&dev->channel));
 
     /* Check that we're referring a known pipe channel */
     if (command != PIPE_CMD_OPEN && pipe == NULL) {
@@ -290,16 +332,31 @@ pipeDevice_doCommand( PipeDevice* dev, uint32_t command )
         dev->pipes = pipe;
         dev->save_pipes = dev->pipes;
         dev->status = 0;
+        g_hash_table_insert(dev->pipes_by_channel,
+                            hash_create_key_from_channel(dev->channel), pipe);
         break;
 
-    case PIPE_CMD_CLOSE:
+    case PIPE_CMD_CLOSE: {
         DD("%s: CMD_CLOSE channel=0x%llx", __FUNCTION__, (unsigned long long)dev->channel);
-        /* Remove from device's lists */
-        *lookup = pipe->next;
+        // Remove from device's lists.
+        // This linear lookup is potentially slow, but we don't delete pipes
+        // often enough for it to become noticable.
+        HwPipe** pnode = &dev->pipes;
+        while (*pnode && *pnode != pipe) {
+            pnode = &(*pnode)->next;
+        }
+        if (!*pnode) {
+            dev->status = PIPE_ERROR_INVAL;
+            break;
+        }
+        *pnode = pipe->next;
         pipe->next = NULL;
         dev->save_pipes = dev->pipes;
+        g_hash_table_remove(dev->pipes_by_channel,
+                            hash_cast_key_from_channel(&pipe->channel));
         pipe_free(pipe);
         break;
+    }
 
     case PIPE_CMD_POLL:
         dev->status = android_pipe_poll(pipe->pipe);
@@ -567,6 +624,12 @@ static void android_pipe_realize(DeviceState *dev, Error **errp)
     s->dev->ps = s; /* HACK: backlink */
     s->dev->cache_pipe = NULL;
     s->dev->cache_pipe_64bit = NULL;
+    s->dev->pipes_by_channel = g_hash_table_new_full(
+                                   hash_channel, hash_channel_equal,
+                                   hash_channel_destroy, NULL);
+    if (!s->dev->pipes_by_channel) {
+        APANIC("%s: failed to initialize pipes hash\n", __func__);
+    }
     qemu_mutex_init(&s->dev->lock);
 
     memory_region_init_io(&s->iomem, OBJECT(s), &android_pipe_iomem_ops, s,
