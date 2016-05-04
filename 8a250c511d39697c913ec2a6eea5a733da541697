@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6d7da3ec_22ef4298",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-04T17:35:16Z",
+      "side": 1,
+      "message": "quote",
+      "range": {
+        "startLine": 219,
+        "startChar": 24,
+        "endLine": 219,
+        "endChar": 54
+      },
+      "revId": "8a250c511d39697c913ec2a6eea5a733da541697",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d7da3ec_e2fc4a50",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-04T17:35:16Z",
+      "side": 1,
+      "message": "I don\u0027t understand what you\u0027re looping over here. Isn\u0027t \"${OUT_DIR}/${UNIT_TEST}${EXE_SUFFIX}\" exactly one binary?",
+      "range": {
+        "startLine": 219,
+        "startChar": 12,
+        "endLine": 219,
+        "endChar": 15
+      },
+      "revId": "8a250c511d39697c913ec2a6eea5a733da541697",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d7da3ec_2294a2f8",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-04T17:35:16Z",
+      "side": 1,
+      "message": "ditto.",
+      "range": {
+        "startLine": 231,
+        "startChar": 13,
+        "endLine": 231,
+        "endChar": 56
+      },
+      "revId": "8a250c511d39697c913ec2a6eea5a733da541697",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d7da3ec_e291aa03",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-04T17:35:16Z",
+      "side": 1,
+      "message": "Please keep the log line here and on line 200 identical.",
+      "range": {
+        "startLine": 232,
+        "startChar": 28,
+        "endLine": 232,
+        "endChar": 45
+      },
+      "revId": "8a250c511d39697c913ec2a6eea5a733da541697",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
