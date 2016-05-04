@@ -131,6 +131,13 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mUserActionsCounter(new android::qt::UserActionsCounter(&mEventCapturer)),
       mAdbInterface(mLooper),
       mApkInstaller(&mAdbInterface),
+      mFilePusher(&mAdbInterface,
+                  [this](StringView filePath, FilePusher::Result result) {
+                      adbPushDone(filePath, result);
+                  },
+                  [this](double progress, bool done) {
+                      adbPushProgress(progress, done);
+                  }),
       mScreenCapturer(&mAdbInterface),
       mInstallDialog(this),
       mPushDialog(this),
@@ -288,11 +295,6 @@ EmulatorQtWindow::~EmulatorQtWindow() {
     }
     mInstallDialog.disconnect();
     mInstallDialog.close();
-
-    if (mFilePusher) {
-        mFilePusherSubscription.reset();
-        mFilePusher->cancel();
-    }
     mPushDialog.disconnect();
     mPushDialog.close();
 
@@ -1091,32 +1093,19 @@ void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
                 tr("File Copy"));
         return;
     }
-
-    if (!mFilePusher) {
-        mFilePusher = android::emulation::FilePusher::create(mLooper);
-    }
-    mFilePusher->setAdbCommandArgs(adbCommandArgs);
-    if (!mFilePusherSubscription) {
-        mFilePusherSubscription = mFilePusher->subscribeToUpdates(
-                [this](StringView filePath, FilePusher::Result result) {
-                    this->adbPushDone(filePath, result);
-                },
-                [this](double progress, bool done) {
-                    this->adbPushProgress(progress, done);
-                });
-    }
-
+    std::vector<std::pair<std::string, std::string>> file_paths;
     for (const auto& url : urls) {
-        mFilePusher->enqueue(url.toLocalFile().toStdString(),
-                             kRemoteDownloadsDir);
+        file_paths.push_back(
+            std::make_pair(url.toLocalFile().toStdString(),
+                           kRemoteDownloadsDir));
     }
+    mFilePusher.pushFiles(
+        file_paths.begin(),
+        file_paths.end());
 }
 
 void EmulatorQtWindow::slot_adbPushCanceled() {
-    if (mFilePusher) {
-        mFilePusher->cancel();
-    }
-    mFilePusherSubscription.reset();
+    mFilePusher.cancel();
 }
 
 void EmulatorQtWindow::adbPushProgress(double progress, bool done) {
