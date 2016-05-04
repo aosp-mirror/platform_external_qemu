@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "6d7da3ec_cf204ea4",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-05-04T18:33:35Z",
+      "side": 1,
+      "message": "Considering many people probably do not currently use this feature, it may be possible to ease that restriction. However, as of now, it is possible to add more files to be copied while another copy is in flight, and the progress indicator should update appropriately. Glad to talk to J if we think that\u0027s unnecessary / unreasonable.",
+      "parentUuid": "6d7da3ec_4f0a9e7a",
+      "range": {
+        "startLine": 63,
+        "startChar": 8,
+        "endLine": 65,
+        "endChar": 9
+      },
+      "revId": "f92cc9f33ee2cd42f716dfe18b4480320757d80d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6d7da3ec_62277a56",
         "filename": "android/emulation/control/FilePusher.h",
         "patchSetId": 2
@@ -131,6 +155,30 @@
       "side": 1,
       "message": "I have changed the semantics of this class a little bit. Now it is not possible to enqueue files while a push is in progress. That is, you can enqueue a large group of files, using a pair of callbacks, but you must wait until the push completes to enqueue more. So if a file was enqueued with a certain pair of callbacks, that pair is guaranteed to be used with it.",
       "parentUuid": "6d7da3ec_62277a56",
+      "range": {
+        "startLine": 66,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 45
+      },
+      "revId": "f92cc9f33ee2cd42f716dfe18b4480320757d80d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d7da3ec_2f19ea77",
+        "filename": "android/emulation/control/FilePusher.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-05-04T18:33:35Z",
+      "side": 1,
+      "message": "I\u0027m not sure we need to worry about there being a different set of callbacks per file, at least not for now.",
+      "parentUuid": "6d7da3ec_dd7567ec",
       "range": {
         "startLine": 66,
         "startChar": 0,
