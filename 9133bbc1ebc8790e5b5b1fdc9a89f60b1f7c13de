@@ -69,6 +69,30 @@
       "revId": "9133bbc1ebc8790e5b5b1fdc9a89f60b1f7c13de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d3fc7e9_eb87f0c5",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-05-04T16:02:32Z",
+      "side": 1,
+      "message": "Hi, since I\u0027ve already checked the return value of getnameinfo before, it should be a non-null return for memchr according to man page of getnameinfo, do you still want another check here?",
+      "parentUuid": "0d3fc7e9_3dfe4f15",
+      "range": {
+        "startLine": 368,
+        "startChar": 0,
+        "endLine": 368,
+        "endChar": 37
+      },
+      "revId": "9133bbc1ebc8790e5b5b1fdc9a89f60b1f7c13de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
