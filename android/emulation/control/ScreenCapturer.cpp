@@ -38,141 +38,61 @@ const char ScreenCapturer::kRemoteScreenshotFilePath[] =
 const System::Duration ScreenCapturer::kScreenCaptureTimeoutMs =
         System::kInfinite;
 
-// static
-std::shared_ptr<ScreenCapturer> ScreenCapturer::create(
-        Looper* looper,
-        const vector<string>& adbCommandArgs,
-        StringView outputDirectoryPath,
-        ResultCallback resultCallback,
-        unsigned pollingHintMs) {
-    auto inst = new ScreenCapturer(looper, adbCommandArgs, outputDirectoryPath,
-                                   resultCallback, pollingHintMs);
-    return std::shared_ptr<ScreenCapturer>(inst);
-}
-
-ScreenCapturer::ScreenCapturer(Looper* looper,
-                               const vector<string>& adbCommandArgs,
-                               StringView outputDirectoryPath,
-                               ResultCallback resultCallback,
-                               unsigned pollingHintMs)
-    : mLooper(looper),
-      mResultCallback(resultCallback),
-      mOutputDirectoryPath(outputDirectoryPath),
-      mNonDefaultCheckTimeoutForTestMs(pollingHintMs) {
-    setAdbCommandArgs(adbCommandArgs);
-}
-
-bool ScreenCapturer::setAdbCommandArgs(const vector<string>& adbCommandArgs) {
-    if (inFlight()) {
-        return false;
+ScreenCapturer::~ScreenCapturer() {
+    if (mCaptureCommand) {
+        mCaptureCommand->cancel();
     }
-
-    mCaptureCommand = adbCommandArgs;
-    mPullCommandPrefix = adbCommandArgs;
-
-    mCaptureCommand.push_back("shell");
-    mCaptureCommand.push_back("screencap");
-    mCaptureCommand.push_back("-p");
-    mCaptureCommand.push_back(kRemoteScreenshotFilePath);
-
-    mPullCommandPrefix.push_back("pull");
-    mPullCommandPrefix.push_back(kRemoteScreenshotFilePath);
-    return true;
-}
-
-bool ScreenCapturer::setOutputDirectoryPath(StringView path) {
-    if (inFlight()) {
-        return false;
+    if (mPullCommand) {
+        mPullCommand->cancel();
     }
-
-    mOutputDirectoryPath = path;
-    return true;
 }
 
-void ScreenCapturer::cancel() {
-    mCancelled = true;
-}
-
-void ScreenCapturer::start() {
-    if (inFlight()) {
-        mResultCallback(ScreenCapturer::Result::kOperationInProgress);
-        return;
+void ScreenCapturer::capture(android::base::StringView outputDirectoryPath,
+                             ResultCallback resultCallback) {
+    if (mCaptureCommand || mPullCommand) {
+        resultCallback(Result::kOperationInProgress);
     }
-    mCancelled = false;
+    std::string out_path = outputDirectoryPath;
+    mCaptureCommand =
+        mAdb->runAdbCommand(
+            {"shell", "screencap", "-p", kRemoteScreenshotFilePath },
+            [this, resultCallback, out_path](const OptionalAdbCommandResult& result) {
+                if (!result || result->exit_code) {
+                    resultCallback(Result::kCaptureFailed);
+                } else {
+                    pullScreencap(resultCallback, out_path);
+                }
+                mCaptureCommand.reset();
+            },
+            kScreenCaptureTimeoutMs,
+            false);
+}
 
-    auto shared_this = shared_from_this();
-    auto taskFunction = [shared_this](Result* outResult) {
-        shared_this->taskFunction(outResult);
-    };
-    auto taskDoneFunction = [shared_this](const Result& result) {
-        shared_this->taskDoneFunction(result);
-    };
-
-    if (mNonDefaultCheckTimeoutForTestMs == 0) {
-        mParallelTask.reset(new ParallelTask<ScreenCapturer::Result>(
-                mLooper, taskFunction, taskDoneFunction));
+void ScreenCapturer::pullScreencap(ResultCallback resultCallback,
+                                   android::base::StringView outputDirectoryPath) {
+    if (!System::get()->pathIsDir(outputDirectoryPath) ||
+        !System::get()->pathCanWrite(outputDirectoryPath)) {
+        resultCallback(Result::kSaveLocationInvalid);
     } else {
-        // Tests-only branch to speed up things a bit.
-        mParallelTask.reset(new ParallelTask<ScreenCapturer::Result>(
-                mLooper, taskFunction, taskDoneFunction,
-                mNonDefaultCheckTimeoutForTestMs));
+        auto fileName =
+            android::base::StringFormat(
+                "Screenshot_%lu.png",
+                static_cast<unsigned long>(System::get()->getUnixTime()));
+        auto filePath =
+            android::base::PathUtils::join(outputDirectoryPath, fileName);
+        mPullCommand =
+            mAdb->runAdbCommand(
+                {"pull", kRemoteScreenshotFilePath, filePath},
+                [this, resultCallback](const OptionalAdbCommandResult& result) {
+                    resultCallback(
+                        (!result || result->exit_code)
+                            ? Result::kPullFailed
+                            : Result::kSuccess);
+                    mPullCommand.reset();
+                },
+                kPullTimeoutMs,
+                false);
     }
-
-    mParallelTask->start();
-
-    if (!mParallelTask->inFlight()) {
-        mResultCallback(ScreenCapturer::Result::kUnknownError);
-    }
-}
-
-intptr_t ScreenCapturer::taskFunction(ScreenCapturer::Result* outResult) {
-    *outResult = Result::kUnknownError;
-
-    auto sys = System::get();
-    System::ProcessExitCode exitCode;
-    if (!sys->runCommand(mCaptureCommand,
-                         System::RunOptions::WaitForCompletion |
-                                 System::RunOptions::HideAllOutput |
-                                 System::RunOptions::TerminateOnTimeout,
-                         kScreenCaptureTimeoutMs, &exitCode) ||
-        exitCode != 0) {
-        *outResult = Result::kCaptureFailed;
-        return 0;
-    }
-
-    if (!sys->pathIsDir(mOutputDirectoryPath) ||
-        !sys->pathCanWrite(mOutputDirectoryPath)) {
-        *outResult = Result::kSaveLocationInvalid;
-        return 0;
-    }
-
-    auto fileName = android::base::StringFormat(
-            "Screenshot_%lu.png",
-            static_cast<unsigned long>(sys->getUnixTime()));
-    mFilePath = android::base::PathUtils::join(mOutputDirectoryPath, fileName);
-
-    auto command = mPullCommandPrefix;
-    command.push_back(mFilePath);
-    if (!sys->runCommand(command,
-                         System::RunOptions::WaitForCompletion |
-                                 System::RunOptions::HideAllOutput |
-                                 System::RunOptions::TerminateOnTimeout,
-                         kPullTimeoutMs, &exitCode) ||
-        exitCode != 0) {
-        *outResult = Result::kPullFailed;
-        return 0;
-    }
-    *outResult = Result::kSuccess;
-    return 0;
-}
-
-void ScreenCapturer::taskDoneFunction(const Result& result) {
-    if (!mCancelled) {
-        mResultCallback(result);
-    }
-    // Ensure no shared_ptr's linger beyond this in the task.
-    // NOTE: May invalidate |this|.
-    mParallelTask.reset();
 }
 
 }  // namespace emulation
