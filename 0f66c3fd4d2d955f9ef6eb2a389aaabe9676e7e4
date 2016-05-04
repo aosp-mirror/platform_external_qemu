@@ -22,6 +22,30 @@
       "revId": "0f66c3fd4d2d955f9ef6eb2a389aaabe9676e7e4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d3fc7e9_d2c472a5",
+        "filename": "android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2016-05-04T00:19:57Z",
+      "side": 1,
+      "message": "It won\u0027t. When the host object dies, it calls mPullCommand-\u003ecancel() in the destructor. If the command is cancelled, it will not attemot to invoke the callback.",
+      "parentUuid": "0d3fc7e9_327af677",
+      "range": {
+        "startLine": 83,
+        "startChar": 8,
+        "endLine": 83,
+        "endChar": 20
+      },
+      "revId": "0f66c3fd4d2d955f9ef6eb2a389aaabe9676e7e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
