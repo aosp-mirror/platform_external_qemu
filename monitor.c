@@ -77,6 +77,7 @@
 #include "qapi/qmp-event.h"
 #include "qapi-event.h"
 #ifdef CONFIG_ANDROID
+#include "android/console_auth.h"
 #include "android/utils/file_io.h"
 #endif  // CONFIG_ANDROID
 
@@ -176,6 +177,8 @@ typedef struct MonitorQAPIEventState {
 
 typedef void MonitorErrorPrintFn(struct Monitor *mon, const char *fmt, ...);
 
+typedef void MonitorConnectFn(struct Monitor *mon);
+
 struct Monitor {
     CharDriverState *chr;
     int reset_seen;
@@ -206,6 +209,8 @@ struct Monitor {
     const char *prompt;
     const char *banner;
     MonitorErrorPrintFn *print_error;
+    MonitorConnectFn *connect_handler;
+    bool authorized;
     QLIST_HEAD(,mon_fd_t) fds;
     QLIST_ENTRY(Monitor) entry;
 };
@@ -4228,6 +4233,18 @@ static void handle_user_command(Monitor *mon, const char *cmdline)
     QDict *qdict;
     const mon_cmd_t *cmd;
 
+    /* do security check before command parser code is invoked */
+    if (!mon->authorized) {
+        if (android_console_auth_check_authorization_command(cmdline)) {
+            mon->authorized = true;
+            monitor_printf(mon, android_console_help_banner_get());
+        } else {
+            monitor_printf(mon, "KO: Authorization token required\r\n");
+            monitor_disconnect(mon);
+        }
+        return;
+    }
+
     qdict = qdict_new();
 
     cmd = monitor_parse_command(mon, cmdline, 0,
@@ -5386,7 +5403,12 @@ static void monitor_event(void *opaque, int event)
         break;
 
     case CHR_EVENT_OPENED:
-        monitor_printf(mon, "%s\n", mon->banner);
+        if (mon->connect_handler) {
+            mon->connect_handler(mon);
+        } else {
+            monitor_printf(mon, "%s\n", mon->banner);
+        }
+
         if (!mon->mux_out) {
             readline_restart(mon->rs);
             readline_show_prompt(mon->rs);
@@ -5493,6 +5515,28 @@ static GArray * make_dynamic_table(mon_cmd_t *cmds)
     return cmd_array;
 }
 
+#ifdef CONFIG_ANDROID
+void android_connect_handler(Monitor* mon) {
+    // this is the first opportunity to handle new connections
+    int console_auth_status = android_console_auth_get_status();
+    switch (console_auth_status) {
+    case CONSOLE_AUTH_STATUS_DISABLED:
+        mon->banner = android_console_help_banner_get();
+        mon->authorized = true;
+        monitor_printf(mon, "%s\n", mon->banner);
+        break;
+    case CONSOLE_AUTH_STATUS_REQUIRED:
+        mon->banner = android_console_auth_banner_get();
+        mon->authorized = false;
+        monitor_printf(mon, "%s\n", mon->banner);
+        break;
+    case CONSOLE_AUTH_STATUS_ERROR:
+        monitor_disconnect(mon);
+        break;
+    }
+}
+#endif
+
 Monitor * monitor_init(CharDriverState *chr, int flags)
 {
     static int is_first_init = 1;
@@ -5510,14 +5554,29 @@ Monitor * monitor_init(CharDriverState *chr, int flags)
     mon->banner =
         "QEMU " QEMU_VERSION " monitor - type 'help' for more information";
     mon->print_error = monitor_printf;
+    mon->connect_handler = 0;
+    mon->authorized = false;
 
 #ifdef CONFIG_ANDROID
     if (flags & MONITOR_ANDROID_CONSOLE) {
         mon->cmds.static_table = android_cmds;
         mon->prompt = "";
-        mon->banner = "Android Console: type 'help' for a list of commands"
-            "\nOK"
-            ;
+        mon->connect_handler = android_connect_handler;
+
+        int console_auth_status = android_console_auth_get_status();
+        if (console_auth_status == CONSOLE_AUTH_STATUS_ERROR) {
+            mon->banner = "";
+
+            // banners don't get sent reliably, output error message on
+            // console
+            char* emulator_console_auth_token_path =
+                android_console_auth_token_path_dup();
+            fprintf(stderr,
+                    "ERROR: Unable to access '%s' emulator console will "
+                    "not work\n",
+                    emulator_console_auth_token_path);
+            free(emulator_console_auth_token_path);
+        }
         mon->print_error = android_monitor_print_error;
     }
 #endif  // CONFIG_ANDROID

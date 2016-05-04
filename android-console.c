@@ -17,6 +17,7 @@
 
 #include "android-console.h"
 
+#include "android/console_auth.h"
 #include "monitor/monitor.h"
 #include "qemu/config-file.h"
 #include "qemu/option.h"
@@ -1926,3 +1927,13 @@ void android_console_geo_fix(Monitor* mon, const QDict* qdict) {
             params[GEO_LAT], params[GEO_LONG], altitude, n_satellites, &tVal);
     monitor_printf(mon, "OK\n");
 }
+
+#ifndef CONFIG_ANDROID
+const char* android_console_auth_banner_get() {
+    return "";
+}
+
+const char* android_console_help_banner_get() {
+    return "";
+}
+#endif

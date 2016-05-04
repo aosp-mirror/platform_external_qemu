@@ -94,4 +94,7 @@ bool android_initialize_console_and_adb();
 
 void qemu2_android_console_setup(const AndroidConsoleAgents* agents);
 
+const char* android_console_auth_banner_get();
+const char* android_console_help_banner_get();
+
 #endif
