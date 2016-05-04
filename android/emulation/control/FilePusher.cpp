@@ -28,51 +28,15 @@ using android::base::System;
 using std::string;
 using std::vector;
 
-FilePusher::Ptr FilePusher::create(Looper* looper,
-                                   Looper::Duration progressCheckTimeoutMs) {
-    auto inst = new FilePusher(looper, progressCheckTimeoutMs);
-    return std::shared_ptr<FilePusher>(inst);
-}
-
-FilePusher::FilePusher(Looper* looper, Looper::Duration progressCheckTimeoutMs)
-    : mLooper(looper), mProgressCheckTimeoutMs(progressCheckTimeoutMs) {}
-
 FilePusher::~FilePusher() {
     cancel();
 }
 
-void FilePusher::setAdbCommandArgs(const vector<string>& adbCommandArgs) {
-    mAdbCommandArgs = adbCommandArgs;
-    mAdbCommandArgs.push_back("push");
-}
-
-bool FilePusher::enqueue(StringView localFilePath, StringView remoteFilePath) {
-    LOG(VERBOSE) << "Enqueue new file to push: " << localFilePath << " --> "
-                 << remoteFilePath;
-
-    bool triggerPush = mPushQueue.empty() && !mTask;
-    mPushQueue.emplace_back(localFilePath, remoteFilePath);
-
-    if (triggerPush) {
-        LOG(VERBOSE) << "Starting a new adb push";
-        resetProgress();
+void FilePusher::cancel() {
+    if (mCurrentPushCommand) {
+        mCurrentPushCommand->cancel();
     }
-
-    ++mNumQueued;
-    // Notify progress so that clients get immediate feedback.
-    for (auto& subscriber : mSubscribers) {
-        if (subscriber.progressCallback) {
-            subscriber.progressCallback(
-                    static_cast<double>(mNumPushed) / mNumQueued, false);
-        }
-    }
-
-    if (triggerPush) {
-        mSelfRef = shared_from_this();
-        pushNextItem();
-    }
-
-    return true;
+    mPushQueue.clear();
 }
 
 void FilePusher::pushNextItem() {
@@ -81,7 +45,6 @@ void FilePusher::pushNextItem() {
     }
     LOG(VERBOSE) << "Pushing next item... [Queue length: " << mPushQueue.size()
                  << "]";
-
     mCurrentItem = mPushQueue.front();
     mPushQueue.pop_front();
 
@@ -89,69 +52,35 @@ void FilePusher::pushNextItem() {
         pushDone(Result::FileReadError);
         return;
     }
-
-    auto commandLine = mAdbCommandArgs;
-    commandLine.push_back(mCurrentItem.first);
-    commandLine.push_back(mCurrentItem.second);
-
-    mTask.reset(new ParallelTask<Result>(
-            mLooper,
-            [this, commandLine](Result* outResult) {
-                this->pushOneFile(commandLine, outResult);
-            },
-            [this](const Result& result) { this->pushDone(result); },
-            mProgressCheckTimeoutMs));
-    if (!mTask->start()) {
-        // May invalidate |this|.
-        pushDone(Result::ProcessStartFailure);
-    }
-}
-
-// Runs in a worker thread.
-// Since this doesn't access any member variables, we don't need any locking.
-void FilePusher::pushOneFile(const vector<string>& commandLine,
-                             Result* outResult) {
-    System::ProcessExitCode exitCode;
-    if (!System::get()->runCommand(
-                commandLine, System::RunOptions::WaitForCompletion |
-                                     System::RunOptions::TerminateOnTimeout,
-                System::kInfinite, &exitCode)) {
-        *outResult = Result::UnknownError;
-        return;
-    }
-    if (exitCode != 0) {
-        *outResult = Result::AdbPushFailure;
-        return;
-    }
-
-    *outResult = Result::Success;
+    mCurrentPushCommand = mAdb->runAdbCommand(
+        {"push", mCurrentItem.first, mCurrentItem.second},
+        [this](const OptionalAdbCommandResult& result) {
+            if (!result) {
+                pushDone(Result::UnknownError);
+            } else if (result->exit_code) {
+                pushDone(Result::AdbPushFailure);
+            } else {
+                pushDone(Result::Success);
+            }
+        },
+        System::kInfinite);
 }
 
 void FilePusher::pushDone(const Result& result) {
     bool allDone = mPushQueue.empty();
     ++mNumPushed;
-    for (const auto& subscriber : mSubscribers) {
-        if (subscriber.resultCallback) {
-            subscriber.resultCallback(mCurrentItem.first, result);
-        }
-        if (subscriber.progressCallback) {
-            subscriber.progressCallback(
-                    static_cast<double>(mNumPushed) / mNumQueued, allDone);
-        }
+    if (mResultCallback) {
+        mResultCallback(mCurrentItem.first, result);
     }
-
+    if (mProgressCallback) {
+        mProgressCallback(static_cast<double>(mNumPushed) / mNumQueued, allDone);
+    }
     if (!allDone) {
         pushNextItem();
     } else {
-        // Tell us that there's no outstanding push atm.
-        mTask.reset();
-        // May invalidate |this|.
-        mSelfRef.reset();
+        mCurrentPushCommand.reset();
+        resetProgress();
     }
-}
-
-void FilePusher::cancel() {
-    mPushQueue.clear();
 }
 
 void FilePusher::resetProgress() {
