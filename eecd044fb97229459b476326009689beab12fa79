@@ -1,0 +1,293 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6d084364_b05ef832",
+        "filename": "android/console_auth.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "This is a GNU copyright disclaimer, but the corresponding header has an Apache 2.0 one. We should make up our mind. I suggest putting any new code under GPL 2.0 for now. To be debated with the team. Otherwise, pick a single license for all sources :)",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_504a2c70",
+        "filename": "android/console_auth.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "we don\u0027t have android::base::String anymore, please use std::string.\nDoes this even compile in the emu-master-dev branch? It looks like a backport from emu-release-2.0 which still has android::base::String",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_1050a422",
+        "filename": "android/console_auth.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "nit: make these functions static or put them in an anonymous namespace (static is better imho).",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_7013f057",
+        "filename": "android/console_auth.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "use an ssize_t instead of an int to avoid compiler warnings / casting issues.",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_d02a9c7e",
+        "filename": "android/console_auth.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "nit: we tend to use kCamelNames for constants in C++ sources.",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_f02d2099",
+        "filename": "android/console_auth.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "I would suggest only reading as many bytes as necessary.",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_f0588047",
+        "filename": "android/console_auth.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "nit: use android::base::PathUtils::join(sys-\u003egetHomeDirectory(), \".emulator_console_auth_token\");\n\nAlso I\u0027d prefer to put the file under .android/",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_103544e8",
+        "filename": "android/console_auth.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "you maybe should check that auth is followed by a whitespace, otherwise auth\u003csomething\u003e will be interpreted as matching, though this might not what you would want.",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_b011d846",
+        "filename": "android/console_auth.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "don\u0027t you want \\s*auth\\s+auth_token instead?\n\nAlso, any note on the content/format of \u003cauth_token\u003e here?",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_90093423",
+        "filename": "android/console_auth_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "use android/utils/eintr_wrapper.h instead :)",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_f006c010",
+        "filename": "android/console_auth_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "none of these auxiliaury functions need to be exposed in this header. E.g. move this to android/misc/Random.h instead. And call it android::generateRandomBytes()",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_70081018",
+        "filename": "android/console_auth_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "move this to android/base/misc/FileUtils.h and call it android::fileReadIntoString()",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_100384ff",
+        "filename": "android/console_auth_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "probably move this to android/base/misc/FileUtils.h and call it fileWriteString instead. Also probably should take an android::base::StringView instead to be more useful.",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_30fe8815",
+        "filename": "android/console_auth_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "recommend inputting and outputting an android::base::StringView instead to make this more generic / usable.",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_d003bcfe",
+        "filename": "android/console_auth_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "something like that should go into android/utils/string.h instead.\n\nAnd we use camelCasing() for C++ function names, and lower_casing() for C ones.",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_500d0c26",
+        "filename": "android/console_auth_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "nit: exposing mutable global variables is a bad idea. Are you sure you want to do this?",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d084364_f01b6060",
+        "filename": "android/proxy/proxy_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-04T15:20:45Z",
+      "side": 1,
+      "message": "that should probably be move to its own android/base/misc/Base64.cpp source file, and declared as:\n\n  std::string android::base64Encode(android::base::StringView input);",
+      "revId": "eecd044fb97229459b476326009689beab12fa79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
