@@ -16,6 +16,7 @@
 
 #include <stdint.h>
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include "glUtils.h"
 
 // values for 'param' argument of rcGetFBParam
