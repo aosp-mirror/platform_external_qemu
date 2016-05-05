@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "6d7da3ec_2b99af7d",
+        "filename": "android-rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-05T05:24:25Z",
+      "side": 1,
+      "message": "qemu-android_*_unittests isn\u0027t :)\nI\u0027m just making it able to go over a glob\nFor now there is no qemu-android unit tests, but eventually there will be some - and I want to be able to add them all at once, not enumerating each arch separately",
+      "parentUuid": "6d7da3ec_e2fc4a50",
+      "range": {
+        "startLine": 219,
+        "startChar": 12,
+        "endLine": 219,
+        "endChar": 15
+      },
+      "revId": "8a250c511d39697c913ec2a6eea5a733da541697",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6d7da3ec_2294a2f8",
         "filename": "android-rebuild.sh",
         "patchSetId": 1
