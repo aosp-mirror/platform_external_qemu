@@ -46,6 +46,7 @@ static void gles1_unimplemented() {
 #define RETURN_GLenum return 0
 #define RETURN_int return 0
 #define RETURN_GLconstubyteptr return NULL
+#define RETURN_GLsync return NULL
 
 #define RETURN_(x)  RETURN_ ## x
 
