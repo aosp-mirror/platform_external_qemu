@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed5193a9_d62b641e",
+        "filename": "android/skin/qt/gl-canvas.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-05T21:49:30Z",
+      "side": 1,
+      "message": "a comment explaining why this is important would help here as well",
+      "range": {
+        "startLine": 17,
+        "startChar": 1,
+        "endLine": 18,
+        "endChar": 23
+      },
+      "revId": "84aff4154148707255a3b81b2b5e76b5bdc2fdbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed5193a9_b60d78d9",
+        "filename": "android/skin/qt/gl-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-05T21:49:30Z",
+      "side": 1,
+      "message": "Could you please move this to a separate function and explain why it has this calculation?",
+      "range": {
+        "startLine": 191,
+        "startChar": 4,
+        "endLine": 194,
+        "endChar": 16
+      },
+      "revId": "84aff4154148707255a3b81b2b5e76b5bdc2fdbf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
