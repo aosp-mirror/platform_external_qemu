@@ -37,6 +37,7 @@
 #include "qemu/error-report.h"
 #include "qemu/thread.h"
 
+#include <assert.h>
 #include <glib.h>
 
 /* Set to > 0 for debug output */
@@ -115,7 +116,6 @@ typedef struct {
 
 typedef struct HwPipe {
     struct HwPipe               *next;
-    struct HwPipe               *next_waked;
     PipeDevice                  *device;
     uint64_t                    channel; /* opaque kernel handle */
     unsigned char               wanted;
@@ -539,7 +539,7 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
         DR("%s: REG_STATUS status=%d (0x%x)", __FUNCTION__, dev->status, dev->status);
         return dev->status;
 
-    case PIPE_REG_CHANNEL:
+    case PIPE_REG_CHANNEL: {
         cache_pipe = get_and_clear_cache_pipe(dev);
         if (cache_pipe != NULL) {
             if (is_valid_pipe(dev->save_pipes, cache_pipe)) {
@@ -547,39 +547,82 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
                 return (uint32_t)(cache_pipe->channel & 0xFFFFFFFFUL);
             }
         }
-        if (dev->pipes != NULL) {
-            HwPipe* pipe = dev->pipes;
-            DR("%s: channel=0x%llx wanted=%d", __FUNCTION__,
-               (unsigned long long)pipe->channel, pipe->wanted);
-            dev->wakes = get_and_clear_pipe_wanted(pipe);
-            dev->pipes = pipe->next;
-            pipe->next_waked = NULL;
-            if (dev->pipes == NULL) {
-                /* android_device_set_irq(&dev->dev, 0, 0); */
-                qemu_set_irq(s->irq, 0);
-                DD("%s: lowering IRQ", __FUNCTION__);
-            }
-            return (uint32_t)(pipe->channel & 0xFFFFFFFFUL);
-        }
-        dev->pipes = dev->save_pipes;
-        DR("%s: no signaled channels", __FUNCTION__);
-        return 0;
 
-    case PIPE_REG_CHANNEL_HIGH:
+        HwPipe* pipe = dev->pipes;
+        const bool hadPipesInList = (pipe != NULL);
+
+        // find the next pipe to wake
+        while (pipe && pipe->wanted == 0) {
+            pipe = pipe->next;
+        }
+        if (!pipe) {
+            // no pending pipes - restore the pipes list
+            dev->pipes = dev->save_pipes;
+            if (hadPipesInList) {
+                // This means we had some pipes on the previous call and didn't
+                // reset the IRQ yet; let's do it now.
+                qemu_set_irq(s->irq, 0);
+            }
+            DD("%s: no signaled channels%s", __FUNCTION__,
+               hasPipesInList ? ", lowering IRQ" : "");
+            return 0;
+        }
+
+        DR("%s: channel=0x%llx wanted=%d", __FUNCTION__,
+           (unsigned long long)pipe->channel, pipe->wanted);
+        dev->wakes = get_and_clear_pipe_wanted(pipe);
+        dev->pipes = pipe->next;
+        if (dev->pipes == NULL) {
+            // no next pipe, lower the IRQ and wait for a next call - that's
+            // where we'll restore the pipes list
+            qemu_set_irq(s->irq, 0);
+            DD("%s: lowering IRQ", __FUNCTION__);
+        }
+        return (uint32_t)(pipe->channel & 0xFFFFFFFFUL);
+    }
+
+    case PIPE_REG_CHANNEL_HIGH: {
+        // TODO(zyy): this call is really dangerous; currently the device would
+        //  stop the calls as soon as we return 0 here; but it means that if the
+        //  channel's upper 32 bits are zeroes (that happens), we won't be able
+        //  to wake either that channel or any following ones.
+        //  I think we should create a new pipe protocol to deal with this
+        //  issue and also reduce chattiness of the pipe communication at the
+        //  same time.
+
         cache_pipe = get_and_clear_cache_pipe(dev);
         if (cache_pipe != NULL) {
             dev->cache_pipe_64bit = cache_pipe;
+            assert((uint32_t)(cache_pipe->channel >> 32) != 0);
             return (uint32_t)(cache_pipe->channel >> 32);
         }
-        if (dev->pipes != NULL) {
-            HwPipe* pipe = dev->pipes;
-            DR("%s: channel_high=0x%llx wanted=%d", __FUNCTION__,
-               (unsigned long long)pipe->channel, pipe->wanted);
-            return (uint32_t)(pipe->channel >> 32);
+
+        HwPipe* pipe = dev->pipes;
+        const bool hadPipesInList = (pipe != NULL);
+
+        // skip all non-waked pipes here
+        while (pipe && pipe->wanted == 0) {
+            pipe = pipe->next;
         }
-        dev->pipes = dev->save_pipes;
-        DR("%s: no signaled channels", __FUNCTION__);
-        return 0;
+        if (!pipe) {
+            // no pending pipes - restore the pipes list
+            dev->pipes = dev->save_pipes;
+            if (hadPipesInList) {
+                // This means we had some pipes on the previous call and didn't
+                // reset the IRQ yet; let's do it now.
+                qemu_set_irq(s->irq, 0);
+            }
+            DD("%s: no signaled channels%s", __FUNCTION__,
+               hasPipesInList ? ", lowering IRQ" : "");
+            return 0;
+        }
+
+        DR("%s: channel_high=0x%llx wanted=%d", __FUNCTION__,
+           (unsigned long long)pipe->channel, pipe->wanted);
+        dev->pipes = pipe;
+        assert((uint32_t)(pipe->channel >> 32) != 0);
+        return (uint32_t)(pipe->channel >> 32);
+    }
 
     case PIPE_REG_WAKES:
         DR("%s: wakes %d", __FUNCTION__, dev->wakes);
