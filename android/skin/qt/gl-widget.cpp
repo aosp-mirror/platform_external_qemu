@@ -91,6 +91,14 @@ struct EGLState {
     EGLSurface surface;
 };
 
+// Helper function to get the nearest power-of-two.
+// It's needed to create a GLCanvas with correct dimensions
+// to allow generating mipmaps (GLES 2.0 doesn't support
+// mipmaps for NPOT textures)
+static int nearestPOT(int value) {
+    return pow(2, ceil(log(value)/log(2)));
+}
+
 GLWidget::GLWidget(QWidget* parent) :
         QWidget(parent),
         mEGL(MyEGLDispatch::get()),
@@ -188,7 +196,10 @@ bool GLWidget::ensureInit() {
 
 
     makeContextCurrent();
-    mCanvas.reset(new GLCanvas(realPixelsWidth(), realPixelsHeight(), mGLES2));
+    mCanvas.reset(new GLCanvas(
+        nearestPOT(realPixelsWidth()),
+        nearestPOT(realPixelsHeight()),
+        mGLES2));
     mTextureDraw.reset(new TextureDraw(mGLES2));
     mValid = initGL();
 
@@ -255,9 +266,10 @@ void GLWidget::resizeEvent(QResizeEvent* e) {
         // framebuffer will not be created.
         makeContextCurrent();
         // Re-create the framebuffer with new size.
-        mCanvas.reset(new GLCanvas(e->size().width() * devicePixelRatio(),
-                                   e->size().height() * devicePixelRatio(),
-                                   mGLES2));
+        mCanvas.reset(new GLCanvas(
+            nearestPOT(e->size().width() * devicePixelRatio()),
+            nearestPOT(e->size().height() * devicePixelRatio()),
+            mGLES2));
         resizeGL(e->size().width() * devicePixelRatio(),
                  e->size().height() * devicePixelRatio());
         renderFrame();
