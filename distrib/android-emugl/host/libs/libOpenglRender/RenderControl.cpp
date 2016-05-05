@@ -383,6 +383,22 @@ static void rcSelectChecksumCalculator(uint32_t protocol, uint32_t reserved) {
     ChecksumCalculatorThreadInfo::setVersion(protocol);
 }
 
+static EGLSyncKHR rcCreateSyncKHR(EGLenum type, EGLint* attribs, uint32_t num_attribs) {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    GLsync sync;
+    if (tInfo->currContext->isGL2()) {
+        sync = s_gles2.glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    } else {
+        sync = (GLsync)NULL;
+        // sync = s_gles1.glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    }
+    return (EGLSyncKHR)sync;
+}
+
+static EGLint rcClientWaitSyncKHR(EGLSyncKHR sync, EGLint flags, uint64_t timeout) {
+    return EGL_SUCCESS;
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -414,4 +430,6 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateClientImage = rcCreateClientImage;
     dec->rcDestroyClientImage = rcDestroyClientImage;
     dec->rcSelectChecksumCalculator = rcSelectChecksumCalculator;
+    dec->rcCreateSyncKHR = rcCreateSyncKHR;
+    dec->rcClientWaitSyncKHR = rcClientWaitSyncKHR;
 }
