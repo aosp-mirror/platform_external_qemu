@@ -66,6 +66,7 @@ LOCAL_SRC_FILES := \
     android/base/files/StdioStream.cpp \
     android/base/files/Stream.cpp \
     android/base/files/IniFile.cpp \
+    android/base/misc/FileUtils.cpp \
     android/base/misc/HttpUtils.cpp \
     android/base/misc/StringUtils.cpp \
     android/base/misc/Utf8Utils.cpp \
@@ -202,6 +203,7 @@ LOCAL_SRC_FILES := \
     android/camera/camera-format-converters.c \
     android/cmdline-option.c \
     android/console.c \
+    android/console_auth.cpp \
     android/core-init-utils.c \
     android/cpu_accelerator.cpp \
     android/crashreport/CrashSystem.cpp \
@@ -255,6 +257,7 @@ LOCAL_SRC_FILES := \
     android/metrics/metrics_reporter.cpp \
     android/metrics/metrics_reporter_toolbar.cpp \
     android/metrics/StudioHelper.cpp \
+    android/misc/Random.cpp \
     android/multitouch-port.c \
     android/multitouch-screen.c \
     android/opengl/EmuglBackendList.cpp \
@@ -381,6 +384,7 @@ LOCAL_SRC_FILES := \
   android/base/memory/MallocUsableSize_unittest.cpp \
   android/base/memory/ScopedPtr_unittest.cpp \
   android/base/memory/QSort_unittest.cpp \
+  android/base/misc/FileUtils_unittest.cpp \
   android/base/misc/HttpUtils_unittest.cpp \
   android/base/misc/StringUtils_unittest.cpp \
   android/base/misc/Utf8Utils_unittest.cpp \
@@ -401,6 +405,7 @@ LOCAL_SRC_FILES := \
   android/base/Uri_unittest.cpp \
   android/base/Uuid_unittest.cpp \
   android/base/Version_unittest.cpp \
+  android/console_auth_unittest.cpp \
   android/emulation/android_pipe_pingpong_unittest.cpp \
   android/emulation/android_pipe_zero_unittest.cpp \
   android/emulation/bufprint_config_dirs_unittest.cpp \
@@ -424,11 +429,13 @@ LOCAL_SRC_FILES := \
   android/metrics/metrics_reporter_unittest.cpp \
   android/metrics/metrics_reporter_toolbar_unittest.cpp \
   android/metrics/StudioHelper_unittest.cpp \
+  android/misc/Random_unittest.cpp \
   android/opengl/EmuglBackendList_unittest.cpp \
   android/opengl/EmuglBackendScanner_unittest.cpp \
   android/opengl/emugl_config_unittest.cpp \
   android/opengl/GpuFrameBridge_unittest.cpp \
   android/opengl/gpuinfo_unittest.cpp \
+  android/proxy/proxy_common_unittest.cpp \
   android/qt/qt_path_unittest.cpp \
   android/qt/qt_setup_unittest.cpp \
   android/telephony/gsm_unittest.cpp \

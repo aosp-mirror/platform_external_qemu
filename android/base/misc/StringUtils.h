@@ -29,5 +29,8 @@ inline void sortStringVector(StringVector* strings) {
     sortStringArray(&(*strings)[0], strings->size());
 }
 
+// Returns a version of |in| with whitespace trimmed from the front/end
+std::string trim(const std::string& in);
+
 }  // namespace base
 }  // namespace android
