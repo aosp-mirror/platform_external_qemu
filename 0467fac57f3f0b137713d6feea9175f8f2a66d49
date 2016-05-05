@@ -22,6 +22,30 @@
       "revId": "0467fac57f3f0b137713d6feea9175f8f2a66d49",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d7da3ec_13097d1b",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2016-05-05T17:05:11Z",
+      "side": 1,
+      "message": "Fixed 2. For 1, I think getnameinfo also should never fail here. Since we are using assert for meminfo, it\u0027s better also do assert for it. Add a comment in code",
+      "parentUuid": "6d7da3ec_535f7530",
+      "range": {
+        "startLine": 369,
+        "startChar": 0,
+        "endLine": 369,
+        "endChar": 24
+      },
+      "revId": "0467fac57f3f0b137713d6feea9175f8f2a66d49",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
