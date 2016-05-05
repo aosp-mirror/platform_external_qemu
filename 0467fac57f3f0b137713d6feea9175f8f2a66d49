@@ -94,6 +94,30 @@
       "revId": "0467fac57f3f0b137713d6feea9175f8f2a66d49",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed5193a9_564514a2",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1005930
+      },
+      "writtenOn": "2016-05-05T21:23:52Z",
+      "side": 1,
+      "message": "I don\u0027t know about this particular environment, but assert() can sometimes compile to a no-op.\n\nIt\u0027s not good to write a function that yields undefined behavior on valid inputs, even if the buffer length that triggers the overflow isn\u0027t expected to occur.",
+      "parentUuid": "ed5193a9_8bc29995",
+      "range": {
+        "startLine": 369,
+        "startChar": 0,
+        "endLine": 369,
+        "endChar": 24
+      },
+      "revId": "0467fac57f3f0b137713d6feea9175f8f2a66d49",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
