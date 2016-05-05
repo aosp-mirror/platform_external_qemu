@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed5193a9_a2821a10",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglContext.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-05T20:52:18Z",
+      "side": 1,
+      "message": "You could just omit these, since you want to invoke the default constructor.  I would personally vote for that.  (As an aside, I\u0027d also vote for using field-init-at-declaration when applicable.  If that\u0027s available in the version of C++ we\u0027re limited to.)\n\nObviously, my opinion applies to all constructor init lists that were changed, if we went with the change I propose.",
+      "range": {
+        "startLine": 40,
+        "startChar": 1,
+        "endLine": 41,
+        "endChar": 16
+      },
+      "revId": "0568fdab0a2f387d34c4e9d043320ddcaccef188",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed5193a9_10d79435",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglContext.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-05T20:52:18Z",
+      "side": 1,
+      "message": "Yurii and I talked about this in person.  There are arguments one can find on the web saying that most C++ compilers implement a return value optimization that removes the apparent cost of returning a shared_ptr by value, at least in most cases.  But Yurii has proved to his satisfaction that the GCC compiler, at least, does not do this in some cases that are signficant in practice.  The danger of returning a reference is that the lifetime of the returned reference might encompass a modification to m_read, either in this, or another thread.  Yurii is confident that these cases do not hold here.  So I raise, but then (somewhat reluctantly) retract my reservations on this.\n\nAnother alternative: we could decide on a case-by-case basis whether such accessor methods are supposed to return \"ownership pointers\", or just temporary access pointers.  If we returned a \"Surface*\" and, added a comment saying that the lifetime of the returned pointer must be less than that of the containing object (and any subsequent call to setSurfaces that might change the value of, say, m_draw), then that would also solve the performance problem.  It would trade off one potential correctness problem for another: use of the ptr after its undefined, probably caught by MSAN or equivalent, vs, use of the const ref after an assignment, such that the underlying pointer value changes -- not caught by MSAN, and probably a really subtle bug.\n\nLooking at a smattering of uses of \"read\" and \"draw\", it seems like the \"return a regular pointer\" choice might be fine.\n\nSorry for the extended discussion.  This seems like a fundamental usage question, and there isn\u0027t clear guidance in the Google C++ style guide.",
+      "range": {
+        "startLine": 46,
+        "startChar": 4,
+        "endLine": 46,
+        "endChar": 53
+      },
+      "revId": "0568fdab0a2f387d34c4e9d043320ddcaccef188",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed5193a9_05cbd82e",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglGlobalInfo.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-05T20:52:18Z",
+      "side": 1,
+      "message": "These are assigned below -- and in the right order.  Perhaps we should just initialize them to their final values?",
+      "range": {
+        "startLine": 40,
+        "startChar": 7,
+        "endLine": 41,
+        "endChar": 20
+      },
+      "revId": "0568fdab0a2f387d34c4e9d043320ddcaccef188",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed5193a9_055198ff",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLcommon/FramebufferData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-05T20:52:18Z",
+      "side": 1,
+      "message": "Couldn\u0027t this, and other occurrences like this, just be a \".reset()\"?  Seems like that would have to be more efficient?",
+      "range": {
+        "startLine": 38,
+        "startChar": 9,
+        "endLine": 38,
+        "endChar": 48
+      },
+      "revId": "0568fdab0a2f387d34c4e9d043320ddcaccef188",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed5193a9_c5b5f0de",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglContext.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-05T20:52:18Z",
+      "side": 0,
+      "message": "Interesting to note that, IIUC, the problem you\u0027re solving here wouldn\u0027t be present if these were \"nullptr\".  I still agree that it\u0027s better to use the no-arg ctor, or none at all, but there might be other places in which nullptr is better than NULL.",
+      "range": {
+        "startLine": 40,
+        "startChar": 7,
+        "endLine": 41,
+        "endChar": 21
+      },
+      "revId": "db7cf57a4fa172a17c00010bd8d4dab53f7e0ec4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
