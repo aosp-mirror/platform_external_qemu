@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ed5193a9_f67780f7",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglContext.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-05-05T21:23:35Z",
+      "side": 1,
+      "message": "+1 on omitting calls to default constructors. I think it would make the code more clear and remove clutter.",
+      "parentUuid": "ed5193a9_a2821a10",
+      "range": {
+        "startLine": 40,
+        "startChar": 1,
+        "endLine": 41,
+        "endChar": 16
+      },
+      "revId": "0568fdab0a2f387d34c4e9d043320ddcaccef188",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed5193a9_10d79435",
         "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglContext.h",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-05-05T20:52:18Z",
       "side": 1,
       "message": "Yurii and I talked about this in person.  There are arguments one can find on the web saying that most C++ compilers implement a return value optimization that removes the apparent cost of returning a shared_ptr by value, at least in most cases.  But Yurii has proved to his satisfaction that the GCC compiler, at least, does not do this in some cases that are signficant in practice.  The danger of returning a reference is that the lifetime of the returned reference might encompass a modification to m_read, either in this, or another thread.  Yurii is confident that these cases do not hold here.  So I raise, but then (somewhat reluctantly) retract my reservations on this.\n\nAnother alternative: we could decide on a case-by-case basis whether such accessor methods are supposed to return \"ownership pointers\", or just temporary access pointers.  If we returned a \"Surface*\" and, added a comment saying that the lifetime of the returned pointer must be less than that of the containing object (and any subsequent call to setSurfaces that might change the value of, say, m_draw), then that would also solve the performance problem.  It would trade off one potential correctness problem for another: use of the ptr after its undefined, probably caught by MSAN or equivalent, vs, use of the const ref after an assignment, such that the underlying pointer value changes -- not caught by MSAN, and probably a really subtle bug.\n\nLooking at a smattering of uses of \"read\" and \"draw\", it seems like the \"return a regular pointer\" choice might be fine.\n\nSorry for the extended discussion.  This seems like a fundamental usage question, and there isn\u0027t clear guidance in the Google C++ style guide.",
+      "range": {
+        "startLine": 46,
+        "startChar": 4,
+        "endLine": 46,
+        "endChar": 53
+      },
+      "revId": "0568fdab0a2f387d34c4e9d043320ddcaccef188",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed5193a9_36ac089b",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglContext.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-05-05T21:23:35Z",
+      "side": 1,
+      "message": "I agree that we should choose between either returning SurfacePtr or Surface* here to clearly communicate intent. A reference to a shared_ptr looks very strange and as a consumer of the interface I would immediately wonder what is expected of me. Whereas if I get a shared_ptr I assume I\u0027m going to be able to hold on to it for as long as I like (barring the documentation saying otherwise) and if I get a Surface* I\u0027m going to assume that it will at most survive for as long as the object I\u0027m calling the method on (but I would like to see the documentation clarify this for me).\n\nThe biggest advantage of the reference solution as I see it is that it allows the consumer to choose what to do. If you assign the return value to a shared_ptr you will be able to hold on that and if you just want to call something on the surface right away you can do that without additional cost.\n\nIf we want to support both use-cases I would instead suggest that we have\nSurface* read() {}\nSurfacePtr readShared() {}\nSurface* draw() {}\nSurfacePtr drawShared() {}\n\nSo that the consumer will have to be more explicit and to make it more clear when reading the code.",
+      "parentUuid": "ed5193a9_10d79435",
       "range": {
         "startLine": 46,
         "startChar": 4,
