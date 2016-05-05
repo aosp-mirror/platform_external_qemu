@@ -10,6 +10,7 @@
   X(GLconstubyteptr, glGetStringi, (GLenum name, GLint index), (name, index)) \
   X(GLsync, glFenceSync, (GLenum condition, GLbitfield flags), (condition, flags)) \
   X(GLenum, glClientWaitSync, (GLsync wait_on, GLbitfield flags, GLuint64 timeout), (wait_on, flags, timeout)) \
+  X(void, glWaitSync, (GLsync wait_on, GLbitfield flags, GLuint64 timeout), (wait_on, flags, timeout)) \
 
 
 #endif  // GLES3_ONLY_FUNCTIONS_H
