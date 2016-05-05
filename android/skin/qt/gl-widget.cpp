@@ -188,7 +188,10 @@ bool GLWidget::ensureInit() {
 
 
     makeContextCurrent();
-    mCanvas.reset(new GLCanvas(realPixelsWidth(), realPixelsHeight(), mGLES2));
+    mCanvas.reset(new GLCanvas(
+        pow(2, ceil(log(realPixelsWidth())/log(2))),
+        pow(2, ceil(log(realPixelsHeight())/log(2))),
+        mGLES2));
     mTextureDraw.reset(new TextureDraw(mGLES2));
     mValid = initGL();
 
@@ -255,9 +258,10 @@ void GLWidget::resizeEvent(QResizeEvent* e) {
         // framebuffer will not be created.
         makeContextCurrent();
         // Re-create the framebuffer with new size.
-        mCanvas.reset(new GLCanvas(e->size().width() * devicePixelRatio(),
-                                   e->size().height() * devicePixelRatio(),
-                                   mGLES2));
+        mCanvas.reset(new GLCanvas(
+            pow(2, ceil(log(e->size().width())/log(2))) * devicePixelRatio(),
+            pow(2, ceil(log(e->size().height())/log(2))) * devicePixelRatio(),
+            mGLES2));
         resizeGL(e->size().width() * devicePixelRatio(),
                  e->size().height() * devicePixelRatio());
         renderFrame();

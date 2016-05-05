@@ -14,8 +14,8 @@
 #include "GLES2/gl2.h"
 
 GLCanvas::GLCanvas(int w, int h, const GLESv2Dispatch* gl_dispatch) :
-        mWidth(w * 4),
-        mHeight(h * 4),
+        mWidth(w * 2),
+        mHeight(h * 2),
         mGLES2(gl_dispatch),
         mFramebuffer(0),
         mTargetTexture(0),
