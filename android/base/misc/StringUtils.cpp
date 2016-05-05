@@ -53,5 +53,18 @@ bool strContains(StringView haystack, const char* needle) {
                     needle, ::strlen(needle)) != nullptr;
 }
 
+std::string trim(const std::string& in) {
+    size_t start = 0;
+    while (start < in.size() && isspace(in[start])) {
+        start++;
+    }
+
+    size_t end = in.size();
+    while (end > start && isspace(in[end - 1])) {
+        end--;
+    }
+    return std::string(in.c_str() + start, end - start);
+}
+
 }  // namespace base
 }  // namespace android

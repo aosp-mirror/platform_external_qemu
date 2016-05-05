@@ -38,11 +38,22 @@ size_t strlcpy(char* dst, const char * src, size_t size)
 
 #endif
 
+bool str_begins_with(const char* string, const char* prefix) {
+    return strncmp(prefix, string, strlen(prefix)) == 0;
+}
+
 bool str_ends_with(const char* str, const char* suffix) {
     int str_len = strlen(str);
     int suffix_len = strlen(suffix);
     return (str_len >= suffix_len) &&
            (0 == strcmp(str + (str_len - suffix_len), suffix));
+}
+
+const char* str_skip_white_space_if_any(const char* pos) {
+    while (isspace(*pos)) {
+        pos++;
+    }
+    return pos;
 }
 
 void str_reset(char** string, const char* new_value) {

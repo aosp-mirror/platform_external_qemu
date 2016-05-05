@@ -24,6 +24,7 @@
 #include "android/console.h"
 
 #include "android/android.h"
+#include "android/console_auth.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
 #include "android/hw-sensors.h"
@@ -93,7 +94,7 @@ typedef struct ControlClientRec_
     char                       finished;
     char                       buff[ 4096 ];
     int                        buff_len;
-
+    bool authorized;
 } ControlClientRec;
 
 
@@ -299,6 +300,7 @@ control_client_create( Socket         socket,
     if (client) {
         socket_set_nodelay( socket );
         socket_set_nonblock( socket );
+        client->authorized = false;
         client->finished = 0;
         client->global  = global;
         client->sock    = socket;
@@ -395,26 +397,42 @@ dump_help( ControlClient  client,
 
 static int do_quit(ControlClient client, char* args);  // forward
 
-static void
-control_client_do_command( ControlClient  client )
-{
+static void control_send_help_prompt(ControlClient client) {
+    control_write(client,
+                  "Android Console: type 'help' for a list of commands\r\n"
+                  "OK\r\n");
+}
+
+static void control_client_do_command(ControlClient client) {
     char*       line     = client->buff;
     char*       args     = NULL;
     CommandDef  commands = main_commands;
     char*       cmdend   = client->buff;
-    CommandDef  cmd      = find_command( line, commands, &cmdend, &args );
+    CommandDef cmd = NULL;
+
+    // do security checks before executing find_command
+    size_t line_len = strlen(line);
+    if (!client->authorized) {
+        if (android_console_auth_check_authorization_command(line)) {
+            client->authorized = true;
+            control_send_help_prompt(client);
+        } else {
+            control_write(client, "KO: Authorization token required\r\n");
+            do_quit(client, NULL);
+        }
+        return;
+    }
+
+    if (!android_utf8_is_valid(line, line_len)) {
+        control_write(client, "KO: Forbidden binary request. Aborting\r\n");
+        do_quit(client, NULL);
+        return;
+    }
+
+    cmd = find_command(line, commands, &cmdend, &args);
 
     if (cmd == NULL) {
-        size_t line_len = strlen(line);
-        if (android_http_is_request_line(line, line_len)) {
-            control_write( client, "KO: Forbidden HTTP request. Aborting\r\n");
-            do_quit(client, NULL);
-        } else  if (!android_utf8_is_valid(line, line_len)) {
-            control_write( client, "KO: Forbidden binary request. Aborting\r\n");
-            do_quit(client, NULL);
-        } else {
-            control_write( client, "KO: unknown command, try 'help'\r\n" );
-        }
+        control_write(client, "KO: unknown command, try 'help'\r\n");
         return;
     }
 
@@ -576,7 +594,6 @@ static void control_client_read(void* opaque, int fd, unsigned events) {
     }
 }
 
-
 /* this function is called on each new client connection */
 static void control_global_accept(void* opaque,
                                   int listen_fd,
@@ -601,9 +618,35 @@ static void control_global_accept(void* opaque,
     D(( "control_global_accept: creating new client\n" ));
     client = control_client_create( fd, global );
     if (client) {
-        D(( "control_global_accept: new client %p\n", client ));
-        control_write( client, "Android Console: type 'help' for a list of commands\r\n" );
-        control_write( client, "OK\r\n" );
+        char* emulator_console_auth_token_path =
+                android_console_auth_token_path_dup();
+
+        int console_auth_status = android_console_auth_get_status();
+        switch (console_auth_status) {
+            case CONSOLE_AUTH_STATUS_DISABLED:
+                client->authorized = true;
+                control_send_help_prompt(client);
+                D(("control_global_accept: new client %p\n", client));
+                break;
+            case CONSOLE_AUTH_STATUS_REQUIRED:
+                control_write(client,
+                              "Android Console: Authentication required\r\n");
+                control_write(client,
+                              "Android Console: type 'auth <auth_token>' to "
+                              "authenticate\r\n");
+                control_write(client,
+                              "Android Console: you can find your <auth_token> "
+                              "in \r\n'");
+                control_write(client, emulator_console_auth_token_path);
+                control_write(client, "'\r\nOK\r\n");
+                D(("control_global_accept: auth required %p\n", client));
+                break;
+            case CONSOLE_AUTH_STATUS_ERROR:
+                control_client_destroy(client);
+                D(("control_global_accept: rejected client\n"));
+                break;
+        }
+        free(emulator_console_auth_token_path);
     }
 }
 
@@ -634,6 +677,20 @@ int android_console_start(int control_port,
 #define ANDROID_CONSOLE_COPY_AGENT(type, name) \
         global-> name ## _agent [0] = agents-> name [0];
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_COPY_AGENT)
+
+    int console_auth_status = android_console_auth_get_status();
+    if (console_auth_status == CONSOLE_AUTH_STATUS_ERROR) {
+        // Banners don't get sent reliably in QEMU2 if we disconnect quickly, so
+        // we output the error message on stderr there.  Do the same here.
+        char* emulator_console_auth_token_path =
+                android_console_auth_token_path_dup();
+        fprintf(stderr,
+                "ERROR: Unable to access '%s': emulator console will not "
+                "work\n",
+                emulator_console_auth_token_path);
+        free(emulator_console_auth_token_path);
+    }
+
 
     Socket fd4 = socket_loopback4_server(control_port, SOCKET_STREAM);
     Socket fd6 = socket_loopback6_server(control_port, SOCKET_STREAM);
@@ -2671,3 +2728,30 @@ static const CommandDefRec   main_commands[] =
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
+
+const char* android_console_auth_banner_get() {
+    static char s_android_monitor_auth_banner[1024];
+    static bool s_ready = false;
+
+    if (!s_ready) {
+        char* emulator_console_auth_token_path =
+                android_console_auth_token_path_dup();
+        snprintf(s_android_monitor_auth_banner,
+                 sizeof(s_android_monitor_auth_banner),
+                 "Android Console: Authentication required\n"
+                 "Android Console: type 'auth <auth_token>' to authenticate\n"
+                 "Android Console: you can find your <auth_token> in "
+                 "\n'%s'\nOK\n",
+                 emulator_console_auth_token_path);
+        free(emulator_console_auth_token_path);
+
+        s_ready = true;
+    }
+
+    return s_android_monitor_auth_banner;
+}
+
+const char* android_console_help_banner_get() {
+    return "Android Console: type 'help' for a list of commands"
+           "\nOK\n";
+}

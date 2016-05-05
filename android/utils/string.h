@@ -26,8 +26,16 @@ ANDROID_BEGIN_HEADER
 size_t strlcpy(char* dst, const char * src, size_t size);
 #endif
 
-/* Determine if string str ends with the string suffix. */
-bool str_ends_with(const char* str, const char* suffix);
+/* returns true if |string| ends with |suffix| */
+bool str_ends_with(const char* string, const char* suffix);
+
+/* returns true if |string| begins with |prefix| */
+bool str_begins_with(const char* string, const char* prefix);
+
+/* skips white space at pos if any, returns pointer to first
+ * non-whitespace character
+ */
+const char* str_skip_white_space_if_any(const char* str);
 
 // Reset the value of |*string| to a copy of |new_value|. This
 // will free() the previous value of |*string| first. Note that
