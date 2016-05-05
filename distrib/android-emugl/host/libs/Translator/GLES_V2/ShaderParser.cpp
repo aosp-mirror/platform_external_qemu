@@ -24,7 +24,7 @@
 
 ShaderParser::ShaderParser():ObjectData(SHADER_DATA),
                              m_type(0),
-                             m_parsedLines(NULL),
+                             m_parsedLines(),
                              m_deleteStatus(false),
                              m_program(0) {
     m_infoLog = new GLchar[1];
@@ -34,7 +34,7 @@ ShaderParser::ShaderParser():ObjectData(SHADER_DATA),
 
 ShaderParser::ShaderParser(GLenum type):ObjectData(SHADER_DATA),
                                         m_type(type),
-                                        m_parsedLines(NULL),
+                                        m_parsedLines(),
                                         m_deleteStatus(false),
                                         m_program(0) {
 

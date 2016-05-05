@@ -318,8 +318,8 @@ RenderWindow::RenderWindow(int width,
                            bool use_sub_window) :
         mValid(false),
         mHasSubWindow(false),
-        mThread(NULL),
-        mChannel(NULL) {
+        mThread(),
+        mChannel() {
     if (use_thread) {
         mChannel = new RenderWindowChannel();
         mThread = new RenderWindowThread(mChannel);

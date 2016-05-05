@@ -145,10 +145,10 @@ struct WglBaseDispatch {
     // Default Constructor
     WglBaseDispatch() :
 #define INIT_WGL_POINTER(return_type, function_name, signature) \
-    function_name(NULL),
+    function_name(),
             LIST_WGL_FUNCTIONS(INIT_WGL_POINTER)
             LIST_GDI32_FUNCTIONS(INIT_WGL_POINTER)
-            mLib(NULL),
+            mLib(),
             mIsSystemLib(false) {}
 
     // Copy constructor
@@ -458,14 +458,14 @@ public:
     explicit WinSurface(HWND wnd) :
             Surface(WINDOW),
             m_hwnd(wnd),
-            m_pb(NULL),
+            m_pb(),
             m_hdc(GetDC(wnd)) {}
 
     explicit WinSurface(HPBUFFERARB pb, const WglExtensionsDispatch* dispatch) :
             Surface(PBUFFER),
-            m_hwnd(NULL),
+            m_hwnd(),
             m_pb(pb),
-            m_hdc(NULL) {
+            m_hdc() {
         if (dispatch->wglGetPbufferDCARB) {
             m_hdc = dispatch->wglGetPbufferDCARB(pb);
         }
@@ -1039,8 +1039,8 @@ private:
 };
 
 WinEngine::WinEngine() :
-        mLib(NULL),
-        mDispatch(NULL),
+        mLib(),
+        mDispatch(),
         mBaseDispatch(),
         mGlLib(&mBaseDispatch),
         mGlobals(&mBaseDispatch) {

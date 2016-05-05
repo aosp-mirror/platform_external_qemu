@@ -26,7 +26,7 @@ public:
     typedef enum { POINTER_OUT = 0x1, POINTER_IN = 0x2, POINTER_INOUT = 0x3 } PointerDir;
     Var() :
         m_name(""),
-        m_type(NULL),
+        m_type(),
         m_lenExpression(""),
         m_pointerDir(POINTER_IN),
         m_nullAllowed(false),
