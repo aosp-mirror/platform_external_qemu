@@ -22,8 +22,6 @@ class EglDisplay;
 class GLEScontext;
 
 struct ThreadInfo {
-    ThreadInfo():eglDisplay(NULL),glesContext(NULL),objManager(NULL){}
-
     void updateInfo(ContextPtr eglctx,
                     EglDisplay* dpy,
                     GLEScontext* glesCtx,
@@ -31,10 +29,10 @@ struct ThreadInfo {
                     ObjectNameManager* manager);
 
     ContextPtr           eglContext;
-    EglDisplay*          eglDisplay;
-    GLEScontext*         glesContext;
+    EglDisplay*          eglDisplay = nullptr;
+    GLEScontext*         glesContext = nullptr;
     ShareGroupPtr        shareGroup;
-    ObjectNameManager*   objManager;
+    ObjectNameManager*   objManager = nullptr;
 };
 
 ThreadInfo* getThreadInfo();

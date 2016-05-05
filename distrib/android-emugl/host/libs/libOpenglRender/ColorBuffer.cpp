@@ -197,12 +197,6 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 }
 
 ColorBuffer::ColorBuffer(EGLDisplay display, Helper* helper) :
-        m_tex(0),
-        m_blitTex(0),
-        m_eglImage(NULL),
-        m_blitEGLImage(NULL),
-        m_fbo(0),
-        m_internalFormat(0),
         m_display(display),
         m_helper(helper) {}
 

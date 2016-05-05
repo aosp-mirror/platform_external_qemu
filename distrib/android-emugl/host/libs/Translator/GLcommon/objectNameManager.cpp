@@ -20,7 +20,6 @@
 
 NameSpace::NameSpace(NamedObjectType p_type,
                      GlobalNameSpace *globalNameSpace) :
-    m_nextName(0),
     m_type(p_type),
     m_globalNameSpace(globalNameSpace) {}
 
@@ -114,11 +113,6 @@ NameSpace::replaceGlobalName(ObjectLocalName p_localName, unsigned int p_globalN
     }
 }
 
-
-GlobalNameSpace::GlobalNameSpace() : m_lock() {}
-
-GlobalNameSpace::~GlobalNameSpace() {}
-
 unsigned int 
 GlobalNameSpace::genName(NamedObjectType p_type)
 {
@@ -154,12 +148,10 @@ GlobalNameSpace::deleteName(NamedObjectType p_type, unsigned int p_name)
 typedef std::pair<NamedObjectType, ObjectLocalName> ObjectIDPair;
 typedef std::map<ObjectIDPair, ObjectDataPtr> ObjectDataMap;
 
-ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace) : m_lock() {
+ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace) {
     for (int i=0; i < NUM_OBJECT_TYPES; i++) {
         m_nameSpace[i] = new NameSpace((NamedObjectType)i, globalNameSpace);
     }
-
-    m_objectsData = NULL;
 }
 
 ShareGroup::~ShareGroup()
@@ -286,9 +278,7 @@ ShareGroup::getObjectData(NamedObjectType p_type,
 }
 
 ObjectNameManager::ObjectNameManager(GlobalNameSpace *globalNameSpace) :
-    m_lock(), m_globalNameSpace(globalNameSpace) {}
-
-ObjectNameManager::~ObjectNameManager() {}
+    m_globalNameSpace(globalNameSpace) {}
 
 ShareGroupPtr
 ObjectNameManager::createShareGroup(void *p_groupName)
@@ -319,7 +309,7 @@ ObjectNameManager::getShareGroup(void *p_groupName)
 {
     emugl::Mutex::AutoLock _lock(m_lock);
 
-    ShareGroupPtr shareGroupReturn(NULL);
+    ShareGroupPtr shareGroupReturn;
 
     ShareGroupsMap::iterator s( m_groups.find(p_groupName) );
     if (s != m_groups.end()) {
@@ -338,7 +328,7 @@ ObjectNameManager::attachShareGroup(void *p_groupName,
     ShareGroupsMap::iterator s( m_groups.find(p_existingGroupName) );
     if (s == m_groups.end()) {
         // ShareGroup did not found !!!
-        return ShareGroupPtr(NULL);
+        return ShareGroupPtr();
     }
 
     ShareGroupPtr shareGroupReturn((*s).second);

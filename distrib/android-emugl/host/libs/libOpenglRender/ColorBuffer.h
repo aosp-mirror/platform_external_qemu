@@ -138,22 +138,20 @@ public:
     void readback(unsigned char* img);
 
 private:
-    ColorBuffer();  // no default constructor.
-
-    explicit ColorBuffer(EGLDisplay display, Helper* helper);
+    ColorBuffer(EGLDisplay display, Helper* helper);
 
 private:
-    GLuint m_tex;
-    GLuint m_blitTex;
-    EGLImageKHR m_eglImage;
-    EGLImageKHR m_blitEGLImage;
-    GLuint m_width;
-    GLuint m_height;
-    GLuint m_fbo;
-    GLenum m_internalFormat;
-    EGLDisplay m_display;
-    Helper* m_helper;
-    TextureResize * m_resizer;
+    GLuint m_tex = 0;
+    GLuint m_blitTex = 0;
+    EGLImageKHR m_eglImage = nullptr;
+    EGLImageKHR m_blitEGLImage = nullptr;
+    GLuint m_width = 0;
+    GLuint m_height = 0;
+    GLuint m_fbo = 0;
+    GLenum m_internalFormat = 0;
+    EGLDisplay m_display = nullptr;
+    Helper* m_helper = nullptr;
+    TextureResize* m_resizer = nullptr;
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;

@@ -22,27 +22,7 @@
 #include <string>
 #include <vector>
 
-ShaderParser::ShaderParser():ObjectData(SHADER_DATA),
-                             m_type(0),
-                             m_parsedLines(NULL),
-                             m_deleteStatus(false),
-                             m_program(0) {
-    m_infoLog = new GLchar[1];
-    m_infoLog[0] = '\0';
-    m_valid = true;
-};
-
-ShaderParser::ShaderParser(GLenum type):ObjectData(SHADER_DATA),
-                                        m_type(type),
-                                        m_parsedLines(NULL),
-                                        m_deleteStatus(false),
-                                        m_program(0) {
-
-    m_infoLog = new GLchar[1];
-    m_infoLog[0] = '\0';
-    m_valid = true;
-};
-
+ShaderParser::ShaderParser(GLenum type):ObjectData(SHADER_DATA), m_type(type) {}
 
 void ShaderParser::validateGLESKeywords(const char* src) {
     m_valid = validate_glsles_keywords(src);
@@ -56,7 +36,9 @@ void ShaderParser::setSrc(const Version& ver,GLsizei count,const GLchar* const* 
         m_src.append(strings[i], strings[i] + strLen);
     }
     // Store original source as some 'parsing' functions actually modify m_src.
-    m_originalSrc = m_src.c_str();
+    // Note: assign() call is a workaround for the reference-counting
+    //  std::string in GCC's STL - we need a deep copy here.
+    m_originalSrc.assign(m_src.c_str(), m_src.size());
 
     validateGLESKeywords(m_originalSrc.c_str());
 
@@ -348,10 +330,10 @@ GLenum ShaderParser::getType() {
     return m_type;
 }
 
-void ShaderParser::setInfoLog(GLchar* infoLog)
-{
-    delete[] m_infoLog;
+void ShaderParser::setInfoLog(GLchar* infoLog) {
+    assert(infoLog);
     m_infoLog = infoLog;
+    delete [] infoLog;
 }
 
 bool ShaderParser::validShader() const {
@@ -362,16 +344,9 @@ static const GLchar glsles_invalid[] =
     { "ERROR: Valid GLSL but not GLSL ES" };
 
 void ShaderParser::setInvalidInfoLog() {
-    GLchar* glsles_invalid_here = new GLchar[2048];
-    memcpy(glsles_invalid_here, glsles_invalid, 2048);
-    setInfoLog(glsles_invalid_here);
+    m_infoLog = glsles_invalid;
 }
 
-GLchar* ShaderParser::getInfoLog()
-{
-    return m_infoLog;
-}
-
-ShaderParser::~ShaderParser(){
-    delete[] m_infoLog;
+const GLchar* ShaderParser::getInfoLog() const {
+    return m_infoLog.c_str();
 }

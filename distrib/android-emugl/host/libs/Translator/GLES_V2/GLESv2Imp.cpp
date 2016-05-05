@@ -804,7 +804,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
     if (fbObj.get() != NULL) {
         FramebufferData *fbData = (FramebufferData *)fbObj.get();
         fbData->setAttachment(attachment, textarget, 
-                              texture, ObjectDataPtr(NULL));
+                              texture, ObjectDataPtr());
     }
 }
 

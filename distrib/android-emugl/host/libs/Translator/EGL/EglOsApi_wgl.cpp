@@ -139,16 +139,15 @@ struct WglBaseDispatch {
     return_type (GL_APIENTRY* function_name) signature;
     LIST_WGL_FUNCTIONS(DECLARE_WGL_POINTER)
     LIST_GDI32_FUNCTIONS(DECLARE_WGL_POINTER)
-    SharedLibrary* mLib;
-    bool mIsSystemLib;
+    SharedLibrary* mLib = nullptr;
+    bool mIsSystemLib = false;
 
     // Default Constructor
     WglBaseDispatch() :
 #define INIT_WGL_POINTER(return_type, function_name, signature) \
-    function_name(NULL),
+    function_name(),
             LIST_WGL_FUNCTIONS(INIT_WGL_POINTER)
             LIST_GDI32_FUNCTIONS(INIT_WGL_POINTER)
-            mLib(NULL),
             mIsSystemLib(false) {}
 
     // Copy constructor
@@ -429,10 +428,8 @@ const WglExtensionsDispatch* initExtensionsDispatch(
 
 class WinPixelFormat : public EglOS::PixelFormat {
 public:
-    WinPixelFormat(const PIXELFORMATDESCRIPTOR* desc, int configId) {
-        mDesc = *desc;
-        mConfigId = configId;
-    }
+    WinPixelFormat(const PIXELFORMATDESCRIPTOR* desc, int configId)
+        : mDesc(*desc), mConfigId(configId) {}
 
     EglOS::PixelFormat* clone() {
         return new WinPixelFormat(&mDesc, mConfigId);
@@ -446,11 +443,10 @@ public:
     }
 
 private:
-    WinPixelFormat();
-    WinPixelFormat(const WinPixelFormat& other);
+    WinPixelFormat(const WinPixelFormat& other) = delete;
 
-    PIXELFORMATDESCRIPTOR mDesc;
-    int mConfigId;
+    PIXELFORMATDESCRIPTOR mDesc = {};
+    int mConfigId = 0;
 };
 
 class WinSurface : public EglOS::Surface {
@@ -458,14 +454,11 @@ public:
     explicit WinSurface(HWND wnd) :
             Surface(WINDOW),
             m_hwnd(wnd),
-            m_pb(NULL),
             m_hdc(GetDC(wnd)) {}
 
     explicit WinSurface(HPBUFFERARB pb, const WglExtensionsDispatch* dispatch) :
             Surface(PBUFFER),
-            m_hwnd(NULL),
-            m_pb(pb),
-            m_hdc(NULL) {
+            m_pb(pb) {
         if (dispatch->wglGetPbufferDCARB) {
             m_hdc = dispatch->wglGetPbufferDCARB(pb);
         }
@@ -486,9 +479,9 @@ public:
     }
 
 private:
-    HWND        m_hwnd;
-    HPBUFFERARB m_pb;
-    HDC         m_hdc;
+    HWND        m_hwnd = nullptr;
+    HPBUFFERARB m_pb = nullptr;
+    HDC         m_hdc = nullptr;
 };
 
 class WinContext : public EglOS::Context {
@@ -502,7 +495,7 @@ public:
     }
 
 private:
-    HGLRC mCtx;
+    HGLRC mCtx = nullptr;
 };
 
 // A helper class used to deal with a vexing limitation of the WGL API.
@@ -550,8 +543,6 @@ private:
 //
 class WinGlobals {
 public:
-    WinGlobals() = delete;
-
     // Constructor. |dispatch| will be used to call the right version of
     // ::SetPixelFormat() depending on GPU emulation configuration. See
     // technical notes above for details.
@@ -579,9 +570,6 @@ private:
     // declared below. Implemented as a movable type without copy-operations.
     class ConfigDC {
     public:
-        // Disable default constructor.
-        ConfigDC() = delete;
-
         // Constructor. This creates a new dummy 1x1 invisible window and
         // an associated device context. If |format| is not nullptr, then
         // calls |dispatch->SetPixelFormat()| on the resulting context to
@@ -589,7 +577,6 @@ private:
         ConfigDC(const WinPixelFormat* format,
                  const WglBaseDispatch* dispatch) {
             mWindow = createDummyWindow();
-            mDeviceContext = nullptr;
             if (mWindow) {
                 mDeviceContext = GetDC(mWindow);
                 if (format) {
@@ -627,8 +614,8 @@ private:
         HDC dc() const { return mDeviceContext; }
 
     private:
-        HWND mWindow;
-        HDC mDeviceContext;
+        HWND mWindow = nullptr;
+        HDC mDeviceContext = nullptr;
     };
 
     // Convenience type alias for mapping pixel format IDs, a.k.a. EGLConfig
@@ -672,7 +659,7 @@ private:
         return result;
     }
 
-    const WglBaseDispatch* mDispatch;
+    const WglBaseDispatch* mDispatch = nullptr;
     emugl::ThreadStore mTls;
 };
 
@@ -795,8 +782,6 @@ void pixelFormatToConfig(WinGlobals* globals,
 
 class WglDisplay : public EglOS::Display {
 public:
-    WglDisplay() = delete;
-
     WglDisplay(const WglExtensionsDispatch* dispatch,
                WinGlobals* globals)
             : mDispatch(dispatch), mGlobals(globals) {}
@@ -993,8 +978,8 @@ public:
     }
 
 private:
-    const WglExtensionsDispatch* mDispatch;
-    WinGlobals* mGlobals;
+    const WglExtensionsDispatch* mDispatch = nullptr;
+    WinGlobals* mGlobals = nullptr;
 };
 
 class WglLibrary : public GlLibrary {
@@ -1006,7 +991,7 @@ public:
     }
 
 private:
-    const WglBaseDispatch* mDispatch;
+    const WglBaseDispatch* mDispatch = nullptr;
 };
 
 class WinEngine : public EglOS::Engine {
@@ -1031,17 +1016,14 @@ public:
     }
 
 private:
-    SharedLibrary* mLib;
-    const WglExtensionsDispatch* mDispatch;
-    WglBaseDispatch mBaseDispatch;
+    SharedLibrary* mLib = nullptr;
+    const WglExtensionsDispatch* mDispatch = nullptr;
+    WglBaseDispatch mBaseDispatch = {};
     WglLibrary mGlLib;
     WinGlobals mGlobals;
 };
 
 WinEngine::WinEngine() :
-        mLib(NULL),
-        mDispatch(NULL),
-        mBaseDispatch(),
         mGlLib(&mBaseDispatch),
         mGlobals(&mBaseDispatch) {
     const char* kLibName = "opengl32.dll";

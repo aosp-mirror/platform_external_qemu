@@ -37,8 +37,6 @@ EglContext::EglContext(EglDisplay *dpy,
         m_native(context),
         m_config(config),
         m_glesContext(glesCtx),
-        m_read(NULL),
-        m_draw(NULL),
         m_version(ver),
         m_mngr(mngr) {
     m_shareGroup = shared_context.get()?
