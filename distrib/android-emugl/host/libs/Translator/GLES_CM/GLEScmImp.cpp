@@ -2387,3 +2387,16 @@ GL_API void GL_APIENTRY glDrawTexfvOES (const GLfloat * coords) {
 GL_API void GL_APIENTRY glDrawTexxvOES (const GLfixed * coords) {
     glDrawTexOES<GLfloat,GL_FLOAT>(X2F(coords[0]),X2F(coords[1]),X2F(coords[2]),X2F(coords[3]),X2F(coords[4]));
 }
+
+#include <GLES3/gl3.h>
+
+GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags) {
+    GET_CTX_RET(NULL);
+    return ctx->dispatcher().glFenceSync(condition, flags);
+}
+
+GL_APICALL GLenum GL_APIENTRY glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
+    GET_CTX_RET(GL_WAIT_FAILED);
+    return ctx->dispatcher().glClientWaitSync(wait_on, flags, timeout);
+}
+
