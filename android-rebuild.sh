@@ -145,6 +145,12 @@ RUN_GEN_ENTRIES_TESTS=true
 
 TEST_SHELL=
 EXE_SUFFIX=
+
+if [ "$HOST_OS" = "Linux" ]; then
+    # Linux 32-bit binaries are obsolete.
+    RUN_32BIT_TESTS=
+fi
+
 if [ "$MINGW" ]; then
   TEST_SHELL=wine
   EXE_SUFFIX=.exe
@@ -157,11 +163,6 @@ if [ "$MINGW" ]; then
   fi
 
   RUN_32BIT_TESTS=true
-fi
-
-if [ "$HOST_OS" = "Linux" ]; then
-    # Linux 32-bit binaries are obsolete.
-    RUN_32BIT_TESTS=
 fi
 
 # Return the minimum OS X version that a Darwin binary targets.
@@ -212,17 +213,25 @@ if [ -z "$NO_TESTS" ]; then
 
     if [ "$RUN_32BIT_TESTS" ]; then
         echo "Running 32-bit unit test suite."
-        for UNIT_TEST in android_emu_unittests emugl_common_host_unittests emulator_libui_unittests emulator_crashreport_unittests; do
-        echo "   - $UNIT_TEST"
-        run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
+        for UNIT_TEST in android_emu_unittests emugl_common_host_unittests \
+                         emulator_libui_unittests \
+                         emulator_crashreport_unittests; do
+            for TEST in $OUT_DIR/$UNIT_TEST$EXE_SUFFIX; do
+                echo "   - ${TEST#$OUT_DIR/}"
+                run $TEST_SHELL $TEST || FAILURES="$FAILURES ${TEST#$OUT_DIR/}"
+            done
         done
     fi
 
     if [ "$RUN_64BIT_TESTS" ]; then
         echo "Running 64-bit unit test suite."
-        for UNIT_TEST in android_emu64_unittests emugl64_common_host_unittests emulator64_libui_unittests emulator64_crashreport_unittests; do
-            echo "   - $UNIT_TEST"
-            run $TEST_SHELL $OUT_DIR/$UNIT_TEST$EXE_SUFFIX || FAILURES="$FAILURES $UNIT_TEST"
+        for UNIT_TEST in android_emu64_unittests emugl64_common_host_unittests \
+                         emulator64_libui_unittests \
+                         emulator64_crashreport_unittests; do
+             for TEST in $OUT_DIR/$UNIT_TEST$EXE_SUFFIX; do
+                 echo "   - ${TEST#$OUT_DIR/}"
+                 run $TEST_SHELL $TEST || FAILURES="$FAILURES ${TEST#$OUT_DIR/}"
+             done
         done
     fi
 
@@ -304,4 +313,3 @@ else
 fi
 
 echo "Done. !!"
-
