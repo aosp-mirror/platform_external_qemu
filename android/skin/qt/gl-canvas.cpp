@@ -13,13 +13,18 @@
 #include "android/skin/qt/gl-common.h"
 #include "GLES2/gl2.h"
 
+#include <cassert>
+
 GLCanvas::GLCanvas(int w, int h, const GLESv2Dispatch* gl_dispatch) :
-        mWidth(w * 4),
-        mHeight(h * 4),
+        // Note that width and height must be powers of 2 to comply with
+        // GLES 2.0
+        mWidth(w * 2),
+        mHeight(h * 2),
         mGLES2(gl_dispatch),
         mFramebuffer(0),
         mTargetTexture(0),
         mDepthBuffer(0) {
+    assert(((mWidth & (mWidth - 1)) == 0) && ((mHeight & (mHeight - 1)) == 0));
     // Create and bind framebuffer object.
     mGLES2->glGenFramebuffers(1, &mFramebuffer);
     CHECK_GL_ERROR("Failed to create framebuffer object");
