@@ -315,11 +315,7 @@ private:
 RenderWindow::RenderWindow(int width,
                            int height,
                            bool use_thread,
-                           bool use_sub_window) :
-        mValid(false),
-        mHasSubWindow(false),
-        mThread(NULL),
-        mChannel(NULL) {
+                           bool use_sub_window) {
     if (use_thread) {
         mChannel = new RenderWindowChannel();
         mThread = new RenderWindowThread(mChannel);

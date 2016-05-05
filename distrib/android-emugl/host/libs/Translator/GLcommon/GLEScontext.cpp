@@ -93,10 +93,6 @@ std::string    GLEScontext::s_glRenderer;
 std::string    GLEScontext::s_glVersion;
 GLSupport      GLEScontext::s_glSupport;
 
-Version::Version():m_major(0),
-                   m_minor(0),
-                   m_release(0){};
-
 Version::Version(int major,int minor,int release):m_major(major),
                                                   m_minor(minor),
                                                   m_release(release){};
@@ -231,19 +227,6 @@ void GLEScontext::init(GlLibrary* glLib) {
         }
     }
 }
-
-GLEScontext::GLEScontext():
-                           m_initialized(false)    ,
-                           m_activeTexture(0)      ,
-                           m_unpackAlignment(4)    ,
-                           m_glError(GL_NO_ERROR)  ,
-                           m_texState(0)          ,
-                           m_arrayBuffer(0)        ,
-                           m_elementBuffer(0),
-                           m_renderbuffer(0),
-                           m_framebuffer(0)
-{
-};
 
 GLenum GLEScontext::getGLerror() {
     return m_glError;

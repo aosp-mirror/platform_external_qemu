@@ -28,12 +28,6 @@
 
 WindowSurface::WindowSurface(EGLDisplay display,
                              EGLConfig config) :
-        mSurface(NULL),
-        mAttachedColorBuffer(NULL),
-        mReadContext(NULL),
-        mDrawContext(NULL),
-        mWidth(0),
-        mHeight(0),
         mConfig(config),
         mDisplay(display) {}
 
