@@ -13,7 +13,6 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#include <map>
 #include <GLcommon/objectNameManager.h>
 #include <GLcommon/GLEScontext.h>
 
@@ -49,7 +48,6 @@ using ObjectDataMap = std::unordered_map<TypedObjectName, ObjectDataPtr>;
 
 NameSpace::NameSpace(NamedObjectType p_type,
                      GlobalNameSpace *globalNameSpace) :
-    m_nextName(0),
     m_type(p_type),
     m_globalNameSpace(globalNameSpace) {}
 
@@ -144,11 +142,6 @@ NameSpace::replaceGlobalName(ObjectLocalName p_localName, unsigned int p_globalN
     }
 }
 
-
-GlobalNameSpace::GlobalNameSpace() : m_lock() {}
-
-GlobalNameSpace::~GlobalNameSpace() {}
-
 unsigned int 
 GlobalNameSpace::genName(NamedObjectType p_type)
 {
@@ -181,12 +174,10 @@ GlobalNameSpace::deleteName(NamedObjectType p_type, unsigned int p_name)
 {
 }
 
-ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace) : m_lock() {
+ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace) {
     for (int i=0; i < NUM_OBJECT_TYPES; i++) {
         m_nameSpace[i] = new NameSpace((NamedObjectType)i, globalNameSpace);
     }
-
-    m_objectsData = NULL;
 }
 
 ShareGroup::~ShareGroup()
@@ -313,9 +304,7 @@ ShareGroup::getObjectData(NamedObjectType p_type,
 }
 
 ObjectNameManager::ObjectNameManager(GlobalNameSpace *globalNameSpace) :
-    m_lock(), m_globalNameSpace(globalNameSpace) {}
-
-ObjectNameManager::~ObjectNameManager() {}
+    m_globalNameSpace(globalNameSpace) {}
 
 ShareGroupPtr
 ObjectNameManager::createShareGroup(void *p_groupName)

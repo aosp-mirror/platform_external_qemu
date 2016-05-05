@@ -36,8 +36,6 @@ void GLESv2Context::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
-GLESv2Context::GLESv2Context():GLEScontext(), m_att0Array(NULL), m_att0ArrayLength(0), m_att0NeedsDisable(false){};
-
 GLESv2Context::~GLESv2Context()
 {
     delete[] m_att0Array;

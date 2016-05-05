@@ -18,32 +18,16 @@
 #include <GLcommon/FramebufferData.h>
 #include <GLcommon/GLEScontext.h>
 
-RenderbufferData::RenderbufferData() : sourceEGLImage(0),
-                         eglImageDetach(NULL),
-                         attachedFB(0),
-                         attachedPoint(0),
-                         eglImageGlobalTexName(0) {
-}
-
 RenderbufferData::~RenderbufferData() {
     if (sourceEGLImage && eglImageDetach) (*eglImageDetach)(sourceEGLImage);
 }
 
-
-FramebufferData::FramebufferData(GLuint name):m_dirty(false) {
-    m_fbName = name;
-    for (int i=0; i<MAX_ATTACH_POINTS; i++) {
-        m_attachPoints[i].target = 0;
-        m_attachPoints[i].name = 0;
-        m_attachPoints[i].obj = ObjectDataPtr(NULL);
-        m_attachPoints[i].owned = false;
-    }
-}
+FramebufferData::FramebufferData(GLuint name) : m_fbName(name) {}
 
 FramebufferData::~FramebufferData() {
-for (int i=0; i<MAX_ATTACH_POINTS; i++) {
-    detachObject(i);
-}
+    for (int i=0; i<MAX_ATTACH_POINTS; i++) {
+        detachObject(i);
+    }
 }
 
 void FramebufferData::setAttachment(GLenum attachment,
@@ -121,10 +105,7 @@ void FramebufferData::detachObject(int idx) {
         }
     }
 
-    m_attachPoints[idx].target = 0;
-    m_attachPoints[idx].name = 0;
-    m_attachPoints[idx].obj = ObjectDataPtr(NULL);
-    m_attachPoints[idx].owned = false;
+    m_attachPoints[idx] = {};
 }
 
 void FramebufferData::validate(GLEScontext* ctx)
@@ -195,7 +176,7 @@ void FramebufferData::validate(GLEScontext* ctx)
         ctx->dispatcher().glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
         ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, 0);
-        setAttachment(GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, ObjectDataPtr(NULL), true);
+        setAttachment(GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, ObjectDataPtr(), true);
 
         ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, prev);
     }

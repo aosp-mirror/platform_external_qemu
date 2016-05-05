@@ -124,10 +124,10 @@ public:
 private:
     bool processMessage(const RenderWindowMessage& msg);
 
-    bool mValid;
-    bool mHasSubWindow;
-    emugl::Thread* mThread;
-    RenderWindowChannel* mChannel;
+    bool mValid = false;
+    bool mHasSubWindow = false;
+    emugl::Thread* mThread = nullptr;
+    RenderWindowChannel* mChannel = nullptr;
 };
 
 #endif  // ANDROID_EMUGL_LIBRENDER_RENDER_WINDOW_H

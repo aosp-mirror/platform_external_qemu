@@ -24,7 +24,6 @@
 class GLESv2Context : public GLEScontext{
 public:
     virtual void init(GlLibrary* glLib);
-    GLESv2Context();
     virtual ~GLESv2Context();
     void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
     int  getMaxCombinedTexUnits();
@@ -45,10 +44,10 @@ private:
     void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int pointsIndex = -1);
     void initExtensionString();
 
-    float m_attribute0value[4];
-    GLfloat* m_att0Array;
-    unsigned int m_att0ArrayLength;
-    bool m_att0NeedsDisable;
+    float m_attribute0value[4] = {};
+    GLfloat* m_att0Array = nullptr;
+    unsigned int m_att0ArrayLength = 0;
+    bool m_att0NeedsDisable = false;
 };
 
 #endif

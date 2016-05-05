@@ -100,11 +100,11 @@ private:
 
     friend emugl::LazyInstance<EglGlobalInfo>;
 
-    std::vector<EglDisplay*>  m_displays;
-    EglOS::Engine*                 m_engine;
-    EglOS::Display*                m_display;
-    const GLESiface*               m_gles_ifaces[MAX_GLES_VERSION];
-    bool                           m_gles_extFuncs_inited[MAX_GLES_VERSION];
+    std::vector<EglDisplay*>       m_displays;
+    EglOS::Engine*                 m_engine = nullptr;
+    EglOS::Display*                m_display = nullptr;
+    const GLESiface*               m_gles_ifaces[MAX_GLES_VERSION] = {};
+    bool                           m_gles_extFuncs_inited[MAX_GLES_VERSION] = {};
     mutable emugl::Mutex           m_lock;
 };
 

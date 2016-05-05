@@ -311,51 +311,53 @@ private:
 private:
     static FrameBuffer *s_theFrameBuffer;
     static HandleType s_nextHandle;
-    int m_x;
-    int m_y;
-    int m_framebufferWidth;
-    int m_framebufferHeight;
-    int m_windowWidth;
-    int m_windowHeight;
-    float m_dpr;
-    bool m_useSubWindow;
+    int m_x = 0;
+    int m_y = 0;
+    int m_framebufferWidth = 0;
+    int m_framebufferHeight = 0;
+    int m_windowWidth = 0;
+    int m_windowHeight = 0;
+    float m_dpr = 0;
+
+    bool m_useSubWindow = false;
+    bool m_eglContextInitialized = false;
+
+    bool m_fpsStats = false;
+    int m_statsNumFrames = 0;
+    long long m_statsStartTime = 0;
+
     emugl::Mutex m_lock;
-    FbConfigList* m_configs;
-    FBNativeWindowType m_nativeWindow;
-    FrameBufferCaps m_caps;
-    EGLDisplay m_eglDisplay;
+    FbConfigList* m_configs = nullptr;
+    FBNativeWindowType m_nativeWindow = 0;
+    FrameBufferCaps m_caps = {};
+    EGLDisplay m_eglDisplay = nullptr;
     RenderContextMap m_contexts;
     WindowSurfaceMap m_windows;
     ColorBufferMap m_colorbuffers;
-    ColorBuffer::Helper* m_colorBufferHelper;
+    ColorBuffer::Helper* m_colorBufferHelper = nullptr;
 
-    EGLSurface m_eglSurface;
-    EGLContext m_eglContext;
-    EGLSurface m_pbufSurface;
-    EGLContext m_pbufContext;
+    EGLSurface m_eglSurface = EGL_NO_SURFACE;
+    EGLContext m_eglContext = EGL_NO_CONTEXT;
+    EGLSurface m_pbufSurface = EGL_NO_SURFACE;
+    EGLContext m_pbufContext = EGL_NO_CONTEXT;
 
-    EGLContext m_prevContext;
-    EGLSurface m_prevReadSurf;
-    EGLSurface m_prevDrawSurf;
-    EGLNativeWindowType m_subWin;
-    TextureDraw* m_textureDraw;
-    EGLConfig  m_eglConfig;
-    HandleType m_lastPostedColorBuffer;
-    float      m_zRot;
-    float      m_px;
-    float      m_py;
-    bool       m_eglContextInitialized;
+    EGLContext m_prevContext = EGL_NO_CONTEXT;
+    EGLSurface m_prevReadSurf = EGL_NO_SURFACE;
+    EGLSurface m_prevDrawSurf = EGL_NO_SURFACE;
+    EGLNativeWindowType m_subWin = {};
+    TextureDraw* m_textureDraw = nullptr;
+    EGLConfig  m_eglConfig = nullptr;
+    HandleType m_lastPostedColorBuffer = 0;
+    float      m_zRot = 0;
+    float      m_px = 0;
+    float      m_py = 0;
 
-    int m_statsNumFrames;
-    long long m_statsStartTime;
-    bool m_fpsStats;
+    emugl::Renderer::OnPostCallback m_onPost = nullptr;
+    void* m_onPostContext = nullptr;
+    unsigned char* m_fbImage = nullptr;
 
-    emugl::Renderer::OnPostCallback m_onPost;
-    void* m_onPostContext;
-    unsigned char* m_fbImage;
-
-    const char* m_glVendor;
-    const char* m_glRenderer;
-    const char* m_glVersion;
+    const char* m_glVendor = nullptr;
+    const char* m_glRenderer = nullptr;
+    const char* m_glVersion = nullptr;
 };
 #endif

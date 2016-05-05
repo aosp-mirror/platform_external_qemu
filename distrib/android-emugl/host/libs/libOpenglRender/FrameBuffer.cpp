@@ -435,33 +435,8 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow) :
     m_windowWidth(p_width),
     m_windowHeight(p_height),
     m_useSubWindow(useSubWindow),
-    m_configs(NULL),
-    m_eglDisplay(EGL_NO_DISPLAY),
-    m_colorBufferHelper(new ColorBufferHelper(this)),
-    m_eglSurface(EGL_NO_SURFACE),
-    m_eglContext(EGL_NO_CONTEXT),
-    m_pbufContext(EGL_NO_CONTEXT),
-    m_prevContext(EGL_NO_CONTEXT),
-    m_prevReadSurf(EGL_NO_SURFACE),
-    m_prevDrawSurf(EGL_NO_SURFACE),
-    m_subWin((EGLNativeWindowType)0),
-    m_textureDraw(NULL),
-    m_lastPostedColorBuffer(0),
-    m_zRot(0.0f),
-    m_px(0),
-    m_py(0),
-    m_eglContextInitialized(false),
-    m_statsNumFrames(0),
-    m_statsStartTime(0LL),
-    m_onPost(NULL),
-    m_onPostContext(NULL),
-    m_fbImage(NULL),
-    m_glVendor(NULL),
-    m_glRenderer(NULL),
-    m_glVersion(NULL)
-{
-    m_fpsStats = getenv("SHOW_FPS_STATS") != NULL;
-}
+    m_fpsStats(getenv("SHOW_FPS_STATS") != nullptr),
+    m_colorBufferHelper(new ColorBufferHelper(this)) {}
 
 FrameBuffer::~FrameBuffer() {
     delete m_textureDraw;
@@ -654,7 +629,7 @@ HandleType FrameBuffer::createRenderContext(int p_config, HandleType p_share,
         return ret;
     }
 
-    RenderContextPtr share(NULL);
+    RenderContextPtr share;
     if (p_share != 0) {
         RenderContextMap::iterator s(m_contexts.find(p_share));
         if (s == m_contexts.end()) {
@@ -888,8 +863,8 @@ bool FrameBuffer::bindContext(HandleType p_context,
 {
     emugl::Mutex::AutoLock mutex(m_lock);
 
-    WindowSurfacePtr draw(NULL), read(NULL);
-    RenderContextPtr ctx(NULL);
+    WindowSurfacePtr draw, read;
+    RenderContextPtr ctx;
 
     //
     // if this is not an unbind operation - make sure all handles are good
@@ -973,7 +948,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
 
 HandleType FrameBuffer::createClientImage(HandleType context, EGLenum target, GLuint buffer)
 {
-    RenderContextPtr ctx(NULL);
+    RenderContextPtr ctx;
 
     if (context) {
         RenderContextMap::iterator r( m_contexts.find(context) );

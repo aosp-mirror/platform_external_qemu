@@ -34,7 +34,6 @@ class GLEScmContext: public GLEScontext
 public:
     virtual void init(GlLibrary* glLib);
     GLEScmContext();
-
     void setActiveTexture(GLenum tex);
     void  setClientActiveTexture(GLenum tex);
     GLenum  getActiveTexture() { return GL_TEXTURE0 + m_activeTexture;};
@@ -61,10 +60,9 @@ private:
     void drawPointsData(GLESConversionArrays& arrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices_in,bool isElemsDraw);
     void initExtensionString();
 
-    GLESpointer*          m_texCoords;
-    int                   m_pointsIndex;
-    unsigned int          m_clientActiveTexture;
+    GLESpointer*          m_texCoords = nullptr;
+    int                   m_pointsIndex = -1;
+    unsigned int          m_clientActiveTexture = 0;
 };
 
 #endif
-
