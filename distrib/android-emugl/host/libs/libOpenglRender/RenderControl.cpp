@@ -13,15 +13,34 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+
 #include "RenderControl.h"
 
 #include "DispatchTables.h"
 #include "FbConfig.h"
+#include "FenceSyncInfo.h"
 #include "FrameBuffer.h"
+#include "RenderContext.h"
 #include "RenderThreadInfo.h"
 #include "ChecksumCalculatorThreadInfo.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
+
+#include <inttypes.h>
+
+using android::base::Lock;
+using android::base::AutoLock;
+
+#define DEBUG 1
+
+#if DEBUG && !defined(_WIN32)
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#define DPRINT(...) do { fprintf(stderr, "tid=0x%lx", syscall(__NR_gettid)); fprintf(stderr, __VA_ARGS__); } while(0)
+#else
+#define DPRINT(...)
+#endif
 
 static const GLint rendererVersion = 1;
 
@@ -383,6 +402,107 @@ static void rcSelectChecksumCalculator(uint32_t protocol, uint32_t reserved) {
     ChecksumCalculatorThreadInfo::setVersion(protocol);
 }
 
+static uint64_t rcCreateSyncKHR(EGLenum type, EGLint* attribs, uint32_t num_attribs) {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    RcSyncInfo* sync_info = RcSyncInfo::get();
+
+    DPRINT("%s: type=0x%x num_attribs=%d\n",
+            __FUNCTION__, type, num_attribs);
+
+    GLsync sync;
+    int err;
+    if (tInfo->currContext->isGL2()) {
+        sync = s_gles2.glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+        err = s_gles2.glGetError();
+        RcSync* rcsync = new RcSync(sync, (void*)tInfo->currContext.get());
+        DPRINT("%s: glerror=0x%x cxt@%p glsync@%p handle=0x%lx\n",
+               __FUNCTION__,
+               err,
+               tInfo->currContext.get(),
+               rcsync->sync,
+               rcsync->handle);
+
+        sync_info->addSync(rcsync);
+        return rcsync->handle;
+    } else {
+        DPRINT("%s: warning: CreateSync in gles1 context\n", __FUNCTION__);
+        sync_info->addSync(NULL);
+        return 0;
+    }
+}
+
+static EGLint rcClientWaitSyncKHR(uint64_t handle, EGLint flags, uint64_t timeout) {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    RenderContext* cxt;
+
+    RcSyncInfo* sync_info = RcSyncInfo::get();
+    DPRINT("%s: handle=0x%lx flags=0x%x timeout=%" PRIu64 "\n",
+            __FUNCTION__, handle, flags, timeout);
+
+    // If the fence was already signaled,
+    // skip all this and go through the map instead.
+    if (sync_info->isSignaled(handle)) {
+        DPRINT("%s: fence with handle=0x%lx already signaled\n", __FUNCTION__, handle);
+        return EGL_CONDITION_SATISFIED_KHR;
+    }
+
+    RcSync* rcsync = sync_info->lookupSync(handle);
+
+    if (!rcsync) { DPRINT("%s: ERROR: rcsync is null!\n", __FUNCTION__); return EGL_CONDITION_SATISFIED_KHR; }
+
+    GLsync glsync = rcsync->sync;
+    RenderContext* orig_cxt = (RenderContext*)rcsync->gl_cxt;
+    GLenum gl_wait_res;
+
+    // Possibly big TODO: Need to have two threads for every context, one to render,
+    // the other to wait on fences. This is for when the guest has not really
+    // set up the second context itself.
+    if (!tInfo->currContext) {
+        DPRINT("%s: no context yet, creating\n", __FUNCTION__);
+        FrameBuffer *fb = FrameBuffer::getFB();
+        const FbConfig* cfg = fb->getConfigs()->get(0);
+        cxt = RenderContext::create(fb->getDisplay(), cfg->getEglConfig(), orig_cxt->getEGLContext(), 1);
+        DPRINT("%s: context created, cxt@%p err=0x%x\n", __FUNCTION__, cxt, s_egl.eglGetError());
+        DPRINT("%s: cxt->eglcxt=%p origcxt=%p\n", __FUNCTION__, cxt->getEGLContext(), orig_cxt->getEGLContext());
+    } else {
+        cxt = tInfo->currContext.get();
+    }
+
+    int err;
+    if (cxt->isGL2()) {
+        gl_wait_res = s_gles2.glClientWaitSync(glsync, GL_SYNC_FLUSH_COMMANDS_BIT, timeout);
+        err = s_gles2.glGetError();
+    } else {
+        DPRINT("%s: Warning: ClientWaitSync in gles1 context. Should be short circuited already!", __FUNCTION__);
+        return EGL_CONDITION_SATISFIED_KHR;
+    }
+
+    EGLint egl_res;
+    switch(gl_wait_res) {
+    case GL_CONDITION_SATISFIED:
+        DPRINT("%s: wait finished with GL_CONDITION_SATISFIED\n", __FUNCTION__);
+        sync_info->setSignaled(handle);
+        egl_res = EGL_CONDITION_SATISFIED_KHR;
+        break;
+    case GL_ALREADY_SIGNALED:
+        DPRINT("%s: wait finished with GL_ALREADY_SIGNALED\n", __FUNCTION__);
+        sync_info->setSignaled(handle);
+        egl_res = EGL_CONDITION_SATISFIED_KHR;
+        break;
+    case GL_TIMEOUT_EXPIRED:
+        DPRINT("%s: wait finished with GL_TIMEOUT_EXPIRED\n", __FUNCTION__);
+        egl_res = EGL_TIMEOUT_EXPIRED_KHR;
+        break;
+    case GL_WAIT_FAILED:
+        DPRINT("%s: wait finished with GL_WAIT_FAILED. glGetError=0x%x\n", __FUNCTION__, err);
+        egl_res = EGL_CONDITION_SATISFIED_KHR;
+        break;
+    default:
+        egl_res = EGL_CONDITION_SATISFIED_KHR;
+    }
+    return egl_res;
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -414,4 +534,6 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateClientImage = rcCreateClientImage;
     dec->rcDestroyClientImage = rcDestroyClientImage;
     dec->rcSelectChecksumCalculator = rcSelectChecksumCalculator;
+    dec->rcCreateSyncKHR = rcCreateSyncKHR;
+    dec->rcClientWaitSyncKHR = rcClientWaitSyncKHR;
 }
