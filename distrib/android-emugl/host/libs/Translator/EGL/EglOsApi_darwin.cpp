@@ -31,7 +31,7 @@ namespace {
 class MacSurface : public EglOS::Surface {
 public:
     MacSurface(void* handle, SurfaceType type) :
-            Surface(type), m_handle(handle), m_hasMipmap(false) {}
+            Surface(type), m_handle(handle) {}
 
     void* handle() const { return m_handle; }
 
@@ -43,8 +43,8 @@ public:
     }
 
 private:
-    void* m_handle;
-    bool m_hasMipmap;
+    void* m_handle = nullptr;
+    bool m_hasMipmap = false;
 };
 
 class MacContext : public EglOS::Context {
@@ -62,7 +62,7 @@ public:
     }
 
 private:
-    void* mContext;
+    void* mContext = nullptr;
 };
 
 typedef std::list<void*> NativeFormatList;
@@ -106,10 +106,10 @@ private:
     MacPixelFormat();
     MacPixelFormat(const MacPixelFormat& other);
 
-    void* mHandle;
-    int mRedSize;
-    int mGreenSize;
-    int mBlueSize;
+    void* mHandle = nullptr;
+    int mRedSize = 0;
+    int mGreenSize = 0;
+    int mBlueSize = 0;
 };
 
 
@@ -118,9 +118,7 @@ void pixelFormatToConfig(int index,
                          void* frmt,
                          EglOS::AddConfigCallback addConfigFunc,
                          void* addConfigOpaque) {
-    EglOS::ConfigInfo info;
-    memset(&info, 0, sizeof(info));
-
+    EglOS::ConfigInfo info = {};
     EGLint doubleBuffer;
     getPixelFormatAttrib(frmt, MAC_HAS_DOUBLE_BUFFER, &doubleBuffer);
     if (!doubleBuffer) {
@@ -328,12 +326,12 @@ public:
     EGLNativeDisplayType dpy() const { return mDpy; }
 
 private:
-    EGLNativeDisplayType mDpy;
+    EGLNativeDisplayType mDpy = nullptr;
 };
 
 class MacGlLibrary : public GlLibrary {
 public:
-    MacGlLibrary() : mLib(NULL) {
+    MacGlLibrary() {
         static const char kLibName[] =
                 "/System/Library/Frameworks/OpenGL.framework/OpenGL";
         char error[256];
@@ -357,13 +355,11 @@ public:
     }
 
 private:
-    emugl::SharedLibrary* mLib;
+    emugl::SharedLibrary* mLib = nullptr;
 };
 
 class MacEngine : public EglOS::Engine {
 public:
-    MacEngine() : mGlLib() {}
-
     virtual EglOS::Display* getDefaultDisplay() {
         return new MacDisplay(0);
     }

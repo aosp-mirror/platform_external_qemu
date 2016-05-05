@@ -38,7 +38,7 @@ public:
 
 private:
     static int s_lastErrorCode;
-    int (*m_oldErrorHandler)(Display *, XErrorEvent *);
+    int (*m_oldErrorHandler)(Display *, XErrorEvent *) = nullptr;
     static emugl::Mutex s_lock;
     static int errorHandlerProc(EGLNativeDisplayType dpy,XErrorEvent* event);
 };
@@ -90,7 +90,7 @@ public:
     }
 
 private:
-    GLXFBConfig mFbConfig;
+    GLXFBConfig mFbConfig = nullptr;
 };
 
 void pixelFormatToConfig(EGLNativeDisplayType dpy,
@@ -221,7 +221,7 @@ public:
     }
 
 private:
-    GLXDrawable mDrawable;
+    GLXDrawable mDrawable = 0;
 };
 
 // Implementation of EglOS::Context based on GLX.
@@ -235,7 +235,7 @@ public:
         return static_cast<GlxContext*>(context)->context();
     }
 private:
-    GLXContext mContext;
+    GLXContext mContext = nullptr;
 };
 
 // Implementation of EglOS::Display based on GLX.
@@ -379,7 +379,7 @@ public:
     }
 
 private:
-    X11Display* mDisplay;
+    X11Display* mDisplay = nullptr;
 };
 
 class GlxLibrary : public GlLibrary {
@@ -390,7 +390,7 @@ public:
     // the vendor-specific version of the library. libGL.so might in some
     // cases, depending on bad ldconfig configurations, link to the wrapper
     // lib that doesn't behave the same.
-    GlxLibrary() : mLib(NULL), mResolver(NULL) {
+    GlxLibrary() {
         static const char kLibName[] = "libGL.so.1";
         char error[256];
         mLib = emugl::SharedLibrary::open(kLibName, error, sizeof(error));
@@ -429,14 +429,12 @@ public:
     }
 
 private:
-    emugl::SharedLibrary* mLib;
-    ResolverFunc* mResolver;
+    emugl::SharedLibrary* mLib = nullptr;
+    ResolverFunc* mResolver = nullptr;
 };
 
 class GlxEngine : public EglOS::Engine {
 public:
-    GlxEngine() : mGlLib() {}
-
     virtual EglOS::Display* getDefaultDisplay() {
         return new GlxDisplay(XOpenDisplay(0));
     }

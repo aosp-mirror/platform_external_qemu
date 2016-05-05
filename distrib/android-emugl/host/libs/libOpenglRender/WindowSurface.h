@@ -80,22 +80,21 @@ public:
     void bind(RenderContextPtr p_ctx, BindType p_bindType);
 
 private:
-    WindowSurface();
-    WindowSurface(const WindowSurface& other);
+    WindowSurface(const WindowSurface& other) = delete;
 
-    explicit WindowSurface(EGLDisplay display, EGLConfig config);
+    WindowSurface(EGLDisplay display, EGLConfig config);
 
     bool resize(unsigned int p_width, unsigned int p_height);
 
 private:
-    EGLSurface mSurface;
+    EGLSurface mSurface = EGL_NO_SURFACE;
     ColorBufferPtr mAttachedColorBuffer;
     RenderContextPtr mReadContext;
     RenderContextPtr mDrawContext;
-    GLuint mWidth;
-    GLuint mHeight;
-    EGLConfig mConfig;
-    EGLDisplay mDisplay;
+    GLuint mWidth = 0;
+    GLuint mHeight = 0;
+    EGLConfig mConfig = nullptr;
+    EGLDisplay mDisplay = EGL_NO_DISPLAY;
 };
 
 typedef emugl::SmartPtr<WindowSurface> WindowSurfacePtr;

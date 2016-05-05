@@ -29,44 +29,48 @@
 #include <EGL/egl.h>
 
 class EglContext;
-typedef  emugl::SmartPtr<EglContext> ContextPtr;
+typedef emugl::SmartPtr<EglContext> ContextPtr;
 
 class EglDisplay;
 
 class EglContext {
-
 public:
-
-    EglContext(EglDisplay *dpy, EglOS::Context* context,ContextPtr shared_context,EglConfig* config,GLEScontext* glesCtx,GLESVersion ver,ObjectNameManager* mngr);
+    EglContext(EglDisplay* dpy,
+               EglOS::Context* context,
+               ContextPtr shared_context,
+               EglConfig* config,
+               GLEScontext* glesCtx,
+               GLESVersion ver,
+               ObjectNameManager* mngr);
     bool usingSurface(SurfacePtr surface);
     EglOS::Context* nativeType() const { return m_native; }
-    bool getAttrib(EGLint attrib,EGLint* value);
-    SurfacePtr read(){ return m_read;};
-    SurfacePtr draw(){ return m_draw;};
-    ShareGroupPtr getShareGroup(){return m_shareGroup;}
-    EglConfig* getConfig(){ return m_config;};
-    GLESVersion version(){return m_version;};
-    GLEScontext* getGlesContext(){return m_glesContext;}
-    void setSurfaces(SurfacePtr read,SurfacePtr draw);
-    unsigned int getHndl(){return m_hndl;}
-    bool attachImage(unsigned int imageId,ImagePtr img);
+    bool getAttrib(EGLint attrib, EGLint* value);
+    const SurfacePtr& read() const { return m_read; };
+    const SurfacePtr& draw() const { return m_draw; };
+    const ShareGroupPtr& getShareGroup() const { return m_shareGroup; }
+    EglConfig* getConfig() { return m_config; };
+    GLESVersion version() { return m_version; };
+    GLEScontext* getGlesContext() { return m_glesContext; }
+    void setSurfaces(SurfacePtr read, SurfacePtr draw);
+    unsigned int getHndl() { return m_hndl; }
+    bool attachImage(unsigned int imageId, ImagePtr img);
     void detachImage(unsigned int imageId);
 
     ~EglContext();
 
 private:
-    static unsigned int  s_nextContextHndl;
-    EglDisplay          *m_dpy;
-    EglOS::Context*      m_native;
-    EglConfig*           m_config;
-    GLEScontext*         m_glesContext;
-    ShareGroupPtr        m_shareGroup;
-    SurfacePtr           m_read;
-    SurfacePtr           m_draw;
-    GLESVersion          m_version;
-    ObjectNameManager    *m_mngr;
-    unsigned int         m_hndl;
-    ImagesHndlMap        m_attachedImages;
+    static unsigned int s_nextContextHndl;
+    EglDisplay* m_dpy = nullptr;
+    EglOS::Context* m_native = nullptr;
+    EglConfig* m_config = nullptr;
+    GLEScontext* m_glesContext = nullptr;
+    ShareGroupPtr m_shareGroup;
+    SurfacePtr m_read;
+    SurfacePtr m_draw;
+    GLESVersion m_version;
+    ObjectNameManager* m_mngr = nullptr;
+    unsigned int m_hndl = 0;
+    ImagesHndlMap m_attachedImages;
 };
 
 #endif

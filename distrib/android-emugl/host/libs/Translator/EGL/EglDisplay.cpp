@@ -24,11 +24,7 @@
 EglDisplay::EglDisplay(EGLNativeDisplayType dpy,
                        EglOS::Display* idpy) :
     m_dpy(dpy),
-    m_idpy(idpy),
-    m_initialized(false),
-    m_configInitialized(false),
-    m_nextEglImageId(0),
-    m_globalSharedContext(NULL)
+    m_idpy(idpy)
 {
     m_manager[GLES_1_1] = new ObjectNameManager(&m_globalNameSpace);
     m_manager[GLES_2_0] = new ObjectNameManager(&m_globalNameSpace);
@@ -195,7 +191,7 @@ SurfacePtr EglDisplay::getSurface(EGLSurface surface) const {
     SurfacesHndlMap::const_iterator it = m_surfaces.find(hndl);
     return it != m_surfaces.end() ?
                                   (*it).second :
-                                   SurfacePtr(NULL);
+                                   SurfacePtr();
 }
 
 ContextPtr EglDisplay::getContext(EGLContext ctx) const {
@@ -205,7 +201,7 @@ ContextPtr EglDisplay::getContext(EGLContext ctx) const {
     ContextsHndlMap::const_iterator it = m_contexts.find(hndl);
     return it != m_contexts.end() ?
                                   (*it).second :
-                                   ContextPtr(NULL);
+                                   ContextPtr();
 }
 
 bool EglDisplay::removeSurface(EGLSurface s) {
@@ -337,7 +333,7 @@ ImagePtr EglDisplay::getImage(EGLImageKHR img) const {
     /* img is "key" in map<unsigned int, ImagePtr>. */
     unsigned int hndl = SafeUIntFromPointer(img);
     ImagesHndlMap::const_iterator i( m_eglImages.find(hndl) );
-    return (i != m_eglImages.end()) ? (*i).second :ImagePtr(NULL);
+    return (i != m_eglImages.end()) ? (*i).second :ImagePtr();
 }
 
 bool EglDisplay:: destroyImageKHR(EGLImageKHR img) {

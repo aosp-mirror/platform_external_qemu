@@ -41,8 +41,7 @@ typedef textureTargetState textureUnitState[NUM_TEXTURE_TARGETS];
 
 class Version{
 public:
-    Version();
-    Version(int major,int minor,int release);
+    explicit Version(int major = 0,int minor = 0,int release = 0);
     Version(const char* versionString);
     Version(const Version& ver);
     bool operator<(const Version& ver) const;
@@ -54,56 +53,40 @@ private:
 };
 
 struct GLSupport {
-    GLSupport():maxLights(0),maxVertexAttribs(0),maxClipPlane(0),maxTexUnits(0), \
-                maxTexImageUnits(0),maxTexSize(0) , maxCombinedTexImageUnits(0), \
-                GL_EXT_TEXTURE_FORMAT_BGRA8888(false), GL_EXT_FRAMEBUFFER_OBJECT(false), \
-                GL_ARB_VERTEX_BLEND(false), GL_ARB_MATRIX_PALETTE(false), \
-                GL_EXT_PACKED_DEPTH_STENCIL(false) , GL_OES_READ_FORMAT(false), \
-                GL_ARB_HALF_FLOAT_PIXEL(false), GL_NV_HALF_FLOAT(false), \
-                GL_ARB_HALF_FLOAT_VERTEX(false),GL_SGIS_GENERATE_MIPMAP(false),
-                GL_ARB_ES2_COMPATIBILITY(false),GL_OES_STANDARD_DERIVATIVES(false),
-                GL_OES_TEXTURE_NPOT(false), GL_OES_RGB8_RGBA8(false) {} ;
-    int  maxLights;
-    int  maxVertexAttribs;
-    int  maxClipPlane;
-    int  maxTexUnits;
-    int  maxTexImageUnits;
-    int  maxTexSize;
-    int  maxCombinedTexImageUnits;
+    int  maxLights = 0;
+    int  maxVertexAttribs = 0;
+    int  maxClipPlane = 0;
+    int  maxTexUnits = 0;
+    int  maxTexImageUnits = 0;
+    int  maxTexSize = 0;
+    int  maxCombinedTexImageUnits = 0;
     Version glslVersion;
-    bool GL_EXT_TEXTURE_FORMAT_BGRA8888;
-    bool GL_EXT_FRAMEBUFFER_OBJECT;
-    bool GL_ARB_VERTEX_BLEND;
-    bool GL_ARB_MATRIX_PALETTE;
-    bool GL_EXT_PACKED_DEPTH_STENCIL;
-    bool GL_OES_READ_FORMAT;
-    bool GL_ARB_HALF_FLOAT_PIXEL;
-    bool GL_NV_HALF_FLOAT;
-    bool GL_ARB_HALF_FLOAT_VERTEX;
-    bool GL_SGIS_GENERATE_MIPMAP;
-    bool GL_ARB_ES2_COMPATIBILITY;
-    bool GL_OES_STANDARD_DERIVATIVES;
-    bool GL_OES_TEXTURE_NPOT;
-    bool GL_OES_RGB8_RGBA8;
-
+    bool GL_EXT_TEXTURE_FORMAT_BGRA8888 = false;
+    bool GL_EXT_FRAMEBUFFER_OBJECT = false;
+    bool GL_ARB_VERTEX_BLEND = false;
+    bool GL_ARB_MATRIX_PALETTE = false;
+    bool GL_EXT_PACKED_DEPTH_STENCIL = false;
+    bool GL_OES_READ_FORMAT = false;
+    bool GL_ARB_HALF_FLOAT_PIXEL = false;
+    bool GL_NV_HALF_FLOAT = false;
+    bool GL_ARB_HALF_FLOAT_VERTEX = false;
+    bool GL_SGIS_GENERATE_MIPMAP = false;
+    bool GL_ARB_ES2_COMPATIBILITY = false;
+    bool GL_OES_STANDARD_DERIVATIVES = false;
+    bool GL_OES_TEXTURE_NPOT = false;
+    bool GL_OES_RGB8_RGBA8 = false;
 };
 
 struct ArrayData{
-    ArrayData():data(NULL),
-                type(0),
-                stride(0),
-                allocated(false){};
-
-    void*        data;
-    GLenum       type;
-    unsigned int stride;
-    bool         allocated;
+    void*        data = nullptr;
+    GLenum       type = 0;
+    unsigned int stride = 0;
+    bool         allocated = false;
 };
 
 class GLESConversionArrays
 {
 public:
-    GLESConversionArrays():m_current(0){};
     void setArr(void* data,unsigned int stride,GLenum type);
     void allocArr(unsigned int size,GLenum type);
     ArrayData& operator[](int i);
@@ -115,17 +98,16 @@ public:
     ~GLESConversionArrays();
 private:
     std::unordered_map<GLenum,ArrayData> m_arrays;
-    unsigned int m_current;
+    unsigned int m_current = 0;
 };
 
 class GLEScontext{
 public:
     virtual void init(GlLibrary* glLib);
-    GLEScontext();
     GLenum getGLerror();
     void setGLerror(GLenum err);
     void setShareGroup(ShareGroupPtr grp){m_shareGroup = grp;};
-    ShareGroupPtr shareGroup() const { return m_shareGroup; }
+    const ShareGroupPtr& shareGroup() const { return m_shareGroup; }
     virtual void setActiveTexture(GLenum tex);
     unsigned int getBindedTexture(GLenum target);
     unsigned int getBindedTexture(GLenum unit,GLenum target);
@@ -194,9 +176,9 @@ protected:
 
     static emugl::Mutex   s_lock;
     static GLDispatch     s_glDispatch;
-    bool                  m_initialized;
-    unsigned int          m_activeTexture;
-    GLint                 m_unpackAlignment;
+    bool                  m_initialized = false;
+    unsigned int          m_activeTexture = 0;
+    GLint                 m_unpackAlignment = 4;
     ArraysMap             m_map;
     static std::string*   s_glExtensions;
     static GLSupport      s_glSupport;
@@ -207,12 +189,12 @@ private:
     GLuint getBuffer(GLenum target);
 
     ShareGroupPtr         m_shareGroup;
-    GLenum                m_glError;
-    textureUnitState*     m_texState;
-    unsigned int          m_arrayBuffer;
-    unsigned int          m_elementBuffer;
-    GLuint                m_renderbuffer;
-    GLuint                m_framebuffer;
+    GLenum                m_glError = GL_NO_ERROR;
+    textureUnitState*     m_texState = nullptr;
+    unsigned int          m_arrayBuffer = 0;
+    unsigned int          m_elementBuffer = 0;
+    GLuint                m_renderbuffer = 0;
+    GLuint                m_framebuffer = 0;
 
     static std::string    s_glVendor;
     static std::string    s_glRenderer;
