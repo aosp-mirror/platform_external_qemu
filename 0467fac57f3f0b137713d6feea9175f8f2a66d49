@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6d7da3ec_535f7530",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-05T16:58:31Z",
+      "side": 1,
+      "message": "1. please keep real error checking for getnameinfo(), assert() only for memchr() call - that\u0027s what is never supposed to fail\n2. android/utils/assert.h is an old and deprecated header, please use \u003cassert.h\u003e and a simple assert(condition);",
+      "range": {
+        "startLine": 369,
+        "startChar": 0,
+        "endLine": 369,
+        "endChar": 24
+      },
+      "revId": "0467fac57f3f0b137713d6feea9175f8f2a66d49",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
