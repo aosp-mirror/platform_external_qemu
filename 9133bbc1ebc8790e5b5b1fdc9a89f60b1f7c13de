@@ -93,6 +93,30 @@
       "revId": "9133bbc1ebc8790e5b5b1fdc9a89f60b1f7c13de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d7da3ec_e03091fa",
+        "filename": "android/utils/sockets.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-05T16:21:51Z",
+      "side": 1,
+      "message": "just an assert to state that you\u0027re aware of a possible failure and know that it\u0027s not supposed to happen",
+      "parentUuid": "0d3fc7e9_eb87f0c5",
+      "range": {
+        "startLine": 368,
+        "startChar": 0,
+        "endLine": 368,
+        "endChar": 37
+      },
+      "revId": "9133bbc1ebc8790e5b5b1fdc9a89f60b1f7c13de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
