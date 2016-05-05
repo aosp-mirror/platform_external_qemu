@@ -43,9 +43,9 @@ public:
     bool usingSurface(SurfacePtr surface);
     EglOS::Context* nativeType() const { return m_native; }
     bool getAttrib(EGLint attrib,EGLint* value);
-    SurfacePtr read(){ return m_read;};
-    SurfacePtr draw(){ return m_draw;};
-    ShareGroupPtr getShareGroup(){return m_shareGroup;}
+    const SurfacePtr& read() const { return m_read;};
+    const SurfacePtr& draw() const { return m_draw;};
+    const ShareGroupPtr& getShareGroup() const {return m_shareGroup;}
     EglConfig* getConfig(){ return m_config;};
     GLESVersion version(){return m_version;};
     GLEScontext* getGlesContext(){return m_glesContext;}

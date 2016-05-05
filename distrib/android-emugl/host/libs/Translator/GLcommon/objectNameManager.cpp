@@ -319,7 +319,7 @@ ObjectNameManager::getShareGroup(void *p_groupName)
 {
     emugl::Mutex::AutoLock _lock(m_lock);
 
-    ShareGroupPtr shareGroupReturn(NULL);
+    ShareGroupPtr shareGroupReturn;
 
     ShareGroupsMap::iterator s( m_groups.find(p_groupName) );
     if (s != m_groups.end()) {
@@ -338,7 +338,7 @@ ObjectNameManager::attachShareGroup(void *p_groupName,
     ShareGroupsMap::iterator s( m_groups.find(p_existingGroupName) );
     if (s == m_groups.end()) {
         // ShareGroup did not found !!!
-        return ShareGroupPtr(NULL);
+        return ShareGroupPtr();
     }
 
     ShareGroupPtr shareGroupReturn((*s).second);

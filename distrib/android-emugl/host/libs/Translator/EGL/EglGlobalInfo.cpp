@@ -37,8 +37,8 @@ EglGlobalInfo* EglGlobalInfo::getInstance() {
 
 EglGlobalInfo::EglGlobalInfo() :
         m_displays(),
-        m_engine(NULL),
-        m_display(NULL),
+        m_engine(),
+        m_display(),
         m_lock() {
     // TODO(digit): Choose alternate engine based on env. variable?
     m_engine = EglOS::Engine::getHostInstance();

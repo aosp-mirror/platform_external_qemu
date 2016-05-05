@@ -390,7 +390,7 @@ public:
     // the vendor-specific version of the library. libGL.so might in some
     // cases, depending on bad ldconfig configurations, link to the wrapper
     // lib that doesn't behave the same.
-    GlxLibrary() : mLib(NULL), mResolver(NULL) {
+    GlxLibrary() : mLib(), mResolver() {
         static const char kLibName[] = "libGL.so.1";
         char error[256];
         mLib = emugl::SharedLibrary::open(kLibName, error, sizeof(error));

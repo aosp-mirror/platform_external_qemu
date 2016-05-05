@@ -333,7 +333,7 @@ private:
 
 class MacGlLibrary : public GlLibrary {
 public:
-    MacGlLibrary() : mLib(NULL) {
+    MacGlLibrary() : mLib() {
         static const char kLibName[] =
                 "/System/Library/Frameworks/OpenGL.framework/OpenGL";
         char error[256];

@@ -711,7 +711,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
            if(!dpy->nativeType()->makeCurrent(NULL,NULL,NULL)) {
                RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
            }
-           thread->updateInfo(ContextPtr(NULL),dpy,NULL,ShareGroupPtr(NULL),dpy->getManager(prevCtx->version()));
+           thread->updateInfo(ContextPtr(),dpy,NULL,ShareGroupPtr(),dpy->getManager(prevCtx->version()));
        }
     } else { //assining new context
         VALIDATE_CONTEXT(context);
@@ -780,7 +780,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
 
     // release previous context surface binding
     if(prevCtx.get() && releaseContext) {
-        prevCtx->setSurfaces(SurfacePtr(NULL),SurfacePtr(NULL));
+        prevCtx->setSurfaces(SurfacePtr(),SurfacePtr());
     }
 
     return EGL_TRUE;

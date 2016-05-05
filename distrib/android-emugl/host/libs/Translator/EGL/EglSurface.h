@@ -72,7 +72,7 @@ protected:
        m_config(config),
        m_width(width),
        m_height(height),
-       m_native(NULL),
+       m_native(),
        m_dpy(dpy)
     {
         m_hndl = ++s_nextSurfaceHndl;

@@ -22,7 +22,7 @@ class EglDisplay;
 class GLEScontext;
 
 struct ThreadInfo {
-    ThreadInfo():eglDisplay(NULL),glesContext(NULL),objManager(NULL){}
+    ThreadInfo():eglDisplay(),glesContext(),objManager(){}
 
     void updateInfo(ContextPtr eglctx,
                     EglDisplay* dpy,
