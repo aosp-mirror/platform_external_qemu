@@ -272,6 +272,17 @@ static void set_cache_pipe(PipeDevice* dev, HwPipe* cache_pipe) {
     qemu_mutex_unlock(&dev->lock);
 }
 
+static void clear_cache_pipe_if_equal(PipeDevice* dev, HwPipe* pipe) {
+    qemu_mutex_lock(&dev->lock);
+    if (dev->cache_pipe == pipe) {
+        dev->cache_pipe = NULL;
+    }
+    if (dev->cache_pipe_64bit == pipe) {
+        dev->cache_pipe_64bit = NULL;
+    }
+    qemu_mutex_unlock(&dev->lock);
+}
+
 /* Update this version number if the device's interface changes. */
 #define PIPE_DEVICE_VERSION  1
 
@@ -354,6 +365,10 @@ static void pipeDevice_doCommand(PipeDevice* dev, uint32_t command) {
         dev->save_pipes = dev->pipes;
         g_hash_table_remove(dev->pipes_by_channel,
                             hash_cast_key_from_channel(&pipe->channel));
+
+        // clear the device's cache_pipe if we're closing it now
+        clear_cache_pipe_if_equal(dev, pipe);
+
         pipe_free(pipe);
         break;
     }
@@ -518,15 +533,6 @@ static void pipe_dev_write(void *opaque, hwaddr offset, uint64_t value, unsigned
     }
 }
 
-static int is_valid_pipe(HwPipe* head, HwPipe* pipe) {
-    while(1) {
-        if (head == NULL) return 0;
-        if (head == pipe) return 1;
-        head = head->next;
-    }
-    return 0;
-}
-
 /* I/O read */
 static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
 {
@@ -542,10 +548,8 @@ static uint64_t pipe_dev_read(void *opaque, hwaddr offset, unsigned size)
     case PIPE_REG_CHANNEL: {
         cache_pipe = get_and_clear_cache_pipe(dev);
         if (cache_pipe != NULL) {
-            if (is_valid_pipe(dev->save_pipes, cache_pipe)) {
-                dev->wakes = get_and_clear_pipe_wanted(cache_pipe);
-                return (uint32_t)(cache_pipe->channel & 0xFFFFFFFFUL);
-            }
+            dev->wakes = get_and_clear_pipe_wanted(cache_pipe);
+            return (uint32_t)(cache_pipe->channel & 0xFFFFFFFFUL);
         }
 
         HwPipe* pipe = dev->pipes;
