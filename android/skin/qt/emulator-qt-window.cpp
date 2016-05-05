@@ -1693,25 +1693,16 @@ void EmulatorQtWindow::slot_adbWarningMessageAccepted() {
     }
 }
 
-void EmulatorQtWindow::adbShellStopRunner() {
-    // convert the command + arguments to the format needed in System class call
-    std::vector<std::string> fullArgs = getAdbFullPathStd();
-    fullArgs.push_back("shell");
-    fullArgs.push_back("stop");
-    System::get()->runCommand(fullArgs, RunOptions::WaitForCompletion |
-                                                RunOptions::HideAllOutput);
-    queueQuitEvent();
-}
-
 void EmulatorQtWindow::runAdbShellStopAndQuit() {
     // we need to run it only once, so don't ever reset this
     if (mStartedAdbStopProcess) {
         return;
     }
-
-    if (async([this] { this->adbShellStopRunner(); })) {
-        mStartedAdbStopProcess = true;
-    } else {
-        queueQuitEvent();
-    }
+    mStartedAdbStopProcess = true;
+    mAdbInterface.runAdbCommand(
+        {"shell", "stop"},
+        [this](const android::emulation::OptionalAdbCommandResult&) {
+            queueQuitEvent();
+        },
+        android::base::System::kInfinite);
 }

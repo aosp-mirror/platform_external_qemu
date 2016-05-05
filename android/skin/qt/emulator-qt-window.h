@@ -327,7 +327,6 @@ private:
                      android::emulation::FilePusher::Result result);
 
     void runAdbShellStopAndQuit();
-    void adbShellStopRunner();
 
     android::base::Looper* mLooper;
     QTimer mStartupTimer;
