@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "72590445_cba909f1",
+        "filename": "android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-06T23:59:18Z",
+      "side": 1,
+      "message": "use a semi-colon here \";\" rather than a comma.",
+      "range": {
+        "startLine": 76,
+        "startChar": 44,
+        "endLine": 76,
+        "endChar": 45
+      },
+      "revId": "49014085a8ccf1f89adff7e1d71706b6b406d3bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "72590445_6b80dd5b",
+        "filename": "android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-06T23:59:18Z",
+      "side": 1,
+      "message": "How about \"in the thread that calls\" ...",
+      "range": {
+        "startLine": 79,
+        "startChar": 62,
+        "endLine": 80,
+        "endChar": 21
+      },
+      "revId": "49014085a8ccf1f89adff7e1d71706b6b406d3bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "72590445_cb1ea9fa",
+        "filename": "android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-06T23:59:18Z",
+      "side": 1,
+      "message": "Some (short) spec comments on the public operations would be nice.  I, at least, don\u0027t know what values one would use for \"flags\", or what determines whether \"needsLock\" is true.",
+      "range": {
+        "startLine": 84,
+        "startChar": 4,
+        "endLine": 84,
+        "endChar": 55
+      },
+      "revId": "49014085a8ccf1f89adff7e1d71706b6b406d3bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "72590445_2bdb055f",
+        "filename": "android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-06T23:59:18Z",
+      "side": 1,
+      "message": "This ought to say something about there being a static instance, returned by get.",
+      "range": {
+        "startLine": 87,
+        "startChar": 4,
+        "endLine": 87,
+        "endChar": 39
+      },
+      "revId": "49014085a8ccf1f89adff7e1d71706b6b406d3bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "72590445_ce0d9729",
+        "filename": "android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-06T23:59:18Z",
+      "side": 1,
+      "message": "People more familiar than I no doubt knew that \"ScopedVmLock\" locks the global QEMU lock.  Still, it would be good to connect this with the description above -- something like \"Acquire the global QEMU lock if we need it\" in the comment below.",
+      "range": {
+        "startLine": 166,
+        "startChar": 8,
+        "endLine": 166,
+        "endChar": 38
+      },
+      "revId": "49014085a8ccf1f89adff7e1d71706b6b406d3bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "72590445_0b428151",
+        "filename": "android/opengles-pipe.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-06T23:59:18Z",
+      "side": 1,
+      "message": "operations",
+      "range": {
+        "startLine": 27,
+        "startChar": 67,
+        "endLine": 27,
+        "endChar": 76
+      },
+      "revId": "49014085a8ccf1f89adff7e1d71706b6b406d3bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "72590445_cb2349ae",
+        "filename": "android/opengles-pipe.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-06T23:59:18Z",
+      "side": 1,
+      "message": "thread from which",
+      "range": {
+        "startLine": 28,
+        "startChar": 13,
+        "endLine": 28,
+        "endChar": 29
+      },
+      "revId": "49014085a8ccf1f89adff7e1d71706b6b406d3bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
