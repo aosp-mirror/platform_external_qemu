@@ -56,15 +56,16 @@ static void _save_pipe_message(Stream* f, QemudPipeMessage* msg) {
  *  List of pending pipe messages loaded from snapshot, or NULL if snapshot didn't
  *  contain saved messages.
  */
-static QemudPipeMessage* _load_pipe_message(Stream* f) {
+static QemudPipeMessage* _load_pipe_message(Stream* f, QemudPipeMessage** last) {
     QemudPipeMessage* ret = NULL;
     QemudPipeMessage** next = &ret;
+    *last = NULL;
 
     uint32_t size = stream_get_be32(f);
     while (size != 0) {
         QemudPipeMessage* wrk =
                 static_cast<QemudPipeMessage*>(android_alloc0(sizeof(*wrk)));
-        *next = wrk;
+        *last = *next = wrk;
         wrk->size = size;
         wrk->offset = stream_get_be32(f);
         wrk->message = static_cast<uint8_t*>(malloc(wrk->size));
@@ -246,6 +247,10 @@ _qemudPipe_recvBuffers(void* opaque, AndroidPipeBuffer* buffers, int numBuffers)
         }
     }
 
+    if (!*msg_list) {
+        client->ProtocolSelector.Pipe.last_msg = NULL;
+    }
+
     D("%s: -> %u (of %u)", __FUNCTION__, sent_bytes, buffers->size);
 
     return sent_bytes;
@@ -343,7 +348,8 @@ static void* _qemudPipe_load(void* hwpipe,
         return NULL;
 
     /* Load pending messages. */
-    c->ProtocolSelector.Pipe.messages = _load_pipe_message(f);
+    c->ProtocolSelector.Pipe.messages =
+            _load_pipe_message(f, &c->ProtocolSelector.Pipe.last_msg);
 
     /* load client-specific state */
     if (c->clie_load && c->clie_load(f, c, c->clie_opaque)) {
