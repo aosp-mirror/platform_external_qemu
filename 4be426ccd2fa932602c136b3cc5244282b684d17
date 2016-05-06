@@ -140,6 +140,30 @@
     },
     {
       "key": {
+        "uuid": "0d22678a_48f05fdb",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-05-06T21:10:55Z",
+      "side": 1,
+      "message": "Critical sections are recursive whereas SRW locks are not. If the locking behavior is different on different platforms it could cause some really subtle, hard to find bugs.\n\nI seem to remember reading that it\u0027s pretty tricky to implement non-recursive locks on Windows without SRW locks though. I know boost has done it so perhaps taking a look at their solution would be helpful.",
+      "parentUuid": "0d22678a_086ca724",
+      "range": {
+        "startLine": 130,
+        "startChar": 0,
+        "endLine": 134,
+        "endChar": 54
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d22678a_28524359",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 2
