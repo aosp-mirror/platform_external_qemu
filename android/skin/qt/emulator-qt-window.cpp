@@ -387,19 +387,6 @@ void EmulatorQtWindow::dropEvent(QDropEvent *event)
 void EmulatorQtWindow::keyPressEvent(QKeyEvent *event)
 {
     handleKeyEvent(kEventKeyDown, event);
-
-    // If the key event generated any text, we need
-    // to send an additional TextInput event to the emulator.
-    if (event->text().length() > 0) {
-        SkinEvent *skin_event = createSkinEvent(kEventTextInput);
-        skin_event->u.text.down = false;
-        strncpy((char*)skin_event->u.text.text,
-                (const char*)event->text().toUtf8().constData(),
-                sizeof(skin_event->u.text.text) - 1);
-        // Ensure the event's text is 0-terminated
-        skin_event->u.text.text[sizeof(skin_event->u.text.text)-1] = 0;
-        queueEvent(skin_event);
-    }
 }
 
 void EmulatorQtWindow::keyReleaseEvent(QKeyEvent *event)
@@ -1121,6 +1108,23 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent *event)
 
     if (mForwardShortcutsToDevice || !mToolWindow->handleQtKeyEvent(event)) {
         forwardKeyEventToEmulator(type, event);
+
+        if (type == kEventKeyDown && event->text().length() > 0) {
+            Qt::KeyboardModifiers mods = event->modifiers();
+            mods &= ~(Qt::ShiftModifier | Qt::KeypadModifier);
+            if (mods == 0) {
+                // The key event generated text without Ctrl, Alt, etc.
+                // Send an additional TextInput event to the emulator.
+                SkinEvent *skin_event = createSkinEvent(kEventTextInput);
+                skin_event->u.text.down = false;
+                strncpy((char*)skin_event->u.text.text,
+                        (const char*)event->text().toUtf8().constData(),
+                        sizeof(skin_event->u.text.text) - 1);
+                // Ensure the event's text is 0-terminated
+                skin_event->u.text.text[sizeof(skin_event->u.text.text)-1] = 0;
+                queueEvent(skin_event);
+            }
+        }
     }
 }
 
