@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d22678a_a5981e2c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-06T20:22:40Z",
+      "side": 1,
+      "message": "I think you ought to go ahead and acquire the lock to do this assignment.  Simplifies reasoning about the larger locked region you add below.  Without locking here, the value of mState could change between read and write in onEvent (assuming that could be concurrent with setEventCallback).",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 26
+      },
+      "revId": "90b9acf70e3ec33c2992690a06c8fffb374afec3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d22678a_85608228",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-06T20:22:40Z",
+      "side": 1,
+      "message": "If mStateLock protects only mState, no reason for this to be inside the lock.",
+      "range": {
+        "startLine": 115,
+        "startChar": 4,
+        "endLine": 115,
+        "endChar": 39
+      },
+      "revId": "90b9acf70e3ec33c2992690a06c8fffb374afec3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d22678a_45abea2c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-06T20:22:40Z",
+      "side": 1,
+      "message": "If you don\u0027t want to do locking on reads, and you\u0027d like to be \"officially correct\", but not lose any perf, you could use std::atomic::compareExchange for this operation.",
+      "range": {
+        "startLine": 116,
+        "startChar": 3,
+        "endLine": 117,
+        "endChar": 26
+      },
+      "revId": "90b9acf70e3ec33c2992690a06c8fffb374afec3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d22678a_2500ae25",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-06T20:22:40Z",
+      "side": 1,
+      "message": "I think it would be good to adopt, as a comment convention, something like the google3 thread annotations.  Maybe\n\n    // Protected by mStateLock.\n\nI think you should go further and say something like:\n\"Since State is sufficiently small, we assume it can be read atomically (as in currentState()).  Technically, this is allows race conditions, but these should be benign.\"\n\nAnother possibility: us a C++11 std::atomic for this.",
+      "range": {
+        "startLine": 66,
+        "startChar": 31,
+        "endLine": 66,
+        "endChar": 32
+      },
+      "revId": "90b9acf70e3ec33c2992690a06c8fffb374afec3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
