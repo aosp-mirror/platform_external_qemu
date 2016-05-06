@@ -17,6 +17,7 @@
 #include "RendererImpl.h"
 
 #include "android/base/Compiler.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/MessageChannel.h"
 
 #include <memory>
@@ -60,7 +61,27 @@ private:
     std::shared_ptr<RendererImpl> mRenderer;
 
     EventCallback mOnEvent;
+
+    // Protects the state recalculation and writes to mState.
+    //
+    // The correctness condition governing the relationship between mFromGuest,
+    // mToGuest, and mState is that we can't reach a potentially stable state
+    // (i.e., at the end of a set of invocations of publically-visible
+    // operations) in which either:
+    //  - mFromGuest().size() < mFromGuest.capacity(), yet state does not have
+    //    State::CanWrite, or
+    //  - mToGuest().size > 0, yet state does not have State::CanRead.
+    // Clients assume they can poll currentState() and have the indicate whether
+    // a write or read might possibly succeed, and this correctness condition
+    // makes that assumption valid -- if a write or read might succeed,
+    // mState is required to eventually indicate this.
+    //
+    // Note: as mState is an enum, we don't need to lock the reads from it while
+    //  emulator only targets x86 - its memory architecture is strong enough to
+    //  guarantee the read value.
+    android::base::Lock mStateLock;
     State mState = State::Empty;
+
     bool mStopped = false;
 
     static const size_t kChannelCapacity = 256;
