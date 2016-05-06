@@ -29,6 +29,7 @@
 #include "GLESv2Context.h"
 #include "GLESv2Validate.h"
 #include "ShaderParser.h"
+#include "ANGLEShaderParser.h"
 #include "ProgramData.h"
 #include <GLcommon/TextureUtils.h>
 #include <GLcommon/FramebufferData.h>
@@ -70,8 +71,8 @@ static GLESiface  s_glesIface = {
 extern "C" {
 
 static void initGLESx() {
-    DBG("No special initialization necessary for GLES_V2\n");
-    return;
+    // ANGLE compilers must be initialize once per process.
+    ANGLEShaderParser::initialize();
 }
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
@@ -398,8 +399,6 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
             infoLog = new GLchar[infoLogLength+1];
             ctx->dispatcher().glGetShaderInfoLog(globalShaderName,infoLogLength,NULL,infoLog);
             sp->setInfoLog(infoLog);
-        } else {
-            sp->setInvalidInfoLog();
         }
     }
 }
@@ -1442,7 +1441,7 @@ GL_APICALL void  GL_APIENTRY glGetShaderSource(GLuint shader, GLsizei bufsize, G
        ObjectDataPtr objData = ctx->shareGroup()->getObjectData(SHADER,shader);
        SET_ERROR_IF(!objData.get(),GL_INVALID_OPERATION);
        SET_ERROR_IF(objData.get()->getDataType()!=SHADER_DATA,GL_INVALID_OPERATION);
-       const std::string& src = ((ShaderParser*)objData.get())->getOriginalSrc();
+       const std::string& src = ((ShaderParser*)objData.get())->getSrc();
        int srcLength = static_cast<int>(src.size());
 
        int returnLength = bufsize<srcLength ? bufsize-1 : srcLength;
