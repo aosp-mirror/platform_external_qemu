@@ -70,6 +70,30 @@
       "revId": "dd446c41ec67a4d21bfe0b0ba44bfdd1eed30555",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad65dbc5_00d0ea60",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-06T17:43:07Z",
+      "side": 1,
+      "message": "Thanks for the tip :)\n\nThe particular reason for the lock:\n\nWhen using GL fence sync (to improve buffer flipping/app transitions), there can be multiple threads that could wait on a single fence command\u0027s completion. We might get better performance using this lock when multiple threads initiate waits on a single OpenGL fence sync object in a short time; rather than allowing just one thread to read from a map at a time, allow several.\n\nJust using a regular lock seems fine for the moment in that application, though. Overall, I mostly thought this would be nice to have in general.",
+      "parentUuid": "ad65dbc5_801ebaa7",
+      "range": {
+        "startLine": 89,
+        "startChar": 10,
+        "endLine": 89,
+        "endChar": 27
+      },
+      "revId": "dd446c41ec67a4d21bfe0b0ba44bfdd1eed30555",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
