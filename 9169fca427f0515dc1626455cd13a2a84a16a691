@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d22678a_f9863feb",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-06T22:26:31Z",
+      "side": 1,
+      "message": "well, in your current code you need to call delete too - because DeleteCriticalSection only deletes the OS-managed state, not the heap memory.\nAlso, I hope with the union solution you won\u0027t need to have dynamic allocation here",
+      "range": {
+        "startLine": 142,
+        "startChar": 8,
+        "endLine": 142,
+        "endChar": 29
+      },
+      "revId": "9169fca427f0515dc1626455cd13a2a84a16a691",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
