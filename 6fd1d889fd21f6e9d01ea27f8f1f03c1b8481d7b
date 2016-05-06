@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ad65dbc5_dd7c1f64",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1115,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-06T17:03:55Z",
+      "side": 1,
+      "message": "I\u0027ve seen this block of code being moved back and forth at least three times. Could you please add a comment to the code explaining why you think it has to be here? Because it\u0027s always some random change _plus_ cut-n-paste the whole block somewhere else :)",
+      "range": {
+        "startLine": 1112,
+        "startChar": 6,
+        "endLine": 1115,
+        "endChar": 28
+      },
+      "revId": "6fd1d889fd21f6e9d01ea27f8f1f03c1b8481d7b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
