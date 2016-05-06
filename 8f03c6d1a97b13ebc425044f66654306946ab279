@@ -46,6 +46,30 @@
       "revId": "8f03c6d1a97b13ebc425044f66654306946ab279",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d22678a_998d4b3c",
+        "filename": "android/crashreport/CrashService_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1079748
+      },
+      "writtenOn": "2016-05-06T22:18:26Z",
+      "side": 1,
+      "message": "easiest way is to just bump it to 1 second and start logging the time it really took.",
+      "parentUuid": "0d22678a_8b825162",
+      "range": {
+        "startLine": 170,
+        "startChar": 44,
+        "endLine": 170,
+        "endChar": 47
+      },
+      "revId": "8f03c6d1a97b13ebc425044f66654306946ab279",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
