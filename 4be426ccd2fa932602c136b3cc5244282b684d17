@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d22678a_c5827a11",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-06T20:55:26Z",
+      "side": 1,
+      "message": "just skip this",
+      "range": {
+        "startLine": 106,
+        "startChar": 0,
+        "endLine": 106,
+        "endChar": 24
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d22678a_a87c73db",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-06T20:55:26Z",
+      "side": 1,
+      "message": "could you please explain that this is the copy of the Windows.h\u0027s definition of a SRWLOCK structure?",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 2
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d22678a_48485fbc",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-06T20:55:26Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 77,
+        "startChar": 35,
+        "endLine": 77,
+        "endChar": 61
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d22678a_48e4dfbc",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-06T20:55:26Z",
+      "side": 1,
+      "message": "why not just sLockSupportLoader.get() ? why do you need an extra indirection level?",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 39
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d22678a_28f6c3a0",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-06T20:55:26Z",
+      "side": 1,
+      "message": "please use LoadLibraryW(L\"kernel32.dll\");",
+      "range": {
+        "startLine": 86,
+        "startChar": 15,
+        "endLine": 86,
+        "endChar": 26
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d22678a_086ca724",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-06T20:55:26Z",
+      "side": 1,
+      "message": "this all is a little heavyweight what about a union of void* and CRITICAL_SECTION just inside of the class body, so it\u0027s allocated statically?\nAlso",
+      "range": {
+        "startLine": 130,
+        "startChar": 0,
+        "endLine": 134,
+        "endChar": 54
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d22678a_28524359",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-06T20:55:26Z",
+      "side": 1,
+      "message": "you need to call DeleteCriticalSection()",
+      "range": {
+        "startLine": 144,
+        "startChar": 8,
+        "endLine": 144,
+        "endChar": 40
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
