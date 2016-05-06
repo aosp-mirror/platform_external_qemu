@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0d22678a_4ec5c74b",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-06T22:04:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d22678a_c5827a11",
+      "range": {
+        "startLine": 106,
+        "startChar": 0,
+        "endLine": 106,
+        "endChar": 24
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d22678a_a87c73db",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-05-06T20:55:26Z",
       "side": 1,
       "message": "could you please explain that this is the copy of the Windows.h\u0027s definition of a SRWLOCK structure?",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 2
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d22678a_aee0fbde",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-06T22:04:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d22678a_a87c73db",
       "range": {
         "startLine": 29,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "0d22678a_0ed02f08",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-06T22:04:04Z",
+      "side": 1,
+      "message": "Sorry, this was left over from ConditionVariable_win32.cpp :p",
+      "parentUuid": "0d22678a_48485fbc",
+      "range": {
+        "startLine": 77,
+        "startChar": 35,
+        "endLine": 77,
+        "endChar": 61
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d22678a_48e4dfbc",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 2
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "0d22678a_8e041f70",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-06T22:04:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d22678a_48e4dfbc",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 39
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d22678a_28f6c3a0",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 2
@@ -105,6 +201,30 @@
       "writtenOn": "2016-05-06T20:55:26Z",
       "side": 1,
       "message": "please use LoadLibraryW(L\"kernel32.dll\");",
+      "range": {
+        "startLine": 86,
+        "startChar": 15,
+        "endLine": 86,
+        "endChar": 26
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d22678a_cefe177a",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-06T22:04:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d22678a_28f6c3a0",
       "range": {
         "startLine": 86,
         "startChar": 15,
@@ -164,6 +284,30 @@
     },
     {
       "key": {
+        "uuid": "0d22678a_ee38332f",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-06T22:04:04Z",
+      "side": 1,
+      "message": "Thanks for the tips Yurii and Bjoern :) investigation + revisions incoming.",
+      "parentUuid": "0d22678a_48f05fdb",
+      "range": {
+        "startLine": 130,
+        "startChar": 0,
+        "endLine": 134,
+        "endChar": 54
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d22678a_28524359",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 2
@@ -175,6 +319,30 @@
       "writtenOn": "2016-05-06T20:55:26Z",
       "side": 1,
       "message": "you need to call DeleteCriticalSection()",
+      "range": {
+        "startLine": 144,
+        "startChar": 8,
+        "endLine": 144,
+        "endChar": 40
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d22678a_6e4523a3",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-06T22:04:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d22678a_28524359",
       "range": {
         "startLine": 144,
         "startChar": 8,
