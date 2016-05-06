@@ -82,6 +82,56 @@ private:
     DISALLOW_COPY_AND_ASSIGN(Lock);
 };
 
+class ReadWriteLock {
+public:
+    ReadWriteLock() {
+#ifdef _WIN32
+        ::InitializeSRWLock(&mRWLock);
+#else
+        ::pthread_rwlock_init(&mRWLock, NULL);
+#endif
+    }
+    void lockRead() {
+#ifdef _WIN32
+        ::AcquireSRWLockShared(&mRWLock);
+#else
+        ::pthread_rwlock_rdlock(&mRWLock);
+#endif
+    }
+    void unlockRead() {
+#ifdef _WIN32
+        ::ReleaseSRWLockShared(&mRWLock);
+#else
+        ::pthread_rwlock_unlock(&mRWLock);
+#endif
+    }
+    void lockWrite() {
+#ifdef _WIN32
+        ::AcquireSRWLockExclusive(&mRWLock);
+#else
+        ::pthread_rwlock_wrlock(&mRWLock);
+#endif
+    }
+    void unlockWrite() {
+#ifdef _WIN32
+        ::ReleaseSRWLockExclusive(&mRWLock);
+#else
+        ::pthread_rwlock_unlock(&mRWLock);
+#endif
+    }
+private:
+    friend class ConditionVariable;
+
+#ifdef _WIN32
+    SRWLock mRWLock;
+#else
+    pthread_rwlock_t mRWLock;
+#endif
+    DISALLOW_COPY_AND_ASSIGN(ReadWriteLock);
+};
+
+
+
 // Helper class to lock / unlock a mutex automatically on scope
 // entry and exit.
 // NB: not thread-safe (as opposed to the Lock class)
@@ -114,6 +164,7 @@ private:
     bool mLocked = true;
     DISALLOW_COPY_AND_ASSIGN(AutoLock);
 };
+
 
 }  // namespace base
 }  // namespace android
