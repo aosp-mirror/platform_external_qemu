@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0d22678a_0b274104",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-06T21:44:57Z",
+      "side": 1,
+      "message": "it\u0027s not supposed to be called while operating, but I\u0027d rather just lock it instead of adding one more comment about some assumption",
+      "parentUuid": "0d22678a_a5981e2c",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 26
+      },
+      "revId": "90b9acf70e3ec33c2992690a06c8fffb374afec3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d22678a_85608228",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-05-06T20:22:40Z",
       "side": 1,
       "message": "If mStateLock protects only mState, no reason for this to be inside the lock.",
+      "range": {
+        "startLine": 115,
+        "startChar": 4,
+        "endLine": 115,
+        "endChar": 39
+      },
+      "revId": "90b9acf70e3ec33c2992690a06c8fffb374afec3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d22678a_cb336952",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-06T21:44:57Z",
+      "side": 1,
+      "message": "very good find, I need to add an explanation as a comment\nit doesn\u0027t just protect mState, it makes sure mState is the right one. This means it protects both calculation of the new state and storing of it in mState.\nOtherwise it\u0027s possible for two threads to (1) calculate old state, switch out (2) update state, calculate new state, lock, assign new state to mState, exit, (1) wake, assign _old_ state to mState, ...",
+      "parentUuid": "0d22678a_85608228",
       "range": {
         "startLine": 115,
         "startChar": 4,
@@ -82,6 +130,30 @@
       "writtenOn": "2016-05-06T20:22:40Z",
       "side": 1,
       "message": "I think it would be good to adopt, as a comment convention, something like the google3 thread annotations.  Maybe\n\n    // Protected by mStateLock.\n\nI think you should go further and say something like:\n\"Since State is sufficiently small, we assume it can be read atomically (as in currentState()).  Technically, this is allows race conditions, but these should be benign.\"\n\nAnother possibility: us a C++11 std::atomic for this.",
+      "range": {
+        "startLine": 66,
+        "startChar": 31,
+        "endLine": 66,
+        "endChar": 32
+      },
+      "revId": "90b9acf70e3ec33c2992690a06c8fffb374afec3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d22678a_2b24fdfc",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-06T21:44:57Z",
+      "side": 1,
+      "message": "will add a comment.\natomic won\u0027t solve all issues - as you can see in my response to another question",
+      "parentUuid": "0d22678a_2500ae25",
       "range": {
         "startLine": 66,
         "startChar": 31,
