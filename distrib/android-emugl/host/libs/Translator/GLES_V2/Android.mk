@@ -13,6 +13,8 @@ host_common_SRC_FILES := \
 $(call emugl-begin-shared-library,lib$(BUILD_TARGET_SUFFIX)GLES_V2_translator)
 $(call emugl-import, libGLcommon)
 
+LOCAL_C_INCLUDES += $(ANGLE_TRANSLATOR_INCLUDES)
+LOCAL_STATIC_LIBRARIES += $(ANGLE_TRANSLATOR_STATIC_LIBRARIES)
 LOCAL_SRC_FILES := $(host_common_SRC_FILES)
 
 $(call emugl-end-module)
