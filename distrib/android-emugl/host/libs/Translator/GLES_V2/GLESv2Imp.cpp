@@ -29,6 +29,7 @@
 #include "GLESv2Context.h"
 #include "GLESv2Validate.h"
 #include "ShaderParser.h"
+#include "ANGLEShaderParser.h"
 #include "ProgramData.h"
 #include <GLcommon/TextureUtils.h>
 #include <GLcommon/FramebufferData.h>
@@ -72,8 +73,8 @@ static GLESiface  s_glesIface = {
 extern "C" {
 
 static void initGLESx() {
-    DBG("No special initialization necessary for GLES_V2\n");
-    return;
+    // ANGLE compilers must be initialize once per process.
+    ANGLEShaderParser::initialize();
 }
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
@@ -400,8 +401,6 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
             infoLog = new GLchar[infoLogLength+1];
             ctx->dispatcher().glGetShaderInfoLog(globalShaderName,infoLogLength,NULL,infoLog);
             sp->setInfoLog(infoLog);
-        } else {
-            sp->setInvalidInfoLog();
         }
     }
 }

@@ -1,11 +1,11 @@
 LOCAL_PATH := $(call my-dir)
 
 host_common_SRC_FILES := \
+     ANGLEShaderParser.cpp \
      GLESv2Imp.cpp       \
      GLESv2Context.cpp   \
      GLESv2Validate.cpp  \
      ShaderParser.cpp    \
-     ShaderValidator.cpp \
      ProgramData.cpp
 
 
