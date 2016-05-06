@@ -139,6 +139,24 @@
       "revId": "811298c18143f4256dee62645d1acc9f225f249c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad65dbc5_fd0c832c",
+        "filename": "android/hw-pipe-net.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1048574
+      },
+      "writtenOn": "2016-05-06T16:57:57Z",
+      "side": 1,
+      "message": "nit: for future reference, I think it\u0027s easier to read positive cases first.  e.g.\n\n#ifdef _WIN32\n        int  len \u003d qemu2_send_all(loopIo_fd(pipe-\u003eio), buff-\u003edata + buffStart, avail);\n#else\n        int  len \u003d HANDLE_EINTR(send(loopIo_fd(pipe-\u003eio), buff-\u003edata + buffStart, avail, 0));\n#endif",
+      "parentUuid": "08733496_39189557",
+      "revId": "811298c18143f4256dee62645d1acc9f225f249c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
