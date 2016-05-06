@@ -22,6 +22,30 @@
       "revId": "6fd1d889fd21f6e9d01ea27f8f1f03c1b8481d7b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad65dbc5_60e446bd",
+        "filename": "android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1115,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-05-06T17:26:45Z",
+      "side": 1,
+      "message": "This code block used to be in keyPressEvent(), which was a problem for two reasons:\n\n1. It was confusing for handleKeyEvent() to not contain all the logic that *handled key events*.\n2. Sending text on key presses was the reason we were sending erroneous characters (like \u003d on volume up).\n\nI think it was moved from keyPressEvent to keyReleaseEvent once to fix the problem, but it either didn\u0027t fix it or I complained and said it should be in handleKeyEvent.",
+      "parentUuid": "ad65dbc5_dd7c1f64",
+      "range": {
+        "startLine": 1112,
+        "startChar": 6,
+        "endLine": 1115,
+        "endChar": 28
+      },
+      "revId": "6fd1d889fd21f6e9d01ea27f8f1f03c1b8481d7b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
