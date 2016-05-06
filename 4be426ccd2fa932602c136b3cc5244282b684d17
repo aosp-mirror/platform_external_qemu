@@ -308,6 +308,30 @@
     },
     {
       "key": {
+        "uuid": "0d22678a_ee5d93d9",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-06T22:15:11Z",
+      "side": 1,
+      "message": "regarding the recursive part - I don\u0027t really think it\u0027s that big of a deal. Both linux and mac have non-recursive locks, and even on Vista+ it won\u0027t be recursive. That gives _me_ enough confidence in the code - that if it actually has any recursive paths, we would experience a deadlock much earlier than someone tries it on XP and bad things happen\n\nAlso, XP x64 is so rarely used that I don\u0027t think it\u0027s worth spending more time dealing with its limitations.",
+      "parentUuid": "0d22678a_48f05fdb",
+      "range": {
+        "startLine": 130,
+        "startChar": 0,
+        "endLine": 134,
+        "endChar": 54
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d22678a_28524359",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 2
