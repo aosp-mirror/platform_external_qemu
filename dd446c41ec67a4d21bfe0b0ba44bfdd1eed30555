@@ -46,6 +46,30 @@
       "revId": "dd446c41ec67a4d21bfe0b0ba44bfdd1eed30555",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad65dbc5_801ebaa7",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-06T17:23:55Z",
+      "side": 1,
+      "message": "Easily, you just need to dynamically load all these functions (LoadLibrary()/GetProcAddresss()). If they aren\u0027t present - that\u0027s XP :)\nAlso, you need a fallback implementation for the case when it\u0027s XP\n\n@Vince: maybe we can deprecate XP now, where there\u0027s one more piece of a code for Vista+?\nBTW, where do we need this kind of a lock?",
+      "parentUuid": "ad65dbc5_00eb8ac0",
+      "range": {
+        "startLine": 89,
+        "startChar": 10,
+        "endLine": 89,
+        "endChar": 27
+      },
+      "revId": "dd446c41ec67a4d21bfe0b0ba44bfdd1eed30555",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
