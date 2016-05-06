@@ -142,6 +142,7 @@ LOCAL_SRC_FILES := \
 ifeq ($(BUILD_TARGET_OS),windows)
 LOCAL_SRC_FILES += \
     android/base/synchronization/ConditionVariable_win32.cpp \
+    android/base/synchronization/ReadWriteLock_win32.cpp \
     android/base/threads/Thread_win32.cpp \
     android/base/system/Win32Utils.cpp \
     android/base/system/Win32UnicodeString.cpp \
@@ -431,6 +432,7 @@ LOCAL_SRC_FILES := \
   android/base/StringView_unittest.cpp \
   android/base/synchronization/ConditionVariable_unittest.cpp \
   android/base/synchronization/Lock_unittest.cpp \
+  android/base/synchronization/ReadWriteLock_unittest.cpp \
   android/base/synchronization/MessageChannel_unittest.cpp \
   android/base/system/System_unittest.cpp \
   android/base/threads/FunctorThread_unittest.cpp \
