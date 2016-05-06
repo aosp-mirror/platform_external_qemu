@@ -22,6 +22,30 @@
       "revId": "dd446c41ec67a4d21bfe0b0ba44bfdd1eed30555",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad65dbc5_00eb8ac0",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-06T17:20:57Z",
+      "side": 1,
+      "message": "Got it! Any way to detect XP at runtime?",
+      "parentUuid": "ad65dbc5_c092725c",
+      "range": {
+        "startLine": 89,
+        "startChar": 10,
+        "endLine": 89,
+        "endChar": 27
+      },
+      "revId": "dd446c41ec67a4d21bfe0b0ba44bfdd1eed30555",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
