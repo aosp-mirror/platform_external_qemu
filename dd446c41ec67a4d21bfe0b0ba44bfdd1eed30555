@@ -94,6 +94,30 @@
       "revId": "dd446c41ec67a4d21bfe0b0ba44bfdd1eed30555",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad65dbc5_4047420e",
+        "filename": "android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-06T17:45:19Z",
+      "side": 1,
+      "message": "In that case the fallback implementation could be just a simple \u0027regular\u0027 lock, where both lockRead() and lockWrite() just call lock()\nthis way we would keep the code as simple as possible and also take advantage from the OS-provided read-write lock where it\u0027s supported (pretty much everywhere)",
+      "parentUuid": "ad65dbc5_00d0ea60",
+      "range": {
+        "startLine": 89,
+        "startChar": 10,
+        "endLine": 89,
+        "endChar": 27
+      },
+      "revId": "dd446c41ec67a4d21bfe0b0ba44bfdd1eed30555",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
