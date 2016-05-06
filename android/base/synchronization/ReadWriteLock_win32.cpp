@@ -1,0 +1,156 @@
+// Copyright (C) 2016 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "android/base/synchronization/Lock.h"
+
+#include "android/base/memory/LazyInstance.h"
+
+// Based on a similar setup for condition variables in Windows
+// (ConditionVariable_win32.cpp), + chromium webrtc.
+
+// We need to check at runtime if there is support for
+// SRWLock's (WinXP doesn't have it).
+
+// Function pointers for locking operations are set
+// depending on support. If there aren't any, we use a fallback
+// implementation.
+
+struct SRWLock {
+    void* ptr;
+};
+
+static bool sSRWSupported = false;
+static bool sModuleLoaded = false;
+static HMODULE sLibrary = NULL;
+
+typedef void (*initialize_srw_lock_t)(SRWLock*);
+
+typedef void (*acquire_srw_lock_exclusive_t)(SRWLock*);
+typedef void (*release_srw_lock_exclusive_t)(SRWLock*);
+
+typedef void (*acquire_srw_lock_shared_t)(SRWLock*);
+typedef void (*release_srw_lock_shared_t)(SRWLock*);
+
+namespace android {
+namespace base {
+
+namespace {
+
+
+void default_initialize_srw_lock(SRWLock* lock) {
+    InitializeCriticalSection((CRITICAL_SECTION*)lock);
+}
+
+void default_acquire_srw_lock_exclusive(SRWLock* lock) {
+    EnterCriticalSection((CRITICAL_SECTION*)lock);
+}
+
+void default_release_srw_lock_exclusive(SRWLock* lock) {
+    LeaveCriticalSection((CRITICAL_SECTION*)lock);
+}
+
+void default_acquire_srw_lock_shared(SRWLock* lock) {
+    EnterCriticalSection((CRITICAL_SECTION*)lock);
+}
+
+void default_release_srw_lock_shared(SRWLock* lock) {
+    LeaveCriticalSection((CRITICAL_SECTION*)lock);
+}
+
+initialize_srw_lock_t initialize_srw_lock = default_initialize_srw_lock;
+acquire_srw_lock_exclusive_t acquire_srw_lock_exclusive = default_acquire_srw_lock_exclusive;
+release_srw_lock_exclusive_t release_srw_lock_exclusive = default_release_srw_lock_exclusive;
+acquire_srw_lock_shared_t acquire_srw_lock_shared = default_acquire_srw_lock_shared;
+release_srw_lock_shared_t release_srw_lock_shared = default_release_srw_lock_shared;
+
+// Helper class which implements a free list of event handles.
+class SRWLockSupportLoader {
+public:
+    SRWLockSupportLoader();
+    static SRWLockSupportLoader* get();
+};
+
+
+SRWLockSupportLoader::SRWLockSupportLoader() {
+    sLibrary = LoadLibrary(TEXT("Kernel32.dll"));
+    if (!sLibrary) { return; }
+    sModuleLoaded = true;
+
+    initialize_srw_lock_t initsrwlock =
+        (initialize_srw_lock_t)GetProcAddress(sLibrary, "InitializeSRWLock");
+
+    acquire_srw_lock_exclusive_t acqlockex =
+        (acquire_srw_lock_exclusive_t)GetProcAddress(sLibrary, "AcquireSRWLockExclusive");
+    release_srw_lock_exclusive_t rellockex =
+        (release_srw_lock_exclusive_t)GetProcAddress(sLibrary, "ReleaseSRWLockExclusive");
+
+    acquire_srw_lock_shared_t acqlocksh =
+        (acquire_srw_lock_shared_t)GetProcAddress(sLibrary, "AcquireSRWLockShared");
+    release_srw_lock_shared_t rellocksh =
+        (release_srw_lock_shared_t)GetProcAddress(sLibrary, "ReleaseSRWLockShared");
+
+    if (initsrwlock &&
+        acqlockex && rellockex &&
+        acqlocksh && rellocksh) {
+        sSRWSupported = true;
+
+        initialize_srw_lock = initsrwlock;
+
+        acquire_srw_lock_exclusive = acqlockex;
+        release_srw_lock_exclusive = rellockex;
+
+        acquire_srw_lock_shared = acqlocksh;
+        release_srw_lock_shared = rellocksh;
+    } else {
+        sSRWSupported = false;
+    }
+}
+
+LazyInstance<SRWLockSupportLoader> sLockSupportLoader = LAZY_INSTANCE_INIT;
+
+SRWLockSupportLoader* SRWLockSupportLoader::get() {
+    return sLockSupportLoader.ptr();
+}
+
+}  // namespace
+
+ReadWriteLock::ReadWriteLock() {
+    if (!sModuleLoaded) { SRWLockSupportLoader::get(); }
+    if (sSRWSupported) {
+        SRWLock* lock = new SRWLock;
+        mLock = (void*)lock;
+    } else {
+        CRITICAL_SECTION* lock = new CRITICAL_SECTION;
+        mLock = (void*)lock;
+    }
+    initialize_srw_lock((SRWLock*)mLock);
+}
+
+ReadWriteLock::~ReadWriteLock() {
+    if (sSRWSupported) {
+        delete (SRWLock*)mLock;
+    } else {
+        delete (CRITICAL_SECTION*)mLock;
+    }
+}
+
+void ReadWriteLock::lockWrite() { acquire_srw_lock_exclusive((SRWLock*)mLock); }
+void ReadWriteLock::unlockWrite() { release_srw_lock_exclusive((SRWLock*)mLock); }
+
+void ReadWriteLock::lockRead() { acquire_srw_lock_shared((SRWLock*)mLock); }
+void ReadWriteLock::unlockRead() { release_srw_lock_shared((SRWLock*)mLock); }
+
+}  // namespace base
+}  // namespace android
+
