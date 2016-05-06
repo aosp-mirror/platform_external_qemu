@@ -17,6 +17,7 @@
 #include "RendererImpl.h"
 
 #include "android/base/Compiler.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/MessageChannel.h"
 
 #include <memory>
@@ -60,7 +61,14 @@ private:
     std::shared_ptr<RendererImpl> mRenderer;
 
     EventCallback mOnEvent;
+
+    // Protects the state recalculation and writes to mState.
+    // Note: as mState is an enum, we don't need to lock the reads from it while
+    //  emulator only targets x86 - its memory architecture is strong enough to
+    //  guarantee the read value.
+    android::base::Lock mStateLock;
     State mState = State::Empty;
+
     bool mStopped = false;
 
     static const size_t kChannelCapacity = 256;
