@@ -126,7 +126,6 @@ LOCAL_SRC_FILES := \
     android/utils/property_file.c \
     android/utils/reflist.c \
     android/utils/refset.c \
-    android/utils/sockets.c \
     android/utils/stralloc.c \
     android/utils/stream.cpp \
     android/utils/string.cpp \
@@ -317,6 +316,7 @@ LOCAL_SRC_FILES := \
     android/update-check/VersionExtractor.cpp \
     android/user-config.cpp \
     android/utils/socket_drainer.cpp \
+    android/utils/sockets.c \
     android/utils/looper.cpp \
     android/wear-agent/android_wear_agent.cpp \
     android/wear-agent/WearAgent.cpp \
