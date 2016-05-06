@@ -17,6 +17,7 @@
 #include "RendererImpl.h"
 
 #include "android/base/Compiler.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/MessageChannel.h"
 
 #include <memory>
@@ -60,6 +61,8 @@ private:
     std::shared_ptr<RendererImpl> mRenderer;
 
     EventCallback mOnEvent;
+
+    android::base::Lock mStateLock;
     State mState = State::Empty;
     bool mStopped = false;
 

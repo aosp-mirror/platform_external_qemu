@@ -110,9 +110,13 @@ void RenderChannelImpl::onEvent(bool byGuest) {
     if (!mOnEvent) {
         return;
     }
+
+    android::base::AutoLock lock(mStateLock);
     const State newState = calcState();
-    if (newState != mState) {
+    if (mState != newState) {
         mState = newState;
+        lock.unlock();
+
         mOnEvent(newState,
                  byGuest ? EventSource::Client : EventSource::RenderChannel);
     }
