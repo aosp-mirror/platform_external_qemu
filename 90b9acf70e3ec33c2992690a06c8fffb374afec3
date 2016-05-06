@@ -120,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "72590445_888af774",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-06T22:58:50Z",
+      "side": 1,
+      "message": "We talked in person.  Here\u0027s how I now explain this code to myself -- if we believe it\u0027s correct, then maybe this explanation needs to be part of the documentation somewhere.\n\nThe correctness condition governing the relationship between mFromGuest, mToGuest, and mState is that we can\u0027t reach a potentially stable state (i.e., at the end of a set of invocations of publically-visible operations) in which either:\n  mFromGuest().size() \u003c mFromGuest.capacity(), yet state does not have State::CanWrite, or\n  mToGuest().size \u003e 0, yet state does not have State::CanRead.\n\nClients assume they can poll currentState() and have the indicate whether a write or read might possibly succeed, and this correctness condition makes that assumption valid -- if a write or read might succeed, mState is required to eventually indicate this.",
+      "parentUuid": "0d22678a_0e274f04",
+      "range": {
+        "startLine": 115,
+        "startChar": 4,
+        "endLine": 115,
+        "endChar": 39
+      },
+      "revId": "90b9acf70e3ec33c2992690a06c8fffb374afec3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d22678a_45abea2c",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
         "patchSetId": 1
