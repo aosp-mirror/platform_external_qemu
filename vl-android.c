@@ -2013,7 +2013,7 @@ int main(int argc, char **argv, char **envp)
     /* Initialize boot properties. */
     boot_property_init_service();
     android_hw_control_init();
-    android_init_opengles_pipe();
+    android_init_opengles_pipe(looper_getForThread());
 
     socket_drainer_start(looper_getForThread());
     android_wear_agent_start(looper_getForThread());
