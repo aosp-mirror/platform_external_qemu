@@ -496,6 +496,7 @@ LOCAL_SRC_FILES := \
   android/utils/path_unittest.cpp \
   android/utils/property_file_unittest.cpp \
   android/utils/string_unittest.cpp \
+  android/utils/socket_drainer.cpp \
   android/utils/sockets_unittest.cpp \
   android/utils/x86_cpuid_unittest.cpp \
   android/wear-agent/PairUpWearPhone_unittest.cpp \
