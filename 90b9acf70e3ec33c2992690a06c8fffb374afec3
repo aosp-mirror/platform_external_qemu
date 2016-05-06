@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "0d22678a_0e274f04",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-06T22:01:20Z",
+      "side": 1,
+      "message": "Generally speaking, locks protect data, not computation.  If it \"protects calculation of the new state\", then this really means it (also) protects some fields accessed in that calculation. Sounds to me like you need to specify this lock as also protecting mStopped, mToGuest, and mFromGuest.\n\nMy (long, hard :-)) experience is that there\u0027s no getting around this -- that it\u0027s best to specify a locking protocol, and follow it to the letter -- code that would pass TSAN, if we had it available.",
+      "parentUuid": "0d22678a_cb336952",
+      "range": {
+        "startLine": 115,
+        "startChar": 4,
+        "endLine": 115,
+        "endChar": 39
+      },
+      "revId": "90b9acf70e3ec33c2992690a06c8fffb374afec3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d22678a_45abea2c",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.cpp",
         "patchSetId": 1
