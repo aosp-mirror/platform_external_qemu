@@ -25,6 +25,27 @@
 
 #include <assert.h>
 
+#ifdef _WIN32
+// Declarations for shared reader/writer lock objects.
+// For the ReadWriteLock class.
+struct SRWLock {
+// Note: this is a copy of the definition of the SRWLOCK struct
+// from Windows.h.
+    void* ptr;
+};
+
+struct FallbackLockObj {
+    CRITICAL_SECTION write_lock;
+    CRITICAL_SECTION read_lock;
+    size_t num_readers;
+};
+
+union SRWLockObj {
+    SRWLock srw_lock;
+    FallbackLockObj fallback_lock_obj;
+};
+#endif
+
 namespace android {
 namespace base {
 
@@ -82,6 +103,46 @@ private:
     DISALLOW_COPY_AND_ASSIGN(Lock);
 };
 
+
+#ifdef _WIN32
+class ReadWriteLock {
+public:
+    ReadWriteLock();
+    ~ReadWriteLock();
+    void lockRead();
+    void lockWrite();
+    void unlockRead();
+    void unlockWrite();
+private:
+    friend class ConditionVariable;
+    SRWLockObj mLock;
+    DISALLOW_COPY_AND_ASSIGN(ReadWriteLock);
+};
+#else
+class ReadWriteLock {
+public:
+    ReadWriteLock() {
+        ::pthread_rwlock_init(&mRWLock, NULL);
+    }
+    void lockRead() {
+        ::pthread_rwlock_rdlock(&mRWLock);
+    }
+    void unlockRead() {
+        ::pthread_rwlock_unlock(&mRWLock);
+    }
+    void lockWrite() {
+        ::pthread_rwlock_wrlock(&mRWLock);
+    }
+    void unlockWrite() {
+        ::pthread_rwlock_unlock(&mRWLock);
+    }
+private:
+    friend class ConditionVariable;
+    pthread_rwlock_t mRWLock;
+    DISALLOW_COPY_AND_ASSIGN(ReadWriteLock);
+};
+#endif
+
 // Helper class to lock / unlock a mutex automatically on scope
 // entry and exit.
 // NB: not thread-safe (as opposed to the Lock class)
@@ -114,6 +175,7 @@ private:
     bool mLocked = true;
     DISALLOW_COPY_AND_ASSIGN(AutoLock);
 };
+
 
 }  // namespace base
 }  // namespace android
