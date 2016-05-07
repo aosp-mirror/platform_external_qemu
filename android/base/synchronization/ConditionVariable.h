@@ -15,7 +15,9 @@
 #pragma once
 
 #include "android/base/synchronization/Lock.h"
-#include "android/base/containers/PodVector.h"
+#include "android/base/system/Win32Utils.h"
+
+#include <vector>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -32,9 +34,6 @@ namespace base {
 class ConditionVariable {
 public:
 #ifdef _WIN32
-
-    // Default constructor.
-    ConditionVariable();
 
     // Destructor.
     ~ConditionVariable();
@@ -56,7 +55,7 @@ public:
     void signal();
 
 private:
-    PodVector<HANDLE> mWaiters;
+    std::vector<Win32Utils::ScopedHandle> mWaiters;
     Lock mLock;
 
 #else  // !_WIN32

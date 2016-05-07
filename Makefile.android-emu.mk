@@ -69,7 +69,6 @@ LOCAL_C_INCLUDES := \
     $(LIBUUID_INCLUDES) \
 
 LOCAL_SRC_FILES := \
-    android/base/containers/PodVector.cpp \
     android/base/containers/PointerSet.cpp \
     android/base/containers/HashUtils.cpp \
     android/base/files/PathUtils.cpp \
@@ -405,7 +404,6 @@ LOCAL_SRC_FILES := \
   android/base/containers/CircularBuffer_unittest.cpp \
   android/base/containers/HashUtils_unittest.cpp \
   android/base/containers/Lookup_unittest.cpp \
-  android/base/containers/PodVector_unittest.cpp \
   android/base/containers/PointerSet_unittest.cpp \
   android/base/containers/ScopedPointerSet_unittest.cpp \
   android/base/containers/TailQueueList_unittest.cpp \

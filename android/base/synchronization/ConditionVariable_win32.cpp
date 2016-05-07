@@ -16,7 +16,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
-#include "android/base/containers/PodVector.h"
+#include "android/base/system/Win32Utils.h"
 
 // Technical note: this is loosely based on the Chromium implementation
 // of ConditionVariable. This version works on Windows XP and above and
@@ -30,37 +30,32 @@ namespace {
 // Helper class which implements a free list of event handles.
 class WaitEventStorage {
 public:
-    WaitEventStorage() : mFreeHandles(), mLock() {}
-
-    ~WaitEventStorage() {
-        for (size_t n = 0; n < mFreeHandles.size(); ++n) {
-            CloseHandle(mFreeHandles[n]);
-        }
-    }
-
     HANDLE alloc() {
         HANDLE handle;
-        mLock.lock();
-        size_t size = mFreeHandles.size();
-        if (size > 0) {
-            handle = mFreeHandles[size - 1U];
-            mFreeHandles.remove(size - 1U);
+        AutoLock lock(mLock);
+        if (!mFreeHandles.empty()) {
+            handle = mFreeHandles.back().release();
+            mFreeHandles.pop_back();
         } else {
+            lock.unlock();
             handle = CreateEvent(NULL, TRUE, FALSE, NULL);
         }
-        mLock.unlock();
         return handle;
     }
 
     void free(HANDLE h) {
-        mLock.lock();
         ResetEvent(h);
-        mFreeHandles.push_back(h);
-        mLock.unlock();
+        AutoLock lock(mLock);
+        if (mFreeHandles.size() < 100) {
+            mFreeHandles.emplace_back(h);
+        } else {
+            lock.unlock();
+            CloseHandle(h); // don't collect too many open events
+        }
     }
 
 private:
-    PodVector<HANDLE> mFreeHandles;
+    std::vector<Win32Utils::ScopedHandle> mFreeHandles;
     Lock mLock;
 };
 
@@ -68,23 +63,19 @@ LazyInstance<WaitEventStorage> sWaitEvents = LAZY_INSTANCE_INIT;
 
 }  // namespace
 
-ConditionVariable::ConditionVariable() : mWaiters(), mLock() {}
-
 ConditionVariable::~ConditionVariable() {
-    mLock.lock();
-    for (size_t n = 0; n < mWaiters.size(); ++n) {
-        CloseHandle(mWaiters[n]);
-    }
-    mWaiters.resize(0U);
-    mLock.unlock();
+    // Don't lock anything here: if there's someone blocked on |this| while
+    // we're in a dtor in a different thread, the code is already heavily
+    // bugged. Lock here won't save it.
 }
 
 void ConditionVariable::wait(Lock* userLock) {
     // Grab new waiter event handle.
-    mLock.lock();
     HANDLE handle = sWaitEvents->alloc();
-    mWaiters.push_back(handle);
-    mLock.unlock();
+    {
+        AutoLock lock(mLock);
+        mWaiters.emplace_back(handle);
+    }
 
     // Unlock user lock then wait for event.
     userLock->unlock();
@@ -96,20 +87,17 @@ void ConditionVariable::wait(Lock* userLock) {
 }
 
 void ConditionVariable::signal() {
-    mLock.lock();
-    size_t size = mWaiters.size();
-    if (size > 0U) {
+    android::base::AutoLock lock(mLock);
+    if (!mWaiters.empty()) {
         // NOTE: This wakes up the thread that went to sleep most
         //       recently (LIFO) for performance reason. For better
         //       fairness, using (FIFO) would be appropriate.
-        HANDLE handle = mWaiters[size - 1U];
-        mWaiters.remove(size - 1U);
+        HANDLE handle = mWaiters.back().release();
+        mWaiters.pop_back();
+        lock.unlock();
         SetEvent(handle);
         // NOTE: The handle will be closed/recycled by the waiter.
-    } else {
-        // Nothing to signal.
     }
-    mLock.unlock();
 }
 
 }  // namespace base
