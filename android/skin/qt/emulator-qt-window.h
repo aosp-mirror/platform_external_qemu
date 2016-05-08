@@ -359,7 +359,7 @@ private:
             mEventLogger;
 
     std::shared_ptr<android::qt::UserActionsCounter> mUserActionsCounter;
-    android::emulation::AdbInterface mAdbInterface;
+    std::unique_ptr<android::emulation::AdbInterface> mAdbInterface;
     android::emulation::AdbCommandPtr mApkInstallCommand;
     android::emulation::ApkInstaller mApkInstaller;
     android::emulation::FilePusher mFilePusher;

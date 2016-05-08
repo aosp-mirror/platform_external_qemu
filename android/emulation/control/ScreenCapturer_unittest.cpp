@@ -19,7 +19,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
-#include "android/emulation/control/AdbInterface.h"
+#include "android/emulation/control/TestAdbInterface.h"
 
 #include <gtest/gtest.h>
 
@@ -31,7 +31,7 @@
 
 using android::base::System;
 using android::emulation::ScreenCapturer;
-using android::emulation::AdbInterface;
+using android::emulation::TestAdbInterface;
 using std::string;
 using std::vector;
 
@@ -51,8 +51,8 @@ public:
         mHaveResult = false;
         mTestSystem.setShellCommand(&ScreenCapturerTest::shellCmdHandler,
                                     this);
-        mLooper = android::base::ThreadLooper::get();
-        mAdb.reset(new AdbInterface(mLooper));
+        mLooper = android::base::Looper::create();
+        mAdb.reset(new TestAdbInterface(mLooper, "adb"));
         mCapturer.reset(new ScreenCapturer(mAdb.get()));
         mTestSystem.getTempRoot()->makeSubDir("ScreencapOut");
     }
@@ -61,6 +61,8 @@ public:
         // Ensure that no hanging thread makes the object undead at the end of
         // the test.
         mCapturer.reset();
+        mAdb.reset();
+        delete mLooper;
     }
 
     void looperAdvance() { mLooper->runWithTimeoutMs(100); }
@@ -108,7 +110,7 @@ public:
 protected:
     android::base::TestSystem mTestSystem;
     android::base::Looper* mLooper;
-    std::unique_ptr<AdbInterface> mAdb;
+    std::unique_ptr<TestAdbInterface> mAdb;
     std::unique_ptr<ScreenCapturer> mCapturer;
     bool mCaptureMustSucceed;
     bool mPullMustSucceed;

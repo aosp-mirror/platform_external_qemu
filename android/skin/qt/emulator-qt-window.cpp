@@ -129,16 +129,16 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
               &mEventCapturer,
               android::base::CircularBuffer<EventRecord>(1000))),
       mUserActionsCounter(new android::qt::UserActionsCounter(&mEventCapturer)),
-      mAdbInterface(mLooper),
-      mApkInstaller(&mAdbInterface),
-      mFilePusher(&mAdbInterface,
+      mAdbInterface(android::emulation::AdbInterface::create(mLooper)),
+      mApkInstaller(mAdbInterface.get()),
+      mFilePusher(mAdbInterface.get(),
                   [this](StringView filePath, FilePusher::Result result) {
                       adbPushDone(filePath, result);
                   },
                   [this](double progress, bool done) {
                       adbPushProgress(progress, done);
                   }),
-      mScreenCapturer(&mAdbInterface),
+      mScreenCapturer(mAdbInterface.get()),
       mInstallDialog(this),
       mPushDialog(this),
       mStartedAdbStopProcess(false) {
@@ -1144,8 +1144,8 @@ vector<string> EmulatorQtWindow::getAdbFullPathStd() {
     std::string adbPath;
     QSettings settings;
     if (settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
-        if (!mAdbInterface.detectedAdbPath().empty()) {
-            adbPath = mAdbInterface.detectedAdbPath();
+        if (!mAdbInterface->detectedAdbPath().empty()) {
+            adbPath = mAdbInterface->detectedAdbPath();
         } else {
             showErrorDialog(tr("Could not automatically find ADB.<br>"
                                "Please use the settings page to manually set "
@@ -1663,13 +1663,13 @@ void EmulatorQtWindow::wheelScrollTimeout() {
 
 void EmulatorQtWindow::checkAdbVersionAndWarn() {
     QSettings settings;
-    if (!mAdbInterface.isAdbVersionCurrent() &&
+    if (!mAdbInterface->isAdbVersionCurrent() &&
         settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
         mAdbWarningBox.setText(tr(
             "The ADB binary found at %1 is obsolete and has serious"
             "performance problems with the Android Emulator. Please update to "
             "a newer version to get significantly faster app/file transfer.")
-                .arg(mAdbInterface.detectedAdbPath().c_str()));
+                .arg(mAdbInterface->detectedAdbPath().c_str()));
         QSettings settings;
         if (settings.value(Ui::Settings::SHOW_ADB_WARNING, true).toBool()) {
             QObject::connect(&mAdbWarningBox,
@@ -1699,7 +1699,7 @@ void EmulatorQtWindow::runAdbShellStopAndQuit() {
         return;
     }
     mStartedAdbStopProcess = true;
-    mAdbInterface.runAdbCommand(
+    mAdbInterface->runAdbCommand(
         {"shell", "stop"},
         [this](const android::emulation::OptionalAdbCommandResult&) {
             queueQuitEvent();

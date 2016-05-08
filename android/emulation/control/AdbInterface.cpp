@@ -19,6 +19,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/ConfigDirs.h"
+#include "android/utils/debug.h"
 
 #include <cstdio>
 #include <fstream>
@@ -28,6 +29,43 @@ using namespace android::base;
 
 namespace android {
 namespace emulation {
+
+class AdbInterfaceImpl final : public AdbInterface {
+public:
+    explicit AdbInterfaceImpl(android::base::Looper* looper);
+
+    // Returns true is the ADB version is fresh enough.
+    bool isAdbVersionCurrent() const override final { return mAdbVersionCurrent; }
+
+    // Returns the automatically detected path to adb
+    const std::string& detectedAdbPath() const override final { return mAdbPath; }
+
+    // Runs an adb command asynchronously.
+    // |args| - the arguments to pass to adb, i.e. "shell dumpsys battery"
+    // |result_callback| - the callback function that will be invoked on the
+    // calling
+    //                     thread after the command completes.
+    // |timeout_ms| - how long to wait for the command to complete, in
+    // milliseconds.
+    // |want_output| - if set to true, the argument passed to the callback will
+    // contain the
+    //                 output of the command.
+    AdbCommandPtr runAdbCommand(
+            const std::vector<std::string>& args,
+            std::function<void(const OptionalAdbCommandResult&)>
+                    result_callback,
+            base::System::Duration timeout_ms,
+            bool want_output = true) override final;
+
+private:
+    android::base::Looper* mLooper;
+    std::string mAdbPath;
+    bool mAdbVersionCurrent;
+};
+
+std::unique_ptr<AdbInterface> AdbInterface::create(android::base::Looper* looper) {
+    return std::unique_ptr<AdbInterface>{new AdbInterfaceImpl(looper)};
+}
 
 // Helper function, checks if the version of adb in the given SDK is
 // fresh enough.
@@ -64,7 +102,7 @@ static bool checkAdbVersion(const std::string& sdk_root_directory) {
     return false;
 }
 
-AdbInterface::AdbInterface(android::base::Looper* looper)
+AdbInterfaceImpl::AdbInterfaceImpl(android::base::Looper* looper)
     : mLooper(looper), mAdbVersionCurrent(false) {
     // First try finding ADB by the environment variable.
     auto sdk_root_by_env = android::ConfigDirs::getSdkRootDirectoryByEnv();
@@ -95,9 +133,19 @@ AdbInterface::AdbInterface(android::base::Looper* looper)
                     PathUtils::join(sdk_root_by_path, "platform-tools", "adb");
         }
     }
+
+    // TODO(zyy): check if there's an adb binary on %PATH% and use that as a
+    //  last line of defense.
+
+    if (mAdbPath.empty()) {
+        // Well, we won't run any ADB commands during this session. Let's at
+        // least warn the user.
+        dwarning("couldn't detect an ADB binary on the machine. "
+                 "ADB functionality is disabled");
+    }
 }
 
-AdbCommandPtr AdbInterface::runAdbCommand(
+AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         const std::vector<std::string>& args,
         std::function<void(const OptionalAdbCommandResult&)> result_callback,
         base::System::Duration timeout_ms,
@@ -126,7 +174,7 @@ AdbCommand::AdbCommand(android::base::Looper* looper,
     mCommand.insert(mCommand.end(), command.begin(), command.end());
 }
 
-void AdbCommand::start() {
+void AdbCommand::start(int checkTimeoutMs) {
     if (!mTask && !mFinished) {
         auto shared = shared_from_this();
         mTask.reset(new ParallelTask<OptionalAdbCommandResult>(
@@ -136,7 +184,8 @@ void AdbCommand::start() {
                 },
                 [shared](const OptionalAdbCommandResult& result) {
                     shared->taskDoneFunction(result);
-                }));
+                },
+                checkTimeoutMs));
         mTask->start();
     }
 }
@@ -150,6 +199,11 @@ void AdbCommand::taskDoneFunction(const OptionalAdbCommandResult& result) {
 }
 
 void AdbCommand::taskFunction(OptionalAdbCommandResult* result) {
+    if (mCommand.empty() || mCommand.front().empty()) {
+        *result = {};
+        return;
+    }
+
     RunOptions output_flag = mWantOutput ? System::RunOptions::DumpOutputToFile
                                          : System::RunOptions::HideAllOutput;
     RunOptions run_flags = System::RunOptions::WaitForCompletion |
@@ -168,5 +222,6 @@ void AdbCommand::taskFunction(OptionalAdbCommandResult* result) {
                              : std::unique_ptr<std::ifstream>()});
     }
 }
+
 }
 }
