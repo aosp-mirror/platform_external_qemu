@@ -332,6 +332,30 @@
     },
     {
       "key": {
+        "uuid": "12728820_a8d5d3c6",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-05-09T17:50:01Z",
+      "side": 1,
+      "message": "I\u0027m not really comfortable with gambling with the correctness of the program like that, catching and debugging that kind of thing can be very difficult and painful. But if I\u0027m in the minority I\u0027ll try my best to live with that discomfort.",
+      "parentUuid": "0d22678a_ee5d93d9",
+      "range": {
+        "startLine": 130,
+        "startChar": 0,
+        "endLine": 134,
+        "endChar": 54
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d22678a_28524359",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 2
