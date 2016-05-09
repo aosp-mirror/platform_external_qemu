@@ -16,6 +16,24 @@
       "revId": "c5dbaf76a766734e940c9033b06057a1939c908d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b259bc75_6ed13762",
+        "filename": "android/base/synchronization/ConditionVariable_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-09T15:11:43Z",
+      "side": 1,
+      "message": "that\u0027s why I like to have the I prefix - even IFooImpl is fine there :)",
+      "parentUuid": "929d9872_d1aac482",
+      "revId": "c5dbaf76a766734e940c9033b06057a1939c908d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
