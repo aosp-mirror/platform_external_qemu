@@ -629,6 +629,8 @@ static void control_global_accept(void* opaque,
                 D(("control_global_accept: new client %p\n", client));
                 break;
             case CONSOLE_AUTH_STATUS_REQUIRED:
+                // Note that Studio looks for the first line of this message
+                // /exactly/
                 control_write(client,
                               "Android Console: Authentication required\r\n");
                 control_write(client,
@@ -2734,6 +2736,9 @@ const char* android_console_auth_banner_get() {
     static bool s_ready = false;
 
     if (!s_ready) {
+        // in QEMU2, banners get \n appended when they are output so no trailing
+        // \n here
+        // Note that Studio looks for the first line of this message /exactly/
         char* emulator_console_auth_token_path =
                 android_console_auth_token_path_dup();
         snprintf(s_android_monitor_auth_banner,
@@ -2741,7 +2746,7 @@ const char* android_console_auth_banner_get() {
                  "Android Console: Authentication required\n"
                  "Android Console: type 'auth <auth_token>' to authenticate\n"
                  "Android Console: you can find your <auth_token> in "
-                 "\n'%s'\nOK\n",
+                 "\n'%s'\nOK",
                  emulator_console_auth_token_path);
         free(emulator_console_auth_token_path);
 
@@ -2752,6 +2757,8 @@ const char* android_console_auth_banner_get() {
 }
 
 const char* android_console_help_banner_get() {
+    // in QEMU2, banners get \n appended when they are output so no trailing \n
+    // here
     return "Android Console: type 'help' for a list of commands"
-           "\nOK\n";
+           "\nOK";
 }
