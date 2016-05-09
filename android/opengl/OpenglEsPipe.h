@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 #pragma once
 
+#include "android/base/Compiler.h"
 #include "android/emulation/android_pipe.h"
 
 #include "OpenglRender/RenderChannel.h"
@@ -77,6 +78,8 @@ private:
     // number of remaining bytes in |mDataForReadingLeft| for the next read().
     emugl::ChannelBuffer mDataForReading;
     size_t mDataForReadingLeft = 0;
+
+    DISALLOW_COPY_ASSIGN_AND_MOVE(OpenglEsPipe);
 };
 
 }  // namespace android
