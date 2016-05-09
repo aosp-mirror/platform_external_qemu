@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "12ed28ca_cdbe89bc",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-09T08:57:11Z",
+      "side": 1,
+      "message": "This is true, but I would suggest putting a compile-time check here to ensure we check this properly. Another alternative is to use an std::atomic value with explicit load_acquire / store_release operations on it.",
+      "revId": "acc0bfb2920cd284fe7786189d7e12cbba574f62",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
