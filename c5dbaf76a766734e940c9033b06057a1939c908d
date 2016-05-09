@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "929d9872_d1aac482",
+        "filename": "android/base/synchronization/ConditionVariable_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-09T07:41:53Z",
+      "side": 1,
+      "message": "nit: it\u0027s slightly confusing to have an interface named with an \"Impl\" suffix, may I suggest to use \"Base\" instead?",
+      "revId": "c5dbaf76a766734e940c9033b06057a1939c908d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
