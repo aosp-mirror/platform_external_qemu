@@ -19,7 +19,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
-#include "android/emulation/control/AdbInterface.h"
+#include "android/emulation/control/TestAdbInterface.h"
 
 #include <gtest/gtest.h>
 
@@ -31,7 +31,7 @@
 using android::base::PathUtils;
 using android::base::StringView;
 using android::base::System;
-using android::emulation::AdbInterface;
+using android::emulation::TestAdbInterface;
 using android::emulation::FilePusher;
 using std::shared_ptr;
 using std::string;
@@ -45,8 +45,8 @@ public:
     void SetUp() override {
         mTestSystem.reset(new android::base::TestSystem(
                 "/progdir", System::kProgramBitness, "/homedir", "/appdir"));
-        mLooper = android::base::ThreadLooper::get();
-        mAdb.reset(new AdbInterface(mLooper));
+        mLooper = android::base::Looper::create();
+        mAdb.reset(new TestAdbInterface(mLooper, "adb"));
         mFilePusher.reset(
             new FilePusher(mAdb.get(),
                            [this](StringView filePath, FilePusher::Result result) {
@@ -63,6 +63,8 @@ public:
 
     void TearDown() {
         mFilePusher.reset();
+        mAdb.reset();
+        delete mLooper;
         mTestSystem.reset();
     }
 
@@ -73,7 +75,7 @@ public:
                                  System::Pid*,
                                  const string&) {
         EXPECT_GE(command.size(), 2);
-        EXPECT_EQ("/platform-tools/adb", command[0]);
+        EXPECT_EQ("adb", command[0]);
         EXPECT_EQ("push", command[1]);
 
         auto thisPtr = static_cast<FilePusherTest*>(opaque);
@@ -109,7 +111,7 @@ public:
 protected:
     std::unique_ptr<android::base::TestSystem> mTestSystem;
     android::base::Looper* mLooper;
-    std::unique_ptr<AdbInterface> mAdb;
+    std::unique_ptr<TestAdbInterface> mAdb;
     std::unique_ptr<FilePusher> mFilePusher;
 
     // Fake runCommand support.

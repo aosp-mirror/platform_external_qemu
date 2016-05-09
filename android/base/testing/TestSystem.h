@@ -69,7 +69,7 @@ public:
         if (mLauncherDir.size()) {
             return mLauncherDir;
         } else {
-            return mTempDir->pathString();
+            return getTempRoot()->pathString();
         }
     }
 
@@ -208,11 +208,8 @@ public:
     virtual std::vector<std::string> scanDirEntries(
             StringView dirPath,
             bool fullPath = false) const {
-        if (!mTempDir) {
-            // Nothing to return for now.
-            LOG(ERROR) << "No temp root yet!";
-            return std::vector<std::string>();
-        }
+        getTempRoot(); // make sure we have a temp root;
+
         std::string newPath = toTempRoot(dirPath);
         std::vector<std::string> result = scanDirInternal(newPath);
         if (fullPath) {

@@ -44,17 +44,15 @@ struct AdbCommandResult {
 };
 using OptionalAdbCommandResult = android::base::Optional<AdbCommandResult>;
 
-// A utility class used to automatically locate the ADB binary and
+// A utility interface used to automatically locate the ADB binary and
 // asynchronously run ADB commands.
 class AdbInterface {
 public:
-    explicit AdbInterface(android::base::Looper* looper);
-
     // Returns true is the ADB version is fresh enough.
-    bool isAdbVersionCurrent() const { return mAdbVersionCurrent; }
+    virtual bool isAdbVersionCurrent() const = 0;
 
     // Returns the automatically detected path to adb
-    const std::string& detectedAdbPath() const { return mAdbPath; }
+    virtual const std::string& detectedAdbPath() const = 0;
 
     // Runs an adb command asynchronously.
     // |args| - the arguments to pass to adb, i.e. "shell dumpsys battery"
@@ -66,23 +64,25 @@ public:
     // |want_output| - if set to true, the argument passed to the callback will
     // contain the
     //                 output of the command.
-    AdbCommandPtr runAdbCommand(
+    virtual AdbCommandPtr runAdbCommand(
             const std::vector<std::string>& args,
             std::function<void(const OptionalAdbCommandResult&)>
                     result_callback,
             base::System::Duration timeout_ms,
-            bool want_output = true);
+            bool want_output = true) = 0;
 
-private:
-    android::base::Looper* mLooper;
-    std::string mAdbPath;
-    bool mAdbVersionCurrent;
+    // Creates a new instance of the AdbInterface.
+    static std::unique_ptr<AdbInterface> create(android::base::Looper* looper);
 };
+
+class AdbInterfaceImpl;
+class TestAdbInterface;
 
 // Representation of an asynchronously running ADB command.
 // These shouldn't be created directly, use AdbInterface::runAdbCommand.
 class AdbCommand : public std::enable_shared_from_this<AdbCommand> {
-    friend class ::android::emulation::AdbInterface;
+    friend android::emulation::AdbInterfaceImpl;
+    friend android::emulation::TestAdbInterface;
 
 public:
     using ResultCallback = std::function<void(const OptionalAdbCommandResult&)>;
@@ -100,7 +100,7 @@ private:
                bool want_output,
                base::System::Duration timeout,
                ResultCallback callback);
-    void start();
+    void start(int checkTimeoutMs = 1000);
     void taskFunction(OptionalAdbCommandResult* result);
     void taskDoneFunction(const OptionalAdbCommandResult& result);
 
