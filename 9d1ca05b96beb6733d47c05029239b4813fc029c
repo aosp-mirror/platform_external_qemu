@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "12728820_d9dca323",
+        "filename": "android/base/synchronization/ReadWriteLock_unittest.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-09T21:56:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "12728820_6e192373",
+      "range": {
+        "startLine": 100,
+        "startChar": 9,
+        "endLine": 100,
+        "endChar": 47
+      },
+      "revId": "9d1ca05b96beb6733d47c05029239b4813fc029c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "12728820_0e334f03",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 10
@@ -36,6 +60,30 @@
       "writtenOn": "2016-05-09T19:09:20Z",
       "side": 1,
       "message": "I don\u0027t think you need this one as a global",
+      "range": {
+        "startLine": 40,
+        "startChar": 15,
+        "endLine": 40,
+        "endChar": 23
+      },
+      "revId": "9d1ca05b96beb6733d47c05029239b4813fc029c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12728820_1f7b7be4",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-09T21:56:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "12728820_0e334f03",
       "range": {
         "startLine": 40,
         "startChar": 15,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "12728820_5900b359",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-09T21:56:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "12728820_ae231bae",
+      "range": {
+        "startLine": 109,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 30
+      },
+      "revId": "9d1ca05b96beb6733d47c05029239b4813fc029c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "12728820_ee7b53aa",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 10
@@ -82,6 +154,30 @@
       "writtenOn": "2016-05-09T19:09:20Z",
       "side": 1,
       "message": "please set this one as a last operation in the ctor, otherwise there\u0027s a possible race when sModuleLoaded and sSRWSupported are true, but some of the function pointers are still poining to the fallback implementation",
+      "range": {
+        "startLine": 110,
+        "startChar": 1,
+        "endLine": 110,
+        "endChar": 25
+      },
+      "revId": "9d1ca05b96beb6733d47c05029239b4813fc029c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12728820_f9f07fa0",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-09T21:56:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "12728820_ee7b53aa",
       "range": {
         "startLine": 110,
         "startChar": 1,
