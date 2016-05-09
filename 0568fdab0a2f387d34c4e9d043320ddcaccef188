@@ -180,6 +180,24 @@
       "revId": "0568fdab0a2f387d34c4e9d043320ddcaccef188",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b259bc75_e9170132",
+        "filename": "distrib/android-emugl/host/tools/emugen/Var.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1099352
+      },
+      "writtenOn": "2016-05-09T16:17:16Z",
+      "side": 1,
+      "message": "+1.  As David points out, putting the initialization, for data members of primitive or pointer types, in the declaration where possible (i.e., when the initialization is to a default value) eliminates a class of possible errors.",
+      "parentUuid": "d2f6309d_6b330151",
+      "revId": "0568fdab0a2f387d34c4e9d043320ddcaccef188",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
