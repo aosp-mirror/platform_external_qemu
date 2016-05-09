@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "12728820_6e192373",
+        "filename": "android/base/synchronization/ReadWriteLock_unittest.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-09T19:09:20Z",
+      "side": 1,
+      "message": "std::vector\u003cTestThread\u003e write_threads.\nfor (... ) {\n   write_threads.emplace(writeThreadFunction, \u0026p);\n}",
+      "range": {
+        "startLine": 100,
+        "startChar": 9,
+        "endLine": 100,
+        "endChar": 47
+      },
+      "revId": "9d1ca05b96beb6733d47c05029239b4813fc029c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12728820_0e334f03",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-09T19:09:20Z",
+      "side": 1,
+      "message": "I don\u0027t think you need this one as a global",
+      "range": {
+        "startLine": 40,
+        "startChar": 15,
+        "endLine": 40,
+        "endChar": 23
+      },
+      "revId": "9d1ca05b96beb6733d47c05029239b4813fc029c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12728820_ae231bae",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-09T19:09:20Z",
+      "side": 1,
+      "message": "you won\u0027t ever enter the ctor code again, even if sLibrary failed to load. So please set sModuleLoaded to true here to stop .get()-ting the SRWLockSupportLoader instance",
+      "range": {
+        "startLine": 109,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 30
+      },
+      "revId": "9d1ca05b96beb6733d47c05029239b4813fc029c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12728820_ee7b53aa",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-09T19:09:20Z",
+      "side": 1,
+      "message": "please set this one as a last operation in the ctor, otherwise there\u0027s a possible race when sModuleLoaded and sSRWSupported are true, but some of the function pointers are still poining to the fallback implementation",
+      "range": {
+        "startLine": 110,
+        "startChar": 1,
+        "endLine": 110,
+        "endChar": 25
+      },
+      "revId": "9d1ca05b96beb6733d47c05029239b4813fc029c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
