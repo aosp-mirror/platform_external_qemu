@@ -75,6 +75,7 @@ LOCAL_SRC_FILES := \
     android/base/files/StdioStream.cpp \
     android/base/files/Stream.cpp \
     android/base/files/IniFile.cpp \
+    android/base/misc/Base64.cpp \
     android/base/misc/HttpUtils.cpp \
     android/base/misc/StringUtils.cpp \
     android/base/misc/Utf8Utils.cpp \
@@ -419,6 +420,7 @@ LOCAL_SRC_FILES := \
   android/base/memory/LazyInstance_unittest.cpp \
   android/base/memory/MallocUsableSize_unittest.cpp \
   android/base/memory/QSort_unittest.cpp \
+  android/base/misc/Base64_unittest.cpp \
   android/base/misc/HttpUtils_unittest.cpp \
   android/base/misc/Random_unittest.cpp \
   android/base/misc/StringUtils_unittest.cpp \
