@@ -356,6 +356,30 @@
     },
     {
       "key": {
+        "uuid": "12728820_6b9cb56c",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-09T18:12:19Z",
+      "side": 1,
+      "message": "I ended up not using the recursive lock feature and implementing the fallback as actual SRW.",
+      "parentUuid": "12728820_a8d5d3c6",
+      "range": {
+        "startLine": 130,
+        "startChar": 0,
+        "endLine": 134,
+        "endChar": 54
+      },
+      "revId": "4be426ccd2fa932602c136b3cc5244282b684d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d22678a_28524359",
         "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
         "patchSetId": 2
