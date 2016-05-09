@@ -494,13 +494,8 @@ static void ranchu_init(MachineState *machine)
                          "generic,goldfish-fb", 1, 0, 0);
     create_simple_device(vbi, pic, RANCHU_GF_BATTERY, "goldfish_battery",
                          "generic,goldfish-battery", 1, 0, 0);
-#if 0
-    /* Audio is not enabled for now as it is untested and reportedly
-     * the lionhead goldfish device is buggy.
-     */
     create_simple_device(vbi, pic, RANCHU_GF_AUDIO, "goldfish_audio",
                          "generic,goldfish-audio", 1, 0, 0);
-#endif
     create_simple_device(vbi, pic, RANCHU_GF_EVDEV, "goldfish-events",
                          "generic,goldfish-events-keypad", 1, 0, 0);
     create_simple_device(vbi, pic, RANCHU_ANDROID_PIPE, "android_pipe",
