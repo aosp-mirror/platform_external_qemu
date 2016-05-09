@@ -16,6 +16,24 @@
       "revId": "52dc530bc7a4b37cc8aa4091189988c34951a0f7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b259bc75_0e1cfbff",
+        "filename": "android/base/synchronization/ConditionVariable_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-09T15:26:24Z",
+      "side": 1,
+      "message": "header includes it already, and it has to - there\u0027s a member std::vector\u003c\u003e\nthat\u0027s why I think it\u0027s redundant",
+      "parentUuid": "f2fb3484_4cee1fd4",
+      "revId": "52dc530bc7a4b37cc8aa4091189988c34951a0f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
