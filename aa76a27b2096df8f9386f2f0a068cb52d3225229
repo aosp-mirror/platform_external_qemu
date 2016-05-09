@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "12728820_0405eb04",
+        "filename": "android/base/synchronization/ReadWriteLock_unittest.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-09T23:46:06Z",
+      "side": 1,
+      "message": "why do you need a custom stack here?",
+      "range": {
+        "startLine": 108,
+        "startChar": 60,
+        "endLine": 108,
+        "endChar": 66
+      },
+      "revId": "aa76a27b2096df8f9386f2f0a068cb52d3225229",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12728820_04bdeb0f",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-09T23:46:06Z",
+      "side": 1,
+      "message": "this implementation causes writer starvation - if there is enough readers, writer will never be able to write.\nbut we don\u0027t really care - it\u0027s for XP only, and that\u0027s going away",
+      "range": {
+        "startLine": 74,
+        "startChar": 0,
+        "endLine": 80,
+        "endChar": 52
+      },
+      "revId": "aa76a27b2096df8f9386f2f0a068cb52d3225229",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12728820_67978149",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-09T23:46:06Z",
+      "side": 1,
+      "message": "isn\u0027t it the same address being passed here?",
+      "range": {
+        "startLine": 151,
+        "startChar": 0,
+        "endLine": 155,
+        "endChar": 5
+      },
+      "revId": "aa76a27b2096df8f9386f2f0a068cb52d3225229",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12728820_e7aa9182",
+        "filename": "android/base/synchronization/ReadWriteLock_win32.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-09T23:46:06Z",
+      "side": 1,
+      "message": "you could use the same trick with a function pointer here, just set it to the empty function for the WinAPI\u0027s SRWLock",
+      "range": {
+        "startLine": 159,
+        "startChar": 0,
+        "endLine": 162,
+        "endChar": 5
+      },
+      "revId": "aa76a27b2096df8f9386f2f0a068cb52d3225229",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
