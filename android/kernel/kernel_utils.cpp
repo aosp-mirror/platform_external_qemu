@@ -9,7 +9,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/containers/PodVector.h"
 #include "android/base/Log.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/StringUtils.h"
@@ -19,6 +18,8 @@
 #include "android/utils/file_data.h"
 #include "android/utils/path.h"
 #include "android/utils/string.h"
+
+#include <vector>
 
 #include <stdint.h>
 #include <stdio.h>
@@ -32,8 +33,6 @@
 #define KERNEL_PLOG    PLOG_IF(INFO, DEBUG_KERNEL)
 #define KERNEL_ERROR   LOG_IF(ERROR, DEBUG_KERNEL)
 #define KERNEL_PERROR  PLOG_IF(ERROR, DEBUG_KERNEL)
-
-using android::base::PodVector;
 
 namespace {
 
@@ -88,7 +87,7 @@ bool android_imageProbeKernelVersionString(const uint8_t* kernelFileData,
                                            size_t kernelFileSize,
                                            char* dst/*[dstLen]*/,
                                            size_t dstLen) {
-    PodVector<uint8_t> uncompressed;
+    std::vector<uint8_t> uncompressed;
 
     const uint8_t* uncompressedKernel = NULL;
     size_t uncompressedKernelLen = 0;
@@ -137,9 +136,9 @@ bool android_imageProbeKernelVersionString(const uint8_t* kernelFileData,
             // absurdly large buffer
             uncompressedKernelLen = compressedKernelLen * 10;
             uncompressed.resize(uncompressedKernelLen);
-            uncompressedKernel = uncompressed.begin();
+            uncompressedKernel = uncompressed.data();
 
-            bool zOk = uncompress_gzipStream(uncompressed.begin(),
+            bool zOk = uncompress_gzipStream(uncompressed.data(),
                                             &uncompressedKernelLen,
                                             compressedKernel,
                                             compressedKernelLen);

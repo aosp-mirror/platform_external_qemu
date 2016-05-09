@@ -17,6 +17,7 @@
 #include <utility>
 
 #include <assert.h>
+#include <string.h>
 
 namespace emugl {
 

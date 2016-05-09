@@ -75,7 +75,10 @@ private:
     friend class ConditionVariable;
 
 #ifdef _WIN32
+public: // Currently ConditionVariable has a hidden implementation class, and
+        // that's the one requiring access to mLock - so let it be public.
     CRITICAL_SECTION mLock;
+private:
 #else
     pthread_mutex_t mLock;
 #endif
