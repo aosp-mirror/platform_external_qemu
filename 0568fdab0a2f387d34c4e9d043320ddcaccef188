@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "b227fcf3_4a8a73f3",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglContext.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-09T09:37:24Z",
+      "side": 1,
+      "message": "I agree with Bjoern, with the clarification that the convention of using field_name() to return the direct value of a named field doesn\u0027t apply if we return anything other than a direct value. I.e. I would rather name the function getDrawSurface() / getDrawSurfacePtr() instead.\n\nGenerally speaking, I consider that the use of shared pointers of any kind is an indication that object ownership is not correctly supported by an API, and that they very often result in weird problems, especially when threads are involved. I\u0027d rather push for less of them, and more explicit rules regarding lifecycle / ownership instead. I believe this makes code easier to understand and maintain in the long run, and minimizes the amount of surprises discovered in production. Just my 2 cents though, and I\u0027m not recommending to clean everything right now, but let\u0027s try to avoid more subtle API issues if possible.\n\n(And yes, the original Emugl implementation was done by a third-party company, and I never had the time to cleanup ownership in the code base).",
+      "parentUuid": "ed5193a9_36ac089b",
+      "range": {
+        "startLine": 46,
+        "startChar": 4,
+        "endLine": 46,
+        "endChar": 53
+      },
+      "revId": "0568fdab0a2f387d34c4e9d043320ddcaccef188",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed5193a9_05cbd82e",
         "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglGlobalInfo.cpp",
         "patchSetId": 2
@@ -136,6 +160,23 @@
         "endLine": 38,
         "endChar": 48
       },
+      "revId": "0568fdab0a2f387d34c4e9d043320ddcaccef188",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d2f6309d_6b330151",
+        "filename": "distrib/android-emugl/host/tools/emugen/Var.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-09T09:37:24Z",
+      "side": 1,
+      "message": "frankly I\u0027m very uncomfortable with the idea of potentially-uninitialized pointers in class instances. It\u0027s very easy to extend a class with a new constructor and/or method and forget that the pointer isn\u0027t properly initialized.\n\nI doubt that pointer construction to NULL is really a performance issue, compared to say copying std::shared_ptr instances, I\u0027d rather see the use of default initialization values in class member declarations instead. What do you think?",
       "revId": "0568fdab0a2f387d34c4e9d043320ddcaccef188",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
