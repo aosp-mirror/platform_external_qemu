@@ -16,6 +16,7 @@
 #define _LIBRENDER_FB_CONFIG_H
 
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <GLES/gl.h>
 
 #include <stddef.h>

@@ -56,6 +56,7 @@ const GLuint kConfigAttributes[] = {
     EGL_ALPHA_MASK_SIZE,
     EGL_COLOR_BUFFER_TYPE,
     //EGL_MATCH_NATIVE_PIXMAP,
+    EGL_RECORDABLE_ANDROID,
     EGL_CONFORMANT
 };
 

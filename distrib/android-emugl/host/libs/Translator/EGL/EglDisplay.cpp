@@ -104,6 +104,7 @@ void EglDisplay::addSimplePixelFormat(int red_size,
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
+                    EGL_DONT_CARE,
                     NULL);
 
     if(!doChooseConfigs(dummy, &match, 1))
@@ -406,6 +407,7 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
             info->trans_red_val,
             info->trans_green_val,
             info->trans_blue_val,
+            info->recordable_android,
             info->frmt);
 
     display->m_configs.emplace_back(config);

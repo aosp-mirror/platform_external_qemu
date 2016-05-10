@@ -17,6 +17,7 @@
 #define EGL_VALIDATE_H
 
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 class EglValidate {
 public:
