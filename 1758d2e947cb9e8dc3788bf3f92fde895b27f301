@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "125a88dd_25daae25",
+        "filename": "android/base/misc/Base64.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T15:49:37Z",
+      "side": 1,
+      "message": "why not std::string at once?",
+      "range": {
+        "startLine": 34,
+        "startChar": 4,
+        "endLine": 34,
+        "endChar": 22
+      },
+      "revId": "1758d2e947cb9e8dc3788bf3f92fde895b27f301",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_65d0a605",
+        "filename": "android/base/misc/Base64.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T15:49:37Z",
+      "side": 1,
+      "message": "nit: shouldn\u0027t it happen that the whole 3-byte sequence gets here?",
+      "range": {
+        "startLine": 46,
+        "startChar": 23,
+        "endLine": 46,
+        "endChar": 68
+      },
+      "revId": "1758d2e947cb9e8dc3788bf3f92fde895b27f301",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_c58cfa42",
+        "filename": "android/base/misc/Base64.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T15:49:37Z",
+      "side": 1,
+      "message": "nit: it could be \"Optional\u003cstring\u003e base64Decode(StringView);\"",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 67
+      },
+      "revId": "1758d2e947cb9e8dc3788bf3f92fde895b27f301",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_05abf288",
+        "filename": "android/base/misc/Base64.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T15:49:37Z",
+      "side": 1,
+      "message": "as I said in another review, could you please add a function to calculate an output size for some input size (in both directions)?",
+      "revId": "1758d2e947cb9e8dc3788bf3f92fde895b27f301",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
