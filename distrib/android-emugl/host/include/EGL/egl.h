@@ -242,6 +242,7 @@ typedef void *EGLClientBuffer;
  * a bug in Khronos Bugzilla against task "Registry".
  */
 
+#define EGL_RECORDABLE_ANDROID		0x3142
 
 
 /* EGL Functions */
