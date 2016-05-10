@@ -56,6 +56,7 @@ const GLuint kConfigAttributes[] = {
     EGL_ALPHA_MASK_SIZE,
     EGL_COLOR_BUFFER_TYPE,
     //EGL_MATCH_NATIVE_PIXMAP,
+    EGL_RECORDABLE_ANDROID,
     EGL_CONFORMANT
 };
 
@@ -98,10 +99,13 @@ FbConfig::FbConfig(EGLConfig hostConfig, EGLDisplay hostDisplay) :
     mAttribValues = new GLint[kConfigAttributesLen];
     for (size_t i = 0; i < kConfigAttributesLen; ++i) {
         mAttribValues[i] = 0;
-        s_egl.eglGetConfigAttrib(hostDisplay,
+        if (!s_egl.eglGetConfigAttrib(hostDisplay,
                                  hostConfig,
                                  kConfigAttributes[i],
-                                 &mAttribValues[i]);
+                                 &mAttribValues[i])) {
+          E("%s: Unable to get config attrib 0x%x\n", __FUNCTION__,
+              kConfigAttributes[i]);
+        }
 
         // This implementation supports guest window surfaces by wrapping
         // them around host Pbuffers, so always report it to the guest.

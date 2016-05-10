@@ -96,6 +96,8 @@ struct ConfigInfo {
     EGLint trans_red_val;
     EGLint trans_green_val;
     EGLint trans_blue_val;
+    EGLBoolean recordable_android;
+    EGLBoolean framebuffer_target_android;
     PixelFormat* frmt;
 };
 

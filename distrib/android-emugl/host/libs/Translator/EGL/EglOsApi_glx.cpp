@@ -144,7 +144,6 @@ void pixelFormatToConfig(EGLNativeDisplayType dpy,
             dpy ,frmt, GLX_DEPTH_SIZE, &info.depth_size));
     EXIT_IF_FALSE(glXGetFBConfigAttrib(
             dpy ,frmt, GLX_STENCIL_SIZE, &info.stencil_size));
-
     info.renderable_type = renderableType;
     int nativeRenderable = 0;
     EXIT_IF_FALSE(glXGetFBConfigAttrib(
@@ -203,7 +202,16 @@ void pixelFormatToConfig(EGLNativeDisplayType dpy,
 
     info.frmt = new GlxPixelFormat(frmt);
 
+    info.recordable_android = EGL_FALSE;
+    info.framebuffer_target_android = EGL_FALSE;
     (*addConfigFunc)(addConfigOpaque, &info);
+
+    info.recordable_android = EGL_TRUE;
+    info.framebuffer_target_android = EGL_TRUE;
+    info.config_id+=500;
+    (*addConfigFunc)(addConfigOpaque, &info);
+
+
 }
 
 // Implementation of EglOS::Surface based on GLX.

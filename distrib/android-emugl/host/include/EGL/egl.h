@@ -242,8 +242,6 @@ typedef void *EGLClientBuffer;
  * a bug in Khronos Bugzilla against task "Registry".
  */
 
-
-
 /* EGL Functions */
 
 EGLAPI EGLint EGLAPIENTRY eglGetError(void);
