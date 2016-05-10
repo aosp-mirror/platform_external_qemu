@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "125a88dd_ce9657fe",
+        "filename": "android/emulation/ConsoleAuthToken.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-05-10T18:16:08Z",
+      "side": 1,
+      "message": "How safe is this on Windows? Will it map the mode to something that will have similar behavior?",
+      "revId": "cfaa8ac4c95ef5cea1e5baad2803fcb5b319a8cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_ce61772d",
+        "filename": "android/emulation/ConsoleAuthToken.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-05-10T18:16:08Z",
+      "side": 1,
+      "message": "This comment does not match the code. The same flags are still there but with some additional ones as well. Maybe the comment could just mention that we attempt to create a new file only and that it will fail if it already exists. That leaves the details of the implementation to the code itself.",
+      "revId": "cfaa8ac4c95ef5cea1e5baad2803fcb5b319a8cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "12728820_622e86ee",
         "filename": "android/emulation/ConsoleAuthToken.cpp",
         "patchSetId": 1
@@ -90,6 +124,23 @@
         "endLine": 124,
         "endChar": 51
       },
+      "revId": "cfaa8ac4c95ef5cea1e5baad2803fcb5b319a8cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_ae043b6d",
+        "filename": "android/emulation/ConsoleAuthToken.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2016-05-10T18:16:08Z",
+      "side": 1,
+      "message": "Nit/curious: Is this really necessary, won\u0027t this just be the same thing as not having this line at all?",
       "revId": "cfaa8ac4c95ef5cea1e5baad2803fcb5b319a8cc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
