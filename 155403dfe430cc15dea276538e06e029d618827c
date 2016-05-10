@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "125a88dd_051e92a9",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1089,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T15:58:19Z",
+      "side": 1,
+      "message": "btw, you are using stat() here very widely, and it really sucks on Windows: it performs at least 3 system calls, all of them read some data from disk. it is a real perf killer, I improved perf of one app by 1000x by just replacing stat() with a direct WinAPI call.\nWe might want to consider that - especially as we tend to do read/exec checks very often.",
+      "range": {
+        "startLine": 1089,
+        "startChar": 14,
+        "endLine": 1089,
+        "endChar": 28
+      },
+      "revId": "155403dfe430cc15dea276538e06e029d618827c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_453d6a19",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T15:58:19Z",
+      "side": 1,
+      "message": "didn\u0027t Bjoern take care of the path issues?",
+      "range": {
+        "startLine": 228,
+        "startChar": 18,
+        "endLine": 228,
+        "endChar": 35
+      },
+      "revId": "155403dfe430cc15dea276538e06e029d618827c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
