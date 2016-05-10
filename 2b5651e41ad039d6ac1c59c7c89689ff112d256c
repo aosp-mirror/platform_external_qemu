@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "125a88dd_2e9e0b71",
+        "filename": "android/scripts/build-ANGLEtranslator.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T18:12:34Z",
+      "side": 1,
+      "message": "some fixed revision?",
+      "range": {
+        "startLine": 76,
+        "startChar": 12,
+        "endLine": 76,
+        "endChar": 93
+      },
+      "revId": "2b5651e41ad039d6ac1c59c7c89689ff112d256c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "125a88dd_0e1b0f63",
         "filename": "android/scripts/build-ANGLEtranslator.sh",
         "patchSetId": 2
@@ -18,6 +41,53 @@
         "startChar": 84,
         "endLine": 82,
         "endChar": 120
+      },
+      "revId": "2b5651e41ad039d6ac1c59c7c89689ff112d256c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_0eef8ffc",
+        "filename": "android/scripts/build-ANGLEtranslator.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T18:12:34Z",
+      "side": 1,
+      "message": "I just needed to apt-get install libpci-dev to fix that",
+      "parentUuid": "125a88dd_0e1b0f63",
+      "range": {
+        "startLine": 82,
+        "startChar": 84,
+        "endLine": 82,
+        "endChar": 120
+      },
+      "revId": "2b5651e41ad039d6ac1c59c7c89689ff112d256c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_f9143f8e",
+        "filename": "android/scripts/build-ANGLEtranslator.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T18:12:34Z",
+      "side": 1,
+      "message": "these things have to replace the configure-make-make install triad in the builder_build_autotools_package_full_install()\nthe rest should be the same (it looks to me like that :)",
+      "range": {
+        "startLine": 83,
+        "startChar": 0,
+        "endLine": 86,
+        "endChar": 36
       },
       "revId": "2b5651e41ad039d6ac1c59c7c89689ff112d256c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
