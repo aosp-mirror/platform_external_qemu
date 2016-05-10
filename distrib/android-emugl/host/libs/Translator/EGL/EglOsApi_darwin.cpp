@@ -326,7 +326,7 @@ public:
     EGLNativeDisplayType dpy() const { return mDpy; }
 
 private:
-    EGLNativeDisplayType mDpy = nullptr;
+    EGLNativeDisplayType mDpy = {};
 };
 
 class MacGlLibrary : public GlLibrary {
