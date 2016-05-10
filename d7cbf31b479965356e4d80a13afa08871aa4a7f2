@@ -16,6 +16,24 @@
       "revId": "d7cbf31b479965356e4d80a13afa08871aa4a7f2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12728820_73ad83ae",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T02:46:04Z",
+      "side": 1,
+      "message": "m_infoLog is std::string now, so it\u0027s ok to delete it. Actually, we have to delete it",
+      "parentUuid": "12ed28ca_ad217d41",
+      "revId": "d7cbf31b479965356e4d80a13afa08871aa4a7f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
