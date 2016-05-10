@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "125a88dd_3f92b704",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-10T19:52:57Z",
+      "side": 1,
+      "message": "Hehe, fixed",
+      "parentUuid": "125a88dd_b4d00e60",
+      "range": {
+        "startLine": 44,
+        "startChar": 12,
+        "endLine": 44,
+        "endChar": 20
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "125a88dd_94b71294",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
         "patchSetId": 8
@@ -36,6 +60,30 @@
       "writtenOn": "2016-05-10T19:06:48Z",
       "side": 1,
       "message": "please add a set of AutoWriteLock/AutoReadLock classes",
+      "range": {
+        "startLine": 51,
+        "startChar": 13,
+        "endLine": 51,
+        "endChar": 24
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_5f7533b8",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-10T19:52:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "125a88dd_94b71294",
       "range": {
         "startLine": 51,
         "startChar": 13,
@@ -94,6 +142,54 @@
     },
     {
       "key": {
+        "uuid": "125a88dd_3f2f177c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-10T19:52:57Z",
+      "side": 1,
+      "message": "Yeah, the signaled map is purely for the rest of the waiters to use after one waiter has already detected the signal, so as to avoid another gl call.\n\nThis goes for an approach that uses only the first map too, but: I\u0027m not sure how best to clean up the second map yet, since a) no timeout on creation of the sync object b) not known how many waiters there are",
+      "parentUuid": "125a88dd_342f3e7c",
+      "range": {
+        "startLine": 53,
+        "startChar": 4,
+        "endLine": 53,
+        "endChar": 12
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_dffcc31c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-10T19:52:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "125a88dd_149562eb",
+      "range": {
+        "startLine": 53,
+        "startChar": 3,
+        "endLine": 53,
+        "endChar": 23
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "125a88dd_54751ab8",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
         "patchSetId": 8
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "125a88dd_df4e0361",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-10T19:52:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "125a88dd_54751ab8",
+      "range": {
+        "startLine": 60,
+        "startChar": 5,
+        "endLine": 63,
+        "endChar": 26
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "125a88dd_b441ee4e",
         "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
         "patchSetId": 8
@@ -128,6 +248,30 @@
       "writtenOn": "2016-05-10T19:06:48Z",
       "side": 1,
       "message": "_un_lock ? AutoReadLock is much safer",
+      "range": {
+        "startLine": 77,
+        "startChar": 12,
+        "endLine": 77,
+        "endChar": 20
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_ff53bf03",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2016-05-10T19:52:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "125a88dd_b441ee4e",
       "range": {
         "startLine": 77,
         "startChar": 12,
