@@ -16,8 +16,6 @@
 #ifndef EGL_DISPLAY_H
 #define EGL_DISPLAY_H
 
-#include <list>
-#include <map>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include "emugl/common/mutex.h"
@@ -29,10 +27,13 @@
 #include "EglSurface.h"
 #include "EglWindowSurface.h"
 
+#include <memory>
+#include <unordered_map>
+#include <vector>
 
-
-typedef std::map<unsigned int, ContextPtr>  ContextsHndlMap;
-typedef std::map<unsigned int, SurfacePtr>  SurfacesHndlMap;
+typedef std::vector<std::unique_ptr<EglConfig>> ConfigsList;
+typedef std::unordered_map<unsigned int, ContextPtr>  ContextsHndlMap;
+typedef std::unordered_map<unsigned int, SurfacePtr>  SurfacesHndlMap;
 
 class EglDisplay {
 public:
