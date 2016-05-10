@@ -134,6 +134,30 @@
       "revId": "155403dfe430cc15dea276538e06e029d618827c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "521a4004_976f24b7",
+        "filename": "android/base/system/System.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-10T16:21:48Z",
+      "side": 1,
+      "message": "Yes, and this is still used by the rest of the code. I still think dedicated methods in android::base::System are better for the purpose of unit-testing :)\n\nThe benefit of a FilePath class are: less UTF-8 \u003c-\u003e Unicode conversions in general + semantically easier operations like appendASCII(\"\u003cascii-subpath\u003e\"),  parent(), etc. To be considered but not a priority right now I think.",
+      "parentUuid": "125a88dd_0508d21d",
+      "range": {
+        "startLine": 228,
+        "startChar": 18,
+        "endLine": 228,
+        "endChar": 35
+      },
+      "revId": "155403dfe430cc15dea276538e06e029d618827c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
