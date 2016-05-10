@@ -122,38 +122,14 @@ bool tokenGet(std::string* auth_token) {
 
 }  // namespace android
 
-bool android_console_auth_check_authorization_command(const char* line) {
-    const char* pos = str_skip_white_space_if_any(line);
-    if (!str_begins_with(pos, "auth")) {
-        // didn't find "auth"
-        return false;
-    }
-    pos += 4;
-
-    // require a space after "auth"
-    if (!isspace(*pos)) {
-        return false;
-    }
-
-    // skip any white space between "auth" and <auth_token>
-    pos = str_skip_white_space_if_any(pos);
-
+char* android_console_auth_get_token_dup() {
     std::string auth_token;
     if (!android::console_auth::tokenGet(&auth_token)) {
         // couldn't get auth token, disable the console
-        return false;
+        return nullptr;
     }
 
-    if (!str_begins_with(pos, auth_token.c_str())) {
-        return false;
-    }
-    pos += auth_token.size();
-    pos = str_skip_white_space_if_any(pos);
-    if (pos[0] == 0) {
-        return true;
-    }
-    // there is garbage at the end of the command
-    return false;
+    return strdup(auth_token.c_str());
 }
 
 int android_console_auth_get_status() {
