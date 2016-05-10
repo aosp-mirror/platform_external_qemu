@@ -164,10 +164,5 @@ int GLESv2Context::getMaxTexUnits() {
 }
 
 int GLESv2Context::getMaxCombinedTexUnits() {
-    // GLES spec requires only 2, and the ATI driver erronously
-    // returns 32 (although it supports only 16). This WAR is simple,
-    // compliant and good enough for developers.
-    if (getCaps()->maxCombinedTexImageUnits > 16)
-        return 16;
     return getCaps()->maxCombinedTexImageUnits;
 }
