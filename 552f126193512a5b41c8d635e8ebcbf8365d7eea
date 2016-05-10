@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "12728820_e26b560e",
+        "filename": "android/console-auth.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T15:31:32Z",
+      "side": 1,
+      "message": "why? if the value changes, clients most probably won\u0027t be able to log in - as they would all see the new token. why don\u0027t we read it on each auth request?",
+      "range": {
+        "startLine": 26,
+        "startChar": 13,
+        "endLine": 26,
+        "endChar": 33
+      },
+      "revId": "552f126193512a5b41c8d635e8ebcbf8365d7eea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9220382f_799127a8",
         "filename": "android/console-auth.h",
         "patchSetId": 1
