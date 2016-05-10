@@ -18,6 +18,7 @@
 
 #include "EglOsApi.h"
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 #include <list>
 
@@ -87,6 +88,7 @@ public:
               EGLint trans_red_val,
               EGLint trans_green_val,
               EGLint trans_blue_val,
+              EGLBoolean recordable_android,
               EglOS::PixelFormat* frmt);
 
     // Copy-constructor.
@@ -138,6 +140,7 @@ private:
     const EGLint      m_trans_red_val;
     const EGLint      m_trans_green_val;
     const EGLint      m_trans_blue_val;
+    const EGLBoolean  m_recordable_android;
     const EGLenum     m_conformant;
 
     EglOS::PixelFormat*  m_nativeFormat;
