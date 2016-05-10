@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "9220382f_59df8377",
+        "filename": "android/base/misc/Random.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-10T16:11:45Z",
+      "side": 1,
+      "message": "urgh, wrong patch, will update the stack.",
+      "revId": "155403dfe430cc15dea276538e06e029d618827c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "125a88dd_051e92a9",
         "filename": "android/base/system/System.cpp",
         "patchSetId": 1
@@ -13,6 +30,30 @@
       "writtenOn": "2016-05-10T15:58:19Z",
       "side": 1,
       "message": "btw, you are using stat() here very widely, and it really sucks on Windows: it performs at least 3 system calls, all of them read some data from disk. it is a real perf killer, I improved perf of one app by 1000x by just replacing stat() with a direct WinAPI call.\nWe might want to consider that - especially as we tend to do read/exec checks very often.",
+      "range": {
+        "startLine": 1089,
+        "startChar": 14,
+        "endLine": 1089,
+        "endChar": 28
+      },
+      "revId": "155403dfe430cc15dea276538e06e029d618827c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "721744d9_f8845170",
+        "filename": "android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1089,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-10T16:11:45Z",
+      "side": 1,
+      "message": "Oh my, that\u0027s right, let\u0027s do this in a future patch though, this one is more about refactoring and adding new methods than optimizing the existing code. Thanks for the input. Do you have an example to be inspired from? I assume GetFileAttributesW() should be used.",
+      "parentUuid": "125a88dd_051e92a9",
       "range": {
         "startLine": 1089,
         "startChar": 14,
