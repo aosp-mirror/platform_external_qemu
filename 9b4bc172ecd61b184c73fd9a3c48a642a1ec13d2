@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "12728820_227c8ea3",
+        "filename": "android/base/misc/Random.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T15:43:18Z",
+      "side": 1,
+      "message": "ScopedStdioFile ?",
+      "range": {
+        "startLine": 39,
+        "startChar": 8,
+        "endLine": 39,
+        "endChar": 18
+      },
+      "revId": "9b4bc172ecd61b184c73fd9a3c48a642a1ec13d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "926e7879_69c5e54d",
+        "filename": "android/base/misc/Random.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T15:43:18Z",
+      "side": 1,
+      "message": "could you please use the \u003crandom\u003e header instead?\nhttp://www.cplusplus.com/reference/random/random_device/",
+      "range": {
+        "startLine": 49,
+        "startChar": 45,
+        "endLine": 49,
+        "endChar": 49
+      },
+      "revId": "9b4bc172ecd61b184c73fd9a3c48a642a1ec13d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b26b7c69_ea66a742",
+        "filename": "android/base/misc/Random_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T15:43:18Z",
+      "side": 1,
+      "message": "std::all_of() ?",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 5
+      },
+      "revId": "9b4bc172ecd61b184c73fd9a3c48a642a1ec13d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
