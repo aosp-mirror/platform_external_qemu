@@ -1996,7 +1996,7 @@ GL_API void GLAPIENTRY glFramebufferTexture2DOES(GLenum target, GLenum attachmen
     if (fbObj.get() != NULL) {
         FramebufferData *fbData = (FramebufferData *)fbObj.get();
         fbData->setAttachment(attachment, textarget, 
-                              texture, ObjectDataPtr(NULL));
+                              texture, ObjectDataPtr());
     }
 }
 

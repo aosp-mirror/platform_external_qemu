@@ -94,7 +94,7 @@ FbConfig::~FbConfig() {
 }
 
 FbConfig::FbConfig(EGLConfig hostConfig, EGLDisplay hostDisplay) :
-        mEglConfig(hostConfig), mAttribValues(NULL) {
+        mEglConfig(hostConfig), mAttribValues() {
     mAttribValues = new GLint[kConfigAttributesLen];
     for (size_t i = 0; i < kConfigAttributesLen; ++i) {
         mAttribValues[i] = 0;
@@ -111,8 +111,7 @@ FbConfig::FbConfig(EGLConfig hostConfig, EGLDisplay hostDisplay) :
     }
 }
 
-FbConfigList::FbConfigList(EGLDisplay display) :
-        mCount(0), mConfigs(NULL), mDisplay(display) {
+FbConfigList::FbConfigList(EGLDisplay display) : mDisplay(display) {
     if (display == EGL_NO_DISPLAY) {
         E("%s: Invalid display value %p (EGL_NO_DISPLAY)\n",
           __FUNCTION__, (void*)display);

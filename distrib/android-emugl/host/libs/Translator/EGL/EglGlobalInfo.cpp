@@ -35,17 +35,10 @@ EglGlobalInfo* EglGlobalInfo::getInstance() {
     return sSingleton.ptr();
 }
 
-EglGlobalInfo::EglGlobalInfo() :
-        m_displays(),
-        m_engine(NULL),
-        m_display(NULL),
-        m_lock() {
+EglGlobalInfo::EglGlobalInfo() {
     // TODO(digit): Choose alternate engine based on env. variable?
     m_engine = EglOS::Engine::getHostInstance();
     m_display = m_engine->getDefaultDisplay();
-
-    memset(m_gles_ifaces, 0, sizeof(m_gles_ifaces));
-    memset(m_gles_extFuncs_inited, 0, sizeof(m_gles_extFuncs_inited));
 }
 
 EglGlobalInfo::~EglGlobalInfo() {

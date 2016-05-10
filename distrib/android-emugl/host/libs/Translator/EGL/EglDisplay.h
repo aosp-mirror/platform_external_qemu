@@ -97,10 +97,10 @@ private:
    void addMissingConfigs(void);
    void initConfigurations(int renderableType);
 
-   EGLNativeDisplayType    m_dpy;
-   EglOS::Display*         m_idpy;
-   bool                    m_initialized;
-   bool                    m_configInitialized;
+   EGLNativeDisplayType    m_dpy = {};
+   EglOS::Display*         m_idpy = nullptr;
+   bool                    m_initialized = false;
+   bool                    m_configInitialized = false;
    ConfigsList             m_configs;
    ContextsHndlMap         m_contexts;
    SurfacesHndlMap         m_surfaces;
@@ -108,10 +108,8 @@ private:
    ObjectNameManager*      m_manager[MAX_GLES_VERSION];
    mutable emugl::Mutex    m_lock;
    ImagesHndlMap           m_eglImages;
-   unsigned int            m_nextEglImageId;
-   mutable EglOS::Context* m_globalSharedContext;
+   unsigned int            m_nextEglImageId = 0;
+   mutable EglOS::Context* m_globalSharedContext = nullptr;
 };
 
 #endif
-
-

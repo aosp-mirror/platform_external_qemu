@@ -23,15 +23,13 @@
 class RenderbufferData : public ObjectData
 {
 public:
-    RenderbufferData();
     ~RenderbufferData();
 
-    unsigned int sourceEGLImage;
-    void (*eglImageDetach)(unsigned int imageId);
-    GLuint attachedFB;
-    GLenum attachedPoint;
-    GLuint eglImageGlobalTexName;
-
+    unsigned int sourceEGLImage = 0;
+    void (*eglImageDetach)(unsigned int imageId) = nullptr;
+    GLuint attachedFB = 0;
+    GLenum attachedPoint = 0;
+    GLuint eglImageGlobalTexName = 0;
 };
 
 const int MAX_ATTACH_POINTS = 3;
@@ -59,14 +57,14 @@ private:
     void detachObject(int idx);
 
 private:
-    GLuint m_fbName;
+    GLuint m_fbName = 0;
     struct attachPoint {
         GLenum target; // OGL if owned, GLES otherwise
         GLuint name; // OGL if owned, GLES otherwise
         ObjectDataPtr obj;
         bool owned;
-    } m_attachPoints[MAX_ATTACH_POINTS+1];
-    bool m_dirty;
+    } m_attachPoints[MAX_ATTACH_POINTS+1] = {};
+    bool m_dirty = false;
 };
 
 #endif

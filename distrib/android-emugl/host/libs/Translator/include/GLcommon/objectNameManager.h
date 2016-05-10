@@ -40,10 +40,9 @@ enum ObjectDataType {
 class ObjectData
 {
 public:
-    ObjectData() : m_dataType(UNDEFINED_DATA) {};
-    ObjectData(ObjectDataType type): m_dataType(type) {};
+    ObjectData(ObjectDataType type = UNDEFINED_DATA): m_dataType(type) {}
     ObjectDataType getDataType() { return m_dataType; };
-    virtual ~ObjectData() {};
+    virtual ~ObjectData() = default;
 private:
     ObjectDataType m_dataType;
 };
@@ -115,18 +114,16 @@ private:
     void replaceGlobalName(ObjectLocalName p_localName, unsigned int p_globalName);
 
 private:
-    ObjectLocalName m_nextName;
+    ObjectLocalName m_nextName = 0;
     NamesMap m_localToGlobalMap;
     GlobalToLocalNamesMap m_globalToLocalMap;
     const NamedObjectType m_type;
-    GlobalNameSpace *m_globalNameSpace;
+    GlobalNameSpace *m_globalNameSpace = nullptr;
 };
 
 class GlobalNameSpace
 {
 public:
-    GlobalNameSpace();
-    ~GlobalNameSpace();
     unsigned int genName(NamedObjectType p_type);
     void deleteName(NamedObjectType p_type, unsigned int p_name);
 
@@ -206,7 +203,7 @@ private:
 private:
     emugl::Mutex m_lock;
     NameSpace *m_nameSpace[NUM_OBJECT_TYPES];
-    void *m_objectsData;
+    void *m_objectsData = nullptr;
 };
 
 typedef emugl::SmartPtr<ShareGroup> ShareGroupPtr;
@@ -225,7 +222,6 @@ class ObjectNameManager
 {
 public:
     explicit ObjectNameManager(GlobalNameSpace *globalNameSpace);
-    ~ObjectNameManager();
 
     //
     // createShareGroup - create a new ShareGroup object and attach it with
@@ -263,7 +259,7 @@ public:
 private:
     ShareGroupsMap m_groups;
     emugl::Mutex m_lock;
-    GlobalNameSpace *m_globalNameSpace;
+    GlobalNameSpace *m_globalNameSpace = nullptr;
 };
 
 #endif

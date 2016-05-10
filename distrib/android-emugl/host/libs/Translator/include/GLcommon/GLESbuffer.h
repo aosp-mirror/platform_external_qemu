@@ -23,7 +23,7 @@
 
 class GLESbuffer: public ObjectData {
 public:
-   GLESbuffer():ObjectData(BUFFER_DATA),m_size(0),m_usage(GL_STATIC_DRAW),m_data(NULL),m_wasBound(false){}
+   GLESbuffer():ObjectData(BUFFER_DATA) {}
    GLuint getSize(){return m_size;};
    GLuint getUsage(){return m_usage;};
    GLvoid* getData(){ return m_data;}
@@ -36,11 +36,11 @@ public:
    ~GLESbuffer();
 
 private:
-    GLuint         m_size;
-    GLuint         m_usage;
-    unsigned char* m_data;
+    GLuint         m_size = 0;
+    GLuint         m_usage = GL_STATIC_DRAW;
+    unsigned char* m_data = nullptr;
     RangeList      m_conversionManager;
-    bool           m_wasBound;
+    bool           m_wasBound = false;
 };
 
 typedef emugl::SmartPtr<GLESbuffer> GLESbufferPtr;

@@ -24,14 +24,12 @@
 
 class ShaderParser:public ObjectData{
 public:
-    ShaderParser();
-    ShaderParser(GLenum type);
+    ShaderParser(GLenum type = 0);
     void           setSrc(const Version& ver,GLsizei count,const GLchar* const* strings,const GLint* length);
     const std::string& getOriginalSrc() const;
     const GLchar** parsedLines();
     void           clear();
     GLenum         getType();
-    ~ShaderParser();
 
     void setInfoLog(GLchar * infoLog);
     // Query whether the shader parsed is valid.
@@ -42,7 +40,7 @@ public:
     // as the actual info log from guest POV.
     void setInvalidInfoLog();
 
-    GLchar* getInfoLog();
+    const GLchar* getInfoLog() const;
 
     void setDeleteStatus(bool val) { m_deleteStatus = val; }
     bool getDeleteStatus() const { return m_deleteStatus; }
@@ -62,14 +60,14 @@ private:
     void parseLineNumbers();
     void clearParsedSrc();
 
-    GLenum      m_type;
+    GLenum      m_type = 0;
     std::string m_originalSrc;
     std::string m_src;
     std::string m_parsedSrc;
-    GLchar*     m_parsedLines;
-    GLchar*     m_infoLog;
-    bool        m_deleteStatus;
-    GLuint      m_program;
-    bool        m_valid;
+    GLchar*     m_parsedLines = nullptr;
+    std::basic_string<GLchar> m_infoLog;
+    bool        m_deleteStatus = false;
+    GLuint      m_program = 0;
+    bool        m_valid = true;
 };
 #endif

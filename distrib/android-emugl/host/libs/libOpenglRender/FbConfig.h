@@ -152,12 +152,11 @@ public:
     EGLint packConfigs(GLuint bufferByteSize, GLuint* buffer) const;
 
 private:
-    FbConfigList();
-    FbConfigList(const FbConfigList& other);
+    FbConfigList(const FbConfigList& other) = delete;
 
-    int mCount;
-    FbConfig** mConfigs;
-    EGLDisplay mDisplay;
+    int mCount = 0;
+    FbConfig** mConfigs = nullptr;
+    EGLDisplay mDisplay = 0;
 };
 
 #endif  // _LIBRENDER_FB_CONFIG_H

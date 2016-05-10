@@ -24,19 +24,7 @@ class Var {
 public:
     // pointer data direction - from the client point of view.
     typedef enum { POINTER_OUT = 0x1, POINTER_IN = 0x2, POINTER_INOUT = 0x3 } PointerDir;
-    Var() :
-        m_name(""),
-        m_type(NULL),
-        m_lenExpression(""),
-        m_pointerDir(POINTER_IN),
-        m_nullAllowed(false),
-        m_isLarge(false),
-        m_packExpression(""),
-        m_writeExpression(""),
-        m_paramCheckExpression("")
-
-    {
-    }
+    Var() = default;
 
     Var(const std::string & name,
         const VarType * vartype,
@@ -48,11 +36,8 @@ public:
         m_type(const_cast<VarType *>(vartype)),
         m_lenExpression(lenExpression),
         m_pointerDir(dir),
-        m_nullAllowed(false),
-        m_isLarge(false),
         m_packExpression(packExpression),
-        m_writeExpression(writeExpression),
-	m_paramCheckExpression("")
+        m_writeExpression(writeExpression)
     {
     }
 
@@ -95,16 +80,15 @@ public:
 
 private:
     std::string m_name;
-    const VarType * m_type;
-    bool m_pointer; // is this variable a pointer;
+    const VarType * m_type = nullptr;
+    bool m_pointer = false; // is this variable a pointer;
     std::string m_lenExpression; // an expression to calcualte a pointer data size
-    PointerDir m_pointerDir;
-    bool m_nullAllowed;
-    bool m_isLarge;
+    PointerDir m_pointerDir = POINTER_IN;
+    bool m_nullAllowed = false;
+    bool m_isLarge = false;
     std::string m_packExpression; // an expression to pack data into the stream
     std::string m_writeExpression; // an expression to write data into the stream
     std::string m_paramCheckExpression; //an expression to check parameter value
-
 };
 
 #endif

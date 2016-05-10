@@ -39,8 +39,7 @@ void GLEScmContext::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
-GLEScmContext::GLEScmContext():GLEScontext(),m_texCoords(NULL),m_pointsIndex(-1), m_clientActiveTexture(0) {
-
+GLEScmContext::GLEScmContext() {
     m_map[GL_COLOR_ARRAY]          = new GLESpointer();
     m_map[GL_NORMAL_ARRAY]         = new GLESpointer();
     m_map[GL_VERTEX_ARRAY]         = new GLESpointer();

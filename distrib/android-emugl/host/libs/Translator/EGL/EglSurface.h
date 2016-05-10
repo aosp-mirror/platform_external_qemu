@@ -57,8 +57,8 @@ public:
 private:
     static unsigned int s_nextSurfaceHndl;
 
-    ESurfaceType m_type;
-    unsigned int m_hndl;
+    ESurfaceType m_type = WINDOW;
+    unsigned int m_hndl = 0;
 
 protected:
     EglSurface(EglDisplay *dpy,
@@ -70,18 +70,17 @@ protected:
        m_config(config),
        m_width(width),
        m_height(height),
-       m_native(NULL),
        m_dpy(dpy)
     {
         m_hndl = ++s_nextSurfaceHndl;
     }
 
 protected:
-    EglConfig*            m_config;
-    EGLint                m_width;
-    EGLint                m_height;
-    EglOS::Surface*       m_native;
-    EglDisplay           *m_dpy;
+    EglConfig*            m_config = nullptr;
+    EGLint                m_width = 0;
+    EGLint                m_height = 0;
+    EglOS::Surface*       m_native = nullptr;
+    EglDisplay*           m_dpy = nullptr;
 };
 
 #endif  // EGL_SURFACE_H
