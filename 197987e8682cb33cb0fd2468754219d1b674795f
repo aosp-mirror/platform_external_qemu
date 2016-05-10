@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "125a88dd_1d67be40",
+        "filename": "android/scripts/utils/package_builder.shi",
+        "patchSetId": 3
+      },
+      "lineNbr": 622,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-05-10T23:12:25Z",
+      "side": 1,
+      "message": "This change won\u0027t actually go in - simply added so that others can pull down these patches and test them out / suggest fixes.",
+      "range": {
+        "startLine": 618,
+        "startChar": 4,
+        "endLine": 622,
+        "endChar": 52
+      },
+      "revId": "197987e8682cb33cb0fd2468754219d1b674795f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
