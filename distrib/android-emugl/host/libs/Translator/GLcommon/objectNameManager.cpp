@@ -300,15 +300,12 @@ ObjectNameManager::createShareGroup(void *p_groupName)
     ShareGroupsMap::iterator s( m_groups.find(p_groupName) );
     if (s != m_groups.end()) {
         shareGroupReturn = (*s).second;
-    }
-    else {
+    } else {
         //
         // Group does not exist, create new group
         //
         shareGroupReturn = ShareGroupPtr(new ShareGroup(m_globalNameSpace));
-        m_groups.insert(
-                std::pair<void*, ShareGroupPtr>(
-                        p_groupName, shareGroupReturn));
+        m_groups.emplace(p_groupName, shareGroupReturn);
     }
 
     return shareGroupReturn;
@@ -319,7 +316,7 @@ ObjectNameManager::getShareGroup(void *p_groupName)
 {
     emugl::Mutex::AutoLock _lock(m_lock);
 
-    ShareGroupPtr shareGroupReturn(NULL);
+    ShareGroupPtr shareGroupReturn;
 
     ShareGroupsMap::iterator s( m_groups.find(p_groupName) );
     if (s != m_groups.end()) {
@@ -337,15 +334,13 @@ ObjectNameManager::attachShareGroup(void *p_groupName,
 
     ShareGroupsMap::iterator s( m_groups.find(p_existingGroupName) );
     if (s == m_groups.end()) {
-        // ShareGroup did not found !!!
-        return ShareGroupPtr(NULL);
+        // ShareGroup is not found !!!
+        return ShareGroupPtr();
     }
 
     ShareGroupPtr shareGroupReturn((*s).second);
     if (m_groups.find(p_groupName) == m_groups.end()) {
-        m_groups.insert(
-                std::pair<void*, ShareGroupPtr>(
-                        p_groupName, shareGroupReturn));
+        m_groups.emplace(p_groupName, shareGroupReturn);
     }
     return shareGroupReturn;
 }
@@ -364,6 +359,5 @@ ObjectNameManager::deleteShareGroup(void *p_groupName)
 void *ObjectNameManager::getGlobalContext()
 {
     emugl::Mutex::AutoLock _lock(m_lock);
-    return (m_groups.size() > 0) ? (*m_groups.begin()).first : NULL;
+    return m_groups.empty() ? nullptr : m_groups.begin()->first;
 }
-

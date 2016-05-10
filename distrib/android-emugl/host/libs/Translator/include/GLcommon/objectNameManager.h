@@ -18,7 +18,6 @@
 
 #include "emugl/common/mutex.h"
 #include "emugl/common/smart_ptr.h"
-#include <map>
 #include <unordered_map>
 
 enum NamedObjectType {
@@ -209,7 +208,7 @@ private:
 };
 
 typedef emugl::SmartPtr<ShareGroup> ShareGroupPtr;
-typedef std::multimap<void *, ShareGroupPtr> ShareGroupsMap;
+typedef std::unordered_map<void*, ShareGroupPtr> ShareGroupsMap;
 
 //
 // ObjectNameManager -
