@@ -16,9 +16,9 @@
 #ifndef _OBJECT_NAME_MANAGER_H
 #define _OBJECT_NAME_MANAGER_H
 
-#include <map>
 #include "emugl/common/mutex.h"
 #include "emugl/common/smart_ptr.h"
+#include <unordered_map>
 
 enum NamedObjectType {
     VERTEXBUFFER = 0,
@@ -49,7 +49,8 @@ private:
 };
 typedef emugl::SmartPtr<ObjectData> ObjectDataPtr;
 typedef unsigned long long ObjectLocalName;
-typedef std::map<ObjectLocalName, unsigned int> NamesMap;
+typedef std::unordered_map<ObjectLocalName, unsigned int> NamesMap;
+typedef std::unordered_map<unsigned int, ObjectLocalName> GlobalToLocalNamesMap;
 
 //
 // Class NameSpace - this class manages allocations and deletions of objects
@@ -116,6 +117,7 @@ private:
 private:
     ObjectLocalName m_nextName;
     NamesMap m_localToGlobalMap;
+    GlobalToLocalNamesMap m_globalToLocalMap;
     const NamedObjectType m_type;
     GlobalNameSpace *m_globalNameSpace;
 };
@@ -208,7 +210,7 @@ private:
 };
 
 typedef emugl::SmartPtr<ShareGroup> ShareGroupPtr;
-typedef std::multimap<void *, ShareGroupPtr> ShareGroupsMap;
+typedef std::unordered_map<void*, ShareGroupPtr> ShareGroupsMap;
 
 //
 // ObjectNameManager -

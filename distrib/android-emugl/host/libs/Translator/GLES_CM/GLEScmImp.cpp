@@ -32,7 +32,7 @@
 #include <GLcommon/FramebufferData.h>
 
 #include <cmath>
-#include <map>
+#include <unordered_map>
 
 #include <stdio.h>
 
@@ -50,7 +50,7 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
 
 /************************************** GLES EXTENSIONS *********************************************************/
 //extentions descriptor
-typedef std::map<std::string, __translatorMustCastToProperFunctionPointerType> ProcTableMap;
+typedef std::unordered_map<std::string, __translatorMustCastToProperFunctionPointerType> ProcTableMap;
 ProcTableMap *s_glesExtensions = NULL;
 /****************************************************************************************************************/
 

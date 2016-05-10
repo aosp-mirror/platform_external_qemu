@@ -21,12 +21,11 @@
 #include <GLcommon/GLESbuffer.h>
 #include <GLcommon/GLEScontext.h>
 
-#include <map>
 #include <vector>
 #include <string>
+#include <unordered_map>
 
-
-typedef std::map<GLfloat,std::vector<int> > PointSizeIndices;
+typedef std::unordered_map<GLfloat,std::vector<int> > PointSizeIndices;
 
 class GlLibrary;
 

@@ -33,7 +33,7 @@ static void convertByteDirectLoop(const char* dataIn,unsigned int strideIn,void*
 static void convertByteIndirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,GLsizei count,GLenum indices_type,const GLvoid* indices,unsigned int strideOut,int attribSize);
 
 GLESConversionArrays::~GLESConversionArrays() {
-    for(std::map<GLenum,ArrayData>::iterator it = m_arrays.begin(); it != m_arrays.end();it++) {
+    for(auto it = m_arrays.begin(); it != m_arrays.end();it++) {
         if((*it).second.allocated){
             if((*it).second.type == GL_FLOAT){
                 GLfloat* p = (GLfloat *)((*it).second.data);

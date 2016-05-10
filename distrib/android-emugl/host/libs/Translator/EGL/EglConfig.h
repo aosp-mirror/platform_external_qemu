@@ -19,8 +19,6 @@
 #include "EglOsApi.h"
 #include <EGL/egl.h>
 
-#include <list>
-
 #define MIN_SWAP_INTERVAL 1
 #define MAX_SWAP_INTERVAL 10
 
@@ -142,7 +140,5 @@ private:
 
     EglOS::PixelFormat*  m_nativeFormat;
 };
-
-typedef std::list<EglConfig*> ConfigsList;
 
 #endif

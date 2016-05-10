@@ -28,7 +28,7 @@
 
 #include <EGL/egl.h>
 
-#include <map>
+#include <unordered_map>
 
 #include <stdint.h>
 
@@ -40,9 +40,9 @@ struct ColorBufferRef {
     ColorBufferPtr cb;
     uint32_t refcount;  // number of client-side references
 };
-typedef std::map<HandleType, RenderContextPtr> RenderContextMap;
-typedef std::map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
-typedef std::map<HandleType, ColorBufferRef> ColorBufferMap;
+typedef std::unordered_map<HandleType, RenderContextPtr> RenderContextMap;
+typedef std::unordered_map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
+typedef std::unordered_map<HandleType, ColorBufferRef> ColorBufferMap;
 
 // A structure used to list the capabilities of the underlying EGL
 // implementation that the FrameBuffer instance depends on.

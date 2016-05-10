@@ -22,8 +22,9 @@
 #include "objectNameManager.h"
 #include "emugl/common/mutex.h"
 #include <string>
+#include <unordered_map>
 
-typedef std::map<GLenum,GLESpointer*>  ArraysMap;
+typedef std::unordered_map<GLenum,GLESpointer*>  ArraysMap;
 
 enum TextureTarget {
 TEXTURE_2D,
@@ -113,7 +114,7 @@ public:
 
     ~GLESConversionArrays();
 private:
-    std::map<GLenum,ArrayData> m_arrays;
+    std::unordered_map<GLenum,ArrayData> m_arrays;
     unsigned int m_current;
 };
 

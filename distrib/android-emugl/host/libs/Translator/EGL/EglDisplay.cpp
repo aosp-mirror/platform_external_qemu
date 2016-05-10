@@ -19,6 +19,8 @@
 #include "EglOsApi.h"
 #include <GLcommon/GLutils.h>
 
+#include <algorithm>
+
 EglDisplay::EglDisplay(EGLNativeDisplayType dpy,
                        EglOS::Display* idpy) :
     m_dpy(dpy),
@@ -43,11 +45,7 @@ EglDisplay::~EglDisplay() {
         m_idpy->destroyContext(m_globalSharedContext);
     }
 
-    for(ConfigsList::iterator it = m_configs.begin();
-        it != m_configs.end();
-        it++) {
-        delete *it;
-    }
+    m_configs.clear();
 
     delete m_manager[GLES_1_1];
     delete m_manager[GLES_2_0];
@@ -71,15 +69,20 @@ void EglDisplay::terminate(){
      m_initialized = false;
 }
 
-static bool compareEglConfigsPtrs(EglConfig* first,EglConfig* second) {
-    return *first < *second ;
+namespace {
+struct CompareEglConfigsPtrs {
+    bool operator()(const std::unique_ptr<EglConfig>& first,
+                    const std::unique_ptr<EglConfig>& second) const {
+        return *first < *second;
+    }
+};
 }
 
 void EglDisplay::addSimplePixelFormat(int red_size,
                                       int green_size,
                                       int blue_size,
                                       int alpha_size) {
-    m_configs.sort(compareEglConfigsPtrs);
+    std::sort(m_configs.begin(), m_configs.end(), CompareEglConfigsPtrs());
 
     EGLConfig match;
 
@@ -124,7 +127,7 @@ void EglDisplay::addSimplePixelFormat(int red_size,
 
     int max_config_id = 0;
 
-    for(ConfigsList::iterator it = m_configs.begin(); it != m_configs.end() ;it++) {
+    for(ConfigsList::iterator it = m_configs.begin(); it != m_configs.end() ;++it) {
         EGLint id;
         (*it)->getConfAttrib(EGL_CONFIG_ID, &id);
         if(id > max_config_id)
@@ -135,7 +138,7 @@ void EglDisplay::addSimplePixelFormat(int red_size,
                                          red_size, green_size, blue_size,
                                          alpha_size);
 
-    m_configs.push_back(newConfig);
+    m_configs.emplace_back(newConfig);
 }
 
 void EglDisplay::addMissingConfigs() {
@@ -152,13 +155,13 @@ void EglDisplay::initConfigurations(int renderableType) {
     m_idpy->queryConfigs(renderableType, addConfig, this);
 
     addMissingConfigs();
-    m_configs.sort(compareEglConfigsPtrs);
+    std::sort(m_configs.begin(), m_configs.end(), CompareEglConfigsPtrs());
 
 #if EMUGL_DEBUG
     for (ConfigsList::const_iterator it = m_configs.begin();
          it != m_configs.end();
-         it++) {
-        EglConfig* config = *it;
+         ++it) {
+        EglConfig* config = it->get();
         EGLint red, green, blue, alpha, depth, stencil, renderable, surface;
         config->getConfAttrib(EGL_RED_SIZE, &red);
         config->getConfAttrib(EGL_GREEN_SIZE, &green);
@@ -177,9 +180,9 @@ EglConfig* EglDisplay::getConfig(EGLConfig conf) const {
 
     for(ConfigsList::const_iterator it = m_configs.begin();
         it != m_configs.end();
-        it++) {
-        if(static_cast<EGLConfig>(*it) == conf) {
-            return (*it);
+        ++it) {
+        if(static_cast<EGLConfig>(it->get()) == conf) {
+            return it->get();
         }
     }
     return NULL;
@@ -233,7 +236,7 @@ bool EglDisplay::removeContext(ContextPtr ctx) {
     emugl::Mutex::AutoLock mutex(m_lock);
 
     ContextsHndlMap::iterator it;
-    for(it = m_contexts.begin(); it != m_contexts.end();it++) {
+    for(it = m_contexts.begin(); it != m_contexts.end();++it) {
         if((*it).second.get() == ctx.get()){
             break;
         }
@@ -250,10 +253,9 @@ EglConfig* EglDisplay::getConfig(EGLint id) const {
 
     for(ConfigsList::const_iterator it = m_configs.begin();
         it != m_configs.end();
-        it++) {
+        ++it) {
         if((*it)->id() == id) {
-            return (*it);
-
+            return it->get();
         }
     }
     return NULL;
@@ -264,8 +266,8 @@ int EglDisplay::getConfigs(EGLConfig* configs,int config_size) const {
     int i = 0;
     for(ConfigsList::const_iterator it = m_configs.begin();
         it != m_configs.end() && i < config_size;
-        i++, it++) {
-        configs[i] = static_cast<EGLConfig>(*it);
+        i++, ++it) {
+        configs[i] = static_cast<EGLConfig>(it->get());
     }
     return i;
 }
@@ -283,10 +285,10 @@ int EglDisplay::doChooseConfigs(const EglConfig& dummy,
     int added = 0;
     for(ConfigsList::const_iterator it = m_configs.begin();
         it != m_configs.end() && (added < config_size || !configs);
-        it++) {
+        ++it) {
         if( (*it)->chosen(dummy)){
             if(configs) {
-                configs[added] = static_cast<EGLConfig>(*it);
+                configs[added] = static_cast<EGLConfig>(it->get());
             }
             added++;
        }
@@ -369,11 +371,11 @@ EglOS::Context* EglDisplay::getGlobalSharedContext() const {
         // with a context which is already current. This dummy context
         // will never be current to any thread so it is safe to share with.
         // Create that context using the first config
-        if (m_configs.size() < 1) {
+        if (m_configs.empty()) {
             // Should not happen! config list should be initialized at this point
             return NULL;
         }
-        EglConfig *cfg = (*m_configs.begin());
+        EglConfig *cfg = m_configs.front().get();
         m_globalSharedContext = m_idpy->createContext(
                 cfg->nativeFormat(), NULL);
     }
@@ -410,5 +412,5 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
             info->trans_blue_val,
             info->frmt);
 
-    display->m_configs.push_back(config);
+    display->m_configs.emplace_back(config);
 }
