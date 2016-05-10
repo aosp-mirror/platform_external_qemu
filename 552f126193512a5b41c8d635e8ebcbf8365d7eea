@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9220382f_f9321795",
+        "filename": "android/console-auth.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-10T16:26:05Z",
+      "side": 1,
+      "message": "Good point, and there is one more corner case: when sending an SMS to another emulator, or making a phone call, we use the console interface under the hood (through android/async-console.h).\n\nWe need to update this code as well, and of course it will need the newest auth token. This means no more singleton, and re-creating a new instance on every call.\n\nThanks!",
+      "parentUuid": "12728820_e26b560e",
+      "range": {
+        "startLine": 26,
+        "startChar": 13,
+        "endLine": 26,
+        "endChar": 33
+      },
+      "revId": "552f126193512a5b41c8d635e8ebcbf8365d7eea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9220382f_799127a8",
         "filename": "android/console-auth.h",
         "patchSetId": 1
