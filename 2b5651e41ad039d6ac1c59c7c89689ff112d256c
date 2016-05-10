@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "125a88dd_ff017ff7",
+        "filename": "android/scripts/build-ANGLEtranslator.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-05-10T19:48:47Z",
+      "side": 1,
+      "message": "Yep, same for him. The actual problem is that this build script depends on system libraries, which I\u0027m fairly certain is a no-go for anything related to building the emulator :/\n\nLooking for input from David here - otherwise we\u0027ll need to build and distribute our own versions of X11, Xi, and Xext (and libpci I suppose)",
+      "parentUuid": "125a88dd_0eef8ffc",
+      "range": {
+        "startLine": 82,
+        "startChar": 84,
+        "endLine": 82,
+        "endChar": 120
+      },
+      "revId": "2b5651e41ad039d6ac1c59c7c89689ff112d256c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "125a88dd_f9143f8e",
         "filename": "android/scripts/build-ANGLEtranslator.sh",
         "patchSetId": 2
@@ -88,6 +112,53 @@
         "startChar": 0,
         "endLine": 86,
         "endChar": 36
+      },
+      "revId": "2b5651e41ad039d6ac1c59c7c89689ff112d256c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_5f11b340",
+        "filename": "android/scripts/build-ANGLEtranslator.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-05-10T19:48:47Z",
+      "side": 1,
+      "message": "Yes, I\u0027m going to try writing a configure script that basically just does these!",
+      "parentUuid": "125a88dd_f9143f8e",
+      "range": {
+        "startLine": 83,
+        "startChar": 0,
+        "endLine": 86,
+        "endChar": 36
+      },
+      "revId": "2b5651e41ad039d6ac1c59c7c89689ff112d256c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_1f1b3b63",
+        "filename": "android/scripts/build-ANGLEtranslator.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-05-10T19:48:47Z",
+      "side": 1,
+      "message": "Is there a good way to build this into a Makefile as the \"install\" command? If not, oh well.",
+      "range": {
+        "startLine": 89,
+        "startChar": 12,
+        "endLine": 99,
+        "endChar": 63
       },
       "revId": "2b5651e41ad039d6ac1c59c7c89689ff112d256c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
