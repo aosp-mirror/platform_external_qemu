@@ -189,5 +189,67 @@ private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(AutoLock);
 };
 
+class AutoWriteLock {
+public:
+    AutoWriteLock(ReadWriteLock& lock) : mRWLock(lock) {
+        mRWLock.lockWrite();
+    }
+
+    void lockWrite() {
+        assert(!mWriteLocked);
+        mRWLock.lockWrite();
+        mWriteLocked = true;
+    }
+
+    void unlockWrite() {
+        assert(mWriteLocked);
+        mRWLock.unlockWrite();
+        mWriteLocked = false;
+    }
+
+    ~AutoWriteLock() {
+        if (mWriteLocked) {
+            mRWLock.unlockWrite();
+        }
+    }
+
+private:
+    ReadWriteLock& mRWLock;
+    bool mWriteLocked = true;
+    // This class has a non-movable object.
+    DISALLOW_COPY_ASSIGN_AND_MOVE(AutoWriteLock);
+};
+
+class AutoReadLock {
+public:
+    AutoReadLock(ReadWriteLock& lock) : mRWLock(lock) {
+        mRWLock.lockRead();
+    }
+
+    void lockRead() {
+        assert(!mReadLocked);
+        mRWLock.lockRead();
+        mReadLocked = true;
+    }
+
+    void unlockRead() {
+        assert(mReadLocked);
+        mRWLock.unlockRead();
+        mReadLocked = false;
+    }
+
+    ~AutoReadLock() {
+        if (mReadLocked) {
+            mRWLock.unlockRead();
+        }
+    }
+
+private:
+    ReadWriteLock& mRWLock;
+    bool mReadLocked = true;
+    // This class has a non-movable object.
+    DISALLOW_COPY_ASSIGN_AND_MOVE(AutoReadLock);
+};
+
 }  // namespace base
 }  // namespace android
