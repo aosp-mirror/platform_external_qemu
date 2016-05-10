@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "12728820_c2a023a6",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 980,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T00:21:40Z",
+      "side": 1,
+      "message": "please use const \u0026 where possible",
+      "range": {
+        "startLine": 980,
+        "startChar": 3,
+        "endLine": 980,
+        "endChar": 17
+      },
+      "revId": "8f829ea71570833290881680f5058382ad11f0a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12728820_02ab1b88",
+        "filename": "distrib/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 986,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T00:21:40Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 985,
+        "startChar": 0,
+        "endLine": 986,
+        "endChar": 72
+      },
+      "revId": "8f829ea71570833290881680f5058382ad11f0a9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
