@@ -229,6 +229,11 @@ struct android_native_buffer_t;
 #define EGL_NATIVE_BUFFER_ANDROID       0x3140  /* eglCreateImageKHR target */
 #endif
 
+#ifndef EGL_ANDROID_recordable
+#define EGL_ANDROID_recordable 1
+#define EGL_RECORDABLE_ANDROID          0x3142
+#endif
+
 #ifndef EGL_ANDROID_swap_rectangle
 #define EGL_ANDROID_swap_rectangle 1
 #ifdef EGL_EGLEXT_PROTOTYPES
