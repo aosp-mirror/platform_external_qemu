@@ -2,6 +2,75 @@
   "comments": [
     {
       "key": {
+        "uuid": "12728820_622e86ee",
+        "filename": "android/emulation/ConsoleAuthToken.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T15:30:04Z",
+      "side": 1,
+      "message": "otherwise you could use the data you\u0027ve written as is, without the file read operation",
+      "range": {
+        "startLine": 105,
+        "startChar": 12,
+        "endLine": 110,
+        "endChar": 13
+      },
+      "revId": "cfaa8ac4c95ef5cea1e5baad2803fcb5b319a8cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12728820_c23c9a21",
+        "filename": "android/emulation/ConsoleAuthToken.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T15:30:04Z",
+      "side": 1,
+      "message": "should we move this size calculation into the base64 encoding module?",
+      "range": {
+        "startLine": 124,
+        "startChar": 3,
+        "endLine": 124,
+        "endChar": 51
+      },
+      "revId": "cfaa8ac4c95ef5cea1e5baad2803fcb5b319a8cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12728820_02ddd21c",
+        "filename": "android/emulation/ConsoleAuthToken.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T15:30:04Z",
+      "side": 1,
+      "message": "nit: cref?",
+      "range": {
+        "startLine": 63,
+        "startChar": 4,
+        "endLine": 63,
+        "endChar": 16
+      },
+      "revId": "cfaa8ac4c95ef5cea1e5baad2803fcb5b319a8cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9220382f_398baf7c",
         "filename": "android/emulation/ConsoleAuthToken.h",
         "patchSetId": 1
