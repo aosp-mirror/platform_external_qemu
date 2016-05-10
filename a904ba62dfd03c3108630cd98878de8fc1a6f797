@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9220382f_79f847d2",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-10T16:23:38Z",
+      "side": 1,
+      "message": "Right, it comes from one of our included headers, but it\u0027s better to be explicit here instead. Will do.",
+      "parentUuid": "12728820_e2d516c6",
+      "range": {
+        "startLine": 94,
+        "startChar": 4,
+        "endLine": 94,
+        "endChar": 8
+      },
+      "revId": "a904ba62dfd03c3108630cd98878de8fc1a6f797",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "12728820_c2d81a01",
         "filename": "android/console.c",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "b2829c4f_328bd07c",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-10T16:23:38Z",
+      "side": 1,
+      "message": "Ah good catch, actually not used anymore, so can be dropped :)",
+      "parentUuid": "12728820_c2d81a01",
+      "range": {
+        "startLine": 101,
+        "startChar": 8,
+        "endLine": 101,
+        "endChar": 23
+      },
+      "revId": "a904ba62dfd03c3108630cd98878de8fc1a6f797",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "12728820_a2d4fecb",
         "filename": "android/console.c",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2016-05-10T15:34:47Z",
       "side": 1,
       "message": "well, calloc zeroes out the memory. Now when you set finished to false and don\u0027t set authenticated it looks like a bug. Could you please either add authenticated or remove finished here?",
+      "range": {
+        "startLine": 305,
+        "startChar": 8,
+        "endLine": 305,
+        "endChar": 33
+      },
+      "revId": "a904ba62dfd03c3108630cd98878de8fc1a6f797",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "721744d9_789121a8",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-10T16:23:38Z",
+      "side": 1,
+      "message": "Will remove it, thanks :)",
+      "parentUuid": "12728820_a2d4fecb",
       "range": {
         "startLine": 305,
         "startChar": 8,
