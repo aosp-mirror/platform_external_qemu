@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9220382f_398baf7c",
+        "filename": "android/emulation/ConsoleAuthToken.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-10T14:42:27Z",
+      "side": 1,
+      "message": "nit: to Base-64 string.",
+      "revId": "cfaa8ac4c95ef5cea1e5baad2803fcb5b319a8cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
