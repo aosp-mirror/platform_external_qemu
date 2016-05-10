@@ -1,0 +1,257 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "125a88dd_b4d00e60",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T19:06:48Z",
+      "side": 1,
+      "message": "nope :)",
+      "range": {
+        "startLine": 44,
+        "startChar": 12,
+        "endLine": 44,
+        "endChar": 20
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_94b71294",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T19:06:48Z",
+      "side": 1,
+      "message": "please add a set of AutoWriteLock/AutoReadLock classes",
+      "range": {
+        "startLine": 51,
+        "startChar": 13,
+        "endLine": 51,
+        "endChar": 24
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_149562eb",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T19:06:48Z",
+      "side": 1,
+      "message": "why not just erase(handle) ?",
+      "range": {
+        "startLine": 53,
+        "startChar": 3,
+        "endLine": 53,
+        "endChar": 23
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_342f3e7c",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T19:06:48Z",
+      "side": 1,
+      "message": "should we clean up both containers?",
+      "range": {
+        "startLine": 53,
+        "startChar": 4,
+        "endLine": 53,
+        "endChar": 12
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_54751ab8",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T19:06:48Z",
+      "side": 1,
+      "message": "locking/unlocking twice is very expensive, what about combining the code here under the same lock?",
+      "range": {
+        "startLine": 60,
+        "startChar": 5,
+        "endLine": 63,
+        "endChar": 26
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_b441ee4e",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T19:06:48Z",
+      "side": 1,
+      "message": "_un_lock ? AutoReadLock is much safer",
+      "range": {
+        "startLine": 77,
+        "startChar": 12,
+        "endLine": 77,
+        "endChar": 20
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_1431e2f3",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T19:06:48Z",
+      "side": 1,
+      "message": "should you delete all pending syncs in dtor?",
+      "range": {
+        "startLine": 37,
+        "startChar": 2,
+        "endLine": 37,
+        "endChar": 17
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_b4180e71",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T19:06:48Z",
+      "side": 1,
+      "message": "please use unordered_map instead - it\u0027s a hash map, and hash maps way faster than the sorted ones",
+      "range": {
+        "startLine": 48,
+        "startChar": 9,
+        "endLine": 48,
+        "endChar": 12
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_9406320d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/FenceSyncInfo.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T19:06:48Z",
+      "side": 1,
+      "message": "this should just be an unordered_set\u003cuint64_t\u003e, containing signaled handles\n\nOr, just have a single map of handle -\u003e struct { sync, isSignaled }",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 42
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_749136a8",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T19:06:48Z",
+      "side": 1,
+      "message": "for the gles1 case you would end up having multiple syncs with handle \u003d 0. So you would leak all of them but the first one",
+      "range": {
+        "startLine": 424,
+        "startChar": 0,
+        "endLine": 424,
+        "endChar": 31
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "125a88dd_94a2b20d",
+        "filename": "distrib/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2016-05-10T19:06:48Z",
+      "side": 1,
+      "message": "null check?",
+      "range": {
+        "startLine": 441,
+        "startChar": 0,
+        "endLine": 442,
+        "endChar": 18
+      },
+      "revId": "e6760791c2c02e1b334f39edae788ff20acf1a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
