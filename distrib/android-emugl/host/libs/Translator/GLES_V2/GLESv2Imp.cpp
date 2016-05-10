@@ -543,7 +543,7 @@ GL_APICALL void  GL_APIENTRY glDeleteTextures(GLsizei n, const GLuint* textures)
                 // texture is not a target of EGLImage.
                 if (!tData || tData->sourceEGLImage == 0) {
                     const GLuint globalTextureName = ctx->shareGroup()->getGlobalName(TEXTURE,textures[i]);
-                    ctx->dispatcher().glDeleteTextures(1,&globalTextureName);
+                    ctx->shareGroup()->decTexRefCounterAndReleaseIf0(globalTextureName);
                 }
                 ctx->shareGroup()->deleteName(TEXTURE,textures[i]);
 
@@ -2226,7 +2226,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             if (oldGlobal) {
                 TextureData* oldTexData = getTextureData(tex);
                 if (!oldTexData || oldTexData->sourceEGLImage == 0) {
-                    ctx->dispatcher().glDeleteTextures(1, &oldGlobal);
+                    ctx->shareGroup()->decTexRefCounterAndReleaseIf0(oldGlobal);
                 }
             }
             // replace mapping and bind the new global object
