@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "125a88dd_0e1b0f63",
+        "filename": "android/scripts/build-ANGLEtranslator.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1079203
+      },
+      "writtenOn": "2016-05-10T17:58:52Z",
+      "side": 1,
+      "message": "gclient sync fails to create the build files unless it can find X11, Xi, and Xext (although it failed because it couldn\u0027t find libpci on Frank\u0027s system).",
+      "range": {
+        "startLine": 82,
+        "startChar": 84,
+        "endLine": 82,
+        "endChar": 120
+      },
+      "revId": "2b5651e41ad039d6ac1c59c7c89689ff112d256c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
