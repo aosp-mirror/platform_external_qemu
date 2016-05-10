@@ -288,6 +288,7 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
         if(!globalTextureName){
             ctx->shareGroup()->genName(TEXTURE,localTexName);
             globalTextureName = ctx->shareGroup()->getGlobalName(TEXTURE,localTexName);
+            ctx->shareGroup()->incTexRefCounter(globalTextureName);
         }
 
         TextureData* texData = getTextureData(localTexName);
@@ -541,7 +542,9 @@ GL_APICALL void  GL_APIENTRY glDeleteTextures(GLsizei n, const GLuint* textures)
                 // texture is not a target of EGLImage.
                 if (!tData || tData->sourceEGLImage == 0) {
                     const GLuint globalTextureName = ctx->shareGroup()->getGlobalName(TEXTURE,textures[i]);
-                    ctx->dispatcher().glDeleteTextures(1,&globalTextureName);
+                    if (ctx->shareGroup()->decTexRefCounter(globalTextureName) == 0) {
+                        ctx->dispatcher().glDeleteTextures(1,&globalTextureName);
+                    }
                 }
                 ctx->shareGroup()->deleteName(TEXTURE,textures[i]);
 
@@ -791,6 +794,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
     if(texture) {
         if (!ctx->shareGroup()->isObject(TEXTURE,texture)) {
             ctx->shareGroup()->genName(TEXTURE,texture);
+            ctx->shareGroup()->incTexRefCounter(globalTextureName);
         }
         ObjectLocalName texname = TextureLocalName(textarget,texture);
         globalTextureName = ctx->shareGroup()->getGlobalName(TEXTURE,texname);
@@ -874,6 +878,8 @@ GL_APICALL void  GL_APIENTRY glGenTextures(GLsizei n, GLuint* textures){
     if(ctx->shareGroup().get()) {
         for(int i=0; i<n ;i++) {
             textures[i] = ctx->shareGroup()->genName(TEXTURE, 0, true);
+            unsigned int globalName = ctx->shareGroup()->getGlobalName(TEXTURE, textures[i]);
+            ctx->shareGroup()->incTexRefCounter(globalName);
         }
     }
 }
@@ -2230,12 +2236,14 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             // Delete old texture object but only if it is not a target of a EGLImage
             if (oldGlobal) {
                 TextureData* oldTexData = getTextureData(tex);
-                if (!oldTexData || oldTexData->sourceEGLImage == 0) {
-                    ctx->dispatcher().glDeleteTextures(1, &oldGlobal);
+                if ((!oldTexData || oldTexData->sourceEGLImage == 0) &&
+                    ctx->shareGroup()->decTexRefCounter(oldGlobal) == 0) {
+                        ctx->dispatcher().glDeleteTextures(1, &oldGlobal);
                 }
             }
             // replace mapping and bind the new global object
             ctx->shareGroup()->replaceGlobalName(TEXTURE, tex,img->globalTexName);
+            ctx->shareGroup()->incTexRefCounter(img->globalTexName);
             ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, img->globalTexName);
             TextureData *texData = getTextureTargetData(target);
             SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);

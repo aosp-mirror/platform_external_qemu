@@ -964,6 +964,7 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
             img->border = texData->border;
             img->internalFormat = texData->internalFormat;
             img->globalTexName = globalTexName;
+            sg->incTexRefCounter(globalTexName);
             return dpy->addImageKHR(img);
         }
     }
@@ -975,6 +976,16 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image)
 {
     VALIDATE_DISPLAY(display);
+    ThreadInfo* thread  = getThreadInfo();
+    ShareGroupPtr sg = thread->shareGroup;
+    ImagePtr img = dpy->getImage(image);
+    if (sg != NULL && img != NULL) {
+        unsigned int globalTexName = img->globalTexName;
+        if (!sg->decTexRefCounter(globalTexName)) {
+                //GET_CTX();
+                //ctx->dispatcher().glDeleteTextures(1, &globalTexName);
+        }
+    }
     return dpy->destroyImageKHR(image) ? EGL_TRUE:EGL_FALSE;
 }
 
