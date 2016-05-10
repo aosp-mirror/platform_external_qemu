@@ -153,6 +153,7 @@ GlobalNameSpace::deleteName(NamedObjectType p_type, unsigned int p_name)
 
 typedef std::pair<NamedObjectType, ObjectLocalName> ObjectIDPair;
 typedef std::map<ObjectIDPair, ObjectDataPtr> ObjectDataMap;
+typedef std::map<unsigned int, size_t> TextureRefCounterMap;
 
 ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace) : m_lock() {
     for (int i=0; i < NUM_OBJECT_TYPES; i++) {
@@ -160,6 +161,7 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace) : m_lock() {
     }
 
     m_objectsData = NULL;
+    m_globalTextureRefCounter = NULL;
 }
 
 ShareGroup::~ShareGroup()
@@ -170,6 +172,7 @@ ShareGroup::~ShareGroup()
     }
 
     delete (ObjectDataMap *)m_objectsData;
+    delete (TextureRefCounterMap *)m_globalTextureRefCounter;
 }
 
 ObjectLocalName
@@ -182,6 +185,9 @@ ShareGroup::genName(NamedObjectType p_type,
     emugl::Mutex::AutoLock _lock(m_lock);
     ObjectLocalName localName =
             m_nameSpace[p_type]->genName(p_localName, true, genLocal);
+    if (p_type == TEXTURE) {
+        incTexRefCounterNoLock(m_nameSpace[p_type]->getGlobalName(localName));
+    }
     return localName;
 }
 
@@ -283,6 +289,49 @@ ShareGroup::getObjectData(NamedObjectType p_type,
         if (i != map->end()) ret = (*i).second;
     }
     return ret;
+}
+
+size_t
+ShareGroup::incTexRefCounterNoLock(unsigned int p_globalName) {
+    TextureRefCounterMap *map =
+            (TextureRefCounterMap *)m_globalTextureRefCounter;
+    if (!map) {
+        map = new TextureRefCounterMap();
+        m_globalTextureRefCounter = map;
+    }
+    (*map)[p_globalName] ++;
+    return (*map)[p_globalName];
+}
+
+size_t
+ShareGroup::incTexRefCounter(unsigned int p_globalName) {
+    emugl::Mutex::AutoLock _lock(m_lock);
+    return incTexRefCounterNoLock(p_globalName);
+}
+
+size_t
+ShareGroup::decTexRefCounter(unsigned int p_globalName) {
+    emugl::Mutex::AutoLock _lock(m_lock);
+    TextureRefCounterMap *map =
+            (TextureRefCounterMap *)m_globalTextureRefCounter;
+    if (!map) {
+        map = new TextureRefCounterMap();
+        m_globalTextureRefCounter = map;
+    }
+    (*map)[p_globalName] --;
+    return (*map)[p_globalName];
+}
+
+size_t
+ShareGroup::decTexRefCounterAndReleaseIf0(unsigned int p_globalName) {
+    size_t val = decTexRefCounter(p_globalName);
+    if (!val) {
+        TextureRefCounterMap *map =
+            (TextureRefCounterMap *)m_globalTextureRefCounter;
+        map->erase(p_globalName);
+        GLEScontext::dispatcher().glDeleteTextures(1, &p_globalName);
+    }
+    return val;
 }
 
 ObjectNameManager::ObjectNameManager(GlobalNameSpace *globalNameSpace) :
