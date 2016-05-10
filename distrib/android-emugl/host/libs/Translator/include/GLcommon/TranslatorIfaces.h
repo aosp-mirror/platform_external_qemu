@@ -21,6 +21,8 @@
 #include <GLES/gl.h>
 #include <string.h>
 
+#include <unordered_map>
+
 extern "C" {
 
 /* This is a generic function pointer type, whose name indicates it must
@@ -77,7 +79,7 @@ struct EglImage
 };
 
 typedef emugl::SmartPtr<EglImage> ImagePtr;
-typedef std::map< unsigned int, ImagePtr>       ImagesHndlMap;
+typedef std::unordered_map<unsigned int, ImagePtr> ImagesHndlMap;
 
 class GLEScontext;
 

@@ -16,8 +16,6 @@
 #ifndef EGL_SURFACE_H
 #define EGL_SURFACE_H
 
-#include <map>
-
 #include "EglConfig.h"
 #include "EglOsApi.h"
 

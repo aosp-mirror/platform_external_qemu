@@ -28,8 +28,6 @@
 
 #include <EGL/egl.h>
 
-#include <map>
-
 class EglContext;
 typedef  emugl::SmartPtr<EglContext> ContextPtr;
 
