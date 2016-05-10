@@ -168,6 +168,7 @@ OPT_PARAM( screen, "<mode>", "set emulated screen mode" )
 OPT_FLAG( force_32bit, "always use 32-bit emulator" )
 
 OPT_PARAM(selinux, "<disabled|permissive>", "Set SELinux to either disabled or permissive mode")
+OPT_FLAG(console_auth_token, "print console authentication token")
 
 #undef CFG_FLAG
 #undef CFG_PARAM
