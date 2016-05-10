@@ -57,6 +57,10 @@ int monitor_cur_is_qmp(void);
 
 Monitor * monitor_init(CharDriverState *chr, int flags);
 void monitor_add_command(Monitor *mon, mon_cmd_t *cmd);
+void monitor_set_command_table(Monitor* mon, mon_cmd_t* cmds);
+#ifdef CONFIG_ANDROID
+mon_cmd_t* monitor_get_android_cmds();
+#endif
 
 int monitor_suspend(Monitor *mon);
 void monitor_resume(Monitor *mon);

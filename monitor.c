@@ -4233,18 +4233,6 @@ static void handle_user_command(Monitor *mon, const char *cmdline)
     QDict *qdict;
     const mon_cmd_t *cmd;
 
-    /* do security check before command parser code is invoked */
-    if (!mon->authorized) {
-        if (android_console_auth_check_authorization_command(cmdline)) {
-            mon->authorized = true;
-            monitor_printf(mon, android_console_help_banner_get());
-        } else {
-            monitor_printf(mon, "KO: Authorization token required\r\n");
-            monitor_disconnect(mon);
-        }
-        return;
-    }
-
     qdict = qdict_new();
 
     cmd = monitor_parse_command(mon, cmdline, 0,
@@ -5515,19 +5503,31 @@ static GArray * make_dynamic_table(mon_cmd_t *cmds)
     return cmd_array;
 }
 
+static void destroy_dynamic_table(GArray* cmd_array) {
+    int i = 0;
+    for (i = 0; i < cmd_array->len; i++) {
+        mon_cmd_t* cmd = &g_array_index(cmd_array, mon_cmd_t, i);
+        if (cmd->sub_cmds.dynamic_table) {
+            destroy_dynamic_table(cmd->sub_cmds.dynamic_table);
+        }
+    }
+
+    g_array_free(cmd_array, TRUE);
+}
+
 #ifdef CONFIG_ANDROID
 void android_connect_handler(Monitor* mon) {
     // this is the first opportunity to handle new connections
+    mon->cmds.static_table = android_preauth_cmds;
     int console_auth_status = android_console_auth_get_status();
     switch (console_auth_status) {
     case CONSOLE_AUTH_STATUS_DISABLED:
+        mon->cmds.static_table = android_cmds;
         mon->banner = android_console_help_banner_get();
-        mon->authorized = true;
         monitor_printf(mon, "%s\n", mon->banner);
         break;
     case CONSOLE_AUTH_STATUS_REQUIRED:
         mon->banner = android_console_auth_banner_get();
-        mon->authorized = false;
         monitor_printf(mon, "%s\n", mon->banner);
         break;
     case CONSOLE_AUTH_STATUS_ERROR:
@@ -5559,12 +5559,13 @@ Monitor * monitor_init(CharDriverState *chr, int flags)
 
 #ifdef CONFIG_ANDROID
     if (flags & MONITOR_ANDROID_CONSOLE) {
-        mon->cmds.static_table = android_cmds;
+        mon->cmds.static_table = android_preauth_cmds;
         mon->prompt = "";
         mon->connect_handler = android_connect_handler;
 
         int console_auth_status = android_console_auth_get_status();
-        if (console_auth_status == CONSOLE_AUTH_STATUS_ERROR) {
+        switch (console_auth_status) {
+            case CONSOLE_AUTH_STATUS_ERROR:
             mon->banner = "";
 
             // banners don't get sent reliably, output error message on
@@ -5576,6 +5577,10 @@ Monitor * monitor_init(CharDriverState *chr, int flags)
                     "not work\n",
                     emulator_console_auth_token_path);
             free(emulator_console_auth_token_path);
+            break;
+            case CONSOLE_AUTH_STATUS_DISABLED:
+                mon->cmds.static_table = android_cmds;
+                break;
         }
         mon->print_error = android_monitor_print_error;
     }
@@ -5616,6 +5621,19 @@ Monitor * monitor_init(CharDriverState *chr, int flags)
         default_mon = mon;
 
     return mon;
+}
+
+void monitor_set_command_table(Monitor* mon, mon_cmd_t* cmds) {
+    if (mon->flags & MONITOR_DYNAMIC_CMDS) {
+        destroy_dynamic_table(mon->cmds.dynamic_table);
+        mon->cmds.dynamic_table = make_dynamic_table(mon->cmds.static_table);
+    } else {
+        mon->cmds.static_table = cmds;
+    }
+}
+
+mon_cmd_t* monitor_get_android_cmds() {
+    return android_cmds;
 }
 
 static void bdrv_password_cb(void *opaque, const char *password,

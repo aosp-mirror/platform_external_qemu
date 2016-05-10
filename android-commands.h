@@ -1,3 +1,4 @@
+
 /* hand-written for now; consider .hx autogen */
 
 static mon_cmd_t android_redir_cmds[] = {
@@ -358,14 +359,23 @@ static mon_cmd_t android_gsm_cmds[] = {
     { NULL, NULL, },
 };
 
+#define HELP_COMMAND                                                  \
+    {                                                                 \
+        .name = "help|h|?", .args_type = "helptext:S?", .params = "", \
+        .help = "print a list of commands",                           \
+        .mhandler.cmd = android_console_help,                         \
+    }
+
+#define QUIT_COMMAND                                                          \
+    {                                                                         \
+        .name = "quit|exit", .args_type = "", .params = "",                   \
+        .help = "quit control session", .mhandler.cmd = android_console_quit, \
+    }
+
+#define AVD_HELP "control virtual device execution"
+
 static mon_cmd_t android_cmds[] = {
-    {
-        .name = "help|h|?",
-        .args_type = "helptext:S?",
-        .params = "",
-        .help = "print a list of commands",
-        .mhandler.cmd = android_console_help,
-    },
+    HELP_COMMAND,
     {
         .name = "crash",
         .args_type = "",
@@ -380,13 +390,7 @@ static mon_cmd_t android_cmds[] = {
         .help = "kill the emulator instance",
         .mhandler.cmd = android_console_kill,
     },
-    {
-        .name = "quit|exit",
-        .args_type = "",
-        .params = "",
-        .help = "quit control session",
-        .mhandler.cmd = android_console_quit,
-    },
+    QUIT_COMMAND,
     {
         .name = "redir",
         .args_type = "item:s?",
@@ -412,7 +416,7 @@ static mon_cmd_t android_cmds[] = {
     {   .name = "avd",
         .args_type = "item:s?",
         .params = "",
-        .help = "control virtual device execution",
+        .help = AVD_HELP,
         .mhandler.cmd = android_console_avd,
         .sub_cmds.static_table = android_avd_cmds,
     },
@@ -460,4 +464,45 @@ static mon_cmd_t android_cmds[] = {
     },
 
     { NULL, NULL, },
+};
+
+static mon_cmd_t android_preauth_avd_cmds[] = {
+    {
+        .name = "name",
+        .args_type = "",
+        .params = "",
+        .help = "query virtual device name",
+        .mhandler.cmd = android_console_avd_name,
+    },
+    {
+        NULL,
+        NULL,
+    },
+};
+
+/* "preauth" commands are the set of commands that are legal before
+* authentication.  "avd name is special cased here because it is needed by
+* older versions of Android Studio */
+static mon_cmd_t android_preauth_cmds[] = {
+    HELP_COMMAND,
+    {
+        .name = "auth",
+        .args_type = "arg:s?",
+        .params = "",
+        .help = "use 'auth <auth_token>' to get extended functionality",
+        .mhandler.cmd = android_console_auth,
+    },
+    {
+        .name = "avd",
+        .args_type = "item:s?",
+        .params = "",
+        .help = AVD_HELP,
+        .mhandler.cmd = android_console_avd_preauth,
+        .sub_cmds.static_table = android_preauth_avd_cmds,
+    },
+    QUIT_COMMAND,
+    {
+        NULL,
+        NULL,
+    },
 };
