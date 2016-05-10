@@ -34,6 +34,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/emulation/ConsoleAuthToken.h"
 #include "android/main-emugl.h"
 #include "android/opengl/emugl_config.h"
 #include "android/qt/qt_setup.h"
@@ -139,6 +140,7 @@ int main(int argc, char** argv)
     bool force_32bit = false;
     bool no_window = false;
     bool useSystemLibs = false;
+    bool consoleAuthToken = false;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -246,6 +248,17 @@ int main(int argc, char** argv)
             }
             avdScanner_free(scanner);
             exit(0);
+        }
+
+        if (!strcmp(opt, "-console-auth-token")) {
+            android::ConsoleAuthToken token;
+            if (token.isValid()) {
+                printf("%s\n", token.toString().c_str());
+                exit(0);
+            } else {
+                fprintf(stderr, "ERROR: %s\n", token.getStatus().c_str());
+                exit(1);
+            }
         }
 
         if (!avdName) {

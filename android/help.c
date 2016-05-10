@@ -1547,6 +1547,18 @@ help_use_system_libs(stralloc_t* out)
 }
 #endif  // __linux__
 
+static void
+help_console_auth_token(stralloc_t* out)
+{
+    PRINTF(
+    "  Use -console-auth-token to print the Base-64 string that is\n"
+    "  used to authenticate the user on the Android console interface.\n"
+    "  After connecting to the interface (e.g. with 'telnet localhost 5554')\n"
+    "  one has to type 'auth <token>' to authorize the user to modify the\n"
+    "  emulator's state.\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
