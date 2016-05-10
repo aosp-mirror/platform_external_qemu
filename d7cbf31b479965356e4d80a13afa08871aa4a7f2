@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "12ed28ca_ad217d41",
+        "filename": "distrib/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-10T02:41:10Z",
+      "side": 1,
+      "message": "It looks like this creates a dangling pointer in m_infoLog !?",
+      "revId": "d7cbf31b479965356e4d80a13afa08871aa4a7f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
