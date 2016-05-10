@@ -47,6 +47,7 @@ bool EglValidate::confAttrib(EGLint attrib) {
     case EGL_TRANSPARENT_RED_VALUE:
     case EGL_TRANSPARENT_GREEN_VALUE:
     case EGL_TRANSPARENT_BLUE_VALUE:
+    case EGL_RECORDABLE_ANDROID:
     case EGL_CONFORMANT:
         return true;
     }
