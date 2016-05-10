@@ -16,6 +16,24 @@
       "revId": "447cfa09121100ab0816f0a994280e973344ece5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f2c414d4_e4e83ac9",
+        "filename": "android/main-emulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2016-05-10T19:32:43Z",
+      "side": 1,
+      "message": "Not anymore, will remove it, thanks :)",
+      "parentUuid": "125a88dd_399e5771",
+      "revId": "447cfa09121100ab0816f0a994280e973344ece5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
